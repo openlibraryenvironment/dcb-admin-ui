@@ -6,7 +6,7 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Button from 'react-bootstrap/Button';
 import Link from "next/link";
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signIn, signOut, SignInOptions } from "next-auth/react"
 
 // https://react-bootstrap.github.io/components/navbar/
 // https://getbootstrap.com/docs/5.0/examples/
@@ -16,6 +16,8 @@ import { useTranslation, Trans } from 'react-i18next';
 function AnonNavbar() {
 
   const { t, i18n } = useTranslation();
+
+  const sign_in_options: SignInOptions = {};
 
   return (
     <Navbar id="navbarScroll" expand="lg" variant="dark" bg="dark">
@@ -27,8 +29,9 @@ function AnonNavbar() {
         </Nav>
 
         <Nav>
-          <Nav.Item onClick={() => signIn('keycloak', null, { kc_idp_hint: 'folio-snapshot-oidc' } )} className="nav-link">Login(Folio)</Nav.Item>
-          <Nav.Item onClick={() => signIn('keycloak', null, { kc_idp_hint: 'folio-snapshot-oidc' } )} className="nav-link">{t('login')}</Nav.Item>
+          <Nav.Item onClick={() => signIn('keycloak', sign_in_options, { kc_idp_hint: 'sierra-kc-towers-oidc' } )} className="nav-link">Login(kc-towers)</Nav.Item>
+          <Nav.Item onClick={() => signIn('keycloak', sign_in_options, { kc_idp_hint: 'folio-snapshot-oidc' } )} className="nav-link">Login(Folio)</Nav.Item>
+          <Nav.Item onClick={() => signIn('keycloak', sign_in_options)} className="nav-link">{t('login')}</Nav.Item>
         </Nav>
       </Container>
     </Navbar>
