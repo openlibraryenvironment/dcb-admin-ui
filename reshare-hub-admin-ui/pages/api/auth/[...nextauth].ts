@@ -59,11 +59,12 @@ export default NextAuth({
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       issuer: process.env.KEYCLOAK_ISSUER!,
+      // authorization: { params: { scope: 'openid email profile' } },
     })
   ],
   callbacks: {
     async session({ session, token, user }:{session:any, token?:any, user?:any}) {
-      // console.log("update access token:%o, user:%o",token,user);
+      // console.log("SESSION CALLBACK: update access token:%o, user:%o",token,user);
       session.accessToken = token.accessToken
       session.profile = token.profile
 
@@ -85,7 +86,7 @@ export default NextAuth({
     async jwt({ token, account, user, profile }:{token:any, account?:any, user?:any, profile?:any}) {
       // console.log("jwt handler %o, %o",token,account);
       // See https://next-auth.js.org/tutorials/refresh-token-rotation for info on how to refresh
-      // console.log("jwt handler token=%o, user=%o, account=%o, profile=%o",token,user,account,profile);
+      // console.log("JWT CALLBACK: handler token=%o, user=%o, account=%o, profile=%o",token,user,account,profile);
 
       // For this to work - in the keycloak client, protocol mappers need to be enabled - currently using
       // zoneinfo, locale, client roles, profile, groups, realm roles
@@ -112,6 +113,13 @@ export default NextAuth({
       }
 
       return token
+    }
+  },
+  events: {
+    async signOut() {
+      // The keycloak logout URL is
+      // http://{KEYCLOAK_URL}/auth/realms/{REALM_NAME}/protocol/openid-connect/logout?redirect_uri={ENCODED_REDIRECT_URI}
+      console.log("signOut");
     }
   },
   secret: process.env.SECRET
