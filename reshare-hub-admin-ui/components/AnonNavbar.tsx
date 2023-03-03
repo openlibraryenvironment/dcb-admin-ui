@@ -25,12 +25,10 @@ function AnonNavbar() {
 
         <Nav className="me-auto my-2 my-lg-0" style={{ maxHeight: '100px' }} navbarScroll >
           <Navbar.Brand href="/">{t('appname')}</Navbar.Brand>
-          <Link href="/somelink" className="nav-link" passHref>Link</Link>
+          <!-- Link href="/somelink" className="nav-link" passHref Link  -->
         </Nav>
 
         <Nav>
-          <Nav.Item onClick={() => signIn('keycloak', sign_in_options, { kc_idp_hint: 'sierra-kc-towers-oidc' } )} className="nav-link">Login(kc-towers)</Nav.Item>
-          <Nav.Item onClick={() => signIn('keycloak', sign_in_options, { kc_idp_hint: 'folio-snapshot-oidc' } )} className="nav-link">Login(Folio)</Nav.Item>
           <Nav.Item onClick={() => signIn('keycloak', sign_in_options)} className="nav-link">{t('login')}</Nav.Item>
         </Nav>
       </Container>

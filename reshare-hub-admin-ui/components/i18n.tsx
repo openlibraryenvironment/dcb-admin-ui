@@ -19,7 +19,7 @@ i18n
     resources: {
       en: {
         translation: {
-          appname: 'ReShare Hub Discovery Scaffold',
+          appname: 'ReShare Hub Admin',
           login: 'Login'
         }
       }
