@@ -25,7 +25,6 @@ function AnonNavbar() {
 
         <Nav className="me-auto my-2 my-lg-0" style={{ maxHeight: '100px' }} navbarScroll >
           <Navbar.Brand href="/">{t('appname')}</Navbar.Brand>
-          <!-- Link href="/somelink" className="nav-link" passHref Link  -->
         </Nav>
 
         <Nav>
