@@ -133,8 +133,11 @@ export default function SidebarNav() {
         Dashboard
         { /* <small className="ms-auto"><Badge bg="info" className="ms-auto">NEW</Badge></small> */ }
       </SidebarNavItem>
-      <SidebarNavGroup toggleIcon={faFileLines} toggleText="Forms">
-        <SidebarNavItem href="/requests">Patron Requests</SidebarNavItem>
+      <SidebarNavGroup toggleIcon={faFileLines} toggleText="Resources">
+        <SidebarNavItem href="/requests">Host LMS</SidebarNavItem>
+        <SidebarNavItem href="/requests">Agency</SidebarNavItem>
+        <SidebarNavItem href="/requests">Location</SidebarNavItem>
+        <SidebarNavItem href="/requests">Patron Request</SidebarNavItem>
       </SidebarNavGroup>
     </ul>
   )
