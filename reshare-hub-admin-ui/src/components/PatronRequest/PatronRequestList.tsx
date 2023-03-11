@@ -17,7 +17,12 @@ export default function PatronRequestList(props: Props) {
     <Table responsive bordered hover>
       <thead className="bg-light">
         <tr>
-          <th><THSort name="id" setSort={setSort} setOrder={setOrder}>#</THSort></th>
+          <th>#</th>
+          <th><THSort name="patronId" setSort={setSort} setOrder={setOrder}>Patron Id</THSort></th>
+          <th><THSort name="patronAgency" setSort={setSort} setOrder={setOrder}>Patron Agency</THSort></th>
+          <th>Bib Cluster</th>
+          <th><THSort name="pickupLocation" setSort={setSort} setOrder={setOrder}>Pickup Location</THSort></th>
+          <th><THSort name="statusCode" setSort={setSort} setOrder={setOrder}>Status Code</THSort></th>
           <th aria-label="Action" />
         </tr>
       </thead>
@@ -25,6 +30,13 @@ export default function PatronRequestList(props: Props) {
         {patronRequests.map((patronRequest) => (
           <tr key={patronRequest.id}>
             <td>{patronRequest.id}</td>
+            <td>{patronRequest.patronId}</td>
+            <td>{patronRequest.patronAgencyCode}</td>
+            <td>{patronRequest.bibClusterId}</td>
+            <td>{patronRequest.pickupLocationCode}</td>
+            <td>{patronRequest.statusCode}</td>
+            <td>
+            </td>
           </tr>
         ))}
       </tbody>

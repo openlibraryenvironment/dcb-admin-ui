@@ -1,44 +1,26 @@
 export interface Resource<T> {
-  data: T[];
-  meta: {
-    current_page: number;
-    last_page: number;
-    from: number;
-    to: number;
-    per_page: number;
-    total: number;
+  content: T[];
+  meta?: {
+    size?: number;
+    number?: number;
+    sort?: any;
   };
-}
-
-const getTo = (total: number, page: number, perPage: number) => {
-  if (page === 1) {
-    return total < perPage ? total : perPage
-  }
-
-  return (page - 1) * perPage + perPage
-}
-
-const getLastPage = (total: number, perPage: number) => {
-  if (total <= 1) {
-    return 1
-  }
-
-  return Math.ceil(total / perPage)
+  totalSize: number;
 }
 
 export const newResource = <T>(
-  data: T[],
-  total: number,
-  page: number,
-  perPage: number,
+  content: T[],
+  pageable: any,
+  totalSize: number,
 ): Resource<T> => ({
-    data,
-    meta: {
-      current_page: page,
-      last_page: getLastPage(total, perPage),
-      from: page === 1 ? 1 : (page - 1) * perPage + 1,
-      to: getTo(total, page, perPage),
-      per_page: perPage,
-      total,
+    content: content,
+    meta:{
+      from:1, 
+      to: totalSize, 
+      total: totalSize, 
+      per_page: pageable.size, 
+      last_page: Math.floor ( ( totalSize / pageable.size ) + 1 ),
+      current_page: 1, // (pageable.number)+1,
     },
+    totalSize: totalSize,
   })

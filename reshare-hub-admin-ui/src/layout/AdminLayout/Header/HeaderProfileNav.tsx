@@ -95,7 +95,7 @@ export default function HeaderProfileNav() {
           */ }
 
           <Dropdown.Header className="bg-light fw-bold">Settings</Dropdown.Header>
-          <Link href="/" passHref legacyBehavior>
+          <Link href="/profile" passHref legacyBehavior>
             <Dropdown.Item>
               <ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
             </Dropdown.Item>
