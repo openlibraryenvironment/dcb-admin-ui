@@ -63,7 +63,6 @@ const PatronRequests: NextPage<Props> = (props) => {
   // <Pagination meta={resource.pageable} setPerPage={setPerPage} setPage={setPage} />
   return (
     <AdminLayout>
-      {JSON.stringify(resource)}
       <Card>
         <Card.Header>Requests</Card.Header>
         <Card.Body>
