@@ -1,8 +1,12 @@
 export interface Resource<T> {
   content: T[];
-  meta?: {
-    size?: number;
-    number?: number;
+  meta: {
+    from: number;
+    to: number;
+    size: number;
+    total: number;
+    last_page: number;
+    current_page: number;
     sort?: any;
   };
   totalSize: number;
@@ -18,7 +22,7 @@ export const newResource = <T>(
       from:1, 
       to: totalSize, 
       total: totalSize, 
-      per_page: pageable.size, 
+      size: pageable.size, 
       last_page: Math.floor ( ( totalSize / pageable.size ) + 1 ),
       current_page: 1, // (pageable.number)+1,
     },

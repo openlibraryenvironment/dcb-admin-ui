@@ -30,7 +30,7 @@ const PatronRequests: NextPage<Props> = (props) => {
   const patronRequestListURL = "https://dcb.libsdev.k-int.com/patrons/requests";
 
   const [fallbackResource, setFallbackResource] = useState<Resource<PatronRequest>>(
-    newResource([], 0, page, perPage),
+    newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0),
   )
 
   // swr: data -> axios: data -> resource: data
