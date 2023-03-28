@@ -135,7 +135,7 @@ export default function SidebarNav() {
       </SidebarNavItem>
       <SidebarNavItem href="/requests">Patron Request</SidebarNavItem>
       <SidebarNavItem href="/agencies">Agency</SidebarNavItem>
-      <SidebarNavItem href="/requests">Host LMS</SidebarNavItem>
+      <SidebarNavItem href="/hostlmss">Host LMS</SidebarNavItem>
       <SidebarNavItem href="/locations">Location</SidebarNavItem>
       { /* <SidebarNavGroup toggleIcon={faFileLines} toggleText="Resources"> </SidebarNavGroup> */ }
     </ul>
