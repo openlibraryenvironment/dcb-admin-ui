@@ -3,11 +3,11 @@ import { Card } from 'react-bootstrap'
 import { AdminLayout } from '@layout'
 import React, { useEffect, useState } from 'react'
 import { newResource, Resource } from '@models/resource'
-import { Agency } from '@models/Agency'
+import { HostLMS } from '@models/HostLMS'
 import { transformResponseWrapper, useSWRAxios } from '@hooks'
 import { Pagination } from '@components/Pagination'
 import { useSession, signIn, signOut } from "next-auth/react"
-import { AgencyList } from '@components/Agency'
+import { HostLMSList } from '@components/HostLMS'
 
 type Props = {
   page: number;
@@ -16,7 +16,7 @@ type Props = {
   order: string;
 }
 
-const Agencies: NextPage<Props> = (props) => {
+const HostLmss: NextPage<Props> = (props) => {
   const {
     page: initPage, perPage: initPerPage, sort: initSort, order: initOrder,
   } = props
@@ -27,17 +27,15 @@ const Agencies: NextPage<Props> = (props) => {
   const [order, setOrder] = useState(initOrder)
   const { data: session, status } : {data:any, status:any} =useSession();
 
-  const agencyListURL = "https://dcb.libsdev.k-int.com/agencies";
+  const patronRequestListURL = "https://dcb.libsdev.k-int.com/hostlmss";
 
-  const [fallbackResource, setFallbackResource] = useState<Resource<Agency>>(
+  const [fallbackResource, setFallbackResource] = useState<Resource<HostLMS>>(
     newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0),
   )
 
-  console.log("Session token: %s",session.accessToken);
-
   // swr: data -> axios: data -> resource: data
-  const { data: { data: resource } } = useSWRAxios<Resource<Agency>>({
-    url: agencyListURL,
+  const { data: { data: resource } } = useSWRAxios<Resource<HostLMS>>({
+    url: patronRequestListURL,
     params: {
       // _page: page,
       // _limit: perPage,
@@ -45,7 +43,7 @@ const Agencies: NextPage<Props> = (props) => {
       // _order: order,
     },
     headers : { 'Authorization' : 'Bearer '+session.accessToken },
-    // transformResponse: transformResponseWrapper((d: PatronRequest[], h) => {
+    // transformResponse: transformResponseWrapper((d: HostLMS[], h) => {
     transformResponse: transformResponseWrapper((d) => {
       // const total = h ? parseInt(h['x-total-count'], 10) : 0
       // return newResource(d, total, page, perPage)
@@ -54,7 +52,8 @@ const Agencies: NextPage<Props> = (props) => {
   }, {
     data: fallbackResource,
     headers: {
-      'x-total-count': '0'
+      'x-total-count': '0',
+      'Authorization': 'Bearer '+session.accessToken
     },
   })
 
@@ -67,11 +66,11 @@ const Agencies: NextPage<Props> = (props) => {
   return (
     <AdminLayout>
       <Card>
-        <Card.Header>Agencies</Card.Header>
+        <Card.Header>Requests</Card.Header>
         <Card.Body>
           <Pagination meta={resource.meta} setPerPage={setPerPage} setPage={setPage} />
-          <AgencyList
-            agencies={resource.content}
+          <HostLMSList
+            hostlmss={resource.content}
             setSort={setSort}
             setOrder={setOrder}
           />
@@ -113,4 +112,4 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
   }
 }
 
-export default Agencies
+export default HostLmss

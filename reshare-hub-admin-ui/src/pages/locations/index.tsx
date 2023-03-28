@@ -42,6 +42,7 @@ const Locations: NextPage<Props> = (props) => {
       // _sort: sort,
       // _order: order,
     },
+    headers : { 'Authorization' : 'Bearer '+session.accessToken },
     // transformResponse: transformResponseWrapper((d: PatronRequest[], h) => {
     transformResponse: transformResponseWrapper((d) => {
       // const total = h ? parseInt(h['x-total-count'], 10) : 0
@@ -52,6 +53,7 @@ const Locations: NextPage<Props> = (props) => {
     data: fallbackResource,
     headers: {
       'x-total-count': '0',
+      'Authorization': 'Bearer '+session.accessToken
     },
   })
 
