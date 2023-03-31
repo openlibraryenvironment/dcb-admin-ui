@@ -8,6 +8,7 @@ import { transformResponseWrapper, useSWRAxios } from '@hooks'
 import { Pagination } from '@components/Pagination'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { HostLMSList } from '@components/HostLMS'
+import getConfig from 'next/config'
 
 type Props = {
   page: number;
@@ -15,6 +16,8 @@ type Props = {
   sort: string;
   order: string;
 }
+
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
 
 const HostLmss: NextPage<Props> = (props) => {
   const {
@@ -27,7 +30,8 @@ const HostLmss: NextPage<Props> = (props) => {
   const [order, setOrder] = useState(initOrder)
   const { data: session, status } : {data:any, status:any} =useSession();
 
-  const patronRequestListURL = "https://dcb.libsdev.k-int.com/hostlmss";
+  // const patronRequestListURL = "https://dcb.libsdev.k-int.com/hostlmss";
+  const patronRequestListURL = publicRuntimeConfig.DCB_API_BASE+"/hostlmss";
 
   const [fallbackResource, setFallbackResource] = useState<Resource<HostLMS>>(
     newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0),

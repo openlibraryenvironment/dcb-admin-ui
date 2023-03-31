@@ -8,6 +8,10 @@ import { transformResponseWrapper, useSWRAxios } from '@hooks'
 import { Pagination } from '@components/Pagination'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { PatronRequestList } from '@components/PatronRequest'
+import getConfig from 'next/config'
+
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+
 
 type Props = {
   page: number;
@@ -27,7 +31,9 @@ const PatronRequests: NextPage<Props> = (props) => {
   const [order, setOrder] = useState(initOrder)
   const { data: session, status } : {data:any, status:any} =useSession();
 
-  const patronRequestListURL = "https://dcb.libsdev.k-int.com/patrons/requests";
+  // const patronRequestListURL = "https://dcb.libsdev.k-int.com/patrons/requests";
+  const patronRequestListURL = publicRuntimeConfig.DCB_API_BASE+"/patrons/requests";
+
 
   const [fallbackResource, setFallbackResource] = useState<Resource<PatronRequest>>(
     newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0),

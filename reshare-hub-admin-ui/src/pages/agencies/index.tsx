@@ -8,6 +8,9 @@ import { transformResponseWrapper, useSWRAxios } from '@hooks'
 import { Pagination } from '@components/Pagination'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { AgencyList } from '@components/Agency'
+import getConfig from 'next/config'
+
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
 
 type Props = {
   page: number;
@@ -27,7 +30,9 @@ const Agencies: NextPage<Props> = (props) => {
   const [order, setOrder] = useState(initOrder)
   const { data: session, status } : {data:any, status:any} =useSession();
 
-  const agencyListURL = "https://dcb.libsdev.k-int.com/agencies";
+  // const agencyListURL = "https://dcb.libsdev.k-int.com/agencies";
+  const agencyListURL = publicRuntimeConfig.DCB_API_BASE+"/agencies";
+
 
   const [fallbackResource, setFallbackResource] = useState<Resource<Agency>>(
     newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0),
