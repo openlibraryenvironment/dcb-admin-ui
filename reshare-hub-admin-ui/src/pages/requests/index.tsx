@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { newResource, Resource } from '@models/resource'
 import { PatronRequest } from '@models/PatronRequest'
 import { transformResponseWrapper, useSWRAxios } from '@hooks'
+import axios from 'axios';
 import { Pagination } from '@components/Pagination'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { PatronRequestList } from '@components/PatronRequest'
@@ -21,53 +22,38 @@ type Props = {
 
 const PatronRequests: NextPage<Props> = (props) => {
   const {
-    page: initPage, perPage: initPerPage, sort: initSort, order: initOrder,
+    page: initPage, perPage: initPerPage, sort: initSort, order: initOrder
   } = props
 
   const [page, setPage] = useState(initPage)
   const [perPage, setPerPage] = useState(initPerPage)
   const [sort, setSort] = useState(initSort)
   const [order, setOrder] = useState(initOrder)
+  const [resource, setResource] = useState(newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0));
   const { data: session, status } : {data:any, status:any} =useSession();
 
   // const patronRequestListURL = "https://dcb.libsdev.k-int.com/patrons/requests";
-  const patronRequestListURL = publicRuntimeConfig.DCB_API_BASE+"/patrons/requests";
-
-
-  const [fallbackResource, setFallbackResource] = useState<Resource<PatronRequest>>(
-    newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0),
-  )
-
-  // swr: data -> axios: data -> resource: data
-  const { data: { data: resource } } = useSWRAxios<Resource<PatronRequest>>({
-    url: patronRequestListURL,
-    params: {
-      // _page: page,
-      // _limit: perPage,
-      // _sort: sort,
-      // _order: order,
-    },
-    headers : { 'Authorization' : 'Bearer '+session.accessToken },
-    // transformResponse: transformResponseWrapper((d: PatronRequest[], h) => {
-    transformResponse: transformResponseWrapper((d) => {
-      // const total = h ? parseInt(h['x-total-count'], 10) : 0
-      // return newResource(d, total, page, perPage)
-      return newResource(d.content, d.pageable, d.totalSize);
-    }),
-  }, {
-    data: fallbackResource,
-    headers: {
-      'x-total-count': '0',
-      'Authorization': 'Bearer '+session.accessToken
-    },
-  })
+  // const patronRequestListURL = publicRuntimeConfig.DCB_API_BASE+"/patrons/requests";
 
   useEffect(() => {
-    setFallbackResource(resource)
-  }, [resource])
+    if ( status === "authenticated" ) {
+      const fetchData = async () => {
+        const url_endpoint = publicRuntimeConfig.DCB_API_BASE+"/patrons/requests";
 
+        // Fetch the okapi clusters known at that zone
+        const result = await axios(url_endpoint,
+                                   {"headers" : { 'Authorization' : 'Bearer '+session.accessToken} } )
+        console.log("Got request data %o",result);
+        // setDashboardState((prev:any) => ({...prev, ['tenants']: result.data}));
+        setResource(newResource(result.data.content,result.data.pageable, result.data.totalSize));
+      };
+      fetchData();
+    }
+    else {
+      console.log("Not auth");
+    }
+  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // <Pagination meta={resource.pageable} setPerPage={setPerPage} setPage={setPage} />
   return (
     <AdminLayout>
       <Card>
@@ -79,7 +65,6 @@ const PatronRequests: NextPage<Props> = (props) => {
             setSort={setSort}
             setOrder={setOrder}
           />
-
         </Card.Body>
       </Card>
     </AdminLayout>
