@@ -12,7 +12,6 @@ import getConfig from 'next/config'
 
 const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
 
-
 type Props = {
   page: number;
   perPage: number;
