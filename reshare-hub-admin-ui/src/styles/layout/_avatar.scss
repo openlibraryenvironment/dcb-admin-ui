@@ -4,11 +4,11 @@ $avatar-status-width: 0.6666666667rem;
 $avatar-status-height: 0.6666666667rem;
 
 .avatar {
-  width: $avatar-width;
-  height: $avatar-height;
+	width: $avatar-width;
+	height: $avatar-height;
 
-  .avatar-status {
-    width: $avatar-status-width;
-    height: $avatar-status-height;
-  }
+	.avatar-status {
+		width: $avatar-status-width;
+		height: $avatar-status-height;
+	}
 }

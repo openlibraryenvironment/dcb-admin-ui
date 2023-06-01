@@ -1,104 +1,155 @@
-import { GetServerSideProps, NextPage } from 'next'
-import { Card } from 'react-bootstrap'
-import { AdminLayout } from '@layout'
-import React, { useEffect, useState } from 'react'
-import { newResource, Resource } from '@models/resource'
-import { Agency } from '@models/Agency'
-import { transformResponseWrapper, useSWRAxios } from '@hooks'
-import { Pagination } from '@components/Pagination'
-import { useSession, signIn, signOut } from "next-auth/react"
-import { AgencyList } from '@components/Agency'
-import getConfig from 'next/config'
-import axios from 'axios';
+import * as React from 'react';
+import { GetServerSideProps, NextPage } from 'next';
+import getConfig from 'next/config';
+import { useSession } from 'next-auth/react';
 
-const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+import { Card } from 'react-bootstrap';
+import { AdminLayout } from '@layout';
+import { Pagination } from '@components/Pagination';
+import TanStackTable from '@components/TanStackTable';
+
+import { useResource } from '@hooks';
+import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+
+import { Agency } from '@models/Agency';
 
 type Props = {
-  page: number;
-  perPage: number;
-  sort: string;
-  order: string;
-}
+	page: number;
+	resultsPerPage: number;
+	sort: SortingState;
+};
 
-const Agencies: NextPage<Props> = (props) => {
-  const {
-    page: initPage, perPage: initPerPage, sort: initSort, order: initOrder,
-  } = props
+const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+	// Access the accessToken for running authenticated requests
+	const { data, status } = useSession();
 
-  const [page, setPage] = useState(initPage)
-  const [perPage, setPerPage] = useState(initPerPage)
-  const [sort, setSort] = useState(initSort)
-  const [order, setOrder] = useState(initOrder)
-  const [resource, setResource] = useState(newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0));
-  const { data: session, status } : {data:any, status:any} =useSession();
+	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
+	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+		() => ({
+			pagination: {
+				pageIndex: page - 1,
+				pageSize: resultsPerPage
+			},
+			sort: sort
+		}),
+		[page, resultsPerPage, sort]
+	);
 
-  useEffect(() => {
-    if ( status === "authenticated" ) {
-      const fetchData = async () => {
-        const url_endpoint = publicRuntimeConfig.DCB_API_BASE+"/agencies";
+	const url = React.useMemo(() => {
+		const { publicRuntimeConfig } = getConfig();
+		return publicRuntimeConfig.DCB_API_BASE + '/agencies';
+	}, []);
 
-        // Fetch the okapi clusters known at that zone
-        const result = await axios(url_endpoint,
-                                   {"headers" : { 'Authorization' : 'Bearer '+session.accessToken} } )
-        console.log("Got request data %o",result);
-        // setDashboardState((prev:any) => ({...prev, ['tenants']: result.data}));
-        setResource(newResource(result.data.content,result.data.pageable, result.data.totalSize));
-      };
-      fetchData();
-    }
-    else {
-      console.log("Not auth");
-    }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+	const columns = React.useMemo(() => {
+		const columnHelper = createColumnHelper<Agency>();
 
-  // <Pagination meta={resource.pageable} setPerPage={setPerPage} setPage={setPage} />
-  return (
-    <AdminLayout>
-      <Card>
-        <Card.Header>Agencies</Card.Header>
-        <Card.Body>
-          <Pagination meta={resource.meta} setPerPage={setPerPage} setPage={setPage} />
-          <AgencyList
-            agencies={resource.content}
-            setSort={setSort}
-            setOrder={setOrder}
-          />
+		return [
+			columnHelper.accessor('id', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: '#',
+				id: 'id',
+				enableSorting: false
+			}),
+			columnHelper.accessor('code', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Code',
+				id: 'agencyId' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+			columnHelper.accessor('name', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Name',
+				id: 'agencyCode' // Used as the unique property in the sorting state (See React-Query dev tools)
+			})
+		];
+	}, []);
 
-        </Card.Body>
-      </Card>
-    </AdminLayout>
-  )
-}
+	const {
+		resource,
+		status: resourceFetchStatus,
+		state
+	} = useResource<Agency>({
+		isQueryEnabled: status === 'authenticated',
+		accessToken: data?.accessToken ?? null,
+		baseQueryKey: 'agencies',
+		url: url,
+		externalState
+	});
+
+	return (
+		<AdminLayout>
+			<Card>
+				<Card.Header>Agencies</Card.Header>
+				<Card.Body>
+					{resourceFetchStatus === 'loading' && (
+						<p className='text-center mb-0'>Loading agencies.....</p>
+					)}
+
+					{resourceFetchStatus === 'error' && (
+						<p className='text-center mb-0'>Failed to fetch the agencies</p>
+					)}
+
+					{resourceFetchStatus === 'success' && (
+						<>
+							<Pagination
+								from={resource?.meta?.from ?? 0}
+								to={resource?.meta?.to ?? 0}
+								total={resource?.meta?.total ?? 0}
+								perPage={externalState.pagination.pageSize}
+								pageIndex={externalState.pagination.pageIndex}
+								totalNumberOfPages={state.totalNumberOfPages}
+							/>
+
+							<TanStackTable
+								data={resource?.content ?? []}
+								columns={columns}
+								pageCount={state.totalNumberOfPages}
+								enableTableSorting
+								sortingState={externalState.sort}
+							/>
+						</>
+					)}
+				</Card.Body>
+			</Card>
+		</AdminLayout>
+	);
+};
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  let page = 1
-  if (context.query?.page && typeof context.query.page === 'string') {
-    page = parseInt(context.query.page, 10)
-  }
+	let page = 1;
+	if (context.query?.page && typeof context.query.page === 'string') {
+		page = parseInt(context.query.page, 10);
+	}
 
-  let perPage = 20
-  if (context.query?.per_page && typeof context.query.per_page === 'string') {
-    perPage = parseInt(context.query.per_page.toString(), 10)
-  }
+	let resultsPerPage = 20;
+	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+	}
 
-  let sort = 'id'
-  if (context.query?.sort && typeof context.query.sort === 'string') {
-    sort = context.query.sort
-  }
+	// Defaults to sorting the agencyId in ascending order (The id must be the same the id assigned to the "column")
+	let sort: SortingState = [{ id: 'agencyId', desc: false }];
 
-  let order = 'asc'
-  if (context.query?.order && typeof context.query.order === 'string') {
-    order = context.query.order
-  }
+	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+		const contextSort = context.query?.sort ?? '';
 
-  return {
-    props: {
-      page,
-      perPage,
-      sort,
-      order,
-    }, // will be passed to the page component as props
-  }
-}
+		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
 
-export default Agencies
+		// If the values pass the validation check override the original sort with the new sort
+		if (contextOrder === 'desc' || contextOrder === 'asc') {
+			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+		}
+	}
+
+	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+
+	return {
+		props: {
+			page,
+			resultsPerPage,
+			sort: sort
+		}
+	};
+};
+
+export default Agencies;

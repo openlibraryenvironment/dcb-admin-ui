@@ -1,6 +1,6 @@
 export interface HostLMS {
-  id: number;
-  code: string;
-  name: string;
-  lmsClientClass: string;
+	id: string;
+	code: string;
+	name: string;
+	lmsClientClass: string;
 }

@@ -1,106 +1,156 @@
-import { GetServerSideProps, NextPage } from 'next'
-import { Card } from 'react-bootstrap'
-import { AdminLayout } from '@layout'
-import React, { useEffect, useState } from 'react'
-import { newResource, Resource } from '@models/resource'
-import { Location } from '@models/Location'
-import { transformResponseWrapper, useSWRAxios } from '@hooks'
-import { Pagination } from '@components/Pagination'
-import { useSession, signIn, signOut } from "next-auth/react"
-import { LocationList } from '@components/Location'
-import getConfig from 'next/config'
-import axios from 'axios';
+import * as React from 'react';
+import { GetServerSideProps, NextPage } from 'next';
+import { useSession } from 'next-auth/react';
+import getConfig from 'next/config';
 
-const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+import { Card } from 'react-bootstrap';
+import { AdminLayout } from '@layout';
+import { Pagination } from '@components/Pagination';
+import TanStackTable from '@components/TanStackTable';
 
+import { useResource } from '@hooks';
+import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+
+import { Location } from '@models/Location';
 
 type Props = {
-  page: number;
-  perPage: number;
-  sort: string;
-  order: string;
-}
+	page: number;
+	resultsPerPage: number;
+	sort: SortingState;
+};
 
-const Locations: NextPage<Props> = (props) => {
-  const {
-    page: initPage, perPage: initPerPage, sort: initSort, order: initOrder,
-  } = props
+const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+	// Access the accessToken for running authenticated requests
+	const { data, status } = useSession();
 
-  const [page, setPage] = useState(initPage)
-  const [perPage, setPerPage] = useState(initPerPage)
-  const [sort, setSort] = useState(initSort)
-  const [order, setOrder] = useState(initOrder)
-  const [resource, setResource] = useState(newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0));
-  const { data: session, status } : {data:any, status:any} =useSession();
+	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
+	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+		() => ({
+			pagination: {
+				pageIndex: page - 1,
+				pageSize: resultsPerPage
+			},
+			sort: sort
+		}),
+		[page, resultsPerPage, sort]
+	);
 
+	// Generate the url for the useResource hook
+	const url = React.useMemo(() => {
+		const { publicRuntimeConfig } = getConfig();
+		return publicRuntimeConfig.DCB_API_BASE + '/locations';
+	}, []);
 
-  useEffect(() => {
-    if ( status === "authenticated" ) {
-      const fetchData = async () => {
-        const url_endpoint = publicRuntimeConfig.DCB_API_BASE+"/locations";
+	const columns = React.useMemo(() => {
+		const columnHelper = createColumnHelper<Location>();
 
-        // Fetch the okapi clusters known at that zone
-        const result = await axios(url_endpoint,
-                                   {"headers" : { 'Authorization' : 'Bearer '+session.accessToken} } )
-        console.log("Got request data %o",result);
-        // setDashboardState((prev:any) => ({...prev, ['tenants']: result.data}));
-        setResource(newResource(result.data.content,result.data.pageable, result.data.totalSize));
-      };
-      fetchData();
-    }
-    else {
-      console.log("Not auth");
-    }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+		return [
+			columnHelper.accessor('id', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: '#',
+				id: 'locationId',
+				enableSorting: false
+			}),
+			columnHelper.accessor('code', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Code',
+				id: 'locationCode' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+			columnHelper.accessor('name', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Name',
+				id: 'locationName' // Used as the unique property in the sorting state (See React-Query dev tools)
+			})
+		];
+	}, []);
 
-  // <Pagination meta={resource.pageable} setPerPage={setPerPage} setPage={setPage} />
-  return (
-    <AdminLayout>
-      <Card>
-        <Card.Header>Locations</Card.Header>
-        <Card.Body>
-          <Pagination meta={resource.meta} setPerPage={setPerPage} setPage={setPage} />
-          <LocationList
-            locations={resource.content}
-            setSort={setSort}
-            setOrder={setOrder}
-          />
+	const {
+		resource,
+		status: resourceFetchStatus,
+		state
+	} = useResource<Location>({
+		isQueryEnabled: status === 'authenticated',
+		accessToken: data?.accessToken ?? null,
+		baseQueryKey: 'locations',
+		url: url,
+		externalState
+	});
 
-        </Card.Body>
-      </Card>
-    </AdminLayout>
-  )
-}
+	return (
+		<AdminLayout>
+			<Card>
+				<Card.Header>Locations</Card.Header>
+				<Card.Body>
+					{resourceFetchStatus === 'loading' && (
+						<p className='text-center mb-0'>Loading locations.....</p>
+					)}
+
+					{resourceFetchStatus === 'error' && (
+						<p className='text-center mb-0'>Failed to fetch the locations</p>
+					)}
+
+					{resourceFetchStatus === 'success' && (
+						<>
+							<Pagination
+								from={resource?.meta?.from ?? 0}
+								to={resource?.meta?.to ?? 0}
+								total={resource?.meta?.total ?? 0}
+								perPage={externalState.pagination.pageSize}
+								pageIndex={externalState.pagination.pageIndex}
+								totalNumberOfPages={state.totalNumberOfPages}
+							/>
+
+							<TanStackTable
+								data={resource?.content ?? []}
+								columns={columns}
+								pageCount={state.totalNumberOfPages}
+								enableTableSorting
+								sortingState={externalState.sort}
+							/>
+						</>
+					)}
+				</Card.Body>
+			</Card>
+		</AdminLayout>
+	);
+};
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  let page = 1
-  if (context.query?.page && typeof context.query.page === 'string') {
-    page = parseInt(context.query.page, 10)
-  }
+	let page = 1;
+	if (context.query?.page && typeof context.query.page === 'string') {
+		page = parseInt(context.query.page, 10);
+	}
 
-  let perPage = 20
-  if (context.query?.per_page && typeof context.query.per_page === 'string') {
-    perPage = parseInt(context.query.per_page.toString(), 10)
-  }
+	let resultsPerPage = 20;
+	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+	}
 
-  let sort = 'id'
-  if (context.query?.sort && typeof context.query.sort === 'string') {
-    sort = context.query.sort
-  }
+	// Defaults to sorting the locationCode in ascending order (The id must be the same the id assigned to the "column")
+	let sort: SortingState = [{ id: 'locationCode', desc: false }];
 
-  let order = 'asc'
-  if (context.query?.order && typeof context.query.order === 'string') {
-    order = context.query.order
-  }
+	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+		const contextSort = context.query?.sort ?? '';
 
-  return {
-    props: {
-      page,
-      perPage,
-      sort,
-      order,
-    }, // will be passed to the page component as props
-  }
-}
+		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
 
-export default Locations
+		// If the values pass the validation check override the original sort with the new sort
+		if (contextOrder === 'desc' || contextOrder === 'asc') {
+			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+		}
+	}
+
+	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+
+	return {
+		props: {
+			page,
+			resultsPerPage,
+			sort: sort
+		}
+	};
+};
+
+export default Locations;
