@@ -1,12 +1,12 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBell, faEnvelope } from '@fortawesome/free-regular-svg-icons'
-import { faList } from '@fortawesome/free-solid-svg-icons'
-import { Nav } from 'react-bootstrap'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell, faEnvelope } from '@fortawesome/free-regular-svg-icons';
+import { faList } from '@fortawesome/free-solid-svg-icons';
+import { Nav } from 'react-bootstrap';
 
 export default function HeaderNotificationNav() {
-  return (
-    <Nav>
-      { /*
+	return (
+		<Nav>
+			{/*
       <Nav.Item>
         <Nav.Link className="p-2">
           <FontAwesomeIcon icon={faBell} size="lg" />
@@ -22,7 +22,7 @@ export default function HeaderNotificationNav() {
           <FontAwesomeIcon icon={faEnvelope} size="lg" />
         </Nav.Link>
       </Nav.Item>
-      */ }
-    </Nav>
-  )
+      */}
+		</Nav>
+	);
 }

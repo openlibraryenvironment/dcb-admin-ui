@@ -1,105 +1,286 @@
-import { GetServerSideProps, NextPage } from 'next'
-import { Card } from 'react-bootstrap'
-import { AdminLayout } from '@layout'
-import React, { useEffect, useState } from 'react'
-import { newResource, Resource } from '@models/resource'
-import { HostLMS } from '@models/HostLMS'
-import { transformResponseWrapper, useSWRAxios } from '@hooks'
-import { Pagination } from '@components/Pagination'
-import { useSession, signIn, signOut } from "next-auth/react"
-import { HostLMSList } from '@components/HostLMS'
-import getConfig from 'next/config'
-import axios from 'axios';
+import * as React from 'react';
+import { GetServerSideProps, NextPage } from 'next';
+import { useSession } from 'next-auth/react';
+import getConfig from 'next/config';
 
+import { Button, Card } from 'react-bootstrap';
+import { AdminLayout } from '@layout';
+import { Pagination } from '@components/Pagination';
+import { HostLMSListPopout } from '@components/HostLMS';
+import TanStackTable from '@components/TanStackTable';
+
+import { useResource } from '@hooks';
+import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+
+import { HostLMS } from '@models/HostLMS';
 
 type Props = {
-  page: number;
-  perPage: number;
-  sort: string;
-  order: string;
-}
+	page: number;
+	resultsPerPage: number;
+	sort: SortingState;
+};
 
-const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+/*
 
-const HostLmss: NextPage<Props> = (props) => {
-  const {
-    page: initPage, perPage: initPerPage, sort: initSort, order: initOrder,
-  } = props
+******************************************************
+Client-Side actions and Server-Side actions:
+******************************************************
 
-  const [page, setPage] = useState(initPage)
-  const [perPage, setPerPage] = useState(initPerPage)
-  const [sort, setSort] = useState(initSort)
-  const [order, setOrder] = useState(initOrder)
-  const [resource, setResource] = useState(newResource([], {from:0, to:0, size:20, last_page:0, current_page:0}, 0));
-  const { data: session, status } : {data:any, status:any} =useSession();
+By default this page will leaverage the built in NextJS getServerSideProps function, whenever a link within the page is clicked
+and it links to the same page it will re-run. Whenever it re-runs the props injected into the page are updated, so we can pass
+these to React-Query to trigger a re-query as the cache key will have changed.
 
-  useEffect(() => {
-    if ( status === "authenticated" ) {
-      const fetchData = async () => {
-        const url_endpoint = publicRuntimeConfig.DCB_API_BASE+"/hostlmss";
+******************************************************
+Pagination component with client-side actions:
+******************************************************
 
-        // Fetch the okapi clusters known at that zone
-        const result = await axios(url_endpoint,
-                                   {"headers" : { 'Authorization' : 'Bearer '+session.accessToken} } )
-        console.log("Got request data %o",result);
-        // setDashboardState((prev:any) => ({...prev, ['tenants']: result.data}));
-        setResource(newResource(result.data.content,result.data.pageable, result.data.totalSize));
-      };
-      fetchData();
-    }
-    else {
-      console.log("Not auth");
-    }
-  }, [status]); // eslint-disable-line react-hooks/exhaustive-deps
+- Updated the "perPage" prop to read the "pageSize" property from the externalState object (Contains the pagination and sorting state)
 
-  // <Pagination meta={resource.pageable} setPerPage={setPerPage} setPage={setPage} />
-  return (
-    <AdminLayout>
-      <Card>
-        <Card.Header>Requests</Card.Header>
-        <Card.Body>
-          <Pagination meta={resource.meta} setPerPage={setPerPage} setPage={setPage} />
-          <HostLMSList
-            hostlmss={resource.content}
-            setSort={setSort}
-            setOrder={setOrder}
-          />
+- Add the appropriate event handle to the "onChange" prop (See example below)
 
-        </Card.Body>
-      </Card>
-    </AdminLayout>
-  )
-}
+onChange={(data) => {
+	switch (data.type) {
+		case 'ITEMS_PER_PAGE_CHANGE': {
+			dispatch({
+				type: 'CHANGE_ITEMS_PER_PAGE',
+				payload: {
+					newNumberOfItemsPerPage: parseInt(data.payload.perPage, 10)
+				}
+			});
+		}
+
+		case 'PAGE_NUMBER_CHANGE': {
+			dispatch({
+				type: 'CHANGE_PAGE_NUMBER',
+				payload: {
+					newIncomingPageNumberState: data.payload.pageIndex
+				}
+			});
+		}
+
+		default:
+			break;
+	}
+}}
+
+******************************************************
+useResource hook with client-side actions:
+******************************************************
+
+- Set "useClientSideSorting" prop to true
+
+- Set "useClientSidePaging" to true
+
+- Instead of using the "defaultValues" prop use "externalState" full object
+
+- Add the "dispatch" property from useResource hook, this will be used to interact with the reducer
+
+******************************************************
+TanStackTable component with client-side actions:
+******************************************************
+
+- Set "enableClientSideSorting" prop to true
+
+- Set the "paginationState" prop to read from the externalState.pagination
+
+- Add the appropriate event handle to the "onSortingChange" prop (See example below)
+
+onSortingChange={(updateOrNewValue) => {
+	if (typeof updateOrNewValue === 'function') {
+		// updateOrNewValue is an updater function which needs to be called so we need to check the
+		const sort = updateOrNewValue(state.sort);
+
+		dispatch({
+			type: 'CHANGE_SORT',
+			payload: {
+				newIncomingSortState: sort
+			}
+		});
+	}
+}}
+
+Best part is you can mix and match the above approaches, so if you were to extend this for filtering (Filtering cant always be stored in the url) you could then
+update useResource and TanStackTable to incorporate the filtering functionality (Exactly like sorting and paging).
+
+NOTE: This applies to all pages, not just /hostlmss page, the hooks and components are very reusable so any resource can use them.
+
+*/
+
+const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+	// Access the accessToken for running authenticated requests
+	const { data, status } = useSession();
+
+	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+		() => ({
+			pagination: {
+				pageIndex: page - 1,
+				pageSize: resultsPerPage
+			},
+			sort: sort
+		}),
+		[page, resultsPerPage, sort]
+	);
+
+	// Generate the url for the useResource hook
+	const url = React.useMemo(() => {
+		const { publicRuntimeConfig } = getConfig();
+		return publicRuntimeConfig.DCB_API_BASE + '/hostlmss';
+	}, []);
+
+	const [popoutState, setPopoutState] = React.useState<{
+		show: boolean;
+		information: HostLMS | null;
+	}>({
+		show: false,
+		information: null
+	});
+
+	const columns = React.useMemo(() => {
+		const columnHelper = createColumnHelper<HostLMS>();
+
+		return [
+			columnHelper.accessor('id', {
+				cell: (info) => (
+					<Button
+						variant='link'
+						type='button'
+						onClick={() => {
+							setPopoutState((prevState) => ({
+								...prevState,
+								show: !prevState.show,
+								information: prevState.information === null ? info.row.original : null
+							}));
+						}}
+					>
+						{info.getValue()}
+					</Button>
+				),
+				header: 'Id',
+				id: 'requestId',
+				enableSorting: false
+			}),
+			columnHelper.accessor('code', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Code',
+				id: 'requestCode' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+			columnHelper.accessor('name', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Name',
+				id: 'requestName' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+			columnHelper.accessor('lmsClientClass', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'IMS Client Class',
+				id: 'requestLmsClientClass' // Used as the unique property in the sorting state (See React-Query dev tools)
+			})
+		];
+	}, []);
+
+	const {
+		resource,
+		status: resourceFetchStatus,
+		state
+	} = useResource<HostLMS>({
+		isQueryEnabled: status === 'authenticated',
+		accessToken: data?.accessToken ?? null,
+		baseQueryKey: 'hostlms',
+		url: url,
+		defaultValues: externalState
+	});
+
+	return (
+		<AdminLayout>
+			<Card>
+				<Card.Header>Requests</Card.Header>
+				<Card.Body>
+					{resourceFetchStatus === 'loading' && (
+						<p className='text-center mb-0'>Loading requests.....</p>
+					)}
+
+					{resourceFetchStatus === 'error' && (
+						<p className='text-center mb-0'>Failed to fetch the requests</p>
+					)}
+
+					{resourceFetchStatus === 'success' && (
+						<>
+							<Pagination
+								from={resource?.meta?.from ?? 0}
+								to={resource?.meta?.to ?? 0}
+								total={resource?.meta?.total ?? 0}
+								pageIndex={externalState.pagination.pageIndex}
+								totalNumberOfPages={state.totalNumberOfPages}
+								perPage={state.pagination.pageSize}
+							/>
+
+							<TanStackTable
+								data={resource?.content ?? []}
+								columns={columns}
+								pageCount={state.totalNumberOfPages}
+								enableTableSorting
+								sortingState={state.sort}
+								paginationState={state.pagination}
+							/>
+
+							<HostLMSListPopout
+								show={popoutState.show}
+								onClick={() => {
+									setPopoutState((prevState) => ({
+										...prevState,
+
+										// Reset the information back to null as were closing the dialog
+										information: null,
+
+										// Hide the popup content
+										show: false
+									}));
+								}}
+								content={popoutState.information}
+							/>
+						</>
+					)}
+				</Card.Body>
+			</Card>
+		</AdminLayout>
+	);
+};
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-  let page = 1
-  if (context.query?.page && typeof context.query.page === 'string') {
-    page = parseInt(context.query.page, 10)
-  }
+	let page = 1;
+	if (context.query?.page && typeof context.query.page === 'string') {
+		page = parseInt(context.query.page, 10);
+	}
 
-  let perPage = 20
-  if (context.query?.per_page && typeof context.query.per_page === 'string') {
-    perPage = parseInt(context.query.per_page.toString(), 10)
-  }
+	let resultsPerPage = 20;
+	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+	}
 
-  let sort = 'id'
-  if (context.query?.sort && typeof context.query.sort === 'string') {
-    sort = context.query.sort
-  }
+	// Defaults to sorting the requestCode in ascending order (The id must be the same the id assigned to the "column")
+	let sort: SortingState = [{ id: 'requestCode', desc: false }];
 
-  let order = 'asc'
-  if (context.query?.order && typeof context.query.order === 'string') {
-    order = context.query.order
-  }
+	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+		const contextSort = context.query?.sort ?? '';
 
-  return {
-    props: {
-      page,
-      perPage,
-      sort,
-      order,
-    }, // will be passed to the page component as props
-  }
-}
+		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
 
-export default HostLmss
+		// If the values pass the validation check override the original sort with the new sort
+		if (contextOrder === 'desc' || contextOrder === 'asc') {
+			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+		}
+	}
+
+	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+
+	return {
+		props: {
+			page,
+			resultsPerPage,
+			sort: sort
+		}
+	};
+};
+
+export default HostLmss;
