@@ -38,7 +38,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Generate the url for the useResource hook
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/patrons/requests';
+		return publicRuntimeConfig.DCB_API_BASE + '/admin/patrons/requests';
 	}, []);
 
 	const columns = React.useMemo(() => {
