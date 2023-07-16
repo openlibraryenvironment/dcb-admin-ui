@@ -101,7 +101,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch the locations</p>
+						<p className='text-center mb-0'>Failed to fetch patron requests </p>
 					)}
 
 					{resourceFetchStatus === 'success' && (
