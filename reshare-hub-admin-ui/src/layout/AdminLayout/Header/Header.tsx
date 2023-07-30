@@ -36,7 +36,7 @@ export default function Header(props: HeaderProps) {
 				</Button>
 				<Link href='/' className='header-brand d-md-none'>
 					<svg width='118' height='46'>
-						<title>Reshare DCB</title>
+						<title>DCB</title>
 					</svg>
 				</Link>
 				<div className='header-nav d-none d-md-flex'>

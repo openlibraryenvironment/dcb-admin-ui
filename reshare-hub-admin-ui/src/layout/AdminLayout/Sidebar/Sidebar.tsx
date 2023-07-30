@@ -33,10 +33,10 @@ export default function Sidebar(props: { isShow: boolean; isShowMd: boolean }) {
 		>
 			<div className='sidebar-brand d-none d-md-flex align-items-center justify-content-center'>
 				<svg className='sidebar-brand-full' width='118' height='46'>
-					<title>ReShare DCB Logo</title>
+					<title>DCB Logo</title>
 				</svg>
 				<svg className='sidebar-brand-narrow d-none' width='46' height='46'>
-					<title>ReShare DCB Logo</title>
+					<title>DCB Logo</title>
 					DCB Logo
 				</svg>
 			</div>
