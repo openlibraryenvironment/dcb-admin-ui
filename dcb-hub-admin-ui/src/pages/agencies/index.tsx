@@ -1,10 +1,12 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Card } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
+import Details from '@components/Details/Details';
 import { Pagination } from '@components/Pagination';
 import TanStackTable from '@components/TanStackTable';
 
@@ -22,6 +24,18 @@ type Props = {
 const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
+	const [showDetails, setShowDetails] = useState(false);
+	const [idClicked, setIdClicked] = useState(42);
+
+	const openDetails = ( {id} : {id: number}) =>
+	{
+		setShowDetails(true);
+		setIdClicked(id);
+	}
+	const closeDetails = () => {
+		setShowDetails(false);
+	};
+	
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
@@ -45,8 +59,12 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 		return [
 			columnHelper.accessor('id', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: '#',
+				cell: (info) => <Button
+				variant='link'
+				type='button'
+				onClick={() => openDetails({ id: info.getValue() })}			>
+				{info.getValue()}
+			</Button>,				header: '#',
 				id: 'id',
 				enableSorting: false
 			}),
@@ -110,6 +128,9 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 				</Card.Body>
 			</Card>
+			<div>
+	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Agency"} /> : null }
+    		</div>
 		</AdminLayout>
 	);
 };

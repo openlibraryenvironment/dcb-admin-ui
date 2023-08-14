@@ -1,17 +1,21 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
-import { Card } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
 import { Pagination } from '@components/Pagination';
 import TanStackTable from '@components/TanStackTable';
+import Details from '@components/Details/Details';
+
 
 import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
 
 import { Location } from '@models/Location';
+
 
 type Props = {
 	page: number;
@@ -22,6 +26,18 @@ type Props = {
 const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
+	const [showDetails, setShowDetails] = useState(false);
+	const [idClicked, setIdClicked] = useState(42);
+
+	const openDetails = ( {id} : {id: number}) =>
+	{
+		setShowDetails(true);
+		setIdClicked(id);
+	}
+	const closeDetails = () => {
+		setShowDetails(false);
+	};
+
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
@@ -46,9 +62,14 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 		return [
 			columnHelper.accessor('id', {
-				cell: (info) => <span>{info.getValue()}</span>,
+				cell: (info) => <Button
+				variant='link'
+				type='button'
+				onClick={() => openDetails({ id: info.getValue() })}			>
+				{info.getValue()}
+			</Button>,
 				header: '#',
-				id: 'locationId',
+				id: 'id',
 				enableSorting: false
 			}),
 			columnHelper.accessor('code', {
@@ -111,6 +132,9 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 				</Card.Body>
 			</Card>
+			<div>
+	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Location"} /> : null }
+    		</div>
 		</AdminLayout>
 	);
 };
