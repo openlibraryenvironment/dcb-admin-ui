@@ -1,17 +1,20 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Card } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
 import { Pagination } from '@components/Pagination';
 import TanStackTable from '@components/TanStackTable';
+import Details from '@components/Details/Details';
 
 import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
 
 import { PatronRequest } from '@models/PatronRequest';
+
 
 type Props = {
 	page: number;
@@ -22,6 +25,18 @@ type Props = {
 const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
+
+	const [showDetails, setShowDetails] = useState(false);
+	const [idClicked, setIdClicked] = useState(42);
+
+	const openDetails = ( {id} : {id: number}) =>
+	{
+		setShowDetails(true);
+		setIdClicked(id);
+	}
+	const closeDetails = () => {
+		setShowDetails(false);
+	};
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
@@ -43,10 +58,16 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 	const columns = React.useMemo(() => {
 		const columnHelper = createColumnHelper<PatronRequest>();
-
+		// onClick will produce the modal
+		// but we need to get the correct data first!
 		return [
 			columnHelper.accessor('id', {
-				cell: (info) => <span>{info.getValue()}</span>,
+				cell: (info) => <Button
+				variant='link'
+				type='button'
+				onClick={() => openDetails({ id: info.getValue() })}			>
+				{info.getValue()}
+			</Button>,
 				header: '#',
 				id: 'id',
 				enableSorting: false
@@ -55,6 +76,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				cell: (info) => <span>{info.getValue()}</span>,
 				header: 'Patron Id',
 				id: 'patronId' // Used as the unique property in the sorting state (See React-Query dev tools)
+				// Revert back to patron.id for the accessor if we have any issues here.
 			}),
 			columnHelper.accessor('patronAgencyCode', {
 				cell: (info) => <span>{info.getValue()}</span>,
@@ -71,10 +93,23 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				header: 'Pickup Location',
 				id: 'pickupLocation' // Used as the unique property in the sorting state (See React-Query dev tools)
 			}),
-			columnHelper.accessor('statusCode', {
+			  // @ts-ignore: TypeScript doesn't like the below accessor, but it's the only one that works with the pre-existing table implementation 
+			  // to get the info we need.
+			columnHelper.accessor('localRequestStatus', {
+								// @ts-ignore: Will be reviewed when table implementation is reviewed in DCB-231
 				cell: (info) => <span>{info.getValue()}</span>,
 				header: 'Status Code',
 				id: 'statusCode' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+			// @ts-ignore: Unfortunately this way of accessing table data has to stay until we re-work table implementation.
+			// TypeScript understandably hates it.			
+			// When table implementation is reviewed, this will be too.
+			columnHelper.accessor('description', {
+				// @ts-ignore: Unfortunately this way of accessing table data has to stay until we re-work table implementation.
+				// TypeScript understandably hates it.
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Description',
+				id: 'description' // Used as the unique property in the sorting state (See React-Query dev tools)
 			})
 		];
 	}, []);
@@ -93,7 +128,8 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 	return (
 		<AdminLayout>
-			<Card>
+				<div> 
+				<Card>
 				<Card.Header>Requests</Card.Header>
 				<Card.Body>
 					{resourceFetchStatus === 'loading' && (
@@ -121,15 +157,27 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 								pageCount={state.totalNumberOfPages}
 								enableTableSorting
 								sortingState={externalState.sort}
+
 							/>
 						</>
 					)}
+
 				</Card.Body>
 			</Card>
+			</div>
+		    <div>
+	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Request"} /> : null }
+    		</div>
+
 		</AdminLayout>
 	);
+	// conditional rendering to only show details when clicked on.
+	// Request data passed down through the content prop, along with the associated id as the i prop.
+	// This means we can find what we need in the array in Details.tsx and display only the relevant information for a given request.
+	// We also pass down type to indicate that we need the 'Request' details only.
 };
 
+// details will need to be shown differently for each entry
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {

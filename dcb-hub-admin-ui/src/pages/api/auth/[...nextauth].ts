@@ -3,6 +3,7 @@ import KeycloakProvider from 'next-auth/providers/keycloak';
 import axios from 'axios';
 import { JWT } from 'next-auth/jwt';
 
+
 /*
 async function getUserData(token:string) {
   return axios.get(process.env.TLP_API_BASE+'/party/about', {
@@ -64,84 +65,76 @@ export default NextAuth({
 		})
 	],
 	callbacks: {
-		async session({ session, token = null }) {
-			return {
-				...session,
-				accessToken: token?.accessToken ?? null,
-				isAdmin: token?.profile?.roles?.includes('ADMIN'),
-				profile: token?.profile ?? {}
-			};
+		async session({ session, token, user }:{session:any, token?:any, user?:any}) {
+			// console.log("SESSION CALLBACK: update access token:%o, user:%o",token,user);
+			session.accessToken = token.accessToken
+			session.profile = token.profile
+	  
+			if ( token?.profile?.groups?.includes('ADMIN') )
+			  session.isAdmin = true;
+	  
+			if ( user ) {
+			  // console.log("not repeating user fetch");
+			}
+			else {
+			  // Send properties to the client, like an access_token from a provider.
+			  // session.tlpUserData = await getTlpUserData(token.accessToken as string)
+			  // session.userData = await getUserData(token.accessToken as string)
+			  // console.log("created session %o %o",session,user);
+			}
+	  
+			return session
 		},
-		async jwt({ token, account = null, profile }) {
+		async jwt({ token, account, user, profile }:{token:any, account?:any, user?:any, profile?:any}) {
+			// console.log("jwt handler %o, %o",token,account);
 			// See https://next-auth.js.org/tutorials/refresh-token-rotation for info on how to refresh
 			// console.log("JWT CALLBACK: handler token=%o, user=%o, account=%o, profile=%o",token,user,account,profile);
-
+	  
 			// For this to work - in the keycloak client, protocol mappers need to be enabled - currently using
 			// zoneinfo, locale, client roles, profile, groups, realm roles
 			//
 			// For refresh tokens to work - go to client config - bottom of settings - OpenID Compat. - Use refresh tokens for client credentials
-
+	  
 			// If account and user are set, then this is our first login
 
-			let existingToken = { ...token };
+			// token will expire in 30 minutes, auto-logout unless something changes.
+			// first stage in implementing OWASP auto logout
 
-			if (process.env.NODE_ENV === 'development') {
-				console.log('Is Account available', Boolean(account));
-			}
-
-			// If the account is available then update the token to include various additional properties like the access_token
 			if (account) {
-				existingToken = {
-					...existingToken,
-					profile: profile ?? null,
-					access_token: account.access_token,
-					refresh_token: account.refresh_token,
-					accessTokenExpires: account.expires_at * 1000
-				};
-
-				if (process.env.NODE_ENV === 'development') {
-					console.log('Token has had the account data injected', existingToken);
-				}
+			  token.accessToken = account.access_token;
+			  token.refreshToken  = account.refresh_token;
+			  token.profile = profile;
+			  console.log("accessTokenExpires=%o",account.expires_at);
+			  token.accessTokenExpires = account?.expires_at * 1000;
+			  console.log("accessTokenExpires=%o",token.accessTokenExpires);
 			}
-
-			// If the token has expired then attempt to renew it (In the event it can't be renewed you will get the old one back)
-			if (Date.now() > existingToken.accessTokenExpires) {
-				if (process.env.NODE_ENV === 'development') {
-					console.log('Refreshing the token as it has expired');
-				}
-
-				existingToken = await refreshAccessToken(token);
+	  
+			if (Date.now() > token.accessTokenExpires) {
+			  // console.log("Token has expired - need to refresh");
+			  token = await refreshAccessToken(token)
+			  // console.log("Refreshed token: %o",token);
 			}
-			/*
-
-			Weird mapping issues:
-
-			- Sometimes the account is available sometimes it isn't
-
-			- To ensure any properties are still mapped even when the account is missing we map them before returning them.
-
-
-			Example: access_token- > access_token OR refresh_token -> refreshToken
-
-			*/
-
-			existingToken = {
-				...existingToken,
-				accessToken: existingToken?.access_token ?? null,
-				refreshToken: existingToken?.refresh_token
-			};
-
-			if (process.env.NODE_ENV === 'development') {
-				console.log('Existing token has been remapped to include additional values', existingToken);
+			else {
+			  // console.log("remaining: %o %o", token.accessTokenExpires-Date.now(), token);
+			  // console.log("remaining: %o", token.accessTokenExpires-Date.now());
 			}
-
-			return existingToken;
-		}
-	},
+	  
+			return token
+		  }
+		},
 	events: {
 		async signOut() {
+
+			//cookies().delete('');
+
+			// For actual logout
+			// Trigger keycloak signout
+			// Delete or invalidate the JWT and associated cookies
+			// Redirect to keycloak signin page
+
 			// The keycloak logout URL is
 			// http://{KEYCLOAK_URL}/auth/realms/{REALM_NAME}/protocol/openid-connect/logout?redirect_uri={ENCODED_REDIRECT_URI}
+			// http:///keycloak.sph.k-int.com/auth/realms/dcb-hub/protocol/openid-connect/logout?redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fauth%2Fcallback%2Fkeycloak
 			console.log('signOut');
 		}
 	},
