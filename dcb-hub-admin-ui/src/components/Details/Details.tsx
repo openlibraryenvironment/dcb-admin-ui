@@ -3,13 +3,9 @@ import Modal from 'react-bootstrap/Modal';
 import Card from 'react-bootstrap/Card';
 import CardGroup from 'react-bootstrap/Card';
 
-
-
-
 // this can be changed to be fullscreen if desired - just pass the fullscreen prop and uncomment  code
 // fullscreen code goes here. we can set it depending on the screen size
 // {fullscreen, }
-
 
 type DetailsType = {
         i: any,
@@ -64,11 +60,11 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 </Card.Body>
                 </Card>: null}
                 {type == "Request"?<Card>
-                        <Card.Body>
-                        <Card.Title>
-                        Request Updated: {dayjs(toDisplay?.dateUpdated).format('DD/MM/YYYY, HH:mm A')}
-                        </Card.Title>
-                        </Card.Body>
+                <Card.Body>
+                <Card.Title>
+                Request Updated: {dayjs(toDisplay?.dateUpdated).format('DD/MM/YYYY, HH:mm A')}
+                </Card.Title>
+                </Card.Body>
                 </Card>: null}
                 {type == "Request"?<Card>
                 <Card.Body>
