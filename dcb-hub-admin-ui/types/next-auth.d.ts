@@ -39,7 +39,9 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
 	interface JWT {
+		provider: string;
 		accessToken: string | null;
+		id_token: string;
 		access_token: string | null;
 		refreshToken: string;
 		profile: Partial<Profile> | null; // Please update this if this is incorrect, it's a parrtial match so the entire object doesn't need to be an exact match for the JWT profile argument

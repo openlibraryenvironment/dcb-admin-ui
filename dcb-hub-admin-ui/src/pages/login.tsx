@@ -8,20 +8,22 @@ import { SyntheticEvent, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { deleteCookie, getCookie } from 'cookies-next';
+import { signIn } from "next-auth/react"
+
 
 const Login: NextPage = () => {
-	const router = useRouter();
+	// const router = useRouter();
 	const [submitting, setSubmitting] = useState(false);
 
-	const getRedirect = () => {
-		const redirect = getCookie('redirect');
-		if (redirect) {
-			deleteCookie('redirect');
-			return redirect.toString();
-		}
+	// const getRedirect = () => {
+	// 	const redirect = getCookie('redirect');
+	// 	if (redirect) {
+	// 		deleteCookie('redirect');
+	// 		return redirect.toString();
+	// 	}
 
-		return '/';
-	};
+	// 	return '/';
+	// };
 
 	const login = async (e: SyntheticEvent) => {
 		e.stopPropagation();
@@ -29,12 +31,11 @@ const Login: NextPage = () => {
 
 		setSubmitting(true);
 
-		const res = await axios.post('api/mock/login');
-		if (res.status === 200) {
-			router.push(getRedirect());
-		}
+		signIn();
+
 		setSubmitting(false);
 	};
+	// we'll want signIn('provider') at some point
 
 	return (
 		<div className='bg-light min-vh-100 d-flex flex-row align-items-center dark:bg-transparent'>
@@ -83,6 +84,7 @@ const Login: NextPage = () => {
 													className='px-4'
 													variant='primary'
 													type='submit'
+													onClick={() => signIn()}
 													disabled={submitting}
 												>
 													Login
