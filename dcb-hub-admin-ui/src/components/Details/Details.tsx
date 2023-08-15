@@ -2,6 +2,7 @@ import * as React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Card from 'react-bootstrap/Card';
 import CardGroup from 'react-bootstrap/Card';
+import dayjs from 'dayjs';
 
 // this can be changed to be fullscreen if desired - just pass the fullscreen prop and uncomment  code
 // fullscreen code goes here. we can set it depending on the screen size
@@ -23,7 +24,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
         // done because we can't get row id out of TST + other table weirdness is causing issues.
         // ideally we'd only pass down what we need here - working on that now. Lookup should ideally take place in table before this component loads.
 
-        const dayjs = require('dayjs');
         const base = 'base-url';
         const size = 'page-size';
 
@@ -46,6 +46,8 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 <Card.Body>
                     <Card.Title>{type} ID: : {toDisplay?.id}</Card.Title>
                 </Card.Body>
+                <Card.Body> Request Updated: {dayjs(1692090061).format('DD/MM/YYYY, HH:mm')}
+ </Card.Body>
                 </Card>
                 {/* // These items are shown for all types, excluding Requests*/}
                 {type !== "Request"?<Card>
@@ -56,13 +58,13 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 {/* // These are the items that we typically need to only show for 'Request Details', hence the conditional rendering*/}
                 {type == "Request"?<Card>
                 <Card.Body>
-                        <Card.Title> Request Created: {dayjs(toDisplay?.dateCreated).format('DD/MM/YYYY, HH:mm A')}</Card.Title>
+                        <Card.Title> Request Created: {dayjs(toDisplay?.dateCreated).format('DD/MM/YYYY, HH:mm')}</Card.Title>
                 </Card.Body>
                 </Card>: null}
                 {type == "Request"?<Card>
                 <Card.Body>
                 <Card.Title>
-                Request Updated: {dayjs(toDisplay?.dateUpdated).format('DD/MM/YYYY, HH:mm A')}
+                Request Updated: {dayjs(toDisplay?.dateUpdated).format('DD/MM/YYYY, HH:mm')}
                 </Card.Title>
                 </Card.Body>
                 </Card>: null}
