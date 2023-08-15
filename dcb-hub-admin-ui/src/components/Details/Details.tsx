@@ -46,8 +46,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 <Card.Body>
                     <Card.Title>{type} ID: : {toDisplay?.id}</Card.Title>
                 </Card.Body>
-                <Card.Body> Request Updated: {dayjs(1692090061).format('DD/MM/YYYY, HH:mm')}
- </Card.Body>
                 </Card>
                 {/* // These items are shown for all types, excluding Requests*/}
                 {type !== "Request"?<Card>
