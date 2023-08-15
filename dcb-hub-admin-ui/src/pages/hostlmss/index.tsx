@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
@@ -6,8 +7,10 @@ import getConfig from 'next/config';
 import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
 import { Pagination } from '@components/Pagination';
-import { HostLMSListPopout } from '@components/HostLMS';
 import TanStackTable from '@components/TanStackTable';
+import Details from '@components/Details/Details';
+
+
 
 import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
@@ -110,6 +113,19 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
 
+	
+	const [showDetails, setShowDetails] = useState(false);
+	const [idClicked, setIdClicked] = useState("");
+
+	const openDetails = ( {id} : {id: string}) =>
+	{
+		setShowDetails(true);
+		setIdClicked(id);
+	}
+	const closeDetails = () => {
+		setShowDetails(false);
+	};
+
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
@@ -127,13 +143,13 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		return publicRuntimeConfig.DCB_API_BASE + '/hostlmss';
 	}, []);
 
-	const [popoutState, setPopoutState] = React.useState<{
-		show: boolean;
-		information: HostLMS | null;
-	}>({
-		show: false,
-		information: null
-	});
+	// const [popoutState, setPopoutState] = React.useState<{
+	// 	show: boolean;
+	// 	information: HostLMS | null;
+	// }>({
+	// 	show: false,
+	// 	information: null
+	// });
 
 	const columns = React.useMemo(() => {
 		const columnHelper = createColumnHelper<HostLMS>();
@@ -144,14 +160,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					<Button
 						variant='link'
 						type='button'
-						onClick={() => {
-							setPopoutState((prevState) => ({
-								...prevState,
-								show: !prevState.show,
-								information: prevState.information === null ? info.row.original : null
-							}));
-						}}
-					>
+						onClick={() => openDetails({ id: info.getValue() })}			>
 						{info.getValue()}
 					</Button>
 				),
@@ -192,7 +201,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	return (
 		<AdminLayout>
 			<Card>
-				<Card.Header>Requests</Card.Header>
+				<Card.Header>HostLMS</Card.Header>
 				<Card.Body>
 					{resourceFetchStatus === 'loading' && (
 						<p className='text-center mb-0'>Loading requests.....</p>
@@ -222,7 +231,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 								paginationState={state.pagination}
 							/>
 
-							<HostLMSListPopout
+							{/* <HostLMSListPopout
 								show={popoutState.show}
 								onClick={() => {
 									setPopoutState((prevState) => ({
@@ -236,11 +245,14 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 									}));
 								}}
 								content={popoutState.information}
-							/>
+							/> */}
 						</>
 					)}
 				</Card.Body>
 			</Card>
+			<div>
+	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"HostLMS"} /> : null }
+    		</div>
 		</AdminLayout>
 	);
 };
