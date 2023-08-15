@@ -13,6 +13,7 @@ import { PropsWithChildren } from 'react';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faGear, faListCheck, faLock, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import { signOut } from "next-auth/react"
 import axios from 'axios';
 import { useRouter } from 'next/router';
 
@@ -33,13 +34,6 @@ const ProfileDropdownItem = (props: NavItemProps) => {
 
 export default function HeaderProfileNav() {
 	const router = useRouter();
-
-	const logout = async () => {
-		const res = await axios.post('/api/mock/logout');
-		if (res.status === 200) {
-			router.push('/login');
-		}
-	};
 
 	return (
 		<Nav>
@@ -126,7 +120,7 @@ export default function HeaderProfileNav() {
             </Dropdown.Item>
           </Link>
           */}
-					<Dropdown.Item onClick={logout}>
+					<Dropdown.Item onClick={()=>signOut()}>
 						<ProfileDropdownItem icon={faPowerOff}>Logout</ProfileDropdownItem>
 					</Dropdown.Item>
 				</Dropdown.Menu>
