@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
 import { Button, Card } from 'react-bootstrap';
@@ -112,7 +112,6 @@ NOTE: This applies to all pages, not just /hostlmss page, the hooks and componen
 const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-
 	
 	const [showDetails, setShowDetails] = useState(false);
 	const [idClicked, setIdClicked] = useState("");
@@ -198,6 +197,16 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		defaultValues: externalState
 	});
 
+	useEffect(() => {
+		if (data?.error === "RefreshAccessTokenError") {
+			signIn('keycloak', {
+				callbackUrl:  process.env.REDIRECT_HOSTLMSS!,
+		  }
+		  ); // Force sign in to resolve error (DCB-241)
+		}
+		
+	  }, [data]);
+
 	return (
 		<AdminLayout>
 			<Card>
@@ -208,7 +217,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch the requests</p>
+						<p className='text-center mb-0'>Failed to fetch the requests, will retry</p>
 					)}
 
 					{resourceFetchStatus === 'success' && (
