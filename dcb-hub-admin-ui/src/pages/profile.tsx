@@ -1,7 +1,14 @@
 import * as React from 'react';
 import { NextPage } from 'next';
 
-import { Card, CardGroup } from 'react-bootstrap';
+import { Card, CardGroup, ListGroupItem } from 'react-bootstrap';
+
+import { ListGroup } from 'react-bootstrap';
+import { MdPersonOutline } from 'react-icons/md';
+import { MdOutlineMail } from 'react-icons/md';
+import { MdOutlineMarkEmailRead } from 'react-icons/md';
+import { MdThumbUpOffAlt } from 'react-icons/md';
+import { MdOutlineSupervisorAccount } from 'react-icons/md';
 
 import { AdminLayout } from '@layout';
 
@@ -16,35 +23,47 @@ type Props = {
 
 const Profile: NextPage<Props> = (props) => {
 	const { data: session, status }: { data: any; status: any } = useSession();
-	// eventually we should read this data in properly so we're not referring directly to session
-	// we also want to make this look a lot nicer - it's there to help development at the minute
-	// read roles in properly too and split it nicely
-	// and figure out if we want any dev info there
-	const emailVerified = (session?.profile?.email_verified) ?? "Cannot fetch verified email status." ;
+	const emailVerified = session?.profile?.email_verified ?? 'Cannot fetch verified email status.';
+	const renderListOfRoles = (roles: string[]) => {
+		return roles?.map((role) => <li key={roles.indexOf(role)}>{role}</li>);
+	};
+
 	return (
 		<AdminLayout>
-					<CardGroup>
-						<Card>
-							<Card.Header>Profile</Card.Header>
-							<Card.Body> Name: {session?.user?.name} </Card.Body>
-							<Card.Body> Email: {session?.user?.email}</Card.Body>
-							<Card.Body> Email Verified: {emailVerified.toString()}</Card.Body>
-							<Card.Body> Preferred Username: {session?.profile?.preferred_username} </Card.Body>
-							<Card.Body> Roles : {session?.profile?.roles}</Card.Body>
-
-
-						</Card>	
-
-
-		{/* <Card>
-			<Card.Body>
-					<pre>{JSON.stringify(session, null, 2)}</pre>
-			</Card.Body>
-			</Card> */}
-		</CardGroup>
-
+			<CardGroup>
+				<Card style={{ width: '30rem' }}>
+					{/*use <Card.Img for profile pictures if needed in the future*/}
+					<Card.Body>
+						<Card.Title>Profile</Card.Title>
+						<Card.Text>Your details</Card.Text>
+					</Card.Body>
+					<ListGroup className='list-group-flush'>
+						<ListGroup.Item>
+							<MdPersonOutline /> <span style={{ fontWeight: 'bold' }}>Name: </span>{' '}
+							{session?.user?.name}
+						</ListGroup.Item>
+						<ListGroupItem>
+							<MdOutlineMail /> <span style={{ fontWeight: 'bold' }}>Email: </span>
+							{session?.user?.email}
+						</ListGroupItem>
+						<ListGroupItem>
+							<MdOutlineMarkEmailRead />
+							<span style={{ fontWeight: 'bold' }}> Email Verified: </span>
+							{emailVerified.toString()}
+						</ListGroupItem>
+						<ListGroupItem>
+							<MdThumbUpOffAlt /> <span style={{ fontWeight: 'bold' }}>Preferred Username: </span>
+							{session?.profile?.preferred_username}
+						</ListGroupItem>
+						<ListGroupItem>
+							<MdOutlineSupervisorAccount />
+							<span style={{ fontWeight: 'bold' }}>Roles: </span>
+							{renderListOfRoles(session?.profile?.roles)}
+						</ListGroupItem>
+					</ListGroup>
+				</Card>
+			</CardGroup>
 		</AdminLayout>
-
 	);
 };
 
