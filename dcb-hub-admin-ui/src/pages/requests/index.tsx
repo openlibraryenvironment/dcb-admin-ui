@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn} from 'next-auth/react';
 
 import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
@@ -76,7 +76,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				cell: (info) => <span>{info.getValue()}</span>,
 				header: 'Patron Id',
 				id: 'patronId' // Used as the unique property in the sorting state (See React-Query dev tools)
-				// Revert back to patron.id for the accessor if we have any issues here.
+				// Revert back to patron.id for the accessor if we have any issues here. Need to fix the associated TS error
 			}),
 			columnHelper.accessor('patronAgencyCode', {
 				cell: (info) => <span>{info.getValue()}</span>,
@@ -126,6 +126,17 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		externalState
 	});
 
+	useEffect(() => {
+		if (data?.error === "RefreshAccessTokenError") {
+			signIn('keycloak', {
+				callbackUrl:  process.env.REDIRECT_REQUESTS!,
+		  }
+		  ); // Force sign in to hopefully resolve error
+		}
+		
+	  }, [data]);
+
+
 	return (
 		<AdminLayout>
 				<div> 
@@ -137,7 +148,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch patron requests </p>
+						<p className='text-center mb-0'>Failed to fetch patron requests, reloading page </p>
 					)}
 
 					{resourceFetchStatus === 'success' && (

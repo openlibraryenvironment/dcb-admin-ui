@@ -28,12 +28,26 @@ declare module 'next-auth' {
 	interface Session {
 		accessToken: string;
 		isAdmin: boolean;
+		error: string;
 	}
 
 	interface Account {
-		access_token: string | null;
+		provider: string;
+		type: string;
+		id: string;
+		accessToken: string;
+		accessTokenExpires?: any;
+		refreshToken: string;
+		idToken: string;
+		access_token: string;
+		expires_in: number;
+		refresh_expires_in: number;
 		refresh_token: string;
-		expires_at: number;
+		token_type: string;
+		id_token: string;
+		'not-before-policy': number;
+		session_state: string;
+		scope: string;
 	}
 }
 
@@ -46,8 +60,14 @@ declare module 'next-auth/jwt' {
 		refreshToken: string;
 		profile: Partial<Profile> | null; // Please update this if this is incorrect, it's a parrtial match so the entire object doesn't need to be an exact match for the JWT profile argument
 		accessTokenExpires: number;
+		refreshTokenExpires: number;
 		expires_in: number;
 		refresh_token: string;
+		name: string;
+		email: string;
+		sub: string
+		error: string;
+		user: IUser;
 	}
 
 	// Appends the  user interface to the Profile user so properties like groups is available to decide if the user is admin or not
