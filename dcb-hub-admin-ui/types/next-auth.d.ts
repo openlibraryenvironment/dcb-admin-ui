@@ -27,6 +27,7 @@ interface IUser extends DefaultUser {
 declare module 'next-auth' {
 	interface Session {
 		accessToken: string;
+		refreshToken: string;
 		isAdmin: boolean;
 		error: string;
 	}

@@ -95,6 +95,7 @@ export default NextAuth({
 			// Set session properties if token exists
 			if (token) {
 				session.accessToken = token.accessToken
+				session.refreshToken = token.refreshToken
 				session.profile = token.profile
 				session.error = token.error;
 				session.user = token.user;

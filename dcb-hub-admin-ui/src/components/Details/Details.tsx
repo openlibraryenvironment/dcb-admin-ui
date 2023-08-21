@@ -3,10 +3,11 @@ import Modal from 'react-bootstrap/Modal';
 import Card from 'react-bootstrap/Card';
 import CardGroup from 'react-bootstrap/Card';
 import dayjs from 'dayjs';
+import { createColumnHelper } from '@tanstack/react-table';
+import { Agency } from '@models/Agency';
+import { Table } from '@components/Table';
 
-// this can be changed to be fullscreen if desired - just pass the fullscreen prop and uncomment  code
-// fullscreen code goes here. we can set it depending on the screen size
-// {fullscreen, }
+// this can be changed to be fullscreen if desired - just pass the fullscreen prop. It can also be adjusted depending on screen size.
 
 type DetailsType = {
         i: any,
@@ -20,10 +21,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
         
         // Card implementation is in-place until we have UI design
 
-        // content array passed down with ID, which we use to do lookup to find the relevant request item to display. 
-        // done because we can't get row id out of TST + other table weirdness is causing issues.
-        // ideally we'd only pass down what we need here - working on that now. Lookup should ideally take place in table before this component loads.
-
         const base = 'base-url';
         const size = 'page-size';
 
@@ -31,12 +28,37 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 return array.find(item => item.id === id);
             };
         const toDisplay = findItemById(content, i);
-
+        // Columns for the table for the listing of group member agencies.
+        const columns = React.useMemo(() => {
+		const columnHelper = createColumnHelper<Agency>();
+                // it's possible this should be AgencyGroupMember
+		return [
+			columnHelper.accessor('id', {
+				cell: (info) => <span> {info.getValue()}
+                                </span>,				
+                                header: '#',
+				id: 'id',
+				enableSorting: true
+			}),
+			columnHelper.accessor('code', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Code',
+				id: 'groupId' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+			columnHelper.accessor('name', {
+				cell: (info) => <span>{info.getValue()}</span>,
+				header: 'Name',
+				id: 'groupCode' // Used as the unique property in the sorting state (See React-Query dev tools)
+			}),
+		];
+	}, []);
+                
     return (
         <Modal show={show} onHide={onClose}  size="lg"
         aria-labelledby="centred-details-modal"
         centered>
                     <Modal.Header closeButton aria-labelledby='close-details-modal'>
+          <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title>
           <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -185,10 +207,23 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 </Card.Body>
                 </Card>: null}
                 {/* These are the items we typically only need to show for 'Group Details'*/}
-                {/* Description, and potentially current / former members'*/}
-                {/* Array of agencies (eventually editable)'*/}
+                {/* Table of group member agencies. These will be editable in future versions)'*/}
+                {type == "Group"?<Card>
+                <Card.Body>
+                        <Card.Title> Group Name: {toDisplay?.name} </Card.Title>
+                </Card.Body>
+                </Card>: null}
+                {type == "Group"?<Card>
+                <Card.Body>
+                        <Card.Title> Group Members: </Card.Title>
+                        <Table
+                                data={toDisplay?.members.map((item: { agency: any; }) => item.agency) ?? []}
+				columns={columns}
+				type = "Groups"
+			/>                
+                </Card.Body>
+                </Card>: null}
             </CardGroup>
-            {/* <p> Error message: {content[i]?.errorMessage} </p> */}
         </Modal.Body>
       </Modal>
     );
