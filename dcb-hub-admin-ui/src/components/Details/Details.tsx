@@ -37,11 +37,11 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
         aria-labelledby="centred-details-modal"
         centered>
                     <Modal.Header closeButton aria-labelledby='close-details-modal'>
-          <Modal.Title> {type} Details</Modal.Title>
+          <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <CardGroup>
-                {/* // These are the items that we always show on every 'Details' instance*/}
+                {/* // These are the items that we always show on every 'Details' instance. */}
                 <Card>
                 <Card.Body>
                     <Card.Title>{type} ID: : {toDisplay?.id}</Card.Title>
@@ -184,13 +184,12 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         <Card.Title> Host System ID: {toDisplay?.hostSystem?.id} </Card.Title>
                 </Card.Body>
                 </Card>: null}
+                {/* These are the items we typically only need to show for 'Group Details'*/}
+                {/* Description, and potentially current / former members'*/}
+                {/* Array of agencies (eventually editable)'*/}
             </CardGroup>
             {/* <p> Error message: {content[i]?.errorMessage} </p> */}
         </Modal.Body>
-
       </Modal>
-
     );
-
-
 }
