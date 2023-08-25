@@ -7,13 +7,12 @@ import { useSession } from 'next-auth/react';
 import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
 import Details from '@components/Details/Details';
-import { Pagination } from '@components/Pagination';
-import TanStackTable from '@components/TanStackTable';
 
 import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
 
 import { Agency } from '@models/Agency';
+import { Table } from '@components/Table';
 
 type Props = {
 	page: number;
@@ -108,21 +107,10 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Pagination
-								from={resource?.meta?.from ?? 0}
-								to={resource?.meta?.to ?? 0}
-								total={resource?.meta?.total ?? 0}
-								perPage={externalState.pagination.pageSize}
-								pageIndex={externalState.pagination.pageIndex}
-								totalNumberOfPages={state.totalNumberOfPages}
-							/>
-
-							<TanStackTable
+							<Table
 								data={resource?.content ?? []}
 								columns={columns}
-								pageCount={state.totalNumberOfPages}
-								enableTableSorting
-								sortingState={externalState.sort}
+								type = "Agencies"
 							/>
 						</>
 					)}

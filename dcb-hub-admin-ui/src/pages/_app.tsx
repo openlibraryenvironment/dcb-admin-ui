@@ -5,7 +5,7 @@ import type { AppProps } from 'next/app';
 // It handles optimization and all the necessary Webpack configuration to make this work.
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { SSRProvider } from 'react-bootstrap';
+
 import { SessionProvider } from 'next-auth/react';
 import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -38,13 +38,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 	// to ensure that the auto-generated ids are consistent between the server and client.
 	// https://react-bootstrap.github.io/getting-started/server-side-rendering/
 	return (
-		<QueryClientProvider client={queryClient}>
+			<QueryClientProvider client={queryClient}>
 			<Hydrate state={pageProps.dehydratedState}>
 				<SessionProvider session={pageProps.session}>
-					<SSRProvider>
 						<ProgressBar />
 						<Component {...pageProps} />
-					</SSRProvider>
 				</SessionProvider>
 			</Hydrate>
 			<ReactQueryDevtools initialIsOpen={false} />

@@ -3,18 +3,13 @@ import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession, signIn} from 'next-auth/react';
-
 import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
-import { Pagination } from '@components/Pagination';
-import TanStackTable from '@components/TanStackTable';
 import Details from '@components/Details/Details';
-
 import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
-
 import { PatronRequest } from '@models/PatronRequest';
-
+import { Table } from '@components/Table';
 
 type Props = {
 	page: number;
@@ -135,8 +130,6 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		}
 		
 	  }, [data]);
-
-
 	return (
 		<AdminLayout>
 				<div> 
@@ -149,26 +142,14 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'error' && (
 						<p className='text-center mb-0'>Failed to fetch patron requests, reloading page </p>
-					)}
+					) }
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Pagination
-								from={resource?.meta?.from ?? 0}
-								to={resource?.meta?.to ?? 0}
-								total={resource?.meta?.total ?? 0}
-								perPage={externalState.pagination.pageSize}
-								pageIndex={externalState.pagination.pageIndex}
-								totalNumberOfPages={state.totalNumberOfPages}
-							/>
-
-							<TanStackTable
+							<Table
 								data={resource?.content ?? []}
 								columns={columns}
-								pageCount={state.totalNumberOfPages}
-								enableTableSorting
-								sortingState={externalState.sort}
-
+								type="Requests"
 							/>
 						</>
 					)}
@@ -179,7 +160,6 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		    <div>
 	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Request"} /> : null }
     		</div>
-
 		</AdminLayout>
 	);
 	// conditional rendering to only show details when clicked on.

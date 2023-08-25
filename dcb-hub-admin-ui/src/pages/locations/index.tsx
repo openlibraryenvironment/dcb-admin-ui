@@ -6,8 +6,6 @@ import getConfig from 'next/config';
 
 import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
-import { Pagination } from '@components/Pagination';
-import TanStackTable from '@components/TanStackTable';
 import Details from '@components/Details/Details';
 
 
@@ -15,6 +13,7 @@ import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
 
 import { Location } from '@models/Location';
+import { Table } from '@components/Table';
 
 
 type Props = {
@@ -85,6 +84,9 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		];
 	}, []);
 
+	// MUST KEEP COLUMNS FOR DETAILS PAGE TO WORK AS THAT'S WHERE ONCLICK IS
+	// If we change onClick, that can be altered.
+
 	const {
 		resource,
 		status: resourceFetchStatus,
@@ -112,21 +114,10 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Pagination
-								from={resource?.meta?.from ?? 0}
-								to={resource?.meta?.to ?? 0}
-								total={resource?.meta?.total ?? 0}
-								perPage={externalState.pagination.pageSize}
-								pageIndex={externalState.pagination.pageIndex}
-								totalNumberOfPages={state.totalNumberOfPages}
-							/>
-
-							<TanStackTable
+							<Table
 								data={resource?.content ?? []}
 								columns={columns}
-								pageCount={state.totalNumberOfPages}
-								enableTableSorting
-								sortingState={externalState.sort}
+								type="Locations"
 							/>
 						</>
 					)}
