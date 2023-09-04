@@ -10,12 +10,12 @@ import { Pagination } from '@components/Pagination';
 import TanStackTable from '@components/TanStackTable';
 import Details from '@components/Details/Details';
 
-
 import { useResource } from '@hooks';
 import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
 
 import { Location } from '@models/Location';
 
+import SignOutIfInactive from '../useAutoSignout';
 
 type Props = {
 	page: number;
@@ -29,15 +29,13 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const [showDetails, setShowDetails] = useState(false);
 	const [idClicked, setIdClicked] = useState(42);
 
-	const openDetails = ( {id} : {id: number}) =>
-	{
+	const openDetails = ({ id }: { id: number }) => {
 		setShowDetails(true);
 		setIdClicked(id);
-	}
+	};
 	const closeDetails = () => {
 		setShowDetails(false);
 	};
-
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
@@ -51,6 +49,9 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		[page, resultsPerPage, sort]
 	);
 
+	//automatic sign out after 15 minutes
+	SignOutIfInactive();
+
 	// Generate the url for the useResource hook
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
@@ -62,12 +63,11 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 		return [
 			columnHelper.accessor('id', {
-				cell: (info) => <Button
-				variant='link'
-				type='button'
-				onClick={() => openDetails({ id: info.getValue() })}			>
-				{info.getValue()}
-			</Button>,
+				cell: (info) => (
+					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
+						{info.getValue()}
+					</Button>
+				),
 				header: '#',
 				id: 'id',
 				enableSorting: false
@@ -133,8 +133,16 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				</Card.Body>
 			</Card>
 			<div>
-	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Location"} /> : null }
-    		</div>
+				{showDetails ? (
+					<Details
+						i={idClicked}
+						content={resource?.content ?? []}
+						show={showDetails}
+						onClose={closeDetails}
+						type={'Location'}
+					/>
+				) : null}
+			</div>
 		</AdminLayout>
 	);
 };

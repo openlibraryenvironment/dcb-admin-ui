@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
-import { useSession, signIn} from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 
 import { Button, Card } from 'react-bootstrap';
 import { AdminLayout } from '@layout';
@@ -15,6 +15,7 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 
 import { PatronRequest } from '@models/PatronRequest';
 
+import SignOutIfInactive from '../useAutoSignout';
 
 type Props = {
 	page: number;
@@ -29,11 +30,10 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const [showDetails, setShowDetails] = useState(false);
 	const [idClicked, setIdClicked] = useState(42);
 
-	const openDetails = ( {id} : {id: number}) =>
-	{
+	const openDetails = ({ id }: { id: number }) => {
 		setShowDetails(true);
 		setIdClicked(id);
-	}
+	};
 	const closeDetails = () => {
 		setShowDetails(false);
 	};
@@ -56,18 +56,20 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		return publicRuntimeConfig.DCB_API_BASE + '/admin/patrons/requests';
 	}, []);
 
+	//automatic sign out after 15 minutes
+	SignOutIfInactive();
+
 	const columns = React.useMemo(() => {
 		const columnHelper = createColumnHelper<PatronRequest>();
 		// onClick will produce the modal
 		// but we need to get the correct data first!
 		return [
 			columnHelper.accessor('id', {
-				cell: (info) => <Button
-				variant='link'
-				type='button'
-				onClick={() => openDetails({ id: info.getValue() })}			>
-				{info.getValue()}
-			</Button>,
+				cell: (info) => (
+					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
+						{info.getValue()}
+					</Button>
+				),
 				header: '#',
 				id: 'id',
 				enableSorting: false
@@ -93,16 +95,16 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				header: 'Pickup Location',
 				id: 'pickupLocation' // Used as the unique property in the sorting state (See React-Query dev tools)
 			}),
-			  // @ts-ignore: TypeScript doesn't like the below accessor, but it's the only one that works with the pre-existing table implementation 
-			  // to get the info we need.
+			// @ts-ignore: TypeScript doesn't like the below accessor, but it's the only one that works with the pre-existing table implementation
+			// to get the info we need.
 			columnHelper.accessor('localRequestStatus', {
-								// @ts-ignore: Will be reviewed when table implementation is reviewed in DCB-231
+				// @ts-ignore: Will be reviewed when table implementation is reviewed in DCB-231
 				cell: (info) => <span>{info.getValue()}</span>,
 				header: 'Status Code',
 				id: 'statusCode' // Used as the unique property in the sorting state (See React-Query dev tools)
 			}),
 			// @ts-ignore: Unfortunately this way of accessing table data has to stay until we re-work table implementation.
-			// TypeScript understandably hates it.			
+			// TypeScript understandably hates it.
 			// When table implementation is reviewed, this will be too.
 			columnHelper.accessor('description', {
 				// @ts-ignore: Unfortunately this way of accessing table data has to stay until we re-work table implementation.
@@ -127,59 +129,61 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	});
 
 	useEffect(() => {
-		if (data?.error === "RefreshAccessTokenError") {
+		if (data?.error === 'RefreshAccessTokenError') {
 			signIn('keycloak', {
-				callbackUrl:  process.env.REDIRECT_REQUESTS!,
-		  }
-		  ); // Force sign in to hopefully resolve error
+				callbackUrl: process.env.REDIRECT_REQUESTS!
+			}); // Force sign in to hopefully resolve error
 		}
-		
-	  }, [data]);
-
+	}, [data]);
 
 	return (
 		<AdminLayout>
-				<div> 
+			<div>
 				<Card>
-				<Card.Header>Requests</Card.Header>
-				<Card.Body>
-					{resourceFetchStatus === 'loading' && (
-						<p className='text-center mb-0'>Loading requests.....</p>
-					)}
+					<Card.Header>Requests</Card.Header>
+					<Card.Body>
+						{resourceFetchStatus === 'loading' && (
+							<p className='text-center mb-0'>Loading requests.....</p>
+						)}
 
-					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch patron requests, reloading page </p>
-					)}
+						{resourceFetchStatus === 'error' && (
+							<p className='text-center mb-0'>Failed to fetch patron requests, reloading page </p>
+						)}
 
-					{resourceFetchStatus === 'success' && (
-						<>
-							<Pagination
-								from={resource?.meta?.from ?? 0}
-								to={resource?.meta?.to ?? 0}
-								total={resource?.meta?.total ?? 0}
-								perPage={externalState.pagination.pageSize}
-								pageIndex={externalState.pagination.pageIndex}
-								totalNumberOfPages={state.totalNumberOfPages}
-							/>
+						{resourceFetchStatus === 'success' && (
+							<>
+								<Pagination
+									from={resource?.meta?.from ?? 0}
+									to={resource?.meta?.to ?? 0}
+									total={resource?.meta?.total ?? 0}
+									perPage={externalState.pagination.pageSize}
+									pageIndex={externalState.pagination.pageIndex}
+									totalNumberOfPages={state.totalNumberOfPages}
+								/>
 
-							<TanStackTable
-								data={resource?.content ?? []}
-								columns={columns}
-								pageCount={state.totalNumberOfPages}
-								enableTableSorting
-								sortingState={externalState.sort}
-
-							/>
-						</>
-					)}
-
-				</Card.Body>
-			</Card>
+								<TanStackTable
+									data={resource?.content ?? []}
+									columns={columns}
+									pageCount={state.totalNumberOfPages}
+									enableTableSorting
+									sortingState={externalState.sort}
+								/>
+							</>
+						)}
+					</Card.Body>
+				</Card>
 			</div>
-		    <div>
-	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Request"} /> : null }
-    		</div>
-
+			<div>
+				{showDetails ? (
+					<Details
+						i={idClicked}
+						content={resource?.content ?? []}
+						show={showDetails}
+						onClose={closeDetails}
+						type={'Request'}
+					/>
+				) : null}
+			</div>
 		</AdminLayout>
 	);
 	// conditional rendering to only show details when clicked on.
