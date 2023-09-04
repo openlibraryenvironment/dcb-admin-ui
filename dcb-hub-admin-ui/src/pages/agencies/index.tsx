@@ -14,6 +14,8 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 import { Agency } from '@models/Agency';
 import { Table } from '@components/Table';
 
+import SignOutIfInactive from '../useAutoSignout';
+
 type Props = {
 	page: number;
 	resultsPerPage: number;
@@ -26,15 +28,15 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const [showDetails, setShowDetails] = useState(false);
 	const [idClicked, setIdClicked] = useState(42);
 
-	const openDetails = ( {id} : {id: number}) =>
-	{
+	SignOutIfInactive();
+
+	const openDetails = ({ id }: { id: number }) => {
 		setShowDetails(true);
 		setIdClicked(id);
-	}
+	};
 	const closeDetails = () => {
 		setShowDetails(false);
 	};
-	
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
@@ -58,12 +60,12 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 		return [
 			columnHelper.accessor('id', {
-				cell: (info) => <Button
-				variant='link'
-				type='button'
-				onClick={() => openDetails({ id: info.getValue() })}			>
-				{info.getValue()}
-			</Button>,				header: '#',
+				cell: (info) => (
+					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
+						{info.getValue()}
+					</Button>
+				),
+				header: '#',
 				id: 'id',
 				enableSorting: false
 			}),
@@ -107,18 +109,22 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Table
-								data={resource?.content ?? []}
-								columns={columns}
-								type = "Agencies"
-							/>
+							<Table data={resource?.content ?? []} columns={columns} type='Agencies' />
 						</>
 					)}
 				</Card.Body>
 			</Card>
 			<div>
-	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Agency"} /> : null }
-    		</div>
+				{showDetails ? (
+					<Details
+						i={idClicked}
+						content={resource?.content ?? []}
+						show={showDetails}
+						onClose={closeDetails}
+						type={'Agency'}
+					/>
+				) : null}
+			</div>
 		</AdminLayout>
 	);
 };

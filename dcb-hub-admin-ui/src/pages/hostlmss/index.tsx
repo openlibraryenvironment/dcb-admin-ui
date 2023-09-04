@@ -14,6 +14,8 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 import { HostLMS } from '@models/HostLMS';
 import { Table } from '@components/Table';
 
+import SignOutIfInactive from '../useAutoSignout';
+
 type Props = {
 	page: number;
 	resultsPerPage: number;
@@ -21,17 +23,19 @@ type Props = {
 };
 
 const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+	//automatic sign out after 15 minutes
+	SignOutIfInactive();
+
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-	
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState("");
 
-	const openDetails = ( {id} : {id: string}) =>
-	{
+	const [showDetails, setShowDetails] = useState(false);
+	const [idClicked, setIdClicked] = useState('');
+
+	const openDetails = ({ id }: { id: string }) => {
 		setShowDetails(true);
 		setIdClicked(id);
-	}
+	};
 	const closeDetails = () => {
 		setShowDetails(false);
 	};
@@ -59,10 +63,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		return [
 			columnHelper.accessor('id', {
 				cell: (info) => (
-					<Button
-						variant='link'
-						type='button'
-						onClick={() => openDetails({ id: info.getValue() })}			>
+					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
 						{info.getValue()}
 					</Button>
 				),
@@ -101,14 +102,12 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	});
 
 	useEffect(() => {
-		if (data?.error === "RefreshAccessTokenError") {
+		if (data?.error === 'RefreshAccessTokenError') {
 			signIn('keycloak', {
-				callbackUrl:  process.env.REDIRECT_HOSTLMSS!,
-		  }
-		  ); // Force sign in to resolve error (DCB-241)
+				callbackUrl: process.env.REDIRECT_HOSTLMSS!
+			}); // Force sign in to resolve error (DCB-241)
 		}
-		
-	  }, [data]);
+	}, [data]);
 
 	return (
 		<AdminLayout>
@@ -120,28 +119,34 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</p>
+						<p className='text-center mb-0'>
+							Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.
+						</p>
 					)}
 
 					{resourceFetchStatus === 'success' && (
-						<>			
-							<Table
-								data={resource?.content ?? []}
-								columns={columns}
-								type="HostLMS"
-							/>
+						<>
+							<Table data={resource?.content ?? []} columns={columns} type='HostLMS' />
 						</>
 					)}
 				</Card.Body>
 			</Card>
 			<div>
-	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"HostLMS"} /> : null }
-    		</div>
+				{showDetails ? (
+					<Details
+						i={idClicked}
+						content={resource?.content ?? []}
+						show={showDetails}
+						onClose={closeDetails}
+						type={'HostLMS'}
+					/>
+				) : null}
+			</div>
 		</AdminLayout>
 	);
 };
 
-// This relates mainly to the previous non-functional server side pagination. 
+// This relates mainly to the previous non-functional server side pagination.
 // Likely to be completely taken out in full review of table and data-fetching
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;

@@ -2,6 +2,8 @@ import type { NextPage } from 'next';
 
 import { AdminLayout } from '@layout';
 
+import SignOutIfInactive from './useAutoSignout';
+
 import {
 	BarElement,
 	CategoryScale,
@@ -13,14 +15,26 @@ import {
 	Tooltip
 } from 'chart.js';
 
-Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Tooltip, Filler);
+const Home: NextPage = () => {
+	SignOutIfInactive();
 
-const Home: NextPage = () => (
-	<AdminLayout>
-		<div className='row'>
-			<div className='col-sm-6 col-lg-3'>This is the home dash</div>
-		</div>
-	</AdminLayout>
-);
+	Chart.register(
+		CategoryScale,
+		LinearScale,
+		PointElement,
+		LineElement,
+		BarElement,
+		Tooltip,
+		Filler
+	);
+
+	return (
+		<AdminLayout>
+			<div className='row'>
+				<div className='col-sm-6 col-lg-3'>This is the home dash</div>
+			</div>
+		</AdminLayout>
+	);
+};
 
 export default Home;

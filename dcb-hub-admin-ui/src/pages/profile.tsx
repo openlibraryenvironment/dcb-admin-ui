@@ -14,6 +14,8 @@ import { AdminLayout } from '@layout';
 
 import { useSession } from 'next-auth/react';
 
+import SignOutIfInactive from './useAutoSignout';
+
 type Props = {
 	page: number;
 	perPage: number;
@@ -27,6 +29,7 @@ const Profile: NextPage<Props> = (props) => {
 	const renderListOfRoles = (roles: string[]) => {
 		return roles?.map((role) => <li key={roles.indexOf(role)}>{role}</li>);
 	};
+	SignOutIfInactive();
 
 	return (
 		<AdminLayout>
