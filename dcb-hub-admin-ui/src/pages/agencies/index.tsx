@@ -109,11 +109,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Table
-								data={resource?.content ?? []}
-								columns={columns}
-								type = "Agencies"
-							/>
+							<Table data={resource?.content ?? []} columns={columns} type='Agencies' />
 						</>
 					)}
 				</Card.Body>
