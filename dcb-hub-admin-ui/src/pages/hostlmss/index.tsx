@@ -14,6 +14,8 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 import { HostLMS } from '@models/HostLMS';
 import { Table } from '@components/Table';
 
+import SignOutIfInactive from '../useAutoSignout';
+
 type Props = {
 	page: number;
 	resultsPerPage: number;
@@ -21,17 +23,19 @@ type Props = {
 };
 
 const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+	//automatic sign out after 15 minutes
+	SignOutIfInactive();
+
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-	
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState("");
 
-	const openDetails = ( {id} : {id: string}) =>
-	{
+	const [showDetails, setShowDetails] = useState(false);
+	const [idClicked, setIdClicked] = useState('');
+
+	const openDetails = ({ id }: { id: string }) => {
 		setShowDetails(true);
 		setIdClicked(id);
-	}
+	};
 	const closeDetails = () => {
 		setShowDetails(false);
 	};
@@ -59,10 +63,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		return [
 			columnHelper.accessor('id', {
 				cell: (info) => (
-					<Button
-						variant='link'
-						type='button'
-						onClick={() => openDetails({ id: info.getValue() })}			>
+					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
 						{info.getValue()}
 					</Button>
 				),
@@ -101,14 +102,12 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	});
 
 	useEffect(() => {
-		if (data?.error === "RefreshAccessTokenError") {
+		if (data?.error === 'RefreshAccessTokenError') {
 			signIn('keycloak', {
-				callbackUrl:  process.env.REDIRECT_HOSTLMSS!,
-		  }
-		  ); // Force sign in to resolve error (DCB-241)
+				callbackUrl: process.env.REDIRECT_HOSTLMSS!
+			}); // Force sign in to resolve error (DCB-241)
 		}
-		
-	  }, [data]);
+	}, [data]);
 
 	return (
 		<AdminLayout>
@@ -135,8 +134,16 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				</Card.Body>
 			</Card>
 			<div>
-	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"HostLMS"} /> : null }
-    		</div>
+				{showDetails ? (
+					<Details
+						i={idClicked}
+						content={resource?.content ?? []}
+						show={showDetails}
+						onClose={closeDetails}
+						type={'HostLMS'}
+					/>
+				) : null}
+			</div>
 		</AdminLayout>
 	);
 };
