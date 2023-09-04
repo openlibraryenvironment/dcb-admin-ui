@@ -16,6 +16,8 @@ import { Table } from '@components/Table';
 
 import SignOutIfInactive from '../useAutoSignout';
 
+import SignOutIfInactive from '../useAutoSignout';
+
 type Props = {
 	page: number;
 	resultsPerPage: number;
