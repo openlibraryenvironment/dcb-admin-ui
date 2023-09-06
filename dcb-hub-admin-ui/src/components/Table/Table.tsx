@@ -124,12 +124,12 @@ export default function Table<T extends Object>({
 			>
 			  {'>>'}
 			</button>
-			<span className="pageCount">
-			  <div>Page {table.getState().pagination.pageIndex + 1} of{' '}
-				{table.getPageCount()}</div>
-			</span>
+			<div className="pageCount">
+			  <p>Page {table.getState().pagination.pageIndex + 1} of{' '}
+				{table.getPageCount()}</p>
+			</div>
             {/* Embolden page numbers */}
-			<span className="flex items-center gap-1">
+			<div className="flex items-center gap-1">
 			  | Go to page:
 			  <input
 				type="number"
@@ -140,7 +140,7 @@ export default function Table<T extends Object>({
 				}}
 				className="border p-1 rounded w-16"
 			  />
-			</span>
+			</div>
             {/* Limit the available page numbers (i.e. to ones that are possible, no -1) */}
 			<select
 			  value={table.getState().pagination.pageSize}

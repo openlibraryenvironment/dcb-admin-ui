@@ -10,6 +10,8 @@ import axios from 'axios';
 import { deleteCookie, getCookie } from 'cookies-next';
 import { signIn } from "next-auth/react"
 
+// LEGACY FILE MARKED FOR POTENTIAL DELETION - UNCLEAR IF ANYTHING IS STILL BEING USED HERE
+// TODO: Review as part of DCB-232
 
 const Login: NextPage = () => {
 	// const router = useRouter();
@@ -109,11 +111,11 @@ const Login: NextPage = () => {
 										Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
 										incididunt ut labore et dolore magna aliqua.
 									</p>
-									<Link href='/register'>
+									{/* <Link href='/register'>
 										<button className='btn btn-lg btn-outline-light mt-3' type='button'>
 											Register Now!
 										</button>
-									</Link>
+									</Link> */}
 								</div>
 							</Col>
 						</Row>
