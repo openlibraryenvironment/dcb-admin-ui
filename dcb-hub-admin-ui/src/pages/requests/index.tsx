@@ -131,8 +131,8 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				callbackUrl: process.env.REDIRECT_REQUESTS!
 			}); // Force sign in to hopefully resolve error
 		}
-	}, [data]);
-
+		
+	  }, [data]);
 	return (
 		<AdminLayout>
 			<div>
@@ -143,29 +143,26 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							<p className='text-center mb-0'>Loading requests.....</p>
 						)}
 
-						{resourceFetchStatus === 'error' && (
-							<p className='text-center mb-0'>Failed to fetch patron requests, reloading page </p>
-						)}
+					{resourceFetchStatus === 'error' && (
+						<p className='text-center mb-0'>Failed to fetch patron requests, reloading page </p>
+					) }
 
-						{resourceFetchStatus === 'success' && (
-							<>
-								<Table data={resource?.content ?? []} columns={columns} type='Requests' />
-							</>
-						)}
-					</Card.Body>
-				</Card>
+					{resourceFetchStatus === 'success' && (
+						<>
+							<Table
+								data={resource?.content ?? []}
+								columns={columns}
+								type="Requests"
+							/>
+						</>
+					)}
+
+				</Card.Body>
+			</Card>
 			</div>
-			<div>
-				{showDetails ? (
-					<Details
-						i={idClicked}
-						content={resource?.content ?? []}
-						show={showDetails}
-						onClose={closeDetails}
-						type={'Request'}
-					/>
-				) : null}
-			</div>
+		    <div>
+	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Request"} /> : null }
+    		</div>
 		</AdminLayout>
 	);
 	// conditional rendering to only show details when clicked on.

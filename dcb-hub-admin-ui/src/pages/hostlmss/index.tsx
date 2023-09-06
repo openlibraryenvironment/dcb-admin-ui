@@ -119,14 +119,16 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>
-							Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.
-						</p>
+						<p className='text-center mb-0'>Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</p>
 					)}
 
 					{resourceFetchStatus === 'success' && (
-						<>
-							<Table data={resource?.content ?? []} columns={columns} type='HostLMS' />
+						<>			
+							<Table
+								data={resource?.content ?? []}
+								columns={columns}
+								type="HostLMS"
+							/>
 						</>
 					)}
 				</Card.Body>
@@ -146,7 +148,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	);
 };
 
-// This relates mainly to the previous non-functional server side pagination.
+// This relates mainly to the previous non-functional server side pagination. 
 // Likely to be completely taken out in full review of table and data-fetching
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;

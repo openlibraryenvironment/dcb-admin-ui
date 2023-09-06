@@ -7,7 +7,8 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"prettier": "prettier --write ."
+		"prettier": "prettier --write .",
+		"codegen": "graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "^6.2.1",
@@ -27,6 +28,8 @@
 		"cookies-next": "^2.1.1",
 		"dayjs": "^1.11.9",
 		"formik": "^2.4.3",
+		"graphql": "^16.8.0",
+		"graphql-request": "^5.0.0",
 		"next": "13.0.1",
 		"next-auth": "^4.20.1",
 		"nprogress": "^0.2.0",
@@ -38,9 +41,13 @@
 		"react-icons": "^4.10.1",
 		"react-idle-timer": "^5.7.2",
 		"react-paginate": "^8.1.4",
-		"react-resize-detector": "^7.1.2"
+		"react-resize-detector": "^7.1.2",
+		"yup": "^1.2.0"
 	},
 	"devDependencies": {
+		"@graphql-codegen/cli": "5.0.0",
+		"@graphql-codegen/client-preset": "4.1.0",
+		"@parcel/watcher": "^2.3.0",
 		"@types/cookie": "^0.5.1",
 		"@types/node": "^18.11.18",
 		"@types/nprogress": "^0.2.0",
@@ -59,6 +66,7 @@
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"json-server": "^0.17.1",
 		"sass": "^1.58.0",
+		"ts-node": "^10.9.1",
 		"typescript": "^4.9.5"
 	}
 }

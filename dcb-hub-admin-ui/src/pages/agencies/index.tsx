@@ -13,6 +13,7 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 
 import { Agency } from '@models/Agency';
 import { Table } from '@components/Table';
+import AddAgenciesToGroup from './AddAgenciesToGroup';
 
 import SignOutIfInactive from '../useAutoSignout';
 
@@ -25,8 +26,10 @@ type Props = {
 const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
+	// State management variables for the Details and AddAgenciesToGroup modals.
 	const [showDetails, setShowDetails] = useState(false);
 	const [idClicked, setIdClicked] = useState(42);
+	const [addToGroup, setAddToGroup] = useState(false);
 
 	SignOutIfInactive();
 
@@ -36,6 +39,15 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	};
 	const closeDetails = () => {
 		setShowDetails(false);
+	};
+	
+	const openAddToGroup = ( {id} : {id: number}) =>
+	{
+		setAddToGroup(true);
+		setIdClicked(id);
+	}
+	const closeAddToGroup = () => {
+		setAddToGroup(false);
 	};
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
@@ -109,22 +121,21 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Table data={resource?.content ?? []} columns={columns} type='Agencies' />
+							<Button onClick={() => openAddToGroup({ id: 42 })} > Add Agencies to Group</Button>
+							<Table
+								data={resource?.content ?? []}
+								columns={columns}
+								type = "Agencies"
+							/>
 						</>
 					)}
 				</Card.Body>
 			</Card>
 			<div>
-				{showDetails ? (
-					<Details
-						i={idClicked}
-						content={resource?.content ?? []}
-						show={showDetails}
-						onClose={closeDetails}
-						type={'Agency'}
-					/>
-				) : null}
-			</div>
+	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Agency"} /> : null }
+	{ addToGroup ? <AddAgenciesToGroup show={addToGroup} onClose={closeAddToGroup} /> : null}
+
+    		</div>
 		</AdminLayout>
 	);
 };
