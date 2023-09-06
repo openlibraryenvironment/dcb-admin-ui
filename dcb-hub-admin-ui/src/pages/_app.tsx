@@ -7,6 +7,7 @@ import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 
 import { SessionProvider } from 'next-auth/react';
+import { SSRProvider } from 'react-bootstrap';
 import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ProgressBar } from '@components/ProgressBar';
@@ -41,8 +42,10 @@ function MyApp({ Component, pageProps }: AppProps) {
 			<QueryClientProvider client={queryClient}>
 			<Hydrate state={pageProps.dehydratedState}>
 				<SessionProvider session={pageProps.session}>
+					<SSRProvider>
 						<ProgressBar />
 						<Component {...pageProps} />
+					</SSRProvider>
 				</SessionProvider>
 			</Hydrate>
 			<ReactQueryDevtools initialIsOpen={false} />
