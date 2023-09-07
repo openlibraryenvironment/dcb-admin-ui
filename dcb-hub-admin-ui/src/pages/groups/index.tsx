@@ -160,7 +160,6 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 	);
 }
 
-//   SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
 
 
 //   Fixing this should fix our weird data fetching issues
