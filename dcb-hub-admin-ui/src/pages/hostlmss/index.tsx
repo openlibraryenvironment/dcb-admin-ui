@@ -149,7 +149,9 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 // This relates mainly to the previous non-functional server side pagination. 
-// Likely to be completely taken out in full review of table and data-fetching
+// TO BE RESTORED WITH SERVER SIDE PAGINATION WHEN READY
+// Current failures are SSR errors
+
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
