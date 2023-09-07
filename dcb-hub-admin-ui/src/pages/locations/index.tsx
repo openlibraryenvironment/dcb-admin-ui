@@ -139,44 +139,42 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-  // SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+	let page = 1;
+	if (context.query?.page && typeof context.query.page === 'string') {
+		page = parseInt(context.query.page, 10);
+	}
 
-// export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-// 	let page = 1;
-// 	if (context.query?.page && typeof context.query.page === 'string') {
-// 		page = parseInt(context.query.page, 10);
-// 	}
+	let resultsPerPage = 20;
+	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+	}
 
-// 	let resultsPerPage = 20;
-// 	if (context.query?.perPage && typeof context.query.perPage === 'string') {
-// 		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
-// 	}
+	// Defaults to sorting the locationCode in ascending order (The id must be the same the id assigned to the "column")
+	let sort: SortingState = [{ id: 'locationCode', desc: false }];
 
-// 	// Defaults to sorting the locationCode in ascending order (The id must be the same the id assigned to the "column")
-// 	let sort: SortingState = [{ id: 'locationCode', desc: false }];
+	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+		const contextSort = context.query?.sort ?? '';
 
-// 	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
-// 		// Sort in this case is something like locationName (table prefix + some unique id for the table)
-// 		const contextSort = context.query?.sort ?? '';
+		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
 
-// 		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
-// 		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
+		// If the values pass the validation check override the original sort with the new sort
+		if (contextOrder === 'desc' || contextOrder === 'asc') {
+			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+		}
+	}
 
-// 		// If the values pass the validation check override the original sort with the new sort
-// 		if (contextOrder === 'desc' || contextOrder === 'asc') {
-// 			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
-// 		}
-// 	}
+	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
 
-// 	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
-
-// 	return {
-// 		props: {
-// 			page,
-// 			resultsPerPage,
-// 			sort: sort
-// 		}
-// 	};
-// };
+	return {
+		props: {
+			page,
+			resultsPerPage,
+			sort: sort
+		}
+	};
+};
 
 export default Locations;

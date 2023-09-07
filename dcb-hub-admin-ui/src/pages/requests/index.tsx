@@ -174,7 +174,6 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 // details will need to be shown differently for each entry
 
 
-  // SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
