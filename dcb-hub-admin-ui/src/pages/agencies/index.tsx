@@ -15,7 +15,7 @@ import { Agency } from '@models/Agency';
 import { Table } from '@components/Table';
 import AddAgenciesToGroup from './AddAgenciesToGroup';
 
-import SignOutIfInactive from '../useAutoSignout';
+// import SignOutIfInactive from '../useAutoSignout';
 
 type Props = {
 	page: number;
@@ -31,7 +31,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const [idClicked, setIdClicked] = useState(42);
 	const [addToGroup, setAddToGroup] = useState(false);
 
-	SignOutIfInactive();
+	// SignOutIfInactive();
 
 	const openDetails = ({ id }: { id: number }) => {
 		setShowDetails(true);
@@ -139,6 +139,9 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		</AdminLayout>
 	);
 };
+
+
+  // SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;

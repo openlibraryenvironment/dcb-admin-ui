@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 
 import { AdminLayout } from '@layout';
 
-import SignOutIfInactive from './useAutoSignout';
+// import SignOutIfInactive from './useAutoSignout';
 
 import {
 	BarElement,
@@ -16,7 +16,7 @@ import {
 } from 'chart.js';
 
 const Home: NextPage = () => {
-	SignOutIfInactive();
+	// SignOutIfInactive();
 
 	Chart.register(
 		CategoryScale,
