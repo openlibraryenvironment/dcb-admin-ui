@@ -14,7 +14,7 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 import { Location } from '@models/Location';
 import { Table } from '@components/Table';
 
-import SignOutIfInactive from '../useAutoSignout';
+// import SignOutIfInactive from '../useAutoSignout';
 
 type Props = {
 	page: number;
@@ -49,7 +49,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	);
 
 	//automatic sign out after 15 minutes
-	SignOutIfInactive();
+	// SignOutIfInactive();
 
 	// Generate the url for the useResource hook
 	const url = React.useMemo(() => {
@@ -137,6 +137,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		</AdminLayout>
 	);
 };
+
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;

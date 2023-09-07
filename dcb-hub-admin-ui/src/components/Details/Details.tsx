@@ -59,7 +59,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
         centered>
                     <Modal.Header closeButton aria-labelledby='close-details-modal'>
           <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title>
-          <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title>
         </Modal.Header>
         <Modal.Body>
             <CardGroup>

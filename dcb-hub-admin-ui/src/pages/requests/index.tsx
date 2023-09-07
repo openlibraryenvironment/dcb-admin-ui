@@ -12,7 +12,7 @@ import { PaginationState, SortingState, createColumnHelper } from '@tanstack/rea
 import { PatronRequest } from '@models/PatronRequest';
 import { Table } from '@components/Table';
 
-import SignOutIfInactive from '../useAutoSignout';
+// import SignOutIfInactive from '../useAutoSignout';
 
 type Props = {
 	page: number;
@@ -54,7 +54,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	}, []);
 
 	//automatic sign out after 15 minutes
-	SignOutIfInactive();
+// 	SignOutIfInactive();
 
 	const columns = React.useMemo(() => {
 		const columnHelper = createColumnHelper<PatronRequest>();
@@ -172,6 +172,8 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 // details will need to be shown differently for each entry
+
+
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
