@@ -1,21 +1,20 @@
-import { createColumnHelper } from '@tanstack/react-table'
+import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table'
 import * as React from 'react';
 import { useState } from 'react';
 import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import { Button, Card } from 'react-bootstrap';
+import { Alert, Button, Card } from 'react-bootstrap';
 import NewGroup from './NewGroup';
 import { Table } from '@components/Table';
 import request, { GraphQLClient } from 'graphql-request';
-import { useMutation, useQuery, useQueryClient  } from '@tanstack/react-query';
+import { useQuery, useQueryClient  } from '@tanstack/react-query';
 import Details from '@components/Details/Details';
 import { groupsQueryDocument } from 'src/queries/queries';
-// import axios from 'axios';
-// import KeycloakProvider from 'next-auth/providers/keycloak';
-
-
+import { useResource } from '@hooks';
+import { GetServerSideProps, NextPage } from 'next';
+import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
 // This page shows the list of groups
@@ -24,22 +23,18 @@ import { groupsQueryDocument } from 'src/queries/queries';
 // In /agencies, there is the Add Agencies to Group form.
 // Our GraphQL client decision is still under review, as it's glitchy.
 
-// Commented-out code in this file is for the experimental method of refreshing access tokens
-// this is aimed at fixing the graphQL issues ^^
+type Props = {
+	page: number;
+	resultsPerPage: number;
+	sort: SortingState;
+	data: any;
+};
 
-// const keycloak = KeycloakProvider({
-//     clientId: process.env.KEYCLOAK_ID!,
-//     clientSecret: process.env.KEYCLOAK_SECRET!,
-//     issuer: process.env.KEYCLOAK_ISSUER,
-// });
+const Groups: NextPage<Props> = ({ page, resultsPerPage, sort, data}) => {
 
-export default function Groups() {
+	// Automatic logout after 15 minutes for security purposes
+	SignOutIfInactive();
 	const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql');
-	// const refreshUrl = React.useMemo(() => {
-	// 	const { publicRuntimeConfig } = getConfig();
-	// 	return publicRuntimeConfig.KEYCLOAK_REFRESH + '/protocol/openid-connect/token';
-	// }, []);
-	// console.log("The refresh URL is", refreshUrl); 
 	const queryClient = useQueryClient();
 	const { data: session, status } = useSession();
 	const [showNewGroup, setShowNewGroup] = useState(false);
@@ -53,8 +48,9 @@ export default function Groups() {
 	}
 	const closeNewGroup = () => {
 		setShowNewGroup(false);
-		queryClient.invalidateQueries(['findGroups']);
-		// forces the query to refresh once a new group is added		
+		queryClient.invalidateQueries(['groups']);
+		// forces the query to refresh once a new group is added	
+		// needs to be adapted to work with SSR approach	
 	};
 	
 	const openDetails = ( {id} : {id: number}) =>
@@ -66,42 +62,16 @@ export default function Groups() {
 		setShowDetails(false);
 	};
 
-	// // experimental RAT method
-	// console.log("Session data:", session);
-	// const newAccessToken = session?.accessToken;
-
-	// const details = {
-	// 	client_id: process.env.KEYCLOAK_CLIENT_ID!,
-	// 	client_secret: process.env.KEYCLOAK_SECRET!,
-	// 	grant_type: ['refresh_token'],
-	// 	refresh_token: session?.refreshToken,
-	//   };
-	//   console.log(details);
-	//   const formBody: string[] = [];
-	//   Object.entries(details).forEach(([key, value]: [string, any]) => {
-	// 	const encodedKey = encodeURIComponent(key);
-	// 	const encodedValue = encodeURIComponent(value);
-	// 	formBody.push(encodedKey + '=' + encodedValue);
-	//   });
-	//   const formData = formBody.join('&');
-	// const refreshToken = async () => {
-	// 	// This is where we hit Keycloak for the refreshing of our access token
-	// 	const response = await axios.post(refreshUrl, formData, { headers: {
-	// 		'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}})
-	// 	return response.data.access_token;
-	//   };
-
-	//   const { mutate: refreshAccessTokenMutation } = useMutation(refreshToken, {
-	// 	onSuccess: (newAccessToken) => {
-	// 	  // Update the session with the new access token
-	// 	  console.log("Token refreshed and is now:", newAccessToken);
-	// 	  queryClient.setQueryData(['session'], { ...session, accessToken: newAccessToken });
-	// 	  console.log("Updated session.accessToken:", session?.accessToken);
-	// 	  loadGroups();
-	// 	  queryClient.invalidateQueries(['findGroups']);
-	// 	},
-	//   });
-	//   // async/ await causing this not to work correctly
+	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+		() => ({
+			pagination: {
+				pageIndex: page - 1,
+				pageSize: resultsPerPage
+			},
+			sort: sort
+		}),
+		[page, resultsPerPage, sort]
+	);
 
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
@@ -135,77 +105,123 @@ export default function Groups() {
 			}),
 		];
 	}, []);
-	const headers = { Authorization: `Bearer ${session?.accessToken}` }
 	const queryVariables = {};
-	const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
 
-	// const loadGroups = async () => {
-	// 	try {
-	// 	  // Axios happy path
-	// 	  console.log("Happy path attempt.");
-	// 	  const response = await axios.post(
-	// 		url,
-	// 		{ query: groupsQueryDocument, variables: queryVariables },
-	// 		{
-	// 		  headers: {
-	// 			Authorization: `Bearer ${session?.accessToken}`, // Use the updated access token
-	// 			'Content-Type': 'application/json', // You can adjust the content type as needed
-	// 		  },
-	// 		}
-	// 	  );
-	// 	  console.log("Response received", response);
-	// 	  console.log(response.status);
-	// 	  return response.data;
-	// 	} catch (error) {
-	// 		console.log(error);
-	// 		if (error?.response.status === 401) {
-	// 			// If the status is 401, refresh the access token
-	// 			console.log("401");
-	// 			await refreshAccessTokenMutation();
-	// 			console.log("New token ", session?.accessToken);
-	// 			// Retry the GraphQL request with the new access token
-	// 			const newResponse = await axios.post(
-	// 				url,
-	// 				{ query: groupsQueryDocument },
-	// 				{
-	// 				  headers: {
-	// 					Authorization: `Bearer ${session?.accessToken}`, // Use the updated access token
-	// 					'Content-Type': 'application/json', // You can adjust the content type as needed
-	// 				  },
-	// 				}
-	// 			  );				
-	// 			  return newResponse.data;
-	// 		  }
-	// 	  // Handle other errors here
-	// 	  throw error;
-	// 	}
-	//   };
-	
-
-
-	const { data, error, isLoading }: any = useQuery(['findGroups'], loadGroups);
-	// console.log("Data",data?.data?.agencyGroups);
-	// fix authorisation issues on GQL pages
-	// need to be able to pick up an error - doesn't come down on the GQL response
+	const {
+		resource,
+		status: resourceFetchStatus,
+		state
+	} = useResource<Group>({
+		isQueryEnabled: status === 'authenticated',
+		accessToken: session?.accessToken ?? null,
+		refreshToken: session?.refreshToken ?? null,
+		baseQueryKey: 'groups',
+		url: url,
+		defaultValues: externalState,
+		type: 'GraphQL',
+		graphQLQuery: groupsQueryDocument,
+		graphQLVariables: queryVariables
+	});
 
 	return (
 		<AdminLayout>
 			<Card>
 				<Card.Header>Groups</Card.Header>
 				<Card.Body>
-					{/* TODO: Implement GraphQL error + loading behaviour here */}
-					<Table
-						data={data?.agencyGroups ?? []}
-						columns={columns}
-						type = "Groups"
-					/>
-					<Button onClick={() => openNewGroup({ id: 42 })} > New Group</Button>
+					{/* TODO: Could we style this nicely in the MUI upgrade? */}
+					{resourceFetchStatus === 'loading' && (
+						<p className='text-center mb-0'>Loading Groups.....</p>
+					)}
+
+					{resourceFetchStatus === 'error' && (
+						<div>
+							   <Alert variant="danger" dismissible>
+							   Failed to fetch Groups, will retry. If this error persists, please refresh the page.
+							</Alert> 
+						</div>
+					)}
+
+					{resourceFetchStatus === 'success' && (
+						<>	
+						<Table
+							data={resource?.content ?? []}
+							columns={columns}
+							type = "Groups"
+						/>
+						<Button onClick={() => openNewGroup({ id: 42 })} > New Group</Button>
+						</>
+					)}
 				</Card.Body>
 			</Card>
 			<div>
 			{ showNewGroup ? <NewGroup show={showNewGroup}  onClose={closeNewGroup}/> : null }
-			{ showDetails ? <Details i={idClicked} content = {data?.agencyGroups ?? []} show={showDetails}  onClose={closeDetails} type={"Group"} /> : null }
+			{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Group"} /> : null }
     		</div>
 		</AdminLayout>
 	);
   }
+
+  // SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
+
+
+  // Fixing this should fix our weird data fetching issues
+  
+//   export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+// 	// this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
+// 	// the intention is that a page change will trigger a refetch / query, as will new group creation
+
+// 	let page = 1;
+// 	if (context.query?.page && typeof context.query.page === 'string') {
+// 		page = parseInt(context.query.page, 10);
+// 	}
+
+// 	let resultsPerPage = 20;
+// 	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+// 		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+// 	}
+// 	const queryVariables = {};
+// 	const url = "https://dcb-uat.sph.k-int.com/graphql";
+// 	const headers = {
+// 		Authorization: `Bearer ${accessToken}`, // Use the updated access token
+// 		'Content-Type': 'application/json', // You can adjust the content type as needed
+// 	};
+
+
+// 	const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
+	
+
+// 	// const serverSideResource = useResource<Group>({
+// 	// 	isQueryEnabled: true, // Ensure the query is enabled for SSR
+// 	// 	baseQueryKey: 'groups',
+// 	// 	// Add other options as needed
+// 	//   });
+
+// 	// Defaults to sorting the agencyId in ascending order (The id must be the same the id assigned to the "column")
+// 	let sort: SortingState = [{ id: 'agencyId', desc: false }];
+
+// 	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+// 		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+// 		const contextSort = context.query?.sort ?? '';
+
+// 		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+// 		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
+
+// 		// If the values pass the validation check override the original sort with the new sort
+// 		if (contextOrder === 'desc' || contextOrder === 'asc') {
+// 			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+// 		}
+// 	}
+
+// 	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+
+// 	return {
+// 		props: {
+// 			page,
+// 			resultsPerPage,
+// 			sort: sort,
+// 			data: data
+// 		}
+// 	};	
+//   };
+
+  export default Groups;

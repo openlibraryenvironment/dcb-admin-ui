@@ -149,43 +149,48 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 // This relates mainly to the previous non-functional server side pagination. 
-// Likely to be completely taken out in full review of table and data-fetching
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-	let page = 1;
-	if (context.query?.page && typeof context.query.page === 'string') {
-		page = parseInt(context.query.page, 10);
-	}
+// TO BE RESTORED WITH SERVER SIDE PAGINATION WHEN READY
+// Current failures are SSR errors
 
-	let resultsPerPage = 20;
-	if (context.query?.perPage && typeof context.query.perPage === 'string') {
-		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
-	}
 
-	// Defaults to sorting the requestCode in ascending order (The id must be the same the id assigned to the "column")
-	let sort: SortingState = [{ id: 'requestCode', desc: false }];
+  // SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
 
-	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
-		// Sort in this case is something like locationName (table prefix + some unique id for the table)
-		const contextSort = context.query?.sort ?? '';
+// export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+// 	let page = 1;
+// 	if (context.query?.page && typeof context.query.page === 'string') {
+// 		page = parseInt(context.query.page, 10);
+// 	}
 
-		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
-		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
+// 	let resultsPerPage = 20;
+// 	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+// 		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+// 	}
 
-		// If the values pass the validation check override the original sort with the new sort
-		if (contextOrder === 'desc' || contextOrder === 'asc') {
-			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
-		}
-	}
+// 	// Defaults to sorting the requestCode in ascending order (The id must be the same the id assigned to the "column")
+// 	let sort: SortingState = [{ id: 'requestCode', desc: false }];
 
-	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+// 	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+// 		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+// 		const contextSort = context.query?.sort ?? '';
 
-	return {
-		props: {
-			page,
-			resultsPerPage,
-			sort: sort
-		}
-	};
-};
+// 		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+// 		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
+
+// 		// If the values pass the validation check override the original sort with the new sort
+// 		if (contextOrder === 'desc' || contextOrder === 'asc') {
+// 			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+// 		}
+// 	}
+
+// 	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+
+// 	return {
+// 		props: {
+// 			page,
+// 			resultsPerPage,
+// 			sort: sort
+// 		}
+// 	};
+// };
 
 export default HostLmss;
