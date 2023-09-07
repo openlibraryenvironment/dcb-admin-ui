@@ -14,7 +14,7 @@ import Details from '@components/Details/Details';
 import { groupsQueryDocument } from 'src/queries/queries';
 import { useResource } from '@hooks';
 import { GetServerSideProps, NextPage } from 'next';
-import SignOutIfInactive from '../useAutoSignout';
+// import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
 // This page shows the list of groups
@@ -27,13 +27,12 @@ type Props = {
 	page: number;
 	resultsPerPage: number;
 	sort: SortingState;
-	data: any;
 };
 
-const Groups: NextPage<Props> = ({ page, resultsPerPage, sort, data}) => {
+const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 	// Automatic logout after 15 minutes for security purposes
-	SignOutIfInactive();
+	// SignOutIfInactive();
 	const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql');
 	const queryClient = useQueryClient();
 	const { data: session, status } = useSession();
@@ -159,69 +158,68 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort, data}) => {
     		</div>
 		</AdminLayout>
 	);
-  }
+}
 
-  // SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
+//   SERVER SIDE PROPS COMMENTED OUT FOR TESTING PURPOSES
 
 
-  // Fixing this should fix our weird data fetching issues
+//   Fixing this should fix our weird data fetching issues
   
-//   export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
-// 	// this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
-// 	// the intention is that a page change will trigger a refetch / query, as will new group creation
+  export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+	// this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
+	// the intention is that a page change will trigger a refetch / query, as will new group creation
 
-// 	let page = 1;
-// 	if (context.query?.page && typeof context.query.page === 'string') {
-// 		page = parseInt(context.query.page, 10);
-// 	}
+	let page = 1;
+	if (context.query?.page && typeof context.query.page === 'string') {
+		page = parseInt(context.query.page, 10);
+	}
 
-// 	let resultsPerPage = 20;
-// 	if (context.query?.perPage && typeof context.query.perPage === 'string') {
-// 		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
-// 	}
-// 	const queryVariables = {};
-// 	const url = "https://dcb-uat.sph.k-int.com/graphql";
-// 	const headers = {
-// 		Authorization: `Bearer ${accessToken}`, // Use the updated access token
-// 		'Content-Type': 'application/json', // You can adjust the content type as needed
-// 	};
+	let resultsPerPage = 20;
+	if (context.query?.perPage && typeof context.query.perPage === 'string') {
+		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
+	}
+	// const queryVariables = {};
+	// const url = "https://dcb-uat.sph.k-int.com/graphql";
+	// const headers = {
+	// 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
+	// 	'Content-Type': 'application/json', // You can adjust the content type as needed
+	// };
 
 
-// 	const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
+	// const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
 	
 
-// 	// const serverSideResource = useResource<Group>({
-// 	// 	isQueryEnabled: true, // Ensure the query is enabled for SSR
-// 	// 	baseQueryKey: 'groups',
-// 	// 	// Add other options as needed
-// 	//   });
+	// const serverSideResource = useResource<Group>({
+	// 	isQueryEnabled: true, // Ensure the query is enabled for SSR
+	// 	baseQueryKey: 'groups',
+	// 	// Add other options as needed
+	//   });
 
-// 	// Defaults to sorting the agencyId in ascending order (The id must be the same the id assigned to the "column")
-// 	let sort: SortingState = [{ id: 'agencyId', desc: false }];
+	// Defaults to sorting the agencyId in ascending order (The id must be the same the id assigned to the "column")
+	let sort: SortingState = [{ id: 'agencyId', desc: false }];
 
-// 	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
-// 		// Sort in this case is something like locationName (table prefix + some unique id for the table)
-// 		const contextSort = context.query?.sort ?? '';
+	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
+		// Sort in this case is something like locationName (table prefix + some unique id for the table)
+		const contextSort = context.query?.sort ?? '';
 
-// 		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
-// 		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
+		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
+		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
 
-// 		// If the values pass the validation check override the original sort with the new sort
-// 		if (contextOrder === 'desc' || contextOrder === 'asc') {
-// 			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
-// 		}
-// 	}
+		// If the values pass the validation check override the original sort with the new sort
+		if (contextOrder === 'desc' || contextOrder === 'asc') {
+			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
+		}
+	}
 
-// 	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
+	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
 
-// 	return {
-// 		props: {
-// 			page,
-// 			resultsPerPage,
-// 			sort: sort,
-// 			data: data
-// 		}
-// 	};	
-//   };
+	return {
+		props: {
+			page,
+			resultsPerPage,
+			sort: sort,
+		}
+	};	
+  };
 
   export default Groups;
