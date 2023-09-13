@@ -66,7 +66,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<p className='text-center mb-0'>Failed to fetch the locations</p>
+								<p className='text-center mb-0'>Failed to fetch the locations, please refresh the page.</p>
 							)}
 
 							{resourceFetchStatus === 'success' && (

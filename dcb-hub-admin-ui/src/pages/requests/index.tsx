@@ -69,11 +69,11 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<p className='text-center mb-0'>Loading locations.....</p>
+								<p className='text-center mb-0'>Loading requests.....</p>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<p className='text-center mb-0'>Failed to fetch the locations</p>
+								<p className='text-center mb-0'>Failed to fetch the requests, please refresh</p>
 							)}
 
 							{resourceFetchStatus === 'success' && (

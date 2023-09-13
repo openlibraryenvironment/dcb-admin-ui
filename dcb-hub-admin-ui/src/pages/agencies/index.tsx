@@ -72,7 +72,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch the agencies</p>
+						<p className='text-center mb-0'>Failed to fetch the agencies, please refresh the page</p>
 					)}
 
 					{resourceFetchStatus === 'success' && (
