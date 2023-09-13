@@ -78,7 +78,6 @@ export default function NewGroup({show, onClose}: NewGroupType) {
     const handleSubmit = async (values: FormData) => {
     try {
       const data  = await createGroupMutation.mutateAsync(values);
-      console.log('Response:', data);
       onClose();
     } catch (error) {
       console.error('Error:', error);

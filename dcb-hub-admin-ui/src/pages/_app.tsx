@@ -7,10 +7,21 @@ import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 
 import { SessionProvider } from 'next-auth/react';
-import { SSRProvider } from 'react-bootstrap';
 import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ProgressBar } from '@components/ProgressBar';
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { CacheProvider, EmotionCache } from "@emotion/react";
+
+// We don't have to use Roboto - change font as needed here for MUI components
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import Head from 'next/head';
+import createEmotionCache from 'src/createEmotionCache';
 
 // You change this configuration value to false so that the Font Awesome core SVG library
 // will not try and insert <style> elements into the <head> of the page.
@@ -18,7 +29,18 @@ import { ProgressBar } from '@components/ProgressBar';
 // See https://fontawesome.com/v6/docs/web/use-with/react/use-with#next-js
 config.autoAddCss = false;
 
-function MyApp({ Component, pageProps }: AppProps) {
+const clientSideEmotionCache = createEmotionCache();
+
+// later we'll modify this to its own file
+const theme = createTheme();
+
+export interface MyAppProps extends AppProps {
+	emotionCache?: EmotionCache;
+  }
+
+function MyApp(props: MyAppProps) {
+	const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+
 	const [queryClient] = React.useState(
 		() =>
 			new QueryClient({
@@ -35,21 +57,24 @@ function MyApp({ Component, pageProps }: AppProps) {
 			})
 	);
 
-	// In server-side rendered applications, a SSRProvider must wrap the application in order
-	// to ensure that the auto-generated ids are consistent between the server and client.
-	// https://react-bootstrap.github.io/getting-started/server-side-rendering/
 	return (
+			<CacheProvider value={emotionCache}>
+			<Head>
+			<meta name="viewport" content="initial-scale=1, width=device-width" />
+			</Head>
 			<QueryClientProvider client={queryClient}>
 			<Hydrate state={pageProps.dehydratedState}>
 				<SessionProvider session={pageProps.session}>
-					<SSRProvider>
+					<ThemeProvider theme={theme}>
+						<CssBaseline />
 						<ProgressBar />
 						<Component {...pageProps} />
-					</SSRProvider>
+						</ThemeProvider>
 				</SessionProvider>
 			</Hydrate>
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
+		</CacheProvider>
 	);
 }
 

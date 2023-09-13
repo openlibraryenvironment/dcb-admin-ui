@@ -1,18 +1,15 @@
 import * as React from 'react';
-import { useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
-import { Button, Card } from 'react-bootstrap';
+import { Card, CardContent} from '@mui/material';
 import { AdminLayout } from '@layout';
-import Details from '@components/Details/Details';
-
 import { useResource } from '@hooks';
-import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 
 import { Location } from '@models/Location';
-import { Table } from '@components/Table';
+import { DataGrid } from '@components/DataGrid';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -25,16 +22,7 @@ type Props = {
 const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState(42);
 
-	const openDetails = ({ id }: { id: number }) => {
-		setShowDetails(true);
-		setIdClicked(id);
-	};
-	const closeDetails = () => {
-		setShowDetails(false);
-	};
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
@@ -48,7 +36,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		[page, resultsPerPage, sort]
 	);
 
-	//automatic sign out after 15 minutes
+	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
 	// SignOutIfInactive();
 
 	// Generate the url for the useResource hook
@@ -56,36 +44,6 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/locations';
 	}, []);
-
-	const columns = React.useMemo(() => {
-		const columnHelper = createColumnHelper<Location>();
-
-		return [
-			columnHelper.accessor('id', {
-				cell: (info) => (
-					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
-						{info.getValue()}
-					</Button>
-				),
-				header: '#',
-				id: 'id',
-				enableSorting: false
-			}),
-			columnHelper.accessor('code', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Code',
-				id: 'locationCode' // Used as the unique property in the sorting state (See React-Query dev tools)
-			}),
-			columnHelper.accessor('name', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Name',
-				id: 'locationName' // Used as the unique property in the sorting state (See React-Query dev tools)
-			})
-		];
-	}, []);
-
-	// MUST KEEP COLUMNS FOR DETAILS PAGE TO WORK AS THAT'S WHERE ONCLICK IS
-	// If we change onClick, that can be altered.
 
 	const {
 		resource,
@@ -102,38 +60,27 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	return (
 		<AdminLayout>
 			<Card>
-				<Card.Header>Locations</Card.Header>
-				<Card.Body>
-					{resourceFetchStatus === 'loading' && (
-						<p className='text-center mb-0'>Loading locations.....</p>
-					)}
+				<CardContent>
+						{resourceFetchStatus === 'loading' && (
+								<p className='text-center mb-0'>Loading locations.....</p>
+							)}
 
-					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch the locations</p>
-					)}
+							{resourceFetchStatus === 'error' && (
+								<p className='text-center mb-0'>Failed to fetch the locations, please refresh the page.</p>
+							)}
 
-					{resourceFetchStatus === 'success' && (
-						<>
-							<Table
-								data={resource?.content ?? []}
-								columns={columns}
-								type="Locations"
-							/>
-						</>
-					)}
-				</Card.Body>
+							{resourceFetchStatus === 'success' && (
+								<>
+									<DataGrid
+										data={resource?.content ?? []}
+										columns={[ {field: 'name', headerName: "Location name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Location ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Location code", minWidth: 50, flex: 0.5}]}	
+										type="Location"
+										selectable={true}
+									/>
+								</>
+							)}
+				</CardContent>
 			</Card>
-			<div>
-				{showDetails ? (
-					<Details
-						i={idClicked}
-						content={resource?.content ?? []}
-						show={showDetails}
-						onClose={closeDetails}
-						type={'Location'}
-					/>
-				) : null}
-			</div>
 		</AdminLayout>
 	);
 };

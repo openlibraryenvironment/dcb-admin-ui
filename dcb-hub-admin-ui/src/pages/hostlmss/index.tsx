@@ -1,18 +1,18 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { signIn, useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
-import { Button, Card } from 'react-bootstrap';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import { AdminLayout } from '@layout';
-import Details from '@components/Details/Details';
 
 import { useResource } from '@hooks';
-import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 
 import { HostLMS } from '@models/HostLMS';
-import { Table } from '@components/Table';
+import { DataGrid } from '@components/DataGrid';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -23,22 +23,11 @@ type Props = {
 };
 
 const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
-	//automatic sign out after 15 minutes
+	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
 	// SignOutIfInactive();
 
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState('');
-
-	const openDetails = ({ id }: { id: string }) => {
-		setShowDetails(true);
-		setIdClicked(id);
-	};
-	const closeDetails = () => {
-		setShowDetails(false);
-	};
 
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
@@ -55,38 +44,6 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/hostlmss';
-	}, []);
-
-	const columns = React.useMemo(() => {
-		const columnHelper = createColumnHelper<HostLMS>();
-
-		return [
-			columnHelper.accessor('id', {
-				cell: (info) => (
-					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
-						{info.getValue()}
-					</Button>
-				),
-				header: 'Id',
-				id: 'requestId',
-				enableSorting: false
-			}),
-			columnHelper.accessor('code', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Code',
-				id: 'requestCode' // Used as the unique property in the sorting state (See React-Query dev tools)
-			}),
-			columnHelper.accessor('name', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Name',
-				id: 'requestName' // Used as the unique property in the sorting state (See React-Query dev tools)
-			}),
-			columnHelper.accessor('lmsClientClass', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'IMS Client Class',
-				id: 'requestLmsClientClass' // Used as the unique property in the sorting state (See React-Query dev tools)
-			})
-		];
 	}, []);
 
 	const {
@@ -112,8 +69,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	return (
 		<AdminLayout>
 			<Card>
-				<Card.Header>HostLMS</Card.Header>
-				<Card.Body>
+				<CardContent>
 					{resourceFetchStatus === 'loading' && (
 						<p className='text-center mb-0'>Loading HostLMS.....</p>
 					)}
@@ -124,33 +80,19 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>			
-							<Table
+							<DataGrid
 								data={resource?.content ?? []}
-								columns={columns}
+								columns={[ {field: 'name', headerName: "HostLMS name", minWidth: 150, flex: 1}, { field: 'id', headerName: "HostLMS ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "HostLMS code", minWidth: 50, flex: 0.5}]}	
 								type="HostLMS"
+								selectable={true}
 							/>
 						</>
 					)}
-				</Card.Body>
+				</CardContent>
 			</Card>
-			<div>
-				{showDetails ? (
-					<Details
-						i={idClicked}
-						content={resource?.content ?? []}
-						show={showDetails}
-						onClose={closeDetails}
-						type={'HostLMS'}
-					/>
-				) : null}
-			</div>
 		</AdminLayout>
 	);
 };
-
-// This relates mainly to the previous non-functional server side pagination. 
-// TO BE RESTORED WITH SERVER SIDE PAGINATION WHEN READY
-// Current failures are SSR errors
 
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {

@@ -1,19 +1,17 @@
-import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table'
+import { PaginationState, SortingState } from '@tanstack/react-table'
 import * as React from 'react';
 import { useState } from 'react';
 import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
-import { useSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import { Alert, Button, Card } from 'react-bootstrap';
+import { Alert, Button, Card, CardContent, Paper } from '@mui/material';
 import NewGroup from './NewGroup';
-import { Table } from '@components/Table';
-import request, { GraphQLClient } from 'graphql-request';
-import { useQuery, useQueryClient  } from '@tanstack/react-query';
-import Details from '@components/Details/Details';
+import { dehydrate, QueryClient, useQueryClient, useQuery } from '@tanstack/react-query'
 import { groupsQueryDocument } from 'src/queries/queries';
 import { useResource } from '@hooks';
 import { GetServerSideProps, NextPage } from 'next';
+import { DataGrid } from '@components/DataGrid';
 // import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
@@ -31,35 +29,12 @@ type Props = {
 
 const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
-	// Automatic logout after 15 minutes for security purposes
+	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
 	// SignOutIfInactive();
-	const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql');
 	const queryClient = useQueryClient();
+	const queryVariables = {};
 	const { data: session, status } = useSession();
 	const [showNewGroup, setShowNewGroup] = useState(false);
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState(42);
-
-	const openNewGroup = ( {id} : {id: number}) =>
-	{
-		setShowNewGroup(true);
-		setIdClicked(id);
-	}
-	const closeNewGroup = () => {
-		setShowNewGroup(false);
-		queryClient.invalidateQueries(['groups']);
-		// forces the query to refresh once a new group is added	
-		// needs to be adapted to work with SSR approach	
-	};
-	
-	const openDetails = ( {id} : {id: number}) =>
-	{
-		setShowDetails(true);
-		setIdClicked(id);
-	}
-	const closeDetails = () => {
-		setShowDetails(false);
-	};
 
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
@@ -77,34 +52,17 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);
 
-	const columns = React.useMemo(() => {
-		const columnHelper = createColumnHelper<Group>();
+	const openNewGroup = () =>
+	{
+		setShowNewGroup(true);
+	}
+	const closeNewGroup = () => {
+		setShowNewGroup(false);
+		queryClient.invalidateQueries();
+		// forces the query to refresh once a new group is added	
+		// needs to be adapted to work with SSR approach so that the grid always updates correctly on new group creation	
+	};
 
-		return [
-			columnHelper.accessor('id', {
-				cell: (info) => <Button
-				variant='link'
-				type='button'
-				onClick={() => openDetails({ id: info.getValue() })}>
-				{info.getValue()}
-			</Button>,
-				header: '#',
-				id: 'id',
-				enableSorting: true
-			}),
-			columnHelper.accessor('code', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Code',
-				id: 'groupId'
-			}),
-			columnHelper.accessor('name', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Name',
-				id: 'groupCode'
-			}),
-		];
-	}, []);
-	const queryVariables = {};
 
 	const {
 		resource,
@@ -124,9 +82,9 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 	return (
 		<AdminLayout>
-			<Card>
-				<Card.Header>Groups</Card.Header>
-				<Card.Body>
+				<Paper elevation={16}>
+				<Card>
+					<CardContent>
 					{/* TODO: Could we style this nicely in the MUI upgrade? */}
 					{resourceFetchStatus === 'loading' && (
 						<p className='text-center mb-0'>Loading Groups.....</p>
@@ -134,27 +92,30 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 					{resourceFetchStatus === 'error' && (
 						<div>
-							   <Alert variant="danger" dismissible>
+							   <Alert severity="error"  onClose={() => {}}>
 							   Failed to fetch Groups, will retry. If this error persists, please refresh the page.
 							</Alert> 
 						</div>
 					)}
 
 					{resourceFetchStatus === 'success' && (
-						<>	
-						<Table
-							data={resource?.content ?? []}
-							columns={columns}
-							type = "Groups"
-						/>
-						<Button onClick={() => openNewGroup({ id: 42 })} > New Group</Button>
+						<>
+							<div>
+								<Button variant="contained" onClick={openNewGroup} > New Group</Button>
+								<DataGrid
+								data={resource?.content ?? []}
+								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
+								type = "Group"
+								selectable= {true}
+								/>
+							</div>						
 						</>
 					)}
-				</Card.Body>
-			</Card>
+					</CardContent>
+				</Card>
+				</Paper>
 			<div>
 			{ showNewGroup ? <NewGroup show={showNewGroup}  onClose={closeNewGroup}/> : null }
-			{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Group"} /> : null }
     		</div>
 		</AdminLayout>
 	);
@@ -162,11 +123,30 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 
 
-//   Fixing this should fix our weird data fetching issues
+//  Fixing this should fix our weird data fetching issues
+// 	Step One: verify SSR works
+// 	Step Two: verify Server-Side Pagination works
   
   export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+
+	const session = await getSession(context);
+	const accessToken = session?.accessToken;
+	// console.log('Access Token:', accessToken);
+	// await queryClient.prefetchQuery(['groups'], useResource)
+
 	// this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
 	// the intention is that a page change will trigger a refetch / query, as will new group creation
+	// const queryVariables = {};
+	// const url = "https://dcb-uat.sph.k-int.com/graphql";
+	// const headers = {
+	// 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
+	// 	'Content-Type': 'application/json', // You can adjust the content type as needed
+	// };
+
+	// const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
+
+	// await queryClient.prefetchQuery(['groups'], loadGroups);
+
 
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
@@ -177,16 +157,6 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 	if (context.query?.perPage && typeof context.query.perPage === 'string') {
 		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
 	}
-	// const queryVariables = {};
-	// const url = "https://dcb-uat.sph.k-int.com/graphql";
-	// const headers = {
-	// 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
-	// 	'Content-Type': 'application/json', // You can adjust the content type as needed
-	// };
-
-
-	// const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
-	
 
 	// const serverSideResource = useResource<Group>({
 	// 	isQueryEnabled: true, // Ensure the query is enabled for SSR
@@ -217,8 +187,9 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 			page,
 			resultsPerPage,
 			sort: sort,
+			// dehydratedState: dehydrate(queryClient),
 		}
 	};	
   };
 
-  export default Groups;
+export default Groups;
