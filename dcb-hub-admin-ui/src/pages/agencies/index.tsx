@@ -4,15 +4,13 @@ import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Button, Card } from 'react-bootstrap';
+import { Button, Card, CardContent } from '@mui/material';
 import { AdminLayout } from '@layout';
-import Details from '@components/Details/Details';
-
+import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
-import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 
 import { Agency } from '@models/Agency';
-import { Table } from '@components/Table';
 import AddAgenciesToGroup from './AddAgenciesToGroup';
 
 // import SignOutIfInactive from '../useAutoSignout';
@@ -26,25 +24,11 @@ type Props = {
 const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-	// State management variables for the Details and AddAgenciesToGroup modals.
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState(42);
+	// State management variables for the AddAgenciesToGroup modal.
 	const [addToGroup, setAddToGroup] = useState(false);
 
-	// SignOutIfInactive();
-
-	const openDetails = ({ id }: { id: number }) => {
-		setShowDetails(true);
-		setIdClicked(id);
-	};
-	const closeDetails = () => {
-		setShowDetails(false);
-	};
-	
-	const openAddToGroup = ( {id} : {id: number}) =>
-	{
+	const openAddToGroup = () => {
 		setAddToGroup(true);
-		setIdClicked(id);
 	}
 	const closeAddToGroup = () => {
 		setAddToGroup(false);
@@ -67,33 +51,6 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		return publicRuntimeConfig.DCB_API_BASE + '/agencies';
 	}, []);
 
-	const columns = React.useMemo(() => {
-		const columnHelper = createColumnHelper<Agency>();
-
-		return [
-			columnHelper.accessor('id', {
-				cell: (info) => (
-					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
-						{info.getValue()}
-					</Button>
-				),
-				header: '#',
-				id: 'id',
-				enableSorting: false
-			}),
-			columnHelper.accessor('code', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Code',
-				id: 'agencyId' // Used as the unique property in the sorting state (See React-Query dev tools)
-			}),
-			columnHelper.accessor('name', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Name',
-				id: 'agencyCode' // Used as the unique property in the sorting state (See React-Query dev tools)
-			})
-		];
-	}, []);
-
 	const {
 		resource,
 		status: resourceFetchStatus,
@@ -109,8 +66,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	return (
 		<AdminLayout>
 			<Card>
-				<Card.Header>Agencies</Card.Header>
-				<Card.Body>
+				<CardContent>
 					{resourceFetchStatus === 'loading' && (
 						<p className='text-center mb-0'>Loading agencies.....</p>
 					)}
@@ -121,20 +77,20 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Button onClick={() => openAddToGroup({ id: 42 })} > Add Agencies to Group</Button>
-							<Table
+							<Button variant = 'contained' onClick={openAddToGroup} > Add Agencies to Group</Button>
+							<DataGrid
 								data={resource?.content ?? []}
-								columns={columns}
-								type = "Agencies"
+								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
+								type = "Agency"
+								selectable= {true}
 							/>
+							{/* slots allows for further customisation. We can choose whether to do this in the DataGrid based on type, or here. */}
 						</>
 					)}
-				</Card.Body>
+				</CardContent>
 			</Card>
 			<div>
-	{ showDetails ? <Details i={idClicked} content = {resource?.content ?? []} show={showDetails}  onClose={closeDetails} type={"Agency"} /> : null }
-	{ addToGroup ? <AddAgenciesToGroup show={addToGroup} onClose={closeAddToGroup} /> : null}
-
+	        { addToGroup ? <AddAgenciesToGroup show={addToGroup} onClose={closeAddToGroup} /> : null}
     		</div>
 		</AdminLayout>
 	);
@@ -142,6 +98,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
 		page = parseInt(context.query.page, 10);
