@@ -1,9 +1,9 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
+import { MdMenu } from 'react-icons/md';
 import Link from 'next/link';
 import Breadcrumb from '@layout/AdminLayout/Breadcrumb/Breadcrumb';
 import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav';
 import { Button, Container } from 'react-bootstrap';
+import { IconContext } from 'react-icons';
 
 type HeaderProps = {
 	toggleSidebar: () => void;
@@ -29,7 +29,11 @@ export default function Header(props: HeaderProps) {
 					type='button'
 					onClick={toggleSidebar}
 				>
-					<FontAwesomeIcon icon={faBars} />
+				<IconContext.Provider value={{ size: "2em"}}>
+					<div>
+						<MdMenu />
+					</div>
+				</IconContext.Provider>
 				</Button>
 				<Button
 					variant='link'
@@ -37,7 +41,11 @@ export default function Header(props: HeaderProps) {
 					type='button'
 					onClick={toggleSidebarMd}
 				>
-					<FontAwesomeIcon icon={faBars} />
+				<IconContext.Provider value={{ size: "2em"}}>
+					<div>
+						<MdMenu />
+					</div>
+				</IconContext.Provider>
 				</Button>
 				<Link href='/' className='header-brand d-md-none'>
 					<svg width='118' height='46'>

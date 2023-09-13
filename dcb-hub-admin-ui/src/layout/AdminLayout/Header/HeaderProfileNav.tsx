@@ -1,36 +1,13 @@
-import { Badge, Dropdown, Nav, NavItem } from 'react-bootstrap';
-import Image from 'next/image';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Dropdown, Nav, NavItem } from 'react-bootstrap';
 import {
-	faBell,
-	faCreditCard,
-	faEnvelopeOpen,
-	faFile,
-	faMessage,
-	faUser
-} from '@fortawesome/free-regular-svg-icons';
-import { PropsWithChildren } from 'react';
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { faGear, faListCheck, faLock, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+	MdPerson, MdLogout
+} from 'react-icons/md';
 import Link from 'next/link';
 import { signOut } from "next-auth/react"
-import axios from 'axios';
 import { useRouter } from 'next/router';
+import { IconContext } from "react-icons";
 
-type NavItemProps = {
-	icon: IconDefinition;
-} & PropsWithChildren;
 
-const ProfileDropdownItem = (props: NavItemProps) => {
-	const { icon, children } = props;
-
-	return (
-		<>
-			<FontAwesomeIcon className='me-2' icon={icon} fixedWidth />
-			{children}
-		</>
-	);
-};
 
 export default function HeaderProfileNav() {
 	const router = useRouter();
@@ -47,81 +24,25 @@ export default function HeaderProfileNav() {
 					<div className='avatar position-relative'>
 						<Nav.Item>
 							<Nav.Link className='p-2'>
-								<FontAwesomeIcon icon={faUser} size='lg' />
+              <IconContext.Provider value={{ size: "2em"}}>
+                  <div>
+                      <MdPerson />
+                  </div>
+              </IconContext.Provider>;
 							</Nav.Link>
 						</Nav.Item>
 					</div>
 				</Dropdown.Toggle>
 				<Dropdown.Menu className='pt-0'>
 					<Dropdown.Header className='bg-light fw-bold rounded-top'>Account</Dropdown.Header>
-					{/*
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faBell}>
-                Updates
-                <Badge bg="info" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faEnvelopeOpen}>
-                Updates
-                <Badge bg="success" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faListCheck}>
-                Tasks
-                <Badge bg="danger" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faMessage}>
-                Messages
-                <Badge bg="warning" className="ms-2">42</Badge>
-              </ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          */}
-
 					<Dropdown.Header className='bg-light fw-bold'>Settings</Dropdown.Header>
 					<Link href='/profile' passHref legacyBehavior>
 						<Dropdown.Item>
-							<ProfileDropdownItem icon={faUser}>Profile</ProfileDropdownItem>
+							<MdPerson/> Profile
 						</Dropdown.Item>
 					</Link>
-					{/*
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faGear}>Settings</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faCreditCard}>Payments</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faFile}>Projects</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-
-          <Dropdown.Divider />
-
-          <Link href="/" passHref legacyBehavior>
-            <Dropdown.Item>
-              <ProfileDropdownItem icon={faLock}>Lock Account</ProfileDropdownItem>
-            </Dropdown.Item>
-          </Link>
-          */}
 					<Dropdown.Item onClick={()=>signOut()}>
-						<ProfileDropdownItem icon={faPowerOff}>Logout</ProfileDropdownItem>
+						<MdLogout/> Logout
 					</Dropdown.Item>
 				</Dropdown.Menu>
 			</Dropdown>
