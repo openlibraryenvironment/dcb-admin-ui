@@ -3,7 +3,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
-import { Card, CardContent} from '@mui/material';
+import { Alert, Card, CardContent, Paper, Typography} from '@mui/material';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
@@ -59,14 +59,15 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 	return (
 		<AdminLayout>
+			<Paper elevation={16}>
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<p className='text-center mb-0'>Loading locations.....</p>
+								<Typography variant = 'body1' className='text-center mb-0'>Loading locations.....</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<p className='text-center mb-0'>Failed to fetch the locations, please refresh the page.</p>
+								<Alert severity='error' onClose={() => {}}>Failed to fetch the locations, please refresh the page.</Alert>
 							)}
 
 							{resourceFetchStatus === 'success' && (
@@ -81,6 +82,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							)}
 				</CardContent>
 			</Card>
+			</Paper>
 		</AdminLayout>
 	);
 };

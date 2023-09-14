@@ -5,7 +5,7 @@ import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
 import { getSession, useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import { Alert, Button, Card, CardContent, Paper } from '@mui/material';
+import { Alert, Button, Card, CardContent, Paper, Typography } from '@mui/material';
 import NewGroup from './NewGroup';
 import { dehydrate, QueryClient, useQueryClient, useQuery } from '@tanstack/react-query'
 import { groupsQueryDocument } from 'src/queries/queries';
@@ -85,9 +85,8 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 				<Paper elevation={16}>
 				<Card>
 					<CardContent>
-					{/* TODO: Could we style this nicely in the MUI upgrade? */}
 					{resourceFetchStatus === 'loading' && (
-						<p className='text-center mb-0'>Loading Groups.....</p>
+						<Typography variant='body1' className='text-center mb-0'>Loading Groups.....</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (

@@ -3,36 +3,21 @@ import type { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-
-import {
-	BarElement,
-	CategoryScale,
-	Chart,
-	Filler,
-	LinearScale,
-	LineElement,
-	PointElement,
-	Tooltip
-} from 'chart.js';
+import { Paper, CardContent, Typography, Card } from '@mui/material';
 
 const Home: NextPage = () => {
 	// SignOutIfInactive();
 
-	Chart.register(
-		CategoryScale,
-		LinearScale,
-		PointElement,
-		LineElement,
-		BarElement,
-		Tooltip,
-		Filler
-	);
-
 	return (
 		<AdminLayout>
-			<div className='row'>
-				<div className='col-sm-6 col-lg-3'>This is the home dash</div>
-			</div>
+			<Paper elevation={16}>
+				<Card>
+					<CardContent>
+						<Typography variant="h3"> Home </Typography>
+						<Typography variant="body1"> Welcome to the home page of the DCB Admin UI! </Typography>
+					</CardContent>	
+				</Card>
+			</Paper>
 		</AdminLayout>
 	);
 };

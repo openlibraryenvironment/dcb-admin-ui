@@ -1,8 +1,11 @@
 import * as React from 'react';
-import Modal from 'react-bootstrap/Modal';
-import { CardContent, Card, Typography  }from "@mui/material"
+import { CardContent, Card, Typography, Dialog, Slide, AppBar, IconButton, Toolbar, DialogContent }from "@mui/material"
+import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
 import { DataGrid } from '@components/DataGrid';
+import { MdClose } from 'react-icons/md'
+import { IconContext } from 'react-icons';
+
 
 // this can be changed to be fullscreen if desired - just pass the fullscreen prop. It can also be adjusted depending on screen size.
 
@@ -13,6 +16,17 @@ type DetailsType = {
         onClose: any,
         type: string;
 };
+
+
+const Transition = React.forwardRef(function Transition(
+        props: TransitionProps & {
+          children: React.ReactElement;
+        },
+        ref: React.Ref<unknown>,
+      ) {
+        return <Slide direction="left" ref={ref} {...props} />;
+});
+
 export default function Details({i, content, show, onClose, type}: DetailsType) {
 
         const base = 'base-url';
@@ -24,13 +38,31 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
         const toDisplay = findItemById(content, i);
                 
         return (
-                <Modal show={show} onHide={onClose}  size="lg"
-                aria-labelledby="centred-details-modal"
-                centered>
-                        <Modal.Header closeButton aria-labelledby='close-details-modal'>
-                <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+      
+                 <Dialog open={show} onClose={onClose} fullScreen TransitionComponent={Transition} aria-labelledby="details-dialog">
+                        <div>
+                                <AppBar sx={{ position: 'relative' }}>
+                                <Toolbar>
+                                        <IconButton
+                                        edge="start"
+                                        color="inherit"
+                                        onClick={onClose}
+                                        aria-label="close"
+                                        >
+                                        <IconContext.Provider value={{size: "2em"}}>
+                                                <MdClose />
+                                        </IconContext.Provider>
+                                        </IconButton>
+                                        <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                                        View {type} Details - {toDisplay?.name ?? toDisplay?.id}
+                                        </Typography>
+                                </Toolbar>
+                        </AppBar>
+
+                        {/* <Modal.Header closeButton aria-labelledby='close-details-modal'> */}
+                {/* // <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title> */}
+                {/* </Modal.Header> */}
+                <DialogContent>
                         {/* // These are the items that we always show on every 'Details' instance. */}
                         <Card variant = 'outlined'>
                         <CardContent>
@@ -201,7 +233,8 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         selectable= {true}/>                                
                                 </CardContent>
                         </Card>: null}
-                </Modal.Body>
-        </Modal>
+                </DialogContent>
+                </div>
+        </Dialog>
         );
 }

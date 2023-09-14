@@ -4,7 +4,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Button, Card, CardContent } from '@mui/material';
+import { Alert, Button, Card, CardContent, Typography } from '@mui/material';
 import { AdminLayout } from '@layout';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
@@ -68,11 +68,11 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<p className='text-center mb-0'>Loading agencies.....</p>
+						<Typography variant='body1' className='text-center mb-0'>Loading agencies.....</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch the agencies, please refresh the page</p>
+						<Alert severity='error' onClose={() => {}}>Failed to fetch the agencies, please refresh the page</Alert>
 					)}
 
 					{resourceFetchStatus === 'success' && (

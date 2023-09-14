@@ -13,6 +13,8 @@ import { PaginationState, SortingState } from '@tanstack/react-table';
 
 import { HostLMS } from '@models/HostLMS';
 import { DataGrid } from '@components/DataGrid';
+import Paper from '@mui/material/Paper';
+import { Alert, Typography } from '@mui/material';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -68,14 +70,15 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 	return (
 		<AdminLayout>
+			<Paper elevation={16}>
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<p className='text-center mb-0'>Loading HostLMS.....</p>
+						<Typography variant='body1' className='text-center mb-0'>Loading HostLMS.....</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</p>
+						<Alert severity='error' onClose={() => {}} >Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</Alert>
 					)}
 
 					{resourceFetchStatus === 'success' && (
@@ -90,6 +93,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 				</CardContent>
 			</Card>
+			</Paper>
 		</AdminLayout>
 	);
 };

@@ -10,6 +10,13 @@ type HeaderProps = {
 	toggleSidebarMd: () => void;
 };
 
+// This component, along with HeaderProfileNav, will be replaced with an AppBar that will have profile and logout buttons on it
+// instead of being in a drop-down
+// This will be implemented in DCB-305, removing the react-bootstrap components and replacing them with MUI ones.
+// Once this is complete, please delete this comment.
+
+// We will also need an adaptor for the MUI Next Link component, as seen here https://mui.com/material-ui/guides/routing/#next-js-pages-router .
+// This should be implemented either with the sidebar, or with the menu bar.
 export default function Header(props: HeaderProps) {
 	const { toggleSidebar, toggleSidebarMd } = props;
 
