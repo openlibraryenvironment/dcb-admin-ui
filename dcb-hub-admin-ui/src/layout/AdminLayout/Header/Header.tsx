@@ -1,6 +1,6 @@
 import { MdMenu } from 'react-icons/md';
-import Link from 'next/link';
-import Breadcrumb from '@layout/AdminLayout/Breadcrumb/Breadcrumb';
+import Link from '@mui/material/Link';
+import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
 import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav';
 import { Button, Container } from 'react-bootstrap';
 import { IconContext } from 'react-icons';
@@ -17,6 +17,7 @@ type HeaderProps = {
 
 // We will also need an adaptor for the MUI Next Link component, as seen here https://mui.com/material-ui/guides/routing/#next-js-pages-router .
 // This should be implemented either with the sidebar, or with the menu bar.
+
 export default function Header(props: HeaderProps) {
 	const { toggleSidebar, toggleSidebarMd } = props;
 
@@ -58,7 +59,7 @@ export default function Header(props: HeaderProps) {
 			</Container>
 			<div className='header-divider border-top my-2 ms-n2 me-n2' />
 			<Container fluid>
-				<Breadcrumb />
+				<Breadcrumbs />
 			</Container>
 		</header>
 	);
