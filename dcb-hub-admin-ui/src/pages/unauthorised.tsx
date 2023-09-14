@@ -1,23 +1,24 @@
 import Link from 'next/link';
 import * as React from 'react';
 import { AdminLayout } from '@layout';
+import { Typography } from '@mui/material';
 
 export default function Unauthorised() {
 	return (
 		<AdminLayout>
 			{' '}
 			<div className='not-found'>
-				<p className='Title'>401</p>
-				<p className='Text'>Sorry, you do not have access to this page.</p>
-				<p className='Text'>
+				<Typography className='Title'>401</Typography>
+				<Typography className='Text'>Sorry, you do not have access to this page.</Typography>
+				<Typography className='Text'>
 					If you think you should have access, contact your system administrator
-				</p>
-				<p className='GoBackText'>
+				</Typography>
+				<Typography className='GoBackText'>
 					Go back to the{' '}
 					<Link aria-label='dashboard link' className='LinkTo' href='/'>
 						dashboard
 					</Link>
-				</p>
+				</Typography>
 			</div>
 		</AdminLayout>
 	);

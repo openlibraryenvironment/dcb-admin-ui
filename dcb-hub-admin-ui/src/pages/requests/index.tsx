@@ -4,7 +4,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession, signIn } from 'next-auth/react';
 
-import { Card, CardContent } from '@mui/material';
+import { Alert, Card, CardContent, Paper, Typography } from '@mui/material';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
@@ -66,14 +66,15 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	return (
 		<AdminLayout>
 			<div>
+			<Paper elevation={16}>
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<p className='text-center mb-0'>Loading requests.....</p>
+								<Typography variant='body1' className='text-center mb-0'>Loading requests.....</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<p className='text-center mb-0'>Failed to fetch the requests, please refresh</p>
+								<Alert severity='error' onClose={() => {}}>Failed to fetch the requests, please refresh</Alert>
 							)}
 
 							{resourceFetchStatus === 'success' && (
@@ -90,6 +91,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							)}
 				</CardContent>
 			</Card>
+			</Paper>
 			</div>
 		</AdminLayout>
 	);
