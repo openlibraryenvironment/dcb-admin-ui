@@ -222,7 +222,6 @@ const useResource = <T>({
 		try {
 		  let headers: AxiosRequestHeaders = {};
 		  // queryClient.invalidateQueries([generatedQueryKey]);
-		  console.log(baseQueryKey);
 	
 		  if (accessToken !== null) {
 			headers = {
@@ -230,9 +229,7 @@ const useResource = <T>({
 			  Authorization: 'Bearer ' + accessToken
 			};
 		  }
-	
-		  console.log("Happy path attempt.");
-		  const response = await axios.post(
+			  const response = await axios.post(
 			url,
 			{ query: graphQLQuery, variables: graphQLVariables },
 			{
@@ -254,10 +251,9 @@ const useResource = <T>({
 		  }
 		  else if (response.status === 401)
 			{
-				console.log("Yikes, 401");
 				// refresh access token method
 				const newAccessToken = await refreshToken();
-				console.log("New token is being generated.");
+				console.log("401 encountered, new token is being generated.");
 				// Update the accessToken variable with the new token
 				accessToken = newAccessToken;
 				// retry
@@ -270,7 +266,7 @@ const useResource = <T>({
 		}
 		} catch {
 			// If the above promise does not resolve
-			console.log("BAD PATH, promise has not resolved");
+			console.log("Promise has not resolved");
 		  	return Promise.reject(`Failed to perform a GraphQL request for ${generatedQueryKey.toString()}`);
 		}
 	  };

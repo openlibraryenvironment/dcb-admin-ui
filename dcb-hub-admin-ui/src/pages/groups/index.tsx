@@ -130,13 +130,11 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 	const session = await getSession(context);
 	const accessToken = session?.accessToken;
-	// console.log('Access Token:', accessToken);
 	// await queryClient.prefetchQuery(['groups'], useResource)
 
 	// this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
 	// the intention is that a page change will trigger a refetch / query, as will new group creation
 	// const queryVariables = {};
-	// const url = "https://dcb-uat.sph.k-int.com/graphql";
 	// const headers = {
 	// 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
 	// 	'Content-Type': 'application/json', // You can adjust the content type as needed

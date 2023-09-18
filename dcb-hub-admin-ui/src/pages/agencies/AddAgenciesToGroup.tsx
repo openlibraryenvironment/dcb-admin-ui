@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
 import { Alert, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import { MdClose } from 'react-icons/md'
+import getConfig from 'next/config';
 
 interface FormData {
   groupId: string;
@@ -53,9 +54,13 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const url = React.useMemo(() => {
+      const { publicRuntimeConfig } = getConfig();
+      return publicRuntimeConfig.DCB_API_BASE + '/graphql';
+    }, []);
 
 
-    const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql'); 
+    const graphQLClient = new GraphQLClient(url); 
     const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
     // TODO: Implement a GraphQL client that does do this and supports OAuth. Our current client is glitchy and is suffering from 401s.
@@ -66,7 +71,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
 
     const addAgenciesMutation = useMutation(
       async (values: FormData) => {
-        const { data } = await request<AddAgenciesResponse>('https://dcb-uat.sph.k-int.com/graphql', addAgenciesToGroup, {
+        const { data } = await request<AddAgenciesResponse>(url, addAgenciesToGroup, {
           input: {
             group: values.groupId,
             agency: values.agencyId
@@ -151,7 +156,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     <div>
     <Dialog open={show} onClose={onClose}
     aria-labelledby="centred-add-agency-dialog">
-        <DialogTitle style={{ textAlign: 'center', fontWeight: 'bold' }}> Add agencies to a group</DialogTitle>
+        <DialogTitle style={{ textAlign: 'center'}}> Add agencies to a group</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={onClose}

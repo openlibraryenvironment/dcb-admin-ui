@@ -21,6 +21,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import Head from 'next/head';
 import createEmotionCache from 'src/createEmotionCache';
+import { useMediaQuery } from '@mui/material';
 
 // You change this configuration value to false so that the Font Awesome core SVG library
 // will not try and insert <style> elements into the <head> of the page.
@@ -30,8 +31,8 @@ config.autoAddCss = false;
 
 const clientSideEmotionCache = createEmotionCache();
 
-// later we'll modify this to its own file
-const theme = createTheme();
+// Later, the theme work here can be spun out into its own file.
+// We could then ship the relevant theme file for the relevant client.
 
 export interface MyAppProps extends AppProps {
 	emotionCache?: EmotionCache;
@@ -39,6 +40,30 @@ export interface MyAppProps extends AppProps {
 
 function MyApp(props: MyAppProps) {
 	const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
+	const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');	
+	// set the theme here
+	// For multi-theme, do as follows:
+	// 1. Create either separate theme variables or theme.ts files.
+	// 2. Apply changes accordingly within createTheme.
+	// 3. Change the theme passed into the 'ThemeProvider' accordingly.
+	const theme = React.useMemo(
+	  () =>
+	  // Uses the user's previously expressed system preference. If we want this to be toggleable, we'll need to change it 
+	  // accordingly.
+	  // We can also use setColorScheme to override the default 'dark' or 'light' as necessary.
+	  // For 'High Contrast' this should do the job
+	  // Eventually, we want a settings page for this where the user can select their 
+		createTheme({
+		  palette: {
+			contrastThreshold: 4.5,
+			mode: prefersDarkMode ? 'dark' : 'light',
+			background: {
+				default: prefersDarkMode ? '#121212': '#fffff',
+			},
+		  },
+		}),
+	  [prefersDarkMode],
+	);
 
 	const [queryClient] = React.useState(
 		() =>
