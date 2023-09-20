@@ -1,66 +1,68 @@
-import { MdMenu } from 'react-icons/md';
-import Link from '@mui/material/Link';
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
-import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav';
-import { Button, Container } from 'react-bootstrap';
-import { IconContext } from 'react-icons';
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import { MdLogout, MdMenu } from "react-icons/md";
+import { MdAccountCircle } from "react-icons/md";
+import Link from 'next/link';
+import { signOut } from "next-auth/react"
+import { styled } from '@mui/material/styles';
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 
-type HeaderProps = {
-	toggleSidebar: () => void;
-	toggleSidebarMd: () => void;
-};
+interface AppBarProps extends MuiAppBarProps {
+  open?: boolean;
+}
 
-// This component, along with HeaderProfileNav, will be replaced with an AppBar that will have profile and logout buttons on it
-// instead of being in a drop-down
-// This will be implemented in DCB-305, removing the react-bootstrap components and replacing them with MUI ones.
-// Once this is complete, please delete this comment.
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})<AppBarProps>(({ theme}) => ({
+  zIndex: theme.zIndex.drawer + 1,
+}));
 
-// We will also need an adaptor for the MUI Next Link component, as seen here https://mui.com/material-ui/guides/routing/#next-js-pages-router .
-// This should be implemented either with the sidebar, or with the menu bar.
+export default function Header(props:any) {
 
-export default function Header(props: HeaderProps) {
-	const { toggleSidebar, toggleSidebarMd } = props;
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="fixed" sx={{bgcolor: "#3c4b64;"}}>
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={props.openStateFuncClosed}
+            sx={{ mr: 2 }}
+          >
+            <MdMenu size={20}/>
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            DCB Admin UI
+          </Typography>
+          <div>
+            <Link href='/profile'
+              style={{ color: 'inherit' }}>
+                <IconButton
+                size="large"
+                aria-label="account of current user"
+                color="inherit"
+                >
+                <MdAccountCircle size={20}/>
+                </IconButton>  
+            </Link>
 
-	return (
-		<header className='header sticky-top mb-4 p-2 border-bottom'>
-			<Container fluid className='header-navbar d-flex align-items-center'>
-				<Button
-					variant='link'
-					className='header-toggler d-md-none px-md-0 me-md-3 rounded-0 shadow-none'
-					type='button'
-					onClick={toggleSidebar}
-				>
-				<IconContext.Provider value={{ size: "2em"}}>
-					<div>
-						<MdMenu />
-					</div>
-				</IconContext.Provider>
-				</Button>
-				<Button
-					variant='link'
-					className='header-toggler d-none d-md-inline-block px-md-0 me-md-3 rounded-0 shadow-none'
-					type='button'
-					onClick={toggleSidebarMd}
-				>
-				<IconContext.Provider value={{ size: "2em"}}>
-					<div>
-						<MdMenu />
-					</div>
-				</IconContext.Provider>
-				</Button>
-				<Link href='/' className='header-brand d-md-none'>
-					<svg width='118' height='46'>
-						<title>DCB</title>
-					</svg>
-				</Link>
-				<div className='header-nav ms-auto'>
-					<HeaderProfileNav />
-				</div>
-			</Container>
-			<div className='header-divider border-top my-2 ms-n2 me-n2' />
-			<Container fluid>
-				<Breadcrumbs />
-			</Container>
-		</header>
-	);
+            <IconButton
+              size="large"
+              aria-label="sign out"
+              aria-haspopup="true"
+              onClick={()=>signOut()}
+              color="inherit"
+              >
+            <MdLogout size={20}/>
+            </IconButton>
+          </div>
+        </Toolbar>
+      </AppBar>
+    </Box>
+  );
 }
