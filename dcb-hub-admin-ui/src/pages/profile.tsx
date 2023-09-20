@@ -61,7 +61,7 @@ const Profile: NextPage<Props> = (props) => {
 							<ListItemText> <span style={{ fontWeight: 'bold' }}>Preferred Username: </span>
 							{session?.profile?.preferred_username} </ListItemText>
 						</ListItem>
-						<ListItem>
+						<ListItem component = "div">
 							<ListItemIcon> <MdOutlineSupervisorAccount /> </ListItemIcon>
 							<ListItemText> <span style={{ fontWeight: 'bold' }}>Roles: </span>
 							{renderListOfRoles(session?.profile?.roles)} </ListItemText>
