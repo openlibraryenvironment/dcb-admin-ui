@@ -1,12 +1,8 @@
 import * as React from 'react';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
-import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
-//import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
-//import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import CssBaseline from '@mui/material/CssBaseline';
-//import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
@@ -54,27 +50,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
-/*
-interface AppBarProps extends MuiAppBarProps {
-  open?: boolean;
-}
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));*/
-
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
     width: drawerWidth,
@@ -92,39 +67,18 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-export default function Sidebar() {
-  const [open, setOpen] = React.useState(true);
+export default function Sidebar(props:any) {
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      {/*
-      <AppBar position="fixed" sx={{bgcolor: "#3c4b64;"}}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={()=>{setOpen(!open)}}
-            edge="start"
-            sx={{
-              marginRight: 5
-            }}
-          >
-            <MdMenu />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" >
-            DCB Admin UI
-          </Typography>
-        </Toolbar>
-      </AppBar>
-          */}
+    <>
+    <CssBaseline />
       <Drawer 
-      variant="permanent"  open={open}>
+      variant="permanent"  open={props.openStateOpen}>
         <DrawerHeader>
             <IconButton
             color="inherit"
             aria-label="open drawer"
-            onClick={()=>{setOpen(!open)}}
+            onClick={props.openStateFuncClosed}
             edge="start"
             sx={{
               mr: 'auto',
@@ -143,7 +97,7 @@ export default function Sidebar() {
               href=
               {
                 index === 0 ? '/': 
-                index=== 1? '/requests':
+                index=== 1 ? '/requests':
                 index === 2 ? '/agencies':
                 index === 3 ? '/hostlmss':
                 index === 4 ? '/locations':
@@ -155,33 +109,34 @@ export default function Sidebar() {
               <ListItemButton
                 sx={{
                   minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
+                  justifyContent: props.openStateOpen ? 'initial' : 'center',
                   px: 2.5,
                 }}
               >
                 <ListItemIcon
-                  onClick={()=>{setOpen(open)}}
+                  onClick={props.openStateFuncOpen}
                   sx={{
                     minWidth: 0,
-                    mr: open ? 3 : 'auto',
+                    mr: props.openStateOpen ? 3 : 'auto',
                     justifyContent: 'center',
                   }}
                 >
                   {
-                  index === 0 ? <MdSpaceDashboard/>: index === 1 ? <MdSpaceDashboard />: 
-                  index === 2 ? <MdSpaceDashboard/>: index === 3 ? <MdSpaceDashboard/>:
-                  index === 4 ? <MdLocationOn/>: <MdGroup/>
+                  index === 0 ? <MdSpaceDashboard size={20}/>: index === 1 ? <MdSpaceDashboard size={20}/>: 
+                  index === 2 ? <MdSpaceDashboard size={20}/>: index === 3 ? <MdSpaceDashboard size={20}/>:
+                  index === 4 ? <MdLocationOn size={20}/>: <MdGroup size={20}/>
                   }
                 </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
+                <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
             </Link>
 
           ))}
-        </List>
+          </List>
         <Divider />
       </Drawer>
-    </Box>
+    </>
+      
   );
 }
