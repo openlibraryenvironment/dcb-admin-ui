@@ -88,7 +88,7 @@ export default function DataGrid<T extends Object>({
 
 // This custom toolbar allows for multi-search (i.e. searching for two+ things, separated by a comma)
 
-// // function QuickSearchToolbar() {
+// function QuickSearchToolbar() {
 //   return (
 //     <Box
 //       sx={{
@@ -96,6 +96,7 @@ export default function DataGrid<T extends Object>({
 //         pb: 0,
 //       }}
 //     >
+//         <GridToolbar/>
 //       <GridToolbarQuickFilter
 //         quickFilterParser={(searchInput: string) =>
 //           searchInput

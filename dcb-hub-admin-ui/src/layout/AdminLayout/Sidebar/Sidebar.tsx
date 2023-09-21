@@ -2,7 +2,6 @@ import * as React from 'react';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
-import CssBaseline from '@mui/material/CssBaseline';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
@@ -17,6 +16,7 @@ import
   MdMenu,
   MdGroup
 }from 'react-icons/md';
+import { Typography, useMediaQuery } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -68,10 +68,10 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 export default function Sidebar(props:any) {
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   return (
     <>
-    <CssBaseline />
       <Drawer 
       variant="permanent"  open={props.openStateOpen}>
         <DrawerHeader>
@@ -93,7 +93,7 @@ export default function Sidebar(props:any) {
         <List>
           {['Dashboard', 'Patron Request', 'Agency', 'Host LMS', 'Location', 'Groups'].map((text, index) => (
             <Link
-              style={{textDecoration: 'none', color: '#363a3d'}}
+              style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=
               {
                 index === 0 ? '/': 

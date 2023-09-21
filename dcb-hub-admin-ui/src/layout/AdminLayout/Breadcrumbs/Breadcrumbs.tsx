@@ -25,7 +25,6 @@ export default function Breadcrumbs () {
   
       const breadcrumbs: BreadcrumbType[] = pathArray.map((path, index) => {
         const href = "/" + pathArray.slice(0, index + 1).join("/");
-        console.log("Line 40", pathArray);
         return {
           href,
           label: path.charAt(0).toUpperCase() + path.slice(1),

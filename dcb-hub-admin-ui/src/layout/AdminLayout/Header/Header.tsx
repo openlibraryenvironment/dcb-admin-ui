@@ -24,7 +24,7 @@ export default function Header(props:any) {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed" sx={{bgcolor: "#3c4b64;"}}>
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             size="large"

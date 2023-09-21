@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
 import { Dialog, DialogContent, DialogTitle, IconButton, styled, Alert, Button, TextField } from '@mui/material';
 import { MdClose } from 'react-icons/md'
+import getConfig from 'next/config';
 
 interface FormData {
   name: string;
@@ -42,14 +43,18 @@ export default function NewGroup({show, onClose}: NewGroupType) {
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql'); 
+    const url = React.useMemo(() => {
+      const { publicRuntimeConfig } = getConfig();
+      return publicRuntimeConfig.DCB_API_BASE + '/graphql';
+    }, []);
+    const graphQLClient = new GraphQLClient(url); 
     const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
     // look at a client that does do this
 
     const createGroupMutation = useMutation(
       async (values: FormData) => {
-        const { data } = await request<CreateGroupResponse>('https://dcb-uat.sph.k-int.com/graphql', createGroup, {
+        const { data } = await request<CreateGroupResponse>(url, createGroup, {
           input: {
             name: values.name,
             code: values.code,
@@ -127,7 +132,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
   return (
     <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-      <DialogTitle style={{ textAlign: 'center', fontWeight: 'bold' }}> New Group</DialogTitle>
+      <DialogTitle style={{ textAlign: 'center'}}> New Group</DialogTitle>
       <IconButton
           aria-label="close"
           onClick={onClose}
