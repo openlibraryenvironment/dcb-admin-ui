@@ -26,7 +26,13 @@ const Profile: NextPage<Props> = (props) => {
 	const { data: session, status }: { data: any; status: any } = useSession();
 	const emailVerified = session?.profile?.email_verified ?? 'Cannot fetch verified email status.';
 	const renderListOfRoles = (roles: string[]) => {
-		return roles?.map((role) => <li key={roles.indexOf(role)}>{role}</li>);
+		return roles?.map((role) => (
+			<ListItem key={role} sx={{ display: 'list-item', listStyleType: 'disc', pl: 4 }}>
+				<ListItemText>
+					{role}
+				</ListItemText>
+			</ListItem>
+		));
 	};
 	// SignOutIfInactive();
 
@@ -35,7 +41,7 @@ const Profile: NextPage<Props> = (props) => {
 			<Paper elevation={16}>
 				<Card>
 					{/*use <CardMedia for profile pictures if needed in the future*/}
-					<CardContent>
+					<CardContent component="div">
 						<List className='list-profile'>
 						<ListSubheader> 
 								<Typography variant = "h2">Profile</Typography> 
@@ -61,10 +67,13 @@ const Profile: NextPage<Props> = (props) => {
 							<ListItemText> <span style={{ fontWeight: 'bold' }}>Preferred Username: </span>
 							{session?.profile?.preferred_username} </ListItemText>
 						</ListItem>
-						<ListItem component = "div">
+						<ListItem>
 							<ListItemIcon> <MdOutlineSupervisorAccount /> </ListItemIcon>
 							<ListItemText> <span style={{ fontWeight: 'bold' }}>Roles: </span>
-							{renderListOfRoles(session?.profile?.roles)} </ListItemText>
+								<List component="ul">
+									{renderListOfRoles(session?.profile?.roles)}
+								</List>
+							</ListItemText>
 						</ListItem>
 					</List>
 					</CardContent>

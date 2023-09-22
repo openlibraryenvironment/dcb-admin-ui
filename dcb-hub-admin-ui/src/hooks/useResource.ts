@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { useQuery, QueryKey, QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, QueryKey } from '@tanstack/react-query';
 import axios, { AxiosRequestHeaders } from 'axios';
 import { newGraphQLResource, newResource, Resource } from '@models/resource';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 // If we keep using this, implement access token refresh here
+// Remove remaining react-table stuff when we fully implement server side pagination
 const INITIAL_STATE: { pagination: PaginationState; sort: SortingState } = {
 	pagination: {
 		pageIndex: 0,
