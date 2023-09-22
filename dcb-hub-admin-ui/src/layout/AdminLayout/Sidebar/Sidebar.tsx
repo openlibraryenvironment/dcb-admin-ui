@@ -92,7 +92,8 @@ export default function Sidebar(props:any) {
         <Divider />
         <List>
           {['Dashboard', 'Patron Request', 'Agency', 'Host LMS', 'Location', 'Groups'].map((text, index) => (
-            <Link
+            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+              <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=
               {
@@ -104,8 +105,7 @@ export default function Sidebar(props:any) {
                 '/groups'
               }
               key={index}
-            >
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+              >
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -129,9 +129,8 @@ export default function Sidebar(props:any) {
                 </ListItemIcon>
                 <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
               </ListItemButton>
-            </ListItem>
             </Link>
-
+            </ListItem>
           ))}
           </List>
         <Divider />
