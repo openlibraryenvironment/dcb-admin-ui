@@ -39,6 +39,8 @@ export default function DataGrid<T extends Object>({
     return (
         <div>
         <MUIDataGrid
+            //DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
+            experimentalFeatures={{ ariaV7: true }}
             // determines whether we allow row selection
             checkboxSelection={selectable}
             // These variables have been commented out until server-side pagination is working.
