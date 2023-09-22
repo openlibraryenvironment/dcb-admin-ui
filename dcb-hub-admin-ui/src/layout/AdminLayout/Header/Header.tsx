@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import { MdLogout, MdMenu } from "react-icons/md";
 import { MdAccountCircle } from "react-icons/md";
-import Link from 'next/link';
+import Link from '@components/Link/Link';
 import { signOut } from "next-auth/react"
 import { styled } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
@@ -23,46 +23,46 @@ const AppBar = styled(MuiAppBar, {
 export default function Header(props:any) {
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed">
-        <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={props.openStateFuncClosed}
-            sx={{ mr: 2 }}
-          >
-            <MdMenu size={20}/>
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            DCB Admin UI
-          </Typography>
-          <div>
-            <Link href='/profile'
-              style={{ color: 'inherit' }}>
-                <IconButton
-                size="large"
-                aria-label="account of current user"
-                color="inherit"
-                >
-                <MdAccountCircle size={20}/>
-                </IconButton>  
-            </Link>
+            <Box sx={{ flexGrow: 1 }}>
+              <AppBar position="fixed">
+                <Toolbar>
+                  <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={props.openStateFuncClosed}
+                    sx={{ mr: 2 }}
+                  >
+                    <MdMenu size={20}/>
+                  </IconButton>
+                  <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                    DCB Admin UI
+                  </Typography>
+                  <div>
+                    <Link href='/profile'
+                      style={{ color: 'inherit' }}>
+                        <IconButton
+                        size="large"
+                        aria-label="account of current user"
+                        color="inherit"
+                        >
+                        <MdAccountCircle size={20}/>
+                        </IconButton>  
+                    </Link>
 
-            <IconButton
-              size="large"
-              aria-label="sign out"
-              aria-haspopup="true"
-              onClick={()=>signOut()}
-              color="inherit"
-              >
-            <MdLogout size={20}/>
-            </IconButton>
-          </div>
-        </Toolbar>
-      </AppBar>
-    </Box>
+                    <IconButton
+                      size="large"
+                      aria-label="sign out"
+                      aria-haspopup="true"
+                      onClick={()=>signOut()}
+                      color="inherit"
+                      >
+                    <MdLogout size={20}/>
+                    </IconButton>
+                  </div>
+                </Toolbar>
+              </AppBar>
+          </Box>
   );
 }

@@ -8,7 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Link from 'next/link';
+import Link from '@components/Link/Link';
 
 import
 { MdLocationOn, 
@@ -16,7 +16,8 @@ import
   MdMenu,
   MdGroup
 }from 'react-icons/md';
-import { Typography, useMediaQuery } from '@mui/material';
+import { useMediaQuery } from '@mui/material';
+import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
 
 const drawerWidth = 240;
 
@@ -73,7 +74,7 @@ export default function Sidebar(props:any) {
   return (
     <>
       <Drawer 
-      variant="permanent"  open={props.openStateOpen}>
+      variant="permanent" open={props.openStateOpen}>
         <DrawerHeader>
             <IconButton
             color="inherit"
@@ -90,7 +91,11 @@ export default function Sidebar(props:any) {
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <List>
+        <List component = "nav">
+              { props.openStateOpen ? <ListItem key={"breadcrumbs-sidebar"} component="nav">
+                <Breadcrumbs />
+                  {/* Hide this on toggled sidebar */}
+              </ListItem>: null }
           {['Dashboard', 'Patron Request', 'Agency', 'Host LMS', 'Location', 'Groups'].map((text, index) => (
             <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
@@ -105,7 +110,7 @@ export default function Sidebar(props:any) {
               }
               key={index}
             >
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+            <ListItem key={text} component="nav" disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={{
                   minHeight: 48,
@@ -131,7 +136,6 @@ export default function Sidebar(props:any) {
               </ListItemButton>
             </ListItem>
             </Link>
-
           ))}
           </List>
         <Divider />

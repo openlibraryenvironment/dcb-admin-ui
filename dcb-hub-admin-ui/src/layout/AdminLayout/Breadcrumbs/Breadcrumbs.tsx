@@ -1,6 +1,6 @@
 import { Breadcrumbs as MUIBreadcrumbs } from "@mui/material"
 import { MdArrowForwardIos } from 'react-icons/md';
-import Link from '@mui/material/Link';
+import Link from "@components/Link/Link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -8,7 +8,8 @@ type BreadcrumbType = {
     href: string;
     label: string;
     isCurrent: boolean;
-  };
+};
+
 
 
 export default function Breadcrumbs () {

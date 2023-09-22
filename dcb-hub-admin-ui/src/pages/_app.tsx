@@ -3,7 +3,6 @@ import '@styles/globals.scss';
 import type { AppProps } from 'next/app';
 // Next.js allows you to import CSS directly in .js files.
 // It handles optimization and all the necessary Webpack configuration to make this work.
-import { config } from '@fortawesome/fontawesome-svg-core';
 
 import { SessionProvider } from 'next-auth/react';
 import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query';
@@ -27,7 +26,6 @@ import { useMediaQuery } from '@mui/material';
 // will not try and insert <style> elements into the <head> of the page.
 // Next.js blocks this from happening anyway so you might as well not even try.
 // See https://fontawesome.com/v6/docs/web/use-with/react/use-with#next-js
-config.autoAddCss = false;
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -47,22 +45,22 @@ function MyApp(props: MyAppProps) {
 	// 2. Apply changes accordingly within createTheme.
 	// 3. Change the theme passed into the 'ThemeProvider' accordingly.
 	const theme = React.useMemo(
-	  () =>
-	  // Uses the user's previously expressed system preference. If we want this to be toggleable, we'll need to change it 
-	  // accordingly.
-	  // We can also use setColorScheme to override the default 'dark' or 'light' as necessary.
-	  // For 'High Contrast' this should do the job
-	  // Eventually, we want a settings page for this where the user can select their 
+		() =>
+		// Uses the user's previously expressed system preference. If we want this to be toggleable, we'll need to change it 
+		// accordingly.
+		// We can also use setColorScheme to override the default 'dark' or 'light' as necessary.
+		// For 'High Contrast' this should do the job
+		// Eventually, we want a settings page for this where the user can select their 
 		createTheme({
-		  palette: {
+			palette: {
 			contrastThreshold: 4.5,
 			mode: prefersDarkMode ? 'dark' : 'light',
 			background: {
 				default: prefersDarkMode ? '#121212': '#fffff',
 			},
-		  },
+			},
 		}),
-	  [prefersDarkMode],
+		[prefersDarkMode],
 	);
 
 	const [queryClient] = React.useState(

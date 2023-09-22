@@ -1,4 +1,4 @@
-import { Link } from '@mui/material';
+import Link from '@components/Link/Link';
 import React from 'react';
 
 export default function Footer() {
