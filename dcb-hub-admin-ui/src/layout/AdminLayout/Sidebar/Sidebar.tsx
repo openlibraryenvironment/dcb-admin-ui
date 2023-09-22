@@ -97,8 +97,7 @@ export default function Sidebar(props:any) {
                   {/* Hide this on toggled sidebar */}
               </ListItem>: null }
           {['Dashboard', 'Patron Request', 'Agency', 'Host LMS', 'Location', 'Groups'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <Link
+            <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=
               {
@@ -135,6 +134,7 @@ export default function Sidebar(props:any) {
                 </ListItemIcon>
                 <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
               </ListItemButton>
+            </ListItem>
             </Link>
           ))}
           </List>
