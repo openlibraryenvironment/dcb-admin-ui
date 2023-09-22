@@ -1,6 +1,6 @@
 /** @type {import('@typescript-eslint/utils').TSESLint.Linter.Config} */
 const config = {
-  "extends": ["next/core-web-vitals", "prettier"],
+  extends: ["next/core-web-vitals"],
   rules: {
     'no-restricted-syntax': [
       'warn',

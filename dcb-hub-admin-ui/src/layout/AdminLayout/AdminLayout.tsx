@@ -17,6 +17,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 		</Head>
 
 		<Header openStateFuncClosed={()=>setOpen(!open)} />
+
 		<Box sx={{ display: 'flex'}}>
 			<Sidebar
 			openStateOpen = {open}
