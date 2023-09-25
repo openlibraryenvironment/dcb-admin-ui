@@ -13,28 +13,24 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 
-// We don't have to use Roboto - change font as needed here for MUI components
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+// We don't have to use Roboto - import whichever fonts you want here.
+import { Roboto } from "next/font/google"
 import Head from 'next/head';
 import createEmotionCache from 'src/createEmotionCache';
 import { useMediaQuery } from '@mui/material';
 
-// You change this configuration value to false so that the Font Awesome core SVG library
-// will not try and insert <style> elements into the <head> of the page.
-// Next.js blocks this from happening anyway so you might as well not even try.
-// See https://fontawesome.com/v6/docs/web/use-with/react/use-with#next-js
 
 const clientSideEmotionCache = createEmotionCache();
-
-// Later, the theme work here can be spun out into its own file.
-// We could then ship the relevant theme file for the relevant client.
 
 export interface MyAppProps extends AppProps {
 	emotionCache?: EmotionCache;
   }
+
+  const roboto = Roboto({
+	weight: ["300", "400", "500", "700"],
+	style: ["normal", "italic"],
+	subsets: ["latin"],
+  });
 
 function MyApp(props: MyAppProps) {
 	const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
@@ -53,12 +49,16 @@ function MyApp(props: MyAppProps) {
 		// Eventually, we want a settings page for this where the user can select their 
 		createTheme({
 			palette: {
-			contrastThreshold: 4.5,
-			mode: prefersDarkMode ? 'dark' : 'light',
-			background: {
-				default: prefersDarkMode ? '#121212': '#fffff',
+				contrastThreshold: 4.5,
+				mode: prefersDarkMode ? 'dark' : 'light',
+				background: {
+					default: prefersDarkMode ? '#121212': '#fffff',
+				},
 			},
-			},
+			typography: {
+				// and then set the fonts for the theme here
+				fontFamily: roboto.style.fontFamily,
+			}
 		}),
 		[prefersDarkMode],
 	);

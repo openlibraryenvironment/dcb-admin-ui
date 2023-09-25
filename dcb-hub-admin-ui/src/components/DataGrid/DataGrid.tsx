@@ -32,8 +32,11 @@ export default function DataGrid<T extends Object>({
 
     // Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' panel.
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
-		setShowDetails(true);
-		setIdClicked(params?.row?.id);
+        if (type != "GroupDetails")
+        {
+            setShowDetails(true);
+            setIdClicked(params?.row?.id);
+        }
 	  };
 
     return (
