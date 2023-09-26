@@ -182,7 +182,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {type == "Agency"?<Card variant = 'outlined'>
                                 <Accordion>
-                                        <AccordionSummary aria-controls="client-config" id="client-config" 
+                                        <AccordionSummary aria-controls="client-config" id="client-config-agency" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
                                                <Typography sx={{ fontWeight: 'bold' }}> Location information </Typography>
@@ -211,7 +211,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {type == "HostLMS"?<Card variant = 'outlined'>
                                 <Accordion>
-                                        <AccordionSummary aria-controls="client-config" id="client-config" 
+                                        <AccordionSummary aria-controls="client-config" id="client-config-hostlms" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
                                                <Typography sx={{ fontWeight: 'bold' }}> Client Config </Typography>
@@ -221,7 +221,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 {toDisplay?.clientConfig?.ingest} </Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Shelving locations: </span>
                                                 {toDisplay?.clientConfig?.[shelving]} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Client Config - Number of records to generate: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Number of records to generate: </span>
                                                 {toDisplay?.clientConfig?.[numRecord]} </Typography>
                                         </AccordionDetails>
                                 </Accordion>
@@ -247,7 +247,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {type == "Location"?<Card variant = 'outlined'>
                                 <Accordion>
-                                        <AccordionSummary aria-controls="client-config" id="client-config" 
+                                        <AccordionSummary aria-controls="client-config" id="client-config-location" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
                                                <Typography sx={{ fontWeight: 'bold' }}> Location information </Typography>
