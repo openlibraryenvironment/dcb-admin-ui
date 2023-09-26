@@ -56,10 +56,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </Typography>
                                 </Toolbar>
                         </AppBar>
-
-                        {/* <Modal.Header closeButton aria-labelledby='close-details-modal'> */}
-                {/* // <Modal.Title> View {type} Details - {toDisplay?.name ?? toDisplay?.id} </Modal.Title> */}
-                {/* </Modal.Header> */}
                 <DialogContent>
                         {/* // These are the items that we always show on every 'Details' instance. */}
                         <Card variant = 'outlined'>
@@ -272,9 +268,13 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                 <CardContent>
                                         <DataGrid 
                                         data={toDisplay?.members.map((item: { agency: any; }) => item.agency) ?? []}
-                                        columns={[ {field: 'name', headerName: "Agency name", minWidth: 100, flex: 1}, { field: 'id', headerName: "Agency ID", minWidth: 50, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
-                                        type = "Group"
-                                        selectable= {true}/>                                
+                                        columns={[ {field: 'name', headerName: "Agency name", minWidth: 100, flex: 1}, 
+                                                { field: 'id', headerName: "Agency ID", minWidth: 50, flex: 0.5}, 
+                                                { field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
+                                        type = "GroupDetails"
+                                        // This grid doesn't need to show Details
+                                        selectable= {false}
+                                        />                                
                                 </CardContent>
                         </Card>: null}
                 </DialogContent>
