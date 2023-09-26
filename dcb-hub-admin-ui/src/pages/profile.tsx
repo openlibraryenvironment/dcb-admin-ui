@@ -25,6 +25,10 @@ type Props = {
 const Profile: NextPage<Props> = (props) => {
 	const { data: session, status }: { data: any; status: any } = useSession();
 	const emailVerified = session?.profile?.email_verified ?? 'Cannot fetch verified email status.';
+	
+	//This is the old way of rendering roles before DCB-397 (https://openlibraryfoundation.atlassian.net/browse/DCB-397)
+	//Use this function to render roles in a list
+	/*
 	const renderListOfRoles = (roles: string[]) => {
 		return roles?.map((role) => (
 			<ListItem key={role} sx={{ display: 'list-item', listStyleType: 'disc', pl: 4 }}>
@@ -33,14 +37,23 @@ const Profile: NextPage<Props> = (props) => {
 				</ListItemText>
 			</ListItem>
 		));
-	};
+	};*/
+
+	const formatRoles = (roles: any) => {
+		const formattedRoles = roles && roles.join(', ')
+		return(
+			<ListItemText> <span style={{ fontWeight: 'bold' }}>Roles: </span>
+				{formattedRoles}
+			</ListItemText>
+		)
+	}
+
 	// SignOutIfInactive();
 
 	return (
 		<AdminLayout>
 			<Paper elevation={16}>
 				<Card>
-					{/*use <CardMedia for profile pictures if needed in the future*/}
 					<CardContent component="div">
 						<List className='list-profile'>
 						<ListSubheader> 
@@ -68,12 +81,8 @@ const Profile: NextPage<Props> = (props) => {
 							{session?.profile?.preferred_username} </ListItemText>
 						</ListItem>
 						<ListItem>
-							<ListItemIcon> <MdOutlineSupervisorAccount /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>Roles: </span>
-								<List component="ul">
-									{renderListOfRoles(session?.profile?.roles)}
-								</List>
-							</ListItemText>
+								<ListItemIcon><MdOutlineSupervisorAccount/></ListItemIcon>
+								{formatRoles(session?.profile?.roles)}
 						</ListItem>
 					</List>
 					</CardContent>
