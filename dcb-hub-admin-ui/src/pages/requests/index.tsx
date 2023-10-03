@@ -1,15 +1,17 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
-import { Alert, Card, CardContent, Paper, Typography } from '@mui/material';
+import { Card, CardContent, Paper, Typography } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { PatronRequest } from '@models/PatronRequest';
 import { DataGrid } from '@components/DataGrid';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -55,14 +57,8 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		externalState
 	});
 
-	useEffect(() => {
-		if (data?.error === 'RefreshAccessTokenError') {
-			signIn('keycloak', {
-				callbackUrl: process.env.REDIRECT_REQUESTS!
-			}); // Force sign in to hopefully resolve error
-		}
-		
-	  }, [data]);
+	const { t } = useTranslation();
+
 	return (
 		<AdminLayout>
 			<div>
@@ -70,11 +66,11 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>Loading requests.....</Typography>
+								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severity='error' onClose={() => {}}>Failed to fetch the requests, please refresh</Alert>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text")}/>
 							)}
 
 							{resourceFetchStatus === 'success' && (

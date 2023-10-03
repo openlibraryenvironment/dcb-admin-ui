@@ -4,11 +4,14 @@ import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Alert, Button, Card, CardContent, Typography } from '@mui/material';
+import { Button, Card, CardContent, Typography } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 import { Agency } from '@models/Agency';
 import AddAgenciesToGroup from './AddAgenciesToGroup';
@@ -63,21 +66,23 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		externalState
 	});
 
+	const { t } = useTranslation();
+
 	return (
 		<AdminLayout>
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>Loading agencies.....</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("agencies.loading_msg")}.</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severity='error' onClose={() => {}}>Failed to fetch the agencies, please refresh the page</Alert>
+						<Alert severityType='error' onCloseFunc={() => {}} alertText="Failed to fetch the agencies, please refresh the page"/>
 					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Button variant = 'contained' onClick={openAddToGroup} > Add Agencies to Group</Button>
+							<Button variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group")}</Button>
 							<DataGrid
 								data={resource?.content ?? []}
 								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	

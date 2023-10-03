@@ -3,10 +3,14 @@ import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
-import { Alert, Card, CardContent, Paper, Typography} from '@mui/material';
+import {Card, CardContent, Paper, Typography} from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
+
+//localisation
+import { useTranslation } from 'react-i18next';
 
 import { Location } from '@models/Location';
 import { DataGrid } from '@components/DataGrid';
@@ -57,17 +61,19 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		externalState
 	});
 
+	const { t } = useTranslation();
+
 	return (
 		<AdminLayout>
 			<Paper elevation={16}>
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant = 'body1' className='text-center mb-0'>Loading locations.....</Typography>
+								<Typography variant = 'body1' className='text-center mb-0'>{t("locations.loading_msg")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severity='error' onClose={() => {}}>Failed to fetch the locations, please refresh the page.</Alert>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("locations.alert_text")}/>
 							)}
 
 							{resourceFetchStatus === 'success' && (

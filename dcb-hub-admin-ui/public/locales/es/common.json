@@ -1,0 +1,29 @@
+{
+  "dashboard": {
+    "app_title": "Pagina De Inicio",
+    "page_welcome_message": "Bienvenido a la página de inicio de la interfaz de usuario de administración de DCB!"
+  },
+
+  "sidebar": {
+    "dashboard_page_button": "Panel",
+    "patron_request_button": "Solicitud de usuario",
+    "agency_button": "Agencia",
+    "host_lms_button": "Host LMS",
+    "location_button": "Ubicación",
+    "groups_button": "Grupos"
+  },
+  
+  "profile": {
+    "title": "Perfil",
+    "details": "Tus detalles",
+    "name": "Nombre: ",
+    "email": "Email: ",
+    "email_verified": "Email Verificado: ",
+    "prefered_username": "Nombre Preferido: ",
+    "roles": "Roles: "
+  },
+  
+  "header": {
+    "language_switcher_title": "Idioma"
+  }
+}

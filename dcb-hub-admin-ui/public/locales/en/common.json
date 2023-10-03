@@ -1,0 +1,62 @@
+{
+  "dashboard": {
+    "app_title": "Home",
+    "page_welcome_message": "Welcome to the home page of the DCB Admin UI!"
+  },
+
+  "sidebar": {
+    "dashboard_page_button": "Dashboard",
+    "patron_request_button": "Patron Request",
+    "agency_button": "Agency",
+    "host_lms_button": "Host LMS",
+    "location_button": "Location",
+    "groups_button": "Groups"
+  },
+  
+  "profile": {
+    "title": "Profile",
+    "details": "Your details",
+    "name": "Name: ",
+    "email": "Email: ",
+    "email_verified": "Email Verified: ",
+    "prefered_username": "Prefered Username: ",
+    "roles": "Roles: "
+  },
+
+  "header": {
+    "language_switcher_title": "Language"
+  },
+
+  "agencies": {
+    "add_to_group": "Add agencies to a group",
+    "loading_msg": "loading agencies....",
+    "alert_text_success": "Agency added to group!"
+  },
+
+  "groups": {
+    "loading_msg": "loading groups....",
+    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page.",
+    "type_new": "New Group",
+    "new_group_success": "Success: New group created!"
+  },
+
+  "hostlms": {
+    "loading_msg": "Loading HostLMS....",
+    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page."
+  },
+
+  "locations": {
+    "loading_msg": "Loading locations....",
+    "alert_text": "Failed to fetch the locations, please refresh the page."
+  },
+
+  "requests": {
+    "loading_msg": "Loading requests....",
+    "alert_text": "Failed to fetch the requests, please refresh"
+  },
+
+  "breadcrumbs": {
+    "home_text": "Home"
+  }
+
+}

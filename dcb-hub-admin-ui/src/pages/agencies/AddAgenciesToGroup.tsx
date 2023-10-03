@@ -5,7 +5,10 @@ import request, { GraphQLClient } from 'graphql-request';
 import { addAgenciesToGroup } from 'src/queries/queries';
 import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
-import { Alert, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import Alert from '@components/Alert/Alert';
+//localisation
+import { useTranslation } from 'react-i18next';
 import { MdClose } from 'react-icons/md'
 import getConfig from 'next/config';
 
@@ -59,7 +62,6 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       return publicRuntimeConfig.DCB_API_BASE + '/graphql';
     }, []);
 
-
     const graphQLClient = new GraphQLClient(url); 
     const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
@@ -99,7 +101,6 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     try {
         setIsSubmitting(true);
         await addAgenciesMutation.mutateAsync(values);
-        console.log(isSuccess, isSubmitting);
     } catch (error) {
         console.error('Error:', error);
     }
@@ -151,12 +152,14 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
   };
   // TODO: Check Formik error behaviour on 401s
 
+  const { t } = useTranslation();
+
 //All modals/dialogs should have centered and bold headings, and must close onSuccess
   return (
     <div>
     <Dialog open={show} onClose={onClose}
     aria-labelledby="centred-add-agency-dialog">
-        <DialogTitle style={{ textAlign: 'center'}}> Add agencies to a group</DialogTitle>
+        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -173,14 +176,12 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-         Success: Agency added to group!
+        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success")}>
         </Alert>
       )}
     {isError && (
-        <Alert severity="error" onClose={() => setError(false)}>
-            {errorMessage}
-        </Alert>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText = {errorMessage}>
+      </Alert>
     )}
     </Dialog>
     </div>

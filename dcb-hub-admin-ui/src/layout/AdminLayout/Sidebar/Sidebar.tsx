@@ -9,7 +9,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Link from '@components/Link/Link';
-
 import
 { MdLocationOn, 
   MdSpaceDashboard, 
@@ -18,6 +17,8 @@ import
 }from 'react-icons/md';
 import { useMediaQuery } from '@mui/material';
 import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 const drawerWidth = 240;
 
@@ -70,6 +71,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 export default function Sidebar(props:any) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const { t } = useTranslation();
 
   return (
     <>
@@ -96,7 +98,8 @@ export default function Sidebar(props:any) {
                 <Breadcrumbs />
                   {/* Hide this on toggled sidebar */}
               </ListItem>: null }
-          {['Dashboard', 'Patron Request', 'Agency', 'Host LMS', 'Location', 'Groups'].map((text, index) => (
+          {[t('sidebar.dashboard_page_button'), t('sidebar.patron_request_button'),
+          t('sidebar.agency_button'), t('sidebar.host_lms_button'), t('sidebar.location_button'), t('sidebar.groups_button')].map((text, index) => (
             <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=

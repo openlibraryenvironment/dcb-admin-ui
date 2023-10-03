@@ -18,6 +18,10 @@ const nextConfig = {
 		DCB_API_BASE: process.env.DCB_API_BASE,
 		DCB_ES_URL: process.env.DCB_ES_URL,
 		KEYCLOAK_REFRESH: "https://keycloak.sph.k-int.com/realms/dcb-hub",
+	},
+	i18n: {
+		defaultLocale: 'en',
+		locales: ['en', 'es'],
 	}
 };
 

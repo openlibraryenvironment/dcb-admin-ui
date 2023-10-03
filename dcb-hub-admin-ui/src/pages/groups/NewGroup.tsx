@@ -5,8 +5,11 @@ import request, {gql, GraphQLClient } from 'graphql-request';
 import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
-import { Dialog, DialogContent, DialogTitle, IconButton, styled, Alert, Button, TextField } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextField } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { MdClose } from 'react-icons/md'
+//localisation
+import { useTranslation } from 'react-i18next';
 import getConfig from 'next/config';
 
 interface FormData {
@@ -51,6 +54,8 @@ export default function NewGroup({show, onClose}: NewGroupType) {
     const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
     // look at a client that does do this
+
+    const { t } = useTranslation();
 
     const createGroupMutation = useMutation(
       async (values: FormData) => {
@@ -149,14 +154,10 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-          Success: New group created!
-        </Alert>
+      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success")}/>
       )}
     {isError && (
-        <Alert severity="error" onClose={() => setError(false)}>
-            {errorMessage}
-        </Alert>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage}/>
     )}
     </Dialog>
   );

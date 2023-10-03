@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
 import Card from '@mui/material/Card';
@@ -14,7 +13,10 @@ import { PaginationState, SortingState } from '@tanstack/react-table';
 import { HostLMS } from '@models/HostLMS';
 import { DataGrid } from '@components/DataGrid';
 import Paper from '@mui/material/Paper';
-import { Alert, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+//localisation
+import { useTranslation } from 'react-i18next';
+import Alert from '@components/Alert/Alert';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -60,13 +62,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		defaultValues: externalState
 	});
 
-	useEffect(() => {
-		if (data?.error === 'RefreshAccessTokenError') {
-			signIn('keycloak', {
-				callbackUrl: process.env.REDIRECT_HOSTLMSS!
-			}); // Force sign in to resolve error (DCB-241)
-		}
-	}, [data]);
+	const { t } = useTranslation();
 
 	return (
 		<AdminLayout>
@@ -74,11 +70,11 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>Loading HostLMS.....</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severity='error' onClose={() => {}} >Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</Alert>
+						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text")}></Alert>
 					)}
 
 					{resourceFetchStatus === 'success' && (

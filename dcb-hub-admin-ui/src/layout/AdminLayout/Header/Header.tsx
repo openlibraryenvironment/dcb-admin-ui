@@ -9,6 +9,7 @@ import Link from '@components/Link/Link';
 import { signOut } from "next-auth/react"
 import { styled } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+//import LanguageSwitcher from "./LanguageSwitcher";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -39,6 +40,7 @@ export default function Header(props:any) {
                   <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                     DCB Admin UI
                   </Typography>
+                  {/*<LanguageSwitcher/>*/}                  
                   <div>
                     <Link href='/profile'
                       style={{ color: 'inherit' }}>
