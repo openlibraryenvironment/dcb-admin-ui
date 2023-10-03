@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
 import Card from '@mui/material/Card';
@@ -59,14 +58,6 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		url: url,
 		defaultValues: externalState
 	});
-
-	useEffect(() => {
-		if (data?.error === 'RefreshAccessTokenError') {
-			signIn('keycloak', {
-				callbackUrl: process.env.REDIRECT_HOSTLMSS!
-			}); // Force sign in to resolve error (DCB-241)
-		}
-	}, [data]);
 
 	return (
 		<AdminLayout>

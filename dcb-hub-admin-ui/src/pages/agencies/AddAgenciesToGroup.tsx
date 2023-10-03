@@ -99,7 +99,6 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     try {
         setIsSubmitting(true);
         await addAgenciesMutation.mutateAsync(values);
-        console.log(isSuccess, isSubmitting);
     } catch (error) {
         console.error('Error:', error);
     }

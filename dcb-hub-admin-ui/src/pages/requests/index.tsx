@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 import { Alert, Card, CardContent, Paper, Typography } from '@mui/material';
 import { AdminLayout } from '@layout';
@@ -55,14 +54,6 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		externalState
 	});
 
-	useEffect(() => {
-		if (data?.error === 'RefreshAccessTokenError') {
-			signIn('keycloak', {
-				callbackUrl: process.env.REDIRECT_REQUESTS!
-			}); // Force sign in to hopefully resolve error
-		}
-		
-	  }, [data]);
 	return (
 		<AdminLayout>
 			<div>
