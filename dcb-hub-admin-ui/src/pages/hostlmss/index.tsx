@@ -13,7 +13,8 @@ import { PaginationState, SortingState } from '@tanstack/react-table';
 import { HostLMS } from '@models/HostLMS';
 import { DataGrid } from '@components/DataGrid';
 import Paper from '@mui/material/Paper';
-import { Alert, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -69,7 +70,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severity='error' onClose={() => {}} >Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</Alert>
+						<Alert severityType='error' onCloseFunc={() => {}} alertText='Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.'></Alert>
 					)}
 
 					{resourceFetchStatus === 'success' && (
