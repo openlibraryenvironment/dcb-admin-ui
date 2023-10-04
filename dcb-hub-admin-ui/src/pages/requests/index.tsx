@@ -3,7 +3,8 @@ import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Alert, Card, CardContent, Paper, Typography } from '@mui/material';
+import { Card, CardContent, Paper, Typography } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
@@ -65,7 +66,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severity='error' onClose={() => {}}>Failed to fetch the requests, please refresh</Alert>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText="Failed to fetch the requests, please refresh"/>
 							)}
 
 							{resourceFetchStatus === 'success' && (

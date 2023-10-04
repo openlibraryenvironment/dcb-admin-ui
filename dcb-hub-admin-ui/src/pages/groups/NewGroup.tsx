@@ -5,7 +5,8 @@ import request, {gql, GraphQLClient } from 'graphql-request';
 import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
-import { Dialog, DialogContent, DialogTitle, IconButton, styled, Alert, Button, TextField } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextField } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { MdClose } from 'react-icons/md'
 import getConfig from 'next/config';
 
@@ -149,14 +150,10 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-          Success: New group created!
-        </Alert>
+      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText="Success: New group created!"/>
       )}
     {isError && (
-        <Alert severity="error" onClose={() => setError(false)}>
-            {errorMessage}
-        </Alert>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage}/>
     )}
     </Dialog>
   );

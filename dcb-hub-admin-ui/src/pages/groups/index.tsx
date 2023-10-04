@@ -5,7 +5,8 @@ import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
 import { getSession, useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import { Alert, Button, Card, CardContent, Paper, Typography } from '@mui/material';
+import { Button, Card, CardContent, Paper, Typography } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import NewGroup from './NewGroup';
 import { dehydrate, QueryClient, useQueryClient, useQuery } from '@tanstack/react-query'
 import { groupsQueryDocument } from 'src/queries/queries';
@@ -91,9 +92,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 					{resourceFetchStatus === 'error' && (
 						<div>
-							   <Alert severity="error"  onClose={() => {}}>
-							   Failed to fetch Groups, will retry. If this error persists, please refresh the page.
-							</Alert> 
+							<Alert severityType="error" onCloseFunc={() => {}} alertText = "Failed to fetch Groups, will retry. If this error persists, please refresh the page."/>
 						</div>
 					)}
 

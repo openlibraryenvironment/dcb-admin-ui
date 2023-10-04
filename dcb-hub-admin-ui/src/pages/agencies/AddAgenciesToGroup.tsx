@@ -5,7 +5,8 @@ import request, { GraphQLClient } from 'graphql-request';
 import { addAgenciesToGroup } from 'src/queries/queries';
 import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
-import { Alert, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import Alert from '@components/Alert/Alert';
 import { MdClose } from 'react-icons/md'
 import getConfig from 'next/config';
 
@@ -172,14 +173,12 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severity="success" onClose={() => setSuccess(false)}>
-         Success: Agency added to group!
+        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = "Agency added to group!">
         </Alert>
       )}
     {isError && (
-        <Alert severity="error" onClose={() => setError(false)}>
-            {errorMessage}
-        </Alert>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText = {errorMessage}>
+      </Alert>
     )}
     </Dialog>
     </div>
