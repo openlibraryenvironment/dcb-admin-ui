@@ -84,6 +84,8 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 								columns={[ {field: 'name', headerName: "HostLMS name", minWidth: 150, flex: 1}, { field: 'id', headerName: "HostLMS ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "HostLMS code", minWidth: 50, flex: 0.5}]}	
 								type="HostLMS"
 								selectable={true}
+								noDataTitle={"No HostLMS found."}
+								noDataMessage={"Try changing your filters or search terms."}
 							/>
 						</>
 					)}

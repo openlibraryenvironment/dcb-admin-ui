@@ -9,7 +9,8 @@
     "agency_button": "Agencia",
     "host_lms_button": "LMS anfitrión",
     "location_button": "Ubicación",
-    "groups_button": "Grupos"
+    "groups_button": "Grupos",
+    "settings_button": "Ajustes"
   },
   "profile": {
     "title": "Perfil",
@@ -86,7 +87,18 @@
   },
   "requests": {
     "loading_msg": "Cargando solicitudes....",
-    "alert_text": "No se pudieron recuperar las solicitudes, actualice"
+    "alert_text": "No se pudieron recuperar las solicitudes, actualice la página."
+  },
+  "settings": {
+    "ajustes": "Settings",
+    "estado_circulación": "Asignaciones de estado de circulación de artículos"
+  },
+  "mappings": {
+    "mappings": "mappings",
+    "loading_msg": "Cargando mappings...",
+    "alert_text": "No se han podido obtener las asignaciones, actualice la página.",
+    "no_results": "No se han encontrado resultados",
+    "import_circulation_status": "Importar asignaciones de estado de circulación para un Host LMS"
   },
   "breadcrumbs": {
     "home_text": "Hogar"

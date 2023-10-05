@@ -42,6 +42,8 @@ const refreshAccessToken = async (token: JWT) => {
 		})
 		.catch((error) => {
 			console.info("RATS! Error attempting to refresh token %o",error);
+			console.log(token);
+			return token;
 		 })
 }
 

@@ -1,28 +1,63 @@
 import Details from "@components/Details/Details";
+import Link from "@components/Link/Link";
+import { Box, Typography } from "@mui/material";
+import { styled } from '@mui/material/styles';
+// Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener } from "@mui/x-data-grid";
 import { useState } from "react";
-
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving 
+const StyledOverlay = styled('div')(() => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+}));
+
 
 export default function DataGrid<T extends Object>({
     data = [],
 	columns,
     type,
     selectable,
-    slots
+    slots,
+    noDataTitle,
+    noDataMessage,
+    noDataLink,
 }: {
 	data: Array<T>;
 	columns: any; 
     type: string;
     selectable: boolean;
     slots?: any;
+    noDataTitle?: string;
+    noDataMessage?: any;
+    noDataLink?: any;
 }) {
     // When passing a type into DataGrid, use the singular - 'Group' not Groups etc.
     // This ensures consistency with Details.
     // The slots prop allows for customisation https://mui.com/x/react-data-grid/components/ 
 
     // State management variables for the Details panel.
+
+
+    // This overlay displays when there is no data in the grid.
+    // It takes a title, message, and if needed a link for the user to take action.
+    // These must be supplied as props for each usage of the DataGrid that wishes to use them,
+    // or a blank screen will be displayed.
+    function CustomNoDataOverlay() {
+        return (
+            <StyledOverlay>
+            <Box sx={{ mt: 1 }}>
+                <Typography variant="body1"> {noDataTitle} </Typography>
+                {noDataLink? <Link href={noDataLink}> {noDataMessage} </Link> : 
+                <Typography variant ="body1"> {noDataMessage} </Typography>}
+            </Box>
+            </StyledOverlay>
+        );
+    }
+
     const [showDetails, setShowDetails] = useState(false);
 	const [idClicked, setIdClicked] = useState(42);
 	
@@ -39,7 +74,9 @@ export default function DataGrid<T extends Object>({
         }
 	  };
 
+
     return (
+        // may have to fix height for no data overlay to display
         <div>
         <MUIDataGrid
             //DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
@@ -55,6 +92,7 @@ export default function DataGrid<T extends Object>({
             // we can also have a custom pagination component, see here for details https://mui.com/x/react-data-grid/components/#pagination 
             // Currently set to default until server side pagination is working.
             pagination
+            autoHeight={true}
             onRowClick={handleRowClick}
             disableRowSelectionOnClick  
             initialState={{
@@ -73,7 +111,9 @@ export default function DataGrid<T extends Object>({
             columns= {columns}
             // we can make our own custom toolbar if necessary, potentially extending the default GridToolbar. Just pass it in here
             rows={data ?? []}  
-            slots={{toolbar: GridToolbar,}}
+            // And if we ever need to distinguish between no data and no results (i.e. from search) we'd just pass different overlays here.
+            slots={{toolbar: GridToolbar, noRowsOverlay: CustomNoDataOverlay, 
+                noResultsOverlay: CustomNoDataOverlay}}
             // and we can also pass a custom footer component in 'slots'. This might work for NewGroup or addAgency buttons
             slotProps={{
                 toolbar: {

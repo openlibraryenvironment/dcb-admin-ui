@@ -109,6 +109,8 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
 								type = "Group"
 								selectable= {true}
+								noDataTitle={"No groups found."}
+								noDataMessage={"Try changing your filters or search terms, or create some groups!"}
 								/>
 							</div>						
 						</>
