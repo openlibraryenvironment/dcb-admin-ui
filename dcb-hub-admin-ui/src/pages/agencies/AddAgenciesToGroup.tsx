@@ -144,7 +144,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
             helperText={formik.touched.agencyId && formik.errors.agencyId}
           />
           <Button color="primary" variant="contained" fullWidth type="submit">
-            Submit
+            {t("general.submit")}  
           </Button>
         </form>
       </div>

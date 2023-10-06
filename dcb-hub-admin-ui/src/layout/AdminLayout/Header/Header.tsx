@@ -9,6 +9,7 @@ import Link from '@components/Link/Link';
 import { signOut } from "next-auth/react"
 import { styled } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import { useTranslation } from 'react-i18next'
 //import LanguageSwitcher from "./LanguageSwitcher";
 
 interface AppBarProps extends MuiAppBarProps {
@@ -22,6 +23,8 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 export default function Header(props:any) {
+
+  const { t } = useTranslation();
 
   return (
             <Box sx={{ flexGrow: 1 }}>
@@ -38,7 +41,7 @@ export default function Header(props:any) {
                     <MdMenu size={20}/>
                   </IconButton>
                   <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                    DCB Admin UI
+                  {t("header.title")}
                   </Typography>
                   {/*<LanguageSwitcher/>*/}                  
                   <div>

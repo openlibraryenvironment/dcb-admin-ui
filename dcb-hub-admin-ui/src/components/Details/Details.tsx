@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { DataGrid } from '@components/DataGrid';
 import { MdClose, MdExpandMore } from 'react-icons/md'
 import { IconContext } from 'react-icons';
+import { useTranslation } from 'react-i18next';
 
 type DetailsType = {
         i: any,
@@ -25,6 +26,7 @@ const Transition = React.forwardRef(function Transition(
 });
 
 export default function Details({i, content, show, onClose, type}: DetailsType) {
+        const { t } = useTranslation();
 
         // Handles response variables with hyphens, which will throw an error if you try and reference the same way as everything else
         const shelving = 'shelving-locations';
@@ -52,7 +54,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </IconContext.Provider>
                                         </IconButton>
                                         <Typography sx={{ ml: 2, flex: 1 }} component="div" variant="h6">
-                                        View {type} Details - {toDisplay?.name ?? toDisplay?.id}
+                                        {t("details.view")} {type} {t("details.details")} - {toDisplay?.name ?? toDisplay?.id}
                                         </Typography>
                                 </Toolbar>
                         </AppBar>
@@ -60,7 +62,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         {/* // These are the items that we always show on every 'Details' instance. */}
                         <Card variant = 'outlined'>
                         <CardContent>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} ID: </span>
+                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.id")}: </span>
                         {toDisplay?.id}
                         </Typography>
                         </CardContent>
@@ -68,125 +70,125 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         {/* // These items are shown for all types, excluding Requests*/}
                         {type !== "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} code: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.code")}: </span>
                                  {toDisplay?.code} </Typography>
                         </CardContent>
                         </Card>: null}
                         {/* // These are the items that we typically need to only show for 'Request Details', hence the conditional rendering*/}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Request created: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_created")} </span>
                                  {dayjs(toDisplay?.dateCreated).format('DD/MM/YYYY, HH:mm')}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Request updated: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_updated")} </span>
                                 {dayjs(toDisplay?.dateUpdated).format('DD/MM/YYYY, HH:mm')}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Patron ID: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.patron_id")} </span>
                                 {toDisplay?.patron?.id}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Requesting agency ID: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.requestor_id")}</span>
                                 {toDisplay?.requestingIdentity?.id}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>BibClusterID: </span> 
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.bib_cluster_id")}</span> 
                                 {toDisplay?.bibClusterId}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Pickup location code: </span> 
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.pickup_id")}</span> 
                                 {toDisplay?.pickupLocationCode}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Description: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.description")}</span>
                                 {toDisplay?.description}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Local Request ID: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_request_id")}</span>
                                 {toDisplay?.localRequestId}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Local Request Status: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_request_status")}</span>
                                 {toDisplay?.localRequestStatus}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Local Item ID: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_id")}</span>
                                 {toDisplay?.localItemId}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Local Item Status: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_status")}</span>
                                 {toDisplay?.localItemStatus}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Local Bib Id:  </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_bib_id")}</span>
                                 {toDisplay?.localBibId}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Active Workflow: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.active_workflow")}</span>
                                 {toDisplay?.activeWorkflow}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Patron Host LMS Code: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.patron_hostlms")}</span>
                                 {toDisplay?.patronHostlmsCode}</Typography>
                         </CardContent>
                         </Card>: null}
                         {/* These are the items we typically only need to show for 'Agency Details'*/}
                         {type == "Agency"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Agency Name: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.agency_name")}</span>
                                 {toDisplay?.name}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Agency"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Agency HostLMS Code: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.agency_hostlms")}</span>
                                 {toDisplay?.hostLMSCode}</Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Agency"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Agency Auth Profile: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.agency_auth")}</span>
                                 {toDisplay?.authProfile} </Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Agency"?<Card variant = 'outlined'>
                                 <Accordion>
-                                        <AccordionSummary aria-controls="client-config" id="client-config-agency" 
+                                        <AccordionSummary aria-controls="agency_details_location_info" id="agency_details_location_info" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography sx={{ fontWeight: 'bold' }}> Location information </Typography>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.location_info")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Longitude: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.long")}</span>
                                                 {toDisplay?.longitude} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Latitude: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.lat")}</span>
                                                 {toDisplay?.latitude} </Typography>
                                         </AccordionDetails>
                                 </Accordion>
@@ -195,29 +197,29 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         We should also include an accordion component for Client Config*/}
                         {type == "HostLMS"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>HostLMS Name: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_name")}</span>
                                 {toDisplay?.name} </Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "HostLMS"?<Card variant = 'outlined'>
                         <CardContent>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>LmsClientClass: </span>
+                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.lms_client")}</span>
                                 {toDisplay?.lmsClientClass} </Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "HostLMS"?<Card variant = 'outlined'>
                                 <Accordion>
-                                        <AccordionSummary aria-controls="client-config" id="client-config-hostlms" 
+                                        <AccordionSummary aria-controls="client-config-hostlms-details" id="client-config-hostlms-details" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography sx={{ fontWeight: 'bold' }}> Client Config </Typography>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Ingest: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_ingest")}</span>
                                                 {toDisplay?.clientConfig?.ingest} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Shelving locations: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_shelving")}</span>
                                                 {toDisplay?.clientConfig?.[shelving]} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Number of records to generate: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_records")}</span>
                                                 {toDisplay?.clientConfig?.[numRecord]} </Typography>
                                         </AccordionDetails>
                                 </Accordion>
@@ -225,33 +227,33 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         {/* These are the items we typically only need to show for 'Location Details'*/}
                         {type == "Location"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Location name: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.location_name")} </span>
                                 {toDisplay?.name} </Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Location"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Type: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.location_type")} </span>
                                 {toDisplay?.type} </Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Location"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography  component="div"> <span style={{ fontWeight: 'bold' }}>Location agency ID: </span>
+                                <Typography  component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.location_agency")} </span>
                                 {toDisplay?.agency?.id} </Typography>
                         </CardContent>
                         </Card>: null}
                         {type == "Location"?<Card variant = 'outlined'>
                                 <Accordion>
-                                        <AccordionSummary aria-controls="client-config" id="client-config-location" 
+                                        <AccordionSummary aria-controls="client-config-location-details" id="client-config-location-details" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography sx={{ fontWeight: 'bold' }}> Location information </Typography>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.location_info")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Longitude: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.long")}</span>
                                                 {toDisplay?.longitude} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Latitude: </span>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.lat")}</span>
                                                 {toDisplay?.latitude} </Typography>
                                         </AccordionDetails>
                                 </Accordion>
@@ -260,7 +262,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         {/* Table of group member agencies. These will be editable in future versions)'*/}
                         {type == "Group"?<Card variant = 'outlined'>
                         <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>Group name: </span>
+                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.group_name")}</span>
                                 {toDisplay?.name} </Typography>
                         </CardContent>
                         </Card>: null}

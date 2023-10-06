@@ -127,7 +127,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
               helperText={formik.touched.code && formik.errors.code}
             />
             <Button color="primary" variant="contained" fullWidth type="submit">
-              Submit
+              {t("general.submit")}            
             </Button>
           </form>
         </div>
@@ -137,7 +137,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
   return (
     <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-      <DialogTitle style={{ textAlign: 'center'}}> New Group</DialogTitle>
+      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
       <IconButton
           aria-label="close"
           onClick={onClose}
