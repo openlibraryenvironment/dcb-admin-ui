@@ -13,6 +13,8 @@ import { groupsQueryDocument } from 'src/queries/queries';
 import { useResource } from '@hooks';
 import { GetServerSideProps, NextPage } from 'next';
 import { DataGrid } from '@components/DataGrid';
+//localisation
+import { useTranslation } from 'react-i18next';
 // import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
@@ -81,25 +83,27 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 		graphQLVariables: queryVariables
 	});
 
+	const { t } = useTranslation();
+
 	return (
 		<AdminLayout>
 				<Paper elevation={16}>
 				<Card>
 					<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>Loading Groups.....</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
 						<div>
-							<Alert severityType="error" onCloseFunc={() => {}} alertText = "Failed to fetch Groups, will retry. If this error persists, please refresh the page."/>
+							<Alert severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text")}/>
 						</div>
 					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>
 							<div>
-								<Button variant="contained" onClick={openNewGroup} > New Group</Button>
+								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
 								<DataGrid
 								data={resource?.content ?? []}
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	

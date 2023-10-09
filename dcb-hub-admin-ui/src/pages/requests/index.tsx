@@ -10,6 +10,8 @@ import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { PatronRequest } from '@models/PatronRequest';
 import { DataGrid } from '@components/DataGrid';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -55,6 +57,8 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		externalState
 	});
 
+	const { t } = useTranslation();
+
 	return (
 		<AdminLayout>
 			<div>
@@ -62,11 +66,11 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>Loading requests.....</Typography>
+								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText="Failed to fetch the requests, please refresh"/>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text")}/>
 							)}
 
 							{resourceFetchStatus === 'success' && (

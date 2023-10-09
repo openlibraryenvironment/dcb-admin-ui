@@ -1,0 +1,127 @@
+{
+  "dashboard": {
+    "app_title": "Home",
+    "page_welcome_message": "Welcome to the home page of the DCB Admin UI!"
+  },
+
+  "sidebar": {
+    "dashboard_page_button": "Dashboard",
+    "patron_request_button": "Patron Request",
+    "agency_button": "Agency",
+    "host_lms_button": "Host LMS",
+    "location_button": "Location",
+    "groups_button": "Groups"
+  },
+  
+  "profile": {
+    "title": "Profile",
+    "details": "Your details",
+    "name": "Name: ",
+    "email": "Email: ",
+    "email_verified": "Email Verified: ",
+    "prefered_username": "Prefered Username: ",
+    "roles": "Roles: "
+  },
+
+  "header": {
+    "language_switcher_title": "Language",
+    "title": "DCB Admin UI"
+  },
+
+  "details": {
+    "request_created": "Request created: ",
+    "request_updated": "Request updated: ",
+    "patron_id": "Patron ID: ",
+    "requestor_id": "Requesting agency ID: ",
+    "bib_cluster_id": "BibClusterID: ",
+    "pickup_id": "Pickup location code: ",
+    "description": "Description: ",
+    "local_request_id": "Local request ID: ",
+    "local_request_status": "Local request status: ",
+    "local_item_id": "Local item ID: ",
+    "local_item_status": "Local item status: ",
+    "local_bib_id": "Local Bib ID: ",
+    "active_workflow": "Active workflow: ",
+    "patron_hostlms": "Patron HostLMS code: ",
+    "agency_name": "Agency name: ",
+    "agency_id": "Agency ID: ",
+    "agency_code": "Agency code: ",
+    "agency_hostlms": "Agency HostLMS code: ",
+    "agency_auth": "Agency auth profile: ",
+    "location_info": "Location information",
+    "location_name": "Location name: ",
+    "location_type": "Type: ",
+    "location_agency": "Location agency ID: ",
+    "long": "Longitude: ",
+    "lat": "Latitude: ",
+    "hostlms_name": "HostLMS name: ",
+    "lms_client": "LmsClientClass: ",
+    "client_config": "Client config",
+    "client_config_ingest": "Ingest: ",
+    "client_config_shelving": "Shelving locations: ",
+    "client_config_records": "Number of records to generate: ",
+    "group_name": "Group name: ",
+    "code": "code",
+    "id": "ID: ",
+    "details": "Details",
+    "view": "View"
+  },
+
+  "agencies": {
+    "add_to_group": "Add agencies to a group",
+    "loading_msg": "Loading agencies....",
+    "alert_text_success": "Agency added to group!"
+  },
+
+  "general": {
+    "submit": "Submit"
+  },
+
+  "groups": {
+    "loading_msg": "Loading groups....",
+    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page.",
+    "type_new": "New Group",
+    "new_group_success": "Success: New group created!"
+  },
+
+  "hostlms": {
+    "loading_msg": "Loading HostLMS....",
+    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page."
+  },
+
+  "locations": {
+    "loading_msg": "Loading locations....",
+    "alert_text": "Failed to fetch the locations, please refresh the page."
+  },
+
+  "requests": {
+    "loading_msg": "Loading requests....",
+    "alert_text": "Failed to fetch the requests, please refresh"
+  },
+
+  "breadcrumbs": {
+    "home_text": "Home"
+  },
+
+  "404": {
+    "page_title": "404",
+    "page_text": "Oops! Page not found.",
+    "go_back_text": "Go back to the ",
+    "dashboard_text": "dashboard"
+  },
+
+  "unauthorised": {
+    "page_title": "401",
+    "page_text_no_access": "Sorry, you do not have access to this page.",
+    "page_text_contact_admin": "If you think you should have access, contact your system administrator",
+    "go_back_text": "Go back to the ",
+    "dashboard_text": "dashboard"
+  },
+
+  "footer": {
+    "openRS": "Project OpenRS",
+    "dcb": "Direct Consortial Borrowing",
+    "version": "Version 1.0"
+  }
+
+}

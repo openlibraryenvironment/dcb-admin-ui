@@ -4,17 +4,20 @@ import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
 import { Paper, CardContent, Typography, Card } from '@mui/material';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 const Home: NextPage = () => {
 	// SignOutIfInactive();
+	const { t } = useTranslation();
 
 	return (
 		<AdminLayout>
 			<Paper elevation={16}>
 				<Card>
 					<CardContent>
-						<Typography variant="h3"> Home </Typography>
-						<Typography variant="body1"> Welcome to the home page of the DCB Admin UI! </Typography>
+						<Typography variant="h3"> {t('dashboard.app_title')} </Typography>
+						<Typography variant="body1"> {t('dashboard.page_welcome_message')} </Typography>
 					</CardContent>	
 				</Card>
 			</Paper>

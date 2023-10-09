@@ -9,6 +9,9 @@ import { MdOutlineMarkEmailRead } from 'react-icons/md';
 import { MdThumbUpOffAlt } from 'react-icons/md';
 import { MdOutlineSupervisorAccount } from 'react-icons/md';
 
+//localisation
+import { useTranslation } from 'react-i18next';
+
 import { AdminLayout } from '@layout';
 
 import { useSession } from 'next-auth/react';
@@ -42,13 +45,14 @@ const Profile: NextPage<Props> = (props) => {
 	const formatRoles = (roles: any) => {
 		const formattedRoles = roles && roles.join(', ')
 		return(
-			<ListItemText> <span style={{ fontWeight: 'bold' }}>Roles: </span>
+			<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.roles")} </span>
 				{formattedRoles}
 			</ListItemText>
 		)
 	}
 
 	// SignOutIfInactive();
+	const { t } = useTranslation();
 
 	return (
 		<AdminLayout>
@@ -57,27 +61,27 @@ const Profile: NextPage<Props> = (props) => {
 					<CardContent component="div">
 						<List className='list-profile'>
 						<ListSubheader> 
-								<Typography variant = "h2">Profile</Typography> 
-								<Typography variant = "h6">Your details</Typography> 
+								<Typography variant = "h2">{t("profile.title")}</Typography> 
+								<Typography variant = "h6">{t("profile.details")}</Typography> 
 						</ListSubheader> 
 						<ListItem>
 							<ListItemIcon> <MdPersonOutline /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>Name: </span>{' '}
+							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.name")} </span>{' '}
 							{session?.user?.name} </ListItemText> 
 						</ListItem>
 						<ListItem>
 							<ListItemIcon> <MdOutlineMail /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>Email: </span>
+							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.email")} </span>
 							{session?.user?.email} </ListItemText>
 						</ListItem>
 						<ListItem>
 							<ListItemIcon> <MdOutlineMarkEmailRead /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}> Email Verified: </span>
+							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.email_verified")} </span>
 							{emailVerified.toString()} </ListItemText>
 						</ListItem>
 						<ListItem>
 							<ListItemIcon> <MdThumbUpOffAlt /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>Preferred Username: </span>
+							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.prefered_username")} </span>
 							{session?.profile?.preferred_username} </ListItemText>
 						</ListItem>
 						<ListItem>
