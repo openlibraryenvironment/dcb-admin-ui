@@ -10,7 +10,8 @@
     "agency_button": "Agency",
     "host_lms_button": "Host LMS",
     "location_button": "Location",
-    "groups_button": "Groups"
+    "groups_button": "Groups",
+    "settings_button": "Settings"
   },
   
   "profile": {
@@ -96,7 +97,20 @@
 
   "requests": {
     "loading_msg": "Loading requests....",
-    "alert_text": "Failed to fetch the requests, please refresh"
+    "alert_text": "Failed to fetch the requests, please refresh the page."
+  },
+
+  "settings": {
+    "settings": "Settings",
+    "circulation_status": "Item circulation status mappings"
+  },
+
+  "mappings": {
+    "mappings": "Mappings",
+    "loading_msg": "Loading mappings...",
+    "alert_text": "Failed to fetch the mappings, please refresh the page.",
+    "no_results": "No results found",
+    "import_circulation_status": "Import circulation status mappings for a Host LMS"
   },
 
   "breadcrumbs": {

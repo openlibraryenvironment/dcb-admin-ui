@@ -88,8 +88,10 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
 								type = "Agency"
 								selectable= {true}
+								noDataTitle={"No agencies found."}
+								noDataMessage={"Try changing your filters or search terms."}
 							/>
-							{/* slots allows for further customisation. We can choose whether to do this in the DataGrid based on type, or here. */}
+							{/* The slots prop allows for further customisation. We can choose whether to do this in the DataGrid based on type, or here. */}
 						</>
 					)}
 				</CardContent>

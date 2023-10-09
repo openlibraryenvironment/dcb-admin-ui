@@ -77,11 +77,15 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 								<>
 									<DataGrid
 										data={resource?.content ?? []}
-										columns={[ {field: 'id', headerName: "Request ID", minWidth: 100, flex: 0.75}, { field: 'patronId', headerName: "Patron ID", minWidth: 100, flex: 0.5}, 
-												   {field: 'patronAgencyCode', headerName: "Patron agency code", minWidth: 50, flex: 0.5}, {field: 'pickupLocation', headerName: "Pickup location", minWidth: 50, flex: 0.5},
-												   {field: 'localRequestStatus', headerName: "Request status code", minWidth: 50, flex: 0.5 }]}	
+										columns={[ {field: 'id', headerName: "Request ID", minWidth: 100, flex: 0.75}, 
+												// { field: 'patron', headerName: "Patron ID", minWidth: 100, flex: 0.5, valueGetter: (params: { row: { patron: { id: any; }; }; }) => params.row.patron.id}, 
+												   {field: 'pickupLocationCode', headerName: "Pickup location", minWidth: 50, flex: 0.5},
+												   {field: 'description', headerName: "Description", minWidth: 50, flex: 0.5}]}
+												// {field: 'localRequestStatus', headerName: "Request status code", minWidth: 50, flex: 0.5 }]}	
 										type="Request"
 										selectable={true}
+										noDataTitle={"No requests found."}
+										noDataMessage={"Try changing your filters or search terms."}
 									/>
 								</>
 							)}

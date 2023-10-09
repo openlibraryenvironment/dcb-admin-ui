@@ -276,6 +276,8 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         type = "GroupDetails"
                                         // This grid doesn't need to show Details
                                         selectable= {false}
+                                        noDataTitle={"No agencies found."}
+                                        noDataMessage={"Try changing your filters or search terms."}
                                         />                                
                                 </CardContent>
                         </Card>: null}
