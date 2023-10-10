@@ -41,10 +41,10 @@ const refreshAccessToken = async (token: JWT) => {
 		  }
 		})
 		.catch((error) => {
-			console.info("RATS! Error attempting to refresh token %o",error);
-			console.log(token);
-			return token;
-		 })
+			console.log("Error attempting to refresh token %o",error);
+			console.log("Failed token, ", token, "and status", error.status);
+			return { ...token, error: "RefreshAccessTokenError" as const }
+		})
 }
 
 // This method ensures we signout correctly, with token(s) correctly invalidated and the user redirected to the login screen.
@@ -83,12 +83,18 @@ export default NextAuth({
 				session.profile = token.profile
 				session.error = token.error;
 				session.user = token.user;
+				console.log("First log of session", session);
+				console.log("First log of token", token.expires)
 				// if user has 'ADMIN' role, set isAdmin to true
 				if ( token?.profile?.roles?.includes('ADMIN') )
 				{
 					session.isAdmin = true;
 				}
 			}
+			if (session.expires < Date.now()) {
+				console.warn('Session expired');
+				return undefined;
+			  }
 			return session
 		},
 		 jwt: async({ token, account, user, profile  }:{token:any, account?:any, user?:any, profile?:any}) => {
@@ -114,6 +120,11 @@ export default NextAuth({
 			// And then return token
 			return token;
 		  }
+		},
+		session: {
+			strategy: 'jwt',
+			// In seconds. This should match the value defined on the backend. 
+			maxAge: 1800
 		},
 		events: {
 			// when signOut from nextAuth detected, trigger the completeSignout method to complete it properly.

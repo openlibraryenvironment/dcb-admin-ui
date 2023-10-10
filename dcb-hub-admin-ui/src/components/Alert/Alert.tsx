@@ -5,7 +5,7 @@ export default function Alert(props: any) {
     return(
         <>
             <MUIAlert severity={props.severityType} onClose={props.onCloseFunc}>
-                <AlertTitle>{props.severityType}</AlertTitle>
+                <AlertTitle sx={{style: {textTransform: 'capitalize'}}}>{props.severityType}</AlertTitle>
                 {props.alertText}
             </MUIAlert>
         </>
