@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { Alert, Button, Modal } from 'react-bootstrap';
+import { useFormik} from 'formik';
 import { useSession } from 'next-auth/react';
 import request, { GraphQLClient } from 'graphql-request';
 import { addAgenciesToGroup } from 'src/queries/queries';
 import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import Alert from '@components/Alert/Alert';
+//localisation
+import { useTranslation } from 'react-i18next';
+import { MdClose } from 'react-icons/md'
+import getConfig from 'next/config';
+
 interface FormData {
   groupId: string;
   agencyId: string;
@@ -51,9 +57,12 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const url = React.useMemo(() => {
+      const { publicRuntimeConfig } = getConfig();
+      return publicRuntimeConfig.DCB_API_BASE + '/graphql';
+    }, []);
 
-
-    const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql'); 
+    const graphQLClient = new GraphQLClient(url); 
     const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
     // TODO: Implement a GraphQL client that does do this and supports OAuth. Our current client is glitchy and is suffering from 401s.
@@ -64,7 +73,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
 
     const addAgenciesMutation = useMutation(
       async (values: FormData) => {
-        const { data } = await request<AddAgenciesResponse>('https://dcb-uat.sph.k-int.com/graphql', addAgenciesToGroup, {
+        const { data } = await request<AddAgenciesResponse>(url, addAgenciesToGroup, {
           input: {
             group: values.groupId,
             agency: values.agencyId
@@ -92,7 +101,6 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     try {
         setIsSubmitting(true);
         await addAgenciesMutation.mutateAsync(values);
-        console.log(isSuccess, isSubmitting);
     } catch (error) {
         console.error('Error:', error);
     }
@@ -101,43 +109,81 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       }
   };
 
-//All modals should have centered and bold headings, and must close onSuccess
+  const FormikMaterial = () => {
+    const formik = useFormik({
+      initialValues: {
+        groupId: '',
+        agencyId: '',
+      },
+      validationSchema: validationSchema,
+      onSubmit: handleSubmit,
+    });
+    return (
+      <div>
+        <form id = "add-agency-form" onSubmit={formik.handleSubmit}>
+          <TextField
+            fullWidth
+            id="groupId"
+            name="groupId"
+            label="Group ID"
+            value={formik.values.groupId}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.groupId && Boolean(formik.errors.groupId)}
+            helperText={formik.touched.groupId && formik.errors.groupId}
+          />
+          <TextField
+            fullWidth
+            id="agencyId"
+            name="agencyId"
+            label="Agency ID"
+            value={formik.values.agencyId}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.agencyId && Boolean(formik.errors.agencyId)}
+            helperText={formik.touched.agencyId && formik.errors.agencyId}
+          />
+          <Button color="primary" variant="contained" fullWidth type="submit">
+            {t("general.submit")}  
+          </Button>
+        </form>
+      </div>
+    );
+  };
+  // TODO: Check Formik error behaviour on 401s
+
+  const { t } = useTranslation();
+
+//All modals/dialogs should have centered and bold headings, and must close onSuccess
   return (
     <div>
-    <Modal show={show} onHide={onClose}  size="lg"
-    aria-labelledby="centred-new-group-modal"
-    centered>
-        <Modal.Header closeButton aria-labelledby='close-new-group-modal'>
-        <Modal.Title style={{ textAlign: 'center', fontWeight: 'bold' }}> Add agencies to a group</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={validationSchema}>
-      <Form>
-        <div>
-          <label htmlFor="groupId">Group ID</label>
-          <Field type="text" id="groupId" name="groupId" style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}/>
-          <ErrorMessage name="groupId" component="div" />
-        </div>
-        <div>
-          <label htmlFor="agencyId">Agency ID</label>
-          <Field type="text" id="agencyId" name="agencyId" style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
-          <ErrorMessage name="agencyId" component="div" />
-        </div>
-        <Button variant="primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Add agencies to group'}</Button>
-      </Form>
-    </Formik>
-    </Modal.Body>
+    <Dialog open={show} onClose={onClose}
+    aria-labelledby="centred-add-agency-dialog">
+        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <MdClose/>
+        </IconButton>
+    <DialogContent>
+      <FormikMaterial/>
+    </DialogContent>
     {isSuccess && (
-        <Alert variant="success" onClose={() => setSuccess(false)} dismissible>
-         Success: Agency added to group!
+        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success")}>
         </Alert>
       )}
     {isError && (
-        <Alert variant="danger" onClose={() => setError(false)} dismissible>
-            {errorMessage}
-        </Alert>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText = {errorMessage}>
+      </Alert>
     )}
-    </Modal>
+    </Dialog>
     </div>
   );
 };

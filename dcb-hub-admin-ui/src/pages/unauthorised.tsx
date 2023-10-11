@@ -1,23 +1,27 @@
-import Link from 'next/link';
+import Link from '@components/Link/Link';
 import * as React from 'react';
 import { AdminLayout } from '@layout';
+import { Typography } from '@mui/material';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 export default function Unauthorised() {
+	const { t } = useTranslation();
 	return (
 		<AdminLayout>
 			{' '}
 			<div className='not-found'>
-				<p className='Title'>401</p>
-				<p className='Text'>Sorry, you do not have access to this page.</p>
-				<p className='Text'>
-					If you think you should have access, contact your system administrator
-				</p>
-				<p className='GoBackText'>
-					Go back to the{' '}
+				<Typography className='Title'>{t("unauthorised.page_title")}</Typography>
+				<Typography className='Text'>{t("unauthorised.page_text_no_access")}</Typography>
+				<Typography className='Text'>
+					{t("unauthorised.page_text_contact_admin")}
+				</Typography>
+				<Typography className='GoBackText'>
+					{t("unauthorised.go_back_text")}
 					<Link aria-label='dashboard link' className='LinkTo' href='/'>
-						dashboard
+						{t("unauthorised.dashboard_text")}
 					</Link>
-				</p>
+				</Typography>
 			</div>
 		</AdminLayout>
 	);

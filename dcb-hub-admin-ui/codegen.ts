@@ -3,7 +3,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli'
 // https://the-guild.dev/graphql/codegen
  
 const config: CodegenConfig = {
-   schema: 'https://dcb-uat.sph.k-int.com/graphql/admin',
+   schema: +process.env.DCB_API_BASE!+'/admin',
    documents: ['src/**/*.tsx'],
    generates: {
       './src/gql/': {

@@ -21,47 +21,31 @@ const keycloak = KeycloakProvider({
 // See DCB-241 for more details - this method kills the sporadic 401 failures we were seeing by forcing the token to refresh.
 // If the token can't be refreshed, an error is returned and the user must sign in again / authenticate with Keycloak
 const refreshAccessToken = async (token: JWT) => {
-	try {
-	  if (Date.now() > token.refreshTokenExpires) throw Error;
-	  const details = {
-		client_id: process.env.KEYCLOAK_ID!,
-		client_secret: process.env.KEYCLOAK_SECRET!,
-		grant_type: ['refresh_token'],
-		refresh_token: token.refreshToken,
-	  };
-	  const formBody: string[] = [];
-	  Object.entries(details).forEach(([key, value]: [string, any]) => {
-		const encodedKey = encodeURIComponent(key);
-		const encodedValue = encodeURIComponent(value);
-		formBody.push(encodedKey + '=' + encodedValue);
-	  });
-	  const formData = formBody.join('&');
-	  const url = `${process.env.KEYCLOAK_REFRESH}/protocol/openid-connect/token`;
-	  const response = await fetch(url, {
-		method: 'POST',
-		headers: {
-		  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-		},
-		body: formData,
-	  });
-	  const refreshedTokens = await response.json();
-	  if (!response.ok) throw refreshedTokens;
-	  return {
-		...token,
-		accessToken: refreshedTokens.access_token,
-		accessTokenExpires: Date.now() + (refreshedTokens.expires_in - 15) * 1000,
-		refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-		refreshTokenExpires:
-		  Date.now() + (refreshedTokens.refresh_expires_in - 15) * 1000,
-	  };
-	} catch (error) {
-		console.log("RATs!");
-	  return {
-		...token,
-		error: 'RefreshAccessTokenError',
-	  };
-	}
-  };
+	console.info("RAT Method triggered")
+	const params = new URLSearchParams();
+	params.append('client_id', process.env.KEYCLOAK_ID!)
+	params.append('grant_type', 'refresh_token')
+	params.append('refresh_token', token.refreshToken)
+	params.append('client_secret', process.env.KEYCLOAK_SECRET!)
+	return axios.post(process.env.KEYCLOAK_ISSUER+'/protocol/openid-connect/token',
+	params,
+	{ headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } )
+	.then((refresh_response) => {
+		console.info("Keycloak request made in nextauth, new token is", refresh_response.data.access_token)
+		const new_token = refresh_response.data;
+		return {
+			...token,
+			accessToken: new_token.access_token,
+			accessTokenExpires: Date.now() + new_token.expires_in * 1000,
+			refreshToken: new_token.refresh_token ?? token.refreshToken, // Fall back to old refresh token
+		  }
+		})
+		.catch((error) => {
+			console.log("Error attempting to refresh token %o",error);
+			console.log("Failed token, ", token, "and status", error.status);
+			return { ...token, error: "RefreshAccessTokenError" as const }
+		})
+}
 
 // This method ensures we signout correctly, with token(s) correctly invalidated and the user redirected to the login screen.
 async function completeSignout(jwt: JWT) {
@@ -99,12 +83,18 @@ export default NextAuth({
 				session.profile = token.profile
 				session.error = token.error;
 				session.user = token.user;
+				console.log("First log of session", session);
+				console.log("First log of token", token.expires)
 				// if user has 'ADMIN' role, set isAdmin to true
 				if ( token?.profile?.roles?.includes('ADMIN') )
 				{
 					session.isAdmin = true;
 				}
 			}
+			if (session.expires < Date.now()) {
+				console.warn('Session expired');
+				return undefined;
+			  }
 			return session
 		},
 		 jwt: async({ token, account, user, profile  }:{token:any, account?:any, user?:any, profile?:any}) => {
@@ -121,11 +111,20 @@ export default NextAuth({
 			  token.user = user;
 			  return token;
 			}
-			// If the access token hasn't expired, keep it
-			if (Date.now() < token.accessTokenExpires) return token;
-			// Otherwise, the access token has expired, so trigger refreshAccessToken and try and update it
-			return refreshAccessToken(token);
+
+			// Refresh token if it's expired
+			if (Date.now() > token.accessTokenExpires) {
+				token = await refreshAccessToken(token)
+			}
+
+			// And then return token
+			return token;
 		  }
+		},
+		session: {
+			strategy: 'jwt',
+			// In seconds. This should match the value defined on the backend. 
+			maxAge: 1800
 		},
 		events: {
 			// when signOut from nextAuth detected, trigger the completeSignout method to complete it properly.

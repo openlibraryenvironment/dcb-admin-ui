@@ -1,94 +1,50 @@
-# reshare-hub-admin-scaffold
+# dcb-admin-ui
 
 
+## Welcome
 
-## Getting started
+Welcome to the DCB Admin UI application! The Admin UI is a Knowledge Integration application and is part of the wider Direct Consortial Borrowing project. It is designed to help people administrate instances of DCB.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+You can find the DCB Service repository [here](https://gitlab.com/knowledge-integration/libraries/dcb-service) and more information [https://openlibraryfoundation.atlassian.net/l/cp/67Q16M0Q](url). 
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+The admin UI is written in TypeScript, and uses Next.js and React. [Material UI](https://mui.com/) has also been used within the project to deliver a dynamic, themable and resillient user interface.
 
-## Add your files
+This project also conforms to the [WCAG 2.1](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. If you would like to experience the admin UI in dark mode, please set your system settings accordingly.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## How to get started
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/knowledge-integration/libraries/reshare-hub-admin-scaffold.git
-git branch -M main
-git push -uf origin main
-```
+To get started with this project, simply clone it into your IDE of choice. You will need to _npm install_ the project's dependencies, and for development you will also need a .env file - speak to your team about this.
 
-## Integrate with your tools
+To see the application running, please visit https://admin.dcbdev.lsphost.com/ - this is based upon the _main_ branch. https://admin.dcbqa.lsphost.com/ currently plays host to our release branch deployment, which is typically behind main.
 
-- [ ] [Set up project integrations](https://gitlab.com/knowledge-integration/libraries/reshare-hub-admin-scaffold/-/settings/integrations)
+## Documentation
 
-## Collaborate with your team
+To follow.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Testing
 
-## Test and Deploy
+This project will be using Cypress and Jest for testing in future releases. Once this has been implemented, this section will be updated with details of how to run the tests.
 
-Use the built-in continuous integration in GitLab.
+Expected process:
+_npm run cypress_ for Cypress integration tests (make sure you have Cypress installed - this will launch Cypress so you can choose which tests to run)
+_npm run jest_ for Jest unit / snapshot tests - this will typically run all Jest tests, you can specify with --[jest.filename].
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+# Releases
 
-***
+This project is released using semantic_release. See the tags section for past releases
 
-# Editing this README
+## Screenshots
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+A look at the admin UI in its current early stages. UI elements and pages may be subject to change.
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+![Add-Agencies-Form](https://drive.google.com/uc?id=1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal "Add Agencies Form")
+![Groups-Page](https://drive.google.com/uc?id=1fv3JU7uVJytJiRSx7mFN7KKE_wXrohdF "Groups Page")
+![HostLMS-Page](https://drive.google.com/uc?id=1URZtchBa0YqdYFjr72weCD5Af0a4ejHN "HostLMS Page")
+![Locations-Page](https://drive.google.com/uc?id=1DloMYDfMQQ7aFpCxU0QwbZjQgOKU_GF2 "Locations Page")
+![Mappings-Page](https://drive.google.com/uc?id=1LzHXskc635TluToeEC22SR1qEQVcXMxd "Mappings Page: WIP")
+![New-Group-Form](https://drive.google.com/uc?id=1eG2XC2aQzs2F-w1ncCjs6Nbw7eN3Q9aR "New Group Form")
+![Requests Page](https://drive.google.com/uc?id=1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal "Requests Page")
 
 ## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
-
+// TODO 
 

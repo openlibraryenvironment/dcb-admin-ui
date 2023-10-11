@@ -1,50 +1,73 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
-import Link from 'next/link';
-import Breadcrumb from '@layout/AdminLayout/Breadcrumb/Breadcrumb';
-import HeaderProfileNav from '@layout/AdminLayout/Header/HeaderProfileNav';
-import { Button, Container } from 'react-bootstrap';
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import { MdLogout, MdMenu } from "react-icons/md";
+import { MdAccountCircle } from "react-icons/md";
+import Link from '@components/Link/Link';
+import { signOut } from "next-auth/react"
+import { styled } from '@mui/material/styles';
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import { useTranslation } from 'react-i18next'
+//import LanguageSwitcher from "./LanguageSwitcher";
 
-type HeaderProps = {
-	toggleSidebar: () => void;
-	toggleSidebarMd: () => void;
-};
+interface AppBarProps extends MuiAppBarProps {
+  open?: boolean;
+}
 
-export default function Header(props: HeaderProps) {
-	const { toggleSidebar, toggleSidebarMd } = props;
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})<AppBarProps>(({ theme}) => ({
+  zIndex: theme.zIndex.drawer + 1,
+}));
 
-	return (
-		<header className='header sticky-top mb-4 p-2 border-bottom'>
-			<Container fluid className='header-navbar d-flex align-items-center'>
-				<Button
-					variant='link'
-					className='header-toggler d-md-none px-md-0 me-md-3 rounded-0 shadow-none'
-					type='button'
-					onClick={toggleSidebar}
-				>
-					<FontAwesomeIcon icon={faBars} />
-				</Button>
-				<Button
-					variant='link'
-					className='header-toggler d-none d-md-inline-block px-md-0 me-md-3 rounded-0 shadow-none'
-					type='button'
-					onClick={toggleSidebarMd}
-				>
-					<FontAwesomeIcon icon={faBars} />
-				</Button>
-				<Link href='/' className='header-brand d-md-none'>
-					<svg width='118' height='46'>
-						<title>DCB</title>
-					</svg>
-				</Link>
-				<div className='header-nav ms-auto'>
-					<HeaderProfileNav />
-				</div>
-			</Container>
-			<div className='header-divider border-top my-2 ms-n2 me-n2' />
-			<Container fluid>
-				<Breadcrumb />
-			</Container>
-		</header>
-	);
+export default function Header(props:any) {
+
+  const { t } = useTranslation();
+
+  return (
+            <Box sx={{ flexGrow: 1 }}>
+              <AppBar position="fixed">
+                <Toolbar>
+                  <IconButton
+                    size="large"
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={props.openStateFuncClosed}
+                    sx={{ mr: 2 }}
+                  >
+                    <MdMenu size={20}/>
+                  </IconButton>
+                  <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                  {t("header.title")}
+                  </Typography>
+                  {/*<LanguageSwitcher/>*/}                  
+                  <div>
+                    <Link href='/profile'
+                      style={{ color: 'inherit' }}>
+                        <IconButton
+                        size="large"
+                        aria-label="account of current user"
+                        color="inherit"
+                        >
+                        <MdAccountCircle size={20}/>
+                        </IconButton>  
+                    </Link>
+
+                    <IconButton
+                      size="large"
+                      aria-label="sign out"
+                      aria-haspopup="true"
+                      onClick={()=>signOut()}
+                      color="inherit"
+                      >
+                    <MdLogout size={20}/>
+                    </IconButton>
+                  </div>
+                </Toolbar>
+              </AppBar>
+          </Box>
+  );
 }

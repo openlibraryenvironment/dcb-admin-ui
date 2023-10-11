@@ -1,0 +1,23 @@
+default:
+  image: node:latest
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - git config --global user.name "ianibbo"
+    - git config --global user.email "ian.ibbotson@k-int.com"
+    - npm install
+    - echo "token $GITLAB_TOKEN $NPM_TOKEN"
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
+  tags:
+    - ki-onprem
+
+stages:
+  - release
+
+publish:
+  stage: release
+  only:
+    - release
+  script:
+    - npm run semantic-release

@@ -1,18 +1,22 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
-import { Button, Card } from 'react-bootstrap';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import { AdminLayout } from '@layout';
-import Details from '@components/Details/Details';
 
 import { useResource } from '@hooks';
-import { PaginationState, SortingState, createColumnHelper } from '@tanstack/react-table';
+import { PaginationState, SortingState } from '@tanstack/react-table';
 
 import { HostLMS } from '@models/HostLMS';
-import { Table } from '@components/Table';
+import { DataGrid } from '@components/DataGrid';
+import Paper from '@mui/material/Paper';
+import { Typography } from '@mui/material';
+//localisation
+import { useTranslation } from 'react-i18next';
+import Alert from '@components/Alert/Alert';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -23,22 +27,11 @@ type Props = {
 };
 
 const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
-	//automatic sign out after 15 minutes
+	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
 	// SignOutIfInactive();
 
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-
-	const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState('');
-
-	const openDetails = ({ id }: { id: string }) => {
-		setShowDetails(true);
-		setIdClicked(id);
-	};
-	const closeDetails = () => {
-		setShowDetails(false);
-	};
 
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
@@ -57,38 +50,6 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		return publicRuntimeConfig.DCB_API_BASE + '/hostlmss';
 	}, []);
 
-	const columns = React.useMemo(() => {
-		const columnHelper = createColumnHelper<HostLMS>();
-
-		return [
-			columnHelper.accessor('id', {
-				cell: (info) => (
-					<Button variant='link' type='button' onClick={() => openDetails({ id: info.getValue() })}>
-						{info.getValue()}
-					</Button>
-				),
-				header: 'Id',
-				id: 'requestId',
-				enableSorting: false
-			}),
-			columnHelper.accessor('code', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Code',
-				id: 'requestCode' // Used as the unique property in the sorting state (See React-Query dev tools)
-			}),
-			columnHelper.accessor('name', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'Name',
-				id: 'requestName' // Used as the unique property in the sorting state (See React-Query dev tools)
-			}),
-			columnHelper.accessor('lmsClientClass', {
-				cell: (info) => <span>{info.getValue()}</span>,
-				header: 'IMS Client Class',
-				id: 'requestLmsClientClass' // Used as the unique property in the sorting state (See React-Query dev tools)
-			})
-		];
-	}, []);
-
 	const {
 		resource,
 		status: resourceFetchStatus,
@@ -101,56 +62,39 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		defaultValues: externalState
 	});
 
-	useEffect(() => {
-		if (data?.error === 'RefreshAccessTokenError') {
-			signIn('keycloak', {
-				callbackUrl: process.env.REDIRECT_HOSTLMSS!
-			}); // Force sign in to resolve error (DCB-241)
-		}
-	}, [data]);
+	const { t } = useTranslation();
 
 	return (
 		<AdminLayout>
+			<Paper elevation={16}>
 			<Card>
-				<Card.Header>HostLMS</Card.Header>
-				<Card.Body>
+				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<p className='text-center mb-0'>Loading HostLMS.....</p>
+						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<p className='text-center mb-0'>Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.</p>
+						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text")}></Alert>
 					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>			
-							<Table
+							<DataGrid
 								data={resource?.content ?? []}
-								columns={columns}
+								columns={[ {field: 'name', headerName: "HostLMS name", minWidth: 150, flex: 1}, { field: 'id', headerName: "HostLMS ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "HostLMS code", minWidth: 50, flex: 0.5}]}	
 								type="HostLMS"
+								selectable={true}
+								noDataTitle={"No HostLMS found."}
+								noDataMessage={"Try changing your filters or search terms."}
 							/>
 						</>
 					)}
-				</Card.Body>
+				</CardContent>
 			</Card>
-			<div>
-				{showDetails ? (
-					<Details
-						i={idClicked}
-						content={resource?.content ?? []}
-						show={showDetails}
-						onClose={closeDetails}
-						type={'HostLMS'}
-					/>
-				) : null}
-			</div>
+			</Paper>
 		</AdminLayout>
 	);
 };
-
-// This relates mainly to the previous non-functional server side pagination. 
-// TO BE RESTORED WITH SERVER SIDE PAGINATION WHEN READY
-// Current failures are SSR errors
 
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {

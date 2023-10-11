@@ -1,19 +1,23 @@
+import Link from '@components/Link/Link';
 import React from 'react';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+	const { t } = useTranslation();
 	return (
 		<footer className='footer flex-column flex-md-row border-top d-flex align-items-center justify-content-between px-4 py-2'>
 			<div>
-				<a className='text-decoration-none' href='https://www.k-int.com'>
-					Project OpenRS{' '}
-				</a>{' '}
+				<Link className='text-decoration-none' href='https://www.k-int.com'>
+					{t("footer.openRS")}{' '}
+				</Link>{' '}
 				/
-				<a className='text-decoration-none' href='https://www.k-int.com'>
+				<Link className='text-decoration-none' href='https://www.k-int.com'>
 					{' '}
-					Direct Consortial Borrowing
-				</a>
+					{t("footer.dcb")}
+				</Link>
 			</div>
-			<div className='ms-md-auto'>Admin 1.0</div>
+			<div className='ms-md-auto'>{t("footer.version")}</div>
 		</footer>
 	);
 }

@@ -1,20 +1,24 @@
-import Link from 'next/link';
+import Link from '@components/Link/Link';
 import * as React from 'react';
 import { AdminLayout } from '@layout';
+import { Typography } from '@mui/material';
+//localisation
+import { useTranslation } from 'react-i18next';
 
 export default function NotFound() {
+	const { t } = useTranslation();
 	return (
 		<AdminLayout>
 			{' '}
 			<div className='not-found'>
-				<p className='Title'>404</p>
-				<p className='Text'>Oops! Page not found.</p>
-				<p className='GoBackText'>
-					Go back to the{' '}
+				<Typography className='Title'>{t("404.page_title")}</Typography>
+				<Typography className='Text'>{t("404.page_text")}</Typography>
+				<Typography className='GoBackText'>
+					{t("404.go_back_text")}
 					<Link aria-label='dashboard link' className='LinkTo' href='/'>
-						dashboard
+						{t("404.dashboard_text")}
 					</Link>
-				</p>
+				</Typography>
 			</div>
 		</AdminLayout>
 	);

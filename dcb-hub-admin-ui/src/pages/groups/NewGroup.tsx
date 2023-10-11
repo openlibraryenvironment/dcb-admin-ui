@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import { Alert, Button, Modal } from 'react-bootstrap';
+import { useFormik } from 'formik';
 import { useSession } from 'next-auth/react';
 import request, {gql, GraphQLClient } from 'graphql-request';
 import { useMutation } from '@tanstack/react-query';
 import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
+import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextField } from '@mui/material';
+import Alert from '@components/Alert/Alert';
+import { MdClose } from 'react-icons/md'
+//localisation
+import { useTranslation } from 'react-i18next';
+import getConfig from 'next/config';
 
 interface FormData {
   name: string;
@@ -23,11 +28,6 @@ interface CreateGroupResponse {
   };
 }
 
-const initialValues: FormData = {
-  name: '',
-  code: '',
-};
-
 type NewGroupType = {
   show: boolean,
   onClose: any,
@@ -39,20 +39,27 @@ const validationSchema = Yup.object().shape({
   name: Yup.string().required('Group name is required').max(32, 'Group name must be at most 32 characters'),
   code: Yup.string().required('Group code is required').max(5, 'Group code must be at most 5 characters'),
 });
+
 // sort Group typings
 export default function NewGroup({show, onClose}: NewGroupType) {
     const { data: session, status } = useSession();
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const graphQLClient = new GraphQLClient('https://dcb-uat.sph.k-int.com/graphql'); 
+    const url = React.useMemo(() => {
+      const { publicRuntimeConfig } = getConfig();
+      return publicRuntimeConfig.DCB_API_BASE + '/graphql';
+    }, []);
+    const graphQLClient = new GraphQLClient(url); 
     const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
     // look at a client that does do this
 
+    const { t } = useTranslation();
+
     const createGroupMutation = useMutation(
       async (values: FormData) => {
-        const { data } = await request<CreateGroupResponse>('https://dcb-uat.sph.k-int.com/graphql', createGroup, {
+        const { data } = await request<CreateGroupResponse>(url, createGroup, {
           input: {
             name: values.name,
             code: values.code,
@@ -78,55 +85,80 @@ export default function NewGroup({show, onClose}: NewGroupType) {
     const handleSubmit = async (values: FormData) => {
     try {
       const data  = await createGroupMutation.mutateAsync(values);
-      console.log('Response:', data);
       onClose();
     } catch (error) {
       console.error('Error:', error);
     }
-  };
+    };
 
-  // We will also need validation here, once we know what these should be
+    const FormikMaterial = () => {
+      const formik = useFormik({
+        initialValues: {
+          name: '',
+          code: '',
+        },
+        validationSchema: validationSchema,
+        onSubmit: handleSubmit,
+
+      });
+      return (
+        <div>
+          <form id = "new-group-form" onSubmit={formik.handleSubmit}>
+            <TextField
+              fullWidth
+              id="name"
+              name="name"
+              label="Group name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              helperText={formik.touched.name && formik.errors.name}
+            />
+            <TextField
+              fullWidth
+              id="code"
+              name="code"
+              label="Group Code"
+              value={formik.values.code}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.code && Boolean(formik.errors.code)}
+              helperText={formik.touched.code && formik.errors.code}
+            />
+            <Button color="primary" variant="contained" fullWidth type="submit">
+              {t("general.submit")}            
+            </Button>
+          </form>
+        </div>
+      );
+    };
+
+
   return (
-    <Modal show={show} onHide={onClose}  size="lg"
-    aria-labelledby="centred-new-group-modal"
-    centered>
-      <Modal.Header closeButton aria-labelledby='close-new-group-modal'>
-      <Modal.Title> New Group</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={validationSchema}>
-      <Form>
-        <div>
-          <label htmlFor="name">Group Name</label>
-          <Field type="text" id="name" name="name" style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }}/>
-          <ErrorMessage name="name" component="div" />
-        </div>
-        <div>
-          <label htmlFor="code">Group Code</label>
-          <Field type="text" id="code" name="code" style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
-          <ErrorMessage name="code" component="div" />
-        </div>
-        {/* <div>
-          <label htmlFor="groupId">Description</label>
-          <Field type="text" id="groupId" name="groupId" style={{ width: '100%', padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />
-          <ErrorMessage name="groupId" component="div" />
-        </div> */}
-    {/* // add the agencies stuff here. Should really post an array of all the agencies that'll be part of the group (or at least their IDs) - but check implementation when we have it
-      We should also consider whether the user should have the ability to create a new agency here, or whether we wish to transition them to the 'Add Agencies to Group' screen*/}
-        <Button variant="primary" type="submit">Create Group</Button>
-      </Form>
-    </Formik>
-    </Modal.Body>
+    <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
+      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
+      <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <MdClose/>
+        </IconButton>
+    <DialogContent>
+      <FormikMaterial/>
+    </DialogContent>
     {isSuccess && (
-        <Alert variant="success" onClose={() => setSuccess(false)} dismissible>
-          Success: New group created!
-        </Alert>
+      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success")}/>
       )}
     {isError && (
-        <Alert variant="danger" onClose={() => setError(false)} dismissible>
-            {errorMessage}
-        </Alert>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage}/>
     )}
-    </Modal>
+    </Dialog>
   );
 };

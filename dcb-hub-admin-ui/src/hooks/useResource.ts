@@ -1,10 +1,14 @@
 import * as React from 'react';
 
-import { useQuery, QueryKey, QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, QueryKey } from '@tanstack/react-query';
 import axios, { AxiosRequestHeaders } from 'axios';
 import { newGraphQLResource, newResource, Resource } from '@models/resource';
 import { PaginationState, SortingState } from '@tanstack/react-table';
-// If we keep using this, implement access token refresh here
+// This is the method of data fetching we use for the Admin UI application.
+// It is a modified implementation of react-query's useQuery, and currently supports both GraphQL
+// and REST requests. 
+
+
 const INITIAL_STATE: { pagination: PaginationState; sort: SortingState } = {
 	pagination: {
 		pageIndex: 0,
@@ -32,7 +36,6 @@ type AxiosResponse<TData> = {
 	};
 	totalSize: number;
 };
-// may need GraphQL response type
 
 type UseResourceParams<T> = {
 	isQueryEnabled?: boolean;
@@ -198,31 +201,22 @@ const useResource = <T>({
 	  });
 	  const formData = formBody.join('&');
 	  const refreshUrl = process.env.KEYCLOAK_REFRESH!;
+
+	  // We need to refresh token on 401 AND expiry
 	const refreshToken = async () => {
 		// This is where we hit Keycloak for the refreshing of our access token
+		
 		const response = await axios.post(refreshUrl, formData, { headers: {
 			'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}})
 		return response.data.access_token;
 	  };
-	  
-	// This is an alternative mutation method for setting new access tokens. 
-	//const queryClient = useQueryClient();
-	//   const { mutate: refreshAccessTokenMutation } = useMutation(refreshToken, {
-	// 	onSuccess: (newAccessToken) => {
-	// 	  // Update the session with the new access token
-	// 	  console.log("Token refreshed and is now:", newAccessToken);
-	// 	  queryClient.setQueryData(['session'], { ...session, accessToken: newAccessToken });
-	// 	  console.log("Updated session.accessToken:", session?.accessToken);
-	// 	  loadGroups();
-	// 	  queryClient.invalidateQueries(['findGroups']);
-	// 	},
-	//   });
+
+
+	// Fetcher for GraphQL data
 
 	const fetchGraphQLData:any = async () => {
 		try {
 		  let headers: AxiosRequestHeaders = {};
-		  // queryClient.invalidateQueries([generatedQueryKey]);
-		  console.log(baseQueryKey);
 	
 		  if (accessToken !== null) {
 			headers = {
@@ -230,9 +224,7 @@ const useResource = <T>({
 			  Authorization: 'Bearer ' + accessToken
 			};
 		  }
-	
-		  console.log("Happy path attempt.");
-		  const response = await axios.post(
+			  const response = await axios.post(
 			url,
 			{ query: graphQLQuery, variables: graphQLVariables },
 			{
@@ -246,7 +238,7 @@ const useResource = <T>({
 			if(baseQueryKey == "groups")
 			{
 				const responseData = response.data.data?.agencyGroups;
-				console.log("Special groups response handling activated", responseData)
+				console.info("Special groups response handling activated", responseData)
 				return Promise.resolve(newGraphQLResource<T>(responseData));
 			}
 			const responseData = response.data.data;
@@ -254,28 +246,23 @@ const useResource = <T>({
 		  }
 		  else if (response.status === 401)
 			{
-				console.log("Yikes, 401");
 				// refresh access token method
 				const newAccessToken = await refreshToken();
-				console.log("New token is being generated.");
+				console.info("401 encountered, new token is being generated.");
 				// Update the accessToken variable with the new token
 				accessToken = newAccessToken;
 				// retry
 				return fetchGraphQLData();
-			} 
-		else {
-			console.log("Different kind of error")
-			throw Error();
-		
-		}
+			}
 		} catch {
 			// If the above promise does not resolve
-			console.log("BAD PATH, promise has not resolved");
+			console.info("GraphQL: Promise has not resolved");
 		  	return Promise.reject(`Failed to perform a GraphQL request for ${generatedQueryKey.toString()}`);
 		}
 	  };
 
-	  const fetchRestData = async () => {
+	  // Fetcher for REST endpoints.
+	  const fetchRestData:any = async () => {
 		try {
 		  let headers: AxiosRequestHeaders = {};
 	
@@ -291,13 +278,18 @@ const useResource = <T>({
 		  const response = await axios.get<AxiosResponse<T>>(requestUrl, {
 			headers: { ...headers }
 		  });
-		  console.log("Response received", response, response.data.pageable);
+		  console.info("Response received", response, response.data.pageable);
 
 	
 		  if (response.status !== 200) {
 			if(response.status === 401)
 			{
-				console.log("401");
+				const newAccessToken = await refreshToken();
+				console.info("401 encountered, new token is being generated.");
+				// Update the accessToken variable with the new token
+				accessToken = newAccessToken;
+				// retry
+				return fetchRestData();				
 				// refresh access token method
 			}
 			throw Error();
@@ -355,49 +347,4 @@ const useResource = <T>({
 
 export default useResource;
 
-
-// 	LEGACY CODE TO BE REMOVED AFTER SERVER-SIDE PAGINATION CONFIRMED WORKING	
-// queryFn: async () => {
-		// 	try {
-		// 		// Stores the requests headers
-		// 		let headers: AxiosRequestHeaders = {};
-
-		// 		// If available the accessToken is available append it to the Authorization Header
-		// 		if (accessToken !== null) {
-		// 			headers = {
-		// 				...headers,
-		// 				Authorization: 'Bearer ' + accessToken
-		// 			};
-		// 		}
-
-		// 		// Includes the base url e.g. /audit, /hostlms
-		// 		let requestUrl = url;
-
-		// 		// TODO: Append the new data to the url to update the current resource being displayed
-		// 		// NOTE: When appending the parameters read from the "dependencies" as that contains the data we need e.g. sorting or paging etc
-
-		// 		// Perform the request and wait for the response to resolve
-
-		// 		// Potentially needs to be altered for GraphQL - selection to send different requests
-	
-		// 		const response = await axios.get<AxiosResponse<T>>(requestUrl, {
-		// 			headers: { ...headers }
-		// 		});
-	
-		// 		console.log("RESPONSE", response)
-
-		// 		// If the status isn't 200 then throw an error to put the query in rejected mode
-		// 		if (response.status !== 200) {
-		// 			throw Error();
-		// 		}
-
-		// 		// Return the data in the approproiate format
-		// 		return Promise.resolve(
-		// 			newResource<T>(response.data.content, response.data.pageable, response.data.totalSize)
-		// 		);
-		// 	} catch {
-		// 		return Promise.reject(
-		// 			`Failed to perform a fetch request for ${generatedQueryKey.toString()}`
-		// 		);
-		// 	}
-		// },
+// We should consider deconstructing this further to make it more accessible.
