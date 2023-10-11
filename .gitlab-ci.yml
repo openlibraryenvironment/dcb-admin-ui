@@ -11,7 +11,7 @@ default:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - .npm/
-      - node-modules/
+      - dcb-hub-admin-ui/node-modules/
 
 stages:
   - build
