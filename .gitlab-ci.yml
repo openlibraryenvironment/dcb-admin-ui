@@ -21,8 +21,6 @@ stages:
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
-  files:
-    - dcb-hub-admin-ui/yarn.lock
   paths:
     - dcb-hub-admin-ui/.npm/
     - dcb-hub-admin-ui/node-modules/
