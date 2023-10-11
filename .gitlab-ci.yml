@@ -18,6 +18,7 @@ stages:
 
 build:
   stage: build
+  script:
     - npm install
     # Tests can be run here
 
