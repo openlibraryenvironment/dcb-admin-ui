@@ -17,7 +17,6 @@ default:
 
 stages:
   - build
-  - release
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -33,13 +32,4 @@ build:
     - pwd
     - ls -al
     - npm install
-    # Tests can be run here
-
-publish:
-  stage: release
-  only:
-    - release
-  script:
-    - pwd
-    - ls -al
     - npm run semantic-release
