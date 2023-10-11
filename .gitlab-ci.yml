@@ -4,17 +4,22 @@ default:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - git config --global user.name "ianibbo"
     - git config --global user.email "ian.ibbotson@k-int.com"
-    - npm install
-    - echo "token $GITLAB_TOKEN $NPM_TOKEN"
+    - cd dcb-hub-admin-ui
+  tags:
+    - ki-onprem
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - .npm/
-  tags:
-    - ki-onprem
 
 stages:
+  - build
   - release
+
+build:
+  stage: build
+    - npm install
+    # Tests can be run here
 
 publish:
   stage: release
