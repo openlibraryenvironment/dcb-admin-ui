@@ -7,6 +7,8 @@ import { Paper, CardContent, Typography, Card } from '@mui/material';
 //localisation
 import { useTranslation } from 'react-i18next';
 
+import FileUploadStatus from '@components/FileUploadStatus/FileUploadStatus';
+
 const Home: NextPage = () => {
 	// SignOutIfInactive();
 	const { t } = useTranslation();
@@ -18,6 +20,7 @@ const Home: NextPage = () => {
 					<CardContent>
 						<Typography variant="h3"> {t('dashboard.app_title')} </Typography>
 						<Typography variant="body1"> {t('dashboard.page_welcome_message')} </Typography>
+						{FileUploadStatus()}
 					</CardContent>	
 				</Card>
 			</Paper>
