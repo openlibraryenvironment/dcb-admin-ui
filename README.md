@@ -37,13 +37,13 @@ This project is released using semantic_release. See the tags section for past r
 
 A look at the admin UI in its current early stages. UI elements and pages may be subject to change.
 
-![Add-Agencies-Form](https://drive.google.com/file/d/1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal/view "Add Agencies Form")
-![Groups-Page](https://drive.google.com/file/d/1fv3JU7uVJytJiRSx7mFN7KKE_wXrohdF/view?usp=drive_link "Groups Page")
-![HostLMS-Page](https://drive.google.com/file/d/1URZtchBa0YqdYFjr72weCD5Af0a4ejHN/view?usp=drive_link "HostLMS Page")
-![Locations-Page](https://drive.google.com/file/d/1DloMYDfMQQ7aFpCxU0QwbZjQgOKU_GF2/view?usp=drive_link "Locations Page")
-![Mappings-Page](https://drive.google.com/file/d/1LzHXskc635TluToeEC22SR1qEQVcXMxd/view?usp=drive_link "Mappings Page: WIP")
-![New-Group-Form](https://drive.google.com/file/d/1eG2XC2aQzs2F-w1ncCjs6Nbw7eN3Q9aR/view?usp=drive_link "New Group Form")
-![Requests Page](https://drive.google.com/file/d/1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal/view?usp=drive_link "Requests Page")
+![Add-Agencies-Form](https://drive.google.com/uc?id=1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal "Add Agencies Form")
+![Groups-Page](https://drive.google.com/uc?1fv3JU7uVJytJiRSx7mFN7KKE_wXrohdF "Groups Page")
+![HostLMS-Page](https://drive.google.com/uc?1URZtchBa0YqdYFjr72weCD5Af0a4ejHN "HostLMS Page")
+![Locations-Page](https://drive.google.com/uc?1DloMYDfMQQ7aFpCxU0QwbZjQgOKU_GF2 "Locations Page")
+![Mappings-Page](https://drive.google.com/file/uc?1LzHXskc635TluToeEC22SR1qEQVcXMxd "Mappings Page: WIP")
+![New-Group-Form](https://drive.google.com/file/uc?1eG2XC2aQzs2F-w1ncCjs6Nbw7eN3Q9aR "New Group Form")
+![Requests Page](https://drive.google.com/file/uc?1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal "Requests Page")
 
 ## Roadmap
 // TODO 
