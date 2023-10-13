@@ -87,7 +87,7 @@
 
   "hostlms": {
     "loading_msg": "Loading HostLMS....",
-    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page."
+    "alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page."
   },
 
   "locations": {

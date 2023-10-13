@@ -15,6 +15,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'react-i18next';
+import { getServerSession } from 'next-auth';
 // import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
@@ -133,21 +134,22 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
   
   export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
 
-	const session = await getSession(context);
-	const accessToken = session?.accessToken;
-	// await queryClient.prefetchQuery(['groups'], useResource)
+	// https://next-auth.js.org/configuration/nextjs#in-getserversideprops
+    // const session = await getServerSession(context.req, context.res, authOptions)
+	// const accessToken = session?.accessToken;
+	// // await queryClient.prefetchQuery(['groups'], useResource)
 
-	// this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
-	// the intention is that a page change will trigger a refetch / query, as will new group creation
-	// const queryVariables = {};
-	// const headers = {
-	// 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
-	// 	'Content-Type': 'application/json', // You can adjust the content type as needed
-	// };
+	// // this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
+	// // the intention is that a page change will trigger a refetch / query, as will new group creation
+	// // const queryVariables = {};
+	// // const headers = {
+	// // 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
+	// // 	'Content-Type': 'application/json', // You can adjust the content type as needed
+	// // };
 
-	// const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
+	// // const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
 
-	// await queryClient.prefetchQuery(['groups'], loadGroups);
+	// // await queryClient.prefetchQuery(['groups'], loadGroups);
 
 
 	let page = 1;
