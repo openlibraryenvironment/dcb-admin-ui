@@ -66,7 +66,8 @@
   "agencies": {
     "add_to_group": "Agregar agencias a un grupo",
     "loading_msg": "Agencias de carga....",
-    "alert_text_success": "¡Agencia agregada al grupo!"
+    "alert_text_success": "¡Agencia agregada al grupo!",
+    "alert_text": "No se han podido obtener las agencias, actualice la página."
   },
   "general": {
     "submit": "Enviar"
@@ -98,7 +99,13 @@
     "loading_msg": "Cargando mappings...",
     "alert_text": "No se han podido obtener las asignaciones, actualice la página.",
     "no_results": "No se han encontrado resultados",
-    "import_circulation_status": "Importar asignaciones de estado de circulación para un Host LMS"
+    "import_circulation_status": "Importar asignaciones de estado de circulación para un Host LMS",
+    "add_success": "Añadido con éxito {{fileName}}. Cuando estés listo para subirlo, haz clic en el botón",
+    "drag_n_drop": "Arrastra y suelta o haz clic para seleccionar un archivo",
+    "suggested_formats": "Formatos sugeridos: CSV, TSV",
+    "max_size": "Tamaño máximo 100 MB",
+    "file_too_large": "El archivo es mayor que {{maxSize}}",
+    "wrong_file_type": "El tipo de archivo debe ser {{allowedFiles}}."
   },
   "breadcrumbs": {
     "home_text": "Hogar"
