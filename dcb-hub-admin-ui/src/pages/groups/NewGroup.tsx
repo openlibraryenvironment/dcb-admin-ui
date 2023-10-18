@@ -51,7 +51,9 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       return publicRuntimeConfig.DCB_API_BASE + '/graphql';
     }, []);
     const graphQLClient = new GraphQLClient(url); 
-    const headers = { Authorization: `Bearer ${session?.accessToken}` }
+    // const headers = { Authorization: `Bearer ${session?.accessToken}` }
+    // is this using an old token? ^^ would only be updated when component reloaded
+    // refreshing also potentially not working here - possibly because it's out of useResource
     // remember your headers - these don't get added automatically with the client we're using
     // look at a client that does do this
 
@@ -59,6 +61,8 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
     const createGroupMutation = useMutation(
       async (values: FormData) => {
+
+        const headers = { Authorization: `Bearer ${session?.accessToken}` }
         const { data } = await request<CreateGroupResponse>(url, createGroup, {
           input: {
             name: values.name,

@@ -71,7 +71,8 @@
   "agencies": {
     "add_to_group": "Add agencies to a group",
     "loading_msg": "Loading agencies....",
-    "alert_text_success": "Agency added to group!"
+    "alert_text_success": "Agency added to group!",
+    "alert_text": "Failed to fetch the agencies, please refresh the page."
   },
 
   "general": {
@@ -87,7 +88,7 @@
 
   "hostlms": {
     "loading_msg": "Loading HostLMS....",
-    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page."
+    "alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page."
   },
 
   "locations": {
@@ -110,7 +111,13 @@
     "loading_msg": "Loading mappings...",
     "alert_text": "Failed to fetch the mappings, please refresh the page.",
     "no_results": "No results found",
-    "import_circulation_status": "Import circulation status mappings for a Host LMS"
+    "import_circulation_status": "Import circulation status mappings for a Host LMS",
+    "add_success": "Successfully added {{fileName}}. When you're ready to upload, just click the button.",
+    "drag_n_drop": "Drag and drop or click to select a file.",
+    "suggested_formats": "Suggested formats: CSV, TSV",
+    "max_size": "Maximum size 100 MB",
+    "file_too_large": "File is larger than {{maxSize}}.",
+    "wrong_file_type": "File type must be {{allowedFiles}}."
   },
 
   "breadcrumbs": {

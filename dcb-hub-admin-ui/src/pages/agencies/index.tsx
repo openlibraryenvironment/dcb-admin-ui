@@ -73,11 +73,11 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("agencies.loading_msg")}.</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("agencies.loading_msg")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severityType='error' onCloseFunc={() => {}} alertText="Failed to fetch the agencies, please refresh the page"/>
+						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("agencies.alert_text")}/>
 					)}
 
 					{resourceFetchStatus === 'success' && (
