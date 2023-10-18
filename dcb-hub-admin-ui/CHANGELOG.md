@@ -1,3 +1,10 @@
+## [1.0.1](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.0...v1.0.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* Fix access token issues [DCB-488] ([724ad34](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/commit/724ad34c18a4a0400ff422e5ebfd3c6c11f924ce))
+
 # 1.0.0 (2023-10-11)
 
 
