@@ -3,7 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import { useMemo } from "react";
 import Alert from "@components/Alert/Alert";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 type FileType = {
   size: number;
@@ -99,12 +99,12 @@ function StyledDropzone(props: any) {
           <div className="container">
             <div {...getRootProps({style})}>
               <input {...getInputProps()} />
-              <Typography variant="h6" color="black">{t("mappings.drag_n_drop")} </Typography>
+              <Typography variant="h6" color="black">{t("mappings.drag_n_drop", "Drag and drop or click to select a file.")} </Typography>
               <Typography variant = "body1" display="block" color="black"> 
-                {t("mappings.suggested_formats")}
+                {t("mappings.suggested_formats", "Suggested formats: CSV, TSV")}
               </Typography>
               <Typography variant = "body1" display="block" color="black"> 
-                {t("mappings.max_size")}
+                {t("mappings.max_size", "Maximum size 100 MB")}
               </Typography>
             </div>
             <ul>{fileRejectionItems}</ul>

@@ -70,7 +70,9 @@
     "alert_text": "No se han podido obtener las agencias, actualice la página."
   },
   "general": {
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "english": "Inglés",
+    "spanish": "Español"
   },
   "groups": {
     "loading_msg": "Cargando grupos....",

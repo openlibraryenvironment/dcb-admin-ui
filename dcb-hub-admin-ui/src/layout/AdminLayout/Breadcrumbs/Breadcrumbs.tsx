@@ -4,7 +4,7 @@ import Link from "@components/Link/Link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 type BreadcrumbType = {
     href: string;
@@ -42,7 +42,7 @@ export default function Breadcrumbs () {
 
     return (
         <MUIBreadcrumbs separator={<MdArrowForwardIos/>}>
-        <Link color="inherit" href="/">{t("breadcrumbs.home_text")}</Link>
+        <Link color="inherit" href="/">{t("breadcrumbs.home_text", "Home")}</Link>
         {breadcrumbs?.map((breadcrumb) => (
           <Link color="inherit" underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
             {breadcrumb.label}

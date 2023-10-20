@@ -15,7 +15,7 @@ import { DataGrid } from '@components/DataGrid';
 import Paper from '@mui/material/Paper';
 import { Typography } from '@mui/material';
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import Alert from '@components/Alert/Alert';
 
 // import SignOutIfInactive from '../useAutoSignout';
@@ -70,12 +70,10 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg")}</Typography>
-					)}
+						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg", "Loading HostLMS....")}</Typography>					)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text")}></Alert>
-					)}
+						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text", "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.")}></Alert>					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>			

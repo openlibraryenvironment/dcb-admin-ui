@@ -76,7 +76,9 @@
   },
 
   "general": {
-    "submit": "Submit"
+    "submit": "Submit",
+    "english": "English",
+    "spanish": "Spanish"
   },
 
   "groups": {
