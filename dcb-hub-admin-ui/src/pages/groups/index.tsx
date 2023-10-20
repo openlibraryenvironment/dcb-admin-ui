@@ -87,7 +87,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 	// Temporary fix due to TS issues - to review
 	const rows:any = resource?.content;
-	const hostLmsData = rows?.agencyGroups?.content;
+	const groupsData = rows?.content;
 	
 	const { t } = useTranslation();
 
@@ -111,7 +111,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 							<div>
 								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new", "New Group")}</Button>
 								<DataGrid
-								data={hostLmsData ?? []}
+								data={groupsData ?? []}
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
 								type = "Group"
 								selectable= {true}

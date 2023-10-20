@@ -74,3 +74,31 @@ query HostLms {
     }
 }
 `;
+
+// A query for loading agencies. Has the same temporary page size restriction as the loadHostlms query.
+export const loadAgencies = gql`
+query loadAgencies {
+    agencies(pagesize: 100) {
+        totalSize
+        content {
+            id
+            code
+            name
+            authProfile
+            longitude
+            latitude
+            hostLms {
+                id
+                code
+                name
+                lmsClientClass
+                clientConfig
+            }
+        }
+        pageable {
+            number
+            offset
+        }
+    }
+}
+`;

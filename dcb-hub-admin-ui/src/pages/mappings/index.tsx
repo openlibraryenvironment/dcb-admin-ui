@@ -3,17 +3,19 @@ import { GetServerSideProps, NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, Alert, CardHeader} from '@mui/material';
+import { Paper, CardContent, Card, Typography, Alert, CardHeader, Button} from '@mui/material';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
 import { useSession } from 'next-auth/react';
 import { PaginationState, SortingState } from '@tanstack/react-table';
-import React from 'react';
+import React, { useState } from 'react';
 import getConfig from 'next/config';
 
 //localisation
 import { useTranslation } from 'next-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import Import from '@components/Import/Import';
 
 type Props = {
 	page: number;
@@ -24,6 +26,19 @@ type Props = {
 const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
+	const queryClient = useQueryClient();
+	const [showImport, setImport] = useState(false);
+	const openImport = () =>
+	{
+		setImport(true);
+	}
+	const closeImport = () => {
+		setImport(false);
+		queryClient.invalidateQueries();
+		// forces the query to refresh once a new group is added	
+		// needs to be adapted to work with SSR approach so that the grid always updates correctly on new group creation	
+	};
+
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
@@ -86,6 +101,8 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 							{resourceFetchStatus === 'success' && (
 								<>
+									<Button variant="contained" onClick={openImport} > {t("mappings.import")}</Button>
+
 									<DataGrid
 										data={resource?.content ?? []}
 										// columns={[ {field: 'hostlms', headerName: "Host LMS", minWidth: 50, flex: 0.5}, 
@@ -112,6 +129,9 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 				    </CardContent>
 				</Card>
 			</Paper>
+			<div>
+			{ showImport ? <Import show={showImport}  onClose={closeImport}/> : null }
+    		</div>
 		</AdminLayout>
 	);
 };

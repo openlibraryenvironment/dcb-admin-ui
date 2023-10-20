@@ -15,6 +15,7 @@ import { useTranslation } from 'next-i18next';
 
 import { Agency } from '@models/Agency';
 import AddAgenciesToGroup from './AddAgenciesToGroup';
+import { loadAgencies } from 'src/queries/queries';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -37,34 +38,28 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		setAddToGroup(false);
 	};
 
-	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
-	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
-		() => ({
-			pagination: {
-				pageIndex: page - 1,
-				pageSize: resultsPerPage
-			},
-			sort: sort
-		}),
-		[page, resultsPerPage, sort]
-	);
-
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/agencies';
+		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);
 
 	const {
 		resource,
 		status: resourceFetchStatus,
-		state
 	} = useResource<Agency>({
 		isQueryEnabled: status === 'authenticated',
 		accessToken: data?.accessToken ?? null,
 		baseQueryKey: 'agencies',
 		url: url,
-		externalState
+		type: 'GraphQL',
+		graphQLQuery: loadAgencies,
+		graphQLVariables: {}
 	});
+
+	// A hopefully temporary fix to get around some TS issues that occur when accessing the data directly.
+	const rows:any = resource?.content;
+	const agenciesData = rows?.agencies?.content;
+
 
 	const { t } = useTranslation();
 
@@ -84,7 +79,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 						<>
 							<Button variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group", "Add agencies to a group")}</Button>
 							<DataGrid
-								data={resource?.content ?? []}
+								data={agenciesData ?? []}
 								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
 								type = "Agency"
 								selectable= {true}
