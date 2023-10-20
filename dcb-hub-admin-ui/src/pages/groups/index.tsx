@@ -14,7 +14,7 @@ import { useResource } from '@hooks';
 import { GetServerSideProps, NextPage } from 'next';
 import { DataGrid } from '@components/DataGrid';
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { getServerSession } from 'next-auth';
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -92,19 +92,19 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 				<Card>
 					<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg", "Loading groups....")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
 						<div>
-							<Alert severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text")}/>
+							<Alert severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text", "Failed to fetch Groups, will retry. If this error persists, please refresh the page.")}/>
 						</div>
 					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>
 							<div>
-								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
+								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new", "New Group")}</Button>
 								<DataGrid
 								data={resource?.content ?? []}
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	

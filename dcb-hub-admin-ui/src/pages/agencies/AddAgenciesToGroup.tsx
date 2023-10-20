@@ -8,7 +8,7 @@ import * as Yup from 'yup';
 import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { MdClose } from 'react-icons/md'
 import getConfig from 'next/config';
 
@@ -144,7 +144,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
             helperText={formik.touched.agencyId && formik.errors.agencyId}
           />
           <Button color="primary" variant="contained" fullWidth type="submit">
-            {t("general.submit")}  
+            {t("general.submit", "Submit")}  
           </Button>
         </form>
       </div>
@@ -159,7 +159,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     <div>
     <Dialog open={show} onClose={onClose}
     aria-labelledby="centred-add-agency-dialog">
-        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
+        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group", "Add agencies to a group")}</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -176,7 +176,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success")}>
+        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success", "Agency added to group!")}>
         </Alert>
       )}
     {isError && (
