@@ -16,6 +16,7 @@ import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'next-i18next';
 import { getServerSession } from 'next-auth';
+import { AgencyGroupPage } from '@models/AgencyGroupPage';
 // import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
@@ -72,7 +73,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 		resource,
 		status: resourceFetchStatus,
 		state
-	} = useResource<Group>({
+	} = useResource<AgencyGroupPage>({
 		isQueryEnabled: status === 'authenticated',
 		accessToken: session?.accessToken ?? null,
 		refreshToken: session?.refreshToken ?? null,
@@ -84,6 +85,10 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 		graphQLVariables: queryVariables
 	});
 
+	// Temporary fix due to TS issues - to review
+	const rows:any = resource?.content;
+	const hostLmsData = rows?.agencyGroups?.content;
+	
 	const { t } = useTranslation();
 
 	return (
@@ -106,7 +111,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 							<div>
 								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new", "New Group")}</Button>
 								<DataGrid
-								data={resource?.content ?? []}
+								data={hostLmsData ?? []}
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
 								type = "Group"
 								selectable= {true}
