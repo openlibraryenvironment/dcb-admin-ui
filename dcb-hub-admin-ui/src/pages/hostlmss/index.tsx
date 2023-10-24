@@ -15,8 +15,10 @@ import { DataGrid } from '@components/DataGrid';
 import Paper from '@mui/material/Paper';
 import { Typography } from '@mui/material';
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import Alert from '@components/Alert/Alert';
+import { loadHostlms } from 'src/queries/queries';
+import { HostLmsPage } from '@models/HostLMSPage';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -33,6 +35,8 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
 
+	const queryVariables = {};
+
 	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
@@ -47,22 +51,31 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Generate the url for the useResource hook
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/hostlmss';
+		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);
 
 	const {
 		resource,
 		status: resourceFetchStatus,
 		state
-	} = useResource<HostLMS>({
+	} = useResource<HostLmsPage>({
 		isQueryEnabled: status === 'authenticated',
 		accessToken: data?.accessToken ?? null,
 		baseQueryKey: 'hostlms',
 		url: url,
-		defaultValues: externalState
+		defaultValues: externalState,
+		type: 'GraphQL',
+		graphQLQuery: loadHostlms,
+		graphQLVariables: queryVariables
 	});
 
 	const { t } = useTranslation();
+	// Fix weird typing errors that cause this to fail, and find a nicer solution to these TS issues
+	// console.log(resource?.content?.hostLms?.content);
+	const rows:any = resource?.content;
+	const hostLmsData = rows?.hostLms?.content;
+
+
 
 	return (
 		<AdminLayout>
@@ -70,17 +83,15 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg")}</Typography>
-					)}
+						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg", "Loading HostLMS....")}</Typography>					)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text")}></Alert>
-					)}
+						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text", "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.")}></Alert>					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>			
 							<DataGrid
-								data={resource?.content ?? []}
+								data={hostLmsData?? []}
 								columns={[ {field: 'name', headerName: "HostLMS name", minWidth: 150, flex: 1}, { field: 'id', headerName: "HostLMS ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "HostLMS code", minWidth: 50, flex: 0.5}]}	
 								type="HostLMS"
 								selectable={true}

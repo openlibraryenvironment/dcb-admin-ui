@@ -13,7 +13,7 @@ import React from 'react';
 import getConfig from 'next/config';
 
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 type Props = {
 	page: number;
@@ -62,8 +62,7 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Paper elevation={16}>
 				<Card>
 					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status")}</Typography>}/>
-                    <CardContent>
+					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status", "Item circulation status mappings")}</Typography>}/>                    <CardContent>
                             {/* Tabs? May also need custom toolbar.
 							If empty, needs to show link to import mappings */}
 
@@ -78,11 +77,11 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							{/* {resourceFetchStatus === 'success' && (
 								<> */}
 							{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg")}</Typography>
+								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg", "Loading mappings...")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severity='error' onClose={() => {}}>{t("mappings.alert_text")}</Alert>
+								<Alert severity='error' onClose={() => {}}>{t("mappings.alert_text", "Failed to fetch the mappings, please refresh the page.")}</Alert>
 							)}
 
 							{resourceFetchStatus === 'success' && (
@@ -104,8 +103,8 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 												{field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5}]}		
 										type="Circulation Status Mappings"
 										noDataLink={"#"}
-										noDataMessage={t("mappings.import_circulation_status")}
-										noDataTitle={t("mappings.no_results")}
+										noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
+										noDataTitle={t("mappings.no_results", "No results found")}
 										selectable={false}
 									/>
 								</>

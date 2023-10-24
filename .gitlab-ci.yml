@@ -1,0 +1,35 @@
+variables:
+  FF_USE_FASTZIP: "true"
+  # These can be specified per job or per pipeline
+  ARTIFACT_COMPRESSION_LEVEL: "fast"
+  CACHE_COMPRESSION_LEVEL: "fast"
+
+default:
+  image: node:latest
+  before_script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - git config --global user.name "ianibbo"
+    - git config --global user.email "ian.ibbotson@k-int.com"
+    - ls -al
+    - cd dcb-hub-admin-ui
+  tags:
+    - ki-onprem
+
+stages:
+  - build
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - dcb-hub-admin-ui/.npm/
+    - dcb-hub-admin-ui/node-modules/
+    - .yarn
+    - .npm
+
+build:
+  stage: build
+  script:
+    - pwd
+    - ls -al
+    - npm install
+    - npm run semantic-release

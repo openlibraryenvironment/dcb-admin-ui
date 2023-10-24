@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextFie
 import Alert from '@components/Alert/Alert';
 import { MdClose } from 'react-icons/md'
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import getConfig from 'next/config';
 
 interface FormData {
@@ -51,7 +51,9 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       return publicRuntimeConfig.DCB_API_BASE + '/graphql';
     }, []);
     const graphQLClient = new GraphQLClient(url); 
-    const headers = { Authorization: `Bearer ${session?.accessToken}` }
+    // const headers = { Authorization: `Bearer ${session?.accessToken}` }
+    // is this using an old token? ^^ would only be updated when component reloaded
+    // refreshing also potentially not working here - possibly because it's out of useResource
     // remember your headers - these don't get added automatically with the client we're using
     // look at a client that does do this
 
@@ -59,6 +61,8 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
     const createGroupMutation = useMutation(
       async (values: FormData) => {
+
+        const headers = { Authorization: `Bearer ${session?.accessToken}` }
         const { data } = await request<CreateGroupResponse>(url, createGroup, {
           input: {
             name: values.name,
@@ -127,7 +131,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
               helperText={formik.touched.code && formik.errors.code}
             />
             <Button color="primary" variant="contained" fullWidth type="submit">
-              {t("general.submit")}            
+              {t("general.submit", "Submit")}            
             </Button>
           </form>
         </div>
@@ -137,7 +141,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
   return (
     <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
+      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new", "New Group")}</DialogTitle>
       <IconButton
           aria-label="close"
           onClick={onClose}
@@ -154,7 +158,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success")}/>
+      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success", "Success: New group created!")}/>
       )}
     {isError && (
       <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage}/>

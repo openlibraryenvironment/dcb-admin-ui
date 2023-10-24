@@ -33,6 +33,7 @@ const refreshAccessToken = async (token: JWT) => {
 	.then((refresh_response) => {
 		console.info("Keycloak request made in nextauth, new token is", refresh_response.data.access_token)
 		const new_token = refresh_response.data;
+		console.log("The new token", new_token, "will expire at", new_token.accessTokenExpires, "and in ", new_token.expires_in);
 		return {
 			...token,
 			accessToken: new_token.access_token,
@@ -43,7 +44,7 @@ const refreshAccessToken = async (token: JWT) => {
 		.catch((error) => {
 			console.log("Error attempting to refresh token %o",error);
 			console.log("Failed token, ", token, "and status", error.status);
-			return { ...token, error: "RefreshAccessTokenError" as const }
+			return { ...token, error: "RefreshAccessTokenError"}
 		})
 }
 
@@ -83,8 +84,6 @@ export default NextAuth({
 				session.profile = token.profile
 				session.error = token.error;
 				session.user = token.user;
-				console.log("First log of session", session);
-				console.log("First log of token", token.expires)
 				// if user has 'ADMIN' role, set isAdmin to true
 				if ( token?.profile?.roles?.includes('ADMIN') )
 				{
@@ -99,27 +98,65 @@ export default NextAuth({
 		},
 		 jwt: async({ token, account, user, profile  }:{token:any, account?:any, user?:any, profile?:any}) => {
 			// on initial sign in
-			if (account) {
+			if (account && user) {
 			  // Add everything to the token after sign-in
-			  token.accessToken = account.access_token;
-			  token.refreshToken  = account.refresh_token;
-			  token.id_token = account.id_token;
-			  token.profile = profile;
-			  token.provider = account?.provider;
-			  token.accessTokenExpires = Date.now() + (account.expires_in - 15) * 1000;
-			  token.refreshTokenExpires = Date.now() + (account.refresh_expires_in - 15) *1000;
-			  token.user = user;
-			  return token;
+			//   token.accessToken = account.access_token;
+			//   token.refreshToken  = account.refresh_token;
+			//   token.id_token = account.id_token;
+			//   token.profile = profile;
+			//   token.provider = account?.provider;
+			//   token.accessTokenExpires = Date.now() + (account.expires_in - 15) * 1000;
+			//   token.refreshTokenExpires = Date.now() + (account.refresh_expires_in - 15) *1000;
+			//   token.user = user;
+			//   return token;
+			  return {
+				accessToken: account.accessToken,
+				accessTokenExpires: Date.now() + account.expires_in * 1000,
+				refreshToken: account.refresh_token,
+				profile: profile,
+				user,
+			  }
 			}
 
-			// Refresh token if it's expired
-			if (Date.now() > token.accessTokenExpires) {
-				token = await refreshAccessToken(token)
-			}
+			// If the token hasn't expired, return the old token.
+			// if (Date.now() < token.accessTokenExpires)
+			// {
+			// 	console.log("Returning an old token, no need to refresh", token.accessTokenExpires, Date.now())
+			// 	return token;
+			// }
+			// console.log("Refreshing!")
+			// return refreshAccessToken(token);
 
-			// And then return token
+			if (Date.now() >= token.accessTokenExpires)
+			{
+				console.log("Refreshing! at", Date.now())
+				return refreshAccessToken(token);
+			}
+			console.log("Returning an old token, no need to refresh", token.accessTokenExpires, Date.now())
 			return token;
-		  }
+
+
+
+
+
+			// If it has expired, return the new, refreshed token.
+		// 	else if (Date.now() > token.accessTokenExpires) {
+		// 		console.log("Refreshing!", token.accessTokenExpires, Date.now())
+		// 		token = await refreshAccessToken(token)
+		// 		console.log("Refreshed!", token.accessTokenExpires, Date.now())
+		// 		return token;
+		// 	}
+		// 	else if (Date.now() === token.accessTokenExpires)
+		// 	{
+		// 		console.log("Equal, somehow", token.accessTokenExpires)
+		// 	}
+		// 	else 
+		// 	{
+		// 		console.log("Outside of expected scenarios", Date.now(), token.accessTokenExpires)
+		// 		return token;
+		// 	}
+		//   }
+		 }
 		},
 		session: {
 			strategy: 'jwt',

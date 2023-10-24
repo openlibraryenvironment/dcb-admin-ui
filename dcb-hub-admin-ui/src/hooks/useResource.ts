@@ -217,14 +217,14 @@ const useResource = <T>({
 	const fetchGraphQLData:any = async () => {
 		try {
 		  let headers: AxiosRequestHeaders = {};
-	
+		  console.log("The GraphQL fetcher has been called.")
 		  if (accessToken !== null) {
 			headers = {
 			  ...headers,
 			  Authorization: 'Bearer ' + accessToken
 			};
 		  }
-			  const response = await axios.post(
+		const response = await axios.post(
 			url,
 			{ query: graphQLQuery, variables: graphQLVariables },
 			{
@@ -256,7 +256,7 @@ const useResource = <T>({
 			}
 		} catch {
 			// If the above promise does not resolve
-			console.info("GraphQL: Promise has not resolved");
+			console.info("GraphQL: Promise has not resolved", accessToken);
 		  	return Promise.reject(`Failed to perform a GraphQL request for ${generatedQueryKey.toString()}`);
 		}
 	  };

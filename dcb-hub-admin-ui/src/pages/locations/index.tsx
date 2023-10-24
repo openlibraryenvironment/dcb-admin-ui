@@ -10,7 +10,7 @@ import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 import { Location } from '@models/Location';
 import { DataGrid } from '@components/DataGrid';
@@ -69,13 +69,10 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant = 'body1' className='text-center mb-0'>{t("locations.loading_msg")}</Typography>
-							)}
+								<Typography variant = 'body1' className='text-center mb-0'>{t("locations.loading_msg", "Loading locations....")}</Typography>)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("locations.alert_text")}/>
-							)}
-
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("locations.alert_text", "Failed to fetch the locations, please refresh the page.")}/>)}
 							{resourceFetchStatus === 'success' && (
 								<>
 									<DataGrid

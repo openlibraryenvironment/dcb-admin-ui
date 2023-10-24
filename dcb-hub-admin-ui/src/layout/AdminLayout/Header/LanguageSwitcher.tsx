@@ -5,7 +5,7 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 //localisation
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 
 
 export default function LanguageSwitcher() {
@@ -21,12 +21,12 @@ export default function LanguageSwitcher() {
 
   return (
     <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-      <InputLabel id="language-select-menu-label">{t("header.language_switcher_title")}</InputLabel>
+      <InputLabel id="language-select-menu-label">{t("header.language_switcher_title", "Language")}</InputLabel>
       <Select
         labelId="language-select-menu-label"
         id="language-select-menu"
         value={language}
-        label={t("header.language_switcher_title")}
+        label={t("header.language_switcher_title", "Language")}
         onChange={handleChange}
       >
         <MenuItem value={10} onClick={() => changeLanguage('en')}>English</MenuItem>
