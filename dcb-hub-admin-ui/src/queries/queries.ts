@@ -102,3 +102,42 @@ query loadAgencies {
     }
 }
 `;
+
+// A query to load locations. Has the same temporary page size restriction as the loadHostlms query.
+
+export const loadLocations = gql`
+query loadLocations {
+    locations(pagesize: 100) {
+        totalSize
+        content {
+            id
+            code
+            name
+            type
+            isPickup
+            longitude
+            latitude
+            agency {
+                id
+                code
+                name
+                authProfile
+                longitude
+                latitude
+            }
+            parentLocation {
+                id
+                code
+                name
+                type
+                isPickup
+                longitude
+                latitude
+            }
+            hostSystem {
+                id
+            }
+        }
+    }
+}
+`;

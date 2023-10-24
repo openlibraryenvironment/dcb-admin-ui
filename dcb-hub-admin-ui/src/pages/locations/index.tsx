@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 
 import { Location } from '@models/Location';
 import { DataGrid } from '@components/DataGrid';
+import { loadLocations } from 'src/queries/queries';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -46,22 +47,25 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Generate the url for the useResource hook
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/locations';
+		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);
 
 	const {
 		resource,
 		status: resourceFetchStatus,
-		state
 	} = useResource<Location>({
 		isQueryEnabled: status === 'authenticated',
 		accessToken: data?.accessToken ?? null,
 		baseQueryKey: 'locations',
 		url: url,
-		externalState
+		type: 'GraphQL',
+		graphQLQuery: loadLocations,
+		graphQLVariables: {}
 	});
 
 	const { t } = useTranslation();
+	const rows:any = resource?.content;
+	const locationsData = rows?.locations?.content;
 
 	return (
 		<AdminLayout>
@@ -76,7 +80,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							{resourceFetchStatus === 'success' && (
 								<>
 									<DataGrid
-										data={resource?.content ?? []}
+										data={locationsData ?? []}
 										columns={[ {field: 'name', headerName: "Location name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Location ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Location code", minWidth: 50, flex: 0.5}]}	
 										type="Location"
 										selectable={true}
