@@ -138,6 +138,51 @@ query loadLocations {
                 id
             }
         }
+        pageable {
+            number
+            offset
+        }
     }
 }
 `;
+
+// A query to load patron requests. Has the same temporary page size restriction as loadHostlms.
+
+export const loadPatronRequests = gql`
+query PatronRequests {
+    patronRequests(pagesize: 100) {
+        totalSize
+        content {
+            id
+            patronHostlmsCode
+            bibClusterId
+            pickupLocationCode
+            pickupPatronId
+            pickupItemId
+            pickupItemType
+            pickupItemStatus
+            pickupRequestId
+            pickupRequestStatus
+            status
+            localRequestId
+            localRequestStatus
+            localItemId
+            localItemStatus
+            localItemType
+            localBibId
+            description
+            errorMessage
+            activeWorkflow
+            patron {
+                id
+            }
+            requestingIdentity {
+                id
+            }
+        }
+        pageable {
+            number
+            offset
+        }
+    }
+}`;

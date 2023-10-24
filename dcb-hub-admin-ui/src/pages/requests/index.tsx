@@ -12,6 +12,7 @@ import { PatronRequest } from '@models/PatronRequest';
 import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'next-i18next';
+import { loadPatronRequests } from 'src/queries/queries';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -24,40 +25,32 @@ type Props = {
 const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
-	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
-		() => ({
-			pagination: {
-				pageIndex: page - 1,
-				pageSize: resultsPerPage
-			},
-			sort: sort
-		}),
-		[page, resultsPerPage, sort]
-	);
 
 	// Generate the url for the useResource hook
 	const url = React.useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/admin/patrons/requests';
+		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);
 
 	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
-	// 	SignOutIfInactive();
+	// SignOutIfInactive();
 
 	const {
 		resource,
 		status: resourceFetchStatus,
-		state
 	} = useResource<PatronRequest>({
 		isQueryEnabled: status === 'authenticated',
 		accessToken: data?.accessToken ?? null,
 		baseQueryKey: 'patrons',
 		url: url,
-		externalState
+		type: 'GraphQL',
+		graphQLQuery: loadPatronRequests,
+		graphQLVariables: {}
 	});
 
 	const { t } = useTranslation();
+	const rows:any = resource?.content;
+	const patronRequestData = rows?.patronRequests?.content;
 
 	return (
 		<AdminLayout>
@@ -76,7 +69,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							{resourceFetchStatus === 'success' && (
 								<>
 									<DataGrid
-										data={resource?.content ?? []}
+										data={patronRequestData ?? []}
 										columns={[ {field: 'id', headerName: "Request ID", minWidth: 100, flex: 0.75}, 
 												// { field: 'patron', headerName: "Patron ID", minWidth: 100, flex: 0.5, valueGetter: (params: { row: { patron: { id: any; }; }; }) => params.row.patron.id}, 
 												   {field: 'pickupLocationCode', headerName: "Pickup location", minWidth: 50, flex: 0.5},
