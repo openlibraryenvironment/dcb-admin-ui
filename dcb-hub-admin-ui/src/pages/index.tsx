@@ -7,6 +7,8 @@ import { Paper, CardContent, Typography, Card } from '@mui/material';
 //localisation
 import { useTranslation } from 'next-i18next';
 
+import FileUploadStatus from '@components/FileUploadStatus/FileUploadStatus';
+
 const Home: NextPage = () => {
 	// SignOutIfInactive();
 	const { t } = useTranslation();
