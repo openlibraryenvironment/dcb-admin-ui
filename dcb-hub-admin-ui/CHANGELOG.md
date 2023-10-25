@@ -1,3 +1,10 @@
+## [1.0.2](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.1...v1.0.2) (2023-10-25)
+
+
+### Bug Fixes
+
+* Fix i18n key error message [DCB-507] ([13bfbbc](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/commit/13bfbbc98121d4a35812b60470c2634d1b3e48fa))
+
 ## [1.0.1](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.0...v1.0.1) (2023-10-18)
 
 
