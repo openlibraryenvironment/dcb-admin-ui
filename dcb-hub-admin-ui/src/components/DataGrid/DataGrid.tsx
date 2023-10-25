@@ -79,6 +79,11 @@ export default function DataGrid<T extends Object>({
         // may have to fix height for no data overlay to display
         <div>
         <MUIDataGrid
+        sx={{
+            ".MuiDataGrid-virtualScroller": {
+                overflow: 'hidden'
+            }
+        }}
             //DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
             experimentalFeatures={{ ariaV7: true }}
             // determines whether we allow row selection
