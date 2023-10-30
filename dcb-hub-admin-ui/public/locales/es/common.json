@@ -105,6 +105,7 @@
     "import_title": "Importar {{profile}} asignaciones",
     "add_success": "Añadido con éxito {{fileName}}",
     "upload_success": "Subido con éxito {{fileName}}.",
+    "upload_failure": "No se ha podido cargar {{fileName}}, vuelva a intentarlo.",
     "drag_n_drop": "Arrastra y suelta o haz clic para seleccionar un archivo",
     "suggested_formats": "Formatos sugeridos: CSV, TSV",
     "max_size": "Tamaño máximo {{maxSize}} MB",

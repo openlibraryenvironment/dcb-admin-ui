@@ -107,14 +107,19 @@ const UppyFileUpload = ({ onFileUpload }: any) => {
   uppy.on('error', (error) => {
     setErrorDisplayed(true);
     setErrorMessage("File failed to upload, please retry."+ error);
+    
+  });
+  uppy.on('upload-error', (file:any, error) => {
+    setErrorDisplayed(true);
+    setFailedFile({name: file.name, size: file.size});
+    setErrorMessage("File failed to upload, please retry."+ error);
+    
   });
 
   // Maps all added files to display them as alerts.
-  // const acceptedFileItems = uppy.getFiles().map(file => (
-  //   // <li key={file.name} style={{ listStyleType: 'none' }}> 
-  //     <Alert severityType="info" alertText={t("mappings.add_success", {fileName: file.name})} key={file.size}/>
-  // //  </li>
-  // ));
+  const acceptedFileItems = uppy.getFiles().map(file => (
+      <Alert severityType="info" alertText={t("mappings.add_success", {fileName: file.name})} key={file.size}/>
+  ));
 
   // Used to conditionally render the UI depending on if accepted files exist (i.e. disabling buttons etc)
   const doFilesAcceptedExist = (uppy.getFiles().length > 0) ? true : false;
@@ -137,12 +142,12 @@ const UppyFileUpload = ({ onFileUpload }: any) => {
         // Change colour / disabled on zero accepted files ^^
         Set displayed error
         https://uppy.io/docs/uppy/#upload */}
-        {/* {acceptedFileItems} */}
+        {acceptedFileItems}
         {(errorMessage.includes("exceeds maximum allowed size") && isErrorDisplayed) && (<Alert severityType="error" alertText={t("mappings.file_too_large", {fileName: failedFile.name, fileSize: fileSizeConvertor(failedFile.size), maxSize: 1})} key={"validation-upload-error-file-size"} onCloseFunc={dismissError}/>)}
         {(errorMessage.includes("This file is smaller than the allowed size") && isErrorDisplayed) && (<Alert severityType="error" alertText={t("mappings.file_empty", {fileName: failedFile.name})} key={"validation-upload-error-file-empty"} onCloseFunc={dismissError}/>)}
         {(errorMessage.includes("Error: You can only upload") && isErrorDisplayed) && (<Alert severityType="error" alertText={t("mappings.wrong_file_type", {fileName: failedFile.name, allowedFiles: ".csv, .tsv"})} key={"validation-upload-error-file-type"} onCloseFunc={dismissError}/>)}
-        {(errorMessage.includes("Upload failed") && isErrorDisplayed) && (<Alert severityType="error" alertText={t("mappings.upload_failed", {fileName: failedFile.name})} key={"validation-upload-error"} onCloseFunc={dismissError}/>)}
-        {isAdded && (<Alert severityType="info" alertText={t("mappings.add_success", {fileName: addedFile.name})} key={"add-successful"}/>)}
+        {(errorMessage.includes("failed to upload") && isErrorDisplayed) && (<Alert severityType="error" alertText={t("mappings.upload_failure", {fileName: failedFile.name})} key={"validation-upload-error"} onCloseFunc={dismissError}/>)}
+        {/* {isAdded && (<Alert severityType="info" alertText={t("mappings.add_success", {fileName: addedFile.name})} key={"add-successful"}/>)} */}
         {isSuccess && (<Alert severityType="success" alertText={t("mappings.upload_success", {fileName: addedFile.name})} key={"upload-successful"}/>)}
     </Stack>
   );
