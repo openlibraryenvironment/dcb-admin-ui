@@ -80,7 +80,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							<Button variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group", "Add agencies to a group")}</Button>
 							<DataGrid
 								data={agenciesData ?? []}
-								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
+								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
 								type = "Agency"
 								selectable= {true}
 								noDataTitle={"No agencies found."}

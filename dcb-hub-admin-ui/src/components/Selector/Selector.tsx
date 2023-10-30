@@ -63,12 +63,12 @@ export default function Selector({optionsType, options}: SelectorType) {
             setHostLmsId(value?.value);
           }}
         // Here we can store the value to be used for import, and supply the necessary hostlms ID
-          disablePortal
+          disablePortal 
           id="selector-combo-box"
           options={names ?? []}
           getOptionLabel={(option: any) => option.label}
-          sx={{ width: 300 }}
-          renderInput={(params: any) => <TextField {...params} label={optionsType} />}
+          fullWidth
+          renderInput={(params: any) => <TextField {...params} required label={optionsType} helperText={"Required field"} />}
           isOptionEqualToValue={(option, value) => option.id === value.id}
         />
       );
