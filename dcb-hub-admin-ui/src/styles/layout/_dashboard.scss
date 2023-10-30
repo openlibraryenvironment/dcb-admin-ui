@@ -37,7 +37,7 @@
 }
 
 .uppy-DragDrop--isDragDropSupported {
-  border: 2px dashed lighten($gray-500, 10%);
+  border: 2px lighten($gray-500, 10%);
 }
 
 .uppy-DragDrop--isDraggingOver {
@@ -63,4 +63,5 @@
 .uppy-DragDrop-note {
   color: black;
   font-size: 1em;
+  white-space: pre-wrap;
 }

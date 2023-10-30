@@ -112,7 +112,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new", "New Group")}</Button>
 								<DataGrid
 								data={groupsData ?? []}
-								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
+								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
 								type = "Group"
 								selectable= {true}
 								noDataTitle={"No groups found."}

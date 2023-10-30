@@ -114,17 +114,18 @@
     "alert_text": "Failed to fetch the mappings, please refresh the page.",
     "no_results": "No results found",
     "import_circulation_status": "Import circulation status mappings for a Host LMS",
-    "import_title": "Import circulation status mappings",
-    "add_success": "Successfully added {{fileName}}. When you're ready to upload, just click the button.",
-    "upload_success": "Successfuly uploaded {{fileName}}.",
+    "import_title": "Import {{profile}} mappings",
+    "add_success": "Successfully added {{fileName}}.",
+    "upload_success": "Successfully uploaded {{fileName}}.",
     "upload_failure": "Failed to upload {{fileName}}, please retry.",
     "drag_n_drop": "Drag and drop or click to select a file.",
     "suggested_formats": "Suggested formats: CSV, TSV",
-    "max_size": "Maximum size 10 MB",
+    "max_size": "Maximum size {{maxSize}}",
     "file_too_large": "{{fileName}} is {{fileSize}} MB. Maximum file size is {{maxSize}} MB. Please select a smaller file.",
     "wrong_file_type": "{{fileName}} is in an unsupported format. The valid formats are {{allowedFiles}}. Please select another file.",
     "file_empty": "{{fileName}} has no content. The file must not be empty. Please select a file with content.",
-    "import": "Import"
+    "import": "Import",
+    "import_file": "Import file"
   },
 
   "breadcrumbs": {

@@ -102,16 +102,17 @@
     "alert_text": "No se han podido obtener las asignaciones, actualice la página.",
     "no_results": "No se han encontrado resultados",
     "import_circulation_status": "Importar asignaciones de estado de circulación para un Host LMS",
-    "import_title": "Asignaciones de estado de circulación de las importaciones",
-    "add_success": "Añadido con éxito {{fileName}}. Cuando estés listo para subirlo, haz clic en el botón",
+    "import_title": "Importar {{profile}} asignaciones",
+    "add_success": "Añadido con éxito {{fileName}}",
     "upload_success": "Subido con éxito {{fileName}}.",
     "drag_n_drop": "Arrastra y suelta o haz clic para seleccionar un archivo",
     "suggested_formats": "Formatos sugeridos: CSV, TSV",
-    "max_size": "Tamaño máximo 10 MB",
+    "max_size": "Tamaño máximo {{maxSize}} MB",
     "file_too_large": "{{fileName}} es {{fileSize}} MB. El tamaño máximo del archivo es {{maxSize}} MB. Por favor, seleccione un archivo más pequeño",
     "wrong_file_type": "{{fileName}} está en un formato no admitido. Los formatos válidos son {{allowedFiles}}. Seleccione otro archivo",
     "file_empty": "{{fileName}} no tiene contenido. El archivo no debe estar vacío. Seleccione un archivo con contenido",
-    "import": "Importar"
+    "import": "Importar",
+    "import_file": "Importar archivo"
   },
   "breadcrumbs": {
     "home_text": "Hogar"

@@ -81,7 +81,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 								<>
 									<DataGrid
 										data={locationsData ?? []}
-										columns={[ {field: 'name', headerName: "Location name", minWidth: 150, flex: 1}, { field: 'id', headerName: "Location ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Location code", minWidth: 50, flex: 0.5}]}	
+										columns={[ {field: 'name', headerName: "Location name", minWidth: 150, flex: 0.6}, { field: 'id', headerName: "Location ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Location code", minWidth: 50, flex: 0.5}]}	
 										type="Location"
 										selectable={true}
 										noDataTitle={"No locations found."}
