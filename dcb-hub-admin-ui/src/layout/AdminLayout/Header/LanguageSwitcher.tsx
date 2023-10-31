@@ -1,4 +1,3 @@
-import * as React from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -6,10 +5,11 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 
 //localisation
 import { useTranslation } from 'next-i18next';
+import { useState } from 'react';
 
 
 export default function LanguageSwitcher() {
-  const [language, setLanguage] = React.useState('');
+  const [language, setLanguage] = useState('');
   const handleChange = (event: SelectChangeEvent) => {
     setLanguage(event.target.value);
   };

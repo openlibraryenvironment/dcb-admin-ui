@@ -1,4 +1,4 @@
-import React, { PropsWithChildren } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import Head from 'next/head';
 import Sidebar from '@layout/AdminLayout/Sidebar/Sidebar';
 import Footer from '@layout/AdminLayout/Footer/Footer';
@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Header from './Header/Header';
 
 export default function AdminLayout({ children }: PropsWithChildren) {
-	const [open, setOpen] = React.useState(true);
+	const [open, setOpen] = useState(true);
 
 	return (
 		<>

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
@@ -13,6 +12,7 @@ import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'next-i18next';
 import { loadPatronRequests } from 'src/queries/queries';
+import { useMemo } from 'react';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -27,7 +27,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const { data, status } = useSession();
 
 	// Generate the url for the useResource hook
-	const url = React.useMemo(() => {
+	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);

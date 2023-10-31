@@ -32,7 +32,7 @@ export const createGroup = gql`
 // A query for loading groups and their members.
 export const groupsQueryDocument = gql`
 query FindGroups {
-    agencyGroups(pagesize: 100) {
+    agencyGroups(pagesize: 500) {
         totalSize
         content {
             id
@@ -40,6 +40,21 @@ query FindGroups {
             name
             members {
                 id
+                agency {
+                    id
+                    code
+                    name
+                    authProfile
+                    longitude
+                    latitude
+                    hostLms {
+                        id
+                        code
+                        name
+                        lmsClientClass
+                        clientConfig
+                    }
+                }
             }
         }
         pageable {

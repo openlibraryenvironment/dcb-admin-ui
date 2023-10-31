@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
@@ -15,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { Location } from '@models/Location';
 import { DataGrid } from '@components/DataGrid';
 import { loadLocations } from 'src/queries/queries';
+import { useMemo } from 'react';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -30,7 +30,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
-	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
 				pageIndex: page - 1,
@@ -45,7 +45,7 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	// SignOutIfInactive();
 
 	// Generate the url for the useResource hook
-	const url = React.useMemo(() => {
+	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);

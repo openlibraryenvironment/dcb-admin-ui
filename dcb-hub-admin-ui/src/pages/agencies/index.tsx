@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
@@ -38,7 +37,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		setAddToGroup(false);
 	};
 
-	const url = React.useMemo(() => {
+	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);

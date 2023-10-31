@@ -1,9 +1,8 @@
-import * as React from 'react';
-
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import axios, { AxiosRequestHeaders } from 'axios';
 import { newGraphQLResource, newResource, Resource } from '@models/resource';
 import { PaginationState, SortingState } from '@tanstack/react-table';
+import { useMemo, useReducer } from 'react';
 // This is the method of data fetching we use for the Admin UI application.
 // It is a modified implementation of react-query's useQuery, and currently supports both GraphQL
 // and REST requests. 
@@ -116,7 +115,7 @@ const useResource = <T>({
 	graphQLVariables
 }: UseResourceParams<T> & { [key: string]: unknown }) => {
 	// Used to update the useResource state e.g. page number, current sort, number of items per page etc
-	const [state, dispatch] = React.useReducer(
+	const [state, dispatch] = useReducer(
 		// Reducer for managing state
 		reducer,
 
@@ -140,7 +139,7 @@ const useResource = <T>({
 
 	// This also needs GraphQL specific behaviour 
 	// And fixing so that server side pagination actually works
-	const dependencies = React.useMemo(
+	const dependencies = useMemo(
 		() => ({
 			// Page number (Pagination state)
 			pageIndex:
@@ -170,7 +169,7 @@ const useResource = <T>({
 	);
 
 	// Generate the query key, this is exposed as you could use it for mutations to update the cache
-	const generatedQueryKey: QueryKey = React.useMemo(
+	const generatedQueryKey: QueryKey = useMemo(
 		() => [
 			{
 				// Base key e.g. "audits", "hostlmss" etc

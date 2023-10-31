@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useFormik} from 'formik';
 import { useSession } from 'next-auth/react';
 import request, { GraphQLClient } from 'graphql-request';
@@ -57,7 +57,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const url = React.useMemo(() => {
+    const url = useMemo(() => {
       const { publicRuntimeConfig } = getConfig();
       return publicRuntimeConfig.DCB_API_BASE + '/graphql';
     }, []);
