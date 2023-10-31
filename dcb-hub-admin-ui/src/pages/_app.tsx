@@ -1,4 +1,3 @@
-import * as React from 'react';
 import '@styles/globals.scss';
 import type { AppProps } from 'next/app';
 // Next.js allows you to import CSS directly in .js files.
@@ -22,6 +21,7 @@ import { useMediaQuery } from '@mui/material';
 //localisation
 import { appWithI18Next, useSyncLanguage } from 'ni18n';
 import { ni18nConfig } from 'ni18n.config';
+import { useMemo, useState } from 'react';
 
 
 const clientSideEmotionCache = createEmotionCache();
@@ -44,7 +44,7 @@ function MyApp(props: MyAppProps) {
 	// 1. Create either separate theme variables or theme.ts files.
 	// 2. Apply changes accordingly within createTheme.
 	// 3. Change the theme passed into the 'ThemeProvider' accordingly.
-	const theme = React.useMemo(
+	const theme = useMemo(
 		() =>
 		// Uses the user's previously expressed system preference. If we want this to be toggleable, we'll need to change it 
 		// accordingly.
@@ -67,7 +67,7 @@ function MyApp(props: MyAppProps) {
 		[prefersDarkMode],
 	);
 
-	const [queryClient] = React.useState(
+	const [queryClient] = useState(
 		() =>
 			new QueryClient({
 				defaultOptions: {

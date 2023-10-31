@@ -1,5 +1,4 @@
 import Link from '@components/Link/Link';
-import * as React from 'react';
 import { AdminLayout } from '@layout';
 import { Typography } from '@mui/material';
 //localisation

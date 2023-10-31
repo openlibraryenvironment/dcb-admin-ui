@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { GetServerSideProps, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
+import { useMemo } from 'react';
 
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -37,7 +37,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 	const queryVariables = {};
 
-	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
 				pageIndex: page - 1,
@@ -49,7 +49,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	);
 
 	// Generate the url for the useResource hook
-	const url = React.useMemo(() => {
+	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);

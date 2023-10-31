@@ -1,6 +1,5 @@
 import { PaginationState, SortingState } from '@tanstack/react-table'
-import * as React from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
 import { getSession, useSession } from 'next-auth/react';
@@ -41,7 +40,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 	const { data: session, status } = useSession();
 	const [showNewGroup, setShowNewGroup] = useState(false);
 
-	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
 				pageIndex: page - 1,
@@ -52,7 +51,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 		[page, resultsPerPage, sort]
 	);
 
-	const url = React.useMemo(() => {
+	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
 	}, []);

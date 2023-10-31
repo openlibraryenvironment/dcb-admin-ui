@@ -1,4 +1,3 @@
-import * as React from 'react';
 import LinearProgress, { LinearProgressProps, linearProgressClasses } from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -6,6 +5,7 @@ import { MdFilePresent} from 'react-icons/md';
 import { MdClose } from 'react-icons/md';
 import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
+import { useState, useEffect } from 'react';
 
 // material ui code reference for progress bar: https://mui.com/material-ui/react-progress/#linear-with-label
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number }) {
@@ -36,9 +36,9 @@ const BorderLinearProgress = styled(LinearProgressWithLabel)(({ theme }) => ({
 }));
 
 const RenderFileUploadStatus = (props:any) => {
-  const [progress, setProgress] = React.useState(10);
+  const [progress, setProgress] = useState(10);
 
-  React.useEffect(() => {
+  useEffect(() => {
     //this is to just to show how the progress bar looks loading, remove to retain actual functionality 
     const timer = setInterval(() => {
       setProgress((prevProgress) => (prevProgress >= 100 ? 10 : prevProgress + 10));
@@ -69,7 +69,7 @@ const RenderFileUploadStatus = (props:any) => {
 /* logic regarding when the file upload component will show needs to be handled seperately 
    as part of the actual file upload implementation  */
 export default function FileUploadStatus() {
-  const [hidden, setHidden] = React.useState(false);
+  const [hidden, setHidden] = useState(false);
   
   const HandleComponentToggle = () => {
     setHidden(!hidden);

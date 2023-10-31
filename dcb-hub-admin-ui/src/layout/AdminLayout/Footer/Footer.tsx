@@ -1,5 +1,4 @@
 import Link from '@components/Link/Link';
-import React from 'react';
 //localisation
 import { useTranslation } from 'next-i18next';
 

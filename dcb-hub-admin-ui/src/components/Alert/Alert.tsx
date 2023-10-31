@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Alert as MUIAlert, AlertTitle} from '@mui/material';
 import { capitalize } from '@mui/material/utils';
 

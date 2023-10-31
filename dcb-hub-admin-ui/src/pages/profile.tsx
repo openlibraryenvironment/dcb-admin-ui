@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { NextPage } from 'next';
 
 import { Card, CardContent, Paper, List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem } from "@mui/material"

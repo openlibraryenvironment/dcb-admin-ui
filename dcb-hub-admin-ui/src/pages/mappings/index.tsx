@@ -9,7 +9,7 @@ import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
 import { useSession } from 'next-auth/react';
 import { PaginationState, SortingState } from '@tanstack/react-table';
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import getConfig from 'next/config';
 
 //localisation
@@ -40,7 +40,7 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	};
 
 	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
-	const externalState = React.useMemo<{ pagination: PaginationState; sort: SortingState }>(
+	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
 				pageIndex: page - 1,
@@ -52,7 +52,7 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	);
 
 	// Generate the url for the useResource hook
-	const url = React.useMemo(() => {
+	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/referenceValueMappings';
 	}, []);

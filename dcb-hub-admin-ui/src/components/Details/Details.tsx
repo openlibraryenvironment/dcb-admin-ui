@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { forwardRef } from 'react';
 import { CardContent, Card, Typography, Dialog, Slide, AppBar, IconButton, Toolbar, DialogContent, AccordionSummary, Accordion, AccordionDetails }from "@mui/material"
 import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
@@ -16,7 +16,7 @@ type DetailsType = {
 };
 
 
-const Transition = React.forwardRef(function Transition(
+const Transition = forwardRef(function Transition(
         props: TransitionProps & {
           children: React.ReactElement;
         },
@@ -36,6 +36,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 return array.find(item => item.id === id);
                 };
         const toDisplay = findItemById(content, i);
+        console.log(toDisplay);
                 
         return (
       
@@ -268,6 +269,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {type == "Group"?<Card variant='outlined'>
                                 <CardContent>
+                                        {/* // Map is causing a problem */}
                                         <DataGrid 
                                         data={toDisplay?.members.map((item: { agency: any; }) => item.agency) ?? []}
                                         columns={[ {field: 'name', headerName: "Agency name", minWidth: 100, flex: 1}, 
