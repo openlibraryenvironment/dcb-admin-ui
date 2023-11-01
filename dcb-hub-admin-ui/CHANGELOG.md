@@ -1,3 +1,11 @@
+## [1.0.3](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.2...v1.0.3) (2023-11-01)
+
+
+### Bug Fixes
+
+* Add upload error handler [DCB-487] ([3c554ce](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/commit/3c554ce65099c92bd7742b5ed476dfe5aeb4d594))
+* Remove unnecessary React imports [DCB-524] ([12b5416](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/commit/12b5416b31cdec557dde844a964a4b97de1e777c))
+
 ## [1.0.2](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.1...v1.0.2) (2023-10-25)
 
 
