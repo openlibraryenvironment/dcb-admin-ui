@@ -12,6 +12,11 @@ export interface Resource<T> {
 	totalSize: number;
 }
 
+// Also part of workaround - to be removed as part of server side pagination work
+export interface NonPageableResource<T> {
+	content: T[];
+}
+
 export interface GraphQLResource<T> {
 	content: T[];
 	meta: {};
@@ -28,6 +33,12 @@ export const newResource = <T>(content: T[], pageable: any, totalSize: number): 
 		current_page: 1 // (pageable.number)+1,
 	},
 	totalSize: totalSize
+});
+
+// To be made redundant by proper server-side pagination 
+// Workaround as it's too complex to fix as part of this ticket
+export const newNonPageableResource = <T>(content: T[]): NonPageableResource<T> => ({
+	content: content,
 });
 
 // We've temporarily switched to using this UNTIL server-side pagination is working for both REST and GraphQL responses.

@@ -67,12 +67,12 @@ export default function DataGrid<T extends Object>({
 
     // Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' panel.
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
-        if (type != "GroupDetails")
-        {
+        if (type !== "GroupDetails" && type !== "CirculationStatus" && type !== "All Mappings") {
             setShowDetails(true);
             setIdClicked(params?.row?.id);
         }
-	  };
+	};
+    // Disable click-through on mappings for now ^^.
 
 
     return (

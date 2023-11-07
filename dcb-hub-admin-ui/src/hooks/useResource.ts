@@ -1,6 +1,6 @@
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import axios, { AxiosRequestHeaders } from 'axios';
-import { newGraphQLResource, newResource, Resource } from '@models/resource';
+import { newGraphQLResource, newNonPageableResource, newResource, Resource } from '@models/resource';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { useMemo, useReducer } from 'react';
 // This is the method of data fetching we use for the Admin UI application.
@@ -28,7 +28,7 @@ type APP_STATE = {
 
 type AxiosResponse<TData> = {
 	content: TData[];
-	pageable: {
+	pageable?: {
 		size: number;
 		number: number;
 		sort: Object;
@@ -293,7 +293,13 @@ const useResource = <T>({
 			}
 			throw Error();
 		  }
-		  return Promise.resolve(newResource<T>(response.data.content, response.data.pageable, response.data.totalSize));
+		  if (response?.data?.pageable!=null)
+		  {
+			return Promise.resolve(newResource<T>(response.data.content, response.data.pageable, response.data.totalSize));
+		  }
+		  // @ts-ignore
+		  else return Promise.resolve(newNonPageableResource<T>(response.data)); 	
+		  // come back and fix this - Axios type weirdness needs to be investigated.
 		} catch {
 		  return Promise.reject(`Failed to perform a REST request for ${generatedQueryKey.toString()}`);
 		}
