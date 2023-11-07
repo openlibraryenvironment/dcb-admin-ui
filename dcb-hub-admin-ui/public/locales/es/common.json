@@ -93,8 +93,11 @@
     "alert_text": "No se pudieron recuperar las solicitudes, actualice la página."
   },
   "settings": {
-    "ajustes": "Settings",
-    "estado_circulación": "Asignaciones de estado de circulación de artículos"
+    "settings": "Ajustes",
+    "mappings": "Asignaciones",
+    "all_mappings": "Todos Asignaciones",
+    "circulation_status": "Asignaciones de estado de circulación de artículos",
+    "shelving_location": "Asignaciones de ubicación de estanterías"
   },
   "mappings": {
     "mappings": "mappings",
@@ -104,8 +107,8 @@
     "import_circulation_status": "Importar asignaciones de estado de circulación para un Host LMS",
     "import_title": "Importar {{profile}} asignaciones",
     "add_success": "Añadido con éxito {{fileName}}",
-    "upload_success": "Subido con éxito {{fileName}}.",
-    "upload_failure": "No se ha podido cargar {{fileName}}, vuelva a intentarlo.",
+    "upload_success": "La importación se ha completado. {{cuenta}} {{category}} se han creado asignaciones. Seleccione “Cerrar” para verlas",
+    "upload_failure": "La importación no ha finalizado porque se ha encontrado un problema. No se ha creado ninguna asignación. Seleccione “Cerrar” e intente importar de nuevo",
     "drag_n_drop": "Arrastra y suelta o haz clic para seleccionar un archivo",
     "suggested_formats": "Formatos sugeridos: CSV, TSV",
     "max_size": "Tamaño máximo {{maxSize}} MB",
