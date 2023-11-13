@@ -3,6 +3,10 @@
 import { withAuthProvider } from './middlewares/withAuthorization';
 export default withAuthProvider('keycloak');
 
+
+// Suggested by https://github.com/nextauthjs/next-auth/discussions/4414
+import { withAuth } from "next-auth/middleware";
+
 // See https://next-auth.js.org/configuration/nextjs
 //
 
@@ -23,3 +27,8 @@ export const config = {
 	],
 	unstable_allowDynamic: ['**/@babel/runtime/regenerator/index.js']
 };
+
+export default withAuth({
+  secret: process.env.NEXTAUTH_SECRET,
+});
+
