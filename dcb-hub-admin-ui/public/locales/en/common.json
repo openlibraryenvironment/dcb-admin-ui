@@ -105,7 +105,10 @@
 
   "settings": {
     "settings": "Settings",
-    "circulation_status": "Item circulation status mappings"
+    "mappings": "Mappings",
+    "all_mappings": "All mappings",
+    "circulation_status": "Item circulation status mappings",
+    "shelving_location": "Shelving location mappings"
   },
 
   "mappings": {
@@ -116,8 +119,8 @@
     "import_circulation_status": "Import circulation status mappings for a Host LMS",
     "import_title": "Import {{profile}} mappings",
     "add_success": "Successfully added {{fileName}}.",
-    "upload_success": "Successfully uploaded {{fileName}}.",
-    "upload_failure": "Failed to upload {{fileName}}, please retry.",
+    "upload_success": "Import is complete. {{count}} {{category}} mappings were created. Select “Close” to view them.",
+    "upload_failure": "The import has not completed because a problem was encountered. No mappings have been created. Select “Close” and try importing again",
     "drag_n_drop": "Drag and drop or click to select a file.",
     "suggested_formats": "Suggested formats: CSV, TSV",
     "max_size": "Maximum size {{maxSize}}",

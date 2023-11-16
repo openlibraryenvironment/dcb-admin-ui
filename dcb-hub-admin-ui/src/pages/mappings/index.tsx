@@ -16,6 +16,7 @@ import getConfig from 'next/config';
 import { useTranslation } from 'next-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Import from '@components/Import/Import';
+import dayjs from 'dayjs';
 
 type Props = {
 	page: number;
@@ -23,7 +24,9 @@ type Props = {
 	sort: SortingState;
 };
 
-const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+// Page for 'ALL' referenceValueMappings - includes CirculationStatus, ShelvingLocation, etc.
+
+const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 		// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
 	const queryClient = useQueryClient();
@@ -35,11 +38,9 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const closeImport = () => {
 		setImport(false);
 		queryClient.invalidateQueries();
-		// forces the query to refresh once a new group is added	
-		// needs to be adapted to work with SSR approach so that the grid always updates correctly on new group creation	
 	};
 
-	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
+	// Formats the data from getServerSideProps into the appropriate format for the useResource hook (Query key) and the TanStackTable component
 	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
 		() => ({
 			pagination: {
@@ -65,7 +66,7 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	} = useResource<Mapping>({
 		isQueryEnabled: status === 'authenticated',
 		accessToken: data?.accessToken ?? null,
-		baseQueryKey: 'referenceValueMappings',
+		baseQueryKey: 'allMappings',
 		url: url,
 		defaultValues: externalState
 	});
@@ -77,20 +78,8 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Paper elevation={16}>
 				<Card>
 					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status", "Item circulation status mappings")}</Typography>}/>                    <CardContent>
-                            {/* Tabs? May also need custom toolbar.
-							If empty, needs to show link to import mappings */}
-
-						    {/* {resourceFetchStatus === 'loading' && (
-								<Typography variant = 'body1' className='text-center mb-0'>Loading locations.....</Typography>
-							)}
-
-							{resourceFetchStatus === 'error' && (
-								<Alert severity='error' onClose={() => {}}>Failed to fetch the locations, please refresh the page.</Alert>
-							)} */}
-
-							{/* {resourceFetchStatus === 'success' && (
-								<> */}
+					<CardHeader title={<Typography variant = "h5"> {t("settings.mappings", "Item circulation status mappings")}</Typography>}/>                    
+					<CardContent>
 							{resourceFetchStatus === 'loading' && (
 								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg", "Loading mappings...")}</Typography>
 							)}
@@ -105,20 +94,16 @@ const Mappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 									<DataGrid
 										data={resource?.content ?? []}
-										// columns={[ {field: 'hostlms', headerName: "Host LMS", minWidth: 50, flex: 0.5}, 
-                                        //            {field: 'localValue', headerName: "Local Value", minWidth: 50, flex: 0.5}, 
-                                        //            {field: 'meaning', headerName: "Meaning", minWidth: 50, flex: 0.5}, 
-                                        //            {field: 'dcbValue', headerName: "DCB Value", minWidth: 50, flex: 0.5}, 
-                                        //            {field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5}]}
 										columns={[{field: 'fromCategory', headerName: "Category", minWidth: 50, flex: 0.5},
 												{field: 'fromContext', headerName: "HostLMS", minWidth: 50, flex: 0.5},
-												// {field: 'toContext', headerName: "Context To", minWidth: 50, flex: 0.5}, 
-												// {field: 'toCategory', headerName: "Category To", minWidth: 50, flex: 0.5},
-												{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.5}, 
-												{field: 'meaning', headerName: "Meaning", minWidth: 50, flex: 0.5},
+												{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.4}, 
+												{field: 'label', headerName: "Meaning", minWidth: 50, flex: 0.5},
 												{field: 'toValue', headerName: "DCB Value", minWidth: 50, flex: 0.5}, 
-												{field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5}]}		
-										type="Circulation Status Mappings"
+												{field: 'last_imported', headerName: "Last imported", minWidth: 100, flex: 0.5, valueGetter: (params: { row: { lastImported: any; }; }) => {
+													const lastImported = params.row.lastImported;
+													return dayjs(lastImported).format('DD/MM/YY hh.mm A');
+												}}]}		
+										type="All Mappings"
 										noDataLink={"#"}
 										noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
 										noDataTitle={t("mappings.no_results", "No results found")}
@@ -174,4 +159,4 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 	};
 };
 
-export default Mappings;
+export default AllMappings;
