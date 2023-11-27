@@ -79,6 +79,7 @@ const MappingsByCategory: NextPage<Props> = () => {
 					noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
 					noDataTitle={t("mappings.no_results", "No results found")}
 					selectable={false}
+					sortModel={[{field: 'lastImported', sort: 'desc'}]}
 				/>
 			</div>
 		)
