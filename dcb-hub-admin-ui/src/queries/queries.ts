@@ -162,6 +162,8 @@ query loadLocations {
 `;
 
 // A query to load patron requests. Has the same temporary page size restriction as loadHostlms.
+// Slim it down once we've decided what we need - if this mega query is needed for diagnostics 
+// we can have a 'just the essentials' query for other use cases
 
 export const loadPatronRequests = gql`
 query PatronRequests {
@@ -169,6 +171,8 @@ query PatronRequests {
         totalSize
         content {
             id
+            dateCreated
+            dateUpdated
             patronHostlmsCode
             bibClusterId
             pickupLocationCode
@@ -188,16 +192,135 @@ query PatronRequests {
             description
             errorMessage
             activeWorkflow
+            requesterNote
             patron {
                 id
             }
             requestingIdentity {
                 id
+                localId
+                homeIdentity
+                localBarcode
+                localNames
+                localPtype
+                canonicalPtype
+                localHomeLibraryCode
+                lastValidated
             }
-        }
-        pageable {
-            number
-            offset
+            suppliers {
+                id
+                canonicalItemType
+                dateCreated
+                dateUpdated
+                hostLmsCode
+                isActive
+                localItemId
+                localBibId
+                localItemBarcode
+                localItemLocationCode
+                localItemStatus
+                localItemType
+                localId
+                localStatus
+                localAgency
+                patronRequest {
+                    id
+                    dateCreated
+                    dateUpdated
+                    patronHostlmsCode
+                    bibClusterId
+                    pickupLocationCode
+                    pickupPatronId
+                    pickupItemId
+                    pickupItemType
+                    pickupItemStatus
+                    pickupRequestId
+                    pickupRequestStatus
+                    status
+                    localRequestId
+                    localRequestStatus
+                    localItemId
+                    localItemStatus
+                    localItemType
+                    localBibId
+                    description
+                    errorMessage
+                    activeWorkflow
+                    requesterNote
+                }
+            }
+            audit {
+                id
+                auditDate
+                briefDescription
+                fromStatus
+                toStatus
+                auditData
+                patronRequest {
+                    id
+                    dateCreated
+                    dateUpdated
+                    patronHostlmsCode
+                    bibClusterId
+                    pickupLocationCode
+                    pickupPatronId
+                    pickupItemId
+                    pickupItemType
+                    pickupItemStatus
+                    pickupRequestId
+                    pickupRequestStatus
+                    status
+                    localRequestId
+                    localRequestStatus
+                    localItemId
+                    localItemStatus
+                    localItemType
+                    localBibId
+                    description
+                    errorMessage
+                    activeWorkflow
+                    requesterNote
+                    requestingIdentity {
+                        id
+                        localId
+                        homeIdentity
+                        localBarcode
+                        localNames
+                        localPtype
+                        canonicalPtype
+                        localHomeLibraryCode
+                        lastValidated
+                    }
+                    patron {
+                        id
+                    }
+                    suppliers {
+                        id
+                        canonicalItemType
+                        dateCreated
+                        dateUpdated
+                        hostLmsCode
+                        isActive
+                        localItemId
+                        localBibId
+                        localItemBarcode
+                        localItemLocationCode
+                        localItemStatus
+                        localItemType
+                        localId
+                        localStatus
+                        localAgency
+                    }
+                    audit {
+                        id
+                        auditDate
+                        briefDescription
+                        fromStatus
+                        toStatus
+                        auditData
+                    }
+                }
+            }
         }
     }
 }`;

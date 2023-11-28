@@ -25,6 +25,8 @@ export default function DataGrid<T extends Object>({
     noDataTitle,
     noDataMessage,
     noDataLink,
+    columnVisibilityModel,
+    sortModel
 }: {
 	data: Array<T>;
 	columns: any; 
@@ -34,6 +36,8 @@ export default function DataGrid<T extends Object>({
     noDataTitle?: string;
     noDataMessage?: any;
     noDataLink?: any;
+    columnVisibilityModel?: any;
+    sortModel?: any
 }) {
     // When passing a type into DataGrid, use the singular - 'Group' not Groups etc.
     // This ensures consistency with Details.
@@ -67,7 +71,7 @@ export default function DataGrid<T extends Object>({
 
     // Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' panel.
     const handleRowClick: GridEventListener<'rowClick'> = (params) => {
-        if (type !== "GroupDetails" && type !== "CirculationStatus" && type !== "All Mappings") {
+        if (type !== "GroupDetails" && type !== "CirculationStatus" && type !== "All Mappings" && type !== "Audit") {
             setShowDetails(true);
             setIdClicked(params?.row?.id);
         }
@@ -79,6 +83,7 @@ export default function DataGrid<T extends Object>({
         // may have to fix height for no data overlay to display
         <div>
         <MUIDataGrid
+        // Makes sure scrollbars aren't visible
         sx={{
             ".MuiDataGrid-virtualScroller": {
                 overflow: 'hidden'
@@ -105,12 +110,24 @@ export default function DataGrid<T extends Object>({
                             // initiate the filter models here
                             filterModel: {
                             items: [],
+                            // So we don't search hidden columns and confuse the user
                             quickFilterExcludeHiddenColumns: true,
                             },
                             },
                     pagination: {
+                        // To be replaced with server side pagination
                                 paginationModel: { pageSize: 25, page: 0 },
                     },
+                    // Handles whether columns are visible or not - pass the relevant model in (see requests)
+                    columns: 
+                    {
+                        columnVisibilityModel
+                    },
+                    // Handles default sort order- pass the relevant model in (see requests)
+                    sorting:
+                    {
+                        sortModel
+                    }
                     }} 
             // if we don't want to filter by a column, set filterable to false (turned on by default)
             columns= {columns}
