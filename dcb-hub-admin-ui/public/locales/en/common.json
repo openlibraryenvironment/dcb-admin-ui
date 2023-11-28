@@ -76,6 +76,7 @@
     "local_item_type": "Local item type: ",
     "local_request_id": "Local request ID: ",
     "local_request_status": "Local request status: ",
+    "local_supplier_id": "Local supplier request ID: ",
     "location_agency": "Location agency ID: ",
     "location_info": "Location information",
     "location_name": "Location name: ",
