@@ -87,9 +87,9 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_id", "Request ID: ")} </span>
                                                 {toDisplay?.id}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_created", "Request created: ")} </span>
-                                                {dayjs(toDisplay?.dateCreated).format('DD/MM/YYYY, HH:mm:ss')}</Typography>
+                                                {dayjs(toDisplay?.dateCreated).format('YYYY-MM-DD HH:mm')}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_updated", "Request updated: ")} </span>
-                                                {dayjs(toDisplay?.dateUpdated).format('DD/MM/YYYY, HH:mm:ss')}</Typography>
+                                                {dayjs(toDisplay?.dateUpdated).format('YYYY-MM-DD HH:mm')}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.description", "Description: ")}</span>
                                                 {toDisplay?.description}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.bib_cluster_id", "Bib cluster ID: ")}</span> 
@@ -175,9 +175,9 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.supplier_ctype", "Canonical item type: ")}</span> 
                                                 {toDisplay?.suppliers[0]?.canonicalItemType}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.dateCreated", "Date created: ")}</span> 
-                                                {dayjs(toDisplay?.suppliers[0]?.dateCreated).format('DD/MM/YY hh.mm A')}</Typography>
+                                                {dayjs(toDisplay?.suppliers[0]?.dateCreated).format('YYYY-MM-DD HH:mm')}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.dateUpdated", "Date updated: ")}</span> 
-                                                {dayjs(toDisplay?.suppliers[0]?.dateUpdated).format(('DD/MM/YY hh.mm A'))}</Typography>
+                                                {dayjs(toDisplay?.suppliers[0]?.dateUpdated).format('YYYY-MM-DD HH:mm')}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_code", "Host LMS code: ")}</span> 
                                                 {toDisplay?.suppliers[0]?.hostLmsCode}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.is_active", "isActive: ")}</span> 
@@ -195,7 +195,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_type", "Local item type: ")}</span> 
                                                 {toDisplay?.suppliers[0]?.localItemType}</Typography>
                                                 {/* We need clarity on what local ID is meant to be in this context - likewise for status and ctype */}
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_id", "Local ID: ")}</span> 
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_supplier_id", "Local supplier request ID: ")}</span> 
                                                 {toDisplay?.suppliers[0]?.localId}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_status", "Local status: ")}</span> 
                                                 {toDisplay?.suppliers[0]?.localStatus}</Typography>
@@ -216,9 +216,9 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 data={toDisplay?.audit}
                                                 columns={[{ field: 'id', headerName: "ID", minWidth: 100, flex: 0.3}, 
                                                         {field: 'auditDate', headerName: "Audit date", minWidth: 30, flex: 0.2,
-                                                        valueGetter: (params: { row: { lastImported: any; }; }) => {
-								const auditDate = params.row.lastImported;
-								return dayjs(auditDate).format('DD/MM/YY hh:mm:ss'); }},
+                                                        valueGetter: (params: { row: { auditDate: any; }; }) => {
+								const auditDate = params.row.auditDate;
+								return dayjs(auditDate).format('YYYY-MM-DD HH:mm:ss'); }},
                                                         {field: 'briefDescription', headerName: "Description", minWidth: 100, flex: 0.5},
                                                         {field: 'fromStatus', headerName: "fromStatus", minWidth: 50, flex: 0.2}, 
                                                         {field: 'toStatus', headerName: "toStatus", minWidth: 50, flex: 0.2}, ]}	

@@ -71,13 +71,13 @@ console.log(patronRequestData);
 								<>
 									<DataGrid
 										data={patronRequestData ?? []}
-										columns={[ {field: 'lastUpdated', headerName: "Request updated", minWidth: 75, flex: 0.5, valueGetter: (params: { row: { lastUpdated: any; }; }) => {
-											const requestUpdated = params.row.lastUpdated;
-											return dayjs(requestUpdated).format('DD/MM/YY hh.mm A');}},
+										columns={[ {field: 'dateUpdated', headerName: "Request updated", minWidth: 75, flex: 0.3, valueGetter: (params: { row: { dateUpdated: any; }; }) => {
+											const requestUpdated = params.row.dateUpdated;
+											return dayjs(requestUpdated).format('YYYY-MM-DD HH:mm');}},
 											{field: 'id', headerName: "Request ID", minWidth: 100, flex: 0.5}, 
 											{field: 'patron', headerName: "Patron ID", minWidth: 100, flex: 0.5, valueGetter: (params: { row: { patron: { id: any; }; }; }) => params.row.patron.id}, 
-											{field: 'localBarcode', headerName: "Patron barcode", minWidth: 50, flex: 0.5, valueGetter: (params: { row: { requestingIdentity: { localBarcode: any; }; }; }) => params?.row?.requestingIdentity?.localBarcode},
-											{field: 'description', headerName: "Description", minWidth: 50, flex: 0.5},
+											{field: 'localBarcode', headerName: "Patron barcode", minWidth: 50, flex: 0.3, valueGetter: (params: { row: { requestingIdentity: { localBarcode: any; }; }; }) => params?.row?.requestingIdentity?.localBarcode},
+											{field: 'description', headerName: "Description", minWidth: 100, flex: 0.5},
 											// HIDDEN BY DEFAULT
 											{field: 'suppliers', headerName: "Requesting agency", minWidth: 50, flex: 0.5,  valueGetter: (params: { row: { suppliers: Array<{ localAgency: any }> } }) => {
 												// Check if suppliers array is not empty
