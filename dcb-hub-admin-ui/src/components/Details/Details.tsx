@@ -39,7 +39,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
 
         // experimental - fix with a map solution as numbers of needed accordions will change
         // State values for expanded accordions
-        const [expandedAccordions, setExpandedAccordions] = useState([false, false, false, false, false]);
+        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true]);
 
         // Functions to handle expanding both individual accordions and all accordions
         const handleAccordionChange = (index: number) => () => {
@@ -92,7 +92,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {/* // These are the items that we typically need to only show for 'Request Details', hence the conditional rendering*/}
                         {type == "Request"? <Stack direction="row" justifyContent="end">
-                                <Button onClick={expandAll}>{expandedAccordions[0] ? "Close all": "Expand all"}</Button> </Stack> : null}
+                                <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse", "Collapse all"): t("details.expand", "Expand all")}</Button> </Stack> : null}
                         {type == "Request"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
                                         <AccordionSummary aria-controls="request-general-details" id="request_details_general" 
