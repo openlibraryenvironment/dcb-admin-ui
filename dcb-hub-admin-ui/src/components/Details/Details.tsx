@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
-import { CardContent, Card, Typography, Dialog, Slide, AppBar, IconButton, Toolbar, DialogContent, AccordionSummary, Accordion, AccordionDetails }from "@mui/material"
+import { forwardRef, useState } from 'react';
+import { CardContent, Card, Typography, Dialog, Slide, AppBar, IconButton, Toolbar, DialogContent, AccordionSummary, Accordion, AccordionDetails, Button, Stack }from "@mui/material"
 import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
 import { DataGrid } from '@components/DataGrid';
@@ -36,10 +36,26 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                 return array.find(item => item.id === id);
                 };
         const toDisplay = findItemById(content, i);
-        console.log(toDisplay);
-                
-        return (
+
+        // experimental - fix with a map solution as numbers of needed accordions will change
+        // State values for expanded accordions
+        const [expandedAccordions, setExpandedAccordions] = useState([false, false, false, false, false]);
+
+        // Functions to handle expanding both individual accordions and all accordions
+        const handleAccordionChange = (index: number) => () => {
+                setExpandedAccordions((prevExpanded) => {
+                  const newExpanded = [...prevExpanded];
+                  newExpanded[index] = !newExpanded[index];
+                  return newExpanded;
+                });
+        };
       
+        // Works for closing + expanding as it sets values to their opposite
+        const expandAll = () => {
+                setExpandedAccordions((prevExpanded) => prevExpanded.map(() => !prevExpanded[0]));
+        };
+        
+        return (
                  <Dialog open={show} onClose={onClose} fullScreen TransitionComponent={Transition} aria-labelledby="details-dialog">
                         <div>
                                 <AppBar sx={{ position: 'relative' }}>
@@ -75,9 +91,10 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </CardContent>
                         </Card>: null}
                         {/* // These are the items that we typically need to only show for 'Request Details', hence the conditional rendering*/}
-                        {/*// TO BE SPLIT into Patron, Pickup, Supplier and Audit. Accordion only if we can be open by default */}
+                        {type == "Request"? <Stack direction="row" justifyContent="end">
+                                <Button onClick={expandAll}>{expandedAccordions[0] ? "Close all": "Expand all"}</Button> </Stack> : null}
                         {type == "Request"?<Card variant = 'outlined'>
-                        <Accordion defaultExpanded={true}>
+                        <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
                                         <AccordionSummary aria-controls="request-general-details" id="request_details_general" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
@@ -105,13 +122,11 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
-
-
                         {type == "Request"?<Card variant = 'outlined'>
-                        <Accordion>
+                        <Accordion expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
                                         <AccordionSummary aria-controls="request-patron-details" id="request_details_patron" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
-                                                </IconContext.Provider>}>
+                                                </IconContext.Provider>} >
                                                <Typography sx={{ fontWeight: 'bold' }}> {t("details.patron", "Patron")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
@@ -137,7 +152,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Accordion>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
-                        <Accordion>
+                        <Accordion expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
                                         <AccordionSummary aria-controls="request-pickup-details" id="request_details_pickup" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
@@ -162,7 +177,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Accordion>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
-                        <Accordion>
+                        <Accordion expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
                                         <AccordionSummary aria-controls="request-supplier-details" id="request_details_supplier" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
@@ -205,7 +220,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Accordion>
                         </Card>: null}
                         {type == "Request"?<Card variant = 'outlined'>
-                        <Accordion>
+                        <Accordion expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
                                         <AccordionSummary aria-controls="request-audit_log" id="request_audit_log" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
