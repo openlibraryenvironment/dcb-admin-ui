@@ -1,3 +1,11 @@
+## [1.0.4](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.3...v1.0.4) (2023-11-29)
+
+
+### Bug Fixes
+
+* Set request details page to expand all by default [DCB-744] ([fbc58cf](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/commit/fbc58cf46d8e0392dfba84ba7d706441bd13ca69))
+* Standardise timestamp formatting [DCB-744] ([6da7ec6](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/commit/6da7ec65053f414f1c1a61fc7ced2a4167e288b8))
+
 ## [1.0.3](https://gitlab.com/knowledge-integration/libraries/dcb-hub-admin-scaffold/compare/v1.0.2...v1.0.3) (2023-11-01)
 
 
