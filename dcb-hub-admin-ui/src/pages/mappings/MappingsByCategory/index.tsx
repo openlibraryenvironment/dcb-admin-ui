@@ -72,13 +72,14 @@ const MappingsByCategory: NextPage<Props> = () => {
 							{field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5, 
 							valueGetter: (params: { row: { lastImported: any; }; }) => {
 								const lastImported = params.row.lastImported;
-								return dayjs(lastImported).format('DD/MM/YY hh.mm A');
+								return dayjs(lastImported).format('YYYY-MM-DD HH:mm');
 							}}]}		
 					type={category}
 					noDataLink={"#"}
 					noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
 					noDataTitle={t("mappings.no_results", "No results found")}
 					selectable={false}
+					sortModel={[{field: 'lastImported', sort: 'desc'}]}
 				/>
 			</div>
 		)
