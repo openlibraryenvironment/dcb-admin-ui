@@ -65,17 +65,16 @@ const MappingsByCategory: NextPage<Props> = () => {
 				<DataGrid
 					data={resource?.content ?? []}
 					columns={[{field: 'fromCategory', headerName: "Category", minWidth: 50, flex: 0.5},
-							{field: 'fromContext', headerName: "HostLMS", minWidth: 50, flex: 0.5},
-							{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.4}, 
-							{field: 'label', headerName: "Meaning", minWidth: 50, flex: 0.5},
-							{field: 'toValue', headerName: "DCB Value", minWidth: 50, flex: 0.5}, 
+							{field: 'fromContext', headerName: "Host LMS", minWidth: 50, flex: 0.5},
+							{field: 'fromValue', headerName: "Local value", minWidth: 50, flex: 0.4}, 
+							{field: 'label', headerName: "Local meaning", minWidth: 50, flex: 0.5},
+							{field: 'toValue', headerName: "DCB value", minWidth: 50, flex: 0.5}, 
 							{field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5, 
 							valueGetter: (params: { row: { lastImported: any; }; }) => {
 								const lastImported = params.row.lastImported;
 								return dayjs(lastImported).format('YYYY-MM-DD HH:mm');
 							}}]}		
 					type={category}
-					noDataLink={"#"}
 					noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
 					noDataTitle={t("mappings.no_results", "No results found")}
 					selectable={false}
@@ -90,7 +89,7 @@ const MappingsByCategory: NextPage<Props> = () => {
 			<Paper elevation={16}>
 				<Card>
 					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status", "Item circulation status mappings")}</Typography>}/>                    
+					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status", "Circulation status mappings")}</Typography>}/>                    
 					<CardContent>
 						<ByCategory category={useCode((state) => state.category) ?? "CirculationStatus"}/>
 				    </CardContent>
