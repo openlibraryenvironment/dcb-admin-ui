@@ -11,6 +11,12 @@ type ImportForm = {
 
 export default function Import({show, onClose}: ImportForm) {
   const { t } = useTranslation();
+  const handleCloseImport = () => {
+    onClose(); 
+  };
+  // This method closes the import modal and is passed to Upload as a callback, so that Upload's cancel button can close the whole Import window.
+  // This means that the Cancel button in 'Upload' can be used to close this Import modal.
+  // Same principle can be used in other components - a callback can be passed to the child to affect behaviour in the parent.
   // Dialog for the mappings import. Features the HostLMS selector and Upload components
   return (
   <Dialog open={show} onClose={onClose} aria-labelledby="import-dialog" fullWidth maxWidth={"sm"}>
@@ -31,7 +37,7 @@ export default function Import({show, onClose}: ImportForm) {
   <DialogContent>
       <Stack spacing={1}>
         <Selector optionsType="Host LMS"/>
-        <Upload/>
+        <Upload onCancel={handleCloseImport}/>
       </Stack>
   </DialogContent>
 

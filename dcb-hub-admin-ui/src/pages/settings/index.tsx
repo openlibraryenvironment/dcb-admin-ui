@@ -41,7 +41,7 @@ const Settings: NextPage = () => {
 							<ListItem component="nav" disablePadding>
             					<ListItemButton onClick={(event) => setDestinationCategory("CirculationStatus")}
 												component="a" href="/mappings/MappingsByCategory">
-              					<ListItemText primary={t("settings.circulation_status", "Item circulation status mappings")} />
+              					<ListItemText primary={t("settings.circulation_status", "Circulation status mappings")} />
             					</ListItemButton>
           					</ListItem>
 						</List>

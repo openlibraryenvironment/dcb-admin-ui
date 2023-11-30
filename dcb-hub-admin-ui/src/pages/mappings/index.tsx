@@ -3,7 +3,8 @@ import { GetServerSideProps, NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, Alert, CardHeader, Button} from '@mui/material';
+import { Paper, CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
+// Use our alert component here ^^^^^^
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
@@ -16,6 +17,7 @@ import getConfig from 'next/config';
 import { useTranslation } from 'next-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Import from '@components/Import/Import';
+import Alert from '@components/Alert/Alert'
 import dayjs from 'dayjs';
 
 type Props = {
@@ -85,13 +87,12 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severity='error' onClose={() => {}}>{t("mappings.alert_text", "Failed to fetch the mappings, please refresh the page.")}</Alert>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("mappings.alert_text", "Failed to fetch the mappings, please refresh the page.")}/>
 							)}
 
 							{resourceFetchStatus === 'success' && (
 								<>
 									<Button variant="contained" onClick={openImport} > {t("mappings.import")}</Button>
-
 									<DataGrid
 										data={resource?.content ?? []}
 										columns={[{field: 'fromCategory', headerName: "Category", minWidth: 50, flex: 0.5},
@@ -99,7 +100,8 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 												{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.4}, 
 												{field: 'label', headerName: "Meaning", minWidth: 50, flex: 0.5},
 												{field: 'toValue', headerName: "DCB Value", minWidth: 50, flex: 0.5}, 
-												{field: 'last_imported', headerName: "Last imported", minWidth: 100, flex: 0.5, valueGetter: (params: { row: { lastImported: any; }; }) => {
+												{field: 'last_imported', headerName: "Last imported", minWidth: 100, flex: 0.5, 							
+													valueGetter: (params: { row: { lastImported: any; }; }) => {
 													const lastImported = params.row.lastImported;
 													return dayjs(lastImported).format('YYYY-MM-DD HH:mm');
 												}}]}		
