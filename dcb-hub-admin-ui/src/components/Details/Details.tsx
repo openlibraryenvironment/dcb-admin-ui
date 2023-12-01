@@ -28,9 +28,6 @@ const Transition = forwardRef(function Transition(
 export default function Details({i, content, show, onClose, type}: DetailsType) {
         const { t } = useTranslation();
 
-        // Handles response variables with hyphens, which will throw an error if you try and reference the same way as everything else
-        const shelving = 'shelving-locations';
-        const numRecord = 'num-records-to-generate';
 
         const findItemById = (array: any[], id: any) => {
                 return array.find(item => item.id === id);
@@ -76,15 +73,15 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                 </Toolbar>
                         </AppBar>
                 <DialogContent>
-                        {/* // These items are shown for every 'Details' instance, excluding Requests*/}                        
-                        {type !== "Request"?<Card variant = 'outlined'>
+                        {/* // These items are shown for every 'Details' instance, excluding Requests and HostLMS due to their different UX*/}                        
+                        {(type !== "Request" && type!== "HostLMS") ?<Card variant = 'outlined'>
                         <CardContent>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.id", "ID: ")}: </span>
                         {toDisplay?.id}
                         </Typography>
                         </CardContent>
                         </Card>: null}
-                        {type !== "Request"?<Card variant = 'outlined'>
+                        {(type !== "Request" && type!== "HostLMS")?<Card variant = 'outlined'>
                         <CardContent>
                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.code", "code")}: </span>
                                  {toDisplay?.code} </Typography>
@@ -280,36 +277,133 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                                 </Accordion>
                         </Card>: null}               
-                        {/* These are the items we typically only need to show for 'HostLMS Details'.
-                        We should also include an accordion component for Client Config*/}
+                        {/* These are the items we typically only need to show for 'HostLMS Details'.*/}
+                        {type == "HostLMS"? <Stack direction="row" justifyContent="end">
+                                <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse", "Collapse all"): t("details.expand", "Expand all")}</Button> </Stack> : null}
                         {type == "HostLMS"?<Card variant = 'outlined'>
-                        <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_name", "HostLMS name: ")}</span>
-                                {toDisplay?.name} </Typography>
-                        </CardContent>
-                        </Card>: null}
-                        {type == "HostLMS"?<Card variant = 'outlined'>
-                        <CardContent>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.lms_client", "LmsClientClass: ")}</span>
-                                {toDisplay?.lmsClientClass} </Typography>
-                        </CardContent>
-                        </Card>: null}
-                        {type == "HostLMS"?<Card variant = 'outlined'>
-                                <Accordion>
-                                        <AccordionSummary aria-controls="client-config-hostlms-details" id="client-config-hostlms-details" 
+                                {/* // Fix how weird this looks and only display the client config object if it exists */}
+                        <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
+                                        <AccordionSummary aria-controls="hostlms-general-details" id="hostlms_details_general" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config", "Client config")} </Typography>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.general", "General")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_ingest", "Ingest: ")}</span>
-                                                {toDisplay?.clientConfig?.ingest} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_shelving", "Shelving locations: ")}</span>
-                                                {toDisplay?.clientConfig?.[shelving]} </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_records", "Number of records to generate: ")}</span>
-                                                {toDisplay?.clientConfig?.[numRecord]} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_id", "HostLMS ID: ")}</span>
+                                                {toDisplay?.id} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_code", "HostLMS code: ")}</span>
+                                                {toDisplay?.code} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_name", "HostLMS name: ")}</span>
+                                                {toDisplay?.name} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.lms_client", "LmsClientClass: ")}</span>
+                                                {toDisplay?.lmsClientClass} </Typography>
                                         </AccordionDetails>
+                        </Accordion>
+                        </Card> : null}
+                        {type == "HostLMS"?<Card variant = 'outlined'>
+                        <Accordion expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
+                                <AccordionSummary aria-controls="hostlms-client-config-details" id="hostlms_details_client_config" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config", "Client config")} </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                {toDisplay?.clientConfig?.apikey != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_api", "API key: ")}</span>
+                                        {toDisplay?.clientConfig?.apikey} </Typography> : null}
+                                {toDisplay?.clientConfig?.ingest != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_ingest", "Ingest: ")}</span>
+                                        {toDisplay?.clientConfig?.ingest} </Typography> : null}
+                                {toDisplay?.clientConfig?.['shelving-locations'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_shelving", "Shelving locations: ")}</span>
+                                        {toDisplay?.clientConfig?.['shelving-locations']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['num-records-to-generate'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_records", "Number of records to generate: ")}</span>
+                                        {toDisplay?.clientConfig?.['num-records-to-generate']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['record-syntax'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_record_syntax", "Record syntax: ")}</span>
+                                        {toDisplay?.clientConfig?.['record-syntax']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['metadata-prefix'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_metadata_prefix", "Metadata prefix: ")}</span>
+                                        {toDisplay?.clientConfig?.['metadata-prefix']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['base-url'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_base_url", "Base URL: ")}</span>
+                                        {toDisplay?.clientConfig?.['base-url']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['access-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_access_id", "Access ID: ")}</span>
+                                        {toDisplay?.clientConfig?.['access-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['domain-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_domain_id", "Domain ID: ")}</span>
+                                        {toDisplay?.clientConfig?.['domain-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['page-size'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_page_size", "Pahe size: ")}</span>
+                                        {toDisplay?.clientConfig?.['page-size']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['access-key'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_access_key", "Access key: ")}</span>
+                                        {toDisplay?.clientConfig?.['access-key']} </Typography> : null}
+                                {toDisplay?.clientConfig?.['staff-username'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_staff_username", "Staff username: ")}</span>
+                                        {toDisplay?.clientConfig?.['staff-username']} </Typography> : null} 
+                                {toDisplay?.clientConfig?.['staff-password'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_staff_password", "Staff password: ")}</span>
+                                        {toDisplay?.clientConfig?.['staff-password']} </Typography> : null} 
+                                {toDisplay?.clientConfig?.secret != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_secret", "Secret: ")}</span>
+                                        {toDisplay?.clientConfig?.secret} </Typography> : null}
+                                {toDisplay?.clientConfig?.key != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_key", "Key: ")}</span>
+                                        {toDisplay?.clientConfig?.key} </Typography> : null} 
+                                {/* // For the 'item' object on some HostLMS */}
+                                {toDisplay?.clientConfig?.item != null ?<Card variant = 'outlined'>
+                                <Accordion expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
+                                <AccordionSummary aria-controls="hostlms-client-config-details-item" id="hostlms_details_client_config_item" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config_item", "Item configuration")} </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                {toDisplay?.clientConfig?.item?.['fine-code-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_fine-code-id", "fine-code-id: ")}</span>
+                                        {toDisplay?.clientConfig?.item?.['fine-code-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.item?.['renewal-limit'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_renewal_limit", "Renewal limit: ")}</span>
+                                        {toDisplay?.clientConfig?.item?.['renewal-limit']} </Typography> : null}
+                                {toDisplay?.clientConfig?.item?.['barcode-prefix'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_barcode_prefix", "Barcode prefix: ")}</span>
+                                        {toDisplay?.clientConfig?.item?.['barcode-prefix']} </Typography> : null}
+                                {toDisplay?.clientConfig?.item?.['history-action-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_history_action_id", "History action ID: ")}</span>
+                                        {toDisplay?.clientConfig?.item?.['history-action-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.item?.['shelving-scheme-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_shelving_scheme_id", "Shelving scheme ID: ")}</span>
+                                        {toDisplay?.clientConfig?.item?.['shelving-scheme-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.item?.['loan-period-code-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_loan_id", "Loan period code ID: ")}</span>
+                                        {toDisplay?.clientConfig?.item?.['loan-period-code-id']} </Typography> : null}
+                                </AccordionDetails>
                                 </Accordion>
+                                </Card>: null }                        
+                                {/* // For the 'PAPI' object on some HostLMS */}
+                                {toDisplay?.clientConfig?.papi != null ?<Card variant = 'outlined'>
+                                <Accordion expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
+                                <AccordionSummary aria-controls="hostlms-client-config-details-papi" id="hostlms_details_client_config_papi" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config_papi", "PAPI configuration")} </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                {toDisplay?.clientConfig?.papi?.['app-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_app_id", "PAPI app ID: ")}</span>
+                                        {toDisplay?.clientConfig?.papi?.['app-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.papi?.['org-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_org_id", "PAPI organisation ID: ")}</span>
+                                        {toDisplay?.clientConfig?.papi?.['org-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.papi?.['lang-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_lang_id", "PAPI language ID: ")}</span>
+                                        {toDisplay?.clientConfig?.papi?.['lang-id']} </Typography> : null}
+                                {toDisplay?.clientConfig?.papi?.['papi-version'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_version", "PAPI version: ")}</span>
+                                        {toDisplay?.clientConfig?.papi?.['papi-version']} </Typography> : null}
+                                </AccordionDetails>
+                                </Accordion>
+                                </Card>: null } 
+                                {/* // For 'services' object on some HostLMS */}
+                                {toDisplay?.clientConfig?.services != null ?<Card variant = 'outlined'>
+                                <Accordion expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
+                                <AccordionSummary aria-controls="hostlms-client-config-details-services" id="hostlms_details_client_config_services" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config_services", "Services")} </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                {toDisplay?.clientConfig?.services?.language!= null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_language", "Services language: ")}</span>
+                                        {toDisplay?.clientConfig?.services?.language}</Typography> : null}
+                                {toDisplay?.clientConfig?.services?.['product-id']!= null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_product_id", "Services product ID: ")}</span>
+                                        {toDisplay?.clientConfig?.services?.['product-id']}</Typography> : null}
+                                {toDisplay?.clientConfig?.services?.['site-domain']!= null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_site_domain", "Services site domain: ")}</span>
+                                        {toDisplay?.clientConfig?.services?.['site-domain']}</Typography> : null}
+                                {toDisplay?.clientConfig?.services?.['workstation-id']!= null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_workstation_id", "Services workstation ID: ")}</span>
+                                        {toDisplay?.clientConfig?.services?.['workstation-id']}</Typography> : null}
+                                {toDisplay?.clientConfig?.services?.['organisation-id']!= null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_organisation_id", "Services organisation ID: ")}</span>
+                                        {toDisplay?.clientConfig?.services?.['organisation-id']}</Typography> : null}
+                                {toDisplay?.clientConfig?.services?.['services-version']!= null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_version", "Services version: ")}</span>
+                                        {toDisplay?.clientConfig?.services?.['services-version']}</Typography> : null}
+                                </AccordionDetails>
+                                </Accordion>
+                                </Card>: null } 
+                        </AccordionDetails>
+                        </Accordion>
                         </Card>: null}
                         {/* These are the items we typically only need to show for 'Location Details'*/}
                         {type == "Location"?<Card variant = 'outlined'>
