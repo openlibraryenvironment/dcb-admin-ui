@@ -36,7 +36,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
 
         // experimental - fix with a map solution as numbers of needed accordions will change
         // State values for expanded accordions
-        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true]);
+        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true]);
 
         // Functions to handle expanding both individual accordions and all accordions
         const handleAccordionChange = (index: number) => () => {
@@ -134,17 +134,12 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 {toDisplay?.requestingIdentity?.id}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.patron_hostlms", "Patron HostLMS code: ")}</span>
                                                 {toDisplay?.patronHostlmsCode}</Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_request_id", "Local request ID: ")}</span>
-                                                {toDisplay?.localRequestId}</Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_request_status", "Local request status: ")}</span>
-                                                {toDisplay?.localRequestStatus}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_id", "Local item ID: ")}</span>
                                                 {toDisplay?.localItemId}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_status", "Local item status: ")}</span>
                                                 {toDisplay?.localItemStatus}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_bib_id", "Local Bib ID: ")}</span>
                                                 {toDisplay?.localBibId}</Typography>
-                                                        {/* Requesting Identity stuff maybe goes here? All need 3 IDs*/}
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
@@ -215,9 +210,29 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 {toDisplay?.suppliers[0]?.localAgency}</Typography>
                                         </AccordionDetails>
                         </Accordion>
-                        </Card>: null}
+                        </Card>: null}              
                         {type == "Request"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
+                                        <AccordionSummary aria-controls="request-details-borrowing" id="request_details_borrowing" 
+                                                expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.borrowing", "Borrowing")} </Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_id", "Borrowing request ID: ")}</span>
+                                                {toDisplay?.localRequestId}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_status", "Borrowing request status: ")}</span>
+                                                {toDisplay?.localRequestStatus}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_id", "Borrowing library patron ID: ")}</span>
+                                                {toDisplay?.requestingIdentity?.id}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_type", "Borrowing library patron type: ")}</span>
+                                                {toDisplay?.requestingIdentity?.localPtype}</Typography>
+                                
+                                        </AccordionDetails>
+                        </Accordion>
+                        </Card>: null}
+                        {type == "Request"?<Card variant = 'outlined'>
+                        <Accordion expanded={expandedAccordions[5]} onChange={handleAccordionChange(5)}>
                                         <AccordionSummary aria-controls="request-audit_log" id="request_audit_log" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
