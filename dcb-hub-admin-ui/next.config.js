@@ -1,4 +1,6 @@
 const path = require('path');
+const { version } = require('./package.json')
+const { releaseDate } = require('./release-info.json')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -18,6 +20,7 @@ const nextConfig = {
 		DCB_API_BASE: process.env.DCB_API_BASE,
 		DCB_ES_URL: process.env.DCB_ES_URL,
 		KEYCLOAK_REFRESH: "https://keycloak.sph.k-int.com/realms/dcb-hub",
+		version, releaseDate
 	},
 	i18n: {
 		defaultLocale: 'en',

@@ -42,7 +42,7 @@ export default function Breadcrumbs () {
 
     return (
         <MUIBreadcrumbs separator={<MdArrowForwardIos/>}>
-        <Link color="inherit" href="/">{t("breadcrumbs.home_text", "Home")}</Link>
+        <Link color="inherit" href="/">{t("breadcrumbs.welcome_text", "Welcome")}</Link>
         {breadcrumbs?.map((breadcrumb) => (
           <Link color="inherit" underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
             {breadcrumb.label}

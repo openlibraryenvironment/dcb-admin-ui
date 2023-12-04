@@ -1,9 +1,14 @@
 import Link from '@components/Link/Link';
 //localisation
 import { useTranslation } from 'next-i18next';
+import getConfig from "next/config";
+import { formatDate } from 'src/helpers/formatDate';
+
 
 export default function Footer() {
 	const { t } = useTranslation();
+	const { publicRuntimeConfig } = getConfig();
+
 	return (
 		<footer className='footer flex-column flex-md-row border-top d-flex align-items-center justify-content-between px-4 py-2'>
 			<div>
@@ -16,7 +21,8 @@ export default function Footer() {
 					{t("footer.dcb", "Direct Consortial Borrowing")}
 				</Link>
 			</div>
-			<div className='ms-md-auto'>{t("footer.version", "Version 1.0")}</div>
+			<div className='ms-md-auto'>{'DCB Admin. '+t("footer.version", "Version ")+publicRuntimeConfig?.version+'. '+
+			t("footer.released_text", "Released ")+formatDate(publicRuntimeConfig?.releaseDate)+'.'}</div>
 		</footer>
 	);
 }

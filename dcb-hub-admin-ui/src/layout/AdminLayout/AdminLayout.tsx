@@ -4,6 +4,7 @@ import Sidebar from '@layout/AdminLayout/Sidebar/Sidebar';
 import Footer from '@layout/AdminLayout/Footer/Footer';
 import Box from '@mui/material/Box';
 import Header from './Header/Header';
+import Breadcrumbs from './Breadcrumbs/Breadcrumbs';
 
 export default function AdminLayout({ children }: PropsWithChildren) {
 	const [open, setOpen] = useState(true);
@@ -17,7 +18,6 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 		</Head>
 
 		<Header openStateFuncClosed={()=>setOpen(!open)} />
-
 		<Box sx={{ display: 'flex'}}>
 			<Sidebar
 			openStateOpen = {open}
@@ -26,6 +26,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
 			/>
 			<Box sx={{flexGrow: 3, p: 3, marginTop: 7, overflow: 'auto'}}>
 				<div>
+					<Breadcrumbs />
 					{children}
 					<Footer />
 				</div>
