@@ -52,7 +52,6 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const { t } = useTranslation();
 	const rows:any = resource?.content;
 	const patronRequestData = rows?.patronRequests?.content;
-console.log(patronRequestData);
 
 	return (
 		<AdminLayout>
@@ -84,7 +83,7 @@ console.log(patronRequestData);
 												if (params.row.suppliers.length > 0) {
 												  return params.row.suppliers[0].localAgency;
 												} else {
-												  return ''; // This allows us to handle the array being empty. The weirdness here is to handle type errors with this object.
+												  return ''; // This allows us to handle the array being empty, and any related type errors.
 												}
 											  }},
 										{field: 'pickupLocationCode', headerName: "Pickup location", minWidth: 50, flex: 0.5}]}

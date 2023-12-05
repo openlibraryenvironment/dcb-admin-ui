@@ -130,16 +130,10 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.patron_id", "Patron ID: ")} </span>
                                                         {toDisplay?.patron?.id}
                                                 </Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.requestor_id", "Requesting agency ID: ")}</span>
-                                                {toDisplay?.requestingIdentity?.id}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.patron_hostlms", "Patron HostLMS code: ")}</span>
                                                 {toDisplay?.patronHostlmsCode}</Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_id", "Local item ID: ")}</span>
-                                                {toDisplay?.localItemId}</Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_item_status", "Local item status: ")}</span>
-                                                {toDisplay?.localItemStatus}</Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.local_bib_id", "Local Bib ID: ")}</span>
-                                                {toDisplay?.localBibId}</Typography>
+                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.requestor_id", "Requesting agency ID: ")}</span>
+                                                {toDisplay?.requestingIdentity?.id}</Typography>
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
@@ -219,15 +213,22 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                <Typography sx={{ fontWeight: 'bold' }}> {t("details.borrowing", "Borrowing")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_id", "Borrowing request ID: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_id", "Virtual request ID: ")}</span>
                                                 {toDisplay?.localRequestId}</Typography>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_status", "Borrowing request status: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_status", "Virtual request status: ")}</span>
                                                 {toDisplay?.localRequestStatus}</Typography>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_id", "Borrowing library patron ID: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_id", "Virtual library patron ID: ")}</span>
                                                 {toDisplay?.requestingIdentity?.id}</Typography>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_type", "Borrowing library patron type: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_type", "Virtual library patron type: ")}</span>
                                                 {toDisplay?.requestingIdentity?.localPtype}</Typography>
-                                
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_id", "Virtual item ID: ")}</span>
+                                                {toDisplay?.localItemId}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_status", "Virtual item status: ")}</span>
+                                                {toDisplay?.localItemStatus}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrrowing_virtual_item_type", "Virtual item type: ")}</span>
+                                                {toDisplay?.localItemType}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrrowing_virtual_bib_id", "Virtual Bib ID: ")}</span>
+                                                {toDisplay?.localBibId}</Typography>
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
