@@ -188,7 +188,7 @@
   },
 
   "mappings": {
-    "add_success": "Successfully added {{fileName}}.",
+    "add_success": "{{fileName}} has been added and is ready to be uploaded.",
     "alert_text": "Failed to fetch the mappings, please refresh the page.",
     "upload_success": "{{count}} {{category}} mappings for {{code}} were added. Select “Close” to view the imported {{category}} mappings.",
     "upload_success_replacement": "{{addedCount}} {{category}} mappings for {{code}} were added and {{deletedMappingCount}} mappings were deleted. Select “Close” to view the imported {{category}} mappings",
@@ -204,7 +204,7 @@
     "max_size": "Maximum size {{maxSize}}",
     "no_results": "No results found",
     "suggested_formats": "Suggested formats: CSV, TSV",
-    "upload_failure": "The import has not completed because a problem was encountered. No mappings have been created. Select “Close” and try importing again",
+    "upload_failure": "The import has not completed because a problem was encountered. No mappings have been created. Select “Close”, refresh the page, and try importing again",
     "wrong_file_type": "{{fileName}} is in an unsupported format. The valid formats are {{allowedFiles}}. Please select another file.",   
     "confirmation_header": "Confirm replacement of circulation status mappings",
     "confirmation_body": "<p> <strong>{{existingMappingCount}}</strong> circulation status mappings for <strong>{{code}}</strong> will be <strong>{{deleted}}</strong> and replaced with mappings from the file “{{fileName}}.”</p>",
@@ -213,6 +213,8 @@
     "cancel": "Cancel",
     "confirmation_replace_mappings": "Replace mappings",
     "validation_expected_headers": "<p>The column headers in <strong>{{fileName}}</strong> do not match the expected headers. The first three columns must be named <strong>“Local code”</strong>, <strong>“Local meaning”</strong> and <strong>“DCB code”</strong>. Please correct the column headers and retry.</p>",
+    "validation_invalid_dcb_code": "One or more values of DCB code is invalid. Valid values are “Available”, “Unavailable” and “Unknown”. DCB code can also be empty. Please correct the values and retry.",
+    "validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
     "validation_missing_values": "The columns <strong>“Local code”</strong> and <strong>“Local meaning”</strong> must contain data. One or more cells in these columns is empty. Please fix and retry."
   },
 

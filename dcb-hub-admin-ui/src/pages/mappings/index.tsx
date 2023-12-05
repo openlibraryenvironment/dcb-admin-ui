@@ -3,8 +3,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
-// Use our alert component here ^^^^^^
+import { Paper, CardContent, Card, Typography, CardHeader, Button, capitalize} from '@mui/material';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
@@ -99,7 +98,10 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 												{field: 'fromContext', headerName: "HostLMS", minWidth: 50, flex: 0.5},
 												{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.4}, 
 												{field: 'label', headerName: "Meaning", minWidth: 50, flex: 0.5},
-												{field: 'toValue', headerName: "DCB Value", minWidth: 50, flex: 0.5}, 
+												{field: 'toValue', headerName: "DCB value", minWidth: 50, flex: 0.5,
+												valueGetter: (params: { row: { toValue: any; }; }) => {
+													return capitalize(params.row.toValue);
+												}},	 
 												{field: 'last_imported', headerName: "Last imported", minWidth: 100, flex: 0.5, 							
 													valueGetter: (params: { row: { lastImported: any; }; }) => {
 													const lastImported = params.row.lastImported;

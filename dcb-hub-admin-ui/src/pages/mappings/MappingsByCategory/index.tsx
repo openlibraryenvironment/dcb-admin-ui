@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
+import { Paper, CardContent, Card, Typography, CardHeader, Button, capitalize} from '@mui/material';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
@@ -64,11 +64,13 @@ const MappingsByCategory: NextPage<Props> = () => {
 				<Button variant="contained" onClick={openImport} > {t("mappings.import")}</Button>
 				<DataGrid
 					data={resource?.content ?? []}
-					columns={[{field: 'fromCategory', headerName: "Category", minWidth: 50, flex: 0.5},
-							{field: 'fromContext', headerName: "Host LMS", minWidth: 50, flex: 0.5},
+					columns={[{field: 'fromContext', headerName: "Host LMS", minWidth: 50, flex: 0.5},
 							{field: 'fromValue', headerName: "Local value", minWidth: 50, flex: 0.4}, 
 							{field: 'label', headerName: "Local meaning", minWidth: 50, flex: 0.5},
-							{field: 'toValue', headerName: "DCB value", minWidth: 50, flex: 0.5}, 
+							{field: 'toValue', headerName: "DCB value", minWidth: 50, flex: 0.5,
+							valueGetter: (params: { row: { toValue: any; }; }) => {
+								return capitalize(params.row.toValue);
+							}},								
 							{field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5, 
 							valueGetter: (params: { row: { lastImported: any; }; }) => {
 								const lastImported = params.row.lastImported;
