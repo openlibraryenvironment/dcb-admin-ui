@@ -1,4 +1,4 @@
-import { Button, Stack } from "@mui/material";
+import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import Alert from "@components/Alert/Alert";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
@@ -26,7 +26,7 @@ const uppy = new Uppy({
     allowedFileTypes: ['.tsv', '.csv'],
     minFileSize: 1,
     maxFileSize: 1 * 1024 * 1024, // 1 MB,
-    // maxNumberOfFiles: 1 // Can only drag-and-drop one file at a time
+    maxNumberOfFiles: 1 // Can only drag-and-drop one file at a time
   },
   meta: {
     category: "",
@@ -70,6 +70,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
   // set different kinds of errors
   const [validationErrorMessage, setValidationErrorMessage] = useState("");
   const [uploadErrorMessage, setUploadErrorMessage] = useState("");
+  const [generalErrorMessage, setGeneralErrorMessage] = useState("");
   const [successCount, setSuccessCount] = useState(0);
   const [deletedCount, setDeletedCount] = useState(0);
   const [addedFile, setAddedFile] = useState({name: "", size: 0});
@@ -173,6 +174,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
   uppy.on('error', (error: any) => {
     console.log("Error information", error);
     setErrorDisplayed(true);
+    setGeneralErrorMessage(error.message);
     console.log(uploadErrorMessage);
     
   });
@@ -183,14 +185,8 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
     uppy.removeFile(file.id);
   });
 
-  // Maps all added files to display them as alerts.
-  // DCB-535 will change this to use file controls etc
-  const acceptedFileItems = uppy.getFiles().map(file => (
-      <Alert severityType="info" alertText={t("mappings.add_success", {fileName: file.name})} key={file.size}/>
-  ));
-
   // Used to conditionally render the UI depending on if accepted files exist (i.e. disabling buttons etc)
-  const doFilesAcceptedExist = (uppy.getFiles().length > 0) ? true : false;
+  const filesAdded = (uppy.getFiles().length > 0) ? true : false;
   const noteText = "Supported file types: TSV and CSV \n Maximum file size: 1 MB";
 
   const [open, setOpen] = useState(true);
@@ -213,7 +209,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
           <Button variant="outlined" onClick={handleReset}> {t("mappings.cancel", "Cancel")}</Button>
           {/* This makes the Cancel and Import buttons left and right aligned, respectively*/}
           <div style={{flex: '1 0 0'}} />
-          <Button disabled={!doFilesAcceptedExist && (code == ''  || code == undefined)} onClick = {handleUpload} color="primary" variant="contained" type="submit">
+          <Button disabled={!filesAdded && (code == ''  || code == undefined)} onClick = {handleUpload} color="primary" variant="contained" type="submit">
                     {t("mappings.import_file", "Import file")}            
           </Button>
         </Stack>
@@ -225,8 +221,12 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
             fileName={addedFile.name}
             code={code}
           />
-        {/* TODO: more dynamic error display, fix autohide behaviour*/}
-        {acceptedFileItems}
+        {/* TODO: more dynamic error display, fix autohide behaviour
+        Alert will be replaced in DCB-535*/}
+
+        {filesAdded? <Card>
+          <Alert severityType="info" alertText={t("mappings.add_success", {fileName: addedFile.name})} key={addedFile.size}/>
+        </Card>:null}
         {(validationErrorMessage.includes("exceeds maximum allowed size") && isErrorDisplayed) && (<TimedAlert severityType="error" open={true} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.file_too_large", {fileName: failedFile.name, fileSize: fileSizeConvertor(failedFile.size), maxSize: 1})} key={"validation-upload-error-file-size"} onCloseFunc={dismissError}/>)}
         {(validationErrorMessage.includes("This file is smaller than the allowed size") && isErrorDisplayed) && (<TimedAlert severityType="error" open={true} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.file_empty", {fileName: failedFile.name})} key={"validation-upload-error-file-empty"} onCloseFunc={dismissError}/>)}
         {(validationErrorMessage.includes("Error: You can only upload") && isErrorDisplayed) && (<TimedAlert severityType="error" open={open} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.wrong_file_type", {fileName: failedFile.name, allowedFiles: "CSV, TSV"})} key={"validation-upload-error-file-type"} onCloseFunc={dismissError}/>)}
@@ -236,6 +236,8 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
         {(uploadErrorMessage.includes("expected headers") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={<Trans i18nKey ="mappings.validation_expected_headers" values={{fileName: addedFile.name}}>
                 The column headers in <strong>filename</strong> do not match the expected headers. The first three columns must be named “Local code”, “Local meaning” and “DCB code”. Please correct the column headers and retry.
                 </Trans>} key={"validation-upload-error-headers"} onCloseFunc={dismissError}/>)}
+        {(uploadErrorMessage.includes("provide a Host LMS") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.validation_no_hostlms")} key={"validation-no-hostlms"} onCloseFunc={dismissError}/>)}
+        {(uploadErrorMessage.includes("DCB code is invalid") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.validation_invalid_dcb_code")} key={"validation-invalid-dcb-code"} onCloseFunc={dismissError}/>)}
         {(isSuccess && !replacement) && (<TimedAlert severityType="success" open={open} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.upload_success", {category: category, count: successCount, code: code})} key={"upload-successful"}/>)}
         {(isSuccess && replacement) && (<TimedAlert severityType="success" open={open} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.upload_success_replacement", {category: category, addedCount: successCount, code: code, deletedMappingCount: existingMappingCount})} key={"upload-successful"}/>)}
     </Stack>
