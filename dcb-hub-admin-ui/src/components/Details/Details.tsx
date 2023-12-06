@@ -213,13 +213,13 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                <Typography sx={{ fontWeight: 'bold' }}> {t("details.borrowing", "Borrowing")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_id", "Virtual request ID: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_id", "Request ID: ")}</span>
                                                 {toDisplay?.localRequestId}</Typography>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_status", "Virtual request status: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_status", "Request status: ")}</span>
                                                 {toDisplay?.localRequestStatus}</Typography>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_id", "Virtual library patron ID: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_id", "Patron ID: ")}</span>
                                                 {toDisplay?.requestingIdentity?.id}</Typography>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_type", "Virtual library patron type: ")}</span>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_type", "Patron type: ")}</span>
                                                 {toDisplay?.requestingIdentity?.localPtype}</Typography>
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_id", "Virtual item ID: ")}</span>
                                                 {toDisplay?.localItemId}</Typography>
