@@ -102,8 +102,8 @@ export default function Sidebar(props:any) {
                 <Breadcrumbs />
                   {// Hide this on toggled sidebar }
               </ListItem>: null */}
-          {[t('sidebar.dashboard_page_button', 'Welcome'), t('sidebar.patron_request_button', 'Patron Request'),
-          t('sidebar.agency_button', 'Agency'), t('sidebar.host_lms_button','Host LMS'), t('sidebar.location_button','Location'), t('sidebar.groups_button', 'Groups'), t('sidebar.settings_button', 'Settings')].map((text, index) => (
+          {[t('sidebar.dashboard_page_button'), t('sidebar.patron_request_button'),
+          t('sidebar.agency_button'), t('sidebar.host_lms_button'), t('sidebar.location_button'), t('sidebar.groups_button'), t('sidebar.settings_button')].map((text, index) => (
             <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=

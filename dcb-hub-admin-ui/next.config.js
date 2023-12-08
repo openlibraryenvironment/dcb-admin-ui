@@ -1,4 +1,5 @@
 const path = require('path');
+const { i18n } = require('./next-i18next.config');
 const { version } = require('./package.json')
 const { releaseDate } = require('./release-info.json')
 
@@ -22,10 +23,7 @@ const nextConfig = {
 		KEYCLOAK_REFRESH: "https://keycloak.sph.k-int.com/realms/dcb-hub",
 		version, releaseDate
 	},
-	i18n: {
-		defaultLocale: 'en',
-		locales: ['en', 'es'],
-	}
+	i18n,
 };
 
 module.exports = nextConfig;

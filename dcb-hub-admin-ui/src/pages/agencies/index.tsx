@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
@@ -11,10 +11,12 @@ import { useResource } from '@hooks';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 //localisation
 import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { Agency } from '@models/Agency';
 import AddAgenciesToGroup from './AddAgenciesToGroup';
 import { loadAgencies } from 'src/queries/queries';
+
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -67,7 +69,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("agencies.loading_msg", "Loading agencies....")}.</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("agencies.loading_msg")}.</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
@@ -76,7 +78,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 					{resourceFetchStatus === 'success' && (
 						<>
-							<Button variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group", "Add agencies to a group")}</Button>
+							<Button variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group")}</Button>
 							<DataGrid
 								data={agenciesData ?? []}
 								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
@@ -98,7 +100,12 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
 
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
@@ -130,6 +137,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
 			sort: sort

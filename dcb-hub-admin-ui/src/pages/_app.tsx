@@ -18,9 +18,7 @@ import Head from 'next/head';
 import createEmotionCache from 'src/createEmotionCache';
 import { useMediaQuery } from '@mui/material';
 
-//localisation
-import { appWithI18Next, useSyncLanguage } from 'ni18n';
-import { ni18nConfig } from 'ni18n.config';
+import { appWithTranslation } from 'next-i18next';
 import { useMemo, useState } from 'react';
 
 
@@ -104,4 +102,4 @@ function MyApp(props: MyAppProps) {
 	);
 }
 
-export default appWithI18Next(MyApp, ni18nConfig);
+export default appWithTranslation(MyApp);

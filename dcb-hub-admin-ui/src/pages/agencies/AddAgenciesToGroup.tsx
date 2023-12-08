@@ -11,6 +11,7 @@ import Alert from '@components/Alert/Alert';
 import { useTranslation } from 'next-i18next';
 import { MdClose } from 'react-icons/md'
 import getConfig from 'next/config';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface FormData {
   groupId: string;
@@ -159,7 +160,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     <div>
     <Dialog open={show} onClose={onClose}
     aria-labelledby="centred-add-agency-dialog">
-        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group", "Add agencies to a group")}</DialogTitle>
+        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={onClose}
@@ -176,7 +177,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success", "Agency added to group!")}>
+        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success")}>
         </Alert>
       )}
     {isError && (
@@ -186,4 +187,16 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     </Dialog>
     </div>
   );
+};
+
+export async function getStaticProps({ locale }: {locale: any}) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale, [
+			'application',
+			'common',
+			'validation'
+			])),
+		},
+	}
 };

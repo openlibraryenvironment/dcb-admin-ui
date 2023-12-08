@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 import { useMemo } from 'react';
@@ -19,6 +19,7 @@ import { useTranslation } from 'next-i18next';
 import Alert from '@components/Alert/Alert';
 import { loadHostlms } from 'src/queries/queries';
 import { HostLmsPage } from '@models/HostLMSPage';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -83,10 +84,10 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg", "Loading HostLMS....")}</Typography>					)}
+						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg")}</Typography>)}
 
 					{resourceFetchStatus === 'error' && (
-						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text", "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.")}></Alert>					)}
+						<Alert severityType='error' onCloseFunc={() => {}} alertText={t("hostlms.alert_text")}></Alert>)}
 
 					{resourceFetchStatus === 'success' && (
 						<>			
@@ -108,7 +109,14 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
+
+
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
 		page = parseInt(context.query.page, 10);
@@ -139,6 +147,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
 			sort: sort

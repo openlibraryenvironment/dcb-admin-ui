@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { loadPatronRequests } from 'src/queries/queries';
 import { useMemo } from 'react';
 import dayjs from 'dayjs';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -60,11 +61,11 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg", "Loading requests....")}</Typography>
+								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text", "Failed to fetch the requests, please refresh the page.")}/>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text")}/>
 							)}
 							{resourceFetchStatus === 'success' && (
 								<>
@@ -108,7 +109,13 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
+
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
 		page = parseInt(context.query.page, 10);
@@ -139,9 +146,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
-			sort: sort
+			sort: sort,
 		}
 	};
 };
