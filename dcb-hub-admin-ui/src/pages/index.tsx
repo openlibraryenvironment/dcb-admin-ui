@@ -35,17 +35,17 @@ const Home: NextPage = () => {
 	// SignOutIfInactive();
 	const { t } = useTranslation();
 	const ConsortiumDetails = [
-		[t('dashboard_consortium_details.row1_col1'), t('dashboard_consortium_details.row1_col2'), 
+		[t('onboarding.stage.introduce_libraries.name'), t('onboarding.stage.introduce_libraries.action'), 
 		<Trans key={"introduceLibraries"} i18nKey={'dashboard_consortium_details.row1_col3'}>We know about <abbr title='placeholder content'>81</abbr> library agencies in MOBIUS.<br/><br/> We are missing basic details for <abbr title='placeholder content'>75</abbr> of these.</Trans>],
-		[t('dashboard_consortium_details.row2_col1'), t('dashboard_consortium_details.row2_col2'), 
+		[t('onboarding.stage.provision_systems.name'), t('onboarding.stage.provision_systems.action'), 
 		<Trans key={'provisionSystems'} i18nKey={'dashboard_consortium_details.row2_col3'}>We know about <abbr title='placeholder content'>51</abbr> Host LMS instances that are needed for MOBIUS.<br/><br/> We are missing essential details for <abbr title='placeholder content'>41</abbr> of these.</Trans>],
-		[t('dashboard_consortium_details.row3_col1'), t('dashboard_consortium_details.row3_col2'), 
+		[t('onboarding.stage.configure_services.name'), t('onboarding.stage.configure_services.action'), 
 		<Trans key={'configureServices'} i18nKey={'dashboard_consortium_details.row3_col3'}>We are missing mapping configurations and patron authentication details for <abbr title='placeholder content'>73</abbr> libraries.<br/><br/> We are missing test records or accounts for <abbr title='placeholder content'>64</abbr> libraries.</Trans>],
-		[t('dashboard_consortium_details.row4_col1'), t('dashboard_consortium_details.row4_col2'),
+		[t('onboarding.stage.migrate_service.name'), t('onboarding.stage.migrate_services.action'),
 		<Trans key={'migrateServices'} i18nKey={'dashboard_consortium_details.row4_col3'}>We are missing expected migration details for <abbr title='placeholder content'>81</abbr> libraries.<br/><br/> We are missing a migration sign-off authority contact for <abbr title='placeholder content'>81</abbr> libraries.</Trans>],
-		[t('dashboard_consortium_details.row5_col1'), t('dashboard_consortium_details.row5_col2'), 
+		[t('onboarding.stage.operate_dcb.name'), t('onboarding.stage.operate_dcb.action'), 
 		<Trans key={'operateDCB'} i18nKey={'dashboard_consortium_details.row5_col3'}>There are <abbr title='placeholder content'>0</abbr> library services administrators authorised to operate DCB services. </Trans>],
-		[t('dashboard_consortium_details.row6_col1'), t('dashboard_consortium_details.row6_col2'),
+		[t('onboarding.stage.manage_support.name'), t('onboarding.stage.manage_support.action'),
 		<Trans key={'manageSupport'} i18nKey={'dashboard_consortium_details.row6_col3'}>We have <abbr title='placeholder content'>0</abbr> library services administrators authorised to operate DCB services.</Trans>]
 		];
 	const YourDCBEnvironment = [
@@ -57,7 +57,7 @@ const Home: NextPage = () => {
 		<AdminLayout>
 			<Card>
 				<CardContent>
-					<Typography variant="h1" fontSize={'300%'} sx={{marginBottom: 1}}> {t('dashboard.app_title')+getUserName()} </Typography>
+					<Typography variant="h1" fontSize={'300%'} sx={{marginBottom: 1}}> {t('welcome.greeting')+' '+getUserName()} </Typography>
 					<Typography variant='body1' sx={{marginBottom:2}} fontSize={'1.3rem'}>{t('dashboard.body_message')}</Typography>
 					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('dashboard.your_consortium_title')}</Typography>
 					<Typography variant='body1' fontSize={'1.1rem'}> {t('dashboard.placeholder_text')} </Typography>
@@ -69,7 +69,7 @@ const Home: NextPage = () => {
 					<VersionInfo/>
 					<Typography variant='body1' fontSize={'1.1rem'}>
 						<Trans i18nKey="see_the_releases">
-							See the <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer">Releases hub</Link> for more details and previous versions.
+							See the <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer">Releases</Link> hub for more details and previous versions.
 						</Trans>
 					</Typography>
 				</CardContent>
