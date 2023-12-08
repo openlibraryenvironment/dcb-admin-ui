@@ -26,7 +26,7 @@ const Confirmation = ({ open, onClose, onConfirm, code, existingMappingCount, fi
             <Trans i18nKey="mappings.confirmation_body" values={{ existingMappingCount, code, fileName, deleted }}>
                 <p> <strong> 44 </strong> circulation status mappings for <strong> code </strong> will be <strong> deleted </strong> and replaced with mappings from the file filename </p>
             </Trans>            
-            <Alert severityType="warning" alertText = {t("mappings.confirmation_warning", "It will not be possible to undo the import. Please ensure you have a backup of the circulation status mappings before continuing.")}/>
+            <Alert severityType="warning" alertText = {t("mappings.confirmation_warning")}/>
             {t("mappings.confirmation_replace")}
       </DialogContent>
       <DialogActions>

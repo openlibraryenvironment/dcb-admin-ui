@@ -10,13 +10,12 @@ import { Mapping } from '@models/Mapping';
 import { useSession } from 'next-auth/react';
 import { useMemo, useState } from 'react';
 import getConfig from 'next/config';
-
-//localisation
 import { useTranslation } from 'next-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Import from '@components/Import/Import';
 import useCode from '@hooks/useCode';
 import dayjs from 'dayjs';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 type Props = {
 	category: string
@@ -77,8 +76,8 @@ const MappingsByCategory: NextPage<Props> = () => {
 								return dayjs(lastImported).format('YYYY-MM-DD HH:mm');
 							}}]}		
 					type={category}
-					noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
-					noDataTitle={t("mappings.no_results", "No results found")}
+					noDataMessage={t("mappings.import_circulation_status")}
+					noDataTitle={t("mappings.no_results")}
 					selectable={false}
 					sortModel={[{field: 'lastImported', sort: 'desc'}]}
 				/>
@@ -91,7 +90,7 @@ const MappingsByCategory: NextPage<Props> = () => {
 			<Paper elevation={16}>
 				<Card>
 					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status", "Circulation status mappings")}</Typography>}/>                    
+					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status")}</Typography>}/>                    
 					<CardContent>
 						<ByCategory category={useCode((state) => state.category) ?? "CirculationStatus"}/>
 				    </CardContent>
@@ -104,5 +103,17 @@ const MappingsByCategory: NextPage<Props> = () => {
 	);
 };
 // Add getServerSideProps back when we do server-side pagination work (DCB-480)
+
+export async function getStaticProps({ locale }: {locale: any}) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale, [
+			'application',
+			'common',
+			'validation'
+			])),
+		},
+	}
+};
 
 export default MappingsByCategory;

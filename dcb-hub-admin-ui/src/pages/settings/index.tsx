@@ -6,6 +6,7 @@ import { AdminLayout } from '@layout';
 import { Paper, CardContent, Card, List, ListSubheader, ListItem, ListItemButton, ListItemText, CardHeader } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import useCode from '@hooks/useCode';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 
 
@@ -30,18 +31,18 @@ const Settings: NextPage = () => {
 							aria-labelledby="settings-subheader"
 							subheader={
 								<ListSubheader component="div" id="settings-subheader">
-								{t("mappings.mappings", "Mappings")}
+								{t("mappings.mappings")}
 								</ListSubheader>
 							}>
 							<ListItem component="nav" disablePadding>
             					<ListItemButton component="a" href="/mappings">
-              					<ListItemText primary={t("settings.all_mappings", "All mappings")} />
+              					<ListItemText primary={t("settings.all_mappings")} />
             					</ListItemButton>
           					</ListItem>
 							<ListItem component="nav" disablePadding>
             					<ListItemButton onClick={(event) => setDestinationCategory("CirculationStatus")}
 												component="a" href="/mappings/MappingsByCategory">
-              					<ListItemText primary={t("settings.circulation_status", "Circulation status mappings")} />
+              					<ListItemText primary={t("settings.circulation_status")} />
             					</ListItemButton>
           					</ListItem>
 						</List>
@@ -50,6 +51,18 @@ const Settings: NextPage = () => {
 			</Paper>
 		</AdminLayout>
 	);
+};
+
+export async function getStaticProps({ locale }: {locale: any}) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale, [
+			'application',
+			'common',
+			'validation'
+			])),
+		},
+	}
 };
 
 export default Settings;

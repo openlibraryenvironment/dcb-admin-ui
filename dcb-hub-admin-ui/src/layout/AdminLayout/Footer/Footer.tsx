@@ -13,16 +13,16 @@ export default function Footer() {
 		<footer className='footer flex-column flex-md-row border-top d-flex align-items-center justify-content-between px-4 py-2'>
 			<div>
 				<Link className='text-decoration-none' href='https://www.k-int.com'>
-					{t("footer.openRS", "Project OpenRS")}{' '}
+					{t("footer.openRS")}{' '}
 				</Link>{' '}
 				/
 				<Link className='text-decoration-none' href='https://www.k-int.com'>
 					{' '}
-					{t("footer.dcb", "Direct Consortial Borrowing")}
+					{t("footer.dcb")}
 				</Link>
 			</div>
-			<div className='ms-md-auto'>{'DCB Admin. '+t("footer.version", "Version ")+publicRuntimeConfig?.version+'. '+
-			t("footer.released_text", "Released ")+formatDate(publicRuntimeConfig?.releaseDate)+'.'}</div>
+			<div className='ms-md-auto'>{'DCB Admin. '+t("footer.version")+publicRuntimeConfig?.version+'. '+
+			t("footer.released_text")+formatDate(publicRuntimeConfig?.releaseDate)+'.'}</div>
 		</footer>
 	);
 }

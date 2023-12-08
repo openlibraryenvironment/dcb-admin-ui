@@ -11,6 +11,7 @@ import { MdClose } from 'react-icons/md'
 //localisation
 import { useTranslation } from 'next-i18next';
 import getConfig from 'next/config';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface FormData {
   name: string;
@@ -141,7 +142,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
   return (
     <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new", "New Group")}</DialogTitle>
+      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
       <IconButton
           aria-label="close"
           onClick={onClose}
@@ -158,11 +159,23 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success", "Success: New group created!")}/>
+      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success")}/>
       )}
     {isError && (
       <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage}/>
     )}
     </Dialog>
   );
+};
+
+export async function getStaticProps({ locale }: {locale: any}) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale, [
+			'application',
+			'common',
+			'validation'
+			])),
+		},
+	}
 };

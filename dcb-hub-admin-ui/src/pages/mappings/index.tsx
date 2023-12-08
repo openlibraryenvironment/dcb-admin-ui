@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 
 import { AdminLayout } from '@layout';
 
@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Import from '@components/Import/Import';
 import Alert from '@components/Alert/Alert'
 import dayjs from 'dayjs';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 type Props = {
 	page: number;
@@ -79,14 +80,14 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Paper elevation={16}>
 				<Card>
 					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.mappings", "Item circulation status mappings")}</Typography>}/>                    
+					<CardHeader title={<Typography variant = "h5"> {t("settings.mappings")}</Typography>}/>                    
 					<CardContent>
 							{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg", "Loading mappings...")}</Typography>
+								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("mappings.alert_text", "Failed to fetch the mappings, please refresh the page.")}/>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("mappings.alert_text")}/>
 							)}
 
 							{resourceFetchStatus === 'success' && (
@@ -109,8 +110,8 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 												}}]}		
 										type="All Mappings"
 										noDataLink={"#"}
-										noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
-										noDataTitle={t("mappings.no_results", "No results found")}
+										noDataMessage={t("mappings.import_circulation_status")}
+										noDataTitle={t("mappings.no_results")}
 										selectable={false}
 										sortModel={[{field: 'lastImported', sort: 'desc'}]}
 									/>
@@ -127,6 +128,13 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
+
+
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
 		page = parseInt(context.query.page, 10);
@@ -157,6 +165,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
 			sort: sort

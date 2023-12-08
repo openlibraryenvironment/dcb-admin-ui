@@ -21,12 +21,12 @@ export default function LanguageSwitcher() {
 
   return (
     <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-      <InputLabel id="language-select-menu-label">{t("header.language_switcher_title", "Language")}</InputLabel>
+      <InputLabel id="language-select-menu-label">{t("header.language_switcher_title")}</InputLabel>
       <Select
         labelId="language-select-menu-label"
         id="language-select-menu"
         value={language}
-        label={t("header.language_switcher_title", "Language")}
+        label={t("header.language_switcher_title")}
         onChange={handleChange}
       >
         <MenuItem value={10} onClick={() => changeLanguage('en')}>English</MenuItem>
