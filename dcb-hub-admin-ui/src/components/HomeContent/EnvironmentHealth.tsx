@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import getConfig from "next/config";
 import { calculateDCBRAGStatus } from 'src/helpers/calculateDCBRAGStatus';

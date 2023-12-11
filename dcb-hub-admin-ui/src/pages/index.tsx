@@ -8,12 +8,12 @@ import getConfig from "next/config";
 import SimpleTable from '@components/SimpleTable/SimpleTable';
 import { Trans } from 'next-i18next';
 import Link from '@components/Link/Link';
-import EnvironmentHealth from '../components/WelcomeContent/EnvironmentHealth';
-import VersionInfo from '../components/WelcomeContent/VersionInfo';
+import EnvironmentHealth from '../components/HomeContent/EnvironmentHealth';
+import VersionInfo from '../components/HomeContent/VersionInfo';
 import {
 	LOCAL_VERSION_LINKS,
 	RELEASE_PAGE_LINKS,
-} from '../../welcomeData/welcomeConfig'
+} from '../../homeData/homeConfig'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 
@@ -60,11 +60,11 @@ const Home: NextPage = () => {
 					<Typography variant="h1" fontSize={'300%'} sx={{marginBottom: 1}}> {t('welcome.greeting')+' '+getUserName()} </Typography>
 					<Typography variant='body1' sx={{marginBottom:2}} fontSize={'1.3rem'}>{t('dashboard.body_message')}</Typography>
 					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('dashboard.your_consortium_title')}</Typography>
-					<Typography variant='body1' fontSize={'1.1rem'}> {t('dashboard.placeholder_text')} </Typography>
-					<SimpleTable column_names={[t('dashboard_consortium_details.column1_name'), t('dashboard_consortium_details.column2_name'), t('dashboard_consortium_details.column3_name')]} row_data={ConsortiumDetails}/>
+					<Typography variant='body1' fontSize={'1.1rem'}> {t('common.placeholder_text')} </Typography>
+					<SimpleTable column_names={[t('onboarding.summary.stage'), t('onboarding.summary.action'), t('onboarding.summary.status')]} row_data={ConsortiumDetails}/>
 					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('dashboard.your_dcb_envrionment')}</Typography>
 					<Typography variant='body1' fontSize={'1.1rem'}>{t('dashboard.configured_for')}</Typography>
-					<SimpleTable column_names={[t('dashboard_your_dcb_environment.column1_name'), t('dashboard_your_dcb_environment.column2_name'), t('dashboard_your_dcb_environment.column3_name'), t('dashboard_your_dcb_environment.column4_name')]} row_data={YourDCBEnvironment} />
+					<SimpleTable column_names={[t('service.name'), t('service.environment'), t('service.address'), t('service.status')]} row_data={YourDCBEnvironment} />
 					<Typography variant='body1' fontSize={'1.1rem'}>{t("dashboard.latest_version_text")}</Typography>
 					<VersionInfo/>
 					<Typography variant='body1' fontSize={'1.1rem'}>
