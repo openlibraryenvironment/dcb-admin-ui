@@ -96,7 +96,7 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 										// This is how to set certain columns as hidden by default
 										columnVisibilityModel={{suppliers: false, pickupLocationCode: false}}
 										// This is how to set the default sort order - so the grid loads as sorted by 'lastUpdated' by default.
-										sortModel={[{field: 'lastUpdated', sort: 'desc'}]}
+										sortModel={[{field: 'dateUpdated', sort: 'desc'}]}
 									/>
 								</>
 							)}
