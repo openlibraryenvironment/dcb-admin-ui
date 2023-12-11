@@ -27,7 +27,7 @@ const REPO_LINKS = {
 }
 
 const RELEASE_PAGE_LINKS = {
-    ALL_RELEASES: 'https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2685698049/Releases',
+    ALL_RELEASES: 'https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2685698049',
     SERVICE: 'https://github.com/openlibraryenvironment/dcb-service/releases',
     LOCATE: 'https://gitlab.com/knowledge-integration/libraries/dcb-locate/-/releases/',
     ADMIN_UI: 'https://github.com/openlibraryenvironment/dcb-admin-ui/releases',
