@@ -3,7 +3,8 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button, capitalize} from '@mui/material';
+import { Paper, CardContent, Card, Typography, CardHeader, Button } from '@mui/material';
+import { capitalize } from 'lodash';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
@@ -57,7 +58,6 @@ const MappingsByCategory: NextPage<Props> = () => {
 		
 		// This will conditionally render by category
 		// Use valueGetter for when we need to format specific values
-		// TODO: Set lastImported to sort 'desc' by default https://mui.com/x/react-data-grid/sorting/
 		return (
 			<div>
 				<Button variant="contained" onClick={openImport} > {t("mappings.import")}</Button>
