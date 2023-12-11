@@ -7,7 +7,7 @@
     "your_dcb_envrionment": "Your DCB environment",
     "configured_for": "This installation of DCB Admin is configured for",
     "latest_version_text": "The latest versions of DCB system components are",
-    "see_the_releases": "See the <Link>Releases</Link> hub for more details and previous versions"
+    "see_the_releases": "See the <0>{{- key}}</0> hub for more details and previous versions"
   },
 
   "dashboard_consortium_details": {

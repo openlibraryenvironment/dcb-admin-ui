@@ -68,8 +68,13 @@ const Home: NextPage = () => {
 					<Typography variant='body1' fontSize={'1.1rem'}>{t("dashboard.latest_version_text")}</Typography>
 					<VersionInfo/>
 					<Typography variant='body1' fontSize={'1.1rem'}>
-						<Trans i18nKey="see_the_releases">
-							See the <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer">Releases</Link> hub for more details and previous versions.
+						<Trans
+						i18nKey="dashboard.see_the_releases"
+						values={{
+							key: "Releases"
+						}}
+						components={[<Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer"/>]}
+						>
 						</Trans>
 					</Typography>
 				</CardContent>
