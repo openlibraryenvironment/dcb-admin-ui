@@ -7,13 +7,13 @@
     "your_dcb_envrionment": "Your DCB environment",
     "configured_for": "This installation of DCB Admin is configured for",
     "latest_version_text": "The latest versions of DCB system components are",
-    "see_the_releases": "See the <0>{{- key}}</0> hub for more details and previous versions"
+    "see_the_releases": "See the <0>releases</0> hub for more details and previous versions"
   },
 
   "dashboard_consortium_details": {
     "row1_col1" : "1. Introduce libraries",
     "row1_col2": "Tell us about the members in your consortium that we need to onboard and migrate",
-    "row1_col3": "We know about <1>81</1> library agencies in MOBIUS.<br/><br/> We are missing basic details for <1>75</1> of these.",
+    "row1_col3": "We know about <0>81</0> library agencies in MOBIUS.<br/><br/> We are missing basic details for <0>75</0> of these.",
     "row2_col1": "2. Provision systems",
     "row2_col2": "Provide technical details we need to set up your DCB services",
     "row2_col3": "We know about <1>51</1> Host LMS instances that are needed for MOBIUS.<br/><br/> We are missing essential details for <1>41</1> of these.",

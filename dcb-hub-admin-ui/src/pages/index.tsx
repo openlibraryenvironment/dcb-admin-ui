@@ -36,12 +36,12 @@ const Home: NextPage = () => {
 	const { t } = useTranslation();
 	const ConsortiumDetails = [
 		[t('onboarding.stage.introduce_libraries.name'), t('onboarding.stage.introduce_libraries.action'), 
-		<Trans key={"introduceLibraries"} i18nKey={'dashboard_consortium_details.row1_col3'}>We know about <abbr title='placeholder content'>81</abbr> library agencies in MOBIUS.<br/><br/> We are missing basic details for <abbr title='placeholder content'>75</abbr> of these.</Trans>],
+		<Trans key={"introduceLibraries"} i18nKey={'dashboard_consortium_details.row1_col3'} components={[<abbr title='placeholder content'/>]}/>],
 		[t('onboarding.stage.provision_systems.name'), t('onboarding.stage.provision_systems.action'), 
 		<Trans key={'provisionSystems'} i18nKey={'dashboard_consortium_details.row2_col3'}>We know about <abbr title='placeholder content'>51</abbr> Host LMS instances that are needed for MOBIUS.<br/><br/> We are missing essential details for <abbr title='placeholder content'>41</abbr> of these.</Trans>],
 		[t('onboarding.stage.configure_services.name'), t('onboarding.stage.configure_services.action'), 
 		<Trans key={'configureServices'} i18nKey={'dashboard_consortium_details.row3_col3'}>We are missing mapping configurations and patron authentication details for <abbr title='placeholder content'>73</abbr> libraries.<br/><br/> We are missing test records or accounts for <abbr title='placeholder content'>64</abbr> libraries.</Trans>],
-		[t('onboarding.stage.migrate_service.name'), t('onboarding.stage.migrate_services.action'),
+		[t('onboarding.stage.migrate_service.name'), t('onboarding.stage.migrate_service.action'),
 		<Trans key={'migrateServices'} i18nKey={'dashboard_consortium_details.row4_col3'}>We are missing expected migration details for <abbr title='placeholder content'>81</abbr> libraries.<br/><br/> We are missing a migration sign-off authority contact for <abbr title='placeholder content'>81</abbr> libraries.</Trans>],
 		[t('onboarding.stage.operate_dcb.name'), t('onboarding.stage.operate_dcb.action'), 
 		<Trans key={'operateDCB'} i18nKey={'dashboard_consortium_details.row5_col3'}>There are <abbr title='placeholder content'>0</abbr> library services administrators authorised to operate DCB services. </Trans>],
@@ -70,9 +70,6 @@ const Home: NextPage = () => {
 					<Typography variant='body1' fontSize={'1.1rem'}>
 						<Trans
 						i18nKey="dashboard.see_the_releases"
-						values={{
-							key: "Releases"
-						}}
 						components={[<Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer"/>]}
 						>
 						</Trans>
