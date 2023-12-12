@@ -6,6 +6,7 @@ import { DataGrid } from '@components/DataGrid';
 import { MdClose, MdExpandMore } from 'react-icons/md'
 import { IconContext } from 'react-icons';
 import { useTranslation } from 'next-i18next';
+import { TreeView } from '@mui/x-tree-view';
 
 type DetailsType = {
         i: any,
@@ -36,7 +37,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
 
         // experimental - fix with a map solution as numbers of needed accordions will change
         // State values for expanded accordions
-        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true]);
+        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, true]);
 
         // Functions to handle expanding both individual accordions and all accordions
         const handleAccordionChange = (index: number) => () => {
@@ -106,8 +107,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 {dayjs(toDisplay?.dateUpdated).format('YYYY-MM-DD HH:mm')}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.description")}</span>
                                                 {toDisplay?.description}</Typography>
-                                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.bib_cluster_id")}</span> 
-                                                {toDisplay?.bibClusterId}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.requestor_note")}</span> 
                                                 {toDisplay?.requestorNote}</Typography>
                                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.status")}</span> 
@@ -266,6 +265,50 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 />
                                         </AccordionDetails>
                         </Accordion>
+                        </Card>: null}
+
+                        {type == "Request"?<Card variant = 'outlined'>
+                                <Accordion expanded={expandedAccordions[6]} onChange={handleAccordionChange(6)}>
+                                        <AccordionSummary aria-controls="request-bib-record" id="request_bib_record" 
+                                                expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.bib_record")} </Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.bib_cluster_id")}</span> 
+                                                {toDisplay?.bibClusterId}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.title")}</span> 
+                                                {toDisplay?.clusterRecord?.title}</Typography>
+                                        {toDisplay?.clusterRecord?.members[0]?.author != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
+                                                {toDisplay?.clusterRecord?.members[0]?.author}</Typography> : null}
+                                                {/* If author isn't where it should be, we can fetch from canonical metadata */}
+                                        {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
+                                                {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label}</Typography> : null}                       
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_created")} </span>
+                                                {dayjs(toDisplay?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_updated")} </span>
+                                                {dayjs(toDisplay?.clusterRecord?.dateUpdated).format('YYYY-MM-DD HH:mm')}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.selected_bib")}</span> 
+                                                {toDisplay?.clusterRecord?.selectedBib}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span> 
+                                                {toDisplay?.clusterRecord?.members[0]?.sourceRecordId}</Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span> 
+                                                {toDisplay?.clusterRecord?.members[0]?.sourceSystemId}</Typography>
+                                        <Card variant="outlined">
+                                        <Accordion expanded={expandedAccordions[7]} onChange={handleAccordionChange(7)}>
+                                        <AccordionSummary aria-controls="request-source-record" id="request_source_record" 
+                                                expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                                <pre>{JSON.stringify(toDisplay?.clusterRecord?.members[0]?.sourceRecord, null, 2)}</pre>
+                                        </AccordionDetails>
+                                        </Accordion>
+                                        </Card>
+                                        </AccordionDetails>
+                                </Accordion>
+
                         </Card>: null}
                         {/* These are the items we typically only need to show for 'Agency Details'*/}
                         {type == "Agency"?<Card variant = 'outlined'>

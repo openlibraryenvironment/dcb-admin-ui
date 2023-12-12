@@ -169,7 +169,7 @@ export const loadPatronRequests = gql`
 query PatronRequests {
     patronRequests(pagesize: 100) {
         totalSize
-        content {
+        content { 
             id
             dateCreated
             dateUpdated
@@ -192,21 +192,21 @@ query PatronRequests {
             description
             errorMessage
             activeWorkflow
-            requesterNote
+            requesterNote 
             patron {
                 id
-            }
-            requestingIdentity {
-                id
-                localId
+            },
+            requestingIdentity { 
+                id, 
+                localId 
                 homeIdentity
                 localBarcode
                 localNames
                 localPtype
-                canonicalPtype
+                canonicalPtype 
                 localHomeLibraryCode
-                lastValidated
-            }
+                lastValidated 
+            }, 
             suppliers {
                 id
                 canonicalItemType
@@ -223,104 +223,38 @@ query PatronRequests {
                 localId
                 localStatus
                 localAgency
-                patronRequest {
+                virtualIdentity {
                     id
-                    dateCreated
-                    dateUpdated
-                    patronHostlmsCode
-                    bibClusterId
-                    pickupLocationCode
-                    pickupPatronId
-                    pickupItemId
-                    pickupItemType
-                    pickupItemStatus
-                    pickupRequestId
-                    pickupRequestStatus
-                    status
-                    localRequestId
-                    localRequestStatus
-                    localItemId
-                    localItemStatus
-                    localItemType
-                    localBibId
-                    description
-                    errorMessage
-                    activeWorkflow
-                    requesterNote
+                    localId
+                    homeIdentity
+                    localBarcode
+                    localNames
+                    localPtype
+                    canonicalPtype
+                    localHomeLibraryCode
+                    lastValidated
                 }
-            }
-            audit {
+            }, 
+            audit { 
                 id
                 auditDate
-                briefDescription
                 fromStatus
                 toStatus
-                auditData
-                patronRequest {
+                briefDescription
+            }, 
+            clusterRecord { 
+                id 
+                title
+                selectedBib
+                members { 
                     id
-                    dateCreated
-                    dateUpdated
-                    patronHostlmsCode
-                    bibClusterId
-                    pickupLocationCode
-                    pickupPatronId
-                    pickupItemId
-                    pickupItemType
-                    pickupItemStatus
-                    pickupRequestId
-                    pickupRequestStatus
-                    status
-                    localRequestId
-                    localRequestStatus
-                    localItemId
-                    localItemStatus
-                    localItemType
-                    localBibId
-                    description
-                    errorMessage
-                    activeWorkflow
-                    requesterNote
-                    requestingIdentity {
-                        id
-                        localId
-                        homeIdentity
-                        localBarcode
-                        localNames
-                        localPtype
-                        canonicalPtype
-                        localHomeLibraryCode
-                        lastValidated
-                    }
-                    patron {
-                        id
-                    }
-                    suppliers {
-                        id
-                        canonicalItemType
-                        dateCreated
-                        dateUpdated
-                        hostLmsCode
-                        isActive
-                        localItemId
-                        localBibId
-                        localItemBarcode
-                        localItemLocationCode
-                        localItemStatus
-                        localItemType
-                        localId
-                        localStatus
-                        localAgency
-                    }
-                    audit {
-                        id
-                        auditDate
-                        briefDescription
-                        fromStatus
-                        toStatus
-                        auditData
-                    }
-                }
-            }
-        }
+                    title
+                    canonicalMetadata
+                    sourceSystemId
+                    sourceRecordId
+                    sourceRecord { id, json }  
+                }  
+            }  
+        } 
     }
 }`;

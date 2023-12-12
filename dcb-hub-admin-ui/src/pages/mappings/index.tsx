@@ -3,7 +3,8 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button, capitalize} from '@mui/material';
+import { Paper, CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
+import { capitalize } from 'lodash';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
