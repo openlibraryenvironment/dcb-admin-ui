@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { loadPatronRequests } from 'src/queries/queries';
 import { useMemo } from 'react';
 import dayjs from 'dayjs';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -52,7 +53,6 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const { t } = useTranslation();
 	const rows:any = resource?.content;
 	const patronRequestData = rows?.patronRequests?.content;
-console.log(patronRequestData);
 
 	return (
 		<AdminLayout>
@@ -61,11 +61,11 @@ console.log(patronRequestData);
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg", "Loading requests....")}</Typography>
+								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg")}</Typography>
 							)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text", "Failed to fetch the requests, please refresh the page.")}/>
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text")}/>
 							)}
 							{resourceFetchStatus === 'success' && (
 								<>
@@ -84,7 +84,7 @@ console.log(patronRequestData);
 												if (params.row.suppliers.length > 0) {
 												  return params.row.suppliers[0].localAgency;
 												} else {
-												  return ''; // This allows us to handle the array being empty. The weirdness here is to handle type errors with this object.
+												  return ''; // This allows us to handle the array being empty, and any related type errors.
 												}
 											  }},
 										{field: 'pickupLocationCode', headerName: "Pickup location", minWidth: 50, flex: 0.5}]}
@@ -96,7 +96,7 @@ console.log(patronRequestData);
 										// This is how to set certain columns as hidden by default
 										columnVisibilityModel={{suppliers: false, pickupLocationCode: false}}
 										// This is how to set the default sort order - so the grid loads as sorted by 'lastUpdated' by default.
-										sortModel={[{field: 'lastUpdated', sort: 'desc'}]}
+										sortModel={[{field: 'dateUpdated', sort: 'desc'}]}
 									/>
 								</>
 							)}
@@ -109,7 +109,13 @@ console.log(patronRequestData);
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
+
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
 		page = parseInt(context.query.page, 10);
@@ -140,9 +146,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
-			sort: sort
+			sort: sort,
 		}
 	};
 };

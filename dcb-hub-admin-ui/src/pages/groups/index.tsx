@@ -10,12 +10,13 @@ import NewGroup from './NewGroup';
 import { dehydrate, QueryClient, useQueryClient, useQuery } from '@tanstack/react-query'
 import { groupsQueryDocument } from 'src/queries/queries';
 import { useResource } from '@hooks';
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'next-i18next';
 import { getServerSession } from 'next-auth';
 import { AgencyGroupPage } from '@models/AgencyGroupPage';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 // import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
@@ -96,19 +97,19 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 				<Card>
 					<CardContent>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg", "Loading groups....")}</Typography>
+						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
 						<div>
-							<Alert severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text", "Failed to fetch Groups, will retry. If this error persists, please refresh the page.")}/>
+							<Alert severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text")}/>
 						</div>
 					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>
 							<div>
-								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new", "New Group")}</Button>
+								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
 								<DataGrid
 								data={groupsData ?? []}
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
@@ -136,7 +137,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 // 	Step One: verify SSR works
 // 	Step Two: verify Server-Side Pagination works
   
-  export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
 
 	// https://next-auth.js.org/configuration/nextjs#in-getserversideprops
     // const session = await getServerSession(context.req, context.res, authOptions)
@@ -155,6 +156,11 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 	// // await queryClient.prefetchQuery(['groups'], loadGroups);
 
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
 
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
@@ -192,6 +198,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
 			sort: sort,

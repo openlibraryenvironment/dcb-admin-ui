@@ -1,8 +1,8 @@
 import Link from '@components/Link/Link';
 import { AdminLayout } from '@layout';
 import { Typography } from '@mui/material';
-//localisation
 import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function NotFound() {
 	const { t } = useTranslation();
@@ -10,15 +10,27 @@ export default function NotFound() {
 		<AdminLayout>
 			{' '}
 			<div className='not-found'>
-				<Typography className='Title'>{t("404.page_title", "404")}</Typography>
-				<Typography className='Text'>{t("404.page_text", "Oops! Page not found.")}</Typography>
+				<Typography className='Title'>{t("404.page_title")}</Typography>
+				<Typography className='Text'>{t("404.page_text")}</Typography>
 				<Typography className='GoBackText'>
-					{t("404.go_back_text", "Go back to the ")}
+					{t("404.go_back_text")}
 					<Link aria-label='dashboard link' className='LinkTo' href='/'>
-						{t("404.dashboard_text", "dashboard")}
+						{t("404.dashboard_text")}
 					</Link>
 				</Typography>
 			</div>
 		</AdminLayout>
 	);
-}
+};
+
+export async function getStaticProps({ locale }: {locale: any}) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale, [
+			'application',
+			'common',
+			'validation'
+			])),
+		},
+	}
+};

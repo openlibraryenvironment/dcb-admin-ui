@@ -3,20 +3,20 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
+import { Paper, CardContent, Card, Typography, CardHeader, Button } from '@mui/material';
+import { capitalize } from 'lodash';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
 import { Mapping } from '@models/Mapping';
 import { useSession } from 'next-auth/react';
 import { useMemo, useState } from 'react';
 import getConfig from 'next/config';
-
-//localisation
 import { useTranslation } from 'next-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Import from '@components/Import/Import';
 import useCode from '@hooks/useCode';
 import dayjs from 'dayjs';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 type Props = {
 	category: string
@@ -58,26 +58,26 @@ const MappingsByCategory: NextPage<Props> = () => {
 		
 		// This will conditionally render by category
 		// Use valueGetter for when we need to format specific values
-		// TODO: Set lastImported to sort 'desc' by default https://mui.com/x/react-data-grid/sorting/
 		return (
 			<div>
 				<Button variant="contained" onClick={openImport} > {t("mappings.import")}</Button>
 				<DataGrid
 					data={resource?.content ?? []}
-					columns={[{field: 'fromCategory', headerName: "Category", minWidth: 50, flex: 0.5},
-							{field: 'fromContext', headerName: "HostLMS", minWidth: 50, flex: 0.5},
-							{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.4}, 
-							{field: 'label', headerName: "Meaning", minWidth: 50, flex: 0.5},
-							{field: 'toValue', headerName: "DCB Value", minWidth: 50, flex: 0.5}, 
+					columns={[{field: 'fromContext', headerName: "Host LMS", minWidth: 50, flex: 0.5},
+							{field: 'fromValue', headerName: "Local value", minWidth: 50, flex: 0.4}, 
+							{field: 'label', headerName: "Local meaning", minWidth: 50, flex: 0.5},
+							{field: 'toValue', headerName: "DCB value", minWidth: 50, flex: 0.5,
+							valueGetter: (params: { row: { toValue: any; }; }) => {
+								return capitalize(params.row.toValue);
+							}},								
 							{field: 'lastImported', headerName: "Last imported", minWidth: 100, flex: 0.5, 
 							valueGetter: (params: { row: { lastImported: any; }; }) => {
 								const lastImported = params.row.lastImported;
 								return dayjs(lastImported).format('YYYY-MM-DD HH:mm');
 							}}]}		
 					type={category}
-					noDataLink={"#"}
-					noDataMessage={t("mappings.import_circulation_status", "Import circulation status mappings for a Host LMS")}
-					noDataTitle={t("mappings.no_results", "No results found")}
+					noDataMessage={t("mappings.import_circulation_status")}
+					noDataTitle={t("mappings.no_results")}
 					selectable={false}
 					sortModel={[{field: 'lastImported', sort: 'desc'}]}
 				/>
@@ -90,7 +90,7 @@ const MappingsByCategory: NextPage<Props> = () => {
 			<Paper elevation={16}>
 				<Card>
 					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status", "Item circulation status mappings")}</Typography>}/>                    
+					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status")}</Typography>}/>                    
 					<CardContent>
 						<ByCategory category={useCode((state) => state.category) ?? "CirculationStatus"}/>
 				    </CardContent>
@@ -103,5 +103,17 @@ const MappingsByCategory: NextPage<Props> = () => {
 	);
 };
 // Add getServerSideProps back when we do server-side pagination work (DCB-480)
+
+export async function getStaticProps({ locale }: {locale: any}) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale, [
+			'application',
+			'common',
+			'validation'
+			])),
+		},
+	}
+};
 
 export default MappingsByCategory;

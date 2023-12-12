@@ -1,0 +1,306 @@
+{
+  "dashboard": {
+    "app_title": "Welcome ",
+    "body_message": "You are using DCB Admin to manage the Direct Consortial Borrowing configuration for the MOBIUS consortium.",
+    "your_consortium_title": "Your Consortium",
+    "placeholder_text": "Note: All numbers displayed below are placeholders only",
+    "your_dcb_envrionment": "Your DCB environment",
+    "configured_for": "This installation of DCB Admin is configured for",
+    "latest_version_text": "The latest versions of DCB system components are",
+    "see_the_releases": "See the <Link>Releases</Link> hub for more details and previous versions"
+  },
+
+  "dashboard_consortium_details": {
+    "row1_col1" : "1. Introduce libraries",
+    "row1_col2": "Tell us about the members in your consortium that we need to onboard and migrate",
+    "row1_col3": "We know about <1>81</1> library agencies in MOBIUS.<br/><br/> We are missing basic details for <1>75</1> of these.",
+    "row2_col1": "2. Provision systems",
+    "row2_col2": "Provide technical details we need to set up your DCB services",
+    "row2_col3": "We know about <1>51</1> Host LMS instances that are needed for MOBIUS.<br/><br/> We are missing essential details for <1>41</1> of these.",
+    "row3_col1": "3. Configure services",
+    "row3_col2": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
+    "row3_col3": "We are missing mapping configurations and patron authentication details for <0>73</0> libraries.<br/><br/> We are missing test records or accounts for <1>64</1> libraries.",
+    "row4_col1": "4. Migrate service",
+    "row4_col2": "Share key dates and contacts so we can plan for your service migration",
+    "row4_col3": "We are missing expected migration details for <1>81</1> libraries.<br/><br/> We are missing a migration sign-off authority contact for <1>81</1> libraries.",
+    "row5_col1": "5. Operate DCB",
+    "row5_col2": "Authorise who can manage your live DCB services",
+    "row5_col3": "There are <1>0</1> library services administrators authorised to operate DCB services.",
+    "row6_col1": "6. Manage support",
+    "row6_col2": "Maintain current authorised support contacts so we can deal with any help you need",
+    "row6_col3": "We have <1>0</1> library services administrators authorised to operate DCB services.",
+    "column1_name": "Onboarding stage",
+    "column2_name": "What you need to do",
+    "column3_name": "How it's going"
+  },
+
+  "dashboard_your_dcb_environment": {
+    "column1_name": "Service",
+    "column2_name": "Environment",
+    "column3_name": "Address",
+    "column4_name": "Status"
+  },
+
+  "dashboard_version_data": {
+    "column1_name": "Component",
+    "column2_name": "Latest Version",
+    "column3_name": "Your Version"
+  },
+
+  "sidebar": {
+    "dashboard_page_button": "Home",
+    "patron_request_button": "Patron Request",
+    "agency_button": "Agency",
+    "host_lms_button": "Host LMS",
+    "location_button": "Location",
+    "groups_button": "Groups",
+    "settings_button": "Settings"
+  },
+  
+  "profile": {
+    "title": "Profile",
+    "details": "Your details",
+    "name": "Name: ",
+    "email": "Email: ",
+    "email_verified": "Email Verified: ",
+    "prefered_username": "Prefered Username: ",
+    "roles": "Roles: "
+  },
+
+  "header": {
+    "language_switcher_title": "Language",
+    "title": "DCB Admin"
+  },
+
+  "details": {
+    "active": "isActive: ",
+    "active_workflow": "Active workflow: ",
+    "agency_auth": "Agency auth profile: ",
+    "agency_code": "Agency code: ",
+    "agency_hostlms": "Agency HostLMS code: ",
+    "agency_id": "Agency ID: ",
+    "agency_name": "Agency name: ",
+    "audit": "Audit data",
+    "audit_date": "Audit date: ",
+    "audit_description": "Audit description: ",
+    "audit_from_status": "fromStatus: ",
+    "audit_id": "Audit ID: ",
+    "audit_log": "Audit log",
+    "audit_to_status": "toStatus: ",
+    "author": "Author: ",
+    "bib_cluster_id": "Bib cluster ID: ",
+    "bib_record": "Bib record",
+    "borrowing": "Borrowing",
+    "borrowing_patron_id": "Virtual patron ID: ",
+    "borrowing_patron_type": "Virtual patron type: ",
+    "borrowing_request_id": "Virtual request ID: ",
+    "borrowing_request_status": "Virtual request status: ",
+    "borrowing_virtual_bib_id": "Virtual Bib ID: ",
+    "borrowing_virtual_id": "Virtual item ID: ",
+    "borrowing_virtual_item_status": "Virtual item status: ",
+    "borrowing_virtual_type": "Virtual item type: ",
+    "client_config": "Client config",
+    "client_config_access_id": "Access ID: ",
+    "client_config_access_key": "Access key: ",
+    "client_config_api": "API key: ",
+    "client_config_barcode_prefix": "Barcode prefix: ",
+    "client_config_base": "Base URL: ",
+    "client_config_domain_id": "Domain ID: ",
+    "client_config_fine": "fine-code-id",
+    "client_config_ingest": "Ingest: ",
+    "client_config_item": "Item config",
+    "client_config_history_action_id": "History action ID: ",
+    "client_config_key": "Key: ",
+    "client_config_loan_id": "Loan period code ID: ",
+    "client_config_metadata": "Metadata prefix: ",
+    "client_config_page_size": "Page size: ",
+    "client_config_papi": "PAPI config",
+    "client_config_papi_app_id": "PAPI app ID: ",
+    "client_config_papi_org_id": "PAPI organisation ID: ",
+    "client_config_papi_lang_id": "PAPI language ID: ",
+    "client_config_papi_version": "PAPI version: ",
+    "client_config_record_syntax": "Record syntax: ",
+    "client_config_records": "Number of records to generate: ",
+    "client_config_renewal_limit": "Renewal limit: ",
+    "client_config_secret": "Secret: ",
+    "client_config_services": "Services config",
+    "client_config_services_language": "Services language: ",
+    "client_config_services_product_id": "Services product ID: ",
+    "client_config_services_site_domain": "Services site domain: ",
+    "client_config_services_workstation_id": "Services workstation ID: ",
+    "client_config_services_organisation_id": "Services organisation ID: ",
+    "client_config_services_version": "Services version: ",
+    "client_config_shelving": "Shelving locations: ",
+    "client_config_shelving_scheme_id": "Shelving scheme ID: ",
+    "client_config_staff_password": "Staff password: ",
+    "client_config_staff_username": "Staff username: ",
+    "code": "code",
+    "collapse": "Collapse all",
+    "date_created": "Date created: ",
+    "date_updated": "Date updated: ",
+    "description": "Description: ",
+    "details": "Details",
+    "error": "Error message: ",
+    "expand": "Expand all",
+    "general": "General",
+    "group_name": "Group name: ",
+    "hostlms_id": "Host LMS ID: ",
+    "hostlms_code": "Host LMS code: ",
+    "hostlms_name": "HostLMS name: ",
+    "id": "ID: ",
+    "json": "JSON",
+    "lms_client": "LmsClientClass: ",
+    "lat": "Latitude: ",
+    "last_validated": "Last validated: ",
+    "local_agency": "Local agency: ",
+    "local_barcode": "Local barcode: ",
+    "local_bib_id": "Local Bib ID: ",
+    "local_home_lib": "Home library code: ",
+    "local_id": "Local ID: ",
+    "local_item_barcode": "Local item barcode: ",
+    "local_item_id": "Local item ID: ",
+    "local_item_loc": "Local item location code: ",
+    "local_item_status": "Local item status: ",
+    "local_item_type": "Local item type: ",
+    "local_request_id": "Local request ID: ",
+    "local_request_status": "Local request status: ",
+    "local_supplier_id": "Local supplier request ID: ",
+    "location_agency": "Location agency ID: ",
+    "location_info": "Location information",
+    "location_name": "Location name: ",
+    "location_type": "Type: ",
+    "long": "Longitude: ",
+    "patron": "Patron",
+    "patron_home_id": "Home identity: ",
+    "patron_id": "Patron ID: ",
+    "patron_local_names": "Local names: ",
+    "patron_local_ptype": "Local Ptype: ",
+    "patron_request": "Patron request data",
+    "patron_hostlms": "Patron HostLMS code: ",
+    "pickup": "Pickup",
+    "pickup_code": "Pickup location code: ",
+    "pickup_item_id": "Pickup item ID: ",
+    "pickup_item_status": "Pickup item status: ",
+    "pickup_item_type": "Pickup item type: ",
+    "pickup_patron_id": "Pickup patron ID: ",
+    "pickup_request_id": "Pickup request ID: ",
+    "pickup_request_status": "Pickup request status: ",
+    "request_created": "Request created: ",
+    "request_id": "Request ID: ",
+    "requestor_id": "Requesting agency ID: ",
+    "requestor_note": "Requestor note: ",
+    "request_updated": "Request updated: ",
+    "selected_bib": "Selected bib: ",
+    "source_record": "Source record",
+    "source_record_id": "Source record ID: ",
+    "source_system_id": "Source system ID: ",
+    "status": "Status: ",
+    "supplier": "Supplier",
+    "supplier_id": "Supplier ID: ",
+    "supplier_ctype": "Canonical item type: ",
+    "supplier_request": "Supplier request data: ",
+    "title": "Title: ",
+    "view": "View"    
+  },
+
+  "agencies": {
+    "add_to_group": "Add agencies to a group",
+    "alert_text_success": "Agency added to group!",
+    "alert_text": "Failed to fetch the agencies, please refresh the page.",
+    "loading_msg": "Loading agencies...."
+  },
+
+  "general": {
+    "submit": "Submit",
+    "english": "English",
+    "spanish": "Spanish"
+  },
+
+  "groups": {
+    "loading_msg": "Loading groups....",
+    "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page.",
+    "type_new": "New Group",
+    "new_group_success": "Success: New group created!"
+  },
+
+  "hostlms": {
+    "loading_msg": "Loading HostLMS....",
+    "alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page."
+  },
+
+  "locations": {
+    "loading_msg": "Loading locations....",
+    "alert_text": "Failed to fetch the locations, please refresh the page."
+  },
+
+  "requests": {
+    "loading_msg": "Loading requests....",
+    "alert_text": "Failed to fetch the requests, please refresh the page."
+  },
+
+  "settings": {
+    "settings": "Settings",
+    "mappings": "Mappings",
+    "all_mappings": "All mappings",
+    "circulation_status": "Circulation status mappings",
+    "shelving_location": "Shelving location mappings"
+  },
+
+  "mappings": {
+    "add_success": "{{fileName}} has been added and is ready to be uploaded.",
+    "alert_text": "Failed to fetch the mappings, please refresh the page.",
+    "upload_success": "{{count}} {{category}} mappings for {{code}} were added. Select “Close” to view the imported {{category}} mappings.",
+    "upload_success_replacement": "{{addedCount}} {{category}} mappings for {{code}} were added and {{deletedMappingCount}} mappings were deleted. Select “Close” to view the imported {{category}} mappings",
+    "drag_n_drop": "Drag and drop or click to select a file.",
+    "file_empty": "{{fileName}} has no content. The file must not be empty. Please select a file with content.",
+    "file_too_large": "{{fileName}} is {{fileSize}} MB. Maximum file size is {{maxSize}} MB. Please select a smaller file.",
+    "import": "Import",
+    "import_circulation_status": "Import circulation status mappings for a Host LMS",
+    "import_file": "Import file",
+    "import_title": "Import {{profile}} mappings",
+    "loading_msg": "Loading mappings...",
+    "mappings": "Mappings",
+    "max_size": "Maximum size {{maxSize}}",
+    "no_results": "No results found",
+    "suggested_formats": "Suggested formats: CSV, TSV",
+    "upload_failure": "The import has not completed because a problem was encountered. No mappings have been created. Select “Close”, refresh the page, and try importing again",
+    "wrong_file_type": "{{fileName}} is in an unsupported format. The valid formats are {{allowedFiles}}. Please select another file.",   
+    "confirmation_header": "Confirm replacement of circulation status mappings",
+    "confirmation_body": "<p> <strong>{{existingMappingCount}}</strong> circulation status mappings for <strong>{{code}}</strong> will be <strong>{{deleted}}</strong> and replaced with mappings from the file “{{fileName}}.”</p>",
+    "confirmation_warning": "It will not be possible to undo the import. Please ensure you have a backup of the circulation status mappings before continuing.",
+    "confirmation_replace": "To go ahead, select “Replace mappings”.",
+    "cancel": "Cancel",
+    "confirmation_replace_mappings": "Replace mappings",
+    "validation_expected_headers": "<p>The column headers in <strong>{{fileName}}</strong> do not match the expected headers. The first three columns must be named <strong>“Local code”</strong>, <strong>“Local meaning”</strong> and <strong>“DCB code”</strong>. Please correct the column headers and retry.</p>",
+    "validation_invalid_dcb_code": "One or more values of DCB code is invalid. Valid values are “Available”, “Unavailable” and “Unknown”. DCB code can also be empty. Please correct the values and retry.",
+    "validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
+    "validation_missing_values": "The columns <strong>“Local code”</strong> and <strong>“Local meaning”</strong> must contain data. One or more cells in these columns is empty. Please fix and retry."
+  },
+
+  "breadcrumbs": {
+    "home_text": "Home"
+  },
+
+  "404": {
+    "page_title": "404",
+    "page_text": "Oops! Page not found.",
+    "go_back_text": "Go back to the ",
+    "dashboard_text": "dashboard"
+  },
+
+  "unauthorised": {
+    "page_title": "401",
+    "page_text_no_access": "Sorry, you do not have access to this page.",
+    "page_text_contact_admin": "If you think you should have access, contact your system administrator",
+    "go_back_text": "Go back to the ",
+    "dashboard_text": "dashboard"
+  },
+
+  "footer": {
+    "openRS": "Project OpenRS",
+    "dcb": "Direct Consortial Borrowing",
+    "version": "Version ",
+    "released_text": "Released "
+  }
+
+}

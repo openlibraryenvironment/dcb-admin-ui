@@ -17,13 +17,10 @@ type SelectorType = {
 // for example requests, locations etc
 
 export default function Selector({optionsType, options}: SelectorType) {
-    // can pass in type, too
+  // can pass in type, too
   const { data: session, status } = useSession();
   const code = useCode((state) => state.code);
   const updateCode = useCode((state) => state.updateCode);
-
-
-
   const [hostLmsId, setHostLmsId] = useState();
   // Generate the url for the useResource hook
   const url = useMemo(() => {
@@ -54,21 +51,19 @@ export default function Selector({optionsType, options}: SelectorType) {
   }));
     // Here, we map across the names and associated IDs for each HostLMS option.
     // This means that the ID will be available for us when we need to import for a specific HostLMS.
-
   return (
       <Autocomplete
         onChange={(event, value) => {
-          console.log(value)
           updateCode(value?.label)
           setHostLmsId(value?.value);
         }}
       // Here we can store the value to be used for import, and supply the necessary hostlms ID
-        disablePortal 
+        disablePortal
         id="selector-combo-box"
         options={names ?? []}
         getOptionLabel={(option: any) => option.label}
         fullWidth
-        renderInput={(params: any) => <TextField {...params} required label={optionsType} helperText={"Required field"} />}
+        renderInput={(params: any) => <TextField {...params} required label={optionsType} />}
         isOptionEqualToValue={(option, value) => option.id === value.id}
       />
   );

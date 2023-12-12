@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from 'next';
+import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
 
@@ -15,6 +15,7 @@ import { Location } from '@models/Location';
 import { DataGrid } from '@components/DataGrid';
 import { loadLocations } from 'src/queries/queries';
 import { useMemo } from 'react';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -73,10 +74,10 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 			<Card>
 				<CardContent>
 						{resourceFetchStatus === 'loading' && (
-								<Typography variant = 'body1' className='text-center mb-0'>{t("locations.loading_msg", "Loading locations....")}</Typography>)}
+								<Typography variant = 'body1' className='text-center mb-0'>{t("locations.loading_msg")}</Typography>)}
 
 							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("locations.alert_text", "Failed to fetch the locations, please refresh the page.")}/>)}
+								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("locations.alert_text")}/>)}
 							{resourceFetchStatus === 'success' && (
 								<>
 									<DataGrid
@@ -97,7 +98,13 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+	const { locale } = context;
+	let translations = {};
+	if (locale) {
+	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+	}
+
 	let page = 1;
 	if (context.query?.page && typeof context.query.page === 'string') {
 		page = parseInt(context.query.page, 10);
@@ -128,6 +135,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
 	return {
 		props: {
+			...translations,
 			page,
 			resultsPerPage,
 			sort: sort
