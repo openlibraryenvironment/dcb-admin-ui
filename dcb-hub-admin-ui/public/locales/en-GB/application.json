@@ -44,10 +44,10 @@
         "name": "Introduce libraries",
         "action": "Tell us about the members in your consortium that we need to onboard and migrate",
         "status_known_none": "We don't know about any library agencies in {{consortium.name}}.",
-        "status_known_one": "We know about {{agencies.total}} library agency in {{consortium.name}}.",
+        "status_known_one": "We know about <0>{{agencies_total}}</0> library agency in {{consortium_name}}.",
         "status_known_other": "We know about {{agencies.total}} library agencies in {{consortium.name}}.",
         "status_missing_none": "We are not missing any basic details for these.",
-        "status_missing_other": "We are missing basic details for {{agencies.incomplete}} of these."
+        "status_missing_other": "We are missing basic details for <0>{{agencies.incomplete}}</0> of these."
       },
       "provision_systems": {
         "name": "Provision systems",

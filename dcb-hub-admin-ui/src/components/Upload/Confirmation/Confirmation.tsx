@@ -23,9 +23,10 @@ const Confirmation = ({ open, onClose, onConfirm, code, existingMappingCount, fi
         {/* // Enforcing the style of bold, centered modal or dialog headers */}
       <DialogTitle style={{ textAlign: 'center'}}><strong>{t("mappings.confirmation_header")}</strong></DialogTitle>
       <DialogContent>
-            <Trans i18nKey="mappings.confirmation_body" values={{ existingMappingCount, code, fileName, deleted }}>
-                <p> <strong> 44 </strong> circulation status mappings for <strong> code </strong> will be <strong> deleted </strong> and replaced with mappings from the file filename </p>
-            </Trans>            
+            <Trans
+              i18nKey="mappings.confirmation_body" 
+              values={{ existingMappingCount, code, fileName, deleted }} 
+              components={[<p key={'para1'}/>, <strong key={'bold1'}/>]}/>           
             <Alert severityType="warning" alertText = {t("mappings.confirmation_warning")}/>
             {t("mappings.confirmation_replace")}
       </DialogContent>
