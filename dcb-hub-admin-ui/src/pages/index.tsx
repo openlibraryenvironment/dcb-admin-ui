@@ -57,7 +57,7 @@ const Home: NextPage = () => {
 					<Typography variant='body1' fontSize={'1.1rem'}>
 						<Trans
 						i18nKey="dashboard.see_the_releases"
-						components={[<Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer" key={'linkRel'}/>]}
+						components={{linkToReleases: <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} target='_blank' rel="noreferrer"/>}}
 						>
 						</Trans>
 					</Typography>

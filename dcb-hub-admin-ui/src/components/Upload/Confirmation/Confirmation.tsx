@@ -26,7 +26,7 @@ const Confirmation = ({ open, onClose, onConfirm, code, existingMappingCount, fi
             <Trans
               i18nKey="mappings.confirmation_body" 
               values={{ existingMappingCount, code, fileName, deleted }} 
-              components={[<p key={'para1'}/>, <strong key={'bold1'}/>]}/>           
+              components={{paragraph: <p/> , bold: <strong/>}}/>           
             <Alert severityType="warning" alertText = {t("mappings.confirmation_warning")}/>
             {t("mappings.confirmation_replace")}
       </DialogContent>
