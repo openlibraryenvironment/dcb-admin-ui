@@ -13,22 +13,22 @@
   "dashboard_consortium_details": {
     "row1_col1" : "1. Introduce libraries",
     "row1_col2": "Tell us about the members in your consortium that we need to onboard and migrate",
-    "row1_col3": "We know about <abbreviation>{{agencies_total}}</abbreviation> library agencies in {{consortium_name}}.<br/><br/> We are missing basic details for <0>75</0> of these.",
+    "row1_col3": "We know about <abbreviation>{{agencies_total}}</abbreviation> library agencies in {{consortium_name}}.<br/><br/> We are missing basic details for <abbreviation>75</abbreviation> of these.",
     "row2_col1": "2. Provision systems",
     "row2_col2": "Provide technical details we need to set up your DCB services",
     "row2_col3": "We know about <abbreviation>{{hostlmss_total}}</abbreviation> Host LMS instances that are needed for {{consortium_name}}.<br/><br/> We are missing essential details for <0>41</0> of these.",
     "row3_col1": "3. Configure services",
     "row3_col2": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
-    "row3_col3": "We are missing mapping configurations and patron authentication details for <abbreviation>73</abbreviation> libraries.<br/><br/> We are missing test records or accounts for <abbreviation>64</abbreviation> libraries.",
+    "row3_col3": "We are missing mapping configurations and patron authentication details for <abbreviation>{{config_incomplete}}</abbreviation> libraries.<br/><br/> We are missing test records or accounts for <abbreviation>64</abbreviation> libraries.",
     "row4_col1": "4. Migrate service",
     "row4_col2": "Share key dates and contacts so we can plan for your service migration",
     "row4_col3": "We are missing expected migration details for <abbreviation>81</abbreviation> libraries.<br/><br/> We are missing a migration sign-off authority contact for <abbreviation>81</abbreviation> libraries.",
     "row5_col1": "5. Operate DCB",
     "row5_col2": "Authorise who can manage your live DCB services",
-    "row5_col3": "There are <0>0</0> library services administrators authorised to operate DCB services.",
+    "row5_col3": "There are <abbreviation>0</abbreviation> library services administrators authorised to operate DCB services.",
     "row6_col1": "6. Manage support",
     "row6_col2": "Maintain current authorised support contacts so we can deal with any help you need",
-    "row6_col3": "We have <0>0</0> library services administrators authorised to operate DCB services.",
+    "row6_col3": "We have <abbreviation>0</abbreviation> library services administrators authorised to operate DCB services.",
     "column1_name": "Onboarding stage",
     "column2_name": "What you need to do",
     "column3_name": "How it's going"
@@ -271,10 +271,10 @@
     "confirmation_replace": "To go ahead, select “Replace mappings”.",
     "cancel": "Cancel",
     "confirmation_replace_mappings": "Replace mappings",
-    "validation_expected_headers": "<p>The column headers in <strong>{{fileName}}</strong> do not match the expected headers. The first three columns must be named <strong>“Local code”</strong>, <strong>“Local meaning”</strong> and <strong>“DCB code”</strong>. Please correct the column headers and retry.</p>",
+    "validation_expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“Local code”</bold>, <bold>“Local meaning”</bold> and <bold>“DCB code”</bold>. Please correct the column headers and retry.</paragraph>",
     "validation_invalid_dcb_code": "One or more values of DCB code is invalid. Valid values are “Available”, “Unavailable” and “Unknown”. DCB code can also be empty. Please correct the values and retry.",
     "validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
-    "validation_missing_values": "The columns <strong>“Local code”</strong> and <strong>“Local meaning”</strong> must contain data. One or more cells in these columns is empty. Please fix and retry."
+    "validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry."
   },
 
   "breadcrumbs": {
