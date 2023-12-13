@@ -1,52 +1,4 @@
 {
-  "dashboard": {
-    "app_title": "Welcome ",
-    "body_message": "You are using DCB Admin to manage the Direct Consortial Borrowing configuration for the MOBIUS consortium.",
-    "your_consortium_title": "Your Consortium",
-    "placeholder_text": "Note: All numbers displayed below are placeholders only",
-    "your_dcb_envrionment": "Your DCB environment",
-    "configured_for": "This installation of DCB Admin is configured for",
-    "latest_version_text": "The latest versions of DCB system components are",
-    "see_the_releases": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions"
-  },
-
-  "dashboard_consortium_details": {
-    "row1_col1" : "1. Introduce libraries",
-    "row1_col2": "Tell us about the members in your consortium that we need to onboard and migrate",
-    "row1_col3": "We know about <abbreviation>{{agencies_total}}</abbreviation> library agencies in {{consortium_name}}.<br/><br/> We are missing basic details for <abbreviation>75</abbreviation> of these.",
-    "row2_col1": "2. Provision systems",
-    "row2_col2": "Provide technical details we need to set up your DCB services",
-    "row2_col3": "We know about <abbreviation>{{hostlmss_total}}</abbreviation> Host LMS instances that are needed for {{consortium_name}}.<br/><br/> We are missing essential details for <0>41</0> of these.",
-    "row3_col1": "3. Configure services",
-    "row3_col2": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
-    "row3_col3": "We are missing mapping configurations and patron authentication details for <abbreviation>{{config_incomplete}}</abbreviation> libraries.<br/><br/> We are missing test records or accounts for <abbreviation>64</abbreviation> libraries.",
-    "row4_col1": "4. Migrate service",
-    "row4_col2": "Share key dates and contacts so we can plan for your service migration",
-    "row4_col3": "We are missing expected migration details for <abbreviation>81</abbreviation> libraries.<br/><br/> We are missing a migration sign-off authority contact for <abbreviation>81</abbreviation> libraries.",
-    "row5_col1": "5. Operate DCB",
-    "row5_col2": "Authorise who can manage your live DCB services",
-    "row5_col3": "There are <abbreviation>0</abbreviation> library services administrators authorised to operate DCB services.",
-    "row6_col1": "6. Manage support",
-    "row6_col2": "Maintain current authorised support contacts so we can deal with any help you need",
-    "row6_col3": "We have <abbreviation>0</abbreviation> library services administrators authorised to operate DCB services.",
-    "column1_name": "Onboarding stage",
-    "column2_name": "What you need to do",
-    "column3_name": "How it's going"
-  },
-
-  "dashboard_your_dcb_environment": {
-    "column1_name": "Service",
-    "column2_name": "Environment",
-    "column3_name": "Address",
-    "column4_name": "Status"
-  },
-
-  "dashboard_version_data": {
-    "column1_name": "Component",
-    "column2_name": "Latest Version",
-    "column3_name": "Your Version"
-  },
-
   "sidebar": {
     "dashboard_page_button": "Home",
     "patron_request_button": "Patron Request",
@@ -294,13 +246,6 @@
     "page_text_contact_admin": "If you think you should have access, contact your system administrator",
     "go_back_text": "Go back to the ",
     "dashboard_text": "dashboard"
-  },
-
-  "footer": {
-    "openRS": "Project OpenRS",
-    "dcb": "Direct Consortial Borrowing",
-    "version": "Version ",
-    "released_text": "Released "
   }
 
 }

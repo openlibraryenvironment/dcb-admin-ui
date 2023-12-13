@@ -21,8 +21,8 @@ export default function Footer() {
 					{t("footer.dcb")}
 				</Link>
 			</div>
-			<div className='ms-md-auto'>{'DCB Admin. '+t("footer.version")+publicRuntimeConfig?.version+'. '+
-			t("footer.released_text")+formatDate(publicRuntimeConfig?.releaseDate)+'.'}</div>
+			<div className='ms-md-auto'>{t('app.name')+'. '+t("app.version")+' '+publicRuntimeConfig?.version+'. '+
+			t("app.released")+' '+formatDate(publicRuntimeConfig?.releaseDate)+'.'}</div>
 		</footer>
 	);
 }

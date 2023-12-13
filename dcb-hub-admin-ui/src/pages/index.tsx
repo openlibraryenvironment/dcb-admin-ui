@@ -45,14 +45,14 @@ const Home: NextPage = () => {
 			<Card>
 				<CardContent>
 					<Typography variant="h1" fontSize={'300%'} sx={{marginBottom: 1}}> {t('welcome.greeting')+' '+getUserName()} </Typography>
-					<Typography variant='body1' sx={{marginBottom:2}} fontSize={'1.3rem'}>{t('dashboard.body_message')}</Typography>
-					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('dashboard.your_consortium_title')}</Typography>
+					<Typography variant='body1' sx={{marginBottom:2}} fontSize={'1.3rem'}>{t('welcome.context', {consortium_name: 'MOBIUS'})}</Typography>
+					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('consortium.your')}</Typography>
 					<Typography variant='body1' fontSize={'1.1rem'}> {t('common.placeholder_text')} </Typography>
 					<ConsortiumDetails/>
-					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('dashboard.your_dcb_envrionment')}</Typography>
-					<Typography variant='body1' fontSize={'1.1rem'}>{t('dashboard.configured_for')}</Typography>
+					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('environment.your')}</Typography>
+					<Typography variant='body1' fontSize={'1.1rem'}>{t('environment.configured_for')}</Typography>
 					<SimpleTable column_names={[t('service.name'), t('service.environment'), t('service.address'), t('service.status')]} row_data={YourDCBEnvironment} />
-					<Typography variant='body1' fontSize={'1.1rem'}>{t("dashboard.latest_version_text")}</Typography>
+					<Typography variant='body1' fontSize={'1.1rem'}>{t("environment.compare_components")}</Typography>
 					<VersionInfo/>
 					<Typography variant='body1' fontSize={'1.1rem'}>
 						<Trans

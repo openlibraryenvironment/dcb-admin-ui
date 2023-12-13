@@ -30,7 +30,7 @@
 
   "welcome": {
     "greeting": "Welcome",
-    "context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium.name}} consortium."
+    "context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
   },
 
   "onboarding": {
@@ -101,6 +101,10 @@
     "latest_version": "Latest version",
     "your_version": "Your version",
     "releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions."
+  },
+
+  "consortium":{
+    "your": "Your consortium"
   },
 
   "service": {
