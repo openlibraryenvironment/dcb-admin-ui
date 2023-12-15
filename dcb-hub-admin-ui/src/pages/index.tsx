@@ -25,7 +25,7 @@ const Home: NextPage = () => {
 	const getUserName = () => {
 		const nameOfUser = session?.profile?.given_name;
 		if (nameOfUser == undefined) {
-			return '(please log in)';
+			return t('app.guest_user');
 		}
 		else{
 			return nameOfUser;
@@ -37,7 +37,7 @@ const Home: NextPage = () => {
 	const { t } = useTranslation();
 	const YourDCBEnvironment = [
 		['DCB Service', 'EBSCO Integrated Environment', <Link href={LOCAL_VERSION_LINKS.SERVICE_INFO} key={'serviceInfo'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.SERVICE}</Link>, <Link key={'serviceHealthLink'} href={LOCAL_VERSION_LINKS.SERVICE_HEALTH} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'serviceHealth'} apiLink={LOCAL_VERSION_LINKS.SERVICE_HEALTH} environment='dcb'/>}</Link>],
-		['Keycloak', 'K-Int Dev Keycloak', <Link href={publicRuntimeConfig.KEYCLOAK_REFRESH} key={'keycloakSite'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.KEYCLOAK}</Link>, <Link href={''} key={'keycloackHealthLink'} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'keycloakHealth'} apiLink={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH} environment='keycloak'/>}</Link>],
+		['Keycloak', 'K-Int Dev Keycloak', <Link href={publicRuntimeConfig.KEYCLOAK_REFRESH} key={'keycloakSite'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.KEYCLOAK}</Link>, <Link href={''} key={'keycloakHealthLink'} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'keycloakHealth'} apiLink={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH} environment='keycloak'/>}</Link>],
 	];
 
 	return (
