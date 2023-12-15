@@ -58,7 +58,7 @@
     "client_config_barcode_prefix": "Barcode prefix: ",
     "client_config_base": "Base URL: ",
     "client_config_domain_id": "Domain ID: ",
-    "client_config_fine": "fine-code-id",
+    "client_config_fine": "fine-code-id: ",
     "client_config_ingest": "Ingest: ",
     "client_config_item": "Item config",
     "client_config_history_action_id": "History action ID: ",

@@ -239,7 +239,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
                 <Trans 
                   i18nKey ="mappings.validation_expected_headers"
                   values={{fileName: addedFile.name}}
-                  components={{paragrah: <p/>, bold: <strong/>}}>
+                  components={{paragraph: <p/>, bold: <strong/>}}>
                 </Trans>} key={"validation-upload-error-headers"} onCloseFunc={dismissError}/>)}
         {(uploadErrorMessage.includes("provide a Host LMS") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.validation_no_hostlms")} key={"validation-no-hostlms"} onCloseFunc={dismissError}/>)}
         {(uploadErrorMessage.includes("DCB code is invalid") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.validation_invalid_dcb_code")} key={"validation-invalid-dcb-code"} onCloseFunc={dismissError}/>)}

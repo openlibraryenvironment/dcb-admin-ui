@@ -13,12 +13,12 @@ export default function Footer() {
 		<footer className='footer flex-column flex-md-row border-top d-flex align-items-center justify-content-between px-4 py-2'>
 			<div>
 				<Link className='text-decoration-none' href='https://www.k-int.com'>
-					{t("footer.openRS")}{' '}
+					{t("app.openRS")}{' '}
 				</Link>{' '}
 				/
 				<Link className='text-decoration-none' href='https://www.k-int.com'>
 					{' '}
-					{t("footer.dcb")}
+					{t("app.dcb_full")}
 				</Link>
 			</div>
 			<div className='ms-md-auto'>{t('app.name')+'. '+t("app.version")+' '+publicRuntimeConfig?.version+'. '+
