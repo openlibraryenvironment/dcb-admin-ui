@@ -223,7 +223,7 @@ query PatronRequests {
                 localId
                 localStatus
                 localAgency
-                virtualIdentity {
+                virtualPatron {
                     id
                     localId
                     homeIdentity
