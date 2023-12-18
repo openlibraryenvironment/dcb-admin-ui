@@ -133,8 +133,8 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         {toDisplay?.clusterRecord?.members[0]?.author != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
                                                 {toDisplay?.clusterRecord?.members[0]?.author}</Typography> : null}
                                                 {/* If author isn't where it should be, we can fetch from canonical metadata */}
-                                        {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
-                                                {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label}</Typography> : null}                       
+                                        {/* {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
+                                                {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label}</Typography> : null}                        */}
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_created")} </span>
                                                 {dayjs(toDisplay?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}</Typography>
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_updated")} </span>
