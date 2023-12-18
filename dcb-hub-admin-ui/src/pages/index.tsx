@@ -8,8 +8,8 @@ import getConfig from "next/config";
 import SimpleTable from '@components/SimpleTable/SimpleTable';
 import { Trans } from 'next-i18next';
 import Link from '@components/Link/Link';
-import EnvironmentHealth from '../components/HomeContent/EnvironmentHealth';
-import VersionInfo from '../components/HomeContent/VersionInfo';
+import EnvironmentHealth from '@components/HomeContent/EnvironmentHealth';
+import VersionInfo from '@components/HomeContent/VersionInfo';
 import ConsortiumDetails from '@components/HomeContent/ConsortiumDetails';
 import {
 	LOCAL_VERSION_LINKS,

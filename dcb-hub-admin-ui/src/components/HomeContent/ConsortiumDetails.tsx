@@ -1,6 +1,5 @@
 import SimpleTable from '@components/SimpleTable/SimpleTable';
 import { useTranslation } from 'next-i18next'; //localisation
-import { Trans } from 'next-i18next';
 
 
 export default function ConsortiumDetails() {
