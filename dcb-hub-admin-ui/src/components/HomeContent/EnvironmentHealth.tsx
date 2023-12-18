@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios, { AxiosError } from 'axios';
-import getConfig from "next/config";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { calculateDCBRAGStatus } from 'src/helpers/calculateDCBRAGStatus';
 import { calculateKeycloakRAGStatus } from 'src/helpers/calculateKeycloakRAGStatus';
 

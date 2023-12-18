@@ -410,7 +410,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config_item")} </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                {toDisplay?.clientConfig?.item?.['fine-code-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_fine-code-id")}</span>
+                                {toDisplay?.clientConfig?.item?.['fine-code-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_fine")}</span>
                                         {toDisplay?.clientConfig?.item?.['fine-code-id']} </Typography> : null}
                                 {toDisplay?.clientConfig?.item?.['renewal-limit'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_renewal_limit")}</span>
                                         {toDisplay?.clientConfig?.item?.['renewal-limit']} </Typography> : null}

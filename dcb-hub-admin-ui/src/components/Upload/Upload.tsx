@@ -230,11 +230,16 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
         {(validationErrorMessage.includes("exceeds maximum allowed size") && isErrorDisplayed) && (<TimedAlert severityType="error" open={true} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.file_too_large", {fileName: failedFile.name, fileSize: fileSizeConvertor(failedFile.size), maxSize: 1})} key={"validation-upload-error-file-size"} onCloseFunc={dismissError}/>)}
         {(validationErrorMessage.includes("This file is smaller than the allowed size") && isErrorDisplayed) && (<TimedAlert severityType="error" open={true} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.file_empty", {fileName: failedFile.name})} key={"validation-upload-error-file-empty"} onCloseFunc={dismissError}/>)}
         {(validationErrorMessage.includes("Error: You can only upload") && isErrorDisplayed) && (<TimedAlert severityType="error" open={open} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.wrong_file_type", {fileName: failedFile.name, allowedFiles: "CSV, TSV"})} key={"validation-upload-error-file-type"} onCloseFunc={dismissError}/>)}
-        {(uploadErrorMessage.includes("Empty value") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={<Trans i18nKey="mappings.validation_missing_values">
-                The columns <strong>“Local code”</strong> and <strong>“Local meaning”</strong> must contain data. One or more cells in these columns is empty. Please fix and retry.
+        {(uploadErrorMessage.includes("Empty value") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={
+                <Trans 
+                  i18nKey="mappings.validation_missing_values"
+                  components={{bold: <strong/>}}>
                 </Trans>} key={"validation-upload-error-missing"} onCloseFunc={dismissError}/>)}
-        {(uploadErrorMessage.includes("expected headers") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={<Trans i18nKey ="mappings.validation_expected_headers" values={{fileName: addedFile.name}}>
-                The column headers in <strong>filename</strong> do not match the expected headers. The first three columns must be named “Local code”, “Local meaning” and “DCB code”. Please correct the column headers and retry.
+        {(uploadErrorMessage.includes("expected headers") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={
+                <Trans 
+                  i18nKey ="mappings.validation_expected_headers"
+                  values={{fileName: addedFile.name}}
+                  components={{paragraph: <p/>, bold: <strong/>}}>
                 </Trans>} key={"validation-upload-error-headers"} onCloseFunc={dismissError}/>)}
         {(uploadErrorMessage.includes("provide a Host LMS") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.validation_no_hostlms")} key={"validation-no-hostlms"} onCloseFunc={dismissError}/>)}
         {(uploadErrorMessage.includes("DCB code is invalid") && isErrorDisplayed) && (<TimedAlert open={open} severityType="error" onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.validation_invalid_dcb_code")} key={"validation-invalid-dcb-code"} onCloseFunc={dismissError}/>)}
