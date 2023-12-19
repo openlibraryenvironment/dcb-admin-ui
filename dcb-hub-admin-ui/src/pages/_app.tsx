@@ -3,10 +3,12 @@ import type { AppProps } from 'next/app';
 // Next.js allows you to import CSS directly in .js files.
 // It handles optimization and all the necessary Webpack configuration to make this work.
 
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
 import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ProgressBar } from '@components/ProgressBar';
+import { ApolloProviderWrapper } from '@components/ApolloProviderWrapper/ApolloProviderWrapper'
+
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -20,6 +22,9 @@ import { useMediaQuery } from '@mui/material';
 
 import { appWithTranslation } from 'next-i18next';
 import { useMemo, useState } from 'react';
+import { createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import getConfig from 'next/config';
 
 
 const clientSideEmotionCache = createEmotionCache();
@@ -37,6 +42,7 @@ export interface MyAppProps extends AppProps {
 function MyApp(props: MyAppProps) {
 	const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 	const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');	
+
 	// set the theme here
 	// For multi-theme, do as follows:
 	// 1. Create either separate theme variables or theme.ts files.
@@ -64,6 +70,28 @@ function MyApp(props: MyAppProps) {
 		}),
 		[prefersDarkMode],
 	);
+	const graphQLURL = useMemo(() => {
+		const { publicRuntimeConfig } = getConfig();
+		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
+	}, [])
+	const token = pageProps.session?.accessToken;
+	console.log("This is the"+ token);
+
+
+	const httpLink = createHttpLink({
+		uri: graphQLURL,
+	  });
+	  
+	  const authLink = setContext((_, { headers }) => {
+		// get the authentication token
+		// return the headers to the context so httpLink can read them
+		return {
+		  headers: {
+			...headers,
+			authorization: token ? `Bearer ${token}` : "",
+		  }
+		}
+	  });
 
 	const [queryClient] = useState(
 		() =>
@@ -86,18 +114,20 @@ function MyApp(props: MyAppProps) {
 			<Head>
 			<meta name="viewport" content="initial-scale=1, width=device-width" />
 			</Head>
+			<SessionProvider session={pageProps.session}>
+			<ApolloProviderWrapper>
 			<QueryClientProvider client={queryClient}>
 			<Hydrate state={pageProps.dehydratedState}>
-				<SessionProvider session={pageProps.session}>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
 						<ProgressBar />
 						<Component {...pageProps} />
 						</ThemeProvider>
-				</SessionProvider>
 			</Hydrate>
 			<ReactQueryDevtools initialIsOpen={false} />
 		</QueryClientProvider>
+		</ApolloProviderWrapper>
+		</SessionProvider>
 		</CacheProvider>
 	);
 }

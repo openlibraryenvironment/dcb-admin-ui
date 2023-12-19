@@ -6,7 +6,8 @@
     "host_lms_button": "Host LMS",
     "location_button": "Location",
     "groups_button": "Groups",
-    "settings_button": "Settings"
+    "settings_button": "Settings",
+    "bib_button": "Bib Records"
   },
   
   "profile": {
@@ -51,6 +52,7 @@
     "borrowing_virtual_id": "Virtual item ID: ",
     "borrowing_virtual_item_status": "Virtual item status: ",
     "borrowing_virtual_type": "Virtual item type: ",
+    "canonical_metadata": "Canonical metadata",
     "client_config": "Client config",
     "client_config_access_id": "Access ID: ",
     "client_config_access_key": "Access key: ",
@@ -88,6 +90,8 @@
     "client_config_staff_username": "Staff username: ",
     "code": "code",
     "collapse": "Collapse all",
+    "contributor_id": "Contributor ID: ",
+    "contributor_title": "Contributor title: ",
     "date_created": "Date created: ",
     "date_updated": "Date updated: ",
     "description": "Description: ",
@@ -143,6 +147,8 @@
     "requestor_note": "Requestor note: ",
     "request_updated": "Request updated: ",
     "selected_bib": "Selected bib: ",
+    "source_bib_id": "Source bib ID: ",
+    "source_bib_title": "Title: ",
     "source_record": "Source record",
     "source_record_id": "Source record ID: ",
     "source_system_id": "Source system ID: ",
@@ -196,6 +202,12 @@
     "all_mappings": "All mappings",
     "circulation_status": "Circulation status mappings",
     "shelving_location": "Shelving location mappings"
+  },
+
+  "bibRecords": {
+    "bib_records": "Bib records",
+    "no_results": "No bib records found. Try changing your search terms or filters.",
+    "no_rows": "No bib records available. Try loading some into your DCB instance."
   },
 
   "mappings": {

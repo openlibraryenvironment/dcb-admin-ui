@@ -8,6 +8,10 @@ import { useMemo, useReducer } from 'react';
 // and REST requests. 
 
 
+// To be removed in DCB-488 and superseded by Apollo GraphQL for data fetching. 
+// This should massively simplify the process of data fetching and remove legacy code.
+// It will also make the codebase more readable and improve debugging times.
+
 const INITIAL_STATE: { pagination: PaginationState; sort: SortingState } = {
 	pagination: {
 		pageIndex: 0,

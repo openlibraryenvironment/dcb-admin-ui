@@ -3,7 +3,7 @@ import Link from "@components/Link/Link";
 import { Box, Typography } from "@mui/material";
 import { styled } from '@mui/material/styles';
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
-import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener } from "@mui/x-data-grid";
+import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener, GridToolbarQuickFilter } from "@mui/x-data-grid";
 import { useState } from "react";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving 
@@ -44,7 +44,6 @@ export default function DataGrid<T extends Object>({
     // The slots prop allows for customisation https://mui.com/x/react-data-grid/components/ 
 
     // State management variables for the Details panel.
-
 
     // This overlay displays when there is no data in the grid.
     // It takes a title, message, and if needed a link for the user to take action.
