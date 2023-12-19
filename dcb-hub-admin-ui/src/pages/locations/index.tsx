@@ -1,12 +1,10 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-
 import {Card, CardContent, Paper, Typography} from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
-import { PaginationState, SortingState } from '@tanstack/react-table';
 
 //localisation
 import { useTranslation } from 'next-i18next';
@@ -19,33 +17,15 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
-type Props = {
-	page: number;
-	resultsPerPage: number;
-	sort: SortingState;
-};
-
-const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+const Locations: NextPage = () => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
-
-
-	// Formats the data from getServerSideProps into the apprropite format for the useResource hook (Query key) and the TanStackTable component
-	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
-		() => ({
-			pagination: {
-				pageIndex: page - 1,
-				pageSize: resultsPerPage
-			},
-			sort: sort
-		}),
-		[page, resultsPerPage, sort]
-	);
 
 	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
 	// SignOutIfInactive();
 
 	// Generate the url for the useResource hook
+	// To be replaced with server-side pagination in DCB-488: Load in the 
 	const url = useMemo(() => {
 		const { publicRuntimeConfig } = getConfig();
 		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
@@ -98,47 +78,16 @@ const Locations: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 	const { locale } = context;
 	let translations = {};
 	if (locale) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
 	}
 
-	let page = 1;
-	if (context.query?.page && typeof context.query.page === 'string') {
-		page = parseInt(context.query.page, 10);
-	}
-
-	let resultsPerPage = 20;
-	if (context.query?.perPage && typeof context.query.perPage === 'string') {
-		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
-	}
-
-	// Defaults to sorting the locationCode in ascending order (The id must be the same the id assigned to the "column")
-	let sort: SortingState = [{ id: 'locationCode', desc: false }];
-
-	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
-		// Sort in this case is something like locationName (table prefix + some unique id for the table)
-		const contextSort = context.query?.sort ?? '';
-
-		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
-		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
-
-		// If the values pass the validation check override the original sort with the new sort
-		if (contextOrder === 'desc' || contextOrder === 'asc') {
-			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
-		}
-	}
-
-	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
-
 	return {
 		props: {
-			...translations,
-			page,
-			resultsPerPage,
-			sort: sort
+			...translations
 		}
 	};
 };
