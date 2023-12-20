@@ -6,7 +6,6 @@ import { DataGrid } from '@components/DataGrid';
 import { MdClose, MdExpandMore } from 'react-icons/md'
 import { IconContext } from 'react-icons';
 import { useTranslation } from 'next-i18next';
-import { TreeView } from '@mui/x-tree-view';
 
 type DetailsType = {
         i: any,
@@ -37,7 +36,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
 
         // experimental - fix with a map solution as numbers of needed accordions will change
         // State values for expanded accordions
-        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false]);
+        const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
 
         // Functions to handle expanding both individual accordions and all accordions
         const handleAccordionChange = (index: number) => () => {
@@ -74,15 +73,15 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                 </Toolbar>
                         </AppBar>
                 <DialogContent>
-                        {/* // These items are shown for every 'Details' instance, excluding Requests and HostLMS due to their different UX*/}                        
-                        {(type !== "Request" && type!== "HostLMS") ?<Card variant = 'outlined'>
+                        {/* // These items are shown for every 'Details' instance, excluding Requests, sourceBibs, and HostLMS due to their different UX*/}                        
+                        {(type !== "Request" && type!== "HostLMS" && type!== "sourceBibs") ?<Card variant = 'outlined'>
                         <CardContent>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.id")}: </span>
                         {toDisplay?.id}
                         </Typography>
                         </CardContent>
                         </Card>: null}
-                        {(type !== "Request" && type!== "HostLMS")?<Card variant = 'outlined'>
+                        {(type !== "Request" && type!== "HostLMS" && type!== "sourceBibs")?<Card variant = 'outlined'>
                         <CardContent>
                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.code")}: </span>
                                  {toDisplay?.code} </Typography>
@@ -133,8 +132,8 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         {toDisplay?.clusterRecord?.members[0]?.author != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
                                                 {toDisplay?.clusterRecord?.members[0]?.author}</Typography> : null}
                                                 {/* If author isn't where it should be, we can fetch from canonical metadata */}
-                                        {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
-                                                {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label}</Typography> : null}                       
+                                        {/* {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span> 
+                                                {toDisplay?.clusterRecord?.members[0]?.canonicalMetadata?.agents[0]?.label}</Typography> : null}                        */}
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_created")} </span>
                                                 {dayjs(toDisplay?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}</Typography>
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_updated")} </span>
@@ -144,7 +143,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span> 
                                                 {toDisplay?.clusterRecord?.members[0]?.sourceRecordId}</Typography>
                                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span> 
-                                                {toDisplay?.clusterRecord?.members[0]?.sourceSystemId}</Typography>
+                                                {toDisplay?.clusterRecord?.sourceSystemId}</Typography>
                                         <Card variant="outlined">
                                         <Accordion expanded={expandedAccordions[7]} onChange={handleAccordionChange(7)}>
                                         <AccordionSummary aria-controls="request-source-record" id="request_source_record" 
@@ -346,7 +345,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         {type == "HostLMS"? <Stack direction="row" justifyContent="end">
                                 <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> </Stack> : null}
                         {type == "HostLMS"?<Card variant = 'outlined'>
-                                {/* // Fix how weird this looks and only display the client config object if it exists */}
                         <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
                                         <AccordionSummary aria-controls="hostlms-general-details" id="hostlms_details_general" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -410,7 +408,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                <Typography sx={{ fontWeight: 'bold' }}> {t("details.client_config_item")} </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                {toDisplay?.clientConfig?.item?.['fine-code-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_fine-code-id")}</span>
+                                {toDisplay?.clientConfig?.item?.['fine-code-id'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_fine")}</span>
                                         {toDisplay?.clientConfig?.item?.['fine-code-id']} </Typography> : null}
                                 {toDisplay?.clientConfig?.item?.['renewal-limit'] != null ? <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_renewal_limit")}</span>
                                         {toDisplay?.clientConfig?.item?.['renewal-limit']} </Typography> : null}
@@ -526,6 +524,46 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         noDataTitle={"No agencies found."}
                                         noDataMessage={"Try changing your filters or search terms."}
                                         />                                
+                                </CardContent>
+                        </Card>: null}
+                        {type == "sourceBibs"? <Stack direction="row" justifyContent="end">
+                                <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> </Stack> : null}
+                        {type == "sourceBibs"?<Card variant = 'outlined'>
+                                <CardContent>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_bib_id")}</span>
+                                                {toDisplay?.id} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.title")}</span>
+                                                {toDisplay?.title} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span>
+                                                {toDisplay?.author} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span>
+                                                {toDisplay?.sourceSystemId} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span>
+                                                {toDisplay?.sourceRecordId} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_id")}</span>
+                                                {toDisplay?.contributesTo?.id} </Typography>
+                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_title")}</span>
+                                                {toDisplay?.contributesTo?.title} </Typography>
+                                        <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
+                                        <AccordionSummary aria-controls="source-bibs-json-details" id="source-bibs-json-details" 
+                                                expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.canonical_metadata")} </Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                                <pre>{JSON.stringify(toDisplay?.canonicalMetadata, null, 2)}</pre>
+                                        </AccordionDetails>
+                                        </Accordion>
+                                        <Accordion expanded={expandedAccordions[8]} onChange={handleAccordionChange(8)}>
+                                        <AccordionSummary aria-controls="source-bibs-source-record-json-details" id="source-bibs-source-record-json-details" 
+                                                expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                                                </IconContext.Provider>}>
+                                               <Typography sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
+                                        </AccordionSummary>
+                                        <AccordionDetails>
+                                                <pre>{JSON.stringify(toDisplay?.sourceRecord, null, 2)}</pre>
+                                        </AccordionDetails>
+                                        </Accordion>
                                 </CardContent>
                         </Card>: null}
                 </DialogContent>

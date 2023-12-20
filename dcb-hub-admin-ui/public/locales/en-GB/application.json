@@ -30,7 +30,7 @@
 
   "welcome": {
     "greeting": "Welcome",
-    "context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium.name}} consortium."
+    "context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
   },
 
   "onboarding": {
@@ -43,52 +43,54 @@
       "introduce_libraries": {
         "name": "Introduce libraries",
         "action": "Tell us about the members in your consortium that we need to onboard and migrate",
-        "status_known_none": "We don't know about any library agencies in {{consortium.name}}.",
-        "status_known_one": "We know about {{agencies.total}} library agency in {{consortium.name}}.",
-        "status_known_other": "We know about {{agencies.total}} library agencies in {{consortium.name}}.",
-        "status_missing_none": "We are not missing any basic details for these.",
-        "status_missing_other": "We are missing basic details for {{agencies.incomplete}} of these."
+        "status_known_zero": "We don't know about any library agencies in {{consortium_name}}.",
+        "status_known_one": "We know about {{count}} library agency in {{consortium_name}}.",
+        "status_known_other": "We know about {{count}} library agencies in {{consortium_name}}.",
+        "status_missing_zero": "We are not missing any basic details for these.",
+        "status_missing_other": "We are missing basic details for {{count}} of these."
       },
       "provision_systems": {
         "name": "Provision systems",
         "action": "Provide technical details we need to set up your DCB services",
-        "status_known_none": "We don't know about any Host LMS instances that are needed for {{consortium.name}}.",
-        "status_known_one": "We know about {{hostlmss.total}} Host LMS instance that is needed for {{consortium.name}}.",
-        "status_known_other": "We know about {{hostlmss.total}} Host LMS instances that are needed for {{consortium.name}}.",
-        "status_missing_none": "We are not missing any essential details for these.",
-        "status_missing_other": "We are missing essential details for {{hostlmss.incomplete}} of these."
+        "status_known_zero": "We don't know about any Host LMS instances that are needed for {{consortium_name}}.",
+        "status_known_one": "We know about {{count}} Host LMS instance that is needed for {{consortium_name}}.",
+        "status_known_other": "We know about {{count}} Host LMS instances that are needed for {{consortium_name}}.",
+        "status_missing_zero": "We are not missing any essential details for these.",
+        "status_missing_other": "We are missing essential details for {{count}} of these."
       },
       "configure_services": {
         "name": "Configure services",
         "action": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
-        "status_config_none": "We are not missing mapping configuration or authentication details for any library.",
-        "status_config_one": "We are missing mapping configuration or authentication details for {{config.incomplete}} library.",
-        "status_config_other": "We are missing mapping configuration or authentication details for {{config.incomplete}} libraries.",
-        "status_testing_none": "We are not missing test records or accounts for any library.",
-        "status_testing_one": "We are missing test records or accounts for {{testing.incomplete}} library.",
-        "status_testing_other": "We are missing test records or accounts for {{testing.incomplete}} libraries."
+        "status_config_zero": "We are not missing mapping configuration or authentication details for any library.",
+        "status_config_one": "We are missing mapping configuration or authentication details for {{count}} library.",
+        "status_config_other": "We are missing mapping configuration or authentication details for {{count}} libraries.",
+        "status_testing_zero": "We are not missing test records or accounts for any library.",
+        "status_testing_one": "We are missing test records or accounts for {{count}} library.",
+        "status_testing_other": "We are missing test records or accounts for {{count}} libraries."
       },
       "migrate_service": {
         "name": "Migrate service",
         "action": "Share key dates and contacts so we can plan for your service migration",
-        "status_migration_none": "We are not missing expected migration details for any library.",
-        "status_migration_one": "We are missing expected migration details for {{migration.incomplete}} library.",
-        "status_migration_other": "We are missing expected migration details for {{migration.incomplete}} libraries.",
-        "status_signoff_none": "We are not missing a migration sign-off authority contact for any library.",
-        "status_signoff_one": "We are missing a migration sign-off authority contact for {{signoff.incomplete}} library.",
-        "status_signoff_other": "We are missing a migration sign-off authority contact for {{signoff.incomplete}} libraries."
+        "status_migration_zero": "We are not missing expected migration details for any library.",
+        "status_migration_one": "We are missing expected migration details for {{count}} library.",
+        "status_migration_other": "We are missing expected migration details for {{count}} libraries.",
+        "status_signoff_zero": "We are not missing a migration sign-off authority contact for any library.",
+        "status_signoff_one": "We are missing a migration sign-off authority contact for {{count}} library.",
+        "status_signoff_other": "We are missing a migration sign-off authority contact for {{count}} libraries."
       },
       "operate_dcb": {
         "name": "Operate DCB",
         "action": "Authorise who can manage your live DCB services",
-        "status_operators_one": "There are {{consortium.administrators}} library services administrators authorised to operate DCB services.",
-        "status_operators_other": "There is {{consortium.administrators}} library services administrators authorised to operate DCB services."
+        "status_operators_zero": "There are no library services administrators authorised to operate DCB services",
+        "status_operators_one": "There are {{count}} library services administrators authorised to operate DCB services.",
+        "status_operators_other": "There is {{count}} library services administrators authorised to operate DCB services."
       },
       "manage_support": {
         "name": "Manage support",
         "action": "Maintain current authorised support contacts so we can deal with any help you need",
-        "status_support_one": "We have {{consortium.support}} support contact authorised to raise or handle support enquiries.",
-        "status_support_other": "We have {{consortium.support}} support contacts authorised to raise or handle support enquiries."
+        "status_support_zero": "We have no support contacts authorised to raise or handle support enquiries.",
+        "status_support_one": "We have {{count}} support contact authorised to raise or handle support enquiries.",
+        "status_support_other": "We have {{count}} support contacts authorised to raise or handle support enquiries."
       }
     }
   },
@@ -100,7 +102,11 @@
     "component": "Component",
     "latest_version": "Latest version",
     "your_version": "Your version",
-    "releases_link": "See the <Link>Releases</Link> hub for more details and previous versions."
+    "releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions."
+  },
+
+  "consortium":{
+    "your": "Your consortium"
   },
 
   "service": {

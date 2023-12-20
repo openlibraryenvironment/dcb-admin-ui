@@ -13,7 +13,8 @@ import
   MdSpaceDashboard, 
   MdMenu,
   MdGroup,
-  MdSettings
+  MdSettings,
+  MdBook
 }from 'react-icons/md';
 import { useMediaQuery } from '@mui/material';
 import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
@@ -103,7 +104,7 @@ export default function Sidebar(props:any) {
                   {// Hide this on toggled sidebar }
               </ListItem>: null */}
           {[t('sidebar.dashboard_page_button'), t('sidebar.patron_request_button'),
-          t('sidebar.agency_button'), t('sidebar.host_lms_button'), t('sidebar.location_button'), t('sidebar.groups_button'), t('sidebar.settings_button')].map((text, index) => (
+          t('sidebar.agency_button'), t('sidebar.host_lms_button'), t('sidebar.location_button'), t('sidebar.groups_button'), t('sidebar.bib_button'), t('sidebar.settings_button')].map((text, index) => (
             <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=
@@ -114,6 +115,7 @@ export default function Sidebar(props:any) {
                 index === 3 ? '/hostlmss':
                 index === 4 ? '/locations':
                 index === 5? '/groups':
+                index === 6? '/sourceBibs':
                 '/settings'
               }
               key={index}
@@ -137,7 +139,7 @@ export default function Sidebar(props:any) {
                   {
                   index === 0 ? <MdSpaceDashboard size={20}/>: index === 1 ? <MdSpaceDashboard size={20}/>: 
                   index === 2 ? <MdSpaceDashboard size={20}/>: index === 3 ? <MdSpaceDashboard size={20}/>:
-                  index === 4 ? <MdLocationOn size={20}/>: index === 6 ? <MdSettings size={20}/>: <MdGroup size={20}/>
+                  index === 4 ? <MdLocationOn size={20}/>: index === 6 ? <MdBook size={20} />: index === 7 ? <MdSettings size={20}/>: <MdGroup size={20}/>
                   }
                 </ListItemIcon>
                 <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />

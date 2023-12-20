@@ -3,7 +3,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Button, Card, CardContent, Typography } from '@mui/material';
+import { Button, Card, CardContent, Paper, Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { DataGrid } from '@components/DataGrid';
@@ -16,7 +16,6 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Agency } from '@models/Agency';
 import AddAgenciesToGroup from './AddAgenciesToGroup';
 import { loadAgencies } from 'src/queries/queries';
-
 
 // import SignOutIfInactive from '../useAutoSignout';
 
@@ -66,6 +65,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 	return (
 		<AdminLayout>
+			<Paper elevation={16}>
 			<Card>
 				<CardContent>
 					{resourceFetchStatus === 'loading' && (
@@ -92,6 +92,7 @@ const Agencies: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 					)}
 				</CardContent>
 			</Card>
+			</Paper>
 			<div>
 	        { addToGroup ? <AddAgenciesToGroup show={addToGroup} onClose={closeAddToGroup} /> : null}
     		</div>

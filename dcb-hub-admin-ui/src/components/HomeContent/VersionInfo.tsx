@@ -9,7 +9,7 @@ import {
 	RELEASE_PAGE_LINKS,
 	API_LINKS,
 	LOCAL_VERSION_LINKS,
-} from '../../../welcomeData/welcomeConfig';
+} from '../../../homeData/homeConfig';
 
 interface InnerObject {
 	tags: string;
@@ -68,27 +68,27 @@ export default function VersionInfo(){
 	}, [apiEndpoints]);
 
     const VersionData = [
-		[<Link key="dcb-service" href={REPO_LINKS.SERVICE} target='_blank' rel="noreferrer">dcb-service</Link>, 
+		[<Link key="dcb-service" href={REPO_LINKS.SERVICE} target='_blank' rel="noreferrer">{t('app.component.service')}</Link>, 
 		<Link key="dcb-service-version" href={RELEASE_PAGE_LINKS.SERVICE} target='_blank' rel="noreferrer">
 			{githubServiceData ? (JSON.stringify(githubServiceData.name).replace(/"/g, '')):('Loading release information...')}
 		</Link>, serviceData ? (JSON.stringify(serviceData.git.tags).replace(/"/g, '')): ('Loading version information...')],
 
-		[<Link key="dcb-locate" href={REPO_LINKS.LOCATE} target='_blank' rel="noreferrer">dcb-locate</Link>, 
+		[<Link key="dcb-locate" href={REPO_LINKS.LOCATE} target='_blank' rel="noreferrer">{t('app.component.locate')}</Link>, 
 		<Link key="dcb-locate-version" href={RELEASE_PAGE_LINKS.LOCATE} target='_blank' rel="noreferrer">
 			2.2.3
 		</Link>, 'NA'],
 
-		[<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">dcb-admin-ui</Link>, 
+		[<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">{t('app.component.admin')}</Link>, 
 		<Link key="dcb-admin-ui-version" href={RELEASE_PAGE_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">
 			{adminUiData ? (JSON.stringify(adminUiData.name).replace(/"/g, '')):('Loading release information...')}
 		</Link>, publicRuntimeConfig?.version],
 
-		[<Link key="dcb-dev-ops" href={REPO_LINKS.DEVOPS} target='_blank' rel="noreferrer">dcb-devops</Link>,
+		[<Link key="dcb-dev-ops" href={REPO_LINKS.DEVOPS} target='_blank' rel="noreferrer">{t('app.component.devops')}</Link>,
 		<Link key="dcb-dev-ops-version" href={RELEASE_PAGE_LINKS.DEVOPS} target='_blank' rel="noreferrer">
 			{devopsData ? (JSON.stringify(devopsData.name).replace(/"/g, '')):('Loading release information...')}
 		</Link>, 'NA'],
 
-		[<Link key="gors-hub-keycloak" href={REPO_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">gors-hub-keycloak</Link>,
+		[<Link key="gors-hub-keycloak" href={REPO_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">{t('app.component.keycloak')}</Link>,
 		<Link key="gors=hub-keycloak-version" href={RELEASE_PAGE_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">
 			{keycloakData ? (JSON.stringify(keycloakData[0].name).replace(/"/g, '')):('Loading release information...')}
 		</Link>, 'NA'],
@@ -96,7 +96,7 @@ export default function VersionInfo(){
 
     return(
         <>
-            <SimpleTable column_names={[t('dashboard_version_data.column1_name', 'Component'), t('dashboard_version_data.column2_name', 'Latest Release'), t('dashboard_version_data.column3_name', 'Your Version')]} row_data={VersionData}/>
+            <SimpleTable column_names={[t('environment.component'), t('environment.latest_version'), t('environment.your_version')]} row_data={VersionData}/>
         </>
     )
 

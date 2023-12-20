@@ -2,19 +2,10 @@ export function calculateDCBRAGStatus(data: any): 'Down' | 'Partial' | 'Up' | 'U
     if (!data || !data.details) {
         return 'Undefined';
     }
-
-    const keys = [
-        'elasticsearchclient',
-        'compositeDiscoveryClient()',
-        'service',
-        'diskSpace',
-        'r2dbc-connection-factory',
-        'jdbc',
-        'ingest'
-    ];
     
-    // Get status values corresponding to keys from healthData
-    const allStatus = keys.map(key => data?.details?.[key]?.status);
+    //Object.values returns an array
+    //extract all status values from data.details
+    const allStatus = Object.values(data.details).map((detail: any) => detail.status);
 
     if (allStatus.every((status) => status === 'DOWN')) { 
         return 'Down'; // All statuses are 'DOWN'

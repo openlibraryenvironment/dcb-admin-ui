@@ -9,7 +9,7 @@ import { signOut } from "next-auth/react"
 import { styled } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import { useTranslation } from 'next-i18next'
-import LanguageSwitcher from "./LanguageSwitcher";
+//import LanguageSwitcher from "./LanguageSwitcher";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;

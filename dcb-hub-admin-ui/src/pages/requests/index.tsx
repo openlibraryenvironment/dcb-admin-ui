@@ -6,7 +6,6 @@ import { Card, CardContent, Paper, Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
-import { PaginationState, SortingState } from '@tanstack/react-table';
 import { PatronRequest } from '@models/PatronRequest';
 import { DataGrid } from '@components/DataGrid';
 //localisation
@@ -18,13 +17,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // import SignOutIfInactive from '../useAutoSignout';
 
-type Props = {
-	page: number;
-	resultsPerPage: number;
-	sort: SortingState;
-};
-
-const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
+const PatronRequests: NextPage = () => {
 	// Access the accessToken for running authenticated requests
 	const { data, status } = useSession();
 
@@ -109,37 +102,11 @@ const PatronRequests: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 };
 
 
-export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
 	const { locale } = context;
 	let translations = {};
 	if (locale) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
-	}
-
-	let page = 1;
-	if (context.query?.page && typeof context.query.page === 'string') {
-		page = parseInt(context.query.page, 10);
-	}
-
-	let resultsPerPage = 20;
-	if (context.query?.perPage && typeof context.query.perPage === 'string') {
-		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
-	}
-
-	// Defaults to sorting the patronId in ascending order (The id must be the same the id assigned to the "column")
-	let sort: SortingState = [{ id: 'patronId', desc: false }];
-
-	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
-		// Sort in this case is something like locationName (table prefix + some unique id for the table)
-		const contextSort = context.query?.sort ?? '';
-
-		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
-		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
-
-		// If the values pass the validation check override the original sort with the new sort
-		if (contextOrder === 'desc' || contextOrder === 'asc') {
-			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
-		}
 	}
 
 	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
@@ -147,9 +114,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context: Get
 	return {
 		props: {
 			...translations,
-			page,
-			resultsPerPage,
-			sort: sort,
 		}
 	};
 };

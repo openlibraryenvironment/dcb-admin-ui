@@ -1,7 +1,9 @@
 import  {gql} from 'graphql-request';
+import {gql as apolloGraphQL} from '@apollo/client'
 
 // This file holds all our GraphQL queries, so they can be reused throughout the project 
-
+// As we switch to using Apollo GraphQL as part of the server-side pagination work, all queries
+// will be switched to having the necessary variables and will use the apollo/client gql import.
 
 // A query for adding an agency to a group. 
 export const addAgenciesToGroup = gql`
@@ -27,6 +29,83 @@ export const createGroup = gql`
     }
   }
 `;
+
+// A query for searching for sourceBibs by their sourceRecordId
+
+export const searchBibs = apolloGraphQL`
+query searchBibs($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
+    sourceBibs(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query) {
+      totalSize
+      content {
+        id
+        dateCreated
+        dateUpdated
+        title
+        author
+        canonicalMetadata
+        sourceSystemId
+        sourceRecordId
+        contributesTo {
+          id
+          title
+        }
+        sourceRecord {
+            id
+            hostLmsId
+            remoteId
+            json
+        }
+      }
+      pageable {
+        number
+        offset
+    }
+    }
+}  
+`;
+
+// A query to load locations with server-side pagination and querying enabled. To be implemented in DCB-488.
+export const getLocations = apolloGraphQL`
+  query loadLocations($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
+    locations(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query) {
+      totalSize
+      content {
+        id
+        code
+        name
+        type
+        isPickup
+        longitude
+        latitude
+        agency {
+          id
+          code
+          name
+          authProfile
+          longitude
+          latitude
+        }
+        parentLocation {
+          id
+          code
+          name
+          type
+          isPickup
+          longitude
+          latitude
+        }
+        hostSystem {
+          id
+        }
+      }
+      pageable {
+        number
+        offset
+      }
+    }
+  }
+`;
+
 
 
 // A query for loading groups and their members.
@@ -90,7 +169,7 @@ query HostLms {
 }
 `;
 
-// A query for loading agencies. Has the same temporary page size restriction as the loadHostlms query.
+// A query for loading agencies. 
 export const loadAgencies = gql`
 query loadAgencies {
     agencies(pagesize: 100) {
@@ -223,7 +302,7 @@ query PatronRequests {
                 localId
                 localStatus
                 localAgency
-                virtualIdentity {
+                virtualPatron {
                     id
                     localId
                     homeIdentity
