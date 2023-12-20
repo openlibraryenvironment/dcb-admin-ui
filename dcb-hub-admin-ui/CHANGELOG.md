@@ -1,3 +1,21 @@
+# [1.2.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.1.0...v1.2.0) (2023-12-20)
+
+
+### Bug Fixes
+
+* Better handling of missing canonicalMetadata ([df82901](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/df829011f49a66a243a7bf116116fe18132bbda2))
+* Calculate DCB health status for any services [DCB-793] ([d35757d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d35757dfb35e7c10291a6fd4c304ec4c3b78157a))
+* correct translation keys ([b8b2749](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b8b274949d35886272b0f71f50a6a5314b09ec5a))
+* Hide unsupported filters [DCB-526] ([b9de914](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b9de914a933bfd7c647065a701e36633f7993e8f))
+* Trans issue with keys and restructure [DCB-759] ([5aabe6b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5aabe6b99a0898b657856d3e2776b3ee02a59515))
+* Update PatronRequest query ([8cf74e9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8cf74e9b4d9766eddbb2a63a0f2c2d866eb16a93))
+* use plural keys [DCB-759] ([72ab0e3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/72ab0e39725dad0e07a4fab48c5f14d13dc9287a))
+
+
+### Features
+
+* use of Trans component adjust ([4108d7d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4108d7ddf25bb32e8e8d827bd77415657248840b))
+
 # [1.1.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.0.4...v1.1.0) (2023-12-12)
 
 
