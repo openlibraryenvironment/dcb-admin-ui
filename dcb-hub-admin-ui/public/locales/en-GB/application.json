@@ -4,7 +4,6 @@
     "name": "DCB Admin",
     "dcb": "DCB",
     "dcb_full": "Direct Consortial Borrowing",
-    "openRS": "Project OpenRS",
     "service": {
       "dcb": "DCB Service",
       "keycloak": "Keycloak"
