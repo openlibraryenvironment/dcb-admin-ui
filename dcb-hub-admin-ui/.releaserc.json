@@ -7,12 +7,6 @@
     "@semantic-release/gitlab",
     "@semantic-release/npm",
     [
-      "@semantic-release/exec",
-      {
-        "shell": "echo \"{ releaseDate:\\"`date`\\" } \" > ./release-info.json"
-      }
-    ],
-    [
       "@semantic-release/git",
       {
         "assets": ["package.json", "CHANGELOG.md", "./release-info.json"],
