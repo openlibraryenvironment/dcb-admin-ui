@@ -31,6 +31,6 @@ build:
   script:
     - pwd
     - ls -al
-    - echo " { releaseDate:\"`date`\" } " > ./release-info.json
+    - echo " { \"releaseDate\":\"`date`\" } " > ./release-info.json
     - npm install
     - npm run semantic-release
