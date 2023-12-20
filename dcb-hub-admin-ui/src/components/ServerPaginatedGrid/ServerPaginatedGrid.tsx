@@ -1,4 +1,4 @@
-import { DataGrid, GridEventListener, GridFilterModel, GridSortModel, GridToolbar, GridToolbarQuickFilter } from '@mui/x-data-grid';
+import { DataGrid, GridEventListener, GridFilterModel, GridSortModel, GridToolbar, GridToolbarQuickFilter, getGridStringOperators } from '@mui/x-data-grid';
 import { DocumentNode, useQuery } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
@@ -18,6 +18,10 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
     {query: DocumentNode, type: string, selectable: boolean, pageSize: number, columns: any, columnVisibilityModel?: any, noResultsMessage?: string, noDataMessage?: string, noDataTitle?: string}) {
   const [sortOptions, setSortOptions] = useState({field: "id", direction: "asc"});
   const [filterOptions, setFilterOptions] = useState("");
+
+  const filterOperators = getGridStringOperators().filter(({ value }) =>
+  ['equals' /* add more over time */ ].includes(value),
+  );
 
   function CustomNoDataOverlay() {
         return (
