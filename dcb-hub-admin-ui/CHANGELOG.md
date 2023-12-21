@@ -1,3 +1,10 @@
+## [1.2.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.2.0...v1.2.1) (2023-12-21)
+
+
+### Bug Fixes
+
+* bump commit to trigger a new minor version ([78deddf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/78deddf27b06642b78815775428fa86657746a3b))
+
 # [1.2.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.1.0...v1.2.0) (2023-12-20)
 
 
