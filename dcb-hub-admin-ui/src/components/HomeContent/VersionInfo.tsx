@@ -75,7 +75,7 @@ export default function VersionInfo(){
 
 		[<Link key="dcb-locate" href={REPO_LINKS.LOCATE} target='_blank' rel="noreferrer">{t('app.component.locate')}</Link>, 
 		<Link key="dcb-locate-version" href={RELEASE_PAGE_LINKS.LOCATE} target='_blank' rel="noreferrer">
-			2.2.3
+			NA
 		</Link>, 'NA'],
 
 		[<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">{t('app.component.admin')}</Link>, 

@@ -1,6 +1,5 @@
 import getConfig from "next/config";
 
-
 const { publicRuntimeConfig } = getConfig();
 
 const API_LINKS = {
@@ -15,7 +14,7 @@ const LOCAL_VERSION_LINKS = {
     SERVICE_INFO: publicRuntimeConfig.DCB_API_BASE+'/info',
     SERVICE_HEALTH: publicRuntimeConfig.DCB_API_BASE+'/health',
     KEYCLOAK: publicRuntimeConfig.KEYCLOAK_REFRESH,
-    KEYCLOAK_HEALTH: 'https://keycloak.sph.k-int.com/health'
+    KEYCLOAK_HEALTH: publicRuntimeConfig.KEYCLOAK_REFRESH.split("/", 3).join("/")+'/health'
 }
 
 const REPO_LINKS = {
