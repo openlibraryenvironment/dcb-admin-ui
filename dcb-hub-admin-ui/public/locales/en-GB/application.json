@@ -13,7 +13,7 @@
       "locate": "dcb-locate",
       "admin": "dcb-admin-ui",
       "devops": "dcb-devops",
-      "keycloak": "gors-hub-keycloak"
+      "keycloak": "dcb-keycloak-extensions"
     },
     "version": "Version", 
     "released": "Released",

@@ -10,6 +10,7 @@ import {
 	API_LINKS,
 	LOCAL_VERSION_LINKS,
 } from '../../../homeData/homeConfig';
+import { Typography } from "@mui/material";
 
 interface InnerObject {
 	tags: string;
@@ -29,14 +30,12 @@ export default function VersionInfo(){
 	const [serviceData, setServiceData] = useState<ServerData | null>(null);
 	const [githubServiceData, setGithubServiceData] = useState<ServerData | null>(null);
 	const [devopsData, setDevOpsData] = useState<ServerData | null>(null);
-	const [keycloakData, setKeycloakData] = useState<ServerData | null>(null);
 	const [adminUiData, setAdminUiData] = useState<ServerData | null>(null);
 
 	const apiEndpoints = useMemo(() => [
 		{ link: LOCAL_VERSION_LINKS.SERVICE_INFO, setter: setServiceData },
 		{ link: API_LINKS.SERVICE, setter: setGithubServiceData },
 		{ link: API_LINKS.DEVOPS, setter: setDevOpsData },
-		{ link: API_LINKS.KEYCLOAK, setter: setKeycloakData },
 		{ link: API_LINKS.ADMIN_UI, setter: setAdminUiData },
 	], [])
 
@@ -75,8 +74,8 @@ export default function VersionInfo(){
 
 		[<Link key="dcb-locate" href={REPO_LINKS.LOCATE} target='_blank' rel="noreferrer">{t('app.component.locate')}</Link>, 
 		<Link key="dcb-locate-version" href={RELEASE_PAGE_LINKS.LOCATE} target='_blank' rel="noreferrer">
-			NA
-		</Link>, 'NA'],
+			{t('common.na')}
+		</Link>, <Typography key='na'>{t('common.na')}</Typography>],
 
 		[<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">{t('app.component.admin')}</Link>, 
 		<Link key="dcb-admin-ui-version" href={RELEASE_PAGE_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">
@@ -86,12 +85,12 @@ export default function VersionInfo(){
 		[<Link key="dcb-dev-ops" href={REPO_LINKS.DEVOPS} target='_blank' rel="noreferrer">{t('app.component.devops')}</Link>,
 		<Link key="dcb-dev-ops-version" href={RELEASE_PAGE_LINKS.DEVOPS} target='_blank' rel="noreferrer">
 			{devopsData ? (JSON.stringify(devopsData.name).replace(/"/g, '')):('Loading release information...')}
-		</Link>, 'NA'],
+		</Link>, <Typography key='na'>{t('common.na')}</Typography>],
 
-		[<Link key="gors-hub-keycloak" href={REPO_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">{t('app.component.keycloak')}</Link>,
-		<Link key="gors=hub-keycloak-version" href={RELEASE_PAGE_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">
-			{keycloakData ? (JSON.stringify(keycloakData[0].name).replace(/"/g, '')):('Loading release information...')}
-		</Link>, 'NA'],
+		[<Link key="dcb-keycloak-extensions" href={REPO_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">{t('app.component.keycloak')}</Link>,
+		<Link key="dcb-keycloak-extensions-version" href={RELEASE_PAGE_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">
+			{t('common.na')}
+		</Link>, <Typography key='na'>{t('common.na')}</Typography>],
 	];	
 
     return(
