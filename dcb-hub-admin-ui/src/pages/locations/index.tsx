@@ -1,7 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import {Card, CardContent, Paper, Typography} from '@mui/material';
+import {Card, CardContent, Typography} from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
@@ -49,10 +49,7 @@ const Locations: NextPage = () => {
 	const locationsData = rows?.locations?.content;
 
 	return (
-		<AdminLayout>
-			<Paper elevation={16}>
-			<Card>
-				<CardContent>
+		<AdminLayout title={t("sidebar.location_button")}>
 						{resourceFetchStatus === 'loading' && (
 								<Typography variant = 'body1' className='text-center mb-0'>{t("locations.loading_msg")}</Typography>)}
 
@@ -70,9 +67,6 @@ const Locations: NextPage = () => {
 									/>
 								</>
 							)}
-				</CardContent>
-			</Card>
-			</Paper>
 		</AdminLayout>
 	);
 };

@@ -14,7 +14,12 @@ import
   MdMenu,
   MdGroup,
   MdSettings,
-  MdBook
+  MdBook,
+  MdHome,
+  MdOutput,
+  MdDns,
+  MdAccountBalance,
+  MdWorkspaces
 }from 'react-icons/md';
 import { useMediaQuery } from '@mui/material';
 import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
@@ -76,8 +81,12 @@ export default function Sidebar(props:any) {
 
   return (
     <>
+          {props.openStateOpen && (
+
       <Drawer 
       variant="permanent" open={props.openStateOpen}>
+    {props.openStateOpen && (
+
         <DrawerHeader>
             <IconButton
             color="inherit"
@@ -93,6 +102,8 @@ export default function Sidebar(props:any) {
             <MdMenu />
           </IconButton>
         </DrawerHeader>
+         )}
+         
         <Divider />
         <List component = "nav">
               {/*
@@ -136,11 +147,11 @@ export default function Sidebar(props:any) {
                     justifyContent: 'center',
                   }}
                 >
-                  {
-                  index === 0 ? <MdSpaceDashboard size={20}/>: index === 1 ? <MdSpaceDashboard size={20}/>: 
-                  index === 2 ? <MdSpaceDashboard size={20}/>: index === 3 ? <MdSpaceDashboard size={20}/>:
-                  index === 4 ? <MdLocationOn size={20}/>: index === 6 ? <MdBook size={20} />: index === 7 ? <MdSettings size={20}/>: <MdGroup size={20}/>
-                  }
+                    {index === 0 ? <MdHome size={20} /> : index === 1 ? <MdOutput size={20} /> :
+                      index === 2 ? <MdAccountBalance size={20} /> : index === 3 ? <MdDns size={20} /> :
+                        index === 4 ? <MdLocationOn size={20} /> : index === 6 ? <MdBook size={20} /> :
+                          index === 7 ? <MdSettings size={20} /> : <MdWorkspaces size={20} />
+                    }
                 </ListItemIcon>
                 <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
               </ListItemButton>
@@ -150,7 +161,10 @@ export default function Sidebar(props:any) {
           </List>
         <Divider />
       </Drawer>
+    )}
+
     </>
       
   );
 }
+

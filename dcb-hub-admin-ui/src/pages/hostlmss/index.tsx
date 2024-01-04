@@ -12,7 +12,6 @@ import { PaginationState, SortingState } from '@tanstack/react-table';
 
 import { HostLMS } from '@models/HostLMS';
 import { DataGrid } from '@components/DataGrid';
-import Paper from '@mui/material/Paper';
 import { Typography } from '@mui/material';
 //localisation
 import { useTranslation } from 'next-i18next';
@@ -79,10 +78,7 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 
 	return (
-		<AdminLayout>
-			<Paper elevation={16}>
-			<Card>
-				<CardContent>
+		<AdminLayout title={t("sidebar.host_lms_button")}>
 					{resourceFetchStatus === 'loading' && (
 						<Typography variant='body1' className='text-center mb-0'>{t("hostlms.loading_msg")}</Typography>)}
 
@@ -101,9 +97,6 @@ const HostLmss: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 							/>
 						</>
 					)}
-				</CardContent>
-			</Card>
-			</Paper>
 		</AdminLayout>
 	);
 };

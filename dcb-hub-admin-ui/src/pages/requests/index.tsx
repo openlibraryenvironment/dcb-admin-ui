@@ -2,7 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Card, CardContent, Paper, Typography } from '@mui/material';
+import { Card, CardContent, Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';
@@ -48,17 +48,12 @@ const PatronRequests: NextPage = () => {
 	const patronRequestData = rows?.patronRequests?.content;
 
 	return (
-		<AdminLayout>
-			<div>
-			<Paper elevation={16}>
-			<Card>
-				<CardContent>
-						{resourceFetchStatus === 'loading' && (
-								<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg")}</Typography>
-							)}
-
-							{resourceFetchStatus === 'error' && (
-								<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text")}/>
+		<AdminLayout title={t("sidebar.patron_request_button")}>
+			{resourceFetchStatus === 'loading' && (
+					<Typography variant='body1' className='text-center mb-0'>{t("requests.loading_msg")}</Typography>
+			)}
+			{resourceFetchStatus === 'error' && (
+				<Alert severityType='error' onCloseFunc={() => {}} alertText={t("requests.alert_text")}/>
 							)}
 							{resourceFetchStatus === 'success' && (
 								<>
@@ -93,10 +88,6 @@ const PatronRequests: NextPage = () => {
 									/>
 								</>
 							)}
-				</CardContent>
-			</Card>
-			</Paper>
-			</div>
 		</AdminLayout>
 	);
 };

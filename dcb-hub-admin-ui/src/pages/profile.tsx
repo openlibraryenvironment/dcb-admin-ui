@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 
-import { Card, CardContent, Paper, List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem } from "@mui/material"
+import { Card, CardContent, List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem } from "@mui/material"
 
 import { MdPersonOutline } from 'react-icons/md';
 import { MdOutlineMail } from 'react-icons/md';
@@ -56,7 +56,6 @@ const Profile: NextPage<Props> = (props) => {
 
 	return (
 		<AdminLayout>
-			<Paper elevation={16}>
 				<Card>
 					<CardContent component="div">
 						<List className='list-profile'>
@@ -91,7 +90,6 @@ const Profile: NextPage<Props> = (props) => {
 					</List>
 					</CardContent>
 				</Card>
-			</Paper>
 		</AdminLayout>
 	);
 };
