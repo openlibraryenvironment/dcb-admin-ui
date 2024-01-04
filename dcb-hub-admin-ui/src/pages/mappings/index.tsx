@@ -3,7 +3,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
+import { CardContent, Card, Typography, CardHeader, Button} from '@mui/material';
 import { capitalize } from 'lodash';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
@@ -77,12 +77,7 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const { t } = useTranslation();
 
 	return (
-		<AdminLayout>
-			<Paper elevation={16}>
-				<Card>
-					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.mappings")}</Typography>}/>                    
-					<CardContent>
+		<AdminLayout title={t("sidebar.mappings_button")}>
 							{resourceFetchStatus === 'loading' && (
 								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg")}</Typography>
 							)}
@@ -93,6 +88,7 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 
 							{resourceFetchStatus === 'success' && (
 								<>
+									<div>
 									<Button variant="contained" onClick={openImport} > {t("mappings.import")}</Button>
 									<DataGrid
 										data={resource?.content ?? []}
@@ -116,11 +112,9 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 										selectable={false}
 										sortModel={[{field: 'lastImported', sort: 'desc'}]}
 									/>
+									</div>
 								</>
 							)}
-				    </CardContent>
-				</Card>
-			</Paper>
 			<div>
 			{ showImport ? <Import show={showImport}  onClose={closeImport}/> : null }
     		</div>

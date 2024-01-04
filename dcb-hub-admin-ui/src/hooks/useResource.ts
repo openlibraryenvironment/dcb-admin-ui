@@ -220,7 +220,7 @@ const useResource = <T>({
 	const fetchGraphQLData:any = async () => {
 		try {
 		  let headers: AxiosRequestHeaders = {};
-		  console.log("The GraphQL fetcher has been called.")
+		  // console.log("The GraphQL fetcher has been called.")
 		  if (accessToken !== null) {
 			headers = {
 			  ...headers,

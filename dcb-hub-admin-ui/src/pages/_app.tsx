@@ -64,34 +64,24 @@ function MyApp(props: MyAppProps) {
 				},
 			},
 			typography: {
+				h1: {
+					fontSize: 20
+				},
+				h2: {
+					fontSize: 32
+				},
+				h3: {
+					fontSize: 20
+				},
+				h4: {
+					fontSize: 18
+				},
 				// and then set the fonts for the theme here
 				fontFamily: roboto.style.fontFamily,
 			}
 		}),
 		[prefersDarkMode],
 	);
-	const graphQLURL = useMemo(() => {
-		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
-	}, [])
-	const token = pageProps.session?.accessToken;
-	console.log("This is the"+ token);
-
-
-	const httpLink = createHttpLink({
-		uri: graphQLURL,
-	  });
-	  
-	  const authLink = setContext((_, { headers }) => {
-		// get the authentication token
-		// return the headers to the context so httpLink can read them
-		return {
-		  headers: {
-			...headers,
-			authorization: token ? `Bearer ${token}` : "",
-		  }
-		}
-	  });
 
 	const [queryClient] = useState(
 		() =>
@@ -112,7 +102,7 @@ function MyApp(props: MyAppProps) {
 	return (
 			<CacheProvider value={emotionCache}>
 			<Head>
-			<meta name="viewport" content="initial-scale=1, width=device-width" />
+			<meta name="viewport" content="width=device-width, initial-scale=1" />
 			</Head>
 			<SessionProvider session={pageProps.session}>
 			<ApolloProviderWrapper>

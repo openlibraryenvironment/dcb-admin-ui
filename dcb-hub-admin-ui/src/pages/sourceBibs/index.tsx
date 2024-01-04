@@ -2,7 +2,6 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 
 import { AdminLayout } from '@layout';
 import { useTranslation } from 'next-i18next';
-import { Card, CardContent, Paper } from '@mui/material';
 import { searchBibs } from 'src/queries/queries';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
@@ -40,14 +39,8 @@ const SourceBibs: NextPage = () => {
         )
     }
     return (
-        <AdminLayout>
-            <Paper elevation={16}>
-                <Card>
-                    <CardContent>
-                        <BibsDisplay/>
-                    </CardContent>
-                </Card>
-            </Paper>
+		<AdminLayout title={t("sidebar.bib_button")}>
+            <BibsDisplay/>
         </AdminLayout>
     )
 }

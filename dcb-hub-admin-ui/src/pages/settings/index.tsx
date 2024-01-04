@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, List, ListSubheader, ListItem, ListItemButton, ListItemText, CardHeader } from '@mui/material';
+import { List, ListSubheader, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import useCode from '@hooks/useCode';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -20,11 +20,7 @@ const Settings: NextPage = () => {
 	};
 
 	return (
-		<AdminLayout>
-			<Paper elevation={16}>
-				<Card>
-					<CardHeader title={t("settings.settings")}/>
-					<CardContent>
+		<AdminLayout title={t("sidebar.settings_button")}>
 						<List
 							sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
 							component="nav"
@@ -46,9 +42,6 @@ const Settings: NextPage = () => {
             					</ListItemButton>
           					</ListItem>
 						</List>
-					</CardContent>	
-				</Card>
-			</Paper>
 		</AdminLayout>
 	);
 };

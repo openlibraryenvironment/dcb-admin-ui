@@ -86,7 +86,8 @@ export default function DataGrid<T extends Object>({
         sx={{
             ".MuiDataGrid-virtualScroller": {
                 overflow: 'hidden'
-            }
+            },
+            border: '0'
         }}
             //DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
             experimentalFeatures={{ ariaV7: true }}

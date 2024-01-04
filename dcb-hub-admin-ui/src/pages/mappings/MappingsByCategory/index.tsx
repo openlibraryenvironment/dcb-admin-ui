@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { Paper, CardContent, Card, Typography, CardHeader, Button } from '@mui/material';
+import { CardContent, Card, Typography, CardHeader, Button } from '@mui/material';
 import { capitalize } from 'lodash';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';
@@ -86,16 +86,8 @@ const MappingsByCategory: NextPage<Props> = () => {
 	}
 
 	return (
-		<AdminLayout>
-			<Paper elevation={16}>
-				<Card>
-					{/* // style this to be more in line with wireframes */}
-					<CardHeader title={<Typography variant = "h5"> {t("settings.circulation_status")}</Typography>}/>                    
-					<CardContent>
-						<ByCategory category={useCode((state) => state.category) ?? "CirculationStatus"}/>
-				    </CardContent>
-				</Card>
-			</Paper>
+		<AdminLayout title={t("sidebar.circulation")}>
+			<ByCategory category={useCode((state) => state.category) ?? "CirculationStatus"}/>
 			<div>
 			{ showImport ? <Import show={showImport}  onClose={closeImport}/> : null }
     		</div>

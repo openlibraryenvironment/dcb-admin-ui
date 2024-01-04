@@ -4,7 +4,7 @@ import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
 import { getSession, useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import { Button, Card, CardContent, Paper, Typography } from '@mui/material';
+import { Button, Card, CardContent, Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import NewGroup from './NewGroup';
 import { dehydrate, QueryClient, useQueryClient, useQuery } from '@tanstack/react-query'
@@ -92,10 +92,7 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 	const { t } = useTranslation();
 
 	return (
-		<AdminLayout>
-				<Paper elevation={16}>
-				<Card>
-					<CardContent>
+		<AdminLayout title={t("sidebar.groups_button")}>
 					{resourceFetchStatus === 'loading' && (
 						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
 					)}
@@ -121,9 +118,6 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 							</div>						
 						</>
 					)}
-					</CardContent>
-				</Card>
-				</Paper>
 			<div>
 			{ showNewGroup ? <NewGroup show={showNewGroup}  onClose={closeNewGroup}/> : null }
     		</div>
