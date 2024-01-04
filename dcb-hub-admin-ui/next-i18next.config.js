@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   i18n: {
     // all the locales supported in the application
@@ -13,11 +15,6 @@ module.exports = {
   defaultNS: 'application',
   fallbackNS: 'common',
 
-  // configure the path for localization (i18n) files based on the environment
-  // if the code is running on server side it will use ./public/locales
-  // if the code is running on client side it will use /locales
-  localePath:
-    typeof window === 'undefined'
-      ? require('path').resolve('./public/locales')
-      : '/locales',
+  //fixes issue of keys showing in vercel 
+  localePath: path.resolve('./public/locales')
 }
