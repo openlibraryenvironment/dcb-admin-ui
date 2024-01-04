@@ -1,3 +1,10 @@
+# [1.3.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.2.1...v1.3.0) (2024-01-04)
+
+
+### Features
+
+* Bump commit to attempt to trigger release ([4ad33a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4ad33a559e6584b24971bdec4250c612afc1ec9e))
+
 ## [1.2.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.2.0...v1.2.1) (2023-12-21)
 
 
