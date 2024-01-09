@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 // import SignOutIfInactive from './useAutoSignout';
-import { CardContent, Typography, Card } from '@mui/material';
+import { Typography, useTheme } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'next-i18next'; //localisation
 import getConfig from "next/config";
@@ -33,12 +33,10 @@ const Home: NextPage = () => {
 	// line below currently does not work as expected, will need to be redone in the future
 	// SignOutIfInactive();
 	const { t } = useTranslation();
+	const theme = useTheme();
 
 	return (
-		<AdminLayout>
-			<Card>
-				<CardContent>
-					<Typography variant="h1" fontSize={'300%'} sx={{marginBottom: 1}}> {t('welcome.greeting')+' '+getUserName()} </Typography>
+		<AdminLayout title={t('welcome.greeting')+' '+getUserName()}>
 					<Typography variant='body1' sx={{marginBottom:2}} fontSize={'1.3rem'}>{t('welcome.context', {consortium_name: 'MOBIUS'})}</Typography>
 					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('consortium.your')}</Typography>
 					<Typography variant='body1' fontSize={'1.1rem'}> {t('common.placeholder_text')} </Typography>
@@ -55,8 +53,6 @@ const Home: NextPage = () => {
 						>
 						</Trans>
 					</Typography>
-				</CardContent>
-			</Card>
 		</AdminLayout>
 	);
 };

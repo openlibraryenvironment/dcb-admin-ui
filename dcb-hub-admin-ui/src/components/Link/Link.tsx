@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import NextLink, { LinkProps as NextLinkProps } from 'next/link';
 import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link';
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import { forwardRef } from 'react';
 
 // Add support for the sx prop for consistency with the other branches.
@@ -79,6 +79,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
   } = props;
 
   const router = useRouter();
+  const theme = useTheme();
   const pathname = typeof href === 'string' ? href : href.pathname;
   const className = clsx(classNameProps, {
     [activeClassName]: router.pathname === pathname && activeClassName,
@@ -89,10 +90,10 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
 
   if (isExternal) {
     if (noLinkStyle) {
-      return <Anchor className={className} href={href} ref={ref} {...other} />;
+      return <Anchor sx={{color: theme.palette.primary.linkText}} className={className} href={href} ref={ref} {...other} />;
     }
 
-    return <MuiLink className={className} href={href} ref={ref} {...other} />;
+    return <MuiLink sx={{color: theme.palette.primary.linkText}} className={className} href={href} ref={ref} {...other} />;
   }
 
   const linkAs = linkAsProp || as;
@@ -108,11 +109,12 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) 
   };
 
   if (noLinkStyle) {
-    return <NextLinkComposed className={className} ref={ref} {...nextjsProps} {...other} />;
+    return <NextLinkComposed sx={{color: theme.palette.primary.linkText}} className={className} ref={ref} {...nextjsProps} {...other} />;
   }
 
   return (
     <MuiLink
+      sx={{color: theme.palette.primary.linkText}}
       component={NextLinkComposed}
       className={className}
       ref={ref}

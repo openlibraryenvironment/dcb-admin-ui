@@ -1,20 +1,18 @@
 import { PaginationState, SortingState } from '@tanstack/react-table'
 import { useMemo, useState } from 'react';
-import { Group } from '@models/Group';
 import { AdminLayout } from '@layout';
-import { getSession, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import getConfig from 'next/config';
-import { Button, Card, CardContent, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import NewGroup from './NewGroup';
-import { dehydrate, QueryClient, useQueryClient, useQuery } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { groupsQueryDocument } from 'src/queries/queries';
 import { useResource } from '@hooks';
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'next-i18next';
-import { getServerSession } from 'next-auth';
 import { AgencyGroupPage } from '@models/AgencyGroupPage';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 // import SignOutIfInactive from '../useAutoSignout';

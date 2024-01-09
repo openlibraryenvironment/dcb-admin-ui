@@ -2,7 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Card, CardContent, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { useResource } from '@hooks';

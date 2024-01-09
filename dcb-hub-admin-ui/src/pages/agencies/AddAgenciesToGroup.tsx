@@ -151,7 +151,6 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       </div>
     );
   };
-  // TODO: Check Formik error behaviour on 401s
 
   const { t } = useTranslation();
 
