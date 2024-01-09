@@ -2,8 +2,7 @@ import Link from '@components/Link/Link';
 //localisation
 import { useTranslation } from 'next-i18next';
 import getConfig from "next/config";
-import { formatDate } from 'src/helpers/formatDate';
-
+import dayjs from 'dayjs';
 
 export default function Footer() {
 	const { t } = useTranslation();
@@ -15,7 +14,7 @@ export default function Footer() {
 			{<Link className='text-decoration-none' href={'https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/'} target='_blank' rel="noreferrer">
 				{t('app.name')}
 			</Link>}
-			{'. '+t("app.version")+' '+publicRuntimeConfig?.version+'. '+t("app.released")+' '+formatDate(publicRuntimeConfig?.releaseDate)+'.'}
+			{'. '+t("app.version")+' '+publicRuntimeConfig?.version+'. '+t("app.released")+' '+dayjs(publicRuntimeConfig?.releaseDate).format('YYYY-MM-DD')+'.'}
 			</div>
 		</footer>
 	);
