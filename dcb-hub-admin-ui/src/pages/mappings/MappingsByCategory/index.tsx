@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { CardContent, Card, Typography, CardHeader, Button } from '@mui/material';
+import { Button } from '@mui/material';
 import { capitalize } from 'lodash';
 import { DataGrid } from '@components/DataGrid';
 import { useResource } from '@hooks';

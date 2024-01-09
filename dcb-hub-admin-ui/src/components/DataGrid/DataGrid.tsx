@@ -102,7 +102,7 @@ export default function DataGrid<T extends Object>({
             // we can also have a custom pagination component, see here for details https://mui.com/x/react-data-grid/components/#pagination 
             // Currently set to default until server side pagination is working.
             pagination
-            autoHeight={true}
+            // autoHeight={true}
             onRowClick={handleRowClick}
             disableRowSelectionOnClick  
             initialState={{

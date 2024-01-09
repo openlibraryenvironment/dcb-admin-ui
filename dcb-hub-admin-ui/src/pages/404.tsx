@@ -7,10 +7,9 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export default function NotFound() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout>
+		<AdminLayout title={t("404.page_title")}>
 			{' '}
 			<div className='not-found'>
-				<Typography className='Title'>{t("404.page_title")}</Typography>
 				<Typography className='Text'>{t("404.page_text")}</Typography>
 				<Typography className='GoBackText'>
 					{t("404.go_back_text")}

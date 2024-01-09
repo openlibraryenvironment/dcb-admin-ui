@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 
-import { Card, CardContent, List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem } from "@mui/material"
+import { Card, CardContent, List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem, useTheme } from "@mui/material"
 
 import { MdPersonOutline } from 'react-icons/md';
 import { MdOutlineMail } from 'react-icons/md';
@@ -53,14 +53,13 @@ const Profile: NextPage<Props> = (props) => {
 
 	// SignOutIfInactive();
 	const { t } = useTranslation();
+	const theme = useTheme();
 
 	return (
-		<AdminLayout>
-				<Card>
-					<CardContent component="div">
+		<AdminLayout title={t("profile.title")}>
+
 						<List className='list-profile'>
-						<ListSubheader> 
-								<Typography variant = "h2">{t("profile.title")}</Typography> 
+						<ListSubheader sx={{backgroundColor: theme.palette.background.default }}> 
 								<Typography variant = "h6">{t("profile.details")}</Typography> 
 						</ListSubheader> 
 						<ListItem>
@@ -88,8 +87,6 @@ const Profile: NextPage<Props> = (props) => {
 								{formatRoles(session?.profile?.roles)}
 						</ListItem>
 					</List>
-					</CardContent>
-				</Card>
 		</AdminLayout>
 	);
 };
