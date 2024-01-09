@@ -17,6 +17,7 @@ const SourceBibs: NextPage = () => {
     const filterOperators = getGridStringOperators().filter(({ value }) =>
     ['equals' /* add more over time */ ].includes(value),
     );
+    // If testing, use this format for the search: sourceRecordId:843 AND id:80bf9c74-a5ae-56c9-8cfe-814220ee38a5
     
     const BibsDisplay = () => {
         return(

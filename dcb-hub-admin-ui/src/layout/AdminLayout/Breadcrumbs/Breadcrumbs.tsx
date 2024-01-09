@@ -1,4 +1,4 @@
-import { Breadcrumbs as MUIBreadcrumbs } from "@mui/material"
+import { Breadcrumbs as MUIBreadcrumbs, useTheme } from "@mui/material"
 import { MdArrowForwardIos } from 'react-icons/md';
 import Link from "@components/Link/Link";
 import { useRouter } from "next/router";
@@ -39,12 +39,13 @@ export default function Breadcrumbs () {
     }, [router.asPath]);
 
     const { t } = useTranslation();
+    const theme = useTheme();
 
     return (
-        <MUIBreadcrumbs separator={<MdArrowForwardIos/>}>
-        <Link color="inherit" href="/">{t("breadcrumbs.home_text")}</Link>
+        <MUIBreadcrumbs sx={{pl: 2}} separator={<MdArrowForwardIos/>}>
+        <Link sx={{color: theme.palette.primary.breadcrumbs}} href="/">{t("breadcrumbs.home_text")}</Link>
         {breadcrumbs?.map((breadcrumb) => (
-          <Link color="inherit" underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
+          <Link sx={{color: theme.palette.primary.breadcrumbs}} underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
             {breadcrumb.label}
           </Link>
         ))}

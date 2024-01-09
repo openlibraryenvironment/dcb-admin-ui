@@ -3,7 +3,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import getConfig from 'next/config';
 import { useSession } from 'next-auth/react';
 
-import { Button, Card, CardContent, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { AdminLayout } from '@layout';
 import { DataGrid } from '@components/DataGrid';

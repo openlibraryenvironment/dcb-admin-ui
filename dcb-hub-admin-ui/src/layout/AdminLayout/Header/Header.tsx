@@ -6,7 +6,7 @@ import { MdMenu } from "react-icons/md";
 import { MdAccountCircle } from "react-icons/md";
 import Link from '@components/Link/Link';
 import { signIn, signOut, useSession } from "next-auth/react"
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import { useTranslation } from 'next-i18next'
 import { Button } from "@mui/material";
@@ -26,6 +26,7 @@ const AppBar = styled(MuiAppBar, {
 
 export default function Header(props:any) {
   const { data: session, status } = useSession()
+  const theme = useTheme();
   const { t } = useTranslation();
   const handleClick = () => {
     if (status === "authenticated")
@@ -40,19 +41,18 @@ export default function Header(props:any) {
 
   return (
             <Box sx={{ flexGrow: 1 }}>
-              <AppBar position="fixed">
+              <AppBar position="fixed" sx={{backgroundColor: theme.palette.primary.header}}>
                 <Toolbar>
                   <IconButton
                     size="large"
                     edge="start"
-                    color="inherit"
                     aria-label="menu"
                     onClick={props.openStateFuncClosed}
-                    sx={{ mr: 2 }}
+                    sx={{ mr: 2, color: theme.palette.primary.headerText}}
                   >
                     <MdMenu size={20}/>
                   </IconButton>
-                  <Typography variant="h1" component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+                  <Typography variant="h1" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1 }}>
                   {t("header.title")}
                   </Typography>
                   {/*
@@ -67,7 +67,7 @@ export default function Header(props:any) {
                         <IconButton
                         size="large"
                         aria-label="account of current user"
-                        color="inherit"
+                        sx={{ color: theme.palette.primary.headerText}}
                         >
                         <MdAccountCircle size={20}/>
                         </IconButton>  
@@ -75,8 +75,8 @@ export default function Header(props:any) {
                     
                     <Button
                       aria-label={(status === "authenticated" ? "Logout": "Login")}
-                      onClick={handleClick} // make this conditional depending on whether we're signed in or not
-                      color="inherit" // same for the text
+                      onClick={handleClick}
+                      sx={{ color: theme.palette.primary.headerText}}
                       >
                         {(status === "authenticated" ? "Logout" : "Login")}
                     </Button>
