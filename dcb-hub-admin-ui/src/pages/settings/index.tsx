@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
 
 // import SignOutIfInactive from './useAutoSignout';
-import { List, ListSubheader, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { List, ListSubheader, ListItem, ListItemButton, ListItemText, useTheme } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import useCode from '@hooks/useCode';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -14,6 +14,7 @@ const Settings: NextPage = () => {
 	// SignOutIfInactive();
 
 	const { t } = useTranslation();
+	const theme = useTheme();
 	const updateCategory = useCode((state) => state.updateCategory);
 	const setDestinationCategory = (value: string) => {
 		updateCategory(value);
@@ -22,11 +23,10 @@ const Settings: NextPage = () => {
 	return (
 		<AdminLayout title={t("sidebar.settings_button")}>
 						<List
-							sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
 							component="nav"
 							aria-labelledby="settings-subheader"
 							subheader={
-								<ListSubheader component="div" id="settings-subheader">
+								<ListSubheader sx={{backgroundColor: theme.palette.background.default }}component="div" id="settings-subheader">
 								{t("mappings.mappings")}
 								</ListSubheader>
 							}>

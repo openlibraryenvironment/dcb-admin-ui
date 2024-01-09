@@ -1,4 +1,4 @@
-import { styled, Theme, CSSObject } from '@mui/material/styles';
+import { styled, Theme, CSSObject, useTheme } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -10,9 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Link from '@components/Link/Link';
 import
 { MdLocationOn, 
-  MdSpaceDashboard, 
   MdMenu,
-  MdGroup,
   MdSettings,
   MdBook,
   MdHome,
@@ -22,13 +20,14 @@ import
   MdWorkspaces
 }from 'react-icons/md';
 import { useMediaQuery } from '@mui/material';
-import Breadcrumbs from '../Breadcrumbs/Breadcrumbs';
 //localisation
 import { useTranslation } from 'next-i18next';
+import { useState } from 'react';
 
 const drawerWidth = 240;
 
 const openedMixin = (theme: Theme): CSSObject => ({
+  backgroundColor: theme.palette.primary.sidebar,
   width: drawerWidth,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
@@ -78,14 +77,14 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 export default function Sidebar(props:any) {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const { t } = useTranslation();
+  const theme = useTheme();
+  const [selected, setSelected] = useState(false);
 
   return (
     <>
-          {props.openStateOpen && (
-
-      <Drawer 
-      variant="permanent" open={props.openStateOpen}>
     {props.openStateOpen && (
+    <Drawer variant="permanent" open={props.openStateOpen}>
+            {props.openStateOpen && (
 
         <DrawerHeader>
             <IconButton
@@ -106,14 +105,6 @@ export default function Sidebar(props:any) {
          
         <Divider />
         <List component = "nav">
-              {/*
-                It has been decided that we do not currently want breadcrumbs in the sidebar,
-                therefore this code has been temporarily disabled
-
-                props.openStateOpen ? <ListItem key={"breadcrumbs-sidebar"} component="nav">
-                <Breadcrumbs />
-                  {// Hide this on toggled sidebar }
-              </ListItem>: null */}
           {[t('sidebar.dashboard_page_button'), t('sidebar.patron_request_button'),
           t('sidebar.agency_button'), t('sidebar.host_lms_button'), t('sidebar.location_button'), t('sidebar.groups_button'), t('sidebar.bib_button'), t('sidebar.settings_button')].map((text, index) => (
             <Link
@@ -133,10 +124,21 @@ export default function Sidebar(props:any) {
             >
             <ListItem key={text} component="nav" disablePadding sx={{ display: 'block' }}>
               <ListItemButton
-                sx={{
+                  selected={selected}
+                  onClick={() => setSelected((prev) => !prev)}
+                  sx={{
                   minHeight: 48,
                   justifyContent: props.openStateOpen ? 'initial' : 'center',
                   px: 2.5,
+                  // "&.Mui-selected": {
+                  //   backgroundColor: theme.palette.primary.selected
+                  // },
+                  "&.Mui-focusVisible": {
+                    backgroundColor: theme.palette.primary.selected
+                  },
+                  ":hover": {
+                    backgroundColor: theme.palette.primary.selected
+                  }
                 }}
               >
                 <ListItemIcon
