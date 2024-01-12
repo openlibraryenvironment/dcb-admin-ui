@@ -128,7 +128,7 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
         filterMode="server"
         onRowClick={handleRowClick}
         onFilterModelChange={onFilterChange}
-        pageSizeOptions={[10]}
+        pageSizeOptions={[5, 10]}
         paginationModel={paginationModel}
         paginationMode="server"
         sortingMode="server"

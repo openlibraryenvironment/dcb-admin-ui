@@ -34,6 +34,7 @@
 		"axios": "^0.27.2",
 		"cookie": "^0.5.0",
 		"cookies-next": "^2.1.1",
+		"cypress": "^13.6.2",
 		"dayjs": "^1.11.10",
 		"formik": "^2.4.3",
 		"graphql": "^16.8.1",
@@ -48,10 +49,12 @@
 		"react-dom": "^18.2.0",
 		"react-i18next": "^13.5.0",
 		"react-icons": "^4.10.1",
+		"swc-plugin-coverage-instrument": "^0.0.20",
 		"yup": "^1.2.0",
 		"zustand": "^4.4.5"
 	},
 	"devDependencies": {
+		"@cypress/code-coverage": "^3.12.17",
 		"@graphql-codegen/cli": "5.0.0",
 		"@graphql-codegen/client-preset": "4.1.0",
 		"@parcel/watcher": "^2.3.0",

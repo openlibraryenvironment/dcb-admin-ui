@@ -90,21 +90,21 @@ const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
 	const { t } = useTranslation();
 
 	return (
-		<AdminLayout title={t("sidebar.groups_button")}>
+		<AdminLayout data-tid="groups-title" title={t("sidebar.groups_button")}>
 					{resourceFetchStatus === 'loading' && (
-						<Typography variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
+						<Typography data-tid="groups-loading-text" variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
 					)}
 
 					{resourceFetchStatus === 'error' && (
 						<div>
-							<Alert severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text")}/>
+							<Alert data-tid="groups-loading-error" severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text")}/>
 						</div>
 					)}
 
 					{resourceFetchStatus === 'success' && (
 						<>
 							<div>
-								<Button variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
+								<Button data-tid="new-group-button" variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
 								<DataGrid
 								data={groupsData ?? []}
 								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	

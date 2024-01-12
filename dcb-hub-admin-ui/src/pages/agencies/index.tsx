@@ -69,8 +69,8 @@ const Agencies: NextPage = () => {
 					{resourceFetchStatus === 'success' && (
 						<>
 							<div>
-							<Button variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group")}</Button>
-							<DataGrid
+							<Button data-tid="add-agencies-to-group" variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group")}</Button>
+							<DataGrid data-tid="agencies-data-grid"
 								data={agenciesData ?? []}
 								columns={[ {field: 'name', headerName: "Agency name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Agency ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Agency code", minWidth: 50, flex: 0.5}]}	
 								type = "Agency"
