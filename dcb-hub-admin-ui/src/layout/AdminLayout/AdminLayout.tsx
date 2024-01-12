@@ -28,33 +28,50 @@ export default function AdminLayout({ title, children }: PropsWithChildren<Admin
 				<link rel='icon' href='/favicon.ico' />
 			</Head>
 			<Header openStateFuncClosed={()=>setSidebarOpen(!sidebarOpen)} />
+			{/*container for everything, includes the sidebar*/}
 			<Box sx={{display: 'flex', height: '100%', width: '100%'}}>
 				<Sidebar
 					openStateOpen = {sidebarOpen}
 					openStateFuncOpen = {()=>{setSidebarOpen(sidebarOpen)}}
 					openStateFuncClosed = {()=>setSidebarOpen(!sidebarOpen)}
 				/>
-				<Box display="flex" sx={{flexGrow: 3, pl: 0, pt: 3, pr: 0, pb: 0, marginTop: 7, overflow: 'auto', height: '100%', width: '100%',display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
-						<Box sx={{flexGrow: 3, overflow: 'auto', flex: 1, minHeight: '50px'}}>
-						<Stack spacing={2} sx={{height: '100%', width: '100%'}}>
-							<Breadcrumbs />
-							<Box sx={{flexGrow: 1, p: 3, pl: 0, pr: 0, backgroundColor: theme.palette.primary.titleArea}}>
+				{/* Container for content exluding the sidebar
+					- flexGrow makes the content grow to the window size
+					- overflow: auto, means that content does not go beyond it's container
+					- minHeight must be 100vh for the footer to be at the bottom of the screen
+				*/}
+				<Box display="flex"
+				sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
+					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
+						<Box>
+							<Breadcrumbs/>
+						</Box>
+						{ /* Title
+							- height: 90px & p: 3 - this is to make the text appear centered
+						*/}
+						<Box sx={{ p: 3, pl: 0, pr: 0, marginTop: 1, marginBottom: 1, height: '90px', backgroundColor: theme.palette.primary.titleArea }}>
 							{(title!= null ? 
-								<Typography id="page-title" pl={2} variant = "h2">
-									{title}
-								</Typography>
-								: null)}
-							</Box>
-							<Box sx={{flexGrow: 1, pl: 2, pr: 0}}>
-								{children}
-							</Box>
-						</Stack>
-				</Box>
-				<Box sx={{backgroundColor: theme.palette.primary.footerArea, minHeight: '50px', overflow: 'auto', padding: 3}}>
-				<Footer/>
+							<Typography id="page-title" pl={2} variant = "h2">
+								{title}
+							</Typography>
+							: null)}
+						</Box>
+						{/* Children
+							- flex: '1 0 auto' - child element grows to fill space and pushes the footer to the bottom
+						*/}
+						<Box sx={{ pl: 2, pr: 0, flex: '1 0 auto' }}>
+							{children}
+						</Box>
+					</Stack>
+					{/* Footer
+						- flexShrink: 0 - flex item does not shrink
+					*/}
+					<Box sx={{ backgroundColor: theme.palette.primary.footerArea, overflow: 'auto', padding: 3, flexShrink: 0 }}>
+						<Footer/>
+					</Box>
 				</Box>
 			</Box>
-		</Box>
 		</>
 	);
 }
