@@ -111,6 +111,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
           <form id = "new-group-form" onSubmit={formik.handleSubmit}>
             <TextField
               fullWidth
+              data-tid="new-group-name"
               id="name"
               name="name"
               label="Group name"
@@ -122,6 +123,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
             />
             <TextField
               fullWidth
+              data-tid="new-group-code"
               id="code"
               name="code"
               label="Group Code"
@@ -131,7 +133,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
               error={formik.touched.code && Boolean(formik.errors.code)}
               helperText={formik.touched.code && formik.errors.code}
             />
-            <Button color="primary" variant="contained" fullWidth type="submit">
+            <Button data-tid="new-group-submit" color="primary" variant="contained" fullWidth type="submit">
               {t("general.submit", "Submit")}            
             </Button>
           </form>
@@ -142,8 +144,9 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
   return (
     <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-      <DialogTitle style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
+      <DialogTitle data-tid="new-group-title" style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
       <IconButton
+          data-tid="new-group-close"
           aria-label="close"
           onClick={onClose}
           sx={{

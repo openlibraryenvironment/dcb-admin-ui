@@ -1,0 +1,577 @@
+{
+    "data": {
+        "sourceBibs": {
+            "totalSize": 6512538,
+            "content": [
+                {
+                    "id": "84b52f96-8fa1-53ca-9600-66b7619dd105",
+                    "dateCreated": "2023-12-18T17:22:53.247212Z",
+                    "dateUpdated": "2024-01-10T01:29:04.184215Z",
+                    "title": "Swamp Thing by Brian K. Vaughan. written by Brian K. Vaughan ; art by Roger Peterson ... [et al.] ; colors by Alex Sinclair ; letters by John Costanza.",
+                    "author": null,
+                    "canonicalMetadata": {
+                        "notes": [
+                            "\"Vertigo\"--Cover.",
+                            "\"Swamp Thing created by Len Wein and Bernie Wrightson.\"",
+                            "Originally published in single magazine form in Swamp Thing (2000) #1-9, Vertigo Secret Files & Origins: Swamp Thing 1,  and a story from Vertigo Winter's Edge #3."
+                        ],
+                        "title": "Swamp Thing by Brian K. Vaughan. written by Brian K. Vaughan ; art by Roger Peterson ... [et al.] ; colors by Alex Sinclair ; letters by John Costanza.",
+                        "agents": [
+                            {
+                                "label": "Vaughan, Brian K.",
+                                "subtype": "name-personal"
+                            }
+                        ],
+                        "author": null,
+                        "summary": [
+                            "Teenager Tefé Holland, daughter of Swamp Thing and Abigail Arcane, is a human/plant elemental hybrid capable of tremendous power, but she must learn to harness her abilities in order to use them to stop ecological disasters."
+                        ],
+                        "subjects": [
+                            {
+                                "label": "Swamp Thing(Fictitious character)",
+                                "subtype": "personal-name"
+                            },
+                            {
+                                "label": "Teenage girls",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Hybridization",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Monsters",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Horror comic books, strips, etc.",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Comic books, strips, etc.",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Graphic novels.",
+                                "subtype": "topical-term"
+                            }
+                        ],
+                        "publisher": "DC Comics",
+                        "derivedType": "Book",
+                        "identifiers": [
+                            {
+                                "value": "swamp thing brian vaughan written brian vaughan art roger peterson colors alex sinclair letters john costanza",
+                                "namespace": "BLOCKING_TITLE"
+                            },
+                            {
+                                "value": "741357",
+                                "namespace": "St Louis"
+                            },
+                            {
+                                "value": "ocn858672563",
+                                "namespace": "OCoLC"
+                            },
+                            {
+                                "value": "858672563",
+                                "namespace": "OCoLC"
+                            },
+                            {
+                                "value": "  2013036120",
+                                "namespace": "LCCN"
+                            },
+                            {
+                                "value": "9781401243043 (pbk.)",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "1401243045 (pbk.)",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "swampthingbybriankvaughan                                        20141      dca                    volume 1  ",
+                                "namespace": "GOLDRUSH"
+                            }
+                        ],
+                        "otherAuthors": [],
+                        "recordStatus": "c",
+                        "dateOfPublication": "c2014",
+                        "placeOfPublication": "New York ",
+                        "physical-description": [
+                            {
+                                "label": "1 v. (unpaged) :chiefly col. ill. ;26 cm"
+                            }
+                        ]
+                    },
+                    "sourceSystemId": "efe60600-0879-5ec5-8831-ae524b11639c",
+                    "sourceRecordId": "741357",
+                    "contributesTo": {
+                        "id": "06072410-44e7-47c9-8d37-705aec3f482e",
+                        "title": null,
+                        "__typename": "ClusterRecord"
+                    },
+                    "sourceRecord": null,
+                    "__typename": "BibRecord"
+                },
+                {
+                    "id": "7e01fe20-df9e-5d11-b5d5-cde248f83d30",
+                    "dateCreated": "2024-01-06T09:43:09.447044Z",
+                    "dateUpdated": "2024-01-06T09:43:09.928222Z",
+                    "title": "An entire new edition (with additions and improvements) of Walpoole's New British traveller, To be fully completed in sixty numbers only, embellished with above 150 engravings. This day is published, number I. (Price only Six-Pence) (Containing three whole sheets of letter-press, elegantly printed in large folio, and embellished with the following copper-plates: 1. A most beautiful and capital frontispiece, engraved by Messrs. Lodge and Thornton, from an original drawing. 2. A whole-sheet map of that district of Great-Britain, called England and Wales, with the adjacent Isles, distirctly and accurately laid down from the latest and best surveys, by Kitchen, geographer and hydrographer to His Majesty. 3. An elegant view of the city of Carlisle, in Cumberland, finely engraved by Peltro.) And on Saturday next will be published, number II. Adorned with two views of Shugborough House; in Staffordshire, and the temple of the winds at Shugborough; (the succeeding numbers to be continued weekly, till the whole is completed) of The new British traveller; or, A complete modern universal display of Great-Britain and Ireland: ...",
+                    "author": null,
+                    "canonicalMetadata": {
+                        "notes": [
+                            "'The new and complete English traveller', a new edition of the work originally entitled 'The new British traveller' was published in 1794.",
+                            "Reproduction of original from British Library.",
+                            "Square bracket(s) in title or imprint.",
+                            "The verso includes the conditions for publishing the work, \"Mr. Walpoole's address to the public\" and a list of some of the plates included in the work."
+                        ],
+                        "title": "An entire new edition (with additions and improvements) of Walpoole's New British traveller, To be fully completed in sixty numbers only, embellished with above 150 engravings. This day is published, number I. (Price only Six-Pence) (Containing three whole sheets of letter-press, elegantly printed in large folio, and embellished with the following copper-plates: 1. A most beautiful and capital frontispiece, engraved by Messrs. Lodge and Thornton, from an original drawing. 2. A whole-sheet map of that district of Great-Britain, called England and Wales, with the adjacent Isles, distirctly and accurately laid down from the latest and best surveys, by Kitchen, geographer and hydrographer to His Majesty. 3. An elegant view of the city of Carlisle, in Cumberland, finely engraved by Peltro.) And on Saturday next will be published, number II. Adorned with two views of Shugborough House; in Staffordshire, and the temple of the winds at Shugborough; (the succeeding numbers to be continued weekly, till the whole is completed) of The new British traveller; or, A complete modern universal display of Great-Britain and Ireland: ...",
+                        "agents": [
+                            {
+                                "label": "Hogg, Alexander,active 1778-1819.",
+                                "subtype": "name-personal"
+                            }
+                        ],
+                        "author": null,
+                        "series": [
+                            "Eighteenth century collections online."
+                        ],
+                        "subjects": [
+                            {
+                                "label": "Great Britain",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Advertisements.",
+                                "subtype": "faceted"
+                            }
+                        ],
+                        "publisher": "Printed for Alex Hogg at the KingsArms No 16 PaternosterRow and sold by all other booksellers and newsmen",
+                        "media-type": [
+                            {
+                                "label": "computerc"
+                            }
+                        ],
+                        "derivedType": "Book",
+                        "identifiers": [
+                            {
+                                "value": "entire new edition with additions improvements walpooles new british traveller fully completed sixty numbers only embellished with above 150 engravings this day is published number price only sixpence containing three whole sheets letterpress elegantly printed large folio embellished with following copperplates 1 most beautiful capital frontispiece engraved messrs lodge thornton from original drawing 2 wholesheet map that district greatbritain called england wales with adjacent isles distirctly accurately laid down from latest best surveys kitchen geographer hydrographer his majesty 3 elegant view city carlisle cumberland finely engraved peltro saturday next will published number adorned with two views shugborough house staffordshire temple winds at shugborough succeeding numbers continued weekly till whole is completed new british traveller complete modern universal display greatbritain ireland",
+                                "namespace": "BLOCKING_TITLE"
+                            },
+                            {
+                                "value": "in00030398255",
+                                "namespace": "CU-RivES"
+                            },
+                            {
+                                "value": "006320098",
+                                "namespace": "Uk-ES"
+                            },
+                            {
+                                "value": "ESTCT225706",
+                                "namespace": "CU-RivES"
+                            },
+                            {
+                                "value": "entireneweditionwithadditionsandimprovementsofwsnbttbfcisnoeelect17942      pra                              ",
+                                "namespace": "GOLDRUSH"
+                            }
+                        ],
+                        "content-type": [
+                            {
+                                "label": "texttxt"
+                            }
+                        ],
+                        "otherAuthors": [],
+                        "recordStatus": "c",
+                        "dateOfPublication": "1794",
+                        "placeOfPublication": "London ",
+                        "physical-description": [
+                            {
+                                "label": "[2]pages :illustrations ;1/4⁰."
+                            }
+                        ]
+                    },
+                    "sourceSystemId": "cce0c702-76fe-5ce3-8e68-ef283cbc8406",
+                    "sourceRecordId": "ae2a79aa-bfad-51a0-8a23-be48e9fe9db8",
+                    "contributesTo": {
+                        "id": "b032351a-b33e-41b7-bce0-695b2dc439e3",
+                        "title": null,
+                        "__typename": "ClusterRecord"
+                    },
+                    "sourceRecord": null,
+                    "__typename": "BibRecord"
+                },
+                {
+                    "id": "824252dd-a8de-5863-afe4-bc00518d4370",
+                    "dateCreated": "2023-12-17T18:27:46.119007Z",
+                    "dateUpdated": "2024-01-08T22:34:58.490350Z",
+                    "title": "Life in letters of William Dean Howells / edited by Mildred Howells.",
+                    "author": null,
+                    "canonicalMetadata": {
+                        "title": "Life in letters of William Dean Howells / edited by Mildred Howells.",
+                        "agents": [
+                            {
+                                "label": "Howells, William Dean,1837-1920.",
+                                "subtype": "name-personal"
+                            }
+                        ],
+                        "author": null,
+                        "bibNotes": [
+                            "A bibliography of the works of William Dean Howells: volume 2, pages 403-409."
+                        ],
+                        "subjects": [
+                            {
+                                "label": "Howells, William Dean,1837-1920.",
+                                "subtype": "personal-name"
+                            }
+                        ],
+                        "publisher": "Doubleday Doran  company inc",
+                        "media-type": [
+                            {
+                                "label": "unmediatedn"
+                            }
+                        ],
+                        "derivedType": "Book",
+                        "identifiers": [
+                            {
+                                "value": "life letters william dean howells edited mildred howells",
+                                "namespace": "BLOCKING_TITLE"
+                            },
+                            {
+                                "value": "156183",
+                                "namespace": "St Louis"
+                            },
+                            {
+                                "value": " AAJ-4312",
+                                "namespace": "Sirsi"
+                            },
+                            {
+                                "value": "   28028879 ",
+                                "namespace": "LCCN"
+                            },
+                            {
+                                "value": "lifeinlettersofwilliamdeanhowells                                    2        a                              ",
+                                "namespace": "GOLDRUSH"
+                            }
+                        ],
+                        "content-type": [
+                            {
+                                "label": "texttxt"
+                            }
+                        ],
+                        "otherAuthors": [],
+                        "recordStatus": "c",
+                        "dateOfPublication": "1928",
+                        "placeOfPublication": "Garden City NY ",
+                        "physical-description": [
+                            {
+                                "label": "2 volumes :illustrations ;25 cm"
+                            }
+                        ]
+                    },
+                    "sourceSystemId": "efe60600-0879-5ec5-8831-ae524b11639c",
+                    "sourceRecordId": "156183",
+                    "contributesTo": {
+                        "id": "7ee19e69-2c2b-44fd-9bd9-6a111f782363",
+                        "title": null,
+                        "__typename": "ClusterRecord"
+                    },
+                    "sourceRecord": null,
+                    "__typename": "BibRecord"
+                },
+                {
+                    "id": "93ab56d3-7338-5771-9328-9d4b173863ce",
+                    "dateCreated": "2024-01-10T15:16:45.056391Z",
+                    "dateUpdated": "2024-01-10T15:16:45.430028Z",
+                    "title": "New forces in world politics.",
+                    "author": null,
+                    "canonicalMetadata": {
+                        "title": "New forces in world politics.",
+                        "agents": [
+                            {
+                                "label": "Brown, Seyom.",
+                                "subtype": "name-personal"
+                            }
+                        ],
+                        "author": null,
+                        "bibNotes": [
+                            "Includes bibliographical references."
+                        ],
+                        "subjects": [
+                            {
+                                "label": "World politics",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "United States",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "United States",
+                                "subtype": "topical-term"
+                            }
+                        ],
+                        "publisher": "Brookings Institution",
+                        "media-type": [
+                            {
+                                "label": "unmediated"
+                            }
+                        ],
+                        "derivedType": "Book",
+                        "identifiers": [
+                            {
+                                "value": "new forces world politics",
+                                "namespace": "BLOCKING_TITLE"
+                            },
+                            {
+                                "value": "cenin00000406372",
+                                "namespace": "cs00000int_0004"
+                            },
+                            {
+                                "value": "803776",
+                                "namespace": "OCLC DEDUP"
+                            },
+                            {
+                                "value": "74000912",
+                                "namespace": "LCCN"
+                            },
+                            {
+                                "value": "0815711182",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "0815711174 (pbk.)",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "newforcesinworldpolitics                                         1974224    bra                              ",
+                                "namespace": "GOLDRUSH"
+                            }
+                        ],
+                        "content-type": [
+                            {
+                                "label": "text"
+                            }
+                        ],
+                        "otherAuthors": [],
+                        "recordStatus": "n",
+                        "dateOfPublication": "1974",
+                        "placeOfPublication": "Washington ",
+                        "physical-description": [
+                            {
+                                "label": "viii, 224 pages ;24 cm"
+                            }
+                        ]
+                    },
+                    "sourceSystemId": "2650d7d4-2da7-5dd8-9521-dd47c1c905ab",
+                    "sourceRecordId": "32f19b1c-1a3d-598f-8250-e2e3c708a5f9",
+                    "contributesTo": {
+                        "id": "2c314d51-d9e5-4e2b-b7f0-44faa42da445",
+                        "title": null,
+                        "__typename": "ClusterRecord"
+                    },
+                    "sourceRecord": null,
+                    "__typename": "BibRecord"
+                },
+                {
+                    "id": "fca4b0e2-d499-50af-bfee-690a05f533f7",
+                    "dateCreated": "2023-12-17T18:27:45.859747Z",
+                    "dateUpdated": "2024-01-08T22:34:57.944228Z",
+                    "title": "Choral director's complete handbook / Lewis Gordon.",
+                    "author": null,
+                    "canonicalMetadata": {
+                        "notes": [
+                            "Includes index."
+                        ],
+                        "title": "Choral director's complete handbook / Lewis Gordon.",
+                        "agents": [
+                            {
+                                "label": "Gordon, Lewis,1938-",
+                                "subtype": "name-personal"
+                            }
+                        ],
+                        "author": null,
+                        "subjects": [
+                            {
+                                "label": "Choirs (Music)",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Choral conducting.",
+                                "subtype": "topical-term"
+                            }
+                        ],
+                        "publisher": "Parker Pub Co",
+                        "media-type": [
+                            {
+                                "label": "unmediatedn"
+                            }
+                        ],
+                        "derivedType": "Book",
+                        "identifiers": [
+                            {
+                                "value": "choral directors complete handbook lewis gordon",
+                                "namespace": "BLOCKING_TITLE"
+                            },
+                            {
+                                "value": "156175",
+                                "namespace": "St Louis"
+                            },
+                            {
+                                "value": " AAV-2070",
+                                "namespace": "Sirsi"
+                            },
+                            {
+                                "value": "   76057166 ",
+                                "namespace": "LCCN"
+                            },
+                            {
+                                "value": "0131333631",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "choraldirectorscompletehandbook                                      220      a                              ",
+                                "namespace": "GOLDRUSH"
+                            }
+                        ],
+                        "content-type": [
+                            {
+                                "label": "texttxt"
+                            }
+                            
+                        ],
+                        "otherAuthors": [],
+                        "recordStatus": "c",
+                        "dateOfPublication": "1977",
+                        "placeOfPublication": "West Nyack NY ",
+                        "physical-description": [
+                            {
+                                "label": "220 pages :illustrations ;24 cm  $12.95."
+                            }
+                        ]
+                    },
+                    "sourceSystemId": "efe60600-0879-5ec5-8831-ae524b11639c",
+                    "sourceRecordId": "156175",
+                    "contributesTo": {
+                        "id": "af7313e4-9c83-47d9-9165-7d90a1978cae",
+                        "title": null,
+                        "__typename": "ClusterRecord"
+                    },
+                    "sourceRecord": null,
+                    "__typename": "BibRecord"
+                },
+                {
+                    "id": "80bf9c74-a5ae-56c9-8cfe-814220ee38a5",
+                    "dateCreated": "2023-12-17T13:11:35.940716Z",
+                    "dateUpdated": "2024-01-10T16:25:43.786419Z",
+                    "title": "Paper towns John Green.",
+                    "author": null,
+                    "canonicalMetadata": {
+                        "title": "Paper towns John Green.",
+                        "agents": [
+                            {
+                                "label": "Green, John,1977-",
+                                "subtype": "name-personal"
+                            }
+                        ],
+                        "author": null,
+                        "summary": [
+                            "One month before graduating from his Central Florida high school, Quentin \"Q\" Jacobsen basks in the predictable boringness of his life until the beautiful and exciting Margo Roth Spiegelman, Q's neighbor and classmate, takes him on a midnight adventure and then mysteriously disappears."
+                        ],
+                        "subjects": [
+                            {
+                                "label": "Missing persons",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Florida",
+                                "subtype": "topical-term"
+                            },
+                            {
+                                "label": "Audiobooks.",
+                                "subtype": "faceted"
+                            },
+                            {
+                                "label": "Bildungsromans.",
+                                "subtype": "faceted"
+                            }
+                        ],
+                        "publisher": "Brilliance Audio ",
+                        "media-type": [
+                            {
+                                "label": "audios"
+                            }
+                        ],
+                        "derivedType": "Audiobook",
+                        "identifiers": [
+                            {
+                                "value": "paper towns john green",
+                                "namespace": "BLOCKING_TITLE"
+                            },
+                            {
+                                "value": "843",
+                                "namespace": "St Louis"
+                            },
+                            {
+                                "value": "ocn259680549",
+                                "namespace": "OCoLC"
+                            },
+                            {
+                                "value": " o259680549",
+                                "namespace": "Sirsi"
+                            },
+                            {
+                                "value": " AGJ-5678",
+                                "namespace": "Sirsi"
+                            },
+                            {
+                                "value": "259680549",
+                                "namespace": "OCoLC"
+                            },
+                            {
+                                "value": "9781606406014 :",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "1606406019 :",
+                                "namespace": "ISBN"
+                            },
+                            {
+                                "value": "papertowns                                                  sound    1        i                              ",
+                                "namespace": "GOLDRUSH"
+                            }
+                        ],
+                        "content-type": [
+                            {
+                                "label": "spoken wordspw"
+                            }
+                        ],
+                        "otherAuthors": [],
+                        "recordStatus": "c",
+                        "dateOfPublication": "2008",
+                        "placeOfPublication": "Place of publication not identified ",
+                        "physical-description": [
+                            {
+                                "label": "1 sound media player (8 hr.) :digital ;9 x 6 cm +1 AAA battery."
+                            }
+                        ]
+                    },
+                    "sourceSystemId": "efe60600-0879-5ec5-8831-ae524b11639c",
+                    "sourceRecordId": "843",
+                    "contributesTo": {
+                        "id": "c9a0bb90-92b7-4465-850e-cc9553f02e09",
+                        "title": null,
+                        "__typename": "ClusterRecord"
+                    },
+                    "sourceRecord": null,
+                    "__typename": "BibRecord"
+                }
+            ],
+            "pageable": {
+                "number": 0,
+                "offset": null,
+                "__typename": "Pageable"
+            },
+            "__typename": "BibRecordPage"
+        }
+    }
+}

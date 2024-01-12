@@ -40,7 +40,7 @@ export default function AdminLayout({ title, children }: PropsWithChildren<Admin
 							<Breadcrumbs />
 							<Box sx={{flexGrow: 1, p: 3, pl: 0, pr: 0, backgroundColor: theme.palette.primary.titleArea}}>
 							{(title!= null ? 
-								<Typography pl={2} variant = "h2">
+								<Typography id="page-title" pl={2} variant = "h2">
 									{title}
 								</Typography>
 								: null)}

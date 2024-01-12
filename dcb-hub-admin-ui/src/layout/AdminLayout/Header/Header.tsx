@@ -44,6 +44,7 @@ export default function Header(props:any) {
               <AppBar position="fixed" sx={{backgroundColor: theme.palette.primary.header}}>
                 <Toolbar>
                   <IconButton
+                    data-tid="sidebar-menu"
                     size="large"
                     edge="start"
                     aria-label="menu"
@@ -52,7 +53,7 @@ export default function Header(props:any) {
                   >
                     <MdMenu size={20}/>
                   </IconButton>
-                  <Typography variant="h1" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1 }}>
+                  <Typography data-tid="header-title" variant="h1" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1 }}>
                   {t("header.title")}
                   </Typography>
                   {/*
@@ -66,6 +67,7 @@ export default function Header(props:any) {
                       style={{ color: 'inherit' }}>
                         <IconButton
                         size="large"
+                        data-tid="profile-button"
                         aria-label="account of current user"
                         sx={{ color: theme.palette.primary.headerText}}
                         >
@@ -74,6 +76,7 @@ export default function Header(props:any) {
                     </Link>
                     
                     <Button
+                      data-tid="login-button"
                       aria-label={(status === "authenticated" ? "Logout": "Login")}
                       onClick={handleClick}
                       sx={{ color: theme.palette.primary.headerText}}

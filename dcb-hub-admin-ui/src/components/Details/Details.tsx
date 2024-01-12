@@ -973,6 +973,18 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                 {toDisplay?.type}
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
+                                        <Typography component="div">
+                                                <span style={{ fontWeight: 'bold' }}>{t("details.location_id")}</span>
+                                                </Typography>
+                                                {toDisplay?.id}
+                                        </Grid>
+                                        <Grid xs={2} sm={4} md={4}>
+                                        <Typography component="div">
+                                                <span style={{ fontWeight: 'bold' }}>{t("details.location_code")}</span>
+                                                </Typography>
+                                                {toDisplay?.code}
+                                        </Grid>
+                                        <Grid xs={2} sm={4} md={4}>
                                                 <Typography component="div">
                                                 <span style={{ fontWeight: 'bold' }}>{t("details.location_agency")}</span>
                                                 </Typography>

@@ -127,6 +127,8 @@
     "local_request_status": "Local request status",
     "local_supplier_id": "Local supplier request ID",
     "location_agency": "Location agency ID",
+    "location_code": "Location code",
+    "location_id": "Location ID",
     "location_info": "Location information",
     "location_name": "Location name",
     "location_type": "Type",

@@ -16,7 +16,7 @@ export default function Footer() {
 			<div className='ms-md-auto'>
 			<Stack direction="row" spacing={2} alignItems="flex-start"
 			justifyContent="space-between">
-			<Typography color={theme.palette.primary.headerText}>
+			<Typography data-tid="footer-information" color={theme.palette.primary.headerText}>
 			{<Link sx={{color: theme.palette.primary.link}} className='text-decoration-none' href={'https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/'} target='_blank' rel="noreferrer">
 				{t('app.name')}
 			</Link>}

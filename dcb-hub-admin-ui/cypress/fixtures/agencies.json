@@ -1,0 +1,234 @@
+{
+  "data": {
+    "agencies": {
+      "totalSize": 15,
+      "content": [
+        {
+            "id": "dd51ff90-55ae-5225-be90-fa82c1f0f0ff",
+            "code": "6avil",
+            "name": "The Great Test University",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "d74636f3-3ab5-5325-922e-a46e20fe52e7",
+            "code": "6bene",
+            "name": "Benedictine College",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "71c878f4-07ad-5d90-b0f6-e4e2993146fb",
+            "code": "6calv",
+            "name": "Calvary University",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "3b189b14-d91d-59a6-9da1-7520bcab2acf",
+            "code": "9camd",
+            "name": "Camden County Library",
+            "authProfile": "BASIC/BARCODE+NAME",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "eb745468-c69c-5f7e-9bd4-cf3cf8db6cd9",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "a464c0f5-45bf-5893-a2a0-6d37684a2f11",
+            "code": "9chrs",
+            "name": "Christian County Library",
+            "authProfile": "BASIC/BARCODE+NAME",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "eb745468-c69c-5f7e-9bd4-cf3cf8db6cd9",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "98151105-a040-5654-aeee-3deba6a6d44b",
+            "code": "6cabb",
+            "name": "Conception Abbey and Seminary College",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "2a65c2d0-d06e-596f-b1ac-dcb036b65978",
+            "code": "6conc",
+            "name": "Concordia Seminary",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "7155c12a-104e-53a6-94b5-dea70ccc28e7",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "458a914b-4ca4-5b04-a294-3cb19863d070",
+            "code": "6cvts",
+            "name": "Covenant Theological Seminary",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "7155c12a-104e-53a6-94b5-dea70ccc28e7",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "03da3703-8536-5031-b277-867c1a7fb3d3",
+            "code": "DA-1-1",
+            "name": "Dummy1Agency1 (Sheffield, UK)",
+            "authProfile": "BASIC/BARCODE+PIN",
+            "longitude": -1.4666670560836792,
+            "latitude": 53.383331298828125,
+            "hostLms": {
+                "id": "d01529fe-0933-5883-b443-134e9727050a",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "18de04fa-96d3-5d62-bcbd-9fbeac0da34b",
+            "code": "DA-1-2",
+            "name": "Dummy1Agency2 (Leeds, UK)",
+            "authProfile": "BASIC/BARCODE+PIN",
+            "longitude": -1.5485670566558838,
+            "latitude": 53.80127716064453,
+            "hostLms": {
+                "id": "d01529fe-0933-5883-b443-134e9727050a",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "9fced42a-83cb-5c9b-baad-5d20ec0efcce",
+            "code": "DA-2-1",
+            "name": "Dummy2Agency1 (Boston, USA)",
+            "authProfile": "BASIC/BARCODE+PIN",
+            "longitude": -71.05708312988281,
+            "latitude": 42.36114501953125,
+            "hostLms": {
+                "id": "6a32d197-a1f8-556a-b939-b8756b972bdd",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "cb29e2fd-d057-54c5-8bd3-ccbe0e91ef50",
+            "code": "DA-2-2",
+            "name": "Dummy2Agency2 (Columbia, MO, USA)",
+            "authProfile": "BASIC/BARCODE+PIN",
+            "longitude": -92.3286361694336,
+            "latitude": 38.951560974121094,
+            "hostLms": {
+                "id": "6a32d197-a1f8-556a-b939-b8756b972bdd",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "2d377c3e-cc91-5f35-8639-4dbc85472563",
+            "code": "DA-3-1",
+            "name": "Dummy3Agency1 (Grand Junction, CO, USA)",
+            "authProfile": "BASIC/BARCODE+PIN",
+            "longitude": -108.55870056152344,
+            "latitude": 39.058799743652344,
+            "hostLms": {
+                "id": "c18044e7-43f8-59ec-a0dd-dca063894423",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "0b42482c-065e-5edf-85df-c2b1de1b6171",
+            "code": "DA-3-2",
+            "name": "Dummy3Agency2",
+            "authProfile": "BASIC/BARCODE+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "c18044e7-43f8-59ec-a0dd-dca063894423",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        },
+        {
+            "id": "147ee5a5-0cd9-54b4-acac-9a2818fed241",
+            "code": "6font",
+            "name": "Fontbonne University",
+            "authProfile": "BASIC/UNIQUE-ID+PIN",
+            "longitude": null,
+            "latitude": null,
+            "hostLms": {
+                "id": "7155c12a-104e-53a6-94b5-dea70ccc28e7",
+                "code": null,
+                "name": null,
+                "lmsClientClass": null,
+                "clientConfig": null
+            }
+        }
+      ]
+    }
+  }
+}

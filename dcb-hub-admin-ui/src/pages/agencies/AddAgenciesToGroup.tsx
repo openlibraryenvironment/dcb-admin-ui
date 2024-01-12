@@ -125,6 +125,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
           <TextField
             fullWidth
             id="groupId"
+            data-tid="add-agency-groupid"
             name="groupId"
             label="Group ID"
             value={formik.values.groupId}
@@ -136,6 +137,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
           <TextField
             fullWidth
             id="agencyId"
+            data-tid="add-agency-agencyid"
             name="agencyId"
             label="Agency ID"
             value={formik.values.agencyId}
@@ -144,7 +146,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
             error={formik.touched.agencyId && Boolean(formik.errors.agencyId)}
             helperText={formik.touched.agencyId && formik.errors.agencyId}
           />
-          <Button color="primary" variant="contained" fullWidth type="submit">
+          <Button color="primary" data-tid="add-agency-submit" variant="contained" fullWidth type="submit">
             {t("general.submit", "Submit")}  
           </Button>
         </form>
@@ -159,7 +161,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     <div>
     <Dialog open={show} onClose={onClose}
     aria-labelledby="centred-add-agency-dialog">
-        <DialogTitle style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
+        <DialogTitle data-tid="add-agency-title" style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={onClose}

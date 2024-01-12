@@ -25,7 +25,7 @@ const SourceBibs: NextPage = () => {
                     query={searchBibs} 
                     type="sourceBibs"
                     selectable={true} 
-                    pageSize={10}
+                    pageSize={5}
                     noDataMessage={t("bibRecords.no_rows")}
                     noResultsMessage={t("bibRecords.no_results")}
                     columns={[{field: 'id', headerName: "Source bib ID", minWidth: 100, flex: 0.5, sortable: false, filterOperators}, 

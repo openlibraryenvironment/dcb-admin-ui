@@ -122,7 +122,7 @@ export default function Sidebar(props:any) {
               }
               key={index}
             >
-            <ListItem key={text} component="nav" disablePadding sx={{ display: 'block' }}>
+            <ListItem id={text.replace(/\s/g, "")} key={text} component="nav" disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                   selected={selected}
                   onClick={() => setSelected((prev) => !prev)}
