@@ -19,6 +19,7 @@ describe('Patron requests page', () => {
     })
 
     it('should search for a given request by title, and display the expected result', () => {
+        // Searches for an example request, verifies that the expected request is found.
         cy.get('[aria-label=Search]').type('Return of the test request');
         cy.get('[data-id=zi3b9a22-2ab3-4118-ae81-61932265777e').should('contain', 'Return of the test request')
     })

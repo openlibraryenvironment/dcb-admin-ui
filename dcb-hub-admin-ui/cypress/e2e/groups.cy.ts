@@ -27,21 +27,21 @@ describe('Groups page', () => {
       cy.get('[data-id=c23df3ab-77c0-5689-b56d-fc8a2d6a5f22]').should('contain', 'Cathedral');
     })
     it('should open the new group modal, add a new group, and have it display in the grid', () => {
+        // Intercept the initial request to load the groups, and supply the fixture.
         cy.intercept('POST', '/graphql', { fixture: 'groups.json' }).as('initialLoadGroups');
+        // Create a new group
         cy.get('[data-tid=new-group-button]').click();
         cy.get('[data-tid=new-group-title]').should('have.text', ' New Group');
         cy.get('[data-tid=new-group-name').type("Hunter's Bar");
         cy.get('[data-tid=new-group-code').type('HUNTR');
+        // Intercept the create new group request and supply the mock response via fixture.
         cy.intercept('POST', '/graphql', { fixture: "new-group.json" }).as('createAgencyGroup');
         cy.get('[data-tid=new-group-submit').click();
-        // With this test, we now need to mock two responses
-        // The first is the response from submitting a new group.
-        // The second is the updating of the groups page after a new group is submittted. We must check that the new group has in fact been added.
-        cy.wait(['@initialLoadGroups', '@createAgencyGroup']); // Wait for both the iniital load AND the new group request to complete before you proceed.
+        cy.wait(['@initialLoadGroups', '@createAgencyGroup']); // Wait for both the initial load AND the new group request to complete before you proceed.
         cy.visit('http://localhost:3000/groups'); // Reload the page to fetch the new groups - not necessary normally but forces Cypress to update the fixture.
-        cy.intercept('POST', '/graphql', { fixture: 'updated-groups.json' }).as('updatedGroups'); // Load the updated list fixture
+        cy.intercept('POST', '/graphql', { fixture: 'updated-groups.json' }).as('updatedGroups'); // Intercept the request for updated groups, load the updated list fixture
         cy.wait('@updatedGroups'); // Wait for the groups update to complete
-        cy.get('[data-id=4196d9f7-da46-58df-9a1f-2930c37f19b8]').should('contain', "Hunter's Bar"); // And check the grid has updated
+        cy.get('[data-id=4196d9f7-da46-58df-9a1f-2930c37f19b8]').should('contain', "Hunter's Bar"); // And check the grid has updated with the new group
     })
 
     it('should search for a group and return the expected result', () => {

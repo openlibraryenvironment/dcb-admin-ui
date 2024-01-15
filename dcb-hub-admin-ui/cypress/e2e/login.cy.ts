@@ -22,7 +22,7 @@ it('should login, verify UI elements are being displayed, and then log out', () 
     cy.get('[data-tid=profile-button]').should('exist');
     cy.get('[data-tid=header-title]').should('have.text', 'DCB Admin');
     cy.get('[data-tid=footer-information]').should('exist');
-    // Logs out of DCB Admin, and checks that the login button text has changed
+    // Logs out of DCB Admin, and checks that the login button text has changed to reflect that
     cy.get('[data-tid=login-button]').should('have.text', 'Logout').click();
     cy.get('[data-tid=login-button]').should('have.text', 'Login'); 
   })

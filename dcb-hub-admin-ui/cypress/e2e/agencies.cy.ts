@@ -4,6 +4,8 @@ export {}
 
 describe('Agencies page', () => {
     beforeEach(() => {
+      // This exists to essentially log us in and navigate to the correct page before each test
+      // Should be re-factored into a cy.login commmand in future work.
         cy.visit('http://localhost:3000/agencies')
         cy.get('.button').click()
         cy.origin('https://keycloak.sph.k-int.com', () => {
@@ -16,7 +18,8 @@ describe('Agencies page', () => {
 
     })    
     it('should render the agencies page with the correct data and UI elements.', () => {
-      // This mocks the GraphQL request that DCB Admin does to get its agencies data. https://docs.cypress.io/api/commands/intercept 
+      // This intercepts the request sent to the DCB server for agencies data
+      // and mocks the GraphQL 'agencies' response from DCB. https://docs.cypress.io/api/commands/intercept 
       // The fixture agencies.json is used to stub the response https://docs.cypress.io/api/commands/fixture
       cy.intercept('POST', '/graphql', { fixture: 'agencies.json'}).as('getAgencies');
       // cy.get is a way of getting a page element by its id https://docs.cypress.io/guides/end-to-end-testing/writing-your-first-end-to-end-test#Adding-more-commands-and-assertions

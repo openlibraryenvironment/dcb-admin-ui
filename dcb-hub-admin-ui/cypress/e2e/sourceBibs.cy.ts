@@ -14,6 +14,7 @@ describe('Source bibs page', () => {
         cy.intercept('POST', '/graphql', { fixture: 'sourceBibs.json'}).as('loadBibs')
     })    
     it('should render the bib records page with the correct data', () => {
+      // Expected data comes from the fixture above - we're checking that the grid is displaying it correctly.
       cy.get('[id=page-title]').should('have.text', 'Bib records');
       cy.get('[data-id=84b52f96-8fa1-53ca-9600-66b7619dd105]').should('contain', 'Swamp Thing by Brian K. Vaughan');
     })
