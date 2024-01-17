@@ -1,3 +1,10 @@
+## [1.3.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.3.0...v1.3.1) (2024-01-17)
+
+
+### Bug Fixes
+
+* Remove outline on sourceBibs page [DCB-817] ([1cfaca3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1cfaca35f36270381ff2a206a11a40fe44af0859))
+
 # [1.3.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.2.1...v1.3.0) (2024-01-04)
 
 
