@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react';
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
+	hideTitleBox?: boolean;
 }
 
 // This layout takes the following props: a title and components to be rendered as children
@@ -18,7 +19,7 @@ interface AdminLayoutProps {
 
 // Title component must have a white background.
 
-export default function AdminLayout({ title, children }: PropsWithChildren<AdminLayoutProps>) {
+export default function AdminLayout({ title, children, hideTitleBox }: PropsWithChildren<AdminLayoutProps>) {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
 	const { data, status } = useSession();
@@ -45,18 +46,20 @@ export default function AdminLayout({ title, children }: PropsWithChildren<Admin
 					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
 						<Box>
-							<Breadcrumbs/>
+							<Breadcrumbs pageTitle={title}/>
 						</Box>
 						{ /* Title
 							- height: 90px & p: 3 - this is to make the text appear centered
 						*/}
+						{/* Only render tile box if the value from page props is true */}
+						{(hideTitleBox!=true ?
 						<Box sx={{ p: 3, pl: 0, pr: 0, marginTop: 1, marginBottom: 1, height: '90px', backgroundColor: theme.palette.primary.titleArea }}>
 							{(title!= null ? 
 							<Typography id="page-title" pl={2} variant = "h2">
 								{title}
 							</Typography>
 							: null)}
-						</Box>
+						</Box> : null )}
 						{/* Children
 							- flex: '1 0 auto' - child element grows to fill space and pushes the footer to the bottom
 						*/}

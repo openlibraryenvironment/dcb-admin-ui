@@ -7,6 +7,7 @@ import { List, ListSubheader, ListItem, ListItemButton, ListItemText, useTheme }
 import { useTranslation } from 'next-i18next';
 import useCode from '@hooks/useCode';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import Typography from '@mui/material/Typography';
 
 
 
@@ -21,7 +22,8 @@ const Settings: NextPage = () => {
 	};
 
 	return (
-		<AdminLayout title={t("sidebar.settings_button")}>
+		<AdminLayout title={t("sidebar.settings_button")} hideTitleBox={true}>
+						<Typography sx={{ fontSize: '200%', pl:2 }}>{t("sidebar.settings_button")}</Typography>
 						<List
 							component="nav"
 							aria-labelledby="settings-subheader"
