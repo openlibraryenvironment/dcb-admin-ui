@@ -36,7 +36,8 @@ const Home: NextPage = () => {
 	const theme = useTheme();
 
 	return (
-		<AdminLayout title={t('welcome.greeting')+' '+getUserName()}>
+		<AdminLayout title={t('welcome.greeting')+' '+getUserName()} hideTitleBox={true}>
+					<Typography variant="h1" fontSize={'300%'} sx={{marginBottom: 1}}>{t('welcome.greeting')+' '+getUserName()}</Typography>
 					<Typography variant='body1' sx={{marginBottom:2}} fontSize={'1.3rem'}>{t('welcome.context', {consortium_name: 'MOBIUS'})}</Typography>
 					<Typography variant='h2' fontSize={'200%'} sx={{marginBottom:1}}>{t('consortium.your')}</Typography>
 					<Typography variant='body1' fontSize={'1.1rem'}> {t('common.placeholder_text')} </Typography>

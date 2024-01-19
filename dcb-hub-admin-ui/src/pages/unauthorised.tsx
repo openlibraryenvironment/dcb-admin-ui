@@ -8,9 +8,10 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export default function Unauthorised() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout title={t("unauthorised.page_title")}>
+		<AdminLayout title={t("unauthorised.page_title")} hideTitleBox={true}>
 			{' '}
 			<div className='unauthorised'>
+				<Typography className='Title'>{t("unauthorised.page_title")}</Typography>
 				<Typography className='Text'>{t("unauthorised.page_text_no_access")}</Typography>
 				<Typography className='Text'>
 					{t("unauthorised.page_text_contact_admin")}

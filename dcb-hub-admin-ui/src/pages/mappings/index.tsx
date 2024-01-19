@@ -77,7 +77,7 @@ const AllMappings: NextPage<Props> = ({ page, resultsPerPage, sort }) => {
 	const { t } = useTranslation();
 
 	return (
-		<AdminLayout title={t("sidebar.mappings_button")}>
+		<AdminLayout title={"mappings test"}>
 							{resourceFetchStatus === 'loading' && (
 								<Typography variant='body1' className='text-center mb-0'>{t("mappings.loading_msg")}</Typography>
 							)}

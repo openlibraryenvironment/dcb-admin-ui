@@ -1,4 +1,4 @@
-import { Breadcrumbs as MUIBreadcrumbs, useTheme } from "@mui/material"
+import { Breadcrumbs as MUIBreadcrumbs, Typography, useTheme } from "@mui/material"
 import { MdArrowForwardIos } from 'react-icons/md';
 import Link from "@components/Link/Link";
 import { useRouter } from "next/router";
@@ -12,10 +12,11 @@ type BreadcrumbType = {
     isCurrent: boolean;
 };
 
+type BreadcrumbProps = {
+  pageTitle?: string;
+}
 
-
-export default function Breadcrumbs () {
-
+export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
     const router = useRouter();
     const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbType[]>([]);
   
@@ -28,27 +29,55 @@ export default function Breadcrumbs () {
   
       const breadcrumbs: BreadcrumbType[] = pathArray.map((path, index) => {
         const href = "/" + pathArray.slice(0, index + 1).join("/");
+        // checks if breadcrumb is last in the array
+        // it will use the page's title if it is, but use the path if it is not.
+        const label = index === pathArray.length - 1 ? (pageTitle || path) : (path.charAt(0).toUpperCase() + path.slice(1));
         return {
           href,
-          label: path.charAt(0).toUpperCase() + path.slice(1),
+          label,
           isCurrent: index === pathArray.length - 1,
         };
       });
   
       setBreadcrumbs(breadcrumbs);
-    }, [router.asPath]);
+    }, [router.asPath, pageTitle]);
 
     const { t } = useTranslation();
-    const theme = useTheme();
+    const theme = useTheme(); 
 
-    return (
-        <MUIBreadcrumbs sx={{pl: 2}} separator={<MdArrowForwardIos/>}>
-        <Link sx={{color: theme.palette.primary.breadcrumbs}} href="/">{t("breadcrumbs.home_text")}</Link>
-        {breadcrumbs?.map((breadcrumb) => (
+    //this is used to either set the breadcrumb as a link if it is the last breadcrumb.
+    const mapBreadcrumbs = () => {
+      return(
+        breadcrumbs?.map((breadcrumb, index) => (
+      // check if the breadcrumb is not the last item in the array.
+      index < breadcrumbs.length - 1 ? (
+        // check if breadcrumb.href is defined and not null for the key.
+        // this is to get around build issues with the key value.
+        // performs if breadcrumbs is last in the array.
+        breadcrumb.href ? (
           <Link sx={{color: theme.palette.primary.breadcrumbs}} underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
             {breadcrumb.label}
           </Link>
-        ))}
+        ) : (
+          // if it is null then use index as the key.
+          <Typography sx={{color: theme.palette.primary.breadcrumbs}} key={index}>
+            {breadcrumb.label}
+          </Typography>
+        )
+      ) : (
+        // renders if the breadcrumb is the last item.
+        <Typography sx={{color: theme.palette.primary.breadcrumbs}} key={breadcrumb.href}>
+          {breadcrumb.label}
+        </Typography>
+      )
+    ))
+      )
+    };
+
+    return (
+        <MUIBreadcrumbs sx={{pl: 2}} separator={<MdArrowForwardIos/>}>
+          <Link sx={{color: theme.palette.primary.breadcrumbs}} href="/">{t("breadcrumbs.home_text")}</Link>
+          {mapBreadcrumbs()};
         </MUIBreadcrumbs>
     )
 } 

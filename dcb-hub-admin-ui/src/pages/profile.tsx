@@ -56,10 +56,10 @@ const Profile: NextPage<Props> = (props) => {
 	const theme = useTheme();
 
 	return (
-		<AdminLayout title={t("profile.title")}>
-
+		<AdminLayout title={t("profile.title")} hideTitleBox={true}>
+						<Typography variant = "h2" sx={{pl: 2}}>{t("profile.title")}</Typography> 
 						<List className='list-profile'>
-						<ListSubheader sx={{backgroundColor: theme.palette.background.default }}> 
+						<ListSubheader sx={{backgroundColor: theme.palette.background.default }}>
 								<Typography variant = "h6">{t("profile.details")}</Typography> 
 						</ListSubheader> 
 						<ListItem>
