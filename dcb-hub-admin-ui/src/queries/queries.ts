@@ -1,5 +1,4 @@
-import  {gql} from 'graphql-request';
-import {gql as apolloGraphQL} from '@apollo/client'
+import {gql} from '@apollo/client'
 
 // This file holds all our GraphQL queries, so they can be reused throughout the project 
 // As we switch to using Apollo GraphQL as part of the server-side pagination work, all queries
@@ -14,6 +13,11 @@ mutation AddAgencyToGroup($input: AddAgencyToGroupCommand!) {
           id
           code
           name
+      }
+      group {
+        id 
+        code
+        name
       }
   }
 }
@@ -32,8 +36,8 @@ export const createGroup = gql`
 
 // A query for searching for sourceBibs by their sourceRecordId
 
-export const searchBibs = apolloGraphQL`
-query searchBibs($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
+export const searchBibs = gql`
+query LoadBibs($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
     sourceBibs(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query) {
       totalSize
       content {
@@ -64,54 +68,286 @@ query searchBibs($pageno: Int!, $pagesize: Int!, $order: String!, $query: String
 }  
 `;
 
-// A query to load locations with server-side pagination and querying enabled. To be implemented in DCB-488.
-export const getLocations = apolloGraphQL`
-  query loadLocations($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
-    locations(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query) {
-      totalSize
-      content {
-        id
-        code
-        name
-        type
-        isPickup
-        longitude
-        latitude
-        agency {
-          id
-          code
-          name
-          authProfile
-          longitude
-          latitude
+// A query to load locations with server-side pagination and querying enabled.
+export const getLocations = gql`
+  query LoadLocations($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+    locations(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
+        totalSize
+        content {
+            id
+            code
+            name
+            type
+            isPickup
+            longitude
+            latitude
+            agency {
+                id
+                code
+                name
+                authProfile
+                longitude
+                latitude
+            }
+            parentLocation {
+                id
+                code
+                name
+                type
+                isPickup
+                longitude
+                latitude
+                dateCreated
+                dateUpdated
+                hostSystem {
+                    id
+                    code
+                    name
+                    lmsClientClass
+                    clientConfig
+                }
+            }
+            hostSystem {
+                id
+                code
+                name
+                lmsClientClass
+                clientConfig
+            }
+            printLabel
+            deliveryStops
+            locationReference
+            dateCreated
+            dateUpdated
         }
-        parentLocation {
-          id
-          code
-          name
-          type
-          isPickup
-          longitude
-          latitude
+        pageable {
+            number
+            offset
         }
-        hostSystem {
-          id
-        }
-      }
-      pageable {
-        number
-        offset
-      }
     }
   }
 `;
+
+// A query to load agencies.
+export const getAgencies = gql`
+  query LoadAgencies($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+    agencies(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
+        totalSize
+        content {
+            id
+            code
+            name
+            authProfile
+            longitude
+            latitude
+            hostLms {
+                id
+                code
+                name
+                lmsClientClass
+                clientConfig
+            }
+            locations {
+                id
+                dateCreated
+                dateUpdated
+                code
+                name
+                type
+                isPickup
+                longitude
+                latitude
+                locationReference
+                deliveryStops
+                printLabel
+            }
+        }
+        pageable {
+            number
+            offset
+        }
+    }
+}`;
+
+
+export const getHostLms = gql`
+query LoadHostLms($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+    hostLms(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
+        totalSize
+        content {
+            id
+            code
+            name
+            lmsClientClass
+            clientConfig
+        }
+        pageable {
+            number
+            offset
+        }
+    }
+}
+`;
+// A GraphQL query to load all reference value mappings, with pagination, filtering etc.
+
+export const getMappings = gql`
+query LoadMappings($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+    referenceValueMappings(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
+        totalSize
+        content {
+            id
+            fromCategory
+            fromContext
+            fromValue
+            toCategory
+            toContext
+            toValue
+            reciprocal
+            label
+            lastImported
+            deleted
+        }
+        pageable {
+            number
+            offset
+        }
+    }
+}`;
+// To ensure that no deleted mappings are loaded when we do this
+// for CirculationStatus mappings
+// query: "fromCategory: CirculationStatus && deleted: false"
+
+// A query to load patron requests.
+// Slim it down once we've decided what we need - if this mega query is needed for diagnostics 
+// we can have a 'just the essentials' query for other use cases
+// This query supports server-side pagination, as well as 'order' and 'query' props being passed in for searching and sorting.
+
+export const getPatronRequests = gql`
+query LoadPatronRequests($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+    patronRequests(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
+        content {
+            id
+            dateUpdated
+            patronHostlmsCode
+            bibClusterId
+            pickupLocationCode
+            pickupPatronId
+            pickupItemId
+            pickupItemType
+            pickupItemStatus
+            pickupRequestId
+            pickupRequestStatus
+            status
+            localRequestId
+            localRequestStatus
+            localItemId
+            localItemStatus
+            localItemType
+            localBibId
+            description
+            errorMessage
+            patron {
+                id
+            }
+            requestingIdentity {
+                id
+                localId
+                homeIdentity
+                localBarcode
+                localNames
+                localPtype
+                canonicalPtype
+                localHomeLibraryCode
+                lastValidated
+            }
+            audit {
+                id
+                auditDate
+                briefDescription
+                fromStatus
+                toStatus
+                auditData
+            }
+            clusterRecord {
+                id
+                title
+                selectedBib
+                isDeleted
+                dateCreated
+                dateUpdated
+                members {
+                    id
+                    dateCreated
+                    dateUpdated
+                    title
+                    author
+                    placeOfPublication
+                    publisher
+                    dateOfPublication
+                    edition
+                    isLargePrint
+                    clusterReason
+                    typeOfRecord
+                    canonicalMetadata
+                    metadataScore
+                    processVersion
+                    sourceSystemId
+                    sourceRecordId
+                    sourceRecord {
+                        id
+                        hostLmsId
+                        remoteId
+                        json
+                    }
+                }
+            }
+            dateCreated
+            activeWorkflow
+            requesterNote
+            suppliers {
+                id
+                canonicalItemType
+                dateCreated
+                dateUpdated
+                hostLmsCode
+                isActive
+                localItemId
+                localBibId
+                localItemBarcode
+                localItemLocationCode
+                localItemStatus
+                localItemType
+                localId
+                localStatus
+                localAgency
+                virtualPatron {
+                    id
+                    localId
+                    homeIdentity
+                    localBarcode
+                    localNames
+                    localPtype
+                    canonicalPtype
+                    localHomeLibraryCode
+                    lastValidated
+                }
+            }
+        }
+        pageable {
+            number
+            offset
+        }
+        totalSize
+    }
+}`;
+
 
 
 
 // A query for loading groups and their members.
 export const groupsQueryDocument = gql`
-query FindGroups {
-    agencyGroups(pagesize: 500) {
+query LoadGroups($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+    agencyGroups(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
         totalSize
         content {
             id
@@ -141,199 +377,6 @@ query FindGroups {
             offset
         }
     }
-}
-`;
-
-// pagesize is 100 ONLY until DCB-480 is implemented
-// Means that it will only fetch up to a maximum of 100 HostLMS
-// Server-side pagination needs to be implemented for this to work as intended (default page size is 10)
-
-
-// A query for loading HostLMS.
-export const loadHostlms = gql`
-query HostLms {
-    hostLms(pagesize: 100) {
-        totalSize
-        content {
-            id
-            code
-            name
-            lmsClientClass
-            clientConfig
-        }
-        pageable {
-            number
-            offset
-        }
-    }
-}
-`;
-
-// A query for loading agencies. 
-export const loadAgencies = gql`
-query loadAgencies {
-    agencies(pagesize: 100) {
-        totalSize
-        content {
-            id
-            code
-            name
-            authProfile
-            longitude
-            latitude
-            hostLms {
-                id
-                code
-                name
-                lmsClientClass
-                clientConfig
-            }
-        }
-        pageable {
-            number
-            offset
-        }
-    }
-}
-`;
-
-// A query to load locations. Has the same temporary page size restriction as the loadHostlms query.
-
-export const loadLocations = gql`
-query loadLocations {
-    locations(pagesize: 100) {
-        totalSize
-        content {
-            id
-            code
-            name
-            type
-            isPickup
-            longitude
-            latitude
-            agency {
-                id
-                code
-                name
-                authProfile
-                longitude
-                latitude
-            }
-            parentLocation {
-                id
-                code
-                name
-                type
-                isPickup
-                longitude
-                latitude
-            }
-            hostSystem {
-                id
-            }
-        }
-        pageable {
-            number
-            offset
-        }
-    }
-}
-`;
-
-// A query to load patron requests. Has the same temporary page size restriction as loadHostlms.
-// Slim it down once we've decided what we need - if this mega query is needed for diagnostics 
-// we can have a 'just the essentials' query for other use cases
-
-export const loadPatronRequests = gql`
-query PatronRequests {
-    patronRequests(pagesize: 100) {
-        totalSize
-        content { 
-            id
-            dateCreated
-            dateUpdated
-            patronHostlmsCode
-            bibClusterId
-            pickupLocationCode
-            pickupPatronId
-            pickupItemId
-            pickupItemType
-            pickupItemStatus
-            pickupRequestId
-            pickupRequestStatus
-            status
-            localRequestId
-            localRequestStatus
-            localItemId
-            localItemStatus
-            localItemType
-            localBibId
-            description
-            errorMessage
-            activeWorkflow
-            requesterNote 
-            patron {
-                id
-            },
-            requestingIdentity { 
-                id, 
-                localId 
-                homeIdentity
-                localBarcode
-                localNames
-                localPtype
-                canonicalPtype 
-                localHomeLibraryCode
-                lastValidated 
-            }, 
-            suppliers {
-                id
-                canonicalItemType
-                dateCreated
-                dateUpdated
-                hostLmsCode
-                isActive
-                localItemId
-                localBibId
-                localItemBarcode
-                localItemLocationCode
-                localItemStatus
-                localItemType
-                localId
-                localStatus
-                localAgency
-                virtualPatron {
-                    id
-                    localId
-                    homeIdentity
-                    localBarcode
-                    localNames
-                    localPtype
-                    canonicalPtype
-                    localHomeLibraryCode
-                    lastValidated
-                }
-            }, 
-            audit { 
-                id
-                auditDate
-                fromStatus
-                toStatus
-                briefDescription
-            }, 
-            clusterRecord { 
-                id 
-                title
-                selectedBib
-                members { 
-                    id
-                    title
-                    canonicalMetadata
-                    sourceSystemId
-                    sourceRecordId
-                    sourceRecord { id, json }  
-                }  
-            }  
-        } 
-    }
 }`;
+
+

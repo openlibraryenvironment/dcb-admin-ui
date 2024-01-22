@@ -69,7 +69,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </IconContext.Provider>
                                         </IconButton>
                                         <Typography sx={{ ml: 2, flex: 1, fontWeight: 'bold'}} component="div" variant="h3">
-                                        {t("details.view")} {type} {t("details.details")} - {toDisplay?.name ?? toDisplay?.id}
+                                        {toDisplay?.name ?? toDisplay?.id}
                                         </Typography>
                                 </Toolbar>
                         </AppBar>
@@ -89,9 +89,9 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </CardContent>
                         </Card>: null} */}
                         {/* // These are the items that we typically need to only show for 'Request Details', hence the conditional rendering*/}
-                        {type == "Request"? <Stack direction="row" justifyContent="end">
+                        {type == "patronRequests"? <Stack direction="row" justifyContent="end">
                                 <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> </Stack> : null}
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
                                         <AccordionSummary aria-controls="request-general-details" id="request_details_general" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -145,7 +145,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                                 <Accordion expanded={expandedAccordions[6]} onChange={handleAccordionChange(6)}>
                                         <AccordionSummary aria-controls="request-bib-record" id="request_bib_record" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -221,7 +221,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                                 </Accordion>
                         </Card>: null}
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
                                         <AccordionSummary aria-controls="request-patron-details" id="request_details_patron" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -276,7 +276,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
                                         <AccordionSummary aria-controls="request-pickup-details" id="request_details_pickup" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -332,7 +332,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
                                         <AccordionSummary aria-controls="request-supplier-details" id="request_details_supplier" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -436,7 +436,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}              
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
                                         <AccordionSummary aria-controls="request-details-borrowing" id="request_details_borrowing" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -497,7 +497,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
-                        {type == "Request"?<Card variant = 'outlined'>
+                        {type == "patronRequests"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[5]} onChange={handleAccordionChange(5)}>
                                         <AccordionSummary aria-controls="request-audit_log" id="request_audit_log" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -525,7 +525,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Accordion>
                         </Card>: null}
                         {/* These are the items we typically only need to show for 'Agency Details'*/}
-                        {type === "Agency" ? (
+                        {type == "agencies" ? (
                         <Card variant="outlined">
                         <CardContent>
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -563,7 +563,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </CardContent>
                         </Card>
                         ) : null}
-                        {type == "Agency"?<Card variant = 'outlined'>
+                        {type == "agencies"?<Card variant = 'outlined'>
                                 <Accordion>
                                         <AccordionSummary aria-controls="agency_details_location_info" id="agency_details_location_info" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -579,9 +579,9 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                 </Accordion>
                         </Card>: null}               
                         {/* These are the items we typically only need to show for 'HostLMS Details'.*/}
-                        {type == "HostLMS"? <Stack direction="row" justifyContent="end">
+                        {type == "hostLms"? <Stack direction="row" justifyContent="end">
                                 <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> </Stack> : null}
-                        {type == "HostLMS"?<Card variant = 'outlined'>
+                        {type == "hostLms"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
                                         <AccordionSummary aria-controls="hostlms-general-details" id="hostlms_details_general" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
@@ -618,7 +618,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </AccordionDetails>
                         </Accordion>
                         </Card> : null}
-                        {type == "HostLMS"?<Card variant = 'outlined'>
+                        {type == "hostLms"?<Card variant = 'outlined'>
                         <Accordion expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
                                 <AccordionSummary aria-controls="hostlms-client-config-details" id="hostlms_details_client_config" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
@@ -957,7 +957,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </AccordionDetails>
                         </Accordion>
                         </Card>: null}
-                        {type == "Location"?<Card variant = 'outlined'>
+                        {type == "locations"?<Card variant = 'outlined'>
                                 <CardContent>
                                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                         <Grid xs={2} sm={4} md={4}>
@@ -993,7 +993,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                         </Grid>
                                 </CardContent>
                         </Card>: null}
-                        {type == "Location"?<Card variant = 'outlined'>
+                        {type == "locations"?<Card variant = 'outlined'>
                                         <Accordion>
                                         <AccordionSummary
                                                 aria-controls="client-config-location-details"
@@ -1019,7 +1019,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}               
                         {/* These are the items we typically only need to show for 'Group Details'*/}
                         {/* Table of group member agencies. These will be editable in future versions)'*/}
-                        {type == "Group"?<Card variant = 'outlined'>
+                        {type == "agencyGroups"?<Card variant = 'outlined'>
                         <CardContent>
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         <Grid xs={2} sm={4} md={4}>
@@ -1040,7 +1040,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Grid>
                         </CardContent>
                         </Card>: null}
-                        {type == "Group"?<Card variant='outlined'>
+                        {type == "agencyGroups"?<Card variant='outlined'>
                                 <CardContent>
                                         {/* // Map is causing a problem */}
                                         <DataGrid 

@@ -172,7 +172,9 @@
     "add_to_group": "Add agencies to a group",
     "alert_text_success": "Agency added to group!",
     "alert_text": "Failed to fetch the agencies, please refresh the page.",
-    "loading_msg": "Loading agencies...."
+    "loading_msg": "Loading agencies....",
+    "no_results": "No agencies were found. Try changing your search terms or filters.",
+    "no_rows": "No agencies available. If you're expecting data to be here, please refresh the page."
   },
 
   "general": {
@@ -185,22 +187,30 @@
     "loading_msg": "Loading groups....",
     "alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page.",
     "type_new": "New Group",
-    "new_group_success": "Success: New group created!"
+    "new_group_success": "Success: New group created!",
+    "no_results": "No groups were found. Try changing your search terms or filters.",
+    "no_rows": "No groups are available. Try adding some by clicking 'New Group'."
   },
 
   "hostlms": {
     "loading_msg": "Loading HostLMS....",
-    "alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page."
+    "alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.",
+    "no_results": "No Host LMSs were found. Try changing your search terms or filters.",
+    "no_rows": "No Host LMSs are available. If you're expecting data to be here, please refresh the page."
   },
 
   "locations": {
     "loading_msg": "Loading locations....",
-    "alert_text": "Failed to fetch the locations, please refresh the page."
+    "alert_text": "Failed to fetch the locations, please refresh the page.",
+    "no_results": "No locations were found. Try changing your search terms or filters.",
+    "no_rows": "No locations available. If you're expecting data to be here, please refresh the page."
   },
 
-  "requests": {
+  "patron_requests": {
     "loading_msg": "Loading requests....",
-    "alert_text": "Failed to fetch the requests, please refresh the page."
+    "alert_text": "Failed to fetch the requests, please refresh the page.",
+    "no_results": "No patron requests were found. Try changing your search terms or filters.",
+    "no_rows": "No patron requests available. If you're expecting data to be here, please refresh the page."
   },
 
   "settings": {
@@ -214,7 +224,7 @@
   "bibRecords": {
     "bib_records": "Bib records",
     "no_results": "No bib records found. Try changing your search terms or filters.",
-    "no_rows": "No bib records available. Try loading some into your DCB instance."
+    "no_rows": "No bib records available. If you're expecting data to be here, please refresh the page."
   },
 
   "mappings": {

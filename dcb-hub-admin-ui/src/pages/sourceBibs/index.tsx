@@ -15,9 +15,11 @@ const SourceBibs: NextPage = () => {
 
     // Limiting available filters due to server-side filtering only supporting 'equals'
     const filterOperators = getGridStringOperators().filter(({ value }) =>
-    ['equals' /* add more over time */ ].includes(value),
+    ['equals', 'contains'/* add more over time */ ].includes(value),
     );
-    // If testing, use this format for the search: sourceRecordId:843 AND id:80bf9c74-a5ae-56c9-8cfe-814220ee38a5
+    // Expose only the filters we have tested. The others need to be mapped to Lucene functionality
+    // If testing, use this format for the search: 
+    
     
     const BibsDisplay = () => {
         return(
@@ -36,7 +38,10 @@ const SourceBibs: NextPage = () => {
                             {field: 'sourceRecordId', headerName: "Source record ID", minWidth: 50, sortable: false, filterOperators, flex: 0.5},
                             {field: 'sourceSystemId', headerName: "Source system ID", minWidth: 50, sortable: false, filterOperators, flex: 0.5}
                         ]}
-                    columnVisibilityModel={{clusterRecordTitle: false, clusterRecordId: false, sourceRecordId: false, sourceSystemId: false}} />
+                    columnVisibilityModel={{clusterRecordTitle: false, clusterRecordId: false, sourceRecordId: false, sourceSystemId: false}}
+                    searchPlaceholder='e.g. sourceRecordId:12345'
+                    sortDirection="ASC" 
+                    sortAttribute="sourceRecordId"/>
         )
     }
     return (

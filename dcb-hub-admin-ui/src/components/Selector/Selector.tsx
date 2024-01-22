@@ -5,7 +5,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useMemo, useState } from "react";
-import { loadHostlms } from "src/queries/queries";
+import { getHostLms } from "src/queries/queries";
 
 type SelectorType = {
     optionsType?: string;
@@ -17,6 +17,9 @@ type SelectorType = {
 // for example requests, locations etc
 
 export default function Selector({optionsType, options}: SelectorType) {
+
+  // We can and will replace this with a specialised GraphQL query based on code.
+  
   // can pass in type, too
   const { data: session, status } = useSession();
   const code = useCode((state) => state.code);
@@ -38,7 +41,7 @@ export default function Selector({optionsType, options}: SelectorType) {
         baseQueryKey: 'hostlms',
         url: url,
         type: 'GraphQL',
-        graphQLQuery: loadHostlms,
+        graphQLQuery: getHostLms,
         graphQLVariables: queryVariables
   }); 
   // To extend this component further consider principles from https://mui.com/material-ui/react-autocomplete/#load-on-open
