@@ -1,20 +1,14 @@
-import { PaginationState, SortingState } from '@tanstack/react-table'
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { AdminLayout } from '@layout';
-import { useSession } from 'next-auth/react';
-import getConfig from 'next/config';
-import { Button, Typography } from '@mui/material';
-import Alert from '@components/Alert/Alert';
+import { Button } from '@mui/material';
 import NewGroup from './NewGroup';
 import { useQueryClient } from '@tanstack/react-query'
 import { groupsQueryDocument } from 'src/queries/queries';
-import { useResource } from '@hooks';
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
-import { DataGrid } from '@components/DataGrid';
 //localisation
 import { useTranslation } from 'next-i18next';
-import { AgencyGroupPage } from '@models/AgencyGroupPage';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 // import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
@@ -22,181 +16,59 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 // New Group is the (modal) form to add a group
 // View Group will be a Details page with type 'Group'
 // In /agencies, there is the Add Agencies to Group form.
-// Our GraphQL client decision is still under review, as it's glitchy.
 
-type Props = {
-	page: number;
-	resultsPerPage: number;
-	sort: SortingState;
-};
 
-const Groups: NextPage<Props> = ({ page, resultsPerPage, sort}) => {
+const Groups: NextPage = () => {
 
 	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
 	// SignOutIfInactive();
-	const queryClient = useQueryClient();
-	const queryVariables = {};
-	const { data: session, status } = useSession();
 	const [showNewGroup, setShowNewGroup] = useState(false);
-
-	const externalState = useMemo<{ pagination: PaginationState; sort: SortingState }>(
-		() => ({
-			pagination: {
-				pageIndex: page - 1,
-				pageSize: resultsPerPage
-			},
-			sort: sort
-		}),
-		[page, resultsPerPage, sort]
-	);
-
-	const url = useMemo(() => {
-		const { publicRuntimeConfig } = getConfig();
-		return publicRuntimeConfig.DCB_API_BASE + '/graphql';
-	}, []);
-
 	const openNewGroup = () =>
 	{
 		setShowNewGroup(true);
 	}
 	const closeNewGroup = () => {
 		setShowNewGroup(false);
-		queryClient.invalidateQueries();
 		// forces the query to refresh once a new group is added	
 		// needs to be adapted to work with SSR approach so that the grid always updates correctly on new group creation	
 	};
 
-
-	const {
-		resource,
-		status: resourceFetchStatus,
-		state
-	} = useResource<AgencyGroupPage>({
-		isQueryEnabled: status === 'authenticated',
-		accessToken: session?.accessToken ?? null,
-		refreshToken: session?.refreshToken ?? null,
-		baseQueryKey: 'groups',
-		url: url,
-		defaultValues: externalState,
-		type: 'GraphQL',
-		graphQLQuery: groupsQueryDocument,
-		graphQLVariables: queryVariables
-	});
-
-	// Temporary fix due to TS issues - to review
-	const rows:any = resource?.content;
-	const groupsData = rows?.content;
-	
+	// We need to make this work with Apollo, as at the minute we lose auto-refresh.	
 	const { t } = useTranslation();
 
 	return (
 		<AdminLayout data-tid="groups-title" title={t("sidebar.groups_button")}>
-					{resourceFetchStatus === 'loading' && (
-						<Typography data-tid="groups-loading-text" variant='body1' className='text-center mb-0'>{t("groups.loading_msg")}</Typography>
-					)}
-
-					{resourceFetchStatus === 'error' && (
-						<div>
-							<Alert data-tid="groups-loading-error" severityType="error" onCloseFunc={() => {}} alertText = {t("groups.alert_text")}/>
-						</div>
-					)}
-
-					{resourceFetchStatus === 'success' && (
-						<>
-							<div>
-								<Button data-tid="new-group-button" variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
-								<DataGrid
-								data={groupsData ?? []}
-								columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
-								type = "Group"
-								selectable= {true}
-								noDataTitle={"No groups found."}
-								noDataMessage={"Try changing your filters or search terms, or create some groups!"}
-								/>
-							</div>						
-						</>
-					)}
+			<Button data-tid="new-group-button" variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
+			<ServerPaginationGrid
+				query={groupsQueryDocument} 
+				type="agencyGroups"
+				columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 0.5}, { field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5}, {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5}]}	
+				selectable={true} 
+				pageSize={10}
+				noDataMessage={t("groups.no_rows")}
+				noResultsMessage={t("groups.no_results")}
+				searchPlaceholder='Search'
+				sortDirection="ASC"
+				sortAttribute="name"
+			/>		
 			<div>
 			{ showNewGroup ? <NewGroup show={showNewGroup}  onClose={closeNewGroup}/> : null }
     		</div>
 		</AdminLayout>
 	);
 }
-
-
-
-//  Fixing this should fix our weird data fetching issues
-// 	Step One: verify SSR works
-// 	Step Two: verify Server-Side Pagination works
   
-  export const getServerSideProps: GetServerSideProps<Props> = async (context: GetServerSidePropsContext) => {
-
-	// https://next-auth.js.org/configuration/nextjs#in-getserversideprops
-    // const session = await getServerSession(context.req, context.res, authOptions)
-	// const accessToken = session?.accessToken;
-	// // await queryClient.prefetchQuery(['groups'], useResource)
-
-	// // this will be wired in properly when server-side pagination is fully integrated (i.e. both GraphQL and REST)
-	// // the intention is that a page change will trigger a refetch / query, as will new group creation
-	// // const queryVariables = {};
-	// // const headers = {
-	// // 	Authorization: `Bearer ${accessToken}`, // Use the updated access token
-	// // 	'Content-Type': 'application/json', // You can adjust the content type as needed
-	// // };
-
-	// // const loadGroups = () => request(url, groupsQueryDocument, queryVariables, headers);
-
-	// // await queryClient.prefetchQuery(['groups'], loadGroups);
-
+export const getServerSideProps: GetServerSideProps= async (context: GetServerSidePropsContext) => {
 	const { locale } = context;
 	let translations = {};
 	if (locale) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
 	}
-
-	let page = 1;
-	if (context.query?.page && typeof context.query.page === 'string') {
-		page = parseInt(context.query.page, 10);
-	}
-
-	let resultsPerPage = 20;
-	if (context.query?.perPage && typeof context.query.perPage === 'string') {
-		resultsPerPage = parseInt(context.query.perPage.toString(), 10);
-	}
-
-	// const serverSideResource = useResource<Group>({
-	// 	isQueryEnabled: true, // Ensure the query is enabled for SSR
-	// 	baseQueryKey: 'groups',
-	// 	// Add other options as needed
-	//   });
-
-	// Defaults to sorting the agencyId in ascending order (The id must be the same the id assigned to the "column")
-	let sort: SortingState = [{ id: 'agencyId', desc: false }];
-
-	if (typeof context.query.sort === 'string' && typeof context.query?.order === 'string') {
-		// Sort in this case is something like locationName (table prefix + some unique id for the table)
-		const contextSort = context.query?.sort ?? '';
-
-		// Cast the contexts order to either be 'asc' or 'desc' (Defaults to asc)
-		const contextOrder = (context.query?.order ?? 'asc') as 'asc' | 'desc';
-
-		// If the values pass the validation check override the original sort with the new sort
-		if (contextOrder === 'desc' || contextOrder === 'asc') {
-			sort = [{ id: contextSort, desc: contextOrder === 'desc' }];
-		}
-	}
-
-	// NOTE: If you really want to prefetch data and as long as you return the data you can then pass it to TanStack query to pre-populate the current cache key to prevent it refetching the data
-
 	return {
 		props: {
 			...translations,
-			page,
-			resultsPerPage,
-			sort: sort,
-			// dehydratedState: dehydrate(queryClient),
 		}
 	};	
-  };
+};
 
 export default Groups;

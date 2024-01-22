@@ -94,7 +94,8 @@ const MappingsByCategory: NextPage<Props> = () => {
 		</AdminLayout>
 	);
 };
-// Add getServerSideProps back when we do server-side pagination work (DCB-480)
+// To switch this to server-side pagination, we need to refactor as CirculationStatus page and apply a default query beginning
+// i.e. fromCategory="CircStatus" AND deleted=false AND the rest
 
 export async function getStaticProps({ locale }: {locale: any}) {
 	return {

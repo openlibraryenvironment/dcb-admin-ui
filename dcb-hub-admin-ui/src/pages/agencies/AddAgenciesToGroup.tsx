@@ -1,16 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useFormik} from 'formik';
-import { useSession } from 'next-auth/react';
-import request, { GraphQLClient } from 'graphql-request';
 import { addAgenciesToGroup } from 'src/queries/queries';
-import { useMutation } from '@tanstack/react-query';
+import { gql, useMutation } from '@apollo/client';
 import * as Yup from 'yup';
 import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 //localisation
 import { useTranslation } from 'next-i18next';
 import { MdClose } from 'react-icons/md'
-import getConfig from 'next/config';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface FormData {
@@ -21,7 +18,6 @@ interface FormData {
 // This is a TypeScript type definition for the response we get from the GraphQL server.
 // Without this, we receive a 'property does not exist on type unknown' error.
 interface AddAgenciesResponse {
-  data: {
     addAgencyToGroup: {
       id: string,
       agency: {
@@ -29,8 +25,12 @@ interface AddAgenciesResponse {
         code: string,
         name: string,
       }
+      group: {
+        id: string,
+        code: string,
+        name: string,
+      }
     }
-  }
 }
 
 const initialValues: FormData = {
@@ -53,18 +53,9 @@ const validationSchema = Yup.object().shape({
 
 // sort Group typings
 export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
-    const { data: session, status } = useSession();
-    const [isSubmitting, setIsSubmitting] = useState(false); 
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const url = useMemo(() => {
-      const { publicRuntimeConfig } = getConfig();
-      return publicRuntimeConfig.DCB_API_BASE + '/graphql';
-    }, []);
-
-    const graphQLClient = new GraphQLClient(url); 
-    const headers = { Authorization: `Bearer ${session?.accessToken}` }
     // remember your headers - these don't get added automatically with the client we're using
     // TODO: Implement a GraphQL client that does do this and supports OAuth. Our current client is glitchy and is suffering from 401s.
 
@@ -72,43 +63,73 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     // https://tanstack.com/query/v4/docs/react/reference/useMutation
     // We have callbacks for both success and error states, in order to display our respective alerts.
 
-    const addAgenciesMutation = useMutation(
-      async (values: FormData) => {
-        const { data } = await request<AddAgenciesResponse>(url, addAgenciesToGroup, {
-          input: {
-            group: values.groupId,
-            agency: values.agencyId
-          },
-        }, headers);
-        return data;
+    // As this returns an updated agency, not a group, and we can't refetch non-active queries, we must update cache ourselves. If we were able to force a refetch, that would be much better
+    //https://www.apollographql.com/docs/react/data/mutations#refetching-queries
+    // This needs fixing to update it correctly
+
+    const [addAgenciesMutation, { loading }] = useMutation<AddAgenciesResponse>(addAgenciesToGroup, {
+      update(cache, { data }) {
+        // The intention is to make sure that groups are updated instantly client-side with this new info
+        console.log(cache, data);
+        const newAgency = data?.addAgencyToGroup?.agency;
+
+        const groupId = data?.addAgencyToGroup?.group?.id;
+        console.log("The new member is"+newAgency+" for the group "+groupId);
+
+        cache.modify({
+          id: cache.identify({ __typename: 'AgencyGroup', id: groupId }),
+
+          fields: {
+            members(existingMembers = [], { readField }) {
+              const newMemberRef = cache.writeFragment({
+                data: newAgency,
+                fragment: gql`
+                fragment NewAgency on Agency {
+                  id
+                  code
+                  name
+                }
+                `
+              });
+              if (
+                existingMembers.some(
+                  (member: any) => readField('id', member.agency) === newAgency?.id
+                )
+              ) {
+                return existingMembers;
+              }
+  
+              return [...existingMembers, { agency: newMemberRef }];            }
+          }});
       },
-      {
-        onSuccess: () => {
-            setSuccess(true);
-            onClose();
-          },
-          onError: (error) => {
-            setError(true);
-            setErrorMessage(
-              'Failed to add agency to group. Please retry, and if this issue persists please sign out and back in again.'
-            );
-            console.error('Error:', error);
-          },
-      }
-    );
+      onCompleted: () => {
+        setSuccess(true);
+        onClose();
+      },
+      onError: (error) => {
+        setError(true);
+        setErrorMessage('Failed to add agency to group. Please retry, and if this issue persists please sign out and back in again.');        
+        // console.error('Error:', error);
+      },
+    });
     
     // This function governs what happens after we click 'submit'.
     const handleSubmit = async (values: FormData) => {
-    try {
-        setIsSubmitting(true);
-        await addAgenciesMutation.mutateAsync(values);
-    } catch (error) {
+      try {
+        await addAgenciesMutation({
+          variables: {
+            input: {
+              group: values.groupId,
+              agency: values.agencyId,
+            }
+          },
+        });
+        onClose();// close on success
+      } catch (error) {
+        // We should bear in mind that GraphQL errors often come as '200' responses.
         console.error('Error:', error);
-    }
-    finally {
-        setIsSubmitting(false); // Sets isSubmitting back to false after submission so we don't have infinite 'submitting'
       }
-  };
+    };
 
   const FormikMaterial = () => {
     const formik = useFormik({

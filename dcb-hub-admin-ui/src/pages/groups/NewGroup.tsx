@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useFormik } from 'formik';
 import { useSession } from 'next-auth/react';
 import request, {gql, GraphQLClient } from 'graphql-request';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@apollo/client';
 import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
 import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextField } from '@mui/material';
@@ -43,58 +43,44 @@ const validationSchema = Yup.object().shape({
 
 // sort Group typings
 export default function NewGroup({show, onClose}: NewGroupType) {
-    const { data: session, status } = useSession();
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    const url = useMemo(() => {
-      const { publicRuntimeConfig } = getConfig();
-      return publicRuntimeConfig.DCB_API_BASE + '/graphql';
-    }, []);
-    const graphQLClient = new GraphQLClient(url); 
-    // const headers = { Authorization: `Bearer ${session?.accessToken}` }
-    // is this using an old token? ^^ would only be updated when component reloaded
-    // refreshing also potentially not working here - possibly because it's out of useResource
-    // remember your headers - these don't get added automatically with the client we're using
-    // look at a client that does do this
-
     const { t } = useTranslation();
 
-    const createGroupMutation = useMutation(
-      async (values: FormData) => {
-
-        const headers = { Authorization: `Bearer ${session?.accessToken}` }
-        const { data } = await request<CreateGroupResponse>(url, createGroup, {
-          input: {
-            name: values.name,
-            code: values.code,
-          },
-        }, headers);
-        return data;
+    const [createGroupMutation, { loading }] = useMutation<CreateGroupResponse>(createGroup, {
+      refetchQueries: ['LoadGroups'],
+      onCompleted: () => {
+        setSuccess(true);
+        onClose();
       },
-      {
-        onSuccess: () => {
-          setSuccess(true);
-          onClose();
-        },
-        onError: (error) => {
-          setError(true);
-          setErrorMessage(
-            'Failed to create new group. Please retry, and if this issue persists please sign out and back in again.'
-          );
-          console.error('Error:', error);
-        },
-    }
-    );
+      onError: (error) => {
+        setError(true);
+        setErrorMessage('Failed to create a new group. Please retry, and if this issue persists, sign out and back in again.');
+        console.error('Error:', error);
+      },
+    });
+
+
 
     const handleSubmit = async (values: FormData) => {
-    try {
-      const data  = await createGroupMutation.mutateAsync(values);
-      onClose();
-    } catch (error) {
-      console.error('Error:', error);
-    }
+      try {
+        await createGroupMutation({
+          variables: {
+            input: {
+              name: values.name,
+              code: values.code,
+            }
+          },
+        });
+        onClose();// this is supposed to auto-close on success
+      } catch (error) {
+        // We should bear in mind that GraphQL errors often come as '200' responses.
+        console.error('Error:', error);
+      }
     };
+  
+  
 
     const FormikMaterial = () => {
       const formik = useFormik({
