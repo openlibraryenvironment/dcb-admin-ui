@@ -51,30 +51,21 @@ const validationSchema = Yup.object().shape({
     agencyId: Yup.string().required('Agency ID is required').max(36, 'Agency ID must be at most 36 characters'),
   });
 
-// sort Group typings
 export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
+    // State management variables.
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-    // remember your headers - these don't get added automatically with the client we're using
-    // TODO: Implement a GraphQL client that does do this and supports OAuth. Our current client is glitchy and is suffering from 401s.
-
-    // This is the react-query mutation that performs the request + updates state
-    // https://tanstack.com/query/v4/docs/react/reference/useMutation
-    // We have callbacks for both success and error states, in order to display our respective alerts.
-
+  
     // As this returns an updated agency, not a group, and we can't refetch non-active queries, we must update cache ourselves. If we were able to force a refetch, that would be much better
     //https://www.apollographql.com/docs/react/data/mutations#refetching-queries
-    // This needs fixing to update it correctly
 
     const [addAgenciesMutation, { loading }] = useMutation<AddAgenciesResponse>(addAgenciesToGroup, {
       update(cache, { data }) {
-        // The intention is to make sure that groups are updated instantly client-side with this new info
-        console.log(cache, data);
+        // Ensure that groups are updated instantly client-side with this new info
         const newAgency = data?.addAgencyToGroup?.agency;
 
         const groupId = data?.addAgencyToGroup?.group?.id;
-        console.log("The new member is"+newAgency+" for the group "+groupId);
 
         cache.modify({
           id: cache.identify({ __typename: 'AgencyGroup', id: groupId }),
@@ -126,7 +117,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
         });
         onClose();// close on success
       } catch (error) {
-        // We should bear in mind that GraphQL errors often come as '200' responses.
+        // We should bear in mind that GraphQL errors often come as '200' responses and implement better handling.
         console.error('Error:', error);
       }
     };

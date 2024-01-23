@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-// For managing the few global state things not covered by react-query
+// For managing the few global state things not covered by Apollo
 // Won't stay as just 'code' - add as necessary.
 
 // Do we need to fold all non react-query state values into this?

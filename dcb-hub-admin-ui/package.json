@@ -36,6 +36,7 @@
 		"cookies-next": "^2.1.1",
 		"cypress": "^13.6.2",
 		"dayjs": "^1.11.10",
+		"dotenv": "^16.3.2",
 		"formik": "^2.4.3",
 		"graphql": "^16.8.1",
 		"graphql-request": "^5.0.0",

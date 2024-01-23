@@ -1,11 +1,8 @@
-import useResource from "@hooks/useResource";
 import useCode from "@hooks/useCode";
-import { HostLmsPage } from "@models/HostLMSPage";
 import { Autocomplete, TextField } from "@mui/material";
-import { useSession } from "next-auth/react";
-import getConfig from "next/config";
-import { useMemo, useState } from "react";
-import { getHostLms } from "src/queries/queries";
+import { useState } from "react";
+import { getHostLmsSelection } from "src/queries/queries";
+import { useQuery } from "@apollo/client/react";
 
 type SelectorType = {
     optionsType?: string;
@@ -18,35 +15,13 @@ type SelectorType = {
 
 export default function Selector({optionsType, options}: SelectorType) {
 
-  // We can and will replace this with a specialised GraphQL query based on code.
-  
-  // can pass in type, too
-  const { data: session, status } = useSession();
-  const code = useCode((state) => state.code);
   const updateCode = useCode((state) => state.updateCode);
   const [hostLmsId, setHostLmsId] = useState();
-  // Generate the url for the useResource hook
-  const url = useMemo(() => {
-    const { publicRuntimeConfig } = getConfig();
-    return publicRuntimeConfig.DCB_API_BASE + '/graphql';
-    }, []);
-    const queryVariables = {};
 
-  const {
-    resource,
-    status: resourceFetchStatus,
-    } = useResource<HostLmsPage>({
-        isQueryEnabled: status === 'authenticated',
-        accessToken: session?.accessToken ?? null,
-        baseQueryKey: 'hostlms',
-        url: url,
-        type: 'GraphQL',
-        graphQLQuery: getHostLms,
-        graphQLVariables: queryVariables
-  }); 
+  const { loading, error, data } = useQuery(getHostLmsSelection, { variables: { order: "name", orderBy: "ASC" }});
+
   // To extend this component further consider principles from https://mui.com/material-ui/react-autocomplete/#load-on-open
-    
-  const rows:any = resource?.content;
+  const rows:any = data?.content;
   const hostLmsData = rows?.hostLms?.content;
   const names = hostLmsData?.map((item: { name: any; id: any; }) => ({
         label: item.name,

@@ -34,7 +34,7 @@ export const createGroup = gql`
   }
 `;
 
-// A query for searching for sourceBibs by their sourceRecordId
+// A query for loading bib records.
 
 export const searchBibs = gql`
 query LoadBibs($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
@@ -188,6 +188,22 @@ query LoadHostLms($pageno: Int!, $pagesize: Int!, $order: String!, $query: Strin
     }
 }
 `;
+
+// A GraphQL query to load Host LMS for the autocomplete on mappings upload - no pagination
+export const getHostLmsSelection = gql`
+query LoadHostLms($order: String!, $orderBy: String!) {
+    hostLms(order: $order, orderBy: $orderBy) {
+        totalSize
+        content {
+            id
+            code
+            name
+            lmsClientClass
+            clientConfig
+        }
+    }
+}
+`;
 // A GraphQL query to load all reference value mappings, with pagination, filtering etc.
 
 export const getMappings = gql`
@@ -216,6 +232,32 @@ query LoadMappings($pageno: Int!, $pagesize: Int!, $order: String!, $query: Stri
 // To ensure that no deleted mappings are loaded when we do this
 // for CirculationStatus mappings
 // query: "fromCategory: CirculationStatus && deleted: false"
+
+export const getCirculationStatusMappings = gql`
+query LoadCirculationStatusMappings($pageno: Int!, $pagesize: Int!, $order: String!, $orderBy: String!, $query: String!) {
+    referenceValueMappings(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query, orderBy: $orderBy) {
+        totalSize
+        content {
+            id
+            fromCategory
+            fromContext
+            fromValue
+            toCategory
+            toContext
+            toValue
+            reciprocal
+            label
+            lastImported
+            deleted
+        }
+        pageable {
+            number
+            offset
+        }
+    }
+}`;
+
+
 
 // A query to load patron requests.
 // Slim it down once we've decided what we need - if this mega query is needed for diagnostics 
