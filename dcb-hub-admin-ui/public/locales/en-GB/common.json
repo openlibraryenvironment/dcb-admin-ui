@@ -174,7 +174,8 @@
     "alert_text": "Failed to fetch the agencies, please refresh the page.",
     "loading_msg": "Loading agencies....",
     "no_results": "No agencies were found. Try changing your search terms or filters.",
-    "no_rows": "No agencies available. If you're expecting data to be here, please refresh the page."
+    "no_rows": "No agencies available. If you're expecting data to be here, please refresh the page.",
+    "search_placeholder": "Search by name"
   },
 
   "general": {
@@ -189,28 +190,32 @@
     "type_new": "New Group",
     "new_group_success": "Success: New group created!",
     "no_results": "No groups were found. Try changing your search terms or filters.",
-    "no_rows": "No groups are available. Try adding some by clicking 'New Group'."
+    "no_rows": "No groups are available. Try adding some by clicking 'New Group'.",
+    "search_placeholder": "Search by name"
   },
 
   "hostlms": {
     "loading_msg": "Loading HostLMS....",
     "alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.",
     "no_results": "No Host LMSs were found. Try changing your search terms or filters.",
-    "no_rows": "No Host LMSs are available. If you're expecting data to be here, please refresh the page."
+    "no_rows": "No Host LMSs are available. If you're expecting data to be here, please refresh the page.",
+    "search_placeholder": "Search by name"
   },
 
   "locations": {
     "loading_msg": "Loading locations....",
     "alert_text": "Failed to fetch the locations, please refresh the page.",
     "no_results": "No locations were found. Try changing your search terms or filters.",
-    "no_rows": "No locations available. If you're expecting data to be here, please refresh the page."
+    "no_rows": "No locations available. If you're expecting data to be here, please refresh the page.",
+    "search_placeholder": "Search by name"
   },
 
   "patron_requests": {
     "loading_msg": "Loading requests....",
     "alert_text": "Failed to fetch the requests, please refresh the page.",
     "no_results": "No patron requests were found. Try changing your search terms or filters.",
-    "no_rows": "No patron requests available. If you're expecting data to be here, please refresh the page."
+    "no_rows": "No patron requests available. If you're expecting data to be here, please refresh the page.",
+    "search_placeholder": "Search by description"
   },
 
   "settings": {
@@ -224,7 +229,8 @@
   "bibRecords": {
     "bib_records": "Bib records",
     "no_results": "No bib records found. Try changing your search terms or filters.",
-    "no_rows": "No bib records available. If you're expecting data to be here, please refresh the page."
+    "no_rows": "No bib records available. If you're expecting data to be here, please refresh the page.",
+    "search_placeholder": "Search by sourceRecordId"
   },
 
   "mappings": {
@@ -251,6 +257,8 @@
     "confirmation_warning": "It will not be possible to undo the import. Please ensure you have a backup of the circulation status mappings before continuing.",
     "confirmation_replace": "To go ahead, select “Replace mappings”.",
     "cancel": "Cancel",
+    "search_placeholder": "Search by category",
+    "search_placeholder_cs": "Search by Host LMS",
     "confirmation_replace_mappings": "Replace mappings",
     "validation_expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“Local code”</bold>, <bold>“Local meaning”</bold> and <bold>“DCB code”</bold>. Please correct the column headers and retry.</paragraph>",
     "validation_invalid_dcb_code": "One or more values of DCB code is invalid. Valid values are “Available”, “Unavailable” and “Unknown”. DCB code can also be empty. Please correct the values and retry.",

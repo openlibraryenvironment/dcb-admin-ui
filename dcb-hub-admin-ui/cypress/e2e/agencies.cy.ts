@@ -15,13 +15,13 @@ describe('Agencies page', () => {
         })
         // Cypress doesn't redirect back to agencies like the normal login process does, so we have to do it.
         cy.visit('http://localhost:3000/agencies')
+        cy.intercept('POST', '/graphql', { fixture: 'agencies.json'}).as('getAgencies');
 
     })    
     it('should render the agencies page with the correct data and UI elements.', () => {
       // This intercepts the request sent to the DCB server for agencies data
       // and mocks the GraphQL 'agencies' response from DCB. https://docs.cypress.io/api/commands/intercept 
       // The fixture agencies.json is used to stub the response https://docs.cypress.io/api/commands/fixture
-      cy.intercept('POST', '/graphql', { fixture: 'agencies.json'}).as('getAgencies');
       // cy.get is a way of getting a page element by its id https://docs.cypress.io/guides/end-to-end-testing/writing-your-first-end-to-end-test#Adding-more-commands-and-assertions
       // And .should creates an assertion - see documentation for the many, many ways of using this https://docs.cypress.io/api/commands/should
       cy.get('[id=page-title]').should('have.text', 'Agencies');
