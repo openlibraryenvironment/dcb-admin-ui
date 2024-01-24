@@ -19,15 +19,17 @@ To see the application running, please visit https://admin.dcbdev.lsphost.com/ -
 
 ## Documentation
 
-To follow.
+See [developer guidance](https://openlibraryfoundation.atlassian.net/wiki/label/DCB/dcb-admin) for DCB Admin documentation.
 
 ## Testing
 
-This project will be using Cypress and Jest for testing in future releases. Once this has been implemented, this section will be updated with details of how to run the tests.
+[DCB Admin uses Cypress](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849/) for end-to-end automated tests. 
 
-Expected process:
-_npm run cypress_ for Cypress integration tests (make sure you have Cypress installed - this will launch Cypress so you can choose which tests to run)
-_npm run jest_ for Jest unit / snapshot tests - this will typically run all Jest tests, you can specify with --[jest.filename].
+1. Run npm install from your working directory root to set up cypress locally.
+
+2. Add CYPRESS_USER and CYPRESS_PW to your .env file, corresponding to the username and password you use to log into DCB Admin
+
+For more details, refer to the [DCB Admin documentation](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849#Configuration-/-setup-within-DCB-Admin).
 
 # Releases
 
