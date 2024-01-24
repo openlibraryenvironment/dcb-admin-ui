@@ -55,18 +55,18 @@ export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
         // this is to get around build issues with the key value.
         // performs if breadcrumbs is last in the array.
         breadcrumb.href ? (
-          <Link sx={{color: theme.palette.primary.breadcrumbs}} underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
+          <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
             {breadcrumb.label}
           </Link>
         ) : (
           // if it is null then use index as the key.
-          <Typography sx={{color: theme.palette.primary.breadcrumbs}} key={index}>
+          <Typography sx={{color: theme.palette.primary.breadcrumbs,textWrap: 'wrap'}} key={index}>
             {breadcrumb.label}
           </Typography>
         )
       ) : (
         // renders if the breadcrumb is the last item.
-        <Typography sx={{color: theme.palette.primary.breadcrumbs}} key={breadcrumb.href}>
+        <Typography sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} key={breadcrumb.href}>
           {breadcrumb.label}
         </Typography>
       )
@@ -75,7 +75,7 @@ export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
     };
 
     return (
-        <MUIBreadcrumbs sx={{pl: 2}} separator={<MdArrowForwardIos/>}>
+        <MUIBreadcrumbs separator={<MdArrowForwardIos/>}>
           <Link sx={{color: theme.palette.primary.breadcrumbs}} href="/">{t("breadcrumbs.home_text")}</Link>
           {mapBreadcrumbs()};
         </MUIBreadcrumbs>

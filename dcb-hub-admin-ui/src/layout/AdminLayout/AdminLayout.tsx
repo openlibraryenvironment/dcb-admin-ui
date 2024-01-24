@@ -41,7 +41,7 @@ export default function AdminLayout({ title, children, hideTitleBox }: PropsWith
 					- overflow: auto, means that content does not go beyond it's container
 					- minHeight must be 100vh for the footer to be at the bottom of the screen
 				*/}
-				<Box display="flex"
+				<Box display="flex" pr={3} pl={3}
 				sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
@@ -63,7 +63,7 @@ export default function AdminLayout({ title, children, hideTitleBox }: PropsWith
 						{/* Children
 							- flex: '1 0 auto' - child element grows to fill space and pushes the footer to the bottom
 						*/}
-						<Box sx={{ pl: 2, pr: 0, flex: '1 0 auto' }}>
+						<Box sx={{ flex: '1 0 auto' }}>
 							{children}
 						</Box>
 					</Stack>
