@@ -75,8 +75,8 @@ export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
     };
 
     return (
-        <MUIBreadcrumbs separator={<MdArrowForwardIos/>}>
-          <Link sx={{color: theme.palette.primary.breadcrumbs}} href="/">{t("breadcrumbs.home_text")}</Link>
+        <MUIBreadcrumbs sx={{pl:3, pr:3}} separator={<MdArrowForwardIos/>}>
+          <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} href="/">{t("breadcrumbs.home_text")}</Link>
           {mapBreadcrumbs()};
         </MUIBreadcrumbs>
     )

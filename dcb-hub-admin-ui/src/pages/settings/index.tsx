@@ -17,7 +17,7 @@ const Settings: NextPage = () => {
 	};
 	return (
 		<AdminLayout title={t("sidebar.settings_button")} hideTitleBox={true}>
-						<Typography sx={{ fontSize: '200%', pl:2 }}>{t("sidebar.settings_button")}</Typography>
+						<Typography sx={{ fontSize: '200%' }}>{t("sidebar.settings_button")}</Typography>
 						<List
 							component="nav"
 							aria-labelledby="settings-subheader"

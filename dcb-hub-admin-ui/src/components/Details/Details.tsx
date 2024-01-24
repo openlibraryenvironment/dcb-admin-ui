@@ -948,8 +948,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                 {toDisplay?.clientConfig?.services?.['version']}
                                 </Grid>
                                 )}
-                        
-
                                 </Grid>
                                 </AccordionDetails>
                                 </Accordion>
@@ -1042,7 +1040,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {type == "agencyGroups"?<Card variant='outlined'>
                                 <CardContent>
-                                        {/* // Map is causing a problem */}
                                         <DataGrid 
                                         data={toDisplay?.members.map((item: { agency: any; }) => item.agency) ?? []}
                                         columns={[ {field: 'name', headerName: "Agency name", minWidth: 100, flex: 1}, 
