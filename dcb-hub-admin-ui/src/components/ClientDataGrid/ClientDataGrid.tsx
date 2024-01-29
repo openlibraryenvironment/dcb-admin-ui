@@ -3,10 +3,11 @@ import Link from "@components/Link/Link";
 import { Box, Typography } from "@mui/material";
 import { styled } from '@mui/material/styles';
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
-import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener, GridToolbarQuickFilter } from "@mui/x-data-grid";
+import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener } from "@mui/x-data-grid";
 import { useState } from "react";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving 
+// This is our Data Grid for the Details pages, which still require client-side pagination. 
 const StyledOverlay = styled('div')(() => ({
     display: 'flex',
     flexDirection: 'column',
@@ -16,7 +17,7 @@ const StyledOverlay = styled('div')(() => ({
 }));
 
 
-export default function DataGrid<T extends Object>({
+export default function ClientDataGrid<T extends Object>({
     data = [],
 	columns,
     type,
@@ -82,13 +83,13 @@ export default function DataGrid<T extends Object>({
         // may have to fix height for no data overlay to display
         <div>
         <MUIDataGrid
-        // Makes sure scrollbars aren't visible
-        sx={{
-            ".MuiDataGrid-virtualScroller": {
-                overflow: 'hidden'
-            },
-            border: '0'
-        }}
+            // Makes sure scrollbars aren't visible
+            sx={{
+                ".MuiDataGrid-virtualScroller": {
+                    overflow: 'hidden'
+                },
+                border: '0'
+            }}
             //DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
             experimentalFeatures={{ ariaV7: true }}
             // determines whether we allow row selection
@@ -151,27 +152,3 @@ export default function DataGrid<T extends Object>({
  
     )
 }
-
-
-// This custom toolbar allows for multi-search (i.e. searching for two+ things, separated by a comma)
-
-// function QuickSearchToolbar() {
-//   return (
-//     <Box
-//       sx={{
-//         p: 0.5,
-//         pb: 0,
-//       }}
-//     >
-//         <GridToolbar/>
-//       <GridToolbarQuickFilter
-//         quickFilterParser={(searchInput: string) =>
-//           searchInput
-//             .split(',')
-//             .map((value) => value.trim())
-//             .filter((value) => value !== '')
-//         }
-//       />
-//     </Box>
-//   );
-// }

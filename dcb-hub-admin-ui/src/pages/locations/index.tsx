@@ -7,7 +7,6 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
 
-// import SignOutIfInactive from '../useAutoSignout';
 const Locations: NextPage = () => {
 	const { t } = useTranslation();
 	const filterOperators = getGridStringOperators().filter(({ value }) =>

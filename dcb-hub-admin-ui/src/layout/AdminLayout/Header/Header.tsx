@@ -10,7 +10,6 @@ import { styled, useTheme } from '@mui/material/styles';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import { useTranslation } from 'next-i18next'
 import { Button } from "@mui/material";
-//import LanguageSwitcher from "./LanguageSwitcher";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -55,13 +54,7 @@ export default function Header(props:any) {
                   </IconButton>
                   <Typography data-tid="header-title" variant="h1" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1 }}>
                   {t("header.title")}
-                  </Typography>
-                  {/*
-                  Temporarily disabled as it is not currently needed due
-                  to lack of other languages, but may be needed in the future
-
-                  <LanguageSwitcher/>
-                  */}                  
+                  </Typography>               
                   <div>
                     <Link href='/profile'
                       style={{ color: 'inherit' }}>

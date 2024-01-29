@@ -27,6 +27,7 @@ export const ApolloProviderWrapper = ({ children }: PropsWithChildren) => {
       return new ApolloClient({
         link: from([authMiddleware, url]),
         cache: new InMemoryCache(),
+        ssrMode: true,
       });
     }, [url, session?.accessToken]);
   

@@ -8,12 +8,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
 
-// import SignOutIfInactive from '../useAutoSignout';
-
 const PatronRequests: NextPage = () => {
-
-	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
-	// SignOutIfInactive();
 	const { t } = useTranslation();
 	const filterOperators = getGridStringOperators().filter(({ value }) =>
     ['equals', 'contains'/* add more over time as we build in support for them */ ].includes(value),

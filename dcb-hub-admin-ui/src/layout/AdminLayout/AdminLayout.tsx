@@ -6,7 +6,6 @@ import Header from './Header/Header';
 import Breadcrumbs from './Breadcrumbs/Breadcrumbs';
 import { Stack, Typography, useTheme } from '@mui/material';
 import Sidebar from '@layout/AdminLayout/Sidebar/Sidebar';
-import { useSession } from 'next-auth/react';
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;

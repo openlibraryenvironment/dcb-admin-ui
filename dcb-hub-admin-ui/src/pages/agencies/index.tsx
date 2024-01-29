@@ -10,8 +10,6 @@ import { getAgencies } from 'src/queries/queries';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
 
-// import SignOutIfInactive from '../useAutoSignout';
-
 const Agencies: NextPage = () => {
 	// State management variables for the AddAgenciesToGroup modal.
 	const [addToGroup, setAddToGroup] = useState(false);

@@ -2,11 +2,10 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-
-//localisation
 import { useTranslation } from 'next-i18next';
 import { useState } from 'react';
-
+// This component is currently unused due to us not presently supporting other languages.
+// It has been maintained within the codebase because there is a high chance we will need to support other languages in the future.
 
 export default function LanguageSwitcher() {
   const [language, setLanguage] = useState('');

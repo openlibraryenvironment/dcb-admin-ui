@@ -1,5 +1,6 @@
 {
-	"name": "App",
+	"name": "DCB Admin",
+	"description": "An administrative application for Direct Consortial Borrowing systems",
 	"icons": [
 		{
 			"src": "/android-icon-36x36.png",

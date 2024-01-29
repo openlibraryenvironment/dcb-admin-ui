@@ -1,10 +1,9 @@
 import { DataGrid, GridEventListener, GridFilterModel, GridSortModel, GridToolbar, GridToolbarQuickFilter } from '@mui/x-data-grid';
 import { DocumentNode, useQuery } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
-import { styled } from '@mui/material/styles';
+import { styled } from '@mui/material/styles'; // Import separately due to this issue https://github.com/vercel/next.js/issues/55663
 import { Box, Typography } from '@mui/material';
 import Details from '@components/Details/Details';
-// Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 
 const StyledOverlay = styled('div')(() => ({
     display: 'flex',

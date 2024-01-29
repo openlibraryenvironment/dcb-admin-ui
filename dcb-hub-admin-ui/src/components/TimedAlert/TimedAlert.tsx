@@ -2,9 +2,6 @@ import { Alert as MUIAlert, AlertTitle, AlertProps, Snackbar} from '@mui/materia
 import { capitalize } from '@mui/material/utils';
 import { forwardRef, useState} from 'react';
 
-
-// Fix autohide behaviour
-
 const SnackbarAlert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
     props,
     ref,
