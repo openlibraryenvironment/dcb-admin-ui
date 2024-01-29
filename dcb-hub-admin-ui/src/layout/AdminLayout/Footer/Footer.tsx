@@ -14,19 +14,14 @@ export default function Footer() {
 	return (
 		<footer className='footer flex-column flex-md-row border-top d-flex align-items-center justify-content-between px-4 py-2'>
 			<div className='ms-md-auto'>
+				{/* // To add footer content, just add items to the Stack. It will adjust to accommodate */}
 			<Stack direction="row" spacing={2} alignItems="flex-start"
 			justifyContent="space-between">
-			<Typography data-tid="footer-information" color={theme.palette.primary.headerText}>
+			<Typography data-tid="footer-information" color={theme.palette.primary.footerText}>
 			{<Link sx={{color: theme.palette.primary.link}} className='text-decoration-none' href={'https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/'} target='_blank' rel="noreferrer">
 				{t('app.name')}
 			</Link>}
 			{'. '+t("app.version")+' '+publicRuntimeConfig?.version+'. '+t("app.released")+' '+dayjs(publicRuntimeConfig?.releaseDate).format('YYYY-MM-DD')+'.'}
-			</Typography>
-			<Typography color={theme.palette.primary.headerText}>
-				Layout area two (Testing)
-			</Typography>
-			<Typography color={theme.palette.primary.headerText}>
-				Layout area three (Testing)
 			</Typography>
 			</Stack>
 			</div>
