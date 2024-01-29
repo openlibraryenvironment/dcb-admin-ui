@@ -4,7 +4,6 @@ import type { AppProps } from 'next/app';
 // It handles optimization and all the necessary Webpack configuration to make this work.
 
 import { SessionProvider } from 'next-auth/react';
-import { QueryClient, QueryClientProvider, Hydrate } from '@tanstack/react-query';
 import { ProgressBar } from '@components/ProgressBar';
 import { ApolloProviderWrapper } from '@components/ApolloProviderWrapper/ApolloProviderWrapper'
 
@@ -193,25 +192,6 @@ function MyApp(props: MyAppProps) {
 	// const [themeSelected, setThemeSelected] = useState(theme);
 	// For some reason, this does not work very well with dark mode. Does the object get truncated?
 	// To be investigated when manual theme selection is needed. It may be that a more complex state object is needed.
-
-	const [queryClient] = useState(
-		() =>
-			new QueryClient({
-				defaultOptions: {
-					queries: {
-						refetchOnWindowFocus: false,
-						refetchOnReconnect: false,
-						retry: parseInt(process.env.NEXT_PUBLIC_API_MAX_RETRY ?? '5', 10)
-					},
-					mutations: {
-						retry: parseInt(process.env.NEXT_PUBLIC_API_MAX_RETRY ?? '5', 10)
-					}
-				}
-			})
-	);
-
-	// Work to fully remove react-query and complete switch to Apollo will be done when server-side pagination is implemented across the app.
-	// https://openlibraryfoundation.atlassian.net/browse/DCB-480 
 	return (
 			<CacheProvider value={emotionCache}>
 			<Head>
@@ -220,16 +200,11 @@ function MyApp(props: MyAppProps) {
 			</Head>
 			<SessionProvider session={pageProps.session}>
 			<ApolloProviderWrapper>
-			<QueryClientProvider client={queryClient}>
-			<Hydrate state={pageProps.dehydratedState}>
 					<ThemeProvider theme={greyscale}>
 						<CssBaseline />
 						<ProgressBar />
 						<Component {...pageProps} />
 						</ThemeProvider>
-			</Hydrate>
-			{/* <ReactQueryDevtools initialIsOpen={false} /> */}
-		</QueryClientProvider>
 		</ApolloProviderWrapper>
 		</SessionProvider>
 		</CacheProvider>

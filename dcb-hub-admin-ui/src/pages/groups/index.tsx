@@ -9,7 +9,6 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
-// import SignOutIfInactive from '../useAutoSignout';
 
 // Groups Feature Page Structure
 // This page shows the list of groups
@@ -18,9 +17,6 @@ import { getGridStringOperators } from '@mui/x-data-grid';
 // In /agencies, there is the Add Agencies to Group form.
 
 const Groups: NextPage = () => {
-
-	// Automatic logout after 15 minutes for security purposes, will be reinstated in DCB-283
-	// SignOutIfInactive();
 	const [showNewGroup, setShowNewGroup] = useState(false);
 	const openNewGroup = () =>
 	{

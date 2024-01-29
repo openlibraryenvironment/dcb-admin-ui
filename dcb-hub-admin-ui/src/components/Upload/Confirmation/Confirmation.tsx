@@ -14,9 +14,6 @@ type ConfirmType = {
 
 const Confirmation = ({ open, onClose, onConfirm, code, existingMappingCount, fileName }: ConfirmType) => {
   const { t } = useTranslation();
-  // Trans component: https://react.i18next.com/latest/trans-component (next-i18next is built on react-i18next hence the use of its docs)
-  // in theory you can also do it this way https://react.i18next.com/latest/trans-component#alternative-usage-which-lists-the-components-v11.6.0 
-  // check spacings between the components
   const deleted = "deleted";
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby='replace-mappings-confirmation-modal'>

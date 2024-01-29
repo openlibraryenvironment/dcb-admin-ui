@@ -1,15 +1,11 @@
-import { GetServerSideProps, NextPage } from 'next';
-
+import { GetServerSideProps, NextPage } from 'next'
 import { AdminLayout } from '@layout';
-
-// import SignOutIfInactive from './useAutoSignout';
 import { Button} from '@mui/material';
 import { capitalize } from 'lodash';
 import { useState } from 'react';
-
 //localisation
 import { useTranslation } from 'next-i18next';
-import { useQueryClient } from '@tanstack/react-query';
+import { useApolloClient } from '@apollo/client';
 import Import from '@components/Import/Import';
 import dayjs from 'dayjs';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -17,10 +13,10 @@ import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginate
 import { getMappings } from 'src/queries/queries';
 import { getGridStringOperators } from '@mui/x-data-grid';
 
-// Page for 'ALL' referenceValueMappings - includes CirculationStatus, ShelvingLocation, etc.
+// Page for 'ALL' referenceValueMappings of any category.
 
 const AllMappings: NextPage = () => {
-	const queryClient = useQueryClient();
+	const client = useApolloClient();
 	const [showImport, setImport] = useState(false);
 	const openImport = () =>
 	{
@@ -28,7 +24,11 @@ const AllMappings: NextPage = () => {
 	}
 	const closeImport = () => {
 		setImport(false);
-		queryClient.invalidateQueries();
+		client.refetchQueries({
+			include: ["LoadMappings"],
+		});	
+		// Refetch only the 'LoadMappings' query, for latest mappings.
+		// https://www.apollographql.com/docs/react/data/refetching/#refetch-recipes
 	};
 
 	const { t } = useTranslation();

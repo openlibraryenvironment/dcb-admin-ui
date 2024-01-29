@@ -3,7 +3,7 @@ import { CardContent, Card, Typography, Dialog, Slide, AppBar, IconButton, Toolb
 import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
 import { TransitionProps } from '@mui/material/transitions';
 import dayjs from 'dayjs';
-import { DataGrid } from '@components/DataGrid';
+import { ClientDataGrid } from '@components/ClientDataGrid';
 import { MdClose, MdExpandMore } from 'react-icons/md'
 import { IconContext } from 'react-icons';
 import { useTranslation } from 'next-i18next';
@@ -74,21 +74,6 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                 </Toolbar>
                         </AppBar>
                 <DialogContent>
-                        {/* // These items are shown for every 'Details' instance, excluding Requests, sourceBibs, and HostLMS due to their different UX*/}                        
-                        {/* {(type !== "Request" && type!== "HostLMS" && type!== "sourceBibs") ?<Card variant = 'outlined'>
-                        <CardContent>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.id")}: </span>
-                        {toDisplay?.id}
-                        </Typography>
-                        </CardContent>
-                        </Card>: null} */}
-                        {/* {(type !== "Request" && type!== "HostLMS" && type!== "sourceBibs")?<Card variant = 'outlined'>
-                        <CardContent>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{type} {t("details.code")}: </span>
-                                 {toDisplay?.code} </Typography>
-                        </CardContent>
-                        </Card>: null} */}
-                        {/* // These are the items that we typically need to only show for 'Request Details', hence the conditional rendering*/}
                         {type == "patronRequests"? <Stack direction="row" justifyContent="end">
                                 <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> </Stack> : null}
                         {type == "patronRequests"?<Card variant = 'outlined'>
@@ -505,7 +490,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                                                <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.audit_log")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                        <DataGrid 
+                                        <ClientDataGrid 
                                                 data={toDisplay?.audit}
                                                 columns={[{ field: 'id', headerName: "ID", minWidth: 100, flex: 0.3}, 
                                                         {field: 'auditDate', headerName: "Audit date", minWidth: 30, flex: 0.2,
@@ -1040,7 +1025,7 @@ export default function Details({i, content, show, onClose, type}: DetailsType) 
                         </Card>: null}
                         {type == "agencyGroups"?<Card variant='outlined'>
                                 <CardContent>
-                                        <DataGrid 
+                                        <ClientDataGrid 
                                         data={toDisplay?.members.map((item: { agency: any; }) => item.agency) ?? []}
                                         columns={[ {field: 'name', headerName: "Agency name", minWidth: 100, flex: 1}, 
                                                 { field: 'id', headerName: "Agency ID", minWidth: 50, flex: 0.5}, 

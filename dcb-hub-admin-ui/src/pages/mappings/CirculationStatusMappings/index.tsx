@@ -1,22 +1,21 @@
 import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
-// import SignOutIfInactive from './useAutoSignout';
 import { Button } from '@mui/material';
 import { capitalize } from 'lodash';
 import { useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { useQueryClient } from '@tanstack/react-query';
 import Import from '@components/Import/Import';
 import dayjs from 'dayjs';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
 import { getCirculationStatusMappings } from 'src/queries/queries';
+import { useApolloClient } from '@apollo/client';
 
 
 const CirculationStatusMappings: NextPage = () => {
 	// Handles the import modal display
-	const queryClient = useQueryClient();
+	const client = useApolloClient();
 	const [showImport, setImport] = useState(false);
 	const openImport = () =>
 	{
@@ -24,8 +23,10 @@ const CirculationStatusMappings: NextPage = () => {
 	}
 	const closeImport = () => {
 		setImport(false);
-		queryClient.invalidateQueries();
-		// forces the query to refresh once a new group is added	
+		// This refetches only the 'LoadCirculationStatusMappings' query, to get the latest mappings after import.
+		client.refetchQueries({
+			include: ["LoadCirculationStatusMappings"],
+		});		
 	};
 	const { t } = useTranslation();
 	const filterOperators = getGridStringOperators().filter(({ value }) =>

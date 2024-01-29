@@ -1,7 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useFormik } from 'formik';
-import { useSession } from 'next-auth/react';
-import request, {gql, GraphQLClient } from 'graphql-request';
 import { useMutation } from '@apollo/client';
 import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
@@ -10,7 +8,6 @@ import Alert from '@components/Alert/Alert';
 import { MdClose } from 'react-icons/md'
 //localisation
 import { useTranslation } from 'next-i18next';
-import getConfig from 'next/config';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface FormData {

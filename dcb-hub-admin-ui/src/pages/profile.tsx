@@ -1,22 +1,16 @@
 import { NextPage } from 'next';
-
-import { Card, CardContent, List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem, useTheme } from "@mui/material"
-
+import { List, ListItemIcon, ListItemText, Typography, ListSubheader, ListItem, useTheme } from "@mui/material"
 import { MdPersonOutline } from 'react-icons/md';
 import { MdOutlineMail } from 'react-icons/md';
 import { MdOutlineMarkEmailRead } from 'react-icons/md';
 import { MdThumbUpOffAlt } from 'react-icons/md';
 import { MdOutlineSupervisorAccount } from 'react-icons/md';
-
 //localisation
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-
 import { AdminLayout } from '@layout';
-
 import { useSession } from 'next-auth/react';
 
-// import SignOutIfInactive from './useAutoSignout';
 
 type Props = {
 	page: number;
@@ -28,20 +22,6 @@ type Props = {
 const Profile: NextPage<Props> = (props) => {
 	const { data: session, status }: { data: any; status: any } = useSession();
 	const emailVerified = session?.profile?.email_verified ?? 'Cannot fetch verified email status.';
-	
-	//This is the old way of rendering roles before DCB-397 (https://openlibraryfoundation.atlassian.net/browse/DCB-397)
-	//Use this function to render roles in a list
-	/*
-	const renderListOfRoles = (roles: string[]) => {
-		return roles?.map((role) => (
-			<ListItem key={role} sx={{ display: 'list-item', listStyleType: 'disc', pl: 4 }}>
-				<ListItemText>
-					{role}
-				</ListItemText>
-			</ListItem>
-		));
-	};*/
-
 	const formatRoles = (roles: any) => {
 		const formattedRoles = roles && roles.join(', ')
 		return(
@@ -50,11 +30,8 @@ const Profile: NextPage<Props> = (props) => {
 			</ListItemText>
 		)
 	}
-
-	// SignOutIfInactive();
 	const { t } = useTranslation();
 	const theme = useTheme();
-
 	return (
 		<AdminLayout title={t("profile.title")} hideTitleBox={true}>
 						<Typography variant = "h2" sx={{pl: 2}}>{t("profile.title")}</Typography> 

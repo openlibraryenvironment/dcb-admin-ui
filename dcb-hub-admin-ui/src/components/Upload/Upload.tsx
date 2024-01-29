@@ -46,7 +46,7 @@ const url = publicRuntimeConfig.DCB_API_BASE + '/uploadedMappings/upload'
 // Using Uppy XHR plugin to manage the upload
 // Make sure this isn't happening twice
 uppy.use(XHR, { endpoint: url,
-  getResponseError (responseText, response) {
+  getResponseError (responseText) {
   // this will get the message
   return new Error(responseText)
 } });
@@ -221,8 +221,6 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
             fileName={addedFile.name}
             code={code}
           />
-        {/* TODO: more dynamic error display, fix autohide behaviour
-        Alert will be replaced in DCB-535*/}
 
         {filesAdded? <Card>
           <Alert severityType="info" alertText={t("mappings.add_success", {fileName: addedFile.name})} key={addedFile.size}/>

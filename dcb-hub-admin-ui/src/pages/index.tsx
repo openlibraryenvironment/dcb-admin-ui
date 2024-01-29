@@ -1,10 +1,8 @@
 import type { NextPage } from 'next';
 import { AdminLayout } from '@layout';
-// import SignOutIfInactive from './useAutoSignout';
 import { Typography, useTheme } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from 'next-i18next'; //localisation
-import getConfig from "next/config";
 import { Trans } from 'next-i18next';
 import Link from '@components/Link/Link';
 import VersionInfo from '@components/HomeContent/VersionInfo';
@@ -17,9 +15,7 @@ import EnvironmentDetails from '@components/HomeContent/EnvironmentDetails';
 
 
 const Home: NextPage = () => {
-	const { data: session, status }: { data: any; status: any } = useSession();
-	const { publicRuntimeConfig } = getConfig();
-
+	const { data: session }: { data: any; } = useSession();
 	const getUserName = () => {
 		const nameOfUser = session?.profile?.given_name;
 		if (nameOfUser == undefined) {
@@ -29,9 +25,6 @@ const Home: NextPage = () => {
 			return nameOfUser;
 		}
 	}
-
-	// line below currently does not work as expected, will need to be redone in the future
-	// SignOutIfInactive();
 	const { t } = useTranslation();
 	const theme = useTheme();
 

@@ -1,6 +1,5 @@
 import { NextPage } from 'next';
 import { AdminLayout } from '@layout';
-// import SignOutIfInactive from './useAutoSignout';
 import { List, ListSubheader, ListItem, ListItemButton, ListItemText, useTheme } from '@mui/material';
 import { useTranslation } from 'next-i18next';
 import useCode from '@hooks/useCode';
@@ -8,7 +7,6 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Typography from '@mui/material/Typography';
 
 const Settings: NextPage = () => {
-	// SignOutIfInactive();
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const updateCategory = useCode((state) => state.updateCategory);

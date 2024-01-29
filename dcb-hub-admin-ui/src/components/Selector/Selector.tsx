@@ -21,8 +21,7 @@ export default function Selector({optionsType, options}: SelectorType) {
   const { loading, error, data } = useQuery(getHostLmsSelection, { variables: { order: "name", orderBy: "ASC" }});
 
   // To extend this component further consider principles from https://mui.com/material-ui/react-autocomplete/#load-on-open
-  const rows:any = data?.content;
-  const hostLmsData = rows?.hostLms?.content;
+  const hostLmsData = data?.hostLms?.content;
   const names = hostLmsData?.map((item: { name: any; id: any; }) => ({
         label: item.name,
         value: item.id,
