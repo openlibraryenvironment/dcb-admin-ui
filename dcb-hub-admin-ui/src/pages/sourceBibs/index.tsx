@@ -44,7 +44,7 @@ const SourceBibs: NextPage = () => {
         )
     }
     return (
-		<AdminLayout title={t("sidebar.bib_button")}>
+		<AdminLayout title={t("nav.sourceBibs")}>
             <BibsDisplay/>
         </AdminLayout>
     )

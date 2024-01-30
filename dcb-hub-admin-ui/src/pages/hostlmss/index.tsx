@@ -13,7 +13,7 @@ const HostLmss: NextPage = () => {
     ['equals', 'contains'/* add more over time as we build in support for them */ ].includes(value),
     );
 	return (
-		<AdminLayout title={t("sidebar.host_lms_button")}>		
+		<AdminLayout title={t("nav.hostlmss")}>		
 			<ServerPaginationGrid
 				query={getHostLms} 
 				coreType="hostLms"

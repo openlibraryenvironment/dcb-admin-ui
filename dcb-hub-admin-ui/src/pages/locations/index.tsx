@@ -14,7 +14,7 @@ const Locations: NextPage = () => {
     );
 
 	return (
-		<AdminLayout title={t("sidebar.location_button")}>
+		<AdminLayout title={t("nav.locations")}>
 			<ServerPaginationGrid
 				query={getLocations} 
 				type="locations"

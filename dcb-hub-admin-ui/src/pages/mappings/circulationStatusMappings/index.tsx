@@ -34,7 +34,7 @@ const CirculationStatusMappings: NextPage = () => {
     );
 
 	return (
-		<AdminLayout title={t("sidebar.circulation")}>			
+		<AdminLayout title={t("nav.circulationStatusMappings")}>			
 			<Button variant="contained" onClick={openImport}>{t("mappings.import")}</Button>
 			<ServerPaginationGrid
 				query={getCirculationStatusMappings}

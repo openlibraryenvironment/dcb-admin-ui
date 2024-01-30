@@ -1,72 +1,32 @@
 import { GetServerSideProps, NextPage } from 'next'
 import { AdminLayout } from '@layout';
-import { Button} from '@mui/material';
-import { capitalize } from 'lodash';
-import { useState } from 'react';
+import { List, ListItem, ListItemButton, ListItemText, useTheme} from '@mui/material';
 //localisation
 import { useTranslation } from 'next-i18next';
-import { useApolloClient } from '@apollo/client';
-import Import from '@components/Import/Import';
-import dayjs from 'dayjs';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
-import { getMappings } from 'src/queries/queries';
-import { getGridStringOperators } from '@mui/x-data-grid';
 
-// Page for 'ALL' referenceValueMappings of any category.
+const Mappings: NextPage = () => {
 
-const AllMappings: NextPage = () => {
-	const client = useApolloClient();
-	const [showImport, setImport] = useState(false);
-	const openImport = () =>
-	{
-		setImport(true);
-	}
-	const closeImport = () => {
-		setImport(false);
-		client.refetchQueries({
-			include: ["LoadMappings"],
-		});	
-		// Refetch only the 'LoadMappings' query, for latest mappings.
-		// https://www.apollographql.com/docs/react/data/refetching/#refetch-recipes
-	};
 
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-    ['equals', 'contains'/* add more over time as we build in support for them */ ].includes(value),
-    );
+	const theme = useTheme();
 
 	return (
-		<AdminLayout title={t("sidebar.mappings_button")}>
-			<Button variant="contained" onClick={openImport}>{t("mappings.import")}</Button>
-			<ServerPaginationGrid
-				query={getMappings}
-				type="referenceValueMappings"
-				coreType="referenceValueMappings"
-				columns={[{field: 'fromCategory', headerName: "Category", minWidth: 50, flex: 0.5, filterOperators},
-						{field: 'fromContext', headerName: "HostLMS", minWidth: 50, flex: 0.5, filterOperators},
-						{field: 'fromValue', headerName: "Local Value", minWidth: 50, flex: 0.4, filterOperators}, 
-						{field: 'label', headerName: "Meaning", minWidth: 50, flex: 0.5, filterOperators},
-						{field: 'toValue', headerName: "DCB value", minWidth: 50, flex: 0.5, filterOperators,
-						valueGetter: (params: { row: { toValue: any; }; }) => {
-							return capitalize(params.row.toValue);
-						}},	 
-						{field: 'last_imported', headerName: "Last imported", minWidth: 100, flex: 0.5, filterOperators, 							
-							valueGetter: (params: { row: { lastImported: any; }; }) => {
-							const lastImported = params.row.lastImported;
-							return dayjs(lastImported).format('YYYY-MM-DD HH:mm');
-						}}]}
-				noDataMessage={t("mappings.import_circulation_status")}
-				noResultsMessage={t("mappings.no_results")}
-				selectable={false}
-				sortModel={[{field: 'lastImported', sort: 'desc'}]}		
-				pageSize={10}
-				sortDirection="DESC"
-				sortAttribute="lastImported"
-			/>	
-			<div>
-			{ showImport ? <Import show={showImport}  onClose={closeImport}/> : null }
-    		</div>
+		<AdminLayout title={t("nav.mappings")}>
+			<List
+				component="nav"
+				aria-labelledby="mappings-title">
+				<ListItem component="nav" disablePadding>
+					<ListItemButton component="a" href="/mappings/allMappings">
+					<ListItemText primary={t("nav.allMappings")} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem component="nav" disablePadding>
+					<ListItemButton component="a" href="/mappings/circulationStatusMappings">
+					<ListItemText primary={t("nav.circulationStatusMappings")} />
+					</ListItemButton>
+				</ListItem>
+			</List>
 		</AdminLayout>
 	);
 };
@@ -84,4 +44,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	};
 };
 
-export default AllMappings;
+export default Mappings;

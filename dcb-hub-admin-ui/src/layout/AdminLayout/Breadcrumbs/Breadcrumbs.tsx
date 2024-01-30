@@ -8,15 +8,11 @@ import { useTranslation } from 'next-i18next';
 
 type BreadcrumbType = {
     href: string;
-    label: string;
     isCurrent: boolean;
+    translationKey: string;
 };
 
-type BreadcrumbProps = {
-  pageTitle?: string;
-}
-
-export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
+export default function Breadcrumbs () {
     const router = useRouter();
     const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbType[]>([]);
   
@@ -29,18 +25,14 @@ export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
   
       const breadcrumbs: BreadcrumbType[] = pathArray.map((path, index) => {
         const href = "/" + pathArray.slice(0, index + 1).join("/");
-        // checks if breadcrumb is last in the array
-        // it will use the page's title if it is, but use the path if it is not.
-        const label = index === pathArray.length - 1 ? (pageTitle || path) : (path.charAt(0).toUpperCase() + path.slice(1));
         return {
           href,
-          label,
           isCurrent: index === pathArray.length - 1,
+          translationKey: path
         };
       });
-  
       setBreadcrumbs(breadcrumbs);
-    }, [router.asPath, pageTitle]);
+    }, [router.asPath]);
 
     const { t } = useTranslation();
     const theme = useTheme(); 
@@ -56,18 +48,18 @@ export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
         // performs if breadcrumbs is last in the array.
         breadcrumb.href ? (
           <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
-            {breadcrumb.label}
+            {t("nav."+breadcrumb.translationKey)}
           </Link>
         ) : (
           // if it is null then use index as the key.
           <Typography sx={{color: theme.palette.primary.breadcrumbs,textWrap: 'wrap'}} key={index}>
-            {breadcrumb.label}
+            {t("nav."+breadcrumb.translationKey)}
           </Typography>
         )
       ) : (
         // renders if the breadcrumb is the last item.
         <Typography sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} key={breadcrumb.href}>
-          {breadcrumb.label}
+          {t("nav."+breadcrumb.translationKey)}
         </Typography>
       )
     ))
@@ -76,7 +68,7 @@ export default function Breadcrumbs ({ pageTitle }: BreadcrumbProps) {
 
     return (
         <MUIBreadcrumbs sx={{pl:3, pr:3}} separator={<MdArrowForwardIos/>}>
-          <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} href="/">{t("breadcrumbs.home_text")}</Link>
+          <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} href="/">{t("nav.home")}</Link>
           {mapBreadcrumbs()};
         </MUIBreadcrumbs>
     )

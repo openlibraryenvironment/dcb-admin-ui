@@ -33,8 +33,8 @@ const Profile: NextPage<Props> = (props) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
 	return (
-		<AdminLayout title={t("profile.title")} hideTitleBox={true}>
-						<Typography variant = "h2" sx={{pl: 2}}>{t("profile.title")}</Typography> 
+		<AdminLayout title={t("nav.profile")} hideTitleBox={true}>
+						<Typography variant = "h2" sx={{pl: 2}}>{t("nav.profile")}</Typography> 
 						<List className='list-profile'>
 						<ListSubheader sx={{backgroundColor: theme.palette.background.default }}>
 								<Typography variant = "h6">{t("profile.details")}</Typography> 

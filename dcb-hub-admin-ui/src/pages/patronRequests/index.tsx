@@ -15,7 +15,7 @@ const PatronRequests: NextPage = () => {
     );
 
 	return (
-		<AdminLayout title={t("sidebar.patron_request_button")}>
+		<AdminLayout title={t("nav.patronRequests")}>
 			<ServerPaginationGrid
 				query={getPatronRequests}
 				type="patronRequests"
