@@ -17,7 +17,8 @@ import
   MdOutput,
   MdDns,
   MdAccountBalance,
-  MdWorkspaces
+  MdWorkspaces,
+  MdMap
 }from 'react-icons/md';
 import { useMediaQuery } from '@mui/material';
 //localisation
@@ -105,19 +106,20 @@ export default function Sidebar(props:any) {
          
         <Divider />
         <List component = "nav">
-          {[t('sidebar.dashboard_page_button'), t('sidebar.patron_request_button'),
-          t('sidebar.agency_button'), t('sidebar.host_lms_button'), t('sidebar.location_button'), t('sidebar.groups_button'), t('sidebar.bib_button'), t('sidebar.settings_button')].map((text, index) => (
+          {[t('nav.home'), t('nav.patronRequests'),
+          t('nav.agencies'), t('nav.hostlmss'), t('nav.locations'), t('nav.groups'), t('nav.sourceBibs'), t('nav.mappings'), t('nav.settings')].map((text, index) => (
             <Link
               style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
               href=
               {
                 index === 0 ? '/': 
-                index=== 1 ? '/requests':
+                index=== 1 ? '/patronRequests':
                 index === 2 ? '/agencies':
                 index === 3 ? '/hostlmss':
                 index === 4 ? '/locations':
                 index === 5? '/groups':
                 index === 6? '/sourceBibs':
+                index === 7? '/mappings':
                 '/settings'
               }
               key={index}
@@ -151,8 +153,8 @@ export default function Sidebar(props:any) {
                 >
                     {index === 0 ? <MdHome size={20} /> : index === 1 ? <MdOutput size={20} /> :
                       index === 2 ? <MdAccountBalance size={20} /> : index === 3 ? <MdDns size={20} /> :
-                        index === 4 ? <MdLocationOn size={20} /> : index === 6 ? <MdBook size={20} /> :
-                          index === 7 ? <MdSettings size={20} /> : <MdWorkspaces size={20} />
+                        index === 4 ? <MdLocationOn size={20} /> : index === 6 ? <MdBook size={20} /> : 
+                        index === 7 ? <MdMap size={20} /> : index === 8 ? <MdSettings size={20} /> : <MdWorkspaces size={20} />
                     }
                 </ListItemIcon>
                 <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />

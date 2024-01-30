@@ -1,20 +1,25 @@
 {
-  "sidebar": {
-    "dashboard_page_button": "Home",
-    "patron_request_button": "Patron requests",
-    "agency_button": "Agencies",
-    "host_lms_button": "Host LMSs",
-    "location_button": "Locations",
-    "groups_button": "Groups",
-    "settings_button": "Settings",
-    "bib_button": "Bib records",
-    "mappings_button": "Mappings",
-    "mappings_category": "Mappings by category",
-    "circulation": "Circulation status mappings"
-  },
+  "nav": {
+    "agencies": "Agencies",
+    "sourceBibs": "Bib records",
+    "groups": "Groups",    
+    "home": "Home",
+    "hostlmss": "Host LMSs",
+    "locations": "Locations",
+    "login": "Login",
+    "logout": "Logout",
+    "mappings": "Mappings",
+    "allMappings": "All mappings",
+    "circulationStatusMappings": "Circulation status mappings",
+    "patronRequests": "Patron requests",
+    "profile": "Profile",
+    "settings": "Settings",
+    "settings_options": {
+      "name": "Settings"
+    }
+  }, 
   
   "profile": {
-    "title": "Profile",
     "details": "Your details",
     "name": "Name: ",
     "email": "Email: ",
@@ -218,14 +223,6 @@
     "search_placeholder": "Search by description"
   },
 
-  "settings": {
-    "settings": "Settings",
-    "mappings": "Mappings",
-    "all_mappings": "All mappings",
-    "circulation_status": "Circulation status mappings",
-    "shelving_location": "Shelving location mappings"
-  },
-
   "bibRecords": {
     "bib_records": "Bib records",
     "no_results": "No bib records found. Try changing your search terms or filters.",
@@ -284,5 +281,4 @@
     "go_back_text": "Go back to the ",
     "dashboard_text": "dashboard"
   }
-
 }

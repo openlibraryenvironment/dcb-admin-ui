@@ -44,7 +44,7 @@ export default function AdminLayout({ title, children, hideTitleBox }: PropsWith
 					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
 						<Box>
-							<Breadcrumbs pageTitle={title}/>
+							<Breadcrumbs/>
 						</Box>
 						{ /* Title
 							- height: 90px & p: 3 - this is to make the text appear centered

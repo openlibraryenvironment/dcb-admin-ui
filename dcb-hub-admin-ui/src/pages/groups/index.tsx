@@ -31,7 +31,7 @@ const Groups: NextPage = () => {
     );
 
 	return (
-		<AdminLayout data-tid="groups-title" title={t("sidebar.groups_button")}>
+		<AdminLayout data-tid="groups-title" title={t("nav.groups")}>
 			<Button data-tid="new-group-button" variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
 			<ServerPaginationGrid
 				query={groupsQueryDocument} 

@@ -29,7 +29,7 @@ const Agencies: NextPage = () => {
     );
 
 	return (
-		<AdminLayout title={t("sidebar.agency_button")}>
+		<AdminLayout title={t("nav.agencies")}>
 			<div>
 			<Button data-tid="add-agencies-to-group" variant = 'contained' onClick={openAddToGroup} > {t("agencies.add_to_group")}</Button>
 			<ServerPaginationGrid

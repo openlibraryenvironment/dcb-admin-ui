@@ -74,7 +74,7 @@ export default function Header(props:any) {
                       onClick={handleClick}
                       sx={{ color: theme.palette.primary.headerText}}
                       >
-                        {(status === "authenticated" ? "Logout" : "Login")}
+                        {(status === "authenticated" ? t("nav.logout"): t("nav.login"))}
                     </Button>
                   </div>
                 </Toolbar>
