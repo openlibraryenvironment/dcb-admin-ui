@@ -92,7 +92,7 @@ function MyApp(props: MyAppProps) {
                     titleArea: prefersDarkMode? '#1E1E1E': '#FFFFFF',
                     footerArea: prefersDarkMode? '#000000': '#EBEBEB',
                     link: prefersDarkMode? '#B3E5FC': '#0C4068',
-                    breadcrumbs: prefersDarkMode? '#35B7FF': '#1976D2',
+                    breadcrumbs: prefersDarkMode? '#35B7FF': '#246F9E',
                 },
                 background: {
                     default: prefersDarkMode? '#1E1E1E': '#FFFFFF'
