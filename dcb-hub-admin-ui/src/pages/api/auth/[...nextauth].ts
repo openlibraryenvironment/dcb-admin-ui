@@ -31,9 +31,8 @@ const refreshAccessToken = async (token: JWT) => {
 	params,
 	{ headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } )
 	.then((refresh_response) => {
-		console.info("Keycloak request made in nextauth, new token is", refresh_response.data.access_token)
+		console.info("Keycloak request made in nextauth.")
 		const new_token = refresh_response.data;
-		console.log("The new token", new_token, "will expire at", new_token.accessTokenExpires, "and in ", new_token.expires_in);
 		return {
 			...token,
 			accessToken: new_token.access_token,
@@ -43,7 +42,6 @@ const refreshAccessToken = async (token: JWT) => {
 		})
 		.catch((error) => {
 			console.log("Error attempting to refresh token %o",error);
-			console.log("Failed token, ", token, "and status", error.status);
 			return { ...token, error: "RefreshAccessTokenError"}
 		})
 }

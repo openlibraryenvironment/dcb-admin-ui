@@ -3,7 +3,7 @@ import { DocumentNode, useQuery } from '@apollo/client';
 import { useCallback, useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles'; // Import separately due to this issue https://github.com/vercel/next.js/issues/55663
 import { Box, Typography } from '@mui/material';
-import Details from '@components/Details/Details';
+import { useRouter } from 'next/router';
 
 const StyledOverlay = styled('div')(() => ({
     display: 'flex',
@@ -20,6 +20,7 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
   // GraphQL data comes in an array that's named after the core type, which causes problems
   const [sortOptions, setSortOptions] = useState({field: "", direction: ""});
   const [filterOptions, setFilterOptions] = useState("");
+  const router = useRouter();
 
   // TODO in future work:
   // Support filtering by date on Patron Requests
@@ -127,8 +128,8 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
                     setFilterOptions(`fromCategory:${sanitisedFilterValue}*`);
                     break;
                   case "agencies":
-                  case "agencyGroups":
-                  case "hostLms":
+                  case "groups":
+                  case "hostlmss":
                   case "locations":
                     setFilterOptions(`name:*${sanitisedFilterValue}*`);
                     break;
@@ -185,21 +186,12 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
     );
   }, [data, setRowCountState, coreType]);
 
-  // For grid click-through, presently to the Details page.
-  // Details will be changing to use parameterised links (i.e. requests/{requestId}) and so this will need to change too.
-
-  const [showDetails, setShowDetails] = useState(false);
-  const [idClicked, setIdClicked] = useState(42);
-  
-  const closeDetails = () => {
-      setShowDetails(false);
-  };
-
-  // Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' panel.
+  // Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' page.
+  // And formulate the correct URL
+  // plurals are used for types to match URL structure.
   const handleRowClick: GridEventListener<'rowClick'> = (params) => {
       if (type !== "GroupDetails" && type !== "referenceValueMappings" && type !== "Audit" && type !== "circulationStatus") {
-          setShowDetails(true);
-          setIdClicked(params?.row?.id);
+            router.push(`/${type}/${params?.row?.id}`)
       }
   };
 
@@ -258,7 +250,6 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
             showQuickFilter: true,
             }, }}
       />
-     { showDetails ? <Details i={idClicked} content = {data?.[type]?.content ?? []} show={showDetails}  onClose={closeDetails} type={type} /> : null }
       </div>
   );
 }

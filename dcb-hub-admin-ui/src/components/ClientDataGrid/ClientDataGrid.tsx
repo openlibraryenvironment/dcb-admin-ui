@@ -1,13 +1,12 @@
-import Details from "@components/Details/Details";
 import Link from "@components/Link/Link";
 import { Box, Typography } from "@mui/material";
 import { styled } from '@mui/material/styles';
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener } from "@mui/x-data-grid";
-import { useState } from "react";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving 
 // This is our Data Grid for the Details pages, which still require client-side pagination. 
+// For example, displaying Agency Group Members.
 const StyledOverlay = styled('div')(() => ({
     display: 'flex',
     flexDirection: 'column',
@@ -40,12 +39,7 @@ export default function ClientDataGrid<T extends Object>({
     columnVisibilityModel?: any;
     sortModel?: any
 }) {
-    // When passing a type into DataGrid, use the singular - 'Group' not Groups etc.
-    // This ensures consistency with Details.
     // The slots prop allows for customisation https://mui.com/x/react-data-grid/components/ 
-
-    // State management variables for the Details panel.
-
     // This overlay displays when there is no data in the grid.
     // It takes a title, message, and if needed a link for the user to take action.
     // These must be supplied as props for each usage of the DataGrid that wishes to use them,
@@ -62,25 +56,7 @@ export default function ClientDataGrid<T extends Object>({
         );
     }
 
-    const [showDetails, setShowDetails] = useState(false);
-	const [idClicked, setIdClicked] = useState(42);
-	
-	const closeDetails = () => {
-		setShowDetails(false);
-	};
-
-    // Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' panel.
-    const handleRowClick: GridEventListener<'rowClick'> = (params) => {
-        if (type !== "GroupDetails" && type !== "CirculationStatus" && type !== "All Mappings" && type !== "Audit") {
-            setShowDetails(true);
-            setIdClicked(params?.row?.id);
-        }
-	};
-    // Disable click-through on mappings for now ^^.
-
-
     return (
-        // may have to fix height for no data overlay to display
         <div>
         <MUIDataGrid
             // Makes sure scrollbars aren't visible
@@ -92,19 +68,8 @@ export default function ClientDataGrid<T extends Object>({
             }}
             //DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
             experimentalFeatures={{ ariaV7: true }}
-            // determines whether we allow row selection
             checkboxSelection={selectable}
-            // These variables have been commented out until server-side pagination is working.
-            // For server-side filtering - we'd need to implement our own onFilterChange handler. Similar practice for sorting https://mui.com/x/react-data-grid/sorting/#server-side-sorting
-            // filterMode="server"
-            // onFilterModelChange={onFilterChange}
-            // paginationMode: will be set to server permanently once server-side pagination is working.
-            // paginationMode = "server"
-            // we can also have a custom pagination component, see here for details https://mui.com/x/react-data-grid/components/#pagination 
-            // Currently set to default until server side pagination is working.
             pagination
-            // autoHeight={true}
-            onRowClick={handleRowClick}
             disableRowSelectionOnClick  
             initialState={{
                     filter: {
@@ -116,7 +81,6 @@ export default function ClientDataGrid<T extends Object>({
                             },
                             },
                     pagination: {
-                        // To be replaced with server side pagination
                                 paginationModel: { pageSize: 25, page: 0 },
                     },
                     // Handles whether columns are visible or not - pass the relevant model in (see requests)
@@ -143,11 +107,6 @@ export default function ClientDataGrid<T extends Object>({
                 showQuickFilter: true,
                 },
         }}></MUIDataGrid> 
-        	{/* // conditional rendering to only show details when clicked on.
-	        // Our data has been passed down through the content prop, along with the associated id as the i prop.
-	        // This means we can find what we need in the array in Details.tsx and display only the relevant information for a given request.
-	        // We also pass down type to indicate that we need the 'Request' details only.  */}
-        { showDetails ? <Details i={idClicked} content = {data ?? []} show={showDetails}  onClose={closeDetails} type={type} /> : null }
         </div>
  
     )

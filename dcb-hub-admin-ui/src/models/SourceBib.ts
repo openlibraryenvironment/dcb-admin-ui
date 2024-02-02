@@ -1,6 +1,11 @@
 export interface SourceBib {
-    id: String;
-    title: String;
-    author: String;
+    id: string;
+    title: string;
+    author: string;
     contributesTo: any;
+    sourceRecord: any;
+    canonicalMetadata: any;
+    sourceRecordId: string;
+    sourceSystemId: string;
+    
 }

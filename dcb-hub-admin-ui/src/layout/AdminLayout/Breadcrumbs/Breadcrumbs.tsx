@@ -59,7 +59,7 @@ export default function Breadcrumbs () {
       ) : (
         // renders if the breadcrumb is the last item.
         <Typography sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} key={breadcrumb.href}>
-          {t("nav."+breadcrumb.translationKey)}
+          {breadcrumb.translationKey.length == 36 ? breadcrumb.translationKey : t("nav."+breadcrumb.translationKey)}
         </Typography>
       )
     ))

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AdminLayout } from '@layout';
 import { Button } from '@mui/material';
 import NewGroup from './NewGroup';
-import { groupsQueryDocument } from 'src/queries/queries';
+import { getGroups } from 'src/queries/queries';
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 //localisation
 import { useTranslation } from 'next-i18next';
@@ -13,7 +13,7 @@ import { getGridStringOperators } from '@mui/x-data-grid';
 // Groups Feature Page Structure
 // This page shows the list of groups
 // New Group is the (modal) form to add a group
-// View Group will be a Details page with type 'Group'
+// [groupId].tsx is the 'Details' page.
 // In /agencies, there is the Add Agencies to Group form.
 
 const Groups: NextPage = () => {
@@ -34,9 +34,9 @@ const Groups: NextPage = () => {
 		<AdminLayout data-tid="groups-title" title={t("nav.groups")}>
 			<Button data-tid="new-group-button" variant="contained" onClick={openNewGroup} > {t("groups.type_new")}</Button>
 			<ServerPaginationGrid
-				query={groupsQueryDocument} 
+				query={getGroups} 
 				coreType="agencyGroups"
-				type="agencyGroups"
+				type="groups"
 				columns={[ {field: 'name', headerName: "Group name", minWidth: 150, flex: 0.5, filterOperators}, 
 						   {field: 'id', headerName: "Group ID", minWidth: 100, flex: 0.5, filterOperators}, 
 						   {field: 'code', headerName: "Group code", minWidth: 50, flex: 0.5, filterOperators}]}	
