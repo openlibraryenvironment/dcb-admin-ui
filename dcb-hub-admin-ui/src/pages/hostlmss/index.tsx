@@ -17,7 +17,7 @@ const HostLmss: NextPage = () => {
 			<ServerPaginationGrid
 				query={getHostLms} 
 				coreType="hostLms"
-				type="hostLms"
+				type="hostlmss"
 				columns={[ {field: 'name', headerName: "HostLMS name", minWidth: 150, flex: 1, filterOperators}, 
 						{field: 'id', headerName: "HostLMS ID", minWidth: 100, flex: 0.5,filterOperators}, 
 						{field: 'code', headerName: "HostLMS code", minWidth: 50, flex: 0.5, filterOperators}]}	

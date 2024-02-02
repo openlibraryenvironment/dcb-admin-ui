@@ -1,7 +1,7 @@
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next';
 import { AdminLayout } from '@layout';
 import { useTranslation } from 'next-i18next';
-import { searchBibs } from 'src/queries/queries';
+import { getBibs } from 'src/queries/queries';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
@@ -20,7 +20,7 @@ const SourceBibs: NextPage = () => {
     const BibsDisplay = () => {
         return(
                 <ServerPaginationGrid 
-                    query={searchBibs} 
+                    query={getBibs} 
                     type="sourceBibs"
                     coreType="sourceBibs"
                     selectable={true} 
