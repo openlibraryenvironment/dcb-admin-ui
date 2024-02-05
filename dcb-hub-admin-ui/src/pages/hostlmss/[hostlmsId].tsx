@@ -314,12 +314,6 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         </AccordionSummary>
                         <AccordionDetails>
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-                        {hostlms?.clientConfig?.services?.language!= null ? 
-                        <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_language")}</span>
-                                </Typography> 
-                                {hostlms?.clientConfig?.services?.language}
-                        </Grid>: null}
                         {hostlms?.clientConfig?.services?.['product-id']!= null ? 
                         <Grid xs={2} sm={4} md={4}>
                                 <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_product_id")}</span>

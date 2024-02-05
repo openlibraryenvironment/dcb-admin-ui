@@ -51,30 +51,6 @@ export const getAgencies = gql`
             id
             code
             name
-            authProfile
-            longitude
-            latitude
-            hostLms {
-                id
-                code
-                name
-                lmsClientClass
-                clientConfig
-            }
-            locations {
-                id
-                dateCreated
-                dateUpdated
-                code
-                name
-                type
-                isPickup
-                longitude
-                latitude
-                locationReference
-                deliveryStops
-                printLabel
-            }
         }
         pageable {
             number

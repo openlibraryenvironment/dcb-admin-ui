@@ -193,12 +193,6 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.patron_hostlms")}</span>
-                                        </Typography>
-                                        {patronRequest?.patronHostlmsCode}
-                                </Grid>
-                                <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
                                         <span style={{ fontWeight: 'bold' }}>{t("details.local_item_id")}</span>
                                         </Typography>
                                         {patronRequest?.localItemId}
