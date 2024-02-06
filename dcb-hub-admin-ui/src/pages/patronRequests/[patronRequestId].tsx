@@ -355,7 +355,7 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_status")}</span>
+                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_request_status")}</span>
                                                 </Typography>
                                                 {patronRequest?.suppliers[0]?.localStatus}
                                                 </Grid>
