@@ -24,7 +24,11 @@ declare module '@mui/material/styles' {
 	interface PaletteColor {
 	  foreground1?: string;
 	  linkText?: string;
-	  selected?: string;
+	  buttonForSelectedPage?: string;
+	  selectedText?: string;
+	  hover?: string;
+	  hoverOnSelectedPage?: string;
+	  buttonForSelectedChildPage?: string;
 	  sidebar?: string;
 	  titleArea?: string;
 	  link?: string;
@@ -38,7 +42,11 @@ declare module '@mui/material/styles' {
 	interface SimplePaletteColorOptions {
 	  foreground1?: string;
 	  linkText?: string;
-	  selected?: string;
+	  buttonForSelectedPage?: string;
+	  selectedText?: string;
+	  hover?: string;
+	  hoverOnSelectedPage?: string;
+	  buttonForSelectedChildPage?: string;
 	  sidebar?: string;
 	  titleArea?: string;
 	  link?: string;
@@ -84,7 +92,11 @@ function MyApp(props: MyAppProps) {
                 primary: {
                     main: prefersDarkMode? '#35B7FF': '#287BAF',
                     linkText: prefersDarkMode? '#35B7FF': '#246F9E',
-                    selected: prefersDarkMode? '#424242': '#EEEEEE',
+                    buttonForSelectedPage: '#287BAF',
+					selectedText: '#FFFFFF',
+					hover: prefersDarkMode? '#424242': '#EEEEEE',
+					hoverOnSelectedPage: prefersDarkMode? '#424242': '#A9A9A9',
+					buttonForSelectedChildPage: '#999999',
                     sidebar: prefersDarkMode? '#292929': '#F6F6F6',
                     header: prefersDarkMode? '#000000': '#0C4068',
                     headerText: '#FFFFFF',
