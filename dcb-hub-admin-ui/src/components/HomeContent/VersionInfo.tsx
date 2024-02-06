@@ -66,11 +66,18 @@ export default function VersionInfo(){
 		getServerInformation();
 	}, [apiEndpoints]);
 
+	const renderVersionData = (data: any) => {
+		if (typeof data === 'string' && data.trim() !==  ''){
+			return data;
+		}
+		return 'NA';
+	}
+
     const VersionData = [
 		[<Link key="dcb-service" href={REPO_LINKS.SERVICE} target='_blank' rel="noreferrer">{t('app.component.service')}</Link>, 
 		<Link key="dcb-service-version" href={RELEASE_PAGE_LINKS.SERVICE} target='_blank' rel="noreferrer">
-			{githubServiceData ? (JSON.stringify(githubServiceData.name).replace(/"/g, '')):('Loading release information...')}
-		</Link>, serviceData ? (JSON.stringify(serviceData.git.tags).replace(/"/g, '')): ('Loading version information...')],
+			{githubServiceData ? (renderVersionData(JSON.stringify(githubServiceData.name).replace(/"/g, ''))):('Loading release information...')}
+		</Link>, serviceData ? (renderVersionData(JSON.stringify(serviceData.git.tags).replace(/"/g, ''))): ('Loading version information...')],
 
 		[<Link key="dcb-locate" href={REPO_LINKS.LOCATE} target='_blank' rel="noreferrer">{t('app.component.locate')}</Link>, 
 		<Link key="dcb-locate-version" href={RELEASE_PAGE_LINKS.LOCATE} target='_blank' rel="noreferrer">
@@ -79,12 +86,12 @@ export default function VersionInfo(){
 
 		[<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">{t('app.component.admin')}</Link>, 
 		<Link key="dcb-admin-ui-version" href={RELEASE_PAGE_LINKS.ADMIN_UI} target='_blank' rel="noreferrer">
-			{adminUiData ? (JSON.stringify(adminUiData.name).replace(/"/g, '')):('Loading release information...')}
+			{adminUiData ? (renderVersionData(JSON.stringify(adminUiData.name).replace(/"/g, ''))):('Loading release information...')}
 		</Link>, publicRuntimeConfig?.version],
 
 		[<Link key="dcb-dev-ops" href={REPO_LINKS.DEVOPS} target='_blank' rel="noreferrer">{t('app.component.devops')}</Link>,
 		<Link key="dcb-dev-ops-version" href={RELEASE_PAGE_LINKS.DEVOPS} target='_blank' rel="noreferrer">
-			{devopsData ? (JSON.stringify(devopsData.name).replace(/"/g, '')):('Loading release information...')}
+			{devopsData ? (renderVersionData(JSON.stringify(devopsData.name).replace(/"/g, ''))):('Loading release information...')}
 		</Link>, <Typography key='na'>{t('common.na')}</Typography>],
 
 		[<Link key="dcb-keycloak-extensions" href={REPO_LINKS.KEYCLOAK} target='_blank' rel="noreferrer">{t('app.component.keycloak')}</Link>,
