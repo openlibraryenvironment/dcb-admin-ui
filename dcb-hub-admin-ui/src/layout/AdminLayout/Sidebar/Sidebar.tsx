@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { styled, Theme, CSSObject, useTheme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 import MuiDrawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -8,8 +11,9 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Link from '@components/Link/Link';
-import
-{ MdLocationOn, 
+import { useRouter } from "next/router";
+import {
+  MdLocationOn,
   MdMenu,
   MdSettings,
   MdBook,
@@ -20,10 +24,6 @@ import
   MdWorkspaces,
   MdMap
 }from 'react-icons/md';
-import { useMediaQuery } from '@mui/material';
-//localisation
-import { useTranslation } from 'next-i18next';
-import { useState } from 'react';
 
 const drawerWidth = 240;
 
@@ -75,18 +75,90 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
+const SidebarIcon = (indexVal: any, isSelected: boolean) => {
+  const iconProps = { size: 20, color: isSelected ? 'white' : 'inherit' };
+  switch (indexVal) {
+    case 0: return <MdHome {...iconProps} />;
+    case 1: return <MdOutput {...iconProps} />;
+    case 2: return <MdAccountBalance {...iconProps} />;
+    case 3: return <MdDns {...iconProps} />;
+    case 4: return <MdLocationOn {...iconProps} />;
+    case 5: return <MdWorkspaces {...iconProps} />;
+    case 6: return <MdBook {...iconProps} />;
+    case 7: return <MdMap {...iconProps} />;
+    case 8: return <MdSettings {...iconProps} />;
+    default: return null;
+  }
+};
+
+type routes = {
+  path: string;
+  translationKey: string;
+};
+
+const routes = [
+  {path: '/', translationKey: 'nav.home'},
+  {path: '/patronRequests', translationKey: 'nav.patronRequests'},
+  {path: '/agencies', translationKey: 'nav.agencies'},
+  {path: '/hostlmss', translationKey: 'nav.hostlmss'},
+  {path: '/locations', translationKey: 'nav.locations'},
+  {path: '/groups', translationKey: 'nav.groups'},
+  {path: '/sourceBibs', translationKey: 'nav.sourceBibs'},
+  {path: '/mappings', translationKey: 'nav.mappings'},
+  // currently unused, may be un-commented in the future
+  //{path: '/settings', translationKey: 'nav.settings'}
+];
+
+
 export default function Sidebar(props:any) {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const { t } = useTranslation();
   const theme = useTheme();
-  const [selected, setSelected] = useState(false);
+  const router = useRouter();
+  const [selected, setSelected] = useState(-1);
+  const [isDisabled, setDisabled] = useState(-1);
+  const [isChildPage, setChildPage] = useState(false);
+
+  // for maintaining highlight and disabled on button, on re-renders
+  useEffect(() => {
+    const currentRoute = router.pathname;
+    /*
+      checks if any path value in the roots array is equal to the currentRoute,
+      returns -1 if not.
+    */
+    const currentIndex = routes.findIndex(route => route.path === currentRoute);
+    // checks if any value in the array exactly matches the path
+    const isExactRoute = routes.some((route) => route.path === currentRoute);
+    // to dismiss '/' from counting as a parent page
+    const homeRemovedFromArray = routes.slice(1);
+    const isChildRoute = homeRemovedFromArray.some((route)=> currentRoute.startsWith(route.path));
+
+    if (isChildRoute && !isExactRoute) {
+      const parentIndex = homeRemovedFromArray.findIndex(route => currentRoute.startsWith(route.path));
+
+      setChildPage(true);
+      setSelected((prev) => (parentIndex !== -1 ? parentIndex : prev)+1);
+    }
+
+    /*
+      keep unchanged if the route is not found in the array
+    */
+    setSelected((prev) => (currentIndex !== -1 ? currentIndex : prev));
+    setDisabled((prev) => (currentIndex !== -1 ? currentIndex : prev));
+  }, [router.pathname]);
+
+  const handleListButtonClick = (
+    index: number,
+  ) => {
+    setSelected(index);
+    setDisabled(index);
+  }
+
 
   return (
     <>
     {props.openStateOpen && (
     <Drawer variant="permanent" open={props.openStateOpen}>
-            {props.openStateOpen && (
-
+      {props.openStateOpen && (
         <DrawerHeader>
             <IconButton
             color="inherit"
@@ -102,65 +174,48 @@ export default function Sidebar(props:any) {
             <MdMenu />
           </IconButton>
         </DrawerHeader>
-         )}
-         
+      )}
         <Divider />
         <List component = "nav">
-          {[t('nav.home'), t('nav.patronRequests'),
-          t('nav.agencies'), t('nav.hostlmss'), t('nav.locations'), t('nav.groups'), t('nav.sourceBibs'), t('nav.mappings'), t('nav.settings')].map((text, index) => (
-            <Link
-              style={{textDecoration: 'none', color: prefersDarkMode? 'white': '#121212'}}
-              href=
-              {
-                index === 0 ? '/': 
-                index=== 1 ? '/patronRequests':
-                index === 2 ? '/agencies':
-                index === 3 ? '/hostlmss':
-                index === 4 ? '/locations':
-                index === 5? '/groups':
-                index === 6? '/sourceBibs':
-                index === 7? '/mappings':
-                '/settings'
-              }
-              key={index}
-            >
-            <ListItem id={text.replace(/\s/g, "")} key={text} component="nav" disablePadding sx={{ display: 'block' }}>
+          {routes.map((route, index) => (
+            <ListItem id={route.translationKey.replace(/\s/g, "")} key={route.translationKey} component="nav" disablePadding sx={{ display: 'block' }}>
               <ListItemButton
-                  selected={selected}
-                  onClick={() => setSelected((prev) => !prev)}
+                  LinkComponent={Link}
+                  href={route.path}
+                  selected={selected === index}
+                  onClick={(event) => handleListButtonClick(index)}
+                  disabled={isDisabled === index}
                   sx={{
                   minHeight: 48,
                   justifyContent: props.openStateOpen ? 'initial' : 'center',
                   px: 2.5,
-                  // "&.Mui-selected": {
-                  //   backgroundColor: theme.palette.primary.selected
-                  // },
-                  "&.Mui-focusVisible": {
-                    backgroundColor: theme.palette.primary.selected
+                  "&.Mui-selected": {
+                    backgroundColor: isChildPage ? theme.palette.primary.buttonForSelectedChildPage : theme.palette.primary.buttonForSelectedPage,
+                    fontWeight: 'bold',
+                    color: theme.palette.primary.selectedText,
+                    ':hover': {
+                      backgroundColor: theme.palette.primary.hoverOnSelectedPage
+                    }
                   },
-                  ":hover": {
-                    backgroundColor: theme.palette.primary.selected
+                  "&.Mui-disabled": {
+                    opacity: '100'
                   }
                 }}
+                aria-current={selected === index ? 'page' : undefined}
               >
                 <ListItemIcon
                   onClick={props.openStateFuncOpen}
                   sx={{
                     minWidth: 0,
                     mr: props.openStateOpen ? 3 : 'auto',
-                    justifyContent: 'center',
+                    justifyContent: 'center'
                   }}
                 >
-                    {index === 0 ? <MdHome size={20} /> : index === 1 ? <MdOutput size={20} /> :
-                      index === 2 ? <MdAccountBalance size={20} /> : index === 3 ? <MdDns size={20} /> :
-                        index === 4 ? <MdLocationOn size={20} /> : index === 6 ? <MdBook size={20} /> : 
-                        index === 7 ? <MdMap size={20} /> : index === 8 ? <MdSettings size={20} /> : <MdWorkspaces size={20} />
-                    }
+                {SidebarIcon(index, selected === index)}
                 </ListItemIcon>
-                <ListItemText primary={text} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
+                <ListItemText primary={t(route.translationKey)} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
               </ListItemButton>
             </ListItem>
-            </Link>
           ))}
           </List>
         <Divider />
