@@ -183,15 +183,15 @@ export default function Sidebar(props:any) {
                   LinkComponent={Link}
                   href={route.path}
                   selected={selected === index}
-                  onClick={(event) => handleListButtonClick(index)}
+                  onClick={() => handleListButtonClick(index)}
                   disabled={isDisabled === index}
+                  aria-current={(isChildPage ? undefined : (selected === index ? 'page' : undefined))}
                   sx={{
                   minHeight: 48,
                   justifyContent: props.openStateOpen ? 'initial' : 'center',
                   px: 2.5,
                   "&.Mui-selected": {
                     backgroundColor: isChildPage ? theme.palette.primary.buttonForSelectedChildPage : theme.palette.primary.buttonForSelectedPage,
-                    fontWeight: 'bold',
                     color: theme.palette.primary.selectedText,
                     ':hover': {
                       backgroundColor: theme.palette.primary.hoverOnSelectedPage
@@ -201,7 +201,6 @@ export default function Sidebar(props:any) {
                     opacity: '100'
                   }
                 }}
-                aria-current={selected === index ? 'page' : undefined}
               >
                 <ListItemIcon
                   onClick={props.openStateFuncOpen}
@@ -213,7 +212,11 @@ export default function Sidebar(props:any) {
                 >
                 {SidebarIcon(index, selected === index)}
                 </ListItemIcon>
-                <ListItemText primary={t(route.translationKey)} sx={{ opacity: props.openStateOpen ? 1 : 0 }} />
+                <ListItemText
+                  primary={t(route.translationKey)}
+                  sx={{ opacity: props.openStateOpen ? 1 : 0}}
+                  primaryTypographyProps={{fontWeight: selected === index ? 'bold' : 'normal'}}
+                />
               </ListItemButton>
             </ListItem>
           ))}
