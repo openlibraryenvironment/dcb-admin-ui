@@ -1,3 +1,21 @@
+# [1.4.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.3.1...v1.4.0) (2024-02-08)
+
+
+### Bug Fixes
+
+* Adjust margins and breadcrumb wrapping [DCB-466] ([89ffe5c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/89ffe5c02feadaebd54e1eaa9ed7ff8853d2c584))
+* Adjust padding for admin layout [DCB-466] ([5960301](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/596030184b891ca5dd57969bcfa68afd62093080))
+* Clean up query and details fields [DCB-856] ([909336d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/909336d7477a131a679b43215fb729ec28561bb6))
+* Fixed incorrect filtering behaviours and updated tests [DCB-480] ([e333cf5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e333cf586cb78b584f615e5a61393ff50bc1826c))
+* handle unexpected data ([01e05c6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/01e05c6f3e2b6307d0b2082f24be59774123fb28))
+* Update breadcrumbs to use translation keys [DCB-818] ([50c7ecf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/50c7ecf5f49f1e2c12316ef755f391982f58ec8d))
+
+
+### Features
+
+* Indicate the current section in the sidebar menu [DCB-835] ([ae15cd6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ae15cd6f83daf17aba0c009dffe755807842026c))
+* Transition to new base theme [DCB-836] ([080f7e7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/080f7e7359cfc36414ab6f20d85dd4ff6a7dc8d1))
+
 ## [1.3.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.3.0...v1.3.1) (2024-01-17)
 
 
