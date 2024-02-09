@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material";
 import { styled } from '@mui/material/styles';
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import { DataGrid as MUIDataGrid, GridToolbar, GridEventListener } from "@mui/x-data-grid";
+import { useRouter } from "next/router";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving 
 // This is our Data Grid for the Details pages, which still require client-side pagination. 
@@ -56,6 +57,16 @@ export default function ClientDataGrid<T extends Object>({
         );
     }
 
+    const router = useRouter();
+
+    // If audit, allow a click-through so the user can access more audit info
+    const handleRowClick: GridEventListener<'rowClick'> = (params) => {
+        if (type == "Audit")
+        {
+            router.push(`/patronRequests/audits/${params?.row?.id}`)
+        }
+    }
+
     return (
         <div>
         <MUIDataGrid
@@ -70,7 +81,8 @@ export default function ClientDataGrid<T extends Object>({
             experimentalFeatures={{ ariaV7: true }}
             checkboxSelection={selectable}
             pagination
-            disableRowSelectionOnClick  
+            disableRowSelectionOnClick
+            onRowClick={handleRowClick}
             initialState={{
                     filter: {
                             // initiate the filter models here

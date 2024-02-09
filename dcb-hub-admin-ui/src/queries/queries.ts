@@ -95,6 +95,25 @@ export const getAgencyById = gql`
     }
 }`;
 
+// AUDITS
+
+export const getAuditById = gql`
+    query GetAuditById($query: String!) {
+        audits(query: $query) {
+            content {
+                id
+                auditDate
+                briefDescription
+                fromStatus
+                toStatus
+                auditData
+                patronRequest {
+                    id
+                }
+            }
+        }
+    }  
+`;
 // BIB RECORDS
 
 // Gets bibs for the data grid
