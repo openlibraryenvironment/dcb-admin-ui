@@ -57,7 +57,7 @@ export async function getServerSideProps(ctx: any) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
 	}
     const session = await getSession(ctx);
-    const groupId = ctx.params.groupId
+    const groupId = ctx.params.groupId;
     const client = createApolloClient(session?.accessToken);
     const { data } = await client.query({
         query: getGroupById,

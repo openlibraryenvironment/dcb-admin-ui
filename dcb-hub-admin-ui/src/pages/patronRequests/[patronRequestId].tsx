@@ -441,15 +441,16 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                                         valueGetter: (params: { row: { auditDate: any; }; }) => {
 								const auditDate = params.row.auditDate;
 								return dayjs(auditDate).format('YYYY-MM-DD HH:mm:ss'); }},
-                                                        {field: 'briefDescription', headerName: "Description", minWidth: 100, flex: 0.5},
+                                                        {field: 'briefDescription', headerName: "Description", minWidth: 100, flex: 0.6},
                                                         {field: 'fromStatus', headerName: "fromStatus", minWidth: 50, flex: 0.2}, 
                                                         {field: 'toStatus', headerName: "toStatus", minWidth: 50, flex: 0.2}, ]}	
                                                 type = "Audit"
                                                 // This grid could show click-through details of its own for each audit log entry
                                                 selectable= {false}
-                                                noDataTitle={"No audit log found."}
-                                                noDataMessage={"Try changing your filters or search terms."}
+                                                noDataTitle={t("details.audit_log_no_data")}
+                                                noDataMessage={t("details.audit_log_no_rows")}
                                                 />
+                                                <pre>{JSON.stringify(patronRequest?.audit?.auditData, null, 2)}</pre>
                                         </AccordionDetails>
                         </Accordion>
         </AdminLayout>
