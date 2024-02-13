@@ -48,7 +48,7 @@ export default function ClientDataGrid<T extends Object>({
     function CustomNoDataOverlay() {
         return (
             <StyledOverlay>
-            <Box sx={{ mt: 1 }}>
+            <Box>
                 <Typography variant="body1"> {noDataTitle} </Typography>
                 {noDataLink? <Link href={noDataLink}> {noDataMessage} </Link> : 
                 <Typography variant ="body1"> {noDataMessage} </Typography>}
@@ -73,7 +73,13 @@ export default function ClientDataGrid<T extends Object>({
             // Makes sure scrollbars aren't visible
             sx={{
                 ".MuiDataGrid-virtualScroller": {
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                },
+                // this styling only applies to a wrapper that appears when there is no data
+                ".MuiDataGrid-overlayWrapper": {
+                    minHeight: 100,
+                    minWidth: '100%',
+                    textAlign: 'center',
                 },
                 border: '0'
             }}
