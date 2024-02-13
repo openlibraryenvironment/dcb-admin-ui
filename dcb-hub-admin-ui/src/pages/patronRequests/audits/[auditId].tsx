@@ -65,9 +65,11 @@ export default function AuditDetails( {audit}: AuditDetails) {
                     </Typography>
                     <pre>{JSON.stringify(audit?.auditData, null, 2)}</pre>
                 </Grid>
-                <Button variant="contained" onClick={handleReturn}>
-                    {t("details.patron_request_return")}
-                </Button>
+                <Grid xs={2} sm={4} md={4}>
+                    <Button variant="contained" onClick={handleReturn}>
+                        {t("details.patron_request_return")}
+                    </Button>
+                </Grid>
             </Grid>
         </AdminLayout>
     )
