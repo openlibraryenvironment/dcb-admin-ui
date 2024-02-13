@@ -1,5 +1,5 @@
 import { AdminLayout } from "@layout";
-import { SourceBib } from "@models/SourceBib";
+import { Bib } from "@models/Bib";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import createApolloClient from "apollo-client";
@@ -12,11 +12,11 @@ import { MdExpandMore } from "react-icons/md";
 import { getBibById } from "src/queries/queries";
 
 
-type SourceBibDetails = {
-    sourceBib: SourceBib
+type BibDetails = {
+    bib: Bib
 };
 
-export default function SourceBibDetails( {sourceBib}: SourceBibDetails) {
+export default function SourceBibDetails( {bib}: BibDetails) {
         const { t } = useTranslation();
         const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
         // Functions to handle expanding both individual accordions and all accordions
@@ -33,7 +33,7 @@ export default function SourceBibDetails( {sourceBib}: SourceBibDetails) {
                 setExpandedAccordions((prevExpanded) => prevExpanded.map(() => !prevExpanded[0]));
         };
         return (
-        <AdminLayout title={sourceBib?.title}>
+        <AdminLayout title={bib?.title}>
                 <Stack direction="row" justifyContent="end">
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}
                         </Button>
@@ -42,37 +42,37 @@ export default function SourceBibDetails( {sourceBib}: SourceBibDetails) {
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_bib_id")}</span>
                         </Typography>
-                        {sourceBib?.id}
+                        {bib?.id}
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.title")}</span>
                         </Typography>
-                        {sourceBib?.title}
+                        {bib?.title}
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span>
                         </Typography>
-                        {sourceBib?.author}
+                        {bib?.author}
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span>
                         </Typography>
-                        {sourceBib?.sourceSystemId} 
+                        {bib?.sourceSystemId} 
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span>
                         </Typography>
-                        {sourceBib?.sourceRecordId} 
+                        {bib?.sourceRecordId} 
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_id")}</span>
                         </Typography>
-                        {sourceBib?.contributesTo?.id}
+                        {bib?.contributesTo?.id}
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_title")}</span>
                         </Typography>
-                        {sourceBib?.contributesTo?.title}
+                        {bib?.contributesTo?.title}
                 </Grid>
                 </Grid>
                 <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
@@ -82,7 +82,7 @@ export default function SourceBibDetails( {sourceBib}: SourceBibDetails) {
                         <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.canonical_metadata")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                        <pre>{JSON.stringify(sourceBib?.canonicalMetadata, null, 2)}</pre>
+                        <pre>{JSON.stringify(bib?.canonicalMetadata, null, 2)}</pre>
                 </AccordionDetails>
                 </Accordion>
                 <Accordion expanded={expandedAccordions[8]} onChange={handleAccordionChange(8)}>
@@ -92,7 +92,7 @@ export default function SourceBibDetails( {sourceBib}: SourceBibDetails) {
                         <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                        <pre>{JSON.stringify(sourceBib?.sourceRecord, null, 2)}</pre>
+                        <pre>{JSON.stringify(bib?.sourceRecord, null, 2)}</pre>
                 </AccordionDetails>
                 </Accordion>
         </AdminLayout>
@@ -107,19 +107,19 @@ export async function getServerSideProps(ctx: any) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
 	}
     const session = await getSession(ctx);
-    const sourceBibId = ctx.params.sourceBibId
+    const bibId = ctx.params.bibId
     const client = createApolloClient(session?.accessToken);
     const { data } = await client.query({
         query: getBibById,
         variables: {
-            query: "id:"+sourceBibId
+            query: "id:"+bibId
         }        
       });
-    const sourceBib = data?.sourceBibs?.content?.[0];
+    const bib = data?.sourceBibs?.content?.[0];
     return {
       props: {
-        sourceBibId,
-        sourceBib,
+        bibId,
+        bib,
         ...translations,
       },
     }

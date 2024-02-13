@@ -12,18 +12,18 @@ const Mappings: NextPage = () => {
 	const theme = useTheme();
 
 	return (
-		<AdminLayout title={t("nav.mappings")}>
+		<AdminLayout title={t("nav.mappings.name")}>
 			<List
 				component="nav"
 				aria-labelledby="mappings-title">
 				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/mappings/allMappings">
-					<ListItemText primary={t("nav.allMappings")} />
+					<ListItemButton component="a" href="/mappings/all">
+					<ListItemText primary={t("nav.mappings.all")} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/mappings/circulationStatusMappings">
-					<ListItemText primary={t("nav.circulationStatusMappings")} />
+					<ListItemButton component="a" href="/mappings/circulationStatus">
+					<ListItemText primary={t("nav.mappings.circulationStatus")} />
 					</ListItemButton>
 				</ListItem>
 			</List>

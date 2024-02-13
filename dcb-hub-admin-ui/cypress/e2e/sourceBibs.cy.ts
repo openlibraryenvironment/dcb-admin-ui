@@ -3,14 +3,14 @@ import { aliasQuery, aliasMutation } from "../utils/graphql-test-utils"
 describe('Source bibs page', () => {
     beforeEach(() => {
         // In future this should be refactored into a cy.login() command
-        cy.visit('http://localhost:3000/sourceBibs')
+        cy.visit('http://localhost:3000/bibs')
         cy.get('.button').click()
         cy.origin('https://keycloak.sph.k-int.com', () => {
           cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
           cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
           cy.get('[id=kc-login]').click();
         })
-        cy.visit('http://localhost:3000/sourceBibs')
+        cy.visit('http://localhost:3000/bibs')
         cy.intercept('POST', '/graphql', { fixture: 'sourceBibs.json'}).as('loadBibs')
     })    
     it('should render the bib records page with the correct data', () => {

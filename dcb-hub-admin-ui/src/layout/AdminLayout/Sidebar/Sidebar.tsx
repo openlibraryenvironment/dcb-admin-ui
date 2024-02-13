@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { styled, Theme, CSSObject, useTheme } from '@mui/material/styles';
-import { useMediaQuery } from '@mui/material';
 import MuiDrawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
@@ -103,10 +102,10 @@ const routes = [
   {path: '/hostlmss', translationKey: 'nav.hostlmss'},
   {path: '/locations', translationKey: 'nav.locations'},
   {path: '/groups', translationKey: 'nav.groups'},
-  {path: '/sourceBibs', translationKey: 'nav.sourceBibs'},
-  {path: '/mappings', translationKey: 'nav.mappings'},
+  {path: '/bibs', translationKey: 'nav.bibs'},
+  {path: '/mappings', translationKey: 'nav.mappings.name'},
   // currently unused, may be un-commented in the future
-  //{path: '/settings', translationKey: 'nav.settings'}
+  //{path: '/settings', translationKey: 'nav.settings.name'}
 ];
 
 

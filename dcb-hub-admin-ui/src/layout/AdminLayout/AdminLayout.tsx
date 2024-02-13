@@ -10,6 +10,7 @@ interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
 	hideTitleBox?: boolean;
+	hideBreadcrumbs?: boolean;
 }
 
 // This layout takes the following props: a title and components to be rendered as children
@@ -18,7 +19,7 @@ interface AdminLayoutProps {
 
 // Title component must have a white background.
 
-export default function AdminLayout({ title, children, hideTitleBox }: PropsWithChildren<AdminLayoutProps>) {
+export default function AdminLayout({ title, children, hideTitleBox, hideBreadcrumbs }: PropsWithChildren<AdminLayoutProps>) {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
 	return (
@@ -43,9 +44,9 @@ export default function AdminLayout({ title, children, hideTitleBox }: PropsWith
 				sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
-						<Box>
+						{hideBreadcrumbs!= true ? <Box>
 							<Breadcrumbs/>
-						</Box>
+						</Box> : null }
 						{ /* Title
 							- height: 90px & p: 3 - this is to make the text appear centered
 						*/}
