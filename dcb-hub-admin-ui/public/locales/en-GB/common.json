@@ -1,24 +1,25 @@
 {
   "nav": {
     "agencies": "Agencies",
-    "audits": "Audits",
-    "sourceBibs": "Bib records",
+    "auditLog": "Audit log",
+    "bibs": "Bib records",
     "groups": "Groups",    
     "home": "Home",
     "hostlmss": "Host LMSs",
     "locations": "Locations",
     "login": "Login",
     "logout": "Logout",
-    "mappings": "Mappings",
-    "allMappings": "All mappings",
-    "circulationStatusMappings": "Circulation status mappings",
+    "mappings": {
+        "name": "Mappings",
+        "all": "All",
+        "circulationStatus": "Circulation status"
+    },
     "patronRequests": "Patron requests",
     "profile": "Profile",
-    "settings": "Settings",
-    "settings_options": {
-      "name": "Settings"
+    "settings": {
+        "name": "Settings"
     }
-  }, 
+  },  
   
   "profile": {
     "details": "Your details",
@@ -30,8 +31,7 @@
   },
 
   "header": {
-    "language_switcher_title": "Language",
-    "title": "DCB Admin"
+    "language_switcher_title": "Language"
   },
 
   "details": {

@@ -37,7 +37,7 @@ const AllMappings: NextPage = () => {
     );
 
 	return (
-		<AdminLayout title={t("nav.allMappings")}>
+		<AdminLayout title={t("nav.mappings.all")}>
 			<Button variant="contained" onClick={openImport}>{t("mappings.import")}</Button>
 			<ServerPaginationGrid
 				query={getMappings}

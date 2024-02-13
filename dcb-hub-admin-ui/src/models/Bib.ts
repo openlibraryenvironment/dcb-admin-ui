@@ -1,4 +1,4 @@
-export interface SourceBib {
+export interface Bib {
     id: string;
     title: string;
     author: string;

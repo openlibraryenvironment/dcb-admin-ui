@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 const Settings: NextPage = () => {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout title={t("nav.settings")}>
+		<AdminLayout title={t("nav.settings.name")}>
 			<Typography variant = 'h3'>
 				{t('common.missing')}
 			</Typography>

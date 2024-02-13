@@ -6,7 +6,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import ServerPaginationGrid from '@components/ServerPaginatedGrid/ServerPaginatedGrid';
 import { getGridStringOperators } from '@mui/x-data-grid';
 
-const SourceBibs: NextPage = () => {
+const Bibs: NextPage = () => {
 	const { t } = useTranslation();
 
     // Expose only the filters we have tested. The others need to be mapped to Lucene functionality.
@@ -21,7 +21,7 @@ const SourceBibs: NextPage = () => {
         return(
                 <ServerPaginationGrid 
                     query={getBibs} 
-                    type="sourceBibs"
+                    type="bibs"
                     coreType="sourceBibs"
                     selectable={true} 
                     pageSize={5}
@@ -44,7 +44,7 @@ const SourceBibs: NextPage = () => {
         )
     }
     return (
-		<AdminLayout title={t("nav.sourceBibs")}>
+		<AdminLayout title={t("nav.bibs")}>
             <BibsDisplay/>
         </AdminLayout>
     )
@@ -64,4 +64,4 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
 	};
 };
 
-export default SourceBibs;
+export default Bibs;

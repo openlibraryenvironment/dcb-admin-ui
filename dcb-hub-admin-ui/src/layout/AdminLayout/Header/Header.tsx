@@ -53,7 +53,7 @@ export default function Header(props:any) {
                     <MdMenu size={20}/>
                   </IconButton>
                   <Typography data-tid="header-title" variant="h1" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1 }}>
-                  {t("header.title")}
+                  {t("app.name")}
                   </Typography>               
                   <div>
                     <Link href='/profile'

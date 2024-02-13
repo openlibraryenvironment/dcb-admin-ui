@@ -14,7 +14,7 @@ it('should login, verify UI elements are being displayed, and then log out', () 
     cy.visit('http://localhost:3000/requests')
     cy.visit('http://localhost:3000/hostlmss')
     cy.visit('http://localhost:3000/groups')
-    cy.visit('http://localhost:3000/sourceBibs')
+    cy.visit('http://localhost:3000/bibs')
     cy.visit('http://localhost:3000/locations')
     // Verifies key UI elements exist and are being correctly rendered.
     cy.get('[data-tid=sidebar-menu]').should('exist');

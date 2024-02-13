@@ -114,7 +114,7 @@ export default function ServerPaginationGrid({query, type, selectable, pageSize,
                 // Now we switch on type to determine the correct final formulation
                 switch(type)
                 {
-                  case "sourceBibs":
+                  case "bibs":
                     setFilterOptions(`sourceRecordId:${sanitisedFilterValue}`);
                     break;
                   case "patronRequests":
