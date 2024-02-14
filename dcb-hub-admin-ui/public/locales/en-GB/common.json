@@ -159,6 +159,8 @@
     "pickup_patron_id": "Pickup patron ID",
     "pickup_request_id": "Pickup request ID",
     "pickup_request_status": "Pickup request status",
+    "record_created": "Record created",
+    "record_updated": "Record updated",
     "request_created": "Request created",
     "request_id": "Request ID",
     "requestor_id": "Requesting agency ID: ",

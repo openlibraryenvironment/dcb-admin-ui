@@ -122,13 +122,13 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                         {/* Add similar Grid items for other Typography elements */}
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.request_created")}</span>
+                                                        <span style={{ fontWeight: 'bold' }}>{t("details.record_created")}</span>
                                                 </Typography>
                                                 {dayjs(patronRequest?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.request_updated")}</span>
+                                                        <span style={{ fontWeight: 'bold' }}>{t("details.record_updated")}</span>
                                                 </Typography>
                                                 {dayjs(patronRequest?.clusterRecord?.dateUpdated).format('YYYY-MM-DD HH:mm')}
                                         </Grid>
