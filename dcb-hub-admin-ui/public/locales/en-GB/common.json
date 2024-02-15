@@ -271,10 +271,6 @@
     "validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry."
   },
 
-  "breadcrumbs": {
-    "home_text": "Home"
-  },
-
   "404": {
     "page_title": "404",
     "page_text": "Oops! Page not found.",
