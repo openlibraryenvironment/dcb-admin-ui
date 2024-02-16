@@ -10,6 +10,7 @@ import { HostLMS } from "@models/HostLMS";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
+import PrivateData from "@components/PrivateData/PrivateData";
 
 type HostLMSDetails = {
     hostlms: HostLMS
@@ -41,7 +42,7 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                 <AccordionSummary aria-controls="hostlms-general-details" id="hostlms_details_general" 
                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                     </IconContext.Provider>}>
-                    <Typography  variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.general", "General")} </Typography>
+                    <Typography  variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.general")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                     <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -76,16 +77,13 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                 <AccordionSummary aria-controls="hostlms-client-config-details" id="hostlms_details_client_config" 
                             expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                             </IconContext.Provider>}>
-                            <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.client_config", "Client config")} </Typography>
+                            <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.client_config")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         {hostlms?.clientConfig?.apikey != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_api")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.apikey}
+                                <PrivateData clientConfigType={t("details.client_config_api")} hiddenTextValue={hostlms?.clientConfig?.apikey} id="apiKey"/>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.ingest != null && (
@@ -162,10 +160,7 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         )}
                         {hostlms?.clientConfig?.['access-key'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_access_key")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['access-key']}
+                                <PrivateData clientConfigType={t("details.client_config_access_key")} hiddenTextValue={hostlms?.clientConfig?.['access-key']} id={'access-key'}/>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['staff-username'] != null && (
@@ -178,26 +173,17 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         )}
                         {hostlms?.clientConfig?.['staff-password'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_staff_password")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['staff-password']}
+                                {<PrivateData clientConfigType={t("details.client_config_staff_password")} hiddenTextValue={hostlms?.clientConfig?.['staff-password']} id={'staff-password'}/>}
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.secret != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_secret")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.secret}
+                                <PrivateData clientConfigType={t("details.client_config_secret")} hiddenTextValue={hostlms?.clientConfig?.secret} id={'secret'}/>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.key != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_key")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.key}
+                                <PrivateData clientConfigType={t(("details.client_config_key"))} hiddenTextValue={hostlms?.clientConfig?.key} id={'key'}/>
                         </Grid>
                         )}
                         </Grid>

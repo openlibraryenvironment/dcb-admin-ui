@@ -19,7 +19,11 @@
     "settings": {
         "name": "Settings"
     }
-  },  
+  }, 
+  
+  "ui": {
+    "toggle_visibility": "toggle private data visibility"
+  },
   
   "profile": {
     "details": "Your details",
