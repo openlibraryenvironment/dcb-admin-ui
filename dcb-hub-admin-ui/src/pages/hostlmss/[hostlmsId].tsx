@@ -121,7 +121,7 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         {hostlms?.clientConfig?.['metadata-prefix'] != null && (
                         <Grid xs={2} sm={4} md={4}>
                         <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_metadata_prefix")}</span>
+                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_metadata")}</span>
                         </Typography>
                         {hostlms?.clientConfig?.['metadata-prefix']}
                         </Grid>
