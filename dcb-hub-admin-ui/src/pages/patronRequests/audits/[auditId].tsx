@@ -49,7 +49,7 @@ export default function AuditDetails( {audit}: AuditDetails) {
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Typography component="div">
-                        <span style={{ fontWeight: 'bold' }}>{t("details.audit_from_status")}</span>
+                        <span style={{ fontWeight: 'bold' }}>{t("details.audit_to_status")}</span>
                     </Typography>
                     {audit?.toStatus}
                 </Grid>
