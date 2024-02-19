@@ -3,13 +3,13 @@
 
 ## Welcome
 
-Welcome to the DCB Admin UI application! The Admin UI is a Knowledge Integration application and is part of the wider Direct Consortial Borrowing project. It is designed to help people administrate instances of DCB.
+Welcome to DCB Admin! DCB Admin is a Knowledge Integration application and is part of the wider Direct Consortial Borrowing project. It is designed to help people administrate instances of DCB.
 
 You can find the DCB Service repository [here](https://gitlab.com/knowledge-integration/libraries/dcb-service) and more information [https://openlibraryfoundation.atlassian.net/l/cp/67Q16M0Q](url). 
 
-The admin UI is written in TypeScript, and uses Next.js and React. [Material UI](https://mui.com/) has also been used within the project to deliver a dynamic, themable and resillient user interface.
+DCB Admin is written in TypeScript, and uses the Next.js and React frameworks. [Material UI](https://mui.com/) has also been used within the project to deliver a dynamic, themable and resillient user interface.
 
-This project also conforms to the [WCAG 2.1](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. If you would like to experience the admin UI in dark mode, please set your system settings accordingly.
+This project also conforms to the [WCAG 2.1](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. If you would like to experience DCB Admin in dark mode, please set your system settings accordingly.
 
 ## How to get started
 
