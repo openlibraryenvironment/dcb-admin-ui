@@ -27,6 +27,8 @@ export default function PrivateData({hiddenTextValue, clientConfigType, id}: Pri
             <InputAdornment position="start">
               <IconButton
                 aria-label={t('ui.toggle_visibility')}
+                // may be replaced with custom tooltip component in the future
+                title={t('ui.toggle_visibility')}
                 onClick={() => setShowPrivateData((show) => !show)}
                 onMouseDown={handleMouseDownPrivateData}
               >
