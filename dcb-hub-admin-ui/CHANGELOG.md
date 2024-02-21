@@ -1,3 +1,23 @@
+# [1.5.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.4.0...v1.5.0) (2024-02-21)
+
+
+### Bug Fixes
+
+* Add temporary logging for sporadic 504 failures [DCB-868] ([cca0378](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/cca037889a4ad5ebec3e98dd25159ad92eef981a))
+* Fix floating button on audit page [DCB-865] ([f7ab889](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f7ab889437005113a6756b43fbbf6dbfbf42e4ce))
+* Fix incorrect metadata translation key on HostLMS details page ([1866664](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1866664193e8d294323da5580b48671d9ed3c522))
+* Fix incorrect status text on audit details ([2bf3ae2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2bf3ae26ab463ead67f62dbacd67010b3ea7068d))
+* Fix incorrect text in PatronRequest details ([aa99927](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/aa999270f4c93727f74c0aad839bfad8b25ef836))
+* Group data grid has lost its "empty" message [DCB-846] ([17b2a11](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/17b2a114e3ed430374797a72e6d2e8396c533b7f))
+* Remove “aria-current="page"“ from the sub-page menu options [DCB-835] ([ba7e241](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ba7e2418e38c90b0d7a36f195f0a1b6074160801))
+* Remove unecessary breadcrumbs translation key [DCB-866] ([c0074fe](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c0074fe6131f060463470190ab1fdcfddce987c5))
+* Support hierarchical keys for navigation  [DCB-866] ([ce342ad](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ce342ad6c1f39d3dced13001b60eabcbc66f4812))
+
+
+### Features
+
+* Obscure private Host LMS data [DCB-859] ([e0d4704](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e0d47047cf40dee0090cd94f22ec462cb5e20a66))
+
 # [1.4.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.3.1...v1.4.0) (2024-02-08)
 
 
