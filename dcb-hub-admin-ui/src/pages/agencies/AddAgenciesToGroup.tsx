@@ -3,7 +3,7 @@ import { useFormik} from 'formik';
 import { addAgenciesToGroup } from 'src/queries/queries';
 import { gql, useMutation } from '@apollo/client';
 import * as Yup from 'yup';
-import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material';
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, TextField, useTheme } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 //localisation
 import { useTranslation } from 'next-i18next';
@@ -56,6 +56,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     const [isSuccess, setSuccess] = useState(false);
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const theme = useTheme();
   
     // As this returns an updated agency, not a group, and we can't refetch non-active queries, we must update cache ourselves. If we were able to force a refetch, that would be much better
     //https://www.apollographql.com/docs/react/data/mutations#refetching-queries
@@ -190,11 +191,11 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-        <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success")}>
+        <Alert textColor={theme.palette.common.black} severityType="success" onCloseFunc={() => setSuccess(false)} alertText = {t("agencies.alert_text_success")}>
         </Alert>
       )}
     {isError && (
-      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText = {errorMessage}>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText = {errorMessage} textColor={theme.palette.common.white}>
       </Alert>
     )}
     </Dialog>

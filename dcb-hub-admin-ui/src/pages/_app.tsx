@@ -22,40 +22,75 @@ import { appWithTranslation } from 'next-i18next';
 import { useMemo } from 'react';
 declare module '@mui/material/styles' {
 	interface PaletteColor {
-	  foreground1?: string;
-	  linkText?: string;
-	  buttonForSelectedPage?: string;
-	  selectedText?: string;
-	  hover?: string;
-	  hoverOnSelectedPage?: string;
-	  buttonForSelectedChildPage?: string;
-	  sidebar?: string;
-	  titleArea?: string;
-	  link?: string;
-	  header?: string;
-	  headerText?: string;
-	  footerText?: string;
-	  footerArea?: string;
-	  breadcrumbs?: string;
+		breadcrumbs?: string;
+		buttonForSelectedChildPage?: string;
+		buttonForSelectedPage?: string;
+		footerArea?: string;
+		footerText?: string;
+		foreground1?: string;
+		header?: string;
+		headerText?: string;
+		hover?: string;
+		hoverOnSelectedPage?: string;
+		link?: string;
+		linkText?: string;
+		landingBackground?: string;
+		landingCard?: string;
+		loginCard?: string;
+		loginText?: string;
+		selectedText?: string;
+		sidebar?: string;
+		titleArea?: string;
 	}
   
 	interface SimplePaletteColorOptions {
-	  foreground1?: string;
-	  linkText?: string;
-	  buttonForSelectedPage?: string;
-	  selectedText?: string;
-	  hover?: string;
-	  hoverOnSelectedPage?: string;
-	  buttonForSelectedChildPage?: string;
-	  sidebar?: string;
-	  titleArea?: string;
-	  link?: string;
-	  header?: string;
-	  headerText?: string;
-	  footerText?: string;
-	  footerArea?: string;
-	  breadcrumbs?: string;	}
-  }
+		breadcrumbs?: string;
+		buttonForSelectedChildPage?: string;
+		buttonForSelectedPage?: string;
+		footerArea?: string;
+		footerText?: string;
+		foreground1?: string;
+		header?: string;
+		headerText?: string;
+		hover?: string;
+		hoverOnSelectedPage?: string;
+		link?: string;
+		linkText?: string;
+		landingBackground?: string;
+		landingCard?: string;
+		loginCard?: string;
+		loginText?: string;
+		selectedText?: string;
+		sidebar?: string;
+		titleArea?: string;
+	}
+	interface TypographyVariants {
+		loginCardText: React.CSSProperties;
+		subheading: React.CSSProperties;
+		cardActionText: React.CSSProperties;
+	  }
+	interface TypographyVariantsOptions {
+		loginCardText?: React.CSSProperties;
+		subheading: React.CSSProperties;
+		cardActionText: React.CSSProperties;
+	  }
+}
+declare module '@mui/material/Typography' {
+	interface TypographyPropsVariantOverrides {
+		loginCardText: true;
+		subheading: true;
+		cardActionText: true;
+	}
+}
+
+declare module '@mui/material/Button' {
+	interface ButtonPropsSizeOverrides {
+		xlarge: true;
+	}
+
+}
+
+
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -90,21 +125,25 @@ function MyApp(props: MyAppProps) {
 				contrastThreshold: 4.5,
 				mode: prefersDarkMode ? 'dark' : 'light',
                 primary: {
-                    main: prefersDarkMode? '#35B7FF': '#287BAF',
-                    linkText: prefersDarkMode? '#35B7FF': '#246F9E',
-                    buttonForSelectedPage: '#287BAF',
-					selectedText: '#FFFFFF',
+					breadcrumbs: prefersDarkMode? '#35B7FF': '#246F9E',
+					buttonForSelectedChildPage: '#999999',
+					buttonForSelectedPage: '#287BAF',
+					footerArea: prefersDarkMode? '#000000': '#EBEBEB',
+					footerText: prefersDarkMode? '#FFFFFF': '#000000',
+					header: prefersDarkMode? '#000000': '#0C4068',
+					headerText: '#FFFFFF',
 					hover: prefersDarkMode? '#424242': '#EEEEEE',
 					hoverOnSelectedPage: prefersDarkMode? '#424242': '#A9A9A9',
-					buttonForSelectedChildPage: '#999999',
-                    sidebar: prefersDarkMode? '#292929': '#F6F6F6',
-                    header: prefersDarkMode? '#000000': '#0C4068',
-                    headerText: '#FFFFFF',
-					footerText: prefersDarkMode? '#FFFFFF': '#000000',
-                    titleArea: prefersDarkMode? '#1E1E1E': '#FFFFFF',
-                    footerArea: prefersDarkMode? '#000000': '#EBEBEB',
-                    link: prefersDarkMode? '#B3E5FC': '#0C4068',
-                    breadcrumbs: prefersDarkMode? '#35B7FF': '#246F9E',
+					link: prefersDarkMode? '#B3E5FC': '#0C4068',
+					linkText: prefersDarkMode? '#35B7FF': '#246F9E',
+					landingBackground: prefersDarkMode? '#000000': '#F9F9F9',
+					landingCard: prefersDarkMode ? '#202020': '#FFFFFF',
+					loginCard: prefersDarkMode? '#292929': '#E2EEF6',
+					loginText: prefersDarkMode? '#FFFFFF': '#0C4068',
+					main: prefersDarkMode? '#35B7FF': '#287BAF',
+					selectedText: '#FFFFFF',
+					sidebar: prefersDarkMode? '#292929': '#F6F6F6',
+					titleArea: prefersDarkMode? '#1E1E1E': '#FFFFFF',
                 },
                 background: {
                     default: prefersDarkMode? '#1E1E1E': '#FFFFFF'
@@ -112,10 +151,13 @@ function MyApp(props: MyAppProps) {
 			},
 			typography: {
 				h1: {
-					fontSize: 20
+					fontSize: 20,
+					color: "#0C4068"
 				},
 				h2: {
-					fontSize: 32
+					fontSize: 32,
+					fontWeight: 400,
+					color: "#0C4068"
 				},
 				h3: {
 					fontSize: 20
@@ -123,8 +165,31 @@ function MyApp(props: MyAppProps) {
 				h4: {
 					fontSize: 18
 				},
+				loginCardText: {
+					fontSize: 18
+				},
+				cardActionText: {
+					fontSize: '1rem'
+				},
+				subheading : {
+					fontSize: '1.3rem'
+				},
+
 				// and then set the fonts for the theme here
 				fontFamily: roboto.style.fontFamily,
+			},
+			components: {
+				MuiButton: {
+					variants: [
+					  {
+						props: { size: 'xlarge' },
+						style: {
+						  padding: '14px 28px',
+						  fontSize: '1.1rem'
+						},
+					  },
+					],
+				  }
 			}
 		}),
 		[prefersDarkMode],
@@ -139,7 +204,7 @@ function MyApp(props: MyAppProps) {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title> DCB Admin </title>
 		</Head>
-		<SessionProvider session={pageProps.session}>
+		<SessionProvider session={pageProps.session} refetchOnWindowFocus={true}>
 		<ApolloProviderWrapper>
 				<ThemeProvider theme={defaultTheme}>
 					<CssBaseline />
