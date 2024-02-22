@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { useMutation } from '@apollo/client';
 import * as Yup from 'yup';
 import { createGroup } from 'src/queries/queries';
-import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextField } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, IconButton, styled, Button, TextField, useTheme } from '@mui/material';
 import Alert from '@components/Alert/Alert';
 import { MdClose } from 'react-icons/md'
 //localisation
@@ -44,6 +44,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
     const [isError, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const { t } = useTranslation();
+    const theme = useTheme();
 
     const [createGroupMutation, { loading }] = useMutation<CreateGroupResponse>(createGroup, {
       refetchQueries: ['LoadGroups'],
@@ -145,10 +146,10 @@ export default function NewGroup({show, onClose}: NewGroupType) {
       <FormikMaterial/>
     </DialogContent>
     {isSuccess && (
-      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success")}/>
+      <Alert severityType="success" onCloseFunc={() => setSuccess(false)} alertText={t("groups.new_group_success")} textColor={theme.palette.common.black}/>
       )}
     {isError && (
-      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage}/>
+      <Alert severityType="error" onCloseFunc={() => setError(false)} alertText={errorMessage} textColor={theme.palette.common.black}/>
     )}
     </Dialog>
   );

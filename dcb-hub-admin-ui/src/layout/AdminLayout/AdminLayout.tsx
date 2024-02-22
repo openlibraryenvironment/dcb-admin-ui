@@ -35,9 +35,9 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 					openStateFuncOpen = {()=>{setSidebarOpen(sidebarOpen)}}
 					openStateFuncClosed = {()=>setSidebarOpen(!sidebarOpen)}
 				/>
-				{/* Container for content exluding the sidebar
+				{/* Container for content excluding the sidebar
 					- flexGrow makes the content grow to the window size
-					- overflow: auto, means that content does not go beyond it's container
+					- overflow: auto, means that content does not go beyond its container
 					- minHeight must be 100vh for the footer to be at the bottom of the screen
 				*/}
 				<Box display="flex"

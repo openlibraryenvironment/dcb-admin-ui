@@ -22,10 +22,10 @@
   }, 
   
   "ui": {
-    "logo": "logo",
+    "logo": "{{owner}} logo",
     "toggle_visibility": "Toggle visibility"
   },
-  
+
   "profile": {
     "details": "Your details",
     "name": "Name: ",
@@ -36,7 +36,8 @@
   },
 
   "header": {
-    "language_switcher_title": "Language"
+    "language_switcher_title": "Language",
+    "consortium_icon": "The icon of the {{consortium}} consortium."
   },
 
   "details": {
@@ -227,7 +228,7 @@
     "no_rows": "No locations available. If you're expecting data to be here, please refresh the page.",
     "search_placeholder": "Search by name"
   },
-
+  
   "patron_requests": {
     "loading_msg": "Loading requests....",
     "alert_text": "Failed to fetch the requests, please refresh the page.",
