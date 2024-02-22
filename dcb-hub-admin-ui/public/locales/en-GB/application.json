@@ -2,12 +2,6 @@
   
   "app": {
     "name": "DCB Admin",
-    "dcb": "DCB",
-    "dcb_full": "Direct Consortial Borrowing",
-    "service": {
-      "dcb": "DCB Service",
-      "keycloak": "Keycloak"
-    },
     "component": {
       "service": "dcb-service",
       "locate": "dcb-locate",
@@ -15,18 +9,60 @@
       "devops": "dcb-devops",
       "keycloak": "dcb-keycloak-extensions"
     },
-    "version": "Version", 
+    "dcb": "DCB",
+    "dcb_full": "Direct Consortial Borrowing",
+    "guest_user": "Guest",
     "released": "Released",
-    "guest_user": "Guest"
+    "service": {
+      "dcb": "DCB Service",
+      "keycloak": "Keycloak"
+    },
+    "title": "$t(app.name) for {{consortium_name}}",
+    "version": "Version"
   },
 
   "common": {
-    "placeholder_text": "Note: this page contains placeholder data.", 
-    "placeholder_tip": "Caution: example placeholder data", 
+    "about": "About",
     "missing": "Missing",
     "na": "NA",
+    "placeholder_text": "Note: this page contains placeholder data.", 
+    "placeholder_tip": "Caution: example placeholder data", 
     "unknown": "Unknown"
   }, 
+
+  "openrs": {
+    "name": "OpenRS",
+    "about": "$t{common.about} $t{openrs.name}",
+    "dcb": {
+      "about":"$t{common.about} $t{app.dcb}",
+      "description": "$t{application:app.dcb} is an $t{openrs.name} product that enables libraries to deliver direct consortial borrowing services to their patrons across a range of LMS and discovery systems.  <paragraph/> Developed by <link>$t{openrs.who.kint_full}</link>, $t{app.dcb} helps consortia fulfil patrons borrowing requests across their membership faster and cheaper than traditional resource sharing methods.",
+      "project": "$t{app.dcb} project",
+      "release_notes": "Release notes",
+      "roadmap": "Product roadmap"
+    },
+    "description": "$t(openrs.name} is a resource sharing initiative of the <link>$t{openrs.who.olf_full}</link>. <paragraph/>The open source project is reinventing resource sharing to meet the needs of different types of consortia, using open standards and native integration to provide consortia with robust and extended functionality for consortial resource sharing.",
+    "participate": "Get involved",
+    "who": {
+      "ebsco": "EBSCO",
+      "involved": "Who's involved",
+      "kint": "K-Int",
+      "kint_full": "Knowledge Integration",
+      "olf": "OLF",
+      "olf_full": "Open Library Foundation"
+    }
+  },
+
+  "loginout": {
+    "keycloak": "We use <link>Keycloak</link> for secure authentication",
+    "login": "Please <link>login</link> to gain full access to $t(app.name)",
+    "logged_out": "<bold>Your $t{app.title} session has ended</bold> <paragraph/>Please <link>log in</link>. Note that you will be automatically logged out after 30 minutes of inactivity."
+  },
+
+  "support": {
+    "name": "Support",
+    "admin_user_guides": "Admin user guides",
+    "submit_ticket": "Submit a support ticket"
+  },
 
   "welcome": {
     "greeting": "Welcome",
