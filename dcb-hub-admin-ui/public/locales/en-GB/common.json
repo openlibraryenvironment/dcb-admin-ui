@@ -22,6 +22,7 @@
   }, 
   
   "ui": {
+    "logo": "logo",
     "toggle_visibility": "Toggle visibility"
   },
   
