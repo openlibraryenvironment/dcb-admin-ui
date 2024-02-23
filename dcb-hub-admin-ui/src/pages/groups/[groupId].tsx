@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -19,19 +19,22 @@ export default function GroupDetails( {group}: GroupDetails) {
         <AdminLayout title={group?.name}>
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.group_name")}</span>
-                            </Typography>
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.group_name")}</Typography>
                             {group?.name} 
-                    </Grid>
-                    <Grid xs={2} sm={4} md={4}>
-                            <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.group_code")}</span>
-                            </Typography>
-                            {group?.code} 
-                    </Grid>
-                    <Grid xs={2} sm={4} md={4}>
-                            <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.group_id")}</span>
-                            </Typography>
-                            {group?.id}
+                    </Stack>
+                </Grid>
+                <Grid xs={2} sm={4} md={4}>
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.group_code")}</Typography>
+                        {group?.code} 
+                    </Stack>
+                </Grid>
+                <Grid xs={2} sm={4} md={4}>
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.group_id")}</Typography>
+                        {group?.id}
+                    </Stack>
                 </Grid>
             </Grid>
             <ClientDataGrid 

@@ -47,28 +47,32 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                 <AccordionDetails>
                     <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_id")}</span>
-                        </Typography>
-                        {hostlms?.id}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.hostlms_id")}
+                                        </Typography>
+                                        {hostlms?.id}
+                                </Stack>
                         </Grid>
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_code")}</span>
-                        </Typography>
-                        {hostlms?.code}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.hostlms_code")}
+                                        </Typography>
+                                        {hostlms?.code}
+                                </Stack>
                         </Grid>
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_name")}</span>
-                        </Typography>
-                        {hostlms?.name}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.hostlms_name")}
+                                        </Typography>
+                                        {hostlms?.name}
+                                </Stack>
                         </Grid>
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.lms_client")}</span>
-                        </Typography>
-                        {hostlms?.lmsClientClass}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.lms_client")}
+                                        </Typography>
+                                        {hostlms?.lmsClientClass}
+                                </Stack>
                         </Grid>
                     </Grid>
                 </AccordionDetails>
@@ -88,74 +92,83 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         )}
                         {hostlms?.clientConfig?.ingest != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_ingest")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.ingest}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_ingest")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.ingest}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['shelving-locations'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_shelving")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['shelving-locations']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_shelving")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['shelving-locations']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['num-records-to-generate'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_records")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['num-records-to-generate']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_records")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['num-records-to-generate']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['record-syntax'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_record_syntax")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['record-syntax']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_record_syntax")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['record-syntax']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['metadata-prefix'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_metadata")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['metadata-prefix']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_metadata")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['metadata-prefix']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['base-url'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_base")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['base-url']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_base")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['base-url']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['access-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_access_id")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['access-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_access_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['access-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['domain-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_domain_id")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['domain-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_domain_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['domain-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['page-size'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_page_size")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['page-size']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_page_size")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['page-size']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['access-key'] != null && (
@@ -165,10 +178,11 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         )}
                         {hostlms?.clientConfig?.['staff-username'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_staff_username")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.['staff-username']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_staff_username")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.['staff-username']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['staff-password'] != null && (
@@ -198,50 +212,57 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         {hostlms?.clientConfig?.item?.['fine-code-id'] != null && (
                                 <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_fine")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.item?.['fine-code-id']}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.client_config_fine")}
+                                                </Typography>
+                                                {hostlms?.clientConfig?.item?.['fine-code-id']}
+                                        </Stack>
                                 </Grid>
                                 )}
                         {hostlms?.clientConfig?.item?.['renewal-limit'] != null && (
                                 <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_renewal_limit")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.item?.['renewal-limit']}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.client_config_renewal_limit")}
+                                                </Typography>
+                                                {hostlms?.clientConfig?.item?.['renewal-limit']}
+                                        </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.item?.['barcode-prefix'] != null && (
                                 <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_barcode_prefix")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.item?.['barcode-prefix']}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.client_config_barcode_prefix")}
+                                                </Typography>
+                                                {hostlms?.clientConfig?.item?.['barcode-prefix']}
+                                        </Stack>
+                                                                                
                                 </Grid>
                         )}
                         {hostlms?.clientConfig?.item?.['history-action-id'] != null && (
                                 <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_history_action_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.item?.['history-action-id']}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.client_config_history_action_id")}
+                                                </Typography>
+                                                {hostlms?.clientConfig?.item?.['history-action-id']}
+                                        </Stack>
                                 </Grid>
                         )}
                         {hostlms?.clientConfig?.item?.['shelving-scheme-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_shelving_scheme_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.item?.['shelving-scheme-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_shelving_scheme_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.item?.['shelving-scheme-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.item?.['loan-period-code-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_loan_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.item?.['loan-period-code-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_loan_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.item?.['loan-period-code-id']}
+                                </Stack>
                         </Grid>
                         )}
                         </Grid>
@@ -258,34 +279,38 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         {hostlms?.clientConfig?.papi?.['app-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_app_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.papi?.['app-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_papi_app_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.papi?.['app-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.papi?.['org-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_org_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.papi?.['org-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_papi_org_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.papi?.['org-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.papi?.['lang-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_lang_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.papi?.['lang-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_papi_lang_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.papi?.['lang-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.papi?.['papi-version'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_papi_version")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.papi?.['papi-version']}
+                                 <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_papi_version")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.papi?.['papi-version']}
+                                </Stack>
                         </Grid>
                         )}
                         </Grid>
@@ -302,80 +327,96 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         {hostlms?.clientConfig?.services?.['product-id']!= null ? 
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_product_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.services?.['product-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_product_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['product-id']}
+                                </Stack>
                         </Grid> : null}
                         {hostlms?.clientConfig?.services?.['site-domain']!= null ? 
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_site_domain")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.services?.['site-domain']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_site_domain")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['site-domain']}
+                                </Stack>
                         </Grid> : null}
                         {hostlms?.clientConfig?.services?.['workstation-id']!= null ?
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_workstation_id")}</span>
-                                </Typography>
-                                {hostlms?.clientConfig?.services?.['workstation-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_workstation_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['workstation-id']}
+                                </Stack>
                         </Grid> : null}
                         {hostlms?.clientConfig?.services?.['organisation-id']!= null ? 
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_organisation_id")}</span>
-                                </Typography> 
-                                {hostlms?.clientConfig?.services?.['organisation-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_organisation_id")}
+                                        </Typography> 
+                                        {hostlms?.clientConfig?.services?.['organisation-id']}
+                                </Stack>
                         </Grid>: null}
                         {hostlms?.clientConfig?.services?.['services-version']!= null ? 
                         <Grid xs={2} sm={4} md={4}>
-                                <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_version")}</span>
-                                </Typography> 
-                                {hostlms?.clientConfig?.services?.['services-version']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_version")}
+                                        </Typography> 
+                                        {hostlms?.clientConfig?.services?.['services-version']}
+                                </Stack>
                         </Grid>: null}
                         {hostlms?.clientConfig?.services?.language != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_language")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.services?.language}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_language")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.language}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.services?.['product-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_product_id")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.services?.['product-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_product_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['product-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.services?.['site-domain'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_site_domain")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.services?.['site-domain']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_site_domain")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['site-domain']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.services?.['workstation-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_workstation_id")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.services?.['workstation-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_workstation_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['workstation-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.services?.['organisation-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                                <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_organisation_id")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.services?.['organisation-id']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_organisation_id")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['organisation-id']}
+                                </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.services?.['services-version'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                        <span style={{ fontWeight: 'bold' }}>{t("details.client_config_services_version")}</span>
-                        </Typography>
-                        {hostlms?.clientConfig?.services?.['version']}
+                                <Stack direction={"column"}>
+                                        <Typography variant="attributeTitle">{t("details.client_config_services_version")}
+                                        </Typography>
+                                        {hostlms?.clientConfig?.services?.['version']}
+                                </Stack>
                         </Grid>
                         )}
                         </Grid>

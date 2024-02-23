@@ -280,15 +280,13 @@
   "404": {
     "page_title": "404",
     "page_text": "Oops! Page not found.",
-    "go_back_text": "Go back to the ",
-    "dashboard_text": "dashboard"
+    "go_back_text": "Go back to the <linkComponent> dashboard </linkComponent>"
   },
 
   "unauthorised": {
     "page_title": "401",
     "page_text_no_access": "Sorry, you do not have access to this page.",
     "page_text_contact_admin": "If you think you should have access, contact your system administrator",
-    "go_back_text": "Go back to the ",
-    "dashboard_text": "dashboard"
+    "go_back_text": "Go back to the <linkComponent> dashboard </linkComponent>"
   }
 }

@@ -19,7 +19,7 @@ const Confirmation = ({ open, onClose, onConfirm, code, existingMappingCount, fi
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby='replace-mappings-confirmation-modal'>
         {/* // Enforcing the style of bold, centered modal or dialog headers */}
-      <DialogTitle style={{ textAlign: 'center'}}><strong>{t("mappings.confirmation_header")}</strong></DialogTitle>
+      <DialogTitle variant='modalTitle'>{t("mappings.confirmation_header")}</DialogTitle>
       <DialogContent>
             <Trans
               i18nKey="mappings.confirmation_body" 

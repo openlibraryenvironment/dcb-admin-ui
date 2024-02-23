@@ -40,39 +40,53 @@ export default function SourceBibDetails( {bib}: BibDetails) {
                 </Stack>
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_bib_id")}</span>
-                        </Typography>
-                        {bib?.id}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.source_bib_id")}
+                                </Typography>
+                                {bib?.id}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.title")}</span>
-                        </Typography>
-                        {bib?.title}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.title")}
+                                </Typography>
+                                {bib?.title}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span>
-                        </Typography>
-                        {bib?.author}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.author")}
+                                </Typography>
+                                {bib?.author}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span>
-                        </Typography>
-                        {bib?.sourceSystemId} 
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.source_system_id")}
+                                </Typography>
+                                {bib?.sourceSystemId} 
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span>
-                        </Typography>
-                        {bib?.sourceRecordId} 
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.source_record_id")}
+                                </Typography>
+                                {bib?.sourceRecordId}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_id")}</span>
-                        </Typography>
-                        {bib?.contributesTo?.id}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.contributor_id")}
+                                </Typography>
+                                {bib?.contributesTo?.id}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_title")}</span>
-                        </Typography>
-                        {bib?.contributesTo?.title}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.contributor_title")}
+                                </Typography>
+                                {bib?.contributesTo?.title}
+                        </Stack>
                 </Grid>
                 </Grid>
                 <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>

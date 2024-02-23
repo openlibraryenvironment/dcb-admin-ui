@@ -49,44 +49,60 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                         <AccordionDetails>
                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_id")} </span>
-                                        </Typography>
-                                        {patronRequest.id}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.request_id")}
+                                                </Typography>
+                                                {patronRequest.id}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_created")} </span>
-                                        </Typography>
-                                        {dayjs(patronRequest?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.request_created")}
+                                                </Typography>
+                                                {dayjs(patronRequest?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.request_updated")} </span>
-                                        </Typography>
-                                        {dayjs(patronRequest?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.request_updated")} 
+                                                </Typography>
+                                                {dayjs(patronRequest?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.description")}</span>
-                                        </Typography>
-                                        {patronRequest?.description}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.description")}
+                                                </Typography>
+                                                {patronRequest?.description}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.requestor_note")}</span> 
-                                        </Typography>
-                                        {patronRequest?.requestorNote}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.requestor_note")} 
+                                                </Typography>
+                                                {patronRequest?.requestorNote}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.status")}</span> 
-                                        </Typography>        
-                                        {patronRequest?.status}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.status")} 
+                                                </Typography>        
+                                                {patronRequest?.status}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.error")}</span> 
-                                        </Typography>       
-                                        {patronRequest?.errorMessage}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.error")} 
+                                                </Typography>       
+                                                {patronRequest?.errorMessage}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.active_workflow")}</span> 
-                                        </Typography>        
-                                        {patronRequest?.activeWorkflow}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.active_workflow")} 
+                                                </Typography>        
+                                                {patronRequest?.activeWorkflow}
+                                        </Stack>
                                 </Grid>
                         </Grid>
                         </AccordionDetails>
@@ -100,55 +116,63 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                         <AccordionDetails>
                                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div"> 
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.bib_cluster_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.bibClusterId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.bib_cluster_id")}
+                                                        </Typography>
+                                                        {patronRequest?.bibClusterId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.title")}</span>
-                                                </Typography>
-                                                {patronRequest?.clusterRecord?.title}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.title")}
+                                                        </Typography>
+                                                        {patronRequest?.clusterRecord?.title}
+                                                </Stack>
                                         </Grid>
                                         {patronRequest?.clusterRecord?.members[0]?.author != null ? (
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span>
-                                                </Typography>
-                                                {patronRequest?.clusterRecord?.members[0]?.author}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.author")}
+                                                        </Typography>
+                                                        {patronRequest?.clusterRecord?.members[0]?.author}
+                                                </Stack>
                                         </Grid>
                                         ) : null}
                                         {/* Add similar Grid items for other Typography elements */}
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.record_created")}</span>
-                                                </Typography>
-                                                {dayjs(patronRequest?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.record_created")}
+                                                        </Typography>
+                                                        {dayjs(patronRequest?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.record_updated")}</span>
-                                                </Typography>
-                                                {dayjs(patronRequest?.clusterRecord?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.record_updated")}
+                                                        </Typography>
+                                                        {dayjs(patronRequest?.clusterRecord?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.selected_bib")}</span>
-                                                </Typography>
-                                                {patronRequest?.clusterRecord?.selectedBib}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.selected_bib")}
+                                                        </Typography>
+                                                        {patronRequest?.clusterRecord?.selectedBib}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.clusterRecord?.members[0]?.sourceRecordId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.source_record_id")}
+                                                        </Typography>
+                                                        {patronRequest?.clusterRecord?.members[0]?.sourceRecordId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                        <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.clusterRecord?.sourceSystemId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.source_system_id")}
+                                                        </Typography>
+                                                        {patronRequest?.clusterRecord?.sourceSystemId}
+                                                </Stack>
                                         </Grid>
                                 </Grid>
                                 <Card variant="outlined">
@@ -174,40 +198,46 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                 <AccordionDetails>
                                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.patron_id")}</span>
-                                        </Typography>
-                                        {patronRequest?.patron?.id}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.patron_id")}
+                                                </Typography>
+                                                {patronRequest?.patron?.id}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.patron_hostlms")}</span>
-                                        </Typography>
-                                        {patronRequest?.patronHostlmsCode}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.patron_hostlms")}
+                                                </Typography>
+                                                {patronRequest?.patronHostlmsCode}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.requestor_id")}</span>
-                                        </Typography>
-                                        {patronRequest?.requestingIdentity?.id}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.requestor_id")}
+                                                </Typography>
+                                                {patronRequest?.requestingIdentity?.id}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.local_item_id")}</span>
-                                        </Typography>
-                                        {patronRequest?.localItemId}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.local_item_id")}
+                                                </Typography>
+                                                {patronRequest?.localItemId}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.local_item_status")}</span>
-                                        </Typography>
-                                        {patronRequest?.localItemStatus}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.local_item_status")}
+                                                </Typography>
+                                                {patronRequest?.localItemStatus}
+                                        </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
-                                        <Typography component="div">
-                                        <span style={{ fontWeight: 'bold' }}>{t("details.local_bib_id")}</span>
-                                        </Typography>
-                                        {patronRequest?.localBibId}
+                                        <Stack direction={"column"}>
+                                                <Typography variant="attributeTitle">{t("details.local_bib_id")}
+                                                </Typography>
+                                                {patronRequest?.localBibId}
+                                        </Stack>
                                 </Grid>
                                 </Grid>
                                 </AccordionDetails>
@@ -221,46 +251,53 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                         <AccordionDetails>
                                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_code")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupLocationCode}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_code")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupLocationCode}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_item_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupItemId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_item_id")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupItemId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_item_status")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupItemStatus}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_item_status")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupItemStatus}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_item_type")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupItemType}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_item_type")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupItemType}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_patron_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupPatronId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_patron_id")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupPatronId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_request_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupRequestId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_request_id")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupRequestId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.pickup_request_status")}</span>
-                                                </Typography>
-                                                {patronRequest?.pickupRequestStatus}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.pickup_request_status")}
+                                                        </Typography>
+                                                        {patronRequest?.pickupRequestStatus}
+                                                </Stack>
                                         </Grid>
                                         </Grid>
 
@@ -276,94 +313,109 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                         <AccordionDetails>
                                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.supplier_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.id}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.supplier_id")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.id}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.supplier_ctype")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.canonicalItemType}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.supplier_ctype")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.canonicalItemType}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.date_created")}</span>
-                                                </Typography>
-                                                {dayjs(patronRequest?.suppliers[0]?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.date_created")}
+                                                        </Typography>
+                                                        {dayjs(patronRequest?.suppliers[0]?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.date_updated")}</span>
-                                                </Typography>
-                                                {dayjs(patronRequest?.suppliers[0]?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.date_updated")}
+                                                        </Typography>
+                                                        {dayjs(patronRequest?.suppliers[0]?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.hostlms_code")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.hostLmsCode}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.hostlms_code")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.hostLmsCode}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.active")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.isActive}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.active")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.isActive}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localItemId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_item_id")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localItemId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_bib_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localBibId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_bib_id")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localBibId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_barcode")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localItemBarcode}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_item_barcode")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localItemBarcode}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_loc")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localItemLocationCode}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_item_loc")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localItemLocationCode}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_status")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localItemStatus}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_item_status")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localItemStatus}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_type")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localItemType}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_item_type")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localItemType}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_supplier_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_supplier_id")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_request_status")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localStatus}
-                                                </Grid>
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_request_status")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localStatus}
+                                                </Stack>
+                                        </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.local_item_type")}</span>
-                                                </Typography>
-                                                {patronRequest?.suppliers[0]?.localAgency}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.local_item_type")}
+                                                        </Typography>
+                                                        {patronRequest?.suppliers[0]?.localAgency}
+                                                </Stack>
                                         </Grid>
                                         </Grid>
                                         </AccordionDetails>
@@ -377,52 +429,60 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                         <AccordionDetails>
                                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.localRequestId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_request_id")}
+                                                        </Typography>
+                                                        {patronRequest?.localRequestId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_request_status")}</span>
-                                                </Typography>
-                                                {patronRequest?.localRequestStatus}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_request_status")}
+                                                        </Typography>
+                                                        {patronRequest?.localRequestStatus}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.requestingIdentity?.id}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_patron_id")}
+                                                        </Typography>
+                                                        {patronRequest?.requestingIdentity?.id}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_patron_type")}</span>
-                                                </Typography>
-                                                {patronRequest?.requestingIdentity?.localPtype}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_patron_type")}
+                                                        </Typography>
+                                                        {patronRequest?.requestingIdentity?.localPtype}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.localItemId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_virtual_id")}
+                                                        </Typography>
+                                                        {patronRequest?.localItemId}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_item_status")}</span>
-                                                </Typography>
-                                                {patronRequest?.localItemStatus}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_virtual_item_status")}
+                                                        </Typography>
+                                                        {patronRequest?.localItemStatus}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_type")}</span>
-                                                </Typography>
-                                                {patronRequest?.localItemType}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_virtual_type")}
+                                                        </Typography>
+                                                        {patronRequest?.localItemType}
+                                                </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
-                                                <Typography component="div">
-                                                <span style={{ fontWeight: 'bold' }}>{t("details.borrowing_virtual_bib_id")}</span>
-                                                </Typography>
-                                                {patronRequest?.localBibId}
+                                                <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.borrowing_virtual_bib_id")}
+                                                        </Typography>
+                                                        {patronRequest?.localBibId}
+                                                </Stack>
                                         </Grid>
                                         </Grid>
                                         </AccordionDetails>
