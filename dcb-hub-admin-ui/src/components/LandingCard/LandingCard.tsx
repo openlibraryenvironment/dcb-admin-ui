@@ -65,7 +65,7 @@ export default function LandingCard() {
               </Stack>
             </CardContent>
             <CardActions disableSpacing sx={{ mt: "auto" }}>
-              <Button size="medium">
+              <Button size="medium" type='text' href='https://knowint.zendesk.com/' rel="noopener">
                 <Typography variant="cardActionText"> {t("support.submit_ticket")}</Typography> 
               </Button>
             </CardActions>
