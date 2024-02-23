@@ -43,7 +43,6 @@ export default function PrivateData({hiddenTextValue, clientConfigType, id}: Pri
                 sx={{
                   wordBreak: 'break-word'
                 }}
-                aria-hidden={false}
               >
                 {hiddenTextValue}
               </Typography>
@@ -57,8 +56,9 @@ export default function PrivateData({hiddenTextValue, clientConfigType, id}: Pri
                 disableUnderline
                 inputProps={{
                   readOnly: true,
+                  tabIndex: -1,
+                  'aria-hidden': true,
                 }}
-                aria-hidden={true}
               />
             )}
             
