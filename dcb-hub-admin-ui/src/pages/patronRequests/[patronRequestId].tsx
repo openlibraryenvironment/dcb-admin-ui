@@ -519,35 +519,50 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
 }
 
 export async function getServerSideProps(ctx: any) {
-        const { locale } = ctx;
+        try {
+            const { locale } = ctx;
             let translations = {};
+    
             if (locale) {
-            translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+                translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
             }
-        console.log("Translations have been fetched successfully.")
-        const session = await getSession(ctx);
-        console.log("Session has been fetched successfully.");
-        // The way this works is through Dynamic Routing. 
-        // That means that the filename must match the attribute name exactly: i.e. just 'requestId' in the filename wouldn't work here.
-        // NextJS needs to know the id so that it can use SSR to dynamically generate a page based on it.
-        // That's why we have to fetch the data here server-side.
-        const patronRequestId = ctx.params.patronRequestId
-        const client = createApolloClient(session?.accessToken);
-        console.log("Client has been created successfully, and patronRequest ID is "+patronRequestId);
-        const { data } = await client.query({
-            query: getPatronRequestById,
-            variables: {
-                query: "id:"+patronRequestId
-            }        
-          });
-        const patronRequest = data?.patronRequests?.content?.[0];  
-        console.log("Data has been fetched successfully.");
-        return {
-          props: {
-            patronRequestId,
-            patronRequest,
-            ...translations,
-          },
+            
+            console.log("Translations have been fetched successfully.");
+    
+            const session = await getSession(ctx);
+            console.log("Session has been fetched successfully.");
+    
+            const patronRequestId = ctx.params.patronRequestId;
+            console.log("patronRequestId:", patronRequestId);
+    
+            const client = createApolloClient(session?.accessToken);
+            console.log("Client has been created successfully.");
+    
+            console.log("Querying data...");
+            const { data } = await client.query({
+                query: getPatronRequestById,
+                variables: {
+                    query: "id:"+patronRequestId
+                }
+            });
+            console.log("Data has been fetched successfully:", data);
+    
+            const patronRequest = data?.patronRequests?.content?.[0];  
+            console.log("Patron request:", patronRequest);
+    
+            return {
+                props: {
+                    patronRequestId,
+                    patronRequest,
+                    ...translations,
+                },
+            };
+        } catch (error: any) {
+            console.log("Error occurred:", error, "and the message was"+error?.message);
+            return {
+                props: {
+                    error: error?.message
+                }
+            };
         }
-    }
-
+}
