@@ -1,6 +1,6 @@
 import { AdminLayout } from "@layout";
 import { AuditItem } from "@models/AuditItem";
-import { Button } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Grid from '@mui/material/Unstable_Grid2';
 
@@ -27,41 +27,49 @@ export default function AuditDetails( {audit}: AuditDetails) {
         <AdminLayout title={audit?.id}>
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.audit_id")}</span>
-                    </Typography>
-                    {audit?.id} 
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.audit_id")}
+                        </Typography>
+                        {audit?.id}
+                    </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.audit_date")}</span>
-                    </Typography>
-                    {audit?.auditDate} 
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.audit_date")}
+                        </Typography>
+                        {audit?.auditDate}
+                    </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.audit_description")}</span>
-                    </Typography>
-                    {audit?.briefDescription}
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.audit_description")}
+                        </Typography>
+                        {audit?.briefDescription}
+                    </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                <Typography component="div">
-                    <span style={{ fontWeight: 'bold' }}>{t("details.audit_from_status")}</span>
-                </Typography>
+                <Stack direction={"column"}>
+                    <Typography variant="attributeTitle">{t("details.audit_from_status")}
+                    </Typography>
                     {audit?.fromStatus}
+                </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div">
-                        <span style={{ fontWeight: 'bold' }}>{t("details.audit_to_status")}</span>
-                    </Typography>
-                    {audit?.toStatus}
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.audit_to_status")}
+                        </Typography>
+                        {audit?.toStatus}
+                    </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div">
-                        <span style={{ fontWeight: 'bold' }}>{t("details.patron_request_id")}</span>
-                    </Typography>
-                    {audit?.patronRequest?.id}
+                    <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">{t("details.patron_request_id")}
+                        </Typography>
+                        {audit?.patronRequest?.id}
+                    </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                    <Typography component="div">
-                        <span style={{ fontWeight: 'bold' }}>{t("details.audit")}</span>
+                    <Typography variant="attributeTitle">{t("details.audit")}
                     </Typography>
                     <pre>{JSON.stringify(audit?.auditData, null, 2)}</pre>
                 </Grid>

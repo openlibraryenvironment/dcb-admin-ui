@@ -128,7 +128,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
 
   return (
     <Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-      <DialogTitle data-tid="new-group-title" style={{ textAlign: 'center'}}> {t("groups.type_new")}</DialogTitle>
+      <DialogTitle data-tid="new-group-title" variant='modalTitle'> {t("groups.type_new")}</DialogTitle>
       <IconButton
           data-tid="new-group-close"
           aria-label="close"

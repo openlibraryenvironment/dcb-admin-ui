@@ -174,7 +174,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
     <div>
     <Dialog open={show} onClose={onClose}
     aria-labelledby="centred-add-agency-dialog">
-        <DialogTitle data-tid="add-agency-title" style={{ textAlign: 'center'}}> {t("agencies.add_to_group")}</DialogTitle>
+        <DialogTitle data-tid="add-agency-title" variant="modalTitle"> {t("agencies.add_to_group")}</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={onClose}

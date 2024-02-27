@@ -21,15 +21,15 @@ export default function Login() {
         <Card variant='outlined' sx={{backgroundColor: theme.palette.primary.loginCard, p: 4, border: 'none'}}>
           <CardContent>
             <Stack direction={'column'} spacing={2} width='fit-content'>
-          <Typography color={theme.palette.primary.loginText} variant='h2'>
-            <span style={{ fontWeight: 'bold' }}>{t("loginout.login")} </span>
+          <Typography color={theme.palette.primary.loginText} variant='loginHeader'>
+            {t("loginout.login")}
           </Typography>
           <Typography color={theme.palette.primary.loginText} variant='subheading'> 
             <Trans i18nKey={"loginout.keycloak"} t={t} components={{linkComponent: <Link key="keycloak-information-link" href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2817064969/"/>}} />
           </Typography>
           </Stack>
           <Box sx={{mt: 3.5}}>
-              <Button variant='contained' color='primary' size="xlarge" onClick={() => handleSignIn('keycloak')}>{t("nav.login")}</Button>
+              <Button variant='contained' color={'primary'} size="xlarge" onClick={() => handleSignIn('keycloak')}>{t("nav.login")}</Button>
           </Box>
           </CardContent>
         </Card>

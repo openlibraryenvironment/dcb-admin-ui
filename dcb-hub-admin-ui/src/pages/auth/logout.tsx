@@ -36,8 +36,8 @@ export default function Logout() {
           : null}
           <CardContent>
             <Stack direction={'column'} spacing={2} width='fit-content'>
-            <Typography color={theme.palette.primary.loginText} variant='h2'>
-                <span style={{ fontWeight: 'bold' }}>{t("loginout.login")} </span>
+            <Typography color={theme.palette.primary.loginText} variant='loginHeader'>
+                {t("loginout.login")}
               </Typography>
               <Typography color={theme.palette.primary.loginText} variant='subheading'> 
                 <Trans i18nKey={"loginout.keycloak"} t={t} components={{linkComponent: <Link key="keycloak-link" href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2817064969/"/>}} />

@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -20,34 +20,40 @@ export default function AgencyDetails( {agencyId, agency}: AgencyDetails) {
         <AdminLayout title={agency?.name}>
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                     <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                            <span style={{ fontWeight: 'bold' }}>{t("details.agency_name")}</span>
-                        </Typography>
-                        {agency?.name}
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.agency_name")}
+                            </Typography>
+                            {agency?.name}
+                        </Stack>
+
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                            <span style={{ fontWeight: 'bold' }}>{t("details.agency_id")}</span>
-                        </Typography>
-                        {agency?.id}
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.agency_id")}
+                            </Typography>
+                            {agency?.id}
+                        </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                            <span style={{ fontWeight: 'bold' }}>{t("details.agency_code")}</span>
-                        </Typography>
-                        {agency?.code}
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.agency_code")}
+                            </Typography>
+                            {agency?.code}
+                        </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                            <span style={{ fontWeight: 'bold' }}>{t("details.agency_hostlms")}</span>
-                        </Typography>
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.agency_hostlms")}
+                            </Typography>
                             {agency?.hostlms?.code}
+                        </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div">
-                            <span style={{ fontWeight: 'bold' }}>{t("details.agency_auth")}</span>
-                        </Typography>
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.agency_auth")}
+                            </Typography>
                             {agency?.authProfile}
+                        </Stack>
                     </Grid>
             </Grid>
             <Accordion>
@@ -57,10 +63,14 @@ export default function AgencyDetails( {agencyId, agency}: AgencyDetails) {
                         <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.location_info")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.long")}</span>
-                        {agency?.longitude} </Typography>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.lat")}</span>
-                        {agency?.latitude} </Typography>
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.long")}
+                            {agency?.longitude} </Typography>
+                        </Stack>
+                        <Stack direction={"column"}>
+                            <Typography variant="attributeTitle">{t("details.lat")}
+                            {agency?.latitude} </Typography>
+                        </Stack>
                 </AccordionDetails>
             </Accordion>
         </AdminLayout>

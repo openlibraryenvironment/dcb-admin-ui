@@ -21,7 +21,7 @@ export default function Import({show, onClose}: ImportForm) {
   return (
   <Dialog open={show} onClose={onClose} aria-labelledby="import-dialog" fullWidth maxWidth={"sm"}>
     {/* Parameterised so we can pass in import profiles in future work - we'll just need to add in a prop */}
-    <DialogTitle style={{ textAlign: 'center'}}>{t("mappings.import_title", {profile: "circulation status"})}</DialogTitle>
+    <DialogTitle variant="modalTitle">{t("mappings.import_title", {profile: "circulation status"})}</DialogTitle>
     <IconButton
         aria-label="close"
         onClick={onClose}

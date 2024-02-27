@@ -12,20 +12,15 @@ import { AdminLayout } from '@layout';
 import { useSession } from 'next-auth/react';
 
 
-type Props = {
-	page: number;
-	perPage: number;
-	sort: string;
-	order: string;
-};
 
-const Profile: NextPage<Props> = (props) => {
+const Profile: NextPage = () => {
 	const { data: session, status }: { data: any; status: any } = useSession();
 	const emailVerified = session?.profile?.email_verified ?? 'Cannot fetch verified email status.';
 	const formatRoles = (roles: any) => {
 		const formattedRoles = roles && roles.join(', ')
 		return(
-			<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.roles")} </span>
+			<ListItemText> 
+				<Typography variant='attributeTitle'>{t("profile.roles")} </Typography>
 				{formattedRoles}
 			</ListItemText>
 		)
@@ -41,22 +36,22 @@ const Profile: NextPage<Props> = (props) => {
 						</ListSubheader> 
 						<ListItem>
 							<ListItemIcon> <MdPersonOutline /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.name")} </span>{' '}
+							<ListItemText> <Typography variant='attributeTitle'>{t("profile.name")} </Typography>
 							{session?.user?.name} </ListItemText> 
 						</ListItem>
 						<ListItem>
 							<ListItemIcon> <MdOutlineMail /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.email")} </span>
+							<ListItemText> <Typography variant="attributeTitle">{t("profile.email")} </Typography>
 							{session?.user?.email} </ListItemText>
 						</ListItem>
 						<ListItem>
 							<ListItemIcon> <MdOutlineMarkEmailRead /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.email_verified")} </span>
+							<ListItemText> <Typography variant='attributeTitle'>{t("profile.email_verified")}</Typography>
 							{emailVerified.toString()} </ListItemText>
 						</ListItem>
 						<ListItem>
 							<ListItemIcon> <MdThumbUpOffAlt /> </ListItemIcon>
-							<ListItemText> <span style={{ fontWeight: 'bold' }}>{t("profile.prefered_username")} </span>
+							<ListItemText> <Typography variant='attributeTitle'>{t("profile.prefered_username")}</Typography> 
 							{session?.profile?.preferred_username} </ListItemText>
 						</ListItem>
 						<ListItem>

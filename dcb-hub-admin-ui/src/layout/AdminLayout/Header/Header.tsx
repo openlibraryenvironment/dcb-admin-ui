@@ -83,8 +83,7 @@ export default function Header({openStateFuncClosed, iconsVisible}: HeaderProps)
             {t("app.title", {consortium_name: "MOBIUS"})}
           </Typography>
           <div>
-            {iconsVisible!= false ? <Link href='/profile'
-              style={{ color: 'inherit' }}>
+            {iconsVisible!= false ? <Link href='/profile'>
                 <IconButton
                 size="large"
                 data-tid="profile-button"
