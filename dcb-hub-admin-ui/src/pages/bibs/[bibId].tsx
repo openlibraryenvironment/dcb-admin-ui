@@ -1,9 +1,8 @@
+import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
-import createApolloClient from "apollo-client";
-import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -13,11 +12,17 @@ import { getBibById } from "src/queries/queries";
 
 
 type BibDetails = {
-    bib: Bib
+    bibId: Bib
 };
 
-export default function SourceBibDetails( {bib}: BibDetails) {
+export default function SourceBibDetails( {bibId}: BibDetails) {
         const { t } = useTranslation();
+        const { loading, data} = useQuery(getBibById, {
+                variables: {
+                    query: "id:"+bibId
+                }, pollInterval: 120000      
+        })
+        const bib:Bib = data?.sourceBibs?.content?.[0];
         const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
         // Functions to handle expanding both individual accordions and all accordions
         const handleAccordionChange = (index: number) => () => {
@@ -33,6 +38,7 @@ export default function SourceBibDetails( {bib}: BibDetails) {
                 setExpandedAccordions((prevExpanded) => prevExpanded.map(() => !prevExpanded[0]));
         };
         return (
+        loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={bib?.title}>
                 <Stack direction="row" justifyContent="end">
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}
@@ -115,26 +121,16 @@ export default function SourceBibDetails( {bib}: BibDetails) {
 
 
 export async function getServerSideProps(ctx: any) {
-    const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
-	}
-    const session = await getSession(ctx);
-    const bibId = ctx.params.bibId
-    const client = createApolloClient(session?.accessToken);
-    const { data } = await client.query({
-        query: getBibById,
-        variables: {
-            query: "id:"+bibId
-        }        
-      });
-    const bib = data?.sourceBibs?.content?.[0];
-    return {
-      props: {
-        bibId,
-        bib,
-        ...translations,
-      },
-    }
+        const { locale } = ctx;
+        let translations = {};
+        if (locale) {
+        translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+        }
+        const bibId = ctx.params.bibId
+        return {
+                props: {
+                        bibId,
+                        ...translations,
+                },
+        }
 }

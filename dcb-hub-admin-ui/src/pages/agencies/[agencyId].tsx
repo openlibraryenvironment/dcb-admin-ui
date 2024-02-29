@@ -1,22 +1,29 @@
 import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
-import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { getAgencyById } from "src/queries/queries";
-import createApolloClient from "apollo-client";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
+import { useQuery } from "@apollo/client";
+import { Agency } from "@models/Agency";
 
 type AgencyDetails = {
-    agencyId: any,
-    agency: any
+    agencyId: string,
 };
 
-export default function AgencyDetails( {agencyId, agency}: AgencyDetails) {
+export default function AgencyDetails( {agencyId}: AgencyDetails) {
     const { t } = useTranslation();
+    const { loading, data} = useQuery(getAgencyById, {
+        variables: {
+            query: "id:"+agencyId
+        }, pollInterval: 120000        
+    })
+    const agency:Agency = data?.agencies?.content?.[0];
+    
     return (
+        loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={agency?.name}>
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                     <Grid xs={2} sm={4} md={4}>
@@ -85,27 +92,12 @@ export async function getServerSideProps(ctx: any) {
 	if (locale) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
 	}
-    // This is how we obtain the session information when we can't use useSession().
-    // We need this so we can authenticate our request for agency data.
-    const session = await getSession(ctx);
     // We use ctx.params to extract the ID from the URL. Then we can use it to make the request.
     const agencyId = ctx.params.agencyId
-    // Construct a client to make the request as we can't use hooks here.
-    const client = createApolloClient(session?.accessToken);
-    // Await the agency data
-    const { data } = await client.query({
-        query: getAgencyById,
-        variables: {
-            query: "id:"+agencyId
-        }        
-      });
-    // It comes in an array so it's important to get it in the right format here
-    const agency = data?.agencies?.content?.[0];
     // Then return all the relevant props ready for page load.
     return {
       props: {
         agencyId,
-        agency,
         ...translations,
       },
     }
