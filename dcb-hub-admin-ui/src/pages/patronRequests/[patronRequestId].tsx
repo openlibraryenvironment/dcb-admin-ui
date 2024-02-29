@@ -509,6 +509,7 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                                 selectable= {false}
                                                 noDataTitle={t("details.audit_log_no_data")}
                                                 noDataMessage={t("details.audit_log_no_rows")}
+                                                sortModel={[{field: 'auditDate', sort: 'desc'}]}		
                                                 />
                                                 <pre>{JSON.stringify(patronRequest?.audit?.auditData, null, 2)}</pre>
                                         </AccordionDetails>
