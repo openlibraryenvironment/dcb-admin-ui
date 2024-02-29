@@ -1,21 +1,28 @@
 import { Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
-import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { getGroupById } from "src/queries/queries";
-import createApolloClient from "apollo-client";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Group } from "@models/Group";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import { useQuery } from "@apollo/client";
 
 type GroupDetails = {
-    group: Group
+    groupId: string
 };
 
-export default function GroupDetails( {group}: GroupDetails) {
+export default function GroupDetails( {groupId}: GroupDetails) {
     const { t } = useTranslation();
+    const { loading, data} = useQuery(getGroupById, {
+        variables: {
+            query: "id:"+groupId
+        }, pollInterval: 120000        
+    })
+    const group: Group = data?.agencyGroups?.content?.[0];
+    
     return (
+        loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={group?.name}>
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                 <Grid xs={2} sm={4} md={4}>
@@ -59,20 +66,10 @@ export async function getServerSideProps(ctx: any) {
 	if (locale) {
 	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
 	}
-    const session = await getSession(ctx);
     const groupId = ctx.params.groupId;
-    const client = createApolloClient(session?.accessToken);
-    const { data } = await client.query({
-        query: getGroupById,
-        variables: {
-            query: "id:"+groupId
-        }        
-      });
-    const group = data?.agencyGroups?.content?.[0];
     return {
       props: {
         groupId,
-        group,
         ...translations,
       },
     }

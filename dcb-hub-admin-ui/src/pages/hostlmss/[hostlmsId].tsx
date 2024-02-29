@@ -1,9 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
-import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
-import { getHostLmsById } from "src/queries/queries";
-import createApolloClient from "apollo-client";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { HostLMS } from "@models/HostLMS";
@@ -11,13 +8,23 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import PrivateData from "@components/PrivateData/PrivateData";
+import { getHostLmsById } from "src/queries/queries";
+import { useQuery } from "@apollo/client";
 
 type HostLMSDetails = {
-    hostlms: HostLMS
+    hostlmsId: any
 };
 
-export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
+export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
     const { t } = useTranslation();
+
+    // pollInterval is in ms - set to 2 mins
+    const { loading, data, fetchMore } = useQuery(getHostLmsById, {
+        variables: {
+            query: "id:"+hostlmsId
+        }, pollInterval: 120000}  );
+    const hostlms: HostLMS =  data?.hostLms?.content?.[0];
+
     const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
     // Functions to handle expanding both individual accordions and all accordions
     const handleAccordionChange = (index: number) => () => {
@@ -34,6 +41,7 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
     };
     
     return (
+        loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={hostlms?.name}>
             <Stack direction="row" justifyContent="end">
                 <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> 
@@ -430,26 +438,16 @@ export default function HostLMSDetails( {hostlms}: HostLMSDetails) {
 }
 
 export async function getServerSideProps(ctx: any) {
-    const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
-	}
-    const session = await getSession(ctx);
-    const hostlmsId = ctx.params.hostlmsId
-    const client = createApolloClient(session?.accessToken);
-    const { data } = await client.query({
-        query: getHostLmsById,
-        variables: {
-            query: "id:"+hostlmsId
-        }        
-      });
-    const hostlms = data?.hostLms?.content?.[0];
-    return {
-      props: {
-        hostlmsId,
-        hostlms,
-        ...translations,
-      },
-    }
+        const { locale } = ctx;
+        let translations = {};
+        if (locale) {
+        translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+        }
+        const hostlmsId = ctx.params.hostlmsId
+        return {
+        props: {
+                hostlmsId,
+                ...translations,
+        },
+        }
 }

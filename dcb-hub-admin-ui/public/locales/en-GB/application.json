@@ -22,6 +22,7 @@
 
   "common": {
     "about": "About",
+    "loading": "Loading ...",
     "missing": "Missing",
     "na": "NA",
     "placeholder_text": "Note: this page contains placeholder data.", 

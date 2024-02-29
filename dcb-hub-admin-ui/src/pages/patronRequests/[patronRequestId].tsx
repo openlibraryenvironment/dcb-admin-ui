@@ -1,10 +1,9 @@
+import { useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { Stack, Button, Typography, Accordion, AccordionDetails, AccordionSummary, Card } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
-import createApolloClient from "apollo-client";
 import dayjs from "dayjs";
-import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -13,12 +12,21 @@ import { MdExpandMore } from "react-icons/md";
 import { getPatronRequestById } from "src/queries/queries";
 
 type PatronRequestDetails = {
-    patronRequest: any,
-    // update to use PatronRequest data model.
+    patronRequestId: string,
 };
 
-export default function PatronRequestDetails( {patronRequest}: PatronRequestDetails) {
+export default function PatronRequestDetails( {patronRequestId}: PatronRequestDetails) {
     const { t } = useTranslation();
+
+    const { loading, data, fetchMore } = useQuery(getPatronRequestById, {
+        variables: {
+            query: "id:"+patronRequestId
+        }, pollInterval: 120000}  );
+
+    // define PR data type.
+
+    const patronRequest =  data?.patronRequests?.content?.[0]
+
     const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
 
     // Functions to handle expanding both individual accordions and all accordions
@@ -36,6 +44,7 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
     };
     
     return (
+        loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={patronRequest?.description}>
                 <Stack direction="row" justifyContent="end">
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> 
@@ -52,7 +61,7 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.request_id")}
                                                 </Typography>
-                                                {patronRequest.id}
+                                                {patronRequest?.id}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
@@ -520,50 +529,16 @@ export default function PatronRequestDetails( {patronRequest}: PatronRequestDeta
 }
 
 export async function getServerSideProps(ctx: any) {
-        try {
             const { locale } = ctx;
             let translations = {};
-    
             if (locale) {
                 translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
             }
-            
-            console.log("Translations have been fetched successfully.");
-    
-            const session = await getSession(ctx);
-            console.log("Session has been fetched successfully.");
-    
             const patronRequestId = ctx.params.patronRequestId;
-            console.log("patronRequestId:", patronRequestId);
-    
-            const client = createApolloClient(session?.accessToken);
-            console.log("Client has been created successfully.");
-    
-            console.log("Querying data...");
-            const { data } = await client.query({
-                query: getPatronRequestById,
-                variables: {
-                    query: "id:"+patronRequestId
-                }
-            });
-            console.log("Data has been fetched successfully:", data);
-    
-            const patronRequest = data?.patronRequests?.content?.[0];  
-            console.log("Patron request:", patronRequest);
-    
             return {
                 props: {
                     patronRequestId,
-                    patronRequest,
                     ...translations,
                 },
             };
-        } catch (error: any) {
-            console.log("Error occurred:", error, "and the message was"+error?.message);
-            return {
-                props: {
-                    error: error?.message
-                }
-            };
-        }
 }
