@@ -29,19 +29,22 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 			</Head>
 			<Header openStateFuncClosed={()=>setSidebarOpen(!sidebarOpen)} />
 			{/*container for everything, includes the sidebar*/}
-			<Box sx={{display: 'flex', height: '100%', width: '100%'}}>
-				<Sidebar
+			<Box sx={{display: 'flex', height: '100%', width: '100%', justifyContent: 'center'}}>
+				<Box>
+					<Sidebar
 					openStateOpen = {sidebarOpen}
 					openStateFuncOpen = {()=>{setSidebarOpen(sidebarOpen)}}
 					openStateFuncClosed = {()=>setSidebarOpen(!sidebarOpen)}
-				/>
+					/>
+				</Box>
 				{/* Container for content excluding the sidebar
 					- flexGrow makes the content grow to the window size
 					- overflow: auto, means that content does not go beyond its container
 					- minHeight must be 100vh for the footer to be at the bottom of the screen
+					- maxWidth is the width of all content together (1440px) minus the sidebar width (240px)
 				*/}
 				<Box display="flex"
-				sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+				sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '1200px'}}>
 					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
 						{hideBreadcrumbs!= true ? <Box>
