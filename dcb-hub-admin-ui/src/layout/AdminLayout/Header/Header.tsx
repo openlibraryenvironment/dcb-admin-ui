@@ -48,7 +48,8 @@ export default function Header({openStateFuncClosed, iconsVisible}: HeaderProps)
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed" sx={{backgroundColor: theme.palette.primary.header}}>
-        <Toolbar>
+        {/* this width is the maxSize of the content + sidebar width */}
+        <Toolbar sx={{ maxWidth: '1440px', alignSelf: 'center', width: '100%'}}>
           {/* This code handles the display of the consortium icon and sidebar icon.
           By using iconsVisible, we can render the correct UI for the situation  */}
           {iconsVisible!= false ?
