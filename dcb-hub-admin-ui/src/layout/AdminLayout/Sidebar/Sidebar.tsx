@@ -29,6 +29,9 @@ const drawerWidth = 240;
 const openedMixin = (theme: Theme): CSSObject => ({
   backgroundColor: theme.palette.primary.sidebar,
   width: drawerWidth,
+  // use position: 'static' to fix issue of sidebar not being centred
+  position: 'static',
+  height: '100%',
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,

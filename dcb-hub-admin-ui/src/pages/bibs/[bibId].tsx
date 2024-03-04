@@ -1,9 +1,8 @@
+import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
-import createApolloClient from "apollo-client";
-import { getSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -13,11 +12,17 @@ import { getBibById } from "src/queries/queries";
 
 
 type BibDetails = {
-    bib: Bib
+    bibId: Bib
 };
 
-export default function SourceBibDetails( {bib}: BibDetails) {
+export default function SourceBibDetails( {bibId}: BibDetails) {
         const { t } = useTranslation();
+        const { loading, data} = useQuery(getBibById, {
+                variables: {
+                    query: "id:"+bibId
+                }, pollInterval: 120000      
+        })
+        const bib:Bib = data?.sourceBibs?.content?.[0];
         const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
         // Functions to handle expanding both individual accordions and all accordions
         const handleAccordionChange = (index: number) => () => {
@@ -33,6 +38,7 @@ export default function SourceBibDetails( {bib}: BibDetails) {
                 setExpandedAccordions((prevExpanded) => prevExpanded.map(() => !prevExpanded[0]));
         };
         return (
+        loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={bib?.title}>
                 <Stack direction="row" justifyContent="end">
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}
@@ -40,39 +46,53 @@ export default function SourceBibDetails( {bib}: BibDetails) {
                 </Stack>
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_bib_id")}</span>
-                        </Typography>
-                        {bib?.id}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.source_bib_id")}
+                                </Typography>
+                                {bib?.id}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.title")}</span>
-                        </Typography>
-                        {bib?.title}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.title")}
+                                </Typography>
+                                {bib?.title}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.author")}</span>
-                        </Typography>
-                        {bib?.author}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.author")}
+                                </Typography>
+                                {bib?.author}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_system_id")}</span>
-                        </Typography>
-                        {bib?.sourceSystemId} 
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.source_system_id")}
+                                </Typography>
+                                {bib?.sourceSystemId} 
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.source_record_id")}</span>
-                        </Typography>
-                        {bib?.sourceRecordId} 
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.source_record_id")}
+                                </Typography>
+                                {bib?.sourceRecordId}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_id")}</span>
-                        </Typography>
-                        {bib?.contributesTo?.id}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.contributor_id")}
+                                </Typography>
+                                {bib?.contributesTo?.id}
+                        </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
-                        <Typography component="div"> <span style={{ fontWeight: 'bold' }}>{t("details.contributor_title")}</span>
-                        </Typography>
-                        {bib?.contributesTo?.title}
+                        <Stack direction={"column"}>
+                                <Typography variant="attributeTitle">{t("details.contributor_title")}
+                                </Typography>
+                                {bib?.contributesTo?.title}
+                        </Stack>
                 </Grid>
                 </Grid>
                 <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
@@ -101,26 +121,16 @@ export default function SourceBibDetails( {bib}: BibDetails) {
 
 
 export async function getServerSideProps(ctx: any) {
-    const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-	translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
-	}
-    const session = await getSession(ctx);
-    const bibId = ctx.params.bibId
-    const client = createApolloClient(session?.accessToken);
-    const { data } = await client.query({
-        query: getBibById,
-        variables: {
-            query: "id:"+bibId
-        }        
-      });
-    const bib = data?.sourceBibs?.content?.[0];
-    return {
-      props: {
-        bibId,
-        bib,
-        ...translations,
-      },
-    }
+        const { locale } = ctx;
+        let translations = {};
+        if (locale) {
+        translations = await serverSideTranslations(locale as string, ['common', 'application', 'validation']);
+        }
+        const bibId = ctx.params.bibId
+        return {
+                props: {
+                        bibId,
+                        ...translations,
+                },
+        }
 }

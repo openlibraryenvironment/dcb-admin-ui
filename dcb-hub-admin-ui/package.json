@@ -12,10 +12,12 @@
 	},
 	"dependencies": {
 		"@apollo/client": "^3.8.8",
+		"@emotion/cache": "^11.11.0",
 		"@emotion/react": "^11.11.1",
 		"@emotion/server": "^11.11.0",
 		"@emotion/styled": "^11.11.0",
 		"@mui/material": "^5.14.8",
+		"@mui/material-nextjs": "^5.15.11",
 		"@mui/x-data-grid": "^6.18.4",
 		"@types/lodash": "^4.14.202",
 		"@typescript-eslint/utils": "^6.6.0",

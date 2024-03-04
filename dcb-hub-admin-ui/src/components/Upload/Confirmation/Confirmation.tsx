@@ -1,6 +1,6 @@
 // A modal to confirm or cancel file uploads. Originally built for Circulation status mappings.
 import Alert from '@components/Alert/Alert';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, useTheme } from '@mui/material';
 import { useTranslation, Trans } from 'next-i18next';
 
 type ConfirmType = {
@@ -14,17 +14,18 @@ type ConfirmType = {
 
 const Confirmation = ({ open, onClose, onConfirm, code, existingMappingCount, fileName }: ConfirmType) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const deleted = "deleted";
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby='replace-mappings-confirmation-modal'>
         {/* // Enforcing the style of bold, centered modal or dialog headers */}
-      <DialogTitle style={{ textAlign: 'center'}}><strong>{t("mappings.confirmation_header")}</strong></DialogTitle>
+      <DialogTitle variant='modalTitle'>{t("mappings.confirmation_header")}</DialogTitle>
       <DialogContent>
             <Trans
               i18nKey="mappings.confirmation_body" 
               values={{ existingMappingCount, code, fileName, deleted }} 
               components={{paragraph: <p/> , bold: <strong/>}}/>           
-            <Alert severityType="warning" alertText = {t("mappings.confirmation_warning")}/>
+            <Alert severityType="warning" alertText = {t("mappings.confirmation_warning")} textColor={theme.palette.common.black}/>
             {t("mappings.confirmation_replace")}
       </DialogContent>
       <DialogActions>

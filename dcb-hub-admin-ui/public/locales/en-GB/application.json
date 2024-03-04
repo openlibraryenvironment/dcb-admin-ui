@@ -1,13 +1,6 @@
 {
-  
   "app": {
     "name": "DCB Admin",
-    "dcb": "DCB",
-    "dcb_full": "Direct Consortial Borrowing",
-    "service": {
-      "dcb": "DCB Service",
-      "keycloak": "Keycloak"
-    },
     "component": {
       "service": "dcb-service",
       "locate": "dcb-locate",
@@ -15,18 +8,61 @@
       "devops": "dcb-devops",
       "keycloak": "dcb-keycloak-extensions"
     },
-    "version": "Version", 
+    "dcb": "DCB",
+    "dcb_full": "Direct Consortial Borrowing",
+    "guest_user": "Guest",
     "released": "Released",
-    "guest_user": "Guest"
+    "service": {
+      "dcb": "DCB Service",
+      "keycloak": "Keycloak"
+    },
+    "title": "$t(app.name) for {{consortium_name}}",
+    "version": "Version"
   },
 
   "common": {
-    "placeholder_text": "Note: this page contains placeholder data.", 
-    "placeholder_tip": "Caution: example placeholder data", 
+    "about": "About",
+    "loading": "Loading ...",
     "missing": "Missing",
     "na": "NA",
+    "placeholder_text": "Note: this page contains placeholder data.", 
+    "placeholder_tip": "Caution: example placeholder data", 
     "unknown": "Unknown"
   }, 
+
+  "openrs": {
+    "name": "OpenRS",
+    "about": "$t(common.about) $t(openrs.name)",
+    "dcb": {
+      "about":"$t(common.about) $t(app.dcb)",
+      "description": "$t(app.dcb) is an $t(openrs.name) product that enables libraries to deliver direct consortial borrowing services to their patrons across a range of LMS and discovery systems. <paragraph/> Developed by <linkComponent>$t(openrs.who.kint_full)</linkComponent>, $t(app.dcb) helps consortia fulfil patrons borrowing requests across their membership faster and cheaper than traditional resource sharing methods.<paragraph/>",
+      "project": "$t(app.dcb) project",
+      "release_notes": "Release notes",
+      "roadmap": "Product roadmap"
+    },
+    "description": "$t(openrs.name)  is a resource sharing initiative of the <linkComponent>$t(openrs.who.olf_full)</linkComponent>. <paragraph/>The open source project is reinventing resource sharing to meet the needs of different types of consortia, using open standards and native integration to provide consortia with robust and extended functionality for consortial resource sharing.<paragraph/>",
+    "participate": "Get involved",
+    "who": {
+      "ebsco": "EBSCO",
+      "involved": "Who's involved",
+      "kint": "K-Int",
+      "kint_full": "Knowledge Integration",
+      "olf": "OLF",
+      "olf_full": "Open Library Foundation"
+    }
+  },
+
+  "loginout": {
+    "keycloak": "We use <linkComponent>Keycloak</linkComponent> for secure authentication",
+    "login": "Please login to gain full access to $t(app.name)",
+    "logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>"
+  },
+
+  "support": {
+    "name": "Support",
+    "admin_user_guides": "Admin user guides",
+    "submit_ticket": "Submit a support ticket"
+  },
 
   "welcome": {
     "greeting": "Welcome",
@@ -106,6 +142,9 @@
   },
 
   "consortium":{
+    "about": "About {{consortium}}",
+    "description": "<linkComponent>MOBIUS</linkComponent> is a vibrant, collaborative partnership of libraries that has transformed library services for the citizens of Missouri and nearby states. <paragraph/> As a founder member of OpenRS and pioneer adopter of DCB, the consortium is proactively pursuing its goal to create equal access to materials and information for all its users.<paragraph/>",
+    "search": "Search {{consortium}}",
     "your": "Your consortium"
   },
 

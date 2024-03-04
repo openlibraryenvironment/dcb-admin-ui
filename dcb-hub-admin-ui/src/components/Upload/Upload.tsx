@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Button, Card, CardContent, Stack, Typography, useTheme } from "@mui/material";
 import { useState } from "react";
 import Alert from "@components/Alert/Alert";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
@@ -54,6 +54,7 @@ uppy.use(XHR, { endpoint: url,
 // Upload component, using Uppy - docs at https://uppy.io/docs/ 
 const UppyFileUpload = ({ category, onCancel }: any) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   uppy.setMeta({category: category});
   const xhrplug = uppy.getPlugin('XHRUpload');
   const { data, status } = useSession();
@@ -223,7 +224,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
           />
 
         {filesAdded? <Card>
-          <Alert severityType="info" alertText={t("mappings.add_success", {fileName: addedFile.name})} key={addedFile.size}/>
+          <Alert severityType="info" textColor={theme.palette.common.black} alertText={t("mappings.add_success", {fileName: addedFile.name})} key={addedFile.size}/>
         </Card>:null}
         {(validationErrorMessage.includes("exceeds maximum allowed size") && isErrorDisplayed) && (<TimedAlert severityType="error" open={true} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.file_too_large", {fileName: failedFile.name, fileSize: fileSizeConvertor(failedFile.size), maxSize: 1})} key={"validation-upload-error-file-size"} onCloseFunc={dismissError}/>)}
         {(validationErrorMessage.includes("This file is smaller than the allowed size") && isErrorDisplayed) && (<TimedAlert severityType="error" open={true} onClose={handleClose} autoHideDuration={3000} alertText={t("mappings.file_empty", {fileName: failedFile.name})} key={"validation-upload-error-file-empty"} onCloseFunc={dismissError}/>)}
