@@ -1,3 +1,20 @@
+# [1.6.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.5.0...v1.6.0) (2024-03-04)
+
+
+### Bug Fixes
+
+* Add support ticket link [DCB-821] ([03d78d5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/03d78d5688c2c274f2849372197747e9efc09ce9))
+* Additional logging to catch the Vercel timeout issue ([2753cbb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2753cbbfab1b980679c33af7a71f7014bb1c835e))
+* fix 'hidden element must not be focusable' ([82b3d01](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/82b3d0110c0100dd6d2dc77fcb4f6c4930b17f5b))
+* Remove serverless functions from DCB Admin [DCB-906] ([76b6e96](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/76b6e962796a711ed982e8c34ac7da6371553e5a))
+* Sort audit logs to show newest first [DCB-905] ([9145cc7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9145cc79e3474f3929f6f4978ce83eb6c7d5f205))
+
+
+### Features
+
+* Add landing page for DCB Admin [DCB-821] ([3af08cc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3af08ccdeeee75a9670a8c83070434f01aa10016))
+* Set up base theme with existing styles [DCB-874] ([c29da14](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c29da1430254d36a2c0ec5dd6b1ff7b9871ecc7d))
+
 # [1.5.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.4.0...v1.5.0) (2024-02-21)
 
 
