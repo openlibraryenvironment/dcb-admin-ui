@@ -26,6 +26,10 @@
     "toggle_visibility": "Toggle visibility"
   },
 
+  "link": {
+    "discovery_tip": "Link to $t(app.service.discovery)"
+  },
+
   "profile": {
     "details": "Your details",
     "name": "Name: ",

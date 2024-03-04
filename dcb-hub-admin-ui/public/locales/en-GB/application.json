@@ -14,6 +14,7 @@
     "released": "Released",
     "service": {
       "dcb": "DCB Service",
+      "discovery": "DCB Discovery",
       "keycloak": "Keycloak"
     },
     "title": "$t(app.name) for {{consortium_name}}",
