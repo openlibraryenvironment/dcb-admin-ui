@@ -1,11 +1,13 @@
 import { useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import Link from "@components/Link/Link";
 import { AdminLayout } from "@layout";
 import { Stack, Button, Typography, Accordion, AccordionDetails, AccordionSummary, Card } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import dayjs from "dayjs";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import getConfig from "next/config";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
@@ -17,6 +19,8 @@ type PatronRequestDetails = {
 
 export default function PatronRequestDetails( {patronRequestId}: PatronRequestDetails) {
     const { t } = useTranslation();
+    const { publicRuntimeConfig } = getConfig();
+
 
     const { loading, data, fetchMore } = useQuery(getPatronRequestById, {
         variables: {
@@ -42,6 +46,9 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
     const expandAll = () => {
             setExpandedAccordions((prevExpanded) => prevExpanded.map(() => !prevExpanded[0]));
     };
+
+    // Check for the presence of a configured discovery scaffold URL. If it's there, render the URL: if not return blank.
+    const bibClusterRecordUrl = publicRuntimeConfig.DISCOVERY_SCAFFOLD_URL ? publicRuntimeConfig.DISCOVERY_SCAFFOLD_URL + 'resourceDescription/' + patronRequest?.bibClusterId : '';
     
     return (
         loading ? <AdminLayout title={t("common.loading")} /> : 
@@ -128,7 +135,7 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.bib_cluster_id")}
                                                         </Typography>
-                                                        {patronRequest?.bibClusterId}
+                                                        {(bibClusterRecordUrl == '') ? patronRequest?.bibClusterId : <Link href={bibClusterRecordUrl} key="bibClusterRecordLink" target='_blank' rel="noreferrer" title={t("link.discovery_tip")}>{patronRequest?.bibClusterId}</Link>}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
