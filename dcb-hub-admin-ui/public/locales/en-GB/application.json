@@ -61,6 +61,7 @@
 
   "support": {
     "name": "Support",
+    "docs": "Support docs",
     "admin_user_guides": "Admin user guides",
     "submit_ticket": "Submit a support ticket"
   },

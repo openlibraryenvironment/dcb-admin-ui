@@ -60,8 +60,10 @@ const openRSLight = createTheme({
             breadcrumbs: '#246F9E',
             buttonForSelectedChildPage: '#999999',
             buttonForSelectedPage: '#287BAF',
-            footerArea: '#EBEBEB',
+            footerArea: '#FFFFFF',
             footerText: '#000000',
+            linkedFooterBackground: '#0C4068',
+					  linkedFooterText: '#FFFFFF',
             header: '#0C4068',
             headerText: '#FFFFFF',
             hover: '#EEEEEE',
@@ -127,7 +129,14 @@ const openRSLight = createTheme({
         },
         notFoundText: {
             fontSize: '1.5rem'
-        }
+        },
+        linkedFooterTextSize: {
+          fontSize: '14px'
+        },
+        linkedFooterHeader: {
+          fontSize: 18,
+          fontWeight: 'bold'
+        },
     },
     components: {
         MuiButton: {

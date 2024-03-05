@@ -55,8 +55,10 @@ const openRSDark = createTheme({
             breadcrumbs: '#35B7FF',
             buttonForSelectedChildPage: '#999999',
             buttonForSelectedPage: '#287BAF',
-            footerArea: '#000000',
+            footerArea: '#202020',
             footerText: '#FFFFFF',
+            linkedFooterBackground: '#000000',
+					  linkedFooterText: '#FFFFFF',
             header: '#000000',
             headerText: '#FFFFFF',
             hover: '#424242',
@@ -121,7 +123,14 @@ const openRSDark = createTheme({
         },
         notFoundText: {
             fontSize: '1.5rem'
-        }
+        },
+        linkedFooterTextSize: {
+          fontSize: '14px'
+        },
+        linkedFooterHeader: {
+          fontSize: '18px',
+          fontWeight: 'bold'
+        },
     },
     components: {
         MuiButton: {
