@@ -15,7 +15,7 @@ export default function LandingCard() {
     // Elevation of 3 applied to the cards for drop shadows: content spaced by '4' - 32 px
 
     return(
-        <Stack direction={{ xs: 'column', sm: 'row', md: 'row', lg: 'row'}} spacing={4} p={6}>
+        <Stack direction={{ xs: 'column', sm: 'column', md: 'row', lg: 'row'}} spacing={4} p={6}>
           <Card elevation={3} sx={{p: 3, backgroundColor: theme.palette.primary.landingCard, width: '100%', display: "flex",
             flexDirection: "column"}}>
             <CardContent>
