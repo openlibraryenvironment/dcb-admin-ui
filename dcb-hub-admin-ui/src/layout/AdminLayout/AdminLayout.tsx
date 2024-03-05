@@ -1,11 +1,11 @@
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Footer from '@layout/AdminLayout/Footer/Footer';
-import Box from '@mui/material/Box';
 import Header from './Header/Header';
 import Breadcrumbs from './Breadcrumbs/Breadcrumbs';
-import { Stack, Typography, useTheme } from '@mui/material';
+import { Stack, Typography, useTheme, Box } from '@mui/material';
 import Sidebar from '@layout/AdminLayout/Sidebar/Sidebar';
+import LinkedFooter from './LinkedFooter/LinkedFooter';
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
@@ -46,7 +46,7 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 				<Box display="flex"
 				sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '1200px'}}>
 					{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
-					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
+					<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9, marginBottom: 2}}>
 						{hideBreadcrumbs!= true ? <Box>
 							<Breadcrumbs/>
 						</Box> : null }
@@ -72,7 +72,10 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 					{/* Footer
 						- flexShrink: 0 - flex item does not shrink
 					*/}
-					<Box sx={{ backgroundColor: theme.palette.primary.footerArea, overflow: 'auto', padding: 3, flexShrink: 0 }}>
+					<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.linkedFooterBackground, paddingBottom: 2, paddingTop: 2, flexShrink: 0}}>
+						<LinkedFooter/>
+					</Box>
+					<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.footerArea, padding: 2, flexShrink: 0 }}>
 						<Footer/>
 					</Box>
 				</Box>

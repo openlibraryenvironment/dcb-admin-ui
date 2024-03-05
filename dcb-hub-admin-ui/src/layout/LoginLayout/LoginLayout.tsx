@@ -1,5 +1,6 @@
 import Footer from "@layout/AdminLayout/Footer/Footer";
 import Header from "@layout/AdminLayout/Header/Header";
+import LinkedFooter from "@layout/AdminLayout/LinkedFooter/LinkedFooter";
 import { Box, Paper, Stack, useTheme } from "@mui/material";
 import Head from "next/head";
 import { PropsWithChildren, ReactNode } from "react";
@@ -29,7 +30,10 @@ export default function LoginLayout({ children}: PropsWithChildren<LoginLayoutPr
 					{/* Footer
 						- flexShrink: 0 - flex item does not shrink
 					*/}
-					<Box sx={{ backgroundColor: theme.palette.primary.footerArea, overflow: 'auto', padding: 3, flexShrink: 0 }}>
+					<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.linkedFooterBackground, paddingBottom: 2, paddingTop: 2, flexShrink: 0}}>
+						<LinkedFooter/>
+					</Box>
+					<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.footerArea, padding: 2, flexShrink: 0 }}>
 						<Footer/>
 					</Box>
 				</Box>

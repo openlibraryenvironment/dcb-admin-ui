@@ -39,6 +39,8 @@ declare module '@mui/material/styles' {
 		selectedText?: string;
 		sidebar?: string;
 		titleArea?: string;
+		linkedFooterBackground?: string;
+		linkedFooterText?: string;
 	}
   
 	interface SimplePaletteColorOptions {
@@ -61,6 +63,8 @@ declare module '@mui/material/styles' {
 		selectedText?: string;
 		sidebar?: string;
 		titleArea?: string;
+		linkedFooterBackground?: string;
+	  	linkedFooterText?: string;
 	}
 	interface TypographyVariants {
 		loginCardText: React.CSSProperties;
@@ -72,6 +76,8 @@ declare module '@mui/material/styles' {
 		homePageText: React.CSSProperties;
 		notFoundTitle: React.CSSProperties;
 		notFoundText: React.CSSProperties;
+		linkedFooterTextSize: React.CSSProperties;
+		linkedFooterHeader: React.CSSProperties;
 	  }
 	interface TypographyVariantsOptions {
 		loginCardText?: React.CSSProperties;
@@ -83,6 +89,8 @@ declare module '@mui/material/styles' {
 		homePageText: React.CSSProperties;
 		notFoundTitle: React.CSSProperties;
 		notFoundText: React.CSSProperties;
+		linkedFooterTextSize: React.CSSProperties;
+		linkedFooterHeader: React.CSSProperties;
 	  }
 }
 declare module '@mui/material/Typography' {
@@ -96,6 +104,8 @@ declare module '@mui/material/Typography' {
 		homePageText: true;
 		notFoundTitle: true;
 		notFoundText: true;
+		linkedFooterTextSize: true;
+		linkedFooterHeader: true;
 	}
 }
 
