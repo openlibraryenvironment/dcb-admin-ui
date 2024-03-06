@@ -30,6 +30,7 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
     // define PR data type.
 
     const patronRequest =  data?.patronRequests?.content?.[0]
+    const members = patronRequest?.clusterRecord?.members;
 
     const [expandedAccordions, setExpandedAccordions] = useState([true, true, true, true, true, true, true, false, false]);
 
@@ -199,9 +200,15 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                        {patronRequest?.clusterRecord?.members.map((member: { sourceRecord: any; }, index: number) => (member.sourceRecord && (
-                                                <pre key={index}>{JSON.stringify(member.sourceRecord, null, 2)}</pre>)
-                                        ))}                                
+                                        {members && members.some((member: { sourceRecord: any; }) => member.sourceRecord !== null) ? (
+                                                members.map((member: { sourceRecord: any; }, index: number) => (
+                                                        member.sourceRecord && (
+                                                        <pre key={index}>{JSON.stringify(member.sourceRecord, null, 2)}</pre>
+                                                )
+                                                ))
+                                        ) : (
+                                        <Typography variant="body1">{t("details.source_record_not_found")}</Typography>
+                                )}                             
                                 </AccordionDetails>
                                 </Accordion>
                                 </Card>
