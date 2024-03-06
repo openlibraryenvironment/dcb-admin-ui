@@ -199,7 +199,9 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                        <pre>{JSON.stringify(patronRequest?.clusterRecord?.members[0]?.sourceRecord, null, 2)}</pre>
+                                        {patronRequest?.clusterRecord?.members.map((member: { sourceRecord: any; }, index: number) => (member.sourceRecord && (
+                                                <pre key={index}>{JSON.stringify(member.sourceRecord, null, 2)}</pre>)
+                                        ))}                                
                                 </AccordionDetails>
                                 </Accordion>
                                 </Card>
