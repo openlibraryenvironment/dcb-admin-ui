@@ -27,7 +27,7 @@ export default function ClientDataGrid<T extends Object>({
     noDataMessage,
     noDataLink,
     columnVisibilityModel,
-    sortModel
+    sortModel,
 }: {
 	data: Array<T>;
 	columns: any; 
@@ -64,6 +64,14 @@ export default function ClientDataGrid<T extends Object>({
         if (type == "Audit")
         {
             router.push(`/patronRequests/audits/${params?.row?.id}`)
+        }
+    }
+    function getIdOfRow(row: any) {
+        if (type == "bibRecordCountByHostLMS") {
+            return row.sourceSystemId;
+        }
+        else {
+            return row.id;
         }
     }
 
@@ -115,7 +123,8 @@ export default function ClientDataGrid<T extends Object>({
             // if we don't want to filter by a column, set filterable to false (turned on by default)
             columns= {columns}
             // we can make our own custom toolbar if necessary, potentially extending the default GridToolbar. Just pass it in here
-            rows={data ?? []}  
+            rows={data ?? []}
+            getRowId={getIdOfRow}  
             // And if we ever need to distinguish between no data and no results (i.e. from search) we'd just pass different overlays here.
             slots={{toolbar: GridToolbar, noRowsOverlay: CustomNoDataOverlay, 
                 noResultsOverlay: CustomNoDataOverlay}}

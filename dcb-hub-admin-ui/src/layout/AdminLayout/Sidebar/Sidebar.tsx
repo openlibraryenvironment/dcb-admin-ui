@@ -21,7 +21,8 @@ import {
   MdDns,
   MdAccountBalance,
   MdWorkspaces,
-  MdMap
+  MdMap,
+  MdInfo
 }from 'react-icons/md';
 
 const drawerWidth = 240;
@@ -89,6 +90,7 @@ const SidebarIcon = (indexVal: any, isSelected: boolean) => {
     case 6: return <MdBook {...iconProps} />;
     case 7: return <MdMap {...iconProps} />;
     case 8: return <MdSettings {...iconProps} />;
+    case 9: return <MdInfo {...iconProps} />;
     default: return null;
   }
 };
@@ -107,6 +109,7 @@ const routes = [
   {path: '/groups', translationKey: 'nav.groups'},
   {path: '/bibs', translationKey: 'nav.bibs'},
   {path: '/mappings', translationKey: 'nav.mappings.name'},
+  {path: '/serviceInfo', translationKey: 'nav.serviceInfo.name'}
   // currently unused, may be un-commented in the future
   //{path: '/settings', translationKey: 'nav.settings.name'}
 ];

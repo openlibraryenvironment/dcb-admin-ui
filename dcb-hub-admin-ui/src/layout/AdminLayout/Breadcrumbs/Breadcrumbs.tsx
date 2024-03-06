@@ -55,6 +55,7 @@ export default function Breadcrumbs () {
         {
           case "mappings":
           case "settings":
+          case "serviceInfo":
             return "nav."+topLevelKey+".name";
           default:
             return "nav."+topLevelKey;
