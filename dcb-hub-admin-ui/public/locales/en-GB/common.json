@@ -16,6 +16,10 @@
     },
     "patronRequests": "Patron requests",
     "profile": "Profile",
+    "serviceInfo": {
+      "name": "Service info",
+      "bibRecordCountByHostLms": "Bib record count by host lms"
+    },
     "settings": {
         "name": "Settings"
     }
@@ -247,6 +251,12 @@
     "no_results": "No bib records found. Try changing your search terms or filters.",
     "no_rows": "No bib records available. If you're expecting data to be here, please refresh the page.",
     "search_placeholder": "Search by sourceRecordId"
+  },
+
+  "bibRecordCountByHostLms": {
+    "change_filter": "Try changing your filters or search terms.",
+    "error_loading": "An error has occurred while loading bib record counts. Please reload the page.",
+    "no_results": "No bib record counts found. Try changing your search terms or filters."
   },
 
   "mappings": {
