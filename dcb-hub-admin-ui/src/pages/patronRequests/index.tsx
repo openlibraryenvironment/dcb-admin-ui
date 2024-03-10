@@ -20,16 +20,19 @@ const PatronRequests: NextPage = () => {
 				query={getPatronRequests}
 				type="patronRequests"
 				coreType="patronRequests"
-				columns={[	{field: 'dateUpdated', headerName: "Request updated", minWidth: 75, flex: 0.3, filterOperators,
-						 		valueGetter: (params: { row: { dateUpdated: any; }; }) => {
-									const requestUpdated = params.row.dateUpdated;
-									return dayjs(requestUpdated).format('YYYY-MM-DD HH:mm');}},
-							{field: 'id', headerName: "Request ID", minWidth: 100, flex: 0.5, filterOperators}, 
-							{field: 'patron', headerName: "Patron ID", minWidth: 100, flex: 0.5, filterOperators,
-								valueGetter: (params: { row: { patron: { id: any; }; }; }) => params.row.patron.id}, 
+				columns={[
+              {field: 'dateCreated', headerName: "Request created", minWidth: 75, flex: 0.3, filterOperators,
+						 		valueGetter: (params: { row: { dateCreated: any; }; }) => {
+									const requestCreated = params.row.dateCreated;
+									return dayjs(requestCreated).format('YYYY-MM-DD HH:mm');}},
+              {field: 'dateUpdated', headerName: "Request updated", minWidth: 75, flex: 0.3, filterOperators,
+              valueGetter: (params: { row: { dateUpdated: any; }; }) => {
+                const requestUpdated = params.row.dateUpdated;
+                return dayjs(requestUpdated).format('YYYY-MM-DD HH:mm');}},
+              {field: 'description', headerName: "Description", minWidth: 100, flex: 0.5, filterOperators},
+              {field: 'status', headerName: "Status", minWidth: 120, flex: 0.5, filterOperators},
 							{field: 'localBarcode', headerName: "Patron barcode", minWidth: 50, flex: 0.3, filterOperators,
 								valueGetter: (params: { row: { requestingIdentity: { localBarcode: any; }; }; }) => params?.row?.requestingIdentity?.localBarcode},
-							{field: 'description', headerName: "Description", minWidth: 100, flex: 0.5, filterOperators},
 							// HIDDEN BY DEFAULT
 							{field: 'suppliers', headerName: "Requesting agency", minWidth: 50, flex: 0.5, filterOperators,
 							 	valueGetter: (params: { row: { suppliers: Array<{ localAgency: any }> } }) => {
@@ -40,13 +43,14 @@ const PatronRequests: NextPage = () => {
 									return ''; // This allows us to handle the array being empty, and any related type errors.
 									}
 							}},
-							{field: 'pickupLocationCode', headerName: "Pickup location", minWidth: 50, flex: 0.5, filterOperators}]}			
+							{field: 'pickupLocationCode', headerName: "Pickup location", minWidth: 50, flex: 0.5, filterOperators},            
+							{field: 'id', headerName: "Request ID", minWidth: 100, flex: 0.5, filterOperators}]}			
 				selectable={true} 
 				pageSize={10}
 				noDataMessage={t("patron_requests.no_rows")}
 				noResultsMessage={t("patron_requests.no_results")}
 				searchPlaceholder={t("patron_requests.search_placeholder")}
-				columnVisibilityModel={{suppliers: false, pickupLocationCode: false}}
+				columnVisibilityModel={{suppliers: false, pickupLocationCode: false, id: false}}
 				// This is how to set the default sort order - so the grid loads as sorted by 'lastUpdated' by default.
 				sortModel={[{field: 'dateUpdated', sort: 'desc'}]}
 				sortDirection="DESC"

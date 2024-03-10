@@ -521,14 +521,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         <AccordionDetails>
                                         <ClientDataGrid 
                                                 data={patronRequest?.audit}
-                                                columns={[{ field: 'id', headerName: "ID", minWidth: 100, flex: 0.3}, 
-                                                        {field: 'auditDate', headerName: "Audit date", minWidth: 30, flex: 0.2,
+                                                columns={[
+                                                        {field: 'auditDate', headerName: "Audit date", minWidth: 60, flex: 0.2,
                                                         valueGetter: (params: { row: { auditDate: any; }; }) => {
 								const auditDate = params.row.auditDate;
-								return dayjs(auditDate).format('YYYY-MM-DD HH:mm:ss'); }},
-                                                        {field: 'briefDescription', headerName: "Description", minWidth: 100, flex: 0.6},
-                                                        {field: 'fromStatus', headerName: "fromStatus", minWidth: 50, flex: 0.2}, 
-                                                        {field: 'toStatus', headerName: "toStatus", minWidth: 50, flex: 0.2}, ]}	
+								return dayjs(auditDate).format('YYYY-MM-DD HH:mm:ss.SSS'); }},
+                                                        {field: 'briefDescription', headerName: "Description", minWidth: 100, flex: 0.4},
+                                                        {field: 'fromStatus', headerName: "fromStatus", minWidth: 50, flex: 0.25}, 
+                                                        {field: 'toStatus', headerName: "toStatus", minWidth: 50, flex: 0.25}, ]}	
                                                 type = "Audit"
                                                 // This grid could show click-through details of its own for each audit log entry
                                                 selectable= {false}

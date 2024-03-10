@@ -360,6 +360,7 @@ query LoadPatronRequests($pageno: Int!, $pagesize: Int!, $order: String!, $query
             patronHostlmsCode
             pickupLocationCode    
             description
+            status
             patron {
                 id
             }
