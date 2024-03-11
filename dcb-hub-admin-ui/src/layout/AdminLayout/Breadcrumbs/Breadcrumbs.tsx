@@ -123,7 +123,7 @@ export default function Breadcrumbs ({titleAttribute}: BreadcrumbsType) {
     };
 
     return (
-        <MUIBreadcrumbs sx={{pl:3, pr:3}} separator={<MdArrowForwardIos/>}>
+        <MUIBreadcrumbs aria-label="This is a breadcrumb trail" sx={{pl:3, pr:3}} separator={<MdArrowForwardIos/>}>
           {/* Check if we're on the home page - if we are, unset the 'Home' link */}
           {/* Breadcrumb length will always be 0 on the home page as it is at the base URL */}
           {breadcrumbs.length == 0 ? <Typography title={t("nav.home")} sx={{color: theme.palette.primary.breadcrumbs}}>
