@@ -1,7 +1,7 @@
 import axios from "axios";
 import { GetServerSideProps, NextPage } from "next";
 import { useSession } from "next-auth/react";
-import { useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "next-i18next";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
 import { GridColDef } from '@mui/x-data-grid';
@@ -10,6 +10,7 @@ import { AdminLayout } from "@layout";
 import { Typography } from "@mui/material";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Alert from "@components/Alert/Alert";
+import Link from "@components/Link/Link";
 
 const BibRecordCountByHostLms: NextPage = () => {
     const { publicRuntimeConfig } = getConfig();
@@ -19,6 +20,9 @@ const BibRecordCountByHostLms: NextPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
+    const handleReload = () => {
+        location.reload();
+    }
     // useEffect is being used here as this is a REST endpoint
     // Should it change to a GraphQL endpoint we will switch it to useQuery.
     useEffect(() => {
@@ -56,7 +60,7 @@ const BibRecordCountByHostLms: NextPage = () => {
     }
     return (
         error ? <AdminLayout title={t("nav.serviceInfo.bibRecordCountByHostLms")}>
-                    <Alert severityType="error" alertText={t("bibRecordCountByHostLms.error_loading")}/>
+                    <Alert severityType="error" alertText={<Trans i18nKey={"common.error_loading"} t={t} values={{page_title: t("nav.serviceInfo.bibRecordCountByHostLms")}} components={{linkComponent: <Link onClick={handleReload} title={t("ui.reload_page")} key={t("ui.reload_page")} href="bibRecordCountByHostLms" />}} />} onCloseFunc={() => setError(false)}/>
                 </AdminLayout> :
                 <AdminLayout title={t("nav.serviceInfo.bibRecordCountByHostLms")}>
                     <ClientDataGrid
@@ -66,7 +70,6 @@ const BibRecordCountByHostLms: NextPage = () => {
                         // We don't want click-through on this grid.
                         selectable={false}
                         noDataTitle={t("bibRecordCountByHostLms.no_results")}
-                        noDataMessage={t("bibRecordCountByHostLms.change_filters")}
                     />
                 </AdminLayout>
     );

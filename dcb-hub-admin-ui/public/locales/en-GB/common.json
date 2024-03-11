@@ -26,7 +26,9 @@
   }, 
   
   "ui": {
+    "close_alert": "Close alert",
     "logo": "{{owner}} logo",
+    "reload_page": "Reload page",
     "toggle_visibility": "Toggle visibility"
   },
 
@@ -255,7 +257,6 @@
 
   "bibRecordCountByHostLms": {
     "change_filter": "Try changing your filters or search terms.",
-    "error_loading": "An error has occurred while loading bib record counts. Please reload the page.",
     "no_results": "No bib record counts found. Try changing your search terms or filters."
   },
 
