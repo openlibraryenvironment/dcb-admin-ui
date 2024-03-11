@@ -49,7 +49,7 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 						{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 						<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
 							{hideBreadcrumbs!= true ? <Box>
-								<Breadcrumbs/>
+								<Breadcrumbs titleAttribute={title}/>
 							</Box> : null }
 							{ /* Title
 								- height: 90px & p: 3 - this is to make the text appear centered

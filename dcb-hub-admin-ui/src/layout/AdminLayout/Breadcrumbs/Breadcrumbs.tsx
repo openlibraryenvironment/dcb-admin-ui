@@ -5,14 +5,19 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 //localisation
 import { useTranslation } from 'next-i18next';
+import { truncate } from "lodash";
 
 type BreadcrumbType = {
     href: string;
     isCurrent: boolean;
-    translationKey: string;
+    key: string;
 };
 
-export default function Breadcrumbs () {
+type BreadcrumbsType = {
+  titleAttribute?: string;
+}
+
+export default function Breadcrumbs ({titleAttribute}: BreadcrumbsType) {
     const router = useRouter();
     const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbType[]>([]);
   
@@ -28,18 +33,18 @@ export default function Breadcrumbs () {
         return {
           href,
           isCurrent: index === pathArray.length - 1,
-          translationKey: getTranslationKey(pathArray.slice(0, index + 1))
+          key: getKey(pathArray.slice(0, index + 1))
         };
       });
       setBreadcrumbs(breadcrumbs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // Disabled because getTranslationKey is a stable function and will not change.
+    // Disabled because getKey is a stable function and will not change.
     }, [router.asPath]);
 
     const { t } = useTranslation();
     const theme = useTheme(); 
 
-    const getTranslationKey = (pathArray: string[]): string => {
+    const getKey = (pathArray: string[]): string => {
       // This function formulates the correct translation key from the pathArray.
       // For nested keys (like circulation status mappings) we just need to use .join
       const nestedKey = pathArray.join('.');
@@ -94,21 +99,23 @@ export default function Breadcrumbs () {
         // check if breadcrumb.href is defined and not null for the key.
         // this is to get around build issues with the key value.
         // performs if breadcrumbs is last in the array.
-        // This also checks for the audit log key nd unsets the link, because there is no /audits page to link to
-        breadcrumb.href && breadcrumb.translationKey!= "nav.auditLog" ? (
-          <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} underline="hover" key={breadcrumb.href} href={breadcrumb.href}>
-            {t(breadcrumb.translationKey)}
+        // This also checks for the audit log key and unsets the link, because there is no /audits page to link to
+        breadcrumb.href && breadcrumb.key!= "nav.auditLog" ? (
+          <Link sx={{color: theme.palette.primary.breadcrumbs}} underline="hover" key={breadcrumb.href} href={breadcrumb.href} title={t(breadcrumb.key)}>
+            {t(breadcrumb.key)}
           </Link>
         ) : (
           // if it is null then use index as the key.
-          <Typography sx={{color: theme.palette.primary.breadcrumbs,textWrap: 'wrap'}} key={index}>
-            {t(breadcrumb.translationKey)}
+          <Typography sx={{color: theme.palette.primary.breadcrumbs}} key={index} title={t(breadcrumb.key)}>
+            {t(breadcrumb.key)}
           </Typography>
         )
       ) : (
         // renders if the breadcrumb is the last item.
-        <Typography sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} key={breadcrumb.href}>
-          {breadcrumb.translationKey.length == 36 ? breadcrumb.translationKey : t(breadcrumb.translationKey)}
+        // The logic here checks for if the key is a UUID. If it is, we know we're on the details page, and so we attempt to render the titleAttribute. If there is no titleAttribute, we fall back to the UUID.
+        // If it's not a UUID, we know we're not on the details page, and so we can safely translate the value.
+        <Typography sx={{color: theme.palette.primary.breadcrumbs}} key={breadcrumb.href} title={breadcrumb.key.length == 36 ? titleAttribute: t(breadcrumb.key)}>
+          {breadcrumb.key.length == 36 ? (titleAttribute ? (titleAttribute.length > 36 ? truncate(titleAttribute, {length: 36}) : titleAttribute ): breadcrumb.key): t(breadcrumb.key) }
         </Typography>
       )
     ))
@@ -119,8 +126,8 @@ export default function Breadcrumbs () {
         <MUIBreadcrumbs sx={{pl:3, pr:3}} separator={<MdArrowForwardIos/>}>
           {/* Check if we're on the home page - if we are, unset the 'Home' link */}
           {/* Breadcrumb length will always be 0 on the home page as it is at the base URL */}
-          {breadcrumbs.length == 0 ? <Typography sx={{color: theme.palette.primary.breadcrumbs,textWrap: 'wrap'}}>
-          {t("nav.home")} </Typography> : <Link sx={{color: theme.palette.primary.breadcrumbs, textWrap: 'wrap'}} underline="hover" href="/">{t("nav.home")}</Link>}
+          {breadcrumbs.length == 0 ? <Typography title={t("nav.home")} sx={{color: theme.palette.primary.breadcrumbs}}>
+          {t("nav.home")} </Typography> : <Link sx={{color: theme.palette.primary.breadcrumbs}} underline="hover" href="/" title={t("nav.home")}>{t("nav.home")}</Link>}
           {mapBreadcrumbs()};
         </MUIBreadcrumbs>
     )

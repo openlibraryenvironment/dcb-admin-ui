@@ -53,7 +53,7 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
     
     return (
         loading ? <AdminLayout title={t("common.loading")} /> : 
-        <AdminLayout title={patronRequest?.description}>
+        <AdminLayout title={patronRequest?.clusterRecord?.title}>
                 <Stack direction="row" justifyContent="end">
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> 
                 </Stack>
