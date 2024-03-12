@@ -1,4 +1,12 @@
 {
+  "a11y": {
+    "is_breadcrumb": "This is a breadcrumb trail"
+  },
+
+  "link": {
+    "discovery_tip": "Link to $t(app.service.discovery)"
+  },
+  
   "nav": {
     "agencies": "Agencies",
     "auditLog": "Audit log",
@@ -30,10 +38,6 @@
     "logo": "{{owner}} logo",
     "reload_page": "Reload page",
     "toggle_visibility": "Toggle visibility"
-  },
-
-  "link": {
-    "discovery_tip": "Link to $t(app.service.discovery)"
   },
 
   "profile": {
