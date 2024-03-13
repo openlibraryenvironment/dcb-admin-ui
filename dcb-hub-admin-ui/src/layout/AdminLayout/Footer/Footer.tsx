@@ -21,8 +21,7 @@ export default function Footer() {
 	return (
 		<div>
 			{/* // To add footer content, just add items to the Stack. It will adjust to accommodate */}
-		<Stack direction="row" spacing={2} alignItems="center"
-		justifyContent="space-between">
+		<Stack direction="row" sx={{spacing: 2, alignItems:"center", justifyContent:"space-between", maxWidth: '1400px', margin: 'auto', paddingLeft: '24px', paddingRight: '24px'}}>
 		<Typography data-tid="footer-information" color={theme.palette.primary.footerText} sx={{border: 'green'}}>
 		{<Link sx={{color: theme.palette.primary.link}} className='text-decoration-none' href={'https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/'} target='_blank' rel="noreferrer">
 			{t('app.name')}

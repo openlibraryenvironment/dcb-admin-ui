@@ -78,6 +78,8 @@ const openRSLight = createTheme({
             selectedText: '#FFFFFF',
             sidebar: '#F6F6F6',
             titleArea:'#FFFFFF',
+            pageBackground: '#F9F9F9',
+            pageContentBackground: '#FFFFFF'
         },
         background: {
             default: '#FFFFFF'

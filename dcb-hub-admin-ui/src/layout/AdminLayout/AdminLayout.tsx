@@ -29,9 +29,10 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 			</Head>
 			<Header openStateFuncClosed={()=>setSidebarOpen(!sidebarOpen)} />
 			{/*container for everything, includes the sidebar*/}
-			<Box sx={{display: 'flex', height: '100%', width: '100%'}}>
+			<Box sx={{display: 'flex', height: '100%', width: '100%', flexDirection: 'column', minHeight: '100vh', backgroundColor: theme.palette.primary.pageBackground}}>
 				{/* Container for centring content in the middle of the screen */}
-				<Box sx={{display: 'flex', maxWidth: '1400px', height: '100%', width: '100%', margin: 'auto'}}>
+				{/* flex: '1 0 auto' - child element grows to fill space and pushes the footer to the bottom*/}
+				<Box sx={{display: 'flex', maxWidth: '1400px', height: '100%', width: '100%', alignSelf: 'center', flex: '1 0 auto', backgroundColor: theme.palette.primary.pageContentBackground}}>
 					<Box>
 						<Sidebar
 						openStateOpen = {sidebarOpen}
@@ -45,7 +46,7 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 						- minHeight must be 100vh for the footer to be at the bottom of the screen
 					*/}
 					<Box display="flex"
-					sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
+					sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
 						{ /* MarginTop: 9 is to stop the breadcrumbs entering header area */}
 						<Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 9}}>
 							{hideBreadcrumbs!= true ? <Box>
@@ -63,24 +64,21 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 								</Typography>
 								: null)}
 							</Box> : null )}
-							{/* Children
-								- flex: '1 0 auto' - child element grows to fill space and pushes the footer to the bottom
-							*/}
-							<Box sx={{ flex: '1 0 auto', pl: 3, pr: 3 }}>
+							<Box sx={{ pl: 3, pr: 3, paddingBottom: 3 }}>
 								{children}
 							</Box>
 						</Stack>
-					{/* Footer
-						- flexShrink: 0 - flex item does not shrink
-					*/}
-					<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.linkedFooterBackground, paddingBottom: 2, paddingTop: 2, flexShrink: 0}}>
+				</Box>
+			</Box>
+			{/* Footer
+				- flexShrink: 0 - flex item does not shrink
+			*/}
+			<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.linkedFooterBackground, paddingBottom: 2, paddingTop: 2, flexShrink: 0 }}>
 						<LinkedFooter/>
 					</Box>
 					<Box sx={{ overflow: 'auto', backgroundColor: theme.palette.primary.footerArea, padding: 2, flexShrink: 0 }}>
 						<Footer/>
 					</Box>
-				</Box>
-			</Box>
 		</Box>
 		</>
 	);
