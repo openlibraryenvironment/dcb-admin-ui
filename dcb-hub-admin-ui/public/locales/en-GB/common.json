@@ -37,7 +37,10 @@
     "close_alert": "Close alert",
     "logo": "{{owner}} logo",
     "reload_page": "Reload page",
-    "toggle_visibility": "Toggle visibility"
+    "visibility" : {
+      "showHidden": "Show hidden content for {{field}}",
+      "hideShown": "Hide displayed content for {{field}}"
+    }
   },
 
   "profile": {

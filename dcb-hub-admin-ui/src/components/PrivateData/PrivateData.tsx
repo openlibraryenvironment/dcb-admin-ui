@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { InputAdornment, InputLabel, Stack, Box, IconButton, Input, FormControl, styled, Typography } from "@mui/material";
+import { InputAdornment, InputLabel, Stack, Box, IconButton, Input, FormControl, Typography, Tooltip } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
 interface PrivateDataProps {
@@ -25,15 +25,16 @@ export default function PrivateData({hiddenTextValue, clientConfigType, id}: Pri
           <Box sx={{display: "flex", alignItems: "center", width: "100%"}}>
             <InputLabel htmlFor={id} sx={{color:'inherit', fontWeight: 'bold'}}>{clientConfigType}</InputLabel>
             <InputAdornment position="start">
-              <IconButton
-                aria-label={t('ui.toggle_visibility')}
-                // may be replaced with custom tooltip component in the future
-                title={t('ui.toggle_visibility')}
+              <Tooltip title={showPrivateData ? t('ui.visibility.hideShown', {field: clientConfigType}) : t('ui.visibility.showHidden', {field: clientConfigType})}>
+                <IconButton
+                aria-label={showPrivateData ? t('ui.visibility.hideShown', {field: clientConfigType}) : t('ui.visibility.showHidden', {field: clientConfigType})}
                 onClick={() => setShowPrivateData((show) => !show)}
                 onMouseDown={handleMouseDownPrivateData}
-              >
-                {showPrivateData ? <MdVisibilityOff /> : <MdVisibility />}
-              </IconButton>
+                >
+                  {showPrivateData ? <MdVisibilityOff /> : <MdVisibility />}
+                </IconButton>
+              </Tooltip>
+
             </InputAdornment>
           </Box>
           <FormControl sx={{ width: "100%" }} variant="standard">
