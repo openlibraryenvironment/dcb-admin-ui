@@ -47,9 +47,10 @@ export default function Header({openStateFuncClosed, iconsVisible}: HeaderProps)
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="fixed" sx={{backgroundColor: theme.palette.primary.header}}>
+      {/* A maximum height of 70px is set to stop the header overlapping with the sidebar on small screen sizes */}
+      <AppBar position="fixed" sx={{backgroundColor: theme.palette.primary.header, maxHeight: '70px'}}>
         {/* this width is the maxSize of the content */}
-        <Toolbar sx={{ maxWidth: '1400px', alignSelf: 'center', width: '100%'}}>
+        <Toolbar sx={{ maxWidth: '1400px', alignSelf: 'center', width: '100%', padding: 0, maxHeight: '70px', paddingLeft: '24px', paddingRight: '24px'}}>
           {/* This code handles the display of the consortium icon and sidebar icon.
           By using iconsVisible, we can render the correct UI for the situation  */}
           {iconsVisible!= false ?
@@ -98,7 +99,9 @@ export default function Header({openStateFuncClosed, iconsVisible}: HeaderProps)
               data-tid="login-button"
               aria-label={(status === "authenticated" ? "Logout": "Login")}
               onClick={handleClick}
-              sx={{ color: theme.palette.primary.headerText}}
+              /* this removes default styling that was stopping the header and footer from being the same width
+                 it also sets the colour of the header text */
+              sx={{ color: theme.palette.primary.headerText, paddingInline: '0px', minWidth: '0px'}}
               >
                 {(status === "authenticated" ? t("nav.logout"): t("nav.login"))}
             </Button> : null }

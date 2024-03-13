@@ -17,23 +17,31 @@ export default function Login() {
   };
 
   return (
-    <LoginLayout>
+    <LoginLayout pageName='landingPage'>
+      {/* This styling is placed here to enable the background of the login text to extend */}
+      <Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 8}}>
         <Card variant='outlined' sx={{backgroundColor: theme.palette.primary.loginCard, p: 4, border: 'none'}}>
-          <CardContent>
+          <CardContent sx={{maxWidth: '1400px', margin: 'auto'}}>
             <Stack direction={'column'} spacing={2} width='fit-content'>
-          <Typography color={theme.palette.primary.loginText} variant='loginHeader'>
-            {t("loginout.login")}
-          </Typography>
-          <Typography color={theme.palette.primary.loginText} variant='subheading'> 
-            <Trans i18nKey={"loginout.keycloak"} t={t} components={{linkComponent: <Link key="keycloak-information-link" href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2817064969/"/>}} />
-          </Typography>
-          </Stack>
+              <Typography color={theme.palette.primary.loginText} variant='loginHeader'>
+              {t("loginout.login")}
+              </Typography>
+              <Typography color={theme.palette.primary.loginText} variant='subheading'> 
+                <Trans i18nKey={"loginout.keycloak"} t={t} components={{linkComponent: <Link key="keycloak-information-link" href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2817064969/"/>}} />
+              </Typography>
+            </Stack>
           <Box sx={{mt: 3.5}}>
               <Button variant='contained' color={'primary'} size="xlarge" onClick={() => handleSignIn('keycloak')}>{t("nav.login")}</Button>
           </Box>
           </CardContent>
         </Card>
-        <LandingCard/>
+      </Stack>
+      {/* Box for the landing cards */}
+      <Box display="flex" sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', maxWidth: '1400px', margin: 'auto'}}>
+          <Box sx={{ flex: '1 0 auto'}}>
+            <LandingCard/>
+          </Box>
+			</Box>
     </LoginLayout>
   );
 };

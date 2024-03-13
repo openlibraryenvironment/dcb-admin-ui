@@ -41,6 +41,8 @@ declare module '@mui/material/styles' {
 		titleArea?: string;
 		linkedFooterBackground?: string;
 		linkedFooterText?: string;
+		pageBackground?: string;
+		pageContentBackground?: string;
 	}
   
 	interface SimplePaletteColorOptions {
@@ -65,6 +67,8 @@ declare module '@mui/material/styles' {
 		titleArea?: string;
 		linkedFooterBackground?: string;
 	  	linkedFooterText?: string;
+		pageBackground?: string;
+		pageContentBackground?: string;
 	}
 	interface TypographyVariants {
 		loginCardText: React.CSSProperties;

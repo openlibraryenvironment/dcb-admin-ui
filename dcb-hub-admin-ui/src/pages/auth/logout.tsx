@@ -22,10 +22,12 @@ export default function Logout() {
   };
 
   return (
-    <LoginLayout>
+    <LoginLayout pageName='logOut'>
+            {/* This styling is placed here to enable the background of the login text to extend */}
+      <Stack spacing={2} sx={{height: '100%', width: '100%', marginTop: 8}}>
         <Card variant='outlined' sx={{backgroundColor: theme.palette.primary.loginCard, p: 4, border: 'none'}}>
           {alertDisplayed ? 
-            <Box ml={2} mb={2}> 
+            <Box ml={2} mb={2} sx={{maxWidth: '1400px', margin: 'auto'}}> 
                 <Alert severityType="info" variant={"filled"} onCloseFunc={() => setAlertDisplayed(false)}
                   alertText={<Typography variant = "loginCardText" color={theme.palette.common.white}> 
                               <Trans i18nKey={"loginout.logged_out"} t={t} components={{bold: <strong />, break: <br />}} values={{appName: "DCB Admin", consortium: "MOBIUS"}}/>
@@ -34,7 +36,7 @@ export default function Logout() {
                 </Alert> 
             </Box>
           : null}
-          <CardContent>
+          <CardContent sx={{maxWidth: '1400px', margin: 'auto'}}>
             <Stack direction={'column'} spacing={2} width='fit-content'>
             <Typography color={theme.palette.primary.loginText} variant='loginHeader'>
                 {t("loginout.login")}
@@ -48,7 +50,11 @@ export default function Logout() {
             </Box>
           </CardContent>
         </Card>
+      </Stack>
+      {/* Box for the landing cards */}
+      <Box display="flex" sx={{ flexGrow: 3, overflow: 'auto', display: 'flex', flexDirection: 'column', maxWidth: '1400px', margin: 'auto'}}>
         <LandingCard/>
+      </Box>
     </LoginLayout>
   );
 };

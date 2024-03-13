@@ -33,6 +33,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
   // use position: 'static' to fix issue of sidebar not being centred
   position: 'static',
   height: '100%',
+  border: '0px', // disable border inherited from material ui drawer
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -194,7 +195,7 @@ export default function Sidebar(props:any) {
                   sx={{
                   minHeight: 48,
                   justifyContent: props.openStateOpen ? 'initial' : 'center',
-                  px: 2.5,
+                  px: "24px",
                   "&.Mui-selected": {
                     backgroundColor: isChildPage ? theme.palette.primary.buttonForSelectedChildPage : theme.palette.primary.buttonForSelectedPage,
                     color: theme.palette.primary.selectedText,
@@ -226,7 +227,6 @@ export default function Sidebar(props:any) {
             </ListItem>
           ))}
           </List>
-        <Divider />
       </Drawer>
     )}
 
