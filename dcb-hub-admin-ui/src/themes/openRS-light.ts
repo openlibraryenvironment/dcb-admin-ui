@@ -113,6 +113,10 @@ const openRSLight = createTheme({
         attributeTitle: {
             fontWeight: 'bold',
         },
+        attributeText: {
+          wordBreak: 'break-word',
+          textWrap: 'wrap'
+        },
         loginHeader: {
             fontSize: 32, 
             fontWeight: 'bold'
