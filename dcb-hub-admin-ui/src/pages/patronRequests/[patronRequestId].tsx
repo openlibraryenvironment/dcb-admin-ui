@@ -340,6 +340,13 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
+                                                        <Typography variant="attributeTitle">{t("details.supplying_agency_code")}
+                                                        </Typography>
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localAgency)}
+                                                </Stack>
+                                        </Grid>
+                                        <Grid xs={2} sm={4} md={4}>
+                                                <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.supplier_id")}
                                                         </Typography>
                                                         {renderAttribute(patronRequest?.suppliers[0]?.id)}
@@ -434,13 +441,6 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                         <Typography variant="attributeTitle">{t("details.local_request_status")}
                                                         </Typography>
                                                         {renderAttribute(patronRequest?.suppliers[0]?.localStatus)}
-                                                </Stack>
-                                        </Grid>
-                                        <Grid xs={2} sm={4} md={4}>
-                                                <Stack direction={"column"}>
-                                                        <Typography variant="attributeTitle">{t("details.local_item_type")}
-                                                        </Typography>
-                                                        {renderAttribute(patronRequest?.suppliers[0]?.localAgency)}
                                                 </Stack>
                                         </Grid>
                                         </Grid>

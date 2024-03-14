@@ -201,6 +201,7 @@
     "supplier_id": "Supplier ID",
     "supplier_ctype": "Canonical item type",
     "supplier_request": "Supplier request data",
+    "supplying_agency_code": "Supplying agency code",
     "title": "Title",
     "view": "View"    
   },
