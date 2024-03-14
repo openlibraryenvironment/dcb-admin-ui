@@ -88,6 +88,7 @@ declare module '@mui/material/styles' {
 		subheading: React.CSSProperties;
 		cardActionText: React.CSSProperties;
 		attributeTitle: React.CSSProperties;
+		attributeText: React.CSSProperties;
 		loginHeader: React.CSSProperties;
 		modalTitle: React.CSSProperties;
 		homePageText: React.CSSProperties;
@@ -103,6 +104,7 @@ declare module '@mui/material/Typography' {
 		subheading: true;
 		cardActionText: true;
 		attributeTitle: true;
+		attributeText: true;
 		loginHeader: true;
 		modalTitle: true;
 		homePageText: true;
