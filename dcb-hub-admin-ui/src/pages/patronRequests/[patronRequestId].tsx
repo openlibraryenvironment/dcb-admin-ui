@@ -11,6 +11,7 @@ import getConfig from "next/config";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
+import { renderAttribute } from "src/helpers/renderAttribute";
 import { getPatronRequestById } from "src/queries/queries";
 
 type PatronRequestDetails = {
@@ -69,56 +70,56 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.request_id")}
                                                 </Typography>
-                                                {patronRequest?.id}
+                                                {renderAttribute(patronRequest?.id)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.request_created")}
                                                 </Typography>
-                                                {dayjs(patronRequest?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                {renderAttribute(dayjs(patronRequest?.dateCreated).format('YYYY-MM-DD HH:mm'))}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.request_updated")} 
                                                 </Typography>
-                                                {dayjs(patronRequest?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                {renderAttribute(dayjs(patronRequest?.dateUpdated).format('YYYY-MM-DD HH:mm'))}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.description")}
                                                 </Typography>
-                                                {patronRequest?.description}
+                                                {renderAttribute(patronRequest?.description)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.requestor_note")} 
                                                 </Typography>
-                                                {patronRequest?.requestorNote}
+                                                {renderAttribute(patronRequest?.requestorNote)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.status")} 
                                                 </Typography>        
-                                                {patronRequest?.status}
+                                                {renderAttribute(patronRequest?.status)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.error")} 
                                                 </Typography>       
-                                                {patronRequest?.errorMessage}
+                                                {renderAttribute(patronRequest?.errorMessage)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.active_workflow")} 
                                                 </Typography>        
-                                                {patronRequest?.activeWorkflow}
+                                                {renderAttribute(patronRequest?.activeWorkflow)}
                                         </Stack>
                                 </Grid>
                         </Grid>
@@ -136,14 +137,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.bib_cluster_id")}
                                                         </Typography>
-                                                        {(bibClusterRecordUrl == '') ? patronRequest?.bibClusterId : <Link href={bibClusterRecordUrl} key="bibClusterRecordLink" target='_blank' rel="noreferrer" title={t("link.discovery_tip")}>{patronRequest?.bibClusterId}</Link>}
+                                                        {(bibClusterRecordUrl == '') ? renderAttribute(patronRequest?.bibClusterId) : <Link href={bibClusterRecordUrl} key="bibClusterRecordLink" target='_blank' rel="noreferrer" title={t("link.discovery_tip")}>{renderAttribute(patronRequest?.bibClusterId)}</Link>}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.title")}
                                                         </Typography>
-                                                        {patronRequest?.clusterRecord?.title}
+                                                        {renderAttribute(patronRequest?.clusterRecord?.title)}
                                                 </Stack>
                                         </Grid>
                                         {patronRequest?.clusterRecord?.members[0]?.author != null ? (
@@ -151,7 +152,7 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.author")}
                                                         </Typography>
-                                                        {patronRequest?.clusterRecord?.members[0]?.author}
+                                                        {renderAttribute(patronRequest?.clusterRecord?.members[0]?.author)}
                                                 </Stack>
                                         </Grid>
                                         ) : null}
@@ -160,35 +161,35 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.record_created")}
                                                         </Typography>
-                                                        {dayjs(patronRequest?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                        {renderAttribute(dayjs(patronRequest?.clusterRecord?.dateCreated).format('YYYY-MM-DD HH:mm'))}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.record_updated")}
                                                         </Typography>
-                                                        {dayjs(patronRequest?.clusterRecord?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                        {renderAttribute(dayjs(patronRequest?.clusterRecord?.dateUpdated).format('YYYY-MM-DD HH:mm'))}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.selected_bib")}
                                                         </Typography>
-                                                        {patronRequest?.clusterRecord?.selectedBib}
+                                                        {renderAttribute(patronRequest?.clusterRecord?.selectedBib)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.source_record_id")}
                                                         </Typography>
-                                                        {patronRequest?.clusterRecord?.members[0]?.sourceRecordId}
+                                                        {renderAttribute(patronRequest?.clusterRecord?.members[0]?.sourceRecordId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.source_system_id")}
                                                         </Typography>
-                                                        {patronRequest?.clusterRecord?.sourceSystemId}
+                                                        {renderAttribute(patronRequest?.clusterRecord?.sourceSystemId)}
                                                 </Stack>
                                         </Grid>
                                 </Grid>
@@ -226,42 +227,42 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.patron_id")}
                                                 </Typography>
-                                                {patronRequest?.patron?.id}
+                                                {renderAttribute(patronRequest?.patron?.id)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.patron_hostlms")}
                                                 </Typography>
-                                                {patronRequest?.patronHostlmsCode}
+                                                {renderAttribute(patronRequest?.patronHostlmsCode)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.requestor_id")}
                                                 </Typography>
-                                                {patronRequest?.requestingIdentity?.id}
+                                                {renderAttribute(patronRequest?.requestingIdentity?.id)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.local_item_id")}
                                                 </Typography>
-                                                {patronRequest?.localItemId}
+                                                {renderAttribute(patronRequest?.localItemId)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.local_item_status")}
                                                 </Typography>
-                                                {patronRequest?.localItemStatus}
+                                                {renderAttribute(patronRequest?.localItemStatus)}
                                         </Stack>
                                 </Grid>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.local_bib_id")}
                                                 </Typography>
-                                                {patronRequest?.localBibId}
+                                                {renderAttribute(patronRequest?.localBibId)}
                                         </Stack>
                                 </Grid>
                                 </Grid>
@@ -279,49 +280,49 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_code")}
                                                         </Typography>
-                                                        {patronRequest?.pickupLocationCode}
+                                                        {renderAttribute(patronRequest?.pickupLocationCode)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_item_id")}
                                                         </Typography>
-                                                        {patronRequest?.pickupItemId}
+                                                        {renderAttribute(patronRequest?.pickupItemId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_item_status")}
                                                         </Typography>
-                                                        {patronRequest?.pickupItemStatus}
+                                                        {renderAttribute(patronRequest?.pickupItemStatus)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_item_type")}
                                                         </Typography>
-                                                        {patronRequest?.pickupItemType}
+                                                        {renderAttribute(patronRequest?.pickupItemType)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_patron_id")}
                                                         </Typography>
-                                                        {patronRequest?.pickupPatronId}
+                                                        {renderAttribute(patronRequest?.pickupPatronId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_request_id")}
                                                         </Typography>
-                                                        {patronRequest?.pickupRequestId}
+                                                        {renderAttribute(patronRequest?.pickupRequestId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_request_status")}
                                                         </Typography>
-                                                        {patronRequest?.pickupRequestStatus}
+                                                        {renderAttribute(patronRequest?.pickupRequestStatus)}
                                                 </Stack>
                                         </Grid>
                                         </Grid>
@@ -341,105 +342,105 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.supplier_id")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.id}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.id)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.supplier_ctype")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.canonicalItemType}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.canonicalItemType)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.date_created")}
                                                         </Typography>
-                                                        {dayjs(patronRequest?.suppliers[0]?.dateCreated).format('YYYY-MM-DD HH:mm')}
+                                                        {renderAttribute(dayjs(patronRequest?.suppliers[0]?.dateCreated).format('YYYY-MM-DD HH:mm'))}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.date_updated")}
                                                         </Typography>
-                                                        {dayjs(patronRequest?.suppliers[0]?.dateUpdated).format('YYYY-MM-DD HH:mm')}
+                                                        {renderAttribute(dayjs(patronRequest?.suppliers[0]?.dateUpdated).format('YYYY-MM-DD HH:mm'))}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.hostlms_code")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.hostLmsCode}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.hostLmsCode)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.active")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.isActive}
+                                                        {renderAttribute(String(patronRequest?.suppliers[0]?.isActive))}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_item_id")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localItemId}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localItemId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_bib_id")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localBibId}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localBibId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_item_barcode")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localItemBarcode}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localItemBarcode)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_item_loc")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localItemLocationCode}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localItemLocationCode)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_item_status")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localItemStatus}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localItemStatus)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_item_type")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localItemType}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localItemType)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_supplier_id")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localId}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_request_status")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localStatus}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localStatus)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.local_item_type")}
                                                         </Typography>
-                                                        {patronRequest?.suppliers[0]?.localAgency}
+                                                        {renderAttribute(patronRequest?.suppliers[0]?.localAgency)}
                                                 </Stack>
                                         </Grid>
                                         </Grid>
@@ -457,56 +458,56 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_request_id")}
                                                         </Typography>
-                                                        {patronRequest?.localRequestId}
+                                                        {renderAttribute(patronRequest?.localRequestId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_request_status")}
                                                         </Typography>
-                                                        {patronRequest?.localRequestStatus}
+                                                        {renderAttribute(patronRequest?.localRequestStatus)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_patron_id")}
                                                         </Typography>
-                                                        {patronRequest?.requestingIdentity?.id}
+                                                        {renderAttribute(patronRequest?.requestingIdentity?.id)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_patron_type")}
                                                         </Typography>
-                                                        {patronRequest?.requestingIdentity?.localPtype}
+                                                        {renderAttribute(patronRequest?.requestingIdentity?.localPtype)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_virtual_id")}
                                                         </Typography>
-                                                        {patronRequest?.localItemId}
+                                                        {renderAttribute(patronRequest?.localItemId)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_virtual_item_status")}
                                                         </Typography>
-                                                        {patronRequest?.localItemStatus}
+                                                        {renderAttribute(patronRequest?.localItemStatus)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_virtual_type")}
                                                         </Typography>
-                                                        {patronRequest?.localItemType}
+                                                        {renderAttribute(patronRequest?.localItemType)}
                                                 </Stack>
                                         </Grid>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_virtual_bib_id")}
                                                         </Typography>
-                                                        {patronRequest?.localBibId}
+                                                        {renderAttribute(patronRequest?.localBibId)}
                                                 </Stack>
                                         </Grid>
                                         </Grid>

@@ -8,6 +8,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
+import { renderAttribute } from "src/helpers/renderAttribute";
 import { getAuditById } from "src/queries/queries";
 
 
@@ -36,42 +37,42 @@ export default function AuditDetails( {auditId}: AuditDetails) {
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.audit_id")}
                         </Typography>
-                        {audit?.id}
+                        {renderAttribute(audit?.id)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.audit_date")}
                         </Typography>
-                        {audit?.auditDate}
+                        {renderAttribute(audit?.auditDate)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.audit_description")}
                         </Typography>
-                        {audit?.briefDescription}
+                        {renderAttribute(audit?.briefDescription)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                 <Stack direction={"column"}>
                     <Typography variant="attributeTitle">{t("details.audit_from_status")}
                     </Typography>
-                    {audit?.fromStatus}
+                    {renderAttribute(audit?.fromStatus)}
                 </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.audit_to_status")}
                         </Typography>
-                        {audit?.toStatus}
+                        {renderAttribute(audit?.toStatus)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.patron_request_id")}
                         </Typography>
-                        {audit?.patronRequest?.id}
+                        {renderAttribute(audit?.patronRequest?.id)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>

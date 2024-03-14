@@ -8,6 +8,7 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { useQuery } from "@apollo/client";
 import { Agency } from "@models/Agency";
+import { renderAttribute } from "src/helpers/renderAttribute";
 
 type AgencyDetails = {
     agencyId: string,
@@ -30,7 +31,7 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_name")}
                             </Typography>
-                            {agency?.name}
+                            {renderAttribute(agency?.name)}
                         </Stack>
 
                     </Grid>
@@ -38,28 +39,28 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_id")}
                             </Typography>
-                            {agency?.id}
+                            {renderAttribute(agency?.id)}
                         </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_code")}
                             </Typography>
-                            {agency?.code}
+                            {renderAttribute(agency?.code)}
                         </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_hostlms")}
                             </Typography>
-                            {agency?.hostlms?.code}
+                            {renderAttribute(agency?.hostlms?.code)}
                         </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_auth")}
                             </Typography>
-                            {agency?.authProfile}
+                            {renderAttribute(agency?.authProfile)}
                         </Stack>
                     </Grid>
             </Grid>
@@ -72,11 +73,11 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                 <AccordionDetails>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.long")}
-                            {agency?.longitude} </Typography>
+                            {renderAttribute(agency?.longitude)} </Typography>
                         </Stack>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.lat")}
-                            {agency?.latitude} </Typography>
+                            {renderAttribute(agency?.latitude)} </Typography>
                         </Stack>
                 </AccordionDetails>
             </Accordion>

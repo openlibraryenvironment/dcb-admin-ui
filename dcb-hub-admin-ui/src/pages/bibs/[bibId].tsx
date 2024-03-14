@@ -8,6 +8,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
+import { renderAttribute } from "src/helpers/renderAttribute";
 import { getBibById } from "src/queries/queries";
 
 
@@ -49,49 +50,49 @@ export default function SourceBibDetails( {bibId}: BibDetails) {
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.source_bib_id")}
                                 </Typography>
-                                {bib?.id}
+                                {renderAttribute(bib?.id)}
                         </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.title")}
                                 </Typography>
-                                {bib?.title}
+                                {renderAttribute(bib?.title)}
                         </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.author")}
                                 </Typography>
-                                {bib?.author}
+                                {renderAttribute(bib?.author)}
                         </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.source_system_id")}
                                 </Typography>
-                                {bib?.sourceSystemId} 
+                                {renderAttribute(bib?.sourceSystemId)} 
                         </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.source_record_id")}
                                 </Typography>
-                                {bib?.sourceRecordId}
+                                {renderAttribute(bib?.sourceRecordId)}
                         </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.contributor_id")}
                                 </Typography>
-                                {bib?.contributesTo?.id}
+                                {renderAttribute(bib?.contributesTo?.id)}
                         </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.contributor_title")}
                                 </Typography>
-                                {bib?.contributesTo?.title}
+                                {renderAttribute(bib?.contributesTo?.title)}
                         </Stack>
                 </Grid>
                 </Grid>

@@ -8,6 +8,7 @@ import { Location } from "@models/Location";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { useQuery } from "@apollo/client";
+import { renderAttribute } from "src/helpers/renderAttribute";
 
 type LocationDetails = {
     locationId: string
@@ -33,35 +34,35 @@ export default function LocationDetails( {locationId}: LocationDetails) {
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.location_name")}
                         </Typography>
-                        {location?.name}
+                        {renderAttribute(location?.name)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.location_code")}
                         </Typography>
-                        {location?.code} 
+                        {renderAttribute(location?.code)} 
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.location_id")}
                         </Typography>
-                        {location?.id}
+                        {renderAttribute(location?.id)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.location_type")}
                         </Typography>
-                        {location?.type}
+                        {renderAttribute(location?.type)}
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.location_agency")}
                         </Typography>
-                        {location?.agency?.id}
+                        {renderAttribute(location?.agency?.id)}
                     </Stack>
                 </Grid>
             </Grid>
@@ -80,12 +81,12 @@ export default function LocationDetails( {locationId}: LocationDetails) {
                             <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.long")}
                                 </Typography>
-                                {location?.longitude}
+                                {renderAttribute(location?.longitude)}
                             </Stack>
                             <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.lat")}
                                 </Typography>
-                                {location?.latitude}
+                                {renderAttribute(location?.latitude)}
                             </Stack>
                 </AccordionDetails>
             </Accordion>
