@@ -1,15 +1,8 @@
-import { aliasQuery, aliasMutation } from "../utils/graphql-test-utils"
+import { basicUser } from "../users/basic_user"
  // see https://github.com/vercel/next.js/issues/38957 for why we have to do this at the start of all tests
 describe('Source bibs page', () => {
     beforeEach(() => {
-        // In future this should be refactored into a cy.login() command
-        cy.visit('http://localhost:3000/bibs')
-        cy.get('.button').click()
-        cy.origin('https://keycloak.sph.k-int.com', () => {
-          cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
-          cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
-          cy.get('[id=kc-login]').click();
-        })
+        cy.login(basicUser)
         cy.visit('http://localhost:3000/bibs')
         cy.intercept('POST', '/graphql', { fixture: 'sourceBibs.json'}).as('loadBibs')
     })    
@@ -29,5 +22,8 @@ describe('Source bibs page', () => {
         cy.get('[aria-label=Search]').type('sourceRecordId:843 AND id:80bf9c74-a5ae-56c9-8cfe-814220ee38a5');
         // Verify the results.
         cy.get('[data-id=80bf9c74-a5ae-56c9-8cfe-814220ee38a5]').should('contain', 'Paper towns John Green.')
+    })
+    afterEach(() => {
+      cy.logout();
     })
   })

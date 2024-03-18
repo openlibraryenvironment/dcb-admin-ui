@@ -1,14 +1,8 @@
-export {}
+import { basicUser } from "../users/basic_user"
 
 describe('HostLMSs page', () => {
     beforeEach(() => {
-        cy.visit('http://localhost:3000/hostlmss')
-        cy.get('.button').click()
-        cy.origin('https://keycloak.sph.k-int.com', () => {
-          cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
-          cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
-          cy.get('[id=kc-login]').click();
-        })
+        cy.login(basicUser)
         cy.visit('http://localhost:3000/hostlmss')
         cy.intercept('POST', '/graphql', { fixture: 'hostlmss.json'}).as('fetchHostlmss')
     })    
@@ -25,5 +19,8 @@ describe('HostLMSs page', () => {
         cy.get('[data-id=kfe60600-0879-5ec5-8831-ae524b11639c]').should('contain', 'TESTLMS')
         // Can test multiple search variations here
         //As well as sort and filter when we can get to their unique ids
+    })
+    afterEach(() => {
+      cy.logout();
     })
   })

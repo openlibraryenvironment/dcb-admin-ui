@@ -1,22 +1,12 @@
-export {}
+import { basicUser } from "../users/basic_user"
  // see https://github.com/vercel/next.js/issues/38957 
  // for why we have to do either an export or an import at the start of all tests - otherwise TS build fails
 
 describe('Agencies page', () => {
     beforeEach(() => {
-      // This exists to essentially log us in and navigate to the correct page before each test
-      // Should be re-factored into a cy.login commmand in future work.
-        cy.visit('http://localhost:3000/agencies')
-        cy.get('.button').click()
-        cy.origin('https://keycloak.sph.k-int.com', () => {
-          cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
-          cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
-          cy.get('[id=kc-login]').click();
-        })
-        // Cypress doesn't redirect back to agencies like the normal login process does, so we have to do it.
+        cy.login(basicUser)
         cy.visit('http://localhost:3000/agencies')
         cy.intercept('POST', '/graphql', { fixture: 'agencies.json'}).as('getAgencies');
-
     })    
     it('should render the agencies page with the correct data and UI elements.', () => {
       // This intercepts the request sent to the DCB server for agencies data
@@ -41,5 +31,8 @@ describe('Agencies page', () => {
     it('should search for an agency and return the expected result', () => {
         cy.get('[aria-label=Search]').type('Benedictine College');
         cy.get('[data-id=d74636f3-3ab5-5325-922e-a46e20fe52e7]').should('contain', 'Benedictine College')
+    })
+    afterEach(() => {
+      cy.logout();
     })
   })

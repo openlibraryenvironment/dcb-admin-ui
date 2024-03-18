@@ -31,7 +31,7 @@ export default function Login() {
               </Typography>
             </Stack>
           <Box sx={{mt: 3.5}}>
-              <Button variant='contained' color={'primary'} size="xlarge" onClick={() => handleSignIn('keycloak')}>{t("nav.login")}</Button>
+              <Button data-tid="login-button" variant='contained' color={'primary'} size="xlarge" onClick={() => handleSignIn('keycloak')}>{t("nav.login")}</Button>
           </Box>
           </CardContent>
         </Card>
