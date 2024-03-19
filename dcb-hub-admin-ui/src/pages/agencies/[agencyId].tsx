@@ -8,7 +8,7 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { useQuery } from "@apollo/client";
 import { Agency } from "@models/Agency";
-import { renderAttribute } from "src/helpers/renderAttribute";
+import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 
 type AgencyDetails = {
     agencyId: string,
@@ -31,7 +31,7 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_name")}
                             </Typography>
-                            {renderAttribute(agency?.name)}
+                            <RenderAttribute attribute={agency?.name}/>
                         </Stack>
 
                     </Grid>
@@ -39,28 +39,28 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_id")}
                             </Typography>
-                            {renderAttribute(agency?.id)}
+                            <RenderAttribute attribute={agency?.id}/>
                         </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_code")}
                             </Typography>
-                            {renderAttribute(agency?.code)}
+                            <RenderAttribute attribute={agency?.code}/>
                         </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_hostlms")}
                             </Typography>
-                            {renderAttribute(agency?.hostlms?.code)}
+                            <RenderAttribute attribute={agency?.hostlms?.code}/>
                         </Stack>
                     </Grid>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_auth")}
                             </Typography>
-                            {renderAttribute(agency?.authProfile)}
+                            <RenderAttribute attribute={agency?.authProfile}/>
                         </Stack>
                     </Grid>
             </Grid>
@@ -71,13 +71,13 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                         <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.location_info")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                        <Stack direction={"column"}>
-                            <Typography variant="attributeTitle">{t("details.long")}
-                            {renderAttribute(agency?.longitude)} </Typography>
+                        <Stack direction={"row"} spacing={0.5}>
+                            <Typography variant="attributeTitle">{t("details.long")}</Typography>
+                            <RenderAttribute attribute={agency?.longitude}/> 
                         </Stack>
-                        <Stack direction={"column"}>
-                            <Typography variant="attributeTitle">{t("details.lat")}
-                            {renderAttribute(agency?.latitude)} </Typography>
+                        <Stack direction={"row"} spacing={0.5}>
+                            <Typography variant="attributeTitle">{t("details.lat")}</Typography>
+                            <RenderAttribute attribute={agency?.latitude}/> 
                         </Stack>
                 </AccordionDetails>
             </Accordion>

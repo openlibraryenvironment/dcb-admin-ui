@@ -7,7 +7,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Group } from "@models/Group";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { useQuery } from "@apollo/client";
-import { renderAttribute } from "src/helpers/renderAttribute";
+import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 
 type GroupDetails = {
     groupId: string
@@ -29,19 +29,19 @@ export default function GroupDetails( {groupId}: GroupDetails) {
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.group_name")}</Typography>
-                            {renderAttribute(group?.name)} 
+                            <RenderAttribute attribute={group?.name}/> 
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.group_code")}</Typography>
-                        {renderAttribute(group?.code)} 
+                        <RenderAttribute attribute={group?.code}/>
                     </Stack>
                 </Grid>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.group_id")}</Typography>
-                        {renderAttribute(group?.id)}
+                        <RenderAttribute attribute={group?.id}/>
                     </Stack>
                 </Grid>
             </Grid>
