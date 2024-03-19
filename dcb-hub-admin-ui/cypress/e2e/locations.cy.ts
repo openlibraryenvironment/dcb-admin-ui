@@ -1,13 +1,7 @@
-export {}
+import { basicUser } from "../users/basic_user"
 describe('Locations page', () => {
     beforeEach(() => {
-        cy.visit('http://localhost:3000/locations')
-        cy.get('.button').click()
-        cy.origin('https://keycloak.sph.k-int.com', () => {
-          cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
-          cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
-          cy.get('[id=kc-login]').click();
-        })
+      cy.login(basicUser)
         cy.visit('http://localhost:3000/locations')
         cy.intercept('POST', '/graphql', { fixture: 'locations.json'}).as('loadLocations')
     })    
@@ -23,5 +17,8 @@ describe('Locations page', () => {
         // This is verifying that not only does the location have the name we expect, 
         // but that it also has all of thethe other data we would expect it to have.
         cy.get('[data-id=7250910d-1b73-59ac-8482-8b53d0eb12b8]').should('contain', 'ps')
+    })
+    afterEach(() => {
+      cy.logout();
     })
   })

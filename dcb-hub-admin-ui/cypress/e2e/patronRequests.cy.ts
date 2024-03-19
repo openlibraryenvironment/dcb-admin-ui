@@ -1,16 +1,9 @@
-export {}
+import { basicUser } from "../users/basic_user"
 describe('Patron requests page', () => {
     beforeEach(() => {
-        cy.visit('http://localhost:3000/requests')
-        cy.get('.button').click()
-        cy.origin('https://keycloak.sph.k-int.com', () => {
-          cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
-          cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
-          cy.get('[id=kc-login]').click();
-        })
-        cy.visit('http://localhost:3000/requests')
+        cy.login(basicUser)
+        cy.visit('http://localhost:3000/patronRequests')
         cy.intercept('POST', '/graphql', { fixture: 'patronRequests.json'}).as('loadRequests')
-
     })    
     it('should render the Patron requests page with the correct data', () => {
       // We can add more requests to the patronRequests fixture if we want to test sorting, filtering etc.
@@ -22,5 +15,8 @@ describe('Patron requests page', () => {
         // Searches for an example request, verifies that the expected request is found.
         cy.get('[aria-label=Search]').type('Return of the test request');
         cy.get('[data-id=zi3b9a22-2ab3-4118-ae81-61932265777e').should('contain', 'Return of the test request')
+    })
+    afterEach(() => {
+      cy.logout();
     })
   })

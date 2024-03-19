@@ -1,15 +1,8 @@
-import { aliasQuery, aliasMutation } from "../utils/graphql-test-utils"
-
+import { basicUser } from "../users/basic_user"
 describe('Groups page', () => {
     beforeEach(() => {
-        cy.visit('http://localhost:3000/groups')
-        cy.get('.button').click()
-        cy.origin('https://keycloak.sph.k-int.com', () => {
-          cy.get('[id=username]').type(Cypress.env("CYPRESS_USER"))
-          cy.get('[id=password]').type(Cypress.env("CYPRESS_PW"));
-          cy.get('[id=kc-login]').click();
-        })
-        cy.visit('http://localhost:3000/groups')
+        cy.login(basicUser)
+      cy.visit("http://localhost:3000/groups")
         cy.intercept('POST', '/graphql', { fixture: 'groups.json' }).as('initialLoadGroups');
 
         // This is for catching different GraphQL queries and aliasing them.
@@ -48,5 +41,8 @@ describe('Groups page', () => {
         // Search
         cy.get('[aria-label=Search]').type('Ecclesfield');
         cy.get('[data-id=47fbcee4-2fb6-51d3-9e7e-f0bc1c7efa57]').should('contain', 'ECCLF')
+    })
+    afterEach(() => {
+      cy.logout();
     })
   })
