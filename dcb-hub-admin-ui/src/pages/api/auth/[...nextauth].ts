@@ -7,7 +7,7 @@ import { JWT } from 'next-auth/jwt';
 const keycloak = KeycloakProvider({
     clientId: process.env.KEYCLOAK_ID!,
     clientSecret: process.env.KEYCLOAK_SECRET!,
-    issuer: process.env.KEYCLOAK_ISSUER,
+    issuer: process.env.KEYCLOAK_URL,
 });
 
 /**
@@ -22,17 +22,15 @@ const keycloak = KeycloakProvider({
 // See DCB-241 for more details - this method kills the sporadic 401 failures we were seeing by forcing the token to refresh.
 // If the token can't be refreshed, an error is returned and the user must sign in again / authenticate with Keycloak
 const refreshAccessToken = async (token: JWT) => {
-	console.info("RAT Method triggered")
 	const params = new URLSearchParams();
 	params.append('client_id', process.env.KEYCLOAK_ID!)
 	params.append('grant_type', 'refresh_token')
 	params.append('refresh_token', token.refreshToken)
 	params.append('client_secret', process.env.KEYCLOAK_SECRET!)
-	return axios.post(process.env.KEYCLOAK_ISSUER+'/protocol/openid-connect/token',
+	return axios.post(process.env.KEYCLOAK_URL+'/protocol/openid-connect/token',
 	params,
 	{ headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } )
 	.then((refresh_response) => {
-		console.info("Keycloak request made in nextauth.")
 		const new_token = refresh_response.data;
 		return {
 			...token,
@@ -114,10 +112,8 @@ export default NextAuth({
 			}
 			if (Date.now() >= token.accessTokenExpires)
 			{
-				console.log("Refreshing! at", Date.now())
 				return refreshAccessToken(token);
 			}
-			console.log("Returning an old token, no need to refresh", token.accessTokenExpires, Date.now())
 			return token;
 		 }
 		},
