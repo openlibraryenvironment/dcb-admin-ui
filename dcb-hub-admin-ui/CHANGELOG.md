@@ -1,3 +1,25 @@
+# [1.7.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.6.0...v1.7.0) (2024-03-19)
+
+
+### Bug Fixes
+
+* Add 'no source records' message to patron request details ([e037ecc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e037ecca4c02a337df31c42c4d37d616d9b4b793))
+* Add aria-label to breadcrumbs [DCB-878] ([e4ad7b3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e4ad7b35ff3beeee4eaaaf085ca9964b8fd66185))
+* Correct labelling of supplying agency code ([2772178](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2772178af6ab90ee43313b8cd1cb95a50b8fcf3b))
+* Display all source records on patron request details page ([0bbdc5e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0bbdc5e6587fc0a45a5aabebb49c626014280d26))
+* Fix Cypress login test failures [DCB-930] ([5276701](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/52767017a03d719a349d16f8056aedbb2391b372))
+* Improve accessibility of sensitive data toggle [DCB-887] ([8326423](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/83264235393af87f4278983edd59eb31d389e0b9))
+* Scrollbar appearing in a HostLms details page [DCB-913] ([2cfacbe](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2cfacbef1e843125c4752b9f5e6898e453cd39ba))
+
+
+### Features
+
+* Add bib record hostlms count page [DCB-912] ([790da9f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/790da9fc5a4dfd44e8c09974de6ca844d2a379b9))
+* Create new footer and edit the existing footer [DCB-881] ([8d61dc5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8d61dc578a4711fae6361061ce6333387755c4e3))
+* Improve patron request grid and details audit log default info DCB-916 ([1df2d67](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1df2d679a24e0511bb7118f74fe7de83d2849363))
+* Link bib cluster ID to discovery scaffold record [DCB-908] ([5354a45](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5354a455c488fc2deb795d17f9c9c52090ddddd9))
+* Present human-readable breadcrumbs [DCB-878] ([376ad9b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/376ad9bc9604d7752f5cd5397313199ca7bcac1b))
+
 # [1.6.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.5.0...v1.6.0) (2024-03-04)
 
 
