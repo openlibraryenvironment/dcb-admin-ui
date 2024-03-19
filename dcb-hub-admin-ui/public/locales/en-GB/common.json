@@ -1,5 +1,6 @@
 {
   "a11y": {
+    "empty": "Empty field",
     "is_breadcrumb": "This is a breadcrumb trail"
   },
 

@@ -10,7 +10,7 @@ import { MdExpandMore } from "react-icons/md";
 import PrivateData from "@components/PrivateData/PrivateData";
 import { getHostLmsById } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
-import { renderAttribute } from "src/helpers/renderAttribute";
+import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 
 type HostLMSDetails = {
     hostlmsId: any
@@ -60,7 +60,7 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.hostlms_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.id)}
+                                                <RenderAttribute attribute={hostlms?.id}/>
                                         </Typography> 
                                 </Stack>
                         </Grid>
@@ -69,7 +69,7 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.hostlms_code")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.code)}
+                                                <RenderAttribute attribute={hostlms?.code}/>
                                         </Typography>                                
                                 </Stack>
                         </Grid>
@@ -78,7 +78,7 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.hostlms_name")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.name)}
+                                                <RenderAttribute attribute={hostlms?.name}/>
                                         </Typography>                 
                                 </Stack>
                         </Grid>
@@ -87,7 +87,7 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.lms_client")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.lmsClientClass)}
+                                                <RenderAttribute attribute={hostlms?.lmsClientClass}/>
                                         </Typography>
                                 </Stack>
                         </Grid>
@@ -104,7 +104,7 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                 <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
                         {hostlms?.clientConfig?.apikey != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <PrivateData clientConfigType={t("details.client_config_api")} hiddenTextValue={renderAttribute(hostlms?.clientConfig?.apikey)} id="apiKey"/>
+                                <PrivateData clientConfigType={t("details.client_config_api")} hiddenTextValue={hostlms?.clientConfig?.apikey} id="apiKey"/>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.ingest != null && (
@@ -113,9 +113,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_ingest")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.ingest)}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.ingest}/>
+                                        </Typography>    
                                 </Stack>
                         </Grid>
                         )}
@@ -125,9 +124,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_shelving")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['shelving-locations'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['shelving-locations']}/>
+                                        </Typography> 
                                 </Stack>
                         </Grid>
                         )}
@@ -137,9 +135,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_records")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['num-records-to-generate'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['num-records-to-generate']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -149,9 +146,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_record_syntax")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['record-syntax'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['record-syntax']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -161,9 +157,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_metadata")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['metadata-prefix'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['metadata-prefix']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -173,9 +168,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_base")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['base-url'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['base-url']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -185,9 +179,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_access_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['access-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['access-id']}/>
+                                        </Typography> 
                                 </Stack>
                         </Grid>
                         )}
@@ -197,9 +190,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_domain_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['domain-id'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['domain-id']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -209,15 +201,14 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_page_size")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['page-size'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['page-size']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['access-key'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <PrivateData clientConfigType={t("details.client_config_access_key")} hiddenTextValue={renderAttribute(hostlms?.clientConfig?.['access-key'])} id={'access-key'}/>
+                                <PrivateData clientConfigType={t("details.client_config_access_key")} hiddenTextValue={hostlms?.clientConfig?.['access-key']} id={'access-key'}/>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['staff-username'] != null && (
@@ -226,25 +217,24 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_staff_username")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.['staff-username'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.['staff-username']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.['staff-password'] != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                {<PrivateData clientConfigType={t("details.client_config_staff_password")} hiddenTextValue={renderAttribute(hostlms?.clientConfig?.['staff-password'])} id={'staff-password'}/>}
+                                {<PrivateData clientConfigType={t("details.client_config_staff_password")} hiddenTextValue={hostlms?.clientConfig?.['staff-password']} id={'staff-password'}/>}
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.secret != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <PrivateData clientConfigType={t("details.client_config_secret")} hiddenTextValue={renderAttribute(hostlms?.clientConfig?.secret)} id={'secret'}/>
+                                <PrivateData clientConfigType={t("details.client_config_secret")} hiddenTextValue={hostlms?.clientConfig?.secret} id={'secret'}/>
                         </Grid>
                         )}
                         {hostlms?.clientConfig?.key != null && (
                         <Grid xs={2} sm={4} md={4}>
-                                <PrivateData clientConfigType={t(("details.client_config_key"))} hiddenTextValue={renderAttribute(hostlms?.clientConfig?.key)} id={'key'}/>
+                                <PrivateData clientConfigType={t(("details.client_config_key"))} hiddenTextValue={hostlms?.clientConfig?.key} id={'key'}/>
                         </Grid>
                         )}
                         </Grid>
@@ -263,9 +253,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                                 <Typography variant="attributeTitle">{t("details.client_config_fine")}
                                                 </Typography>
                                                 <Typography variant="attributeText">
-                                                        {renderAttribute(hostlms?.clientConfig?.item?.['fine-code-id'])}
-                                                </Typography>
-                                                
+                                                        <RenderAttribute attribute={hostlms?.clientConfig?.item?.['fine-code-id']}/>
+                                                </Typography>     
                                         </Stack>
                                 </Grid>
                                 )}
@@ -275,9 +264,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                                 <Typography variant="attributeTitle">{t("details.client_config_renewal_limit")}
                                                 </Typography>
                                                 <Typography variant="attributeText">
-                                                        {renderAttribute(hostlms?.clientConfig?.item?.['renewal-limit'])}
+                                                        <RenderAttribute attribute={hostlms?.clientConfig?.item?.['renewal-limit']}/>
                                                 </Typography>
-                                                
                                         </Stack>
                         </Grid>
                         )}
@@ -287,11 +275,9 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                                 <Typography variant="attributeTitle">{t("details.client_config_barcode_prefix")}
                                                 </Typography>
                                                 <Typography variant="attributeText">
-                                                        {renderAttribute(hostlms?.clientConfig?.item?.['barcode-prefix'])}
+                                                        <RenderAttribute attribute={hostlms?.clientConfig?.item?.['barcode-prefix']}/>
                                                 </Typography>
-                                                
-                                        </Stack>
-                                                                                
+                                        </Stack>                                    
                                 </Grid>
                         )}
                         {hostlms?.clientConfig?.item?.['history-action-id'] != null && (
@@ -300,9 +286,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                                 <Typography variant="attributeTitle">{t("details.client_config_history_action_id")}
                                                 </Typography>
                                                 <Typography variant="attributeText">
-                                                        {renderAttribute(hostlms?.clientConfig?.item?.['history-action-id'])}
+                                                        <RenderAttribute attribute={hostlms?.clientConfig?.item?.['history-action-id']}/>
                                                 </Typography>
-                                                
                                         </Stack>
                                 </Grid>
                         )}
@@ -312,9 +297,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_shelving_scheme_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.item?.['shelving-scheme-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.item?.['shelving-scheme-id']}/>
+                                        </Typography>  
                                 </Stack>
                         </Grid>
                         )}
@@ -324,9 +308,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_loan_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.item?.['loan-period-code-id'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.item?.['loan-period-code-id']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -348,9 +331,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_papi_app_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.papi?.['app-id'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.papi?.['app-id']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -360,9 +342,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_papi_org_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.papi?.['org-id'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.papi?.['org-id']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -372,9 +353,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_papi_lang_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.papi?.['lang-id'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.papi?.['lang-id']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -384,9 +364,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_papi_version")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.papi?.['papi-version'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.papi?.['papi-version']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -408,9 +387,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_product_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['product-id'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['product-id']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid> : null}
                         {hostlms?.clientConfig?.services?.['site-domain']!= null ? 
@@ -419,9 +397,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_site_domain")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['site-domain'])}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['site-domain']}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid> : null}
                         {hostlms?.clientConfig?.services?.['workstation-id']!= null ?
@@ -430,9 +407,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_workstation_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['workstation-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['workstation-id']}/>
+                                        </Typography>                                      
                                 </Stack>
                         </Grid> : null}
                         {hostlms?.clientConfig?.services?.['organisation-id']!= null ? 
@@ -441,9 +417,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_organisation_id")}
                                         </Typography> 
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['organisation-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['organisation-id']}/>
+                                        </Typography>      
                                 </Stack>
                         </Grid>: null}
                         {hostlms?.clientConfig?.services?.['services-version']!= null ? 
@@ -452,9 +427,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_version")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['services-version'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['services-version']}/>
+                                        </Typography>      
                                 </Stack>
                         </Grid>: null}
                         {hostlms?.clientConfig?.services?.language != null && (
@@ -463,9 +437,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_language")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.language)}
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.language}/>
                                         </Typography>
-                                        
                                 </Stack>
                         </Grid>
                         )}
@@ -475,9 +448,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_product_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['product-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['product-id']}/>
+                                        </Typography> 
                                 </Stack>
                         </Grid>
                         )}
@@ -487,9 +459,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_site_domain")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['site-domain'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['site-domain']}/>
+                                        </Typography>  
                                 </Stack>
                         </Grid>
                         )}
@@ -499,9 +470,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_workstation_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['workstation-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['workstation-id']}/>
+                                        </Typography>  
                                 </Stack>
                         </Grid>
                         )}
@@ -511,9 +481,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_organisation_id")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['organisation-id'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['organisation-id']}/>
+                                        </Typography> 
                                 </Stack>
                         </Grid>
                         )}
@@ -523,9 +492,8 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                                         <Typography variant="attributeTitle">{t("details.client_config_services_version")}
                                         </Typography>
                                         <Typography variant="attributeText">
-                                                {renderAttribute(hostlms?.clientConfig?.services?.['version'])}
-                                        </Typography>
-                                        
+                                                <RenderAttribute attribute={hostlms?.clientConfig?.services?.['version']}/>
+                                        </Typography>    
                                 </Stack>
                         </Grid>
                         )}
