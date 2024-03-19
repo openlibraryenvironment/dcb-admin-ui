@@ -12,8 +12,8 @@ const LOCAL_VERSION_LINKS = {
     SERVICE: publicRuntimeConfig.DCB_API_BASE,
     SERVICE_INFO: publicRuntimeConfig.DCB_API_BASE+'/info',
     SERVICE_HEALTH: publicRuntimeConfig.DCB_API_BASE+'/health',
-    KEYCLOAK: publicRuntimeConfig.KEYCLOAK_REFRESH,
-    KEYCLOAK_HEALTH: publicRuntimeConfig.KEYCLOAK_REFRESH.split("/", 3).join("/")+'/health'
+    KEYCLOAK: publicRuntimeConfig.KEYCLOAK_URL,
+    KEYCLOAK_HEALTH: publicRuntimeConfig.KEYCLOAK_URL.split("/", 3).join("/")+'/health'
 }
 
 const REPO_LINKS = {

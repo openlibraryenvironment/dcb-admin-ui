@@ -31,7 +31,7 @@ export default function EnvironmentDetails(){
 
     const YourDCBEnvironment = [
 		['DCB Service', returnDCBEnvDescription() , <Link href={LOCAL_VERSION_LINKS.SERVICE_INFO} key={'serviceInfo'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.SERVICE}</Link>, <Link key={'serviceHealthLink'} href={LOCAL_VERSION_LINKS.SERVICE_HEALTH} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'serviceHealth'} apiLink={LOCAL_VERSION_LINKS.SERVICE_HEALTH} environment='dcb'/>}</Link>],
-		['Keycloak', t('common.na'), <Link href={publicRuntimeConfig.KEYCLOAK_REFRESH} key={'keycloakSite'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.KEYCLOAK}</Link>, <Link href={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH} key={'keycloackHealthLink'} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'keycloakHealth'} apiLink={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH} environment='keycloak'/>}</Link>],
+		['Keycloak', t('common.na'), <Link href={publicRuntimeConfig.KEYCLOAK_URL} key={'keycloakSite'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.KEYCLOAK}</Link>, <Link href={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH} key={'keycloackHealthLink'} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'keycloakHealth'} apiLink={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH} environment='keycloak'/>}</Link>],
 	];
 
     return(

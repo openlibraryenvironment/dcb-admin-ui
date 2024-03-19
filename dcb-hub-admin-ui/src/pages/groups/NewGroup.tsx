@@ -74,7 +74,7 @@ export default function NewGroup({show, onClose}: NewGroupType) {
         onClose();// this is supposed to auto-close on success
       } catch (error) {
         // We should bear in mind that GraphQL errors often come as '200' responses.
-        console.error('Error:', error);
+        console.error('Error creating a new group:', error);
       }
     };
   

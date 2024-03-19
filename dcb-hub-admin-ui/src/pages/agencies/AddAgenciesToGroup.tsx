@@ -119,7 +119,7 @@ export default function AddAgenciesToGroup({show, onClose}: NewGroupType) {
         onClose();// close on success
       } catch (error) {
         // We should bear in mind that GraphQL errors often come as '200' responses and implement better handling.
-        console.error('Error:', error);
+        console.error('Error adding agency to group:', error);
       }
     };
 

@@ -24,7 +24,7 @@ const nextConfig = {
 		DCB_API_BASE: process.env.DCB_API_BASE,
 		DCB_ES_URL: process.env.DCB_ES_URL,
 		DISCOVERY_SCAFFOLD_URL: process.env.DISCOVERY_SCAFFOLD_URL,
-		KEYCLOAK_REFRESH: "https://keycloak.sph.k-int.com/realms/dcb-hub",
+		KEYCLOAK_URL: "https://keycloak.sph.k-int.com/realms/dcb-hub",
 		version, releaseDate
 	},
 	reactStrictMode: true,
