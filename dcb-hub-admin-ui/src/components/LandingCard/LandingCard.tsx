@@ -30,7 +30,7 @@ export default function LandingCard() {
                     />
                   </a>
                 </CardMedia>
-                <Typography variant="h2">{t("openrs.about")} </Typography>
+                <Typography variant="h2" sx={{fontSize: 32}}>{t("openrs.about")} </Typography>
                 <Typography variant="loginCardText"> 
                     <Trans i18nKey={"openrs.description"} t={t} components={{linkComponent: <Link key="openRS-info" href="https://openlibraryfoundation.org/" />, paragraph: <p />}} />
                 </Typography>
@@ -58,8 +58,8 @@ export default function LandingCard() {
                     />
                   </a>
                 </CardMedia>
-                <Typography variant = "h2"> {t("openrs.dcb.about")} </Typography>
-                <Typography variant = "loginCardText"> 
+                <Typography variant="h2" sx={{fontSize: 32}}> {t("openrs.dcb.about")} </Typography>
+                <Typography variant="loginCardText"> 
                   <Trans i18nKey={"openrs.dcb.description"} t={t} components={{linkComponent: <Link key="dcb-info" href="https://www.k-int.com/" />,paragraph: <p />}} />
                 </Typography>
               </Stack>
@@ -84,7 +84,7 @@ export default function LandingCard() {
                     />
                   </a>
                 </CardMedia>
-                <Typography variant="h2"> 
+                <Typography variant="h2" sx={{fontSize: 32}}> 
                   {t("consortium.about", {consortium: "MOBIUS"})}
                 </Typography>
                 <Typography variant='loginCardText'>

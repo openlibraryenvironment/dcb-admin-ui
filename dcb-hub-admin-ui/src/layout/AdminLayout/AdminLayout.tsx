@@ -59,7 +59,7 @@ export default function AdminLayout({ title, children, hideTitleBox, hideBreadcr
 							{(hideTitleBox!=true ?
 							<Box sx={{ marginTop: 1, marginBottom: 1, height: '90px', backgroundColor: theme.palette.primary.titleArea }}>
 								{(title!= null ? 
-								<Typography id="page-title" p={3} variant = "h2">
+								<Typography id="page-title" p={3} variant = "h1">
 									{title}
 								</Typography>
 								: null)}

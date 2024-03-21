@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Stack, Typography, useTheme } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import { useTranslation } from "next-i18next";
 import { getAgencyById } from "src/queries/queries";
@@ -16,6 +16,7 @@ type AgencyDetails = {
 
 export default function AgencyDetails( {agencyId}: AgencyDetails) {
     const { t } = useTranslation();
+    const theme = useTheme();
     const { loading, data} = useQuery(getAgencyById, {
         variables: {
             query: "id:"+agencyId
@@ -26,7 +27,7 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
     return (
         loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={agency?.name}>
-            <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+            <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                     <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                             <Typography variant="attributeTitle">{t("details.agency_name")}
@@ -64,11 +65,11 @@ export default function AgencyDetails( {agencyId}: AgencyDetails) {
                         </Stack>
                     </Grid>
             </Grid>
-            <Accordion>
-                <AccordionSummary aria-controls="agency_details_location_info" id="agency_details_location_info" 
+            <Accordion variant="outlined" sx={{border: '0'}}>
+                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="agency_details_location_info" id="agency_details_location_info" 
                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                         </IconContext.Provider>}>
-                        <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.location_info")} </Typography>
+                        <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.location_info")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                         <Stack direction={"row"} spacing={0.5}>

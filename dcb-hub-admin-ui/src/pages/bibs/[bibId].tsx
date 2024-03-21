@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography, useTheme } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -17,6 +17,7 @@ type BibDetails = {
 
 export default function SourceBibDetails( {bibId}: BibDetails) {
         const { t } = useTranslation();
+        const theme = useTheme();
         const { loading, data} = useQuery(getBibById, {
                 variables: {
                     query: "id:"+bibId
@@ -44,7 +45,7 @@ export default function SourceBibDetails( {bibId}: BibDetails) {
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}
                         </Button>
                 </Stack>
-                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                 <Grid xs={2} sm={4} md={4}>
                         <Stack direction={"column"}>
                                 <Typography variant="attributeTitle">{t("details.source_bib_id")}
@@ -95,21 +96,21 @@ export default function SourceBibDetails( {bibId}: BibDetails) {
                         </Stack>
                 </Grid>
                 </Grid>
-                <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
-                <AccordionSummary aria-controls="source-bibs-json-details" id="source-bibs-json-details" 
+                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
+                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="source-bibs-json-details" id="source-bibs-json-details" 
                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                         </IconContext.Provider>}>
-                        <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.canonical_metadata")} </Typography>
+                        <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.canonical_metadata")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                         <pre>{JSON.stringify(bib?.canonicalMetadata, null, 2)}</pre>
                 </AccordionDetails>
                 </Accordion>
-                <Accordion expanded={expandedAccordions[8]} onChange={handleAccordionChange(8)}>
-                <AccordionSummary aria-controls="source-bibs-source-record-json-details" id="source-bibs-source-record-json-details" 
+                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[8]} onChange={handleAccordionChange(8)}>
+                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="source-bibs-source-record-json-details" id="source-bibs-source-record-json-details" 
                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                         </IconContext.Provider>}>
-                        <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
+                        <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                         <pre>{JSON.stringify(bib?.sourceRecord, null, 2)}</pre>

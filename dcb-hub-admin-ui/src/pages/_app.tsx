@@ -23,6 +23,7 @@ declare module '@mui/material/styles' {
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
+		detailsAccordionSummary?: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
@@ -49,6 +50,7 @@ declare module '@mui/material/styles' {
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
+		detailsAccordionSummary?: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
@@ -71,6 +73,7 @@ declare module '@mui/material/styles' {
 		pageContentBackground?: string;
 	}
 	interface TypographyVariants {
+		appTitle: React.CSSProperties;
 		loginCardText: React.CSSProperties;
 		subheading: React.CSSProperties;
 		cardActionText: React.CSSProperties;
@@ -84,6 +87,7 @@ declare module '@mui/material/styles' {
 		linkedFooterHeader: React.CSSProperties;
 	  }
 	interface TypographyVariantsOptions {
+		appTitle?: React.CSSProperties;
 		loginCardText?: React.CSSProperties;
 		subheading: React.CSSProperties;
 		cardActionText: React.CSSProperties;
@@ -100,6 +104,7 @@ declare module '@mui/material/styles' {
 }
 declare module '@mui/material/Typography' {
 	interface TypographyPropsVariantOverrides {
+		appTitle: true;
 		loginCardText: true;
 		subheading: true;
 		cardActionText: true;
