@@ -27,7 +27,7 @@ export default function EnvironmentDetails(){
         getEnvDescription();
     }, [])
 
-    const returnDCBEnvDescription = () => environmentDescription ? (JSON.stringify(environmentDescription.env.description).replace(/"/g, '')):('Loading environment description...')
+    const returnDCBEnvDescription = () => environmentDescription ? (JSON.stringify(environmentDescription.env.description).replace(/"/g, '')):(t("common.loading"))
 
     const YourDCBEnvironment = [
 		['DCB Service', returnDCBEnvDescription() , <Link href={LOCAL_VERSION_LINKS.SERVICE_INFO} key={'serviceInfo'} target='_blank' rel="noreferrer">{LOCAL_VERSION_LINKS.SERVICE}</Link>, <Link key={'serviceHealthLink'} href={LOCAL_VERSION_LINKS.SERVICE_HEALTH} target='_blank' rel="noreferrer">{<EnvironmentHealth key={'serviceHealth'} apiLink={LOCAL_VERSION_LINKS.SERVICE_HEALTH} environment='dcb'/>}</Link>],
