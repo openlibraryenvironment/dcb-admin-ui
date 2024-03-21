@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Stack, Typography, useTheme } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import { useTranslation } from "next-i18next";
 import { AdminLayout } from "@layout";
@@ -18,6 +18,7 @@ type HostLMSDetails = {
 
 export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
     const { t } = useTranslation();
+    const theme = useTheme();
 
     // pollInterval is in ms - set to 2 mins
     const { loading, data, fetchMore } = useQuery(getHostLmsById, {
@@ -47,14 +48,14 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
             <Stack direction="row" justifyContent="end">
                 <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> 
             </Stack>
-            <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
-                <AccordionSummary aria-controls="hostlms-general-details" id="hostlms_details_general" 
+            <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
+                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="hostlms-general-details" id="hostlms_details_general" 
                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                     </IconContext.Provider>}>
-                    <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.general")} </Typography>
+                    <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.general")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                    <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                         <Grid xs={2} sm={4} md={4}>
                                 <Stack direction={"column"}>
                                         <Typography variant="attributeTitle">{t("details.hostlms_id")}
@@ -94,14 +95,14 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                     </Grid>
                 </AccordionDetails>
             </Accordion>
-            <Accordion expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
-                <AccordionSummary aria-controls="hostlms-client-config-details" id="hostlms_details_client_config" 
+            <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
+                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="hostlms-client-config-details" id="hostlms_details_client_config" 
                             expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                             </IconContext.Provider>}>
-                            <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.client_config")} </Typography>
+                            <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.client_config")} </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                         {hostlms?.clientConfig?.apikey != null && (
                         <Grid xs={2} sm={4} md={4}>
                                 <PrivateData clientConfigType={t("details.client_config_api")} hiddenTextValue={hostlms?.clientConfig?.apikey} id="apiKey"/>
@@ -240,13 +241,13 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                         </Grid>
                         {/* // For the 'item' object on some HostLMS. Conditionally rendered so it only shows up on Host LMS with this config.  */}
                         {hostlms?.clientConfig?.item != null ? 
-                        <Accordion expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
-                        <AccordionSummary aria-controls="hostlms-client-config-details-item" id="hostlms_details_client_config_item" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                        <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
+                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="hostlms-client-config-details-item" id="hostlms_details_client_config_item" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                         </IconContext.Provider>}>
                                         <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.client_config_item")} </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                         {hostlms?.clientConfig?.item?.['fine-code-id'] != null && (
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
@@ -318,13 +319,13 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                         </Accordion> : null }
                         {/* For Host LMS with the 'PAPI' config. Conditionally rendered so it only shows up on Host LMS with this config. */}
                         {hostlms?.clientConfig?.papi != null ? 
-                        <Accordion expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
-                        <AccordionSummary aria-controls="hostlms-client-config-details-papi" id="hostlms_details_client_config_papi" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                        <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
+                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="hostlms-client-config-details-papi" id="hostlms_details_client_config_papi" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                         </IconContext.Provider>}>
                                         <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.client_config_papi")} </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                         {hostlms?.clientConfig?.papi?.['app-id'] != null && (
                         <Grid xs={2} sm={4} md={4}>
                                 <Stack direction={"column"}>
@@ -374,13 +375,14 @@ export default function HostLMSDetails( {hostlmsId}: HostLMSDetails) {
                         </Accordion> : null }
                         {/* For HostLMS services config. Conditionally rendered so it only shows up on Host LMS with this config. */}
                         {hostlms?.clientConfig?.services != null ?
-                        <Accordion expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
-                        <AccordionSummary aria-controls="hostlms-client-config-details-services" id="hostlms_details_client_config_services" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
+                        <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
+                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} 
+                        aria-controls="hostlms-client-config-details-services" id="hostlms_details_client_config_services" expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                         </IconContext.Provider>}>
                                         <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.client_config_services")} </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                         {hostlms?.clientConfig?.services?.['product-id']!= null ? 
                         <Grid xs={2} sm={4} md={4}>
                                 <Stack direction={"column"}>

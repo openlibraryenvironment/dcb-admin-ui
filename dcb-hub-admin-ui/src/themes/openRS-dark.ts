@@ -55,6 +55,7 @@ const openRSDark = createTheme({
             breadcrumbs: '#35B7FF',
             buttonForSelectedChildPage: '#999999',
             buttonForSelectedPage: '#287BAF',
+            detailsAccordionSummary: '#424242',
             footerArea: '#202020',
             footerText: '#FFFFFF',
             linkedFooterBackground: '#000000',
@@ -80,32 +81,36 @@ const openRSDark = createTheme({
     },
     typography: {
         fontFamily: roboto.style.fontFamily,
-        h1: {
+        appTitle: {
             fontSize: 20,
             color: "#FFFFFF"
         },
+        h1: {
+          fontSize: 32,
+          fontWeight: 400,
+          color: "#FFFFFF"
+        },
         h2: {
-            fontSize: 32,
-            fontWeight: 400,
-            color: "#FFFFFF"
+          fontSize: 20,
+          fontWeight: 400
         },
         h3: {
-            fontSize: 20
+          fontSize: 18
         },
         h4: {
-            fontSize: 18
+          fontSize: 18
         },
         loginCardText: {
-            fontSize: 18
+          fontSize: 18
         },
         cardActionText: {
-            fontSize: '1rem'
+          fontSize: '1rem'
         },
         subheading : {
-            fontSize: '1.3rem'
+          fontSize: '1.3rem'
         },
         attributeTitle: {
-            fontWeight: 'bold'
+          fontWeight: 'bold'
         },
         attributeText: {
           wordBreak: 'break-word',

@@ -8,7 +8,7 @@ const Settings: NextPage = () => {
 	const { t } = useTranslation();
 	return (
 		<AdminLayout title={t("nav.settings.name")}>
-			<Typography variant = 'h3'>
+			<Typography variant = 'h2'>
 				{t('common.missing')}
 			</Typography>
 		</AdminLayout>

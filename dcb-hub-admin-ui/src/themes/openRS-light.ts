@@ -60,6 +60,7 @@ const openRSLight = createTheme({
             breadcrumbs: '#246F9E',
             buttonForSelectedChildPage: '#999999',
             buttonForSelectedPage: '#287BAF',
+            detailsAccordionSummary: "#F6F6F6",
             footerArea: '#FFFFFF',
             footerText: '#000000',
             linkedFooterBackground: '#0C4068',
@@ -88,17 +89,22 @@ const openRSLight = createTheme({
     // Supply the font for the theme here.
     typography: {
         fontFamily: roboto.style.fontFamily,
-        h1: {
+        appTitle: {
             fontSize: 20,
             color: "#0C4068"
         },
+        h1:
+        {
+          fontSize: 32,
+          fontWeight: 400,
+          color: "#0C4068"
+        },
         h2: {
-            fontSize: 32,
-            fontWeight: 400,
-            color: "#0C4068"
+          fontSize: 20,
+          fontWeight: 400
         },
         h3: {
-            fontSize: 20
+            fontSize: 18
         },
         h4: {
             fontSize: 18

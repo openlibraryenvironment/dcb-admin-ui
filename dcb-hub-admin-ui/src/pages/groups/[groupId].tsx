@@ -25,7 +25,7 @@ export default function GroupDetails( {groupId}: GroupDetails) {
     return (
         loading ? <AdminLayout title={t("common.loading")} /> : 
         <AdminLayout title={group?.name}>
-            <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+            <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                 <Grid xs={2} sm={4} md={4}>
                     <Stack direction={"column"}>
                         <Typography variant="attributeTitle">{t("details.group_name")}</Typography>

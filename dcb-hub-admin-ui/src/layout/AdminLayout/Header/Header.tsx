@@ -81,7 +81,7 @@ export default function Header({openStateFuncClosed, iconsVisible}: HeaderProps)
               />
             </Box>
           }
-          <Typography data-tid="header-title" variant="h1" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1, pl: 2}}>
+          <Typography data-tid="header-title" variant="appTitle" component="div" sx={{ color: theme.palette.primary.headerText, fontWeight: 'bold', flexGrow: 1, pl: 2}}>
             {t("app.title", {consortium_name: "MOBIUS"})}
           </Typography>
           <div>

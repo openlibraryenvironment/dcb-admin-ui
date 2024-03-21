@@ -31,12 +31,12 @@ const Home: NextPage = () => {
 	return (
 		<AdminLayout title={t('welcome.greeting')+' '+getUserName()} hideTitleBox={true}>
 					<Stack direction="column" spacing={2}>
-						<Typography variant="h2">{t('welcome.greeting')+' '+getUserName()}</Typography>
+						<Typography variant="h1" sx={{fontSize: 32}}>{t('welcome.greeting')+' '+getUserName()}</Typography>
 						<Typography variant='homePageText'>{t('welcome.context', {consortium_name: 'MOBIUS'})}</Typography>
-						<Typography variant='h2'>{t('consortium.your')}</Typography>
+						<Typography variant='h2' sx={{fontSize: 32}}>{t('consortium.your')}</Typography>
 						<Typography variant='homePageText'> {t('common.placeholder_text')} </Typography>
 					<ConsortiumDetails/>
-						<Typography variant='h2' sx={{marginBottom:1}}>{t('environment.your')}</Typography>
+						<Typography variant='h2' sx={{marginBottom:1, fontSize: 32}}>{t('environment.your')}</Typography>
 						<Typography variant='homePageText'>{t('environment.configured_for')}</Typography>	
 					<EnvironmentDetails/>
 						<Typography variant='homePageText'>{t("environment.compare_components")}</Typography>

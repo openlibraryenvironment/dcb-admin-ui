@@ -2,7 +2,7 @@ import { useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
 import { AdminLayout } from "@layout";
-import { Stack, Button, Typography, Accordion, AccordionDetails, AccordionSummary, Card } from "@mui/material";
+import { Stack, Button, Typography, Accordion, AccordionDetails, AccordionSummary, Card, useTheme } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
 import dayjs from "dayjs";
 import { useTranslation } from "next-i18next";
@@ -20,6 +20,7 @@ type PatronRequestDetails = {
 
 export default function PatronRequestDetails( {patronRequestId}: PatronRequestDetails) {
     const { t } = useTranslation();
+    const theme = useTheme();
     const { publicRuntimeConfig } = getConfig();
 
 
@@ -58,14 +59,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                 <Stack direction="row" justifyContent="end">
                         <Button onClick={expandAll}>{expandedAccordions[0] ?  t("details.collapse"): t("details.expand")}</Button> 
                 </Stack>
-                <Accordion expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
-                        <AccordionSummary aria-controls="request-general-details" id="request_details_general" 
+                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[0]} onChange={handleAccordionChange(0)}>
+                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-general-details" id="request_details_general" 
                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                 </IconContext.Provider>}>
-                                <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.general")} </Typography>
+                                <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.general")} </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.request_id")}
@@ -125,14 +126,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                         </Grid>
                         </AccordionDetails>
                 </Accordion>
-                <Accordion expanded={expandedAccordions[6]} onChange={handleAccordionChange(6)}>
-                        <AccordionSummary aria-controls="request-bib-record" id="request_bib_record" 
+                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[6]} onChange={handleAccordionChange(6)}>
+                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-bib-record" id="request_bib_record" 
                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                 </IconContext.Provider>}>
-                                <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.bib_record")} </Typography>
+                                <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.bib_record")} </Typography>
                         </AccordionSummary>
                         <AccordionDetails>
-                                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.bib_cluster_id")}
@@ -194,11 +195,11 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         </Grid>
                                 </Grid>
                                 <Card variant="outlined">
-                                <Accordion expanded={expandedAccordions[7]} onChange={handleAccordionChange(7)}>
-                                <AccordionSummary aria-controls="request-source-record" id="request_source_record" 
+                                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[7]} onChange={handleAccordionChange(7)}>
+                                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-source-record" id="request_source_record" 
                                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                         </IconContext.Provider>}>
-                                        <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
+                                        <Typography variant="h3" sx={{ fontWeight: 'bold' }}> {t("details.source_record")} </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
                                         {members && members.some((member: { sourceRecord: any; }) => member.sourceRecord !== null) ? (
@@ -215,14 +216,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                 </Card>
                                 </AccordionDetails>
                 </Accordion>
-                <Accordion expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
-                                <AccordionSummary aria-controls="request-patron-details" id="request_details_patron" 
+                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[1]} onChange={handleAccordionChange(1)}>
+                                <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-patron-details" id="request_details_patron" 
                                         expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                         </IconContext.Provider>} >
-                                        <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.patron")} </Typography>
+                                        <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.patron")} </Typography>
                                 </AccordionSummary>
                                 <AccordionDetails>
-                                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                                <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                                 <Grid xs={2} sm={4} md={4}>
                                         <Stack direction={"column"}>
                                                 <Typography variant="attributeTitle">{t("details.patron_id")}
@@ -268,14 +269,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                 </Grid>
                                 </AccordionDetails>
                 </Accordion>
-                <Accordion expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
-                                        <AccordionSummary aria-controls="request-pickup-details" id="request_details_pickup" 
+                <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[2]} onChange={handleAccordionChange(2)}>
+                                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-pickup-details" id="request_details_pickup" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.pickup")} </Typography>
+                                               <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.pickup")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.pickup_code")}
@@ -326,18 +327,17 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                                 </Stack>
                                         </Grid>
                                         </Grid>
-
                                         </AccordionDetails>
                         </Accordion>
-                        <Accordion expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
-                                        <AccordionSummary aria-controls="request-supplier-details" id="request_details_supplier" 
+                        <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[3]} onChange={handleAccordionChange(3)}>
+                                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-supplier-details" id="request_details_supplier" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.supplier")} </Typography>
+                                               <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.supplier")} </Typography>
                                         </AccordionSummary>
                                         {/* We may have to change this for multiple suppliers. Could make it a grid. */}
                                         <AccordionDetails>
-                                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.supplying_agency_code")}
@@ -446,14 +446,14 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         </Grid>
                                         </AccordionDetails>
                         </Accordion>
-                        <Accordion expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
-                                        <AccordionSummary aria-controls="request-details-borrowing" id="request_details_borrowing" 
+                        <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[4]} onChange={handleAccordionChange(4)}>
+                                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-details-borrowing" id="request_details_borrowing" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.borrowing", "Borrowing")} </Typography>
+                                               <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.borrowing", "Borrowing")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
-                                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+                                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
                                         <Grid xs={2} sm={4} md={4}>
                                                 <Stack direction={"column"}>
                                                         <Typography variant="attributeTitle">{t("details.borrowing_request_id")}
@@ -513,11 +513,11 @@ export default function PatronRequestDetails( {patronRequestId}: PatronRequestDe
                                         </Grid>
                                         </AccordionDetails>
                         </Accordion>
-                        <Accordion expanded={expandedAccordions[5]} onChange={handleAccordionChange(5)}>
-                                        <AccordionSummary aria-controls="request-audit_log" id="request_audit_log" 
+                        <Accordion variant="outlined" sx={{border: '0'}} expanded={expandedAccordions[5]} onChange={handleAccordionChange(5)}>
+                                        <AccordionSummary sx={{backgroundColor: theme.palette.primary.detailsAccordionSummary}} aria-controls="request-audit_log" id="request_audit_log" 
                                                 expandIcon={<IconContext.Provider value={{size: "2em"}}> <MdExpandMore/> 
                                                 </IconContext.Provider>}>
-                                               <Typography variant = "h3" sx={{ fontWeight: 'bold' }}> {t("details.audit_log")} </Typography>
+                                               <Typography variant="h2" sx={{ fontWeight: 'bold' }}> {t("details.audit_log")} </Typography>
                                         </AccordionSummary>
                                         <AccordionDetails>
                                         <ClientDataGrid 
