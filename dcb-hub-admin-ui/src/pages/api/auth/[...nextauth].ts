@@ -58,8 +58,8 @@ async function completeSignout(jwt: JWT) {
 		// TS-ignore as temp fix: error behaviour is already covered by the AxiosError on line 86
 		// so failure state is covered.
 		// @ts-ignore
-		const { status, statusText } = await axios.get(
-			`${keycloak.options.issuer}/protocol/openid-connect/logout?${params.toString()}`,
+		// prettier-ignore
+		const { status, statusText } = await axios.get(`${keycloak.options.issuer}/protocol/openid-connect/logout?${params.toString()}`,
 		);
 		// Confirm we've logged out properly - the Keycloak login should appear and force us to put in login info.
 		console.log("Completed post-logout handshake", status, statusText);
