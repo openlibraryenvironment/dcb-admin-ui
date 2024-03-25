@@ -1,9 +1,9 @@
 {
-    "data": {
-        "createAgencyGroup": {
-            "id": "4196d9f7-da46-58df-9a1f-2930c37f19b8",
-            "code": "HUNTR",
-            "name": "Hunter's Bar"
-        }
-    }
+	"data": {
+		"createAgencyGroup": {
+			"id": "4196d9f7-da46-58df-9a1f-2930c37f19b8",
+			"code": "HUNTR",
+			"name": "Hunter's Bar"
+		}
+	}
 }

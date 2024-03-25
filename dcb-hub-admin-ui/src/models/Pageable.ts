@@ -1,5 +1,4 @@
 export interface Pageable {
-    number: number
-    offset: number
-  }
-  
+	number: number;
+	offset: number;
+}

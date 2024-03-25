@@ -1,5 +1,5 @@
 export interface HostLMS {
-    clientConfig: any;
+	clientConfig: any;
 	id: string;
 	code: string;
 	name: string;

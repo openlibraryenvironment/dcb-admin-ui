@@ -60,7 +60,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	// Works for closing + expanding as it sets values to their opposite
 	const expandAll = () => {
 		setExpandedAccordions((prevExpanded) =>
-			prevExpanded.map(() => !prevExpanded[0])
+			prevExpanded.map(() => !prevExpanded[0]),
 		);
 	};
 
@@ -77,7 +77,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 				variant="outlined"
 				sx={{ border: "0" }}
 				expanded={expandedAccordions[0]}
-				onChange={handleAccordionChange(0)}>
+				onChange={handleAccordionChange(0)}
+			>
 				<AccordionSummary
 					sx={{
 						backgroundColor: theme.palette.primary.detailsAccordionSummary,
@@ -89,7 +90,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
-					}>
+					}
+				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{" "}
 						{t("details.general")}{" "}
@@ -99,7 +101,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
-						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
+						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -147,7 +150,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 				variant="outlined"
 				sx={{ border: "0" }}
 				expanded={expandedAccordions[1]}
-				onChange={handleAccordionChange(1)}>
+				onChange={handleAccordionChange(1)}
+			>
 				<AccordionSummary
 					sx={{
 						backgroundColor: theme.palette.primary.detailsAccordionSummary,
@@ -159,7 +163,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
-					}>
+					}
+				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{" "}
 						{t("details.client_config")}{" "}
@@ -169,7 +174,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
-						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
+						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					>
 						{hostlms?.clientConfig?.apikey != null && (
 							<Grid xs={2} sm={4} md={4}>
 								<PrivateData
@@ -366,7 +372,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							variant="outlined"
 							sx={{ border: "0" }}
 							expanded={expandedAccordions[2]}
-							onChange={handleAccordionChange(2)}>
+							onChange={handleAccordionChange(2)}
+						>
 							<AccordionSummary
 								sx={{
 									backgroundColor:
@@ -379,7 +386,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										{" "}
 										<MdExpandMore />
 									</IconContext.Provider>
-								}>
+								}
+							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{" "}
 									{t("details.client_config_item")}{" "}
@@ -389,7 +397,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
-									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
+									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+								>
 									{hostlms?.clientConfig?.item?.["fine-code-id"] != null && (
 										<Grid xs={2} sm={4} md={4}>
 											<Stack direction={"column"}>
@@ -503,7 +512,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							variant="outlined"
 							sx={{ border: "0" }}
 							expanded={expandedAccordions[3]}
-							onChange={handleAccordionChange(3)}>
+							onChange={handleAccordionChange(3)}
+						>
 							<AccordionSummary
 								sx={{
 									backgroundColor:
@@ -516,7 +526,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										{" "}
 										<MdExpandMore />
 									</IconContext.Provider>
-								}>
+								}
+							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{" "}
 									{t("details.client_config_papi")}{" "}
@@ -526,7 +537,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
-									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
+									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+								>
 									{hostlms?.clientConfig?.papi?.["app-id"] != null && (
 										<Grid xs={2} sm={4} md={4}>
 											<Stack direction={"column"}>
@@ -595,7 +607,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							variant="outlined"
 							sx={{ border: "0" }}
 							expanded={expandedAccordions[4]}
-							onChange={handleAccordionChange(4)}>
+							onChange={handleAccordionChange(4)}
+						>
 							<AccordionSummary
 								sx={{
 									backgroundColor:
@@ -608,7 +621,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										{" "}
 										<MdExpandMore />
 									</IconContext.Provider>
-								}>
+								}
+							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{" "}
 									{t("details.client_config_services")}{" "}
@@ -618,7 +632,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
-									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}>
+									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+								>
 									{hostlms?.clientConfig?.services?.["product-id"] != null ? (
 										<Grid xs={2} sm={4} md={4}>
 											<Stack direction={"column"}>

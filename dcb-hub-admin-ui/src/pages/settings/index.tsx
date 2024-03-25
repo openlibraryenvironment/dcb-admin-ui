@@ -1,30 +1,28 @@
-import { NextPage } from 'next';
-import { AdminLayout } from '@layout';
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import Typography from '@mui/material/Typography';
+import { NextPage } from "next";
+import { AdminLayout } from "@layout";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import Typography from "@mui/material/Typography";
 
 const Settings: NextPage = () => {
 	const { t } = useTranslation();
 	return (
 		<AdminLayout title={t("nav.settings.name")}>
-			<Typography variant = 'h2'>
-				{t('common.missing')}
-			</Typography>
+			<Typography variant="h2">{t("common.missing")}</Typography>
 		</AdminLayout>
 	);
 };
 
-export async function getStaticProps({ locale }: {locale: any}) {
+export async function getStaticProps({ locale }: { locale: any }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [
-			'application',
-			'common',
-			'validation'
+				"application",
+				"common",
+				"validation",
 			])),
 		},
-	}
-};
+	};
+}
 
 export default Settings;

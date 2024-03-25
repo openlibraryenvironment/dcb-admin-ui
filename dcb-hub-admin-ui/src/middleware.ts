@@ -19,7 +19,7 @@ import { withAuth } from "next-auth/middleware";
 // Refer to https://next-auth.js.org/configuration/nextjs#middleware to understand what the role of this file is.
 export default withAuth({
 	pages: {
-	  signIn: "/auth/login",
-	  signOut: "/auth/logout"
+		signIn: "/auth/login",
+		signOut: "/auth/logout",
 	},
 });

@@ -14,9 +14,8 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
+import "./commands";
 // import '@cypress/code-coverage/support'
-
 
 // declare global {
 //     namespace Cypress {
@@ -25,7 +24,7 @@ import './commands'
 //       }
 //     }
 //   }
-  
+
 //   Cypress.Commands.add('login', login)
 
 // Alternatively you can use CommonJS syntax:

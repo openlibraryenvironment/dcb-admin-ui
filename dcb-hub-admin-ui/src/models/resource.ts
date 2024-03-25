@@ -22,7 +22,11 @@ export interface GraphQLResource<T> {
 	meta: {};
 }
 
-export const newResource = <T>(content: T[], pageable: any, totalSize: number): Resource<T> => ({
+export const newResource = <T>(
+	content: T[],
+	pageable: any,
+	totalSize: number,
+): Resource<T> => ({
 	content: content,
 	meta: {
 		from: 1,
@@ -30,14 +34,16 @@ export const newResource = <T>(content: T[], pageable: any, totalSize: number): 
 		total: totalSize,
 		size: pageable.size,
 		last_page: Math.floor(totalSize / pageable.size + 1),
-		current_page: 1 // (pageable.number)+1,
+		current_page: 1, // (pageable.number)+1,
 	},
-	totalSize: totalSize
+	totalSize: totalSize,
 });
 
-// To be made redundant by proper server-side pagination 
+// To be made redundant by proper server-side pagination
 // Workaround as it's too complex to fix as part of this ticket
-export const newNonPageableResource = <T>(content: T[]): NonPageableResource<T> => ({
+export const newNonPageableResource = <T>(
+	content: T[],
+): NonPageableResource<T> => ({
 	content: content,
 });
 
@@ -45,14 +51,14 @@ export const newNonPageableResource = <T>(content: T[]): NonPageableResource<T> 
 export const newGraphQLResource = <T>(content: T[]): GraphQLResource<T> => ({
 	content: content,
 	meta: {},
-// 	meta: {
-// 		from: 1,
-// 		to: totalSize,
-// 		total: totalSize,
-// 		size: pageable.size,
-// 		last_page: Math.floor(totalSize / pageable.size + 1),
-// 		current_page: 1 // (pageable.number)+1,
-// 	},
-// 	totalSize: totalSize
-// To be implemented when GraphQL requests support server side pagination - in the mean-time we have to use this workaround
+	// 	meta: {
+	// 		from: 1,
+	// 		to: totalSize,
+	// 		total: totalSize,
+	// 		size: pageable.size,
+	// 		last_page: Math.floor(totalSize / pageable.size + 1),
+	// 		current_page: 1 // (pageable.number)+1,
+	// 	},
+	// 	totalSize: totalSize
+	// To be implemented when GraphQL requests support server side pagination - in the mean-time we have to use this workaround
 });

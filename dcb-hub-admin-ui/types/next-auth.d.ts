@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession, DefaultUser, Profile } from 'next-auth';
+import NextAuth, { DefaultSession, DefaultUser, Profile } from "next-auth";
 
 // Append additional properties to the which is found via the jwt callback
 interface IUser extends DefaultUser {
@@ -24,7 +24,7 @@ interface IUser extends DefaultUser {
 	email: string;
 }
 
-declare module 'next-auth' {
+declare module "next-auth" {
 	interface Session {
 		accessToken: string;
 		refreshToken: string;
@@ -46,13 +46,13 @@ declare module 'next-auth' {
 		refresh_token: string;
 		token_type: string;
 		id_token: string;
-		'not-before-policy': number;
+		"not-before-policy": number;
 		session_state: string;
 		scope: string;
 	}
 }
 
-declare module 'next-auth/jwt' {
+declare module "next-auth/jwt" {
 	interface JWT {
 		provider: string;
 		accessToken: string | null;
@@ -66,7 +66,7 @@ declare module 'next-auth/jwt' {
 		refresh_token: string;
 		name: string;
 		email: string;
-		sub: string
+		sub: string;
 		error: string;
 		user: IUser;
 	}
