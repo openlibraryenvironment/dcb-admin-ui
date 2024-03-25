@@ -27,10 +27,6 @@ See [developer guidance](https://openlibraryfoundation.atlassian.net/wiki/label/
 
 Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849#Configuration-/-setup-within-DCB-Admin) for guidance on getting started.
 
-# Releases
-
-This project is released using semantic_release. See the tags section for past releases.
-
 ## Contributing
 
 // TODO
@@ -43,4 +39,10 @@ This project is released using semantic_release. See the tags section for past r
 
 ## Roadmap
 // TODO 
+
+# Releases
+
+This project is released using semantic_release. See the tags section for past releases.
+
+
 
