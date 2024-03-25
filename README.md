@@ -5,11 +5,11 @@
 
 Welcome to DCB Admin! DCB Admin is a Knowledge Integration application and is part of the wider Direct Consortial Borrowing project. It is designed to help people administrate instances of DCB.
 
-You can find the DCB Service repository [here](https://gitlab.com/knowledge-integration/libraries/dcb-service) and more information [https://openlibraryfoundation.atlassian.net/l/cp/67Q16M0Q](url). 
+You can find the DCB Service repository [here](https://gitlab.com/knowledge-integration/libraries/dcb-service) and more information [here](https://openlibraryfoundation.atlassian.net/l/cp/67Q16M0Q). 
 
-DCB Admin is written in TypeScript, and uses the Next.js and React frameworks. [Material UI](https://mui.com/) has also been used within the project to deliver a dynamic, themable and resillient user interface.
+DCB Admin is written in TypeScript using Next.js 13.5.2 and React 18. [Material UI](https://mui.com/) v5 has also been used within the project to deliver a dynamic, themable and resillient modern user interface.
 
-This project also conforms to the [WCAG 2.1](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. If you would like to experience DCB Admin in dark mode, please set your system settings accordingly.
+This project conforms to the [WCAG 2.1](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. If you would like to experience DCB Admin in dark mode, please set your system settings accordingly.
 
 ## How to get started
 
@@ -25,27 +25,21 @@ See [developer guidance](https://openlibraryfoundation.atlassian.net/wiki/label/
 
 [DCB Admin uses Cypress](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849/) for end-to-end automated tests. 
 
-1. Run npm install from your working directory root to set up cypress locally.
-
-2. Add CYPRESS_USER and CYPRESS_PW to your .env file, corresponding to the username and password you use to log into DCB Admin
-
-For more details, refer to the [DCB Admin documentation](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849#Configuration-/-setup-within-DCB-Admin).
+Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849#Configuration-/-setup-within-DCB-Admin) for guidance on getting started.
 
 # Releases
 
-This project is released using semantic_release. See the tags section for past releases
+This project is released using semantic_release. See the tags section for past releases.
 
-## Screenshots
+## Contributing
 
-A look at the admin UI in its current early stages. UI elements and pages may be subject to change.
+// TODO
 
-![Add-Agencies-Form](https://drive.google.com/uc?id=1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal "Add Agencies Form")
-![Groups-Page](https://drive.google.com/uc?id=1fv3JU7uVJytJiRSx7mFN7KKE_wXrohdF "Groups Page")
-![HostLMS-Page](https://drive.google.com/uc?id=1URZtchBa0YqdYFjr72weCD5Af0a4ejHN "HostLMS Page")
-![Locations-Page](https://drive.google.com/uc?id=1DloMYDfMQQ7aFpCxU0QwbZjQgOKU_GF2 "Locations Page")
-![Mappings-Page](https://drive.google.com/uc?id=1LzHXskc635TluToeEC22SR1qEQVcXMxd "Mappings Page: WIP")
-![New-Group-Form](https://drive.google.com/uc?id=1eG2XC2aQzs2F-w1ncCjs6Nbw7eN3Q9aR "New Group Form")
-![Requests Page](https://drive.google.com/uc?id=1VEZogEd_8P5bbvoPFgMdsCgPLxnetGal "Requests Page")
+
+## Raising an issue
+
+// TODO
+
 
 ## Roadmap
 // TODO 
