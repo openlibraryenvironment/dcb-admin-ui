@@ -29,7 +29,7 @@ Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atla
 
 ## Contributing
 
-// TODO
+DCB Admin uses [Prettier](https://prettier.io/docs) for code formatting. Please install the Prettier extension in your editor and, if using VS Code, set Prettier as your default formatter and enable 'format on save'. If you're having issues, you may need to do Ctrl-Shift-P, open your user settings, and ensure Prettier is set as `editor.defaultFormatter` and that `editor.formatOnSave` is also enabled.
 
 
 ## Raising an issue
