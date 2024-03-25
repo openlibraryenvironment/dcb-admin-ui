@@ -1,504 +1,504 @@
 {
-    "data": {
-        "patronRequests": {
-            "totalSize": 1,
-            "content": [
-                {
-                    "id": "ab3b9a22-2ab3-4118-ae81-61932265777e",
-                    "dateCreated": "2024-01-09T19:56:53.378630Z",
-                    "dateUpdated": "2024-01-10T17:51:34.373317Z",
-                    "patronHostlmsCode": "STLOUIS",
-                    "bibClusterId": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
-                    "pickupLocationCode": "2b4e7985-c612-5e1b-98a7-8ed6fa9ae344",
-                    "pickupPatronId": null,
-                    "pickupItemId": null,
-                    "pickupItemType": null,
-                    "pickupItemStatus": null,
-                    "pickupRequestId": null,
-                    "pickupRequestStatus": null,
-                    "status": "PICKUP_TRANSIT",
-                    "localRequestId": "3463642",
-                    "localRequestStatus": "Pending",
-                    "localItemId": "4499462",
-                    "localItemStatus": "RETURNED",
-                    "localItemType": null,
-                    "localBibId": "1223765",
-                    "description": "Taco Tuesday at NW Missouri State",
-                    "errorMessage": "Virtual item status set to RETURNED (was AVAILABLE) - Unhandled",
-                    "activeWorkflow": "RET-STD",
-                    "requesterNote": null,
-                    "patron": {
-                        "id": "1cdc2db5-36a9-4a51-bd6b-d82ccf07474a"
-                    },
-                    "requestingIdentity": {
-                        "id": "ebe8b7ce-cdaa-4d14-b94b-26afbbd612fb",
-                        "localId": "1255630",
-                        "homeIdentity": true,
-                        "localBarcode": "[0077777777]",
-                        "localNames": null,
-                        "localPtype": "3",
-                        "canonicalPtype": null,
-                        "localHomeLibraryCode": "39",
-                        "lastValidated": "2024-01-09T19:56:54.079107Z"
-                    },
-                    "suppliers": [
-                        {
-                            "id": "6e00581e-0221-4b8f-a826-8848cb1b0ae4",
-                            "canonicalItemType": "GEN",
-                            "dateCreated": "2024-01-09T19:57:00.330904Z",
-                            "dateUpdated": "2024-01-09T20:03:30.805282Z",
-                            "hostLmsCode": "KCTOWERS",
-                            "isActive": true,
-                            "localItemId": "7106904",
-                            "localBibId": "4958487",
-                            "localItemBarcode": "taco",
-                            "localItemLocationCode": "w4m",
-                            "localItemStatus": "AVAILABLE",
-                            "localItemType": "Monograph",
-                            "localId": "214442",
-                            "localStatus": "TRANSIT",
-                            "localAgency": "6nmsu",
-                            "virtualPatron": {
-                                "id": "ada3fc45-b164-4d4b-ba58-fea9e028cb92",
-                                "localId": "1709143",
-                                "homeIdentity": false,
-                                "localBarcode": "[0077777777]",
-                                "localNames": null,
-                                "localPtype": "240",
-                                "canonicalPtype": null,
-                                "localHomeLibraryCode": null,
-                                "lastValidated": null
-                            }
-                        }
-                    ],
-                    "audit": [
-                        {
-                            "id": "7e288bd6-a415-4e59-9466-7c64a727f100",
-                            "auditDate": "2024-01-09T19:56:54.355575Z",
-                            "fromStatus": "SUBMITTED_TO_DCB",
-                            "toStatus": "PATRON_VERIFIED",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "91cf0d8a-653b-4d2f-a396-9376c4e19ceb",
-                            "auditDate": "2024-01-09T19:57:00.390928Z",
-                            "fromStatus": "PATRON_VERIFIED",
-                            "toStatus": "RESOLVED",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "f25f3787-8236-447e-8ad1-ecb5cc1dcd86",
-                            "auditDate": "2024-01-09T19:57:10.580686Z",
-                            "fromStatus": "RESOLVED",
-                            "toStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "99cf16fb-3c60-4a4f-a673-fedfd5003b2b",
-                            "auditDate": "2024-01-09T19:57:23.550455Z",
-                            "fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-                            "toStatus": "REQUEST_PLACED_AT_BORROWING_AGENCY",
-                            "briefDescription": null
-                        }
-                    ],
-                    "clusterRecord": {
-                        "id": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
-                        "title": "Taco Tuesday at NW Missouri State",
-                        "selectedBib": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
-                        "members": [
-                            {
-                                "id": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
-                                "title": "Taco Tuesday at NW Missouri State",
-                                "canonicalMetadata": {
-                                    "title": "Taco Tuesday at NW Missouri State",
-                                    "agents": [
-                                        {
-                                            "label": "Auger, Tim",
-                                            "subtype": "name-personal"
-                                        }
-                                    ],
-                                    "author": null,
-                                    "derivedType": "Book",
-                                    "identifiers": [
-                                        {
-                                            "value": "taco tuesday at nw missouri state",
-                                            "namespace": "BLOCKING_TITLE"
-                                        },
-                                        {
-                                            "value": "tacotuesdayatnwmissouristate                                                  a                              ",
-                                            "namespace": "GOLDRUSH"
-                                        }
-                                    ],
-                                    "otherAuthors": [],
-                                    "recordStatus": "n"
-                                },
-                                "sourceSystemId": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
-                                "sourceRecordId": "4958487",
-                                "sourceRecord": {
-                                    "id": "6e58a40c-ad2b-5f54-a8e1-e0f103b78ca7",
-                                    "json": {
-                                        "fields": [
-                                            {
-                                                "100": {
-                                                    "ind1": " ",
-                                                    "ind2": " ",
-                                                    "subfields": [
-                                                        {
-                                                            "a": "Auger, Tim"
-                                                        }
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                "245": {
-                                                    "ind1": " ",
-                                                    "ind2": " ",
-                                                    "subfields": [
-                                                        {
-                                                            "a": "Taco Tuesday at NW Missouri State"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        ],
-                                        "leader": "00000nam a2200000 a 4500"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "id": "jb3b9a22-2ab3-4118-ae81-61932265777e",
-                    "dateCreated": "2024-01-07T19:56:53.378630Z",
-                    "dateUpdated": "2024-01-10T17:51:34.373317Z",
-                    "patronHostlmsCode": "COOLCAT",
-                    "bibClusterId": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
-                    "pickupLocationCode": "2b4e7985-c612-5e1b-98a7-8ed6fa9ae344",
-                    "pickupPatronId": null,
-                    "pickupItemId": null,
-                    "pickupItemType": null,
-                    "pickupItemStatus": null,
-                    "pickupRequestId": null,
-                    "pickupRequestStatus": null,
-                    "status": "PICKUP_TRANSIT",
-                    "localRequestId": "3463642",
-                    "localRequestStatus": "Pending",
-                    "localItemId": "4499462",
-                    "localItemStatus": "RETURNED",
-                    "localItemType": null,
-                    "localBibId": "1223765",
-                    "description": "Another test request strikes again!",
-                    "errorMessage": "Virtual item status set to RETURNED (was AVAILABLE) - Unhandled",
-                    "activeWorkflow": "RET-STD",
-                    "requesterNote": null,
-                    "patron": {
-                        "id": "1cdc2db5-36a9-4a51-bd6b-d82ccf07474a"
-                    },
-                    "requestingIdentity": {
-                        "id": "ebe8b7ce-cdaa-4d14-b94b-26afbbd612fb",
-                        "localId": "1255630",
-                        "homeIdentity": true,
-                        "localBarcode": "[0077777777]",
-                        "localNames": null,
-                        "localPtype": "3",
-                        "canonicalPtype": null,
-                        "localHomeLibraryCode": "39",
-                        "lastValidated": "2024-01-09T19:56:54.079107Z"
-                    },
-                    "suppliers": [
-                        {
-                            "id": "6e00581e-0221-4b8f-a826-8848cb1b0ae4",
-                            "canonicalItemType": "GEN",
-                            "dateCreated": "2024-01-09T19:57:00.330904Z",
-                            "dateUpdated": "2024-01-09T20:03:30.805282Z",
-                            "hostLmsCode": "KCTOWERS",
-                            "isActive": true,
-                            "localItemId": "7106904",
-                            "localBibId": "4958487",
-                            "localItemBarcode": "taco",
-                            "localItemLocationCode": "w4m",
-                            "localItemStatus": "AVAILABLE",
-                            "localItemType": "Monograph",
-                            "localId": "214442",
-                            "localStatus": "TRANSIT",
-                            "localAgency": "6nmsu",
-                            "virtualPatron": {
-                                "id": "ada3fc45-b164-4d4b-ba58-fea9e028cb92",
-                                "localId": "1709143",
-                                "homeIdentity": false,
-                                "localBarcode": "[0077777777]",
-                                "localNames": null,
-                                "localPtype": "240",
-                                "canonicalPtype": null,
-                                "localHomeLibraryCode": null,
-                                "lastValidated": null
-                            }
-                        }
-                    ],
-                    "audit": [
-                        {
-                            "id": "7e288bd6-a415-4e59-9466-7c64a727f100",
-                            "auditDate": "2024-01-09T19:56:54.355575Z",
-                            "fromStatus": "SUBMITTED_TO_DCB",
-                            "toStatus": "PATRON_VERIFIED",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "91cf0d8a-653b-4d2f-a396-9376c4e19ceb",
-                            "auditDate": "2024-01-09T19:57:00.390928Z",
-                            "fromStatus": "PATRON_VERIFIED",
-                            "toStatus": "RESOLVED",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "f25f3787-8236-447e-8ad1-ecb5cc1dcd86",
-                            "auditDate": "2024-01-09T19:57:10.580686Z",
-                            "fromStatus": "RESOLVED",
-                            "toStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "99cf16fb-3c60-4a4f-a673-fedfd5003b2b",
-                            "auditDate": "2024-01-09T19:57:23.550455Z",
-                            "fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-                            "toStatus": "REQUEST_PLACED_AT_BORROWING_AGENCY",
-                            "briefDescription": null
-                        }
-                    ],
-                    "clusterRecord": {
-                        "id": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
-                        "title": "Another test request strikes again!",
-                        "selectedBib": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
-                        "members": [
-                            {
-                                "id": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
-                                "title": "Another test request strikes again!",
-                                "canonicalMetadata": {
-                                    "title": "Another test request strikes again!",
-                                    "agents": [
-                                        {
-                                            "label": "Auger, Tim",
-                                            "subtype": "name-personal"
-                                        }
-                                    ],
-                                    "author": null,
-                                    "derivedType": "Book",
-                                    "identifiers": [
-                                        {
-                                            "value": "Another test request strikes again!",
-                                            "namespace": "BLOCKING_TITLE"
-                                        },
-                                        {
-                                            "value": "anothertestrequeststrikesagain                                                  a                              ",
-                                            "namespace": "GOLDRUSH"
-                                        }
-                                    ],
-                                    "otherAuthors": [],
-                                    "recordStatus": "n"
-                                },
-                                "sourceSystemId": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
-                                "sourceRecordId": "4958487",
-                                "sourceRecord": {
-                                    "id": "6e58a40c-ad2b-5f54-a8e1-e0f103b78ca7",
-                                    "json": {
-                                        "fields": [
-                                            {
-                                                "100": {
-                                                    "ind1": " ",
-                                                    "ind2": " ",
-                                                    "subfields": [
-                                                        {
-                                                            "a": "Auger, Tim"
-                                                        }
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                "245": {
-                                                    "ind1": " ",
-                                                    "ind2": " ",
-                                                    "subfields": [
-                                                        {
-                                                            "a": "Another test request strikes again!"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        ],
-                                        "leader": "00000nam a2200000 a 4500"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
-                    "id": "zi3b9a22-2ab3-4118-ae81-61932265777e",
-                    "dateCreated": "2024-01-07T19:56:53.378630Z",
-                    "dateUpdated": "2024-01-10T17:51:34.373317Z",
-                    "patronHostlmsCode": "DUMMY1",
-                    "bibClusterId": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
-                    "pickupLocationCode": "2b4e7985-c612-5e1b-98a7-8ed6fa9ae344",
-                    "pickupPatronId": null,
-                    "pickupItemId": null,
-                    "pickupItemType": null,
-                    "pickupItemStatus": null,
-                    "pickupRequestId": null,
-                    "pickupRequestStatus": null,
-                    "status": "PICKUP_TRANSIT",
-                    "localRequestId": "3463642",
-                    "localRequestStatus": "Pending",
-                    "localItemId": "4499462",
-                    "localItemStatus": "RETURNED",
-                    "localItemType": null,
-                    "localBibId": "1223765",
-                    "description": "Return of the test request",
-                    "errorMessage": "Virtual item status set to RETURNED (was AVAILABLE) - Unhandled",
-                    "activeWorkflow": "RET-STD",
-                    "requesterNote": null,
-                    "patron": {
-                        "id": "1cdc2db5-36a9-4a51-bd6b-d82ccf07474a"
-                    },
-                    "requestingIdentity": {
-                        "id": "ebe8b7ce-cdaa-4d14-b94b-26afbbd612fb",
-                        "localId": "1255630",
-                        "homeIdentity": true,
-                        "localBarcode": "[0077777777]",
-                        "localNames": null,
-                        "localPtype": "3",
-                        "canonicalPtype": null,
-                        "localHomeLibraryCode": "39",
-                        "lastValidated": "2024-01-09T19:56:54.079107Z"
-                    },
-                    "suppliers": [
-                        {
-                            "id": "6e00581e-0221-4b8f-a826-8848cb1b0ae4",
-                            "canonicalItemType": "GEN",
-                            "dateCreated": "2024-01-09T19:57:00.330904Z",
-                            "dateUpdated": "2024-01-09T20:03:30.805282Z",
-                            "hostLmsCode": "KCTOWERS",
-                            "isActive": true,
-                            "localItemId": "7106904",
-                            "localBibId": "4958487",
-                            "localItemBarcode": "taco",
-                            "localItemLocationCode": "w4m",
-                            "localItemStatus": "AVAILABLE",
-                            "localItemType": "Monograph",
-                            "localId": "214442",
-                            "localStatus": "TRANSIT",
-                            "localAgency": "6nmsu",
-                            "virtualPatron": {
-                                "id": "ada3fc45-b164-4d4b-ba58-fea9e028cb92",
-                                "localId": "1709143",
-                                "homeIdentity": false,
-                                "localBarcode": "[0077777777]",
-                                "localNames": null,
-                                "localPtype": "240",
-                                "canonicalPtype": null,
-                                "localHomeLibraryCode": null,
-                                "lastValidated": null
-                            }
-                        }
-                    ],
-                    "audit": [
-                        {
-                            "id": "7e288bd6-a415-4e59-9466-7c64a727f100",
-                            "auditDate": "2024-01-09T19:56:54.355575Z",
-                            "fromStatus": "SUBMITTED_TO_DCB",
-                            "toStatus": "PATRON_VERIFIED",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "91cf0d8a-653b-4d2f-a396-9376c4e19ceb",
-                            "auditDate": "2024-01-09T19:57:00.390928Z",
-                            "fromStatus": "PATRON_VERIFIED",
-                            "toStatus": "RESOLVED",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "f25f3787-8236-447e-8ad1-ecb5cc1dcd86",
-                            "auditDate": "2024-01-09T19:57:10.580686Z",
-                            "fromStatus": "RESOLVED",
-                            "toStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-                            "briefDescription": null
-                        },
-                        {
-                            "id": "99cf16fb-3c60-4a4f-a673-fedfd5003b2b",
-                            "auditDate": "2024-01-09T19:57:23.550455Z",
-                            "fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-                            "toStatus": "REQUEST_PLACED_AT_BORROWING_AGENCY",
-                            "briefDescription": null
-                        }
-                    ],
-                    "clusterRecord": {
-                        "id": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
-                        "title": "Return of the test request",
-                        "selectedBib": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
-                        "members": [
-                            {
-                                "id": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
-                                "title": "Return of the test request",
-                                "canonicalMetadata": {
-                                    "title": "Return of the test request",
-                                    "agents": [
-                                        {
-                                            "label": "Auger, Tim",
-                                            "subtype": "name-personal"
-                                        }
-                                    ],
-                                    "author": null,
-                                    "derivedType": "Book",
-                                    "identifiers": [
-                                        {
-                                            "value": "Return of the test request",
-                                            "namespace": "BLOCKING_TITLE"
-                                        },
-                                        {
-                                            "value": "returnofthetestrequest                                                  a                              ",
-                                            "namespace": "GOLDRUSH"
-                                        }
-                                    ],
-                                    "otherAuthors": [],
-                                    "recordStatus": "n"
-                                },
-                                "sourceSystemId": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
-                                "sourceRecordId": "4958487",
-                                "sourceRecord": {
-                                    "id": "6e58a40c-ad2b-5f54-a8e1-e0f103b78ca7",
-                                    "json": {
-                                        "fields": [
-                                            {
-                                                "100": {
-                                                    "ind1": " ",
-                                                    "ind2": " ",
-                                                    "subfields": [
-                                                        {
-                                                            "a": "Auger, Tim"
-                                                        }
-                                                    ]
-                                                }
-                                            },
-                                            {
-                                                "245": {
-                                                    "ind1": " ",
-                                                    "ind2": " ",
-                                                    "subfields": [
-                                                        {
-                                                            "a": "Return of the test request"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        ],
-                                        "leader": "00000nam a2200000 a 4500"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        }
-    }
+	"data": {
+		"patronRequests": {
+			"totalSize": 1,
+			"content": [
+				{
+					"id": "ab3b9a22-2ab3-4118-ae81-61932265777e",
+					"dateCreated": "2024-01-09T19:56:53.378630Z",
+					"dateUpdated": "2024-01-10T17:51:34.373317Z",
+					"patronHostlmsCode": "STLOUIS",
+					"bibClusterId": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
+					"pickupLocationCode": "2b4e7985-c612-5e1b-98a7-8ed6fa9ae344",
+					"pickupPatronId": null,
+					"pickupItemId": null,
+					"pickupItemType": null,
+					"pickupItemStatus": null,
+					"pickupRequestId": null,
+					"pickupRequestStatus": null,
+					"status": "PICKUP_TRANSIT",
+					"localRequestId": "3463642",
+					"localRequestStatus": "Pending",
+					"localItemId": "4499462",
+					"localItemStatus": "RETURNED",
+					"localItemType": null,
+					"localBibId": "1223765",
+					"description": "Taco Tuesday at NW Missouri State",
+					"errorMessage": "Virtual item status set to RETURNED (was AVAILABLE) - Unhandled",
+					"activeWorkflow": "RET-STD",
+					"requesterNote": null,
+					"patron": {
+						"id": "1cdc2db5-36a9-4a51-bd6b-d82ccf07474a"
+					},
+					"requestingIdentity": {
+						"id": "ebe8b7ce-cdaa-4d14-b94b-26afbbd612fb",
+						"localId": "1255630",
+						"homeIdentity": true,
+						"localBarcode": "[0077777777]",
+						"localNames": null,
+						"localPtype": "3",
+						"canonicalPtype": null,
+						"localHomeLibraryCode": "39",
+						"lastValidated": "2024-01-09T19:56:54.079107Z"
+					},
+					"suppliers": [
+						{
+							"id": "6e00581e-0221-4b8f-a826-8848cb1b0ae4",
+							"canonicalItemType": "GEN",
+							"dateCreated": "2024-01-09T19:57:00.330904Z",
+							"dateUpdated": "2024-01-09T20:03:30.805282Z",
+							"hostLmsCode": "KCTOWERS",
+							"isActive": true,
+							"localItemId": "7106904",
+							"localBibId": "4958487",
+							"localItemBarcode": "taco",
+							"localItemLocationCode": "w4m",
+							"localItemStatus": "AVAILABLE",
+							"localItemType": "Monograph",
+							"localId": "214442",
+							"localStatus": "TRANSIT",
+							"localAgency": "6nmsu",
+							"virtualPatron": {
+								"id": "ada3fc45-b164-4d4b-ba58-fea9e028cb92",
+								"localId": "1709143",
+								"homeIdentity": false,
+								"localBarcode": "[0077777777]",
+								"localNames": null,
+								"localPtype": "240",
+								"canonicalPtype": null,
+								"localHomeLibraryCode": null,
+								"lastValidated": null
+							}
+						}
+					],
+					"audit": [
+						{
+							"id": "7e288bd6-a415-4e59-9466-7c64a727f100",
+							"auditDate": "2024-01-09T19:56:54.355575Z",
+							"fromStatus": "SUBMITTED_TO_DCB",
+							"toStatus": "PATRON_VERIFIED",
+							"briefDescription": null
+						},
+						{
+							"id": "91cf0d8a-653b-4d2f-a396-9376c4e19ceb",
+							"auditDate": "2024-01-09T19:57:00.390928Z",
+							"fromStatus": "PATRON_VERIFIED",
+							"toStatus": "RESOLVED",
+							"briefDescription": null
+						},
+						{
+							"id": "f25f3787-8236-447e-8ad1-ecb5cc1dcd86",
+							"auditDate": "2024-01-09T19:57:10.580686Z",
+							"fromStatus": "RESOLVED",
+							"toStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+							"briefDescription": null
+						},
+						{
+							"id": "99cf16fb-3c60-4a4f-a673-fedfd5003b2b",
+							"auditDate": "2024-01-09T19:57:23.550455Z",
+							"fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+							"toStatus": "REQUEST_PLACED_AT_BORROWING_AGENCY",
+							"briefDescription": null
+						}
+					],
+					"clusterRecord": {
+						"id": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
+						"title": "Taco Tuesday at NW Missouri State",
+						"selectedBib": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
+						"members": [
+							{
+								"id": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
+								"title": "Taco Tuesday at NW Missouri State",
+								"canonicalMetadata": {
+									"title": "Taco Tuesday at NW Missouri State",
+									"agents": [
+										{
+											"label": "Auger, Tim",
+											"subtype": "name-personal"
+										}
+									],
+									"author": null,
+									"derivedType": "Book",
+									"identifiers": [
+										{
+											"value": "taco tuesday at nw missouri state",
+											"namespace": "BLOCKING_TITLE"
+										},
+										{
+											"value": "tacotuesdayatnwmissouristate                                                  a                              ",
+											"namespace": "GOLDRUSH"
+										}
+									],
+									"otherAuthors": [],
+									"recordStatus": "n"
+								},
+								"sourceSystemId": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+								"sourceRecordId": "4958487",
+								"sourceRecord": {
+									"id": "6e58a40c-ad2b-5f54-a8e1-e0f103b78ca7",
+									"json": {
+										"fields": [
+											{
+												"100": {
+													"ind1": " ",
+													"ind2": " ",
+													"subfields": [
+														{
+															"a": "Auger, Tim"
+														}
+													]
+												}
+											},
+											{
+												"245": {
+													"ind1": " ",
+													"ind2": " ",
+													"subfields": [
+														{
+															"a": "Taco Tuesday at NW Missouri State"
+														}
+													]
+												}
+											}
+										],
+										"leader": "00000nam a2200000 a 4500"
+									}
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": "jb3b9a22-2ab3-4118-ae81-61932265777e",
+					"dateCreated": "2024-01-07T19:56:53.378630Z",
+					"dateUpdated": "2024-01-10T17:51:34.373317Z",
+					"patronHostlmsCode": "COOLCAT",
+					"bibClusterId": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
+					"pickupLocationCode": "2b4e7985-c612-5e1b-98a7-8ed6fa9ae344",
+					"pickupPatronId": null,
+					"pickupItemId": null,
+					"pickupItemType": null,
+					"pickupItemStatus": null,
+					"pickupRequestId": null,
+					"pickupRequestStatus": null,
+					"status": "PICKUP_TRANSIT",
+					"localRequestId": "3463642",
+					"localRequestStatus": "Pending",
+					"localItemId": "4499462",
+					"localItemStatus": "RETURNED",
+					"localItemType": null,
+					"localBibId": "1223765",
+					"description": "Another test request strikes again!",
+					"errorMessage": "Virtual item status set to RETURNED (was AVAILABLE) - Unhandled",
+					"activeWorkflow": "RET-STD",
+					"requesterNote": null,
+					"patron": {
+						"id": "1cdc2db5-36a9-4a51-bd6b-d82ccf07474a"
+					},
+					"requestingIdentity": {
+						"id": "ebe8b7ce-cdaa-4d14-b94b-26afbbd612fb",
+						"localId": "1255630",
+						"homeIdentity": true,
+						"localBarcode": "[0077777777]",
+						"localNames": null,
+						"localPtype": "3",
+						"canonicalPtype": null,
+						"localHomeLibraryCode": "39",
+						"lastValidated": "2024-01-09T19:56:54.079107Z"
+					},
+					"suppliers": [
+						{
+							"id": "6e00581e-0221-4b8f-a826-8848cb1b0ae4",
+							"canonicalItemType": "GEN",
+							"dateCreated": "2024-01-09T19:57:00.330904Z",
+							"dateUpdated": "2024-01-09T20:03:30.805282Z",
+							"hostLmsCode": "KCTOWERS",
+							"isActive": true,
+							"localItemId": "7106904",
+							"localBibId": "4958487",
+							"localItemBarcode": "taco",
+							"localItemLocationCode": "w4m",
+							"localItemStatus": "AVAILABLE",
+							"localItemType": "Monograph",
+							"localId": "214442",
+							"localStatus": "TRANSIT",
+							"localAgency": "6nmsu",
+							"virtualPatron": {
+								"id": "ada3fc45-b164-4d4b-ba58-fea9e028cb92",
+								"localId": "1709143",
+								"homeIdentity": false,
+								"localBarcode": "[0077777777]",
+								"localNames": null,
+								"localPtype": "240",
+								"canonicalPtype": null,
+								"localHomeLibraryCode": null,
+								"lastValidated": null
+							}
+						}
+					],
+					"audit": [
+						{
+							"id": "7e288bd6-a415-4e59-9466-7c64a727f100",
+							"auditDate": "2024-01-09T19:56:54.355575Z",
+							"fromStatus": "SUBMITTED_TO_DCB",
+							"toStatus": "PATRON_VERIFIED",
+							"briefDescription": null
+						},
+						{
+							"id": "91cf0d8a-653b-4d2f-a396-9376c4e19ceb",
+							"auditDate": "2024-01-09T19:57:00.390928Z",
+							"fromStatus": "PATRON_VERIFIED",
+							"toStatus": "RESOLVED",
+							"briefDescription": null
+						},
+						{
+							"id": "f25f3787-8236-447e-8ad1-ecb5cc1dcd86",
+							"auditDate": "2024-01-09T19:57:10.580686Z",
+							"fromStatus": "RESOLVED",
+							"toStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+							"briefDescription": null
+						},
+						{
+							"id": "99cf16fb-3c60-4a4f-a673-fedfd5003b2b",
+							"auditDate": "2024-01-09T19:57:23.550455Z",
+							"fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+							"toStatus": "REQUEST_PLACED_AT_BORROWING_AGENCY",
+							"briefDescription": null
+						}
+					],
+					"clusterRecord": {
+						"id": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
+						"title": "Another test request strikes again!",
+						"selectedBib": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
+						"members": [
+							{
+								"id": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
+								"title": "Another test request strikes again!",
+								"canonicalMetadata": {
+									"title": "Another test request strikes again!",
+									"agents": [
+										{
+											"label": "Auger, Tim",
+											"subtype": "name-personal"
+										}
+									],
+									"author": null,
+									"derivedType": "Book",
+									"identifiers": [
+										{
+											"value": "Another test request strikes again!",
+											"namespace": "BLOCKING_TITLE"
+										},
+										{
+											"value": "anothertestrequeststrikesagain                                                  a                              ",
+											"namespace": "GOLDRUSH"
+										}
+									],
+									"otherAuthors": [],
+									"recordStatus": "n"
+								},
+								"sourceSystemId": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+								"sourceRecordId": "4958487",
+								"sourceRecord": {
+									"id": "6e58a40c-ad2b-5f54-a8e1-e0f103b78ca7",
+									"json": {
+										"fields": [
+											{
+												"100": {
+													"ind1": " ",
+													"ind2": " ",
+													"subfields": [
+														{
+															"a": "Auger, Tim"
+														}
+													]
+												}
+											},
+											{
+												"245": {
+													"ind1": " ",
+													"ind2": " ",
+													"subfields": [
+														{
+															"a": "Another test request strikes again!"
+														}
+													]
+												}
+											}
+										],
+										"leader": "00000nam a2200000 a 4500"
+									}
+								}
+							}
+						]
+					}
+				},
+				{
+					"id": "zi3b9a22-2ab3-4118-ae81-61932265777e",
+					"dateCreated": "2024-01-07T19:56:53.378630Z",
+					"dateUpdated": "2024-01-10T17:51:34.373317Z",
+					"patronHostlmsCode": "DUMMY1",
+					"bibClusterId": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
+					"pickupLocationCode": "2b4e7985-c612-5e1b-98a7-8ed6fa9ae344",
+					"pickupPatronId": null,
+					"pickupItemId": null,
+					"pickupItemType": null,
+					"pickupItemStatus": null,
+					"pickupRequestId": null,
+					"pickupRequestStatus": null,
+					"status": "PICKUP_TRANSIT",
+					"localRequestId": "3463642",
+					"localRequestStatus": "Pending",
+					"localItemId": "4499462",
+					"localItemStatus": "RETURNED",
+					"localItemType": null,
+					"localBibId": "1223765",
+					"description": "Return of the test request",
+					"errorMessage": "Virtual item status set to RETURNED (was AVAILABLE) - Unhandled",
+					"activeWorkflow": "RET-STD",
+					"requesterNote": null,
+					"patron": {
+						"id": "1cdc2db5-36a9-4a51-bd6b-d82ccf07474a"
+					},
+					"requestingIdentity": {
+						"id": "ebe8b7ce-cdaa-4d14-b94b-26afbbd612fb",
+						"localId": "1255630",
+						"homeIdentity": true,
+						"localBarcode": "[0077777777]",
+						"localNames": null,
+						"localPtype": "3",
+						"canonicalPtype": null,
+						"localHomeLibraryCode": "39",
+						"lastValidated": "2024-01-09T19:56:54.079107Z"
+					},
+					"suppliers": [
+						{
+							"id": "6e00581e-0221-4b8f-a826-8848cb1b0ae4",
+							"canonicalItemType": "GEN",
+							"dateCreated": "2024-01-09T19:57:00.330904Z",
+							"dateUpdated": "2024-01-09T20:03:30.805282Z",
+							"hostLmsCode": "KCTOWERS",
+							"isActive": true,
+							"localItemId": "7106904",
+							"localBibId": "4958487",
+							"localItemBarcode": "taco",
+							"localItemLocationCode": "w4m",
+							"localItemStatus": "AVAILABLE",
+							"localItemType": "Monograph",
+							"localId": "214442",
+							"localStatus": "TRANSIT",
+							"localAgency": "6nmsu",
+							"virtualPatron": {
+								"id": "ada3fc45-b164-4d4b-ba58-fea9e028cb92",
+								"localId": "1709143",
+								"homeIdentity": false,
+								"localBarcode": "[0077777777]",
+								"localNames": null,
+								"localPtype": "240",
+								"canonicalPtype": null,
+								"localHomeLibraryCode": null,
+								"lastValidated": null
+							}
+						}
+					],
+					"audit": [
+						{
+							"id": "7e288bd6-a415-4e59-9466-7c64a727f100",
+							"auditDate": "2024-01-09T19:56:54.355575Z",
+							"fromStatus": "SUBMITTED_TO_DCB",
+							"toStatus": "PATRON_VERIFIED",
+							"briefDescription": null
+						},
+						{
+							"id": "91cf0d8a-653b-4d2f-a396-9376c4e19ceb",
+							"auditDate": "2024-01-09T19:57:00.390928Z",
+							"fromStatus": "PATRON_VERIFIED",
+							"toStatus": "RESOLVED",
+							"briefDescription": null
+						},
+						{
+							"id": "f25f3787-8236-447e-8ad1-ecb5cc1dcd86",
+							"auditDate": "2024-01-09T19:57:10.580686Z",
+							"fromStatus": "RESOLVED",
+							"toStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+							"briefDescription": null
+						},
+						{
+							"id": "99cf16fb-3c60-4a4f-a673-fedfd5003b2b",
+							"auditDate": "2024-01-09T19:57:23.550455Z",
+							"fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+							"toStatus": "REQUEST_PLACED_AT_BORROWING_AGENCY",
+							"briefDescription": null
+						}
+					],
+					"clusterRecord": {
+						"id": "87eb6928-8a85-4db8-a5f9-d74b70b720b5",
+						"title": "Return of the test request",
+						"selectedBib": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
+						"members": [
+							{
+								"id": "b6fad8c8-d341-5912-9e79-6ba1ebf0d686",
+								"title": "Return of the test request",
+								"canonicalMetadata": {
+									"title": "Return of the test request",
+									"agents": [
+										{
+											"label": "Auger, Tim",
+											"subtype": "name-personal"
+										}
+									],
+									"author": null,
+									"derivedType": "Book",
+									"identifiers": [
+										{
+											"value": "Return of the test request",
+											"namespace": "BLOCKING_TITLE"
+										},
+										{
+											"value": "returnofthetestrequest                                                  a                              ",
+											"namespace": "GOLDRUSH"
+										}
+									],
+									"otherAuthors": [],
+									"recordStatus": "n"
+								},
+								"sourceSystemId": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+								"sourceRecordId": "4958487",
+								"sourceRecord": {
+									"id": "6e58a40c-ad2b-5f54-a8e1-e0f103b78ca7",
+									"json": {
+										"fields": [
+											{
+												"100": {
+													"ind1": " ",
+													"ind2": " ",
+													"subfields": [
+														{
+															"a": "Auger, Tim"
+														}
+													]
+												}
+											},
+											{
+												"245": {
+													"ind1": " ",
+													"ind2": " ",
+													"subfields": [
+														{
+															"a": "Return of the test request"
+														}
+													]
+												}
+											}
+										],
+										"leader": "00000nam a2200000 a 4500"
+									}
+								}
+							}
+						]
+					}
+				}
+			]
+		}
+	}
 }

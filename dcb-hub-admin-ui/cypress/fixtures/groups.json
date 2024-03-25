@@ -1,143 +1,143 @@
 {
-    "data": {
-        "agencyGroups": {
-            "totalSize": 16,
-            "content": [
-                {
-                    "id": "eeeb1526-52ca-5826-8ae7-e63e43aa6909",
-                    "code": "TEST",
-                    "name": "A group of testing",
-                    "members": [
-                        {
-                            "id": "4dbd1e54-70de-50a5-b5e2-43ca861eff94",
-                            "agency": {
-                                "id": "dd51ff90-55ae-5225-be90-fa82c1f0f0ff",
-                                "code": "6avil",
-                                "name": "Avila University",
-                                "authProfile": "BASIC/UNIQUE-ID+PIN",
-                                "longitude": null,
-                                "latitude": null,
-                                "hostLms": {
-                                    "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
-                                    "code": null,
-                                    "name": null,
-                                    "lmsClientClass": null,
-                                    "clientConfig": null
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "id": "b566ffc3-4775-526e-905c-382150e6ffe4",
-                    "code": "TAPTO",
-                    "name": "Tapton Hill",
-                    "members": []
-                },
-                {
-                    "id": "k1a0b5dd-94f3-5ccd-8c39-edb157f3f408",
-                    "code": "MEADO",
-                    "name": "Meadowhall",
-                    "members": []
-                },
-                {
-                    "id": "p79319aa-10eb-5861-9653-0491fd04d9fe",
-                    "code": "CROOK",
-                    "name": "Crookes",
-                    "members": [
-                        {
-                            "id": "4dbd1e54-70de-50a5-b5e2-43ca861eff94",
-                            "agency": {
-                                "id": "dd51ff90-55ae-5225-be90-fa82c1f0f0ff",
-                                "code": "6avil",
-                                "name": "Avila University",
-                                "authProfile": "BASIC/UNIQUE-ID+PIN",
-                                "longitude": null,
-                                "latitude": null,
-                                "hostLms": {
-                                    "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
-                                    "code": null,
-                                    "name": null,
-                                    "lmsClientClass": null,
-                                    "clientConfig": null
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "id": "9069f30f-fad7-564d-9d45-35a5ae785a38",
-                    "code": "KELHM",
-                    "name": "Kelham Island",
-                    "members": []
-                },
-                {
-                    "id": "bd16dfc2-0d95-529e-988f-86a59aef4656",
-                    "code": "STANN",
-                    "name": "Stannington",
-                    "members": []
-                },
-                {
-                    "id": "b4346857-5fdf-51dd-8310-e0d549f53693",
-                    "code": "CROSS",
-                    "name": "Crosspool",
-                    "members": []
-                },
-                {
-                    "id": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
-                    "code": "CATHD",
-                    "name": "Cathedral",
-                    "members": []
-                },
-                {
-                    "id": "abde7852-94cb-5448-b827-78aa59db0c29",
-                    "code": "PEACE",
-                    "name": "Peace Gardens",
-                    "members": []
-                },
-                {
-                    "id": "5c46c106-cf80-502c-9734-31165f7a3f4d",
-                    "code": "RIVEL",
-                    "name": "Rivelin",
-                    "members": []
-                },
-                {
-                    "id": "73e85a76-af0b-5e1b-9874-5b15d6e1acc8",
-                    "code": "DORE",
-                    "name": "Dore and Totley",
-                    "members": []
-                },
-                {
-                    "id": "6addb55f-a493-5491-a1db-0f6833af0c67",
-                    "code": "BRMHL",
-                    "name": "Broomhill",
-                    "members": []
-                },
-                {
-                    "id": "68675c46-ab3f-5558-a731-88abcc60a03f",
-                    "code": "ECCLS",
-                    "name": "Ecclesall",
-                    "members": []
-                },
-                {
-                    "id": "185133be-9962-589b-b35b-5e26d3e03532",
-                    "code": "FULWd",
-                    "name": "Fulwood",
-                    "members": []
-                },
-                {
-                    "id": "69237abf-975a-54f5-bc5e-08a0c6a4d572",
-                    "code": "RANMO",
-                    "name": "Ranmoor",
-                    "members": []
-                },
-                {
-                    "id": "47fbcee4-2fb6-51d3-9e7e-f0bc1c7efa57",
-                    "code": "ECCLF",
-                    "name": "Ecclesfield",
-                    "members": []
-                }
-            ]
-        }
-    }
+	"data": {
+		"agencyGroups": {
+			"totalSize": 16,
+			"content": [
+				{
+					"id": "eeeb1526-52ca-5826-8ae7-e63e43aa6909",
+					"code": "TEST",
+					"name": "A group of testing",
+					"members": [
+						{
+							"id": "4dbd1e54-70de-50a5-b5e2-43ca861eff94",
+							"agency": {
+								"id": "dd51ff90-55ae-5225-be90-fa82c1f0f0ff",
+								"code": "6avil",
+								"name": "Avila University",
+								"authProfile": "BASIC/UNIQUE-ID+PIN",
+								"longitude": null,
+								"latitude": null,
+								"hostLms": {
+									"id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+									"code": null,
+									"name": null,
+									"lmsClientClass": null,
+									"clientConfig": null
+								}
+							}
+						}
+					]
+				},
+				{
+					"id": "b566ffc3-4775-526e-905c-382150e6ffe4",
+					"code": "TAPTO",
+					"name": "Tapton Hill",
+					"members": []
+				},
+				{
+					"id": "k1a0b5dd-94f3-5ccd-8c39-edb157f3f408",
+					"code": "MEADO",
+					"name": "Meadowhall",
+					"members": []
+				},
+				{
+					"id": "p79319aa-10eb-5861-9653-0491fd04d9fe",
+					"code": "CROOK",
+					"name": "Crookes",
+					"members": [
+						{
+							"id": "4dbd1e54-70de-50a5-b5e2-43ca861eff94",
+							"agency": {
+								"id": "dd51ff90-55ae-5225-be90-fa82c1f0f0ff",
+								"code": "6avil",
+								"name": "Avila University",
+								"authProfile": "BASIC/UNIQUE-ID+PIN",
+								"longitude": null,
+								"latitude": null,
+								"hostLms": {
+									"id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+									"code": null,
+									"name": null,
+									"lmsClientClass": null,
+									"clientConfig": null
+								}
+							}
+						}
+					]
+				},
+				{
+					"id": "9069f30f-fad7-564d-9d45-35a5ae785a38",
+					"code": "KELHM",
+					"name": "Kelham Island",
+					"members": []
+				},
+				{
+					"id": "bd16dfc2-0d95-529e-988f-86a59aef4656",
+					"code": "STANN",
+					"name": "Stannington",
+					"members": []
+				},
+				{
+					"id": "b4346857-5fdf-51dd-8310-e0d549f53693",
+					"code": "CROSS",
+					"name": "Crosspool",
+					"members": []
+				},
+				{
+					"id": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+					"code": "CATHD",
+					"name": "Cathedral",
+					"members": []
+				},
+				{
+					"id": "abde7852-94cb-5448-b827-78aa59db0c29",
+					"code": "PEACE",
+					"name": "Peace Gardens",
+					"members": []
+				},
+				{
+					"id": "5c46c106-cf80-502c-9734-31165f7a3f4d",
+					"code": "RIVEL",
+					"name": "Rivelin",
+					"members": []
+				},
+				{
+					"id": "73e85a76-af0b-5e1b-9874-5b15d6e1acc8",
+					"code": "DORE",
+					"name": "Dore and Totley",
+					"members": []
+				},
+				{
+					"id": "6addb55f-a493-5491-a1db-0f6833af0c67",
+					"code": "BRMHL",
+					"name": "Broomhill",
+					"members": []
+				},
+				{
+					"id": "68675c46-ab3f-5558-a731-88abcc60a03f",
+					"code": "ECCLS",
+					"name": "Ecclesall",
+					"members": []
+				},
+				{
+					"id": "185133be-9962-589b-b35b-5e26d3e03532",
+					"code": "FULWd",
+					"name": "Fulwood",
+					"members": []
+				},
+				{
+					"id": "69237abf-975a-54f5-bc5e-08a0c6a4d572",
+					"code": "RANMO",
+					"name": "Ranmoor",
+					"members": []
+				},
+				{
+					"id": "47fbcee4-2fb6-51d3-9e7e-f0bc1c7efa57",
+					"code": "ECCLF",
+					"name": "Ecclesfield",
+					"members": []
+				}
+			]
+		}
+	}
 }

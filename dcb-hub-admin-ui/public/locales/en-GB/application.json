@@ -1,166 +1,165 @@
 {
-  "app": {
-    "name": "DCB Admin",
-    "component": {
-      "service": "dcb-service",
-      "locate": "dcb-locate",
-      "admin": "dcb-admin-ui",
-      "devops": "dcb-devops",
-      "keycloak": "dcb-keycloak-extensions"
-    },
-    "dcb": "DCB",
-    "dcb_full": "Direct Consortial Borrowing",
-    "guest_user": "Guest",
-    "released": "Released",
-    "service": {
-      "dcb": "DCB Service",
-      "discovery": "DCB Discovery",
-      "keycloak": "Keycloak"
-    },
-    "title": "$t(app.name) for {{consortium_name}}",
-    "version": "Version"
-  },
+	"app": {
+		"name": "DCB Admin",
+		"component": {
+			"service": "dcb-service",
+			"locate": "dcb-locate",
+			"admin": "dcb-admin-ui",
+			"devops": "dcb-devops",
+			"keycloak": "dcb-keycloak-extensions"
+		},
+		"dcb": "DCB",
+		"dcb_full": "Direct Consortial Borrowing",
+		"guest_user": "Guest",
+		"released": "Released",
+		"service": {
+			"dcb": "DCB Service",
+			"discovery": "DCB Discovery",
+			"keycloak": "Keycloak"
+		},
+		"title": "$t(app.name) for {{consortium_name}}",
+		"version": "Version"
+	},
 
-  "common": {
-    "about": "About",
-    "error_loading": "An error has occurred while loading {{page_title}}. Please <linkComponent>reload</linkComponent> the page.",
-    "loading": "Loading ...",
-    "missing": "Missing",
-    "na": "NA",
-    "placeholder_text": "Note: this page contains placeholder data.", 
-    "placeholder_tip": "Caution: example placeholder data", 
-    "unknown": "Unknown"
-  }, 
+	"common": {
+		"about": "About",
+		"error_loading": "An error has occurred while loading {{page_title}}. Please <linkComponent>reload</linkComponent> the page.",
+		"loading": "Loading ...",
+		"missing": "Missing",
+		"na": "NA",
+		"placeholder_text": "Note: this page contains placeholder data.",
+		"placeholder_tip": "Caution: example placeholder data",
+		"unknown": "Unknown"
+	},
 
-  "openrs": {
-    "name": "OpenRS",
-    "about": "$t(common.about) $t(openrs.name)",
-    "dcb": {
-      "about":"$t(common.about) $t(app.dcb)",
-      "description": "$t(app.dcb) is an $t(openrs.name) product that enables libraries to deliver direct consortial borrowing services to their patrons across a range of LMS and discovery systems. <paragraph/> Developed by <linkComponent>$t(openrs.who.kint_full)</linkComponent>, $t(app.dcb) helps consortia fulfil patrons borrowing requests across their membership faster and cheaper than traditional resource sharing methods.<paragraph/>",
-      "project": "$t(app.dcb) project",
-      "release_notes": "Release notes",
-      "roadmap": "Product roadmap"
-    },
-    "description": "$t(openrs.name)  is a resource sharing initiative of the <linkComponent>$t(openrs.who.olf_full)</linkComponent>. <paragraph/>The open source project is reinventing resource sharing to meet the needs of different types of consortia, using open standards and native integration to provide consortia with robust and extended functionality for consortial resource sharing.<paragraph/>",
-    "participate": "Get involved",
-    "who": {
-      "ebsco": "EBSCO",
-      "involved": "Who's involved",
-      "kint": "K-Int",
-      "kint_full": "Knowledge Integration",
-      "olf": "OLF",
-      "olf_full": "Open Library Foundation"
-    }
-  },
+	"openrs": {
+		"name": "OpenRS",
+		"about": "$t(common.about) $t(openrs.name)",
+		"dcb": {
+			"about": "$t(common.about) $t(app.dcb)",
+			"description": "$t(app.dcb) is an $t(openrs.name) product that enables libraries to deliver direct consortial borrowing services to their patrons across a range of LMS and discovery systems. <paragraph/> Developed by <linkComponent>$t(openrs.who.kint_full)</linkComponent>, $t(app.dcb) helps consortia fulfil patrons borrowing requests across their membership faster and cheaper than traditional resource sharing methods.<paragraph/>",
+			"project": "$t(app.dcb) project",
+			"release_notes": "Release notes",
+			"roadmap": "Product roadmap"
+		},
+		"description": "$t(openrs.name)  is a resource sharing initiative of the <linkComponent>$t(openrs.who.olf_full)</linkComponent>. <paragraph/>The open source project is reinventing resource sharing to meet the needs of different types of consortia, using open standards and native integration to provide consortia with robust and extended functionality for consortial resource sharing.<paragraph/>",
+		"participate": "Get involved",
+		"who": {
+			"ebsco": "EBSCO",
+			"involved": "Who's involved",
+			"kint": "K-Int",
+			"kint_full": "Knowledge Integration",
+			"olf": "OLF",
+			"olf_full": "Open Library Foundation"
+		}
+	},
 
-  "loginout": {
-    "keycloak": "We use <linkComponent>Keycloak</linkComponent> for secure authentication",
-    "login": "Please login to gain full access to $t(app.name)",
-    "logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>"
-  },
+	"loginout": {
+		"keycloak": "We use <linkComponent>Keycloak</linkComponent> for secure authentication",
+		"login": "Please login to gain full access to $t(app.name)",
+		"logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>"
+	},
 
-  "support": {
-    "name": "Support",
-    "docs": "Support docs",
-    "admin_user_guides": "Admin user guides",
-    "submit_ticket": "Submit a support ticket"
-  },
+	"support": {
+		"name": "Support",
+		"docs": "Support docs",
+		"admin_user_guides": "Admin user guides",
+		"submit_ticket": "Submit a support ticket"
+	},
 
-  "welcome": {
-    "greeting": "Welcome",
-    "context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
-  },
+	"welcome": {
+		"greeting": "Welcome",
+		"context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
+	},
 
-  "onboarding": {
-    "summary": {
-      "stage": "Stage",
-      "action": "What you need to do",
-      "status": "How it's going"
-    },
-    "stage": {
-      "introduce_libraries": {
-        "name": "Introduce libraries",
-        "action": "Tell us about the members in your consortium that we need to onboard and migrate",
-        "status_known_zero": "We don't know about any library agencies in {{consortium_name}}.",
-        "status_known_one": "We know about {{count}} library agency in {{consortium_name}}.",
-        "status_known_other": "We know about {{count}} library agencies in {{consortium_name}}.",
-        "status_missing_zero": "We are not missing any basic details for these.",
-        "status_missing_other": "We are missing basic details for {{count}} of these."
-      },
-      "provision_systems": {
-        "name": "Provision systems",
-        "action": "Provide technical details we need to set up your DCB services",
-        "status_known_zero": "We don't know about any Host LMS instances that are needed for {{consortium_name}}.",
-        "status_known_one": "We know about {{count}} Host LMS instance that is needed for {{consortium_name}}.",
-        "status_known_other": "We know about {{count}} Host LMS instances that are needed for {{consortium_name}}.",
-        "status_missing_zero": "We are not missing any essential details for these.",
-        "status_missing_other": "We are missing essential details for {{count}} of these."
-      },
-      "configure_services": {
-        "name": "Configure services",
-        "action": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
-        "status_config_zero": "We are not missing mapping configuration or authentication details for any library.",
-        "status_config_one": "We are missing mapping configuration or authentication details for {{count}} library.",
-        "status_config_other": "We are missing mapping configuration or authentication details for {{count}} libraries.",
-        "status_testing_zero": "We are not missing test records or accounts for any library.",
-        "status_testing_one": "We are missing test records or accounts for {{count}} library.",
-        "status_testing_other": "We are missing test records or accounts for {{count}} libraries."
-      },
-      "migrate_service": {
-        "name": "Migrate service",
-        "action": "Share key dates and contacts so we can plan for your service migration",
-        "status_migration_zero": "We are not missing expected migration details for any library.",
-        "status_migration_one": "We are missing expected migration details for {{count}} library.",
-        "status_migration_other": "We are missing expected migration details for {{count}} libraries.",
-        "status_signoff_zero": "We are not missing a migration sign-off authority contact for any library.",
-        "status_signoff_one": "We are missing a migration sign-off authority contact for {{count}} library.",
-        "status_signoff_other": "We are missing a migration sign-off authority contact for {{count}} libraries."
-      },
-      "operate_dcb": {
-        "name": "Operate DCB",
-        "action": "Authorise who can manage your live DCB services",
-        "status_operators_zero": "There are no library services administrators authorised to operate DCB services",
-        "status_operators_one": "There are {{count}} library services administrators authorised to operate DCB services.",
-        "status_operators_other": "There is {{count}} library services administrators authorised to operate DCB services."
-      },
-      "manage_support": {
-        "name": "Manage support",
-        "action": "Maintain current authorised support contacts so we can deal with any help you need",
-        "status_support_zero": "We have no support contacts authorised to raise or handle support enquiries.",
-        "status_support_one": "We have {{count}} support contact authorised to raise or handle support enquiries.",
-        "status_support_other": "We have {{count}} support contacts authorised to raise or handle support enquiries."
-      }
-    }
-  },
+	"onboarding": {
+		"summary": {
+			"stage": "Stage",
+			"action": "What you need to do",
+			"status": "How it's going"
+		},
+		"stage": {
+			"introduce_libraries": {
+				"name": "Introduce libraries",
+				"action": "Tell us about the members in your consortium that we need to onboard and migrate",
+				"status_known_zero": "We don't know about any library agencies in {{consortium_name}}.",
+				"status_known_one": "We know about {{count}} library agency in {{consortium_name}}.",
+				"status_known_other": "We know about {{count}} library agencies in {{consortium_name}}.",
+				"status_missing_zero": "We are not missing any basic details for these.",
+				"status_missing_other": "We are missing basic details for {{count}} of these."
+			},
+			"provision_systems": {
+				"name": "Provision systems",
+				"action": "Provide technical details we need to set up your DCB services",
+				"status_known_zero": "We don't know about any Host LMS instances that are needed for {{consortium_name}}.",
+				"status_known_one": "We know about {{count}} Host LMS instance that is needed for {{consortium_name}}.",
+				"status_known_other": "We know about {{count}} Host LMS instances that are needed for {{consortium_name}}.",
+				"status_missing_zero": "We are not missing any essential details for these.",
+				"status_missing_other": "We are missing essential details for {{count}} of these."
+			},
+			"configure_services": {
+				"name": "Configure services",
+				"action": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
+				"status_config_zero": "We are not missing mapping configuration or authentication details for any library.",
+				"status_config_one": "We are missing mapping configuration or authentication details for {{count}} library.",
+				"status_config_other": "We are missing mapping configuration or authentication details for {{count}} libraries.",
+				"status_testing_zero": "We are not missing test records or accounts for any library.",
+				"status_testing_one": "We are missing test records or accounts for {{count}} library.",
+				"status_testing_other": "We are missing test records or accounts for {{count}} libraries."
+			},
+			"migrate_service": {
+				"name": "Migrate service",
+				"action": "Share key dates and contacts so we can plan for your service migration",
+				"status_migration_zero": "We are not missing expected migration details for any library.",
+				"status_migration_one": "We are missing expected migration details for {{count}} library.",
+				"status_migration_other": "We are missing expected migration details for {{count}} libraries.",
+				"status_signoff_zero": "We are not missing a migration sign-off authority contact for any library.",
+				"status_signoff_one": "We are missing a migration sign-off authority contact for {{count}} library.",
+				"status_signoff_other": "We are missing a migration sign-off authority contact for {{count}} libraries."
+			},
+			"operate_dcb": {
+				"name": "Operate DCB",
+				"action": "Authorise who can manage your live DCB services",
+				"status_operators_zero": "There are no library services administrators authorised to operate DCB services",
+				"status_operators_one": "There are {{count}} library services administrators authorised to operate DCB services.",
+				"status_operators_other": "There is {{count}} library services administrators authorised to operate DCB services."
+			},
+			"manage_support": {
+				"name": "Manage support",
+				"action": "Maintain current authorised support contacts so we can deal with any help you need",
+				"status_support_zero": "We have no support contacts authorised to raise or handle support enquiries.",
+				"status_support_one": "We have {{count}} support contact authorised to raise or handle support enquiries.",
+				"status_support_other": "We have {{count}} support contacts authorised to raise or handle support enquiries."
+			}
+		}
+	},
 
-  "environment": {
-    "your": "Your $t(app.dcb) environment",
-    "configured_for": "This installation of $t(app.name) is configured for",
-    "compare_components": "The latest versions of $t(app.dcb) system components are",
-    "component": "Component",
-    "latest_version": "Latest version",
-    "your_version": "Your version",
-    "releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions."
-  },
+	"environment": {
+		"your": "Your $t(app.dcb) environment",
+		"configured_for": "This installation of $t(app.name) is configured for",
+		"compare_components": "The latest versions of $t(app.dcb) system components are",
+		"component": "Component",
+		"latest_version": "Latest version",
+		"your_version": "Your version",
+		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions."
+	},
 
-  "consortium":{
-    "about": "About {{consortium}}",
-    "description": "<linkComponent>MOBIUS</linkComponent> is a vibrant, collaborative partnership of libraries that has transformed library services for the citizens of Missouri and nearby states. <paragraph/> As a founder member of OpenRS and pioneer adopter of DCB, the consortium is proactively pursuing its goal to create equal access to materials and information for all its users.<paragraph/>",
-    "search": "Search {{consortium}}",
-    "your": "Your consortium"
-  },
+	"consortium": {
+		"about": "About {{consortium}}",
+		"description": "<linkComponent>MOBIUS</linkComponent> is a vibrant, collaborative partnership of libraries that has transformed library services for the citizens of Missouri and nearby states. <paragraph/> As a founder member of OpenRS and pioneer adopter of DCB, the consortium is proactively pursuing its goal to create equal access to materials and information for all its users.<paragraph/>",
+		"search": "Search {{consortium}}",
+		"your": "Your consortium"
+	},
 
-  "service": {
-    "name": "Service",
-    "environment": "Environment",
-    "address": "Address",
-    "status": "Status",
-    "state": {
-      "up": "Up",
-      "partial": "Partial",
-      "down": "Down"
-    }
-  }
-
+	"service": {
+		"name": "Service",
+		"environment": "Environment",
+		"address": "Address",
+		"status": "Status",
+		"state": {
+			"up": "Up",
+			"partial": "Partial",
+			"down": "Down"
+		}
+	}
 }

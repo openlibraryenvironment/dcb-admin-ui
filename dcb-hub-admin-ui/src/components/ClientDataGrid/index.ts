@@ -1,1 +1,1 @@
-export { default as ClientDataGrid } from './ClientDataGrid'
+export { default as ClientDataGrid } from "./ClientDataGrid";

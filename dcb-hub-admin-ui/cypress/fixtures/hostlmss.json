@@ -1,257 +1,257 @@
 {
-    "data": {
-        "hostLms": {
-            "totalSize": 11,
-            "content": [
-                {
-                    "id": "e215573c-c9c5-5191-9a9f-39aa03dfafa1",
-                    "code": "ALTOONA",
-                    "name": "Altoona",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
-                    "clientConfig": {
-                        "item": {
-                            "fine-code-id": "1",
-                            "renewal-limit": "0",
-                            "barcode-prefix": "test",
-                            "history-action-id": "6",
-                            "shelving-scheme-id": "3",
-                            "loan-period-code-id": "9"
-                        },
-                        "papi": {
-                            "app-id": "100",
-                            "org-id": "1",
-                            "lang-id": "1033",
-                            "papi-version": "v1"
-                        },
-                        "ingest": "false",
-                        "org-id": "1",
-                        "base-url": "https://altoona.polarislibrary.com",
-                        "services": {
-                            "language": "eng",
-                            "product-id": "20",
-                            "site-domain": "polaris",
-                            "workstation-id": "1",
-                            "organisation-id": "73",
-                            "services-version": "v1",
-                            "patron-barcode-prefix": "OpenRs-",
-                            "default-patron-home-location-code": "1"
-                        },
-                        "access-id": "NoveList",
-                        "domain-id": "ALTOONA",
-                        "page-size": 100,
-                        "access-key": "AB4FDB17-B03B-4594-B0AE-36E412BADD68",
-                        "staff-password": "sxZ$cTu@6",
-                        "staff-username": "3MPapiUser"
-                    }
-                },
-                {
-                    "id": "7155c12a-104e-53a6-94b5-dea70ccc28e7",
-                    "code": "BRIDGES",
-                    "name": "Bridges",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
-                    "clientConfig": {
-                        "key": "qUq8xAsUL/q9be2EVBTik3aayJG6",
-                        "ingest": "true",
-                        "secret": "Bx6xJ9JqTGhknrGDsGZz",
-                        "base-url": "https://bridges.searchmobius.org:443",
-                        "page-size": "100",
-                        "holdPolicy": "title"
-                    }
-                },
-                {
-                    "id": "eb745468-c69c-5f7e-9bd4-cf3cf8db6cd9",
-                    "code": "COOLCAT",
-                    "name": "COOLCAT",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
-                    "clientConfig": {
-                        "key": "VenDLGFR08jm3BO6rbHYf/HVzj/p",
-                        "ingest": "true",
-                        "secret": "vyp5gpz*ujd7UAP_avx",
-                        "base-url": "https://coolcat.org",
-                        "page-size": "100",
-                        "holdPolicy": "title",
-                        "defaultAgency": "6tlsa"
-                    }
-                },
-                {
-                    "id": "2650d7d4-2da7-5dd8-9521-dd47c1c905ab",
-                    "code": "cs00000int_0004",
-                    "name": "cs00000int_0004",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient",
-                    "clientConfig": {
-                        "apikey": "eyJzIjoidTBxaEZjWFd1YiIsInQiOiJjczAwMDAwaW50XzAwMDQiLCJ1IjoiRUJTQ09FZGdlIn0=",
-                        "ingest": "true",
-                        "base-url": "https://edge-ecs-testing-special-integration.int.aws.folio.org",
-                        "folio-tenant": "cs00000int_0004",
-                        "record-syntax": "oai_dc",
-                        "user-base-url": "https://ecs-testing-consortium-intg.int.aws.folio.org/",
-                        "metadata-prefix": "marc21_withholdings"
-                    }
-                },
-                {
-                    "id": "501d1416-b5d0-59af-a4e6-27dfd0e0ca46",
-                    "code": "DM",
-                    "name": "Des Moines",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
-                    "clientConfig": {
-                        "key": "vtnkqF/j1zclaJIKrxTu6zzMyJED",
-                        "ingest": "false",
-                        "secret": "dgd-pyu_ueb!agr9TNF",
-                        "base-url": "https://sierra-app.wdm.iowa.gov",
-                        "page-size": "100",
-                        "holdPolicy": "title",
-                        "defaultAgency": "6wdmp"
-                    }
-                },
-                {
-                    "id": "d01529fe-0933-5883-b443-134e9727050a",
-                    "code": "DUMMY1",
-                    "name": "Dummy1",
-                    "lmsClientClass": "org.olf.dcb.devtools.interaction.dummy.DummyLmsClient",
-                    "clientConfig": {
-                        "ingest": "true",
-                        "shelving-locations": "LM1-A1-SL1,LM1-A1-SL2,LM1-A2-SL1,LM1-A2-SL2,LM1-A2-SL3",
-                        "num-records-to-generate": 1000
-                    }
-                },
-                {
-                    "id": "6a32d197-a1f8-556a-b939-b8756b972bdd",
-                    "code": "DUMMY2",
-                    "name": "Dummy2",
-                    "lmsClientClass": "org.olf.dcb.devtools.interaction.dummy.DummyLmsClient",
-                    "clientConfig": {
-                        "ingest": "true",
-                        "shelving-locations": "LM2-A1-SL1,LM2-A2-SL1",
-                        "num-records-to-generate": 100
-                    }
-                },
-                {
-                    "id": "c18044e7-43f8-59ec-a0dd-dca063894423",
-                    "code": "DUMMY3",
-                    "name": "Dummy3",
-                    "lmsClientClass": "org.olf.dcb.devtools.interaction.dummy.DummyLmsClient",
-                    "clientConfig": {
-                        "ingest": "true",
-                        "shelving-locations": "LM3-A1-SL1,LM3-A2-SL1",
-                        "num-records-to-generate": 500
-                    }
-                },
-                {
-                    "id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
-                    "code": "KCTOWERS",
-                    "name": "KC-Towers",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
-                    "clientConfig": {
-                        "key": "cycvEgi5q+5MWPat5pJMHpX7HECX",
-                        "ingest": "true",
-                        "secret": "d98df9!!!#d9d",
-                        "base-url": "https://kc-towers.searchmobius.org:443",
-                        "page-size": "100",
-                        "holdPolicy": "title"
-                    }
-                },
-                {
-                    "id": "cce0c702-76fe-5ce3-8e68-ef283cbc8406",
-                    "code": "MIZU",
-                    "name": "MIZU",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient",
-                    "clientConfig": {
-                        "apikey": "eyJzIjoibVI3dHVhZEwyWCIsInQiOiJmczAwMDAxMDgzIiwidSI6ImZzMDAwMDEwODMifQ==",
-                        "ingest": "true",
-                        "base-url": "https://edge-umsystem-test.folio.ebsco.com",
-                        "record-syntax": "oai_dc",
-                        "metadata-prefix": "marc21_withholdings"
-                    }
-                },
-                {
-                    "id": "efe60600-0879-5ec5-8831-ae524b11639c",
-                    "code": "STLOUIS",
-                    "name": "St Louis",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
-                    "clientConfig": {
-                        "item": {
-                            "fine-code-id": "1",
-                            "renewal-limit": "0",
-                            "barcode-prefix": "",
-                            "history-action-id": "6",
-                            "shelving-scheme-id": "3",
-                            "loan-period-code-id": "9"
-                        },
-                        "papi": {
-                            "app-id": "100",
-                            "org-id": "1",
-                            "lang-id": "1033",
-                            "papi-version": "v1"
-                        },
-                        "ingest": "true",
-                        "base-url": "https://stlouis-training.polarislibrary.com",
-                        "services": {
-                            "language": "eng",
-                            "product-id": "20",
-                            "site-domain": "polaris",
-                            "workstation-id": "1",
-                            "organisation-id": "73",
-                            "services-version": "v1",
-                            "patron-barcode-prefix": "OpenRs-",
-                            "default-patron-home-location-code": "1"
-                        },
-                        "access-id": "DCB",
-                        "domain-id": "STLOUIS",
-                        "page-size": 100,
-                        "access-key": "1C387EAF-9797-4D12-93A8-FA2376CA702B",
-                        "logon-user-id": "1",
-                        "staff-password": "1640RSMobius",
-                        "staff-username": "SLCLReshare",
-                        "logon-branch-id": "73"
-                    }
-                },
-                {
-                    "id": "kfe60600-0879-5ec5-8831-ae524b11639c",
-                    "code": "TESTLMS",
-                    "name": "Test HostLMS",
-                    "lmsClientClass": "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
-                    "clientConfig": {
-                        "item": {
-                            "fine-code-id": "1",
-                            "renewal-limit": "0",
-                            "barcode-prefix": "",
-                            "history-action-id": "6",
-                            "shelving-scheme-id": "3",
-                            "loan-period-code-id": "9"
-                        },
-                        "papi": {
-                            "app-id": "100",
-                            "org-id": "1",
-                            "lang-id": "1033",
-                            "papi-version": "v1"
-                        },
-                        "ingest": "true",
-                        "base-url": "https://stlouis-training.polarislibrary.com",
-                        "services": {
-                            "language": "eng",
-                            "product-id": "20",
-                            "site-domain": "polaris",
-                            "workstation-id": "1",
-                            "organisation-id": "73",
-                            "services-version": "v1",
-                            "patron-barcode-prefix": "OpenRs-",
-                            "default-patron-home-location-code": "1"
-                        },
-                        "access-id": "DCB",
-                        "domain-id": "STLOUIS",
-                        "page-size": 100,
-                        "access-key": "1C387EAF-9797-4D12-93A8-FA2376CA702B",
-                        "logon-user-id": "1",
-                        "staff-password": "1640RSMobius",
-                        "staff-username": "SLCLReshare",
-                        "logon-branch-id": "73"
-                    }
-                }
-            ],
-            "pageable": {
-                "number": 0,
-                "offset": null
-            }
-        }
-    }
+	"data": {
+		"hostLms": {
+			"totalSize": 11,
+			"content": [
+				{
+					"id": "e215573c-c9c5-5191-9a9f-39aa03dfafa1",
+					"code": "ALTOONA",
+					"name": "Altoona",
+					"lmsClientClass": "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
+					"clientConfig": {
+						"item": {
+							"fine-code-id": "1",
+							"renewal-limit": "0",
+							"barcode-prefix": "test",
+							"history-action-id": "6",
+							"shelving-scheme-id": "3",
+							"loan-period-code-id": "9"
+						},
+						"papi": {
+							"app-id": "100",
+							"org-id": "1",
+							"lang-id": "1033",
+							"papi-version": "v1"
+						},
+						"ingest": "false",
+						"org-id": "1",
+						"base-url": "https://altoona.polarislibrary.com",
+						"services": {
+							"language": "eng",
+							"product-id": "20",
+							"site-domain": "polaris",
+							"workstation-id": "1",
+							"organisation-id": "73",
+							"services-version": "v1",
+							"patron-barcode-prefix": "OpenRs-",
+							"default-patron-home-location-code": "1"
+						},
+						"access-id": "NoveList",
+						"domain-id": "ALTOONA",
+						"page-size": 100,
+						"access-key": "AB4FDB17-B03B-4594-B0AE-36E412BADD68",
+						"staff-password": "sxZ$cTu@6",
+						"staff-username": "3MPapiUser"
+					}
+				},
+				{
+					"id": "7155c12a-104e-53a6-94b5-dea70ccc28e7",
+					"code": "BRIDGES",
+					"name": "Bridges",
+					"lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+					"clientConfig": {
+						"key": "qUq8xAsUL/q9be2EVBTik3aayJG6",
+						"ingest": "true",
+						"secret": "Bx6xJ9JqTGhknrGDsGZz",
+						"base-url": "https://bridges.searchmobius.org:443",
+						"page-size": "100",
+						"holdPolicy": "title"
+					}
+				},
+				{
+					"id": "eb745468-c69c-5f7e-9bd4-cf3cf8db6cd9",
+					"code": "COOLCAT",
+					"name": "COOLCAT",
+					"lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+					"clientConfig": {
+						"key": "VenDLGFR08jm3BO6rbHYf/HVzj/p",
+						"ingest": "true",
+						"secret": "vyp5gpz*ujd7UAP_avx",
+						"base-url": "https://coolcat.org",
+						"page-size": "100",
+						"holdPolicy": "title",
+						"defaultAgency": "6tlsa"
+					}
+				},
+				{
+					"id": "2650d7d4-2da7-5dd8-9521-dd47c1c905ab",
+					"code": "cs00000int_0004",
+					"name": "cs00000int_0004",
+					"lmsClientClass": "org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient",
+					"clientConfig": {
+						"apikey": "eyJzIjoidTBxaEZjWFd1YiIsInQiOiJjczAwMDAwaW50XzAwMDQiLCJ1IjoiRUJTQ09FZGdlIn0=",
+						"ingest": "true",
+						"base-url": "https://edge-ecs-testing-special-integration.int.aws.folio.org",
+						"folio-tenant": "cs00000int_0004",
+						"record-syntax": "oai_dc",
+						"user-base-url": "https://ecs-testing-consortium-intg.int.aws.folio.org/",
+						"metadata-prefix": "marc21_withholdings"
+					}
+				},
+				{
+					"id": "501d1416-b5d0-59af-a4e6-27dfd0e0ca46",
+					"code": "DM",
+					"name": "Des Moines",
+					"lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+					"clientConfig": {
+						"key": "vtnkqF/j1zclaJIKrxTu6zzMyJED",
+						"ingest": "false",
+						"secret": "dgd-pyu_ueb!agr9TNF",
+						"base-url": "https://sierra-app.wdm.iowa.gov",
+						"page-size": "100",
+						"holdPolicy": "title",
+						"defaultAgency": "6wdmp"
+					}
+				},
+				{
+					"id": "d01529fe-0933-5883-b443-134e9727050a",
+					"code": "DUMMY1",
+					"name": "Dummy1",
+					"lmsClientClass": "org.olf.dcb.devtools.interaction.dummy.DummyLmsClient",
+					"clientConfig": {
+						"ingest": "true",
+						"shelving-locations": "LM1-A1-SL1,LM1-A1-SL2,LM1-A2-SL1,LM1-A2-SL2,LM1-A2-SL3",
+						"num-records-to-generate": 1000
+					}
+				},
+				{
+					"id": "6a32d197-a1f8-556a-b939-b8756b972bdd",
+					"code": "DUMMY2",
+					"name": "Dummy2",
+					"lmsClientClass": "org.olf.dcb.devtools.interaction.dummy.DummyLmsClient",
+					"clientConfig": {
+						"ingest": "true",
+						"shelving-locations": "LM2-A1-SL1,LM2-A2-SL1",
+						"num-records-to-generate": 100
+					}
+				},
+				{
+					"id": "c18044e7-43f8-59ec-a0dd-dca063894423",
+					"code": "DUMMY3",
+					"name": "Dummy3",
+					"lmsClientClass": "org.olf.dcb.devtools.interaction.dummy.DummyLmsClient",
+					"clientConfig": {
+						"ingest": "true",
+						"shelving-locations": "LM3-A1-SL1,LM3-A2-SL1",
+						"num-records-to-generate": 500
+					}
+				},
+				{
+					"id": "cdca6ab0-7e24-533a-9e04-442d17b2648f",
+					"code": "KCTOWERS",
+					"name": "KC-Towers",
+					"lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+					"clientConfig": {
+						"key": "cycvEgi5q+5MWPat5pJMHpX7HECX",
+						"ingest": "true",
+						"secret": "d98df9!!!#d9d",
+						"base-url": "https://kc-towers.searchmobius.org:443",
+						"page-size": "100",
+						"holdPolicy": "title"
+					}
+				},
+				{
+					"id": "cce0c702-76fe-5ce3-8e68-ef283cbc8406",
+					"code": "MIZU",
+					"name": "MIZU",
+					"lmsClientClass": "org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient",
+					"clientConfig": {
+						"apikey": "eyJzIjoibVI3dHVhZEwyWCIsInQiOiJmczAwMDAxMDgzIiwidSI6ImZzMDAwMDEwODMifQ==",
+						"ingest": "true",
+						"base-url": "https://edge-umsystem-test.folio.ebsco.com",
+						"record-syntax": "oai_dc",
+						"metadata-prefix": "marc21_withholdings"
+					}
+				},
+				{
+					"id": "efe60600-0879-5ec5-8831-ae524b11639c",
+					"code": "STLOUIS",
+					"name": "St Louis",
+					"lmsClientClass": "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
+					"clientConfig": {
+						"item": {
+							"fine-code-id": "1",
+							"renewal-limit": "0",
+							"barcode-prefix": "",
+							"history-action-id": "6",
+							"shelving-scheme-id": "3",
+							"loan-period-code-id": "9"
+						},
+						"papi": {
+							"app-id": "100",
+							"org-id": "1",
+							"lang-id": "1033",
+							"papi-version": "v1"
+						},
+						"ingest": "true",
+						"base-url": "https://stlouis-training.polarislibrary.com",
+						"services": {
+							"language": "eng",
+							"product-id": "20",
+							"site-domain": "polaris",
+							"workstation-id": "1",
+							"organisation-id": "73",
+							"services-version": "v1",
+							"patron-barcode-prefix": "OpenRs-",
+							"default-patron-home-location-code": "1"
+						},
+						"access-id": "DCB",
+						"domain-id": "STLOUIS",
+						"page-size": 100,
+						"access-key": "1C387EAF-9797-4D12-93A8-FA2376CA702B",
+						"logon-user-id": "1",
+						"staff-password": "1640RSMobius",
+						"staff-username": "SLCLReshare",
+						"logon-branch-id": "73"
+					}
+				},
+				{
+					"id": "kfe60600-0879-5ec5-8831-ae524b11639c",
+					"code": "TESTLMS",
+					"name": "Test HostLMS",
+					"lmsClientClass": "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
+					"clientConfig": {
+						"item": {
+							"fine-code-id": "1",
+							"renewal-limit": "0",
+							"barcode-prefix": "",
+							"history-action-id": "6",
+							"shelving-scheme-id": "3",
+							"loan-period-code-id": "9"
+						},
+						"papi": {
+							"app-id": "100",
+							"org-id": "1",
+							"lang-id": "1033",
+							"papi-version": "v1"
+						},
+						"ingest": "true",
+						"base-url": "https://stlouis-training.polarislibrary.com",
+						"services": {
+							"language": "eng",
+							"product-id": "20",
+							"site-domain": "polaris",
+							"workstation-id": "1",
+							"organisation-id": "73",
+							"services-version": "v1",
+							"patron-barcode-prefix": "OpenRs-",
+							"default-patron-home-location-code": "1"
+						},
+						"access-id": "DCB",
+						"domain-id": "STLOUIS",
+						"page-size": 100,
+						"access-key": "1C387EAF-9797-4D12-93A8-FA2376CA702B",
+						"logon-user-id": "1",
+						"staff-password": "1640RSMobius",
+						"staff-username": "SLCLReshare",
+						"logon-branch-id": "73"
+					}
+				}
+			],
+			"pageable": {
+				"number": 0,
+				"offset": null
+			}
+		}
+	}
 }
