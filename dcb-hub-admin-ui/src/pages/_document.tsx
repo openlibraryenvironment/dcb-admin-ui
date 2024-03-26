@@ -1,4 +1,4 @@
-import Document, {
+import {
 	Html,
 	Head,
 	Main,
@@ -6,9 +6,6 @@ import Document, {
 	DocumentProps,
 	DocumentContext,
 } from "next/document";
-import createEmotionServer from "@emotion/server/create-instance";
-import { AppType } from "next/app";
-import createEmotionCache from "src/createEmotionCache";
 import {
 	DocumentHeadTags,
 	DocumentHeadTagsProps,

@@ -1,19 +1,12 @@
 import { GetServerSideProps, NextPage } from "next";
 import { AdminLayout } from "@layout";
-import {
-	List,
-	ListItem,
-	ListItemButton,
-	ListItemText,
-	useTheme,
-} from "@mui/material";
+import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 //localisation
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 const Mappings: NextPage = () => {
 	const { t } = useTranslation();
-	const theme = useTheme();
 
 	return (
 		<AdminLayout title={t("nav.mappings.name")}>

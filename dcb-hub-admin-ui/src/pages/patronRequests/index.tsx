@@ -30,7 +30,7 @@ const PatronRequests: NextPage = () => {
 						minWidth: 75,
 						flex: 0.3,
 						filterOperators,
-						valueGetter: (params: { row: { dateCreated: any } }) => {
+						valueGetter: (params: { row: { dateCreated: string } }) => {
 							const requestCreated = params.row.dateCreated;
 							return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
 						},
@@ -41,7 +41,7 @@ const PatronRequests: NextPage = () => {
 						minWidth: 75,
 						flex: 0.3,
 						filterOperators,
-						valueGetter: (params: { row: { dateUpdated: any } }) => {
+						valueGetter: (params: { row: { dateUpdated: string } }) => {
 							const requestUpdated = params.row.dateUpdated;
 							return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
 						},
@@ -67,7 +67,7 @@ const PatronRequests: NextPage = () => {
 						flex: 0.3,
 						filterOperators,
 						valueGetter: (params: {
-							row: { requestingIdentity: { localBarcode: any } };
+							row: { requestingIdentity: { localBarcode: string } };
 						}) => params?.row?.requestingIdentity?.localBarcode,
 					},
 					// HIDDEN BY DEFAULT
@@ -78,7 +78,7 @@ const PatronRequests: NextPage = () => {
 						flex: 0.5,
 						filterOperators,
 						valueGetter: (params: {
-							row: { suppliers: Array<{ localAgency: any }> };
+							row: { suppliers: Array<{ localAgency: string }> };
 						}) => {
 							// Check if suppliers array is not empty
 							if (params.row.suppliers.length > 0) {

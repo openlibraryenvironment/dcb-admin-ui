@@ -71,7 +71,7 @@ const CirculationStatusMappings: NextPage = () => {
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
-						valueGetter: (params: { row: { toValue: any } }) => {
+						valueGetter: (params: { row: { toValue: string } }) => {
 							return capitalize(params.row.toValue);
 						},
 					},
@@ -81,7 +81,7 @@ const CirculationStatusMappings: NextPage = () => {
 						minWidth: 100,
 						flex: 0.5,
 						filterOperators,
-						valueGetter: (params: { row: { lastImported: any } }) => {
+						valueGetter: (params: { row: { lastImported: string } }) => {
 							const lastImported = params.row.lastImported;
 							return dayjs(lastImported).format("YYYY-MM-DD HH:mm");
 						},
@@ -103,7 +103,7 @@ const CirculationStatusMappings: NextPage = () => {
 	);
 };
 
-export async function getStaticProps({ locale }: { locale: any }) {
+export async function getStaticProps({ locale }: { locale: string }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

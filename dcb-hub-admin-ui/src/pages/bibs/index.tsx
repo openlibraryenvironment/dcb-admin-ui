@@ -60,7 +60,7 @@ const Bibs: NextPage = () => {
 						flex: 0.5,
 						sortable: false,
 						filterOperators,
-						valueGetter: (params: { row: { contributesTo: { id: any } } }) =>
+						valueGetter: (params: { row: { contributesTo: { id: string } } }) =>
 							params?.row?.contributesTo?.id,
 					},
 					{

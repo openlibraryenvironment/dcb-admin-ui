@@ -8,7 +8,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	IconButton,
-	styled,
 	Button,
 	TextField,
 	useTheme,
@@ -59,23 +58,20 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 	const { t } = useTranslation();
 	const theme = useTheme();
 
-	const [createGroupMutation, { loading }] = useMutation<CreateGroupResponse>(
-		createGroup,
-		{
-			refetchQueries: ["LoadGroups"],
-			onCompleted: () => {
-				setSuccess(true);
-				onClose();
-			},
-			onError: (error) => {
-				setError(true);
-				setErrorMessage(
-					"Failed to create a new group. Please retry, and if this issue persists, sign out and back in again.",
-				);
-				console.error("Error:", error);
-			},
+	const [createGroupMutation] = useMutation<CreateGroupResponse>(createGroup, {
+		refetchQueries: ["LoadGroups"],
+		onCompleted: () => {
+			setSuccess(true);
+			onClose();
 		},
-	);
+		onError: (error) => {
+			setError(true);
+			setErrorMessage(
+				"Failed to create a new group. Please retry, and if this issue persists, sign out and back in again.",
+			);
+			console.error("Error:", error);
+		},
+	});
 
 	const handleSubmit = async (values: FormData) => {
 		try {
@@ -186,7 +182,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 	);
 }
 
-export async function getStaticProps({ locale }: { locale: any }) {
+export async function getStaticProps({ locale }: { locale: string }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

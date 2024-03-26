@@ -34,7 +34,7 @@ export default function PatronRequestDetails({
 	const theme = useTheme();
 	const { publicRuntimeConfig } = getConfig();
 
-	const { loading, data, fetchMore } = useQuery(getPatronRequestById, {
+	const { loading, data } = useQuery(getPatronRequestById, {
 		variables: {
 			query: "id:" + patronRequestId,
 		},
@@ -873,7 +873,7 @@ export default function PatronRequestDetails({
 								headerName: "Audit date",
 								minWidth: 60,
 								flex: 0.2,
-								valueGetter: (params: { row: { auditDate: any } }) => {
+								valueGetter: (params: { row: { auditDate: string } }) => {
 									const auditDate = params.row.auditDate;
 									return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
 								},

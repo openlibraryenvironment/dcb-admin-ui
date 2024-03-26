@@ -1,10 +1,22 @@
-/** @type {import('@typescript-eslint/utils').TSESLint.Linter.Config} */
-const config = {
-	extends: ["next/core-web-vitals"],
+/* eslint-env node */
+module.exports = {
+	extends: [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:jsx-a11y/recommended",
+		"next/core-web-vitals",
+		"prettier",
+	],
 	rules: {
+		"@typescript-eslint/no-explicit-any": ["off"], // For now: explicit any should still be avoided, but can't be avoided everywhere just yet.
+		"@typescript-eslint/ban-ts-comment": [
+			"error",
+			{ "ts-ignore": "allow-with-description" }, // ts-ignore is only allowed with a justification
+		],
 		"no-restricted-syntax": [
 			"warn",
 			// Warn on nesting <a> elements, <button> elements and framework <Link> components inside of each other
+			// This is to avoid potential SSR issues.
 			{
 				selector:
 					"JSXElement[openingElement.name.name='a'] > JSXElement[openingElement.name.name=/^(a|button|Link)$/]",
@@ -65,6 +77,7 @@ const config = {
 			},
 		],
 	},
+	parser: "@typescript-eslint/parser",
+	plugins: ["@typescript-eslint", "jsx-a11y"],
+	root: true,
 };
-
-module.exports = config;

@@ -48,6 +48,9 @@ export default function VersionInfo() {
 		const getServerInformation = async () => {
 			try {
 				// Perform multiple API calls at the same time using Promise.allSettled
+				// Disabled because removing the unused var will necessitate re-working the page.
+				// Which should be done separately.
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const responses = await Promise.allSettled(
 					apiEndpoints.map(async ({ link, setter }) => {
 						try {

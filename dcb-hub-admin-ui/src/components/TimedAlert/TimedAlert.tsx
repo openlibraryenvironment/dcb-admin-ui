@@ -5,7 +5,7 @@ import {
 	Snackbar,
 } from "@mui/material";
 import { capitalize } from "@mui/material/utils";
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 
 const SnackbarAlert = forwardRef<HTMLDivElement, AlertProps>(
 	function Alert(props, ref) {
@@ -14,8 +14,6 @@ const SnackbarAlert = forwardRef<HTMLDivElement, AlertProps>(
 );
 
 export default function TimedAlert(props: any) {
-	const [open, setOpen] = useState(false);
-
 	const handleClose = (
 		event?: React.SyntheticEvent | Event,
 		reason?: string,
@@ -23,8 +21,6 @@ export default function TimedAlert(props: any) {
 		if (reason === "clickaway") {
 			return;
 		}
-
-		setOpen(false);
 	};
 	return (
 		<>

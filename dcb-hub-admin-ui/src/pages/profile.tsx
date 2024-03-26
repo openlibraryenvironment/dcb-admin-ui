@@ -20,7 +20,7 @@ import { AdminLayout } from "@layout";
 import { useSession } from "next-auth/react";
 
 const Profile: NextPage = () => {
-	const { data: session, status }: { data: any; status: any } = useSession();
+	const { data: session }: { data: any } = useSession();
 	const emailVerified =
 		session?.profile?.email_verified ?? "Cannot fetch verified email status.";
 	const formatRoles = (roles: any) => {
@@ -108,7 +108,7 @@ const Profile: NextPage = () => {
 	);
 };
 
-export async function getServerSideProps({ locale }: { locale: any }) {
+export async function getServerSideProps({ locale }: { locale: string }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

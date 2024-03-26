@@ -4,6 +4,7 @@ import { addAgenciesToGroup } from "src/queries/queries";
 import { gql, useMutation } from "@apollo/client";
 import * as Yup from "yup";
 import {
+	Box,
 	Button,
 	Dialog,
 	DialogContent,
@@ -41,11 +42,6 @@ interface AddAgenciesResponse {
 	};
 }
 
-const initialValues: FormData = {
-	groupId: "",
-	agencyId: "",
-};
-
 type NewGroupType = {
 	show: boolean;
 	onClose: any;
@@ -73,7 +69,7 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 	// As this returns an updated agency, not a group, and we can't refetch non-active queries, we must update cache ourselves. If we were able to force a refetch, that would be much better
 	//https://www.apollographql.com/docs/react/data/mutations#refetching-queries
 
-	const [addAgenciesMutation, { loading }] = useMutation<AddAgenciesResponse>(
+	const [addAgenciesMutation] = useMutation<AddAgenciesResponse>(
 		addAgenciesToGroup,
 		{
 			update(cache, { data }) {
@@ -120,7 +116,7 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 				setErrorMessage(
 					"Failed to add agency to group. Please retry, and if this issue persists please sign out and back in again.",
 				);
-				// console.error('Error:', error);
+				console.log("Error adding agency to group:", error);
 			},
 		},
 	);
@@ -153,7 +149,7 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 			onSubmit: handleSubmit,
 		});
 		return (
-			<div>
+			<Box>
 				<form id="add-agency-form" onSubmit={formik.handleSubmit}>
 					<TextField
 						fullWidth
@@ -189,7 +185,7 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 						{t("general.submit", "Submit")}
 					</Button>
 				</form>
-			</div>
+			</Box>
 		);
 	};
 
@@ -238,12 +234,20 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 						textColor={theme.palette.common.white}
 					></Alert>
 				)}
+				{isError && (
+					<Alert
+						severityType="error"
+						onCloseFunc={() => setError(false)}
+						alertText={errorMessage}
+						textColor={theme.palette.common.white}
+					></Alert>
+				)}
 			</Dialog>
 		</div>
 	);
 }
 
-export async function getStaticProps({ locale }: { locale: any }) {
+export async function getStaticProps({ locale }: { locale: string }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

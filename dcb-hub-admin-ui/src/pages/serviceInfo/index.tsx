@@ -1,12 +1,5 @@
-import Link from "@components/Link/Link";
 import { AdminLayout } from "@layout";
-import {
-	Card,
-	List,
-	ListItem,
-	ListItemButton,
-	ListItemText,
-} from "@mui/material";
+import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";

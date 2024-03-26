@@ -59,12 +59,7 @@ const Confirmation = ({
 				</Button>
 				{/* This makes the Cancel and Replace Mappings buttons left and right aligned, respectively*/}
 				<div style={{ flex: "1 0 0" }} />
-				<Button
-					onClick={onConfirm}
-					color="primary"
-					variant="contained"
-					autoFocus
-				>
+				<Button onClick={onConfirm} color="primary" variant="contained">
 					{t("mappings.confirmation_replace_mappings")}
 				</Button>
 			</DialogActions>

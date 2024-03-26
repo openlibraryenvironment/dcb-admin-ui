@@ -39,7 +39,7 @@ export default function Unauthorised() {
 	);
 }
 
-export async function getStaticProps({ locale }: { locale: any }) {
+export async function getStaticProps({ locale }: { locale: string }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

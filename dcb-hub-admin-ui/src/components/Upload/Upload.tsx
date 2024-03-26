@@ -1,11 +1,4 @@
-import {
-	Button,
-	Card,
-	CardContent,
-	Stack,
-	Typography,
-	useTheme,
-} from "@mui/material";
+import { Button, Card, Stack, useTheme } from "@mui/material";
 import { useState } from "react";
 import Alert from "@components/Alert/Alert";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
@@ -68,23 +61,19 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 	const theme = useTheme();
 	uppy.setMeta({ category: category });
 	const xhrplug = uppy.getPlugin("XHRUpload");
-	const { data, status } = useSession();
+	const { data } = useSession();
 	// State management - mostly for the displaying of messages
 	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
 	const [isSuccess, setSuccess] = useState(false);
-	const [mappingsExist, setMappingsExist] = useState(false);
 	const [replacement, setReplacement] = useState(false);
 	const [existingMappingCount, setExistingMappingCount] = useState(0);
 	// this is re-defining on re-render, very annoying
 	const [isConfirmOpen, setConfirmOpen] = useState(false);
-	const [isAdded, setAdded] = useState(false);
 	const code = useCode((state) => state.code);
 	// set different kinds of errors
 	const [validationErrorMessage, setValidationErrorMessage] = useState("");
 	const [uploadErrorMessage, setUploadErrorMessage] = useState("");
-	const [generalErrorMessage, setGeneralErrorMessage] = useState("");
 	const [successCount, setSuccessCount] = useState(0);
-	const [deletedCount, setDeletedCount] = useState(0);
 	const [addedFile, setAddedFile] = useState({ name: "", size: 0 });
 	const [failedFile, setFailedFile] = useState({ name: "", size: 0 });
 
@@ -102,8 +91,6 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 		const response = await axios.get<any>(existenceUrl, {
 			headers: { Authorization: `Bearer ${data?.accessToken}` },
 		});
-		const doMappingsExist = !isEmpty(response?.data);
-		setMappingsExist(doMappingsExist);
 		// Check if mappings exist or not.
 		if (!isEmpty(response?.data)) {
 			setExistingMappingCount(response?.data?.length);
@@ -116,7 +103,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 
 	xhrplug?.setOptions({
 		headers,
-		getResponseError(responseText: string, response: any) {
+		getResponseError(responseText: string) {
 			setErrorDisplayed(true);
 			setUploadErrorMessage("Error: " + responseText);
 			// Obtains error message from the response.
@@ -169,7 +156,6 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 
 	// This gets triggered when a file passes validation
 	uppy.on("file-added", (file: any) => {
-		setAdded(true);
 		setAddedFile({ name: file.name, size: file.size });
 		setErrorDisplayed(false);
 		uppy.setFileMeta(file.id, {
@@ -182,7 +168,6 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 	uppy.on("upload-success", (file: any, response: any) => {
 		setSuccess(true);
 		setSuccessCount(response?.body?.recordsImported);
-		setDeletedCount(response?.body?.recordsDeleted);
 		uppy.removeFile(file.id);
 	});
 
@@ -190,10 +175,9 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 	uppy.on("error", (error: any) => {
 		console.log("Error information", error);
 		setErrorDisplayed(true);
-		setGeneralErrorMessage(error.message);
 		console.log(uploadErrorMessage);
 	});
-	uppy.on("upload-error", (file: any, error, response) => {
+	uppy.on("upload-error", (file: any, error) => {
 		setErrorDisplayed(true);
 		setUploadErrorMessage(error.message);
 		setFailedFile({ name: file.name, size: file.size });
