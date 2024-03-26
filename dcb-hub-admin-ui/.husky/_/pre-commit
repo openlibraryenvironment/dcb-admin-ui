@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/husky.sh"
+cd ./dcb-hub-admin-ui
+echo "The DCB Admin pre-commit checks will now run. If you need to skip pre-commit checks, please commit again with --no-verify."
+node_modules/.bin/lint-staged
