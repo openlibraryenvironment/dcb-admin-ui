@@ -27,7 +27,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	const theme = useTheme();
 
 	// Poll interval in ms
-	const { loading, data, fetchMore } = useQuery(getLocationById, {
+	const { loading, data } = useQuery(getLocationById, {
 		variables: {
 			query: "id:" + locationId,
 		},

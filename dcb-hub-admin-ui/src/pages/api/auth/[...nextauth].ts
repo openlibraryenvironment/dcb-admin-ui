@@ -55,9 +55,7 @@ async function completeSignout(jwt: JWT) {
 		// Add the id_token_hint to the query string
 		const params = new URLSearchParams();
 		params.append("id_token_hint", id_token);
-		// TS-ignore as temp fix: error behaviour is already covered by the AxiosError on line 86
-		// so failure state is covered.
-		// @ts-ignore
+		// @ts-ignore as temp fix: error behaviour is already covered by the AxiosError on line 86 and so failure state is covered
 		// prettier-ignore
 		const { status, statusText } = await axios.get(`${keycloak.options.issuer}/protocol/openid-connect/logout?${params.toString()}`,
 		);
@@ -80,15 +78,7 @@ export default NextAuth({
 	},
 	providers: [keycloak],
 	callbacks: {
-		async session({
-			session,
-			token,
-			user,
-		}: {
-			session: any;
-			token?: any;
-			user?: any;
-		}) {
+		async session({ session, token }: { session: any; token?: any }) {
 			// Set session properties if token exists
 			if (token) {
 				session.accessToken = token.accessToken;

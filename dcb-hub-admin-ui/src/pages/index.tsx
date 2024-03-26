@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { AdminLayout } from "@layout";
-import { Stack, Typography, useTheme } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next"; //localisation
 import { Trans } from "next-i18next";
@@ -22,7 +22,6 @@ const Home: NextPage = () => {
 		}
 	};
 	const { t } = useTranslation();
-	const theme = useTheme();
 
 	return (
 		<AdminLayout
@@ -74,7 +73,7 @@ const Home: NextPage = () => {
 	);
 };
 
-export async function getStaticProps({ locale }: { locale: any }) {
+export async function getStaticProps({ locale }: { locale: string }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

@@ -11,6 +11,10 @@ const nextConfig = {
 		// and prevents mismatches between styled component names on the client and server.
 		// https://stackoverflow.com/a/70429669
 	},
+	// eslint: {
+	// 	ignoreDuringBuilds: true, // Do not enable this unless absolutely necessary - if ESLint is flagging something up, go look at it.
+	// 	// And if you think ESLint is wrong in a specific case, add eslint-ignore and a justification instead.
+	// },
 	env: {
 		KEYCLOAK_CLIENT_ID: process.env.KEYCLOAK_ID,
 		KEYCLOAK_SECRET: process.env.KEYCLOAK_SECRET,

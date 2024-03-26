@@ -30,7 +30,6 @@ export default function ServerPaginationGrid({
 	sortModel,
 	noResultsMessage,
 	noDataMessage,
-	noDataTitle,
 	searchPlaceholder,
 	sortDirection,
 	sortAttribute,
@@ -198,7 +197,7 @@ export default function ServerPaginationGrid({
 		sortOptions.direction !== "" ? sortOptions.field : sortAttribute;
 	const direction =
 		sortOptions.direction !== "" ? sortOptions.direction : sortDirection;
-	const { loading, data, fetchMore } = useQuery(query, {
+	const { loading, data } = useQuery(query, {
 		variables: {
 			// Fixes 'ghost page' issue.
 			pageno: paginationModel.page,

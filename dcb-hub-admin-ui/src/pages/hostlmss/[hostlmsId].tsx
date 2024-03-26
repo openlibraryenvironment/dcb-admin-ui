@@ -29,7 +29,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	const theme = useTheme();
 
 	// pollInterval is in ms - set to 2 mins
-	const { loading, data, fetchMore } = useQuery(getHostLmsById, {
+	const { loading, data } = useQuery(getHostLmsById, {
 		variables: {
 			query: "id:" + hostlmsId,
 		},

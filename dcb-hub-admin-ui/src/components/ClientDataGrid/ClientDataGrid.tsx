@@ -20,12 +20,12 @@ const StyledOverlay = styled("div")(() => ({
 	height: "100%",
 }));
 
-export default function ClientDataGrid<T extends Object>({
+export default function ClientDataGrid<T extends object>({
 	data = [],
 	columns,
 	type,
 	selectable,
-	slots,
+	// slots,
 	noDataTitle,
 	noDataMessage,
 	noDataLink,
@@ -38,8 +38,8 @@ export default function ClientDataGrid<T extends Object>({
 	selectable: boolean;
 	slots?: any;
 	noDataTitle?: string;
-	noDataMessage?: any;
-	noDataLink?: any;
+	noDataMessage?: string;
+	noDataLink?: string;
 	columnVisibilityModel?: any;
 	sortModel?: any;
 }) {

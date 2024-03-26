@@ -12,7 +12,7 @@ import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import { getAuditById } from "src/queries/queries";
 
 type AuditDetails = {
-	auditId: any;
+	auditId: string;
 };
 
 export default function AuditDetails({ auditId }: AuditDetails) {

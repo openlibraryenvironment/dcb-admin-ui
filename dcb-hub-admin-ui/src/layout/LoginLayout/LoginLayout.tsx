@@ -37,6 +37,8 @@ export default function LoginLayout({
 					{/* This ternary condition is used to render pages that have specific styling applied to one part of them
 				- in this case it is the background of the login text needing to be extended
 				- the styling has been applied to the individual component and it is rendered here without additional styles if it is the landingPage */}
+					{/* This is a constant condition and should be removed: however this should be done as its own thing (removing pageName etc)*/}
+					{/* eslint-disable-next-line no-constant-condition*/}
 					{pageName === "landingPage" || "logOut" ? (
 						children
 					) : (
