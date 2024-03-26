@@ -30,6 +30,7 @@ Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atla
 ## Contributing
 
 Contributors should be aware of the following formatting and linting policies. These are intended to ensure code is properly formatted and common mistakes are avoided before committing to the repository.
+Contributors should run` npm install` before they make their first commit after these changes.
 
 ### Formatting 
 
