@@ -8,7 +8,8 @@
 		"start": "next start",
 		"lint": "next lint",
 		"codegen": "graphql-codegen --config codegen.ts",
-		"semantic-release": "semantic-release"
+		"semantic-release": "semantic-release",
+		"prepare": "cd .. && husky dcb-hub-admin-ui/.husky"
 	},
 	"dependencies": {
 		"@apollo/client": "^3.8.8",
@@ -75,6 +76,8 @@
 		"eslint-config-next": "^13.5.2",
 		"eslint-config-prettier": "^8.10.0",
 		"eslint-plugin-jsx-a11y": "^6.8.0",
+		"husky": "^9.0.11",
+		"lint-staged": "^15.2.2",
 		"prettier": "3.2.5",
 		"sass": "^1.58.0",
 		"semantic-release": "^22.0.5",
