@@ -4,8 +4,7 @@ import LinearProgress, {
 } from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { MdFilePresent } from "react-icons/md";
-import { MdClose } from "react-icons/md";
+import { MdFilePresent, MdClose } from "react-icons/md";
 import IconButton from "@mui/material/IconButton";
 import { styled } from "@mui/material/styles";
 import { useState, useEffect } from "react";

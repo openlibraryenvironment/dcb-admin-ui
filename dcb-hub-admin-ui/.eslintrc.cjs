@@ -13,6 +13,7 @@ module.exports = {
 			"error",
 			{ "ts-ignore": "allow-with-description" }, // ts-ignore is only allowed with a justification
 		],
+		"no-duplicate-imports": [2],
 		"no-restricted-syntax": [
 			"warn",
 			// Warn on nesting <a> elements, <button> elements and framework <Link> components inside of each other

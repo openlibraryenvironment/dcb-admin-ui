@@ -2,8 +2,7 @@ import type { NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { Stack, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useTranslation } from "next-i18next"; //localisation
-import { Trans } from "next-i18next";
+import { useTranslation, Trans } from "next-i18next"; //localisation
 import Link from "@components/Link/Link";
 import VersionInfo from "@components/HomeContent/VersionInfo";
 import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";

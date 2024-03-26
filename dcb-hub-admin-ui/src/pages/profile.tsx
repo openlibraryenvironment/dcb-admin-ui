@@ -8,11 +8,13 @@ import {
 	ListItem,
 	useTheme,
 } from "@mui/material";
-import { MdPersonOutline } from "react-icons/md";
-import { MdOutlineMail } from "react-icons/md";
-import { MdOutlineMarkEmailRead } from "react-icons/md";
-import { MdThumbUpOffAlt } from "react-icons/md";
-import { MdOutlineSupervisorAccount } from "react-icons/md";
+import {
+	MdPersonOutline,
+	MdOutlineMail,
+	MdOutlineMarkEmailRead,
+	MdThumbUpOffAlt,
+	MdOutlineSupervisorAccount,
+} from "react-icons/md";
 //localisation
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
