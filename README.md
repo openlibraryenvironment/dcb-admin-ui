@@ -45,6 +45,9 @@ To run ESLint, please run the command `npm run lint `. For automatic linting, pl
 		"source.fixAll.eslint": "explicit"
 },
 ```
+### Pre-commit checks
+
+DCB Admin uses [Husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged) to run Prettier and ESLint on staged items. This is done with the use of a pre-commit Git hook, and enforces code and formatting standards in DCB Admin by catching common issues before they are committed. 
 
 ## Raising an issue
 
