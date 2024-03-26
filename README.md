@@ -29,8 +29,22 @@ Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atla
 
 ## Contributing
 
-DCB Admin uses [Prettier](https://prettier.io/docs) for code formatting. Please install the Prettier extension in your editor and, if using VS Code, set Prettier as your default formatter and enable 'format on save'. If you're having issues, you may need to do Ctrl-Shift-P, open your user settings, and ensure Prettier is set as `editor.defaultFormatter` and that `editor.formatOnSave` is also enabled.
+Contributors should be aware of the following formatting and linting policies. These are intended to ensure code is properly formatted and common mistakes are avoided before committing to the repository.
 
+### Formatting 
+
+DCB Admin uses [Prettier](https://prettier.io/docs) for code formatting. Please install the Prettier extension in your editor and, if using VS Code, set Prettier as your default formatter and enable 'format on save'. If you're having issues, Ctrl-Shift-P, open your user settings, and ensure Prettier is set as `editor.defaultFormatter` and that `editor.formatOnSave` is also enabled.
+
+### Linting 
+
+DCB Admin uses [ESLint](https://eslint.org/) with [TypeScript ESLint](https://typescript-eslint.io/) tooling and the recommended TypeScript ESLint configuration. Our ESLint setup also includes [JSX a11y](https://www.npmjs.com/package/eslint-plugin-jsx-a11y) for accessibilty linting and [eslint-config-next](https://nextjs.org/docs/app/building-your-application/configuring/eslint).
+
+To run ESLint, please run the command `npm run lint `. For automatic linting, please ensure you have the ESLint extension installed in VS Code. You can also configure your settings like so to have ESLint run on save:
+```
+"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+},
+```
 
 ## Raising an issue
 
