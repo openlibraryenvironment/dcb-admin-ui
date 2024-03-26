@@ -29,8 +29,9 @@ Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atla
 
 ## Contributing
 
-Contributors should be aware of the following formatting and linting policies. These are intended to ensure code is properly formatted and common mistakes are avoided before committing to the repository.
-Contributors should run` npm install` before they make their first commit after these changes.
+Contributors should be aware of the following standards for code formatting and linting in DCB Admin. These are intended to ensure code is properly formatted and common mistakes are avoided before committing to the repository.
+
+If this is your first commit after these changes were made, please run `npm install` before you commit.
 
 ### Formatting 
 
@@ -48,7 +49,8 @@ To run ESLint, please run the command `npm run lint `. For automatic linting, pl
 ```
 ### Pre-commit checks
 
-DCB Admin uses [Husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged) to run Prettier and ESLint on staged items. This is done with the use of a pre-commit Git hook, and enforces code and formatting standards in DCB Admin by catching common issues before they are committed. 
+DCB Admin uses a pre-commit Git hook, implemented with [Husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged) to run Prettier and ESLint on staged items and catch common issues before they are committed. If issues that can't be automatically fixed are present, the pre-commit hook will point you in the right direction.
+
 
 ## Raising an issue
 
