@@ -1,6 +1,5 @@
 import Link from "@components/Link/Link";
 import { Stack, Typography, useTheme } from "@mui/material";
-import { Fragment } from "react";
 import { useTranslation } from "next-i18next";
 
 export default function LinkedFooter() {
@@ -18,24 +17,27 @@ export default function LinkedFooter() {
 	}
 
 	const generateLinks = (links: LinkItem[]) => {
-		return links.map((link) => (
-			<Fragment key={link.text}>
-				<Link
-					variant="linkedFooterTextSize"
-					href={link.href}
-					sx={{
-						color: theme.palette.primary.linkedFooterText,
-						textDecoration: "none",
-					}}
-					target="_blank"
-					rel="noreferrer"
-					underline="hover"
-				>
-					{link.text}
-				</Link>
-				<br />
-			</Fragment>
-		));
+		return (
+			<ul style={{listStyleType: 'none', margin: 0, padding: 0, textWrap: 'wrap', wordBreak:'break-word'}}>
+				{links.map((link) => (
+					<li key={link.text} style={{paddingTop: '10px', lineHeight: '17px'}}>
+						<Link
+							variant="linkedFooterTextSize"
+							href={link.href}
+							sx={{
+								color: theme.palette.primary.linkedFooterText,
+								textDecoration: "none",
+							}}
+							target="_blank"
+							rel="noreferrer"
+							underline="hover"
+						>
+							{link.text}
+						</Link>
+					</li>
+				))}
+			</ul>
+		);
 	};
 
 	// sections repesents the three sections in LinkedFooter
@@ -92,7 +94,7 @@ export default function LinkedFooter() {
 		<Stack
 			direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
 			justifyContent="center"
-			alignItems={"center"}
+			alignItems={"stretch"}
 		>
 			{sections.map((section) => (
 				<div
@@ -100,7 +102,7 @@ export default function LinkedFooter() {
 					style={{
 						padding: 10,
 						width: "250px",
-						height: "150px",
+						height: '100%',
 						//shorthand for mt, mr, mb, ml
 						margin: "0px 20px 0px 20px",
 					}}
