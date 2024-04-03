@@ -166,7 +166,7 @@
 		"location_name": "Location name",
 		"location_type": "Type",
 		"long": "Longitude: ",
-		"next_poll": "Next scheduled poll",
+		"next_poll": "Next check after",
 		"patron": "Patron",
 		"patron_home_id": "Home identity",
 		"patron_id": "Patron ID",
