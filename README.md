@@ -1,5 +1,6 @@
 # dcb-admin-ui
-
+This branch is used for dress rehearsal deployment testing: as such it may be missing some items from main.
+This branch was cut on 03/04/24.
 
 ## Welcome
 
