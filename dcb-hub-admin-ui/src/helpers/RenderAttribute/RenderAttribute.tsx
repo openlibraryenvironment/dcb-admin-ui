@@ -5,7 +5,10 @@ export default function RenderAttribute({ attribute }: any) {
 	const { t } = useTranslation();
 	// If needs be, we can extend this function to apply other 'rules' to our values as well
 	// in theory this could return a Typography component with more styling
-	return attribute != null && attribute != "" && attribute != undefined ? (
+	return attribute != null &&
+		attribute != "" &&
+		attribute != undefined &&
+		attribute != "Invalid Date" ? (
 		<Typography variant="attributeText" title={attribute}>
 			{attribute}
 		</Typography>

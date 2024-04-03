@@ -479,6 +479,7 @@ export const getPatronRequestById = gql`
 				localItemType
 				localBibId
 				description
+				nextScheduledPoll
 				errorMessage
 				patron {
 					id
