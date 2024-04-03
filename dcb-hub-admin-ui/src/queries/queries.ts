@@ -434,6 +434,7 @@ export const getPatronRequests = gql`
 				pickupLocationCode
 				description
 				status
+				nextScheduledPoll
 				patron {
 					id
 				}

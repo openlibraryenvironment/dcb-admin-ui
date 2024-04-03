@@ -110,8 +110,7 @@ export default function PatronRequestDetails({
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.general")}{" "}
+						{t("details.general")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -190,6 +189,18 @@ export default function PatronRequestDetails({
 									{t("details.active_workflow")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.activeWorkflow} />
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.next_poll")}
+								</Typography>
+								<RenderAttribute
+									attribute={dayjs(patronRequest?.nextScheduledPoll).format(
+										"YYYY-MM-DD HH:mm:ss.SSS",
+									)}
+								/>
 							</Stack>
 						</Grid>
 					</Grid>
