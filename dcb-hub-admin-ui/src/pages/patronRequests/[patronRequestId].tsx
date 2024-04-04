@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useApolloClient, useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
 import { AdminLayout } from "@layout";
@@ -13,7 +13,9 @@ import {
 	useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
+import axios from "axios";
 import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import getConfig from "next/config";
@@ -33,6 +35,8 @@ export default function PatronRequestDetails({
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const { publicRuntimeConfig } = getConfig();
+	const client = useApolloClient();
+	const { data: session }: { data: any } = useSession();
 
 	const { loading, data } = useQuery(getPatronRequestById, {
 		variables: {
@@ -80,6 +84,25 @@ export default function PatronRequestDetails({
 			"resourceDescription/" +
 			patronRequest?.bibClusterId
 		: "";
+	const updateUrl =
+		publicRuntimeConfig.DCB_API_BASE +
+		"/patrons/requests/" +
+		patronRequestId +
+		"/update";
+	const handleUpdate: any = async () => {
+		const data = await axios.post<any>(
+			updateUrl,
+			{},
+			{
+				headers: { Authorization: `Bearer ${session?.accessToken}` },
+			},
+		);
+		console.log("Request to update: " + data);
+		// We may wish to add a loading spinner to this button in future. Ideally this would also be a GraphQL mutation.
+		client.refetchQueries({
+			include: ["LoadPatronRequestsById"],
+		});
+	};
 
 	return loading ? (
 		<AdminLayout title={t("common.loading")} />
@@ -198,9 +221,20 @@ export default function PatronRequestDetails({
 								</Typography>
 								<RenderAttribute
 									attribute={dayjs(patronRequest?.nextScheduledPoll).format(
-										"YYYY-MM-DD HH:mm:ss.SSS",
+										"YYYY-MM-DD HH:mm",
 									)}
 								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Button
+									variant="outlined"
+									color="primary"
+									onClick={handleUpdate}
+								>
+									{t("details.start_update")}
+								</Button>
 							</Stack>
 						</Grid>
 					</Grid>

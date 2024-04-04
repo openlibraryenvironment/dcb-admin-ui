@@ -457,7 +457,7 @@ export const getPatronRequests = gql`
 `;
 
 export const getPatronRequestById = gql`
-	query LoadPatronRequests($query: String!) {
+	query LoadPatronRequestsById($query: String!) {
 		patronRequests(query: $query) {
 			content {
 				id
