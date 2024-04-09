@@ -32,7 +32,8 @@ export default function Login() {
 					variant="outlined"
 					sx={{
 						backgroundColor: theme.palette.primary.loginCard,
-						p: 4,
+						pt: 4,
+						pb: 4,
 						border: "none",
 					}}
 				>

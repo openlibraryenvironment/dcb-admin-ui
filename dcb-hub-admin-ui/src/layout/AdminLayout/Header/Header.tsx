@@ -57,14 +57,15 @@ export default function Header({
 			>
 				{/* this width is the maxSize of the content */}
 				<Toolbar
+					disableGutters
 					sx={{
 						maxWidth: "1400px",
 						alignSelf: "center",
 						width: "100%",
 						padding: 0,
 						maxHeight: "70px",
-						paddingLeft: "24px",
-						paddingRight: "24px",
+						paddingLeft: iconsVisible != false ? "24px" : "16px",
+						paddingRight: iconsVisible != false ? "24px" : "16px"
 					}}
 				>
 					{/* This code handles the display of the consortium icon and sidebar icon.
@@ -91,7 +92,7 @@ export default function Header({
 							alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
 						/>
 					) : (
-						<Box sx={{ ml: 3, mt: 1 }}>
+						<Box sx={{ mt: 1 }}>
 							<Image
 								src={consortiumLogo}
 								alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
