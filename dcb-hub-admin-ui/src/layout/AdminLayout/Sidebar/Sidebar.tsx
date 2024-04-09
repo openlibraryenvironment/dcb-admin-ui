@@ -195,11 +195,11 @@ export default function Sidebar(props: any) {
 						</DrawerHeader>
 					)}
 					<Divider />
-					<List component="nav">
+					<List component="nav" data-tid="sidebar">
 						{routes.map((route, index) => (
 							<ListItem
-								id={route.translationKey.replace(/\s/g, "")}
-								key={route.translationKey}
+								id={t(route.translationKey.replace(/\s/g, ""))}
+								key={t(route.translationKey)}
 								component="nav"
 								disablePadding
 								sx={{ display: "block" }}
@@ -235,6 +235,7 @@ export default function Sidebar(props: any) {
 											opacity: "100",
 										},
 									}}
+									data-tid={t(route.translationKey) + " button"}
 								>
 									<ListItemIcon
 										onClick={props.openStateFuncOpen}
@@ -243,6 +244,7 @@ export default function Sidebar(props: any) {
 											mr: props.openStateOpen ? 3 : "auto",
 											justifyContent: "center",
 										}}
+										data-tid={t(route.translationKey) + " icon"}
 									>
 										{SidebarIcon(index, selected === index)}
 									</ListItemIcon>
@@ -252,6 +254,7 @@ export default function Sidebar(props: any) {
 										primaryTypographyProps={{
 											fontWeight: selected === index ? "bold" : "normal",
 										}}
+										data-tid={t(route.translationKey) + " text"}
 									/>
 								</ListItemButton>
 							</ListItem>

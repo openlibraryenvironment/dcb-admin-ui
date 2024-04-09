@@ -79,7 +79,7 @@ export default function Header({
 								onClick={openStateFuncClosed}
 								sx={{ mr: 2, color: theme.palette.primary.headerText }}
 							>
-								<MdMenu size={20} />
+								<MdMenu size={20} data-tid="menu-icon"/>
 							</IconButton>
 						</Box>
 					) : null}
