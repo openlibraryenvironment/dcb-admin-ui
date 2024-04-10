@@ -1,3 +1,11 @@
+## [1.8.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.8.0...v1.8.1) (2024-04-10)
+
+
+### Bug Fixes
+
+* Anchor at audit log when returning to patron request [DCB-1001] ([40961c7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/40961c707ba78e20789c87aef939ce07d5552f53))
+* asjust styling to centre content ([87a4c74](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/87a4c746f031552354aeb250702371ecc4c5d566))
+
 # [1.8.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.7.0...v1.8.0) (2024-04-04)
 
 
