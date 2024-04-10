@@ -904,7 +904,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography id={t("details.audit_log")} variant="h2" sx={{ fontWeight: "bold" }}>
 						{" "}
 						{t("details.audit_log")}{" "}
 					</Typography>
