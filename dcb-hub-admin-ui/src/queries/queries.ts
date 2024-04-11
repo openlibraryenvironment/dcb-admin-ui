@@ -434,6 +434,7 @@ export const getPatronRequests = gql`
 				pickupLocationCode
 				description
 				status
+				nextScheduledPoll
 				patron {
 					id
 				}
@@ -456,7 +457,7 @@ export const getPatronRequests = gql`
 `;
 
 export const getPatronRequestById = gql`
-	query LoadPatronRequests($query: String!) {
+	query LoadPatronRequestsById($query: String!) {
 		patronRequests(query: $query) {
 			content {
 				id
@@ -478,6 +479,7 @@ export const getPatronRequestById = gql`
 				localItemType
 				localBibId
 				description
+				nextScheduledPoll
 				errorMessage
 				patron {
 					id

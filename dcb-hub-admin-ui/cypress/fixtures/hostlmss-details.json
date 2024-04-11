@@ -1,0 +1,33 @@
+{
+    "data": {
+        "hostLms": {
+            "content": [
+                {
+                    "id": "eb745468-c69c-5f7e-9bd4-cf3cf8db6cd9",
+                    "code": "COOLCAT",
+                    "name": "Coolcat",
+                    "lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+                    "clientConfig": {
+                        "key": "VenDLGFR08jm3BO6rbHYf/HVzj/p",
+                        "roles": [
+                            "CATALOGUE"
+                        ],
+                        "ingest": "false",
+                        "secret": "vyp5gpz*ujd7UAP_avx",
+                        "base-url": "https://coolcat.org",
+                        "page-size": "100",
+                        "holdPolicy": "title",
+                        "defaultAgency": "9sgcl",
+                        "contextHierarchy": [
+                            "COOLCAT",
+                            "MOBIUS-SIERRA",
+                            "GLOBAL"
+                        ]
+                    },
+                    "__typename": "HostLms"
+                }
+            ],
+            "__typename": "HostLmsPage"
+        }
+    }
+}

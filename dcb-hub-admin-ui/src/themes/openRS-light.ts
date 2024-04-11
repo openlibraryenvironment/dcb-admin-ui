@@ -100,12 +100,15 @@ const openRSLight = createTheme({
 		h2: {
 			fontSize: 20,
 			fontWeight: 400,
+			color: "#0C4068",
 		},
 		h3: {
 			fontSize: 18,
+			color: "#0C4068",
 		},
 		h4: {
 			fontSize: 18,
+			color: "#0C4068",
 		},
 		loginCardText: {
 			fontSize: 18,

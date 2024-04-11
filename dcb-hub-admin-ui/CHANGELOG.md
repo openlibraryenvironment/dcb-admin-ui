@@ -1,3 +1,27 @@
+## [1.8.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.8.0...v1.8.1) (2024-04-10)
+
+
+### Bug Fixes
+
+* Anchor at audit log when returning to patron request [DCB-1001] ([40961c7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/40961c707ba78e20789c87aef939ce07d5552f53))
+* asjust styling to centre content ([87a4c74](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/87a4c746f031552354aeb250702371ecc4c5d566))
+
+# [1.8.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.7.0...v1.8.0) (2024-04-04)
+
+
+### Bug Fixes
+
+* Ensure ingest displays correctly on details page ([2be8ae5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2be8ae5d45e4766be5dcb60d5a54bec09b549d33))
+* Fix issue with ts-ignore in nextauth.ts ([0c44087](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0c4408725fc5d45af8ecb3e9c6989637719958cf))
+* Improve accessibility of blank fields [DCB-932] ([2142545](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/21425451934ac355930f19debaaa7cca0f5b3f82))
+* Replace fallback text with translation key [DCB-936] ([440bc8b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/440bc8b3efc1d586df918cae966f3abce98110b3))
+
+
+### Features
+
+* Add 'update now' button to PR details [DCB-989] ([e8ac945](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e8ac9458acfe9b88918b52d859bb79ebf61fe069))
+* Add nextScheduledPoll to details page [DCB-989] ([684e42c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/684e42cfb214c71f76c6974497f60d577f336e62))
+
 # [1.7.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.6.0...v1.7.0) (2024-03-19)
 
 ### Bug Fixes

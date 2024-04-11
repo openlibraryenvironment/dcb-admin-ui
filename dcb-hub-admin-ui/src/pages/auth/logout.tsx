@@ -37,12 +37,13 @@ export default function Logout() {
 					variant="outlined"
 					sx={{
 						backgroundColor: theme.palette.primary.loginCard,
-						p: 4,
+						pt: 4,
+						pb: 4,
 						border: "none",
 					}}
 				>
 					{alertDisplayed ? (
-						<Box ml={2} mb={2} sx={{ maxWidth: "1400px", margin: "auto" }}>
+						<Box ml={2} mb={2} sx={{ maxWidth: "1400px", margin: "auto", paddingLeft: "16px", paddingRight: "16px" }}>
 							<Alert
 								severityType="info"
 								variant={"filled"}

@@ -27,7 +27,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 	const router = useRouter();
 	// Link to the original patron request so users can get back
 	const handleReturn = () => {
-		router.push(`/patronRequests/${audit?.patronRequest?.id}`);
+		router.push(`/patronRequests/${audit?.patronRequest?.id}`+`#${t("details.audit_log")}`);
 	};
 	return loading ? (
 		<AdminLayout title={t("common.loading")} />
