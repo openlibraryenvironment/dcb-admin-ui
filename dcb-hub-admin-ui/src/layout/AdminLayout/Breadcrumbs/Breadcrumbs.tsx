@@ -97,7 +97,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				// This also checks for the audit log key and unsets the link, because there is no /audits page to link to
 				breadcrumb.href && breadcrumb.key != "nav.auditLog" ? (
 					<Link
-						sx={{ color: theme.palette.primary.breadcrumbs }}
+						sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
 						underline="hover"
 						key={breadcrumb.href}
 						href={breadcrumb.href}
@@ -108,7 +108,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				) : (
 					// if it is null then use index as the key.
 					<Typography
-						sx={{ color: theme.palette.primary.breadcrumbs }}
+						sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
 						key={index}
 						title={t(breadcrumb.key)}
 					>
@@ -120,11 +120,12 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				// The logic here checks for if the key is a UUID. If it is, we know we're on the details page, and so we attempt to render the titleAttribute. If there is no titleAttribute, we fall back to the UUID.
 				// If it's not a UUID, we know we're not on the details page, and so we can safely translate the value.
 				<Typography
-					sx={{ color: theme.palette.primary.breadcrumbs }}
+					sx={{ color: "inherit", fontSize: "14px" }}
 					key={breadcrumb.href}
 					title={
 						breadcrumb.key.length == 36 ? titleAttribute : t(breadcrumb.key)
 					}
+					aria-current="page"
 				>
 					{breadcrumb.key.length == 36
 						? titleAttribute
@@ -149,13 +150,13 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 			{breadcrumbs.length == 0 ? (
 				<Typography
 					title={t("nav.home")}
-					sx={{ color: theme.palette.primary.breadcrumbs }}
+					sx={{ color: "inherit", fontSize: "14px" }}
 				>
 					{t("nav.home")}{" "}
 				</Typography>
 			) : (
 				<Link
-					sx={{ color: theme.palette.primary.breadcrumbs }}
+					sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
 					underline="hover"
 					href="/"
 					title={t("nav.home")}
