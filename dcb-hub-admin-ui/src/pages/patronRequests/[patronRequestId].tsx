@@ -281,8 +281,6 @@ export default function PatronRequestDetails({
 									<Link
 										href={bibClusterRecordUrl}
 										key="bibClusterRecordLink"
-										target="_blank"
-										rel="noreferrer"
 										title={t("link.discovery_tip")}
 									>
 										<RenderAttribute attribute={patronRequest?.bibClusterId} />
@@ -904,7 +902,11 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography id={t("details.audit_log")} variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography
+						id={t("details.audit_log")}
+						variant="h2"
+						sx={{ fontWeight: "bold" }}
+					>
 						{" "}
 						{t("details.audit_log")}{" "}
 					</Typography>

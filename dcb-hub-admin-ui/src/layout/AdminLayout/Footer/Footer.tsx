@@ -45,8 +45,6 @@ export default function Footer() {
 							href={
 								"https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/"
 							}
-							target="_blank"
-							rel="noreferrer"
 						>
 							{t("app.name")}
 						</Link>
@@ -63,11 +61,7 @@ export default function Footer() {
 				</Typography>
 				{/* apply a wrapper to style the logo inline with text */}
 				<Box sx={{ pt: 1.25 }}>
-					<Link
-						href={"https://www.openrs.org/"}
-						target="_blank"
-						rel="noreferrer"
-					>
+					<Link href={"https://www.openrs.org/"}>
 						{/* next.js's image used for size optimisation and better speed */}
 						<Image
 							src={OpenRsLogo.src}

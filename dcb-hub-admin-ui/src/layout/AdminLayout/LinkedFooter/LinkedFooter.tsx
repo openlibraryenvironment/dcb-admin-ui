@@ -18,9 +18,20 @@ export default function LinkedFooter() {
 
 	const generateLinks = (links: LinkItem[]) => {
 		return (
-			<ul style={{listStyleType: 'none', margin: 0, padding: 0, textWrap: 'wrap', wordBreak:'break-word'}}>
+			<ul
+				style={{
+					listStyleType: "none",
+					margin: 0,
+					padding: 0,
+					textWrap: "wrap",
+					wordBreak: "break-word",
+				}}
+			>
 				{links.map((link) => (
-					<li key={link.text} style={{paddingTop: '10px', lineHeight: '17px'}}>
+					<li
+						key={link.text}
+						style={{ paddingTop: "10px", lineHeight: "17px" }}
+					>
 						<Link
 							variant="linkedFooterTextSize"
 							href={link.href}
@@ -28,8 +39,6 @@ export default function LinkedFooter() {
 								color: theme.palette.primary.linkedFooterText,
 								textDecoration: "none",
 							}}
-							target="_blank"
-							rel="noreferrer"
 							underline="hover"
 						>
 							{link.text}
@@ -102,7 +111,7 @@ export default function LinkedFooter() {
 					style={{
 						padding: 10,
 						width: "250px",
-						height: '100%',
+						height: "100%",
 						//shorthand for mt, mr, mb, ml
 						margin: "0px 20px 0px 20px",
 					}}

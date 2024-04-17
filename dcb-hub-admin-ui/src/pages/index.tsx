@@ -57,13 +57,7 @@ const Home: NextPage = () => {
 					<Trans
 						i18nKey="environment.releases_link"
 						components={{
-							linkToReleases: (
-								<Link
-									href={RELEASE_PAGE_LINKS.ALL_RELEASES}
-									target="_blank"
-									rel="noreferrer"
-								/>
-							),
+							linkToReleases: <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} />,
 						}}
 					></Trans>
 				</Typography>
