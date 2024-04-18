@@ -12,8 +12,6 @@ export default function ConsortiumDetails() {
 			<Link
 				href={ONBOARDING_LINKS.INTRODUCE_LIBRARIES}
 				key="linkToHelpOnboardingIntroduce"
-				target="_blank"
-				rel="noreferrer"
 			>
 				{t("onboarding.stage.introduce_libraries.name")}
 			</Link>,
@@ -35,8 +33,6 @@ export default function ConsortiumDetails() {
 			<Link
 				href={ONBOARDING_LINKS.PROVISION_SYSTEMS}
 				key="linkToHelpOnboardingProvision"
-				target="_blank"
-				rel="noreferrer"
 			>
 				{t("onboarding.stage.provision_systems.name")}
 			</Link>,
@@ -56,8 +52,6 @@ export default function ConsortiumDetails() {
 			<Link
 				href={ONBOARDING_LINKS.CONFIGURE_SERVICES}
 				key="linkToHelpOnboardingConfigure"
-				target="_blank"
-				rel="noreferrer"
 			>
 				{t("onboarding.stage.configure_services.name")}
 			</Link>,
@@ -74,8 +68,6 @@ export default function ConsortiumDetails() {
 			<Link
 				href={ONBOARDING_LINKS.MIGRATE_SERVICE}
 				key="linkToHelpOnboardingMigrate"
-				target="_blank"
-				rel="noreferrer"
 			>
 				{t("onboarding.stage.migrate_service.name")}
 			</Link>,
@@ -92,8 +84,6 @@ export default function ConsortiumDetails() {
 			<Link
 				href={ONBOARDING_LINKS.OPERATE_DCB}
 				key="linkToHelpOnboardingOperate"
-				target="_blank"
-				rel="noreferrer"
 			>
 				{t("onboarding.stage.operate_dcb.name")}
 			</Link>,
@@ -105,8 +95,6 @@ export default function ConsortiumDetails() {
 			<Link
 				href={ONBOARDING_LINKS.MANAGE_SUPPORT}
 				key="linkToHelpOnboardingSupport"
-				target="_blank"
-				rel="noreferrer"
 			>
 				{t("onboarding.stage.manage_support.name")}
 			</Link>,
