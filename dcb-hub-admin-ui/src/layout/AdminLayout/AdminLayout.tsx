@@ -99,12 +99,14 @@ export default function AdminLayout({
 									sx={{
 										marginTop: 1,
 										marginBottom: 1,
-										height: "90px",
+										height: "100%",
+										// grow and shrink as needed to fill the available space in the flex container
+										flex: "0",
 										backgroundColor: theme.palette.primary.titleArea,
 									}}
 								>
 									{title != null ? (
-										<Typography id="page-title" p={3} variant="h1">
+										<Typography id="page-title" p={3} pb={0} variant="h1">
 											{title}
 										</Typography>
 									) : null}
