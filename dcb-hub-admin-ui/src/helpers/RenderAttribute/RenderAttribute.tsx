@@ -18,8 +18,7 @@ export default function RenderAttribute({ attribute }: any) {
 			aria-hidden="true"
 			title={t("a11y.empty")}
 		>
-			{" "}
-			-{" "}
+			-
 		</Typography>
 	);
 }

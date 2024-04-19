@@ -1,7 +1,7 @@
 import { Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
-import { getGroupById } from "src/queries/queries";
+import { getLibraryGroupById } from "src/queries/queries";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Group } from "@models/Group";
@@ -15,13 +15,13 @@ type GroupDetails = {
 
 export default function GroupDetails({ groupId }: GroupDetails) {
 	const { t } = useTranslation();
-	const { loading, data } = useQuery(getGroupById, {
+	const { loading, data } = useQuery(getLibraryGroupById, {
 		variables: {
 			query: "id:" + groupId,
 		},
 		pollInterval: 120000,
 	});
-	const group: Group = data?.agencyGroups?.content?.[0];
+	const group: Group = data?.libraryGroups?.content?.[0];
 
 	return loading ? (
 		<AdminLayout title={t("common.loading")} />
@@ -34,41 +34,76 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 			>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.group_name")}
-						</Typography>
+						<Typography variant="attributeTitle">{t("groups.name")}</Typography>
 						<RenderAttribute attribute={group?.name} />
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.group_code")}
-						</Typography>
+						<Typography variant="attributeTitle">{t("groups.code")}</Typography>
 						<RenderAttribute attribute={group?.code} />
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.group_id")}
-						</Typography>
+						<Typography variant="attributeTitle">{t("groups.type")}</Typography>
+						<RenderAttribute attribute={group?.type} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">{t("groups.id")}</Typography>
 						<RenderAttribute attribute={group?.id} />
 					</Stack>
 				</Grid>
+				{group?.type?.toLowerCase() === "consortium" ? (
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("libraries.consortium.name")}
+							</Typography>
+							<RenderAttribute attribute={group?.consortium?.name} />
+						</Stack>
+					</Grid>
+				) : null}
+				{group?.type?.toLowerCase() === "consortium" ? (
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("libraries.consortium.id")}
+							</Typography>
+							<RenderAttribute attribute={group?.consortium?.id} />
+						</Stack>
+					</Grid>
+				) : null}
 			</Grid>
 			<ClientDataGrid
-				data={group?.members.map((item: { agency: any }) => item.agency) ?? []}
+				data={
+					group?.members.map((item: { library: any }) => item.library) ?? []
+				}
 				columns={[
-					{ field: "name", headerName: "Agency name", minWidth: 100, flex: 1 },
-					{ field: "id", headerName: "Agency ID", minWidth: 50, flex: 0.5 },
-					{ field: "code", headerName: "Agency code", minWidth: 50, flex: 0.5 },
+					{
+						field: "abbreviatedName",
+						headerName: t("libraries.abbreviated_name"),
+						minWidth: 50,
+						flex: 1,
+					},
+					{
+						field: "fullName",
+						headerName: t("libraries.name"),
+						minWidth: 100,
+						flex: 0.5,
+					},
+					{
+						field: "agencyCode",
+						headerName: t("details.agency_code"),
+						minWidth: 50,
+						flex: 0.5,
+					},
 				]}
-				type="GroupDetails"
-				// We don't want click-through on this grid.
+				type="libraryGroupMembers"
 				selectable={false}
-				noDataTitle={"No agencies found."}
-				noDataMessage={"Try changing your filters or search terms."}
+				noDataTitle={t("groups.no_members")}
 			/>
 		</AdminLayout>
 	);

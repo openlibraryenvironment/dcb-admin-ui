@@ -127,7 +127,6 @@ export default function PatronRequestDetails({
 					id="request_details_general"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
@@ -254,14 +253,12 @@ export default function PatronRequestDetails({
 					id="request_bib_record"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.bib_record")}{" "}
+						{t("details.bib_record")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -384,14 +381,12 @@ export default function PatronRequestDetails({
 								id="request_source_record"
 								expandIcon={
 									<IconContext.Provider value={{ size: "2em" }}>
-										{" "}
 										<MdExpandMore />
 									</IconContext.Provider>
 								}
 							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-									{" "}
-									{t("details.source_record")}{" "}
+									{t("details.source_record")}
 								</Typography>
 							</AccordionSummary>
 							<AccordionDetails>
@@ -432,14 +427,12 @@ export default function PatronRequestDetails({
 					id="request_details_patron"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.patron")}{" "}
+						{t("details.patron")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -515,14 +508,12 @@ export default function PatronRequestDetails({
 					id="request_details_pickup"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.pickup")}{" "}
+						{t("details.pickup")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -608,14 +599,12 @@ export default function PatronRequestDetails({
 					id="request_details_supplier"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.supplier")}{" "}
+						{t("details.supplier")}
 					</Typography>
 				</AccordionSummary>
 				{/* We may have to change this for multiple suppliers. Could make it a grid. */}
@@ -680,7 +669,7 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.hostlms_code")}
+									{t("hostlms.code")}
 								</Typography>
 								<RenderAttribute
 									attribute={patronRequest?.suppliers[0]?.hostLmsCode}
@@ -794,14 +783,12 @@ export default function PatronRequestDetails({
 					id="request_details_borrowing"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.borrowing", "Borrowing")}{" "}
+						{t("details.borrowing", "Borrowing")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -897,7 +884,6 @@ export default function PatronRequestDetails({
 					id="request_audit_log"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
@@ -907,8 +893,7 @@ export default function PatronRequestDetails({
 						variant="h2"
 						sx={{ fontWeight: "bold" }}
 					>
-						{" "}
-						{t("details.audit_log")}{" "}
+						{t("details.audit_log")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>

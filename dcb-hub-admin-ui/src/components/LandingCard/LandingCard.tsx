@@ -54,7 +54,7 @@ export default function LandingCard() {
 							</a>
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{t("openrs.about")}{" "}
+							{t("openrs.about")}
 						</Typography>
 						<Typography variant="loginCardText">
 							<Trans
@@ -109,8 +109,7 @@ export default function LandingCard() {
 							</a>
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{" "}
-							{t("openrs.dcb.about")}{" "}
+							{t("openrs.dcb.about")}
 						</Typography>
 						<Typography variant="loginCardText">
 							<Trans
@@ -134,7 +133,6 @@ export default function LandingCard() {
 						rel="noopener"
 					>
 						<Typography variant="cardActionText">
-							{" "}
 							{t("support.submit_ticket")}
 						</Typography>
 					</Button>

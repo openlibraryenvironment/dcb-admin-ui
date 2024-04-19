@@ -49,54 +49,46 @@ const Profile: NextPage = () => {
 				</ListSubheader>
 				<ListItem>
 					<ListItemIcon>
-						{" "}
-						<MdPersonOutline />{" "}
+						<MdPersonOutline />
 					</ListItemIcon>
 					<ListItemText>
-						{" "}
 						<Typography variant="attributeTitle">
-							{t("profile.name")}{" "}
+							{t("profile.name")}
 						</Typography>
-						{session?.user?.name}{" "}
+						{session?.user?.name}
 					</ListItemText>
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						{" "}
-						<MdOutlineMail />{" "}
+						<MdOutlineMail />
 					</ListItemIcon>
 					<ListItemText>
-						{" "}
 						<Typography variant="attributeTitle">
-							{t("profile.email")}{" "}
+							{t("profile.email")}
 						</Typography>
-						{session?.user?.email}{" "}
+						{session?.user?.email}
 					</ListItemText>
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						{" "}
-						<MdOutlineMarkEmailRead />{" "}
+						<MdOutlineMarkEmailRead />
 					</ListItemIcon>
 					<ListItemText>
-						{" "}
 						<Typography variant="attributeTitle">
 							{t("profile.email_verified")}
 						</Typography>
-						{emailVerified.toString()}{" "}
+						{emailVerified.toString()}
 					</ListItemText>
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						{" "}
-						<MdThumbUpOffAlt />{" "}
+						<MdThumbUpOffAlt />
 					</ListItemIcon>
 					<ListItemText>
-						{" "}
 						<Typography variant="attributeTitle">
 							{t("profile.prefered_username")}
 						</Typography>
-						{session?.profile?.preferred_username}{" "}
+						{session?.profile?.preferred_username}
 					</ListItemText>
 				</ListItem>
 				<ListItem>

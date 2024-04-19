@@ -93,6 +93,7 @@ const openRSDark = createTheme({
 		h2: {
 			fontSize: 20,
 			fontWeight: 400,
+			color: "#FFFFFF",
 		},
 		h3: {
 			fontSize: 18,

@@ -144,14 +144,12 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					id="source-bibs-json-details"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.canonical_metadata")}{" "}
+						{t("details.canonical_metadata")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -172,14 +170,12 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					id="source-bibs-source-record-json-details"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.source_record")}{" "}
+						{t("details.source_record")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
