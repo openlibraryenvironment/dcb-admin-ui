@@ -152,7 +152,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 					title={t("nav.home")}
 					sx={{ color: "inherit", fontSize: "14px" }}
 				>
-					{t("nav.home")}{" "}
+					{t("nav.home")}
 				</Typography>
 			) : (
 				<Link

@@ -43,6 +43,13 @@ const HostLmss: NextPage = () => {
 						flex: 0.5,
 						filterOperators,
 					},
+					{
+						field: "clientConfig.ingest",
+						headerName: "HostLMS code",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators,
+					},
 				]}
 				selectable={true}
 				pageSize={10}

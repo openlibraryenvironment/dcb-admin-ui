@@ -38,8 +38,7 @@ const Home: NextPage = () => {
 					{t("consortium.your")}
 				</Typography>
 				<Typography variant="homePageText">
-					{" "}
-					{t("common.placeholder_text")}{" "}
+					{t("common.placeholder_text")}
 				</Typography>
 				<ConsortiumDetails />
 				<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>

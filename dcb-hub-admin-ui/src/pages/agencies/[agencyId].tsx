@@ -70,7 +70,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<Typography variant="attributeTitle">
 							{t("details.agency_hostlms")}
 						</Typography>
-						<RenderAttribute attribute={agency?.hostlms?.code} />
+						<RenderAttribute attribute={agency?.hostLms?.code} />
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
@@ -91,14 +91,12 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 					id="agency_details_location_info"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.location_info")}{" "}
+						{t("details.location_info")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>

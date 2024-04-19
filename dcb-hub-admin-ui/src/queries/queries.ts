@@ -3,33 +3,34 @@ import { gql } from "@apollo/client";
 // This file holds all our GraphQL queries and mutations, so they can be reused throughout the project
 
 // MUTATIONS - modify data
+// Libraries and LibraryGroups
 
-// A mutation for adding an agency to a group.
-export const addAgenciesToGroup = gql`
-	mutation AddAgencyToGroup($input: AddAgencyToGroupCommand!) {
-		addAgencyToGroup(input: $input) {
+export const createLibraryGroup = gql`
+	mutation CreateLibraryGroup($input: LibraryGroupInput!) {
+		createLibraryGroup(input: $input) {
 			id
-			agency {
-				id
-				code
-				name
-			}
-			group {
-				id
-				code
-				name
-			}
+			code
+			name
+			type
 		}
 	}
 `;
 
-// A mutation for creating a new group.
-export const createGroup = gql`
-	mutation CreateAgencyGroup($input: AgencyGroupInput!) {
-		createAgencyGroup(input: $input) {
+export const addLibraryToGroup = gql`
+	mutation addLibraryToGroup($input: AddLibraryToGroupCommand!) {
+		addLibraryToGroup(input: $input) {
 			id
-			code
-			name
+			library {
+				id
+				agencyCode
+				fullName
+			}
+			libraryGroup {
+				id
+				code
+				name
+				type
+			}
 		}
 	}
 `;
@@ -194,7 +195,7 @@ export const getBibById = gql`
 	}
 `;
 
-// GROUPS
+// AGENCY GROUPS (DEPRECATED)
 
 // A query for loading a page of groups. We only fetch what's displayed in the Data Grid.
 // As we fetch other attributes like members when the user clicks on an individual record.
@@ -403,6 +404,194 @@ export const getLocationById = gql`
 				locationReference
 				dateCreated
 				dateUpdated
+			}
+		}
+	}
+`;
+
+// Libraries
+// A query to load a page of Libraries for display in the data grid
+
+export const getLibraries = gql`
+	query LoadLibraries(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		libraries(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			content {
+				id
+				fullName
+				shortName
+				abbreviatedName
+				agencyCode
+				supportHours
+				address
+				type
+				agency {
+					id
+					code
+					name
+					authProfile
+					hostLms {
+						id
+						code
+						clientConfig
+						lmsClientClass
+					}
+				}
+				secondHostLms {
+					id
+					code
+					clientConfig
+					lmsClientClass
+				}
+			}
+			pageable {
+				number
+				offset
+			}
+			totalSize
+		}
+	}
+`;
+
+// A query to load a Library by its ID
+export const getLibraryById = gql`
+	query LoadLibrary($query: String!) {
+		libraries(query: $query) {
+			content {
+				id
+				fullName
+				shortName
+				abbreviatedName
+				agencyCode
+				supportHours
+				address
+				latitude
+				longitude
+				training
+				patronWebsite
+				discoverySystem
+				type
+				backupDowntimeSchedule
+				hostLmsConfiguration
+				agency {
+					id
+					code
+					name
+					authProfile
+					hostLms {
+						id
+						code
+						name
+						clientConfig
+						lmsClientClass
+					}
+				}
+				secondHostLms {
+					id
+					code
+					name
+					clientConfig
+					lmsClientClass
+				}
+				membership {
+					libraryGroup {
+						id
+						code
+						name
+						type
+						consortium {
+							id
+							name
+						}
+					}
+				}
+				contacts {
+					id
+					firstName
+					lastName
+					role
+					isPrimaryContact
+					email
+				}
+			}
+		}
+	}
+`;
+
+// 'LIBRARY' GROUPS
+
+export const getLibraryGroups = gql`
+	query LoadGroups(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		libraryGroups(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			totalSize
+			content {
+				id
+				code
+				name
+				type
+			}
+			pageable {
+				number
+				offset
+			}
+		}
+	}
+`;
+
+export const getLibraryGroupById = gql`
+	query LoadGroup($query: String!) {
+		libraryGroups(query: $query) {
+			content {
+				id
+				code
+				name
+				type
+				consortium {
+					id
+					name
+				}
+				members {
+					id
+					library {
+						id
+						agencyCode
+						agency {
+							authProfile
+							hostLms {
+								lmsClientClass
+								code
+							}
+						}
+						shortName
+						fullName
+						abbreviatedName
+						longitude
+						latitude
+					}
+				}
 			}
 		}
 	}

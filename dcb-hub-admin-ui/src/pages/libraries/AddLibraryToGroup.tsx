@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFormik } from "formik";
-import { addAgenciesToGroup } from "src/queries/queries";
+import { addLibraryToGroup } from "src/queries/queries";
 import { gql, useMutation } from "@apollo/client";
 import * as Yup from "yup";
 import {
@@ -19,90 +19,96 @@ import { useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
+// FUTURE WORK: Make this take a name or code - something easier than UUID
 interface FormData {
 	groupId: string;
-	agencyId: string;
+	libraryId: string;
 	// Add more fields as needed when we know them
 }
 // This is a TypeScript type definition for the response we get from the GraphQL server.
 // Without this, we receive a 'property does not exist on type unknown' error.
-interface AddAgenciesResponse {
-	addAgencyToGroup: {
+interface AddLibrariesResponse {
+	addLibraryToGroup: {
 		id: string;
-		agency: {
+		library: {
 			id: string;
-			code: string;
-			name: string;
+			libraryCode: string;
+			fullName: string;
 		};
-		group: {
+		libraryGroup: {
 			id: string;
 			code: string;
 			name: string;
+			type: string;
 		};
 	};
 }
 
-type NewGroupType = {
+type AddLibraryType = {
 	show: boolean;
 	onClose: any;
 	// type: string; - for if/when we make this a generic 'New' form later
-	// this will also eventually contain an array of agencies for multi-select
+	// this will also eventually contain an array of libraries for multi-select
 };
 
-//This validates input client-side for the form
+//This validates input client-side for the form - TRANSLATIONS NEEDED
 const validationSchema = Yup.object().shape({
 	groupId: Yup.string()
-		.required("Group ID is required")
-		.max(36, "Group ID must be at most 36 characters"),
-	agencyId: Yup.string()
-		.required("Agency ID is required")
-		.max(36, "Agency ID must be at most 36 characters"),
+		.required("Group UUID is required")
+		.max(36, "Group UUID must be at most 36 characters"),
+	libraryId: Yup.string()
+		.required("Library UUID is required")
+		.max(36, "Library UUID must be at most 36 characters"),
 });
 
-export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
+export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 	// State management variables.
 	const [isSuccess, setSuccess] = useState(false);
 	const [isError, setError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 	const theme = useTheme();
 
-	// As this returns an updated agency, not a group, and we can't refetch non-active queries, we must update cache ourselves. If we were able to force a refetch, that would be much better
+	// As this returns an updated library, not a group, and we can't refetch non-active queries, we must update cache ourselves. If we were able to force a refetch, that would be much better
 	//https://www.apollographql.com/docs/react/data/mutations#refetching-queries
 
-	const [addAgenciesMutation] = useMutation<AddAgenciesResponse>(
-		addAgenciesToGroup,
+	const [addLibraryMutation] = useMutation<AddLibrariesResponse>(
+		addLibraryToGroup,
 		{
 			update(cache, { data }) {
 				// Ensure that groups are updated instantly client-side with this new info
-				const newAgency = data?.addAgencyToGroup?.agency;
+				const newLibrary = data?.addLibraryToGroup?.library;
 
-				const groupId = data?.addAgencyToGroup?.group?.id;
+				const libraryGroupId = data?.addLibraryToGroup?.libraryGroup?.id;
 
 				cache.modify({
-					id: cache.identify({ __typename: "AgencyGroup", id: groupId }),
+					id: cache.identify({
+						__typename: "LibraryGroup",
+						id: libraryGroupId,
+					}),
 
 					fields: {
 						members(existingMembers = [], { readField }) {
 							const newMemberRef = cache.writeFragment({
-								data: newAgency,
+								data: newLibrary,
 								fragment: gql`
-									fragment NewAgency on Agency {
+									fragment NewLibrary on Library {
 										id
-										code
-										name
+										agencyCode
+										fullName
+										type
 									}
 								`,
 							});
 							if (
 								existingMembers.some(
 									(member: any) =>
-										readField("id", member.agency) === newAgency?.id,
+										readField("id", member.library) === newLibrary?.id,
 								)
 							) {
 								return existingMembers;
 							}
 
-							return [...existingMembers, { agency: newMemberRef }];
+							return [...existingMembers, { library: newMemberRef }];
 						},
 					},
 				});
@@ -113,10 +119,8 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 			},
 			onError: (error) => {
 				setError(true);
-				setErrorMessage(
-					"Failed to add agency to group. Please retry, and if this issue persists please sign out and back in again.",
-				);
-				console.log("Error adding agency to group:", error);
+				setErrorMessage(t("libraries.error_adding_to_group"));
+				console.log(t("libraries.error_adding_to_group"), error);
 			},
 		},
 	);
@@ -124,18 +128,18 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 	// This function governs what happens after we click 'submit'.
 	const handleSubmit = async (values: FormData) => {
 		try {
-			await addAgenciesMutation({
+			await addLibraryMutation({
 				variables: {
 					input: {
-						group: values.groupId,
-						agency: values.agencyId,
+						libraryGroup: values.groupId,
+						library: values.libraryId,
 					},
 				},
 			});
 			onClose(); // close on success
 		} catch (error) {
 			// We should bear in mind that GraphQL errors often come as '200' responses and implement better handling.
-			console.error("Error adding agency to group:", error);
+			console.error(t("libraries.error_adding_to_group"));
 		}
 	};
 
@@ -143,18 +147,18 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 		const formik = useFormik({
 			initialValues: {
 				groupId: "",
-				agencyId: "",
+				libraryId: "",
 			},
 			validationSchema: validationSchema,
 			onSubmit: handleSubmit,
 		});
 		return (
 			<Box>
-				<form id="add-agency-form" onSubmit={formik.handleSubmit}>
+				<form id="add-library-form" onSubmit={formik.handleSubmit}>
 					<TextField
 						fullWidth
 						id="groupId"
-						data-tid="add-agency-groupid"
+						data-tid="add-library-groupid"
 						name="groupId"
 						label="Group ID"
 						value={formik.values.groupId}
@@ -165,19 +169,19 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 					/>
 					<TextField
 						fullWidth
-						id="agencyId"
-						data-tid="add-agency-agencyid"
-						name="agencyId"
-						label="Agency ID"
-						value={formik.values.agencyId}
+						id="libraryId"
+						data-tid="add-library-libraryid"
+						name="libraryId"
+						label="Library ID"
+						value={formik.values.libraryId}
 						onChange={formik.handleChange}
 						onBlur={formik.handleBlur}
-						error={formik.touched.agencyId && Boolean(formik.errors.agencyId)}
-						helperText={formik.touched.agencyId && formik.errors.agencyId}
+						error={formik.touched.libraryId && Boolean(formik.errors.libraryId)}
+						helperText={formik.touched.libraryId && formik.errors.libraryId}
 					/>
 					<Button
 						color="primary"
-						data-tid="add-agency-submit"
+						data-tid="add-library-submit"
 						variant="contained"
 						fullWidth
 						type="submit"
@@ -197,11 +201,10 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 			<Dialog
 				open={show}
 				onClose={onClose}
-				aria-labelledby="centred-add-agency-dialog"
+				aria-labelledby="centred-add-library-dialog"
 			>
-				<DialogTitle data-tid="add-agency-title" variant="modalTitle">
-					{" "}
-					{t("agencies.add_to_group")}
+				<DialogTitle data-tid="add-library-title" variant="modalTitle">
+					{t("libraries.add_to_group")}
 				</DialogTitle>
 				<IconButton
 					aria-label="close"
@@ -223,7 +226,7 @@ export default function AddAgenciesToGroup({ show, onClose }: NewGroupType) {
 						textColor={theme.palette.common.black}
 						severityType="success"
 						onCloseFunc={() => setSuccess(false)}
-						alertText={t("agencies.alert_text_success")}
+						alertText={t("libraries.alert_text_success")}
 					></Alert>
 				)}
 				{isError && (

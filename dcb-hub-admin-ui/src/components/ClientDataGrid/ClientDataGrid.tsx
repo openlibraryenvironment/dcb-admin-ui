@@ -6,6 +6,7 @@ import {
 	DataGrid as MUIDataGrid,
 	GridToolbar,
 	GridEventListener,
+	GridToolbarQuickFilter,
 } from "@mui/x-data-grid";
 import { useRouter } from "next/router";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
@@ -20,6 +21,19 @@ const StyledOverlay = styled("div")(() => ({
 	height: "100%",
 }));
 
+function SearchOnlyToolbar() {
+	return (
+		<Box
+			sx={{
+				p: 0.5,
+				pb: 0,
+			}}
+		>
+			<GridToolbarQuickFilter />
+		</Box>
+	);
+}
+
 export default function ClientDataGrid<T extends object>({
 	data = [],
 	columns,
@@ -31,6 +45,7 @@ export default function ClientDataGrid<T extends object>({
 	noDataLink,
 	columnVisibilityModel,
 	sortModel,
+	toolbarVisible,
 }: {
 	data: Array<T>;
 	columns: any;
@@ -42,6 +57,7 @@ export default function ClientDataGrid<T extends object>({
 	noDataLink?: string;
 	columnVisibilityModel?: any;
 	sortModel?: any;
+	toolbarVisible?: string;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -69,6 +85,10 @@ export default function ClientDataGrid<T extends object>({
 	const handleRowClick: GridEventListener<"rowClick"> = (params) => {
 		if (type == "Audit") {
 			router.push(`/patronRequests/audits/${params?.row?.id}`);
+		} else if (type == "libraryGroupMembers") {
+			router.push(`/libraries/${params?.row?.id}`);
+		} else if (type == "groupsOfLibrary") {
+			router.push(`/groups/${params?.row?.id}`);
 		}
 	};
 	function getIdOfRow(row: any) {
@@ -123,13 +143,20 @@ export default function ClientDataGrid<T extends object>({
 					},
 				}}
 				// if we don't want to filter by a column, set filterable to false (turned on by default)
+				// And if we want to hide columns, pass the visibility model in
 				columns={columns}
+				columnVisibilityModel={columnVisibilityModel}
 				// we can make our own custom toolbar if necessary, potentially extending the default GridToolbar. Just pass it in here
 				rows={data ?? []}
 				getRowId={getIdOfRow}
 				// And if we ever need to distinguish between no data and no results (i.e. from search) we'd just pass different overlays here.
 				slots={{
-					toolbar: GridToolbar,
+					toolbar:
+						toolbarVisible != "not-visible" && toolbarVisible != "search-only"
+							? GridToolbar
+							: toolbarVisible == "search-only"
+								? SearchOnlyToolbar
+								: null,
 					noRowsOverlay: CustomNoDataOverlay,
 					noResultsOverlay: CustomNoDataOverlay,
 				}}
