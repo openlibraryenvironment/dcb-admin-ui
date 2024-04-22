@@ -24,7 +24,7 @@ export default function Alert(props: any) {
 					<IconButton
 						size="small"
 						onClick={props.onCloseFunc}
-						title={t("ui.close_alert")}
+						title={t("ui.action.close_alert")}
 					>
 						<MdClose color={props.textColor} />
 					</IconButton>

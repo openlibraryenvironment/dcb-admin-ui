@@ -16,6 +16,8 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
 
 type LocationDetails = {
 	locationId: string;
@@ -27,7 +29,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	const theme = useTheme();
 
 	// Poll interval in ms
-	const { loading, data } = useQuery(getLocationById, {
+	const { loading, data, error } = useQuery(getLocationById, {
 		variables: {
 			query: "id:" + locationId,
 		},
@@ -35,8 +37,39 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	});
 	const location: Location = data?.locations?.content?.[0];
 
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("locations.location_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || location == null || location == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/locations"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/locations"
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={location?.name}>
 			<Grid

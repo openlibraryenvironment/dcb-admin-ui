@@ -1,6 +1,8 @@
 import { useApolloClient, useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import Error from "@components/Error/Error";
 import Link from "@components/Link/Link";
+import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import {
 	Stack,
@@ -38,7 +40,7 @@ export default function PatronRequestDetails({
 	const client = useApolloClient();
 	const { data: session }: { data: any } = useSession();
 
-	const { loading, data } = useQuery(getPatronRequestById, {
+	const { loading, data, error } = useQuery(getPatronRequestById, {
 		variables: {
 			query: "id:" + patronRequestId,
 		},
@@ -109,8 +111,39 @@ export default function PatronRequestDetails({
 		});
 	};
 
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("patron_requests.pr_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || patronRequest == null || patronRequest == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/patronRequests"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/patronRequests"
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={patronRequest?.clusterRecord?.title}>
 			<Stack direction="row" justifyContent="end">

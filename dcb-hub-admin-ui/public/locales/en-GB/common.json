@@ -36,9 +36,47 @@
 	},
 
 	"ui": {
-		"close_alert": "Close alert",
+		"action": {
+			"check_url": "Please check the URL or return to the previous page",
+			"close_alert": "Close alert",
+			"contact_sysadmin": "Contact your system administrator",
+			"go_home": "Go to home page",
+			"reload": "Reload page",
+			"view_error_details": "View error details"
+		},
+		"error": {
+			"401": {
+				"name": "401 Unauthorised",
+				"message": "You are not authorised to access this page",
+				"description": "If you think you should have access to this page, please contact your system administrator."
+			},
+			"404": {
+				"name": "404 Page not found",
+				"summary": "This page seems to be missing",
+				"description": "Check the web address or try another page"
+			},
+			"500": {
+				"name": "500 Server error",
+				"summary": "This doesn't seem to be working at the moment"
+			},
+			"cannot_retrieve_record": "Unable to retrieve the record",
+			"record_not_found": "Record not found",
+			"something_wrong": "Something went wrong",
+			"summary": "Sorry, you do not have access to this page",
+			"too_long_load": "The record is taking too long to load"
+		},
+		"info": {
+			"connection_issue": "There may be a connection issue",
+			"go_back": "Go back",
+			"loading": {
+				"document": "Loading {{document_type}}"
+			},
+			"record_unavailable": "It seems no record is available at this URL",
+			"reload": "Try reloading the page",
+			"try_later": "Please try again later",
+			"wait": "Please wait"
+		},
 		"logo": "{{owner}} logo",
-		"reload_page": "Reload page",
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
 			"hideShown": "Hide displayed content for {{field}}"
@@ -175,6 +213,7 @@
 	},
 
 	"agencies": {
+		"agencies_one": "agency",
 		"add_to_group": "Add agencies to a group",
 		"alert_text_success": "Agency added to group!",
 		"alert_text": "Failed to fetch the agencies, please refresh the page.",
@@ -191,6 +230,7 @@
 	},
 
 	"groups": {
+		"groups_one": "group",
 		"loading_msg": "Loading groups....",
 		"alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page.",
 		"type_new": "New Group",
@@ -207,6 +247,7 @@
 	},
 
 	"hostlms": {
+		"hostlms_one": "Host LMS",
 		"code": "Host LMS code",
 		"name": "Host LMS name",
 		"id": "Host LMS UUID",
@@ -263,6 +304,7 @@
 	},
 
 	"locations": {
+		"location_one": "location",
 		"loading_msg": "Loading locations....",
 		"alert_text": "Failed to fetch the locations, please refresh the page.",
 		"no_results": "No locations were found. Try changing your search terms or filters.",
@@ -358,6 +400,7 @@
 	},
 
 	"patron_requests": {
+		"pr_one": "patron request",
 		"loading_msg": "Loading requests....",
 		"alert_text": "Failed to fetch the requests, please refresh the page.",
 		"no_results": "No patron requests were found. Try changing your search terms or filters.",
@@ -366,6 +409,7 @@
 	},
 
 	"bibRecords": {
+		"bibs_one": "bib record",
 		"bib_records": "Bib records",
 		"no_results": "No bib records found. Try changing your search terms or filters.",
 		"no_rows": "No bib records available. If you're expecting data to be here, please refresh the page.",

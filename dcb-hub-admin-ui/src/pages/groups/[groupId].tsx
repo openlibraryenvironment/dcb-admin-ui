@@ -6,6 +6,8 @@ import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Group } from "@models/Group";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import Error from "@components/Error/Error";
+import Loading from "@components/Loading/Loading";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 
@@ -15,7 +17,7 @@ type GroupDetails = {
 
 export default function GroupDetails({ groupId }: GroupDetails) {
 	const { t } = useTranslation();
-	const { loading, data } = useQuery(getLibraryGroupById, {
+	const { loading, data, error } = useQuery(getLibraryGroupById, {
 		variables: {
 			query: "id:" + groupId,
 		},
@@ -23,8 +25,39 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 	});
 	const group: Group = data?.libraryGroups?.content?.[0];
 
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("groups.groups_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || group == null || group == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/groups"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/groups"
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={group?.name}>
 			<Grid
