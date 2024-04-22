@@ -150,7 +150,7 @@
 		"record_updated": "Record updated",
 		"request_created": "Request created",
 		"request_id": "Request ID",
-		"requestor_id": "Requesting agency ID",
+		"requestor_id": "Patron ID at requesting agency",
 		"requestor_note": "Requestor note",
 		"request_updated": "Request updated",
 		"selected_bib": "Selected bib",

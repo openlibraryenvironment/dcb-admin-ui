@@ -773,16 +773,6 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.borrowing_patron_id")}
-								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.requestingIdentity?.id}
-								/>
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
 									{t("details.local_item_id")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.localItemId} />
