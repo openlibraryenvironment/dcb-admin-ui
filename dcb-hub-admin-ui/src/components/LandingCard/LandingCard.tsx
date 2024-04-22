@@ -27,9 +27,9 @@ export default function LandingCard() {
 		<Stack
 			direction={{ xs: "column", sm: "column", md: "row", lg: "row" }}
 			spacing={4}
-			p={'16px'}
-			pt={'48px'}
-			pb={'48px'}
+			p={"16px"}
+			pt={"48px"}
+			pb={"48px"}
 		>
 			<Card
 				elevation={3}

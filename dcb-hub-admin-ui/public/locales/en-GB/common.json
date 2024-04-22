@@ -81,6 +81,7 @@
 		"bib_cluster_id": "Bib cluster ID",
 		"bib_record": "Bib record",
 		"borrowing": "Borrowing",
+		"borrowing_patron_barcode": "Local patron barcode",
 		"borrowing_patron_id": "Local patron ID",
 		"borrowing_patron_type": "Local patron type",
 		"borrowing_request_id": "Pickup request ID",
@@ -102,6 +103,7 @@
 		"expand": "Expand all",
 		"general": "General",
 		"id": "ID",
+		"item": "Item",
 		"json": "JSON",
 		"lms_client": "LmsClientClass",
 		"lat": "Latitude: ",
@@ -164,9 +166,12 @@
 		"supplier_id": "Supplier ID",
 		"supplier_ctype": "Canonical item type",
 		"supplier_request": "Supplier request data",
+		"supplying": "Supplying",
 		"supplying_agency_code": "Supplying agency code",
 		"title": "Title",
-		"view": "View"
+		"view": "View",
+		"virtual_item": "Virtual item",
+		"virtual_patron": "Virtual patron"
 	},
 
 	"agencies": {
