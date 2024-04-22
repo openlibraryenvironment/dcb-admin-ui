@@ -16,6 +16,8 @@ import { MdExpandMore } from "react-icons/md";
 import { useQuery } from "@apollo/client";
 import { Agency } from "@models/Agency";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
 
 type AgencyDetails = {
 	agencyId: string;
@@ -24,7 +26,7 @@ type AgencyDetails = {
 export default function AgencyDetails({ agencyId }: AgencyDetails) {
 	const { t } = useTranslation();
 	const theme = useTheme();
-	const { loading, data } = useQuery(getAgencyById, {
+	const { loading, data, error } = useQuery(getAgencyById, {
 		variables: {
 			query: "id:" + agencyId,
 		},
@@ -32,8 +34,40 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 	});
 	const agency: Agency = data?.agencies?.content?.[0];
 
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("agencies.agencies_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+	console.log(error);
+
+	return error || agency == null || agency == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/agencies"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/agencies"
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={agency?.name}>
 			<Grid

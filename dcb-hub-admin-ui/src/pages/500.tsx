@@ -1,21 +1,16 @@
-import Error from "@components/Error/Error";
 import { AdminLayout } from "@layout";
+import Error from "@components/Error/Error";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
-export default function NotFound() {
+export default function Custom500Page() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout
-			title={t("404.page_title")}
-			hideTitleBox={true}
-			hideBreadcrumbs={true}
-		>
+		<AdminLayout hideBreadcrumbs>
 			<Error
-				title={t("ui.error.404.name")}
-				message={t("ui.error.404.summary")}
-				description={t("ui.error.404.description")}
-				action={t("ui.info.go_back")}
+				title={t("ui.error.500.name")}
+				message={t("ui.error.500.summary")}
+				action={t("ui.action.go_home")}
 				goBack="/"
 			/>
 		</AdminLayout>

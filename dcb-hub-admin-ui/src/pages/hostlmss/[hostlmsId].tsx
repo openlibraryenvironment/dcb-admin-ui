@@ -15,6 +15,8 @@ import { HostLMS } from "@models/HostLMS";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
+import Error from "@components/Error/Error";
+import Loading from "@components/Loading/Loading";
 import PrivateData from "@components/PrivateData/PrivateData";
 import { getHostLmsById } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
@@ -29,7 +31,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	const theme = useTheme();
 
 	// pollInterval is in ms - set to 2 mins
-	const { loading, data } = useQuery(getHostLmsById, {
+	const { loading, data, error } = useQuery(getHostLmsById, {
 		variables: {
 			query: "id:" + hostlmsId,
 		},
@@ -63,9 +65,39 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 			prevExpanded.map(() => !prevExpanded[0]),
 		);
 	};
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("hostlms.hostlms_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	return error || hostlms == null || hostlms == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/hostlmss"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/hostlmss"
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={hostlms?.name}>
 			<Stack direction="row" justifyContent="end">

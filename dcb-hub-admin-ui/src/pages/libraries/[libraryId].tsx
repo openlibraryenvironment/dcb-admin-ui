@@ -24,6 +24,8 @@ import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
 import PrivateData from "@components/PrivateData/PrivateData";
 import AddressLink from "@components/Address/AddressLink";
+import Error from "@components/Error/Error";
+import Loading from "@components/Loading/Loading";
 import { useQuery } from "@apollo/client/react";
 import { getLibraryById } from "src/queries/queries";
 import { Library } from "@models/Library";
@@ -38,7 +40,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const theme = useTheme();
 
 	// pollInterval is in ms - set to 2 mins
-	const { data } = useQuery(getLibraryById, {
+	const { data, loading, error } = useQuery(getLibraryById, {
 		variables: {
 			query: "id:" + libraryId,
 		},
@@ -82,7 +84,40 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		);
 	};
 
-	return (
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("libraries.library").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || library == null || library == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/libraries"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/libraries"
+				/>
+			)}
+		</AdminLayout>
+	) : (
 		<AdminLayout title={library?.fullName}>
 			<Stack direction="row" justifyContent="end">
 				<Button onClick={expandAll}>

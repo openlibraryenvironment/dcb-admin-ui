@@ -76,8 +76,8 @@ const BibRecordCountByHostLms: NextPage = () => {
 							linkComponent: (
 								<Link
 									onClick={handleReload}
-									title={t("ui.reload_page")}
-									key={t("ui.reload_page")}
+									title={t("ui.action.reload")}
+									key={t("ui.action.reload")}
 									href="bibRecordCountByHostLms"
 								/>
 							),

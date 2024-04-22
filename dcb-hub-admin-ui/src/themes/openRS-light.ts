@@ -60,6 +60,7 @@ const openRSLight = createTheme({
 			buttonForSelectedChildPage: "#999999",
 			buttonForSelectedPage: "#287BAF",
 			detailsAccordionSummary: "#F6F6F6",
+			exclamationIcon: "#999999",
 			footerArea: "#FFFFFF",
 			footerText: "#000000",
 			linkedFooterBackground: "#0C4068",
@@ -119,6 +120,10 @@ const openRSLight = createTheme({
 		subheading: {
 			fontSize: "1.3rem",
 		},
+		componentSubheading: {
+			fontSize: "1.3rem",
+			color: "#0C4068",
+		},
 		attributeTitle: {
 			fontWeight: "bold",
 		},
@@ -147,7 +152,7 @@ const openRSLight = createTheme({
 			fontSize: "14px",
 		},
 		linkedFooterHeader: {
-			fontSize: 18,
+			fontSize: "18px",
 			fontWeight: "bold",
 		},
 	},
