@@ -1,7 +1,10 @@
-import { AgencyGroupMember } from "./AgencyGroupMember";
+import { LibraryGroupMember } from "./LibraryGroupMember";
+import { Consortium } from "./Consortium";
 export interface Group {
 	id: number;
 	code: string;
 	name: string;
-	members: AgencyGroupMember[];
+	type: string;
+	members: LibraryGroupMember[];
+	consortium: Consortium | null;
 }

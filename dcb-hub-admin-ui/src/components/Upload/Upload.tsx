@@ -211,7 +211,6 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 			/>
 			<Stack spacing={1} direction={"row"}>
 				<Button variant="outlined" onClick={handleReset}>
-					{" "}
 					{t("mappings.cancel", "Cancel")}
 				</Button>
 				{/* This makes the Cancel and Import buttons left and right aligned, respectively*/}

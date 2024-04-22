@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AdminLayout } from "@layout";
 import { Button } from "@mui/material";
 import NewGroup from "./NewGroup";
-import { getGroups } from "src/queries/queries";
+import { getLibraryGroups } from "src/queries/queries";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 //localisation
 import { useTranslation } from "next-i18next";
@@ -14,7 +14,7 @@ import { getGridStringOperators } from "@mui/x-data-grid";
 // This page shows the list of groups
 // New Group is the (modal) form to add a group
 // [groupId].tsx is the 'Details' page.
-// In /agencies, there is the Add Agencies to Group form.
+// Groups have been altered to take Libraries - no longer agencies
 
 const Groups: NextPage = () => {
 	const [showNewGroup, setShowNewGroup] = useState(false);
@@ -39,12 +39,11 @@ const Groups: NextPage = () => {
 				variant="contained"
 				onClick={openNewGroup}
 			>
-				{" "}
 				{t("groups.type_new")}
 			</Button>
 			<ServerPaginationGrid
-				query={getGroups}
-				coreType="agencyGroups"
+				query={getLibraryGroups}
+				coreType="libraryGroups"
 				type="groups"
 				columns={[
 					{
@@ -68,12 +67,19 @@ const Groups: NextPage = () => {
 						flex: 0.5,
 						filterOperators,
 					},
+					{
+						field: "type",
+						headerName: "Group type",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators,
+					},
 				]}
 				selectable={true}
 				pageSize={10}
 				noDataMessage={t("groups.no_rows")}
 				noResultsMessage={t("groups.no_results")}
-				searchPlaceholder={t("locations.search_placeholder")}
+				searchPlaceholder={t("groups.search_placeholder")}
 				sortDirection="ASC"
 				sortAttribute="name"
 			/>

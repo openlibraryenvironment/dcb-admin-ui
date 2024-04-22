@@ -27,9 +27,9 @@ export default function LandingCard() {
 		<Stack
 			direction={{ xs: "column", sm: "column", md: "row", lg: "row" }}
 			spacing={4}
-			p={'16px'}
-			pt={'48px'}
-			pb={'48px'}
+			p={"16px"}
+			pt={"48px"}
+			pb={"48px"}
 		>
 			<Card
 				elevation={3}
@@ -54,7 +54,7 @@ export default function LandingCard() {
 							</a>
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{t("openrs.about")}{" "}
+							{t("openrs.about")}
 						</Typography>
 						<Typography variant="loginCardText">
 							<Trans
@@ -109,8 +109,7 @@ export default function LandingCard() {
 							</a>
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{" "}
-							{t("openrs.dcb.about")}{" "}
+							{t("openrs.dcb.about")}
 						</Typography>
 						<Typography variant="loginCardText">
 							<Trans
@@ -134,7 +133,6 @@ export default function LandingCard() {
 						rel="noopener"
 					>
 						<Typography variant="cardActionText">
-							{" "}
 							{t("support.submit_ticket")}
 						</Typography>
 					</Button>

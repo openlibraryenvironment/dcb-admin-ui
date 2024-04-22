@@ -18,6 +18,8 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { getBibById } from "src/queries/queries";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
 
 type BibDetails = {
 	bibId: Bib;
@@ -26,7 +28,7 @@ type BibDetails = {
 export default function SourceBibDetails({ bibId }: BibDetails) {
 	const { t } = useTranslation();
 	const theme = useTheme();
-	const { loading, data } = useQuery(getBibById, {
+	const { loading, data, error } = useQuery(getBibById, {
 		variables: {
 			query: "id:" + bibId,
 		},
@@ -59,8 +61,39 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 			prevExpanded.map(() => !prevExpanded[0]),
 		);
 	};
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("bibRecords.bibs_one").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || bib == null || bib == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack="/bibs"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack="/bibs"
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={bib?.title}>
 			<Stack direction="row" justifyContent="end">
@@ -144,14 +177,12 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					id="source-bibs-json-details"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.canonical_metadata")}{" "}
+						{t("details.canonical_metadata")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
@@ -172,14 +203,12 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					id="source-bibs-source-record-json-details"
 					expandIcon={
 						<IconContext.Provider value={{ size: "2em" }}>
-							{" "}
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{" "}
-						{t("details.source_record")}{" "}
+						{t("details.source_record")}
 					</Typography>
 				</AccordionSummary>
 				<AccordionDetails>

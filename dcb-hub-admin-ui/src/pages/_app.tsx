@@ -24,6 +24,7 @@ declare module "@mui/material/styles" {
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
 		detailsAccordionSummary?: string;
+		exclamationIcon?: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
@@ -51,6 +52,7 @@ declare module "@mui/material/styles" {
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
 		detailsAccordionSummary?: string;
+		exclamationIcon?: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
@@ -83,6 +85,7 @@ declare module "@mui/material/styles" {
 		homePageText: React.CSSProperties;
 		notFoundTitle: React.CSSProperties;
 		notFoundText: React.CSSProperties;
+		componentSubheading: React.CSSProperties;
 		linkedFooterTextSize: React.CSSProperties;
 		linkedFooterHeader: React.CSSProperties;
 	}
@@ -98,6 +101,7 @@ declare module "@mui/material/styles" {
 		homePageText: React.CSSProperties;
 		notFoundTitle: React.CSSProperties;
 		notFoundText: React.CSSProperties;
+		componentSubheading: React.CSSProperties;
 		linkedFooterTextSize: React.CSSProperties;
 		linkedFooterHeader: React.CSSProperties;
 	}
@@ -115,6 +119,7 @@ declare module "@mui/material/Typography" {
 		homePageText: true;
 		notFoundTitle: true;
 		notFoundText: true;
+		componentSubheading: true;
 		linkedFooterTextSize: true;
 		linkedFooterHeader: true;
 	}

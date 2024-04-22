@@ -56,6 +56,7 @@ const openRSDark = createTheme({
 			buttonForSelectedChildPage: "#999999",
 			buttonForSelectedPage: "#287BAF",
 			detailsAccordionSummary: "#424242",
+			exclamationIcon: "#999999",
 			footerArea: "#202020",
 			footerText: "#FFFFFF",
 			linkedFooterBackground: "#000000",
@@ -93,6 +94,7 @@ const openRSDark = createTheme({
 		h2: {
 			fontSize: 20,
 			fontWeight: 400,
+			color: "#FFFFFF",
 		},
 		h3: {
 			fontSize: 18,
@@ -108,6 +110,10 @@ const openRSDark = createTheme({
 		},
 		subheading: {
 			fontSize: "1.3rem",
+		},
+		componentSubheading: {
+			fontSize: "1.3rem",
+			color: "#FFFFFF",
 		},
 		attributeTitle: {
 			fontWeight: "bold",

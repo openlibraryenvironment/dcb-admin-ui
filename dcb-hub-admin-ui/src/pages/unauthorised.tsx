@@ -1,45 +1,24 @@
-import Link from "@components/Link/Link";
+import Error from "@components/Error/Error";
 import { AdminLayout } from "@layout";
-import { Stack, Typography } from "@mui/material";
 //localisation
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 export default function Unauthorised() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout
-			title={t("unauthorised.page_title")}
-			hideTitleBox={true}
-			hideBreadcrumbs={true}
-		>
-			<Stack direction="column" spacing={3} alignItems={"center"}>
-				<Typography variant="notFoundTitle">
-					{t("unauthorised.page_title")}
-				</Typography>
-				<Typography variant="notFoundText">
-					{t("unauthorised.page_text_no_access")}
-				</Typography>
-				<Typography variant="notFoundText">
-					{t("unauthorised.page_text_contact_admin")}
-				</Typography>
-				<Typography variant="notFoundText">
-					<Trans
-						i18nKey={"unauthorised.go_back_text"}
-						t={t}
-						components={{
-							linkComponent: (
-								<Link key="return-to-dashboard-link-401" href="/" />
-							),
-						}}
-					/>
-				</Typography>
-			</Stack>
+		<AdminLayout hideTitleBox={true} hideBreadcrumbs={true}>
+			<Error
+				title={t("ui.error.401.name")}
+				message={t("ui.error.401.message")}
+				description={t("ui.error.401.description")}
+				action={t("ui.action.go_home")}
+			/>
 		</AdminLayout>
 	);
 }
 
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getStaticProps({ locale }: { locale: any }) {
 	return {
 		props: {
 			...(await serverSideTranslations(locale, [

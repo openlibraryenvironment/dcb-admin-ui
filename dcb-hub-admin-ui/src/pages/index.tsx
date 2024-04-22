@@ -38,8 +38,7 @@ const Home: NextPage = () => {
 					{t("consortium.your")}
 				</Typography>
 				<Typography variant="homePageText">
-					{" "}
-					{t("common.placeholder_text")}{" "}
+					{t("common.placeholder_text")}
 				</Typography>
 				<ConsortiumDetails />
 				<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
@@ -57,13 +56,7 @@ const Home: NextPage = () => {
 					<Trans
 						i18nKey="environment.releases_link"
 						components={{
-							linkToReleases: (
-								<Link
-									href={RELEASE_PAGE_LINKS.ALL_RELEASES}
-									target="_blank"
-									rel="noreferrer"
-								/>
-							),
+							linkToReleases: <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} />,
 						}}
 					></Trans>
 				</Typography>

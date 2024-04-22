@@ -38,20 +38,10 @@ export default function EnvironmentDetails() {
 		[
 			"DCB Service",
 			returnDCBEnvDescription(),
-			<Link
-				href={LOCAL_VERSION_LINKS.SERVICE_INFO}
-				key={"serviceInfo"}
-				target="_blank"
-				rel="noreferrer"
-			>
+			<Link href={LOCAL_VERSION_LINKS.SERVICE_INFO} key={"serviceInfo"}>
 				{LOCAL_VERSION_LINKS.SERVICE}
 			</Link>,
-			<Link
-				key={"serviceHealthLink"}
-				href={LOCAL_VERSION_LINKS.SERVICE_HEALTH}
-				target="_blank"
-				rel="noreferrer"
-			>
+			<Link key={"serviceHealthLink"} href={LOCAL_VERSION_LINKS.SERVICE_HEALTH}>
 				{
 					<EnvironmentHealth
 						key={"serviceHealth"}
@@ -64,19 +54,12 @@ export default function EnvironmentDetails() {
 		[
 			"Keycloak",
 			t("common.na"),
-			<Link
-				href={publicRuntimeConfig.KEYCLOAK_URL}
-				key={"keycloakSite"}
-				target="_blank"
-				rel="noreferrer"
-			>
+			<Link href={publicRuntimeConfig.KEYCLOAK_URL} key={"keycloakSite"}>
 				{LOCAL_VERSION_LINKS.KEYCLOAK}
 			</Link>,
 			<Link
 				href={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH}
 				key={"keycloackHealthLink"}
-				target="_blank"
-				rel="noreferrer"
 			>
 				{
 					<EnvironmentHealth

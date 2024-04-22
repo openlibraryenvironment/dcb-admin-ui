@@ -1,3 +1,16 @@
+# [1.9.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.8.1...v1.9.0) (2024-04-22)
+
+
+### Bug Fixes
+
+* Long titles overlap content [DCB-862] ([5af1a2c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5af1a2ce84709ba7db20b887a01d490270364cbd))
+
+
+### Features
+
+* Add loading and error components [DCB-885] ([bc2b07b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/bc2b07b0f0cd8b1b82f0f3d22cebb1d5df8d29f0))
+* Introduce libraries and library groups to DCB Admin [DCB-914] ([78834d3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/78834d31b08a006f1efbbd23c7c9a163fe2e99da))
+
 ## [1.8.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.8.0...v1.8.1) (2024-04-10)
 
 

@@ -10,6 +10,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import { getAuditById } from "src/queries/queries";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
 
 type AuditDetails = {
 	auditId: string;
@@ -17,7 +19,7 @@ type AuditDetails = {
 
 export default function AuditDetails({ auditId }: AuditDetails) {
 	const { t } = useTranslation();
-	const { loading, data } = useQuery(getAuditById, {
+	const { loading, data, error } = useQuery(getAuditById, {
 		variables: {
 			query: "id:" + auditId,
 		},
@@ -27,10 +29,47 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 	const router = useRouter();
 	// Link to the original patron request so users can get back
 	const handleReturn = () => {
-		router.push(`/patronRequests/${audit?.patronRequest?.id}`+`#${t("details.audit_log")}`);
+		router.push(
+			`/patronRequests/${audit?.patronRequest?.id}` +
+				`#${t("details.audit_log")}`,
+		);
 	};
-	return loading ? (
-		<AdminLayout title={t("common.loading")} />
+	const goBackLink: string =
+		`/patronRequests/${audit?.patronRequest?.id}` +
+		`#${t("details.audit_log")}`;
+	if (loading) {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("details.audit").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || audit == null || audit == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.info.go_back")}
+					goBack={goBackLink}
+				/>
+			) : (
+				<Error
+					title={t("ui.error.record_not_found")}
+					message={t("ui.info.record_unavailable")}
+					description={t("ui.action.check_url")}
+					action={t("ui.info.go_back")}
+					goBack={goBackLink}
+				/>
+			)}
+		</AdminLayout>
 	) : (
 		<AdminLayout title={audit?.id}>
 			<Grid
