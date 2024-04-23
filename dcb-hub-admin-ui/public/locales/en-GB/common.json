@@ -316,7 +316,7 @@
 		"abbreviated_name": "Abbreviated name",
 		"add_to_group": "Add library to a group",
 		"alert_text_success": "Library successfully added to group",
-		"error_adding_to_group": "Error adding library to group. Please check the UUIDs and try again.",
+		"error_adding_to_group": "Error adding library to group. Please try again.",
 		"groups": "Groups",
 		"library": "Library",
 		"library_id": "Library UUID",

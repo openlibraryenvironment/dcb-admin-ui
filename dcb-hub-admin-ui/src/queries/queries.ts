@@ -464,6 +464,22 @@ export const getLibraries = gql`
 	}
 `;
 
+// Query to get a selection of libraries for the libraries drop-down
+
+export const getLibrariesSelection = gql`
+	query LoadLibrariesSelection($order: String!, $orderBy: String!) {
+		libraries(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				agencyCode
+				fullName
+				shortName
+			}
+		}
+	}
+`;
+
 // A query to load a Library by its ID
 export const getLibraryById = gql`
 	query LoadLibrary($query: String!) {
@@ -560,7 +576,23 @@ export const getLibraryGroups = gql`
 		}
 	}
 `;
+// Get selection of groups for autocomplete (no pagination)
 
+export const getGroupsSelection = gql`
+	query LoadGroupsSelection($order: String!, $orderBy: String!) {
+		libraryGroups(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				code
+				name
+				type
+			}
+		}
+	}
+`;
+
+// Get a group by ID
 export const getLibraryGroupById = gql`
 	query LoadGroup($query: String!) {
 		libraryGroups(query: $query) {
