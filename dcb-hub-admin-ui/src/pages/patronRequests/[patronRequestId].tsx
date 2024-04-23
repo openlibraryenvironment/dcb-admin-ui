@@ -3,11 +3,13 @@ import { ClientDataGrid } from "@components/ClientDataGrid";
 import Error from "@components/Error/Error";
 import Link from "@components/Link/Link";
 import Loading from "@components/Loading/Loading";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { AdminLayout } from "@layout";
 import {
 	Stack,
 	Button,
 	Typography,
+	CircularProgress,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import axios from "axios";
@@ -34,6 +36,9 @@ export default function PatronRequestDetails({
 	const { publicRuntimeConfig } = getConfig();
 	const client = useApolloClient();
 	const { data: session }: { data: any } = useSession();
+	const [loadingUpdate, setLoadingUpdate] = useState(false);
+	const [successAlertVisibility, setSuccessAlertVisibility] = useState(false);
+	const [errorAlertVisibility, setErrorAlertVisibility] = useState(false);
 
 	const { loading, data, error } = useQuery(getPatronRequestById, {
 		variables: {
@@ -92,18 +97,28 @@ export default function PatronRequestDetails({
 		patronRequestId +
 		"/update";
 	const handleUpdate: any = async () => {
-		const data = await axios.post<any>(
-			updateUrl,
-			{},
-			{
-				headers: { Authorization: `Bearer ${session?.accessToken}` },
-			},
-		);
-		console.log("Request to update: " + data);
+		setLoadingUpdate(true);
+		try {
+			await axios.post<any>(
+				updateUrl,
+				{},
+				{
+					headers: { Authorization: `Bearer ${session?.accessToken}` },
+				},
+			);
+			setSuccessAlertVisibility(true);
+		} catch (error) {
+			console.error("Error starting update", error);
+			console.log("Request data: ", data);
+			setErrorAlertVisibility(true);
+		}
+
+		console.log("Request to update: ", data);
 		// We may wish to add a loading spinner to this button in future. Ideally this would also be a GraphQL mutation.
 		client.refetchQueries({
 			include: ["LoadPatronRequestsById"],
 		});
+		setLoadingUpdate(false);
 	};
 
 	if (loading) {
@@ -255,17 +270,39 @@ export default function PatronRequestDetails({
 									)}
 								/>
 							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Button
-									variant="outlined"
-									color="primary"
-									onClick={handleUpdate}
-								>
-									{t("details.start_update")}
-								</Button>
-							</Stack>
+							<Button
+								variant="outlined"
+								color="primary"
+								sx={{ textTransform: "none", marginTop: 1 }}
+								onClick={handleUpdate}
+								aria-disabled={loadingUpdate ? true : false}
+								disabled={loadingUpdate ? true : false}
+							>
+								{t("details.check_for_updates")}
+								{loadingUpdate ? (
+									<CircularProgress
+										color="inherit"
+										size={13}
+										sx={{ marginLeft: "10px" }}
+									/>
+								) : null}
+							</Button>
+							<TimedAlert
+								open={successAlertVisibility}
+								severityType="success"
+								autoHideDuration={6000}
+								alertText={t("details.check_successful")}
+								key={"update-success-alert"}
+								onCloseFunc={() => setSuccessAlertVisibility(false)}
+							/>
+							<TimedAlert
+								open={errorAlertVisibility}
+								severityType="error"
+								autoHideDuration={6000}
+								alertText={t("details.check_unsuccessful")}
+								key={"update-error-alert"}
+								onCloseFunc={() => setErrorAlertVisibility(false)}
+							/>
 						</Grid>
 					</Grid>
 				</StyledAccordionDetails>
