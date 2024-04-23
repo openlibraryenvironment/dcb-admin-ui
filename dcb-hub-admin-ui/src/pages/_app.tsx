@@ -156,7 +156,12 @@ function MyApp(props: AppProps) {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<title> DCB Admin </title>
 			</Head>
-			<SessionProvider session={pageProps.session} refetchOnWindowFocus={true}>
+			<SessionProvider
+				session={pageProps.session}
+				refetchOnWindowFocus={true}
+				refetchWhenOffline={false}
+				refetchInterval={5 * 60}
+			>
 				<ApolloProviderWrapper>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
