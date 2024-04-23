@@ -1,7 +1,4 @@
 import {
-	Accordion,
-	AccordionDetails,
-	AccordionSummary,
 	Button,
 	Stack,
 	Typography,
@@ -21,6 +18,7 @@ import PrivateData from "@components/PrivateData/PrivateData";
 import { getHostLmsById } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
 
 type HostLMSDetails = {
 	hostlmsId: any;
@@ -105,13 +103,13 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
 				</Button>
 			</Stack>
-			<Accordion
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[0]}
 				onChange={handleAccordionChange(0)}
+				disableGutters
 			>
-				<AccordionSummary
+				<StyledAccordionSummary
 					sx={{
 						backgroundColor: theme.palette.primary.detailsAccordionSummary,
 					}}
@@ -126,8 +124,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("details.general")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
@@ -174,15 +172,15 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Stack>
 						</Grid>
 					</Grid>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[1]}
 				onChange={handleAccordionChange(1)}
+				disableGutters
 			>
-				<AccordionSummary
+				<StyledAccordionSummary
 					sx={{
 						backgroundColor: theme.palette.primary.detailsAccordionSummary,
 					}}
@@ -197,8 +195,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("hostlms.client_config.title")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
@@ -396,17 +394,13 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					</Grid>
 					{/* // For the 'item' object on some HostLMS. Conditionally rendered so it only shows up on Host LMS with this config.  */}
 					{hostlms?.clientConfig?.item != null ? (
-						<Accordion
+						<StyledAccordion
 							variant="outlined"
-							sx={{ border: "0" }}
 							expanded={expandedAccordions[2]}
 							onChange={handleAccordionChange(2)}
+							disableGutters
 						>
-							<AccordionSummary
-								sx={{
-									backgroundColor:
-										theme.palette.primary.detailsAccordionSummary,
-								}}
+							<StyledAccordionSummary
 								aria-controls="hostlms-client-config-details-item"
 								id="hostlms_details_client_config_item"
 								expandIcon={
@@ -418,8 +412,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.item")}
 								</Typography>
-							</AccordionSummary>
-							<AccordionDetails>
+							</StyledAccordionSummary>
+							<StyledAccordionDetails>
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
@@ -529,22 +523,19 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 								</Grid>
-							</AccordionDetails>
-						</Accordion>
+							</StyledAccordionDetails>
+						</StyledAccordion>
 					) : null}
 					{/* For Host LMS with the 'PAPI' config. Conditionally rendered so it only shows up on Host LMS with this config. */}
 					{hostlms?.clientConfig?.papi != null ? (
-						<Accordion
+						<StyledAccordion
 							variant="outlined"
 							sx={{ border: "0" }}
 							expanded={expandedAccordions[3]}
 							onChange={handleAccordionChange(3)}
+							disableGutters
 						>
-							<AccordionSummary
-								sx={{
-									backgroundColor:
-										theme.palette.primary.detailsAccordionSummary,
-								}}
+							<StyledAccordionSummary
 								aria-controls="hostlms-client-config-details-papi"
 								id="hostlms_details_client_config_papi"
 								expandIcon={
@@ -556,8 +547,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.papi")}
 								</Typography>
-							</AccordionSummary>
-							<AccordionDetails>
+							</StyledAccordionSummary>
+							<StyledAccordionDetails>
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
@@ -622,22 +613,18 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 								</Grid>
-							</AccordionDetails>
-						</Accordion>
+							</StyledAccordionDetails>
+						</StyledAccordion>
 					) : null}
 					{/* For HostLMS services config. Conditionally rendered so it only shows up on Host LMS with this config. */}
 					{hostlms?.clientConfig?.services != null ? (
-						<Accordion
+						<StyledAccordion
 							variant="outlined"
-							sx={{ border: "0" }}
 							expanded={expandedAccordions[4]}
 							onChange={handleAccordionChange(4)}
+							disableGutters
 						>
-							<AccordionSummary
-								sx={{
-									backgroundColor:
-										theme.palette.primary.detailsAccordionSummary,
-								}}
+							<StyledAccordionSummary
 								aria-controls="hostlms-client-config-details-services"
 								id="hostlms_details_client_config_services"
 								expandIcon={
@@ -649,8 +636,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.services")}
 								</Typography>
-							</AccordionSummary>
-							<AccordionDetails>
+							</StyledAccordionSummary>
+							<StyledAccordionDetails>
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
@@ -849,11 +836,11 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 								</Grid>
-							</AccordionDetails>
-						</Accordion>
+							</StyledAccordionDetails>
+						</StyledAccordion>
 					) : null}
-				</AccordionDetails>
-			</Accordion>
+				</StyledAccordionDetails>
+			</StyledAccordion>
 		</AdminLayout>
 	);
 }

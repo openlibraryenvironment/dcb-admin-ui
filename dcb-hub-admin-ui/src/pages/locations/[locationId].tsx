@@ -1,10 +1,6 @@
 import {
-	Accordion,
-	AccordionDetails,
-	AccordionSummary,
 	Stack,
 	Typography,
-	useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
@@ -18,6 +14,7 @@ import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
+import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
 
 type LocationDetails = {
 	locationId: string;
@@ -26,7 +23,6 @@ type LocationDetails = {
 
 export default function LocationDetails({ locationId }: LocationDetails) {
 	const { t } = useTranslation();
-	const theme = useTheme();
 
 	// Poll interval in ms
 	const { loading, data, error } = useQuery(getLocationById, {
@@ -118,8 +114,8 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					</Stack>
 				</Grid>
 			</Grid>
-			<Accordion variant="outlined" sx={{ border: "0" }}>
-				<AccordionSummary
+			<StyledAccordion variant="outlined" disableGutters>
+				<StyledAccordionSummary
 					aria-controls="client-config-location-details"
 					id="client-config-location-details"
 					expandIcon={
@@ -127,15 +123,12 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							<MdExpandMore />
 						</IconContext.Provider>
 					}
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
 				>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("details.location_info")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Stack direction={"row"} spacing={0.5}>
 						<Typography variant="attributeTitle">
 							{t("details.long")}
@@ -146,8 +139,8 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
 						<RenderAttribute attribute={location?.latitude} />
 					</Stack>
-				</AccordionDetails>
-			</Accordion>
+				</StyledAccordionDetails>
+			</StyledAccordion>
 		</AdminLayout>
 	);
 }
