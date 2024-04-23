@@ -1,10 +1,6 @@
 import {
-	Accordion,
-	AccordionDetails,
-	AccordionSummary,
 	Stack,
 	Typography,
-	useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
@@ -18,6 +14,7 @@ import { Agency } from "@models/Agency";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
+import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
 
 type AgencyDetails = {
 	agencyId: string;
@@ -25,7 +22,6 @@ type AgencyDetails = {
 
 export default function AgencyDetails({ agencyId }: AgencyDetails) {
 	const { t } = useTranslation();
-	const theme = useTheme();
 	const { loading, data, error } = useQuery(getAgencyById, {
 		variables: {
 			query: "id:" + agencyId,
@@ -116,11 +112,8 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 					</Stack>
 				</Grid>
 			</Grid>
-			<Accordion variant="outlined" sx={{ border: "0" }}>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+			<StyledAccordion variant="outlined" disableGutters>
+				<StyledAccordionSummary
 					aria-controls="agency_details_location_info"
 					id="agency_details_location_info"
 					expandIcon={
@@ -132,8 +125,8 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("details.location_info")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Stack direction={"row"} spacing={0.5}>
 						<Typography variant="attributeTitle">
 							{t("details.long")}
@@ -144,8 +137,8 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
 						<RenderAttribute attribute={agency?.latitude} />
 					</Stack>
-				</AccordionDetails>
-			</Accordion>
+				</StyledAccordionDetails>
+			</StyledAccordion>
 		</AdminLayout>
 	);
 }
