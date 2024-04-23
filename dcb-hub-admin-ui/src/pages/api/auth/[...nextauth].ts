@@ -128,8 +128,8 @@ export default NextAuth({
 	},
 	session: {
 		strategy: "jwt",
-		// In seconds. This should match the value defined on the backend, which by default is 30 minutes.
-		maxAge: 1800,
+		// Changed as part of testing for DCB-996
+		maxAge: 240,
 	},
 	events: {
 		// when signOut from nextAuth detected, trigger the completeSignout method to complete it properly.
