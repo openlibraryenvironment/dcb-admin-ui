@@ -14,20 +14,12 @@ const SnackbarAlert = forwardRef<HTMLDivElement, AlertProps>(
 );
 
 export default function TimedAlert(props: any) {
-	const handleClose = (
-		event?: React.SyntheticEvent | Event,
-		reason?: string,
-	) => {
-		if (reason === "clickaway") {
-			return;
-		}
-	};
 	return (
 		<>
 			<Snackbar
 				open={props.open}
 				autoHideDuration={props.autoHideDuration}
-				onClose={handleClose}
+				onClose={props.onCloseFunc}
 			>
 				<SnackbarAlert
 					severity={props.severityType}
