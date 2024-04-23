@@ -281,9 +281,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 										{t("libraries.consortium.name")}
 									</Typography>
 									<RenderAttribute
-										attribute={
-											library?.membership[0]?.libraryGroup?.consortium?.name
-										}
+										attribute={findConsortium(library?.membership)?.name}
 									/>
 								</Stack>
 							</Grid>
