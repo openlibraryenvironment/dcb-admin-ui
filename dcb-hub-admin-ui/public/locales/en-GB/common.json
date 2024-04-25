@@ -21,7 +21,8 @@
 		"logout": "Logout",
 		"mappings": {
 			"name": "Mappings",
-			"all": "All",
+			"allReferenceValue": "All reference value",
+			"allNumericRange": "All numeric range",
 			"circulationStatus": "Circulation status"
 		},
 		"patronRequests": "Patron requests",

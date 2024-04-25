@@ -65,7 +65,7 @@ const AllMappings: NextPage = () => {
 	}
 
 	return (
-		<AdminLayout title={t("nav.mappings.all")}>
+		<AdminLayout title={t("nav.mappings.allReferenceValue")}>
 			<Button variant="contained" onClick={openImport}>
 				{t("mappings.import")}
 			</Button>
