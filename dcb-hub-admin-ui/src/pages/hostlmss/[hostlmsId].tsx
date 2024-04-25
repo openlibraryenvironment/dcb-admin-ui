@@ -1,9 +1,4 @@
-import {
-	Button,
-	Stack,
-	Typography,
-	useTheme,
-} from "@mui/material";
+import { Button, Stack, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { AdminLayout } from "@layout";
@@ -18,7 +13,13 @@ import PrivateData from "@components/PrivateData/PrivateData";
 import { getHostLmsById } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
-import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
+import {
+	StyledAccordion,
+	StyledAccordionSummary,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 type HostLMSDetails = {
 	hostlmsId: any;
@@ -36,6 +37,17 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 		pollInterval: 120000,
 	});
 	const hostlms: HostLMS = data?.hostLms?.content?.[0];
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
 
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
@@ -63,7 +75,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 			prevExpanded.map(() => !prevExpanded[0]),
 		);
 	};
-	if (loading) {
+	if (loading || status == "loading") {
 		return (
 			<AdminLayout>
 				<Loading

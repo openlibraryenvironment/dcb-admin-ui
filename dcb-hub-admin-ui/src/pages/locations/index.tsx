@@ -6,6 +6,9 @@ import { getLocations } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getGridStringOperators } from "@mui/x-data-grid";
+import Loading from "@components/Loading/Loading";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const Locations: NextPage = () => {
 	const { t } = useTranslation();
@@ -15,6 +18,29 @@ const Locations: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.locations").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	return (
 		<AdminLayout title={t("nav.locations")}>

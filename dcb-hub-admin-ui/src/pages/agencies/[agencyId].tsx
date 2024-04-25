@@ -1,7 +1,4 @@
-import {
-	Stack,
-	Typography,
-} from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { getAgencyById } from "src/queries/queries";
@@ -14,7 +11,13 @@ import { Agency } from "@models/Agency";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
+import {
+	StyledAccordion,
+	StyledAccordionSummary,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 type AgencyDetails = {
 	agencyId: string;
@@ -30,7 +33,18 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 	});
 	const agency: Agency = data?.agencies?.content?.[0];
 
-	if (loading) {
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
+	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
 				<Loading

@@ -1,11 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import {
-	Button,
-	Stack,
-	Typography,
-} from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -16,7 +12,13 @@ import { getBibById } from "src/queries/queries";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
+import {
+	StyledAccordion,
+	StyledAccordionSummary,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 type BibDetails = {
 	bibId: Bib;
@@ -30,6 +32,18 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 		},
 		pollInterval: 120000,
 	});
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
 	const bib: Bib = data?.sourceBibs?.content?.[0];
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
@@ -57,7 +71,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 			prevExpanded.map(() => !prevExpanded[0]),
 		);
 	};
-	if (loading) {
+	if (loading || status == "loading") {
 		return (
 			<AdminLayout>
 				<Loading
