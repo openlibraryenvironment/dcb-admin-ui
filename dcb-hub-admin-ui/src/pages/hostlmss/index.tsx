@@ -72,11 +72,14 @@ const HostLmss: NextPage = () => {
 						filterOperators,
 					},
 					{
-						field: "clientConfig.ingest",
-						headerName: "HostLMS code",
+						field: "clientConfigIngest",
+						headerName: "Ingest",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
+						valueGetter: (params: {
+							row: { clientConfig: { ingest: boolean } };
+						}) => params?.row?.clientConfig?.ingest,
 					},
 				]}
 				selectable={true}

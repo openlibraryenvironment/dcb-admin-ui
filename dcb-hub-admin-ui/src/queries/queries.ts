@@ -281,6 +281,7 @@ export const getHostLms = gql`
 				id
 				code
 				name
+				clientConfig
 			}
 			pageable {
 				number
