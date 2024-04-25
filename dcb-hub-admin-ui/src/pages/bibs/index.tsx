@@ -5,9 +5,23 @@ import { getBibs } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getGridStringOperators } from "@mui/x-data-grid";
+import Loading from "@components/Loading/Loading";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
 
 	// Expose only the filters we have tested. The others need to be mapped to Lucene functionality.
 	// See potential examples here https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
@@ -15,6 +29,19 @@ const Bibs: NextPage = () => {
 		["equals", "contains" /* add more over time */].includes(value),
 	);
 	// If testing, use this format for the search:
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.bibs").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	const BibsDisplay = () => {
 		return (

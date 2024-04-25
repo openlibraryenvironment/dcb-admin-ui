@@ -9,6 +9,9 @@ import { getILS } from "src/helpers/getILS";
 import Button from "@mui/material/Button";
 import { useState } from "react";
 import AddLibraryToGroup from "./AddLibraryToGroup";
+import Loading from "@components/Loading/Loading";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 const Libraries: NextPage = () => {
 	// State management for the adding library to group modal
@@ -26,6 +29,31 @@ const Libraries: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.libraries").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
 	return (
 		<AdminLayout title={t("nav.libraries")}>
 			<Button

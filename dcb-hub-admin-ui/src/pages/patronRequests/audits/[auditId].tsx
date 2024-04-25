@@ -12,6 +12,7 @@ import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import { getAuditById } from "src/queries/queries";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
+import { useSession } from "next-auth/react";
 
 type AuditDetails = {
 	auditId: string;
@@ -27,6 +28,15 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 	});
 	const audit: AuditItem = data?.audits?.content?.[0];
 	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
 	// Link to the original patron request so users can get back
 	const handleReturn = () => {
 		router.push(
@@ -37,7 +47,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 	const goBackLink: string =
 		`/patronRequests/${audit?.patronRequest?.id}` +
 		`#${t("details.audit_log")}`;
-	if (loading) {
+	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
 				<Loading

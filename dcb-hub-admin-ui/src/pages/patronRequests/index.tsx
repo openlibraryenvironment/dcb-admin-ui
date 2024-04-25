@@ -7,15 +7,41 @@ import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getGridStringOperators } from "@mui/x-data-grid";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import Loading from "@components/Loading/Loading";
 
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
 	const filterOperators = getGridStringOperators().filter(({ value }) =>
 		[
 			"equals",
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.patronRequests").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	return (
 		<AdminLayout title={t("nav.patronRequests")}>

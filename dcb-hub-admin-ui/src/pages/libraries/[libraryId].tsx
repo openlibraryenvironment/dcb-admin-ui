@@ -27,7 +27,13 @@ import { getLibraryById } from "src/queries/queries";
 import { Library } from "@models/Library";
 import { getILS } from "src/helpers/getILS";
 import { findConsortium } from "src/helpers/findConsortium";
-import { StyledAccordion, StyledAccordionSummary, StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
+import {
+	StyledAccordion,
+	StyledAccordionSummary,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -44,6 +50,18 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	});
 
 	const library: Library = data?.libraries?.content?.[0];
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
 	const ils: string = getILS(library?.agency?.hostLms?.lmsClientClass);
 	const isConsortiumGroupMember: boolean =
 		findConsortium(library?.membership) != null ? true : false;
@@ -80,7 +98,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		);
 	};
 
-	if (loading) {
+	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
 				<Loading
