@@ -144,6 +144,7 @@ const Libraries: NextPage = () => {
 				searchPlaceholder={t("libraries.search_placeholder")}
 				sortDirection="ASC"
 				sortAttribute="shortName"
+				sortModel={[{ field: "shortName", sort: "ASC" }]}
 			/>
 			{addToGroup ? (
 				<AddLibraryToGroup show={addToGroup} onClose={closeAddToGroup} />
