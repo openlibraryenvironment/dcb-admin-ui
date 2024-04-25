@@ -12,8 +12,13 @@ const Mappings: NextPage = () => {
 		<AdminLayout title={t("nav.mappings.name")}>
 			<List component="nav" aria-labelledby="mappings-title">
 				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/mappings/all">
-						<ListItemText primary={t("nav.mappings.all")} />
+					<ListItemButton component="a" href="/mappings/allNumericRange">
+						<ListItemText primary={t("nav.mappings.allNumericRange")} />
+					</ListItemButton>
+				</ListItem>
+				<ListItem component="nav" disablePadding>
+					<ListItemButton component="a" href="/mappings/allReferenceValue">
+						<ListItemText primary={t("nav.mappings.allReferenceValue")} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem component="nav" disablePadding>
