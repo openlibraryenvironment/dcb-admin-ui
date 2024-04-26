@@ -80,13 +80,6 @@ const PatronRequests: NextPage = () => {
 						filterOperators,
 					},
 					{
-						field: "status",
-						headerName: "Status",
-						minWidth: 120,
-						flex: 0.5,
-						filterOperators,
-					},
-					{
 						field: "localBarcode",
 						headerName: "Patron barcode",
 						minWidth: 50,
@@ -95,6 +88,20 @@ const PatronRequests: NextPage = () => {
 						valueGetter: (params: {
 							row: { requestingIdentity: { localBarcode: string } };
 						}) => params?.row?.requestingIdentity?.localBarcode,
+					},
+					{
+						field: "status",
+						headerName: "Status",
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators,
+					},
+					{
+						field: "outOfSequenceFlag",
+						headerName: "Out of sequence",
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators,
 					},
 					// HIDDEN BY DEFAULT
 					{
@@ -128,6 +135,20 @@ const PatronRequests: NextPage = () => {
 						flex: 0.5,
 						filterOperators,
 					},
+					{
+						field: "pollCountForCurrentStatus",
+						headerName: "Polling count",
+						minWidth: 50,
+						flex: 0.3,
+						filterOperators,
+					},
+					{
+						field: "elapsedTimeInCurrentStatus",
+						headerName: "Time in state",
+						minWidth: 50,
+						flex: 0.3,
+						filterOperators,
+					},
 				]}
 				selectable={true}
 				pageSize={10}
@@ -138,6 +159,8 @@ const PatronRequests: NextPage = () => {
 					suppliers: false,
 					pickupLocationCode: false,
 					id: false,
+					pollCountForCurrentStatus: false,
+					elapsedTimeInCurrentStatus: false,
 				}}
 				// This is how to set the default sort order - so the grid loads as sorted by 'lastUpdated' by default.
 				sortModel={[{ field: "dateUpdated", sort: "desc" }]}

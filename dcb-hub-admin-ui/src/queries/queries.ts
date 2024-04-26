@@ -657,6 +657,9 @@ export const getPatronRequests = gql`
 				description
 				status
 				nextScheduledPoll
+				outOfSequenceFlag
+				elapsedTimeInCurrentStatus
+				pollCountForCurrentStatus
 				patron {
 					id
 				}
