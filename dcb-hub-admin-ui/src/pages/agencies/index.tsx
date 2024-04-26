@@ -81,6 +81,8 @@ const Agencies: NextPage = () => {
 					noDataMessage={t("agencies.no_rows")}
 					noResultsMessage={t("agencies.no_results")}
 					searchPlaceholder={t("agencies.search_placeholder")}
+					// This is how to set the default sort order
+					sortModel={[{ field: "name", sort: "asc" }]}
 					sortDirection="ASC"
 					sortAttribute="name"
 				/>

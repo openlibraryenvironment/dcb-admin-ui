@@ -121,10 +121,11 @@ const CirculationStatusMappings: NextPage = () => {
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				searchPlaceholder={t("mappings.search_placeholder_cs")}
-				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				// This is how to set the default sort order 
+				sortModel={[{ field: "fromContext", sort: "asc" }]}
+				sortDirection="asc"
+				sortAttribute="fromContext"
 				pageSize={10}
-				sortDirection="DESC"
-				sortAttribute="lastImported"
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

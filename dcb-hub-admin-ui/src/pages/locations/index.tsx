@@ -76,6 +76,8 @@ const Locations: NextPage = () => {
 				noDataMessage={t("locations.no_rows")}
 				noResultsMessage={t("locations.no_results")}
 				searchPlaceholder={t("locations.search_placeholder")}
+				// This is how to set the default sort order
+				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="name"
 			/>

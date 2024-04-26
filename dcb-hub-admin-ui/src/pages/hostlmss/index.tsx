@@ -87,6 +87,8 @@ const HostLmss: NextPage = () => {
 				noDataMessage={t("hostlms.no_rows")}
 				noResultsMessage={t("hostlms.no_results")}
 				searchPlaceholder={t("hostlms.search_placeholder")}
+				// This is how to set the default sort order
+				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="name"
 			/>
