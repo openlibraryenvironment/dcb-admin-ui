@@ -1,3 +1,24 @@
+# [1.10.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.9.0...v1.10.0) (2024-04-26)
+
+
+### Bug Fixes
+
+* Add formatDuration helper function [DCB-1064] ([2dc1d84](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2dc1d84b1765441ac25cb19be15bbb493b60bdae))
+* Change session maxAge [DCB-996] ([c4eae64](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c4eae64902c86c9ebbd1df6a027a652a3da89000))
+* Change session refetching interval [DCB-996] ([b66cdd6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b66cdd630b7760463fb64761530cdbb85c3f3519))
+* Fix consortium name not always displaying properly ([3efba52](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3efba5223e25da2ec41b71f741bc92106a9de1ed))
+* Fix libraries sort indicator ([5119d3e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5119d3e9f8a00c32c303b48bbb28112e7f723c9c))
+* Make ingest column reflect ingest values ([84bd31e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/84bd31eb6ebc1312e0c49dafbcb0a42dcf51bc11))
+* More changes to session handling [DCB-996] ([c6803cc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c6803cc8b06e080ff2aa77be8bf0d31d517f0206))
+
+
+### Features
+
+* Add numeric range mappings grid [DCB-1065] ([9466f28](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9466f286b7268d2ddb0b8bf303ac0cf4ba2889f0))
+* Add request telemetry to grid [DCB-1064] ([1807b2e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1807b2e457acf8610d17183618da2550e59b37cc))
+* Add request transition telemetry to patron request details page [DCB-1045] ([8a8bb83](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8a8bb834e3500b9ae00a9b71546380215e5707a0))
+* Use names for adding library to group [DCB-1042] ([d0fec32](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d0fec324044fdfd4d278e1efc21e5e49f0485732))
+
 # [1.9.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.8.1...v1.9.0) (2024-04-22)
 
 
