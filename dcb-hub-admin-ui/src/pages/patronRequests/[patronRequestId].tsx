@@ -26,6 +26,7 @@ import {
 	SubAccordionDetails,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
+import { formatDuration } from "src/helpers/formatDuration";
 
 type PatronRequestDetails = {
 	patronRequestId: string;
@@ -313,6 +314,68 @@ export default function PatronRequestDetails({
 								key={"update-error-alert"}
 								onCloseFunc={() => setErrorAlertVisibility(false)}
 							/>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.previous_status")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.previousStatus} />
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.status_changed")}
+								</Typography>
+								<RenderAttribute
+									attribute={dayjs(
+										patronRequest?.currentStatusTimestamp,
+									).format("YYYY-MM-DD HH:mm:ss.SSS")}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.time_in_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={formatDuration(
+										patronRequest?.elapsedTimeInCurrentStatus,
+									)}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.polling_checks_in_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.pollCountForCurrentStatus?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.is_transition_out_of_sequence")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.outOfSequenceFlag?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.next_expected_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.nextExpectedStatus?.toString()}
+								/>
+							</Stack>
 						</Grid>
 					</Grid>
 				</StyledAccordionDetails>
