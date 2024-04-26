@@ -10,7 +10,7 @@ import { getGridStringOperators } from "@mui/x-data-grid";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
-
+import { formatDuration } from "src/helpers/formatDuration";
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -148,6 +148,9 @@ const PatronRequests: NextPage = () => {
 						minWidth: 50,
 						flex: 0.3,
 						filterOperators,
+						valueGetter: (params: {
+							row: { elapsedTimeInCurrentStatus: number };
+						}) => formatDuration(params.row.elapsedTimeInCurrentStatus),
 					},
 				]}
 				selectable={true}
