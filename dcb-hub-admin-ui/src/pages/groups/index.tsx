@@ -105,6 +105,8 @@ const Groups: NextPage = () => {
 				noDataMessage={t("groups.no_rows")}
 				noResultsMessage={t("groups.no_results")}
 				searchPlaceholder={t("groups.search_placeholder")}
+				// This is how to set the default sort order
+				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="name"
 			/>

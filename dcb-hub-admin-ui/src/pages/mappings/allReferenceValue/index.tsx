@@ -127,10 +127,11 @@ const AllMappings: NextPage = () => {
 				noDataMessage={t("mappings.import_circulation_status")}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
-				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				// This is how to set the default sort order
+				sortModel={[{ field: "fromContext", sort: "asc" }]}
+				sortDirection="ASC"
+				sortAttribute="fromContext"
 				pageSize={10}
-				sortDirection="DESC"
-				sortAttribute="lastImported"
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

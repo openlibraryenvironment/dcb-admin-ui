@@ -165,10 +165,10 @@ const PatronRequests: NextPage = () => {
 					pollCountForCurrentStatus: false,
 					elapsedTimeInCurrentStatus: false,
 				}}
-				// This is how to set the default sort order - so the grid loads as sorted by 'lastUpdated' by default.
-				sortModel={[{ field: "dateUpdated", sort: "desc" }]}
+				// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+				sortModel={[{ field: "dateCreated", sort: "desc" }]}
 				sortDirection="DESC"
-				sortAttribute="dateUpdated"
+				sortAttribute="dateCreated"
 			/>
 		</AdminLayout>
 	);

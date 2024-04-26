@@ -96,6 +96,8 @@ const BibRecordCountByHostLms: NextPage = () => {
 				// We don't want click-through on this grid.
 				selectable={false}
 				noDataTitle={t("bibRecordCountByHostLms.no_results")}
+				// This is how to set the default sort order
+				sortModel={[{ field: "sourceSystemName", sort: "asc" }]}
 			/>
 		</AdminLayout>
 	);
