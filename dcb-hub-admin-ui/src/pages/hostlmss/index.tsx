@@ -73,7 +73,7 @@ const HostLmss: NextPage = () => {
 					},
 					{
 						field: "clientConfigIngest",
-						headerName: "Ingest",
+						headerName: "Ingest status",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
