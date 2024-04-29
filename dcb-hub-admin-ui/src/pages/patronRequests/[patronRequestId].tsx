@@ -22,6 +22,7 @@ import {
 	StyledAccordion,
 	StyledAccordionSummary,
 	StyledAccordionDetails,
+	SubAccordion,
 	SubAccordionSummary,
 	SubAccordionDetails,
 } from "@components/StyledAccordion/StyledAccordion";
@@ -503,7 +504,7 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-					<StyledAccordion
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[7]}
 						onChange={handleAccordionChange(7)}
@@ -541,7 +542,7 @@ export default function PatronRequestDetails({
 								</Typography>
 							)}
 						</SubAccordionDetails>
-					</StyledAccordion>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 			<StyledAccordion
@@ -673,7 +674,7 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-					<StyledAccordion
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[8]}
 						onChange={handleAccordionChange(8)}
@@ -751,8 +752,8 @@ export default function PatronRequestDetails({
 								</Grid>
 							</Grid>
 						</SubAccordionDetails>
-					</StyledAccordion>
-					<StyledAccordion
+					</SubAccordion>
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[9]}
 						onChange={handleAccordionChange(9)}
@@ -827,7 +828,7 @@ export default function PatronRequestDetails({
 								</Grid>
 							</Grid>
 						</SubAccordionDetails>
-					</StyledAccordion>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 			<StyledAccordion
@@ -898,7 +899,7 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-					<StyledAccordion
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[1]}
 						onChange={handleAccordionChange(1)}
@@ -984,8 +985,8 @@ export default function PatronRequestDetails({
 								</Grid>
 							</Grid>
 						</SubAccordionDetails>
-					</StyledAccordion>
-					<StyledAccordion
+					</SubAccordion>
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[11]}
 						onChange={handleAccordionChange(11)}
@@ -1045,7 +1046,7 @@ export default function PatronRequestDetails({
 								</Grid>
 							</Grid>
 						</SubAccordionDetails>
-					</StyledAccordion>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 			<StyledAccordion
@@ -1110,7 +1111,7 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-					<StyledAccordion
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[12]}
 						onChange={handleAccordionChange(12)}
@@ -1129,8 +1130,8 @@ export default function PatronRequestDetails({
 							</Typography>
 						</SubAccordionSummary>
 						<SubAccordionDetails>{"-"}</SubAccordionDetails>
-					</StyledAccordion>
-					<StyledAccordion
+					</SubAccordion>
+					<SubAccordion
 						variant="outlined"
 						expanded={expandedAccordions[13]}
 						onChange={handleAccordionChange(13)}
@@ -1184,7 +1185,7 @@ export default function PatronRequestDetails({
 								</Grid>
 							</Grid>
 						</SubAccordionDetails>
-					</StyledAccordion>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 			<StyledAccordion
