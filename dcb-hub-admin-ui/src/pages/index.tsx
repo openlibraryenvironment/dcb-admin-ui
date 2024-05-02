@@ -9,9 +9,21 @@ import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
 import { RELEASE_PAGE_LINKS } from "../../homeData/homeConfig";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import EnvironmentDetails from "@components/HomeContent/EnvironmentDetails";
+import Loading from "@components/Loading/Loading";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
-	const { data: session }: { data: any } = useSession();
+	const router = useRouter();
+	const { data: session, status }: { data: any; status: any } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
 	const getUserName = () => {
 		const nameOfUser = session?.profile?.given_name;
 		if (nameOfUser == undefined) {
@@ -21,6 +33,19 @@ const Home: NextPage = () => {
 		}
 	};
 	const { t } = useTranslation();
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.home").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	return (
 		<AdminLayout

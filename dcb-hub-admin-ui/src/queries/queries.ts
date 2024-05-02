@@ -281,6 +281,7 @@ export const getHostLms = gql`
 				id
 				code
 				name
+				clientConfig
 			}
 			pageable {
 				number
@@ -464,6 +465,22 @@ export const getLibraries = gql`
 	}
 `;
 
+// Query to get a selection of libraries for the libraries drop-down
+
+export const getLibrariesSelection = gql`
+	query LoadLibrariesSelection($order: String!, $orderBy: String!) {
+		libraries(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				agencyCode
+				fullName
+				shortName
+			}
+		}
+	}
+`;
+
 // A query to load a Library by its ID
 export const getLibraryById = gql`
 	query LoadLibrary($query: String!) {
@@ -560,7 +577,23 @@ export const getLibraryGroups = gql`
 		}
 	}
 `;
+// Get selection of groups for autocomplete (no pagination)
 
+export const getGroupsSelection = gql`
+	query LoadGroupsSelection($order: String!, $orderBy: String!) {
+		libraryGroups(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				code
+				name
+				type
+			}
+		}
+	}
+`;
+
+// Get a group by ID
 export const getLibraryGroupById = gql`
 	query LoadGroup($query: String!) {
 		libraryGroups(query: $query) {
@@ -624,6 +657,9 @@ export const getPatronRequests = gql`
 				description
 				status
 				nextScheduledPoll
+				outOfSequenceFlag
+				elapsedTimeInCurrentStatus
+				pollCountForCurrentStatus
 				patron {
 					id
 				}
@@ -670,6 +706,12 @@ export const getPatronRequestById = gql`
 				description
 				nextScheduledPoll
 				errorMessage
+				previousStatus
+				pollCountForCurrentStatus
+				currentStatusTimestamp
+				nextExpectedStatus
+				outOfSequenceFlag
+				elapsedTimeInCurrentStatus
 				patron {
 					id
 				}
@@ -831,6 +873,41 @@ export const getCirculationStatusMappings = gql`
 				label
 				lastImported
 				deleted
+			}
+			pageable {
+				number
+				offset
+			}
+		}
+	}
+`;
+
+// A query to load paginated numeric range mappings
+
+export const getNumericRangeMappings = gql`
+	query LoadNumericRangeMappings(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$orderBy: String!
+		$query: String!
+	) {
+		numericRangeMappings(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			totalSize
+			content {
+				id
+				context
+				domain
+				lowerBound
+				upperBound
+				targetContext
+				mappedValue
 			}
 			pageable {
 				number

@@ -1,15 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import {
-	Accordion,
-	AccordionDetails,
-	AccordionSummary,
-	Button,
-	Stack,
-	Typography,
-	useTheme,
-} from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -20,6 +12,13 @@ import { getBibById } from "src/queries/queries";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
+import {
+	StyledAccordion,
+	StyledAccordionSummary,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 type BibDetails = {
 	bibId: Bib;
@@ -27,13 +26,24 @@ type BibDetails = {
 
 export default function SourceBibDetails({ bibId }: BibDetails) {
 	const { t } = useTranslation();
-	const theme = useTheme();
 	const { loading, data, error } = useQuery(getBibById, {
 		variables: {
 			query: "id:" + bibId,
 		},
 		pollInterval: 120000,
 	});
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
 	const bib: Bib = data?.sourceBibs?.content?.[0];
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
@@ -61,7 +71,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 			prevExpanded.map(() => !prevExpanded[0]),
 		);
 	};
-	if (loading) {
+	if (loading || status == "loading") {
 		return (
 			<AdminLayout>
 				<Loading
@@ -163,16 +173,13 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					</Stack>
 				</Grid>
 			</Grid>
-			<Accordion
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[0]}
 				onChange={handleAccordionChange(0)}
+				disableGutters
 			>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+				<StyledAccordionSummary
 					aria-controls="source-bibs-json-details"
 					id="source-bibs-json-details"
 					expandIcon={
@@ -184,21 +191,18 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("details.canonical_metadata")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<pre>{JSON.stringify(bib?.canonicalMetadata, null, 2)}</pre>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[8]}
 				onChange={handleAccordionChange(8)}
+				disableGutters
 			>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+				<StyledAccordionSummary
 					aria-controls="source-bibs-source-record-json-details"
 					id="source-bibs-source-record-json-details"
 					expandIcon={
@@ -210,11 +214,11 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("details.source_record")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<pre>{JSON.stringify(bib?.sourceRecord, null, 2)}</pre>
-				</AccordionDetails>
-			</Accordion>
+				</StyledAccordionDetails>
+			</StyledAccordion>
 		</AdminLayout>
 	);
 }

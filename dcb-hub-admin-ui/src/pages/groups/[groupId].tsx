@@ -10,6 +10,8 @@ import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 type GroupDetails = {
 	groupId: string;
@@ -25,7 +27,18 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 	});
 	const group: Group = data?.libraryGroups?.content?.[0];
 
-	if (loading) {
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
+	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
 				<Loading
@@ -137,6 +150,8 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 				type="libraryGroupMembers"
 				selectable={false}
 				noDataTitle={t("groups.no_members")}
+				// This is how to set the default sort order
+				sortModel={[{ field: "fullName", sort: "asc" }]}
 			/>
 		</AdminLayout>
 	);

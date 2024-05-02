@@ -6,6 +6,9 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { getAgencies } from "src/queries/queries";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getGridStringOperators } from "@mui/x-data-grid";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import Loading from "@components/Loading/Loading";
 
 const Agencies: NextPage = () => {
 	// i18n useTranslation hook - this provides the 't' function for translations
@@ -18,6 +21,30 @@ const Agencies: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.agencies").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	return (
 		<AdminLayout title={t("nav.agencies")}>
@@ -54,6 +81,8 @@ const Agencies: NextPage = () => {
 					noDataMessage={t("agencies.no_rows")}
 					noResultsMessage={t("agencies.no_results")}
 					searchPlaceholder={t("agencies.search_placeholder")}
+					// This is how to set the default sort order
+					sortModel={[{ field: "name", sort: "asc" }]}
 					sortDirection="ASC"
 					sortAttribute="name"
 				/>

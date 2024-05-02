@@ -7,15 +7,41 @@ import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getGridStringOperators } from "@mui/x-data-grid";
-
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import Loading from "@components/Loading/Loading";
+import { formatDuration } from "src/helpers/formatDuration";
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
 	const filterOperators = getGridStringOperators().filter(({ value }) =>
 		[
 			"equals",
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.patronRequests").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	return (
 		<AdminLayout title={t("nav.patronRequests")}>
@@ -54,13 +80,6 @@ const PatronRequests: NextPage = () => {
 						filterOperators,
 					},
 					{
-						field: "status",
-						headerName: "Status",
-						minWidth: 120,
-						flex: 0.5,
-						filterOperators,
-					},
-					{
 						field: "localBarcode",
 						headerName: "Patron barcode",
 						minWidth: 50,
@@ -69,6 +88,20 @@ const PatronRequests: NextPage = () => {
 						valueGetter: (params: {
 							row: { requestingIdentity: { localBarcode: string } };
 						}) => params?.row?.requestingIdentity?.localBarcode,
+					},
+					{
+						field: "status",
+						headerName: "Status",
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators,
+					},
+					{
+						field: "outOfSequenceFlag",
+						headerName: "Out of sequence",
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators,
 					},
 					// HIDDEN BY DEFAULT
 					{
@@ -102,6 +135,23 @@ const PatronRequests: NextPage = () => {
 						flex: 0.5,
 						filterOperators,
 					},
+					{
+						field: "pollCountForCurrentStatus",
+						headerName: "Polling count",
+						minWidth: 50,
+						flex: 0.3,
+						filterOperators,
+					},
+					{
+						field: "elapsedTimeInCurrentStatus",
+						headerName: "Time in state",
+						minWidth: 50,
+						flex: 0.3,
+						filterOperators,
+						valueGetter: (params: {
+							row: { elapsedTimeInCurrentStatus: number };
+						}) => formatDuration(params.row.elapsedTimeInCurrentStatus),
+					},
 				]}
 				selectable={true}
 				pageSize={10}
@@ -112,11 +162,13 @@ const PatronRequests: NextPage = () => {
 					suppliers: false,
 					pickupLocationCode: false,
 					id: false,
+					pollCountForCurrentStatus: false,
+					elapsedTimeInCurrentStatus: false,
 				}}
-				// This is how to set the default sort order - so the grid loads as sorted by 'lastUpdated' by default.
-				sortModel={[{ field: "dateUpdated", sort: "desc" }]}
+				// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+				sortModel={[{ field: "dateCreated", sort: "desc" }]}
 				sortDirection="DESC"
-				sortAttribute="dateUpdated"
+				sortAttribute="dateCreated"
 			/>
 		</AdminLayout>
 	);

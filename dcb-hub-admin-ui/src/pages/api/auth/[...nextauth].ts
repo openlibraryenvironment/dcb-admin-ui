@@ -33,6 +33,7 @@ const refreshAccessToken = async (token: JWT) => {
 		})
 		.then((refresh_response) => {
 			const new_token = refresh_response.data;
+			console.log("Token is being refreshed.");
 			return {
 				...token,
 				accessToken: new_token.access_token,
@@ -128,8 +129,8 @@ export default NextAuth({
 	},
 	session: {
 		strategy: "jwt",
-		// In seconds. This should match the value defined on the backend, which by default is 30 minutes.
-		maxAge: 1800,
+		maxAge: 30 * 60, // Seconds - How long until an idle session expires and is no longer valid.
+		// No need to specify JWT max age as it defaults to this.
 	},
 	events: {
 		// when signOut from nextAuth detected, trigger the completeSignout method to complete it properly.

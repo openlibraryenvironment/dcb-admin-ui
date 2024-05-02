@@ -3,15 +3,11 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 import Grid from "@mui/material/Unstable_Grid2";
 import {
-	Accordion,
-	AccordionDetails,
-	AccordionSummary,
 	Button,
 	Divider,
 	ListItemText,
 	Stack,
 	Typography,
-	useTheme,
 } from "@mui/material";
 import { AdminLayout } from "@layout";
 import { useState } from "react";
@@ -31,13 +27,19 @@ import { getLibraryById } from "src/queries/queries";
 import { Library } from "@models/Library";
 import { getILS } from "src/helpers/getILS";
 import { findConsortium } from "src/helpers/findConsortium";
+import {
+	StyledAccordion,
+	StyledAccordionSummary,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 type LibraryDetails = {
 	libraryId: any;
 };
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
-	const theme = useTheme();
 
 	// pollInterval is in ms - set to 2 mins
 	const { data, loading, error } = useQuery(getLibraryById, {
@@ -48,6 +50,18 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	});
 
 	const library: Library = data?.libraries?.content?.[0];
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
 	const ils: string = getILS(library?.agency?.hostLms?.lmsClientClass);
 	const isConsortiumGroupMember: boolean =
 		findConsortium(library?.membership) != null ? true : false;
@@ -84,7 +98,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		);
 	};
 
-	if (loading) {
+	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
 				<Loading
@@ -124,16 +138,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
 				</Button>
 			</Stack>
-			<Accordion
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[0]}
 				onChange={handleAccordionChange(0)}
+				disableGutters
 			>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+				<StyledAccordionSummary
 					aria-controls="library-details-library"
 					id="library-details-library"
 					expandIcon={
@@ -145,8 +156,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("libraries.library")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
@@ -281,9 +292,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 										{t("libraries.consortium.name")}
 									</Typography>
 									<RenderAttribute
-										attribute={
-											library?.membership[0]?.libraryGroup?.consortium?.name
-										}
+										attribute={findConsortium(library?.membership)?.name}
 									/>
 								</Stack>
 							</Grid>
@@ -329,18 +338,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							/>
 						</Grid>
 					</Grid>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[1]}
 				onChange={handleAccordionChange(1)}
+				disableGutters
 			>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+				<StyledAccordionSummary
 					aria-controls="library-details-contacts"
 					id="library-details-contacts"
 					expandIcon={
@@ -352,8 +358,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("libraries.contacts.title")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<ClientDataGrid
 						columns={[
 							{
@@ -392,18 +398,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						noDataTitle={"No groups found for this library."}
 						toolbarVisible="search-only"
 					></ClientDataGrid>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[2]}
 				onChange={handleAccordionChange(2)}
+				disableGutters
 			>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+				<StyledAccordionSummary
 					aria-controls="hostlms-client-config-details"
 					id="hostlms_details_client_config"
 					expandIcon={
@@ -415,8 +418,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Typography variant="h2" fontWeight={"bold"}>
 						{t("libraries.service.title")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
@@ -1069,18 +1072,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Grid>
 						) : null}
 					</Grid>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
 				variant="outlined"
-				sx={{ border: "0" }}
 				expanded={expandedAccordions[3]}
 				onChange={handleAccordionChange(3)}
+				disableGutters
 			>
-				<AccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
+				<StyledAccordionSummary
 					aria-controls="library-configuration-details"
 					id="library-configuration-details"
 					expandIcon={
@@ -1092,8 +1092,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Typography variant="h2" fontWeight={"bold"}>
 						{t("libraries.config.title")}
 					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
@@ -1116,8 +1116,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Stack>
 						</Grid>
 					</Grid>
-				</AccordionDetails>
-			</Accordion>
+				</StyledAccordionDetails>
+			</StyledAccordion>
 		</AdminLayout>
 	);
 }

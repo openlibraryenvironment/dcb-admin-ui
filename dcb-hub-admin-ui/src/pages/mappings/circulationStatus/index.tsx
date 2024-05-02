@@ -11,11 +11,25 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import { getGridStringOperators } from "@mui/x-data-grid";
 import { getCirculationStatusMappings } from "src/queries/queries";
 import { useApolloClient } from "@apollo/client";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import Loading from "@components/Loading/Loading";
 
 const CirculationStatusMappings: NextPage = () => {
 	// Handles the import modal display
 	const client = useApolloClient();
 	const [showImport, setImport] = useState(false);
+
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
 	const openImport = () => {
 		setImport(true);
 	};
@@ -33,6 +47,22 @@ const CirculationStatusMappings: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+
+	if (status === "loading") {
+		return (
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type:
+							t("nav.mappings.circulationStatus").toLowerCase() +
+							" " +
+							t("nav.mappings.name").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
 
 	return (
 		<AdminLayout title={t("nav.mappings.circulationStatus")}>
@@ -91,10 +121,11 @@ const CirculationStatusMappings: NextPage = () => {
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				searchPlaceholder={t("mappings.search_placeholder_cs")}
-				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				// This is how to set the default sort order 
+				sortModel={[{ field: "fromContext", sort: "asc" }]}
+				sortDirection="asc"
+				sortAttribute="fromContext"
 				pageSize={10}
-				sortDirection="DESC"
-				sortAttribute="lastImported"
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

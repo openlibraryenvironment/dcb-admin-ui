@@ -156,7 +156,13 @@ function MyApp(props: AppProps) {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<title> DCB Admin </title>
 			</Head>
-			<SessionProvider session={pageProps.session} refetchOnWindowFocus={true}>
+			<SessionProvider
+				session={pageProps.session}
+				refetchOnWindowFocus={true}
+				refetchWhenOffline={false}
+				refetchInterval={4 * 60} // This is how often we check the session. Maximum interval is probably 29 mins (just under maxAge)
+				// Checking every 4 mins to try and fix the issues we've been seeing + provide up-to-date session info.
+			>
 				<ApolloProviderWrapper>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
