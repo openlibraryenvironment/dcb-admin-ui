@@ -23,6 +23,7 @@ type ConfirmType = {
 	fileName?: string;
 	participation?: string;
 	library?: string;
+	mappingCategory?: string;
 };
 
 const Confirmation = ({
@@ -35,15 +36,17 @@ const Confirmation = ({
 	fileName,
 	participation,
 	library,
+	mappingCategory,
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
-	const deleted = "deleted";
 
 	const getHeaderText = () => {
 		switch (type) {
 			case "mappings":
-				return t("mappings.confirmation_header");
+				return t("mappings.confirmation_header", {
+					category: mappingCategory?.toLowerCase(),
+				});
 			case "participationStatus":
 				switch (participation) {
 					// Fill these out with the relevant text, buttons etc
@@ -81,12 +84,19 @@ const Confirmation = ({
 					<Box>
 						<Trans
 							i18nKey="mappings.confirmation_body"
-							values={{ existingMappingCount, code, fileName, deleted }}
+							values={{
+								category: mappingCategory?.toLowerCase(),
+								existingMappingCount,
+								code,
+								fileName,
+							}}
 							components={{ paragraph: <p />, bold: <strong /> }}
 						/>
 						<Alert
 							severityType="warning"
-							alertText={t("mappings.confirmation_warning")}
+							alertText={t("mappings.confirmation_warning", {
+								mappings: mappingCategory?.toLowerCase(),
+							})}
 							textColor={theme.palette.common.black}
 						/>
 						{t("mappings.confirmation_replace")}

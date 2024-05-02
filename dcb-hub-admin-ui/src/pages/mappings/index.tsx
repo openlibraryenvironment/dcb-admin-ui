@@ -21,11 +21,6 @@ const Mappings: NextPage = () => {
 						<ListItemText primary={t("nav.mappings.allReferenceValue")} />
 					</ListItemButton>
 				</ListItem>
-				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/mappings/circulationStatus">
-						<ListItemText primary={t("nav.mappings.circulationStatus")} />
-					</ListItemButton>
-				</ListItem>
 			</List>
 		</AdminLayout>
 	);
