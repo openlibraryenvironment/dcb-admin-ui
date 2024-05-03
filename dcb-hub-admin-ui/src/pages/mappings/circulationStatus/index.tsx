@@ -1,14 +1,13 @@
 import { NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { Button } from "@mui/material";
-import { capitalize } from "lodash";
 import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import Import from "@components/Import/Import";
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { getCirculationStatusMappings } from "src/queries/queries";
 import { useApolloClient } from "@apollo/client";
 import { useSession } from "next-auth/react";
@@ -76,36 +75,35 @@ const CirculationStatusMappings: NextPage = () => {
 				columns={[
 					{
 						field: "fromContext",
-						headerName: "Host LMS",
+						headerName: "From context",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
 					},
 					{
 						field: "fromValue",
-						headerName: "Local value",
+						headerName: "From value",
 						minWidth: 50,
 						flex: 0.4,
 						filterOperators,
 					},
 					{
-						field: "label",
-						headerName: "Local meaning",
+						field: "toContext",
+						headerName: "To context",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
 					},
 					{
 						field: "toValue",
-						headerName: "DCB value",
+						headerName: "To value",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
-						valueGetter: (params: { row: { toValue: string } }) => {
-							return capitalize(params.row.toValue);
-						},
+						valueGetter: (params: { row: { toValue: string } }) =>
+							params.row.toValue,
 					},
-					{
+					/* {
 						field: "lastImported",
 						headerName: "Last imported",
 						minWidth: 100,
@@ -115,17 +113,17 @@ const CirculationStatusMappings: NextPage = () => {
 							const lastImported = params.row.lastImported;
 							return dayjs(lastImported).format("YYYY-MM-DD HH:mm");
 						},
-					},
+					}, */
 				]}
 				noDataMessage={t("mappings.import_circulation_status")}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				searchPlaceholder={t("mappings.search_placeholder_cs")}
-				// This is how to set the default sort order 
+				// This is how to set the default sort order
 				sortModel={[{ field: "fromContext", sort: "asc" }]}
 				sortDirection="asc"
 				sortAttribute="fromContext"
-				pageSize={10}
+				pageSize={20}
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

@@ -1,17 +1,16 @@
 import { GetServerSideProps, NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { Button } from "@mui/material";
-import { capitalize } from "lodash";
 import { useState } from "react";
 //localisation
 import { useTranslation } from "next-i18next";
 import { useApolloClient } from "@apollo/client";
 import Import from "@components/Import/Import";
-import dayjs from "dayjs";
+// import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getMappings } from "src/queries/queries";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -83,36 +82,35 @@ const AllMappings: NextPage = () => {
 					},
 					{
 						field: "fromContext",
-						headerName: "HostLMS",
+						headerName: "From context",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
 					},
 					{
 						field: "fromValue",
-						headerName: "Local Value",
+						headerName: "From value",
 						minWidth: 50,
 						flex: 0.4,
 						filterOperators,
 					},
 					{
-						field: "label",
-						headerName: "Meaning",
+						field: "toContext",
+						headerName: "To context",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
 					},
 					{
 						field: "toValue",
-						headerName: "DCB value",
+						headerName: "To value",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
-						valueGetter: (params: { row: { toValue: string } }) => {
-							return capitalize(params.row.toValue);
-						},
+						valueGetter: (params: { row: { toValue: string } }) =>
+							params.row.toValue,
 					},
-					{
+					/* 		{
 						field: "last_imported",
 						headerName: "Last imported",
 						minWidth: 100,
@@ -122,7 +120,7 @@ const AllMappings: NextPage = () => {
 							const lastImported = params.row.lastImported;
 							return dayjs(lastImported).format("YYYY-MM-DD HH:mm");
 						},
-					},
+					}, */
 				]}
 				noDataMessage={t("mappings.import_circulation_status")}
 				noResultsMessage={t("mappings.no_results")}
@@ -131,7 +129,7 @@ const AllMappings: NextPage = () => {
 				sortModel={[{ field: "fromContext", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="fromContext"
-				pageSize={10}
+				pageSize={20}
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

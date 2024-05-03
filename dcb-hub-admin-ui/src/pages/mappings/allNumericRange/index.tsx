@@ -5,7 +5,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getNumericRangeMappings } from "src/queries/queries";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 
 // Page for 'ALL' numeric range mappings of any category.
 
@@ -26,15 +26,15 @@ const AllNumericRange: NextPage = () => {
 				coreType="numericRangeMappings"
 				columns={[
 					{
-						field: "context",
-						headerName: "HostLMS",
+						field: "domain",
+						headerName: "Category",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
 					},
 					{
-						field: "domain",
-						headerName: "Domain",
+						field: "context",
+						headerName: "From context",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
@@ -47,8 +47,15 @@ const AllNumericRange: NextPage = () => {
 						filterOperators,
 					},
 					{
+						field: "upperBound",
+						headerName: "Upper bound",
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators,
+					},
+					{
 						field: "targetContext",
-						headerName: "Target context",
+						headerName: "To context",
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
@@ -65,7 +72,7 @@ const AllNumericRange: NextPage = () => {
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				sortModel={[{ field: "context", sort: "asc" }]}
-				pageSize={10}
+				pageSize={20}
 				sortDirection="ASC"
 				sortAttribute="context"
 			/>

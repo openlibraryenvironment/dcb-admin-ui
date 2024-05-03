@@ -1,11 +1,11 @@
 import {
-	DataGrid,
+	DataGridPro,
 	GridEventListener,
 	GridFilterModel,
 	GridSortModel,
 	GridToolbar,
 	GridToolbarQuickFilter,
-} from "@mui/x-data-grid";
+} from "@mui/x-data-grid-pro";
 import { DocumentNode, useQuery } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
 import { styled } from "@mui/material/styles"; // Import separately due to this issue https://github.com/vercel/next.js/issues/55663
@@ -244,7 +244,7 @@ export default function ServerPaginationGrid({
 
 	return (
 		<div>
-			<DataGrid
+			<DataGridPro
 				// Makes sure scrollbars aren't visible
 				sx={{
 					".MuiDataGrid-virtualScroller": {
@@ -253,6 +253,7 @@ export default function ServerPaginationGrid({
 					border: "0",
 				}}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
+				// v7 of the DataGrid removes this but also breaks accessibility - to be looked at when we upgrade.
 				experimentalFeatures={{ ariaV7: true }}
 				columns={columns}
 				rows={data?.[coreType]?.content ?? []}
@@ -264,10 +265,12 @@ export default function ServerPaginationGrid({
 				filterMode="server"
 				onRowClick={handleRowClick}
 				onFilterModelChange={onFilterChange}
-				pageSizeOptions={[5, 10, 20, 30, 40, 50]}
+				pageSizeOptions={[5, 10, 20, 30, 40, 50, 100, 200]}
+				pagination
 				paginationModel={paginationModel}
 				paginationMode="server"
 				sortingMode="server"
+				// sortingOrder={['asc', 'desc']} // If enabled, this will remove the 'null' sorting option
 				onSortModelChange={handleSortModelChange}
 				onPaginationModelChange={setPaginationModel}
 				autoHeight={true}

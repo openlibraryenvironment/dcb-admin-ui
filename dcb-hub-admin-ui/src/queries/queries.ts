@@ -671,6 +671,10 @@ export const getPatronRequests = gql`
 				suppliers {
 					localAgency
 				}
+				clusterRecord {
+					id
+					title
+        }
 			}
 			pageable {
 				number

@@ -6,7 +6,7 @@ import { getPatronRequests } from "src/queries/queries";
 import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
@@ -62,20 +62,36 @@ const PatronRequests: NextPage = () => {
 						},
 					},
 					{
-						field: "dateUpdated",
-						headerName: "Request updated",
-						minWidth: 75,
+						field: "suppliers",
+						headerName: "Supplying agency",
+						minWidth: 50,
 						flex: 0.3,
 						filterOperators,
-						valueGetter: (params: { row: { dateUpdated: string } }) => {
-							const requestUpdated = params.row.dateUpdated;
-							return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+						valueGetter: (params: {
+							row: { suppliers: Array<{ localAgency: string }> };
+						}) => {
+							// Check if suppliers array is not empty
+							if (params.row.suppliers.length > 0) {
+								return params.row.suppliers[0].localAgency;
+							} else {
+								return ""; // This allows us to handle the array being empty, and any related type errors.
+							}
 						},
 					},
 					{
-						field: "description",
-						headerName: "Description",
-						minWidth: 100,
+						field: "clusterRecordTitle",
+						headerName: "Title",
+						minWidth: 60,
+						flex: 0.5,
+						filterOperators,
+						valueGetter: (params: {
+							row: { clusterRecord: { title: string } };
+						}) => params?.row?.clusterRecord?.title,
+					},
+					{
+						field: "patronHostlmsCode",
+						headerName: "Borrowing agency",
+						minWidth: 40,
 						flex: 0.5,
 						filterOperators,
 					},
@@ -92,41 +108,28 @@ const PatronRequests: NextPage = () => {
 					{
 						field: "status",
 						headerName: "Status",
-						minWidth: 50,
+						minWidth: 60,
 						flex: 0.4,
 						filterOperators,
 					},
 					{
 						field: "outOfSequenceFlag",
 						headerName: "Out of sequence",
-						minWidth: 50,
-						flex: 0.4,
+						minWidth: 25,
+						flex: 0.2,
 						filterOperators,
 					},
 					// HIDDEN BY DEFAULT
 					{
-						field: "suppliers",
-						headerName: "Requesting agency",
-						minWidth: 50,
-						flex: 0.5,
+						field: "dateUpdated",
+						headerName: "Request updated",
+						minWidth: 75,
+						flex: 0.3,
 						filterOperators,
-						valueGetter: (params: {
-							row: { suppliers: Array<{ localAgency: string }> };
-						}) => {
-							// Check if suppliers array is not empty
-							if (params.row.suppliers.length > 0) {
-								return params.row.suppliers[0].localAgency;
-							} else {
-								return ""; // This allows us to handle the array being empty, and any related type errors.
-							}
+						valueGetter: (params: { row: { dateUpdated: string } }) => {
+							const requestUpdated = params.row.dateUpdated;
+							return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
 						},
-					},
-					{
-						field: "pickupLocationCode",
-						headerName: "Pickup location",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators,
 					},
 					{
 						field: "id",
@@ -159,11 +162,10 @@ const PatronRequests: NextPage = () => {
 				noResultsMessage={t("patron_requests.no_results")}
 				searchPlaceholder={t("patron_requests.search_placeholder")}
 				columnVisibilityModel={{
-					suppliers: false,
-					pickupLocationCode: false,
+          dateUpdated: false,
 					id: false,
 					pollCountForCurrentStatus: false,
-					elapsedTimeInCurrentStatus: false,
+					elapsedTimeInCurrentStatus: false
 				}}
 				// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 				sortModel={[{ field: "dateCreated", sort: "desc" }]}
