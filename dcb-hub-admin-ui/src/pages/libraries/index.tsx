@@ -1,5 +1,5 @@
 import { AdminLayout } from "@layout";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
 import { NextPage } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
