@@ -10,7 +10,7 @@ import Import from "@components/Import/Import";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getMappings } from "src/queries/queries";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -107,9 +107,10 @@ const AllMappings: NextPage = () => {
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators,
-						valueGetter: (params: { row: { toValue: string } }) => params.row.toValue
+						valueGetter: (params: { row: { toValue: string } }) =>
+							params.row.toValue,
 					},
-			/* 		{
+					/* 		{
 						field: "last_imported",
 						headerName: "Last imported",
 						minWidth: 100,

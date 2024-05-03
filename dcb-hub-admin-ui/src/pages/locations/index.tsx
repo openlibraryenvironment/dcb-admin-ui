@@ -5,7 +5,7 @@ import { useTranslation } from "next-i18next";
 import { getLocations } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";

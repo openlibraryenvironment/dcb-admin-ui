@@ -8,7 +8,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";

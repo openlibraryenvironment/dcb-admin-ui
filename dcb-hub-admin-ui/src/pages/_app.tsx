@@ -1,7 +1,8 @@
 import "@styles/globals.scss";
 // Next.js allows you to import CSS directly in .js files.
 // It handles optimization and all the necessary Webpack configuration to make this work.
-
+// This is what makes our MUI Pro licence key work.
+import { LicenseInfo } from "@mui/x-license";
 import { SessionProvider } from "next-auth/react";
 import { ProgressBar } from "@components/ProgressBar";
 import { ApolloProviderWrapper } from "@components/ApolloProviderWrapper/ApolloProviderWrapper";
@@ -132,6 +133,8 @@ declare module "@mui/material/Button" {
 }
 
 // const clientSideEmotionCache = createEmotionCache();
+
+LicenseInfo.setLicenseKey(String(process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY));
 
 function MyApp(props: AppProps) {
 	const { Component, pageProps } = props;

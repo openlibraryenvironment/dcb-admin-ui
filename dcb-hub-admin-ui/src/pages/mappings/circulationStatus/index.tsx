@@ -7,7 +7,7 @@ import Import from "@components/Import/Import";
 // import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid";
+import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { getCirculationStatusMappings } from "src/queries/queries";
 import { useApolloClient } from "@apollo/client";
 import { useSession } from "next-auth/react";
