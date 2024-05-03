@@ -1,3 +1,12 @@
+## [1.10.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.10.0...v1.10.1) (2024-05-03)
+
+
+### Bug Fixes
+
+* Add optional title prop to RenderAttribute ([9b78747](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9b7874729407d2ed37e2f9cd10b165aebb75a860))
+* Improve diagnostic fields view in request grid [DCB-1081] ([0759620](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/07596202b7bc9fed6dff95e55f898c87a308b05d))
+* Reorganise hostlms grid and details pages DCB-1092 ([5062e40](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5062e4024db7e9e8875c80d230ad8640b3559e06))
+
 # [1.10.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.9.0...v1.10.0) (2024-04-26)
 
 
