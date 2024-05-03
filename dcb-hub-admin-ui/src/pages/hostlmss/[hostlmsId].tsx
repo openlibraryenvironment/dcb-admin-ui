@@ -17,6 +17,9 @@ import {
 	StyledAccordion,
 	StyledAccordionSummary,
 	StyledAccordionDetails,
+	SubAccordion,
+	SubAccordionDetails,
+	SubAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -471,13 +474,13 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					</Grid>
 					{/* // For the 'item' object on some HostLMS. Conditionally rendered so it only shows up on Host LMS with this config.  */}
 					{hostlms?.clientConfig?.item != null ? (
-						<StyledAccordion
+						<SubAccordion
 							variant="outlined"
 							expanded={expandedAccordions[2]}
 							onChange={handleAccordionChange(2)}
 							disableGutters
 						>
-							<StyledAccordionSummary
+							<SubAccordionSummary
 								aria-controls="hostlms-client-config-details-item"
 								id="hostlms_details_client_config_item"
 								expandIcon={
@@ -489,8 +492,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.item")}
 								</Typography>
-							</StyledAccordionSummary>
-							<StyledAccordionDetails>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
@@ -616,19 +619,18 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 								</Grid>
-							</StyledAccordionDetails>
-						</StyledAccordion>
+							</SubAccordionDetails>
+						</SubAccordion>
 					) : null}
 					{/* For Host LMS with the 'PAPI' config. Conditionally rendered so it only shows up on Host LMS with this config. */}
 					{hostlms?.clientConfig?.papi != null ? (
-						<StyledAccordion
+						<SubAccordion
 							variant="outlined"
-							sx={{ border: "0" }}
 							expanded={expandedAccordions[3]}
 							onChange={handleAccordionChange(3)}
 							disableGutters
 						>
-							<StyledAccordionSummary
+							<SubAccordionSummary
 								aria-controls="hostlms-client-config-details-papi"
 								id="hostlms_details_client_config_papi"
 								expandIcon={
@@ -640,8 +642,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.papi")}
 								</Typography>
-							</StyledAccordionSummary>
-							<StyledAccordionDetails>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
@@ -706,18 +708,18 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 								</Grid>
-							</StyledAccordionDetails>
-						</StyledAccordion>
+							</SubAccordionDetails>
+						</SubAccordion>
 					) : null}
 					{/* For HostLMS services config. Conditionally rendered so it only shows up on Host LMS with this config. */}
 					{hostlms?.clientConfig?.services != null ? (
-						<StyledAccordion
+						<SubAccordion
 							variant="outlined"
 							expanded={expandedAccordions[4]}
 							onChange={handleAccordionChange(4)}
 							disableGutters
 						>
-							<StyledAccordionSummary
+							<SubAccordionSummary
 								aria-controls="hostlms-client-config-details-services"
 								id="hostlms_details_client_config_services"
 								expandIcon={
@@ -729,8 +731,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.services")}
 								</Typography>
-							</StyledAccordionSummary>
-							<StyledAccordionDetails>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
 								<Grid
 									container
 									spacing={{ xs: 2, md: 3 }}
@@ -863,8 +865,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 								</Grid>
-							</StyledAccordionDetails>
-						</StyledAccordion>
+							</SubAccordionDetails>
+						</SubAccordion>
 					) : null}
 				</StyledAccordionDetails>
 			</StyledAccordion>
