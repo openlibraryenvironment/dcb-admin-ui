@@ -146,16 +146,6 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("hostlms.id")}
-								</Typography>
-								<Typography variant="attributeText">
-									<RenderAttribute attribute={hostlms?.id} />
-								</Typography>
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
 									{t("hostlms.code")}
 								</Typography>
 								<Typography variant="attributeText">
@@ -173,7 +163,17 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+            <Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("hostlms.id")}
+								</Typography>
+								<Typography variant="attributeText">
+									<RenderAttribute attribute={hostlms?.id} />
+								</Typography>
+							</Stack>
+						</Grid>
+            <Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.lms_client")}
@@ -214,82 +214,16 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						{hostlms?.clientConfig?.apikey != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("hostlms.client_config.api")}
-									hiddenTextValue={hostlms?.clientConfig?.apikey}
-									id="apiKey"
-								/>
-							</Grid>
-						)}
-						{hostlms?.clientConfig?.ingest != null && (
+            {/* START: meta config properties */}
+						{hostlms?.clientConfig?.["base-url-application-services"] != null && (
 							<Grid xs={2} sm={4} md={4}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.ingest")}
+										{t("hostlms.client_config.base_application")}
 									</Typography>
 									<Typography variant="attributeText">
 										<RenderAttribute
-											attribute={String(hostlms?.clientConfig?.ingest)}
-										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
-						{hostlms?.clientConfig?.["shelving-locations"] != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.shelving")}
-									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={hostlms?.clientConfig?.["shelving-locations"]}
-										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
-						{hostlms?.clientConfig?.["num-records-to-generate"] != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.records")}
-									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={
-												hostlms?.clientConfig?.["num-records-to-generate"]
-											}
-										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
-						{hostlms?.clientConfig?.["record-syntax"] != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.record_syntax")}
-									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={hostlms?.clientConfig?.["record-syntax"]}
-										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
-						{hostlms?.clientConfig?.["metadata-prefix"] != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.metadata")}
-									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={hostlms?.clientConfig?.["metadata-prefix"]}
+											attribute={hostlms?.clientConfig?.["base-url-application-services"]}
 										/>
 									</Typography>
 								</Stack>
@@ -309,6 +243,60 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Stack>
 							</Grid>
 						)}
+						{hostlms?.clientConfig?.roles != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.roles")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={String(hostlms?.clientConfig?.roles)}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+						{hostlms?.clientConfig?.["contextHierarchy"] != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.context_hierarchy")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={String(hostlms?.clientConfig?.["contextHierarchy"])}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+						{hostlms?.clientConfig?.["default-agency-code"] != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.default_agency_code")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.clientConfig?.["default-agency-code"]}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+            {/* END: meta. START: credentials */}
+            {/* apikey: FOLIO tenant api key */}
+						{hostlms?.clientConfig?.apikey != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<PrivateData
+									clientConfigType={t("hostlms.client_config.api")}
+									hiddenTextValue={hostlms?.clientConfig?.apikey}
+									id="apiKey"
+								/>
+							</Grid>
+						)}
+            {/* access-id: Polaris api principal credential */}
 						{hostlms?.clientConfig?.["access-id"] != null && (
 							<Grid xs={2} sm={4} md={4}>
 								<Stack direction={"column"}>
@@ -323,6 +311,17 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Stack>
 							</Grid>
 						)}
+            {/* access-key: Polaris api key */}
+						{hostlms?.clientConfig?.["access-key"] != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<PrivateData
+									clientConfigType={t("hostlms.client_config.access_key")}
+									hiddenTextValue={hostlms?.clientConfig?.["access-key"]}
+									id={"access-key"}
+								/>
+							</Grid>
+						)}       
+            {/* domain-id: Polaris staff account domain */}
 						{hostlms?.clientConfig?.["domain-id"] != null && (
 							<Grid xs={2} sm={4} md={4}>
 								<Stack direction={"column"}>
@@ -337,29 +336,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Stack>
 							</Grid>
 						)}
-						{hostlms?.clientConfig?.["page-size"] != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.page_size")}
-									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={hostlms?.clientConfig?.["page-size"]}
-										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
-						{hostlms?.clientConfig?.["access-key"] != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("hostlms.client_config.access_key")}
-									hiddenTextValue={hostlms?.clientConfig?.["access-key"]}
-									id={"access-key"}
-								/>
-							</Grid>
-						)}
+            {/* domain-id: Polaris staff account principal credential */}
 						{hostlms?.clientConfig?.["staff-username"] != null && (
 							<Grid xs={2} sm={4} md={4}>
 								<Stack direction={"column"}>
@@ -374,6 +351,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Stack>
 							</Grid>
 						)}
+            {/* domain-id: Polaris staff account secret credential */}
 						{hostlms?.clientConfig?.["staff-password"] != null && (
 							<Grid xs={2} sm={4} md={4}>
 								{
@@ -384,16 +362,38 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									/>
 								}
 							</Grid>
-						)}
-						{hostlms?.clientConfig?.secret != null && (
+						)}  
+            {/* logon-branch-id: Polaris only */}
+						{hostlms?.clientConfig?.["logon-branch-id"] != null && (
 							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("hostlms.client_config.secret")}
-									hiddenTextValue={hostlms?.clientConfig?.secret}
-									id={"secret"}
-								/>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.logon_branch_id")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.clientConfig?.["logon-branch-id"]}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}         
+            {/* logon-user-id: Polaris only */}
+						{hostlms?.clientConfig?.["logon-user-id"] != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.logon_user_id")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.clientConfig?.["logon-user-id"]}
+										/>
+									</Typography>
+								</Stack>
 							</Grid>
 						)}
+            {/* key: Sierra api key */}
 						{hostlms?.clientConfig?.key != null && (
 							<Grid xs={2} sm={4} md={4}>
 								<PrivateData
@@ -403,6 +403,62 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								/>
 							</Grid>
 						)}
+            {/* key: Sierra api secret */}
+						{hostlms?.clientConfig?.secret != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<PrivateData
+									clientConfigType={t("hostlms.client_config.secret")}
+									hiddenTextValue={hostlms?.clientConfig?.secret}
+									id={"secret"}
+								/>
+							</Grid>
+						)}
+            {/* END: credentials. START: ingest. */}
+						{hostlms?.clientConfig?.ingest != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.ingest")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={String(hostlms?.clientConfig?.ingest)}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+            {/* record-syntax: FOLIO only */}
+						{hostlms?.clientConfig?.["record-syntax"] != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.record_syntax")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.clientConfig?.["record-syntax"]}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+            {/* metadata-prefix: FOLIO only */}
+						{hostlms?.clientConfig?.["metadata-prefix"] != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.client_config.metadata")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.clientConfig?.["metadata-prefix"]}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+            {/* END: ingest properties */}
 					</Grid>
 					{/* // For the 'item' object on some HostLMS. Conditionally rendered so it only shows up on Host LMS with this config.  */}
 					{hostlms?.clientConfig?.item != null ? (
@@ -431,6 +487,38 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									spacing={{ xs: 2, md: 3 }}
 									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 								>
+									{hostlms?.clientConfig?.item?.["barcode-prefix"] != null && (
+										<Grid xs={2} sm={4} md={4}>
+											<Stack direction={"column"}>
+												<Typography variant="attributeTitle">
+													{t("hostlms.client_config.barcode_prefix")}
+												</Typography>
+												<Typography variant="attributeText">
+													<RenderAttribute
+														attribute={
+															hostlms?.clientConfig?.item?.["barcode-prefix"]
+														}
+													/>
+												</Typography>
+											</Stack>
+										</Grid>
+									)}
+									{hostlms?.clientConfig?.item?.["ill-location-id"] != null && (
+										<Grid xs={2} sm={4} md={4}>
+											<Stack direction={"column"}>
+												<Typography variant="attributeTitle">
+													{t("hostlms.client_config.ill_location_id")}
+												</Typography>
+												<Typography variant="attributeText">
+													<RenderAttribute
+														attribute={
+															hostlms?.clientConfig?.item?.["ill-location-id"]
+														}
+													/>
+												</Typography>
+											</Stack>
+										</Grid>
+									)}
 									{hostlms?.clientConfig?.item?.["fine-code-id"] != null && (
 										<Grid xs={2} sm={4} md={4}>
 											<Stack direction={"column"}>
@@ -457,22 +545,6 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 													<RenderAttribute
 														attribute={
 															hostlms?.clientConfig?.item?.["renewal-limit"]
-														}
-													/>
-												</Typography>
-											</Stack>
-										</Grid>
-									)}
-									{hostlms?.clientConfig?.item?.["barcode-prefix"] != null && (
-										<Grid xs={2} sm={4} md={4}>
-											<Stack direction={"column"}>
-												<Typography variant="attributeTitle">
-													{t("hostlms.client_config.barcode_prefix")}
-												</Typography>
-												<Typography variant="attributeText">
-													<RenderAttribute
-														attribute={
-															hostlms?.clientConfig?.item?.["barcode-prefix"]
 														}
 													/>
 												</Typography>
@@ -655,22 +727,25 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									spacing={{ xs: 2, md: 3 }}
 									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 								>
-									{hostlms?.clientConfig?.services?.["product-id"] != null ? (
-										<Grid xs={2} sm={4} md={4}>
-											<Stack direction={"column"}>
-												<Typography variant="attributeTitle">
-													{t("hostlms.client_config.services_product_id")}
-												</Typography>
-												<Typography variant="attributeText">
-													<RenderAttribute
-														attribute={
-															hostlms?.clientConfig?.services?.["product-id"]
-														}
-													/>
-												</Typography>
-											</Stack>
-										</Grid>
-									) : null}
+                  {hostlms?.clientConfig?.services?.["organisation-id"] !=
+                  null ? (
+                    <Grid xs={2} sm={4} md={4}>
+                      <Stack direction={"column"}>
+                        <Typography variant="attributeTitle">
+                          {t("hostlms.client_config.services_organisation_id")}
+                        </Typography>
+                        <Typography variant="attributeText">
+                          <RenderAttribute
+                            attribute={
+                              hostlms?.clientConfig?.services?.[
+                                "organisation-id"
+                              ]
+                            }
+                          />
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                  ) : null}
 									{hostlms?.clientConfig?.services?.["site-domain"] != null ? (
 										<Grid xs={2} sm={4} md={4}>
 											<Stack direction={"column"}>
@@ -681,6 +756,38 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 													<RenderAttribute
 														attribute={
 															hostlms?.clientConfig?.services?.["site-domain"]
+														}
+													/>
+												</Typography>
+											</Stack>
+										</Grid>
+									) : null}
+									{hostlms?.clientConfig?.services?.["patron-barcode-prefix"] != null ? (
+										<Grid xs={2} sm={4} md={4}>
+											<Stack direction={"column"}>
+												<Typography variant="attributeTitle">
+													{t("hostlms.client_config.services_patron_barcode_prefix")}
+												</Typography>
+												<Typography variant="attributeText">
+													<RenderAttribute
+														attribute={
+															hostlms?.clientConfig?.services?.["patron-barcode-prefix"]
+														}
+													/>
+												</Typography>
+											</Stack>
+										</Grid>
+									) : null}
+									{hostlms?.clientConfig?.services?.["product-id"] != null ? (
+										<Grid xs={2} sm={4} md={4}>
+											<Stack direction={"column"}>
+												<Typography variant="attributeTitle">
+													{t("hostlms.client_config.services_product_id")}
+												</Typography>
+												<Typography variant="attributeText">
+													<RenderAttribute
+														attribute={
+															hostlms?.clientConfig?.services?.["product-id"]
 														}
 													/>
 												</Typography>
@@ -699,25 +806,6 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 														attribute={
 															hostlms?.clientConfig?.services?.[
 																"workstation-id"
-															]
-														}
-													/>
-												</Typography>
-											</Stack>
-										</Grid>
-									) : null}
-									{hostlms?.clientConfig?.services?.["organisation-id"] !=
-									null ? (
-										<Grid xs={2} sm={4} md={4}>
-											<Stack direction={"column"}>
-												<Typography variant="attributeTitle">
-													{t("hostlms.client_config.services_organisation_id")}
-												</Typography>
-												<Typography variant="attributeText">
-													<RenderAttribute
-														attribute={
-															hostlms?.clientConfig?.services?.[
-																"organisation-id"
 															]
 														}
 													/>
