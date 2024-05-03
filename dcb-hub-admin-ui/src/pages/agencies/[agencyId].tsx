@@ -84,6 +84,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 				container
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+				sx={{ marginBottom: "5px" }}
 			>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
