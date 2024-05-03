@@ -474,7 +474,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								<RenderAttribute attribute={library?.hostLmsConfiguration} />
 							</Stack>
 						</Grid>
-						{/* First Host LMS Section'*/}
+						{/* First / Circulation Host LMS Section'*/}
 						<Grid xs={4} sm={8} md={12} lg={16}>
 							<Divider aria-hidden="true"></Divider>
 						</Grid>
@@ -529,6 +529,40 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								/>
 							</Stack>
 						</Grid>
+
+						{/* Suppression rulesets */}
+						{library?.agency?.hostLms?.suppressionRulesetName != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.bibSuppressionRulesetName")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={
+												library.agency?.hostLms?.suppressionRulesetName
+											}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+						{library?.agency?.hostLms?.itemSuppressionRulesetName != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.itemSuppressionRulesetName")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={
+												library?.agency?.hostLms?.itemSuppressionRulesetName
+											}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
 
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
