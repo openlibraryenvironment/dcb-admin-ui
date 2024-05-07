@@ -301,6 +301,8 @@ export const getHostLmsById = gql`
 				name
 				lmsClientClass
 				clientConfig
+				itemSuppressionRulesetName
+				suppressionRulesetName
 			}
 		}
 	}
@@ -512,6 +514,8 @@ export const getLibraryById = gql`
 						name
 						clientConfig
 						lmsClientClass
+						itemSuppressionRulesetName
+						suppressionRulesetName
 					}
 				}
 				secondHostLms {
@@ -520,6 +524,8 @@ export const getLibraryById = gql`
 					name
 					clientConfig
 					lmsClientClass
+					itemSuppressionRulesetName
+					suppressionRulesetName
 				}
 				membership {
 					libraryGroup {

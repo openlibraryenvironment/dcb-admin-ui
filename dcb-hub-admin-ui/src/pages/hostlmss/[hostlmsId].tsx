@@ -440,6 +440,35 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Stack>
 							</Grid>
 						)}
+						{/* Suppression rulesets */}
+						{hostlms?.suppressionRulesetName != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.bibSuppressionRulesetName")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.suppressionRulesetName}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+						{hostlms?.itemSuppressionRulesetName != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.itemSuppressionRulesetName")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.itemSuppressionRulesetName}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
 						{/* record-syntax: FOLIO only */}
 						{hostlms?.clientConfig?.["record-syntax"] != null && (
 							<Grid xs={2} sm={4} md={4}>
