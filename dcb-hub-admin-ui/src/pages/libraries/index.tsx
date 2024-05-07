@@ -111,12 +111,10 @@ const Libraries: NextPage = () => {
 						filterOperators,
 					},
 					{
-						field: "code",
+						field: "agencyCode",
 						headerName: "Agency code",
 						flex: 0.5,
 						filterOperators,
-						valueGetter: (params: { row: { agency: { code: string } } }) =>
-							params?.row?.agency?.code,
 					},
 					{
 						field: "hostLmsCirculation",

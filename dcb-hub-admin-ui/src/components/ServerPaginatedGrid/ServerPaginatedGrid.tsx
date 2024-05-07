@@ -163,6 +163,9 @@ export default function ServerPaginationGrid({
 							case "referenceValueMappings":
 								setFilterOptions(`fromCategory:${sanitisedFilterValue}*`);
 								break;
+							case "libraries":
+								setFilterOptions(`fullName:*${sanitisedFilterValue}*`);
+								break;
 							case "agencies":
 							case "groups":
 							case "hostlmss":
