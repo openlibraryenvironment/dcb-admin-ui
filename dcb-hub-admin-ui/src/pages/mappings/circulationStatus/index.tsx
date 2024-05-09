@@ -121,7 +121,7 @@ const CirculationStatusMappings: NextPage = () => {
 				searchPlaceholder={t("mappings.search_placeholder_cs")}
 				// This is how to set the default sort order
 				sortModel={[{ field: "fromContext", sort: "asc" }]}
-				sortDirection="asc"
+				sortDirection="ASC"
 				sortAttribute="fromContext"
 				pageSize={20}
 			/>
