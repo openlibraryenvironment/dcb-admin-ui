@@ -18,6 +18,10 @@ const Locations: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+	const idFilterOperators = getGridStringOperators().filter(({ value }) =>
+		["equals"].includes(value),
+	);
+
 	const router = useRouter();
 	const { status } = useSession({
 		required: true,
@@ -61,7 +65,7 @@ const Locations: NextPage = () => {
 						headerName: "Location ID",
 						minWidth: 100,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: idFilterOperators,
 					},
 					{
 						field: "code",

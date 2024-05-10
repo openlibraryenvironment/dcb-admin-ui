@@ -18,6 +18,9 @@ const HostLmss: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+	const idFilterOperators = getGridStringOperators().filter(({ value }) =>
+		["equals"].includes(value),
+	);
 
 	const router = useRouter();
 	const { status } = useSession({
@@ -45,65 +48,67 @@ const HostLmss: NextPage = () => {
 
 	return (
 		<AdminLayout title={t("nav.hostlmss")}>
-			<ServerPaginationGrid query={getHostLms}
-			coreType="hostLms"
-			type="hostlmss"
-			columns={[
-				{
-					field: "name",
-					headerName: "Host LMS name",
-					minWidth: 150,
-					flex: 1,
-					filterOperators,
-				},
-				{
-					field: "code",
-					headerName: "Host LMS code",
-					minWidth: 50,
-					flex: 0.5,
-					filterOperators,
-				},
-				{
-					field: "clientConfigDefaultAgencyCode",
-					headerName: "Default agency code",
-					minWidth: 50,
-					flex: 0.5,
-					filterOperators,
-					valueGetter: (params: {
-						row: { clientConfig: { 'default-agency-code': string } };
-					}) => params?.row?.clientConfig?.["default-agency-code"],
-				},
-				{
-					field: "clientConfigIngest",
-					headerName: "Ingest enabled",
-					minWidth: 50,
-					flex: 0.5,
-					filterOperators,
-					valueGetter: (params: {
-						row: { clientConfig: { ingest: boolean } };
-					}) => params?.row?.clientConfig?.ingest,
-				},
-        // HIDDEN BY DEFAULT
-				{
-					field: "id",
-					headerName: "Host LMS UUID",
-					minWidth: 100,
-					flex: 0.5,
-					filterOperators,
-				},
-			]}
-			selectable={true}
-			pageSize={10}
-			noDataMessage={t("hostlms.no_rows")}
-			noResultsMessage={t("hostlms.no_results")}
-			searchPlaceholder={t("hostlms.search_placeholder")}
-      columnVisibilityModel={{
-        id: false,
-      }}
-			// This is how to set the default sort order
-			sortModel={[{ field: "name", sort: "asc" }]}
-			sortDirection="ASC"
-			sortAttribute="name"></ServerPaginationGrid>
+			<ServerPaginationGrid
+				query={getHostLms}
+				coreType="hostLms"
+				type="hostlmss"
+				columns={[
+					{
+						field: "name",
+						headerName: "Host LMS name",
+						minWidth: 150,
+						flex: 1,
+						filterOperators,
+					},
+					{
+						field: "code",
+						headerName: "Host LMS code",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators,
+					},
+					{
+						field: "clientConfigDefaultAgencyCode",
+						headerName: "Default agency code",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators,
+						valueGetter: (params: {
+							row: { clientConfig: { "default-agency-code": string } };
+						}) => params?.row?.clientConfig?.["default-agency-code"],
+					},
+					{
+						field: "clientConfigIngest",
+						headerName: "Ingest enabled",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators,
+						valueGetter: (params: {
+							row: { clientConfig: { ingest: boolean } };
+						}) => params?.row?.clientConfig?.ingest,
+					},
+					// HIDDEN BY DEFAULT
+					{
+						field: "id",
+						headerName: "Host LMS UUID",
+						minWidth: 100,
+						flex: 0.5,
+						filterOperators: idFilterOperators,
+					},
+				]}
+				selectable={true}
+				pageSize={10}
+				noDataMessage={t("hostlms.no_rows")}
+				noResultsMessage={t("hostlms.no_results")}
+				searchPlaceholder={t("hostlms.search_placeholder")}
+				columnVisibilityModel={{
+					id: false,
+				}}
+				// This is how to set the default sort order
+				sortModel={[{ field: "name", sort: "asc" }]}
+				sortDirection="ASC"
+				sortAttribute="name"
+			></ServerPaginationGrid>
 		</AdminLayout>
 	);
 };

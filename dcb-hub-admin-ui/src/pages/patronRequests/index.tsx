@@ -56,6 +56,7 @@ const PatronRequests: NextPage = () => {
 						minWidth: 75,
 						flex: 0.3,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: { row: { dateCreated: string } }) => {
 							const requestCreated = params.row.dateCreated;
 							return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
@@ -67,6 +68,7 @@ const PatronRequests: NextPage = () => {
 						minWidth: 50,
 						flex: 0.3,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: {
 							row: { suppliers: Array<{ localAgency: string }> };
 						}) => {
@@ -101,6 +103,7 @@ const PatronRequests: NextPage = () => {
 						minWidth: 50,
 						flex: 0.3,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: {
 							row: { requestingIdentity: { localBarcode: string } };
 						}) => params?.row?.requestingIdentity?.localBarcode,
@@ -126,6 +129,7 @@ const PatronRequests: NextPage = () => {
 						minWidth: 75,
 						flex: 0.3,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: { row: { dateUpdated: string } }) => {
 							const requestUpdated = params.row.dateUpdated;
 							return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
@@ -162,10 +166,10 @@ const PatronRequests: NextPage = () => {
 				noResultsMessage={t("patron_requests.no_results")}
 				searchPlaceholder={t("patron_requests.search_placeholder")}
 				columnVisibilityModel={{
-          dateUpdated: false,
+					dateUpdated: false,
 					id: false,
 					pollCountForCurrentStatus: false,
-					elapsedTimeInCurrentStatus: false
+					elapsedTimeInCurrentStatus: false,
 				}}
 				// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 				sortModel={[{ field: "dateCreated", sort: "desc" }]}

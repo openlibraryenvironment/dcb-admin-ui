@@ -67,6 +67,7 @@ const Agencies: NextPage = () => {
 							minWidth: 100,
 							flex: 0.5,
 							filterOperators,
+							filterable: false,
 						},
 						{
 							field: "code",
