@@ -1,18 +1,12 @@
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 import { getILS } from "src/helpers/getILS";
 import { getLibraries } from "src/queries/queries";
 
 // This is the unique content for the 'welcome' page for when a consortium is operational
 export default function OperatingWelcome() {
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 
 	return (
 		<ServerPaginationGrid
@@ -30,25 +24,26 @@ export default function OperatingWelcome() {
 					field: "abbreviatedName",
 					headerName: "Abbreviated name",
 					flex: 0.3,
-					filterOperators,
+					filterOperators: standardFilters,
 				},
 				{
 					field: "fullName",
 					headerName: "Full name",
 					flex: 0.5,
-					filterOperators,
+					filterOperators: standardFilters,
 				},
 				{
 					field: "agencyCode",
 					headerName: "Agency code",
 					flex: 0.3,
-					filterOperators,
+					filterOperators: standardFilters,
 				},
 				{
 					field: "ils",
 					headerName: "ILS",
 					flex: 0.3,
-					filterOperators,
+					filterable: false,
+					sortable: false,
 					valueGetter: (params: {
 						row: { agency: { hostLms: { lmsClientClass: string } } };
 					}) => getILS(params?.row?.agency?.hostLms?.lmsClientClass),
@@ -59,7 +54,8 @@ export default function OperatingWelcome() {
 					headerName: "Ingest enabled",
 					minWidth: 50,
 					flex: 0.3,
-					filterOperators,
+					filterable: false,
+					sortable: false,
 					valueGetter: (params: {
 						row: { agency: { hostLms: { clientConfig: { ingest: boolean } } } };
 					}) => params?.row?.agency?.hostLms?.clientConfig?.ingest,
@@ -69,7 +65,8 @@ export default function OperatingWelcome() {
 					field: "authProfile",
 					headerName: "Auth profile",
 					flex: 0.5,
-					filterOperators,
+					filterable: false,
+					sortable: false,
 					valueGetter: (params: { row: { agency: { authProfile: string } } }) =>
 						params?.row?.agency?.authProfile,
 				},
@@ -77,13 +74,14 @@ export default function OperatingWelcome() {
 					field: "id",
 					headerName: "Library ID",
 					flex: 0.5,
-					filterOperators,
+					filterOperators: equalsOnly,
 				},
 				{
 					field: "hostLmsCirculation",
 					headerName: "Host LMS (circulation)",
 					flex: 0.5,
-					filterOperators,
+					filterable: false,
+					sortable: false,
 					valueGetter: (params: {
 						row: { agency: { hostLms: { code: string } } };
 					}) => params?.row?.agency?.hostLms?.code,
@@ -92,13 +90,14 @@ export default function OperatingWelcome() {
 					field: "hostLmsCatalogue",
 					headerName: "Host LMS (catalogue)",
 					flex: 0.5,
-					filterOperators,
+					filterable: false,
+					sortable: false,
 					valueGetter: (params: { row: { secondHostLms: { code: string } } }) =>
 						params?.row?.secondHostLms?.code,
 				},
 			]}
 			selectable={true}
-			pageSize={20}
+			pageSize={10}
 			noDataMessage={t("libraries.none_available")}
 			noResultsMessage={t("libraries.none_found")}
 			searchPlaceholder={t("libraries.search_placeholder")}
