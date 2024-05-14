@@ -43,6 +43,7 @@
 			"contact_sysadmin": "Contact your system administrator",
 			"go_home": "Go to home page",
 			"reload": "Reload page",
+			"toggle_ops": "Toggle operational mode",
 			"view_error_details": "View error details"
 		},
 		"error": {
