@@ -120,7 +120,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.source_bib_id")}
+							{t("details.source_bib_uuid")}
 						</Typography>
 						<RenderAttribute attribute={bib?.id} />
 					</Stack>
@@ -144,7 +144,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.source_system_id")}
+							{t("details.source_system_uuid")}
 						</Typography>
 						<RenderAttribute attribute={bib?.sourceSystemId} />
 					</Stack>
@@ -160,7 +160,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.contributor_id")}
+							{t("details.contributor_uuid")}
 						</Typography>
 						<RenderAttribute attribute={bib?.contributesTo?.id} />
 					</Stack>

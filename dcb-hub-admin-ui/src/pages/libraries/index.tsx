@@ -106,7 +106,7 @@ const Libraries: NextPage = () => {
 					},
 					{
 						field: "id",
-						headerName: "Library ID",
+						headerName: "Library UUID",
 						flex: 0.5,
 						filterOperators,
 					},
