@@ -1,5 +1,4 @@
 import { AdminLayout } from "@layout";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
 import { NextPage } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -12,6 +11,7 @@ import AddLibraryToGroup from "./AddLibraryToGroup";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 
 const Libraries: NextPage = () => {
 	// State management for the adding library to group modal
@@ -23,12 +23,6 @@ const Libraries: NextPage = () => {
 		setAddToGroup(false);
 	};
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 
 	const router = useRouter();
 	const { status } = useSession({
@@ -77,19 +71,20 @@ const Libraries: NextPage = () => {
 						field: "abbreviatedName",
 						headerName: "Abbreviated name",
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "shortName",
 						headerName: "Short name",
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "ils",
 						headerName: "ILS",
 						flex: 0.5,
-						filterOperators,
+						filterable: false,
+						sortable: false,
 						valueGetter: (params: {
 							row: { agency: { hostLms: { lmsClientClass: string } } };
 						}) => getILS(params?.row?.agency?.hostLms?.lmsClientClass),
@@ -99,7 +94,8 @@ const Libraries: NextPage = () => {
 						field: "authProfile",
 						headerName: "Auth profile",
 						flex: 0.5,
-						filterOperators,
+						sortable: false,
+						filterable: false,
 						valueGetter: (params: {
 							row: { agency: { authProfile: string } };
 						}) => params?.row?.agency?.authProfile,
@@ -108,19 +104,20 @@ const Libraries: NextPage = () => {
 						field: "id",
 						headerName: "Library UUID",
 						flex: 0.5,
-						filterOperators,
+						filterOperators: equalsOnly,
 					},
 					{
 						field: "agencyCode",
 						headerName: "Agency code",
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "hostLmsCirculation",
 						headerName: "Host LMS (circulation)",
 						flex: 0.5,
-						filterOperators,
+						filterable: false,
+						sortable: false,
 						valueGetter: (params: {
 							row: { agency: { hostLms: { code: string } } };
 						}) => params?.row?.agency?.hostLms?.code,
@@ -129,7 +126,8 @@ const Libraries: NextPage = () => {
 						field: "hostLmsCatalogue",
 						headerName: "Host LMS (catalogue)",
 						flex: 0.5,
-						filterOperators,
+						filterable: false,
+						sortable: false,
 						valueGetter: (params: {
 							row: { secondHostLms: { code: string } };
 						}) => params?.row?.secondHostLms?.code,

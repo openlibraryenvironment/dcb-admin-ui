@@ -1,20 +1,21 @@
+// GO-LIVE TASK: The commented out sections of this file are to be restored before go-live.
+// A default of 'true' has been set for the interim.
+
 import type { NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { useTranslation, Trans } from "next-i18next"; //localisation
-import Link from "@components/Link/Link";
-import VersionInfo from "@components/HomeContent/VersionInfo";
+import { useTranslation } from "next-i18next"; //localisation
 import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
-import { RELEASE_PAGE_LINKS } from "../../homeData/homeConfig";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import EnvironmentDetails from "@components/HomeContent/EnvironmentDetails";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useQuery } from "@apollo/client/react";
-import { getConsortia } from "src/queries/queries";
-import dayjs from "dayjs";
+import { useState } from "react";
+// import { useEffect, useState } from "react";
+// import { useQuery } from "@apollo/client/react";
+// import { getConsortia } from "src/queries/queries";
+// import dayjs from "dayjs";
 import OperatingWelcome from "@components/OperatingWelcome/OperatingWelcome";
 
 const Home: NextPage = () => {
@@ -29,30 +30,31 @@ const Home: NextPage = () => {
 		},
 	});
 
-	const today = dayjs().startOf("day");
-	const { data } = useQuery(getConsortia, {
-		variables: { order: "name", orderBy: "ASC" },
-		context: {
-			headers: {
-				authorization: `${session?.accessToken ? session.accessToken : ""}`,
-			},
-		},
-	});
+	// TO BE RESTORED BEFORE GO-LIVE
+	// const today = dayjs().startOf("day");
+	// const { data } = useQuery(getConsortia, {
+	// 	variables: { order: "name", orderBy: "ASC" },
+	// 	context: {
+	// 		headers: {
+	// 			authorization: `${session?.accessToken ? session.accessToken : ""}`,
+	// 		},
+	// 	},
+	// });
 
 	// This will get the first consortia with a date of launch.
 	// In prod we would expect only one consortia - in dev there may be multiple. This ensures this works regardless.
-	const launchDate = dayjs(
-		data?.consortia?.content?.find(
-			(item: { dateOfLaunch: string }) => item.dateOfLaunch != null,
-		)?.dateOfLaunch,
-	);
-	const isLaunched = launchDate.isBefore(today) || launchDate.isSame(today);
+	// const launchDate = dayjs(
+	// 	data?.consortia?.content?.find(
+	// 		(item: { dateOfLaunch: string }) => item.dateOfLaunch != null,
+	// 	)?.dateOfLaunch,
+	// );
+	// const isLaunched = launchDate.isBefore(today) || launchDate.isSame(today);
 
-	const [operational, setOperational] = useState(isLaunched);
+	const [operational, setOperational] = useState(true);
 
-	useEffect(() => {
-		setOperational(isLaunched);
-	}, [isLaunched]);
+	// useEffect(() => {
+	// 	setOperational(isLaunched);
+	// }, [isLaunched]);
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setOperational(event.target.checked);
@@ -87,9 +89,8 @@ const Home: NextPage = () => {
 						inputProps={{ "aria-label": "controlled" }}
 					/>
 				}
-				label={t("ui.action.toggle_ops")}
+				label={t("ui.action.toggle_on")}
 			/>
-
 			<Stack direction="column" spacing={2}>
 				<Typography variant="h1" sx={{ fontSize: 32 }}>
 					{t("welcome.greeting", { user: nameOfUser })}
@@ -106,25 +107,7 @@ const Home: NextPage = () => {
 					</Typography>
 				)}
 				{operational ? <OperatingWelcome /> : <ConsortiumDetails />}
-				<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
-					{t("environment.your")}
-				</Typography>
-				<Typography variant="homePageText">
-					{t("environment.configured_for")}
-				</Typography>
-				<EnvironmentDetails />
-				<Typography variant="homePageText">
-					{t("environment.compare_components")}
-				</Typography>
-				<VersionInfo />
-				<Typography variant="homePageText">
-					<Trans
-						i18nKey="environment.releases_link"
-						components={{
-							linkToReleases: <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} />,
-						}}
-					></Trans>
-				</Typography>
+				{operational ? null : <EnvironmentDetails />}
 			</Stack>
 		</AdminLayout>
 	);
