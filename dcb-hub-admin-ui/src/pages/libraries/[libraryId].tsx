@@ -84,6 +84,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		true,
 		true,
 		true,
+		true,
+		true,
+		true,
+		true,
+		true,
+		true,
 	]);
 	// Functions to handle expanding both individual accordions and all accordions
 	const handleAccordionChange = (index: number) => () => {
