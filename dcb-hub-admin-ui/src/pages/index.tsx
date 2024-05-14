@@ -87,7 +87,7 @@ const Home: NextPage = () => {
 						inputProps={{ "aria-label": "controlled" }}
 					/>
 				}
-				label="Enable operational mode"
+				label={t("ui.action.toggle_ops")}
 			/>
 
 			<Stack direction="column" spacing={2}>
