@@ -31,6 +31,9 @@ import {
 	StyledAccordion,
 	StyledAccordionSummary,
 	StyledAccordionDetails,
+	SubAccordion,
+	SubAccordionSummary,
+	SubAccordionDetails,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -241,103 +244,146 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								<RenderAttribute attribute={library?.id} />
 							</Stack>
 						</Grid>
-						<Grid xs={4} sm={8} md={12} lg={16}>
-							<Divider aria-hidden="true"></Divider>
-						</Grid>
-						{/* /* 'Primary location' title goes here/* */}
-						<Grid xs={4} sm={8} md={12} lg={16}>
+					</Grid>
+					{/* /* 'Primary location' title goes here/* */}
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[8]}
+						onChange={handleAccordionChange(8)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="library-location"
+							id="library-location"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
 							<Typography variant="h3" fontWeight={"bold"}>
 								{t("libraries.primaryLocation.title")}
 							</Typography>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.primaryLocation.address")}
-								</Typography>
-								{/* This will need address-specific handling, and possibly its own component - leave as placeholder until we're ready + open maps in new tab*/}
-								<AddressLink address={library?.address} />
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.primaryLocation.location")}
-								</Typography>
-								{/* This needs a component which takes the lat+long and makes it into a GMaps link - must be URL encoded so get variables in right format first
-								commas become %2C and spaces become +*
-				This also needs to either store these variables or open the link in a new tab, as going directly back causes issues - same for address*/}
-								<Location
-									latitude={library?.latitude}
-									longitude={library?.longitude}
-								/>
-							</Stack>
-						</Grid>
-						{isConsortiumGroupMember ? (
-							<Grid xs={4} sm={8} md={12} lg={16}>
-								<Divider aria-hidden="true"></Divider>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							<Grid
+								container
+								spacing={{ xs: 2, md: 3 }}
+								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+							>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.primaryLocation.address")}
+										</Typography>
+										{/* This will need address-specific handling, and possibly its own component - leave as placeholder until we're ready + open maps in new tab*/}
+										<AddressLink address={library?.address} />
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.primaryLocation.location")}
+										</Typography>
+										{/* This needs a component which takes the lat+long and makes it into a GMaps link - must be URL encoded so get variables in right format first
+										commas become %2C and spaces become +*
+										This also needs to either store these variables or open the link in a new tab, as going directly back causes issues - same for address*/}
+										<Location
+											latitude={library?.latitude}
+											longitude={library?.longitude}
+										/>
+									</Stack>
+								</Grid>
 							</Grid>
-						) : null}
-						{isConsortiumGroupMember ? (
-							<Grid xs={4} sm={8} md={12} lg={16}>
+						</SubAccordionDetails>
+					</SubAccordion>
+					{isConsortiumGroupMember ? (
+						<SubAccordion
+							variant="outlined"
+							expanded={expandedAccordions[4]}
+							onChange={handleAccordionChange(4)}
+							disableGutters
+						>
+							<SubAccordionSummary
+								aria-controls="library-consortium"
+								id="library-consortium"
+								expandIcon={
+									<IconContext.Provider value={{ size: "2em" }}>
+										<MdExpandMore />
+									</IconContext.Provider>
+								}
+							>
 								<Typography variant="h3" fontWeight={"bold"}>
 									{t("libraries.consortium.title")}
 								</Typography>
-							</Grid>
-						) : null}
-						{isConsortiumGroupMember ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.consortium.name")}
-									</Typography>
-									<RenderAttribute
-										attribute={findConsortium(library?.membership)?.name}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-
-						<Grid xs={4} sm={8} md={12} lg={16}>
-							<Divider aria-hidden="true"></Divider>
-						</Grid>
-						<Grid xs={4} sm={8} md={12} lg={16}>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.consortium.name")}
+										</Typography>
+										<RenderAttribute
+											attribute={findConsortium(library?.membership)?.name}
+										/>
+									</Stack>
+								</Grid>
+							</SubAccordionDetails>
+						</SubAccordion>
+					) : null}
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[5]}
+						onChange={handleAccordionChange(5)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="library-groups"
+							id="library-groups"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
 							<Typography variant="h3" fontWeight={"bold"}>
 								{t("libraries.groups")}
 							</Typography>
-						</Grid>
-						{/* TRANSLATION KEYS NEEDED */}
-						<Grid xs={4} sm={8} md={12} lg={16}>
-							<ClientDataGrid
-								columns={[
-									{
-										field: "name",
-										headerName: t("groups.name"),
-										minWidth: 100,
-										flex: 1,
-									},
-									{
-										field: "code",
-										headerName: t("groups.code"),
-										minWidth: 50,
-										flex: 0.5,
-									},
-									{
-										field: "type",
-										headerName: t("groups.type"),
-										minWidth: 50,
-										flex: 0.5,
-									},
-								]}
-								data={libraryGroups}
-								type="groupsOfLibrary"
-								selectable={false}
-								noDataTitle={t("groups.none_for_library")}
-								toolbarVisible="not-visible"
-								sortModel={[{ field: "name", sort: "asc" }]}
-							/>
-						</Grid>
-					</Grid>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							{/* TRANSLATION KEYS NEEDED */}
+							<Grid xs={4} sm={8} md={12} lg={16}>
+								<ClientDataGrid
+									columns={[
+										{
+											field: "name",
+											headerName: t("groups.name"),
+											minWidth: 100,
+											flex: 1,
+										},
+										{
+											field: "code",
+											headerName: t("groups.code"),
+											minWidth: 50,
+											flex: 0.5,
+										},
+										{
+											field: "type",
+											headerName: t("groups.type"),
+											minWidth: 50,
+											flex: 0.5,
+										},
+									]}
+									data={libraryGroups}
+									type="groupsOfLibrary"
+									selectable={false}
+									noDataTitle={t("groups.none_for_library")}
+									toolbarVisible="not-visible"
+									sortModel={[{ field: "name", sort: "asc" }]}
+								/>
+							</Grid>
+						</SubAccordionDetails>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 			<StyledAccordion
@@ -420,692 +466,781 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</Typography>
 				</StyledAccordionSummary>
 				<StyledAccordionDetails>
-					<Grid
-						container
-						spacing={{ xs: 2, md: 3 }}
-						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[6]}
+						onChange={handleAccordionChange(6)}
+						disableGutters
 					>
-						<Grid xs={4} sm={8} md={12} lg={16}>
-							<Divider aria-hidden="true"></Divider>
-						</Grid>
-						<Grid xs={4} sm={8} md={12} lg={16}>
+						<SubAccordionSummary
+							aria-controls="service-systems"
+							id="service-systems"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
 							<Typography variant="h3" fontWeight={"bold"}>
 								{t("libraries.service.systems.title")}
 							</Typography>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.service.systems.ils")}
-								</Typography>
-								<RenderAttribute attribute={ils} />
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.service.systems.discovery")}
-								</Typography>
-								<RenderAttribute attribute={library?.discoverySystem} />
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.service.systems.patron_site")}
-								</Typography>
-								{library?.patronWebsite ? (
-									<Link
-										href={library?.patronWebsite}
-										title="Link to patron website"
-									>
-										{library?.patronWebsite}
-									</Link>
-								) : (
-									<Typography variant="attributeText">-</Typography>
-								)}
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.configuration")}
-								</Typography>
-								<RenderAttribute attribute={library?.hostLmsConfiguration} />
-							</Stack>
-						</Grid>
-						{/* First / Circulation Host LMS Section'*/}
-						<Grid xs={4} sm={8} md={12} lg={16}>
-							<Divider aria-hidden="true"></Divider>
-						</Grid>
-						<Grid xs={4} sm={8} md={12} lg={16}>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							<Grid
+								container
+								spacing={{ xs: 2, md: 3 }}
+								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+							>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.service.systems.ils")}
+										</Typography>
+										<RenderAttribute attribute={ils} />
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.service.systems.discovery")}
+										</Typography>
+										<RenderAttribute attribute={library?.discoverySystem} />
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.service.systems.patron_site")}
+										</Typography>
+										{library?.patronWebsite ? (
+											<Link
+												href={library?.patronWebsite}
+												title="Link to patron website"
+											>
+												{library?.patronWebsite}
+											</Link>
+										) : (
+											<Typography variant="attributeText">-</Typography>
+										)}
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.configuration")}
+										</Typography>
+										<RenderAttribute
+											attribute={library?.hostLmsConfiguration}
+										/>
+									</Stack>
+								</Grid>
+							</Grid>
+						</SubAccordionDetails>
+					</SubAccordion>
+					{/* First / Circulation Host LMS Section'*/}
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[7]}
+						onChange={handleAccordionChange(7)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="service-hostlms"
+							id="service-hostlms"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
 							<Typography variant="h3" fontWeight={"bold"}>
 								{t("libraries.service.hostlms_title", {
 									name: library?.agency?.hostLms?.name,
 								})}
 							</Typography>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.name")}
-								</Typography>
-								<RenderAttribute attribute={library?.agency?.hostLms?.name} />
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.code")}
-								</Typography>
-								<RenderAttribute attribute={library?.agency?.hostLms?.code} />
-							</Stack>
-						</Grid>
-						{/* Handle multi-roles and separate them */}
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.roles")}
-								</Typography>
-								{formatRoles(library?.agency?.hostLms?.clientConfig?.["roles"])}
-							</Stack>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.id")}
-								</Typography>
-								<RenderAttribute attribute={library?.agency?.hostLms?.id} />
-							</Stack>
-						</Grid>
-
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.client_config.ingest")}
-								</Typography>
-								<RenderAttribute
-									attribute={library?.agency?.hostLms?.clientConfig?.ingest}
-								/>
-							</Stack>
-						</Grid>
-
-						{/* Suppression rulesets */}
-						{library?.agency?.hostLms?.suppressionRulesetName != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.bibSuppressionRulesetName")}
-									</Typography>
-									<Typography variant="attributeText">
+						</SubAccordionSummary>
+						<StyledAccordionDetails>
+							<Grid
+								container
+								spacing={{ xs: 2, md: 3 }}
+								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+							>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.name")}
+										</Typography>
 										<RenderAttribute
-											attribute={
-												library.agency?.hostLms?.suppressionRulesetName
-											}
+											attribute={library?.agency?.hostLms?.name}
 										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
-						{library?.agency?.hostLms?.itemSuppressionRulesetName != null && (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.itemSuppressionRulesetName")}
-									</Typography>
-									<Typography variant="attributeText">
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.code")}
+										</Typography>
 										<RenderAttribute
-											attribute={
-												library?.agency?.hostLms?.itemSuppressionRulesetName
-											}
+											attribute={library?.agency?.hostLms?.code}
 										/>
-									</Typography>
-								</Stack>
-							</Grid>
-						)}
+									</Stack>
+								</Grid>
+								{/* Handle multi-roles and separate them */}
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.roles")}
+										</Typography>
+										{formatRoles(
+											library?.agency?.hostLms?.clientConfig?.["roles"],
+										)}
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.id")}
+										</Typography>
+										<RenderAttribute attribute={library?.agency?.hostLms?.id} />
+									</Stack>
+								</Grid>
 
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.service.environments.api")}
-								</Typography>
-								<RenderAttribute
-									attribute={
-										library?.agency?.hostLms?.clientConfig?.["base-url"]
-									}
-								/>
-							</Stack>
-						</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.client_config.ingest")}
+										</Typography>
+										<RenderAttribute
+											attribute={library?.agency?.hostLms?.clientConfig?.ingest}
+										/>
+									</Stack>
+								</Grid>
 
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("hostlms.client_config.context_hierarchy")}
-								</Typography>
-								{formatRoles(
-									library?.agency?.hostLms?.clientConfig?.contextHierarchy,
+								{/* Suppression rulesets */}
+								{library?.agency?.hostLms?.suppressionRulesetName != null && (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.bibSuppressionRulesetName")}
+											</Typography>
+											<Typography variant="attributeText">
+												<RenderAttribute
+													attribute={
+														library.agency?.hostLms?.suppressionRulesetName
+													}
+												/>
+											</Typography>
+										</Stack>
+									</Grid>
 								)}
-							</Stack>
-						</Grid>
+								{library?.agency?.hostLms?.itemSuppressionRulesetName !=
+									null && (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.itemSuppressionRulesetName")}
+											</Typography>
+											<Typography variant="attributeText">
+												<RenderAttribute
+													attribute={
+														library?.agency?.hostLms?.itemSuppressionRulesetName
+													}
+												/>
+											</Typography>
+										</Stack>
+									</Grid>
+								)}
 
-						{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
-						{library?.agency?.hostLms?.clientConfig?.apikey ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("libraries.service.environments.api_key")}
-									hiddenTextValue={
-										library?.agency?.hostLms?.clientConfig?.apikey
-									}
-									id="lib-prod-env-api-key-1"
-								/>
-							</Grid>
-						) : null}
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.service.environments.api")}
+										</Typography>
+										<RenderAttribute
+											attribute={
+												library?.agency?.hostLms?.clientConfig?.["base-url"]
+											}
+										/>
+									</Stack>
+								</Grid>
 
-						{/* For Polaris libraries it's the 'access key' attribute*/}
-						{library?.agency?.hostLms?.clientConfig?.["access-key"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("libraries.service.environments.api_key")}
-									hiddenTextValue={
-										library?.agency?.hostLms?.clientConfig?.["access-key"]
-									}
-									id="lib-prod-env-api-key-1"
-								/>
-							</Grid>
-						) : null}
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("hostlms.client_config.context_hierarchy")}
+										</Typography>
+										{formatRoles(
+											library?.agency?.hostLms?.clientConfig?.contextHierarchy,
+										)}
+									</Stack>
+								</Grid>
 
-						{/* And for Sierra libraries it is the 'key' attribute*/}
-						{library?.agency?.hostLms?.clientConfig?.key ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("libraries.service.environments.api_key")}
-									hiddenTextValue={library?.agency?.hostLms?.clientConfig?.key}
-									id="lib-prod-env-api-key-1"
-								/>
-							</Grid>
-						) : null}
+								{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
+								{library?.agency?.hostLms?.clientConfig?.apikey ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_key",
+											)}
+											hiddenTextValue={
+												library?.agency?.hostLms?.clientConfig?.apikey
+											}
+											id="lib-prod-env-api-key-1"
+										/>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.secret ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t(
-										"libraries.service.environments.api_secret",
-									)}
-									hiddenTextValue={
-										library?.agency?.hostLms?.clientConfig?.secret
-									}
-									id="lib-prod-env-api-secret-1"
-								/>
-							</Grid>
-						) : null}
+								{/* For Polaris libraries it's the 'access key' attribute*/}
+								{library?.agency?.hostLms?.clientConfig?.["access-key"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_key",
+											)}
+											hiddenTextValue={
+												library?.agency?.hostLms?.clientConfig?.["access-key"]
+											}
+											id="lib-prod-env-api-key-1"
+										/>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.defaultAgency ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.default_agency")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.defaultAgency
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{/* And for Sierra libraries it is the 'key' attribute*/}
+								{library?.agency?.hostLms?.clientConfig?.key ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_key",
+											)}
+											hiddenTextValue={
+												library?.agency?.hostLms?.clientConfig?.key
+											}
+											id="lib-prod-env-api-key-1"
+										/>
+									</Grid>
+								) : null}
 
-						{/* Sierra specific values*/}
+								{library?.agency?.hostLms?.clientConfig?.secret ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_secret",
+											)}
+											hiddenTextValue={
+												library?.agency?.hostLms?.clientConfig?.secret
+											}
+											id="lib-prod-env-api-secret-1"
+										/>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.holdPolicy ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.hold_policy")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.holdPolicy
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.defaultAgency ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.default_agency")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.defaultAgency
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.["page-size"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.page_size")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["page-size"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{/* Sierra specific values*/}
 
-						{/* Polaris-specific values*/}
+								{library?.agency?.hostLms?.clientConfig?.holdPolicy ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.hold_policy")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.holdPolicy
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.["domain-id"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.polaris_domain")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["domain-id"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.agency?.hostLms?.clientConfig?.["domain-id"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.polaris_username")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["staff-username"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.agency?.hostLms?.clientConfig?.["staff-password"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t(
-										"libraries.service.environments.polaris_password",
-									)}
-									hiddenTextValue={
-										library?.agency?.hostLms?.clientConfig?.["staff-password"]
-									}
-									id="lib-prod-env-api-polaris-password"
-								/>
-							</Grid>
-						) : null}
-						{library?.agency?.hostLms?.clientConfig?.services?.[
-							"organisation-id"
-						] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.polaris_org_id")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.services?.[
-												"organisation-id"
-											]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.["page-size"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.page_size")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.["page-size"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{/* FOLIO Specific values: folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
+								{/* Polaris-specific values*/}
 
-						{library?.agency?.hostLms?.clientConfig?.["folio-tenant"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.folio_tenant")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["folio-tenant"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.["domain-id"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.polaris_domain")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.["domain-id"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.agency?.hostLms?.clientConfig?.["domain-id"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.polaris_username")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.[
+														"staff-username"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.agency?.hostLms?.clientConfig?.["staff-password"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.polaris_password",
+											)}
+											hiddenTextValue={
+												library?.agency?.hostLms?.clientConfig?.[
+													"staff-password"
+												]
+											}
+											id="lib-prod-env-api-polaris-password"
+										/>
+									</Grid>
+								) : null}
+								{library?.agency?.hostLms?.clientConfig?.services?.[
+									"organisation-id"
+								] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.polaris_org_id")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.services?.[
+														"organisation-id"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.["metadata-prefix"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.metadata")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.[
-												"metadata-prefix"
-											]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{/* FOLIO Specific values: folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
 
-						{library?.agency?.hostLms?.clientConfig?.["record-syntax"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.record_syntax")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["record-syntax"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.["folio-tenant"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.folio_tenant")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.[
+														"folio-tenant"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.agency?.hostLms?.clientConfig?.["user-base-url"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.user_base_url")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["user-base-url"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.["metadata-prefix"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.metadata")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.[
+														"metadata-prefix"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{/* Second Host LMS section - if exists - conditionally render */}
-						{library?.secondHostLms ? (
-							<Grid xs={4} sm={8} md={12} lg={16}>
-								<Divider aria-hidden="true"></Divider>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={4} sm={8} md={12} lg={16}>
-								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.service.hostlms_title", {
-										name: library?.secondHostLms?.name,
-									})}
-								</Typography>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.name")}
-									</Typography>
-									<RenderAttribute attribute={library?.secondHostLms?.name} />
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.code")}
-									</Typography>
-									<RenderAttribute attribute={library?.secondHostLms?.code} />
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.roles")}
-									</Typography>
-									<RenderAttribute
-										attribute={library?.secondHostLms?.clientConfig?.["roles"]}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.id")}
-									</Typography>
-									<RenderAttribute attribute={library?.secondHostLms?.id} />
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.ingest")}
-									</Typography>
-									<RenderAttribute
-										attribute={library?.secondHostLms?.clientConfig?.ingest}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.api")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["base-url"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.context_hierarchy")}
-									</Typography>
-									{formatRoles(
-										library?.secondHostLms?.clientConfig?.contextHierarchy,
-									)}
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.["record-syntax"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.record_syntax")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.[
+														"record-syntax"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
-						{library?.secondHostLms?.clientConfig?.apikey ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("libraries.service.environments.api_key")}
-									hiddenTextValue={library?.secondHostLms?.clientConfig?.apikey}
-									id="lib-prod-env-api-key-2"
-								/>
-							</Grid>
-						) : null}
+								{library?.agency?.hostLms?.clientConfig?.["user-base-url"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.user_base_url")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.[
+														"user-base-url"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{/* For Polaris libraries it's the 'access key' attribute*/}
-						{library?.secondHostLms?.clientConfig?.["access-key"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("libraries.service.environments.api_key")}
-									hiddenTextValue={
-										library?.secondHostLms?.clientConfig?.["access-key"]
-									}
-									id="lib-prod-env-api-key-2"
-								/>
-							</Grid>
-						) : null}
+								{/* Second Host LMS section - if exists - conditionally render */}
+								{library?.secondHostLms ? (
+									<Grid xs={4} sm={8} md={12} lg={16}>
+										<Divider aria-hidden="true"></Divider>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={4} sm={8} md={12} lg={16}>
+										<Typography variant="h3" fontWeight={"bold"}>
+											{t("libraries.service.hostlms_title", {
+												name: library?.secondHostLms?.name,
+											})}
+										</Typography>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.name")}
+											</Typography>
+											<RenderAttribute
+												attribute={library?.secondHostLms?.name}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.code")}
+											</Typography>
+											<RenderAttribute
+												attribute={library?.secondHostLms?.code}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.roles")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.["roles"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.id")}
+											</Typography>
+											<RenderAttribute attribute={library?.secondHostLms?.id} />
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.ingest")}
+											</Typography>
+											<RenderAttribute
+												attribute={library?.secondHostLms?.clientConfig?.ingest}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.api")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.["base-url"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.context_hierarchy")}
+											</Typography>
+											{formatRoles(
+												library?.secondHostLms?.clientConfig?.contextHierarchy,
+											)}
+										</Stack>
+									</Grid>
+								) : null}
 
-						{/* And for Sierra libraries it is the 'key' attribute*/}
-						{library?.secondHostLms?.clientConfig?.key ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t("libraries.service.environments.api_key")}
-									hiddenTextValue={library?.secondHostLms?.clientConfig?.key}
-									id="lib-prod-env-api-key-2"
-								/>
-							</Grid>
-						) : null}
-						{library?.secondHostLms?.clientConfig?.secret ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t(
-										"libraries.service.environments.api_secret",
-									)}
-									hiddenTextValue={library?.secondHostLms?.clientConfig?.secret}
-									id="lib-test-env-api-secret"
-								/>
-							</Grid>
-						) : null}
+								{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
+								{library?.secondHostLms?.clientConfig?.apikey ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_key",
+											)}
+											hiddenTextValue={
+												library?.secondHostLms?.clientConfig?.apikey
+											}
+											id="lib-prod-env-api-key-2"
+										/>
+									</Grid>
+								) : null}
 
-						{/* Polaris specific values - Second Host LMS */}
+								{/* For Polaris libraries it's the 'access key' attribute*/}
+								{library?.secondHostLms?.clientConfig?.["access-key"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_key",
+											)}
+											hiddenTextValue={
+												library?.secondHostLms?.clientConfig?.["access-key"]
+											}
+											id="lib-prod-env-api-key-2"
+										/>
+									</Grid>
+								) : null}
 
-						{library?.secondHostLms?.clientConfig?.["domain-id"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.polaris_domain")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["domain-id"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms?.clientConfig?.["staff-username"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.polaris_username")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["staff-username"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{library?.secondHostLms?.clientConfig?.["staff-password"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<PrivateData
-									clientConfigType={t(
-										"libraries.service.environments.polaris_password",
-									)}
-									hiddenTextValue={
-										library?.secondHostLms?.clientConfig?.["staff-password"]
-									}
-									id="lib-test-env-polaris-password"
-								/>
-							</Grid>
-						) : null}
-						{library?.secondHostLms?.clientConfig?.services?.[
-							"organisation-id"
-						] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("libraries.service.environments.polaris_org_id")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.services?.[
-												"organisation-id"
-											]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{/* FOLIO Specific values (Second Host LMS): folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
+								{/* And for Sierra libraries it is the 'key' attribute*/}
+								{library?.secondHostLms?.clientConfig?.key ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_key",
+											)}
+											hiddenTextValue={
+												library?.secondHostLms?.clientConfig?.key
+											}
+											id="lib-prod-env-api-key-2"
+										/>
+									</Grid>
+								) : null}
+								{library?.secondHostLms?.clientConfig?.secret ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.api_secret",
+											)}
+											hiddenTextValue={
+												library?.secondHostLms?.clientConfig?.secret
+											}
+											id="lib-test-env-api-secret"
+										/>
+									</Grid>
+								) : null}
 
-						{library?.secondHostLms?.clientConfig?.["folio-tenant"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.folio_tenant")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["folio-tenant"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{/* Polaris specific values - Second Host LMS */}
 
-						{library?.secondHostLms?.clientConfig?.["metadata-prefix"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.metadata")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["metadata-prefix"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.secondHostLms?.clientConfig?.["domain-id"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.polaris_domain")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.["domain-id"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms?.clientConfig?.["staff-username"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.polaris_username")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.[
+														"staff-username"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{library?.secondHostLms?.clientConfig?.["staff-password"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<PrivateData
+											clientConfigType={t(
+												"libraries.service.environments.polaris_password",
+											)}
+											hiddenTextValue={
+												library?.secondHostLms?.clientConfig?.["staff-password"]
+											}
+											id="lib-test-env-polaris-password"
+										/>
+									</Grid>
+								) : null}
+								{library?.secondHostLms?.clientConfig?.services?.[
+									"organisation-id"
+								] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("libraries.service.environments.polaris_org_id")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.services?.[
+														"organisation-id"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{/* FOLIO Specific values (Second Host LMS): folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
 
-						{library?.secondHostLms?.clientConfig?.["record-syntax"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.record_syntax")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["record-syntax"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.secondHostLms?.clientConfig?.["folio-tenant"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.folio_tenant")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.["folio-tenant"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.secondHostLms?.clientConfig?.["user-base-url"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.user_base_url")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.secondHostLms?.clientConfig?.["user-base-url"]
-										}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
-						{/* Sierra specific values*/}
+								{library?.secondHostLms?.clientConfig?.["metadata-prefix"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.metadata")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.[
+														"metadata-prefix"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.secondHostLms?.clientConfig?.holdPolicy ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.hold_policy")}
-									</Typography>
-									<RenderAttribute
-										attribute={library?.secondHostLms?.clientConfig?.holdPolicy}
-									/>
-								</Stack>
-							</Grid>
-						) : null}
+								{library?.secondHostLms?.clientConfig?.["record-syntax"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.record_syntax")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.[
+														"record-syntax"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 
-						{library?.secondHostLms?.clientConfig?.["page-size"] ? (
-							<Grid xs={2} sm={4} md={4}>
-								<Stack direction={"column"}>
-									<Typography variant="attributeTitle">
-										{t("hostlms.client_config.page_size")}
-									</Typography>
-									<RenderAttribute
-										attribute={
-											library?.agency?.hostLms?.clientConfig?.["page-size"]
-										}
-									/>
-								</Stack>
+								{library?.secondHostLms?.clientConfig?.["user-base-url"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.user_base_url")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.[
+														"user-base-url"
+													]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+								{/* Sierra specific values*/}
+
+								{library?.secondHostLms?.clientConfig?.holdPolicy ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.hold_policy")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.secondHostLms?.clientConfig?.holdPolicy
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
+
+								{library?.secondHostLms?.clientConfig?.["page-size"] ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack direction={"column"}>
+											<Typography variant="attributeTitle">
+												{t("hostlms.client_config.page_size")}
+											</Typography>
+											<RenderAttribute
+												attribute={
+													library?.agency?.hostLms?.clientConfig?.["page-size"]
+												}
+											/>
+										</Stack>
+									</Grid>
+								) : null}
 							</Grid>
-						) : null}
-					</Grid>
+						</StyledAccordionDetails>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 			<StyledAccordion
@@ -1128,28 +1263,42 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</Typography>
 				</StyledAccordionSummary>
 				<StyledAccordionDetails>
-					<Grid
-						container
-						spacing={{ xs: 2, md: 3 }}
-						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[9]}
+						onChange={handleAccordionChange(9)}
+						disableGutters
 					>
-						<Grid xs={4} sm={8} md={12} lg={16}>
-							<Divider aria-hidden="true"></Divider>
-						</Grid>
-						<Grid xs={4} sm={8} md={12} lg={16}>
+						<SubAccordionSummary
+							aria-controls="library-configuration-patronAuthentication"
+							id="library-configuration-patronAuthentication"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
 							<Typography variant="h3" fontWeight={"bold"}>
 								{t("libraries.config.patronAuth.title")}
 							</Typography>
-						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.config.patronAuth.auth_profile")}
-								</Typography>
-								<RenderAttribute attribute={library?.agency?.authProfile} />
-							</Stack>
-						</Grid>
-					</Grid>
+						</SubAccordionSummary>
+						<StyledAccordionDetails>
+							<Grid
+								container
+								spacing={{ xs: 2, md: 3 }}
+								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+							>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("libraries.config.patronAuth.auth_profile")}
+										</Typography>
+										<RenderAttribute attribute={library?.agency?.authProfile} />
+									</Stack>
+								</Grid>
+							</Grid>
+						</StyledAccordionDetails>
+					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
 		</AdminLayout>
