@@ -68,7 +68,7 @@
 	},
 
 	"welcome": {
-		"greeting": "Welcome",
+		"greeting": "Welcome {{user}}",
 		"context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
 	},
 
