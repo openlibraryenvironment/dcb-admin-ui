@@ -5,22 +5,13 @@ import { useTranslation } from "next-i18next";
 import { getLocations } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { standardFilters } from "src/helpers/filters";
 
 const Locations: NextPage = () => {
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
-	const idFilterOperators = getGridStringOperators().filter(({ value }) =>
-		["equals"].includes(value),
-	);
 
 	const router = useRouter();
 	const { status } = useSession({
@@ -54,25 +45,28 @@ const Locations: NextPage = () => {
 				coreType="locations"
 				columns={[
 					{
+						field: "hostSystemName",
+						headerName: "Host LMS name",
+						minWidth: 150,
+						flex: 0.6,
+						filterable: false,
+						sortable: false,
+						valueGetter: (params: { row: { hostSystem: { name: string } } }) =>
+							params?.row?.hostSystem?.name,
+					},
+					{
 						field: "name",
 						headerName: "Location name",
 						minWidth: 150,
 						flex: 0.6,
-						filterOperators,
-					},
-					{
-						field: "id",
-						headerName: "Location UUID",
-						minWidth: 100,
-						flex: 0.5,
-						filterOperators: idFilterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "code",
 						headerName: "Location code",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 				]}
 				selectable={true}

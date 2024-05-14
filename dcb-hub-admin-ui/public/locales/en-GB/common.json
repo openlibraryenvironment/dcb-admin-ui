@@ -29,7 +29,7 @@
 		"profile": "Profile",
 		"serviceInfo": {
 			"name": "Service info",
-			"bibRecordCountByHostLms": "Bib record count by host lms"
+			"bibRecordCountByHostLms": "Bib record count by host LMS"
 		},
 		"settings": {
 			"name": "Settings"

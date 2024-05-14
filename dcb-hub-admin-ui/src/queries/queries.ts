@@ -300,6 +300,9 @@ export const getLocations = gql`
 				id
 				code
 				name
+				hostSystem {
+					name
+				}
 			}
 			pageable {
 				number
