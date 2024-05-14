@@ -48,9 +48,8 @@ const BibRecordCountByHostLms: NextPage = () => {
 	}, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE]);
 
 	const columns: GridColDef[] = [
-		{ field: "sourceSystemId", headerName: "Source System UUID", flex: 1 },
 		{ field: "sourceSystemName", headerName: "Source system name", flex: 1 },
-		{ field: "recordCount", headerName: "Bib record count", flex: 0.5 },
+		{ field: "recordCount", headerName: "Bib record count", flex: 1 },
 	];
 
 	// To be immediately replaced with the new loading/ error components from DCB-885 when it's merged.
