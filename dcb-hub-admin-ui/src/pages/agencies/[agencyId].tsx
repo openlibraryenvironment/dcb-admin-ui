@@ -97,7 +97,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.agency_id")}
+							{t("details.agency_uuid")}
 						</Typography>
 						<RenderAttribute attribute={agency?.id} />
 					</Stack>

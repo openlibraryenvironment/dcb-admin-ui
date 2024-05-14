@@ -137,7 +137,7 @@ const PatronRequests: NextPage = () => {
 					},
 					{
 						field: "id",
-						headerName: "Request ID",
+						headerName: "Request UUID",
 						minWidth: 100,
 						flex: 0.5,
 						filterOperators,

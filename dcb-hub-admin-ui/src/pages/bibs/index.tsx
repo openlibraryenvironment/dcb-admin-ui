@@ -61,7 +61,7 @@ const Bibs: NextPage = () => {
 				columns={[
 					{
 						field: "id",
-						headerName: "Source bib ID",
+						headerName: "Source bib UUID",
 						minWidth: 100,
 						flex: 0.5,
 						sortable: false,
@@ -85,7 +85,7 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "clusterRecordId",
-						headerName: "Cluster record ID",
+						headerName: "Cluster record UUID",
 						minWidth: 50,
 						flex: 0.5,
 						sortable: false,
@@ -113,7 +113,7 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "sourceSystemId",
-						headerName: "Source system ID",
+						headerName: "Source system UUID",
 						minWidth: 50,
 						sortable: false,
 						filterOperators: idFilterOperators,

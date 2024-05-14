@@ -63,7 +63,7 @@ const Agencies: NextPage = () => {
 						},
 						{
 							field: "id",
-							headerName: "Agency ID",
+							headerName: "Agency UUID",
 							minWidth: 100,
 							flex: 0.5,
 							filterOperators,

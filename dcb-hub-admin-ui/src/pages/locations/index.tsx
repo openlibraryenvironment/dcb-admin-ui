@@ -62,7 +62,7 @@ const Locations: NextPage = () => {
 					},
 					{
 						field: "id",
-						headerName: "Location ID",
+						headerName: "Location UUID",
 						minWidth: 100,
 						flex: 0.5,
 						filterOperators: idFilterOperators,

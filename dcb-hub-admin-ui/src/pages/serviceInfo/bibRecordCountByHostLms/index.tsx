@@ -48,7 +48,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 	}, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE]);
 
 	const columns: GridColDef[] = [
-		{ field: "sourceSystemId", headerName: "Source System ID", flex: 1 },
+		{ field: "sourceSystemId", headerName: "Source System UUID", flex: 1 },
 		{ field: "sourceSystemName", headerName: "Source system name", flex: 1 },
 		{ field: "recordCount", headerName: "Bib record count", flex: 0.5 },
 	];

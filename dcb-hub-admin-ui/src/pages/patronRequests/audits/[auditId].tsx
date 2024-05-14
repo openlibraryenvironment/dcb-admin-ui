@@ -90,7 +90,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.audit_id")}
+							{t("details.audit_uuid")}
 						</Typography>
 						<RenderAttribute attribute={audit?.id} />
 					</Stack>
@@ -130,7 +130,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.patron_request_id")}
+							{t("details.patron_request_uuid")}
 						</Typography>
 						<RenderAttribute attribute={audit?.patronRequest?.id} />
 					</Stack>

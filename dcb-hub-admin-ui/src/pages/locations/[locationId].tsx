@@ -107,7 +107,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.location_id")}
+							{t("details.location_uuid")}
 						</Typography>
 						<RenderAttribute attribute={location?.id} />
 					</Stack>
