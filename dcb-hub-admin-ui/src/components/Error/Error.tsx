@@ -42,7 +42,12 @@ export default function Error({
 					{message}
 				</Typography>
 				<Typography variant="attributeText">{description}</Typography>
-				<Button variant="contained" onClick={handleReturn} size="large">
+				<Button
+					variant="contained"
+					onClick={handleReturn}
+					size="large"
+					sx={{ textTransform: "none" }}
+				>
 					{action}
 				</Button>
 			</Stack>

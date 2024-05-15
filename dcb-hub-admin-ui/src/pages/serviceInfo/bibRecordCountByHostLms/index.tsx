@@ -7,10 +7,11 @@ import { useEffect, useState } from "react";
 import { GridColDef } from "@mui/x-data-grid-pro";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
-import { Typography } from "@mui/material";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Alert from "@components/Alert/Alert";
 import Link from "@components/Link/Link";
+import Loading from "@components/Loading/Loading";
+import { useRouter } from "next/router";
 
 const BibRecordCountByHostLms: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
@@ -47,16 +48,34 @@ const BibRecordCountByHostLms: NextPage = () => {
 		}
 	}, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE]);
 
+	const router = useRouter();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// If user is not authenticated, push them to unauthorised page
+			// At present, they will likely be kicked to the logout page first
+			// However this is important for when we introduce RBAC.
+			router.push("/unauthorised");
+		},
+	});
+
 	const columns: GridColDef[] = [
 		{ field: "sourceSystemName", headerName: "Source system name", flex: 1 },
 		{ field: "recordCount", headerName: "Bib record count", flex: 1 },
 	];
 
-	// To be immediately replaced with the new loading/ error components from DCB-885 when it's merged.
-	if (loading) {
+	if (loading || status === "loading") {
 		return (
-			<AdminLayout title={t("nav.serviceInfo.bibRecordCountByHostLms")}>
-				<Typography>{t("common.loading")}</Typography>
+			<AdminLayout>
+				<Loading
+					title={t("ui.info.loading.document", {
+						//make the first character lowercase
+						document_type:
+							t("bibRecordCountByHostLms.name").charAt(0).toLowerCase() +
+							t("bibRecordCountByHostLms.name").slice(1),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
 			</AdminLayout>
 		);
 	}

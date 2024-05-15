@@ -155,6 +155,12 @@ const openRSLight = createTheme({
 			fontSize: "18px",
 			fontWeight: "bold",
 		},
+		loadingText: {
+			fontSize: 32,
+			fontWeight: 400,
+			color: "inherit",
+			textAlign: "center",
+		},
 	},
 	components: {
 		MuiButton: {
