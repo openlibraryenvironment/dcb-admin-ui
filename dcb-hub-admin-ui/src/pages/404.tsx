@@ -15,7 +15,7 @@ export default function NotFound() {
 				title={t("ui.error.404.name")}
 				message={t("ui.error.404.summary")}
 				description={t("ui.error.404.description")}
-				action={t("ui.info.go_back")}
+				action={t("ui.error.404.action")}
 				goBack="/"
 			/>
 		</AdminLayout>

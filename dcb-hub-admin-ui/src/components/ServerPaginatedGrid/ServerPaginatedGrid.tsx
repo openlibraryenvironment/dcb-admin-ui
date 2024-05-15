@@ -34,6 +34,7 @@ export default function ServerPaginationGrid({
 	sortDirection,
 	sortAttribute,
 	coreType,
+	scrollbarVisible,
 }: {
 	query: DocumentNode;
 	type: string;
@@ -49,6 +50,7 @@ export default function ServerPaginationGrid({
 	sortDirection: string;
 	sortAttribute: string;
 	coreType: string;
+	scrollbarVisible?: boolean;
 }) {
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
 	// GraphQL data comes in an array that's named after the core type, which causes problems
@@ -96,102 +98,86 @@ export default function ServerPaginationGrid({
 		},
 		[sortDirection, sortAttribute],
 	);
+
 	const onFilterChange = useCallback(
 		(filterModel: GridFilterModel) => {
-			// We set filter defaults here: in the future these may also be extended.
-			const field = filterModel?.items[0]?.field ?? "id";
-			const operator = filterModel?.items[0]?.operator ?? "contains";
-			const value =
-				filterModel?.items[0]?.value !== undefined &&
-				filterModel?.items[0]?.value !== null
-					? filterModel?.items[0]?.value
-					: "";
-			//@ts-ignore: TypeScript hates this for some reason (thinks it's undefined when it isn't). To be fixed.
-			const quickFilterValue = filterModel?.quickFilterValues[0] ?? "";
-			// get search terms in the right format here
-			const replacedValue = value.replaceAll(" ", "?") ?? "";
-			// Question marks are used to replace spaces in search terms- see Lucene docs
-			// https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
-			// Lucene powers our server-side querying so we need to get expressions into the right syntax.
+			const filters = filterModel?.items ?? [];
+			const quickFilterValues = filterModel?.quickFilterValues ?? [];
+			const logicOperator = filterModel?.logicOperator?.toUpperCase() ?? "AND";
 
-			// Here we switch on the filter operator. At present, we only support 'equals' and 'contains', but this can be extended.
-			// Consult Lucene docs above for an idea of what's presently possible.
-			switch (operator) {
-				case "contains":
-					// Handles the contains filter AND quick search
-					// This can be adapted to remove defaults, which would let quick search be a primitive multi-filter builder
+			// Helper function to process the individual filters
+			const buildFilterQuery = (
+				field: string,
+				operator: string,
+				value: string,
+			) => {
+				const replacedValue = value.replaceAll(" ", "?");
+				// Question marks are used to replace spaces in search terms- see Lucene docs https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
+				// Lucene powers our server-side querying so we need to get expressions into the right syntax.
+				// We're currently only supporting contains and equals, but other operators are possible - see docs.
+				// We will also need to introduce type handling - i.e. for UUIDs, numbers etc - based on the field.
+				switch (operator) {
+					case "contains":
+						return `${field}:*${replacedValue}*`;
+					case "equals":
+						return `${field}:${replacedValue}`;
+					default:
+						return `${field}:${replacedValue}`;
+				}
+			};
 
-					// If operator is contains, either the contains filter or the quick search is active.
-					if (filterModel?.quickFilterValues?.length == 0) {
-						// Nothing in the quick filter values means that the contains filter is active.
-						// OR that the search field has just been cleared
-						if (filterModel?.items?.length == 0) {
-							setFilterOptions("");
-						} else {
-							const newValue = filterModel?.items[0]?.value ?? "";
-							const replacedValue = newValue.replaceAll(" ", "?") ?? "";
-							// construct the true result here as it contains filter info
-							if (type == "circulationStatus") {
-								setFilterOptions(
-									`fromCategory: CirculationStatus && deleted: false && ${field}:${replacedValue}*`,
-								);
-							} else {
-								setFilterOptions(`${field}:*${replacedValue}*`);
-							}
-							// this will be used for differentiating between the two
-						}
-					} else {
-						// Means quick search is active
-						const sanitisedFilterValue =
-							quickFilterValue.replaceAll(" ", "?") ?? "";
-						// For now, search bar defaults to 'name' search.
-						// You can change this to be a very primitive multi-filter builder by removing the asterisks.
-						// Now we switch on type to determine the correct final formulation
-						switch (type) {
-							case "bibs":
-								setFilterOptions(`sourceRecordId:${sanitisedFilterValue}`);
-								break;
-							case "patronRequests":
-								// Note that patron requests filtering by date needs special handling
-								setFilterOptions(`description:*${sanitisedFilterValue}*`);
-								break;
-							case "circulationStatus":
-								setFilterOptions(
-									`fromCategory: CirculationStatus && deleted: false && fromContext:${sanitisedFilterValue}*`,
-								);
-								break;
-							case "referenceValueMappings":
-								setFilterOptions(`fromCategory:${sanitisedFilterValue}*`);
-								break;
-							case "agencies":
-							case "groups":
-							case "hostlmss":
-							case "locations":
-								setFilterOptions(`name:*${sanitisedFilterValue}*`);
-								break;
-							default:
-								setFilterOptions(`id:*${sanitisedFilterValue}`);
-								break;
-						}
-					}
-					// this seems to work for contains search - test with University
-					// as just 1 * will only get 14 or 6 results when there are actually 20 with university in the name
-					break;
-				case "equals":
-					// Handles the 'equals' filter
-					// This is for exact matches ONLY
-					setFilterOptions(`${field}:${replacedValue}`);
-					break;
-				default:
-					setFilterOptions(`${field}:${replacedValue}`);
+			// Build the filter query for all filters
+			let filterQuery = filters
+				.map((filter) =>
+					buildFilterQuery(
+						filter.field ?? "id",
+						filter.operator ?? "contains",
+						filter.value ?? "",
+					),
+				)
+				.join(" " + logicOperator + " ");
+
+			// Add quick filters if present
+			if (quickFilterValues.length > 0) {
+				const quickQueries = quickFilterValues.map((qv) =>
+					qv.replaceAll(" ", "?"),
+				);
+				const quickFieldMap: Record<string, string> = {
+					bibs: "sourceRecordId",
+					patronRequests: "description",
+					circulationStatus: "fromContext",
+					referenceValueMappings: "fromCategory",
+					numericRangeMappings: "domain",
+					libraries: "fullName",
+					agencies: "name",
+					groups: "name",
+					hostlmss: "name",
+					locations: "name",
+					default: "id",
+				};
+
+				const quickField = quickFieldMap[type] ?? quickFieldMap.default;
+				const quickFilterQuery = quickQueries
+					.map((qv) => `${quickField}:*${qv}*`)
+					.join(" && ");
+				filterQuery = filterQuery
+					? `${filterQuery} && ${quickFilterQuery}`
+					: quickFilterQuery;
 			}
+
+			// Add specific logic for types that need it.
+			// This is particularly useful for things like mappings, where we don't want to query deleted mappings unless explicitly stated.
+			switch (type) {
+				case "circulationStatus":
+					filterQuery = `fromCategory: CirculationStatus && deleted: false && ${filterQuery}`;
+					break;
+			}
+
+			// Set the final filter options
+			setFilterOptions(filterQuery);
 		},
 		[type],
 	);
-
-	// For multi filters:
-	// sourceRecordId:843 AND id:80bf9c74-a5ae-56c9-8cfe-814220ee38a5
-	// name:"Avila University" OR name:"Altoona Public Library"
 
 	const sortField =
 		sortOptions.direction !== "" ? sortOptions.field : sortAttribute;
@@ -236,7 +222,8 @@ export default function ServerPaginationGrid({
 			type !== "GroupDetails" &&
 			type !== "referenceValueMappings" &&
 			type !== "Audit" &&
-			type !== "circulationStatus"
+			type !== "circulationStatus" &&
+			type !== "numericRangeMappings"
 		) {
 			router.push(`/${type}/${params?.row?.id}`);
 		}
@@ -246,12 +233,18 @@ export default function ServerPaginationGrid({
 		<div>
 			<DataGridPro
 				// Makes sure scrollbars aren't visible
-				sx={{
-					".MuiDataGrid-virtualScroller": {
-						overflow: "hidden",
-					},
-					border: "0",
-				}}
+				sx={
+					scrollbarVisible
+						? {
+								border: "0",
+							}
+						: {
+								".MuiDataGrid-virtualScroller": {
+									overflow: "hidden",
+								},
+								border: "0",
+							}
+				}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
 				// v7 of the DataGrid removes this but also breaks accessibility - to be looked at when we upgrade.
 				experimentalFeatures={{ ariaV7: true }}

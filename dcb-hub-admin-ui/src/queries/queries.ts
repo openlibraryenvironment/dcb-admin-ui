@@ -195,65 +195,18 @@ export const getBibById = gql`
 	}
 `;
 
-// AGENCY GROUPS (DEPRECATED)
+// CONSORTIA
 
-// A query for loading a page of groups. We only fetch what's displayed in the Data Grid.
-// As we fetch other attributes like members when the user clicks on an individual record.
-export const getGroups = gql`
-	query LoadGroups(
-		$pageno: Int!
-		$pagesize: Int!
-		$order: String!
-		$query: String!
-		$orderBy: String!
-	) {
-		agencyGroups(
-			pageno: $pageno
-			pagesize: $pagesize
-			order: $order
-			query: $query
-			orderBy: $orderBy
-		) {
+// Fetches the consortia
+
+export const getConsortia = gql`
+	query LoadConsortia($order: String!, $orderBy: String!) {
+		consortia(order: $order, orderBy: $orderBy) {
 			totalSize
 			content {
 				id
-				code
 				name
-			}
-			pageable {
-				number
-				offset
-			}
-		}
-	}
-`;
-
-// A query for fetching a group by ID, so that it can be displayed on its individual record page.
-export const getGroupById = gql`
-	query LoadGroups($query: String!) {
-		agencyGroups(query: $query) {
-			content {
-				id
-				code
-				name
-				members {
-					id
-					agency {
-						id
-						code
-						name
-						authProfile
-						longitude
-						latitude
-						hostLms {
-							id
-							code
-							name
-							lmsClientClass
-							clientConfig
-						}
-					}
-				}
+				dateOfLaunch
 			}
 		}
 	}
@@ -301,6 +254,8 @@ export const getHostLmsById = gql`
 				name
 				lmsClientClass
 				clientConfig
+				itemSuppressionRulesetName
+				suppressionRulesetName
 			}
 		}
 	}
@@ -345,6 +300,9 @@ export const getLocations = gql`
 				id
 				code
 				name
+				hostSystem {
+					name
+				}
 			}
 			pageable {
 				number
@@ -455,6 +413,19 @@ export const getLibraries = gql`
 					clientConfig
 					lmsClientClass
 				}
+				membership {
+					libraryGroup {
+						id
+						code
+						name
+						type
+						consortium {
+							id
+							name
+							dateOfLaunch
+						}
+					}
+				}
 			}
 			pageable {
 				number
@@ -512,6 +483,8 @@ export const getLibraryById = gql`
 						name
 						clientConfig
 						lmsClientClass
+						itemSuppressionRulesetName
+						suppressionRulesetName
 					}
 				}
 				secondHostLms {
@@ -520,6 +493,8 @@ export const getLibraryById = gql`
 					name
 					clientConfig
 					lmsClientClass
+					itemSuppressionRulesetName
+					suppressionRulesetName
 				}
 				membership {
 					libraryGroup {
@@ -656,6 +631,7 @@ export const getPatronRequests = gql`
 				pickupLocationCode
 				description
 				status
+				errorMessage
 				nextScheduledPoll
 				outOfSequenceFlag
 				elapsedTimeInCurrentStatus
@@ -674,7 +650,7 @@ export const getPatronRequests = gql`
 				clusterRecord {
 					id
 					title
-        }
+				}
 			}
 			pageable {
 				number
@@ -916,6 +892,70 @@ export const getNumericRangeMappings = gql`
 			pageable {
 				number
 				offset
+			}
+		}
+	}
+`;
+
+// AGENCY GROUPS (DEPRECATED)
+
+// A query for loading a page of groups. We only fetch what's displayed in the Data Grid.
+// As we fetch other attributes like members when the user clicks on an individual record.
+export const getGroups = gql`
+	query LoadGroups(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		agencyGroups(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			totalSize
+			content {
+				id
+				code
+				name
+			}
+			pageable {
+				number
+				offset
+			}
+		}
+	}
+`;
+
+// A query for fetching a group by ID, so that it can be displayed on its individual record page.
+export const getGroupById = gql`
+	query LoadGroups($query: String!) {
+		agencyGroups(query: $query) {
+			content {
+				id
+				code
+				name
+				members {
+					id
+					agency {
+						id
+						code
+						name
+						authProfile
+						longitude
+						latitude
+						hostLms {
+							id
+							code
+							name
+							lmsClientClass
+							clientConfig
+						}
+					}
+				}
 			}
 		}
 	}

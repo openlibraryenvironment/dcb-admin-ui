@@ -2,10 +2,16 @@ import getConfig from "next/config";
 import Link from "@components/Link/Link";
 import EnvironmentHealth from "./EnvironmentHealth";
 import SimpleTable from "@components/SimpleTable/SimpleTable";
-import { useTranslation } from "next-i18next"; //localisation
+import { Trans, useTranslation } from "next-i18next"; //localisation
 import axios from "axios";
-import { LOCAL_VERSION_LINKS } from "../../../homeData/homeConfig";
+import {
+	LOCAL_VERSION_LINKS,
+	RELEASE_PAGE_LINKS,
+} from "../../../homeData/homeConfig";
 import { useEffect, useState } from "react";
+import Typography from "@mui/material/Typography";
+import VersionInfo from "./VersionInfo";
+import Box from "@mui/material/Box";
 
 export default function EnvironmentDetails() {
 	const [environmentDescription, setEnvironmentDescription] = useState<
@@ -73,7 +79,16 @@ export default function EnvironmentDetails() {
 	];
 
 	return (
-		<>
+		<Box>
+			<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
+				{t("environment.your")}
+			</Typography>
+			<Typography variant="homePageText">
+				{t("environment.configured_for")}
+			</Typography>
+			<Typography variant="homePageText">
+				{t("environment.compare_components")}
+			</Typography>
 			<SimpleTable
 				column_names={[
 					t("service.name"),
@@ -83,6 +98,15 @@ export default function EnvironmentDetails() {
 				]}
 				row_data={YourDCBEnvironment}
 			/>
-		</>
+			<VersionInfo />
+			<Typography variant="homePageText">
+				<Trans
+					i18nKey="environment.releases_link"
+					components={{
+						linkToReleases: <Link href={RELEASE_PAGE_LINKS.ALL_RELEASES} />,
+					}}
+				></Trans>
+			</Typography>
+		</Box>
 	);
 }

@@ -29,6 +29,12 @@ const PatronRequests: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+	const filterStringByContains = getGridStringOperators().filter(({ value }) =>
+		["contains"].includes(value),
+	);
+	const filterStringByEquals = getGridStringOperators().filter(({ value }) =>
+		["equals"].includes(value),
+	);
 
 	if (status === "loading") {
 		return (
@@ -53,20 +59,43 @@ const PatronRequests: NextPage = () => {
 					{
 						field: "dateCreated",
 						headerName: "Request created",
-						minWidth: 75,
-						flex: 0.3,
+						minWidth: 150,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: { row: { dateCreated: string } }) => {
 							const requestCreated = params.row.dateCreated;
 							return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
 						},
 					},
 					{
+						field: "patronHostlmsCode",
+						headerName: "Patron host LMS code",
+						filterOperators,
+					},
+					{
+						field: "localBarcode",
+						headerName: "Patron barcode",
+						filterOperators,
+						filterable: false,
+						valueGetter: (params: {
+							row: { requestingIdentity: { localBarcode: string } };
+						}) => params?.row?.requestingIdentity?.localBarcode,
+					},
+					{
+						field: "clusterRecordTitle",
+						headerName: "Title",
+						minWidth: 100,
+						flex: 1.25,
+						filterOperators,
+						valueGetter: (params: {
+							row: { clusterRecord: { title: string } };
+						}) => params?.row?.clusterRecord?.title,
+					},
+					{
 						field: "suppliers",
 						headerName: "Supplying agency",
-						minWidth: 50,
-						flex: 0.3,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: {
 							row: { suppliers: Array<{ localAgency: string }> };
 						}) => {
@@ -79,53 +108,46 @@ const PatronRequests: NextPage = () => {
 						},
 					},
 					{
-						field: "clusterRecordTitle",
-						headerName: "Title",
-						minWidth: 60,
-						flex: 0.5,
-						filterOperators,
-						valueGetter: (params: {
-							row: { clusterRecord: { title: string } };
-						}) => params?.row?.clusterRecord?.title,
-					},
-					{
-						field: "patronHostlmsCode",
-						headerName: "Borrowing agency",
-						minWidth: 40,
-						flex: 0.5,
-						filterOperators,
-					},
-					{
-						field: "localBarcode",
-						headerName: "Patron barcode",
-						minWidth: 50,
-						flex: 0.3,
-						filterOperators,
-						valueGetter: (params: {
-							row: { requestingIdentity: { localBarcode: string } };
-						}) => params?.row?.requestingIdentity?.localBarcode,
-					},
-					{
 						field: "status",
 						headerName: "Status",
-						minWidth: 60,
-						flex: 0.4,
+						minWidth: 100,
+						flex: 1.5,
 						filterOperators,
+					},
+					{
+						field: "errorMessage",
+						headerName: "Error message",
+						minWidth: 100,
+						flex: 1.5,
+						filterOperators: filterStringByContains,
 					},
 					{
 						field: "outOfSequenceFlag",
 						headerName: "Out of sequence",
-						minWidth: 25,
-						flex: 0.2,
-						filterOperators,
+						flex: 0.75,
+						filterOperators: filterStringByEquals,
 					},
-					// HIDDEN BY DEFAULT
+					{
+						field: "pollCountForCurrentStatus",
+						headerName: "Polling count",
+						flex: 0.25,
+						filterOperators: filterStringByEquals,
+					},
+					{
+						field: "elapsedTimeInCurrentStatus",
+						headerName: "Time in state",
+						minWidth: 50,
+						filterOperators: filterStringByEquals,
+						valueGetter: (params: {
+							row: { elapsedTimeInCurrentStatus: number };
+						}) => formatDuration(params.row.elapsedTimeInCurrentStatus),
+					},
 					{
 						field: "dateUpdated",
 						headerName: "Request updated",
-						minWidth: 75,
-						flex: 0.3,
+						minWidth: 150,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: { row: { dateUpdated: string } }) => {
 							const requestUpdated = params.row.dateUpdated;
 							return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
@@ -133,40 +155,25 @@ const PatronRequests: NextPage = () => {
 					},
 					{
 						field: "id",
-						headerName: "Request ID",
+						headerName: "Request UUID",
 						minWidth: 100,
 						flex: 0.5,
-						filterOperators,
-					},
-					{
-						field: "pollCountForCurrentStatus",
-						headerName: "Polling count",
-						minWidth: 50,
-						flex: 0.3,
-						filterOperators,
-					},
-					{
-						field: "elapsedTimeInCurrentStatus",
-						headerName: "Time in state",
-						minWidth: 50,
-						flex: 0.3,
-						filterOperators,
-						valueGetter: (params: {
-							row: { elapsedTimeInCurrentStatus: number };
-						}) => formatDuration(params.row.elapsedTimeInCurrentStatus),
+						filterOperators: filterStringByEquals,
 					},
 				]}
 				selectable={true}
-				pageSize={10}
+				pageSize={20}
 				noDataMessage={t("patron_requests.no_rows")}
 				noResultsMessage={t("patron_requests.no_results")}
 				searchPlaceholder={t("patron_requests.search_placeholder")}
 				columnVisibilityModel={{
-          dateUpdated: false,
+					dateUpdated: false,
 					id: false,
 					pollCountForCurrentStatus: false,
-					elapsedTimeInCurrentStatus: false
+					elapsedTimeInCurrentStatus: false,
+					outOfSequenceFlag: false,
 				}}
+				scrollbarVisible={true}
 				// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 				sortModel={[{ field: "dateCreated", sort: "desc" }]}
 				sortDirection="DESC"

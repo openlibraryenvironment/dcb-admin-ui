@@ -1,4 +1,4 @@
-import { Stack, CircularProgress, Typography, Box } from "@mui/material";
+import { Stack, CircularProgress, Typography, Box, Fade } from "@mui/material";
 
 interface LoadingProps {
 	title: string;
@@ -14,11 +14,19 @@ export default function Loading({ title, subtitle }: LoadingProps) {
 			flex="1" // Takes up the available space in the flex container
 			minHeight="0" // Override minHeight to allow the Box to shrink if necessary
 		>
-			<Stack direction="column" alignItems="center" spacing={2} mb={30}>
-				<CircularProgress size={125} />
-				<Typography variant="h1">{title}</Typography>
-				<Typography variant="componentSubheading">{subtitle}</Typography>
-			</Stack>
+			<Fade
+				in={true}
+				style={{
+					transitionDelay: "1s",
+				}}
+				unmountOnExit
+			>
+				<Stack direction="column" alignItems="center" spacing={2} mt={12}>
+					<CircularProgress size={125} />
+					<Typography variant="loadingText">{title}</Typography>
+					<Typography variant="componentSubheading">{subtitle}</Typography>
+				</Stack>
+			</Fade>
 		</Box>
 	);
 }

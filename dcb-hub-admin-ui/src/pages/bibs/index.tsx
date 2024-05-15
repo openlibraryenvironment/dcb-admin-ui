@@ -28,6 +28,9 @@ const Bibs: NextPage = () => {
 	const filterOperators = getGridStringOperators().filter(({ value }) =>
 		["equals", "contains" /* add more over time */].includes(value),
 	);
+	const idFilterOperators = getGridStringOperators().filter(({ value }) =>
+		["equals"].includes(value),
+	);
 	// If testing, use this format for the search:
 
 	if (status === "loading") {
@@ -58,7 +61,7 @@ const Bibs: NextPage = () => {
 				columns={[
 					{
 						field: "id",
-						headerName: "Source bib ID",
+						headerName: "Source bib UUID",
 						minWidth: 100,
 						flex: 0.5,
 						sortable: false,
@@ -82,11 +85,12 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "clusterRecordId",
-						headerName: "Cluster record ID",
+						headerName: "Cluster record UUID",
 						minWidth: 50,
 						flex: 0.5,
 						sortable: false,
 						filterOperators,
+						filterable: false,
 						valueGetter: (params: { row: { contributesTo: { id: string } } }) =>
 							params?.row?.contributesTo?.id,
 					},
@@ -105,15 +109,14 @@ const Bibs: NextPage = () => {
 						headerName: "Source record ID",
 						minWidth: 50,
 						sortable: false,
-						filterOperators,
 						flex: 0.5,
 					},
 					{
 						field: "sourceSystemId",
-						headerName: "Source system ID",
+						headerName: "Source system UUID",
 						minWidth: 50,
 						sortable: false,
-						filterOperators,
+						filterOperators: idFilterOperators,
 						flex: 0.5,
 					},
 				]}

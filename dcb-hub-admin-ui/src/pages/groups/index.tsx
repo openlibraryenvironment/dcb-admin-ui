@@ -80,7 +80,7 @@ const Groups: NextPage = () => {
 					},
 					{
 						field: "id",
-						headerName: "Group ID",
+						headerName: "Group UUID",
 						minWidth: 100,
 						flex: 0.5,
 						filterOperators,

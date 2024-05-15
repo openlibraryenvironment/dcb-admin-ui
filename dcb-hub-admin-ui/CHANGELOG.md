@@ -1,3 +1,20 @@
+# [1.11.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.10.1...v1.11.0) (2024-05-15)
+
+
+### Bug Fixes
+
+* Adjust operational page behaviour [DCB-1103] ([3751281](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3751281c849f7a551d552f8e7605770876873a7d))
+* Clarify operational toggle wording  [DCB-1103] ([e5fde4b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e5fde4b9a5538e1865d0636b128c24b27fef78c2))
+* Fix libraries quick search and code filter ([27d5ba8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/27d5ba8d9d93ceecf13c4fbf955f83ac11a03528))
+* Remove location link on library detais page ([131e3d0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/131e3d05cb309dd0d19745d47f15a61de7db44b8))
+
+
+### Features
+
+* Add HostLMS suppression rulesets [DCB-1097] ([4f21b2a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4f21b2aa37b17cc5070c6854d62e8efbd10236a8))
+* Add operating welcome page [DCB-1103] ([226cb2e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/226cb2ecda51787d7d8a50f86fe4d50af8a120b0))
+* Enable multi-filters in DCB Admin [DCB-1100] ([6cedba3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6cedba38168025f0cd03fa23549091368567fa1a))
+
 ## [1.10.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.10.0...v1.10.1) (2024-05-03)
 
 

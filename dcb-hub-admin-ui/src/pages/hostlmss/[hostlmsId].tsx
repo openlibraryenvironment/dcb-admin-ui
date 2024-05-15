@@ -99,15 +99,15 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					title={t("ui.error.cannot_retrieve_record")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
-					action={t("ui.info.go_back")}
+					action={t("ui.action.go_back")}
 					goBack="/hostlmss"
 				/>
 			) : (
 				<Error
-					title={t("ui.error.record_not_found")}
-					message={t("ui.info.record_unavailable")}
-					description={t("ui.action.check_url")}
-					action={t("ui.info.go_back")}
+					title={t("ui.error.cannot_find_record")}
+					message={t("ui.error.invalid_UUID")}
+					description={t("ui.info.check_address")}
+					action={t("ui.action.go_back")}
 					goBack="/hostlmss"
 				/>
 			)}
@@ -435,6 +435,35 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									<Typography variant="attributeText">
 										<RenderAttribute
 											attribute={String(hostlms?.clientConfig?.ingest)}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+						{/* Suppression rulesets */}
+						{hostlms?.suppressionRulesetName != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.bibSuppressionRulesetName")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.suppressionRulesetName}
+										/>
+									</Typography>
+								</Stack>
+							</Grid>
+						)}
+						{hostlms?.itemSuppressionRulesetName != null && (
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("hostlms.itemSuppressionRulesetName")}
+									</Typography>
+									<Typography variant="attributeText">
+										<RenderAttribute
+											attribute={hostlms?.itemSuppressionRulesetName}
 										/>
 									</Typography>
 								</Stack>

@@ -10,7 +10,8 @@ export default function Custom500Page() {
 			<Error
 				title={t("ui.error.500.name")}
 				message={t("ui.error.500.summary")}
-				action={t("ui.action.go_home")}
+				description={t("ui.error.500.description")}
+				action={t("ui.error.500.action")}
 				goBack="/"
 			/>
 		</AdminLayout>

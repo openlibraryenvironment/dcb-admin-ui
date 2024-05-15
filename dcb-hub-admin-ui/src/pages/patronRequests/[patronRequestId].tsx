@@ -154,15 +154,15 @@ export default function PatronRequestDetails({
 					title={t("ui.error.cannot_retrieve_record")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
-					action={t("ui.info.go_back")}
+					action={t("ui.action.go_back")}
 					goBack="/patronRequests"
 				/>
 			) : (
 				<Error
-					title={t("ui.error.record_not_found")}
-					message={t("ui.info.record_unavailable")}
-					description={t("ui.action.check_url")}
-					action={t("ui.info.go_back")}
+					title={t("ui.error.cannot_find_record")}
+					message={t("ui.error.invalid_UUID")}
+					description={t("ui.info.check_address")}
+					action={t("ui.action.go_back")}
 					goBack="/patronRequests"
 				/>
 			)}
@@ -202,7 +202,7 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.request_id")}
+									{t("details.request_uuid")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.id} />
 							</Stack>
@@ -409,7 +409,7 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.bib_cluster_id")}
+									{t("details.bib_cluster_uuid")}
 								</Typography>
 								{bibClusterRecordUrl == "" ? (
 									<RenderAttribute attribute={patronRequest?.bibClusterId} />
@@ -474,7 +474,7 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.selected_bib")}
+									{t("details.selected_bib_uuid")}
 								</Typography>
 								<RenderAttribute
 									attribute={patronRequest?.clusterRecord?.selectedBib}
@@ -584,7 +584,7 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.supplier_id")}
+									{t("details.supplier_uuid")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.suppliers[0]?.id} />
 							</Stack>
@@ -926,7 +926,7 @@ export default function PatronRequestDetails({
 								<Grid xs={2} sm={4} md={4}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
-											{t("details.patron_id")}
+											{t("details.patron_uuid")}
 										</Typography>
 										<RenderAttribute attribute={patronRequest?.patron?.id} />
 									</Stack>
@@ -944,7 +944,7 @@ export default function PatronRequestDetails({
 								<Grid xs={2} sm={4} md={4}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
-											{t("details.requestor_id")}
+											{t("details.requestor_uuid")}
 										</Typography>
 										<RenderAttribute
 											attribute={patronRequest?.requestingIdentity?.id}
@@ -1077,7 +1077,7 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.pickup_code")}
+									{t("details.pickup_code_uuid")}
 								</Typography>
 								<RenderAttribute
 									attribute={patronRequest?.pickupLocationCode}
