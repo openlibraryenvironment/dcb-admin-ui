@@ -14,8 +14,6 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
-import Location from "@components/Location/Location";
-// import { getLibraryById } from "src/queries/queries";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
 import PrivateData from "@components/PrivateData/PrivateData";
@@ -291,12 +289,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 										<Typography variant="attributeTitle">
 											{t("libraries.primaryLocation.location")}
 										</Typography>
-										{/* This needs a component which takes the lat+long and makes it into a GMaps link - must be URL encoded so get variables in right format first
-										commas become %2C and spaces become +*
-										This also needs to either store these variables or open the link in a new tab, as going directly back causes issues - same for address*/}
-										<Location
+										{/* This component handles lat/long in the same way as address - however we don't require both currently.
+										{/* <Location
 											latitude={library?.latitude}
 											longitude={library?.longitude}
+										/> */}
+										<RenderAttribute
+											attribute={
+												"" + library?.latitude + ", " + library?.longitude
+											}
 										/>
 									</Stack>
 								</Grid>
