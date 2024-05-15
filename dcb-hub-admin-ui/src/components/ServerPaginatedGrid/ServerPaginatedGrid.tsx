@@ -34,6 +34,7 @@ export default function ServerPaginationGrid({
 	sortDirection,
 	sortAttribute,
 	coreType,
+	scrollbarVisible,
 }: {
 	query: DocumentNode;
 	type: string;
@@ -49,6 +50,7 @@ export default function ServerPaginationGrid({
 	sortDirection: string;
 	sortAttribute: string;
 	coreType: string;
+	scrollbarVisible?: boolean;
 }) {
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
 	// GraphQL data comes in an array that's named after the core type, which causes problems
@@ -231,12 +233,18 @@ export default function ServerPaginationGrid({
 		<div>
 			<DataGridPro
 				// Makes sure scrollbars aren't visible
-				sx={{
-					".MuiDataGrid-virtualScroller": {
-						overflow: "hidden",
-					},
-					border: "0",
-				}}
+				sx={
+					scrollbarVisible
+						? {
+								border: "0",
+							}
+						: {
+								".MuiDataGrid-virtualScroller": {
+									overflow: "hidden",
+								},
+								border: "0",
+							}
+				}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
 				// v7 of the DataGrid removes this but also breaks accessibility - to be looked at when we upgrade.
 				experimentalFeatures={{ ariaV7: true }}
