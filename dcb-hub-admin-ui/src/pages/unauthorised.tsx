@@ -10,9 +10,9 @@ export default function Unauthorised() {
 		<AdminLayout hideTitleBox={true} hideBreadcrumbs={true}>
 			<Error
 				title={t("ui.error.401.name")}
-				message={t("ui.error.401.message")}
+				message={t("ui.error.401.summary")}
 				description={t("ui.error.401.description")}
-				action={t("ui.action.go_home")}
+				action={t("ui.error.401.action")}
 			/>
 		</AdminLayout>
 	);

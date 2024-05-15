@@ -38,45 +38,49 @@
 
 	"ui": {
 		"action": {
-			"check_url": "Please check the URL or return to the previous page",
 			"close_alert": "Close alert",
-			"contact_sysadmin": "Contact your system administrator",
-			"go_home": "Go to home page",
+			"contact_sysadmin": "contact your system administrator",
+			"go_home": "Go to $t(nav.home) page",
 			"reload": "Reload page",
-			"toggle_on": "Toggle onboarding mode",
-			"view_error_details": "View error details"
+			"view_error_details": "View error details",
+			"go_back": "Go back",
+			"toggle_on": "Toggle onboarding mode"
 		},
 		"error": {
 			"401": {
 				"name": "401 Unauthorised",
-				"message": "You are not authorised to access this page",
-				"description": "If you think you should have access to this page, please contact your system administrator."
+				"summary": "Sorry, you do not have access to this page",
+				"description": "If you think you should have access, please contact your system administrator",
+				"action": "$t(ui.action.go_home)"
 			},
 			"404": {
 				"name": "404 Page not found",
 				"summary": "This page seems to be missing",
-				"description": "Check the web address or try another page"
+				"description": "Check the web address or try another page",
+				"action": "$t(ui.action.go_home)"
 			},
 			"500": {
 				"name": "500 Server error",
-				"summary": "This doesn't seem to be working at the moment"
+				"summary": "This doesn't seem to be working at the moment",
+				"description": "$t(ui.info.try_later)",
+				"action": "$t(ui.action.go_back)"
 			},
 			"cannot_retrieve_record": "Unable to retrieve the record",
-			"record_not_found": "Record not found",
+			"cannot_find_record": "Unable to find the record",
 			"something_wrong": "Something went wrong",
 			"summary": "Sorry, you do not have access to this page",
-			"too_long_load": "The record is taking too long to load"
+			"too_long_load": "The record is taking too long to load",
+			"invalid_UUID": "The record might have been deleted or the identifier could be wrong"
 		},
 		"info": {
 			"connection_issue": "There may be a connection issue",
-			"go_back": "Go back",
 			"loading": {
 				"document": "Loading {{document_type}}"
 			},
-			"record_unavailable": "It seems no record is available at this URL",
 			"reload": "Try reloading the page",
 			"try_later": "Please try again later",
-			"wait": "Please wait"
+			"wait": "Please wait",
+			"check_address": "Please check the web address"
 		},
 		"logo": "{{owner}} logo",
 		"visibility": {
@@ -438,6 +442,7 @@
 	},
 
 	"bibRecordCountByHostLms": {
+		"name": "Bib record count by host LMS",
 		"change_filter": "Try changing your filters or search terms.",
 		"no_results": "No bib record counts found. Try changing your search terms or filters."
 	},
