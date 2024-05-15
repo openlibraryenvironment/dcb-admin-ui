@@ -628,6 +628,7 @@ export const getPatronRequests = gql`
 				pickupLocationCode
 				description
 				status
+				errorMessage
 				nextScheduledPoll
 				outOfSequenceFlag
 				elapsedTimeInCurrentStatus
