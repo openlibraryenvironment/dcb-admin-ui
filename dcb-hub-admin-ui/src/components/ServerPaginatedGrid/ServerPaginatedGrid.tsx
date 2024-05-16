@@ -35,6 +35,7 @@ export default function ServerPaginationGrid({
 	sortAttribute,
 	coreType,
 	scrollbarVisible,
+	presetQueryVariables,
 }: {
 	query: DocumentNode;
 	type: string;
@@ -51,12 +52,14 @@ export default function ServerPaginationGrid({
 	sortAttribute: string;
 	coreType: string;
 	scrollbarVisible?: boolean;
+	presetQueryVariables?: string;
 }) {
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
 	// GraphQL data comes in an array that's named after the core type, which causes problems
 	const [sortOptions, setSortOptions] = useState({ field: "", direction: "" });
 	const [filterOptions, setFilterOptions] = useState("");
 	const router = useRouter();
+	const presetTypes = ["circulationStatus", "patronRequestsLibrary"];
 
 	// TODO in future work:
 	// Support filtering by date on Patron Requests
@@ -169,14 +172,17 @@ export default function ServerPaginationGrid({
 			// This is particularly useful for things like mappings, where we don't want to query deleted mappings unless explicitly stated.
 			switch (type) {
 				case "circulationStatus":
-					filterQuery = `fromCategory: CirculationStatus && deleted: false && ${filterQuery}`;
+					filterQuery = `${presetQueryVariables} && ${filterQuery}`;
+					break;
+				case "patronRequestLibrary":
+					filterQuery = `${presetQueryVariables} && ${filterQuery}`;
 					break;
 			}
 
 			// Set the final filter options
 			setFilterOptions(filterQuery);
 		},
-		[type],
+		[presetQueryVariables, type],
 	);
 
 	const sortField =
@@ -191,8 +197,8 @@ export default function ServerPaginationGrid({
 			order: sortField,
 			orderBy: direction,
 			query:
-				type === "circulationStatus" && filterOptions == ""
-					? `fromCategory: CirculationStatus && deleted: false`
+				presetTypes.includes(type) && filterOptions == ""
+					? presetQueryVariables
 					: filterOptions,
 		},
 	});
@@ -218,13 +224,18 @@ export default function ServerPaginationGrid({
 	// And formulate the correct URL
 	// plurals are used for types to match URL structure.
 	const handleRowClick: GridEventListener<"rowClick"> = (params) => {
-		if (
+		// Some grids, like the PRs on the library page, need special redirection
+		if (type === "patronRequestsLibrary") {
+			router.push(`/patronRequests/${params?.row?.id}`);
+		} else if (
+			// Others we don't want users to be able to click through on
 			type !== "GroupDetails" &&
 			type !== "referenceValueMappings" &&
 			type !== "Audit" &&
 			type !== "circulationStatus" &&
 			type !== "numericRangeMappings"
 		) {
+			// Whereas most can just use this standard redirection based on type
 			router.push(`/${type}/${params?.row?.id}`);
 		}
 	};

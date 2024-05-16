@@ -124,6 +124,7 @@ const CirculationStatusMappings: NextPage = () => {
 				sortDirection="ASC"
 				sortAttribute="fromContext"
 				pageSize={20}
+				presetQueryVariables="fromCategory: CirculationStatus && deleted: false"
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

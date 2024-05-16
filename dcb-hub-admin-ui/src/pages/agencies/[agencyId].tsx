@@ -56,7 +56,6 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 			</AdminLayout>
 		);
 	}
-	console.log(error);
 
 	return error || agency == null || agency == undefined ? (
 		<AdminLayout hideBreadcrumbs>
