@@ -147,7 +147,7 @@ export default function ServerPaginationGrid({
 				);
 				const quickFieldMap: Record<string, string> = {
 					bibs: "sourceRecordId",
-					patronRequests: "description",
+					patronRequests: "errorMessage",
 					circulationStatus: "fromContext",
 					referenceValueMappings: "fromCategory",
 					numericRangeMappings: "domain",
