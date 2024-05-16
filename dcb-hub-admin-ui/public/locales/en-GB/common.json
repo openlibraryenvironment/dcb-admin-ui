@@ -398,10 +398,10 @@
 			"title": "Contacts"
 		},
 		"patronRequests": {
-			"active": "Active requests",
-			"completed": "Completed requests",
-			"exception": "Exception requests",
-			"inactive": "Inactive requests"
+			"active": "{{number}} Active requests",
+			"completed": "{{number}} Completed requests",
+			"exception": "{{number}} Exception requests",
+			"inactive": "{{number}} Inactive requests"
 		},
 		"primaryLocation": {
 			"address": "Address",
