@@ -36,6 +36,7 @@ export default function ServerPaginationGrid({
 	coreType,
 	scrollbarVisible,
 	presetQueryVariables,
+	onTotalSizeChange,
 }: {
 	query: DocumentNode;
 	type: string;
@@ -53,13 +54,20 @@ export default function ServerPaginationGrid({
 	coreType: string;
 	scrollbarVisible?: boolean;
 	presetQueryVariables?: string;
+	onTotalSizeChange?: any;
 }) {
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
 	// GraphQL data comes in an array that's named after the core type, which causes problems
 	const [sortOptions, setSortOptions] = useState({ field: "", direction: "" });
 	const [filterOptions, setFilterOptions] = useState("");
 	const router = useRouter();
-	const presetTypes = ["circulationStatus", "patronRequestsLibrary"];
+	const presetTypes = [
+		"circulationStatus",
+		"patronRequestsLibraryException",
+		"patronRequestsLibraryActive",
+		"patronRequestsLibraryInactive",
+		"patronRequestsLibraryCompleted",
+	];
 
 	// TODO in future work:
 	// Support filtering by date on Patron Requests
@@ -203,6 +211,15 @@ export default function ServerPaginationGrid({
 		},
 	});
 
+	const totalSize = data?.[coreType]?.totalSize;
+
+	useEffect(() => {
+		if (totalSize !== undefined) {
+			setRowCountState(totalSize);
+			onTotalSizeChange?.(type, totalSize);
+		}
+	}, [totalSize, onTotalSizeChange, type]);
+
 	// Some API clients return undefined while loading
 	// Following lines are here to prevent `rowCountState` from being undefined during the loading
 
@@ -225,7 +242,12 @@ export default function ServerPaginationGrid({
 	// plurals are used for types to match URL structure.
 	const handleRowClick: GridEventListener<"rowClick"> = (params) => {
 		// Some grids, like the PRs on the library page, need special redirection
-		if (type === "patronRequestsLibrary") {
+		if (
+			type === "patronRequestsLibraryActive" ||
+			type === "patronRequestsLibraryInactive" ||
+			type === "patronRequestsLibraryCompleted" ||
+			type === "patronRequestsLibraryException"
+		) {
 			router.push(`/patronRequests/${params?.row?.id}`);
 		} else if (
 			// Others we don't want users to be able to click through on

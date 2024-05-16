@@ -10,7 +10,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { AdminLayout } from "@layout";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
@@ -43,6 +43,14 @@ import { formatDuration } from "src/helpers/formatDuration";
 type LibraryDetails = {
 	libraryId: any;
 };
+
+const INITIAL_EXPANDED_STATE = 12; // Number of accordions that should be initially expanded
+const TOTAL_ACCORDIONS = 15; // Total number of accordions
+
+const getInitialAccordionState = (initialExpanded: number, total: number) => {
+	return Array.from({ length: total }, (_, index) => index < initialExpanded);
+};
+
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
@@ -80,39 +88,36 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		return <ListItemText>{formattedRoles}</ListItemText>;
 	};
 
-	// Sets default state for expansion
-	const [expandedAccordions, setExpandedAccordions] = useState([
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		false,
-		false,
-		false,
-	]);
-	// Functions to handle expanding both individual accordions and all accordions
-	const handleAccordionChange = (index: number) => () => {
-		setExpandedAccordions((prevExpanded) => {
-			const newExpanded = [...prevExpanded];
-			newExpanded[index] = !newExpanded[index];
-			return newExpanded;
-		});
-	};
+	const [expandedAccordions, setExpandedAccordions] = useState<boolean[]>(
+		getInitialAccordionState(INITIAL_EXPANDED_STATE, TOTAL_ACCORDIONS),
+	);
 
-	// Works for closing + expanding as it sets values to their opposite
-	const expandAll = () => {
-		setExpandedAccordions((prevExpanded) =>
-			prevExpanded.map(() => !prevExpanded[0]),
-		);
-	};
+	const handleAccordionChange = useCallback(
+		(index: number) => () => {
+			setExpandedAccordions((prevExpanded) => {
+				const newExpanded = [...prevExpanded];
+				newExpanded[index] = !newExpanded[index];
+				return newExpanded;
+			});
+		},
+		[],
+	);
+
+	const expandAll = useCallback(() => {
+		setExpandedAccordions((prevExpanded) => {
+			const allExpanded = prevExpanded.some((isExpanded) => !isExpanded);
+			return prevExpanded.map(() => allExpanded);
+		});
+	}, []);
+
+	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
+
+	const handleTotalSizeChange = useCallback((type: string, size: number) => {
+		setTotalSizes((prevTotalSizes) => ({
+			...prevTotalSizes,
+			[type]: size,
+		}));
+	}, []);
 
 	if (loading || status === "loading") {
 		return (
@@ -1357,14 +1362,16 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.patronRequests.exception")}
+									{t("libraries.patronRequests.exception", {
+										number: totalSizes["patronRequestsLibraryException"],
+									})}
 								</Typography>
 							</SubAccordionSummary>
 							<SubAccordionDetails>
 								<ServerPaginationGrid
 									query={getPatronRequests}
 									presetQueryVariables={exceptionQueryVariables}
-									type="patronRequestsLibrary"
+									type="patronRequestsLibraryException"
 									coreType="patronRequests"
 									columns={[
 										{
@@ -1461,6 +1468,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
@@ -1481,14 +1489,16 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.patronRequests.inactive")}
+									{t("libraries.patronRequests.inactive", {
+										number: totalSizes["patronRequestsLibraryInactive"],
+									})}
 								</Typography>
 							</SubAccordionSummary>
 							<SubAccordionDetails>
 								<ServerPaginationGrid
 									query={getPatronRequests}
 									presetQueryVariables={outOfSequenceQueryVariables}
-									type="patronRequestsLibrary"
+									type="patronRequestsLibraryInactive"
 									coreType="patronRequests"
 									columns={[
 										{
@@ -1599,6 +1609,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
@@ -1619,14 +1630,16 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.patronRequests.active")}
+									{t("libraries.patronRequests.active", {
+										number: totalSizes["patronRequestsLibraryActive"],
+									})}
 								</Typography>
 							</SubAccordionSummary>
 							<SubAccordionDetails>
 								<ServerPaginationGrid
 									query={getPatronRequests}
 									presetQueryVariables={inProgressQueryVariables}
-									type="patronRequestsLibrary"
+									type="patronRequestsLibraryActive"
 									coreType="patronRequests"
 									columns={[
 										{
@@ -1737,6 +1750,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
@@ -1757,14 +1771,16 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.patronRequests.completed")}
+									{t("libraries.patronRequests.completed", {
+										number: totalSizes["patronRequestsLibraryCompleted"],
+									})}
 								</Typography>
 							</SubAccordionSummary>
 							<SubAccordionDetails>
 								<ServerPaginationGrid
 									query={getPatronRequests}
 									presetQueryVariables={finishedQueryVariables}
-									type="patronRequestsLibrary"
+									type="patronRequestsLibraryCompleted"
 									coreType="patronRequests"
 									columns={[
 										{
@@ -1853,6 +1869,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
