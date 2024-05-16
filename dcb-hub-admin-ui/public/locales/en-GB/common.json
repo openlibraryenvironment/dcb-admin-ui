@@ -397,6 +397,12 @@
 			"time_zone": "Time zone",
 			"title": "Contacts"
 		},
+		"patronRequests": {
+			"active": "Active requests",
+			"completed": "Completed requests",
+			"exception": "Exception requests",
+			"inactive": "Inactive requests"
+		},
 		"primaryLocation": {
 			"address": "Address",
 			"location": "Location",

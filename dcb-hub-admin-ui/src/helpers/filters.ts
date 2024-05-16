@@ -10,3 +10,7 @@ export const standardFilters = getGridStringOperators().filter(({ value }) =>
 export const equalsOnly = getGridStringOperators().filter(({ value }) =>
 	["equals"].includes(value),
 );
+
+export const containsOnly = getGridStringOperators().filter(({ value }) =>
+	["contains"].includes(value),
+);
