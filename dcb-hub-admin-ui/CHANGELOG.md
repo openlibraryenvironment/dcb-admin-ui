@@ -1,3 +1,11 @@
+# [1.12.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.11.0...v1.12.0) (2024-05-20)
+
+
+### Features
+
+* Add number of requests to library details accordions [DCB-1128] ([06711b4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/06711b43306e7b5829f00087d99483aa22b3692c))
+* Add patron request grids to library details page [DCB-1128] ([993a753](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/993a753f5f74a24aa51209f3dcc414b14d055b5f))
+
 # [1.11.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.10.1...v1.11.0) (2024-05-15)
 
 
