@@ -6,11 +6,11 @@ import { getPatronRequests } from "src/queries/queries";
 import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
 import { formatDuration } from "src/helpers/formatDuration";
+import { containsOnly, equalsOnly, standardFilters } from "src/helpers/filters";
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -23,18 +23,6 @@ const PatronRequests: NextPage = () => {
 			router.push("/unauthorised");
 		},
 	});
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
-	const filterStringByContains = getGridStringOperators().filter(({ value }) =>
-		["contains"].includes(value),
-	);
-	const filterStringByEquals = getGridStringOperators().filter(({ value }) =>
-		["equals"].includes(value),
-	);
 
 	if (status === "loading") {
 		return (
@@ -60,7 +48,6 @@ const PatronRequests: NextPage = () => {
 						field: "dateCreated",
 						headerName: "Request created",
 						minWidth: 150,
-						filterOperators,
 						filterable: false,
 						valueGetter: (params: { row: { dateCreated: string } }) => {
 							const requestCreated = params.row.dateCreated;
@@ -70,12 +57,11 @@ const PatronRequests: NextPage = () => {
 					{
 						field: "patronHostlmsCode",
 						headerName: "Patron host LMS code",
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "localBarcode",
 						headerName: "Patron barcode",
-						filterOperators,
 						filterable: false,
 						valueGetter: (params: {
 							row: { requestingIdentity: { localBarcode: string } };
@@ -86,7 +72,7 @@ const PatronRequests: NextPage = () => {
 						headerName: "Title",
 						minWidth: 100,
 						flex: 1.25,
-						filterOperators,
+						filterOperators: standardFilters,
 						valueGetter: (params: {
 							row: { clusterRecord: { title: string } };
 						}) => params?.row?.clusterRecord?.title,
@@ -94,7 +80,6 @@ const PatronRequests: NextPage = () => {
 					{
 						field: "suppliers",
 						headerName: "Supplying agency",
-						filterOperators,
 						filterable: false,
 						valueGetter: (params: {
 							row: { suppliers: Array<{ localAgency: string }> };
@@ -112,32 +97,32 @@ const PatronRequests: NextPage = () => {
 						headerName: "Status",
 						minWidth: 100,
 						flex: 1.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "errorMessage",
 						headerName: "Error message",
 						minWidth: 100,
 						flex: 1.5,
-						filterOperators: filterStringByContains,
+						filterOperators: containsOnly,
 					},
 					{
 						field: "outOfSequenceFlag",
 						headerName: "Out of sequence",
 						flex: 0.75,
-						filterOperators: filterStringByEquals,
+						filterOperators: equalsOnly,
 					},
 					{
 						field: "pollCountForCurrentStatus",
 						headerName: "Polling count",
 						flex: 0.25,
-						filterOperators: filterStringByEquals,
+						filterOperators: equalsOnly,
 					},
 					{
 						field: "elapsedTimeInCurrentStatus",
 						headerName: "Time in state",
 						minWidth: 50,
-						filterOperators: filterStringByEquals,
+						filterOperators: equalsOnly,
 						valueGetter: (params: {
 							row: { elapsedTimeInCurrentStatus: number };
 						}) => formatDuration(params.row.elapsedTimeInCurrentStatus),
@@ -146,7 +131,6 @@ const PatronRequests: NextPage = () => {
 						field: "dateUpdated",
 						headerName: "Request updated",
 						minWidth: 150,
-						filterOperators,
 						filterable: false,
 						valueGetter: (params: { row: { dateUpdated: string } }) => {
 							const requestUpdated = params.row.dateUpdated;
@@ -158,7 +142,7 @@ const PatronRequests: NextPage = () => {
 						headerName: "Request UUID",
 						minWidth: 100,
 						flex: 0.5,
-						filterOperators: filterStringByEquals,
+						filterOperators: equalsOnly,
 					},
 				]}
 				selectable={true}

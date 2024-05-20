@@ -10,7 +10,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { AdminLayout } from "@layout";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
@@ -21,7 +21,7 @@ import AddressLink from "@components/Address/AddressLink";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { useQuery } from "@apollo/client/react";
-import { getLibraryById } from "src/queries/queries";
+import { getLibraryById, getPatronRequests } from "src/queries/queries";
 import { Library } from "@models/Library";
 import { getILS } from "src/helpers/getILS";
 import { findConsortium } from "src/helpers/findConsortium";
@@ -35,10 +35,22 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import dayjs from "dayjs";
+import { containsOnly, equalsOnly, standardFilters } from "src/helpers/filters";
+import { formatDuration } from "src/helpers/formatDuration";
 
 type LibraryDetails = {
 	libraryId: any;
 };
+
+const INITIAL_EXPANDED_STATE = 12; // Number of accordions that should be initially expanded
+const TOTAL_ACCORDIONS = 15; // Total number of accordions
+
+const getInitialAccordionState = (initialExpanded: number, total: number) => {
+	return Array.from({ length: total }, (_, index) => index < initialExpanded);
+};
+
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
@@ -76,34 +88,36 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		return <ListItemText>{formattedRoles}</ListItemText>;
 	};
 
-	// Sets default state for expansion
-	const [expandedAccordions, setExpandedAccordions] = useState([
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-	]);
-	// Functions to handle expanding both individual accordions and all accordions
-	const handleAccordionChange = (index: number) => () => {
-		setExpandedAccordions((prevExpanded) => {
-			const newExpanded = [...prevExpanded];
-			newExpanded[index] = !newExpanded[index];
-			return newExpanded;
-		});
-	};
+	const [expandedAccordions, setExpandedAccordions] = useState<boolean[]>(
+		getInitialAccordionState(INITIAL_EXPANDED_STATE, TOTAL_ACCORDIONS),
+	);
 
-	// Works for closing + expanding as it sets values to their opposite
-	const expandAll = () => {
-		setExpandedAccordions((prevExpanded) =>
-			prevExpanded.map(() => !prevExpanded[0]),
-		);
-	};
+	const handleAccordionChange = useCallback(
+		(index: number) => () => {
+			setExpandedAccordions((prevExpanded) => {
+				const newExpanded = [...prevExpanded];
+				newExpanded[index] = !newExpanded[index];
+				return newExpanded;
+			});
+		},
+		[],
+	);
+
+	const expandAll = useCallback(() => {
+		setExpandedAccordions((prevExpanded) => {
+			const allExpanded = prevExpanded.some((isExpanded) => !isExpanded);
+			return prevExpanded.map(() => allExpanded);
+		});
+	}, []);
+
+	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
+
+	const handleTotalSizeChange = useCallback((type: string, size: number) => {
+		setTotalSizes((prevTotalSizes) => ({
+			...prevTotalSizes,
+			[type]: size,
+		}));
+	}, []);
 
 	if (loading || status === "loading") {
 		return (
@@ -117,7 +131,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			</AdminLayout>
 		);
 	}
-
+	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND status: "ERROR"`;
+	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
+	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
+	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
 			{error ? (
@@ -1308,6 +1325,557 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
+			{library?.agency?.hostLms?.code ? (
+				<StyledAccordion
+					variant="outlined"
+					expanded={expandedAccordions[10]}
+					onChange={handleAccordionChange(10)}
+					disableGutters
+				>
+					<StyledAccordionSummary
+						aria-controls="library-patron-requests"
+						id="library-patron-requests"
+						expandIcon={
+							<IconContext.Provider value={{ size: "2em" }}>
+								<MdExpandMore />
+							</IconContext.Provider>
+						}
+					>
+						<Typography variant="h2" fontWeight={"bold"}>
+							{t("nav.patronRequests")}
+						</Typography>
+					</StyledAccordionSummary>
+					<StyledAccordionDetails>
+						<SubAccordion
+							variant="outlined"
+							expanded={expandedAccordions[11]}
+							onChange={handleAccordionChange(11)}
+							disableGutters
+						>
+							<SubAccordionSummary
+								aria-controls="exception-patron-requests"
+								id="exception-patron-requests"
+								expandIcon={
+									<IconContext.Provider value={{ size: "2em" }}>
+										<MdExpandMore />
+									</IconContext.Provider>
+								}
+							>
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("libraries.patronRequests.exception", {
+										number: totalSizes["patronRequestsLibraryException"],
+									})}
+								</Typography>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
+								<ServerPaginationGrid
+									query={getPatronRequests}
+									presetQueryVariables={exceptionQueryVariables}
+									type="patronRequestsLibraryException"
+									coreType="patronRequests"
+									columns={[
+										{
+											field: "dateCreated",
+											headerName: "Request created",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateCreated: string };
+											}) => {
+												const requestCreated = params.row.dateCreated;
+												return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "localBarcode",
+											headerName: "Patron barcode",
+											filterable: false,
+											valueGetter: (params: {
+												row: { requestingIdentity: { localBarcode: string } };
+											}) => params?.row?.requestingIdentity?.localBarcode,
+										},
+										{
+											field: "clusterRecordTitle",
+											headerName: "Title",
+											minWidth: 100,
+											flex: 1.25,
+											filterOperators: standardFilters,
+											valueGetter: (params: {
+												row: { clusterRecord: { title: string } };
+											}) => params?.row?.clusterRecord?.title,
+										},
+										{
+											field: "suppliers",
+											headerName: "Supplying agency",
+											filterable: false,
+											valueGetter: (params: {
+												row: { suppliers: Array<{ localAgency: string }> };
+											}) => {
+												// Check if suppliers array is not empty
+												if (params.row.suppliers.length > 0) {
+													return params.row.suppliers[0].localAgency;
+												} else {
+													return ""; // This allows us to handle the array being empty, and any related type errors.
+												}
+											},
+										},
+										{
+											field: "status",
+											headerName: "Status",
+											minWidth: 100,
+											flex: 1.5,
+											filterOperators: standardFilters, // Enabled in case we want users to also be able to see other PRs for their library
+										},
+										{
+											field: "errorMessage",
+											headerName: "Error message",
+											minWidth: 100,
+											flex: 1.5,
+											filterOperators: containsOnly,
+										},
+										{
+											field: "dateUpdated",
+											headerName: "Request updated",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateUpdated: string };
+											}) => {
+												const requestUpdated = params.row.dateUpdated;
+												return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "id",
+											headerName: "Request UUID",
+											minWidth: 100,
+											flex: 0.5,
+											filterOperators: equalsOnly,
+										},
+									]}
+									selectable={true}
+									pageSize={20}
+									noDataMessage={t("patron_requests.no_rows")}
+									noResultsMessage={t("patron_requests.no_results")}
+									searchPlaceholder={t("patron_requests.search_placeholder")}
+									columnVisibilityModel={{
+										dateUpdated: false,
+										id: false,
+										status: false,
+									}}
+									scrollbarVisible={true}
+									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+									sortModel={[{ field: "dateCreated", sort: "desc" }]}
+									sortDirection="DESC"
+									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
+								/>
+							</SubAccordionDetails>
+						</SubAccordion>
+						{/* // Out of sequence patron requests (Inactive) */}
+						<SubAccordion
+							variant="outlined"
+							expanded={expandedAccordions[12]}
+							onChange={handleAccordionChange(12)}
+							disableGutters
+						>
+							<SubAccordionSummary
+								aria-controls="out-of-sequence-patron-requests"
+								id="out-of-sequence-patron-requests"
+								expandIcon={
+									<IconContext.Provider value={{ size: "2em" }}>
+										<MdExpandMore />
+									</IconContext.Provider>
+								}
+							>
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("libraries.patronRequests.inactive", {
+										number: totalSizes["patronRequestsLibraryInactive"],
+									})}
+								</Typography>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
+								<ServerPaginationGrid
+									query={getPatronRequests}
+									presetQueryVariables={outOfSequenceQueryVariables}
+									type="patronRequestsLibraryInactive"
+									coreType="patronRequests"
+									columns={[
+										{
+											field: "dateCreated",
+											headerName: "Request created",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateCreated: string };
+											}) => {
+												const requestCreated = params.row.dateCreated;
+												return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "localBarcode",
+											headerName: "Patron barcode",
+											filterable: false,
+											valueGetter: (params: {
+												row: { requestingIdentity: { localBarcode: string } };
+											}) => params?.row?.requestingIdentity?.localBarcode,
+										},
+										{
+											field: "clusterRecordTitle",
+											headerName: "Title",
+											minWidth: 100,
+											flex: 1.25,
+											filterOperators: standardFilters,
+											valueGetter: (params: {
+												row: { clusterRecord: { title: string } };
+											}) => params?.row?.clusterRecord?.title,
+										},
+										{
+											field: "suppliers",
+											headerName: "Supplying agency",
+											filterable: false,
+											valueGetter: (params: {
+												row: { suppliers: Array<{ localAgency: string }> };
+											}) => {
+												// Check if suppliers array is not empty
+												if (params.row.suppliers.length > 0) {
+													return params.row.suppliers[0].localAgency;
+												} else {
+													return ""; // This allows us to handle the array being empty, and any related type errors.
+												}
+											},
+										},
+										{
+											field: "status",
+											headerName: "Status",
+											minWidth: 100,
+											flex: 1.5,
+											filterOperators: standardFilters, // Enabled in case we want users to also be able to see other PRs for their library
+										},
+										{
+											field: "outOfSequenceFlag",
+											headerName: "Out of sequence",
+											flex: 0.75,
+											filterOperators: equalsOnly,
+										},
+										{
+											field: "pollCountForCurrentStatus",
+											headerName: "Polling count",
+											flex: 0.25,
+											filterOperators: equalsOnly,
+										},
+										{
+											field: "elapsedTimeInCurrentStatus",
+											headerName: "Time in state",
+											minWidth: 50,
+											filterOperators: equalsOnly,
+											valueGetter: (params: {
+												row: { elapsedTimeInCurrentStatus: number };
+											}) =>
+												formatDuration(params.row.elapsedTimeInCurrentStatus),
+										},
+										{
+											field: "dateUpdated",
+											headerName: "Request updated",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateUpdated: string };
+											}) => {
+												const requestUpdated = params.row.dateUpdated;
+												return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "id",
+											headerName: "Request UUID",
+											minWidth: 100,
+											flex: 0.5,
+											filterOperators: equalsOnly,
+										},
+									]}
+									selectable={true}
+									pageSize={20}
+									noDataMessage={t("patron_requests.no_rows")}
+									noResultsMessage={t("patron_requests.no_results")}
+									searchPlaceholder={t("patron_requests.search_placeholder")}
+									columnVisibilityModel={{
+										dateUpdated: false,
+										id: false,
+									}}
+									scrollbarVisible={true}
+									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+									sortModel={[{ field: "dateCreated", sort: "desc" }]}
+									sortDirection="DESC"
+									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
+								/>
+							</SubAccordionDetails>
+						</SubAccordion>
+						{/* In progress patron requests (Active) */}
+						<SubAccordion
+							variant="outlined"
+							expanded={expandedAccordions[13]}
+							onChange={handleAccordionChange(13)}
+							disableGutters
+						>
+							<SubAccordionSummary
+								aria-controls="in-progress-patron-requests"
+								id="in-progress-patron-requests"
+								expandIcon={
+									<IconContext.Provider value={{ size: "2em" }}>
+										<MdExpandMore />
+									</IconContext.Provider>
+								}
+							>
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("libraries.patronRequests.active", {
+										number: totalSizes["patronRequestsLibraryActive"],
+									})}
+								</Typography>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
+								<ServerPaginationGrid
+									query={getPatronRequests}
+									presetQueryVariables={inProgressQueryVariables}
+									type="patronRequestsLibraryActive"
+									coreType="patronRequests"
+									columns={[
+										{
+											field: "dateCreated",
+											headerName: "Request created",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateCreated: string };
+											}) => {
+												const requestCreated = params.row.dateCreated;
+												return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "localBarcode",
+											headerName: "Patron barcode",
+											filterable: false,
+											valueGetter: (params: {
+												row: { requestingIdentity: { localBarcode: string } };
+											}) => params?.row?.requestingIdentity?.localBarcode,
+										},
+										{
+											field: "clusterRecordTitle",
+											headerName: "Title",
+											minWidth: 100,
+											flex: 1.25,
+											filterOperators: standardFilters,
+											valueGetter: (params: {
+												row: { clusterRecord: { title: string } };
+											}) => params?.row?.clusterRecord?.title,
+										},
+										{
+											field: "suppliers",
+											headerName: "Supplying agency",
+											filterable: false,
+											valueGetter: (params: {
+												row: { suppliers: Array<{ localAgency: string }> };
+											}) => {
+												// Check if suppliers array is not empty
+												if (params.row.suppliers.length > 0) {
+													return params.row.suppliers[0].localAgency;
+												} else {
+													return ""; // This allows us to handle the array being empty, and any related type errors.
+												}
+											},
+										},
+										{
+											field: "status",
+											headerName: "Status",
+											minWidth: 100,
+											flex: 1.5,
+											filterOperators: standardFilters, // Enabled in case we want users to also be able to see other PRs for their library
+										},
+										{
+											field: "outOfSequenceFlag",
+											headerName: "Out of sequence",
+											flex: 0.75,
+											filterOperators: equalsOnly,
+										},
+										{
+											field: "pollCountForCurrentStatus",
+											headerName: "Polling count",
+											flex: 0.25,
+											filterOperators: equalsOnly,
+										},
+										{
+											field: "elapsedTimeInCurrentStatus",
+											headerName: "Time in state",
+											minWidth: 50,
+											filterOperators: equalsOnly,
+											valueGetter: (params: {
+												row: { elapsedTimeInCurrentStatus: number };
+											}) =>
+												formatDuration(params.row.elapsedTimeInCurrentStatus),
+										},
+										{
+											field: "dateUpdated",
+											headerName: "Request updated",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateUpdated: string };
+											}) => {
+												const requestUpdated = params.row.dateUpdated;
+												return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "id",
+											headerName: "Request UUID",
+											minWidth: 100,
+											flex: 0.5,
+											filterOperators: equalsOnly,
+										},
+									]}
+									selectable={true}
+									pageSize={20}
+									noDataMessage={t("patron_requests.no_rows")}
+									noResultsMessage={t("patron_requests.no_results")}
+									searchPlaceholder={t("patron_requests.search_placeholder")}
+									columnVisibilityModel={{
+										dateUpdated: false,
+										id: false,
+									}}
+									scrollbarVisible={true}
+									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+									sortModel={[{ field: "dateCreated", sort: "desc" }]}
+									sortDirection="DESC"
+									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
+								/>
+							</SubAccordionDetails>
+						</SubAccordion>
+						{/* Finished / Completed patron requests */}
+						<SubAccordion
+							variant="outlined"
+							expanded={expandedAccordions[14]}
+							onChange={handleAccordionChange(14)}
+							disableGutters
+						>
+							<SubAccordionSummary
+								aria-controls="finished-patron-requests"
+								id="finished-patron-requests"
+								expandIcon={
+									<IconContext.Provider value={{ size: "2em" }}>
+										<MdExpandMore />
+									</IconContext.Provider>
+								}
+							>
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("libraries.patronRequests.completed", {
+										number: totalSizes["patronRequestsLibraryCompleted"],
+									})}
+								</Typography>
+							</SubAccordionSummary>
+							<SubAccordionDetails>
+								<ServerPaginationGrid
+									query={getPatronRequests}
+									presetQueryVariables={finishedQueryVariables}
+									type="patronRequestsLibraryCompleted"
+									coreType="patronRequests"
+									columns={[
+										{
+											field: "dateCreated",
+											headerName: "Request created",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateCreated: string };
+											}) => {
+												const requestCreated = params.row.dateCreated;
+												return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "localBarcode",
+											headerName: "Patron barcode",
+											filterable: false,
+											valueGetter: (params: {
+												row: { requestingIdentity: { localBarcode: string } };
+											}) => params?.row?.requestingIdentity?.localBarcode,
+										},
+										{
+											field: "clusterRecordTitle",
+											headerName: "Title",
+											minWidth: 100,
+											flex: 1.25,
+											filterOperators: standardFilters,
+											valueGetter: (params: {
+												row: { clusterRecord: { title: string } };
+											}) => params?.row?.clusterRecord?.title,
+										},
+										{
+											field: "suppliers",
+											headerName: "Supplying agency",
+											filterable: false,
+											valueGetter: (params: {
+												row: { suppliers: Array<{ localAgency: string }> };
+											}) => {
+												// Check if suppliers array is not empty
+												if (params.row.suppliers.length > 0) {
+													return params.row.suppliers[0].localAgency;
+												} else {
+													return ""; // This allows us to handle the array being empty, and any related type errors.
+												}
+											},
+										},
+										{
+											field: "status",
+											headerName: "Status",
+											minWidth: 100,
+											flex: 1.5,
+											filterOperators: standardFilters, // Enabled in case we want users to also be able to see other PRs for their library
+										},
+										{
+											field: "dateUpdated",
+											headerName: "Request updated",
+											minWidth: 150,
+											filterable: false,
+											valueGetter: (params: {
+												row: { dateUpdated: string };
+											}) => {
+												const requestUpdated = params.row.dateUpdated;
+												return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+											},
+										},
+										{
+											field: "id",
+											headerName: "Request UUID",
+											minWidth: 100,
+											flex: 0.5,
+											filterOperators: equalsOnly,
+										},
+									]}
+									selectable={true}
+									pageSize={20}
+									noDataMessage={t("patron_requests.no_rows")}
+									noResultsMessage={t("patron_requests.no_results")}
+									searchPlaceholder={t("patron_requests.search_placeholder")}
+									columnVisibilityModel={{
+										dateUpdated: false,
+										id: false,
+									}}
+									scrollbarVisible={true}
+									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+									sortModel={[{ field: "dateCreated", sort: "desc" }]}
+									sortDirection="DESC"
+									sortAttribute="dateCreated"
+									onTotalSizeChange={handleTotalSizeChange}
+								/>
+							</SubAccordionDetails>
+						</SubAccordion>
+					</StyledAccordionDetails>
+				</StyledAccordion>
+			) : null}
 		</AdminLayout>
 	);
 }
