@@ -232,6 +232,7 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 				existingMappingCount={existingMappingCount}
 				fileName={addedFile.name}
 				code={code}
+				type="mappings"
 			/>
 
 			{filesAdded ? (

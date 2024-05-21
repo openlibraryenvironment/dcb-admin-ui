@@ -8,4 +8,6 @@ export interface Agency {
 	authProfile: string;
 	longitude: number;
 	latitude: number;
+	isSupplyingAgency: boolean;
+	isBorrowingAgency: boolean;
 }
