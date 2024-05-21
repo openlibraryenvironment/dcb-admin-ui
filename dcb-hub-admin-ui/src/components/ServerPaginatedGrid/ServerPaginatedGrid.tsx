@@ -65,7 +65,7 @@ export default function ServerPaginationGrid({
 		"circulationStatus",
 		"patronRequestsLibraryException",
 		"patronRequestsLibraryActive",
-		"patronRequestsLibraryInactive",
+		"patronRequestsLibraryOutOfSequence",
 		"patronRequestsLibraryCompleted",
 	];
 

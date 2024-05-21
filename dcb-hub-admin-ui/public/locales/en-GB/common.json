@@ -440,7 +440,7 @@
 			"active": "{{number}} Active requests",
 			"completed": "{{number}} Completed requests",
 			"exception": "{{number}} Exception requests",
-			"inactive": "{{number}} Inactive requests"
+			"out_of_sequence": "{{number}} Out of sequence requests"
 		},
 		"primaryLocation": {
 			"address": "Address",
