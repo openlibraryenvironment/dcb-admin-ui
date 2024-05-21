@@ -132,8 +132,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		);
 	}
 	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND status: "ERROR"`;
-	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
-	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
+	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
+	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
 	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
@@ -1472,7 +1472,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
-						{/* // Out of sequence patron requests (Inactive) */}
+						{/* // Out of sequence patron requests */}
 						<SubAccordion
 							variant="outlined"
 							expanded={expandedAccordions[12]}
@@ -1489,8 +1489,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.patronRequests.inactive", {
-										number: totalSizes["patronRequestsLibraryInactive"],
+									{t("libraries.patronRequests.out_of_sequence", {
+										number: totalSizes["patronRequestsLibraryOutOfSequence"],
 									})}
 								</Typography>
 							</SubAccordionSummary>
@@ -1498,7 +1498,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								<ServerPaginationGrid
 									query={getPatronRequests}
 									presetQueryVariables={outOfSequenceQueryVariables}
-									type="patronRequestsLibraryInactive"
+									type="patronRequestsLibraryOutOfSequence"
 									coreType="patronRequests"
 									columns={[
 										{
