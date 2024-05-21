@@ -235,9 +235,11 @@
 		"add_to_group": "Add agencies to a group",
 		"alert_text_success": "Agency added to group!",
 		"alert_text": "Failed to fetch the agencies, please refresh the page.",
+		"borrowing": "Is borrowing agency?",
 		"loading_msg": "Loading agencies....",
 		"no_results": "No agencies were found. Try changing your search terms or filters.",
 		"no_rows": "No agencies available. If you're expecting data to be here, please refresh the page.",
+		"supplying": "Is supplying agency?",
 		"search_placeholder": "Search by name"
 	},
 
@@ -353,6 +355,43 @@
 		"short_name": "Short name",
 		"support_hours": "Support office hours",
 		"type": "Type",
+		"circulation": {
+			"borrowing_status": "Patron borrowing status",
+			"disabled_borrow": "Disabled: cannot borrow",
+			"disabled_supply": "Disabled: cannot supply",
+			"enabled_borrow": "Enabled: can borrow",
+			"enabled_supply": "Enabled: can supply",
+			"supplying_status": "Library supplying status",
+			"title": "Circulation",
+			"confirmation": {
+				"disable_borrowing": "Disable patron borrowing",
+				"disable_supplying": "Disable supplying",
+				"enable_borrowing": "Enable patron borrowing",
+				"enable_supplying": "Enable supplying",
+				"header_enable_borrowing": "Enable patron borrowing for {{library}}",
+				"header_enable_supplying": "Enable supplying for {{library}}",
+				"header_disable_borrowing": "Disable patron borrowing for {{library}}",
+				"header_disable_supplying": "Disable supplying for {{library}}",
+				"para1_enable_borrowing": "<bold>{{library}} patrons </bold> will be able to place borrowing requests at other consortium libraries.",
+				"para1_enable_supplying": "Catalogue records for <bold>{{library}}</bold> will become <bold>discoverable</bold> and <bold>requestable</bold> by patrons of other consortium libraries.",
+				"para1_disable_borrowing": "<bold>{{library}} patrons</bold> will no longer be able to place borrowing requests at other consortium libraries.",
+				"para1_disable_supplying": "Catalogue records for <bold>{{library}}</bold> will <bold>not be discoverable</bold> or <bold>requestable</bold> by patrons of other consortium libraries.",
+				"select_enable_borrowing": "Select \"Enable borrowing\" to go ahead",
+				"select_enable_supplying": "Select \"Enable supplying\" to go ahead",
+				"select_disable_borrowing": "Select \"Disable borrowing\" to go ahead",
+				"select_disable_supplying": "Select \"Disable supplying\" to go ahead",
+				"alert": {
+					"borrowing_disabled": "{{library}} patrons are now <bold>not able</bold> to place borrowing requests at other consortium libraries",
+					"borrowing_disabled_fail": "Borrowing status for {{library}} patrons <bold>could not be disabled</bold>",
+					"borrowing_enabled": "{{library}} patrons are now <bold>able</bold> to place borrowing requests at other consortium libraries",
+					"borrowing_enabled_fail": "Borrowing status for {{library}} patrons <bold>could not be enabled</bold>",
+					"supplying_disabled": "{{library}} is now <bold>not able</bold> to act as a supplying library",
+					"supplying_disabled_fail": "Supplying status for {{library}} <bold>could not be disabled</bold>",
+					"supplying_enabled": "{{library}} is now <bold>enabled</bold> to act as a supplying library",
+					"supplying_enabled_fail": "Supplying status for {{library}} <bold>could not be enabled</bold>"
+				}
+			}
+		},
 		"config": {
 			"title": "Configuration",
 			"data": {

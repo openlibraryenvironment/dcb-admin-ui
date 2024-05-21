@@ -3,6 +3,23 @@ import { gql } from "@apollo/client";
 // This file holds all our GraphQL queries and mutations, so they can be reused throughout the project
 
 // MUTATIONS - modify data
+
+// Agencies
+
+export const updateAgencyParticipationStatus = gql`
+	mutation UpdateAgencyParticipationStatus(
+		$input: UpdateAgencyParticipationInput!
+	) {
+		updateAgencyParticipationStatus(input: $input) {
+			id
+			code
+			name
+			isSupplyingAgency
+			isBorrowingAgency
+		}
+	}
+`;
+
 // Libraries and LibraryGroups
 
 export const createLibraryGroup = gql`
@@ -83,6 +100,8 @@ export const getAgencyById = gql`
 				authProfile
 				longitude
 				latitude
+				isSupplyingAgency
+				isBorrowingAgency
 				hostLms {
 					id
 					code
@@ -477,6 +496,8 @@ export const getLibraryById = gql`
 					code
 					name
 					authProfile
+					isSupplyingAgency
+					isBorrowingAgency
 					hostLms {
 						id
 						code

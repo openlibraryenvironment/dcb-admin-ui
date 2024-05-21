@@ -20,20 +20,13 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { AdminLayout } from "@layout";
 import { useSession } from "next-auth/react";
+import FormatRoles from "src/helpers/FormatRoles/FormatRoles";
 
 const Profile: NextPage = () => {
 	const { data: session }: { data: any } = useSession();
 	const emailVerified =
 		session?.profile?.email_verified ?? "Cannot fetch verified email status.";
-	const formatRoles = (roles: any) => {
-		const formattedRoles = roles && roles.join(", ");
-		return (
-			<ListItemText>
-				<Typography variant="attributeTitle">{t("profile.roles")} </Typography>
-				{formattedRoles}
-			</ListItemText>
-		);
-	};
+
 	const { t } = useTranslation();
 	const theme = useTheme();
 	return (
@@ -95,7 +88,7 @@ const Profile: NextPage = () => {
 					<ListItemIcon>
 						<MdOutlineSupervisorAccount />
 					</ListItemIcon>
-					{formatRoles(session?.profile?.roles)}
+					<FormatRoles roles={session?.profile?.roles} />
 				</ListItem>
 			</List>
 		</AdminLayout>
