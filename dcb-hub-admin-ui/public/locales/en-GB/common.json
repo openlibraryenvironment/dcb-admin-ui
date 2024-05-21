@@ -437,10 +437,10 @@
 			"title": "Contacts"
 		},
 		"patronRequests": {
-			"active": "{{number}} Active requests",
-			"completed": "{{number}} Completed requests",
-			"exception": "{{number}} Exception requests",
-			"out_of_sequence": "{{number}} Out of sequence requests"
+			"active": "Active requests ({{number}})",
+			"completed": "Completed requests ({{number}})",
+			"exception": "Exception requests ({{number}})",
+			"out_of_sequence": "Out of sequence requests ({{number}})"
 		},
 		"primaryLocation": {
 			"address": "Address",
