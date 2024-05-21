@@ -29,10 +29,16 @@ export default function Error({
 			alignItems="center"
 			justifyContent="center"
 			width="100%" // Takes the full width of the content area
+			height="100%"
 			flex="1" // Takes up the available space in the flex container
 			minHeight="0" // Override minHeight to allow the Box to shrink if necessary
 		>
-			<Stack direction="column" alignItems={"center"} spacing={2}>
+			<Stack
+				direction="column"
+				alignItems={"center"}
+				alignSelf={"center"}
+				spacing={2}
+			>
 				<MdErrorOutline
 					size={200}
 					color={theme.palette.primary.exclamationIcon}

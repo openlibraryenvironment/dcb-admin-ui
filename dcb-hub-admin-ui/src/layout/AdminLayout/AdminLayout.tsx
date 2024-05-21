@@ -112,7 +112,9 @@ export default function AdminLayout({
 									) : null}
 								</Box>
 							) : null}
-							<Box sx={{ pl: 3, pr: 3, paddingBottom: 3 }}>{children}</Box>
+							<Box sx={{ pl: 3, pr: 3, paddingBottom: 3, height: "100%" }}>
+								{children}
+							</Box>
 						</Stack>
 					</Box>
 				</Box>

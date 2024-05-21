@@ -11,6 +11,7 @@ export default function Loading({ title, subtitle }: LoadingProps) {
 			alignItems="center"
 			justifyContent="center"
 			width="100%" // Takes the full width of the content area
+			height="100%"
 			flex="1" // Takes up the available space in the flex container
 			minHeight="0" // Override minHeight to allow the Box to shrink if necessary
 		>
@@ -21,7 +22,12 @@ export default function Loading({ title, subtitle }: LoadingProps) {
 				}}
 				unmountOnExit
 			>
-				<Stack direction="column" alignItems="center" spacing={2} mt={12}>
+				<Stack
+					direction="column"
+					alignItems="center"
+					alignSelf={"center"}
+					spacing={2}
+				>
 					<CircularProgress size={125} />
 					<Typography variant="loadingText">{title}</Typography>
 					<Typography variant="componentSubheading">{subtitle}</Typography>
