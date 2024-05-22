@@ -67,7 +67,7 @@ export default function EnvironmentDetails() {
 			</Link>,
 			<Link
 				href={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH}
-				key={"keycloackHealthLink"}
+				key={"keycloakHealthLink"}
 			>
 				{
 					<EnvironmentHealth
@@ -82,6 +82,9 @@ export default function EnvironmentDetails() {
 
 	return (
 		<Box>
+			<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
+				{t("environment.your")}
+			</Typography>
 			<Typography variant="homePageText">
 				{t("environment.configured_for")}
 			</Typography>
@@ -104,11 +107,13 @@ export default function EnvironmentDetails() {
 						}}
 					></Trans>
 				</Typography>
+				<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
+					{t("environment.versions")}
+				</Typography>
 				<Typography variant="homePageText">
 					{t("environment.compare_components")}
 				</Typography>
 			</Stack>
-
 			<VersionInfo />
 			<Typography variant="homePageText">
 				<Trans

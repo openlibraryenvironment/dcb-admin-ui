@@ -144,7 +144,8 @@
 		"loading_version_info": "Loading version information ...",
 		"your_version": "Your version",
 		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
-		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information."
+		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information.",
+		"versions": "Versions"
 	},
 
 	"consortium": {
