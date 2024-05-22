@@ -87,6 +87,7 @@ export default NextAuth({
 				session.profile = token.profile;
 				session.error = token.error;
 				session.user = token.user;
+				// session.expires = token.accessTokenExpires;
 				// if user has 'ADMIN' role, set isAdmin to true
 				if (token?.profile?.roles?.includes("ADMIN")) {
 					session.isAdmin = true;
@@ -110,6 +111,8 @@ export default NextAuth({
 			user?: any;
 			profile?: any;
 		}) => {
+			// To stop 'last minute refreshes' - in milliseconds.
+			const bufferTime = 60 * 1000;
 			// on initial sign in
 			if (account && user) {
 				return {
@@ -121,7 +124,7 @@ export default NextAuth({
 					user,
 				};
 			}
-			if (Date.now() >= token.accessTokenExpires) {
+			if (Date.now() >= token.accessTokenExpires - bufferTime) {
 				return refreshAccessToken(token);
 			}
 			return token;
