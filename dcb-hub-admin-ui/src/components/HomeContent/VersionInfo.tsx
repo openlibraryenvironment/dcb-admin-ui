@@ -1,6 +1,6 @@
 import getConfig from "next/config";
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import SimpleTable from "@components/SimpleTable/SimpleTable";
 import Link from "@components/Link/Link";
 import { useTranslation } from "next-i18next"; //localisation
@@ -10,7 +10,6 @@ import {
 	API_LINKS,
 	LOCAL_VERSION_LINKS,
 } from "../../../homeData/homeConfig";
-import { Typography } from "@mui/material";
 
 interface InnerObject {
 	tags: string;
@@ -20,25 +19,23 @@ interface InnerObject {
 interface ServerData {
 	git: InnerObject;
 	name: string;
-	0: InnerObject;
+	tag_name?: string;
 }
 
 export default function VersionInfo() {
 	const { publicRuntimeConfig } = getConfig();
 	const { t } = useTranslation();
-
 	const [serviceData, setServiceData] = useState<ServerData | null>(null);
+
 	const [githubServiceData, setGithubServiceData] = useState<ServerData | null>(
 		null,
 	);
-	const [devopsData, setDevOpsData] = useState<ServerData | null>(null);
 	const [adminUiData, setAdminUiData] = useState<ServerData | null>(null);
 
 	const apiEndpoints = useMemo(
 		() => [
 			{ link: LOCAL_VERSION_LINKS.SERVICE_INFO, setter: setServiceData },
 			{ link: API_LINKS.SERVICE, setter: setGithubServiceData },
-			{ link: API_LINKS.DEVOPS, setter: setDevOpsData },
 			{ link: API_LINKS.ADMIN_UI, setter: setAdminUiData },
 		],
 		[],
@@ -88,78 +85,34 @@ export default function VersionInfo() {
 			</Link>,
 			<Link key="dcb-service-version" href={RELEASE_PAGE_LINKS.SERVICE}>
 				{githubServiceData
-					? renderVersionData(
-							JSON.stringify(githubServiceData.name).replace(/"/g, ""),
-						)
-					: "Loading release information..."}
+					? renderVersionData(githubServiceData?.name)
+					: t("environment.loading_release_info")}
 			</Link>,
 			serviceData
-				? renderVersionData(
-						JSON.stringify(serviceData.git.tags).replace(/"/g, ""),
-					)
-				: "Loading version information...",
+				? renderVersionData(serviceData?.git?.tags)
+				: t("environment.loading_version_info"),
 		],
-
-		[
-			<Link key="dcb-locate" href={REPO_LINKS.LOCATE}>
-				{t("app.component.locate")}
-			</Link>,
-			<Link key="dcb-locate-version" href={RELEASE_PAGE_LINKS.LOCATE}>
-				{t("common.na")}
-			</Link>,
-			<Typography key="na">{t("common.na")}</Typography>,
-		],
-
 		[
 			<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI}>
 				{t("app.component.admin")}
 			</Link>,
 			<Link key="dcb-admin-ui-version" href={RELEASE_PAGE_LINKS.ADMIN_UI}>
 				{adminUiData
-					? renderVersionData(
-							JSON.stringify(adminUiData.name).replace(/"/g, ""),
-						)
-					: "Loading release information..."}
+					? renderVersionData(adminUiData?.tag_name)
+					: t("environment.loading_release_info")}
 			</Link>,
 			publicRuntimeConfig?.version,
-		],
-
-		[
-			<Link key="dcb-dev-ops" href={REPO_LINKS.DEVOPS}>
-				{t("app.component.devops")}
-			</Link>,
-			<Link key="dcb-dev-ops-version" href={RELEASE_PAGE_LINKS.DEVOPS}>
-				{devopsData
-					? renderVersionData(JSON.stringify(devopsData.name).replace(/"/g, ""))
-					: "Loading release information..."}
-			</Link>,
-			<Typography key="na">{t("common.na")}</Typography>,
-		],
-
-		[
-			<Link key="dcb-keycloak-extensions" href={REPO_LINKS.KEYCLOAK}>
-				{t("app.component.keycloak")}
-			</Link>,
-			<Link
-				key="dcb-keycloak-extensions-version"
-				href={RELEASE_PAGE_LINKS.KEYCLOAK}
-			>
-				{t("common.na")}
-			</Link>,
-			<Typography key="na">{t("common.na")}</Typography>,
 		],
 	];
 
 	return (
-		<>
-			<SimpleTable
-				column_names={[
-					t("environment.component"),
-					t("environment.latest_version"),
-					t("environment.your_version"),
-				]}
-				row_data={VersionData}
-			/>
-		</>
+		<SimpleTable
+			column_names={[
+				t("environment.component"),
+				t("environment.latest_version"),
+				t("environment.your_version"),
+			]}
+			row_data={VersionData}
+		/>
 	);
 }

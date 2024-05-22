@@ -19,6 +19,11 @@ const ServiceInfo: NextPage = () => {
 						/>
 					</ListItemButton>
 				</ListItem>
+				<ListItem component="nav" disablePadding>
+					<ListItemButton component="a" href="/serviceInfo/serviceStatus">
+						<ListItemText primary={t("nav.serviceInfo.serviceStatus")} />
+					</ListItemButton>
+				</ListItem>
 			</List>
 		</AdminLayout>
 	);

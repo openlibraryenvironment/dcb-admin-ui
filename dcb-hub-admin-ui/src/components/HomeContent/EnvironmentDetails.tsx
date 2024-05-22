@@ -5,6 +5,7 @@ import SimpleTable from "@components/SimpleTable/SimpleTable";
 import { Trans, useTranslation } from "next-i18next"; //localisation
 import axios from "axios";
 import {
+	DCB_SERVICE_STATUS_LINKS,
 	LOCAL_VERSION_LINKS,
 	RELEASE_PAGE_LINKS,
 } from "../../../homeData/homeConfig";
@@ -12,6 +13,7 @@ import { useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import VersionInfo from "./VersionInfo";
 import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 
 export default function EnvironmentDetails() {
 	const [environmentDescription, setEnvironmentDescription] = useState<
@@ -80,14 +82,8 @@ export default function EnvironmentDetails() {
 
 	return (
 		<Box>
-			<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
-				{t("environment.your")}
-			</Typography>
 			<Typography variant="homePageText">
 				{t("environment.configured_for")}
-			</Typography>
-			<Typography variant="homePageText">
-				{t("environment.compare_components")}
 			</Typography>
 			<SimpleTable
 				column_names={[
@@ -98,6 +94,21 @@ export default function EnvironmentDetails() {
 				]}
 				row_data={YourDCBEnvironment}
 			/>
+			<Stack direction="column" spacing={1}>
+				<Typography variant="homePageText">
+					<Trans
+						i18nKey="environment.see_metrics_loggers"
+						components={{
+							loggersLink: <Link href={DCB_SERVICE_STATUS_LINKS.LOGGERS} />,
+							metricsLink: <Link href={DCB_SERVICE_STATUS_LINKS.METRICS} />,
+						}}
+					></Trans>
+				</Typography>
+				<Typography variant="homePageText">
+					{t("environment.compare_components")}
+				</Typography>
+			</Stack>
+
 			<VersionInfo />
 			<Typography variant="homePageText">
 				<Trans

@@ -84,6 +84,10 @@ export default function LinkedFooter() {
 					href: "https://knowint.zendesk.com/",
 					text: t("support.submit_ticket"),
 				},
+				{
+					href: "/serviceInfo/serviceStatus",
+					text: t("nav.serviceInfo.serviceStatus"),
+				},
 			],
 		},
 		{
