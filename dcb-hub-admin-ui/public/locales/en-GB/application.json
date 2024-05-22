@@ -140,8 +140,11 @@
 		"compare_components": "The latest versions of $t(app.dcb) system components are",
 		"component": "Component",
 		"latest_version": "Latest version",
+		"loading_release_info": "Loading release information ...",
+		"loading_version_info": "Loading version information ...",
 		"your_version": "Your version",
-		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions."
+		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
+		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information."
 	},
 
 	"consortium": {

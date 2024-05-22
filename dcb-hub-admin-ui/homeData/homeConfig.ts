@@ -5,8 +5,6 @@ const { publicRuntimeConfig } = getConfig();
 const API_LINKS = {
 	SERVICE:
 		"https://api.github.com/repos/openlibraryenvironment/dcb-service/releases/latest",
-	DEVOPS:
-		"https://api.github.com/repos/openlibraryenvironment/dcb-devops/releases/latest",
 	ADMIN_UI:
 		"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
 };
@@ -56,8 +54,14 @@ const ONBOARDING_LINKS = {
 		"https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2724167720/",
 };
 
+const DCB_SERVICE_STATUS_LINKS = {
+	LOGGERS: publicRuntimeConfig.DCB_API_BASE + "/loggers",
+	METRICS: publicRuntimeConfig.DCB_API_BASE + "/metrics",
+};
+
 export {
 	API_LINKS,
+	DCB_SERVICE_STATUS_LINKS,
 	LOCAL_VERSION_LINKS,
 	REPO_LINKS,
 	RELEASE_PAGE_LINKS,

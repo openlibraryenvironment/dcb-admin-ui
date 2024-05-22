@@ -3,7 +3,13 @@
 
 import type { NextPage } from "next";
 import { AdminLayout } from "@layout";
-import { FormControlLabel, Stack, Switch, Typography } from "@mui/material";
+import {
+	Box,
+	FormControlLabel,
+	Stack,
+	Switch,
+	Typography,
+} from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next"; //localisation
 import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
@@ -107,7 +113,14 @@ const Home: NextPage = () => {
 					</Typography>
 				)}
 				{operational ? <OperatingWelcome /> : <ConsortiumDetails />}
-				{operational ? null : <EnvironmentDetails />}
+				{operational ? null : (
+					<Box>
+						<Typography variant="h2" sx={{ marginBottom: 1, fontSize: 32 }}>
+							{t("environment.your")}
+						</Typography>
+						<EnvironmentDetails />
+					</Box>
+				)}
 			</Stack>
 		</AdminLayout>
 	);
