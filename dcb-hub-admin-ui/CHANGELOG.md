@@ -1,3 +1,21 @@
+# [1.13.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.12.0...v1.13.0) (2024-05-24)
+
+
+### Bug Fixes
+
+* Add 'not set' to library participation text [DCB-1129] ([f37eb52](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f37eb529013adca5df34a5225bf16af7cf3b776a))
+* Adjust positioning of numbers in accordion titles [DCB-1128] ([50f15a7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/50f15a754e43c818418b14804acccc264c631510))
+* Adjust titles on service status page [DCB-1151] ([5aef848](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5aef8488767ccbe6c8154d4686a04a06d468881f))
+* Fix initial request failures [DCB-1149] ([a5a3dc1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a5a3dc146c96887c065b3a197e466f7303045ac6))
+* Introduce a refresh token buffer [DCB-1149] ([e5b2241](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e5b2241980f66643a86c6676f1764d4fd69dcde1))
+* request grid filters and out of sequence description on library page [DCB-1128] ([2007a3f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2007a3f2388755287534ac60529a22e90e863a28))
+
+
+### Features
+
+* Add service status page [DCB-1151] ([75bf507](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/75bf5079e1ab01bc4d085e056748d0645fa7c367))
+* Manage library participation through DCB Admin [DCB-1129] ([c9b54ac](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c9b54ace2bcb63c5c32bfe4f3833a28a33f44686))
+
 # [1.12.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.11.0...v1.12.0) (2024-05-20)
 
 
