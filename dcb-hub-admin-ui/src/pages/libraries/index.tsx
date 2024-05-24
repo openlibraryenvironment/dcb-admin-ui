@@ -63,6 +63,8 @@ const Libraries: NextPage = () => {
 				type="libraries"
 				columnVisibilityModel={{
 					id: false,
+					isSupplyingAgency: false,
+					isBorrowingAgency: false,
 					hostLmsCatalogue: false,
 					hostLmsCirculation: false,
 				}}
@@ -111,6 +113,26 @@ const Libraries: NextPage = () => {
 						headerName: "Agency code",
 						flex: 0.5,
 						filterOperators: standardFilters,
+					},
+					{
+						field: "isSupplyingAgency",
+						headerName: "Supplying",
+						flex: 0.25,
+						filterable: false,
+						sortable: false,
+						valueGetter: (params: {
+							row: { agency: { isSupplyingAgency: string } };
+						}) => params?.row?.agency?.isSupplyingAgency,
+					},
+					{
+						field: "isBorrowingAgency",
+						headerName: "Borrowing",
+						flex: 0.25,
+						filterable: false,
+						sortable: false,
+						valueGetter: (params: {
+							row: { agency: { isBorrowingAgency: string } };
+						}) => params?.row?.agency?.isBorrowingAgency,
 					},
 					{
 						field: "hostLmsCirculation",

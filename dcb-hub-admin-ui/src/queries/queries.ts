@@ -425,6 +425,8 @@ export const getLibraries = gql`
 						clientConfig
 						lmsClientClass
 					}
+					isSupplyingAgency
+					isBorrowingAgency
 				}
 				secondHostLms {
 					id
