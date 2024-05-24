@@ -77,6 +77,26 @@ export default function OperatingWelcome() {
 					filterOperators: equalsOnly,
 				},
 				{
+					field: "isSupplyingAgency",
+					headerName: "Supplying",
+					flex: 0.25,
+					filterable: false,
+					sortable: false,
+					valueGetter: (params: {
+						row: { agency: { isSupplyingAgency: string } };
+					}) => params?.row?.agency?.isSupplyingAgency,
+				},
+				{
+					field: "isBorrowingAgency",
+					headerName: "Borrowing",
+					flex: 0.25,
+					filterable: false,
+					sortable: false,
+					valueGetter: (params: {
+						row: { agency: { isBorrowingAgency: string } };
+					}) => params?.row?.agency?.isBorrowingAgency,
+				},
+				{
 					field: "hostLmsCirculation",
 					headerName: "Host LMS (circulation)",
 					flex: 0.5,
