@@ -752,74 +752,80 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>
-			<StyledAccordion
-				variant="outlined"
-				expanded={expandedAccordions[15]}
-				onChange={handleAccordionChange(15)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="library-circulation-details"
-					id="library-circulation-details"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+			{library?.agency ? (
+				<StyledAccordion
+					variant="outlined"
+					expanded={expandedAccordions[15]}
+					onChange={handleAccordionChange(15)}
+					disableGutters
 				>
-					<Typography variant="h2" fontWeight={"bold"}>
-						{t("libraries.circulation.title")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
-					<Grid
-						container
-						spacing={{ xs: 2, md: 3 }}
-						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					<StyledAccordionSummary
+						aria-controls="library-circulation-details"
+						id="library-circulation-details"
+						expandIcon={
+							<IconContext.Provider value={{ size: "2em" }}>
+								<MdExpandMore />
+							</IconContext.Provider>
+						}
 					>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.circulation.supplying_status")}
-								</Typography>
-								{library?.agency?.isSupplyingAgency
-									? t("libraries.circulation.enabled_supply")
-									: t("libraries.circulation.disabled_supply")}
-							</Stack>
-							<Button
-								onClick={() => openConfirmation("supplying")}
-								color="primary"
-								variant="contained"
-								type="submit"
-							>
-								{library?.agency?.isSupplyingAgency
-									? t("libraries.circulation.confirmation.disable_supplying")
-									: t("libraries.circulation.confirmation.enable_supplying")}
-							</Button>
+						<Typography variant="h2" fontWeight={"bold"}>
+							{t("libraries.circulation.title")}
+						</Typography>
+					</StyledAccordionSummary>
+					<StyledAccordionDetails>
+						<Grid
+							container
+							spacing={{ xs: 2, md: 3 }}
+							columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+						>
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("libraries.circulation.supplying_status")}
+									</Typography>
+									{library?.agency?.isSupplyingAgency
+										? t("libraries.circulation.enabled_supply")
+										: library?.agency?.isSupplyingAgency == false
+											? t("libraries.circulation.disabled_supply")
+											: t("libraries.circulation.not_set")}
+								</Stack>
+								<Button
+									onClick={() => openConfirmation("supplying")}
+									color="primary"
+									variant="contained"
+									type="submit"
+								>
+									{library?.agency?.isSupplyingAgency
+										? t("libraries.circulation.confirmation.disable_supplying")
+										: t("libraries.circulation.confirmation.enable_supplying")}
+								</Button>
+							</Grid>
+							<Grid xs={2} sm={4} md={4}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("libraries.circulation.borrowing_status")}
+									</Typography>
+									{library?.agency?.isBorrowingAgency
+										? t("libraries.circulation.enabled_borrow")
+										: library?.agency?.isBorrowingAgency == false
+											? t("libraries.circulation.disabled_borrow")
+											: t("libraries.circulation.not_set")}
+								</Stack>
+								<Button
+									onClick={() => openConfirmation("borrowing")}
+									color="primary"
+									variant="contained"
+									type="submit"
+								>
+									{library?.agency?.isBorrowingAgency
+										? t("libraries.circulation.confirmation.disable_borrowing")
+										: t("libraries.circulation.confirmation.enable_borrowing")}
+								</Button>
+							</Grid>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("libraries.circulation.borrowing_status")}
-								</Typography>
-								{library?.agency?.isBorrowingAgency
-									? t("libraries.circulation.enabled_borrow")
-									: t("libraries.circulation.disabled_borrow")}
-							</Stack>
-							<Button
-								onClick={() => openConfirmation("borrowing")}
-								color="primary"
-								variant="contained"
-								type="submit"
-							>
-								{library?.agency?.isBorrowingAgency
-									? t("libraries.circulation.confirmation.disable_borrowing")
-									: t("libraries.circulation.confirmation.enable_borrowing")}
-							</Button>
-						</Grid>
-					</Grid>
-				</StyledAccordionDetails>
-			</StyledAccordion>
+					</StyledAccordionDetails>
+				</StyledAccordion>
+			) : null}
 			{library?.agency?.hostLms?.code ? (
 				<StyledAccordion
 					variant="outlined"

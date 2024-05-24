@@ -362,6 +362,7 @@
 			"disabled_supply": "Disabled: cannot supply",
 			"enabled_borrow": "Enabled: can borrow",
 			"enabled_supply": "Enabled: can supply",
+			"not_set": "Not set",
 			"supplying_status": "Library supplying status",
 			"title": "Circulation",
 			"confirmation": {
