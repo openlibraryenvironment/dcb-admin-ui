@@ -67,6 +67,8 @@ export default function ServerPaginationGrid({
 		"patronRequestsLibraryActive",
 		"patronRequestsLibraryOutOfSequence",
 		"patronRequestsLibraryCompleted",
+		"referenceValueMappingsForLibrary",
+		"numericRangeMappingsForLibrary",
 		"referenceValueMappings",
 		"numericRangeMappings",
 	];
