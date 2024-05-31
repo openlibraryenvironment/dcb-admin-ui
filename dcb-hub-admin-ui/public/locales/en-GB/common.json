@@ -41,7 +41,7 @@
 		"action": {
 			"close_alert": "Close alert",
 			"contact_sysadmin": "contact your system administrator",
-			"go_home": "Go to home page",
+			"go_home": "Go to the $t(nav.home) page",
 			"reload": "Reload page",
 			"view_error_details": "View error details",
 			"go_back": "Go back",
