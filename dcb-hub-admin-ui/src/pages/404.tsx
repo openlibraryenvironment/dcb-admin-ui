@@ -2,6 +2,7 @@ import Error from "@components/Error/Error";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 
 export default function NotFound() {
 	const { t } = useTranslation();
@@ -15,7 +16,7 @@ export default function NotFound() {
 				title={t("ui.error.404.name")}
 				message={t("ui.error.404.summary")}
 				description={t("ui.error.404.description")}
-				action={t("ui.error.404.action")}
+				action={capitaliseFirstCharacter(t("ui.error.404.action"))}
 				goBack="/"
 			/>
 		</AdminLayout>
