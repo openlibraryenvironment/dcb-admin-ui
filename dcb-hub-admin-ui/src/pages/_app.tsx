@@ -17,8 +17,7 @@ import { AppProps } from "next/app";
 import { useMediaQuery } from "@mui/material";
 
 import { appWithTranslation } from "next-i18next";
-import openRSLight from "src/themes/openRS-light";
-import openRSDark from "src/themes/openRS-dark";
+import { openRSLight, openRSDark } from "src/themes/openRS";
 declare module "@mui/material/styles" {
 	interface PaletteColor {
 		breadcrumbs?: string;
