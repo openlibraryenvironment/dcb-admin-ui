@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Divider, Stack, Typography } from "@mui/material";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { Trans, useTranslation } from "next-i18next";
@@ -229,7 +229,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 				style={{ display: "none" }}
 				id="file-upload"
 			/>
-			<Stack direction={"column"} alignContent={"center"} spacing={2}>
+			<Stack direction={"column"} alignContent={"center"} spacing={1} pb={3}>
 				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 					{t("mappings.file")}
 				</Typography>
@@ -241,15 +241,21 @@ const FileUpload = ({ category, onCancel }: any) => {
 				<label htmlFor="file-upload">
 					<Button
 						startIcon={<MdCloudUpload />}
-						variant="contained"
+						variant="outlined"
 						component="span"
+						sx={{ textTransform: "none" }}
 					>
 						{t("mappings.select_file")}
 					</Button>
 				</label>
 			</Stack>
+			<Divider aria-hidden="true"></Divider>
 			<Stack spacing={1} direction={"row"}>
-				<Button variant="outlined" onClick={handleReset}>
+				<Button
+					variant="outlined"
+					onClick={handleReset}
+					sx={{ textTransform: "none" }}
+				>
 					{t("mappings.cancel")}
 				</Button>
 				<div style={{ flex: "1 0 0" }} />
@@ -260,6 +266,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 					color="primary"
 					variant="contained"
 					type="submit"
+					sx={{ textTransform: "none" }}
 				>
 					{t("mappings.import_file")}
 				</Button>
