@@ -5,10 +5,13 @@ import {
 	IconButton,
 	DialogContent,
 	Stack,
+	Autocomplete,
+	TextField,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
 import Selector from "@components/Selector/Selector";
+import { useState } from "react";
 
 type ImportForm = {
 	show: boolean;
@@ -17,6 +20,7 @@ type ImportForm = {
 
 export default function Import({ show, onClose }: ImportForm) {
 	const { t } = useTranslation();
+	const [category, setCategory] = useState("");
 	const handleCloseImport = () => {
 		onClose();
 	};
@@ -32,9 +36,16 @@ export default function Import({ show, onClose }: ImportForm) {
 			fullWidth
 			maxWidth={"sm"}
 		>
-			{/* Parameterised so we can pass in import profiles in future work - we'll just need to add in a prop */}
 			<DialogTitle variant="modalTitle">
-				{t("mappings.import_title", { profile: "circulation status" })}
+				{t("mappings.import_title", {
+					profile:
+						category != ""
+							? category.toLowerCase()
+							: t(
+									"mappings.ref_value",
+									"Reference value mappings",
+								).toLowerCase(),
+				})}
 			</DialogTitle>
 			<IconButton
 				aria-label="close"
@@ -50,8 +61,17 @@ export default function Import({ show, onClose }: ImportForm) {
 			</IconButton>
 			<DialogContent>
 				<Stack spacing={1}>
+					<Autocomplete
+						options={[t("mappings.numeric_range"), t("mappings.ref_value")]}
+						onChange={(event, value) =>
+							setCategory(value ?? t("mappings.ref_value"))
+						} // Or set a default here
+						renderInput={(params) => (
+							<TextField {...params} required label={t("mappings.category")} />
+						)}
+					/>
 					<Selector optionsType="Host LMS" />
-					<Upload onCancel={handleCloseImport} />
+					<Upload onCancel={handleCloseImport} category={category} />
 				</Stack>
 			</DialogContent>
 		</Dialog>

@@ -70,6 +70,7 @@ const AllMappings: NextPage = () => {
 			</Button>
 			<ServerPaginationGrid
 				query={getMappings}
+				presetQueryVariables="deleted:false OR deleted:null"
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
 				columns={[
@@ -122,7 +123,9 @@ const AllMappings: NextPage = () => {
 						},
 					}, */
 				]}
-				noDataMessage={t("mappings.import_circulation_status")}
+				noDataMessage={t("mappings.import_mappings", {
+					category: t("mappings.ref_value").toLowerCase(),
+				})}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				// This is how to set the default sort order

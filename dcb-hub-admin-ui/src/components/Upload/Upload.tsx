@@ -1,135 +1,141 @@
-import { Button, Card, Stack, useTheme } from "@mui/material";
-import { useState } from "react";
-import Alert from "@components/Alert/Alert";
-import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
+import { Button, Stack, Typography } from "@mui/material";
+import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 import { Trans, useTranslation } from "next-i18next";
-import Uppy from "@uppy/core";
-import XHR from "@uppy/xhr-upload";
 import getConfig from "next/config";
-import { DragDrop } from "@uppy/react";
-import "@uppy/core/dist/style.min.css";
-import DragDropLocale from "@uppy/drag-drop/types/generatedLocale";
 import useCode from "@hooks/useCode";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import axios from "axios";
 import { useSession } from "next-auth/react";
-import { isEmpty } from "lodash";
 import Confirmation from "./Confirmation/Confirmation";
+import { useLazyQuery } from "@apollo/client/react";
+import {
+	checkExistingMappings,
+	checkExistingNumericRangeMappings,
+} from "src/queries/queries";
+import { MdCloudUpload } from "react-icons/md";
+import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
 
-// These are the restrictions for files to pass client-side validation.
-// TSV and CSV are the allowed file types
-// 1B minimum file size to prevent empty files from being uploaded.
-// 1 MB max file size (can be altered if requirement changes)
-
-const uppy = new Uppy({
-	restrictions: {
-		allowedFileTypes: [".tsv", ".csv"],
-		minFileSize: 1,
-		maxFileSize: 1 * 1024 * 1024, // 1 MB,
-		maxNumberOfFiles: 1, // Can only drag-and-drop one file at a time
-	},
-	meta: {
-		category: "",
-	},
-});
-
+// WIP: Re-implementing what was previously done for us by Uppy.
+// Long-term aim: feature parity with Uppy for what we need and a better UI.
 const { publicRuntimeConfig } = getConfig();
-
-const componentText: DragDropLocale = {
-	strings: {
-		// Text to show on the droppable area - see https://uppy.io/docs/drag-drop/#locale
-		// `%{browse}` is replaced with a link that opens the system file selection dialog.
-		dropHereOr: "Drag and drop or %{browse}",
-		// Used as the label for the link that opens the system file selection dialog.
-		browse: "select a file",
-	},
-};
 const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
-// Using Uppy XHR plugin to manage the upload
-// Make sure this isn't happening twice
-uppy.use(XHR, {
-	endpoint: url,
-	getResponseError(responseText) {
-		// this will get the message
-		return new Error(responseText);
-	},
-});
 
-// Upload component, using Uppy - docs at https://uppy.io/docs/
-const UppyFileUpload = ({ category, onCancel }: any) => {
+const FileUpload = ({ category, onCancel }: any) => {
 	const { t } = useTranslation();
-	const theme = useTheme();
-	uppy.setMeta({ category: category });
-	const xhrplug = uppy.getPlugin("XHRUpload");
 	const { data } = useSession();
-	// State management - mostly for the displaying of messages
 	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
+	const [isValidationErrorDisplayed, setValidationErrorDisplayed] =
+		useState(false);
 	const [isSuccess, setSuccess] = useState(false);
 	const [replacement, setReplacement] = useState(false);
 	const [existingMappingCount, setExistingMappingCount] = useState(0);
-	// this is re-defining on re-render, very annoying
 	const [isConfirmOpen, setConfirmOpen] = useState(false);
 	const code = useCode((state) => state.code);
-	// set different kinds of errors
-	const [validationErrorMessage, setValidationErrorMessage] = useState("");
 	const [uploadErrorMessage, setUploadErrorMessage] = useState("");
+	const [validationErrorMessage, setValidationErrorMessage] = useState("");
 	const [successCount, setSuccessCount] = useState(0);
-	const [addedFile, setAddedFile] = useState({ name: "", size: 0 });
-	const [failedFile, setFailedFile] = useState({ name: "", size: 0 });
-
-	const dismissError = () => {
-		setErrorDisplayed(false);
-	};
-
-	// TODO: Make this adaptable to different categories
-	const checkMappingsExist: any = async () => {
-		const existenceUrl =
-			publicRuntimeConfig.DCB_API_BASE +
-			"/uploadedMappings/CirculationStatus/" +
-			code;
-
-		const response = await axios.get<any>(existenceUrl, {
-			headers: { Authorization: `Bearer ${data?.accessToken}` },
-		});
-		// Check if mappings exist or not.
-		if (!isEmpty(response?.data)) {
-			setExistingMappingCount(response?.data?.length);
-			return true;
-		}
-		// Mappings don't exist, so return false (count is irrelevant as no modal is shown in this instance.)
-		return false;
-	};
+	const [addedFile, setAddedFile] = useState<File | null>(null);
+	const [failedFile, setFailedFile] = useState<File | null>(null);
+	const [uploadButtonClicked, setUploadButtonClicked] = useState(false);
 	const headers = { Authorization: `Bearer ${data?.accessToken}` };
 
-	xhrplug?.setOptions({
-		headers,
-		getResponseError(responseText: string) {
-			setErrorDisplayed(true);
-			setUploadErrorMessage("Error: " + responseText);
-			// Obtains error message from the response.
-			return new Error(responseText);
+	const getErrorMessageKey = (message: string): string => {
+		switch (true) {
+			case message.includes("exceeds maximum allowed size"):
+				if (failedFile) {
+					return t("mappings.file_too_large", {
+						fileName: failedFile.name,
+						fileSize: fileSizeConvertor(failedFile.size),
+						maxSize: 1,
+					});
+				}
+				return "mappings.file_size_generic";
+			case message.includes("smaller than the allowed size"):
+				return "mappings.file_empty";
+			case message.includes("You can only upload"):
+				return "mappings.wrong_file_type";
+			case message.includes("Empty value"):
+				return "mappings.validation_missing_values";
+			case message.includes("expected headers"):
+				return "mappings.validation_expected_headers";
+			case message.includes("provide a Host LMS"):
+				return "mappings.validation_no_hostlms";
+			case message.includes("fromContext or toContext"):
+				return "mappings.mismatched_context";
+			default:
+				return "mappings.unknown_error";
+		}
+	};
+
+	const [checkMappingsPresent] = useLazyQuery(checkExistingMappings, {
+		variables: {
+			query:
+				"(toContext:" +
+				code +
+				" OR fromContext: " +
+				code +
+				") AND deleted: false",
+			pagesize: 200,
+		},
+		fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
+		onCompleted: (data) => {
+			setExistingMappingCount(data?.referenceValueMappings?.totalSize);
+			if (uploadButtonClicked) {
+				// Add this condition
+				if (data?.referenceValueMappings?.totalSize == 0 || data.isEmpty) {
+					setConfirmOpen(false);
+					uploadFile();
+				} else {
+					setConfirmOpen(true);
+					setReplacement(true);
+				}
+			}
 		},
 	});
 
-	const handleUpload = async () => {
-		// Wait for the asynchronous checkMappingsExist to complete
-		const mappingsExistResult = await checkMappingsExist();
+	const [checkNumericRangeMappingsPresent] = useLazyQuery(
+		checkExistingNumericRangeMappings,
+		{
+			variables: {
+				query: "context:" + code + " AND deleted: false",
+				pagesize: 200,
+			},
+			fetchPolicy: "network-only",
+			onCompleted: (data) => {
+				setExistingMappingCount(data?.numericRangeMappings?.totalSize);
+				if (uploadButtonClicked) {
+					// Add this condition
+					if (data?.numericRangeMappings?.totalSize == 0 || data.isEmpty) {
+						setConfirmOpen(false);
+						uploadFile();
+					} else {
+						setConfirmOpen(true);
+						setReplacement(true);
+					}
+				}
+			},
+		},
+	);
 
-		// If mappings exist, show our modal for confirming the upload
-		if (mappingsExistResult) {
-			setConfirmOpen(true);
-			setReplacement(true);
-		} else {
-			// If mappings don't exist, proceed with the upload, no need to show the modal
-			uppy.upload();
+	const handleFileChange = (event: any) => {
+		const file = event.target.files[0];
+		if (file) {
+			if (file.size > 1 * 1024 * 1024) {
+				// 1 MB size limit
+				setFailedFile(file);
+				setErrorDisplayed(true);
+				setValidationErrorDisplayed(true);
+				setValidationErrorMessage("File size exceeds the limit");
+				return;
+			}
+			setAddedFile(file);
+			setErrorDisplayed(false);
 		}
 	};
 
-	// Functions to regulate the confirm modal's visibility - may be able to refactor
-
 	const handleConfirmUpload = () => {
 		setConfirmOpen(false);
-		uppy.upload();
+		uploadFile();
 	};
 
 	const handleCancelUpload = () => {
@@ -137,92 +143,125 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 	};
 
 	const handleReset = () => {
-		// this needs to clean-up, and then close the modal.
-		uppy.resetProgress();
 		onCancel();
 	};
 
-	// Uppy has events that we can listen for and act accordingly.
-	// This is for when validation fails / file doesn't pass a restriction.
-	uppy.on("restriction-failed", (file: any, error: any) => {
-		console.log("Restriction for", file.name, "failed with", error);
-		// We save the name and size of the failed file, as well as error data.
-		setFailedFile({ name: file.name, size: file.size });
-		setErrorDisplayed(true);
-		setValidationErrorMessage(
-			"Validation on " + file.name + " failed with " + error,
-		);
-	});
-
-	// This gets triggered when a file passes validation
-	uppy.on("file-added", (file: any) => {
-		setAddedFile({ name: file.name, size: file.size });
-		setErrorDisplayed(false);
-		uppy.setFileMeta(file.id, {
-			code: code,
-			mappingCategory: category,
-		});
-	});
-
-	// This is triggered when the upload is successful. Make sure uppy is reset on a completed upload (or even a failed one, maybe?)
-	uppy.on("upload-success", (file: any, response: any) => {
-		setSuccess(true);
-		setSuccessCount(response?.body?.recordsImported);
-		uppy.removeFile(file.id);
-	});
-
-	// This is triggered if there's an upload error
-	uppy.on("error", (error: any) => {
-		console.log("Error information", error);
-		setErrorDisplayed(true);
-		console.log(uploadErrorMessage);
-	});
-	uppy.on("upload-error", (file: any, error) => {
-		setErrorDisplayed(true);
-		setUploadErrorMessage(error.message);
-		setFailedFile({ name: file.name, size: file.size });
-		uppy.removeFile(file.id);
-	});
-
-	// Used to conditionally render the UI depending on if accepted files exist (i.e. disabling buttons etc)
-	const filesAdded = uppy.getFiles().length > 0 ? true : false;
-	const noteText =
-		"Supported file types: TSV and CSV \n Maximum file size: 1 MB";
-
-	const [open, setOpen] = useState(true);
-
-	const handleClose = (
-		event?: React.SyntheticEvent | Event,
-		reason?: string,
-	) => {
-		if (reason === "clickaway") {
+	const uploadFile = () => {
+		if (!addedFile) {
+			setErrorDisplayed(true);
+			setUploadErrorMessage("No file selected for upload.");
+			setUploadButtonClicked(false);
+			setConfirmOpen(false);
 			return;
 		}
-		setOpen(false);
+		const formData = new FormData();
+		formData.append("file", addedFile);
+		formData.append("code", code);
+		formData.append("mappingCategory", category);
+
+		axios
+			.post(url, formData, { headers })
+			.then((response) => {
+				// Handle successful upload response
+				setSuccess(true);
+				setSuccessCount(response.data.recordsImported || 0);
+			})
+			.catch((error) => {
+				// Error handling
+				console.error("Axios error:", error);
+				if (error.response) {
+					// The request was made and the server responded with a non-2xx status code
+					console.error("Server responded with status:", error.response.status);
+					console.error("Response data:", error.response.data);
+					setUploadErrorMessage(error.response.data);
+					setErrorDisplayed(true);
+				} else if (error.request) {
+					// The request was made but no response was received
+					console.error("No response received:", error.request);
+					setErrorDisplayed(true);
+				} else {
+					// Something happened in setting up the request that triggered an error
+					console.error("Error making the upload request:", error.message);
+					setErrorDisplayed(true);
+				}
+			});
 	};
+
+	useEffect(() => {
+		setUploadButtonClicked(false);
+		setConfirmOpen(false);
+	}, [code]);
+
+	const filesAdded = addedFile !== null;
+
+	const handleUpload = useCallback(() => {
+		if (!addedFile) {
+			setErrorDisplayed(true);
+			setUploadErrorMessage("No file selected for upload.");
+			return;
+		}
+
+		setUploadButtonClicked(true);
+
+		if (code && category) {
+			if (category === "Reference value mappings") {
+				checkMappingsPresent();
+			} else {
+				checkNumericRangeMappingsPresent();
+			}
+		} else {
+			setConfirmOpen(false); // Close the confirmation modal if any condition is not met
+		}
+	}, [
+		addedFile,
+		code,
+		category,
+		checkMappingsPresent,
+		checkNumericRangeMappingsPresent,
+	]);
 
 	return (
 		<Stack spacing={1}>
-			<DragDrop
-				className="uppy-DragDrop--isDragDropSupported"
-				uppy={uppy}
-				note={noteText}
-				locale={componentText}
+			<input
+				type="file"
+				accept=".tsv,.csv"
+				onChange={handleFileChange}
+				style={{ display: "none" }}
+				id="file-upload"
 			/>
+			<Stack direction={"column"} alignContent={"center"} spacing={2}>
+				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+					{t("mappings.file")}
+				</Typography>
+				<Typography sx={{ fontWeight: "bold" }}>
+					{filesAdded ? addedFile.name : "No file selected"}
+				</Typography>
+				<Typography>{t("mappings.file_type_requirements")}</Typography>
+				<Typography> {t("mappings.file_size_requirements")}</Typography>
+				<label htmlFor="file-upload">
+					<Button
+						startIcon={<MdCloudUpload />}
+						variant="contained"
+						component="span"
+					>
+						{t("mappings.select_file")}
+					</Button>
+				</label>
+			</Stack>
 			<Stack spacing={1} direction={"row"}>
 				<Button variant="outlined" onClick={handleReset}>
-					{t("mappings.cancel", "Cancel")}
+					{t("mappings.cancel")}
 				</Button>
-				{/* This makes the Cancel and Import buttons left and right aligned, respectively*/}
 				<div style={{ flex: "1 0 0" }} />
+				{/* // Button should be enabled only if category, code, filesAdded all true */}
 				<Button
-					disabled={!filesAdded && (code == "" || code == undefined)}
+					disabled={!filesAdded || !code || !category}
 					onClick={handleUpload}
 					color="primary"
 					variant="contained"
 					type="submit"
 				>
-					{t("mappings.import_file", "Import file")}
+					{t("mappings.import_file")}
 				</Button>
 			</Stack>
 			<Confirmation
@@ -230,159 +269,68 @@ const UppyFileUpload = ({ category, onCancel }: any) => {
 				onClose={handleCancelUpload}
 				onConfirm={handleConfirmUpload}
 				existingMappingCount={existingMappingCount}
-				fileName={addedFile.name}
+				fileName={addedFile?.name}
 				code={code}
 				type="mappings"
+				mappingCategory={category}
 			/>
-
-			{filesAdded ? (
-				<Card>
-					<Alert
-						severityType="info"
-						textColor={theme.palette.common.black}
-						alertText={t("mappings.add_success", { fileName: addedFile.name })}
-						key={addedFile.size}
+			<TimedAlert
+				open={isErrorDisplayed}
+				severityType="error"
+				autoHideDuration={6000}
+				alertText={
+					<Trans
+						i18nKey={getErrorMessageKey(uploadErrorMessage)}
+						components={{ bold: <strong />, paragraph: <p /> }}
+						values={{
+							fileName: addedFile?.name,
+							category: category,
+							count: successCount,
+							code: code,
+							deletedMappingCount: existingMappingCount,
+							addedCount: successCount,
+						}}
 					/>
-				</Card>
-			) : null}
-			{validationErrorMessage.includes("exceeds maximum allowed size") &&
-				isErrorDisplayed && (
-					<TimedAlert
-						severityType="error"
-						open={true}
-						onClose={handleClose}
-						autoHideDuration={3000}
-						alertText={t("mappings.file_too_large", {
-							fileName: failedFile.name,
-							fileSize: fileSizeConvertor(failedFile.size),
-							maxSize: 1,
-						})}
-						key={"validation-upload-error-file-size"}
-						onCloseFunc={dismissError}
+				}
+				key={"validation-upload-error-missing"}
+				onCloseFunc={() => setErrorDisplayed(false)}
+			/>
+			<TimedAlert
+				severityType="error"
+				open={isValidationErrorDisplayed}
+				autoHideDuration={3000}
+				alertText={getErrorMessageKey(validationErrorMessage)}
+				key={"validation-upload-error-file-size"}
+				onCloseFunc={() => setValidationErrorDisplayed(false)}
+			/>
+			<TimedAlert
+				severityType="success"
+				open={isSuccess}
+				autoHideDuration={6000}
+				alertText={
+					<Trans
+						i18nKey={
+							isSuccess && !replacement
+								? t("mappings.upload_success", {
+										category: category.toLowerCase(),
+										count: successCount,
+										code: code,
+									})
+								: t("mappings.upload_success_replacement", {
+										category: category.toLowerCase(),
+										addedCount: successCount,
+										code: code,
+										deletedMappingCount: existingMappingCount,
+									})
+						}
+						components={{ bold: <strong />, paragraph: <p /> }}
 					/>
-				)}
-			{validationErrorMessage.includes(
-				"This file is smaller than the allowed size",
-			) &&
-				isErrorDisplayed && (
-					<TimedAlert
-						severityType="error"
-						open={true}
-						onClose={handleClose}
-						autoHideDuration={3000}
-						alertText={t("mappings.file_empty", { fileName: failedFile.name })}
-						key={"validation-upload-error-file-empty"}
-						onCloseFunc={dismissError}
-					/>
-				)}
-			{validationErrorMessage.includes("Error: You can only upload") &&
-				isErrorDisplayed && (
-					<TimedAlert
-						severityType="error"
-						open={open}
-						onClose={handleClose}
-						autoHideDuration={3000}
-						alertText={t("mappings.wrong_file_type", {
-							fileName: failedFile.name,
-							allowedFiles: "CSV, TSV",
-						})}
-						key={"validation-upload-error-file-type"}
-						onCloseFunc={dismissError}
-					/>
-				)}
-			{uploadErrorMessage.includes("Empty value") && isErrorDisplayed && (
-				<TimedAlert
-					open={open}
-					severityType="error"
-					onClose={handleClose}
-					autoHideDuration={3000}
-					alertText={
-						<Trans
-							i18nKey="mappings.validation_missing_values"
-							components={{ bold: <strong /> }}
-						></Trans>
-					}
-					key={"validation-upload-error-missing"}
-					onCloseFunc={dismissError}
-				/>
-			)}
-			{uploadErrorMessage.includes("expected headers") && isErrorDisplayed && (
-				<TimedAlert
-					open={open}
-					severityType="error"
-					onClose={handleClose}
-					autoHideDuration={3000}
-					alertText={
-						<Trans
-							i18nKey="mappings.validation_expected_headers"
-							values={{ fileName: addedFile.name }}
-							components={{ paragraph: <p />, bold: <strong /> }}
-						></Trans>
-					}
-					key={"validation-upload-error-headers"}
-					onCloseFunc={dismissError}
-				/>
-			)}
-			{uploadErrorMessage.includes("provide a Host LMS") &&
-				isErrorDisplayed && (
-					<TimedAlert
-						open={open}
-						severityType="error"
-						onClose={handleClose}
-						autoHideDuration={3000}
-						alertText={t("mappings.validation_no_hostlms")}
-						key={"validation-no-hostlms"}
-						onCloseFunc={dismissError}
-					/>
-				)}
-			{uploadErrorMessage.includes("DCB code is invalid") &&
-				isErrorDisplayed && (
-					<TimedAlert
-						open={open}
-						severityType="error"
-						onClose={handleClose}
-						autoHideDuration={3000}
-						alertText={t("mappings.validation_invalid_dcb_code")}
-						key={"validation-invalid-dcb-code"}
-						onCloseFunc={dismissError}
-					/>
-				)}
-			{isSuccess && !replacement && (
-				<TimedAlert
-					severityType="success"
-					open={open}
-					onClose={handleClose}
-					autoHideDuration={3000}
-					alertText={t("mappings.upload_success", {
-						category: category,
-						count: successCount,
-						code: code,
-					})}
-					key={"upload-successful"}
-				/>
-			)}
-			{isSuccess && replacement && (
-				<TimedAlert
-					severityType="success"
-					open={open}
-					onClose={handleClose}
-					autoHideDuration={3000}
-					alertText={t("mappings.upload_success_replacement", {
-						category: category,
-						addedCount: successCount,
-						code: code,
-						deletedMappingCount: existingMappingCount,
-					})}
-					key={"upload-successful"}
-				/>
-			)}
+				}
+				key={"upload-successful"}
+				onCloseFunc={() => setSuccess(false)}
+			/>
 		</Stack>
 	);
 };
 
-export default function Upload({ onCancel }: any) {
-	return (
-		// Can pass in category here as needed - right now it's set to CirculationStatus
-		<UppyFileUpload category={"CirculationStatus"} onCancel={onCancel} />
-	);
-}
+export default FileUpload;

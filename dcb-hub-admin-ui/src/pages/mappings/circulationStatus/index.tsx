@@ -13,7 +13,8 @@ import { useApolloClient } from "@apollo/client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
-
+// TODO: When we know future status of circ status mappings, we may want to remove this
+// For now access to it is blocked.
 const CirculationStatusMappings: NextPage = () => {
 	// Handles the import modal display
 	const client = useApolloClient();
@@ -115,7 +116,9 @@ const CirculationStatusMappings: NextPage = () => {
 						},
 					}, */
 				]}
-				noDataMessage={t("mappings.import_circulation_status")}
+				noDataMessage={t("mappings.import_mappings", {
+					category: "CirculationStatus",
+				})}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				searchPlaceholder={t("mappings.search_placeholder_cs")}

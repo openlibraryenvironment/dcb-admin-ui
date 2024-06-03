@@ -846,6 +846,29 @@ export const getMappings = gql`
 	}
 `;
 
+// A query to check if referenceValueMappings exist for a Host LMS
+
+export const checkExistingMappings = gql`
+	query CheckExistingMappings($pagesize: Int!, $query: String!) {
+		referenceValueMappings(pagesize: $pagesize, query: $query) {
+			totalSize
+			content {
+				id
+				fromCategory
+				fromContext
+				fromValue
+				toCategory
+				toContext
+				toValue
+				reciprocal
+				label
+				lastImported
+				deleted
+			}
+		}
+	}
+`;
+
 // A query to load a page of Circulation Status Mappings
 
 export const getCirculationStatusMappings = gql`
@@ -885,6 +908,26 @@ export const getCirculationStatusMappings = gql`
 	}
 `;
 
+// A query to check if numeric range mappings exist
+
+export const checkExistingNumericRangeMappings = gql`
+	query CheckExistingNumericRangeMappings($pagesize: Int!, $query: String!) {
+		numericRangeMappings(pagesize: $pagesize, query: $query) {
+			totalSize
+			content {
+				id
+				context
+				domain
+				lowerBound
+				upperBound
+				targetContext
+				mappedValue
+				deleted
+				lastImported
+			}
+		}
+	}
+`;
 // A query to load paginated numeric range mappings
 
 export const getNumericRangeMappings = gql`
@@ -911,6 +954,8 @@ export const getNumericRangeMappings = gql`
 				upperBound
 				targetContext
 				mappedValue
+				lastImported
+				deleted
 			}
 			pageable {
 				number
