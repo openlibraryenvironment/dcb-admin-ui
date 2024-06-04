@@ -41,27 +41,28 @@ const FileUpload = ({ category, onCancel }: any) => {
 
 	const getErrorMessageKey = (message: string): string => {
 		switch (true) {
-			case message.includes("exceeds maximum allowed size"):
-				if (failedFile) {
-					return t("mappings.file_too_large", {
-						fileName: failedFile.name,
-						fileSize: fileSizeConvertor(failedFile.size),
-						maxSize: 1,
-					});
-				}
-				return "mappings.file_size_generic";
-			case message.includes("smaller than the allowed size"):
+			case message.includes("exceeds the limit"):
+				return "mappings.file_too_large";
+			case message.includes("File is empty"):
 				return "mappings.file_empty";
 			case message.includes("You can only upload"):
 				return "mappings.wrong_file_type";
 			case message.includes("Empty value"):
 				return "mappings.validation_missing_values";
-			case message.includes("expected headers"):
+			case message.includes("expected headers") &&
+				category == "Reference value mappings":
 				return "mappings.validation_expected_headers";
+			case message.includes("expected headers") &&
+				category == "Numeric range mappings":
+				return "mappings.validation_expected_headers_nrm";
 			case message.includes("provide a Host LMS"):
 				return "mappings.validation_no_hostlms";
-			case message.includes("fromContext or toContext"):
+			case message.includes("fromContext or toContext") &&
+				category == "Referemce value mappings":
 				return "mappings.mismatched_context";
+			case message.includes("fromContext or toContext") &&
+				category == "Numeric range mappings":
+				return "mappings.mismatched_context_nrm";
 			default:
 				return "mappings.unknown_error";
 		}
@@ -77,13 +78,16 @@ const FileUpload = ({ category, onCancel }: any) => {
 				") AND deleted: false",
 			pagesize: 200,
 		},
+		pollInterval: 0, // This only ever needs to run when explicitly triggered - no polling needed
 		fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
 		onCompleted: (data) => {
 			setExistingMappingCount(data?.referenceValueMappings?.totalSize);
 			if (uploadButtonClicked) {
-				// Add this condition
 				if (data?.referenceValueMappings?.totalSize == 0 || data.isEmpty) {
 					setConfirmOpen(false);
+					console.log(
+						"DEV: Upload file activated in non-replacement condition",
+					);
 					uploadFile();
 				} else {
 					setConfirmOpen(true);
@@ -100,7 +104,8 @@ const FileUpload = ({ category, onCancel }: any) => {
 				query: "context:" + code + " AND deleted: false",
 				pagesize: 200,
 			},
-			fetchPolicy: "network-only",
+			fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
+			pollInterval: 0, // This only ever needs to run when explicitly triggered - no polling needed
 			onCompleted: (data) => {
 				setExistingMappingCount(data?.numericRangeMappings?.totalSize);
 				if (uploadButtonClicked) {
@@ -127,6 +132,12 @@ const FileUpload = ({ category, onCancel }: any) => {
 				setValidationErrorDisplayed(true);
 				setValidationErrorMessage("File size exceeds the limit");
 				return;
+			} else if (file.size == 0) {
+				setFailedFile(file);
+				setErrorDisplayed(true);
+				setValidationErrorDisplayed(true);
+				setValidationErrorMessage("File is empty");
+				return;
 			}
 			setAddedFile(file);
 			setErrorDisplayed(false);
@@ -147,6 +158,12 @@ const FileUpload = ({ category, onCancel }: any) => {
 	};
 
 	const uploadFile = () => {
+		console.log(
+			"DEV: Upload file method triggered, replacement:" +
+				replacement +
+				" and UBC" +
+				uploadButtonClicked,
+		);
 		if (!addedFile) {
 			setErrorDisplayed(true);
 			setUploadErrorMessage("No file selected for upload.");
@@ -165,9 +182,11 @@ const FileUpload = ({ category, onCancel }: any) => {
 				// Handle successful upload response
 				setSuccess(true);
 				setSuccessCount(response.data.recordsImported || 0);
+				setUploadButtonClicked(false);
 			})
 			.catch((error) => {
 				// Error handling
+				setUploadButtonClicked(false);
 				console.error("Axios error:", error);
 				if (error.response) {
 					// The request was made and the server responded with a non-2xx status code
@@ -205,8 +224,10 @@ const FileUpload = ({ category, onCancel }: any) => {
 
 		if (code && category) {
 			if (category === "Reference value mappings") {
+				console.log("DEV: Ref value check in handleupload");
 				checkMappingsPresent();
 			} else {
+				console.log("DEV: Numeric range check in handleupload");
 				checkNumericRangeMappingsPresent();
 			}
 		} else {
@@ -299,15 +320,29 @@ const FileUpload = ({ category, onCancel }: any) => {
 						}}
 					/>
 				}
-				key={"validation-upload-error-missing"}
+				key={"upload-error"}
 				onCloseFunc={() => setErrorDisplayed(false)}
 			/>
 			<TimedAlert
 				severityType="error"
 				open={isValidationErrorDisplayed}
-				autoHideDuration={3000}
-				alertText={getErrorMessageKey(validationErrorMessage)}
-				key={"validation-upload-error-file-size"}
+				autoHideDuration={6000}
+				// alertText={getErrorMessageKey(validationErrorMessage)}
+				alertText={
+					<Trans
+						i18nKey={
+							failedFile
+								? getErrorMessageKey(validationErrorMessage)
+								: "mappings.file_size_generic"
+						}
+						values={{
+							fileName: failedFile ? failedFile.name : "",
+							fileSize: failedFile ? fileSizeConvertor(failedFile.size) : 0,
+							maxSize: 1,
+						}}
+					/>
+				}
+				key={"validation-error"}
 				onCloseFunc={() => setValidationErrorDisplayed(false)}
 			/>
 			<TimedAlert
