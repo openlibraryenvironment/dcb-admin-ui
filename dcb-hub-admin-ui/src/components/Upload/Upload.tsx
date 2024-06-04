@@ -58,7 +58,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 			case message.includes("provide a Host LMS"):
 				return "mappings.validation_no_hostlms";
 			case message.includes("fromContext or toContext") &&
-				category == "Referemce value mappings":
+				category == "Reference value mappings":
 				return "mappings.mismatched_context";
 			case message.includes("fromContext or toContext") &&
 				category == "Numeric range mappings":
