@@ -1,3 +1,16 @@
+# [1.14.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.13.0...v1.14.0) (2024-06-05)
+
+
+### Bug Fixes
+
+* Fix typo in mapping comparison [DCB-1188] ([1103360](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1103360bcf10da4f51098370d38dd36436921cd7))
+* Prevent auto-triggering of upload error [DCB-1188] ([3913072](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/391307219c7bed389cd3924b74f4c0557d5febba))
+
+
+### Features
+
+* Extend import to all reference value mappings [DCB-1152] ([5758d29](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5758d295a8e9b82b6bc3d1538832039ca243bd3f))
+
 # [1.13.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.12.0...v1.13.0) (2024-05-24)
 
 
