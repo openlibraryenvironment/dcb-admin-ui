@@ -15,6 +15,8 @@ import Loading from "@components/Loading/Loading";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import {
 	getLibraryById,
+	getMappings,
+	getNumericRangeMappings,
 	getPatronRequests,
 	updateAgencyParticipationStatus,
 } from "src/queries/queries";
@@ -39,13 +41,17 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { getInitialAccordionState } from "src/helpers/getInitialAccordionState";
 import LibraryHostLmsDetails from "./LibraryHostLmsDetails";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import {
+	standardNumRangeMappingColumns,
+	standardRefValueMappingColumns,
+} from "src/helpers/columns";
 
 type LibraryDetails = {
 	libraryId: any;
 };
 
 const INITIAL_EXPANDED_STATE = 12; // Number of accordions that should be initially expanded
-const TOTAL_ACCORDIONS = 16; // Total number of accordions
+const TOTAL_ACCORDIONS = 19; // Total number of accordions
 
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
@@ -238,6 +244,21 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
 	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
 	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
+
+	const refValuePatronTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND NOT deleted:true`;
+	const refValueItemTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND NOT deleted:true`;
+	const refValueLocationVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND NOT deleted:true`;
+
+	const numericRangePatronTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "patronType" AND NOT deleted: true`;
+	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND NOT deleted: true`;
+
+	// Add ones for second Host LMS here.
+	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND NOT deleted:true`;
+	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND NOT deleted:true`;
+	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "Location") AND NOT deleted:true`;
+
+	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "patronType" AND NOT deleted: true`;
+	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "ItemType" AND NOT deleted: true`;
 
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
@@ -749,6 +770,296 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								</Grid>
 							</Grid>
 						</StyledAccordionDetails>
+					</SubAccordion>
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[16]}
+						onChange={handleAccordionChange(16)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="library-configuration-patronTypes"
+							id="library-configuration-patronTypes"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("libraries.config.data.mappings.title_patron_type")}
+							</Typography>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.ref_value_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getMappings}
+								presetQueryVariables={refValuePatronTypeVariables}
+								type="referenceValueMappingsForLibrary"
+								coreType="referenceValueMappings"
+								columns={standardRefValueMappingColumns}
+								noDataMessage={t("mappings.import_no_data")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								// This is how to set the default sort order
+								sortModel={[{ field: "fromContext", sort: "asc" }]}
+								sortDirection="ASC"
+								sortAttribute="fromContext"
+								pageSize={20}
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.ref_value_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getMappings}
+									presetQueryVariables={
+										refValuePatronTypeSecondHostLmsVariables
+									}
+									type="referenceValueMappingsForLibrary"
+									coreType="referenceValueMappings"
+									columns={standardRefValueMappingColumns}
+									noDataMessage={t("mappings.import_no_data")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									// This is how to set the default sort order
+									sortModel={[{ field: "fromContext", sort: "asc" }]}
+									sortDirection="ASC"
+									sortAttribute="fromContext"
+									pageSize={20}
+								/>
+							) : null}
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.numeric_range_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getNumericRangeMappings}
+								presetQueryVariables={numericRangePatronTypeVariables}
+								type="numericRangeMappingsForLibrary"
+								coreType="numericRangeMappings"
+								columns={standardNumRangeMappingColumns}
+								noDataMessage={t("mappings.no_results")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								sortModel={[{ field: "context", sort: "asc" }]}
+								pageSize={20}
+								sortDirection="ASC"
+								sortAttribute="context"
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.numeric_range_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getNumericRangeMappings}
+									presetQueryVariables={
+										numericRangePatronTypeSecondHostLmsVariables
+									}
+									type="numericRangeMappingsForLibrary"
+									coreType="numericRangeMappings"
+									columns={standardNumRangeMappingColumns}
+									noDataMessage={t("mappings.no_results")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									sortModel={[{ field: "context", sort: "asc" }]}
+									pageSize={20}
+									sortDirection="ASC"
+									sortAttribute="context"
+								/>
+							) : null}
+						</SubAccordionDetails>
+					</SubAccordion>
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[17]}
+						onChange={handleAccordionChange(17)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="library-configuration-itemType"
+							id="library-configuration-itemType"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("libraries.config.data.mappings.title_item_type")}
+							</Typography>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.ref_value_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getMappings}
+								presetQueryVariables={refValueItemTypeVariables}
+								type="referenceValueMappingsForLibrary"
+								coreType="referenceValueMappings"
+								columns={standardRefValueMappingColumns}
+								noDataMessage={t("mappings.import_no_data")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								// This is how to set the default sort order
+								sortModel={[{ field: "fromContext", sort: "asc" }]}
+								sortDirection="ASC"
+								sortAttribute="fromContext"
+								pageSize={20}
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.ref_value_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getMappings}
+									presetQueryVariables={refValueItemTypeSecondHostLmsVariables}
+									type="referenceValueMappingsForLibrary"
+									coreType="referenceValueMappings"
+									columns={standardRefValueMappingColumns}
+									noDataMessage={t("mappings.import_no_data")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									// This is how to set the default sort order
+									sortModel={[{ field: "fromContext", sort: "asc" }]}
+									sortDirection="ASC"
+									sortAttribute="fromContext"
+									pageSize={20}
+								/>
+							) : null}
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.numeric_range_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getNumericRangeMappings}
+								presetQueryVariables={numericRangeItemTypeVariables}
+								type="numericRangeMappingsForLibrary"
+								coreType="numericRangeMappings"
+								columns={standardNumRangeMappingColumns}
+								noDataMessage={t("mappings.no_results")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								sortModel={[{ field: "context", sort: "asc" }]}
+								pageSize={20}
+								sortDirection="ASC"
+								sortAttribute="context"
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.numeric_range_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getNumericRangeMappings}
+									presetQueryVariables={
+										numericRangeItemTypeSecondHostLmsVariables
+									}
+									type="numericRangeMappingsForLibrary"
+									coreType="numericRangeMappings"
+									columns={standardNumRangeMappingColumns}
+									noDataMessage={t("mappings.no_results")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									sortModel={[{ field: "context", sort: "asc" }]}
+									pageSize={20}
+									sortDirection="ASC"
+									sortAttribute="context"
+								/>
+							) : null}
+						</SubAccordionDetails>
+					</SubAccordion>
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[18]}
+						onChange={handleAccordionChange(18)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="library-configuration-location"
+							id="library-configuration-location"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("libraries.config.data.mappings.title_location")}
+							</Typography>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.ref_value_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getMappings}
+								presetQueryVariables={refValueLocationVariables}
+								type="referenceValueMappingsForLibrary"
+								coreType="referenceValueMappings"
+								columns={standardRefValueMappingColumns}
+								noDataMessage={t("mappings.import_no_data")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								// This is how to set the default sort order
+								sortModel={[{ field: "fromContext", sort: "asc" }]}
+								sortDirection="ASC"
+								sortAttribute="fromContext"
+								pageSize={20}
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.ref_value_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getMappings}
+									presetQueryVariables={
+										refValueLocationForLibrarySecondHostLmsVariables
+									}
+									type="referenceValueMappingsForLibrary"
+									coreType="referenceValueMappings"
+									columns={standardRefValueMappingColumns}
+									noDataMessage={t("mappings.import_no_data")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									// This is how to set the default sort order
+									sortModel={[{ field: "fromContext", sort: "asc" }]}
+									sortDirection="ASC"
+									sortAttribute="fromContext"
+									pageSize={20}
+								/>
+							) : null}
+						</SubAccordionDetails>
 					</SubAccordion>
 				</StyledAccordionDetails>
 			</StyledAccordion>

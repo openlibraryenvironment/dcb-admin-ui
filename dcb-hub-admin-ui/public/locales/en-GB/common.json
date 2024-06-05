@@ -409,7 +409,10 @@
 					"dcb_patron": "DCB -> Patron Type Mapping",
 					"item_dcb": "Item Type -> DCB Mapping",
 					"patron_dcb": "Patron Type -> DCB Mapping",
-					"title": "Mappings"
+					"title": "Mappings",
+					"title_item_type": "Category: Item types",
+					"title_location": "Category: Location",
+					"title_patron_type": "Category: Patron types"
 				}
 			},
 			"patronAuth": {
@@ -511,6 +514,7 @@
 		"import": "Import",
 		"import_mappings": "Import {{category}} for a Host LMS",
 		"import_file": "Import mappings",
+		"import_no_data": "No mappings were found.",
 		"import_title": "Import {{profile}}",
 		"loading_msg": "Loading mappings...",
 		"mappings": "Mappings",
@@ -529,7 +533,9 @@
 		"category": "Category",
 		"select_file": "Select file",
 		"ref_value": "Reference value mappings",
+		"ref_value_for": "Reference value mappings for {{hostLms}}",
 		"numeric_range": "Numeric range mappings",
+		"numeric_range_for": "Numeric range mappings for {{hostLms}}",
 		"search_placeholder": "Search by category",
 		"search_placeholder_cs": "Search by Host LMS",
 		"confirmation_replace_mappings": "Replace mappings",
