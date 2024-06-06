@@ -75,37 +75,37 @@ declare module "@mui/material/styles" {
 		pageContentBackground?: string;
 	}
 	interface TypographyVariants {
-		appTitle: React.CSSProperties;
-		loginCardText: React.CSSProperties;
-		subheading: React.CSSProperties;
-		cardActionText: React.CSSProperties;
-		attributeTitle: React.CSSProperties;
-		loginHeader: React.CSSProperties;
-		modalTitle: React.CSSProperties;
-		homePageText: React.CSSProperties;
-		notFoundTitle: React.CSSProperties;
-		notFoundText: React.CSSProperties;
-		componentSubheading: React.CSSProperties;
-		linkedFooterTextSize: React.CSSProperties;
-		linkedFooterHeader: React.CSSProperties;
-		loadingText: React.CSSProperties;
+		appTitle?: React.CSSProperties;
+		loginCardText?: React.CSSProperties;
+		subheading?: React.CSSProperties;
+		cardActionText?: React.CSSProperties;
+		attributeTitle?: React.CSSProperties;
+		loginHeader?: React.CSSProperties;
+		modalTitle?: React.CSSProperties;
+		homePageText?: React.CSSProperties;
+		notFoundTitle?: React.CSSProperties;
+		notFoundText?: React.CSSProperties;
+		componentSubheading?: React.CSSProperties;
+		linkedFooterTextSize?: React.CSSProperties;
+		linkedFooterHeader?: React.CSSProperties;
+		loadingText?: React.CSSProperties;
 	}
 	interface TypographyVariantsOptions {
 		appTitle?: React.CSSProperties;
 		loginCardText?: React.CSSProperties;
-		subheading: React.CSSProperties;
-		cardActionText: React.CSSProperties;
-		attributeTitle: React.CSSProperties;
-		attributeText: React.CSSProperties;
-		loginHeader: React.CSSProperties;
-		modalTitle: React.CSSProperties;
-		homePageText: React.CSSProperties;
-		notFoundTitle: React.CSSProperties;
-		notFoundText: React.CSSProperties;
-		componentSubheading: React.CSSProperties;
-		linkedFooterTextSize: React.CSSProperties;
-		linkedFooterHeader: React.CSSProperties;
-		loadingText: React.CSSProperties;
+		subheading?: React.CSSProperties;
+		cardActionText?: React.CSSProperties;
+		attributeTitle?: React.CSSProperties;
+		attributeText?: React.CSSProperties;
+		loginHeader?: React.CSSProperties;
+		modalTitle?: React.CSSProperties;
+		homePageText?: React.CSSProperties;
+		notFoundTitle?: React.CSSProperties;
+		notFoundText?: React.CSSProperties;
+		componentSubheading?: React.CSSProperties;
+		linkedFooterTextSize?: React.CSSProperties;
+		linkedFooterHeader?: React.CSSProperties;
+		loadingText?: React.CSSProperties;
 	}
 }
 declare module "@mui/material/Typography" {
