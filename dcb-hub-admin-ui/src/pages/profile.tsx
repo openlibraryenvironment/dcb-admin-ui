@@ -88,6 +88,7 @@ const Profile: NextPage = () => {
 					<ListItemIcon>
 						<MdOutlineSupervisorAccount />
 					</ListItemIcon>
+					<Typography variant="attributeTitle">{t("profile.roles")}</Typography>
 					<FormatRoles roles={session?.profile?.roles} />
 				</ListItem>
 			</List>
