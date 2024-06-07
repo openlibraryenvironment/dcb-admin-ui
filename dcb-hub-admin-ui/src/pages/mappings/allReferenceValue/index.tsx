@@ -1,6 +1,6 @@
 import { GetServerSideProps, NextPage } from "next";
 import { AdminLayout } from "@layout";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { useState } from "react";
 //localisation
 import { useTranslation } from "next-i18next";
@@ -21,7 +21,7 @@ const AllMappings: NextPage = () => {
 	const client = useApolloClient();
 	const [showImport, setImport] = useState(false);
 	const router = useRouter();
-	const { status } = useSession({
+	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
 			// If user is not authenticated, push them to unauthorised page
@@ -62,12 +62,26 @@ const AllMappings: NextPage = () => {
 			</AdminLayout>
 		);
 	}
+	const isAdmin = session?.profile?.roles?.includes("ADMIN");
 
 	return (
 		<AdminLayout title={t("nav.mappings.allReferenceValue")}>
-			<Button variant="contained" onClick={openImport}>
-				{t("mappings.import")}
-			</Button>
+			<Tooltip
+				title={
+					isAdmin ? "" : t("mappings.import_disabled") // Tooltip text when disabled
+				}
+			>
+				{/* Adding a span as a wrapper to enable tooltip on disabled button */}
+				<span>
+					<Button
+						variant="contained"
+						onClick={openImport}
+						disabled={!isAdmin} // Disable if not ADMIN
+					>
+						{t("mappings.import")}
+					</Button>
+				</span>
+			</Tooltip>
 			<ServerPaginationGrid
 				query={getMappings}
 				presetQueryVariables="deleted:false OR deleted:null"

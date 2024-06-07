@@ -8,14 +8,18 @@ import { getNumericRangeMappings } from "src/queries/queries";
 import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useState } from "react";
 import { useApolloClient } from "@apollo/client/react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
+import { useSession } from "next-auth/react";
 
 // Page for 'ALL' numeric range mappings of any category.
 
 const AllNumericRange: NextPage = () => {
 	const client = useApolloClient();
 	const [showImport, setImport] = useState(false);
+	const { data: session } = useSession({
+		required: true,
+	});
 
 	const openImport = () => {
 		setImport(true);
@@ -35,12 +39,26 @@ const AllNumericRange: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+	const isAdmin = session?.profile?.roles?.includes("ADMIN");
 
 	return (
 		<AdminLayout title={t("nav.mappings.allNumericRange")}>
-			<Button variant="contained" onClick={openImport}>
-				{t("mappings.import")}
-			</Button>
+			<Tooltip
+				title={
+					isAdmin ? "" : t("mappings.import_disabled") // Tooltip text when disabled
+				}
+			>
+				{/* Adding a span as a wrapper to enable tooltip on disabled button */}
+				<span>
+					<Button
+						variant="contained"
+						onClick={openImport}
+						disabled={!isAdmin} // Disable if not ADMIN
+					>
+						{t("mappings.import")}
+					</Button>
+				</span>
+			</Tooltip>
 			<ServerPaginationGrid
 				query={getNumericRangeMappings}
 				presetQueryVariables="deleted:false OR deleted:null"
