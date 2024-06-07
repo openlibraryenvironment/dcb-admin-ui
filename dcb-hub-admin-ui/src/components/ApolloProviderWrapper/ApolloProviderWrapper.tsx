@@ -6,6 +6,7 @@ import {
 	InMemoryCache,
 	from,
 } from "@apollo/client";
+import { RetryLink } from "@apollo/client/link/retry";
 import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
 import { useSession } from "next-auth/react";
@@ -48,28 +49,28 @@ export const ApolloProviderWrapper = ({ children }: PropsWithChildren) => {
 			};
 		});
 
-		// const retryLink = new RetryLink({
-		// 	delay: {
-		// 		initial: 300,
-		// 		max: Infinity,
-		// 		jitter: true,
-		// 	},
-		// 	attempts: {
-		// 		max: 5,
-		// 		retryIf: (error, _operation) => {
-		// 			// Log retry attempt
-		// 			console.log(
-		// 				"[RetryLink]: Retrying request due to error:",
-		// 				error,
-		// 				"and operation" + _operation,
-		// 			);
-		// 			return !!error;
-		// 		},
-		// 	},
-		// });
+		const retryLink = new RetryLink({
+			delay: {
+				initial: 300,
+				max: Infinity,
+				jitter: true,
+			},
+			attempts: {
+				max: 5,
+				retryIf: (error, _operation) => {
+					// Log retry attempt
+					console.log(
+						"[RetryLink]: Retrying request due to error:",
+						error,
+						"and operation" + _operation,
+					);
+					return !!error;
+				},
+			},
+		});
 
 		return new ApolloClient({
-			link: from([errorLink, authMiddleware, url]),
+			link: from([retryLink, errorLink, authMiddleware, url]),
 			cache: new InMemoryCache(),
 			ssrMode: true,
 		});
