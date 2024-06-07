@@ -512,6 +512,7 @@
 		"file_too_large": "{{fileName}} is {{fileSize}} MB. Maximum file size is {{maxSize}} MB. Please select a smaller file.",
 		"file_type_requirements": "Supported file types: TSV and CSV",
 		"import": "Import",
+		"import_disabled": "You must have an administrator role to import mappings.",
 		"import_mappings": "Import {{category}} for a Host LMS",
 		"import_file": "Import mappings",
 		"import_no_data": "No mappings were found.",

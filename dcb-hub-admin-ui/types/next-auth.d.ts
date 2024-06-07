@@ -1,3 +1,5 @@
+// This needs a review: in the interim we won't remove these imports.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NextAuth, { DefaultSession, DefaultUser, Profile } from "next-auth";
 
 // Append additional properties to the which is found via the jwt callback
@@ -30,6 +32,11 @@ declare module "next-auth" {
 		refreshToken: string;
 		isAdmin: boolean;
 		error: string;
+		profile: KeycloakProfile;
+	}
+
+	interface KeycloakProfile {
+		roles: string[];
 	}
 
 	interface Account {

@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { AdminLayout } from "@layout";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "next-i18next";
 import Import from "@components/Import/Import";
@@ -21,7 +21,7 @@ const CirculationStatusMappings: NextPage = () => {
 	const [showImport, setImport] = useState(false);
 
 	const router = useRouter();
-	const { status } = useSession({
+	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
 			// If user is not authenticated, push them to unauthorised page
@@ -47,6 +47,7 @@ const CirculationStatusMappings: NextPage = () => {
 			"contains" /* add more over time as we build in support for them */,
 		].includes(value),
 	);
+	const isAdmin = session?.profile?.roles?.includes("ADMIN");
 
 	if (status === "loading") {
 		return (
@@ -66,9 +67,22 @@ const CirculationStatusMappings: NextPage = () => {
 
 	return (
 		<AdminLayout title={t("nav.mappings.circulationStatus")}>
-			<Button variant="contained" onClick={openImport}>
-				{t("mappings.import")}
-			</Button>
+			<Tooltip
+				title={
+					isAdmin ? "" : t("mappings.import_disabled") // Tooltip text when disabled
+				}
+			>
+				{/* Adding a span as a wrapper to enable tooltip on disabled button */}
+				<span>
+					<Button
+						variant="contained"
+						onClick={openImport}
+						disabled={!isAdmin} // Disable if not ADMIN
+					>
+						{t("mappings.import")}
+					</Button>
+				</span>
+			</Tooltip>
 			<ServerPaginationGrid
 				query={getCirculationStatusMappings}
 				type="circulationStatus"
