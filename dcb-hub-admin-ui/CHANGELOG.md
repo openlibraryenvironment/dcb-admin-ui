@@ -1,3 +1,18 @@
+# [1.15.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.14.0...v1.15.0) (2024-06-07)
+
+
+### Bug Fixes
+
+* Add RetryLink to ApolloClient [DCB-1154] ([fd7f10b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fd7f10b660da8a34d2ce9e33ab030def475de37b))
+* Restore roles to profile page on dev ([38504ae](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/38504aede6ad7c02a3bf63429535cdc12548df90))
+
+
+### Features
+
+* Add library-specific mappings to details page [DCB-1179] ([85aa517](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/85aa517ee6a5698253031429bc88cb0faf7acdc0))
+* Introduce ErrorLink to Apollo Client implementation [DCB-1154] ([b3f845f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b3f845f3f24778f37d218b1c85a36c188e6ac059))
+* Restrict mappings operations to authorised users [DCB-606] ([1d321dd](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1d321dd54d2cb048592621e45c866433154e984c))
+
 # [1.14.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.13.0...v1.14.0) (2024-06-05)
 
 
