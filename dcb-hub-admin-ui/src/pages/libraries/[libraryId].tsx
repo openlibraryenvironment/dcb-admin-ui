@@ -773,118 +773,6 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</SubAccordion>
 					<SubAccordion
 						variant="outlined"
-						expanded={expandedAccordions[16]}
-						onChange={handleAccordionChange(16)}
-						disableGutters
-					>
-						<SubAccordionSummary
-							aria-controls="library-configuration-patronTypes"
-							id="library-configuration-patronTypes"
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
-						>
-							<Typography variant="h3" fontWeight={"bold"}>
-								{t("libraries.config.data.mappings.title_patron_type")}
-							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Typography variant="h3" fontWeight={"bold"}>
-								{t("mappings.ref_value_for", {
-									hostLms: library?.agency?.hostLms?.code,
-								})}
-							</Typography>
-							<ServerPaginationGrid
-								query={getMappings}
-								presetQueryVariables={refValuePatronTypeVariables}
-								type="referenceValueMappingsForLibrary"
-								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
-								noDataMessage={t("mappings.import_no_data")}
-								noResultsMessage={t("mappings.no_results")}
-								selectable={false}
-								// This is how to set the default sort order
-								sortModel={[{ field: "fromContext", sort: "asc" }]}
-								sortDirection="ASC"
-								sortAttribute="fromContext"
-								pageSize={20}
-							/>
-							{library?.secondHostLms ? (
-								<Typography variant="h3" fontWeight={"bold"}>
-									{t("mappings.ref_value_for", {
-										hostLms: library?.secondHostLms?.code,
-									})}
-								</Typography>
-							) : null}
-							{library?.secondHostLms ? (
-								<ServerPaginationGrid
-									query={getMappings}
-									presetQueryVariables={
-										refValuePatronTypeSecondHostLmsVariables
-									}
-									type="referenceValueMappingsForLibrary"
-									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
-									noDataMessage={t("mappings.import_no_data")}
-									noResultsMessage={t("mappings.no_results")}
-									selectable={false}
-									// This is how to set the default sort order
-									sortModel={[{ field: "fromContext", sort: "asc" }]}
-									sortDirection="ASC"
-									sortAttribute="fromContext"
-									pageSize={20}
-								/>
-							) : null}
-							<Typography variant="h3" fontWeight={"bold"}>
-								{t("mappings.numeric_range_for", {
-									hostLms: library?.agency?.hostLms?.code,
-								})}
-							</Typography>
-							<ServerPaginationGrid
-								query={getNumericRangeMappings}
-								presetQueryVariables={numericRangePatronTypeVariables}
-								type="numericRangeMappingsForLibrary"
-								coreType="numericRangeMappings"
-								columns={standardNumRangeMappingColumns}
-								noDataMessage={t("mappings.no_results")}
-								noResultsMessage={t("mappings.no_results")}
-								selectable={false}
-								sortModel={[{ field: "context", sort: "asc" }]}
-								pageSize={20}
-								sortDirection="ASC"
-								sortAttribute="context"
-							/>
-							{library?.secondHostLms ? (
-								<Typography variant="h3" fontWeight={"bold"}>
-									{t("mappings.numeric_range_for", {
-										hostLms: library?.secondHostLms?.code,
-									})}
-								</Typography>
-							) : null}
-							{library?.secondHostLms ? (
-								<ServerPaginationGrid
-									query={getNumericRangeMappings}
-									presetQueryVariables={
-										numericRangePatronTypeSecondHostLmsVariables
-									}
-									type="numericRangeMappingsForLibrary"
-									coreType="numericRangeMappings"
-									columns={standardNumRangeMappingColumns}
-									noDataMessage={t("mappings.no_results")}
-									noResultsMessage={t("mappings.no_results")}
-									selectable={false}
-									sortModel={[{ field: "context", sort: "asc" }]}
-									pageSize={20}
-									sortDirection="ASC"
-									sortAttribute="context"
-								/>
-							) : null}
-						</SubAccordionDetails>
-					</SubAccordion>
-					<SubAccordion
-						variant="outlined"
 						expanded={expandedAccordions[17]}
 						onChange={handleAccordionChange(17)}
 						disableGutters
@@ -899,7 +787,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							}
 						>
 							<Typography variant="h3" fontWeight={"bold"}>
-								{t("libraries.config.data.mappings.title_item_type")}
+								{t("libraries.config.data.mappings.item_type")}
 							</Typography>
 						</SubAccordionSummary>
 						<SubAccordionDetails>
@@ -922,6 +810,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								sortDirection="ASC"
 								sortAttribute="fromContext"
 								pageSize={20}
+								columnVisibilityModel={{
+									fromCategory: false,
+								}}
 							/>
 							{library?.secondHostLms ? (
 								<Typography variant="h3" fontWeight={"bold"}>
@@ -945,6 +836,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortDirection="ASC"
 									sortAttribute="fromContext"
 									pageSize={20}
+									columnVisibilityModel={{
+										fromCategory: false,
+									}}
 								/>
 							) : null}
 							<Typography variant="h3" fontWeight={"bold"}>
@@ -965,6 +859,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								pageSize={20}
 								sortDirection="ASC"
 								sortAttribute="context"
+								columnVisibilityModel={{
+									domain: false,
+								}}
 							/>
 							{library?.secondHostLms ? (
 								<Typography variant="h3" fontWeight={"bold"}>
@@ -989,6 +886,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									sortDirection="ASC"
 									sortAttribute="context"
+									columnVisibilityModel={{
+										domain: false,
+									}}
 								/>
 							) : null}
 						</SubAccordionDetails>
@@ -1009,7 +909,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							}
 						>
 							<Typography variant="h3" fontWeight={"bold"}>
-								{t("libraries.config.data.mappings.title_location")}
+								{t("libraries.config.data.mappings.location")}
 							</Typography>
 						</SubAccordionSummary>
 						<SubAccordionDetails>
@@ -1032,6 +932,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								sortDirection="ASC"
 								sortAttribute="fromContext"
 								pageSize={20}
+								columnVisibilityModel={{
+									fromCategory: false,
+								}}
 							/>
 							{library?.secondHostLms ? (
 								<Typography variant="h3" fontWeight={"bold"}>
@@ -1057,6 +960,133 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortDirection="ASC"
 									sortAttribute="fromContext"
 									pageSize={20}
+									columnVisibilityModel={{
+										fromCategory: false,
+									}}
+								/>
+							) : null}
+						</SubAccordionDetails>
+					</SubAccordion>
+					<SubAccordion
+						variant="outlined"
+						expanded={expandedAccordions[16]}
+						onChange={handleAccordionChange(16)}
+						disableGutters
+					>
+						<SubAccordionSummary
+							aria-controls="library-configuration-patronTypes"
+							id="library-configuration-patronTypes"
+							expandIcon={
+								<IconContext.Provider value={{ size: "2em" }}>
+									<MdExpandMore />
+								</IconContext.Provider>
+							}
+						>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("libraries.config.data.mappings.patron_type")}
+							</Typography>
+						</SubAccordionSummary>
+						<SubAccordionDetails>
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.ref_value_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getMappings}
+								presetQueryVariables={refValuePatronTypeVariables}
+								type="referenceValueMappingsForLibrary"
+								coreType="referenceValueMappings"
+								columns={standardRefValueMappingColumns}
+								noDataMessage={t("mappings.import_no_data")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								// This is how to set the default sort order
+								sortModel={[{ field: "fromContext", sort: "asc" }]}
+								sortDirection="ASC"
+								sortAttribute="fromContext"
+								pageSize={20}
+								columnVisibilityModel={{
+									fromCategory: false,
+								}}
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.ref_value_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getMappings}
+									presetQueryVariables={
+										refValuePatronTypeSecondHostLmsVariables
+									}
+									type="referenceValueMappingsForLibrary"
+									coreType="referenceValueMappings"
+									columns={standardRefValueMappingColumns}
+									noDataMessage={t("mappings.import_no_data")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									// This is how to set the default sort order
+									sortModel={[{ field: "fromContext", sort: "asc" }]}
+									sortDirection="ASC"
+									sortAttribute="fromContext"
+									pageSize={20}
+									columnVisibilityModel={{
+										fromCategory: false,
+									}}
+								/>
+							) : null}
+							<Typography variant="h3" fontWeight={"bold"}>
+								{t("mappings.numeric_range_for", {
+									hostLms: library?.agency?.hostLms?.code,
+								})}
+							</Typography>
+							<ServerPaginationGrid
+								query={getNumericRangeMappings}
+								presetQueryVariables={numericRangePatronTypeVariables}
+								type="numericRangeMappingsForLibrary"
+								coreType="numericRangeMappings"
+								columns={standardNumRangeMappingColumns}
+								noDataMessage={t("mappings.no_results")}
+								noResultsMessage={t("mappings.no_results")}
+								selectable={false}
+								sortModel={[{ field: "context", sort: "asc" }]}
+								pageSize={20}
+								sortDirection="ASC"
+								sortAttribute="context"
+								columnVisibilityModel={{
+									domain: false,
+								}}
+							/>
+							{library?.secondHostLms ? (
+								<Typography variant="h3" fontWeight={"bold"}>
+									{t("mappings.numeric_range_for", {
+										hostLms: library?.secondHostLms?.code,
+									})}
+								</Typography>
+							) : null}
+							{library?.secondHostLms ? (
+								<ServerPaginationGrid
+									query={getNumericRangeMappings}
+									presetQueryVariables={
+										numericRangePatronTypeSecondHostLmsVariables
+									}
+									type="numericRangeMappingsForLibrary"
+									coreType="numericRangeMappings"
+									columns={standardNumRangeMappingColumns}
+									noDataMessage={t("mappings.no_results")}
+									noResultsMessage={t("mappings.no_results")}
+									selectable={false}
+									sortModel={[{ field: "context", sort: "asc" }]}
+									pageSize={20}
+									sortDirection="ASC"
+									sortAttribute="context"
+									columnVisibilityModel={{
+										domain: false,
+									}}
 								/>
 							) : null}
 						</SubAccordionDetails>

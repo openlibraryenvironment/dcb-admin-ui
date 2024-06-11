@@ -57,7 +57,7 @@ export default function PatronRequestDetails({
 		variables: {
 			query: "id:" + patronRequestId,
 		},
-		pollInterval: 600000,
+		pollInterval: 180000,
 	});
 
 	// define PR data type.

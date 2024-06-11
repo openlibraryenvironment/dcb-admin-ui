@@ -60,26 +60,10 @@ const Bibs: NextPage = () => {
 				// If we want to restore it, just remove the 'sortable' attributes.
 				columns={[
 					{
-						field: "id",
-						headerName: "Source bib UUID",
-						minWidth: 100,
-						flex: 0.5,
-						sortable: false,
-						filterOperators,
-					},
-					{
 						field: "title",
 						headerName: "Title",
 						minWidth: 150,
 						flex: 0.6,
-						sortable: false,
-						filterOperators,
-					},
-					{
-						field: "author",
-						headerName: "Author",
-						minWidth: 100,
-						flex: 0.5,
 						sortable: false,
 						filterOperators,
 					},
@@ -93,16 +77,6 @@ const Bibs: NextPage = () => {
 						filterable: false,
 						valueGetter: (params: { row: { contributesTo: { id: string } } }) =>
 							params?.row?.contributesTo?.id,
-					},
-					{
-						field: "clusterRecordTitle",
-						headerName: "Cluster record title",
-						minWidth: 50,
-						flex: 0.5,
-						sortable: false,
-						filterOperators,
-						valueGetter: (params: { row: { contributesTo: { title: any } } }) =>
-							params?.row?.contributesTo?.title,
 					},
 					{
 						field: "sourceRecordId",
@@ -119,11 +93,17 @@ const Bibs: NextPage = () => {
 						filterOperators: idFilterOperators,
 						flex: 0.5,
 					},
+					{
+						field: "id",
+						headerName: "Source bib UUID",
+						minWidth: 100,
+						flex: 0.5,
+						sortable: false,
+						filterOperators,
+					},
 				]}
 				columnVisibilityModel={{
-					clusterRecordTitle: false,
 					clusterRecordId: false,
-					sourceRecordId: false,
 					sourceSystemId: false,
 				}}
 				searchPlaceholder={t("bibRecords.search_placeholder")}

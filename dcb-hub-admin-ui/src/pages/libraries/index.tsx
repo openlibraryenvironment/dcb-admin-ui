@@ -63,6 +63,7 @@ const Libraries: NextPage = () => {
 				type="libraries"
 				columnVisibilityModel={{
 					id: false,
+					clientConfigIngest: false,
 					isSupplyingAgency: false,
 					isBorrowingAgency: false,
 					hostLmsCatalogue: false,
@@ -72,13 +73,13 @@ const Libraries: NextPage = () => {
 					{
 						field: "abbreviatedName",
 						headerName: "Abbreviated name",
-						flex: 0.5,
+						flex: 0.4,
 						filterOperators: standardFilters,
 					},
 					{
-						field: "shortName",
-						headerName: "Short name",
-						flex: 0.5,
+						field: "fullName",
+						headerName: "Full name",
+						flex: 0.6,
 						filterOperators: standardFilters,
 					},
 					{
@@ -105,14 +106,27 @@ const Libraries: NextPage = () => {
 					{
 						field: "id",
 						headerName: "Library UUID",
-						flex: 0.5,
+						flex: 0.6,
 						filterOperators: equalsOnly,
 					},
 					{
 						field: "agencyCode",
 						headerName: "Agency code",
-						flex: 0.5,
+						flex: 0.4,
 						filterOperators: standardFilters,
+					},
+					{
+						field: "clientConfigIngest",
+						headerName: "Ingest enabled",
+						minWidth: 50,
+						flex: 0.3,
+						filterable: false,
+						sortable: false,
+						valueGetter: (params: {
+							row: {
+								agency: { hostLms: { clientConfig: { ingest: boolean } } };
+							};
+						}) => params?.row?.agency?.hostLms?.clientConfig?.ingest,
 					},
 					{
 						field: "isSupplyingAgency",
