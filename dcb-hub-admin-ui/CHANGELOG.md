@@ -1,3 +1,15 @@
+# [1.16.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.15.0...v1.16.0) (2024-06-11)
+
+
+### Bug Fixes
+
+* Adjust next-auth behaviours [DCB-1154] ([60f1042](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/60f1042eb384b0486a5ca468304e9ae073ca3dd0))
+
+
+### Features
+
+* Update DCB Admin for service launch [DCB-1198] [DCB-1197] ([b8ef295](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b8ef2957de7db923a57353178dcd71290fe4445a))
+
 # [1.15.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.14.0...v1.15.0) (2024-06-07)
 
 
