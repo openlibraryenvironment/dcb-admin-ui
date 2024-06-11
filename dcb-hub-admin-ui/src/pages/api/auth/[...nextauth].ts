@@ -44,6 +44,7 @@ const refreshAccessToken = async (token: JWT) => {
 		})
 		.catch((error) => {
 			console.log("Error attempting to refresh token %o", error);
+			// We may want to force a sign-out here. If we do, we need to make the client aware.
 			return { ...token, error: "RefreshAccessTokenError" };
 		});
 };
@@ -87,6 +88,7 @@ export default NextAuth({
 				session.profile = token.profile;
 				session.error = token.error;
 				session.user = token.user;
+				// session.expires = token.exp;
 				// session.expires = token.accessTokenExpires;
 				// if user has 'ADMIN' role, set isAdmin to true
 				if (token?.profile?.roles?.includes("ADMIN")) {
@@ -95,7 +97,8 @@ export default NextAuth({
 			}
 			if (session.expires < Date.now()) {
 				console.warn("Session expired");
-				// Should we be returning session undefined?
+				// TODO: Investigate better ways of handling session expiry.
+				// 	const sessionExpiry = Date.parse(session.expires);
 				return undefined;
 			}
 			return session;
@@ -116,9 +119,9 @@ export default NextAuth({
 			// on initial sign in
 			if (account && user) {
 				return {
-					accessToken: account.accessToken,
+					accessToken: account.access_token,
 					id_token: account.id_token,
-					accessTokenExpires: Date.now() + account.expires_in * 1000,
+					accessTokenExpires: account.expires_at,
 					refreshToken: account.refresh_token,
 					profile: profile,
 					user,
