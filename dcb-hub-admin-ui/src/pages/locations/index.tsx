@@ -65,7 +65,14 @@ const Locations: NextPage = () => {
 						field: "code",
 						headerName: "Location code",
 						minWidth: 50,
-						flex: 0.5,
+						flex: 0.4,
+						filterOperators: standardFilters,
+					},
+					{
+						field: "id",
+						headerName: "Location UUID",
+						minWidth: 50,
+						flex: 0.8,
 						filterOperators: standardFilters,
 					},
 				]}
@@ -74,6 +81,9 @@ const Locations: NextPage = () => {
 				noDataMessage={t("locations.no_rows")}
 				noResultsMessage={t("locations.no_results")}
 				searchPlaceholder={t("locations.search_placeholder")}
+				columnVisibilityModel={{
+					id: false,
+				}}
 				// This is how to set the default sort order
 				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"

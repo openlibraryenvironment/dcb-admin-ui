@@ -71,12 +71,6 @@ export default function OperatingWelcome() {
 						params?.row?.agency?.authProfile,
 				},
 				{
-					field: "id",
-					headerName: "Library ID",
-					flex: 0.5,
-					filterOperators: equalsOnly,
-				},
-				{
 					field: "isSupplyingAgency",
 					headerName: "Supplying",
 					flex: 0.25,
@@ -114,6 +108,12 @@ export default function OperatingWelcome() {
 					sortable: false,
 					valueGetter: (params: { row: { secondHostLms: { code: string } } }) =>
 						params?.row?.secondHostLms?.code,
+				},
+				{
+					field: "id",
+					headerName: "Library UUID",
+					flex: 0.5,
+					filterOperators: equalsOnly,
 				},
 			]}
 			selectable={true}

@@ -53,11 +53,21 @@ const Agencies: NextPage = () => {
 					query={getAgencies}
 					type="agencies"
 					coreType="agencies"
+					columnVisibilityModel={{
+						id: false,
+					}}
 					columns={[
 						{
 							field: "name",
 							headerName: "Agency name",
 							minWidth: 150,
+							flex: 0.5,
+							filterOperators,
+						},
+						{
+							field: "code",
+							headerName: "Agency code",
+							minWidth: 50,
 							flex: 0.5,
 							filterOperators,
 						},
@@ -68,13 +78,6 @@ const Agencies: NextPage = () => {
 							flex: 0.5,
 							filterOperators,
 							filterable: false,
-						},
-						{
-							field: "code",
-							headerName: "Agency code",
-							minWidth: 50,
-							flex: 0.5,
-							filterOperators,
 						},
 					]}
 					selectable={true}

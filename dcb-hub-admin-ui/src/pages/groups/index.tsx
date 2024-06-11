@@ -70,33 +70,36 @@ const Groups: NextPage = () => {
 				query={getLibraryGroups}
 				coreType="libraryGroups"
 				type="groups"
+				columnVisibilityModel={{
+					id: false,
+				}}
 				columns={[
 					{
 						field: "name",
 						headerName: "Group name",
 						minWidth: 150,
-						flex: 0.5,
-						filterOperators,
-					},
-					{
-						field: "id",
-						headerName: "Group UUID",
-						minWidth: 100,
-						flex: 0.5,
+						flex: 0.6,
 						filterOperators,
 					},
 					{
 						field: "code",
 						headerName: "Group code",
 						minWidth: 50,
-						flex: 0.5,
+						flex: 0.6,
 						filterOperators,
 					},
 					{
 						field: "type",
 						headerName: "Group type",
 						minWidth: 50,
-						flex: 0.5,
+						flex: 0.4,
+						filterOperators,
+					},
+					{
+						field: "id",
+						headerName: "Group UUID",
+						minWidth: 100,
+						flex: 0.8,
 						filterOperators,
 					},
 				]}

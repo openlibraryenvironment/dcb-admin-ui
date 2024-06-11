@@ -5,17 +5,10 @@ import { getLocationById } from "src/queries/queries";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Location } from "@models/Location";
-import { IconContext } from "react-icons";
-import { MdExpandMore } from "react-icons/md";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import {
-	StyledAccordion,
-	StyledAccordionSummary,
-	StyledAccordionDetails,
-} from "@components/StyledAccordion/StyledAccordion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
@@ -122,6 +115,20 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
+						<RenderAttribute attribute={location?.latitude} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.long")}
+						</Typography>
+						<RenderAttribute attribute={location?.longitude} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.location_agency")}
 						</Typography>
@@ -129,33 +136,6 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					</Stack>
 				</Grid>
 			</Grid>
-			<StyledAccordion variant="outlined" disableGutters>
-				<StyledAccordionSummary
-					aria-controls="client-config-location-details"
-					id="client-config-location-details"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
-				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
-						{t("details.location_info")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
-					<Stack direction={"row"} spacing={0.5}>
-						<Typography variant="attributeTitle">
-							{t("details.long")}
-						</Typography>
-						<RenderAttribute attribute={location?.longitude} />
-					</Stack>
-					<Stack direction={"row"} spacing={0.5}>
-						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
-						<RenderAttribute attribute={location?.latitude} />
-					</Stack>
-				</StyledAccordionDetails>
-			</StyledAccordion>
 		</AdminLayout>
 	);
 }

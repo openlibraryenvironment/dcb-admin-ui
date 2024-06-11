@@ -409,10 +409,10 @@
 					"dcb_patron": "DCB -> Patron Type Mapping",
 					"item_dcb": "Item Type -> DCB Mapping",
 					"patron_dcb": "Patron Type -> DCB Mapping",
-					"title": "Mappings",
-					"title_item_type": "Category: Item types",
-					"title_location": "Category: Location",
-					"title_patron_type": "Category: Patron types"
+					"name": "Mappings",
+					"item_type": "Item type mappings",
+					"location": "Location mappings",
+					"patron_type": "Patron type mappings"
 				}
 			},
 			"patronAuth": {
