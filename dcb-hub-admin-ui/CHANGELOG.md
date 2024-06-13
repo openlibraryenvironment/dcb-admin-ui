@@ -1,3 +1,12 @@
+## [1.16.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.16.0...v1.16.1) (2024-06-13)
+
+
+### Bug Fixes
+
+* Adjust refresh access token error handling [DCB-1154] ([4a687a9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4a687a9ce7952ff6b872c04727982450ec4e724d))
+* Prevent flickering on home page [DCB-1205] ([23a0cae](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/23a0cae303669764e398d14559ab2ae160a16fd1))
+* Restore behaviour of return to patron request button [DCB-1206] ([bfd0d01](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/bfd0d01d8eb51ed672975cd500926b7eb8692cde))
+
 # [1.16.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.15.0...v1.16.0) (2024-06-11)
 
 
