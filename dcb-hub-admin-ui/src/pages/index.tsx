@@ -33,7 +33,8 @@ const Home: NextPage = () => {
 
 	// TO BE RESTORED BEFORE GO-LIVE
 	const today = dayjs().startOf("day");
-	const { data } = useQuery(getConsortia, {
+	const [operational, setOperational] = useState<null | boolean>(null);
+	const { data, loading } = useQuery(getConsortia, {
 		variables: { order: "name", orderBy: "ASC" },
 		context: {
 			headers: {
@@ -44,19 +45,18 @@ const Home: NextPage = () => {
 
 	// This will get the first consortia with a date of launch.
 	// In prod we would expect only one consortia - in dev there may be multiple. This ensures this works regardless.
-	const launchDate = dayjs(
-		data?.consortia?.content?.find(
-			(item: { dateOfLaunch: string }) => item.dateOfLaunch != null,
-		)?.dateOfLaunch,
-	);
-	const isLaunched = launchDate.isBefore(today) || launchDate.isSame(today);
-
-	const [operational, setOperational] = useState(true);
-
+	// The effect is thus to avoid flickering between operational / onboarding
 	useEffect(() => {
-		setOperational(isLaunched);
-	}, [isLaunched]);
-
+		if (data && !loading) {
+			const launchDate = dayjs(
+				data?.consortia?.content?.find(
+					(item: { dateOfLaunch: string }) => item.dateOfLaunch != null,
+				)?.dateOfLaunch,
+			);
+			const isLaunched = launchDate.isBefore(today) || launchDate.isSame(today);
+			setOperational(isLaunched);
+		}
+	}, [data, loading, today]);
 	// const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 	// 	setOperational(event.target.checked);
 	// };
@@ -64,7 +64,7 @@ const Home: NextPage = () => {
 	const { t } = useTranslation();
 	const nameOfUser = session?.profile?.given_name ?? t("app.guest_user");
 
-	if (status === "loading") {
+	if (status === "loading" || operational === null || loading) {
 		return (
 			<AdminLayout>
 				<Loading
