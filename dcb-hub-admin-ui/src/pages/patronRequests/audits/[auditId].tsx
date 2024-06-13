@@ -37,14 +37,10 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 	});
 	// Link to the original patron request so users can get back
 	const handleReturn = () => {
-		router.push(
-			`/patronRequests/${audit?.patronRequest?.id}` +
-				`#${t("details.audit_log")}`,
-		);
+		router.push(`/patronRequests/${audit?.patronRequest?.id}` + `#auditlog`);
 	};
 	const goBackLink: string =
-		`/patronRequests/${audit?.patronRequest?.id}` +
-		`#${t("details.audit_log")}`;
+		`/patronRequests/${audit?.patronRequest?.id}` + `#auditlog`;
 	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
