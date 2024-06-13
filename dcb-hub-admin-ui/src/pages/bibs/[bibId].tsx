@@ -37,10 +37,8 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
-			// If user is not authenticated, push them to unauthorised page
-			// At present, they will likely be kicked to the logout page first
-			// However this is important for when we introduce RBAC.
-			router.push("/unauthorised");
+			// Push to logout page if not authenticated.
+			router.push("/auth/logout");
 		},
 	});
 
