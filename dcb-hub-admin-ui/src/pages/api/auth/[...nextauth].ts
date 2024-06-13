@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import KeycloakProvider from "next-auth/providers/keycloak";
 import axios, { AxiosError } from "axios";
 import { JWT } from "next-auth/jwt";
+import dayjs from "dayjs";
 // For anyone curious about what this file does, start here https://next-auth.js.org/configuration/initialization
 
 const keycloak = KeycloakProvider({
@@ -21,6 +22,8 @@ const keycloak = KeycloakProvider({
 
 // See DCB-241 for more details - this method kills the sporadic 401 failures we were seeing by forcing the token to refresh.
 // If the token can't be refreshed, an error is returned and the user must sign in again / authenticate with Keycloak
+
+// Invalid grant is because the refresh token is not active. Why it's not active in the EBSCO scenario is unclear.
 const refreshAccessToken = async (token: JWT) => {
 	const params = new URLSearchParams();
 	params.append("client_id", process.env.KEYCLOAK_ID!);
@@ -33,7 +36,16 @@ const refreshAccessToken = async (token: JWT) => {
 		})
 		.then((refresh_response) => {
 			const new_token = refresh_response.data;
-			console.log("Token is being refreshed.");
+			if (refresh_response.status != 200) {
+				console.log(
+					"Refresh token request has failed! Reason: " +
+						refresh_response.statusText +
+						" and time " +
+						dayjs().format(),
+				);
+			} else {
+				console.log("Token is being refreshed at " + dayjs().format());
+			}
 			return {
 				...token,
 				accessToken: new_token.access_token,
@@ -94,11 +106,15 @@ export default NextAuth({
 				if (token?.profile?.roles?.includes("ADMIN")) {
 					session.isAdmin = true;
 				}
+				if (token?.error === "RefreshAccessTokenError") {
+					session.error = "RefreshAccessTokenError";
+				}
 			}
-			if (session.expires < Date.now()) {
+			const sessionExpiry = Date.parse(session.expires);
+			if (sessionExpiry < Date.now()) {
 				console.warn("Session expired");
 				// TODO: Investigate better ways of handling session expiry.
-				// 	const sessionExpiry = Date.parse(session.expires);
+				// session.error = "SessionExpiryError"
 				return undefined;
 			}
 			return session;
@@ -118,11 +134,14 @@ export default NextAuth({
 			const bufferTime = 60 * 1000;
 			// on initial sign in
 			if (account && user) {
+				console.log(
+					"Initial sign-in for " + user.id + " at " + dayjs().format(),
+				);
 				return {
 					accessToken: account.access_token,
 					id_token: account.id_token,
 					accessTokenExpires: account.expires_at,
-					refreshToken: account.refresh_token,
+					refreshToken: account.refresh_token, // Expected to be 30 mins/1800 seconds - correlates to session max
 					profile: profile,
 					user,
 				};

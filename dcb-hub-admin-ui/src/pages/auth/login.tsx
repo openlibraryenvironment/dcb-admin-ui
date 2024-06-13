@@ -17,7 +17,7 @@ import LandingCard from "@components/LandingCard/LandingCard";
 
 // This is the DCB Admin login page. It displays a clear call to action for 'Login', as well as three info cards held in the 'LandingCard' component.
 
-export default function Login() {
+const Login = () => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const handleSignIn = async (provider: string) => {
@@ -95,7 +95,9 @@ export default function Login() {
 			</Box>
 		</LoginLayout>
 	);
-}
+};
+Login.noAuthRequired = true;
+export default Login;
 
 export const getServerSideProps: GetServerSideProps = async (
 	context: GetServerSidePropsContext,

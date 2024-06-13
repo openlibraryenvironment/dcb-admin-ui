@@ -20,7 +20,7 @@ import LandingCard from "@components/LandingCard/LandingCard";
 // This is the page shown after logout in DCB Admin. It is very similar to login, but has the logout alert and other logout-specific behaviours.
 // Shared UI elements have been refactored into the LandingCard component.
 
-export default function Logout() {
+const Logout = () => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const [alertDisplayed, setAlertDisplayed] = useState(true);
@@ -43,7 +43,16 @@ export default function Logout() {
 					}}
 				>
 					{alertDisplayed ? (
-						<Box ml={2} mb={2} sx={{ maxWidth: "1400px", margin: "auto", paddingLeft: "16px", paddingRight: "16px" }}>
+						<Box
+							ml={2}
+							mb={2}
+							sx={{
+								maxWidth: "1400px",
+								margin: "auto",
+								paddingLeft: "16px",
+								paddingRight: "16px",
+							}}
+						>
 							<Alert
 								severityType="info"
 								variant={"filled"}
@@ -121,7 +130,9 @@ export default function Logout() {
 			</Box>
 		</LoginLayout>
 	);
-}
+};
+Logout.noAuthRequired = true;
+export default Logout;
 
 export const getServerSideProps: GetServerSideProps = async (
 	context: GetServerSidePropsContext,
