@@ -30,11 +30,18 @@ const refreshAccessToken = async (token: JWT) => {
 	params.append("grant_type", "refresh_token");
 	params.append("refresh_token", token.refreshToken);
 	params.append("client_secret", process.env.KEYCLOAK_SECRET!);
+	console.log("The refresh access token method has been triggered.");
 	return axios
 		.post(process.env.KEYCLOAK_URL + "/protocol/openid-connect/token", params, {
 			headers: { "Content-Type": "application/x-www-form-urlencoded" },
 		})
 		.then((refresh_response) => {
+			console.log(
+				"A response has been received from Keycloak with status " +
+					refresh_response.status +
+					" and error" +
+					refresh_response.data.error,
+			);
 			const new_token = refresh_response.data;
 			if (refresh_response.status != 200 || refresh_response.data?.error) {
 				console.log(
@@ -151,13 +158,16 @@ export default NextAuth({
 				return {
 					accessToken: account.access_token,
 					id_token: account.id_token,
-					accessTokenExpires: account.expires_at,
+					accessTokenExpires: account.expires_at * 1000,
 					refreshToken: account.refresh_token, // Expected to be 30 mins/1800 seconds - correlates to session max
 					profile: profile,
 					user,
 				};
 			}
-			if (Date.now() >= token.accessTokenExpires - bufferTime) {
+			if (Date.now() > token.accessTokenExpires - bufferTime) {
+				console.log(
+					"The token is close to expiry. Triggering the refresh access token method now.",
+				);
 				return refreshAccessToken(token);
 			}
 			return token;

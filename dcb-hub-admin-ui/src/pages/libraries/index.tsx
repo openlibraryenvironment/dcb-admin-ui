@@ -25,13 +25,15 @@ const Libraries: NextPage = () => {
 	const { t } = useTranslation();
 
 	const router = useRouter();
-	const { status } = useSession({
+	const { data, status } = useSession({
 		required: true,
 		onUnauthenticated() {
 			// Push to logout page if not authenticated.
 			router.push("/auth/logout");
 		},
 	});
+	// This is a test to see if the RefreshAccessToken Error is passed to the client properly.
+	console.log(data?.error);
 
 	if (status === "loading") {
 		return (
