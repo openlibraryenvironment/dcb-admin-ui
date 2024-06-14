@@ -5,23 +5,13 @@ import { useTranslation } from "next-i18next";
 import { getHostLms } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 
 const HostLmss: NextPage = () => {
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
-	const idFilterOperators = getGridStringOperators().filter(({ value }) =>
-		["equals"].includes(value),
-	);
-
 	const router = useRouter();
 	const { status } = useSession({
 		required: true,
@@ -56,21 +46,22 @@ const HostLmss: NextPage = () => {
 						headerName: "Host LMS name",
 						minWidth: 150,
 						flex: 1,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "code",
 						headerName: "Host LMS code",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "clientConfigDefaultAgencyCode",
 						headerName: "Default agency code",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterable: false, // Cannot currently filter on nested properties.
+						sortable: false,
 						valueGetter: (params: {
 							row: { clientConfig: { "default-agency-code": string } };
 						}) => params?.row?.clientConfig?.["default-agency-code"],
@@ -80,7 +71,8 @@ const HostLmss: NextPage = () => {
 						headerName: "Ingest enabled",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterable: false,
+						sortable: false,
 						valueGetter: (params: {
 							row: { clientConfig: { ingest: boolean } };
 						}) => params?.row?.clientConfig?.ingest,
@@ -91,7 +83,7 @@ const HostLmss: NextPage = () => {
 						headerName: "Host LMS UUID",
 						minWidth: 100,
 						flex: 0.5,
-						filterOperators: idFilterOperators,
+						filterOperators: equalsOnly,
 					},
 				]}
 				selectable={true}

@@ -10,10 +10,10 @@ import Import from "@components/Import/Import";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getMappings } from "src/queries/queries";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { standardFilters } from "src/helpers/filters";
 
 // Page for 'ALL' referenceValueMappings of any category.
 
@@ -41,12 +41,6 @@ const AllMappings: NextPage = () => {
 	};
 
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 
 	if (status === "loading") {
 		return (
@@ -91,35 +85,35 @@ const AllMappings: NextPage = () => {
 						headerName: "Category",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "fromContext",
 						headerName: "From context",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "fromValue",
 						headerName: "From value",
 						minWidth: 50,
 						flex: 0.4,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "toContext",
 						headerName: "To context",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "toValue",
 						headerName: "To value",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 						valueGetter: (params: { row: { toValue: string } }) =>
 							params.row.toValue,
 					},
@@ -128,7 +122,7 @@ const AllMappings: NextPage = () => {
 						headerName: "Last imported",
 						minWidth: 100,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 						valueGetter: (params: { row: { lastImported: string } }) => {
 							const lastImported = params.row.lastImported;
 							return dayjs(lastImported).format("YYYY-MM-DD HH:mm");
