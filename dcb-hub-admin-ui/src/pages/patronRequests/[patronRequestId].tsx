@@ -5,7 +5,13 @@ import Link from "@components/Link/Link";
 import Loading from "@components/Loading/Loading";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { AdminLayout } from "@layout";
-import { Stack, Button, Typography, CircularProgress } from "@mui/material";
+import {
+	Stack,
+	Button,
+	Typography,
+	CircularProgress,
+	Tooltip,
+} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -32,6 +38,16 @@ import { formatDuration } from "src/helpers/formatDuration";
 type PatronRequestDetails = {
 	patronRequestId: string;
 };
+
+const errorStatuses = [
+	"ERROR",
+	"SUBMITTED_TO_DCB",
+	"PATRON_VERIFIED",
+	"RESOLVED",
+	"NOT_SUPPLIED_CURRENT_SUPPLIER",
+	"NO_ITEMS_AVAILABLE_AT_ANY_AGENCY",
+	"REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+];
 
 export default function PatronRequestDetails({
 	patronRequestId,
@@ -259,23 +275,38 @@ export default function PatronRequestDetails({
 									)}
 								/>
 							</Stack>
-							<Button
-								variant="outlined"
-								color="primary"
-								sx={{ textTransform: "none", marginTop: 1 }}
-								onClick={handleUpdate}
-								aria-disabled={loadingUpdate ? true : false}
-								disabled={loadingUpdate ? true : false}
+							<Tooltip
+								title={
+									!errorStatuses.includes(patronRequest?.status)
+										? ""
+										: t("details.check_for_updates_disabled") // Tooltip text when disabled
+								}
 							>
-								{t("details.check_for_updates")}
-								{loadingUpdate ? (
-									<CircularProgress
-										color="inherit"
-										size={13}
-										sx={{ marginLeft: "10px" }}
-									/>
-								) : null}
-							</Button>
+								<span>
+									<Button
+										variant="outlined"
+										color="primary"
+										sx={{ textTransform: "none", marginTop: 1 }}
+										onClick={handleUpdate}
+										aria-disabled={loadingUpdate ? true : false}
+										disabled={
+											loadingUpdate ||
+											errorStatuses.includes(patronRequest?.status)
+												? true
+												: false
+										}
+									>
+										{t("details.check_for_updates")}
+										{loadingUpdate ? (
+											<CircularProgress
+												color="inherit"
+												size={13}
+												sx={{ marginLeft: "10px" }}
+											/>
+										) : null}
+									</Button>
+								</span>
+							</Tooltip>
 							<TimedAlert
 								open={successAlertVisibility}
 								severityType="success"

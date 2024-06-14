@@ -165,7 +165,7 @@ function MyApp(props: AppProps) {
 				session={pageProps.session}
 				refetchOnWindowFocus={true}
 				refetchWhenOffline={false}
-				refetchInterval={3.8 * 60} // This is how often we check the session. Maximum interval is probably 29 mins (just under maxAge)
+				refetchInterval={3.75 * 60} // This is how often we check the session. Maximum interval is probably 29 mins (just under maxAge)
 				// Checking just under every 4 mins to try and fix the issues we've been seeing + provide up-to-date session info.
 				// Was previously exactly 4 but that can interfere with the refreshes.
 			>

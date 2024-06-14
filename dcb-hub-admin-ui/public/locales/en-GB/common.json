@@ -137,6 +137,7 @@
 		"borrowing_virtual_type": "Virtual item type",
 		"canonical_metadata": "Canonical metadata",
 		"check_for_updates": "Check for updates",
+		"check_for_updates_disabled": "You cannot check for updates when a patron request is in this state.",
 		"check_successful": "Check complete",
 		"check_unsuccessful": "Check unsuccessful",
 		"code": "code",
