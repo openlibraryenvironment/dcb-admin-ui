@@ -36,15 +36,26 @@ const refreshAccessToken = async (token: JWT) => {
 		})
 		.then((refresh_response) => {
 			const new_token = refresh_response.data;
-			if (refresh_response.status != 200) {
+			if (refresh_response.status != 200 || refresh_response.data?.error) {
 				console.log(
 					"Refresh token request has failed! Reason: " +
 						refresh_response.statusText +
 						" and time " +
 						dayjs().format(),
 				);
+				console.log(
+					"Further error information: " +
+						refresh_response.data.error +
+						" and " +
+						refresh_response.data.error_description,
+				);
 			} else {
-				console.log("Token is being refreshed at " + dayjs().format());
+				console.log(
+					"Token is being refreshed at " +
+						dayjs().format() +
+						" and status is" +
+						refresh_response.statusText,
+				);
 			}
 			return {
 				...token,
