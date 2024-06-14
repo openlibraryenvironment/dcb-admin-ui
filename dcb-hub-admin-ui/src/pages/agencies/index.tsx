@@ -5,22 +5,16 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { getAgencies } from "src/queries/queries";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 
 const Agencies: NextPage = () => {
 	// i18n useTranslation hook - this provides the 't' function for translations
 	const { t } = useTranslation();
 	// These are the filter operators we expose to the user. We can control this on a per-page and per-column basis.
 	// For further filter customisation, see here https://mui.com/x/react-data-grid/filtering/customization/
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 
 	const router = useRouter();
 	const { status } = useSession({
@@ -60,21 +54,21 @@ const Agencies: NextPage = () => {
 							headerName: "Agency name",
 							minWidth: 150,
 							flex: 0.5,
-							filterOperators,
+							filterOperators: standardFilters,
 						},
 						{
 							field: "code",
 							headerName: "Agency code",
 							minWidth: 50,
 							flex: 0.5,
-							filterOperators,
+							filterOperators: standardFilters,
 						},
 						{
 							field: "id",
 							headerName: "Agency UUID",
 							minWidth: 100,
 							flex: 0.5,
-							filterOperators,
+							filterOperators: equalsOnly,
 							filterable: false,
 						},
 					]}

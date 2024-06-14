@@ -61,6 +61,7 @@ const PatronRequests: NextPage = () => {
 						field: "localBarcode",
 						headerName: "Patron barcode",
 						filterable: false,
+						sortable: false,
 						valueGetter: (params: {
 							row: { requestingIdentity: { localBarcode: string } };
 						}) => params?.row?.requestingIdentity?.localBarcode,
@@ -70,7 +71,8 @@ const PatronRequests: NextPage = () => {
 						headerName: "Title",
 						minWidth: 100,
 						flex: 1.25,
-						filterOperators: standardFilters,
+						filterable: false, // Cannot currently filter on nested properties.
+						sortable: false,
 						valueGetter: (params: {
 							row: { clusterRecord: { title: string } };
 						}) => params?.row?.clusterRecord?.title,

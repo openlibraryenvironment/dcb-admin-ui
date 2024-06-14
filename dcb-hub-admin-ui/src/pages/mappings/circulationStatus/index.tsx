@@ -7,12 +7,12 @@ import Import from "@components/Import/Import";
 // import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { getCirculationStatusMappings } from "src/queries/queries";
 import { useApolloClient } from "@apollo/client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
+import { standardFilters } from "src/helpers/filters";
 // TODO: When we know future status of circ status mappings, we may want to remove this
 // For now access to it is blocked.
 const CirculationStatusMappings: NextPage = () => {
@@ -39,12 +39,6 @@ const CirculationStatusMappings: NextPage = () => {
 		});
 	};
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 	const isAdmin = session?.profile?.roles?.includes("ADMIN");
 
 	if (status === "loading") {
@@ -91,28 +85,28 @@ const CirculationStatusMappings: NextPage = () => {
 						headerName: "From context",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "fromValue",
 						headerName: "From value",
 						minWidth: 50,
 						flex: 0.4,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "toContext",
 						headerName: "To context",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "toValue",
 						headerName: "To value",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 						valueGetter: (params: { row: { toValue: string } }) =>
 							params.row.toValue,
 					},
@@ -121,7 +115,7 @@ const CirculationStatusMappings: NextPage = () => {
 						headerName: "Last imported",
 						minWidth: 100,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 						valueGetter: (params: { row: { lastImported: string } }) => {
 							const lastImported = params.row.lastImported;
 							return dayjs(lastImported).format("YYYY-MM-DD HH:mm");

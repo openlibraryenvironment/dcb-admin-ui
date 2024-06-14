@@ -4,10 +4,10 @@ import { useTranslation } from "next-i18next";
 import { getBibs } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();
@@ -23,13 +23,6 @@ const Bibs: NextPage = () => {
 
 	// Expose only the filters we have tested. The others need to be mapped to Lucene functionality.
 	// See potential examples here https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		["equals", "contains" /* add more over time */].includes(value),
-	);
-	const idFilterOperators = getGridStringOperators().filter(({ value }) =>
-		["equals"].includes(value),
-	);
-	// If testing, use this format for the search:
 
 	if (status === "loading") {
 		return (
@@ -63,7 +56,7 @@ const Bibs: NextPage = () => {
 						minWidth: 150,
 						flex: 0.6,
 						sortable: false,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "clusterRecordId",
@@ -71,7 +64,7 @@ const Bibs: NextPage = () => {
 						minWidth: 50,
 						flex: 0.5,
 						sortable: false,
-						filterOperators,
+						filterOperators: equalsOnly,
 						filterable: false,
 						valueGetter: (params: { row: { contributesTo: { id: string } } }) =>
 							params?.row?.contributesTo?.id,
@@ -81,6 +74,7 @@ const Bibs: NextPage = () => {
 						headerName: "Source record ID",
 						minWidth: 50,
 						sortable: false,
+						filterOperators: standardFilters,
 						flex: 0.5,
 					},
 					{
@@ -88,7 +82,7 @@ const Bibs: NextPage = () => {
 						headerName: "Source system UUID",
 						minWidth: 50,
 						sortable: false,
-						filterOperators: idFilterOperators,
+						filterOperators: equalsOnly,
 						flex: 0.5,
 					},
 					{
@@ -97,7 +91,7 @@ const Bibs: NextPage = () => {
 						minWidth: 100,
 						flex: 0.5,
 						sortable: false,
-						filterOperators,
+						filterOperators: equalsOnly,
 					},
 				]}
 				columnVisibilityModel={{

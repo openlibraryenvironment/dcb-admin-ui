@@ -5,12 +5,12 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { getNumericRangeMappings } from "src/queries/queries";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useState } from "react";
 import { useApolloClient } from "@apollo/client/react";
 import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
 import { useSession } from "next-auth/react";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 
 // Page for 'ALL' numeric range mappings of any category.
 
@@ -33,12 +33,6 @@ const AllNumericRange: NextPage = () => {
 		// https://www.apollographql.com/docs/react/data/refetching/#refetch-recipes
 	};
 	const { t } = useTranslation();
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 	const isAdmin = session?.profile?.roles?.includes("ADMIN");
 
 	return (
@@ -70,42 +64,42 @@ const AllNumericRange: NextPage = () => {
 						headerName: "Category",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "context",
 						headerName: "From context",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "lowerBound",
 						headerName: "Lower bound",
 						minWidth: 50,
 						flex: 0.4,
-						filterOperators,
+						filterOperators: equalsOnly,
 					},
 					{
 						field: "upperBound",
 						headerName: "Upper bound",
 						minWidth: 50,
 						flex: 0.4,
-						filterOperators,
+						filterOperators: equalsOnly,
 					},
 					{
 						field: "targetContext",
 						headerName: "To context",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "mappedValue",
 						headerName: "Mapped value",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 				]}
 				noDataMessage={t("mappings.no_results")}

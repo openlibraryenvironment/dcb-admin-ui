@@ -8,10 +8,10 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getGridStringOperators } from "@mui/x-data-grid-pro";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
+import { standardFilters } from "src/helpers/filters";
 
 // Groups Feature Page Structure
 // This page shows the list of groups
@@ -36,12 +36,6 @@ const Groups: NextPage = () => {
 			router.push("/auth/logout");
 		},
 	});
-	const filterOperators = getGridStringOperators().filter(({ value }) =>
-		[
-			"equals",
-			"contains" /* add more over time as we build in support for them */,
-		].includes(value),
-	);
 	if (status === "loading") {
 		return (
 			<AdminLayout>
@@ -77,28 +71,28 @@ const Groups: NextPage = () => {
 						headerName: "Group name",
 						minWidth: 150,
 						flex: 0.6,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "code",
 						headerName: "Group code",
 						minWidth: 50,
 						flex: 0.6,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "type",
 						headerName: "Group type",
 						minWidth: 50,
 						flex: 0.4,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 					{
 						field: "id",
 						headerName: "Group UUID",
 						minWidth: 100,
 						flex: 0.8,
-						filterOperators,
+						filterOperators: standardFilters,
 					},
 				]}
 				selectable={true}
