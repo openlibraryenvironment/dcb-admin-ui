@@ -130,7 +130,7 @@ export default NextAuth({
 			}
 			const sessionExpiry = Date.parse(session.expires);
 			if (sessionExpiry < Date.now()) {
-				console.warn("Session expired");
+				console.warn("Session expired at " + dayjs().format());
 				// TODO: Investigate better ways of handling session expiry.
 				// session.error = "SessionExpiryError"
 				return undefined;
@@ -148,6 +148,8 @@ export default NextAuth({
 			user?: any;
 			profile?: any;
 		}) => {
+			// Uncomment this if you want to check if the JWT callback is working properly
+			// console.log("JWT callback at" + dayjs().format());
 			// To stop 'last minute refreshes' - in milliseconds.
 			const bufferTime = 60 * 1000;
 			// on initial sign in
@@ -166,7 +168,8 @@ export default NextAuth({
 			}
 			if (Date.now() > token.accessTokenExpires - bufferTime) {
 				console.log(
-					"The token is close to expiry. Triggering the refresh access token method now.",
+					"The token is close to expiry. Triggering the refresh access token method now at" +
+						dayjs().format(),
 				);
 				return refreshAccessToken(token);
 			}
