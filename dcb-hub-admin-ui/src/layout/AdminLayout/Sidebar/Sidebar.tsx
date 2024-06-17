@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "next-i18next";
 import { styled, Theme, CSSObject, useTheme } from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
@@ -172,10 +172,10 @@ export default function Sidebar(props: any) {
 		setDisabled((prev) => (currentIndex !== -1 ? currentIndex : prev));
 	}, [router.pathname]);
 
-	const handleListButtonClick = (index: number) => {
+	const handleListButtonClick = useCallback((index: number) => {
 		setSelected(index);
 		setDisabled(index);
-	};
+	}, []);
 
 	return (
 		<>
