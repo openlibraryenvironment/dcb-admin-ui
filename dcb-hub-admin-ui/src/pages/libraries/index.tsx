@@ -33,7 +33,9 @@ const Libraries: NextPage = () => {
 		},
 	});
 	// This is a test to see if the RefreshAccessToken Error is passed to the client properly.
-	console.log(data?.error);
+	if (data?.error) {
+		console.log("Error:" + data?.error);
+	}
 
 	if (status === "loading") {
 		return (
