@@ -10,6 +10,7 @@ const openRSLight = createTheme({
 		contrastThreshold: 4.5,
 		mode: "light",
 		primary: {
+			main: "#287BAF",
 			breadcrumbs: "#246F9E",
 			buttonForSelectedChildPage: "#999999",
 			buttonForSelectedPage: "#287BAF",
@@ -29,12 +30,15 @@ const openRSLight = createTheme({
 			landingCard: "#FFFFFF",
 			loginCard: "#E2EEF6",
 			loginText: "#0C4068",
-			main: "#287BAF",
 			selectedText: "#FFFFFF",
 			sidebar: "#F6F6F6",
 			titleArea: "#FFFFFF",
 			pageBackground: "#F9F9F9",
 			pageContentBackground: "#FFFFFF",
+			loginButtonOutlineColor: "#FFFFFF",
+		},
+		secondary: {
+			main: "#0C4068",
 		},
 		background: {
 			default: "#FFFFFF",
@@ -61,6 +65,32 @@ const openRSLight = createTheme({
 			color: "#0C4068",
 		},
 	}),
+	components: mergeThemeStyles(baseTheme.components, {
+		MuiButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						outlineColor: "#000000",
+					},
+					"&.Mui-focusVisible": {
+						outlineColor: "#000000",
+					},
+				},
+			},
+		},
+		MuiListItemButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						borderColor: "#000000",
+					},
+					"&.Mui-focusVisible": {
+						borderColor: "#000000",
+					},
+				},
+			},
+		},
+	}),
 });
 
 const openRSDark = createTheme({
@@ -69,6 +99,7 @@ const openRSDark = createTheme({
 		contrastThreshold: 4.5,
 		mode: "dark",
 		primary: {
+			main: "#35B7FF",
 			breadcrumbs: "#35B7FF",
 			buttonForSelectedChildPage: "#999999",
 			buttonForSelectedPage: "#287BAF",
@@ -88,10 +119,13 @@ const openRSDark = createTheme({
 			landingCard: "#202020",
 			loginCard: "#292929",
 			loginText: "#FFFFFF",
-			main: "#35B7FF",
 			selectedText: "#FFFFFF",
 			sidebar: "#292929",
 			titleArea: "#1E1E1E",
+			loginButtonOutlineColor: "#FFFFFF",
+		},
+		secondary: {
+			main: "#75BEDB",
 		},
 		background: {
 			default: "#1E1E1E",
@@ -110,6 +144,32 @@ const openRSDark = createTheme({
 		},
 		componentSubheading: {
 			color: "#FFFFFF",
+		},
+	}),
+	components: mergeThemeStyles(baseTheme.components, {
+		MuiButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						outlineColor: "#FFFFFF",
+					},
+					"&.Mui-focusVisible": {
+						outlineColor: "#FFFFFF",
+					},
+				},
+			},
+		},
+		MuiListItemButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						borderColor: "#FFFFFF",
+					},
+					"&.Mui-focusVisible": {
+						borderColor: "#FFFFFF",
+					},
+				},
+			},
 		},
 	}),
 });

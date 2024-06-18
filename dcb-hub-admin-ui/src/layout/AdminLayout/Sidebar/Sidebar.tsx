@@ -234,6 +234,12 @@ export default function Sidebar(props: any) {
 												backgroundColor:
 													theme.palette.primary.hoverOnSelectedPage,
 											},
+											// overrides the default focus styles applied by component
+											"&.Mui-focusVisible": {
+												backgroundColor: isChildPage
+													? theme.palette.primary.buttonForSelectedChildPage
+													: theme.palette.primary.buttonForSelectedPage,
+											},
 										},
 										"&.Mui-disabled": {
 											opacity: "100",

@@ -114,16 +114,16 @@ export default function Header({
 					</Typography>
 					<div>
 						{iconsVisible != false ? (
-							<Link href="/profile">
-								<IconButton
-									size="large"
-									data-tid="profile-button"
-									aria-label="account of current user"
-									sx={{ color: theme.palette.primary.headerText }}
-								>
-									<MdAccountCircle size={20} />
-								</IconButton>
-							</Link>
+							<IconButton
+								size="large"
+								data-tid="profile-button"
+								aria-label="account of current user"
+								sx={{ color: theme.palette.primary.headerText }}
+								LinkComponent={Link}
+								href="/profile"
+							>
+								<MdAccountCircle size={20} />
+							</IconButton>
 						) : null}
 						{iconsVisible != false ? (
 							<Button
@@ -136,6 +136,12 @@ export default function Header({
 									color: theme.palette.primary.headerText,
 									paddingInline: "0px",
 									minWidth: "0px",
+									"&:focus": {
+										outlineColor: "#FFFFFF",
+									},
+									"&.Mui-focusVisible": {
+										outlineColor: "#FFFFFF",
+									},
 								}}
 							>
 								{status === "authenticated" ? t("nav.logout") : t("nav.login")}
