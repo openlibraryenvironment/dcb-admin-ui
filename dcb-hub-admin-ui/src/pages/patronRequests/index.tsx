@@ -3,14 +3,21 @@ import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "next-i18next";
 import { getPatronRequests } from "src/queries/queries";
-import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
-import { formatDuration } from "src/helpers/formatDuration";
-import { containsOnly, equalsOnly, standardFilters } from "src/helpers/filters";
+import { standardPatronRequestColumns } from "src/helpers/columns";
+import { Button, Stack, Typography } from "@mui/material";
+import {
+	StyledAccordion,
+	StyledAccordionDetails,
+	StyledAccordionSummary,
+} from "@components/StyledAccordion/StyledAccordion";
+import { IconContext } from "react-icons";
+import { MdExpandMore } from "react-icons/md";
+import { useCallback, useState } from "react";
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -21,6 +28,46 @@ const PatronRequests: NextPage = () => {
 			router.push("/auth/logout");
 		},
 	});
+	const exceptionQueryVariables = `status: "ERROR"`;
+	const outOfSequenceQueryVariables = `outOfSequenceFlag:true AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED"`;
+	const inProgressQueryVariables = `outOfSequenceFlag:false AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED"`;
+	const finishedQueryVariables = `(status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
+
+	const [expandedAccordions, setExpandedAccordions] = useState([
+		true,
+		false,
+		false,
+		false,
+		false,
+	]);
+
+	const handleAccordionChange = useCallback(
+		(index: number) => () => {
+			setExpandedAccordions((prevExpanded) => {
+				const newExpanded = [...prevExpanded];
+				newExpanded[index] = !newExpanded[index];
+				return newExpanded;
+			});
+		},
+		[],
+	);
+
+	// Has an issue when the first is expanded by default
+	const expandAll = useCallback(() => {
+		setExpandedAccordions((prevExpanded) => {
+			const allExpanded = prevExpanded.some((isExpanded) => !isExpanded);
+			return prevExpanded.map(() => allExpanded);
+		});
+	}, []);
+
+	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
+
+	const handleTotalSizeChange = useCallback((type: string, size: number) => {
+		setTotalSizes((prevTotalSizes) => ({
+			...prevTotalSizes,
+			[type]: size,
+		}));
+	}, []);
 
 	if (status === "loading") {
 		return (
@@ -37,132 +84,246 @@ const PatronRequests: NextPage = () => {
 
 	return (
 		<AdminLayout title={t("nav.patronRequests")}>
-			<ServerPaginationGrid
-				query={getPatronRequests}
-				type="patronRequests"
-				coreType="patronRequests"
-				columns={[
-					{
-						field: "dateCreated",
-						headerName: "Request created",
-						minWidth: 150,
-						filterable: false,
-						valueGetter: (params: { row: { dateCreated: string } }) => {
-							const requestCreated = params.row.dateCreated;
-							return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
-						},
-					},
-					{
-						field: "patronHostlmsCode",
-						headerName: "Patron host LMS code",
-						filterOperators: standardFilters,
-					},
-					{
-						field: "localBarcode",
-						headerName: "Patron barcode",
-						filterable: false,
-						sortable: false,
-						valueGetter: (params: {
-							row: { requestingIdentity: { localBarcode: string } };
-						}) => params?.row?.requestingIdentity?.localBarcode,
-					},
-					{
-						field: "clusterRecordTitle",
-						headerName: "Title",
-						minWidth: 100,
-						flex: 1.25,
-						filterable: false, // Cannot currently filter on nested properties.
-						sortable: false,
-						valueGetter: (params: {
-							row: { clusterRecord: { title: string } };
-						}) => params?.row?.clusterRecord?.title,
-					},
-					{
-						field: "suppliers",
-						headerName: "Supplying agency",
-						filterable: false,
-						valueGetter: (params: {
-							row: { suppliers: Array<{ localAgency: string }> };
-						}) => {
-							// Check if suppliers array is not empty
-							if (params.row.suppliers.length > 0) {
-								return params.row.suppliers[0].localAgency;
-							} else {
-								return ""; // This allows us to handle the array being empty, and any related type errors.
-							}
-						},
-					},
-					{
-						field: "status",
-						headerName: "Status",
-						minWidth: 100,
-						flex: 1.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "errorMessage",
-						headerName: "Error message",
-						minWidth: 100,
-						flex: 1.5,
-						filterOperators: containsOnly,
-					},
-					{
-						field: "outOfSequenceFlag",
-						headerName: "Out of sequence",
-						flex: 0.75,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "pollCountForCurrentStatus",
-						headerName: "Polling count",
-						flex: 0.25,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "elapsedTimeInCurrentStatus",
-						headerName: "Time in state",
-						minWidth: 50,
-						filterOperators: equalsOnly,
-						valueGetter: (params: {
-							row: { elapsedTimeInCurrentStatus: number };
-						}) => formatDuration(params.row.elapsedTimeInCurrentStatus),
-					},
-					{
-						field: "dateUpdated",
-						headerName: "Request updated",
-						minWidth: 150,
-						filterable: false,
-						valueGetter: (params: { row: { dateUpdated: string } }) => {
-							const requestUpdated = params.row.dateUpdated;
-							return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
-						},
-					},
-					{
-						field: "id",
-						headerName: "Request UUID",
-						minWidth: 100,
-						flex: 0.5,
-						filterOperators: equalsOnly,
-					},
-				]}
-				selectable={true}
-				pageSize={20}
-				noDataMessage={t("patron_requests.no_rows")}
-				noResultsMessage={t("patron_requests.no_results")}
-				searchPlaceholder={t("patron_requests.search_placeholder")}
-				columnVisibilityModel={{
-					dateUpdated: false,
-					id: false,
-					pollCountForCurrentStatus: false,
-					elapsedTimeInCurrentStatus: false,
-					outOfSequenceFlag: false,
-				}}
-				scrollbarVisible={true}
-				// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
-				sortModel={[{ field: "dateCreated", sort: "desc" }]}
-				sortDirection="DESC"
-				sortAttribute="dateCreated"
-			/>
+			<Stack direction="row" justifyContent="end">
+				<Button onClick={expandAll}>
+					{expandedAccordions[0] && expandedAccordions[1]
+						? t("details.collapse")
+						: t("details.expand")}
+				</Button>
+			</Stack>
+			<StyledAccordion
+				variant="outlined"
+				expanded={expandedAccordions[0]}
+				onChange={handleAccordionChange(0)}
+				disableGutters
+			>
+				<StyledAccordionSummary
+					aria-controls="exceptionRequests"
+					id="exceptionRequests"
+					expandIcon={
+						<IconContext.Provider value={{ size: "2em" }}>
+							<MdExpandMore />
+						</IconContext.Provider>
+					}
+				>
+					<Typography variant="h3" fontWeight={"bold"}>
+						{t("libraries.patronRequests.exception", {
+							number: totalSizes["patronRequestsLibraryException"],
+						})}
+					</Typography>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
+					<ServerPaginationGrid
+						query={getPatronRequests}
+						presetQueryVariables={exceptionQueryVariables}
+						type="patronRequestsLibraryException"
+						coreType="patronRequests"
+						columns={standardPatronRequestColumns}
+						selectable={true}
+						pageSize={20}
+						noDataMessage={t("patron_requests.no_rows")}
+						noResultsMessage={t("patron_requests.no_results")}
+						searchPlaceholder={t("patron_requests.search_placeholder")}
+						columnVisibilityModel={{
+							dateUpdated: false,
+							id: false,
+							status: false,
+						}}
+						scrollbarVisible={true}
+						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+						sortModel={[{ field: "dateCreated", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="dateCreated"
+						onTotalSizeChange={handleTotalSizeChange}
+					/>
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
+				variant="outlined"
+				expanded={expandedAccordions[1]}
+				onChange={handleAccordionChange(1)}
+				disableGutters
+			>
+				<StyledAccordionSummary
+					aria-controls="outOfSequenceRequests"
+					id="outOfSequenceRequests"
+					expandIcon={
+						<IconContext.Provider value={{ size: "2em" }}>
+							<MdExpandMore />
+						</IconContext.Provider>
+					}
+				>
+					<Typography variant="h3" fontWeight={"bold"}>
+						{t("libraries.patronRequests.out_of_sequence", {
+							number: totalSizes["patronRequestsLibraryOutOfSequence"],
+						})}
+					</Typography>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
+					<ServerPaginationGrid
+						query={getPatronRequests}
+						presetQueryVariables={outOfSequenceQueryVariables}
+						type="patronRequestsLibraryOutOfSequence"
+						coreType="patronRequests"
+						columns={standardPatronRequestColumns}
+						selectable={true}
+						pageSize={20}
+						noDataMessage={t("patron_requests.no_rows")}
+						noResultsMessage={t("patron_requests.no_results")}
+						searchPlaceholder={t("patron_requests.search_placeholder")}
+						columnVisibilityModel={{
+							dateUpdated: false,
+							id: false,
+						}}
+						scrollbarVisible={true}
+						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+						sortModel={[{ field: "dateCreated", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="dateCreated"
+						onTotalSizeChange={handleTotalSizeChange}
+					/>
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
+				variant="outlined"
+				expanded={expandedAccordions[2]}
+				onChange={handleAccordionChange(2)}
+				disableGutters
+			>
+				<StyledAccordionSummary
+					aria-controls="active"
+					id="activeRequests"
+					expandIcon={
+						<IconContext.Provider value={{ size: "2em" }}>
+							<MdExpandMore />
+						</IconContext.Provider>
+					}
+				>
+					<Typography variant="h3" fontWeight={"bold"}>
+						{t("libraries.patronRequests.active", {
+							number: totalSizes["patronRequestsLibraryActive"],
+						})}
+					</Typography>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
+					<ServerPaginationGrid
+						query={getPatronRequests}
+						presetQueryVariables={inProgressQueryVariables}
+						type="patronRequestsLibraryActive"
+						coreType="patronRequests"
+						columns={standardPatronRequestColumns}
+						selectable={true}
+						pageSize={20}
+						noDataMessage={t("patron_requests.no_rows")}
+						noResultsMessage={t("patron_requests.no_results")}
+						searchPlaceholder={t("patron_requests.search_placeholder")}
+						columnVisibilityModel={{
+							dateUpdated: false,
+							id: false,
+						}}
+						scrollbarVisible={true}
+						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+						sortModel={[{ field: "dateCreated", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="dateCreated"
+						onTotalSizeChange={handleTotalSizeChange}
+					/>
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
+				variant="outlined"
+				expanded={expandedAccordions[3]}
+				onChange={handleAccordionChange(3)}
+				disableGutters
+			>
+				<StyledAccordionSummary
+					aria-controls="completedPatronRequests"
+					id="completedPatronRequests"
+					expandIcon={
+						<IconContext.Provider value={{ size: "2em" }}>
+							<MdExpandMore />
+						</IconContext.Provider>
+					}
+				>
+					<Typography variant="h3" fontWeight={"bold"}>
+						{t("libraries.patronRequests.completed", {
+							number: totalSizes["patronRequestsLibraryCompleted"],
+						})}
+					</Typography>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
+					<ServerPaginationGrid
+						query={getPatronRequests}
+						presetQueryVariables={finishedQueryVariables}
+						type="patronRequestsLibraryCompleted"
+						coreType="patronRequests"
+						columns={standardPatronRequestColumns}
+						selectable={true}
+						pageSize={20}
+						noDataMessage={t("patron_requests.no_rows")}
+						noResultsMessage={t("patron_requests.no_results")}
+						searchPlaceholder={t("patron_requests.search_placeholder")}
+						columnVisibilityModel={{
+							dateUpdated: false,
+							id: false,
+						}}
+						scrollbarVisible={true}
+						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+						sortModel={[{ field: "dateCreated", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="dateCreated"
+						onTotalSizeChange={handleTotalSizeChange}
+					/>
+				</StyledAccordionDetails>
+			</StyledAccordion>
+			<StyledAccordion
+				variant="outlined"
+				expanded={expandedAccordions[4]}
+				onChange={handleAccordionChange(4)}
+				disableGutters
+			>
+				<StyledAccordionSummary
+					aria-controls="allRequests"
+					id="allRequests"
+					expandIcon={
+						<IconContext.Provider value={{ size: "2em" }}>
+							<MdExpandMore />
+						</IconContext.Provider>
+					}
+				>
+					<Typography variant="h3" fontWeight={"bold"}>
+						{t("libraries.patronRequests.all", {
+							number: totalSizes["patronRequests"],
+						})}
+					</Typography>
+				</StyledAccordionSummary>
+				<StyledAccordionDetails>
+					<ServerPaginationGrid
+						query={getPatronRequests}
+						type="patronRequests"
+						coreType="patronRequests"
+						columns={standardPatronRequestColumns}
+						selectable={true}
+						pageSize={20}
+						noDataMessage={t("patron_requests.no_rows")}
+						noResultsMessage={t("patron_requests.no_results")}
+						searchPlaceholder={t("patron_requests.search_placeholder")}
+						columnVisibilityModel={{
+							dateUpdated: false,
+							id: false,
+							pollCountForCurrentStatus: false,
+							elapsedTimeInCurrentStatus: false,
+							outOfSequenceFlag: false,
+						}}
+						scrollbarVisible={true}
+						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+						sortModel={[{ field: "dateCreated", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="dateCreated"
+						onTotalSizeChange={handleTotalSizeChange}
+					/>
+				</StyledAccordionDetails>
+			</StyledAccordion>
 		</AdminLayout>
 	);
 };
