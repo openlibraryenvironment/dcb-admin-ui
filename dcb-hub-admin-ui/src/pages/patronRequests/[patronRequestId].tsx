@@ -39,14 +39,13 @@ type PatronRequestDetails = {
 	patronRequestId: string;
 };
 
-const errorStatuses = [
+const untrackedStatuses = [
 	"ERROR",
 	"SUBMITTED_TO_DCB",
 	"PATRON_VERIFIED",
 	"RESOLVED",
 	"NOT_SUPPLIED_CURRENT_SUPPLIER",
 	"NO_ITEMS_AVAILABLE_AT_ANY_AGENCY",
-	"REQUEST_PLACED_AT_SUPPLYING_AGENCY",
 ];
 
 export default function PatronRequestDetails({
@@ -277,7 +276,7 @@ export default function PatronRequestDetails({
 							</Stack>
 							<Tooltip
 								title={
-									!errorStatuses.includes(patronRequest?.status)
+									!untrackedStatuses.includes(patronRequest?.status)
 										? ""
 										: t("details.check_for_updates_disabled") // Tooltip text when disabled
 								}
@@ -291,7 +290,7 @@ export default function PatronRequestDetails({
 										aria-disabled={loadingUpdate ? true : false}
 										disabled={
 											loadingUpdate ||
-											errorStatuses.includes(patronRequest?.status)
+											untrackedStatuses.includes(patronRequest?.status)
 												? true
 												: false
 										}
