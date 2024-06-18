@@ -445,6 +445,7 @@
 		},
 		"patronRequests": {
 			"active": "Active requests ({{number}})",
+			"all": "All requests ({{number}})",
 			"completed": "Completed requests ({{number}})",
 			"exception": "Exception requests ({{number}})",
 			"out_of_sequence": "Out of sequence requests ({{number}})"
