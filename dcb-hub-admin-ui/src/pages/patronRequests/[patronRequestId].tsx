@@ -285,7 +285,7 @@ export default function PatronRequestDetails({
 									<Button
 										variant="outlined"
 										color="primary"
-										sx={{ textTransform: "none", marginTop: 1 }}
+										sx={{ marginTop: 1 }}
 										onClick={handleUpdate}
 										aria-disabled={loadingUpdate ? true : false}
 										disabled={

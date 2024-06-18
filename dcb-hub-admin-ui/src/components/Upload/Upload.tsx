@@ -264,7 +264,6 @@ const FileUpload = ({ category, onCancel }: any) => {
 						startIcon={<MdCloudUpload />}
 						variant="outlined"
 						component="span"
-						sx={{ textTransform: "none" }}
 					>
 						{t("mappings.select_file")}
 					</Button>
@@ -272,11 +271,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 			</Stack>
 			<Divider aria-hidden="true"></Divider>
 			<Stack spacing={1} direction={"row"}>
-				<Button
-					variant="outlined"
-					onClick={handleReset}
-					sx={{ textTransform: "none" }}
-				>
+				<Button variant="outlined" onClick={handleReset}>
 					{t("mappings.cancel")}
 				</Button>
 				<div style={{ flex: "1 0 0" }} />
@@ -287,7 +282,6 @@ const FileUpload = ({ category, onCancel }: any) => {
 					color="primary"
 					variant="contained"
 					type="submit"
-					sx={{ textTransform: "none" }}
 				>
 					{t("mappings.import_file")}
 				</Button>
