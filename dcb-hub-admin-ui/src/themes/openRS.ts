@@ -12,7 +12,7 @@ const openRSLight = createTheme({
 		primary: {
 			main: "#287BAF",
 			breadcrumbs: "#246F9E",
-			buttonForSelectedChildPage: "#999999",
+			buttonForSelectedChildPage: "#707070",
 			buttonForSelectedPage: "#287BAF",
 			detailsAccordionSummary: "#F6F6F6",
 			exclamationIcon: "#999999",
