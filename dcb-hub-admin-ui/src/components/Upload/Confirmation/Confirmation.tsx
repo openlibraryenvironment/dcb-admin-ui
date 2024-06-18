@@ -203,22 +203,12 @@ const Confirmation = ({
 			<Divider aria-hidden="true"></Divider>
 			<DialogContent>{getDialogContent()}</DialogContent>
 			<DialogActions>
-				<Button
-					onClick={onClose}
-					variant="outlined"
-					color="primary"
-					sx={{ textTransform: "none" }}
-				>
+				<Button onClick={onClose} variant="outlined" color="primary">
 					{t("mappings.cancel")}
 				</Button>
 				{/* This makes the Cancel and Replace Mappings buttons left and right aligned, respectively*/}
 				<div style={{ flex: "1 0 0" }} />
-				<Button
-					onClick={onConfirm}
-					color="primary"
-					variant="contained"
-					sx={{ textTransform: "none" }}
-				>
+				<Button onClick={onConfirm} color="primary" variant="contained">
 					{getButtonText()}
 				</Button>
 			</DialogActions>

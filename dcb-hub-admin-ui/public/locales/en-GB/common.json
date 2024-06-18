@@ -256,7 +256,7 @@
 		"groups_one": "group",
 		"loading_msg": "Loading groups....",
 		"alert_text": "Failed to fetch Groups, will retry. If this error persists, please refresh the page.",
-		"type_new": "New Group",
+		"type_new": "New group",
 		"name": "Group name",
 		"code": "Group code",
 		"id": "Group UUID",

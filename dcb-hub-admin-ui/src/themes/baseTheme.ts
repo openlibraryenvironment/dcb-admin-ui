@@ -97,6 +97,18 @@ const baseTheme: ThemeOptions = {
 						fontSize: "1.1rem",
 					},
 				},
+				{
+					props: { variant: "contained" },
+					style: {
+						textTransform: "none",
+					},
+				},
+				{
+					props: { variant: "outlined" },
+					style: {
+						textTransform: "none",
+					},
+				},
 			],
 		},
 	},
