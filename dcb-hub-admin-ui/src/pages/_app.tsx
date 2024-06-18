@@ -45,6 +45,7 @@ declare module "@mui/material/styles" {
 		linkedFooterText?: string;
 		pageBackground?: string;
 		pageContentBackground?: string;
+		loginButtonOutlineColor?: string;
 	}
 
 	interface SimplePaletteColorOptions {
@@ -73,6 +74,7 @@ declare module "@mui/material/styles" {
 		linkedFooterText?: string;
 		pageBackground?: string;
 		pageContentBackground?: string;
+		loginButtonOutlineColor?: string;
 	}
 	interface TypographyVariants {
 		appTitle?: React.CSSProperties;

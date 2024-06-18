@@ -89,6 +89,16 @@ const baseTheme: ThemeOptions = {
 	},
 	components: {
 		MuiButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						outline: "2px solid", // For focus from any source
+					},
+					"&.Mui-focusVisible": {
+						outline: "2px solid", // For focus from any source
+					},
+				},
+			},
 			variants: [
 				{
 					props: { size: "xlarge" },
@@ -99,6 +109,52 @@ const baseTheme: ThemeOptions = {
 				},
 			],
 		},
+		MuiButtonBase: {
+			defaultProps: {
+				disableRipple: true, // Disable ripple effect for all buttons
+			},
+		},
+		MuiIconButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						outline: "2px solid", // For focus from any source
+					},
+					"&.Mui-focusVisible": {
+						outline: "2px solid", // For focus from any source
+					},
+				},
+			},
+		},
+		MuiListItemButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						border: "2px solid", // For focus from any source
+						boxSizing: "border-box",
+					},
+					"&.Mui-focusVisible": {
+						border: "2px solid", // For focus from any source
+						boxSizing: "border-box",
+					},
+				},
+			},
+		},
+		/*
+		Re-add when fixing the focus outline issues in accordion
+		MuiAccordionSummary: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						outline: "2px solid", // For focus from any source
+					},
+					"&.Mui-focusVisible": {
+						outline: "2px solid", // For focus from any source
+					},
+				},
+			},
+		},
+		*/
 	},
 };
 

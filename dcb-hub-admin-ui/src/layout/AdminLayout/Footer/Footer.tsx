@@ -36,7 +36,6 @@ export default function Footer() {
 				<Typography
 					data-tid="footer-information"
 					color={theme.palette.primary.footerText}
-					sx={{ border: "green" }}
 				>
 					{
 						<Link
