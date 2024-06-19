@@ -1,3 +1,22 @@
+# [1.17.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.16.1...v1.17.0) (2024-06-19)
+
+
+### Bug Fixes
+
+* Additional logging for refresh token method [DCB-1214] ([af4e415](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/af4e415bb9c2e777164b4f9873fcc4ebda809630))
+* Adjust handling of first sign-in and add logging [DCB-1214] ([e34a02b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e34a02b7d4ad72d4dabc1688fddbedcd533c297a))
+* Adjust refetch interval ([3445c68](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3445c68e14f92141873f522c4410681bd0101f71))
+* Adjust untracked statuses [DCB-1091] ([efe90de](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/efe90de84df551225c73ba811d84fd10989eedc2))
+* Fix accessibility issue with sidebar focus [DCB-1234] ([5af48df](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5af48df7c22c45d35295c2b9e319371e6f80ba8e))
+* Improve sidebar performance [DCB-261] ([ecd6961](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ecd6961a695f7e15d73323e602abe61c1ecb45ee))
+* Remove inoperational filters [DCB-1132] ([9be1996](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9be19965d5959aec89c73fbcecae8b2d4272b6d3))
+
+
+### Features
+
+* Disable patron request force update in certain states [DCB-1091] ([b7b7782](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b7b7782590b48febab3637320d72e242ed1c19e6))
+* Display categorised patron requests [DCB-1231] ([45f0cde](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/45f0cdea8e9dfe31c1d15ac2c8190ddbaf7f9218))
+
 ## [1.16.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.16.0...v1.16.1) (2024-06-13)
 
 
