@@ -248,7 +248,7 @@ export default function ServerPaginationGrid({
 		// Some grids, like the PRs on the library page, need special redirection
 		if (
 			type === "patronRequestsLibraryActive" ||
-			type === "patronRequestsLibraryInactive" ||
+			type === "patronRequestsLibraryOutOfSequence" ||
 			type === "patronRequestsLibraryCompleted" ||
 			type === "patronRequestsLibraryException"
 		) {

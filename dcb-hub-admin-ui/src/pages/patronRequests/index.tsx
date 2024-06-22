@@ -8,7 +8,12 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
-import { standardPatronRequestColumns } from "src/helpers/columns";
+import {
+	standardPatronRequestColumns,
+	defaultPatronRequestColumnVisibility,
+	finishedPatronRequestColumnVisibility,
+	exceptionPatronRequestColumnVisibility,
+} from "src/helpers/columns";
 import { Button, Stack, Typography } from "@mui/material";
 import {
 	StyledAccordion,
@@ -125,9 +130,8 @@ const PatronRequests: NextPage = () => {
 						noResultsMessage={t("patron_requests.no_results")}
 						searchPlaceholder={t("patron_requests.search_placeholder")}
 						columnVisibilityModel={{
-							dateUpdated: false,
-							id: false,
-							status: false,
+							...defaultPatronRequestColumnVisibility,
+							...exceptionPatronRequestColumnVisibility,
 						}}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
@@ -171,10 +175,7 @@ const PatronRequests: NextPage = () => {
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
 						searchPlaceholder={t("patron_requests.search_placeholder")}
-						columnVisibilityModel={{
-							dateUpdated: false,
-							id: false,
-						}}
+						columnVisibilityModel={defaultPatronRequestColumnVisibility}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 						sortModel={[{ field: "dateCreated", sort: "desc" }]}
@@ -217,10 +218,7 @@ const PatronRequests: NextPage = () => {
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
 						searchPlaceholder={t("patron_requests.search_placeholder")}
-						columnVisibilityModel={{
-							dateUpdated: false,
-							id: false,
-						}}
+						columnVisibilityModel={defaultPatronRequestColumnVisibility}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 						sortModel={[{ field: "dateCreated", sort: "desc" }]}
@@ -264,8 +262,8 @@ const PatronRequests: NextPage = () => {
 						noResultsMessage={t("patron_requests.no_results")}
 						searchPlaceholder={t("patron_requests.search_placeholder")}
 						columnVisibilityModel={{
-							dateUpdated: false,
-							id: false,
+							...defaultPatronRequestColumnVisibility,
+							...finishedPatronRequestColumnVisibility,
 						}}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
@@ -309,11 +307,9 @@ const PatronRequests: NextPage = () => {
 						noResultsMessage={t("patron_requests.no_results")}
 						searchPlaceholder={t("patron_requests.search_placeholder")}
 						columnVisibilityModel={{
-							dateUpdated: false,
-							id: false,
-							pollCountForCurrentStatus: false,
-							elapsedTimeInCurrentStatus: false,
-							outOfSequenceFlag: false,
+							...defaultPatronRequestColumnVisibility,
+							errorMessage: true,
+							outOfSequenceFlag: true,
 						}}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.

@@ -40,8 +40,11 @@ import LibraryHostLmsDetails from "./LibraryHostLmsDetails";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import {
 	standardNumRangeMappingColumns,
-	standardPatronRequestLibraryColumns,
+	standardPatronRequestColumns,
 	standardRefValueMappingColumns,
+	defaultPatronRequestLibraryColumnVisibility,
+	finishedPatronRequestColumnVisibility,
+	exceptionPatronRequestColumnVisibility,
 } from "src/helpers/columns";
 
 type LibraryDetails = {
@@ -1211,16 +1214,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={exceptionQueryVariables}
 									type="patronRequestsLibraryException"
 									coreType="patronRequests"
-									columns={standardPatronRequestLibraryColumns}
+									columns={standardPatronRequestColumns}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
 									searchPlaceholder={t("patron_requests.search_placeholder")}
 									columnVisibilityModel={{
-										dateUpdated: false,
-										id: false,
-										status: false,
+										...defaultPatronRequestLibraryColumnVisibility,
+										...exceptionPatronRequestColumnVisibility,
 									}}
 									scrollbarVisible={true}
 									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
@@ -1259,16 +1261,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={outOfSequenceQueryVariables}
 									type="patronRequestsLibraryOutOfSequence"
 									coreType="patronRequests"
-									columns={standardPatronRequestLibraryColumns}
+									columns={standardPatronRequestColumns}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
 									searchPlaceholder={t("patron_requests.search_placeholder")}
-									columnVisibilityModel={{
-										dateUpdated: false,
-										id: false,
-									}}
+									columnVisibilityModel={
+										defaultPatronRequestLibraryColumnVisibility
+									}
 									scrollbarVisible={true}
 									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
@@ -1306,16 +1307,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={inProgressQueryVariables}
 									type="patronRequestsLibraryActive"
 									coreType="patronRequests"
-									columns={standardPatronRequestLibraryColumns}
+									columns={standardPatronRequestColumns}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
 									searchPlaceholder={t("patron_requests.search_placeholder")}
-									columnVisibilityModel={{
-										dateUpdated: false,
-										id: false,
-									}}
+									columnVisibilityModel={
+										defaultPatronRequestLibraryColumnVisibility
+									}
 									scrollbarVisible={true}
 									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
@@ -1353,15 +1353,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={finishedQueryVariables}
 									type="patronRequestsLibraryCompleted"
 									coreType="patronRequests"
-									columns={standardPatronRequestLibraryColumns}
+									columns={standardPatronRequestColumns}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
 									searchPlaceholder={t("patron_requests.search_placeholder")}
 									columnVisibilityModel={{
-										dateUpdated: false,
-										id: false,
+										...defaultPatronRequestLibraryColumnVisibility,
+										...finishedPatronRequestColumnVisibility,
 									}}
 									scrollbarVisible={true}
 									// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
