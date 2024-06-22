@@ -48,7 +48,7 @@ type LibraryDetails = {
 	libraryId: any;
 };
 
-const INITIAL_EXPANDED_STATE = 12; // Number of accordions that should be initially expanded
+const INITIAL_EXPANDED_STATE = 3; // Number of accordions that should be initially expanded
 const TOTAL_ACCORDIONS = 19; // Total number of accordions
 
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
@@ -280,13 +280,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		<AdminLayout title={library?.fullName}>
 			<Stack direction="row" justifyContent="end">
 				<Button onClick={expandAll}>
-					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
+					{expandedAccordions[10] ? t("details.collapse") : t("details.expand")}
 				</Button>
 			</Stack>
 			<StyledAccordion
 				variant="outlined"
-				expanded={expandedAccordions[0]}
-				onChange={handleAccordionChange(0)}
+				expanded={expandedAccordions[10]}
+				onChange={handleAccordionChange(10)}
 				disableGutters
 			>
 				<StyledAccordionSummary
@@ -532,8 +532,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			</StyledAccordion>
 			<StyledAccordion
 				variant="outlined"
-				expanded={expandedAccordions[1]}
-				onChange={handleAccordionChange(1)}
+				expanded={expandedAccordions[11]}
+				onChange={handleAccordionChange(11)}
 				disableGutters
 			>
 				<StyledAccordionSummary
@@ -592,8 +592,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			</StyledAccordion>
 			<StyledAccordion
 				variant="outlined"
-				expanded={expandedAccordions[2]}
-				onChange={handleAccordionChange(2)}
+				expanded={expandedAccordions[3]}
+				onChange={handleAccordionChange(3)}
 				disableGutters
 			>
 				<StyledAccordionSummary
@@ -713,8 +713,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			</StyledAccordion>
 			<StyledAccordion
 				variant="outlined"
-				expanded={expandedAccordions[3]}
-				onChange={handleAccordionChange(3)}
+				expanded={expandedAccordions[2]}
+				onChange={handleAccordionChange(2)}
 				disableGutters
 			>
 				<StyledAccordionSummary
@@ -1166,8 +1166,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			{library?.agency?.hostLms?.code ? (
 				<StyledAccordion
 					variant="outlined"
-					expanded={expandedAccordions[10]}
-					onChange={handleAccordionChange(10)}
+					expanded={expandedAccordions[0]}
+					onChange={handleAccordionChange(0)}
 					disableGutters
 				>
 					<StyledAccordionSummary
@@ -1186,8 +1186,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<StyledAccordionDetails>
 						<SubAccordion
 							variant="outlined"
-							expanded={expandedAccordions[11]}
-							onChange={handleAccordionChange(11)}
+							expanded={expandedAccordions[1]}
+							onChange={handleAccordionChange(1)}
 							disableGutters
 						>
 							<SubAccordionSummary
