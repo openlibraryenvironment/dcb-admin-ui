@@ -1,3 +1,11 @@
+## [1.17.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.17.0...v1.17.1) (2024-06-24)
+
+
+### Bug Fixes
+
+* patron request quick filters ([5269240](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/52692404eca0e2535e08017a450d9cd66a37c2d8))
+* Standardise patron request grid presentation across DCB Admin [DCB-1231] ([5fdff82](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5fdff82d364cbbd8a5cf1866f020e85988a618aa))
+
 # [1.17.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.16.1...v1.17.0) (2024-06-19)
 
 
