@@ -128,7 +128,9 @@ const PatronRequests: NextPage = () => {
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t("patron_requests.search_placeholder")}
+						searchPlaceholder={t(
+							"patron_requests.search_placeholder_error_message",
+						)}
 						columnVisibilityModel={{
 							...defaultPatronRequestColumnVisibility,
 							...exceptionPatronRequestColumnVisibility,
@@ -174,7 +176,7 @@ const PatronRequests: NextPage = () => {
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t("patron_requests.search_placeholder")}
+						searchPlaceholder={t("patron_requests.search_placeholder_status")}
 						columnVisibilityModel={defaultPatronRequestColumnVisibility}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
@@ -217,7 +219,7 @@ const PatronRequests: NextPage = () => {
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t("patron_requests.search_placeholder")}
+						searchPlaceholder={t("patron_requests.search_placeholder_status")}
 						columnVisibilityModel={defaultPatronRequestColumnVisibility}
 						scrollbarVisible={true}
 						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
@@ -260,7 +262,7 @@ const PatronRequests: NextPage = () => {
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t("patron_requests.search_placeholder")}
+						searchPlaceholder={t("patron_requests.search_placeholder_status")}
 						columnVisibilityModel={{
 							...defaultPatronRequestColumnVisibility,
 							...finishedPatronRequestColumnVisibility,
@@ -305,7 +307,9 @@ const PatronRequests: NextPage = () => {
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
 						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t("patron_requests.search_placeholder")}
+						searchPlaceholder={t(
+							"patron_requests.search_placeholder_error_message",
+						)}
 						columnVisibilityModel={{
 							...defaultPatronRequestColumnVisibility,
 							errorMessage: true,

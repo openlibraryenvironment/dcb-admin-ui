@@ -1219,7 +1219,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
-									searchPlaceholder={t("patron_requests.search_placeholder")}
+									searchPlaceholder={t(
+										"patron_requests.search_placeholder_error_message",
+									)}
 									columnVisibilityModel={{
 										...defaultPatronRequestLibraryColumnVisibility,
 										...exceptionPatronRequestColumnVisibility,
@@ -1266,7 +1268,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
-									searchPlaceholder={t("patron_requests.search_placeholder")}
+									searchPlaceholder={t(
+										"patron_requests.search_placeholder_status",
+									)}
 									columnVisibilityModel={
 										defaultPatronRequestLibraryColumnVisibility
 									}
@@ -1312,7 +1316,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
-									searchPlaceholder={t("patron_requests.search_placeholder")}
+									searchPlaceholder={t(
+										"patron_requests.search_placeholder_status",
+									)}
 									columnVisibilityModel={
 										defaultPatronRequestLibraryColumnVisibility
 									}
@@ -1358,7 +1364,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
 									noResultsMessage={t("patron_requests.no_results")}
-									searchPlaceholder={t("patron_requests.search_placeholder")}
+									searchPlaceholder={t(
+										"patron_requests.search_placeholder_status",
+									)}
 									columnVisibilityModel={{
 										...defaultPatronRequestLibraryColumnVisibility,
 										...finishedPatronRequestColumnVisibility,

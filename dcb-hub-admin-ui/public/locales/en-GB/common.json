@@ -483,7 +483,8 @@
 		"alert_text": "Failed to fetch the requests, please refresh the page.",
 		"no_results": "No patron requests were found. Try changing your search terms or filters.",
 		"no_rows": "No patron requests available. If you're expecting data to be here, please refresh the page.",
-		"search_placeholder": "Search by error message"
+		"search_placeholder_error_message": "Search by error message",
+		"search_placeholder_status": "Search by request status"
 	},
 
 	"bibRecords": {
