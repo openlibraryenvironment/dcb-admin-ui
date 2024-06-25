@@ -654,6 +654,8 @@ export const getPatronRequests = gql`
 				pickupLocationCode
 				description
 				status
+				previousStatus
+				nextExpectedStatus
 				errorMessage
 				nextScheduledPoll
 				outOfSequenceFlag

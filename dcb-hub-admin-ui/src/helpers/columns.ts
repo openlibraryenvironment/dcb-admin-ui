@@ -139,8 +139,22 @@ export const standardPatronRequestColumns = [
 		},
 	},
 	{
+		field: "previousStatus",
+		headerName: "Previous status",
+		minWidth: 100,
+		flex: 1.5,
+		filterOperators: standardFilters,
+	},
+	{
 		field: "status",
 		headerName: "Status",
+		minWidth: 100,
+		flex: 1.5,
+		filterOperators: standardFilters,
+	},
+	{
+		field: "nextExpectedStatus",
+		headerName: "Next status",
 		minWidth: 100,
 		flex: 1.5,
 		filterOperators: standardFilters,
@@ -193,6 +207,8 @@ export const standardPatronRequestColumns = [
 
 export const defaultPatronRequestLibraryColumnVisibility = {
 	patronHostlmsCode: false,
+	previousStatus: false,
+	nextExpectedStatus: false,
 	errorMessage: false,
 	outOfSequenceFlag: false,
 	dateUpdated: false,
@@ -200,6 +216,8 @@ export const defaultPatronRequestLibraryColumnVisibility = {
 };
 
 export const defaultPatronRequestColumnVisibility = {
+	previousStatus: false,
+	nextExpectedStatus: false,
 	errorMessage: false,
 	outOfSequenceFlag: false,
 	dateUpdated: false,
@@ -213,6 +231,7 @@ export const finishedPatronRequestColumnVisibility = {
 };
 
 export const exceptionPatronRequestColumnVisibility = {
+	previousStatus: true,
 	status: false,
 	errorMessage: true,
 	elapsedTimeInCurrentStatus: false,
