@@ -680,6 +680,16 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("details.local_request_status_raw")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.rawLocalStatus}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("details.supplier_uuid")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.suppliers[0]?.id} />
@@ -759,6 +769,18 @@ export default function PatronRequestDetails({
 										</Typography>
 										<RenderAttribute
 											attribute={patronRequest?.suppliers[0]?.localItemStatus}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.local_item_status_raw")}
+										</Typography>
+										<RenderAttribute
+											attribute={
+												patronRequest?.suppliers[0]?.rawLocalItemStatus
+											}
 										/>
 									</Stack>
 								</Grid>
@@ -954,6 +976,16 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_request_status_raw")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.rawLocalRequestStatus}
+								/>
+							</Stack>
+						</Grid>
 					</Grid>
 					<SubAccordion
 						variant="outlined"
@@ -1091,6 +1123,16 @@ export default function PatronRequestDetails({
 										</Typography>
 										<RenderAttribute
 											attribute={patronRequest?.localItemStatus}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.borrowing_virtual_item_status_raw")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.rawLocalItemStatus}
 										/>
 									</Stack>
 								</Grid>
