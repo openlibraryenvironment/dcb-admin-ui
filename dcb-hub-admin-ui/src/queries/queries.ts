@@ -709,6 +709,8 @@ export const getPatronRequestById = gql`
 				localItemStatus
 				localItemType
 				localBibId
+				rawLocalItemStatus
+				rawLocalRequestStatus
 				description
 				nextScheduledPoll
 				errorMessage
@@ -795,6 +797,8 @@ export const getPatronRequestById = gql`
 					localId
 					localStatus
 					localAgency
+					rawLocalItemStatus
+					rawLocalStatus
 					virtualPatron {
 						id
 						localId
