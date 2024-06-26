@@ -187,6 +187,12 @@ export const standardPatronRequestColumns = [
 			formatDuration(params.row.elapsedTimeInCurrentStatus),
 	},
 	{
+		field: "isManuallySelectedItem",
+		headerName: "Manually selected?",
+		flex: 0.75,
+		filterOperators: equalsOnly,
+	},
+	{
 		field: "dateUpdated",
 		headerName: "Request updated",
 		minWidth: 150,
@@ -211,6 +217,7 @@ export const defaultPatronRequestLibraryColumnVisibility = {
 	nextExpectedStatus: false,
 	errorMessage: false,
 	outOfSequenceFlag: false,
+	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
 };
@@ -220,6 +227,7 @@ export const defaultPatronRequestColumnVisibility = {
 	nextExpectedStatus: false,
 	errorMessage: false,
 	outOfSequenceFlag: false,
+	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
 };
