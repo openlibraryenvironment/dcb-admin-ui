@@ -717,6 +717,9 @@ export const getPatronRequestById = gql`
 				nextExpectedStatus
 				outOfSequenceFlag
 				elapsedTimeInCurrentStatus
+				localItemHostlmsCode
+				localItemAgencyCode
+				isManuallySelectedItem
 				patron {
 					id
 				}
