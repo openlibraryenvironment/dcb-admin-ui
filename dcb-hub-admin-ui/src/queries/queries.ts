@@ -661,6 +661,7 @@ export const getPatronRequests = gql`
 				outOfSequenceFlag
 				elapsedTimeInCurrentStatus
 				pollCountForCurrentStatus
+				isManuallySelectedItem
 				patron {
 					id
 				}
