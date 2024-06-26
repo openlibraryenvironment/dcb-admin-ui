@@ -1,3 +1,12 @@
+# [1.18.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.17.1...v1.18.0) (2024-06-26)
+
+
+### Features
+
+* Add manually item selection flag to request grids [DCB-1271] ([e644309](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e6443091d5f236980f88d01caffcd5e95bdfe40c))
+* Present raw item and request status on patron request details page [DCB-1142] ([7706ed8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7706ed81b6bbc7aa8e0e4caf3124f71326175c07))
+* Show whether item is manually selected in request details [DCB-1271] ([58adc81](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/58adc810e3b47276d18156e760c61ec3de89c2f0))
+
 ## [1.17.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.17.0...v1.17.1) (2024-06-24)
 
 
