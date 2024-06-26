@@ -792,6 +792,36 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.item_manually_selected")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest.isManuallySelectedItem?.toString()}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.item_manual_agency_code")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.localItemAgencyCode}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.item_manual_hostlms_code")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.localItemHostlmsCode}
+										/>
+									</Stack>
+								</Grid>
 							</Grid>
 						</SubAccordionDetails>
 					</SubAccordion>
