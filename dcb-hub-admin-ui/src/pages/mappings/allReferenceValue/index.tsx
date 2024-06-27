@@ -139,6 +139,7 @@ const AllMappings: NextPage = () => {
 				sortDirection="ASC"
 				sortAttribute="fromContext"
 				pageSize={20}
+				disableHoverInteractions={true}
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

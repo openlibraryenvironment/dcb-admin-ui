@@ -591,6 +591,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
 						noDataTitle={"No groups found for this library."}
 						toolbarVisible="search-only"
+						disableHoverInteractions={true}
 					></ClientDataGrid>
 				</StyledAccordionDetails>
 			</StyledAccordion>

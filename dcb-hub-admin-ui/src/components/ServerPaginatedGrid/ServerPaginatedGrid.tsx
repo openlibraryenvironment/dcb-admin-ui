@@ -35,6 +35,7 @@ export default function ServerPaginationGrid({
 	sortAttribute,
 	coreType,
 	scrollbarVisible,
+	disableHoverInteractions,
 	presetQueryVariables,
 	onTotalSizeChange,
 }: {
@@ -53,6 +54,7 @@ export default function ServerPaginationGrid({
 	sortAttribute: string;
 	coreType: string;
 	scrollbarVisible?: boolean;
+	disableHoverInteractions?: boolean;
 	presetQueryVariables?: string;
 	onTotalSizeChange?: any;
 }) {
@@ -274,18 +276,23 @@ export default function ServerPaginationGrid({
 		<div>
 			<DataGridPro
 				// Makes sure scrollbars aren't visible
-				sx={
-					scrollbarVisible
-						? {
-								border: "0",
-							}
-						: {
-								".MuiDataGrid-virtualScroller": {
-									overflow: "hidden",
-								},
-								border: "0",
-							}
-				}
+				sx={{
+					border: "0",
+					".MuiDataGrid-virtualScroller": {
+						overflow: scrollbarVisible ? "" : "hidden",
+					},
+					// both hover styles need to be added, otherwise a flashing effect appears when hovering
+					// https://stackoverflow.com/questions/76563478/disable-hover-effect-on-mui-datagrid
+					"& .MuiDataGrid-row.Mui-hovered": {
+						backgroundColor: disableHoverInteractions ? "transparent" : "",
+					},
+					"& .MuiDataGrid-row:hover": {
+						backgroundColor: disableHoverInteractions ? "transparent" : "",
+					},
+					"& .MuiDataGrid-cell:focus": {
+						outline: disableHoverInteractions ? "none" : "",
+					},
+				}}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
 				// v7 of the DataGrid removes this but also breaks accessibility - to be looked at when we upgrade.
 				experimentalFeatures={{ ariaV7: true }}
