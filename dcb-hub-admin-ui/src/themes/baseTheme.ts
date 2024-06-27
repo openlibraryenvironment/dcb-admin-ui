@@ -152,6 +152,11 @@ const baseTheme: ThemeOptions = {
 				},
 			},
 		},
+		MuiTooltip: {
+			defaultProps: {
+				arrow: true,
+			},
+		},
 		/*
 		Re-add when fixing the focus outline issues in accordion
 		MuiAccordionSummary: {

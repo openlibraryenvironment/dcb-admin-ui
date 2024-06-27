@@ -171,6 +171,16 @@ const openRSDark = createTheme({
 				},
 			},
 		},
+		MuiTooltip: {
+			styleOverrides: {
+				tooltip: {
+					backgroundColor: "#808080",
+				},
+				arrow: {
+					color: "#808080", // Arrow color to match the tooltip background
+				},
+			},
+		},
 	}),
 });
 
