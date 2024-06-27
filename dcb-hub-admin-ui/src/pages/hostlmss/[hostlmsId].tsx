@@ -136,7 +136,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.general")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -210,7 +210,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("hostlms.client_config.title")}
 					</Typography>
 				</StyledAccordionSummary>

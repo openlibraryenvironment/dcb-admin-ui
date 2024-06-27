@@ -91,6 +91,7 @@ declare module "@mui/material/styles" {
 		linkedFooterTextSize?: React.CSSProperties;
 		linkedFooterHeader?: React.CSSProperties;
 		loadingText?: React.CSSProperties;
+		accordionSummary?: React.CSSProperties;
 	}
 	interface TypographyVariantsOptions {
 		appTitle?: React.CSSProperties;
@@ -108,6 +109,7 @@ declare module "@mui/material/styles" {
 		linkedFooterTextSize?: React.CSSProperties;
 		linkedFooterHeader?: React.CSSProperties;
 		loadingText?: React.CSSProperties;
+		accordionSummary?: React.CSSProperties;
 	}
 }
 declare module "@mui/material/Typography" {
@@ -127,6 +129,7 @@ declare module "@mui/material/Typography" {
 		linkedFooterTextSize: true;
 		linkedFooterHeader: true;
 		loadingText: true;
+		accordionSummary: true;
 	}
 }
 

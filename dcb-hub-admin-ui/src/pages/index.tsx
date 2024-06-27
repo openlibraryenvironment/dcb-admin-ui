@@ -91,15 +91,13 @@ const Home: NextPage = () => {
 				label={t("ui.action.toggle_on")}
 			/> */}
 			<Stack direction="column" spacing={2}>
-				<Typography variant="h1" sx={{ fontSize: 32 }}>
+				<Typography variant="h1">
 					{t("welcome.greeting", { user: nameOfUser })}
 				</Typography>
 				<Typography variant="homePageText">
 					{t("welcome.context", { consortium_name: "MOBIUS" })}
 				</Typography>
-				<Typography variant="h2" sx={{ fontSize: 32 }}>
-					{t("consortium.your")}
-				</Typography>
+				<Typography variant="h2">{t("consortium.your")}</Typography>
 				{operational ? null : (
 					<Typography variant="homePageText">
 						{t("common.placeholder_text")}

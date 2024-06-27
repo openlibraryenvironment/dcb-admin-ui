@@ -302,7 +302,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("libraries.library")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -549,7 +549,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("libraries.contacts.title")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -610,7 +610,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" fontWeight={"bold"}>
+					<Typography variant="accordionSummary">
 						{t("libraries.service.title")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -731,7 +731,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" fontWeight={"bold"}>
+					<Typography variant="accordionSummary">
 						{t("libraries.config.title")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -1110,7 +1110,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</IconContext.Provider>
 						}
 					>
-						<Typography variant="h2" fontWeight={"bold"}>
+						<Typography variant="accordionSummary">
 							{t("libraries.circulation.title")}
 						</Typography>
 					</StyledAccordionSummary>
@@ -1184,7 +1184,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</IconContext.Provider>
 						}
 					>
-						<Typography variant="h2" fontWeight={"bold"}>
+						<Typography variant="accordionSummary">
 							{t("nav.patronRequests")}
 						</Typography>
 					</StyledAccordionSummary>

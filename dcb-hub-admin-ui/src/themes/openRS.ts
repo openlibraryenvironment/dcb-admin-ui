@@ -87,6 +87,18 @@ const openRSLight = createTheme({
 				},
 			},
 		},
+		MuiAccordionSummary: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						borderColor: "#000000",
+					},
+					"&.Mui-focusVisible": {
+						borderColor: "#000000",
+					},
+				},
+			},
+		},
 	}),
 });
 
@@ -154,6 +166,18 @@ const openRSDark = createTheme({
 			},
 		},
 		MuiListItemButton: {
+			styleOverrides: {
+				root: {
+					"&:focus": {
+						borderColor: "#FFFFFF",
+					},
+					"&.Mui-focusVisible": {
+						borderColor: "#FFFFFF",
+					},
+				},
+			},
+		},
+		MuiAccordionSummary: {
 			styleOverrides: {
 				root: {
 					"&:focus": {
