@@ -30,6 +30,7 @@ import {
 	SubAccordion,
 	SubAccordionSummary,
 	SubAccordionDetails,
+	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -282,9 +283,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	) : (
 		<AdminLayout title={library?.fullName}>
 			<Stack direction="row" justifyContent="end">
-				<Button onClick={expandAll}>
+				<StyledAccordionButton onClick={expandAll}>
 					{expandedAccordions[10] ? t("details.collapse") : t("details.expand")}
-				</Button>
+				</StyledAccordionButton>
 			</Stack>
 			<StyledAccordion
 				variant="outlined"

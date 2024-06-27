@@ -1,4 +1,9 @@
-import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
+	Button,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 // Define custom styles using styled()
@@ -23,6 +28,10 @@ const StyledAccordionDetails = styled(AccordionDetails)(() => ({
 	marginTop: "16px",
 }));
 
+const StyledAccordionButton = styled(Button)(() => ({
+	marginBottom: "2px",
+}));
+
 const SubAccordion = styled(StyledAccordion)(() => ({
 	marginTop: "16px",
 }));
@@ -39,6 +48,7 @@ export {
 	StyledAccordion,
 	StyledAccordionSummary,
 	StyledAccordionDetails,
+	StyledAccordionButton,
 	SubAccordion,
 	SubAccordionSummary,
 	SubAccordionDetails,

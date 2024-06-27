@@ -69,9 +69,6 @@ const openRSLight = createTheme({
 		MuiButton: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						outlineColor: "#000000",
-					},
 					"&.Mui-focusVisible": {
 						outlineColor: "#000000",
 					},
@@ -150,9 +147,6 @@ const openRSDark = createTheme({
 		MuiButton: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						outlineColor: "#FFFFFF",
-					},
 					"&.Mui-focusVisible": {
 						outlineColor: "#FFFFFF",
 					},

@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -16,6 +16,7 @@ import {
 	StyledAccordion,
 	StyledAccordionSummary,
 	StyledAccordionDetails,
+	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -105,9 +106,9 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 	) : (
 		<AdminLayout title={bib?.title}>
 			<Stack direction="row" justifyContent="end">
-				<Button onClick={expandAll}>
+				<StyledAccordionButton onClick={expandAll}>
 					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
-				</Button>
+				</StyledAccordionButton>
 			</Stack>
 			<Grid
 				container

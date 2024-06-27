@@ -91,32 +91,33 @@ const baseTheme: ThemeOptions = {
 		MuiButton: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						outline: "2px solid", // For focus from any source
-					},
 					"&.Mui-focusVisible": {
 						outline: "2px solid", // For focus from any source
 					},
 				},
 			},
+			// important: the order in which the variants are specified, affect which styles are applied
+			// e.g. the fontSize of xlarge will override the fontSize in contained, because it is specified after
 			variants: [
-				{
-					props: { size: "xlarge" },
-					style: {
-						padding: "14px 28px",
-						fontSize: "1.1rem",
-					},
-				},
 				{
 					props: { variant: "contained" },
 					style: {
 						textTransform: "none",
+						fontSize: "0.95rem",
 					},
 				},
 				{
 					props: { variant: "outlined" },
 					style: {
 						textTransform: "none",
+						fontSize: "0.95rem",
+					},
+				},
+				{
+					props: { size: "xlarge" },
+					style: {
+						padding: "14px 28px",
+						fontSize: "1.3rem",
 					},
 				},
 			],
