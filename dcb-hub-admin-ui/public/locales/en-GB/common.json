@@ -255,6 +255,7 @@
 
 	"general": {
 		"submit": "Submit",
+		"search": "Search",
 		"english": "English",
 		"spanish": "Spanish"
 	},
@@ -568,5 +569,10 @@
 		"page_text_no_access": "Sorry, you do not have access to this page.",
 		"page_text_contact_admin": "If you think you should have access, contact your system administrator",
 		"go_back_text": "Go back to the <linkComponent> dashboard </linkComponent>"
+	},
+
+	"datagrid": {
+		"download_current_page": "Download current page as CSV",
+		"print_current_page": "Print current page"
 	}
 }
