@@ -29,7 +29,7 @@ const baseTheme: ThemeOptions = {
 			fontWeight: 400,
 		},
 		h2: {
-			fontSize: 20,
+			fontSize: 24,
 			fontWeight: 400,
 		},
 		h3: {
@@ -86,13 +86,17 @@ const baseTheme: ThemeOptions = {
 			fontWeight: 400,
 			textAlign: "center",
 		},
+		accordionSummary: {
+			fontSize: 20,
+			fontWeight: 700,
+		},
 	},
 	components: {
 		MuiButton: {
 			styleOverrides: {
 				root: {
 					"&.Mui-focusVisible": {
-						outline: "2px solid", // For focus from any source
+						outline: "2px solid", // For keyboard focus
 					},
 				},
 			},
@@ -134,7 +138,7 @@ const baseTheme: ThemeOptions = {
 						outline: "2px solid", // For focus from any source
 					},
 					"&.Mui-focusVisible": {
-						outline: "2px solid", // For focus from any source
+						outline: "2px solid", // For keyboard focus
 					},
 				},
 			},
@@ -147,7 +151,7 @@ const baseTheme: ThemeOptions = {
 						boxSizing: "border-box",
 					},
 					"&.Mui-focusVisible": {
-						border: "2px solid", // For focus from any source
+						border: "2px solid", // For keyboard focus
 						boxSizing: "border-box",
 					},
 				},
@@ -158,21 +162,16 @@ const baseTheme: ThemeOptions = {
 				arrow: true,
 			},
 		},
-		/*
-		Re-add when fixing the focus outline issues in accordion
 		MuiAccordionSummary: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						outline: "2px solid", // For focus from any source
-					},
 					"&.Mui-focusVisible": {
-						outline: "2px solid", // For focus from any source
+						border: "2px solid", // For keyboard focus
+						boxSizing: "border-box",
 					},
 				},
 			},
 		},
-		*/
 	},
 };
 

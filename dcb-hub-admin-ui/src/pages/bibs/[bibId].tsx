@@ -188,7 +188,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.canonical_metadata")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -211,7 +211,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.source_record")}
 					</Typography>
 				</StyledAccordionSummary>

@@ -202,7 +202,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.general")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -452,7 +452,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.bib_record")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -603,7 +603,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.supplying")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -941,7 +941,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.borrowing", "Borrowing")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -1002,7 +1002,7 @@ export default function PatronRequestDetails({
 								</IconContext.Provider>
 							}
 						>
-							<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+							<Typography variant="accordionSummary">
 								{t("details.patron")}
 							</Typography>
 						</SubAccordionSummary>
@@ -1165,7 +1165,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography variant="accordionSummary">
 						{t("details.pickup")}
 					</Typography>
 				</StyledAccordionSummary>
@@ -1313,7 +1313,7 @@ export default function PatronRequestDetails({
 						</IconContext.Provider>
 					}
 				>
-					<Typography id="auditlog" variant="h2" sx={{ fontWeight: "bold" }}>
+					<Typography id="auditlog" variant="accordionSummary">
 						{t("details.audit_log")}
 					</Typography>
 				</StyledAccordionSummary>
