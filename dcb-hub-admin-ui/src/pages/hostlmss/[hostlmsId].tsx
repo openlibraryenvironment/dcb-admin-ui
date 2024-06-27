@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, useTheme } from "@mui/material";
+import { Stack, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { AdminLayout } from "@layout";
@@ -20,6 +20,7 @@ import {
 	SubAccordion,
 	SubAccordionDetails,
 	SubAccordionSummary,
+	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -113,9 +114,9 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	) : (
 		<AdminLayout title={hostlms?.name}>
 			<Stack direction="row" justifyContent="end">
-				<Button onClick={expandAll}>
+				<StyledAccordionButton onClick={expandAll}>
 					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
-				</Button>
+				</StyledAccordionButton>
 			</Stack>
 			<StyledAccordion
 				variant="outlined"

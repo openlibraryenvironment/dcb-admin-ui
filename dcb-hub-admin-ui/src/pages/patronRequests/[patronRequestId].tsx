@@ -31,6 +31,7 @@ import {
 	SubAccordion,
 	SubAccordionSummary,
 	SubAccordionDetails,
+	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { formatDuration } from "src/helpers/formatDuration";
@@ -182,9 +183,9 @@ export default function PatronRequestDetails({
 	) : (
 		<AdminLayout title={patronRequest?.clusterRecord?.title}>
 			<Stack direction="row" justifyContent="end">
-				<Button onClick={expandAll}>
+				<StyledAccordionButton onClick={expandAll}>
 					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
-				</Button>
+				</StyledAccordionButton>
 			</Stack>
 			<StyledAccordion // General
 				variant="outlined"

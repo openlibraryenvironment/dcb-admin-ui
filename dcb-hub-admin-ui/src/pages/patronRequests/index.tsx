@@ -14,9 +14,10 @@ import {
 	finishedPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
 } from "src/helpers/columns";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import {
 	StyledAccordion,
+	StyledAccordionButton,
 	StyledAccordionDetails,
 	StyledAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
@@ -90,11 +91,11 @@ const PatronRequests: NextPage = () => {
 	return (
 		<AdminLayout title={t("nav.patronRequests")}>
 			<Stack direction="row" justifyContent="end">
-				<Button onClick={expandAll}>
+				<StyledAccordionButton onClick={expandAll}>
 					{expandedAccordions[0] && expandedAccordions[1]
 						? t("details.collapse")
 						: t("details.expand")}
-				</Button>
+				</StyledAccordionButton>
 			</Stack>
 			<StyledAccordion
 				variant="outlined"
