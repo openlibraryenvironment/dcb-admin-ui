@@ -109,6 +109,7 @@ const AllNumericRange: NextPage = () => {
 				pageSize={20}
 				sortDirection="ASC"
 				sortAttribute="context"
+				disableHoverInteractions={true}
 			/>
 			<Box>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

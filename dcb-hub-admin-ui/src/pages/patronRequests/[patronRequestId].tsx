@@ -1352,7 +1352,7 @@ export default function PatronRequestDetails({
 						]}
 						type="Audit"
 						// This grid could show click-through details of its own for each audit log entry
-						selectable={false}
+						selectable={true}
 						noDataTitle={t("details.audit_log_no_data")}
 						noDataMessage={t("details.audit_log_no_rows")}
 						sortModel={[{ field: "auditDate", sort: "desc" }]}

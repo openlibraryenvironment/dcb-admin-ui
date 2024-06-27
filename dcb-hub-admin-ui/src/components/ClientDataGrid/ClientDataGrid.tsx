@@ -46,6 +46,7 @@ export default function ClientDataGrid<T extends object>({
 	columnVisibilityModel,
 	sortModel,
 	toolbarVisible,
+	disableHoverInteractions,
 }: {
 	data: Array<T>;
 	columns: any;
@@ -58,6 +59,7 @@ export default function ClientDataGrid<T extends object>({
 	columnVisibilityModel?: any;
 	sortModel?: any;
 	toolbarVisible?: string;
+	disableHoverInteractions?: boolean;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -114,6 +116,17 @@ export default function ClientDataGrid<T extends object>({
 						textAlign: "center",
 					},
 					border: "0",
+					// both hover styles need to be added, otherwise a flashing effect appears when hovering
+					// https://stackoverflow.com/questions/76563478/disable-hover-effect-on-mui-datagrid
+					"& .MuiDataGrid-row.Mui-hovered": {
+						backgroundColor: disableHoverInteractions ? "transparent" : "",
+					},
+					"& .MuiDataGrid-row:hover": {
+						backgroundColor: disableHoverInteractions ? "transparent" : "",
+					},
+					"& .MuiDataGrid-cell:focus": {
+						outline: disableHoverInteractions ? "none" : "",
+					},
 				}}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
 				experimentalFeatures={{ ariaV7: true }}

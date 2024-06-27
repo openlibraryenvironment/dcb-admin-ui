@@ -133,6 +133,7 @@ const CirculationStatusMappings: NextPage = () => {
 				sortDirection="ASC"
 				sortAttribute="fromContext"
 				pageSize={20}
+				disableHoverInteractions={true}
 				presetQueryVariables="fromCategory: CirculationStatus && deleted: false"
 			/>
 			<div>
