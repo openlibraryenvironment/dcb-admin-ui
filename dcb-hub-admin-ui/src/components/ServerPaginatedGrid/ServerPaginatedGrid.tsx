@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { styled } from "@mui/material/styles"; // Import separately due to this issue https://github.com/vercel/next.js/issues/55663
 import { Box, Typography } from "@mui/material";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
 
 const StyledOverlay = styled("div")(() => ({
 	display: "flex",
@@ -62,6 +63,7 @@ export default function ServerPaginationGrid({
 	// GraphQL data comes in an array that's named after the core type, which causes problems
 	const [sortOptions, setSortOptions] = useState({ field: "", direction: "" });
 	const [filterOptions, setFilterOptions] = useState("");
+	const { t } = useTranslation();
 	const router = useRouter();
 	const presetTypes = [
 		"circulationStatus",
@@ -278,6 +280,9 @@ export default function ServerPaginationGrid({
 				// Makes sure scrollbars aren't visible
 				sx={{
 					border: "0",
+					"@media print": {
+						".MuiDataGrid-main": { color: "rgba(0, 0, 0, 0.87)" },
+					},
 					".MuiDataGrid-virtualScroller": {
 						overflow: scrollbarVisible ? "" : "hidden",
 					},
@@ -321,7 +326,10 @@ export default function ServerPaginationGrid({
 					noRowsOverlay: CustomNoDataOverlay,
 				}}
 				localeText={{
-					toolbarQuickFilterPlaceholder: searchPlaceholder ?? "Search",
+					toolbarQuickFilterPlaceholder:
+						searchPlaceholder ?? t("general.search"),
+					toolbarExportCSV: t("datagrid.download_current_page"),
+					toolbarExportPrint: t("datagrid.print_current_page"),
 				}}
 				// See examples here for what can be customised
 				// https://github.com/mui/mui-x/blob/next/packages/grid/x-data-grid/src/constants/localeTextConstants.ts
