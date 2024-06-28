@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 import { ThemeOptions } from "@mui/material/styles";
+import type {} from "@mui/x-data-grid-pro/themeAugmentation";
 
 // We have switched to using Next local fonts due to Next.js having issues fetching Google Fonts that were causing strange behaviour in dev mode
 // See here https://github.com/vercel/next.js/issues/45080
@@ -153,6 +154,39 @@ const baseTheme: ThemeOptions = {
 					"&.Mui-focusVisible": {
 						border: "2px solid", // For keyboard focus
 						boxSizing: "border-box",
+					},
+				},
+			},
+		},
+		MuiDataGrid: {
+			styleOverrides: {
+				// focus styles
+				cell: {
+					"&:focus": {
+						outline: "none",
+					},
+					":focus-visible": {
+						outline: "2px solid",
+					},
+				},
+				cellCheckbox: {
+					"&:focus-within": {
+						outline: "2px solid",
+						outlineOffset: "-3px",
+					},
+				},
+				columnHeaderCheckbox: {
+					"&:focus-within": {
+						outline: "2px solid",
+						outlineOffset: "-3px",
+					},
+				},
+				columnHeader: {
+					"&:focus": {
+						outline: "none",
+					},
+					":focus-visible": {
+						outline: "2px solid",
 					},
 				},
 			},
