@@ -47,6 +47,9 @@ const untrackedStatuses = [
 	"RESOLVED",
 	"NOT_SUPPLIED_CURRENT_SUPPLIER",
 	"NO_ITEMS_AVAILABLE_AT_ANY_AGENCY",
+	"CANCELLED",
+	"HANDED_OFF_AS_LOCAL",
+	"FINALISED",
 ];
 
 export default function PatronRequestDetails({
@@ -279,7 +282,9 @@ export default function PatronRequestDetails({
 								title={
 									!untrackedStatuses.includes(patronRequest?.status)
 										? ""
-										: t("details.check_for_updates_disabled") // Tooltip text when disabled
+										: t("details.check_for_updates_disabled", {
+												status: patronRequest?.status,
+											}) // Tooltip text when disabled
 								}
 							>
 								<span>
