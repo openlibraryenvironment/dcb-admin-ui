@@ -137,8 +137,24 @@ const Libraries: NextPage = () => {
 						filterable: false,
 						sortable: false,
 						valueGetter: (params: {
-							row: { agency: { isSupplyingAgency: string } };
-						}) => params?.row?.agency?.isSupplyingAgency,
+							row: { agency: { isSupplyingAgency: boolean } };
+						}) => {
+							const agency = params?.row?.agency;
+							if (
+								agency &&
+								Object.prototype.hasOwnProperty.call(
+									agency,
+									"isSupplyingAgency",
+								) &&
+								agency?.isSupplyingAgency == null
+							) {
+								// Returns "Not set" only for libraries where an agency with the property exists, but is set to null
+								// Does not return "Not set" for libraries without an agency
+								return t("libraries.circulation.not_set");
+							}
+
+							return params?.row?.agency?.isSupplyingAgency;
+						},
 					},
 					{
 						field: "isBorrowingAgency",
@@ -147,8 +163,24 @@ const Libraries: NextPage = () => {
 						filterable: false,
 						sortable: false,
 						valueGetter: (params: {
-							row: { agency: { isBorrowingAgency: string } };
-						}) => params?.row?.agency?.isBorrowingAgency,
+							row: { agency: { isBorrowingAgency: boolean } };
+						}) => {
+							const agency = params?.row?.agency;
+							if (
+								agency &&
+								Object.prototype.hasOwnProperty.call(
+									agency,
+									"isBorrowingAgency",
+								) &&
+								agency?.isBorrowingAgency == null
+							) {
+								// Returns "Not set" only for libraries where an agency with the property exists, but is set to null
+								// Does not return "Not set" for libraries without an agency
+								return t("libraries.circulation.not_set");
+							}
+
+							return params?.row?.agency?.isBorrowingAgency;
+						},
 					},
 					{
 						field: "hostLmsCirculation",
