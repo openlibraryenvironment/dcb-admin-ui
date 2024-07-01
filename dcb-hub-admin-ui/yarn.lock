@@ -1330,10 +1330,10 @@
     clsx "^2.1.0"
     prop-types "^15.8.1"
 
-"@mui/core-downloads-tracker@^5.15.20":
-  version "5.15.20"
-  resolved "https://registry.npmjs.org/@mui/core-downloads-tracker/-/core-downloads-tracker-5.15.20.tgz"
-  integrity sha512-DoL2ppgldL16utL8nNyj/P12f8mCNdx/Hb/AJnX9rLY4b52hCMIx1kH83pbXQ6uMy6n54M3StmEbvSGoj2OFuA==
+"@mui/core-downloads-tracker@^5.15.21":
+  version "5.15.21"
+  resolved "https://registry.npmjs.org/@mui/core-downloads-tracker/-/core-downloads-tracker-5.15.21.tgz"
+  integrity sha512-dp9lXBaJZzJYeJfQY3Ow4Rb49QaCEdkl2KKYscdQHQm6bMJ+l4XPY3Cd9PCeeJTsHPIDJ60lzXbeRgs6sx/rpw==
 
 "@mui/material-nextjs@^5.15.11":
   version "5.15.11"
@@ -1342,14 +1342,14 @@
   dependencies:
     "@babel/runtime" "^7.23.9"
 
-"@mui/material@^5.0.0", "@mui/material@^5.15.20", "@mui/material@^5.4.1":
-  version "5.15.20"
-  resolved "https://registry.npmjs.org/@mui/material/-/material-5.15.20.tgz"
-  integrity sha512-tVq3l4qoXx/NxUgIx/x3lZiPn/5xDbdTE8VrLczNpfblLYZzlrbxA7kb9mI8NoBF6+w9WE9IrxWnKK5KlPI2bg==
+"@mui/material@^5.0.0", "@mui/material@^5.15.21", "@mui/material@^5.4.1":
+  version "5.15.21"
+  resolved "https://registry.npmjs.org/@mui/material/-/material-5.15.21.tgz"
+  integrity sha512-nTyCcgduKwHqiuQ/B03EQUa+utSMzn2sQp0QAibsnYe4tvc3zkMbO0amKpl48vhABIY3IvT6w9615BFIgMt0YA==
   dependencies:
     "@babel/runtime" "^7.23.9"
     "@mui/base" "5.0.0-beta.40"
-    "@mui/core-downloads-tracker" "^5.15.20"
+    "@mui/core-downloads-tracker" "^5.15.21"
     "@mui/system" "^5.15.20"
     "@mui/types" "^7.2.14"
     "@mui/utils" "^5.15.20"
@@ -1408,24 +1408,24 @@
     prop-types "^15.8.1"
     react-is "^18.2.0"
 
-"@mui/x-data-grid-pro@^6.20.1":
-  version "6.20.1"
-  resolved "https://registry.npmjs.org/@mui/x-data-grid-pro/-/x-data-grid-pro-6.20.1.tgz"
-  integrity sha512-5PjgQjo+jpHTlt7yLbg60/5e++69Vmu9dvLAPw5wkVO3jvZojGbCU8turWlHtDC35uGhaugabDYxowGLjjUKeQ==
+"@mui/x-data-grid-pro@^6.20.3":
+  version "6.20.3"
+  resolved "https://registry.npmjs.org/@mui/x-data-grid-pro/-/x-data-grid-pro-6.20.3.tgz"
+  integrity sha512-UblinLg4BZkHkjSy5r4B5Ip+kBcZ/6PzNUJNB0I1nep/gi/vqJd5zCsPZ9IZqtTbh0wyDfupvqQxnneMsiLl2w==
   dependencies:
     "@babel/runtime" "^7.23.2"
     "@mui/utils" "^5.14.16"
-    "@mui/x-data-grid" "6.20.1"
+    "@mui/x-data-grid" "6.20.3"
     "@mui/x-license-pro" "6.10.2"
     "@types/format-util" "^1.0.3"
     clsx "^2.0.0"
     prop-types "^15.8.1"
     reselect "^4.1.8"
 
-"@mui/x-data-grid@6.20.1":
-  version "6.20.1"
-  resolved "https://registry.npmjs.org/@mui/x-data-grid/-/x-data-grid-6.20.1.tgz"
-  integrity sha512-x1muWWIG9otkk4FuvoTxH3I4foyA1caFu8ZC9TvMQ+7NSBKcfy/JeLQfKkZk8ACUUosvENdrRIkhqU2xdIqIVg==
+"@mui/x-data-grid@6.20.3":
+  version "6.20.3"
+  resolved "https://registry.npmjs.org/@mui/x-data-grid/-/x-data-grid-6.20.3.tgz"
+  integrity sha512-VVggwKiEgMdkVqpORZEBgSqcpuBoVKMwYZnO+Q8vns2+otpiFE4yr52TZjKkF+ugDPgZ4rcq8mlj4VsK83XiMQ==
   dependencies:
     "@babel/runtime" "^7.23.2"
     "@mui/utils" "^5.14.16"
@@ -2020,11 +2020,6 @@
     "@tufjs/canonical-json" "2.0.0"
     minimatch "^9.0.4"
 
-"@types/cookie@^0.5.4":
-  version "0.5.4"
-  resolved "https://registry.npmjs.org/@types/cookie/-/cookie-0.5.4.tgz"
-  integrity sha512-7z/eR6O859gyWIAjuvBWFzNURmf2oPBmJlfVWkwehU5nzIyjwBsTh7WMmEEV4JFnHuQ3ex4oyTvfKzcyJVDBNA==
-
 "@types/cookie@^0.6.0":
   version "0.6.0"
   resolved "https://registry.npmjs.org/@types/cookie/-/cookie-0.6.0.tgz"
@@ -2084,10 +2079,10 @@
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.6.tgz"
   integrity sha512-OpXEVoCKSS3lQqjx9GGGOapBeuW5eUboYHRlHP9urXPX25IKZ6AnP5ZRxtVf63iieUbsHxLn8NQ5Nlftc6yzAA==
 
-"@types/node@*", "@types/node@^18.19.39":
-  version "18.19.39"
-  resolved "https://registry.npmjs.org/@types/node/-/node-18.19.39.tgz"
-  integrity sha512-nPwTRDKUctxw3di5b4TfT3I0sWDiWoPQCZjXhvdkINntwr8lcoVCKsTgnXeRubKIlfnV+eN/HYk6Jb40tbcEAQ==
+"@types/node@*", "@types/node@^20.14.9":
+  version "20.14.9"
+  resolved "https://registry.npmjs.org/@types/node/-/node-20.14.9.tgz"
+  integrity sha512-06OCtnTXtWOZBJlRApleWndH4JsRVs1pDCc8dLSQp+7PpUpX3ePdHyeNSFTeSe7FtKyQkrlPvHwJOW3SLd8Oyg==
   dependencies:
     undici-types "~5.26.4"
 
