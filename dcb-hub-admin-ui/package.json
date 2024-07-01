@@ -8,7 +8,7 @@
 		"start": "next start",
 		"lint": "next lint",
 		"semantic-release": "semantic-release",
-		"prepare": "cd .. && husky dcb-hub-admin-ui/.husky"
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@apollo/client": "^3.10.8",
