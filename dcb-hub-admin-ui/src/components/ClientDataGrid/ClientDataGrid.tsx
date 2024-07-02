@@ -9,6 +9,7 @@ import {
 	GridToolbarQuickFilter,
 } from "@mui/x-data-grid-pro";
 import { useRouter } from "next/router";
+import { useTranslation } from "next-i18next";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.
@@ -66,6 +67,7 @@ export default function ClientDataGrid<T extends object>({
 	// It takes a title, message, and if needed a link for the user to take action.
 	// These must be supplied as props for each usage of the DataGrid that wishes to use them,
 	// or a blank screen will be displayed.
+	const { t } = useTranslation();
 	function CustomNoDataOverlay() {
 		return (
 			<StyledOverlay>
@@ -106,6 +108,10 @@ export default function ClientDataGrid<T extends object>({
 			<MUIDataGrid
 				// Makes sure scrollbars aren't visible
 				sx={{
+					border: "0",
+					"@media print": {
+						".MuiDataGrid-main": { color: "rgba(0, 0, 0, 0.87)" },
+					},
 					".MuiDataGrid-virtualScroller": {
 						overflow: "hidden",
 					},
@@ -115,7 +121,6 @@ export default function ClientDataGrid<T extends object>({
 						minWidth: "100%",
 						textAlign: "center",
 					},
-					border: "0",
 					// both hover styles need to be added, otherwise a flashing effect appears when hovering
 					// https://stackoverflow.com/questions/76563478/disable-hover-effect-on-mui-datagrid
 					"& .MuiDataGrid-row.Mui-hovered": {
@@ -178,6 +183,10 @@ export default function ClientDataGrid<T extends object>({
 					toolbar: {
 						showQuickFilter: true,
 					},
+				}}
+				localeText={{
+					toolbarExportCSV: t("datagrid.download_current_page"),
+					toolbarExportPrint: t("datagrid.print_current_page"),
 				}}
 			></MUIDataGrid>
 		</div>
