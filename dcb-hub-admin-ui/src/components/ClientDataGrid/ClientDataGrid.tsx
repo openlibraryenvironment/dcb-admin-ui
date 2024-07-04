@@ -86,13 +86,19 @@ export default function ClientDataGrid<T extends object>({
 	const router = useRouter();
 
 	// If audit, allow a click-through so the user can access more audit info
-	const handleRowClick: GridEventListener<"rowClick"> = (params) => {
+	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
 		if (type == "Audit") {
-			router.push(`/patronRequests/audits/${params?.row?.id}`);
+			event.ctrlKey || event.metaKey
+				? window.open(`/patronRequests/audits/${params?.row?.id}`, "_blank")
+				: router.push(`/patronRequests/audits/${params?.row?.id}`);
 		} else if (type == "libraryGroupMembers") {
-			router.push(`/libraries/${params?.row?.id}`);
+			event.ctrlKey || event.metaKey
+				? window.open(`/libraries/${params?.row?.id}`)
+				: router.push(`/libraries/${params?.row?.id}`);
 		} else if (type == "groupsOfLibrary") {
-			router.push(`/groups/${params?.row?.id}`);
+			event.ctrlKey || event.metaKey
+				? window.open(`/groups/${params?.row?.id}`)
+				: router.push(`/groups/${params?.row?.id}`);
 		}
 	};
 	function getIdOfRow(row: any) {

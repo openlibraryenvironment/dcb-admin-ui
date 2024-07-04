@@ -252,7 +252,7 @@ export default function ServerPaginationGrid({
 	// Listens for a row being clicked, passes through the params so they can be used to display the correct 'Details' page.
 	// And formulate the correct URL
 	// plurals are used for types to match URL structure.
-	const handleRowClick: GridEventListener<"rowClick"> = (params) => {
+	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
 		// Some grids, like the PRs on the library page, need special redirection
 		if (
 			type === "patronRequestsLibraryActive" ||
@@ -260,17 +260,21 @@ export default function ServerPaginationGrid({
 			type === "patronRequestsLibraryCompleted" ||
 			type === "patronRequestsLibraryException"
 		) {
-			router.push(`/patronRequests/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey)
+				window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+			if (!(event.ctrlKey || event.metaKey))
+				router.push(`/patronRequests/${params?.row?.id}`);
 		} else if (
 			// Others we don't want users to be able to click through on
-			type !== "GroupDetails" &&
 			type !== "referenceValueMappings" &&
-			type !== "Audit" &&
 			type !== "circulationStatus" &&
 			type !== "numericRangeMappings"
 		) {
 			// Whereas most can just use this standard redirection based on type
-			router.push(`/${type}/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey)
+				window.open(`/${type}/${params?.row?.id}`, "_blank");
+			if (!(event.ctrlKey || event.metaKey))
+				router.push(`/${type}/${params?.row?.id}`);
 		}
 	};
 
