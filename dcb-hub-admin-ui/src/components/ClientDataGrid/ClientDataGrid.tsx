@@ -88,15 +88,15 @@ export default function ClientDataGrid<T extends object>({
 	// If audit, allow a click-through so the user can access more audit info
 	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
 		if (type == "Audit") {
-			event.ctrlKey
+			event.ctrlKey || event.metaKey
 				? window.open(`/patronRequests/audits/${params?.row?.id}`, "_blank")
 				: router.push(`/patronRequests/audits/${params?.row?.id}`);
 		} else if (type == "libraryGroupMembers") {
-			event.ctrlKey
+			event.ctrlKey || event.metaKey
 				? window.open(`/libraries/${params?.row?.id}`)
 				: router.push(`/libraries/${params?.row?.id}`);
 		} else if (type == "groupsOfLibrary") {
-			event.ctrlKey
+			event.ctrlKey || event.metaKey
 				? window.open(`/groups/${params?.row?.id}`)
 				: router.push(`/groups/${params?.row?.id}`);
 		}
