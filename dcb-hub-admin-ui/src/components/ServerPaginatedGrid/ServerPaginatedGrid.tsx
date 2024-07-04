@@ -265,9 +265,7 @@ export default function ServerPaginationGrid({
 			if (!event.ctrlKey) router.push(`/patronRequests/${params?.row?.id}`);
 		} else if (
 			// Others we don't want users to be able to click through on
-			type !== "GroupDetails" &&
 			type !== "referenceValueMappings" &&
-			type !== "Audit" &&
 			type !== "circulationStatus" &&
 			type !== "numericRangeMappings"
 		) {
