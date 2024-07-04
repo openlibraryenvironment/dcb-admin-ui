@@ -268,7 +268,9 @@ export default function ServerPaginationGrid({
 			// Others we don't want users to be able to click through on
 			type !== "referenceValueMappings" &&
 			type !== "circulationStatus" &&
-			type !== "numericRangeMappings"
+			type !== "numericRangeMappings" &&
+			type !== "referenceValueMappingsForLibrary" &&
+			type !== "numericRangeMappingsForLibrary"
 		) {
 			// Whereas most can just use this standard redirection based on type
 			if (event.ctrlKey || event.metaKey)
