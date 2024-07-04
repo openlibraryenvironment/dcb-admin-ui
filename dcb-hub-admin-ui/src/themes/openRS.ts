@@ -37,9 +37,12 @@ const openRSLight = createTheme({
 			pageContentBackground: "#FFFFFF",
 			loginButtonOutlineColor: "#FFFFFF",
 		},
-		secondary: {
-			main: "#0C4068",
-		},
+		// Currently not defining secondary palette. When we do we need to define all colours.
+		// Otherwise you can run into type issues.
+		// secondary: {
+		// 	main: "#0C4068",
+		// 	detailsAccordionSummary: "#F6F6F6",
+		// },
 		background: {
 			default: "#FFFFFF",
 		},
@@ -64,6 +67,9 @@ const openRSLight = createTheme({
 		componentSubheading: {
 			color: "#0C4068",
 		},
+		accordionSummary: {
+			color: "#0C4068",
+		},
 	}),
 	components: mergeThemeStyles(baseTheme.components, {
 		MuiButton: {
@@ -74,13 +80,33 @@ const openRSLight = createTheme({
 					},
 				},
 			},
+
+			// Probably best to do overrides if it needs to be different on a per theme basis: doing the below will cause all other styles to be disapplied
+			// REDUNDANT
+			// // important: the order in which the variants are specified, affect which styles are applied
+			// // e.g. the fontSize of xlarge will override the fontSize in contained, because it is specified after
+			// variants: [
+			// 	{
+			// 		props: { variant: "contained" },
+			// 		style: {
+			// 			":active": {
+			// 				outline: "#75BEDB",
+			// 			},
+			// 		},
+			// 	},
+			// 	{
+			// 		props: { variant: "outlined" },
+			// 		style: {
+			// 			":active": {
+			// 				outline: "#75BEDB",
+			// 			},
+			// 		},
+			// 	},
+			// ],
 		},
 		MuiListItemButton: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						borderColor: "#000000",
-					},
 					"&.Mui-focusVisible": {
 						borderColor: "#000000",
 					},
@@ -143,9 +169,10 @@ const openRSDark = createTheme({
 			titleArea: "#1E1E1E",
 			loginButtonOutlineColor: "#FFFFFF",
 		},
-		secondary: {
-			main: "#75BEDB",
-		},
+		// secondary: {
+		// 	main: "#75BEDB",
+		// 	detailsAccordionSummary: "#424242",
+		// },
 		background: {
 			default: "#1E1E1E",
 		},
@@ -178,9 +205,6 @@ const openRSDark = createTheme({
 		MuiListItemButton: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						borderColor: "#FFFFFF",
-					},
 					"&.Mui-focusVisible": {
 						borderColor: "#FFFFFF",
 					},

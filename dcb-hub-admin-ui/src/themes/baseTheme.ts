@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { ThemeOptions } from "@mui/material/styles";
+import { ThemeOptions, alpha, darken, lighten } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-pro/themeAugmentation";
 
 // We have switched to using Next local fonts due to Next.js having issues fetching Google Fonts that were causing strange behaviour in dev mode
@@ -106,17 +106,61 @@ const baseTheme: ThemeOptions = {
 			variants: [
 				{
 					props: { variant: "contained" },
-					style: {
+					style: ({ theme }) => ({
 						textTransform: "none",
 						fontSize: "0.95rem",
-					},
+						":hover": {
+							backgroundColor:
+								theme.palette.mode == "light"
+									? darken(theme.palette.primary.main, 0.08)
+									: lighten(theme.palette.primary.main, 0.08),
+						},
+						":active": {
+							outline: "1px solid #75BEDB", // Adds a 1px solid outline
+							backgroundColor:
+								theme.palette.mode == "light"
+									? darken(theme.palette.primary.main, 0.16)
+									: lighten(theme.palette.primary.main, 0.16),
+						},
+					}),
 				},
 				{
 					props: { variant: "outlined" },
-					style: {
+					style: ({ theme }) => ({
 						textTransform: "none",
 						fontSize: "0.95rem",
-					},
+						":hover": {
+							backgroundColor:
+								theme.palette.mode == "light"
+									? darken(theme.palette.background.default, 0.08)
+									: lighten(theme.palette.background.default, 0.08),
+						},
+						":active": {
+							border: "1px solid #75BEDB", // Adds a 1px solid border
+							outline: "1px solid #75BEDB", // Adds a 1px solid outline
+							backgroundColor:
+								theme.palette.mode == "light"
+									? darken(theme.palette.background.default, 0.16)
+									: lighten(theme.palette.background.default, 0.16),
+						},
+					}),
+				},
+				{
+					props: { variant: "text" },
+					style: ({ theme }) => ({
+						":hover": {
+							backgroundColor:
+								theme.palette.mode == "light"
+									? darken(theme.palette.background.default, 0.08)
+									: lighten(theme.palette.background.default, 0.08),
+						},
+						":active": {
+							backgroundColor:
+								theme.palette.mode == "light"
+									? darken(theme.palette.background.default, 0.16)
+									: lighten(theme.palette.background.default, 0.16),
+						},
+					}),
 				},
 				{
 					props: { size: "xlarge" },
@@ -134,23 +178,28 @@ const baseTheme: ThemeOptions = {
 		},
 		MuiIconButton: {
 			styleOverrides: {
-				root: {
-					"&:focus": {
-						outline: "2px solid", // For focus from any source
-					},
+				root: ({ theme }) => ({
 					"&.Mui-focusVisible": {
 						outline: "2px solid", // For keyboard focus
 					},
-				},
+					":hover": {
+						backgroundColor:
+							theme.palette.mode == "light"
+								? darken(theme.palette.background.default, 0.08)
+								: lighten(theme.palette.background.default, 0.08),
+					},
+					":active": {
+						backgroundColor:
+							theme.palette.mode == "light"
+								? darken(theme.palette.background.default, 0.16)
+								: lighten(theme.palette.background.default, 0.16),
+					},
+				}),
 			},
 		},
 		MuiListItemButton: {
 			styleOverrides: {
 				root: {
-					"&:focus": {
-						border: "2px solid", // For focus from any source
-						boxSizing: "border-box",
-					},
 					"&.Mui-focusVisible": {
 						border: "2px solid", // For keyboard focus
 						boxSizing: "border-box",
@@ -198,12 +247,24 @@ const baseTheme: ThemeOptions = {
 		},
 		MuiAccordionSummary: {
 			styleOverrides: {
-				root: {
+				root: ({ theme }) => ({
 					"&.Mui-focusVisible": {
-						border: "2px solid", // For keyboard focus
-						boxSizing: "border-box",
+						outline: "2px solid", // For keyboard focus
 					},
-				},
+					backgroundColor: theme.palette.primary.detailsAccordionSummary,
+					":hover": {
+						backgroundColor:
+							theme.palette.mode == "light"
+								? alpha(theme.palette.primary.detailsAccordionSummary, 0.08)
+								: lighten(theme.palette.primary.detailsAccordionSummary, 0.08),
+					},
+					":active": {
+						backgroundColor:
+							theme.palette.mode == "light"
+								? darken(theme.palette.primary.detailsAccordionSummary, 0.16)
+								: lighten(theme.palette.primary.detailsAccordionSummary, 0.16),
+					},
+				}),
 			},
 		},
 	},

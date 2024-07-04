@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "next-i18next";
-import { styled, Theme, CSSObject, useTheme } from "@mui/material/styles";
+import {
+	styled,
+	Theme,
+	CSSObject,
+	useTheme,
+	lighten,
+	darken,
+} from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
@@ -225,15 +232,23 @@ export default function Sidebar(props: any) {
 										minHeight: 48,
 										justifyContent: props.openStateOpen ? "initial" : "center",
 										px: "24px",
+										":hover": {
+											backgroundColor:
+												theme.palette.mode === "light"
+													? darken(theme.palette.primary.sidebar, 0.08)
+													: lighten(theme.palette.primary.sidebar, 0.16),
+										},
+										":active": {
+											backgroundColor:
+												theme.palette.mode === "light"
+													? darken(theme.palette.primary.sidebar, 0.08)
+													: lighten(theme.palette.primary.sidebar, 0.16),
+										},
 										"&.Mui-selected": {
 											backgroundColor: isChildPage
 												? theme.palette.primary.buttonForSelectedChildPage
 												: theme.palette.primary.buttonForSelectedPage,
 											color: theme.palette.primary.selectedText,
-											":hover": {
-												backgroundColor:
-													theme.palette.primary.hoverOnSelectedPage,
-											},
 											// overrides the default focus styles applied by component
 											"&.Mui-focusVisible": {
 												backgroundColor: isChildPage
