@@ -3,6 +3,8 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	Button,
+	darken,
+	lighten,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -22,6 +24,20 @@ StyledAccordion.defaultProps = {
 
 const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
 	backgroundColor: theme.palette.primary.detailsAccordionSummary,
+	":hover": {
+		backgroundColor:
+			theme.palette.mode == "light"
+				? darken(theme.palette.primary.detailsAccordionSummary, 0.08)
+				: lighten(theme.palette.primary.detailsAccordionSummary, 0.08),
+	},
+	":active": {
+		backgroundColor:
+			theme.palette.mode == "light"
+				? darken(theme.palette.primary.detailsAccordionSummary, 0.16)
+				: lighten(theme.palette.primary.detailsAccordionSummary, 0.16),
+	},
+	// Ideally this would be a variant of the Accordion Summary
+	// however it doesn't seem that the MUI AccordionSummary fully supports that at this time.
 }));
 
 const StyledAccordionDetails = styled(AccordionDetails)(() => ({

@@ -8,7 +8,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { styled, useTheme } from "@mui/material/styles";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { useTranslation } from "next-i18next";
-import { Button } from "@mui/material";
+import { Button, lighten } from "@mui/material";
 import consortiumLogo from "public/assets/brand/MOBIUS_Mark x36.jpg";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -65,7 +65,7 @@ export default function Header({
 						padding: 0,
 						maxHeight: "70px",
 						paddingLeft: iconsVisible != false ? "24px" : "16px",
-						paddingRight: iconsVisible != false ? "24px" : "16px"
+						paddingRight: iconsVisible != false ? "24px" : "16px",
 					}}
 				>
 					{/* This code handles the display of the consortium icon and sidebar icon.
@@ -78,9 +78,24 @@ export default function Header({
 								edge="start"
 								aria-label="menu"
 								onClick={openStateFuncClosed}
-								sx={{ mr: 2, color: theme.palette.primary.headerText }}
+								sx={{
+									mr: 2,
+									color: theme.palette.primary.headerText,
+									":hover": {
+										backgroundColor:
+											theme.palette.mode == "light"
+												? lighten(theme.palette.primary.header, 0.08)
+												: lighten(theme.palette.primary.header, 0.16),
+									},
+									":active": {
+										backgroundColor:
+											theme.palette.mode == "light"
+												? lighten(theme.palette.primary.header, 0.16)
+												: lighten(theme.palette.primary.header, 0.24),
+									},
+								}}
 							>
-								<MdMenu size={20} data-tid="menu-icon"/>
+								<MdMenu size={20} data-tid="menu-icon" />
 							</IconButton>
 						</Box>
 					) : null}
@@ -118,7 +133,21 @@ export default function Header({
 								size="large"
 								data-tid="profile-button"
 								aria-label="account of current user"
-								sx={{ color: theme.palette.primary.headerText }}
+								sx={{
+									color: theme.palette.primary.headerText,
+									":hover": {
+										backgroundColor:
+											theme.palette.mode == "light"
+												? lighten(theme.palette.primary.header, 0.08)
+												: lighten(theme.palette.primary.header, 0.16),
+									},
+									":active": {
+										backgroundColor:
+											theme.palette.mode == "light"
+												? lighten(theme.palette.primary.header, 0.16)
+												: lighten(theme.palette.primary.header, 0.24),
+									},
+								}}
 								LinkComponent={Link}
 								href="/profile"
 							>
@@ -134,13 +163,23 @@ export default function Header({
                  it also sets the colour of the header text */
 								sx={{
 									color: theme.palette.primary.headerText,
-									paddingInline: "0px",
+									p: 1,
+									// paddingInline: "0px",
 									minWidth: "0px",
-									"&:focus": {
-										outlineColor: "#FFFFFF",
-									},
 									"&.Mui-focusVisible": {
 										outlineColor: "#FFFFFF",
+									},
+									":hover": {
+										backgroundColor:
+											theme.palette.mode == "light"
+												? lighten(theme.palette.primary.header, 0.08)
+												: lighten(theme.palette.primary.header, 0.16),
+									},
+									":active": {
+										backgroundColor:
+											theme.palette.mode == "light"
+												? lighten(theme.palette.primary.header, 0.16)
+												: lighten(theme.palette.primary.header, 0.24),
 									},
 								}}
 							>
