@@ -3,7 +3,7 @@
 
 import type { NextPage } from "next";
 import { AdminLayout } from "@layout";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 // import { FormControlLabel, Stack, Switch, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next"; //localisation
@@ -90,9 +90,6 @@ const Home: NextPage = () => {
 				}
 				label={t("ui.action.toggle_on")}
 			/> */}
-			{<Button variant="outlined">Outlined</Button>}
-			{<Button variant="contained">Contained</Button>}
-			{<Button variant="text">Text</Button>}
 			<Stack direction="column" spacing={2}>
 				<Typography variant="h1">
 					{t("welcome.greeting", { user: nameOfUser })}
