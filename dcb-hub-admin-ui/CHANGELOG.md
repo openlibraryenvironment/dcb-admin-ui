@@ -1,3 +1,24 @@
+# [1.19.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.18.0...v1.19.0) (2024-07-04)
+
+
+### Bug Fixes
+
+* Add support on ClientDataGrids ([e75a238](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e75a238de1acd7795673524f6e21f7bc026de584))
+* Change npm prepare script for Husky ([4066df0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4066df00fee41a77285c48adc8ae098699384d5f))
+* Display 'not set' participation status in library grids ([a15dbb4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a15dbb49c824b500ffefb6b5499ccf5d145b87f5))
+* Full support for Cmd key on Mac ([3c88162](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3c8816234ad2d99dd0156b129f0bd17bab869386))
+* Prevent clickthrough on library mappings resulting in 404 ([68e6793](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/68e67934f387fbbe751568f2c37593626b170983))
+* Remove testing buttons ([fd44db3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fd44db3b3cfe558b02862dde62260ecf4873ce58))
+* sorting by duration with double digit days ([df7f11c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/df7f11c2950bdbc2fe33698e44bc1eff16407820))
+* Test support opening new tab with Cmd key on Mac ([f36a1f3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f36a1f333bab827830cadf72665120fb228142a8))
+* Update packages ([a187381](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a187381794a0a741022d02462ec99266659d0d3c))
+* Update packages after npm audit ([cfa346e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/cfa346e14c5a1b2ac8437272cdb9afe058ee49ba))
+
+
+### Features
+
+* Add terminating statuses to unTracked statuses [DCB-1282] ([fb02260](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fb0226095462aece1f69bcf6202289eff98662d0))
+
 # [1.18.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.17.1...v1.18.0) (2024-06-26)
 
 
