@@ -260,9 +260,10 @@ export default function ServerPaginationGrid({
 			type === "patronRequestsLibraryCompleted" ||
 			type === "patronRequestsLibraryException"
 		) {
-			if (event.ctrlKey)
+			if (event.ctrlKey || event.metaKey)
 				window.open(`/patronRequests/${params?.row?.id}`, "_blank");
-			if (!event.ctrlKey) router.push(`/patronRequests/${params?.row?.id}`);
+			if (!(event.ctrlKey || event.metaKey))
+				router.push(`/patronRequests/${params?.row?.id}`);
 		} else if (
 			// Others we don't want users to be able to click through on
 			type !== "referenceValueMappings" &&
@@ -270,8 +271,10 @@ export default function ServerPaginationGrid({
 			type !== "numericRangeMappings"
 		) {
 			// Whereas most can just use this standard redirection based on type
-			if (event.ctrlKey) window.open(`/${type}/${params?.row?.id}`, "_blank");
-			if (!event.ctrlKey) router.push(`/${type}/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey)
+				window.open(`/${type}/${params?.row?.id}`, "_blank");
+			if (!(event.ctrlKey || event.metaKey))
+				router.push(`/${type}/${params?.row?.id}`);
 		}
 	};
 
