@@ -6,14 +6,20 @@ Contributors should be aware of the following when contributing to DCB Admin.
 
 Contributions to DCB Admin must meet the following standards, most of which have been taken from our DCB Definition of Done:
 
-- The code for the issue must be written with accompanying tests (where required), and should have passed manual developer testing. 
-- All defined acceptance criteria must have been met, as well as any other criteria (i.e. accessibility).
-- Commit messages should be in the conventional format (see the [Angular guidelines](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines))
-- The AXE Dev Tools must be run against all pages affected by the changes, and any accessibility issues must be fixed before contributions are submitted for review. We follow the WCAG 2.1 accessibility guidelines, which can be found [here](https://www.w3.org/TR/WCAG21/) 
-- Any relevant scripts and technical documentation should be updated.
+- Your contribution must have accompanying tests (if required by the original issue), and must be manually tested before submitting.
+
+- All defined acceptance criteria must have been met, as well as any other criteria (i.e. accessibility). These are usually defined on the corresponding JIRA ticket. Checking that the criteria have been met is the 'manual testing' referred to previously.
+
+- Commit messages should be in conventional format (see the [Angular guidelines](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines)). If you're curious about this, check the other commits to the project. We typically attach the JIRA ticket number to the end of the commit message for reference.
+
+- The AXE Dev Tools must be run against all pages affected by the changes, and any accessibility issues must be fixed before contributions are submitted for review. We follow the WCAG 2.1 accessibility guidelines, which can be found [here](https://www.w3.org/TR/WCAG21/). The Chrome extension for the AXE Dev Tools can be found here https://chromewebstore.google.com/detail/axe-devtools-web-accessib/lhdoppojpmngadmnindnejefpokejbdd?pli=1 .
+
+- Any relevant scripts and technical documentation should be updated. 
+
 - Tests should be run before submitting an MR, and any failures must be addressed before submitting. If you run into failures that you're not sure about, please submit your MR as a draft so that others can assist you.
 - This also applies to the pre-commit hooks. Do not skip these or add 'ignore' statements without clear justification. It is also recommended that you run `npm run build` before submitting your changes, to catch potential build failures.
-- A link to a screen capture or a link to a Vercel preview branch should be added to the MR. This aids QA, and makes potential changes more visible.
+
+- A link to a screen capture or a link to a Vercel preview branch should be added to the MR. This aids QA, and makes potential changes more visible, so people can see what you've changed.
 
 ### Formatting 
 
