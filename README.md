@@ -33,6 +33,19 @@ Contributors should be aware of the following standards for code formatting and 
 
 If this is your first commit after these changes were made, please run `npm install` before you commit.
 
+### Standards
+
+Contributions to DCB Admin must meet the following standards, most of which have been taken from our DCB Definition of Done:
+
+- The code for the issue must be written with accompanying tests (where required), and should have passed manual developer testing. 
+- All defined acceptance criteria must have been met, as well as any other criteria (i.e. accessibility).
+- Commit messages should be in the conventional format (see the [Angular guidelines](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines))
+- The AXE Dev Tools must be run against all pages affected by the changes, and any accessibility issues must be fixed before contributions are submitted for review. We follow the WCAG 2.1 accessibility guidelines, which can be found [here](https://www.w3.org/TR/WCAG21/) 
+- Any relevant scripts and technical documentation should be updated.
+- Tests should be run before submitting an MR, and any failures must be addressed before submitting. If you run into failures that you're not sure about, please submit your MR as a draft so that others can assist you.
+- This also applies to the pre-commit hooks. Do not skip these or add 'ignore' statements without clear justification. It is also recommended that you run `npm run build` before submitting your changes, to catch potential build failures.
+- A link to a screen capture or a link to a Vercel preview branch should be added to the MR. This aids QA, and makes potential changes more visible.
+
 ### Formatting 
 
 DCB Admin uses [Prettier](https://prettier.io/docs) for code formatting. Please install the Prettier extension in your editor and, if using VS Code, set Prettier as your default formatter and enable 'format on save'. If you're having issues, Ctrl-Shift-P, open your user settings, and ensure Prettier is set as `editor.defaultFormatter` and that `editor.formatOnSave` is also enabled.
