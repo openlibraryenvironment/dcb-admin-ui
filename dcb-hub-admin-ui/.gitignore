@@ -174,3 +174,6 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node,nextjs
+
+# To stop multiple lockfiles causing conflict
+yarn.lock
