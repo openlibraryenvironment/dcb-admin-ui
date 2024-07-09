@@ -22,6 +22,10 @@ StyledAccordion.defaultProps = {
 	TransitionProps: { timeout: 400 }, // Setting default timeout
 };
 
+// Ideally this would be a variant of the Accordion Summary, and all components in here would also be variants defined at theme level.
+// however it doesn't seem that the MUI AccordionSummary fully supports that at this time.
+// As such we have to apply the lighten / darken rules at this level.
+
 const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
 	backgroundColor: theme.palette.primary.detailsAccordionSummary,
 	":hover": {
@@ -36,8 +40,6 @@ const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
 				? darken(theme.palette.primary.detailsAccordionSummary, 0.16)
 				: lighten(theme.palette.primary.detailsAccordionSummary, 0.16),
 	},
-	// Ideally this would be a variant of the Accordion Summary
-	// however it doesn't seem that the MUI AccordionSummary fully supports that at this time.
 }));
 
 const StyledAccordionDetails = styled(AccordionDetails)(() => ({

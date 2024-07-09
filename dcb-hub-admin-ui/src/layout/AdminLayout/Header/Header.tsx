@@ -27,6 +27,11 @@ const AppBar = styled(MuiAppBar, {
 	zIndex: theme.zIndex.drawer + 1,
 }));
 
+// Note that in dark mode the header's icon button colour changes are greater.
+// This is because the standard percentages did not distinguish them enough.
+// It's also worth noting that 'lighten' is used irrespective of mode. This is intentional, as the header will always have a dark background.
+// Should this change, this approach will need re-visiting.
+
 export default function Header({
 	openStateFuncClosed,
 	iconsVisible,
