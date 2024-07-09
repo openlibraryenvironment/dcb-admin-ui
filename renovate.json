@@ -20,5 +20,5 @@
 			"groupName": "Cypress packages"
 		}
 	],
-	"extends": ["config:recommended"]
+	"extends": ["config:base"]
 }
