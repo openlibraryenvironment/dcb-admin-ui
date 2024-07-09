@@ -1,5 +1,5 @@
 import localFont from "next/font/local";
-import { ThemeOptions, alpha, darken, lighten } from "@mui/material/styles";
+import { ThemeOptions, darken, lighten } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-pro/themeAugmentation";
 
 // We have switched to using Next local fonts due to Next.js having issues fetching Google Fonts that were causing strange behaviour in dev mode
@@ -255,7 +255,7 @@ const baseTheme: ThemeOptions = {
 					":hover": {
 						backgroundColor:
 							theme.palette.mode == "light"
-								? alpha(theme.palette.primary.detailsAccordionSummary, 0.08)
+								? darken(theme.palette.primary.detailsAccordionSummary, 0.08)
 								: lighten(theme.palette.primary.detailsAccordionSummary, 0.08),
 					},
 					":active": {
