@@ -1,3 +1,15 @@
+# [1.20.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.19.0...v1.20.0) (2024-07-10)
+
+
+### Bug Fixes
+
+* Remove unnecessary alpha ([4004e90](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4004e90c042816ae5f9682781e130c2a386cbf17))
+
+
+### Features
+
+* Introduce initial master detail [DCB-1295] ([55097bb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/55097bb6d223b994b2f9b754e0ab6d6fb05882ff))
+
 # [1.19.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.18.0...v1.19.0) (2024-07-04)
 
 
