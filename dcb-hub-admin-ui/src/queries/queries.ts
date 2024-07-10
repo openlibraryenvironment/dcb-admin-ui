@@ -319,6 +319,11 @@ export const getLocations = gql`
 				id
 				code
 				name
+				type
+				agency {
+					id
+					name
+				}
 				hostSystem {
 					name
 				}
@@ -567,6 +572,10 @@ export const getLibraryGroups = gql`
 				code
 				name
 				type
+				consortium {
+					name
+					id
+				}
 			}
 			pageable {
 				number

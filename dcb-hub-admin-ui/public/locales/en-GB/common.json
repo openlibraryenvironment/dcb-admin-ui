@@ -47,6 +47,12 @@
 			"go_back": "Go back",
 			"toggle_on": "Toggle onboarding mode"
 		},
+		"data_grid": {
+			"checkbox_selection": "Checkbox selection",
+			"collapse": "Collapse",
+			"expand": "Expand",
+			"master_detail": "Master detail"
+		},
 		"error": {
 			"401": {
 				"name": "401 Unauthorised",
@@ -142,6 +148,7 @@
 		"check_for_updates_disabled": "You cannot check for updates when a patron request is in status {{status}}.",
 		"check_successful": "Check complete",
 		"check_unsuccessful": "Check unsuccessful",
+		"cluster_record_uuid": "Cluster record UUID",
 		"code": "code",
 		"collapse": "Collapse all",
 		"contributor_uuid": "Contributor UUID",
@@ -182,6 +189,7 @@
 		"local_request_status_raw": "Raw local request status",
 		"local_supplier_id": "Local supplier request ID",
 		"location_agency": "Location agency UUID",
+		"location_agency_name": "Location agency name",
 		"location_code": "Location code",
 		"location_uuid": "Location UUID",
 		"location_info": "Location information",

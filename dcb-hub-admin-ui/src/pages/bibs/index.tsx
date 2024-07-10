@@ -8,11 +8,14 @@ import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
+// import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
 
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();
 
 	const router = useRouter();
+	const customColumns = useCustomColumns();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -50,9 +53,10 @@ const Bibs: NextPage = () => {
 				// Sorting is disabled on this page because of the expensive nature of sorting millions of records.
 				// If we want to restore it, just remove the 'sortable' attributes.
 				columns={[
+					...customColumns,
 					{
 						field: "title",
-						headerName: "Title",
+						headerName: t("details.source_bib_title"),
 						minWidth: 150,
 						flex: 0.6,
 						sortable: false,
@@ -60,7 +64,7 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "clusterRecordId",
-						headerName: "Cluster record UUID",
+						headerName: t("details.cluster_record_uuid"),
 						minWidth: 50,
 						flex: 0.5,
 						sortable: false,
@@ -71,7 +75,7 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "sourceRecordId",
-						headerName: "Source record ID",
+						headerName: t("details.source_record_id"),
 						minWidth: 50,
 						sortable: false,
 						filterOperators: standardFilters,
@@ -79,7 +83,7 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "sourceSystemId",
-						headerName: "Source system UUID",
+						headerName: t("details.source_system_id"),
 						minWidth: 50,
 						sortable: false,
 						filterOperators: equalsOnly,
@@ -87,7 +91,7 @@ const Bibs: NextPage = () => {
 					},
 					{
 						field: "id",
-						headerName: "Source bib UUID",
+						headerName: t("details.source_bib_uuid"),
 						minWidth: 100,
 						flex: 0.5,
 						sortable: false,
@@ -101,6 +105,9 @@ const Bibs: NextPage = () => {
 				searchPlaceholder={t("bibRecords.search_placeholder")}
 				sortDirection="ASC"
 				sortAttribute="sourceRecordId"
+				// getDetailPanelContent={({ row }: any) => (
+				// 	<MasterDetail row={row} type="bibs" />
+				// )}
 			/>
 		);
 	};

@@ -47,6 +47,8 @@ import {
 	finishedPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
 } from "src/helpers/columns";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -57,6 +59,7 @@ const TOTAL_ACCORDIONS = 19; // Total number of accordions
 
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
+	const customColumns = useCustomColumns();
 
 	// pollInterval is in ms - set to 2 mins
 	const { data, loading, error } = useQuery(getLibraryById, {
@@ -1216,7 +1219,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={exceptionQueryVariables}
 									type="patronRequestsLibraryException"
 									coreType="patronRequests"
-									columns={standardPatronRequestColumns}
+									columns={[...customColumns, ...standardPatronRequestColumns]}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
@@ -1234,6 +1237,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
 									onTotalSizeChange={handleTotalSizeChange}
+									getDetailPanelContent={({ row }: any) => (
+										<MasterDetail row={row} type="patronRequests" />
+									)}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
@@ -1265,7 +1271,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={outOfSequenceQueryVariables}
 									type="patronRequestsLibraryOutOfSequence"
 									coreType="patronRequests"
-									columns={standardPatronRequestColumns}
+									columns={[...customColumns, ...standardPatronRequestColumns]}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
@@ -1282,6 +1288,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
 									onTotalSizeChange={handleTotalSizeChange}
+									getDetailPanelContent={({ row }: any) => (
+										<MasterDetail row={row} type="patronRequests" />
+									)}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
@@ -1313,7 +1322,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={inProgressQueryVariables}
 									type="patronRequestsLibraryActive"
 									coreType="patronRequests"
-									columns={standardPatronRequestColumns}
+									columns={[...customColumns, ...standardPatronRequestColumns]}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
@@ -1330,6 +1339,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
 									onTotalSizeChange={handleTotalSizeChange}
+									getDetailPanelContent={({ row }: any) => (
+										<MasterDetail row={row} type="patronRequests" />
+									)}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
@@ -1361,7 +1373,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={finishedQueryVariables}
 									type="patronRequestsLibraryCompleted"
 									coreType="patronRequests"
-									columns={standardPatronRequestColumns}
+									columns={[...customColumns, ...standardPatronRequestColumns]}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
@@ -1379,6 +1391,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortDirection="DESC"
 									sortAttribute="dateCreated"
 									onTotalSizeChange={handleTotalSizeChange}
+									getDetailPanelContent={({ row }: any) => (
+										<MasterDetail row={row} type="patronRequests" />
+									)}
 								/>
 							</SubAccordionDetails>
 						</SubAccordion>
