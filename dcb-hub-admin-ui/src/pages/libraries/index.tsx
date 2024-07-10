@@ -12,6 +12,8 @@ import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
+// import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 const Libraries: NextPage = () => {
 	// State management for the adding library to group modal
@@ -23,6 +25,7 @@ const Libraries: NextPage = () => {
 		setAddToGroup(false);
 	};
 	const { t } = useTranslation();
+	const customColumns = useCustomColumns();
 
 	const router = useRouter();
 	const { data, status } = useSession({
@@ -72,6 +75,8 @@ const Libraries: NextPage = () => {
 					hostLmsCirculation: false,
 				}}
 				columns={[
+					...customColumns,
+
 					{
 						field: "abbreviatedName",
 						headerName: "Abbreviated name",
@@ -211,6 +216,9 @@ const Libraries: NextPage = () => {
 				sortDirection="ASC"
 				sortAttribute="shortName"
 				sortModel={[{ field: "shortName", sort: "asc" }]}
+				// getDetailPanelContent={({ row }: any) => (
+				// 	<MasterDetail row={row} type="libraries" />
+				// )}
 			/>
 			{addToGroup ? (
 				<AddLibraryToGroup show={addToGroup} onClose={closeAddToGroup} />

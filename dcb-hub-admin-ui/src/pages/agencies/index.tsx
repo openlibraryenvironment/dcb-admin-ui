@@ -9,6 +9,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
+// import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 const Agencies: NextPage = () => {
 	// i18n useTranslation hook - this provides the 't' function for translations
@@ -17,6 +19,7 @@ const Agencies: NextPage = () => {
 	// For further filter customisation, see here https://mui.com/x/react-data-grid/filtering/customization/
 
 	const router = useRouter();
+	const customColumns = useCustomColumns();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -49,6 +52,7 @@ const Agencies: NextPage = () => {
 						id: false,
 					}}
 					columns={[
+						...customColumns,
 						{
 							field: "name",
 							headerName: "Agency name",
@@ -81,6 +85,9 @@ const Agencies: NextPage = () => {
 					sortModel={[{ field: "name", sort: "asc" }]}
 					sortDirection="ASC"
 					sortAttribute="name"
+					// getDetailPanelContent={({ row }: any) => (
+					// 	<MasterDetail row={row} type="agencies" />
+					// )}
 				/>
 			</div>
 		</AdminLayout>

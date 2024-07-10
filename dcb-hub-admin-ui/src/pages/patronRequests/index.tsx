@@ -24,6 +24,9 @@ import {
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { useCallback, useState } from "react";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
+
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -34,6 +37,10 @@ const PatronRequests: NextPage = () => {
 			router.push("/auth/logout");
 		},
 	});
+	const customColumns = useCustomColumns();
+	// Combines standard columns with master detail and checkbox columns
+	const allColumns = [...customColumns, ...standardPatronRequestColumns];
+
 	const exceptionQueryVariables = `status: "ERROR"`;
 	const outOfSequenceQueryVariables = `outOfSequenceFlag:true AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED"`;
 	const inProgressQueryVariables = `outOfSequenceFlag:false AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED"`;
@@ -124,7 +131,7 @@ const PatronRequests: NextPage = () => {
 						presetQueryVariables={exceptionQueryVariables}
 						type="patronRequestsLibraryException"
 						coreType="patronRequests"
-						columns={standardPatronRequestColumns}
+						columns={allColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
@@ -142,6 +149,9 @@ const PatronRequests: NextPage = () => {
 						sortDirection="DESC"
 						sortAttribute="dateCreated"
 						onTotalSizeChange={handleTotalSizeChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
 					/>
 				</StyledAccordionDetails>
 			</StyledAccordion>
@@ -172,7 +182,7 @@ const PatronRequests: NextPage = () => {
 						presetQueryVariables={outOfSequenceQueryVariables}
 						type="patronRequestsLibraryOutOfSequence"
 						coreType="patronRequests"
-						columns={standardPatronRequestColumns}
+						columns={allColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
@@ -185,6 +195,9 @@ const PatronRequests: NextPage = () => {
 						sortDirection="DESC"
 						sortAttribute="dateCreated"
 						onTotalSizeChange={handleTotalSizeChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
 					/>
 				</StyledAccordionDetails>
 			</StyledAccordion>
@@ -215,7 +228,7 @@ const PatronRequests: NextPage = () => {
 						presetQueryVariables={inProgressQueryVariables}
 						type="patronRequestsLibraryActive"
 						coreType="patronRequests"
-						columns={standardPatronRequestColumns}
+						columns={allColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
@@ -228,6 +241,9 @@ const PatronRequests: NextPage = () => {
 						sortDirection="DESC"
 						sortAttribute="dateCreated"
 						onTotalSizeChange={handleTotalSizeChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
 					/>
 				</StyledAccordionDetails>
 			</StyledAccordion>
@@ -258,7 +274,7 @@ const PatronRequests: NextPage = () => {
 						presetQueryVariables={finishedQueryVariables}
 						type="patronRequestsLibraryCompleted"
 						coreType="patronRequests"
-						columns={standardPatronRequestColumns}
+						columns={allColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
@@ -274,6 +290,9 @@ const PatronRequests: NextPage = () => {
 						sortDirection="DESC"
 						sortAttribute="dateCreated"
 						onTotalSizeChange={handleTotalSizeChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
 					/>
 				</StyledAccordionDetails>
 			</StyledAccordion>
@@ -303,7 +322,7 @@ const PatronRequests: NextPage = () => {
 						query={getPatronRequests}
 						type="patronRequests"
 						coreType="patronRequests"
-						columns={standardPatronRequestColumns}
+						columns={allColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
@@ -322,6 +341,9 @@ const PatronRequests: NextPage = () => {
 						sortDirection="DESC"
 						sortAttribute="dateCreated"
 						onTotalSizeChange={handleTotalSizeChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
 					/>
 				</StyledAccordionDetails>
 			</StyledAccordion>

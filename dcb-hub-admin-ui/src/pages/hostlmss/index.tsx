@@ -9,10 +9,13 @@ import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
+// import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
 
 const HostLmss: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
+	const customColumns = useCustomColumns();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -41,6 +44,7 @@ const HostLmss: NextPage = () => {
 				coreType="hostLms"
 				type="hostlmss"
 				columns={[
+					...customColumns,
 					{
 						field: "name",
 						headerName: "Host LMS name",
@@ -98,6 +102,9 @@ const HostLmss: NextPage = () => {
 				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="name"
+				// getDetailPanelContent={({ row }: any) => (
+				// 	<MasterDetail row={row} type="hostlmss" />
+				// )}
 			></ServerPaginationGrid>
 		</AdminLayout>
 	);

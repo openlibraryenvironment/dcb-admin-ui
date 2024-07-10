@@ -3,23 +3,25 @@ import {
 	GridEventListener,
 	GridFilterModel,
 	GridSortModel,
-	GridToolbar,
-	GridToolbarQuickFilter,
 } from "@mui/x-data-grid-pro";
 import { DocumentNode, useQuery } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
-import { styled } from "@mui/material/styles"; // Import separately due to this issue https://github.com/vercel/next.js/issues/55663
-import { Box, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
+import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import {
+	CustomNoDataOverlay,
+	CustomNoResultsOverlay,
+} from "./components/DynamicOverlays";
+import QuickSearchToolbar from "./components/QuickSearchToolbar";
 
-const StyledOverlay = styled("div")(() => ({
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-	justifyContent: "center",
-	height: "100%",
-}));
+// Slots that won't change are defined here to stop them from being re-created on every render.
+// See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
+const staticSlots = {
+	toolbar: QuickSearchToolbar,
+	detailPanelExpandIcon: MdExpandMore,
+	detailPanelCollapseIcon: MdExpandLess,
+};
 
 export default function ServerPaginationGrid({
 	query,
@@ -39,6 +41,7 @@ export default function ServerPaginationGrid({
 	disableHoverInteractions,
 	presetQueryVariables,
 	onTotalSizeChange,
+	getDetailPanelContent,
 }: {
 	query: DocumentNode;
 	type: string;
@@ -58,6 +61,7 @@ export default function ServerPaginationGrid({
 	disableHoverInteractions?: boolean;
 	presetQueryVariables?: string;
 	onTotalSizeChange?: any;
+	getDetailPanelContent?: any;
 }) {
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
 	// GraphQL data comes in an array that's named after the core type, which causes problems
@@ -79,27 +83,8 @@ export default function ServerPaginationGrid({
 
 	// TODO in future work:
 	// Support filtering by date on Patron Requests
-	// Multi-Filter GUI
 
-	function CustomNoDataOverlay() {
-		return (
-			<StyledOverlay>
-				<Box sx={{ mt: 1 }}>
-					<Typography variant="body1"> {noDataMessage} </Typography>
-				</Box>
-			</StyledOverlay>
-		);
-	}
-
-	function CustomNoResultsOverlay() {
-		return (
-			<StyledOverlay>
-				<Box sx={{ mt: 1 }}>
-					<Typography variant="body1"> {noResultsMessage} </Typography>
-				</Box>
-			</StyledOverlay>
-		);
-	}
+	const getDetailPanelHeight = useCallback(() => "auto", []); // Should be able to take this out when master detail is expanded to all
 
 	const [paginationModel, setPaginationModel] = useState({
 		page: 0,
@@ -303,6 +288,10 @@ export default function ServerPaginationGrid({
 					"& .MuiDataGrid-cell:focus": {
 						outline: disableHoverInteractions ? "none" : "",
 					},
+					"& .MuiDataGrid-detailPanel": {
+						overflow: "hidden", // Prevent scrollbars in the detail panel
+						height: "auto", // Adjust height automatically
+					},
 				}}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
 				// v7 of the DataGrid removes this but also breaks accessibility - to be looked at when we upgrade.
@@ -327,9 +316,13 @@ export default function ServerPaginationGrid({
 				onPaginationModelChange={setPaginationModel}
 				autoHeight={true}
 				slots={{
-					toolbar: QuickSearchToolbar,
-					noResultsOverlay: CustomNoResultsOverlay,
-					noRowsOverlay: CustomNoDataOverlay,
+					...staticSlots,
+					noResultsOverlay: () => (
+						<CustomNoResultsOverlay noResultsMessage={noResultsMessage} />
+					),
+					noRowsOverlay: () => (
+						<CustomNoDataOverlay noDataMessage={noDataMessage} />
+					),
 				}}
 				localeText={{
 					toolbarQuickFilterPlaceholder:
@@ -337,6 +330,8 @@ export default function ServerPaginationGrid({
 					toolbarExportCSV: t("datagrid.download_current_page"),
 					toolbarExportPrint: t("datagrid.print_current_page"),
 				}}
+				getDetailPanelContent={getDetailPanelContent}
+				getDetailPanelHeight={getDetailPanelHeight}
 				// See examples here for what can be customised
 				// https://github.com/mui/mui-x/blob/next/packages/grid/x-data-grid/src/constants/localeTextConstants.ts
 				// https://stackoverflow.com/questions/75697255/how-to-change-mui-datagrid-toolbar-label-and-input-placeholder-text
@@ -355,27 +350,5 @@ export default function ServerPaginationGrid({
 				}}
 			/>
 		</div>
-	);
-}
-
-function QuickSearchToolbar() {
-	return (
-		<Box
-			sx={{
-				p: 0.5,
-				pb: 0,
-			}}
-		>
-			<GridToolbar />
-			<GridToolbarQuickFilter
-				debounceMs={100}
-				quickFilterParser={(searchInput: string) =>
-					searchInput
-						.split(",")
-						.map((value) => value.trim())
-						.filter((value) => value !== "")
-				}
-			/>
-		</Box>
 	);
 }

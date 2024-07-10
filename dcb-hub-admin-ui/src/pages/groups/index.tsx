@@ -12,6 +12,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
 import { standardFilters } from "src/helpers/filters";
+// import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { useCustomColumns } from "src/helpers/useCustomColumns";
 
 // Groups Feature Page Structure
 // This page shows the list of groups
@@ -21,6 +23,7 @@ import { standardFilters } from "src/helpers/filters";
 
 const Groups: NextPage = () => {
 	const [showNewGroup, setShowNewGroup] = useState(false);
+	const customColumns = useCustomColumns();
 	const openNewGroup = () => {
 		setShowNewGroup(true);
 	};
@@ -66,6 +69,7 @@ const Groups: NextPage = () => {
 					id: false,
 				}}
 				columns={[
+					...customColumns,
 					{
 						field: "name",
 						headerName: "Group name",
@@ -104,6 +108,9 @@ const Groups: NextPage = () => {
 				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="name"
+				// getDetailPanelContent={({ row }: any) => (
+				// 	<MasterDetail row={row} type="groups" />
+				// )}
 			/>
 			<div>
 				{showNewGroup ? (
