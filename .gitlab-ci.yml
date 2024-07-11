@@ -5,7 +5,7 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
 
 default:
-  image: node:latest
+  image: node:20.15.1-alpine
   before_script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - git config --global user.name "ianibbo"
