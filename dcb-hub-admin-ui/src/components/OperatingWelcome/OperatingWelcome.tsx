@@ -44,9 +44,8 @@ export default function OperatingWelcome() {
 					flex: 0.3,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: {
-						row: { agency: { hostLms: { lmsClientClass: string } } };
-					}) => getILS(params?.row?.agency?.hostLms?.lmsClientClass),
+					valueGetter: (value, row) =>
+						getILS(row?.agency?.hostLms?.lmsClientClass),
 					// These default to the ILS and ingest of the first Host LMS
 				},
 				{
@@ -56,9 +55,8 @@ export default function OperatingWelcome() {
 					flex: 0.3,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: {
-						row: { agency: { hostLms: { clientConfig: { ingest: boolean } } } };
-					}) => params?.row?.agency?.hostLms?.clientConfig?.ingest,
+					valueGetter: (value, row) =>
+						row?.agency?.hostLms?.clientConfig?.ingest,
 				},
 				// Hidden by default
 				{
@@ -67,8 +65,7 @@ export default function OperatingWelcome() {
 					flex: 0.5,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: { row: { agency: { authProfile: string } } }) =>
-						params?.row?.agency?.authProfile,
+					valueGetter: (value, row) => row?.agency?.authProfile,
 				},
 				{
 					field: "isSupplyingAgency",
@@ -76,10 +73,8 @@ export default function OperatingWelcome() {
 					flex: 0.25,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: {
-						row: { agency: { isSupplyingAgency: boolean } };
-					}) => {
-						const agency = params?.row?.agency;
+					valueGetter: (value, row) => {
+						const agency = row?.agency;
 						if (
 							agency &&
 							Object.prototype.hasOwnProperty.call(
@@ -93,7 +88,7 @@ export default function OperatingWelcome() {
 							return t("libraries.circulation.not_set");
 						}
 
-						return params?.row?.agency?.isSupplyingAgency;
+						return row?.agency?.isSupplyingAgency;
 					},
 				},
 				{
@@ -102,10 +97,8 @@ export default function OperatingWelcome() {
 					flex: 0.25,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: {
-						row: { agency: { isBorrowingAgency: boolean } };
-					}) => {
-						const agency = params?.row?.agency;
+					valueGetter: (value, row) => {
+						const agency = row?.agency;
 						if (
 							agency &&
 							Object.prototype.hasOwnProperty.call(
@@ -119,7 +112,7 @@ export default function OperatingWelcome() {
 							return t("libraries.circulation.not_set");
 						}
 
-						return params?.row?.agency?.isBorrowingAgency;
+						return row?.agency?.isBorrowingAgency;
 					},
 				},
 				{
@@ -128,9 +121,7 @@ export default function OperatingWelcome() {
 					flex: 0.5,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: {
-						row: { agency: { hostLms: { code: string } } };
-					}) => params?.row?.agency?.hostLms?.code,
+					valueGetter: (value, row) => row?.agency?.hostLms?.code,
 				},
 				{
 					field: "hostLmsCatalogue",
@@ -138,8 +129,7 @@ export default function OperatingWelcome() {
 					flex: 0.5,
 					filterable: false,
 					sortable: false,
-					valueGetter: (params: { row: { secondHostLms: { code: string } } }) =>
-						params?.row?.secondHostLms?.code,
+					valueGetter: (value, row) => row?.secondHostLms?.code,
 				},
 				{
 					field: "id",

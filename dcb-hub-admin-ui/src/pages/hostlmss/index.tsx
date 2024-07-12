@@ -66,9 +66,10 @@ const HostLmss: NextPage = () => {
 						flex: 0.5,
 						filterable: false, // Cannot currently filter on nested properties.
 						sortable: false,
-						valueGetter: (params: {
-							row: { clientConfig: { "default-agency-code": string } };
-						}) => params?.row?.clientConfig?.["default-agency-code"],
+						valueGetter: (
+							value,
+							row: { clientConfig: { "default-agency-code": string } },
+						) => row?.clientConfig?.["default-agency-code"],
 					},
 					{
 						field: "clientConfigIngest",
@@ -77,9 +78,8 @@ const HostLmss: NextPage = () => {
 						flex: 0.5,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: { clientConfig: { ingest: boolean } };
-						}) => params?.row?.clientConfig?.ingest,
+						valueGetter: (value, row: { clientConfig: { ingest: boolean } }) =>
+							row?.clientConfig?.ingest,
 					},
 					// HIDDEN BY DEFAULT
 					{

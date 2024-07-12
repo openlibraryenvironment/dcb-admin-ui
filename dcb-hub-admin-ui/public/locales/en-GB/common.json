@@ -50,8 +50,11 @@
 		"data_grid": {
 			"checkbox_selection": "Checkbox selection",
 			"collapse": "Collapse",
+			"download_current_page": "Download current page as CSV",
 			"expand": "Expand",
-			"master_detail": "Master detail"
+			"find_column": "Find column",
+			"master_detail": "Master detail",
+			"print_current_page": "Print current page"
 		},
 		"error": {
 			"401": {

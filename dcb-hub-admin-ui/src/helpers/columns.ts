@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { containsOnly, equalsOnly, standardFilters } from "./filters";
 import { formatDuration } from "./formatDuration";
+import { PatronRequest } from "@models/PatronRequest";
 
 // Handles standard columns so we don't have to re-declare them everywhere
 
@@ -39,7 +40,7 @@ export const standardRefValueMappingColumns = [
 		minWidth: 50,
 		flex: 0.5,
 		filterOperators: standardFilters,
-		valueGetter: (params: { row: { toValue: string } }) => params.row.toValue,
+		valueGetter: (value: any, row: { toValue: any }) => row?.toValue,
 	},
 ];
 
@@ -94,8 +95,8 @@ export const standardPatronRequestColumns = [
 		headerName: "Request created",
 		minWidth: 150,
 		filterable: false,
-		valueGetter: (params: { row: { dateCreated: string } }) => {
-			const requestCreated = params.row.dateCreated;
+		valueGetter: (value: any, row: { dateCreated: string }) => {
+			const requestCreated = row.dateCreated;
 			return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
 		},
 	},
@@ -109,9 +110,8 @@ export const standardPatronRequestColumns = [
 		headerName: "Patron barcode",
 		filterable: false,
 		sortable: false,
-		valueGetter: (params: {
-			row: { requestingIdentity: { localBarcode: string } };
-		}) => params?.row?.requestingIdentity?.localBarcode,
+		valueGetter: (value: any, row: PatronRequest) =>
+			row?.requestingIdentity?.localBarcode,
 	},
 	{
 		field: "clusterRecordTitle",
@@ -120,19 +120,20 @@ export const standardPatronRequestColumns = [
 		flex: 1.25,
 		filterable: false, // Cannot currently filter on nested properties.
 		sortable: false,
-		valueGetter: (params: { row: { clusterRecord: { title: string } } }) =>
-			params?.row?.clusterRecord?.title,
+		valueGetter: (value: any, row: { clusterRecord: { title: string } }) =>
+			row?.clusterRecord?.title,
 	},
 	{
 		field: "suppliers",
 		headerName: "Supplying agency",
 		filterable: false,
-		valueGetter: (params: {
-			row: { suppliers: Array<{ localAgency: string }> };
-		}) => {
+		valueGetter: (
+			value: any,
+			row: { suppliers: Array<{ localAgency: string }> },
+		) => {
 			// Check if suppliers array is not empty
-			if (params.row.suppliers.length > 0) {
-				return params.row.suppliers[0].localAgency;
+			if (row.suppliers.length > 0) {
+				return row.suppliers[0].localAgency;
 			} else {
 				return ""; // This allows us to handle the array being empty, and any related type errors.
 			}
@@ -183,8 +184,8 @@ export const standardPatronRequestColumns = [
 		headerName: "Time in state",
 		minWidth: 50,
 		filterOperators: equalsOnly,
-		valueGetter: (params: { row: { elapsedTimeInCurrentStatus: number } }) =>
-			formatDuration(params.row.elapsedTimeInCurrentStatus),
+		valueGetter: (value: any, row: { elapsedTimeInCurrentStatus: number }) =>
+			formatDuration(row.elapsedTimeInCurrentStatus),
 	},
 	{
 		field: "isManuallySelectedItem",
@@ -197,8 +198,8 @@ export const standardPatronRequestColumns = [
 		headerName: "Request updated",
 		minWidth: 150,
 		filterable: false,
-		valueGetter: (params: { row: { dateUpdated: string } }) => {
-			const requestUpdated = params.row.dateUpdated;
+		valueGetter: (value: any, row: { dateUpdated: string }) => {
+			const requestUpdated = row.dateUpdated;
 			return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
 		},
 	},

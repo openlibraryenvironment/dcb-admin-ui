@@ -70,8 +70,8 @@ const Bibs: NextPage = () => {
 						sortable: false,
 						filterOperators: equalsOnly,
 						filterable: false,
-						valueGetter: (params: { row: { contributesTo: { id: string } } }) =>
-							params?.row?.contributesTo?.id,
+						valueGetter: (value: any, row: { contributesTo: { id: string } }) =>
+							row?.contributesTo?.id,
 					},
 					{
 						field: "sourceRecordId",

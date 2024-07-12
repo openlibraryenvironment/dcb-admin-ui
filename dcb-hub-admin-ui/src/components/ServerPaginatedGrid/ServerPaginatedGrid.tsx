@@ -1,5 +1,6 @@
 import {
 	DataGridPro,
+	GridColDef,
 	GridEventListener,
 	GridFilterModel,
 	GridSortModel,
@@ -47,7 +48,7 @@ export default function ServerPaginationGrid({
 	type: string;
 	selectable: boolean;
 	pageSize: number;
-	columns: any;
+	columns: GridColDef[];
 	columnVisibilityModel?: any;
 	sortModel?: any;
 	noResultsMessage?: string;
@@ -293,9 +294,6 @@ export default function ServerPaginationGrid({
 						height: "auto", // Adjust height automatically
 					},
 				}}
-				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
-				// v7 of the DataGrid removes this but also breaks accessibility - to be looked at when we upgrade.
-				experimentalFeatures={{ ariaV7: true }}
 				columns={columns}
 				rows={data?.[coreType]?.content ?? []}
 				{...data}
@@ -327,8 +325,9 @@ export default function ServerPaginationGrid({
 				localeText={{
 					toolbarQuickFilterPlaceholder:
 						searchPlaceholder ?? t("general.search"),
-					toolbarExportCSV: t("datagrid.download_current_page"),
-					toolbarExportPrint: t("datagrid.print_current_page"),
+					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
+					toolbarExportCSV: t("ui.data_grid.download_current_page"),
+					toolbarExportPrint: t("ui.data_grid.print_current_page"),
 				}}
 				getDetailPanelContent={getDetailPanelContent}
 				getDetailPanelHeight={getDetailPanelHeight}

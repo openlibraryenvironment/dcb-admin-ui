@@ -54,8 +54,8 @@ const Locations: NextPage = () => {
 						flex: 0.6,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: { row: { hostSystem: { name: string } } }) =>
-							params?.row?.hostSystem?.name,
+						valueGetter: (value, row: { hostSystem: { name: string } }) =>
+							row?.hostSystem?.name,
 					},
 					{
 						field: "name",
