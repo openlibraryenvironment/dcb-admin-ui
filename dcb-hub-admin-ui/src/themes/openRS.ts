@@ -78,6 +78,20 @@ const openRSLight = createTheme({
 					"&.Mui-focusVisible": {
 						outlineColor: "#000000",
 					},
+					"&.MuiButton-contained": {
+						"&:disabled": {
+							background: "#E0E0E0",
+							color: "#7E7E7E",
+							border: "none",
+						},
+					},
+					"&.MuiButton-outlined": {
+						"&:disabled": {
+							background: "#E0E0E0",
+							color: "#7E7E7E",
+							border: "none",
+						},
+					},
 				},
 			},
 
@@ -198,6 +212,20 @@ const openRSDark = createTheme({
 				root: {
 					"&.Mui-focusVisible": {
 						outlineColor: "#FFFFFF",
+					},
+					"&.MuiButton-contained": {
+						"&:disabled": {
+							background: "#393939",
+							color: "#727374",
+							border: "none",
+						},
+					},
+					"&.MuiButton-outlined": {
+						"&:disabled": {
+							background: "#393939",
+							color: "#727374",
+							border: "none",
+						},
 					},
 				},
 			},
