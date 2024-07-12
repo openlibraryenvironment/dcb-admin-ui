@@ -114,20 +114,8 @@ const AllMappings: NextPage = () => {
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators: standardFilters,
-						valueGetter: (params: { row: { toValue: string } }) =>
-							params.row.toValue,
+						valueGetter: (value, row: { toValue: string }) => row.toValue,
 					},
-					/* 		{
-						field: "last_imported",
-						headerName: "Last imported",
-						minWidth: 100,
-						flex: 0.5,
-						filterOperators: standardFilters,
-						valueGetter: (params: { row: { lastImported: string } }) => {
-							const lastImported = params.row.lastImported;
-							return dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-						},
-					}, */
 				]}
 				noDataMessage={t("mappings.import_mappings", {
 					category: t("mappings.ref_value").toLowerCase(),

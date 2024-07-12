@@ -1,4 +1,5 @@
 export interface PatronRequest {
+	requestingIdentity: any;
 	id: number;
 	patronId: string;
 	patronAgencyCode: string;

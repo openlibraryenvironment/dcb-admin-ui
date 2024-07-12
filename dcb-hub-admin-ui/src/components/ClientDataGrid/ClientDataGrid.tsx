@@ -140,7 +140,6 @@ export default function ClientDataGrid<T extends object>({
 					},
 				}}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
-				experimentalFeatures={{ ariaV7: true }}
 				checkboxSelection={selectable}
 				pagination
 				disableRowSelectionOnClick
@@ -191,8 +190,8 @@ export default function ClientDataGrid<T extends object>({
 					},
 				}}
 				localeText={{
-					toolbarExportCSV: t("datagrid.download_current_page"),
-					toolbarExportPrint: t("datagrid.print_current_page"),
+					toolbarExportCSV: t("ui.data_grid.download_current_page"),
+					toolbarExportPrint: t("ui.data_grid.print_current_page"),
 				}}
 			></MUIDataGrid>
 		</div>

@@ -49,6 +49,7 @@ import {
 } from "src/helpers/columns";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { Person } from "@models/Person";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -570,9 +571,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								headerName: t("libraries.contacts.name"),
 								minWidth: 50,
 								flex: 0.7,
-								valueGetter: (params: {
-									row: { firstName: string; lastName: string };
-								}) => `${params.row.firstName} ${params.row.lastName}`,
+								valueGetter: (value: string, row: Person) =>
+									`${row.firstName} ${row.lastName}`,
 							},
 							{
 								field: "email",

@@ -95,9 +95,8 @@ const Libraries: NextPage = () => {
 						flex: 0.5,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: { agency: { hostLms: { lmsClientClass: string } } };
-						}) => getILS(params?.row?.agency?.hostLms?.lmsClientClass),
+						valueGetter: (value, row) =>
+							getILS(row?.agency?.hostLms?.lmsClientClass),
 						// This defaults to the ILS of the first Host LMS
 					},
 					{
@@ -106,9 +105,7 @@ const Libraries: NextPage = () => {
 						flex: 0.5,
 						sortable: false,
 						filterable: false,
-						valueGetter: (params: {
-							row: { agency: { authProfile: string } };
-						}) => params?.row?.agency?.authProfile,
+						valueGetter: (value, row) => row?.agency?.authProfile,
 					},
 					{
 						field: "id",
@@ -129,11 +126,9 @@ const Libraries: NextPage = () => {
 						flex: 0.3,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: {
-								agency: { hostLms: { clientConfig: { ingest: boolean } } };
-							};
-						}) => params?.row?.agency?.hostLms?.clientConfig?.ingest,
+						valueGetter: (value, row) => {
+							return row?.agency?.hostLms?.clientConfig?.ingest;
+						},
 					},
 					{
 						field: "isSupplyingAgency",
@@ -141,10 +136,8 @@ const Libraries: NextPage = () => {
 						flex: 0.25,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: { agency: { isSupplyingAgency: boolean } };
-						}) => {
-							const agency = params?.row?.agency;
+						valueGetter: (value, row) => {
+							const agency = row?.agency;
 							if (
 								agency &&
 								Object.prototype.hasOwnProperty.call(
@@ -158,7 +151,7 @@ const Libraries: NextPage = () => {
 								return t("libraries.circulation.not_set");
 							}
 
-							return params?.row?.agency?.isSupplyingAgency;
+							return row?.agency?.isSupplyingAgency;
 						},
 					},
 					{
@@ -167,10 +160,8 @@ const Libraries: NextPage = () => {
 						flex: 0.25,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: { agency: { isBorrowingAgency: boolean } };
-						}) => {
-							const agency = params?.row?.agency;
+						valueGetter: (value, row) => {
+							const agency = row?.agency;
 							if (
 								agency &&
 								Object.prototype.hasOwnProperty.call(
@@ -184,7 +175,7 @@ const Libraries: NextPage = () => {
 								return t("libraries.circulation.not_set");
 							}
 
-							return params?.row?.agency?.isBorrowingAgency;
+							return row?.agency?.isBorrowingAgency;
 						},
 					},
 					{
@@ -193,9 +184,7 @@ const Libraries: NextPage = () => {
 						flex: 0.5,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: { agency: { hostLms: { code: string } } };
-						}) => params?.row?.agency?.hostLms?.code,
+						valueGetter: (value, row) => row?.agency?.hostLms?.code,
 					},
 					{
 						field: "hostLmsCatalogue",
@@ -203,9 +192,7 @@ const Libraries: NextPage = () => {
 						flex: 0.5,
 						filterable: false,
 						sortable: false,
-						valueGetter: (params: {
-							row: { secondHostLms: { code: string } };
-						}) => params?.row?.secondHostLms?.code,
+						valueGetter: (value, row) => row?.secondHostLms?.code,
 					},
 				]}
 				selectable={true}
