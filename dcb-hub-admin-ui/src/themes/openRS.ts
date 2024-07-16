@@ -36,6 +36,7 @@ const openRSLight = createTheme({
 			pageBackground: "#F9F9F9",
 			pageContentBackground: "#FFFFFF",
 			loginButtonOutlineColor: "#FFFFFF",
+			outlineColor: "#000000",
 		},
 		// Currently not defining secondary palette. When we do we need to define all colours.
 		// Otherwise you can run into type issues.
@@ -127,18 +128,6 @@ const openRSLight = createTheme({
 				},
 			},
 		},
-		MuiAccordionSummary: {
-			styleOverrides: {
-				root: {
-					"&:focus": {
-						borderColor: "#000000",
-					},
-					"&.Mui-focusVisible": {
-						borderColor: "#000000",
-					},
-				},
-			},
-		},
 		MuiTooltip: {
 			styleOverrides: {
 				tooltip: {
@@ -182,6 +171,7 @@ const openRSDark = createTheme({
 			sidebar: "#292929",
 			titleArea: "#1E1E1E",
 			loginButtonOutlineColor: "#FFFFFF",
+			outlineColor: "#FFFFFF",
 		},
 		// secondary: {
 		// 	main: "#75BEDB",
@@ -233,18 +223,6 @@ const openRSDark = createTheme({
 		MuiListItemButton: {
 			styleOverrides: {
 				root: {
-					"&.Mui-focusVisible": {
-						borderColor: "#FFFFFF",
-					},
-				},
-			},
-		},
-		MuiAccordionSummary: {
-			styleOverrides: {
-				root: {
-					"&:focus": {
-						borderColor: "#FFFFFF",
-					},
 					"&.Mui-focusVisible": {
 						borderColor: "#FFFFFF",
 					},

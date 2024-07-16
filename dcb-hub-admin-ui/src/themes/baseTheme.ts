@@ -249,7 +249,9 @@ const baseTheme: ThemeOptions = {
 			styleOverrides: {
 				root: ({ theme }) => ({
 					"&.Mui-focusVisible": {
-						outline: "2px solid", // For keyboard focus
+						border: "2px solid", // For keyboard focus
+						borderColor: theme.palette.primary.outlineColor,
+						boxSizing: "border-box",
 					},
 					backgroundColor: theme.palette.primary.detailsAccordionSummary,
 					":hover": {
