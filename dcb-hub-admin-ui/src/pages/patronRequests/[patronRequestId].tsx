@@ -1007,7 +1007,7 @@ export default function PatronRequestDetails({
 								</IconContext.Provider>
 							}
 						>
-							<Typography variant="accordionSummary">
+							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 								{t("details.patron")}
 							</Typography>
 						</SubAccordionSummary>
