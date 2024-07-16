@@ -46,6 +46,7 @@ declare module "@mui/material/styles" {
 		pageBackground?: string;
 		pageContentBackground?: string;
 		loginButtonOutlineColor?: string;
+		outlineColor?: string;
 	}
 
 	interface SimplePaletteColorOptions {
@@ -75,6 +76,7 @@ declare module "@mui/material/styles" {
 		pageBackground?: string;
 		pageContentBackground?: string;
 		loginButtonOutlineColor?: string;
+		outlineColor?: string;
 	}
 	interface TypographyVariants {
 		appTitle?: React.CSSProperties;

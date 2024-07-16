@@ -3,8 +3,6 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	Button,
-	darken,
-	lighten,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -26,20 +24,21 @@ StyledAccordion.defaultProps = {
 // however it doesn't seem that the MUI AccordionSummary fully supports that at this time.
 // As such we have to apply the lighten / darken rules at this level.
 
-const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
-	backgroundColor: theme.palette.primary.detailsAccordionSummary,
-	":hover": {
-		backgroundColor:
-			theme.palette.mode == "light"
-				? darken(theme.palette.primary.detailsAccordionSummary, 0.08)
-				: lighten(theme.palette.primary.detailsAccordionSummary, 0.08),
-	},
-	":active": {
-		backgroundColor:
-			theme.palette.mode == "light"
-				? darken(theme.palette.primary.detailsAccordionSummary, 0.16)
-				: lighten(theme.palette.primary.detailsAccordionSummary, 0.16),
-	},
+// to be removed and integrated into the theme, in theming cleanup ticket: https://openlibraryfoundation.atlassian.net/browse/DCB-1304
+const StyledAccordionSummary = styled(AccordionSummary)(() => ({
+	// backgroundColor: theme.palette.primary.detailsAccordionSummary,
+	// ":hover": {
+	// 	backgroundColor:
+	// 		theme.palette.mode == "light"
+	// 			? darken(theme.palette.primary.detailsAccordionSummary, 0.08)
+	// 			: lighten(theme.palette.primary.detailsAccordionSummary, 0.08),
+	// },
+	// ":active": {
+	// 	backgroundColor:
+	// 		theme.palette.mode == "light"
+	// 			? darken(theme.palette.primary.detailsAccordionSummary, 0.16)
+	// 			: lighten(theme.palette.primary.detailsAccordionSummary, 0.16),
+	// },
 }));
 
 const StyledAccordionDetails = styled(AccordionDetails)(() => ({
@@ -55,7 +54,10 @@ const SubAccordion = styled(StyledAccordion)(() => ({
 }));
 
 const SubAccordionSummary = styled(AccordionSummary)(() => ({
-	backgroundColor: "none",
+	backgroundColor: "transparent",
+	"&.Mui-focusVisible": {
+		outline: "2px solid", // For keyboard focus
+	},
 }));
 
 const SubAccordionDetails = styled(AccordionDetails)(() => ({

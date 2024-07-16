@@ -241,8 +241,8 @@ export default function Sidebar(props: any) {
 										":active": {
 											backgroundColor:
 												theme.palette.mode === "light"
-													? darken(theme.palette.primary.sidebar, 0.08)
-													: lighten(theme.palette.primary.sidebar, 0.16),
+													? darken(theme.palette.primary.sidebar, 0.16)
+													: lighten(theme.palette.primary.sidebar, 0.24),
 										},
 										"&.Mui-selected": {
 											backgroundColor: isChildPage
