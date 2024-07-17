@@ -1,3 +1,11 @@
+## [1.20.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.0...v1.20.1) (2024-07-17)
+
+
+### Bug Fixes
+
+* Fix patron text on request details page ([720f7f7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/720f7f782aad24f19c8b07cd77de614039192311))
+* Upgrade MUI Data Grids to v7 and resolve breaking changes [DCB-1235] ([bdf0d56](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/bdf0d56c6049423a473de63f46c1b33bd552703d))
+
 # [1.20.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.19.0...v1.20.0) (2024-07-10)
 
 
