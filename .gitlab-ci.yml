@@ -6,11 +6,6 @@ variables:
 
 default:
   image: node:20.15.1-bullseye
-  before_script:
-    - export NPM_TOKEN="$NPMJS_TOKEN"
-    - git config --global user.name "ianibbo"
-    - git config --global user.email "ian.ibbotson@k-int.com"
-    - ls -al
   tags:
     - ki-onprem
 
@@ -26,22 +21,28 @@ cache:
     - .yarn
     - .npm
 
-build-container-image:
-  image: docker:stable
-  stage: container
-  script:
-    - echo Building container image
-    - docker info
-
-
 build:
   stage: build
   image: node:20.15.1-bullseye
+  tags:
+    - ki-onprem
   script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - git config --global user.name "ianibbo"
+    - git config --global user.email "ian.ibbotson@k-int.com"
     - cd dcb-hub-admin-ui
     - pwd
     - ls -al
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
     - npm install
     - npm run semantic-release
+
+build-container-image:
+  image: docker:stable
+  stage: container
+  tags:
+    - ki-onprem
+  script:
+    - echo Building container image
+    - docker info
 
