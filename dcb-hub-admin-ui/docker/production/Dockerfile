@@ -29,6 +29,8 @@ RUN npm run build
 
 FROM nginx:stable-alpine
 
+# This is done to provide a mechanism whereby in k8s we can mount a configmap as this file
+# providing a way to set config in a k8s idiomatic way
 COPY config-empty.json /usr/share/nginx/html/config.json
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
