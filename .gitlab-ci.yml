@@ -29,6 +29,7 @@ cache:
 build:
   stage: build
   script:
+    - docker info
     - pwd
     - ls -al
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
