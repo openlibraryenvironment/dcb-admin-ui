@@ -5,6 +5,7 @@ const { releaseDate } = require("./release-info.json");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
 	compiler: {
 		styledComponents: true,
 		// This helps SWC (the compiler) build our styled components faster,
