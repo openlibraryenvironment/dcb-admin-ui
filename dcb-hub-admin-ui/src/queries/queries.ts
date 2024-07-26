@@ -128,6 +128,64 @@ export const getAgencyById = gql`
 	}
 `;
 
+// DATA CHANGE LOG
+
+export const getDataChangeLog = gql`
+	query LoadDataChangeLog(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+	) {
+		dataChangeLog(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+		) {
+			totalSize
+			content {
+				id
+				entityId
+				entityType
+				actionInfo
+				lastEditedBy
+				reason
+				changes
+				oldData
+				newData
+			}
+			pageable {
+				number
+				offset
+			}
+		}
+	}
+`;
+
+export const getDataChangeLogById = gql`
+	query GetDataChangeLogById($query: String!) {
+		dataChangeLog(query: $query) {
+			totalSize
+			content {
+				id
+				entityId
+				entityType
+				actionInfo
+				lastEditedBy
+				reason
+				changes
+				oldData
+				newData
+			}
+			pageable {
+				number
+				offset
+			}
+		}
+	}
+`;
+
 // AUDITS
 
 export const getAuditById = gql`

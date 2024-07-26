@@ -244,12 +244,24 @@ export default function ServerPaginationGrid({
 			type === "patronRequestsLibraryActive" ||
 			type === "patronRequestsLibraryOutOfSequence" ||
 			type === "patronRequestsLibraryCompleted" ||
-			type === "patronRequestsLibraryException"
+			type === "patronRequestsLibraryException" ||
+			type === "dataChangeLog"
 		) {
 			if (event.ctrlKey || event.metaKey)
-				window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+				if (type === "dataChangeLog") {
+					window.open(
+						`/serviceInfo/dataChangeLog/${params?.row?.id}`,
+						"_blank",
+					);
+				} else {
+					window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+				}
 			if (!(event.ctrlKey || event.metaKey))
-				router.push(`/patronRequests/${params?.row?.id}`);
+				if (type === "dataChangeLog") {
+					router.push(`/serviceInfo/dataChangeLog/${params?.row?.id}`);
+				} else {
+					router.push(`/patronRequests/${params?.row?.id}`);
+				}
 		} else if (
 			// Others we don't want users to be able to click through on
 			type !== "referenceValueMappings" &&

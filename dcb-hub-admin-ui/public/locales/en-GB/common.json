@@ -28,8 +28,9 @@
 		"patronRequests": "Patron requests",
 		"profile": "Profile",
 		"serviceInfo": {
-			"name": "Service info",
 			"bibRecordCountByHostLms": "Bib record count by host LMS",
+			"dataChangeLog": "Data change log",
+			"name": "Service info",
 			"serviceStatus": "Service status"
 		},
 		"settings": {
@@ -262,6 +263,19 @@
 		"no_rows": "No agencies available. If you're expecting data to be here, please refresh the page.",
 		"supplying": "Is supplying agency?",
 		"search_placeholder": "Search by name"
+	},
+
+	"data_change_log": {
+		"action": "Action",
+		"changes": "Changes",
+		"entity_id": "Entity UUID",
+		"entity_type": "Entity type",
+		"id": "Data change log UUID",
+		"last_edited_by": "Last edited by",
+		"new_data": "New data",
+		"old_data": "Old data",
+		"reason": "Reason for change",
+		"timestamp": "Timestamp"
 	},
 
 	"general": {

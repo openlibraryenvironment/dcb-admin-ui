@@ -84,6 +84,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const handleParticipationConfirmation = (
 		active: string,
 		targetParticipation: string,
+		// put a reason in here
 	) => {
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
@@ -104,10 +105,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				? {
 						code: library?.agencyCode,
 						isBorrowingAgency: borrowInput ?? null,
+						reason: "Testing the audit functionality with participation",
 					}
 				: {
 						code: library?.agencyCode,
 						isSupplyingAgency: supplyInput ?? null,
+						reason: "Testing the audit functionality with participation",
 					};
 		updateParticipation({
 			variables: {
@@ -244,7 +247,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	}
 
 	// These are pre-sets for the library Patron Request grids.
-	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND status: "ERROR"`;
+	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND status: "ERROR"`;
 	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
 	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
 	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
