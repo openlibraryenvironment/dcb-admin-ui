@@ -178,10 +178,17 @@ export default function ServerPaginationGrid({
 			// This is particularly useful for things like mappings, where we don't want to query deleted mappings unless explicitly stated.
 			switch (type) {
 				case "circulationStatus":
-					filterQuery = `${presetQueryVariables} && ${filterQuery}`;
-					break;
 				case "patronRequestLibrary":
-					filterQuery = `${presetQueryVariables} && ${filterQuery}`;
+				case "patronRequestsLibraryException":
+				case "patronRequestsLibraryOutOfSequence":
+				case "patronRequestsLibraryActive":
+				case "patronRequestsLibraryCompleted":
+				case "referenceValueMappingsForLibrary":
+				case "numericRangeMappingsForLibrary":
+					filterQuery =
+						filterQuery != ""
+							? `${presetQueryVariables} && ${filterQuery}`
+							: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
 					break;
 			}
 
