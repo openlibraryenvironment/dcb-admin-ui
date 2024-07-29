@@ -40,12 +40,13 @@ import { getInitialAccordionState } from "src/helpers/getInitialAccordionState";
 import LibraryHostLmsDetails from "./LibraryHostLmsDetails";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import {
-	standardNumRangeMappingColumns,
 	standardPatronRequestColumns,
-	standardRefValueMappingColumns,
 	defaultPatronRequestLibraryColumnVisibility,
 	finishedPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
+	patronRequestColumnsNoStatusFilter,
+	refValueMappingColumnsNoCategoryFilter,
+	numRangeMappingColumnsNoCategoryFilter,
 } from "src/helpers/columns";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
@@ -805,7 +806,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={refValueItemTypeVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
+								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -831,7 +832,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={refValueItemTypeSecondHostLmsVariables}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
+									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -855,7 +856,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={numericRangeItemTypeVariables}
 								type="numericRangeMappingsForLibrary"
 								coreType="numericRangeMappings"
-								columns={standardNumRangeMappingColumns}
+								columns={numRangeMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.no_results")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -882,7 +883,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="numericRangeMappingsForLibrary"
 									coreType="numericRangeMappings"
-									columns={standardNumRangeMappingColumns}
+									columns={numRangeMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.no_results")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -927,7 +928,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={refValueLocationVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
+								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -955,7 +956,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
+									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -1001,7 +1002,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={refValuePatronTypeVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
+								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -1029,7 +1030,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
+									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -1053,7 +1054,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={numericRangePatronTypeVariables}
 								type="numericRangeMappingsForLibrary"
 								coreType="numericRangeMappings"
-								columns={standardNumRangeMappingColumns}
+								columns={numRangeMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.no_results")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -1080,7 +1081,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="numericRangeMappingsForLibrary"
 									coreType="numericRangeMappings"
-									columns={standardNumRangeMappingColumns}
+									columns={numRangeMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.no_results")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -1219,7 +1220,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={exceptionQueryVariables}
 									type="patronRequestsLibraryException"
 									coreType="patronRequests"
-									columns={[...customColumns, ...standardPatronRequestColumns]}
+									columns={[
+										...customColumns,
+										...patronRequestColumnsNoStatusFilter,
+									]}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
