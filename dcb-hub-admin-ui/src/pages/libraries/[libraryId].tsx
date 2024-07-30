@@ -84,7 +84,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const handleParticipationConfirmation = (
 		active: string,
 		targetParticipation: string,
-		// put a reason in here
+		reason: string,
 	) => {
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
@@ -105,12 +105,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				? {
 						code: library?.agencyCode,
 						isBorrowingAgency: borrowInput ?? null,
-						reason: "Testing the audit functionality with participation",
+						reason: reason,
 					}
 				: {
 						code: library?.agencyCode,
 						isSupplyingAgency: supplyInput ?? null,
-						reason: "Testing the audit functionality with participation",
+						reason: reason,
 					};
 		updateParticipation({
 			variables: {
@@ -1408,12 +1408,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Confirmation
 						open={showConfirmationBorrowing}
 						onClose={() => closeConfirmation("borrowing")}
-						onConfirm={() =>
+						onConfirm={(reason) =>
 							handleParticipationConfirmation(
 								"borrowing",
 								library?.agency?.isBorrowingAgency
 									? "disableBorrowing"
 									: "enableBorrowing",
+								reason,
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type="participationStatus"
@@ -1430,12 +1431,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Confirmation
 						open={showConfirmationSupplying}
 						onClose={() => closeConfirmation("supplying")}
-						onConfirm={() =>
+						onConfirm={(reason) =>
 							handleParticipationConfirmation(
-								"supplying",
-								library?.agency?.isSupplyingAgency
-									? "disableSupplying"
-									: "enableSupplying",
+								"borrowing",
+								library?.agency?.isBorrowingAgency
+									? "disableBorrowing"
+									: "enableBorrowing",
+								reason,
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type={"participationStatus"}

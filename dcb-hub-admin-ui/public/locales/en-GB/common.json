@@ -415,6 +415,7 @@
 				"para1_enable_supplying": "Catalogue records for <bold>{{library}}</bold> will become <bold>discoverable</bold> and <bold>requestable</bold> by patrons of other consortium libraries.",
 				"para1_disable_borrowing": "<bold>{{library}} patrons</bold> will no longer be able to place borrowing requests at other consortium libraries.",
 				"para1_disable_supplying": "Catalogue records for <bold>{{library}}</bold> will <bold>not be discoverable</bold> or <bold>requestable</bold> by patrons of other consortium libraries.",
+				"reason": "Reason for change",
 				"select_enable_borrowing": "Select \"Enable borrowing\" to go ahead",
 				"select_enable_supplying": "Select \"Enable supplying\" to go ahead",
 				"select_disable_borrowing": "Select \"Disable borrowing\" to go ahead",

@@ -136,12 +136,14 @@ export const getDataChangeLog = gql`
 		$pagesize: Int!
 		$order: String!
 		$query: String!
+		$orderBy: String!
 	) {
 		dataChangeLog(
 			pageno: $pageno
 			pagesize: $pagesize
 			order: $order
 			query: $query
+			orderBy: $orderBy
 		) {
 			totalSize
 			content {

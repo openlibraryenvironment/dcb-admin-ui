@@ -10,13 +10,15 @@ import {
 	Box,
 	Typography,
 	Divider,
+	TextField,
 } from "@mui/material";
 import { useTranslation, Trans } from "next-i18next";
+import { useState } from "react";
 
 type ConfirmType = {
 	open: boolean;
 	onClose: any;
-	onConfirm: any;
+	onConfirm: (reason: string) => void; // Updated to accept a reason
 	existingMappingCount?: number;
 	code?: string;
 	type: string;
@@ -40,6 +42,7 @@ const Confirmation = ({
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
+	const [reason, setReason] = useState("");
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -201,14 +204,33 @@ const Confirmation = ({
 			{/* // Enforcing the style of bold, centered modal or dialog headers */}
 			<DialogTitle variant="modalTitle">{getHeaderText()}</DialogTitle>
 			<Divider aria-hidden="true"></Divider>
-			<DialogContent>{getDialogContent()}</DialogContent>
+			<DialogContent>
+				<Box>
+					{getDialogContent()}
+					<TextField
+						fullWidth
+						multiline
+						rows={3}
+						required
+						variant="outlined"
+						label={t("libraries.circulation.confirmation.reason")}
+						value={reason}
+						onChange={(e) => setReason(e.target.value)}
+						margin="normal"
+					/>
+				</Box>
+			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose} variant="outlined" color="primary">
 					{t("mappings.cancel")}
 				</Button>
 				{/* This makes the Cancel and Replace Mappings buttons left and right aligned, respectively*/}
 				<div style={{ flex: "1 0 0" }} />
-				<Button onClick={onConfirm} color="primary" variant="contained">
+				<Button
+					onClick={() => onConfirm(reason)}
+					color="primary"
+					variant="contained"
+				>
 					{getButtonText()}
 				</Button>
 			</DialogActions>

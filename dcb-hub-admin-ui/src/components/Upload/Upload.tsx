@@ -144,9 +144,9 @@ const FileUpload = ({ category, onCancel }: any) => {
 		}
 	};
 
-	const handleConfirmUpload = () => {
+	const handleConfirmUpload = (reason: string) => {
 		setConfirmOpen(false);
-		uploadFile();
+		uploadFile(reason);
 	};
 
 	const handleCancelUpload = () => {
@@ -157,7 +157,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 		onCancel();
 	};
 
-	const uploadFile = () => {
+	const uploadFile = (reason?: string) => {
 		console.log(
 			"DEV: Upload file method triggered, replacement:" +
 				replacement +
@@ -175,6 +175,11 @@ const FileUpload = ({ category, onCancel }: any) => {
 		formData.append("file", addedFile);
 		formData.append("code", code);
 		formData.append("mappingCategory", category);
+		if (reason) {
+			formData.append("reason", reason);
+		} else {
+			formData.append("reason", "Initial upload of mappings");
+		}
 
 		axios
 			.post(url, formData, { headers })
@@ -289,7 +294,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 			<Confirmation
 				open={isConfirmOpen}
 				onClose={handleCancelUpload}
-				onConfirm={handleConfirmUpload}
+				onConfirm={(reason) => handleConfirmUpload(reason)}
 				existingMappingCount={existingMappingCount}
 				fileName={addedFile?.name}
 				code={code}
