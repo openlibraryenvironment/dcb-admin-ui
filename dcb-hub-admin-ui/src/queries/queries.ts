@@ -150,6 +150,7 @@ export const getDataChangeLog = gql`
 				entityType
 				actionInfo
 				lastEditedBy
+				timestampLogged
 				reason
 				changes
 				oldData
@@ -174,6 +175,7 @@ export const getDataChangeLogById = gql`
 				actionInfo
 				lastEditedBy
 				reason
+				timestampLogged
 				changes
 				oldData
 				newData

@@ -8,10 +8,11 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { standardFilters } from "src/helpers/filters";
+import { equalsOnly, standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import dayjs from "dayjs";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 const DataChangeLog: NextPage = () => {
 	const { t } = useTranslation();
@@ -39,7 +40,6 @@ const DataChangeLog: NextPage = () => {
 		);
 	}
 
-	// Master detail is commented out, but will be restored in future work.
 	return (
 		<AdminLayout title={t("nav.serviceInfo.dataChangeLog")}>
 			<ServerPaginationGrid
@@ -54,32 +54,10 @@ const DataChangeLog: NextPage = () => {
 						minWidth: 150,
 						flex: 0.6,
 						filterable: false,
-						sortable: false,
 						valueGetter: (value: any, row: { timestampLogged: string }) => {
 							const timestampLogged = row.timestampLogged;
 							return dayjs(timestampLogged).format("YYYY-MM-DD HH:mm");
 						},
-					},
-					{
-						field: "entityId",
-						headerName: "Entity ID",
-						minWidth: 150,
-						flex: 0.6,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "entityType",
-						headerName: "Entity type",
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "id",
-						headerName: "Data change log UUID",
-						minWidth: 50,
-						flex: 0.8,
-						filterOperators: standardFilters,
 					},
 					{
 						field: "lastEditedBy",
@@ -89,8 +67,15 @@ const DataChangeLog: NextPage = () => {
 						filterOperators: standardFilters,
 					},
 					{
-						field: "reason",
-						headerName: "Reason",
+						field: "entityId",
+						headerName: "Entity ID",
+						minWidth: 150,
+						flex: 0.6,
+						filterOperators: equalsOnly,
+					},
+					{
+						field: "entityType",
+						headerName: "Entity type",
 						minWidth: 50,
 						flex: 0.4,
 						filterOperators: standardFilters,
@@ -103,27 +88,42 @@ const DataChangeLog: NextPage = () => {
 						filterOperators: standardFilters,
 					},
 					{
+						field: "reason",
+						headerName: "Reason",
+						minWidth: 50,
+						flex: 0.6,
+						filterOperators: standardFilters,
+					},
+					{
 						field: "changes",
 						headerName: "Changes",
 						minWidth: 50,
 						flex: 0.4,
-						filterOperators: standardFilters,
+						filterOperators: equalsOnly, // May want to filter by changes attributes - complex
+					},
+					{
+						field: "id",
+						headerName: "Data change log UUID",
+						minWidth: 50,
+						flex: 0.8,
+						filterOperators: equalsOnly,
 					},
 				]}
 				selectable={true}
 				pageSize={10}
-				noDataMessage={t("dataChangeLog.no_rows")}
-				noResultsMessage={t("dataChangeLog.no_results")}
+				noDataMessage={t("data_change_log.no_rows")}
+				noResultsMessage={t("data_change_log.no_results")}
 				columnVisibilityModel={{
 					id: false,
+					changes: false,
 				}}
 				// This is how to set the default sort order
-				sortModel={[{ field: "id", sort: "asc" }]}
-				sortDirection="ASC"
-				sortAttribute="id"
-				// getDetailPanelContent={({ row }: any) => (
-				// 	<MasterDetail row={row} type="dataChangeLog" />
-				// )}
+				sortModel={[{ field: "timestampLogged", sort: "desc" }]}
+				sortDirection="DESC"
+				sortAttribute="timestampLogged"
+				getDetailPanelContent={({ row }: any) => (
+					<MasterDetail row={row} type="dataChangeLog" />
+				)}
 			/>
 		</AdminLayout>
 	);

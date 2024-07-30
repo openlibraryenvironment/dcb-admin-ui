@@ -273,6 +273,8 @@
 		"id": "Data change log UUID",
 		"last_edited_by": "Last edited by",
 		"new_data": "New data",
+		"no_results": "No data change log entries were found. Try changing your search terms or filters.",
+		"no_rows": "No data change log entries are available. If you're expecting data to be here, please refresh the page.",
 		"old_data": "Old data",
 		"reason": "Reason for change",
 		"timestamp": "Timestamp"

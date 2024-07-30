@@ -11,6 +11,7 @@ import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
+import Link from "@components/Link/Link";
 
 type DataChangeLogDetails = {
 	dataChangeLogId: string;
@@ -95,6 +96,10 @@ export default function DataChangeLogDetails({
 							{t("data_change_log.entity_id")}
 						</Typography>
 						<RenderAttribute attribute={dataChangeLog?.entityId} />
+						<Link href={`/agencies/${dataChangeLog?.entityId}`}>
+							View details
+						</Link>
+						{/* //Make this a contextual link  */}
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
