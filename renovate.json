@@ -3,5 +3,6 @@
 	"dependencyDashboard": true,
 	"bumpVersion": "patch",
 	"prHourlyLimit": 10,
-	"extends": ["config:base"]
+	"extends": ["config:base"],
+	"rangeStrategy": "update-lockfile"
 }
