@@ -267,17 +267,39 @@
 
 	"data_change_log": {
 		"action": "Action",
+		"category": "Change category",
+		"category_helper": "Choose a pre-defined reason for this change",
+		"categories": {
+			"additional_information": "Additional information provided",
+			"changing_status": "Status changed",
+			"details_changed": "Details changed",
+			"error_correction": "Error correction",
+			"initial_upload": "Initial mappings upload",
+			"mappings_replacement": "Mappings replacement",
+			"membership_ended": "Membership ended",
+			"new_member": "New member",
+			"other": "Other"
+		},
 		"changes": "Changes",
 		"entity_id": "Entity UUID",
 		"entity_type": "Entity type",
+		"field_label": "Field label",
+		"field_name": "Field name",
 		"id": "Data change log UUID",
 		"last_edited_by": "Last edited by",
 		"new_data": "New data",
+		"new_value": "New value",
 		"no_results": "No data change log entries were found. Try changing your search terms or filters.",
 		"no_rows": "No data change log entries are available. If you're expecting data to be here, please refresh the page.",
 		"old_data": "Old data",
+		"old_value": "Old value",
 		"reason": "Reason for change",
-		"timestamp": "Timestamp"
+		"reason_helper": "Additional context for why this change is being made.",
+		"reference_url": "Change reference URL",
+		"ref_url_helper": "The URL of the ticket describing the change requested, if applicable.",
+		"table_name": "Database table name",
+		"timestamp": "Timestamp",
+		"user": "User"
 	},
 
 	"general": {

@@ -85,6 +85,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		active: string,
 		targetParticipation: string,
 		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
 	) => {
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
@@ -106,11 +108,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						code: library?.agencyCode,
 						isBorrowingAgency: borrowInput ?? null,
 						reason: reason,
+						changeCategory: changeCategory,
+						changeReferenceUrl: changeReferenceUrl,
 					}
 				: {
 						code: library?.agencyCode,
 						isSupplyingAgency: supplyInput ?? null,
 						reason: reason,
+						changeCategory: changeCategory,
+						changeReferenceUrl: changeReferenceUrl,
 					};
 		updateParticipation({
 			variables: {
@@ -1408,13 +1414,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Confirmation
 						open={showConfirmationBorrowing}
 						onClose={() => closeConfirmation("borrowing")}
-						onConfirm={(reason) =>
+						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 							handleParticipationConfirmation(
 								"borrowing",
 								library?.agency?.isBorrowingAgency
 									? "disableBorrowing"
 									: "enableBorrowing",
 								reason,
+								changeCategory,
+								changeReferenceUrl,
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type="participationStatus"
@@ -1431,13 +1439,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Confirmation
 						open={showConfirmationSupplying}
 						onClose={() => closeConfirmation("supplying")}
-						onConfirm={(reason) =>
+						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 							handleParticipationConfirmation(
 								"borrowing",
 								library?.agency?.isBorrowingAgency
 									? "disableBorrowing"
 									: "enableBorrowing",
 								reason,
+								changeCategory,
+								changeReferenceUrl,
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type={"participationStatus"}

@@ -11,6 +11,8 @@ import {
 	Typography,
 	Divider,
 	TextField,
+	Stack,
+	Autocomplete,
 } from "@mui/material";
 import { useTranslation, Trans } from "next-i18next";
 import { useState } from "react";
@@ -18,7 +20,11 @@ import { useState } from "react";
 type ConfirmType = {
 	open: boolean;
 	onClose: any;
-	onConfirm: (reason: string) => void; // Updated to accept a reason
+	onConfirm: (
+		reason: string,
+		changeReferenceUrl: string,
+		changeCategory: string,
+	) => void; // Updated to accept a reason
 	existingMappingCount?: number;
 	code?: string;
 	type: string;
@@ -43,6 +49,8 @@ const Confirmation = ({
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const [reason, setReason] = useState("");
+	const [changeCategory, setChangeCategory] = useState("");
+	const [changeReferenceUrl, setChangeReferenceUrl] = useState("");
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -205,20 +213,57 @@ const Confirmation = ({
 			<DialogTitle variant="modalTitle">{getHeaderText()}</DialogTitle>
 			<Divider aria-hidden="true"></Divider>
 			<DialogContent>
-				<Box>
+				<Stack direction="column">
 					{getDialogContent()}
+					<Autocomplete
+						options={[
+							t("data_change_log.categories.error_correction"),
+							t("data_change_log.categories.details_changed"),
+							t("data_change_log.categories.new_member"),
+							t("data_change_log.categories.membership_ended"),
+							t("data_change_log.categories.additional_information"),
+							t("data_change_log.categories.changing_status"),
+							t("data_change_log.categories.initial_upload"),
+							t("data_change_log.categories.mappings_replacement"),
+							t("data_change_log.categories.other"),
+						]}
+						onChange={(event, value) =>
+							setChangeCategory(
+								value ?? t("data_change_log.categories.details_changed"),
+							)
+						} // Or set a default here
+						renderInput={(params) => (
+							<TextField
+								{...params}
+								required
+								label={t("data_change_log.category")}
+								helperText={t("data_change_log.category_helper")}
+							/>
+						)}
+					/>
 					<TextField
 						fullWidth
-						multiline
-						rows={3}
 						required
+						multiline
 						variant="outlined"
-						label={t("libraries.circulation.confirmation.reason")}
+						helperText={t("data_change_log.reason_helper")}
+						label={t("data_change_log.reason")}
 						value={reason}
 						onChange={(e) => setReason(e.target.value)}
 						margin="normal"
 					/>
-				</Box>
+					{/* 					// Limit to 200 chars, and limit categories to 100 chars
+					 */}
+					<TextField
+						fullWidth
+						helperText={t("data_change_log.ref_url_helper")}
+						variant="outlined"
+						label={t("data_change_log.reference_url")}
+						value={changeReferenceUrl}
+						onChange={(e) => setChangeReferenceUrl(e.target.value)}
+						margin="normal"
+					/>
+				</Stack>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose} variant="outlined" color="primary">
@@ -227,7 +272,7 @@ const Confirmation = ({
 				{/* This makes the Cancel and Replace Mappings buttons left and right aligned, respectively*/}
 				<div style={{ flex: "1 0 0" }} />
 				<Button
-					onClick={() => onConfirm(reason)}
+					onClick={() => onConfirm(reason, changeCategory, changeReferenceUrl)}
 					color="primary"
 					variant="contained"
 				>

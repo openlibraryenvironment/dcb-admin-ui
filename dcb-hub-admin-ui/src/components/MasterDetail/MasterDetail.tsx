@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useGridApiContext } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
@@ -7,22 +7,11 @@ import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
 import { formatDuration } from "src/helpers/formatDuration";
+import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 type MasterDetailType = {
 	row: any;
 	type: string;
 };
-
-interface Values {
-	reason: string | null;
-	date_updated: string;
-	last_edited_by: string;
-	is_borrowing_agency: string | null;
-}
-
-interface Changes {
-	new_values: Values;
-	old_values: Values;
-}
 
 export default function MasterDetail({ row, type }: MasterDetailType) {
 	const apiRef = useGridApiContext();
@@ -44,10 +33,6 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 	}, [apiRef, handleViewportInnerSizeChange]);
 
 	const { t } = useTranslation();
-	const changes = row?.changes;
-	const parsedChanges: Changes = JSON.parse(changes);
-	const { new_values, old_values } = parsedChanges;
-	// changes is being sent as a string - investigate why
 
 	switch (type) {
 		case "agencies":
@@ -83,38 +68,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "dataChangeLog":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={4} sm={8} md={12} lg={16}>
-						<Stack direction={"column"}>
-							<Typography variant="attributeTitle">
-								{t("data_change_log.changes")}
-							</Typography>
-							<Typography variant="attributeText">
-								{row?.actionInfo != "INSERT"
-									? Object?.keys(new_values).map((key) => (
-											<Box key={key}>
-												<Typography variant="attributeTitle">{key}</Typography>
-												<Stack direction={"column"}>
-													<Typography variant="attributeText">
-														Old:
-														<RenderAttribute
-															attribute={old_values[key as keyof Values]}
-														/>
-													</Typography>
-												</Stack>
-												<Stack direction={"column"}>
-													<Typography variant="attributeText">
-														New:
-														<RenderAttribute
-															attribute={new_values[key as keyof Values]}
-														/>
-													</Typography>
-												</Stack>
-											</Box>
-										))
-									: row?.changes}
-							</Typography>
-						</Stack>
-					</Grid>
+					<ChangesSummary changes={row?.changes} action={row?.actionInfo} />
 				</MasterDetailLayout>
 			);
 		case "groups":

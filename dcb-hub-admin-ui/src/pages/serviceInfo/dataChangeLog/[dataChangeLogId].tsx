@@ -12,7 +12,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import Link from "@components/Link/Link";
-import { calculateEntityLink } from "src/helpers/calculateEntityLink";
+import {
+	calculateEntityLink,
+	tableNameToEntityName,
+} from "src/helpers/dataChangeLogHelperFunctions";
+import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 
 type DataChangeLogDetails = {
 	dataChangeLogId: string;
@@ -125,6 +129,16 @@ export default function DataChangeLogDetails({
 						<Typography variant="attributeTitle">
 							{t("data_change_log.entity_type")}
 						</Typography>
+						<RenderAttribute
+							attribute={tableNameToEntityName(dataChangeLog?.entityType)}
+						/>
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("data_change_log.table_name")}
+						</Typography>
 						<RenderAttribute attribute={dataChangeLog?.entityType} />
 					</Stack>
 				</Grid>
@@ -147,34 +161,32 @@ export default function DataChangeLogDetails({
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
+							{t("data_change_log.category")}
+						</Typography>
+						<RenderAttribute attribute={dataChangeLog?.changeCategory} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("data_change_log.reference_url")}
+						</Typography>
+						<RenderAttribute attribute={dataChangeLog?.changeReferenceUrl} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
 							{t("data_change_log.action")}
 						</Typography>
 						<RenderAttribute attribute={dataChangeLog?.actionInfo} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("data_change_log.changes")}
-						</Typography>
-						{dataChangeLog?.changes}
-					</Stack>
-				</Grid>
-				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("data_change_log.new_data")}
-						</Typography>
-						{dataChangeLog?.newData}
-					</Stack>
-				</Grid>
-				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("data_change_log.old_data")}
-						</Typography>
-						{dataChangeLog?.oldData}
-					</Stack>
+				<Grid xs={4} sm={8} md={12}>
+					<ChangesSummary
+						changes={dataChangeLog?.changes}
+						action={dataChangeLog?.actionInfo}
+					/>
 				</Grid>
 			</Grid>
 		</AdminLayout>

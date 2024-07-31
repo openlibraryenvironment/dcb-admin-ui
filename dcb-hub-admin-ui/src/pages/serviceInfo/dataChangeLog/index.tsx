@@ -13,6 +13,7 @@ import { equalsOnly, standardFilters } from "src/helpers/filters";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import dayjs from "dayjs";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { tableNameToEntityName } from "src/helpers/dataChangeLogHelperFunctions";
 
 const DataChangeLog: NextPage = () => {
 	const { t } = useTranslation();
@@ -51,8 +52,8 @@ const DataChangeLog: NextPage = () => {
 					{
 						field: "timestampLogged",
 						headerName: "Timestamp",
-						minWidth: 150,
-						flex: 0.6,
+						minWidth: 100,
+						flex: 0.5,
 						filterable: false,
 						valueGetter: (value: any, row: { timestampLogged: string }) => {
 							const timestampLogged = row.timestampLogged;
@@ -60,52 +61,72 @@ const DataChangeLog: NextPage = () => {
 						},
 					},
 					{
-						field: "lastEditedBy",
-						headerName: "Last edited by",
+						field: "entityType",
+						headerName: "Entity",
 						minWidth: 50,
-						flex: 0.4,
+						flex: 0.5,
 						filterOperators: standardFilters,
+						valueGetter: (value: any, row: { entityType: string }) => {
+							const formattedEntity = tableNameToEntityName(row.entityType);
+							return formattedEntity;
+						},
 					},
+
 					{
 						field: "entityId",
-						headerName: "Entity ID",
-						minWidth: 150,
-						flex: 0.6,
+						headerName: t("data_change_log.entity_id"),
+						minWidth: 100,
+						flex: 0.4,
 						filterOperators: equalsOnly,
 					},
 					{
-						field: "entityType",
-						headerName: "Entity type",
+						field: "actionInfo",
+						headerName: t("data_change_log.action"),
 						minWidth: 50,
-						flex: 0.4,
+						flex: 0.25,
 						filterOperators: standardFilters,
 					},
 					{
-						field: "actionInfo",
-						headerName: "Action info",
+						field: "changeCategory",
+						headerName: t("data_change_log.category"),
 						minWidth: 50,
 						flex: 0.4,
 						filterOperators: standardFilters,
 					},
 					{
 						field: "reason",
-						headerName: "Reason",
+						headerName: t("data_change_log.reason"),
+						minWidth: 50,
+						flex: 0.6,
+						filterOperators: standardFilters,
+					},
+					{
+						field: "lastEditedBy",
+						headerName: t("data_change_log.user"),
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators: standardFilters,
+					},
+					// Hidden by default
+					{
+						field: "changeReferenceUrl",
+						headerName: t("data_change_log.reference_url"),
 						minWidth: 50,
 						flex: 0.6,
 						filterOperators: standardFilters,
 					},
 					{
 						field: "changes",
-						headerName: "Changes",
+						headerName: t("data_change_log.changes"),
 						minWidth: 50,
 						flex: 0.4,
 						filterOperators: equalsOnly, // May want to filter by changes attributes - complex
 					},
 					{
 						field: "id",
-						headerName: "Data change log UUID",
+						headerName: t("data_change_log.id"),
 						minWidth: 50,
-						flex: 0.8,
+						flex: 0.4,
 						filterOperators: equalsOnly,
 					},
 				]}
@@ -116,6 +137,7 @@ const DataChangeLog: NextPage = () => {
 				columnVisibilityModel={{
 					id: false,
 					changes: false,
+					changeReferenceUrl: false,
 				}}
 				// This is how to set the default sort order
 				sortModel={[{ field: "timestampLogged", sort: "desc" }]}

@@ -154,9 +154,9 @@ export const getDataChangeLog = gql`
 				lastEditedBy
 				timestampLogged
 				reason
+				changeReferenceUrl
+				changeCategory
 				changes
-				oldData
-				newData
 			}
 			pageable {
 				number
@@ -165,7 +165,8 @@ export const getDataChangeLog = gql`
 		}
 	}
 `;
-
+// 				// oldData
+// newData
 export const getDataChangeLogById = gql`
 	query GetDataChangeLogById($query: String!) {
 		dataChangeLog(query: $query) {
@@ -177,10 +178,10 @@ export const getDataChangeLogById = gql`
 				actionInfo
 				lastEditedBy
 				reason
+				changeReferenceUrl
+				changeCategory
 				timestampLogged
 				changes
-				oldData
-				newData
 			}
 			pageable {
 				number
