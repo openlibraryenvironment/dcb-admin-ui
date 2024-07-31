@@ -3,19 +3,6 @@
 	"dependencyDashboard": true,
 	"bumpVersion": "patch",
 	"prHourlyLimit": 10,
-	"packageRules": [
-		{
-			"matchPackagePatterns": ["^@mui/material"],
-			"groupName": "MUI core packages, excluding MUI X"
-		},
-		{
-			"matchPackagePatterns": ["^emotion"],
-			"groupName": "Emotion styling packages"
-		},
-		{
-			"matchPackagePatterns": ["^cypress"],
-			"groupName": "Cypress packages"
-		}
-	],
-	"extends": ["config:base"]
+	"extends": ["config:base"],
+	"rangeStrategy": "update-lockfile"
 }
