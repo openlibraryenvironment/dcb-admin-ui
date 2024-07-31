@@ -1,3 +1,10 @@
+## [1.20.2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.1...v1.20.2) (2024-07-31)
+
+
+### Bug Fixes
+
+* Preserve grid pre-filters when adding additional filters [DCB-1349] ([e562bef](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e562befd6a205ae47c8762156d724e6848a7095c))
+
 ## [1.20.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.0...v1.20.1) (2024-07-17)
 
 
