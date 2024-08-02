@@ -66,8 +66,14 @@ export default function PatronRequestDetails({
 		},
 	});
 	const [loadingUpdate, setLoadingUpdate] = useState(false);
-	const [successAlertVisibility, setSuccessAlertVisibility] = useState(false);
-	const [errorAlertVisibility, setErrorAlertVisibility] = useState(false);
+	const [loadingCleanup, setLoadingCleanup] = useState(false);
+	const [updateSuccessAlertVisibility, setUpdateSuccessAlertVisibility] =
+		useState(false);
+	const [cleanupSuccessAlertVisibility, setCleanupSuccessAlertVisibility] =
+		useState(false);
+	const [updateErrorAlertVisibility, setErrorAlertVisibility] = useState(false);
+	const [cleanupErrorAlertVisibility, setCleanupErrorAlertVisibility] =
+		useState(false);
 	const router = useRouter();
 
 	const { loading, data, error } = useQuery(getPatronRequestById, {
@@ -125,6 +131,12 @@ export default function PatronRequestDetails({
 		"/patrons/requests/" +
 		patronRequestId +
 		"/update";
+	const cleanupUrl =
+		publicRuntimeConfig.DCB_API_BASE +
+		"/patrons/requests/" +
+		patronRequestId +
+		"/transition/cleanup";
+
 	const handleUpdate: any = async () => {
 		setLoadingUpdate(true);
 		try {
@@ -135,7 +147,7 @@ export default function PatronRequestDetails({
 					headers: { Authorization: `Bearer ${session?.accessToken}` },
 				},
 			);
-			setSuccessAlertVisibility(true);
+			setUpdateSuccessAlertVisibility(true);
 		} catch (error) {
 			console.error("Error starting update", error);
 			console.log("Request data: ", data);
@@ -143,11 +155,33 @@ export default function PatronRequestDetails({
 		}
 
 		console.log("Request to update: ", data);
-		// We may wish to add a loading spinner to this button in future. Ideally this would also be a GraphQL mutation.
 		client.refetchQueries({
 			include: ["LoadPatronRequestsById"],
 		});
 		setLoadingUpdate(false);
+	};
+
+	const handleCleanup: any = async () => {
+		setLoadingCleanup(true);
+		try {
+			await axios.post<any>(
+				cleanupUrl,
+				{},
+				{
+					headers: { Authorization: `Bearer ${session?.accessToken}` },
+				},
+			);
+			setLoadingCleanup(false);
+			setCleanupSuccessAlertVisibility(true);
+		} catch (error) {
+			console.error("Error starting cleanup", error);
+			console.log("Request data: ", data);
+			setCleanupErrorAlertVisibility(true);
+		}
+		client.refetchQueries({
+			include: ["LoadPatronRequestsById"],
+		});
+		setLoadingCleanup(false);
 	};
 
 	if (loading || status === "loading") {
@@ -313,20 +347,46 @@ export default function PatronRequestDetails({
 								</span>
 							</Tooltip>
 							<TimedAlert
-								open={successAlertVisibility}
+								open={
+									updateSuccessAlertVisibility || cleanupSuccessAlertVisibility
+								}
 								severityType="success"
 								autoHideDuration={6000}
-								alertText={t("details.check_successful")}
-								key={"update-success-alert"}
-								onCloseFunc={() => setSuccessAlertVisibility(false)}
+								alertText={
+									updateSuccessAlertVisibility
+										? t("details.check_successful")
+										: t("patron_requests.cleanup_successful")
+								}
+								key={
+									updateSuccessAlertVisibility
+										? "update-success-alert"
+										: "cleanup-success-alert"
+								}
+								onCloseFunc={
+									updateSuccessAlertVisibility
+										? () => setUpdateSuccessAlertVisibility(false)
+										: () => setCleanupSuccessAlertVisibility(false)
+								}
 							/>
 							<TimedAlert
-								open={errorAlertVisibility}
+								open={updateErrorAlertVisibility || cleanupErrorAlertVisibility}
 								severityType="error"
 								autoHideDuration={6000}
-								alertText={t("details.check_unsuccessful")}
-								key={"update-error-alert"}
-								onCloseFunc={() => setErrorAlertVisibility(false)}
+								alertText={
+									updateErrorAlertVisibility
+										? t("details.check_unsuccessful")
+										: t("patron_requests.cleanup_unsuccessful")
+								}
+								key={
+									updateErrorAlertVisibility
+										? "update-error-alert"
+										: "cleanup-error-alert"
+								}
+								onCloseFunc={
+									updateErrorAlertVisibility
+										? () => setErrorAlertVisibility(false)
+										: () => setCleanupErrorAlertVisibility(false)
+								}
 							/>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
@@ -344,6 +404,40 @@ export default function PatronRequestDetails({
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.status} />
 							</Stack>
+							<Tooltip
+								title={
+									patronRequest?.status === "ERROR" &&
+									session?.profile?.roles?.includes("CONSORTIUM_ADMIN") // Must be both request with ERROR state and a user with CONSORTIUM_ADMIN
+										? t("patron_requests.cleanup_info")
+										: t("patron_requests.cleanup_disabled") // Tooltip text when disabled
+								}
+							>
+								<span>
+									<Button
+										variant="outlined"
+										color="primary"
+										sx={{ marginTop: 1 }}
+										onClick={handleCleanup}
+										aria-disabled={loadingCleanup ? true : false}
+										disabled={
+											loadingCleanup ||
+											patronRequest?.status != "ERROR" ||
+											!session?.profile?.roles?.includes("CONSORTIUM_ADMIN")
+												? true
+												: false
+										}
+									>
+										{t("patron_requests.cleanup")}
+										{loadingCleanup ? (
+											<CircularProgress
+												color="inherit"
+												size={13}
+												sx={{ marginLeft: "10px" }}
+											/>
+										) : null}
+									</Button>
+								</span>
+							</Tooltip>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
