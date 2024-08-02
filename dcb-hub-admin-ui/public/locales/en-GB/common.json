@@ -494,6 +494,7 @@
 		},
 		"contacts": {
 			"email": "Email",
+			"entity_name": "Library contact",
 			"location": "Location",
 			"name": "Name",
 			"primary": "Primary contact",
@@ -595,8 +596,10 @@
 		"category": "Category",
 		"select_file": "Select file",
 		"ref_value": "Reference value mappings",
+		"ref_value_one": "Reference value mapping",
 		"ref_value_for": "Reference value mappings for {{hostLms}}",
 		"numeric_range": "Numeric range mappings",
+		"num_range_one": "Numeric range mapping",
 		"numeric_range_for": "Numeric range mappings for {{hostLms}}",
 		"search_placeholder": "Search by category",
 		"search_placeholder_cs": "Search by Host LMS",

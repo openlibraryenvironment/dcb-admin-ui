@@ -13,7 +13,12 @@ import { equalsOnly, standardFilters } from "src/helpers/filters";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import dayjs from "dayjs";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { tableNameToEntityName } from "src/helpers/dataChangeLogHelperFunctions";
+import {
+	calculateEntityLink,
+	tableNameToEntityName,
+} from "src/helpers/dataChangeLogHelperFunctions";
+import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
+import Link from "@components/Link/Link";
 
 const DataChangeLog: NextPage = () => {
 	const { t } = useTranslation();
@@ -67,7 +72,9 @@ const DataChangeLog: NextPage = () => {
 						flex: 0.5,
 						filterOperators: standardFilters,
 						valueGetter: (value: any, row: { entityType: string }) => {
-							const formattedEntity = tableNameToEntityName(row.entityType);
+							const formattedEntity = capitaliseFirstCharacter(
+								t(tableNameToEntityName(row?.entityType)),
+							);
 							return formattedEntity;
 						},
 					},
@@ -78,6 +85,23 @@ const DataChangeLog: NextPage = () => {
 						minWidth: 100,
 						flex: 0.4,
 						filterOperators: equalsOnly,
+						renderCell: (params: any) => {
+							const row = params.row;
+							if (
+								row?.entityType == "reference_value_mapping" ||
+								row?.entityType == "numeric_range_mapping"
+							) {
+								return params.value;
+							} else {
+								return (
+									<Link
+										href={`/${calculateEntityLink(row?.entityType)}/${row?.entityId}`}
+									>
+										{params.value}
+									</Link>
+								);
+							}
+						},
 					},
 					{
 						field: "actionInfo",

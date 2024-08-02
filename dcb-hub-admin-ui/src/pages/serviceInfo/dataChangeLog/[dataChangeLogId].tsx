@@ -17,6 +17,7 @@ import {
 	tableNameToEntityName,
 } from "src/helpers/dataChangeLogHelperFunctions";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
+import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 
 type DataChangeLogDetails = {
 	dataChangeLogId: string;
@@ -130,7 +131,9 @@ export default function DataChangeLogDetails({
 							{t("data_change_log.entity_type")}
 						</Typography>
 						<RenderAttribute
-							attribute={tableNameToEntityName(dataChangeLog?.entityType)}
+							attribute={capitaliseFirstCharacter(
+								t(tableNameToEntityName(dataChangeLog?.entityType)),
+							)}
 						/>
 					</Stack>
 				</Grid>

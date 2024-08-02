@@ -27,25 +27,25 @@ export function calculateEntityLink(entityType: string) {
 export function tableNameToEntityName(entityType: string) {
 	switch (entityType) {
 		case "agency":
-			return "Agency";
+			return "agencies.agencies_one";
 		case "library":
-			return "Library";
+			return "libraries.library";
 		case "host_lms":
-			return "Host LMS";
+			return "hostlms_one";
 		case "library_contact":
-			return "Library contact";
+			return "libraries.contacts.entity_name";
 		case "library_group":
-			return "Group";
+			return "groups.groups_one";
 		case "location":
-			return "Location";
+			return "locations.location_one";
 		case "patron_request":
-			return "Patron request";
+			return "patron_requests.pr_one";
 		case "reference_value_mapping":
-			return "Reference value mapping";
+			return "mappings.ref_value_one";
 		case "numeric_range_mapping":
-			return "Numeric range mapping";
+			return "mappings.num_range_one";
 		case "bib_record":
-			return "Bib record";
+			return "bibRecords.bib_one";
 		default:
 			// If no match, return the original string or a default value
 			return entityType;
