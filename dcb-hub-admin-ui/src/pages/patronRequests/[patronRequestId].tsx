@@ -404,40 +404,39 @@ export default function PatronRequestDetails({
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.status} />
 							</Stack>
-							<Tooltip
-								title={
-									patronRequest?.status === "ERROR" &&
-									session?.profile?.roles?.includes("CONSORTIUM_ADMIN") // Must be both request with ERROR state and a user with CONSORTIUM_ADMIN
-										? t("patron_requests.cleanup_info")
-										: t("patron_requests.cleanup_disabled") // Tooltip text when disabled
-								}
-							>
-								<span>
-									<Button
-										variant="outlined"
-										color="primary"
-										sx={{ marginTop: 1 }}
-										onClick={handleCleanup}
-										aria-disabled={loadingCleanup ? true : false}
-										disabled={
-											loadingCleanup ||
-											patronRequest?.status != "ERROR" ||
-											!session?.profile?.roles?.includes("CONSORTIUM_ADMIN")
-												? true
-												: false
-										}
-									>
-										{t("patron_requests.cleanup")}
-										{loadingCleanup ? (
-											<CircularProgress
-												color="inherit"
-												size={13}
-												sx={{ marginLeft: "10px" }}
-											/>
-										) : null}
-									</Button>
-								</span>
-							</Tooltip>
+							{session?.profile?.roles?.includes("CONSORTIUM_ADMIN") ? (
+								<Tooltip
+									title={
+										patronRequest?.status === "ERROR" // Must be both request with ERROR state and a user with CONSORTIUM_ADMIN
+											? t("patron_requests.cleanup_info")
+											: t("patron_requests.cleanup_disabled") // Tooltip text when disabled
+									}
+								>
+									<span>
+										<Button
+											variant="outlined"
+											color="primary"
+											sx={{ marginTop: 1 }}
+											onClick={handleCleanup}
+											aria-disabled={loadingCleanup ? true : false}
+											disabled={
+												loadingCleanup || patronRequest?.status != "ERROR"
+													? true
+													: false
+											}
+										>
+											{t("patron_requests.cleanup")}
+											{loadingCleanup ? (
+												<CircularProgress
+													color="inherit"
+													size={13}
+													sx={{ marginLeft: "10px" }}
+												/>
+											) : null}
+										</Button>
+									</span>
+								</Tooltip>
+							) : null}
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
