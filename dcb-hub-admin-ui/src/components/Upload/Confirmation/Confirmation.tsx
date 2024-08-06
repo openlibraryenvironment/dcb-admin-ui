@@ -124,7 +124,7 @@ const Confirmation = ({
 									values={{ library }}
 									components={{ bold: <strong /> }}
 								/>
-								<Typography>
+								<Typography mt={1} mb={1}>
 									{t(
 										"libraries.circulation.confirmation.select_enable_supplying",
 									)}
@@ -139,7 +139,7 @@ const Confirmation = ({
 									values={{ library }}
 									components={{ bold: <strong /> }}
 								/>
-								<Typography>
+								<Typography pt={1} pb={1}>
 									{t(
 										"libraries.circulation.confirmation.select_disable_supplying",
 									)}
@@ -154,7 +154,7 @@ const Confirmation = ({
 									values={{ library }}
 									components={{ bold: <strong /> }}
 								/>
-								<Typography>
+								<Typography pt={1} pb={1}>
 									{t(
 										"libraries.circulation.confirmation.select_enable_borrowing",
 									)}
@@ -169,7 +169,7 @@ const Confirmation = ({
 									values={{ library }}
 									components={{ bold: <strong /> }}
 								/>
-								<Typography>
+								<Typography pt={1} pb={1}>
 									{t(
 										"libraries.circulation.confirmation.select_disable_borrowing",
 									)}

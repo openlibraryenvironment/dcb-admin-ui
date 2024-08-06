@@ -1441,10 +1441,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						onClose={() => closeConfirmation("supplying")}
 						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 							handleParticipationConfirmation(
-								"borrowing",
+								"supplying",
 								library?.agency?.isBorrowingAgency
-									? "disableBorrowing"
-									: "enableBorrowing",
+									? "disableSupplying"
+									: "enableSupplying",
 								reason,
 								changeCategory,
 								changeReferenceUrl,

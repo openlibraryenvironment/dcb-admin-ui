@@ -52,7 +52,7 @@ export default function DataChangeLogDetails({
 			<AdminLayout>
 				<Loading
 					title={t("ui.info.loading.document", {
-						document_type: t("dataChangeLogs.dataChangeLog_one"),
+						document_type: t("data_change_log.loading_details"),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
@@ -120,7 +120,7 @@ export default function DataChangeLogDetails({
 						</Typography>
 						<RenderAttribute
 							attribute={dayjs(dataChangeLog?.timestampLogged).format(
-								"YYYY-MM-DD HH:mm",
+								"YYYY-MM-DD HH:mm:ss",
 							)}
 						/>
 					</Stack>
@@ -148,7 +148,7 @@ export default function DataChangeLogDetails({
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("data_change_log.last_edited_by")}
+							{t("data_change_log.user")}
 						</Typography>
 						<RenderAttribute attribute={dataChangeLog?.lastEditedBy} />
 					</Stack>

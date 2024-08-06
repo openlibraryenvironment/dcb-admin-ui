@@ -287,6 +287,7 @@
 		"field_name": "Field name",
 		"id": "Data change log UUID",
 		"last_edited_by": "Last edited by",
+		"loading_details": "data change details",
 		"new_data": "New data",
 		"new_value": "New value",
 		"no_results": "No data change log entries were found. Try changing your search terms or filters.",

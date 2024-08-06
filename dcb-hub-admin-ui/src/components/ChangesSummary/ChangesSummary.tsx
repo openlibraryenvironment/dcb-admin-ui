@@ -37,8 +37,8 @@ export default function ChangesSummary({
 			<Table>
 				<TableHead>
 					<TableRow>
-						<TableCell>{t("data_change_log.field_label")}</TableCell>
 						<TableCell>{t("data_change_log.field_name")}</TableCell>
+						<TableCell>{t("data_change_log.field_label")}</TableCell>
 						<TableCell>{t("data_change_log.new_value")}</TableCell>
 						{isUpdate && (
 							<TableCell>{t("data_change_log.old_value")}</TableCell>

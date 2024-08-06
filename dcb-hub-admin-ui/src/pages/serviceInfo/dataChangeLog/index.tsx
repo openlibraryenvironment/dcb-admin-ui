@@ -62,7 +62,7 @@ const DataChangeLog: NextPage = () => {
 						filterable: false,
 						valueGetter: (value: any, row: { timestampLogged: string }) => {
 							const timestampLogged = row.timestampLogged;
-							return dayjs(timestampLogged).format("YYYY-MM-DD HH:mm");
+							return dayjs(timestampLogged).format("YYYY-MM-DD HH:mm:ss");
 						},
 					},
 					{
@@ -138,13 +138,6 @@ const DataChangeLog: NextPage = () => {
 						minWidth: 50,
 						flex: 0.6,
 						filterOperators: standardFilters,
-					},
-					{
-						field: "changes",
-						headerName: t("data_change_log.changes"),
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: equalsOnly, // May want to filter by changes attributes - complex
 					},
 					{
 						field: "id",
