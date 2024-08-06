@@ -11,7 +11,7 @@
 		"prepare": "husky"
 	},
 	"dependencies": {
-		"@apollo/client": "^3.10.8",
+		"@apollo/client": "^3.11.3",
 		"@emotion/cache": "^11.13.1",
 		"@emotion/react": "^11.13.0",
 		"@emotion/server": "^11.11.0",
@@ -24,7 +24,7 @@
 		"@panva/hkdf": "^1.2.1",
 		"@types/lodash": "^4.17.6",
 		"@typescript-eslint/utils": "^7.15.0",
-		"axios": "^1.7.2",
+		"axios": "^1.7.3",
 		"cookie": "^0.6.0",
 		"cookies-next": "^4.2.1",
 		"cypress-real-events": "^1.13.0",
