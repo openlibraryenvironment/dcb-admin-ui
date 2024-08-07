@@ -23,7 +23,6 @@ export function calculateEntityLink(entityType: string) {
 	}
 }
 
-// may need to return translation keys instead
 export function tableNameToEntityName(entityType: string) {
 	switch (entityType) {
 		case "agency":

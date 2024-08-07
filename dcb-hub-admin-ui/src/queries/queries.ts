@@ -156,6 +156,7 @@ export const getDataChangeLog = gql`
 				reason
 				changeReferenceUrl
 				changeCategory
+				changes
 			}
 			pageable {
 				number

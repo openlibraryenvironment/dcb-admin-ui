@@ -156,12 +156,15 @@ export default function ServerPaginationGrid({
 					patronRequestsLibraryCompleted: "status",
 					circulationStatus: "fromContext",
 					referenceValueMappings: "fromCategory",
+					referenceValueMappingsForLibrary: "fromCategory",
 					numericRangeMappings: "domain",
+					numericRangeMappingsForLibrary: "domain",
 					libraries: "fullName",
 					agencies: "name",
 					groups: "name",
 					hostlmss: "name",
 					locations: "name",
+					dataChangeLog: "actionInfo",
 					default: "id",
 				};
 

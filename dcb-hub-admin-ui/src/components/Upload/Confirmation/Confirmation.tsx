@@ -13,9 +13,12 @@ import {
 	TextField,
 	Stack,
 	Autocomplete,
+	CircularProgress,
 } from "@mui/material";
-import { useTranslation, Trans } from "next-i18next";
-import { useState } from "react";
+import { Form, Formik } from "formik";
+import { Trans, useTranslation } from "next-i18next";
+import { useMemo } from "react";
+import * as Yup from "yup";
 
 type ConfirmType = {
 	open: boolean;
@@ -48,9 +51,36 @@ const Confirmation = ({
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
-	const [reason, setReason] = useState("");
-	const [changeCategory, setChangeCategory] = useState("");
-	const [changeReferenceUrl, setChangeReferenceUrl] = useState("");
+	const validationSchema = useMemo(
+		() =>
+			Yup.object({
+				reason: Yup.string()
+					.required(t("data_change_log.reason_required"))
+					.max(200, t("data_change_log.max_length_exceeded")),
+				changeCategory: Yup.string()
+					.required(t("data_change_log.category_required"))
+					.max(200, t("data_change_log.max_length_exceeded")),
+				changeReferenceUrl: Yup.string().max(
+					200,
+					t("data_change_log.max_length_exceeded"),
+				),
+			}),
+		[t],
+	);
+	const getCharCountHelperText = (
+		value: string,
+		maxLength: number,
+		baseHelperText: string,
+	) => {
+		const remainingChars = maxLength - value.length;
+		if (remainingChars <= 0) {
+			return t("data_change_log.max_length_exceeded", { maxLength });
+		}
+		if (remainingChars <= 20) {
+			return `${baseHelperText} (${t("data_change_log.characters_remaining", { characters: remainingChars })})`;
+		}
+		return baseHelperText;
+	};
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -213,72 +243,157 @@ const Confirmation = ({
 			<DialogTitle variant="modalTitle">{getHeaderText()}</DialogTitle>
 			<Divider aria-hidden="true"></Divider>
 			<DialogContent>
-				<Stack direction="column">
-					{getDialogContent()}
-					<Autocomplete
-						options={[
-							t("data_change_log.categories.error_correction"),
-							t("data_change_log.categories.details_changed"),
-							t("data_change_log.categories.new_member"),
-							t("data_change_log.categories.membership_ended"),
-							t("data_change_log.categories.additional_information"),
-							t("data_change_log.categories.changing_status"),
-							t("data_change_log.categories.initial_upload"),
-							t("data_change_log.categories.mappings_replacement"),
-							t("data_change_log.categories.other"),
-						]}
-						onChange={(event, value) =>
-							setChangeCategory(
-								value ?? t("data_change_log.categories.details_changed"),
-							)
-						} // Or set a default here
-						renderInput={(params) => (
-							<TextField
-								{...params}
-								required
-								label={t("data_change_log.category")}
-								helperText={t("data_change_log.category_helper")}
-							/>
-						)}
-					/>
-					<TextField
-						fullWidth
-						required
-						multiline
-						variant="outlined"
-						helperText={t("data_change_log.reason_helper")}
-						label={t("data_change_log.reason")}
-						value={reason}
-						onChange={(e) => setReason(e.target.value)}
-						margin="normal"
-					/>
-					{/* 					// Limit to 200 chars, and limit categories to 100 chars
-					 */}
-					<TextField
-						fullWidth
-						helperText={t("data_change_log.ref_url_helper")}
-						variant="outlined"
-						label={t("data_change_log.reference_url")}
-						value={changeReferenceUrl}
-						onChange={(e) => setChangeReferenceUrl(e.target.value)}
-						margin="normal"
-					/>
-				</Stack>
-			</DialogContent>
-			<DialogActions>
-				<Button onClick={onClose} variant="outlined" color="primary">
-					{t("mappings.cancel")}
-				</Button>
-				{/* This makes the Cancel and Replace Mappings buttons left and right aligned, respectively*/}
-				<div style={{ flex: "1 0 0" }} />
-				<Button
-					onClick={() => onConfirm(reason, changeCategory, changeReferenceUrl)}
-					color="primary"
-					variant="contained"
+				<Formik
+					initialValues={{
+						reason: "",
+						changeCategory: "",
+						changeReferenceUrl: "",
+					}}
+					validationSchema={validationSchema}
+					validateOnMount
+					onSubmit={(values) => {
+						onConfirm(
+							values.reason,
+							values.changeCategory,
+							values.changeReferenceUrl,
+						);
+					}}
 				>
-					{getButtonText()}
-				</Button>
-			</DialogActions>
+					{({
+						values,
+						errors,
+						touched,
+						dirty,
+						handleChange,
+						handleBlur,
+						setFieldValue,
+						setFieldTouched,
+						isValid,
+						isSubmitting,
+					}) => (
+						<Form>
+							<Stack direction="column">
+								{getDialogContent()}
+								<Autocomplete
+									options={[
+										t("data_change_log.categories.error_correction"),
+										t("data_change_log.categories.details_changed"),
+										t("data_change_log.categories.new_member"),
+										t("data_change_log.categories.membership_ended"),
+										t("data_change_log.categories.additional_information"),
+										t("data_change_log.categories.changing_status"),
+										t("data_change_log.categories.initial_upload"),
+										t("data_change_log.categories.mappings_replacement"),
+										t("data_change_log.categories.other"),
+									]}
+									value={values.changeCategory || null}
+									onChange={(event, newValue) => {
+										setFieldValue("changeCategory", newValue || "");
+									}}
+									onBlur={() => setFieldTouched("changeCategory", true)}
+									renderInput={(params) => (
+										<TextField
+											{...params}
+											required
+											name="changeCategory"
+											label={t("data_change_log.category")}
+											helperText={
+												touched.changeCategory && errors.changeCategory
+													? errors.changeCategory
+													: t("data_change_log.category_helper")
+											}
+											error={
+												touched.changeCategory && Boolean(errors.changeCategory)
+											}
+										/>
+									)}
+									isOptionEqualToValue={(option, value) =>
+										option === value || (!option && !value)
+									}
+								/>
+								<TextField
+									fullWidth
+									required
+									multiline
+									variant="outlined"
+									label={t("data_change_log.reason")}
+									name="reason"
+									value={values.reason}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									margin="normal"
+									error={
+										touched.reason &&
+										(Boolean(errors.reason) || values.reason.length >= 200)
+									}
+									helperText={
+										touched.reason && errors.reason
+											? errors.reason
+											: getCharCountHelperText(
+													values.reason,
+													200,
+													t("data_change_log.reason_helper"),
+												)
+									}
+									inputProps={{ maxLength: 200 }}
+								/>
+								<TextField
+									fullWidth
+									variant="outlined"
+									label={t("data_change_log.reference_url")}
+									name="changeReferenceUrl"
+									value={values.changeReferenceUrl}
+									onChange={handleChange}
+									onBlur={handleBlur}
+									margin="normal"
+									error={
+										touched.changeReferenceUrl &&
+										(Boolean(errors.changeReferenceUrl) ||
+											values.changeReferenceUrl.length >= 200)
+									}
+									helperText={
+										touched.changeReferenceUrl && errors.changeReferenceUrl
+											? errors.changeReferenceUrl
+											: getCharCountHelperText(
+													values.changeReferenceUrl,
+													200,
+													t("data_change_log.ref_url_helper"),
+												)
+									}
+									inputProps={{ maxLength: 200 }}
+								/>
+							</Stack>
+							<DialogActions>
+								<Button onClick={onClose} variant="outlined" color="primary">
+									{t("mappings.cancel")}
+								</Button>
+								<div style={{ flex: "1 0 0" }} />
+								<Button
+									type="submit"
+									color="primary"
+									variant="contained"
+									disabled={
+										!isValid ||
+										!dirty ||
+										!values.reason ||
+										!values.changeCategory ||
+										isSubmitting
+									}
+								>
+									{getButtonText()}
+									{isSubmitting ? (
+										<CircularProgress
+											color="inherit"
+											size={13}
+											sx={{ marginLeft: "10px" }}
+										/>
+									) : null}
+								</Button>
+							</DialogActions>
+						</Form>
+					)}
+				</Formik>
+			</DialogContent>
 		</Dialog>
 	);
 };
