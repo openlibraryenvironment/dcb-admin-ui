@@ -170,12 +170,10 @@ export const getBibs = gql`
 				dateUpdated
 				title
 				author
-				canonicalMetadata
 				sourceSystemId
 				sourceRecordId
 				contributesTo {
 					id
-					title
 				}
 			}
 			pageable {
