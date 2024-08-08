@@ -150,16 +150,14 @@ const Confirmation = ({
 			case "participationStatus":
 				return (
 					<Box>
-						<Typography component={"p"} mb={2}>
+						<Typography component={"p"} mb={1}>
 							<Trans
 								i18nKey={getConfirmationFirstPara(participation ?? "")}
 								values={{ library }}
 								components={{ bold: <strong /> }}
 							/>
-							<Typography mt={2}>
-								<Typography mt={2}>
-									{t(getConfirmationSecondPara(participation ?? ""))}
-								</Typography>
+							<Typography mt={1}>
+								{t(getConfirmationSecondPara(participation ?? ""))}
 							</Typography>
 						</Typography>
 					</Box>
@@ -227,7 +225,7 @@ const Confirmation = ({
 						isSubmitting,
 					}) => (
 						<Form>
-							<Stack direction="column">
+							<Stack direction="column" spacing={2}>
 								{getDialogContent()}
 								<Autocomplete
 									options={[
