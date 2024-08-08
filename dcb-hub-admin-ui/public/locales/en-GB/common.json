@@ -28,8 +28,9 @@
 		"patronRequests": "Patron requests",
 		"profile": "Profile",
 		"serviceInfo": {
-			"name": "Service info",
 			"bibRecordCountByHostLms": "Bib record count by host LMS",
+			"dataChangeLog": "Data change log",
+			"name": "Service info",
 			"serviceStatus": "Service status"
 		},
 		"settings": {
@@ -264,6 +265,47 @@
 		"search_placeholder": "Search by name"
 	},
 
+	"data_change_log": {
+		"action": "Action",
+		"category": "Change category",
+		"category_required": "Please select a category before proceeding.",
+		"categories": {
+			"additional_information": "Additional information provided",
+			"changing_status": "Status changed",
+			"details_changed": "Details changed",
+			"error_correction": "Error correction",
+			"initial_upload": "Initial mappings upload",
+			"mappings_replacement": "Mappings replacement",
+			"membership_ended": "Membership ended",
+			"new_member": "New member",
+			"other": "Other"
+		},
+		"changes": "Changes",
+		"characters_remaining": "{{characters}} characters remaining",
+		"entity_id": "Entity UUID",
+		"entity_type": "Entity type",
+		"field_label": "Field label",
+		"field_name": "Field name",
+		"id": "Data change log UUID",
+		"last_edited_by": "Last edited by",
+		"loading_details": "data change details",
+		"max_length_exceeded": "Values must not exceed 200 characters. Please provide a shorter value.",
+		"max_length_reached": "Maximum length of {{maxLength}} characters reached",
+		"new_data": "New data",
+		"new_value": "New value",
+		"no_results": "No data change log entries were found. Try changing your search terms or filters.",
+		"no_rows": "No data change log entries are available. If you're expecting data to be here, please refresh the page.",
+		"old_data": "Old data",
+		"old_value": "Old value",
+		"reason": "Reason for change",
+		"reason_required": "Please provide a reason for this change.",
+		"reference_url": "Change reference URL",
+		"ref_url_helper": "The URL of the ticket describing the change requested, if applicable.",
+		"table_name": "Database table name",
+		"timestamp": "Timestamp",
+		"user": "User"
+	},
+
 	"general": {
 		"submit": "Submit",
 		"search": "Search",
@@ -399,10 +441,11 @@
 				"para1_enable_supplying": "Catalogue records for <bold>{{library}}</bold> will become <bold>discoverable</bold> and <bold>requestable</bold> by patrons of other consortium libraries.",
 				"para1_disable_borrowing": "<bold>{{library}} patrons</bold> will no longer be able to place borrowing requests at other consortium libraries.",
 				"para1_disable_supplying": "Catalogue records for <bold>{{library}}</bold> will <bold>not be discoverable</bold> or <bold>requestable</bold> by patrons of other consortium libraries.",
-				"select_enable_borrowing": "Select \"Enable borrowing\" to go ahead",
-				"select_enable_supplying": "Select \"Enable supplying\" to go ahead",
-				"select_disable_borrowing": "Select \"Disable borrowing\" to go ahead",
-				"select_disable_supplying": "Select \"Disable supplying\" to go ahead",
+				"reason": "Reason for change",
+				"select_enable_borrowing": "Select \"Enable borrowing\" to go ahead.",
+				"select_enable_supplying": "Select \"Enable supplying\" to go ahead.",
+				"select_disable_borrowing": "Select \"Disable borrowing\" to go ahead.",
+				"select_disable_supplying": "Select \"Disable supplying\" to go ahead.",
 				"alert": {
 					"borrowing_disabled": "{{library}} patrons are now <bold>not able</bold> to place borrowing requests at other consortium libraries",
 					"borrowing_disabled_fail": "Borrowing status for {{library}} patrons <bold>could not be disabled</bold>",
@@ -455,6 +498,7 @@
 		},
 		"contacts": {
 			"email": "Email",
+			"entity_name": "Library contact",
 			"location": "Location",
 			"name": "Name",
 			"primary": "Primary contact",
@@ -561,8 +605,10 @@
 		"category": "Category",
 		"select_file": "Select file",
 		"ref_value": "Reference value mappings",
+		"ref_value_one": "Reference value mapping",
 		"ref_value_for": "Reference value mappings for {{hostLms}}",
 		"numeric_range": "Numeric range mappings",
+		"num_range_one": "Numeric range mapping",
 		"numeric_range_for": "Numeric range mappings for {{hostLms}}",
 		"search_placeholder": "Search by category",
 		"search_placeholder_cs": "Search by Host LMS",

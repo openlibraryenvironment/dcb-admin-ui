@@ -5,7 +5,7 @@ import { Divider, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
-import FormatRoles from "src/helpers/FormatRoles/FormatRoles";
+import FormatArrayAsList from "src/helpers/FormatArrayAsList/FormatArrayAsList";
 import { HostLMS } from "@models/HostLMS";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
@@ -47,7 +47,11 @@ export default function LibraryHostLmsDetails({
 						<Typography variant="attributeTitle">
 							{t("hostlms.roles")}
 						</Typography>
-						{<FormatRoles roles={firstHostLms?.clientConfig?.["roles"]} />}
+						{
+							<FormatArrayAsList
+								roles={firstHostLms?.clientConfig?.["roles"]}
+							/>
+						}
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
@@ -114,7 +118,9 @@ export default function LibraryHostLmsDetails({
 						<Typography variant="attributeTitle">
 							{t("hostlms.client_config.context_hierarchy")}
 						</Typography>
-						<FormatRoles roles={firstHostLms?.clientConfig?.contextHierarchy} />
+						<FormatArrayAsList
+							roles={firstHostLms?.clientConfig?.contextHierarchy}
+						/>
 					</Stack>
 				</Grid>
 
@@ -395,7 +401,7 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.context_hierarchy")}
 							</Typography>
-							<FormatRoles
+							<FormatArrayAsList
 								roles={secondHostLms?.clientConfig?.contextHierarchy}
 							/>
 						</Stack>
