@@ -18,6 +18,10 @@ import {
 import { Form, Formik } from "formik";
 import { Trans, useTranslation } from "next-i18next";
 import { useMemo } from "react";
+import {
+	getConfirmationFirstPara,
+	getConfirmationSecondPara,
+} from "src/helpers/getConfirmationText";
 import * as Yup from "yup";
 
 type ConfirmType = {
@@ -144,71 +148,22 @@ const Confirmation = ({
 					</Box>
 				);
 			case "participationStatus":
-				switch (participation) {
-					// Fill these out with the relevant text
-					case "enableSupplying":
-						return (
-							<Box>
-								<Trans
-									i18nKey="libraries.circulation.confirmation.para1_enable_supplying"
-									values={{ library }}
-									components={{ bold: <strong /> }}
-								/>
-								<Typography mt={1} mb={1}>
-									{t(
-										"libraries.circulation.confirmation.select_enable_supplying",
-									)}
+				return (
+					<Box>
+						<Typography component={"p"} mb={2}>
+							<Trans
+								i18nKey={getConfirmationFirstPara(participation ?? "")}
+								values={{ library }}
+								components={{ bold: <strong /> }}
+							/>
+							<Typography mt={2}>
+								<Typography mt={2}>
+									{t(getConfirmationSecondPara(participation ?? ""))}
 								</Typography>
-							</Box>
-						);
-					case "disableSupplying":
-						return (
-							<Box>
-								<Trans
-									i18nKey="libraries.circulation.confirmation.para1_disable_supplying"
-									values={{ library }}
-									components={{ bold: <strong /> }}
-								/>
-								<Typography pt={1} pb={1}>
-									{t(
-										"libraries.circulation.confirmation.select_disable_supplying",
-									)}
-								</Typography>
-							</Box>
-						);
-					case "enableBorrowing":
-						return (
-							<Box>
-								<Trans
-									i18nKey="libraries.circulation.confirmation.para1_enable_borrowing"
-									values={{ library }}
-									components={{ bold: <strong /> }}
-								/>
-								<Typography pt={1} pb={1}>
-									{t(
-										"libraries.circulation.confirmation.select_enable_borrowing",
-									)}
-								</Typography>
-							</Box>
-						);
-					case "disableBorrowing":
-						return (
-							<Box>
-								<Trans
-									i18nKey="libraries.circulation.confirmation.para1_disable_borrowing"
-									values={{ library }}
-									components={{ bold: <strong /> }}
-								/>
-								<Typography pt={1} pb={1}>
-									{t(
-										"libraries.circulation.confirmation.select_disable_borrowing",
-									)}
-								</Typography>
-							</Box>
-						);
-					default:
-						return <Box />;
-				}
+							</Typography>
+						</Typography>
+					</Box>
+				);
 			default:
 				return null;
 		}
@@ -300,7 +255,7 @@ const Confirmation = ({
 											helperText={
 												touched.changeCategory && errors.changeCategory
 													? errors.changeCategory
-													: t("data_change_log.category_helper")
+													: null
 											}
 											error={
 												touched.changeCategory && Boolean(errors.changeCategory)
@@ -327,13 +282,7 @@ const Confirmation = ({
 										(Boolean(errors.reason) || values.reason.length >= 200)
 									}
 									helperText={
-										touched.reason && errors.reason
-											? errors.reason
-											: getCharCountHelperText(
-													values.reason,
-													200,
-													t("data_change_log.reason_helper"),
-												)
+										touched.reason && errors.reason ? errors.reason : null
 									}
 									inputProps={{ maxLength: 200 }}
 								/>

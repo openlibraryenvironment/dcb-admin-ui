@@ -268,7 +268,6 @@
 	"data_change_log": {
 		"action": "Action",
 		"category": "Change category",
-		"category_helper": "Choose a pre-defined reason for this change",
 		"category_required": "Please select a category before proceeding.",
 		"categories": {
 			"additional_information": "Additional information provided",
@@ -299,7 +298,6 @@
 		"old_data": "Old data",
 		"old_value": "Old value",
 		"reason": "Reason for change",
-		"reason_helper": "Additional context for why this change is being made.",
 		"reason_required": "Please provide a reason for this change.",
 		"reference_url": "Change reference URL",
 		"ref_url_helper": "The URL of the ticket describing the change requested, if applicable.",
