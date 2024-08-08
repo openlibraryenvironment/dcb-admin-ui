@@ -88,6 +88,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
+		console.log(active);
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
 			active == "borrowing"
@@ -1442,7 +1443,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 							handleParticipationConfirmation(
 								"supplying",
-								library?.agency?.isBorrowingAgency
+								library?.agency?.isSupplyingAgency
 									? "disableSupplying"
 									: "enableSupplying",
 								reason,
