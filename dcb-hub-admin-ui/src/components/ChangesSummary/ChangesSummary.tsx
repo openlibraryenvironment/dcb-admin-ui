@@ -47,7 +47,12 @@ export default function ChangesSummary({
 				</TableHead>
 				<TableBody>
 					{fields.map((field) => (
-						<TableRow key={field}>
+						<TableRow
+							key={field}
+							sx={{
+								"&:last-child td, &:last-child th": { borderBottom: 0 },
+							}}
+						>
 							<TableCell>{field}</TableCell>
 							<TableCell>{fieldNameToLabel(field)}</TableCell>
 							<TableCell>
