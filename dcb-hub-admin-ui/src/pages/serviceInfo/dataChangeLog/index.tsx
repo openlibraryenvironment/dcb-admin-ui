@@ -8,7 +8,7 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { containsOnly, equalsOnly, standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import dayjs from "dayjs";
@@ -70,7 +70,7 @@ const DataChangeLog: NextPage = () => {
 						headerName: "Entity",
 						minWidth: 50,
 						flex: 0.5,
-						filterOperators: standardFilters,
+						filterOperators: containsOnly,
 						valueGetter: (value: any, row: { entityType: string }) => {
 							const formattedEntity = capitaliseFirstCharacter(
 								t(tableNameToEntityName(row?.entityType)),
