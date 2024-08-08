@@ -55,6 +55,7 @@ export function fieldNameToLabel(fieldName: string): string {
 	// Define any special cases that don't meet the standard rule.
 	const specialCases: { [key: string]: string } = {
 		id: "ID",
+		idp: "IDP",
 		url: "URL",
 		api: "API",
 		lms: "LMS",
