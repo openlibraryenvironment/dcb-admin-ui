@@ -248,8 +248,9 @@ export const getBibs = gql`
 `;
 
 // Gets a bib record by its ID for the individual record page
-export const getBibById = gql`
-	query LoadBibs($query: String!) {
+// But leaves out the sourceRecord to be fetched on-demand ONLY
+export const getBibMainDetails = gql`
+	query LoadBibMainDetails($query: String!) {
 		sourceBibs(query: $query) {
 			content {
 				id
@@ -264,6 +265,15 @@ export const getBibById = gql`
 					id
 					title
 				}
+			}
+		}
+	}
+`;
+// Fetch source record on demand.
+export const getBibSourceRecord = gql`
+	query LoadBibSourceRecord($query: String!) {
+		sourceBibs(query: $query) {
+			content {
 				sourceRecord {
 					id
 					hostLmsId

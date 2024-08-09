@@ -557,6 +557,7 @@
 
 	"bibRecords": {
 		"bibs_one": "bib record",
+		"source_record": "Source record",
 		"bib_records": "Bib records",
 		"no_results": "No bib records found. Try changing your search terms or filters.",
 		"no_rows": "No bib records available. If you're expecting data to be here, please refresh the page.",

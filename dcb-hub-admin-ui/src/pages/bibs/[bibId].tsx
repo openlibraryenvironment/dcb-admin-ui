@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useLazyQuery, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
 import { Stack, Typography } from "@mui/material";
@@ -8,7 +8,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
-import { getBibById } from "src/queries/queries";
+import { getBibMainDetails, getBibSourceRecord } from "src/queries/queries";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -27,12 +27,17 @@ type BibDetails = {
 
 export default function SourceBibDetails({ bibId }: BibDetails) {
 	const { t } = useTranslation();
-	const { loading, data, error } = useQuery(getBibById, {
+	const { loading, data, error } = useQuery(getBibMainDetails, {
 		variables: {
 			query: "id:" + bibId,
 		},
-		pollInterval: 120000,
+		pollInterval: 600000, // Increased to reduce load with bib records.
 	});
+
+	const [
+		fetchSourceRecord,
+		{ loading: sourceRecordLoading, data: sourceRecordData },
+	] = useLazyQuery(getBibSourceRecord);
 
 	const router = useRouter();
 	const { status } = useSession({
@@ -55,11 +60,23 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 		false,
 		false,
 	]);
+
 	// Functions to handle expanding both individual accordions and all accordions
 	const handleAccordionChange = (index: number) => () => {
 		setExpandedAccordions((prevExpanded) => {
 			const newExpanded = [...prevExpanded];
 			newExpanded[index] = !newExpanded[index];
+			if (index === 8 && !prevExpanded[8]) {
+				fetchSourceRecord({
+					variables: {
+						query: "id:" + bibId + " && title:*",
+						// This is a workaround to deal with Apollo treating these two queries as having the same cache query key
+						// And thus re-fetching one when the other is fired because it thinks that the cache has been changed.
+						// By specifying an additional useless parameter as an AND, we get round this.
+						// But only as an AND with the UUID- so it will only fetch the bib matching the UUID
+					},
+				});
+			}
 			return newExpanded;
 		});
 	};
@@ -216,7 +233,22 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 					</Typography>
 				</StyledAccordionSummary>
 				<StyledAccordionDetails>
-					<pre>{JSON.stringify(bib?.sourceRecord, null, 2)}</pre>
+					{sourceRecordLoading ? (
+						<Loading
+							title={t("ui.info.loading.document", {
+								document_type: t("details.source_record").toLowerCase(),
+							})}
+							subtitle={t("ui.info.wait")}
+						/>
+					) : (
+						<pre>
+							{JSON.stringify(
+								sourceRecordData?.sourceBibs?.content?.[0]?.sourceRecord,
+								null,
+								2,
+							)}
+						</pre>
+					)}
 				</StyledAccordionDetails>
 			</StyledAccordion>
 		</AdminLayout>
