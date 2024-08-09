@@ -188,6 +188,8 @@ export default function ServerPaginationGrid({
 				case "patronRequestsLibraryCompleted":
 				case "referenceValueMappingsForLibrary":
 				case "numericRangeMappingsForLibrary":
+				case "referenceValueMappings":
+				case "numericRangeMappings":
 					filterQuery =
 						filterQuery != ""
 							? `${presetQueryVariables} && ${filterQuery}`

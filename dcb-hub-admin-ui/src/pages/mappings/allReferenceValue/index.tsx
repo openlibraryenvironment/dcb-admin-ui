@@ -76,7 +76,7 @@ const AllMappings: NextPage = () => {
 			</Tooltip>
 			<ServerPaginationGrid
 				query={getMappings}
-				presetQueryVariables="deleted:false OR deleted:null"
+				presetQueryVariables="(NOT deleted:true)"
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
 				columns={[

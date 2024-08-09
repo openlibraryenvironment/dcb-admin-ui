@@ -55,7 +55,7 @@ const AllNumericRange: NextPage = () => {
 			</Tooltip>
 			<ServerPaginationGrid
 				query={getNumericRangeMappings}
-				presetQueryVariables="deleted:false OR deleted:null"
+				presetQueryVariables="(NOT deleted:true)"
 				type="numericRangeMappings"
 				coreType="numericRangeMappings"
 				columns={[
