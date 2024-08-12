@@ -31,7 +31,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 		variables: {
 			query: "id:" + bibId,
 		},
-		pollInterval: 600000, // Increased to reduce load with bib records.
+		// pollInterval: 600000, // Polling disabled on bib record page to reduce server load.
 	});
 
 	const [
