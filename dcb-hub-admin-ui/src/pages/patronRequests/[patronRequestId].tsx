@@ -1278,9 +1278,11 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("details.pickup_code_uuid")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.pickupLocationCode}
-								/>
+								<Link href={`/locations/${patronRequest?.pickupLocationCode}`}>
+									<RenderAttribute
+										attribute={patronRequest?.pickupLocationCode}
+									/>
+								</Link>
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
