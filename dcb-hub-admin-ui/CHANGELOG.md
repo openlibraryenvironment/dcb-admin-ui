@@ -1,3 +1,16 @@
+# [1.22.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.21.0...v1.22.0) (2024-08-21)
+
+
+### Bug Fixes
+
+* Render plaintext if pickup location code is null ([9406f0c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9406f0c122e88a11418172b7ebc0baf7e84deceb))
+* Restrict access to the data change log [DCB-1302] ([1f5ffaa](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1f5ffaa54f586605fdb0bb09f37520f3aa039f54))
+
+
+### Features
+
+* Add pickup location link to request details page ([8790df6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8790df6b07d751de3f892e3ba4f0801a46947b33))
+
 # [1.21.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.2...v1.21.0) (2024-08-12)
 
 
