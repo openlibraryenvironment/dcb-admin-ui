@@ -542,7 +542,7 @@
 
 	"patron_requests": {
 		"cleanup": "Force clean up",
-		"cleanup_disabled": "Clean up is only available for requests in an ERROR state.",
+		"cleanup_disabled": "Clean up is only available for requests in a non-terminal or ERROR state.",
 		"cleanup_info": "Bypass circulation; clean up and finalise request",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",

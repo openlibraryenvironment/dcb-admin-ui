@@ -35,22 +35,11 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { formatDuration } from "src/helpers/formatDuration";
+import { cleanupStatuses, untrackedStatuses } from "src/helpers/statuses";
 
 type PatronRequestDetails = {
 	patronRequestId: string;
 };
-
-const untrackedStatuses = [
-	"ERROR",
-	"SUBMITTED_TO_DCB",
-	"PATRON_VERIFIED",
-	"RESOLVED",
-	"NOT_SUPPLIED_CURRENT_SUPPLIER",
-	"NO_ITEMS_AVAILABLE_AT_ANY_AGENCY",
-	"CANCELLED",
-	"HANDED_OFF_AS_LOCAL",
-	"FINALISED",
-];
 
 export default function PatronRequestDetails({
 	patronRequestId,
@@ -407,8 +396,9 @@ export default function PatronRequestDetails({
 							{session?.profile?.roles?.includes("CONSORTIUM_ADMIN") ? (
 								<Tooltip
 									title={
-										patronRequest?.status === "ERROR" // Must be both request with ERROR state and a user with CONSORTIUM_ADMIN
-											? t("patron_requests.cleanup_info")
+										cleanupStatuses.includes(patronRequest?.status)
+											? // Must be both request with ERROR or non-terminal state and a user with CONSORTIUM_ADMIN
+												t("patron_requests.cleanup_info")
 											: t("patron_requests.cleanup_disabled") // Tooltip text when disabled
 									}
 								>
@@ -420,7 +410,8 @@ export default function PatronRequestDetails({
 											onClick={handleCleanup}
 											aria-disabled={loadingCleanup ? true : false}
 											disabled={
-												loadingCleanup || patronRequest?.status != "ERROR"
+												loadingCleanup ||
+												!cleanupStatuses.includes(patronRequest?.status)
 													? true
 													: false
 											}
