@@ -109,7 +109,6 @@ export default function ServerPaginationGrid({
 			const filters = filterModel?.items ?? [];
 			const quickFilterValues = filterModel?.quickFilterValues ?? [];
 			const logicOperator = filterModel?.logicOperator?.toUpperCase() ?? "AND";
-
 			// Helper function to process the individual filters
 			const buildFilterQuery = (
 				field: string,
@@ -121,25 +120,42 @@ export default function ServerPaginationGrid({
 				// Lucene powers our server-side querying so we need to get expressions into the right syntax.
 				// We're currently only supporting contains and equals, but other operators are possible - see docs.
 				// We will also need to introduce type handling - i.e. for UUIDs, numbers etc - based on the field.
+				const containsQuery = `${field}:*${replacedValue}*`;
+				const doesNotContainQuery = `*:* AND NOT (${containsQuery})`;
+				const equalsQuery = `${field}:${replacedValue}`;
+				const doesNotEqualQuery = `*:* AND NOT (${equalsQuery})`;
+				if (!field || !value) {
+					// Handle the case when the field or value is empty
+					return null;
+				}
+
 				switch (operator) {
 					case "contains":
-						return `${field}:*${replacedValue}*`;
+						return containsQuery;
 					case "equals":
-						return `${field}:${replacedValue}`;
+						return equalsQuery;
+					case "does not equal":
+						// Note - the NOT operator can not be used with just one term. So we have to improvise
+						// https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#not-heading
+						return doesNotEqualQuery;
+					case "does not contain":
+						return doesNotContainQuery;
 					default:
-						return `${field}:${replacedValue}`;
+						return equalsQuery;
 				}
 			};
 
 			// Build the filter query for all filters
 			let filterQuery = filters
-				.map((filter) =>
-					buildFilterQuery(
+				.map((filter) => {
+					const query = buildFilterQuery(
 						filter.field ?? "id",
 						filter.operator ?? "contains",
 						filter.value ?? "",
-					),
-				)
+					);
+					return query ? query : "";
+				})
+				.filter(Boolean)
 				.join(" " + logicOperator + " ");
 
 			// Add quick filters if present
@@ -156,12 +172,15 @@ export default function ServerPaginationGrid({
 					patronRequestsLibraryCompleted: "status",
 					circulationStatus: "fromContext",
 					referenceValueMappings: "fromCategory",
+					referenceValueMappingsForLibrary: "fromCategory",
 					numericRangeMappings: "domain",
+					numericRangeMappingsForLibrary: "domain",
 					libraries: "fullName",
 					agencies: "name",
 					groups: "name",
 					hostlmss: "name",
 					locations: "name",
+					dataChangeLog: "actionInfo",
 					default: "id",
 				};
 
@@ -178,10 +197,19 @@ export default function ServerPaginationGrid({
 			// This is particularly useful for things like mappings, where we don't want to query deleted mappings unless explicitly stated.
 			switch (type) {
 				case "circulationStatus":
-					filterQuery = `${presetQueryVariables} && ${filterQuery}`;
-					break;
 				case "patronRequestLibrary":
-					filterQuery = `${presetQueryVariables} && ${filterQuery}`;
+				case "patronRequestsLibraryException":
+				case "patronRequestsLibraryOutOfSequence":
+				case "patronRequestsLibraryActive":
+				case "patronRequestsLibraryCompleted":
+				case "referenceValueMappingsForLibrary":
+				case "numericRangeMappingsForLibrary":
+				case "referenceValueMappings":
+				case "numericRangeMappings":
+					filterQuery =
+						filterQuery != ""
+							? `${presetQueryVariables} && ${filterQuery}`
+							: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
 					break;
 			}
 
@@ -244,12 +272,24 @@ export default function ServerPaginationGrid({
 			type === "patronRequestsLibraryActive" ||
 			type === "patronRequestsLibraryOutOfSequence" ||
 			type === "patronRequestsLibraryCompleted" ||
-			type === "patronRequestsLibraryException"
+			type === "patronRequestsLibraryException" ||
+			type === "dataChangeLog"
 		) {
 			if (event.ctrlKey || event.metaKey)
-				window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+				if (type === "dataChangeLog") {
+					window.open(
+						`/serviceInfo/dataChangeLog/${params?.row?.id}`,
+						"_blank",
+					);
+				} else {
+					window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+				}
 			if (!(event.ctrlKey || event.metaKey))
-				router.push(`/patronRequests/${params?.row?.id}`);
+				if (type === "dataChangeLog") {
+					router.push(`/serviceInfo/dataChangeLog/${params?.row?.id}`);
+				} else {
+					router.push(`/patronRequests/${params?.row?.id}`);
+				}
 		} else if (
 			// Others we don't want users to be able to click through on
 			type !== "referenceValueMappings" &&

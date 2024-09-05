@@ -7,6 +7,7 @@ import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
 import { formatDuration } from "src/helpers/formatDuration";
+import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 type MasterDetailType = {
 	row: any;
 	type: string;
@@ -32,6 +33,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 	}, [apiRef, handleViewportInnerSizeChange]);
 
 	const { t } = useTranslation();
+
 	switch (type) {
 		case "agencies":
 			return (
@@ -61,6 +63,12 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 						</Stack>
 					</Grid>
+				</MasterDetailLayout>
+			);
+		case "dataChangeLog":
+			return (
+				<MasterDetailLayout width={width}>
+					<ChangesSummary changes={row?.changes} action={row?.actionInfo} />
 				</MasterDetailLayout>
 			);
 		case "groups":

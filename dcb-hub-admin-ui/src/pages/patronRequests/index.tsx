@@ -13,6 +13,7 @@ import {
 	defaultPatronRequestColumnVisibility,
 	finishedPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
+	patronRequestColumnsNoStatusFilter,
 } from "src/helpers/columns";
 import { Stack, Typography } from "@mui/material";
 import {
@@ -131,7 +132,7 @@ const PatronRequests: NextPage = () => {
 						presetQueryVariables={exceptionQueryVariables}
 						type="patronRequestsLibraryException"
 						coreType="patronRequests"
-						columns={allColumns}
+						columns={[...customColumns, ...patronRequestColumnsNoStatusFilter]}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}

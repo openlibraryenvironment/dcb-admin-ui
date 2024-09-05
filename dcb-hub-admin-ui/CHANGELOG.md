@@ -1,3 +1,61 @@
+# [1.23.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.22.0...v1.23.0) (2024-09-05)
+
+
+### Features
+
+* Add "does not equal" and "does not contain" filters [DCB-1406] [DCB-1409] ([126b047](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/126b04763bf9c928b64e4050fb7b8a05f99b72ff))
+* Manually finalise incomplete requests [DCB-1346] ([948359f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/948359f288165e57eef666c86c5eaed241f8ede7))
+
+# [1.22.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.21.0...v1.22.0) (2024-08-21)
+
+
+### Bug Fixes
+
+* Render plaintext if pickup location code is null ([9406f0c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9406f0c122e88a11418172b7ebc0baf7e84deceb))
+* Restrict access to the data change log [DCB-1302] ([1f5ffaa](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1f5ffaa54f586605fdb0bb09f37520f3aa039f54))
+
+
+### Features
+
+* Add pickup location link to request details page ([8790df6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8790df6b07d751de3f892e3ba4f0801a46947b33))
+
+# [1.21.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.2...v1.21.0) (2024-08-12)
+
+
+### Bug Fixes
+
+* Adjust entityType filter [DCB-1302] ([2627c4b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2627c4b5cf77f813c921b1ae210fd09f6993fa9b))
+* Adjust getBibs query ([412695e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/412695e191cb809dadcd7df97f419f792afd92c2))
+* Apply better validation to Confirmation modal values [DCB-1302] ([6dce1ed](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6dce1ed1970e704e918ca071ba41e98a9e111710))
+* Disable polling on individual bib record page ([85740ca](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/85740ca8a0c99ef5ea94587ba131e3f934c980f1))
+* Fix agency participation issue and improve UX [DCB-1302] ([6f93b35](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6f93b35bb487c4e59ae0ef5a0dfee91afcf4bd31))
+* Fix participation bug ([fffc68c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fffc68cd827b3b1eb1f899843819ef79ff58f424))
+* Fix problems with displaying mappings ([e547ccf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e547ccffb40a4c6be52829352f066c018200dc19))
+* Fix spacing ([aba22a7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/aba22a71fe50d54b77607ae812080af81b5fddc8))
+* Fix spacing on confirmation modal [DCB-1302] ([f147e33](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f147e33460997a7cf8166849c3d218922fdd9a5d))
+* Fix translation keys and links in data grid  [DCB-1302] ([55a7edb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/55a7edb2652b8cd01a3de7ce8478cb1222a130ad))
+* Fully hide cleanup button for non-authorised users [DCB-1345] ([2484a4e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2484a4edaecf138e52c13ab829b56334bbe48a60))
+* Only fetch source record on demand [DCB-1394] ([007c913](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/007c913fc82a798c2d0be57d3ddd0c5a3b3f1ec5))
+* Remove last border on ChangesSummary ([c2cdd10](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c2cdd10bda8c8f45e32f639f0dc5bab3b7229783))
+* Streamline display of confirmation paragraphs [DCB-1302] ([729c5cc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/729c5ccee645053a4eaa6515e3a8cc0ca6c079d1))
+* Text fix for displaying IDP [DCB-1302] ([1567174](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1567174de3cca710dc98df253bf5789c66b0fbc0))
+
+
+### Features
+
+* Add data change log master detail [DCB-1302] ([07eadef](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/07eadeff568dd5bd425f7ad6b7170384a341e45f))
+* Add data change log to DCB Admin [DCB-1302] ([429b944](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/429b944d0f2acbc7e43c8425527b5e86220026f3))
+* Enable cleanup of patron request on details page [DCB-1345] ([e19d1db](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e19d1dbd1283090dd335b5b1f6cad39a3451e277))
+* Supply optional change reference URL and category [DCB-1302] ([2d212c9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2d212c9f84e5dfabfd65e7ce84ec8a602bc4a24d))
+* Supply reason for changes through DCB Admin [DCB-1302] ([dff8da4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/dff8da4e9e83e3e85d97e7c79f6b07f326e4c255))
+
+## [1.20.2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.1...v1.20.2) (2024-07-31)
+
+
+### Bug Fixes
+
+* Preserve grid pre-filters when adding additional filters [DCB-1349] ([e562bef](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e562befd6a205ae47c8762156d724e6848a7095c))
+
 ## [1.20.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.20.0...v1.20.1) (2024-07-17)
 
 

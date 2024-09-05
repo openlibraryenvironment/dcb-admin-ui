@@ -40,12 +40,13 @@ import { getInitialAccordionState } from "src/helpers/getInitialAccordionState";
 import LibraryHostLmsDetails from "./LibraryHostLmsDetails";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import {
-	standardNumRangeMappingColumns,
 	standardPatronRequestColumns,
-	standardRefValueMappingColumns,
 	defaultPatronRequestLibraryColumnVisibility,
 	finishedPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
+	patronRequestColumnsNoStatusFilter,
+	refValueMappingColumnsNoCategoryFilter,
+	numRangeMappingColumnsNoCategoryFilter,
 } from "src/helpers/columns";
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
@@ -84,7 +85,11 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const handleParticipationConfirmation = (
 		active: string,
 		targetParticipation: string,
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
 	) => {
+		console.log(active);
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
 			active == "borrowing"
@@ -104,10 +109,16 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				? {
 						code: library?.agencyCode,
 						isBorrowingAgency: borrowInput ?? null,
+						reason: reason,
+						changeCategory: changeCategory,
+						changeReferenceUrl: changeReferenceUrl,
 					}
 				: {
 						code: library?.agencyCode,
 						isSupplyingAgency: supplyInput ?? null,
+						reason: reason,
+						changeCategory: changeCategory,
+						changeReferenceUrl: changeReferenceUrl,
 					};
 		updateParticipation({
 			variables: {
@@ -244,25 +255,25 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	}
 
 	// These are pre-sets for the library Patron Request grids.
-	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND status: "ERROR"`;
+	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND status: "ERROR"`;
 	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
 	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
 	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
 
-	const refValuePatronTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND NOT deleted:true`;
-	const refValueItemTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND NOT deleted:true`;
-	const refValueLocationVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND NOT deleted:true`;
+	const refValuePatronTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
+	const refValueItemTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
+	const refValueLocationVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND (NOT deleted:true)`;
 
-	const numericRangePatronTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "patronType" AND NOT deleted: true`;
-	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND NOT deleted: true`;
+	const numericRangePatronTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "patronType" AND (NOT deleted:true)`;
+	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND (NOT deleted:true)`;
 
 	// Add ones for second Host LMS here.
-	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND NOT deleted:true`;
-	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND NOT deleted:true`;
-	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "Location") AND NOT deleted:true`;
+	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
+	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
+	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "Location") AND (NOT deleted:true)`;
 
-	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "patronType" AND NOT deleted: true`;
-	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "ItemType" AND NOT deleted: true`;
+	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "patronType" AND (NOT deleted:true)`;
+	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "ItemType" AND (NOT deleted:true)`;
 
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
@@ -805,7 +816,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={refValueItemTypeVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
+								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -831,7 +842,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={refValueItemTypeSecondHostLmsVariables}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
+									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -855,7 +866,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={numericRangeItemTypeVariables}
 								type="numericRangeMappingsForLibrary"
 								coreType="numericRangeMappings"
-								columns={standardNumRangeMappingColumns}
+								columns={numRangeMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.no_results")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -882,7 +893,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="numericRangeMappingsForLibrary"
 									coreType="numericRangeMappings"
-									columns={standardNumRangeMappingColumns}
+									columns={numRangeMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.no_results")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -927,7 +938,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={refValueLocationVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
+								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -955,7 +966,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
+									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -1001,7 +1012,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={refValuePatronTypeVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
-								columns={standardRefValueMappingColumns}
+								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -1029,7 +1040,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
-									columns={standardRefValueMappingColumns}
+									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -1053,7 +1064,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								presetQueryVariables={numericRangePatronTypeVariables}
 								type="numericRangeMappingsForLibrary"
 								coreType="numericRangeMappings"
-								columns={standardNumRangeMappingColumns}
+								columns={numRangeMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.no_results")}
 								noResultsMessage={t("mappings.no_results")}
 								selectable={false}
@@ -1080,7 +1091,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									}
 									type="numericRangeMappingsForLibrary"
 									coreType="numericRangeMappings"
-									columns={standardNumRangeMappingColumns}
+									columns={numRangeMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.no_results")}
 									noResultsMessage={t("mappings.no_results")}
 									selectable={false}
@@ -1219,7 +1230,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={exceptionQueryVariables}
 									type="patronRequestsLibraryException"
 									coreType="patronRequests"
-									columns={[...customColumns, ...standardPatronRequestColumns]}
+									columns={[
+										...customColumns,
+										...patronRequestColumnsNoStatusFilter,
+									]}
 									selectable={true}
 									pageSize={20}
 									noDataMessage={t("patron_requests.no_rows")}
@@ -1405,12 +1419,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Confirmation
 						open={showConfirmationBorrowing}
 						onClose={() => closeConfirmation("borrowing")}
-						onConfirm={() =>
+						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 							handleParticipationConfirmation(
 								"borrowing",
 								library?.agency?.isBorrowingAgency
 									? "disableBorrowing"
 									: "enableBorrowing",
+								reason,
+								changeCategory,
+								changeReferenceUrl,
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type="participationStatus"
@@ -1427,12 +1444,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					<Confirmation
 						open={showConfirmationSupplying}
 						onClose={() => closeConfirmation("supplying")}
-						onConfirm={() =>
+						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 							handleParticipationConfirmation(
 								"supplying",
 								library?.agency?.isSupplyingAgency
 									? "disableSupplying"
 									: "enableSupplying",
+								reason,
+								changeCategory,
+								changeReferenceUrl,
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type={"participationStatus"}
