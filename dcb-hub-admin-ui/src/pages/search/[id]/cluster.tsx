@@ -16,10 +16,35 @@ const Cluster: NextPage = () => {
 	const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query; // Access the dynamic id parameter
+  const [clusterDetail, setClusterDetail] = useState({});
+
+  useEffect(() => {
+    const fetchCluster = async () => {
+      try {
+        const response = await axios.get<any[]>(
+          // query limit offset
+          `${publicRuntimeConfig.DCB_API_BASE}/clusters/${id}`,
+          {
+            headers: { Authorization: `Bearer ${data?.accessToken}` }
+          },
+        );
+        setClusterDetail(response.data);
+        setLoading(false);
+      } catch (error) {
+        // setError(true);
+        // setLoading(false);
+      }
+    };
+
+    if ( (id) && (data?.accessToken) ) {
+      fetchCluster();
+    }
+  }, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE, id]);
 
 	return (
-		<AdminLayout title={t("nav.search.name")}>
-			Cluster layout {id}
+		<AdminLayout title={t("nav.clusterdetail.name")}>
+			Cluster {id}
+      {JSON.stringify(clusterDetail)}
 		</AdminLayout>
 	);
 };
