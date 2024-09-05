@@ -7,16 +7,19 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
+import { useRouter } from 'next/router';
 
 const Cluster: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
   const { data } = useSession();
 	const { t } = useTranslation();
+  const router = useRouter();
+  const { id } = router.query; // Access the dynamic id parameter
 
 	return (
 		<AdminLayout title={t("nav.search.name")}>
-			Cluster layout
+			Cluster layout {id}
 		</AdminLayout>
 	);
 };
