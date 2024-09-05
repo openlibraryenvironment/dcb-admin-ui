@@ -1,3 +1,11 @@
+# [1.23.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.22.0...v1.23.0) (2024-09-05)
+
+
+### Features
+
+* Add "does not equal" and "does not contain" filters [DCB-1406] [DCB-1409] ([126b047](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/126b04763bf9c928b64e4050fb7b8a05f99b72ff))
+* Manually finalise incomplete requests [DCB-1346] ([948359f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/948359f288165e57eef666c86c5eaed241f8ede7))
+
 # [1.22.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.21.0...v1.22.0) (2024-08-21)
 
 
