@@ -71,11 +71,11 @@ const Search: NextPage = () => {
 		  		  <li>
               <table>
                 <tr>
-                  <td> {i} : {JSON.stringify(instance)}</td>
+                  <td> {i} : {instance.title}</td>
                 </tr>
                 <tr>
                   <td>
-                    <a href={`/search/${instance.id}/cluster`}>Cluster Info</a>
+                    <a href={`/search/${instance.id}/cluster`}>Cluster Info</a> &nbsp;
                     <a href={`/search/${instance.id}/items`}>Item Info</a>
                   </td>
                 </tr>
