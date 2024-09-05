@@ -16,6 +16,33 @@ const Items: NextPage = () => {
 	const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query; // Access the dynamic id parameter
+  const [clusterItems, setClusterItems] = useState({});
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        // /items/availability?clusteredBibId=X
+        const response = await axios.get<any[]>(
+          // query limit offset
+          `${publicRuntimeConfig.DCB_API_BASE}/items/availability?clusteredBibId=${id}`,
+          {
+            headers: { Authorization: `Bearer ${data?.accessToken}` }
+          },
+        );
+        setClusterItems(response.data);
+        setLoading(false);
+      } catch (error) {
+        // setError(true);
+        // setLoading(false);
+      }
+    };
+
+    if ( (id) && (data?.accessToken) ) {
+      fetchItems();
+    }
+  }, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE, id]);
+
+
 
 	return (
 		<AdminLayout title={t("nav.search.name")}>
