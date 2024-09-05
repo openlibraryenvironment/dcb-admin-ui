@@ -8,8 +8,6 @@ import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
 
-
-
 const Search: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
@@ -29,7 +27,7 @@ const Search: NextPage = () => {
           {
             headers: { Authorization: `Bearer ${data?.accessToken}` },
             params: {
-              query: query,
+              query: `@keyword all "${query}"`,
               offset: 0,
               limit: 100
             }
@@ -59,6 +57,36 @@ const Search: NextPage = () => {
 		setQuery(inputValue);
 	}
 
+	const renderSearchResults = () => {
+    console.log("doSearch");
+		if ( searchResults?.instances == null )
+      return ( <div></div> );
+
+
+		return (
+			<div>
+				Total: {searchResults.totalRecords}
+  		  <ul>
+          {searchResults.instances.map((instance, i: number) => (
+		  		  <li>
+              <table>
+                <tr>
+                  <td> {i} : {JSON.stringify(instance)}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href={`/search/${instance.id}/cluster`}>Cluster Info</a>
+                    <a href={`/search/${instance.id}/items`}>Item Info</a>
+                  </td>
+                </tr>
+ 	            </table>
+            </li>
+          )) }
+  			</ul>
+			</div>
+    );
+  }
+
 	return (
 		<AdminLayout title={t("nav.search.name")}>
       <input
@@ -69,7 +97,7 @@ const Search: NextPage = () => {
       />
       <button onClick={doSearch}>Search -&gt;</button>
 			<hr/>
-      {JSON.stringify(searchResults)}
+			{renderSearchResults()}
 		</AdminLayout>
 	);
 };
