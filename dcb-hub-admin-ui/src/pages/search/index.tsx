@@ -7,14 +7,17 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
+import { useRouter } from 'next/router';
 
 const Search: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
   const { data } = useSession();
 	const { t } = useTranslation();
+  const router = useRouter();
+  const { query } = router; // Get the current query from the URL
+
   const [searchResults, setSearchResults] = useState({});
-  const [query, setQuery] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +30,7 @@ const Search: NextPage = () => {
           {
             headers: { Authorization: `Bearer ${data?.accessToken}` },
             params: {
-              query: `@keyword all "${query}"`,
+              query: `@keyword all "${query.q}"`,
               offset: 0,
               limit: 100
             }
@@ -41,10 +44,10 @@ const Search: NextPage = () => {
       }
     };
 
-    if (data?.accessToken) {
+    if ( (query.q) && (data?.accessToken) ) {
       fetchRecords();
     }
-  }, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE, query]);
+  }, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE, query.q]);
 
 
   const handleInputChange = (e) => {
@@ -53,8 +56,9 @@ const Search: NextPage = () => {
 
   const doSearch = () => {
     console.log("doSearch");
-		setLoading(true);
-		setQuery(inputValue);
+    router.push(`/search?q=${encodeURIComponent(inputValue)}`);
+		// setLoading(true);
+		// setQuery(inputValue);
 	}
 
 	const renderSearchResults = () => {
