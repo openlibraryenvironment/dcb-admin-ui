@@ -8,43 +8,33 @@ import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/router';
+import { useApolloClient, useQuery } from "@apollo/client";
+import { getClusters } from "src/queries/queries";
 
-const Cluster: NextPage = () => {
+
+const Clusters: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
-  const { data } = useSession();
+  const { session } = useSession();
 	const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query; // Access the dynamic id parameter
-  const [clusterDetail, setClusterDetail] = useState({});
+  const client = useApolloClient();
 
-  useEffect(() => {
-    const fetchCluster = async () => {
-      try {
-        const response = await axios.get<any[]>(
-          // query limit offset
-          `${publicRuntimeConfig.DCB_API_BASE}/clusters/${id}`,
-          {
-            headers: { Authorization: `Bearer ${data?.accessToken}` }
-          },
-        );
-        setClusterDetail(response.data);
-        setLoading(false);
-      } catch (error) {
-        // setError(true);
-        // setLoading(false);
-      }
-    };
-
-    if ( (id) && (data?.accessToken) ) {
-      fetchCluster();
-    }
-  }, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE, id]);
+  const { loading, error, data  } = useQuery(getClusters, {
+    variables: { query: `id: ${id}` }, // Passing the dynamic variable
+  });
 
 	return (
-		<AdminLayout title={t("nav.clusterdetail.name")}>
-			Cluster {id}
-      {JSON.stringify(clusterDetail)}
+		<AdminLayout title={t("nav.cluster.name")}>
+			Cluster layout {id} <br/>
+      <ul>
+        {data?.instanceClusters?.content.map((instance, i: number) => (
+          <li>
+            {JSON.stringify(instance)}
+          </li>
+        ))}
+      </ul>
 		</AdminLayout>
 	);
 };
@@ -68,4 +58,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	};
 };
 
-export default Cluster;
+export default Clusters;

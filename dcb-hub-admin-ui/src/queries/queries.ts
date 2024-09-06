@@ -1124,6 +1124,17 @@ export const getClusters = gql`
     instanceClusters(query: $query) {
       content {
         id
+        title
+        members { 
+          id
+          title
+          author
+          typeOfRecord
+          canonicalMetadata
+          clusterReason
+          sourceSystemId 
+          sourceRecordId
+        }
       }
     }
   }
