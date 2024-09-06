@@ -1134,6 +1134,10 @@ export const getClusters = gql`
           clusterReason
           sourceSystemId 
           sourceRecordId
+          matchPoints {
+            id
+            value
+          }
         }
       }
     }
