@@ -1118,3 +1118,13 @@ export const getGroupById = gql`
 		}
 	}
 `;
+
+export const getClusters = gql`
+  query ClusterRecords($query: String!) {
+    instanceClusters(query: $query) {
+      content {
+        id
+      }
+    }
+  }
+`;

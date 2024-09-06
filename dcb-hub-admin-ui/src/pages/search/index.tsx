@@ -8,6 +8,8 @@ import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/router';
+import Link from "@components/Link/Link";
+
 
 const Search: NextPage = () => {
 
@@ -79,8 +81,8 @@ const Search: NextPage = () => {
                 </tr>
                 <tr>
                   <td>
-                    <a href={`/search/${instance.id}/cluster`}>Cluster Info</a> &nbsp;
-                    <a href={`/search/${instance.id}/items`}>Item Info</a>
+                    <Link key="instance-cluster-details" href={`/search/${instance.id}/cluster`}> ClusterInfo </Link> &nbsp;
+                    <Link key="instance-item-details" href={`/search/${instance.id}/items`}> Item </Link> &nbsp;
                   </td>
                 </tr>
  	            </table>

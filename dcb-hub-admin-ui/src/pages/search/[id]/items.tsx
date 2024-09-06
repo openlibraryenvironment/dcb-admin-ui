@@ -8,45 +8,27 @@ import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/router';
+import { useApolloClient, useQuery } from "@apollo/client";
+import { getClusters } from "src/queries/queries";
+
 
 const Items: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
-  const { data } = useSession();
+  const { session } = useSession();
 	const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query; // Access the dynamic id parameter
-  const [clusterItems, setClusterItems] = useState({});
+  const client = useApolloClient();
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        // /items/availability?clusteredBibId=X
-        const response = await axios.get<any[]>(
-          // query limit offset
-          `${publicRuntimeConfig.DCB_API_BASE}/items/availability?clusteredBibId=${id}`,
-          {
-            headers: { Authorization: `Bearer ${data?.accessToken}` }
-          },
-        );
-        setClusterItems(response.data);
-        setLoading(false);
-      } catch (error) {
-        // setError(true);
-        // setLoading(false);
-      }
-    };
-
-    if ( (id) && (data?.accessToken) ) {
-      fetchItems();
-    }
-  }, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE, id]);
-
-
+  const { loading, error, data  } = useQuery(getClusters, {
+    variables: { query: `id: ${id}` }, // Passing the dynamic variable
+  });
 
 	return (
 		<AdminLayout title={t("nav.search.name")}>
-			Items layout {id}
+			Items layout {id} <br/>
+      cluster data: {JSON.stringify(data)}
 		</AdminLayout>
 	);
 };
