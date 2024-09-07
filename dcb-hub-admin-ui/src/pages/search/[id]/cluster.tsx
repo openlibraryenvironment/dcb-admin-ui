@@ -57,38 +57,52 @@ const Clusters: NextPage = () => {
 	const matchpoints = theCluster != null ? extractMatchpoints(theCluster) : [];
 
 	const hasMatchpoint = (mp, instance) => {
-		return (<span>OK</span>);
+    const present = ( instance.matchPoints.some(obj => obj.value === mp) );
+		return (<span>{present ? "GreenTick" : "RedCross" }</span>);
 	}
 
+							// {matchpoints.map((mp) => ( <TableCell> {hasMatchpoint(mp, instance)} </TableCell> ) ) }
 	return (
 		<AdminLayout title={t("nav.cluster.name")}>
-			<h1>Cluster Title</h1>
-			{theCluster?.title}
+			<h1>{theCluster?.title}</h1>
 			<Table>
 				<TableHead>
-        <TableRow >
-					<TableCell>Member</TableCell>
-					{matchpoints.map((mp) => ( <TableCell>{mp}</TableCell> ) ) }
-				</TableRow>
+          <TableRow >
+	  				<TableCell colSpan={20}>Member</TableCell>
+		  		</TableRow>
+	        <TableRow >
+						{matchpoints.map((mp) => ( <TableCell>{mp}</TableCell> ) ) }
+					</TableRow>
 				</TableHead>
         <TableBody>
-        {data?.instanceClusters?.content.map((instance, i: number) => (
-          <TableRow>
-            <TableCell>
-			  			<h2>{instance.title}</h2>
-							<dl>
-                <dt>Id</dt><dd>{instance.id}</dd>
-							</dl>
-              <pre>{JSON.stringify(instance, null, '  ')}</pre>
-            </TableCell>
-						{matchpoints.map((mp) => ( <TableCell> {hasMatchpoint(mp, instance)} </TableCell> ) ) }
-          </TableRow>
-        ))}
+	        {theCluster?.members?.map((instance, i: number) => (
+            <>
+			        <TableRow>
+				        <TableCell colspan={matchpoints?.length}>
+									<h2>{i+1} {instance.title}</h2>
+									<dl>
+							      <dt>Id</dt><dd>{instance.id}</dd>
+							      <dt>Title</dt><dd>{instance.title}</dd>
+							      <dt>Author</dt><dd>{instance.author}</dd>
+									</dl>
+					      </TableCell>
+				      </TableRow>
+			        <TableRow>
+								{matchpoints.map((mp) => ( <TableCell> {hasMatchpoint(mp, instance)} </TableCell> ) ) }
+			        </TableRow>
+            </>
+	        ))}
         </TableBody>
       </Table>
+      <hr/>
+      {data?.instanceClusters?.content.map((instance, i: number) => (
+        <div>
+          <h1>{i} {instance.title}</h1>
+          <pre>{JSON.stringify(instance, null, '  ')}</pre>
+        </div>
+      ))}
 		</AdminLayout>
 	);
-  // Include this to dump the instance record <pre>{JSON.stringify(instance, null, '  ')}</pre>
 };
 
 

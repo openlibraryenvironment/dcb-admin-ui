@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from 'next/router';
 import { useApolloClient, useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
+import { Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 
 const Items: NextPage = () => {
@@ -38,8 +40,7 @@ const Items: NextPage = () => {
           },
         );
         setAvailabilityResults(response.data);
-      } catch (error) {
-				console.error("problem",error);
+      } catch (error) { console.error("problem",error);
         // setError(true);
       }
     };
@@ -53,10 +54,43 @@ const Items: NextPage = () => {
 
 	return (
 		<AdminLayout title={t("nav.search.name")}>
-			Items layout {id} <br/>
-      availability: {JSON.stringify(availabilityResults)}
+			Items available for cluster {id} <br/>
+			
+      <Table>
+        <TableHead>
+	        <TableRow >
+		        <TableCell>ID (Authority)</TableCell>
+		        <TableCell>Status</TableCell>
+		        <TableCell>Location</TableCell>
+		        <TableCell>Barcode (Call No)</TableCell>
+		        <TableCell>Requestable</TableCell>
+		        <TableCell>Suppressed</TableCell>
+		        <TableCell>Hold Count</TableCell>
+		        <TableCell>Canonical Item Type</TableCell>
+		        <TableCell>Local Item Type</TableCell>
+		        <TableCell>Agency (Name)</TableCell>
+				  </TableRow>
+        </TableHead>
+        <TableBody>
+          {availabilityResults?.itemList?.map((item, i: number) => (
+            <TableRow>
+              <TableCell> <Tooltip title={`${item.hostLmsCode}:${item.id}`}>{item.id} </Tooltip> </TableCell>
+              <TableCell>{item.status.code}</TableCell>
+              <TableCell> <Tooltip title={item.location.name}> {item.location.code} </Tooltip> </TableCell>
+              <TableCell> <Tooltip title={item.callNumber}> {item.barcode} </Tooltip> </TableCell>
+              <TableCell>{item.isRequestable ? 'YES' : 'NO'}</TableCell>
+              <TableCell>{item.isSuppressed ? 'YES' : 'NO' }</TableCell>
+              <TableCell>{item.holdCount}</TableCell>
+              <TableCell>{item.canonicalItemType}</TableCell>
+              <TableCell> <Tooltip title={item.localItemType}> {item.localItemTypeCode} </Tooltip> </TableCell>
+              <TableCell> <Tooltip title={item.agency.description}> {item.agency.code} </Tooltip> </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+			</Table>
 		</AdminLayout>
 	);
+  // availability: {JSON.stringify(availabilityResults)}
 };
 
 
