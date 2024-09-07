@@ -15,20 +15,46 @@ import { getClusters } from "src/queries/queries";
 const Items: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
-  const { session } = useSession();
+  const { data: sess } = useSession();
 	const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query; // Access the dynamic id parameter
-  const client = useApolloClient();
+  const [availabilityResults, setAvailabilityResults] = useState({});
 
-  const { loading, error, data  } = useQuery(getClusters, {
-    variables: { query: `id: ${id}` }, // Passing the dynamic variable
-  });
+	// lets fetch /items/availability?clusteredBibId={id}
+  useEffect(() => {
+    const fetchRecords = async () => {
+			console.log("Fetching records....{}",sess);
+      try {
+        const response = await axios.get<any[]>(
+          // query limit offset
+          `${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
+          {
+            headers: { Authorization: `Bearer ${sess?.accessToken}` },
+            params: {
+              clusteredBibId: id,
+							filters: 'none'
+            }
+          },
+        );
+        setAvailabilityResults(response.data);
+      } catch (error) {
+				console.error("problem",error);
+        // setError(true);
+      }
+    };
+
+		console.log("Testing %o %o",id,sess);
+
+    if ( (id) && (sess?.accessToken) ) {
+      fetchRecords();
+    }
+  }, [sess, publicRuntimeConfig.DCB_API_BASE, id]);
 
 	return (
 		<AdminLayout title={t("nav.search.name")}>
 			Items layout {id} <br/>
-      cluster data: {JSON.stringify(data)}
+      availability: {JSON.stringify(availabilityResults)}
 		</AdminLayout>
 	);
 };

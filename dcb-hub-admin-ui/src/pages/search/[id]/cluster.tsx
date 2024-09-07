@@ -29,7 +29,7 @@ const RotatedTableCell = styled(TableCell)({
 const Clusters: NextPage = () => {
 
   const { publicRuntimeConfig } = getConfig();
-  const { session } = useSession();
+  const { data: session } = useSession();
 	const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query; // Access the dynamic id parameter
@@ -79,6 +79,7 @@ const Clusters: NextPage = () => {
 							<dl>
                 <dt>Id</dt><dd>{instance.id}</dd>
 							</dl>
+              <pre>{JSON.stringify(instance, null, '  ')}</pre>
             </TableCell>
 						{matchpoints.map((mp) => ( <TableCell> {hasMatchpoint(mp, instance)} </TableCell> ) ) }
           </TableRow>
