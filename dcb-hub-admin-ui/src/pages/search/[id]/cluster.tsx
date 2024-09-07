@@ -84,6 +84,14 @@ const Clusters: NextPage = () => {
 							      <dt>Id</dt><dd>{instance.id}</dd>
 							      <dt>Title</dt><dd>{instance.title}</dd>
 							      <dt>Author</dt><dd>{instance.author}</dd>
+							      <dt>Identifiers</dt>
+										<dd>
+											<ul>
+												{instance.canonicalMetadata.identifiers.map((id) => (
+													<li>{id.namespace} {id.value}</li>
+												))}
+											</ul>
+										</dd>
 									</dl>
 					      </TableCell>
 				      </TableRow>
