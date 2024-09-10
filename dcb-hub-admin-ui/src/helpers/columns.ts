@@ -42,6 +42,22 @@ export const standardRefValueMappingColumns = [
 		filterOperators: standardFilters,
 		valueGetter: (value: any, row: { toValue: any }) => row?.toValue,
 	},
+	{
+		field: "last_imported",
+		headerName: "Last imported",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		valueGetter: (value: any, row: { lastImported: any }) => {
+			const lastImported = row.lastImported;
+			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+			if (formattedDate == "Invalid Date") {
+				return "";
+			} else {
+				return formattedDate;
+			}
+		},
+	},
 ];
 
 export const refValueMappingColumnsNoCategoryFilter = [
@@ -80,6 +96,22 @@ export const refValueMappingColumnsNoCategoryFilter = [
 		flex: 0.5,
 		filterOperators: standardFilters,
 		valueGetter: (value: any, row: { toValue: any }) => row?.toValue,
+	},
+	{
+		field: "last_imported",
+		headerName: "Last imported",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		valueGetter: (value: any, row: { lastImported: any }) => {
+			const lastImported = row.lastImported;
+			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+			if (formattedDate == "Invalid Date") {
+				return "";
+			} else {
+				return formattedDate;
+			}
+		},
 	},
 ];
 
@@ -126,6 +158,22 @@ export const standardNumRangeMappingColumns = [
 		flex: 0.5,
 		filterOperators: standardFilters,
 	},
+	{
+		field: "last_imported",
+		headerName: "Last imported",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		valueGetter: (value: any, row: { lastImported: any }) => {
+			const lastImported = row.lastImported;
+			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+			if (formattedDate == "Invalid Date") {
+				return "";
+			} else {
+				return formattedDate;
+			}
+		},
+	},
 ];
 
 export const numRangeMappingColumnsNoCategoryFilter = [
@@ -170,6 +218,22 @@ export const numRangeMappingColumnsNoCategoryFilter = [
 		minWidth: 50,
 		flex: 0.5,
 		filterOperators: standardFilters,
+	},
+	{
+		field: "last_imported",
+		headerName: "Last imported",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		valueGetter: (value: any, row: { lastImported: any }) => {
+			const lastImported = row.lastImported;
+			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+			if (formattedDate == "Invalid Date") {
+				return "";
+			} else {
+				return formattedDate;
+			}
+		},
 	},
 ];
 

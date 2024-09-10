@@ -14,6 +14,7 @@ import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { standardFilters } from "src/helpers/filters";
+import dayjs from "dayjs";
 
 // Page for 'ALL' referenceValueMappings of any category.
 
@@ -76,7 +77,7 @@ const AllMappings: NextPage = () => {
 			</Tooltip>
 			<ServerPaginationGrid
 				query={getMappings}
-				presetQueryVariables="(NOT deleted:true)"
+				presetQueryVariables="(fromContext: * AND NOT deleted:true)"
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
 				columns={[
@@ -116,6 +117,23 @@ const AllMappings: NextPage = () => {
 						filterOperators: standardFilters,
 						valueGetter: (value, row: { toValue: string }) => row.toValue,
 					},
+					{
+						field: "last_imported",
+						headerName: t("common.mappings.last_imported"),
+						minWidth: 100,
+						flex: 0.5,
+						filterOperators: standardFilters,
+						valueGetter: (value: any, row: { lastImported: any }) => {
+							const lastImported = row.lastImported;
+							const formattedDate =
+								dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+							if (formattedDate == "Invalid Date") {
+								return "";
+							} else {
+								return formattedDate;
+							}
+						},
+					},
 				]}
 				noDataMessage={t("mappings.import_mappings", {
 					category: t("mappings.ref_value").toLowerCase(),
@@ -128,6 +146,9 @@ const AllMappings: NextPage = () => {
 				sortAttribute="fromContext"
 				pageSize={20}
 				disableHoverInteractions={true}
+				columnVisibilityModel={{
+					last_imported: false,
+				}}
 			/>
 			<div>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}

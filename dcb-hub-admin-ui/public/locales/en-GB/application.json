@@ -25,6 +25,9 @@
 		"about": "About",
 		"error_loading": "An error has occurred while loading {{page_title}}. Please <linkComponent>reload</linkComponent> the page.",
 		"loading": "Loading ...",
+		"mappings": {
+			"last_imported": "Last imported"
+		},
 		"missing": "Missing",
 		"na": "NA",
 		"placeholder_text": "Note: this page contains placeholder data.",

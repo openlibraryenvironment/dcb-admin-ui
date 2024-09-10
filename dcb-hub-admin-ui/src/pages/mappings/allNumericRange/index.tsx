@@ -11,6 +11,7 @@ import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
+import dayjs from "dayjs";
 
 // Page for 'ALL' numeric range mappings of any category.
 
@@ -55,7 +56,7 @@ const AllNumericRange: NextPage = () => {
 			</Tooltip>
 			<ServerPaginationGrid
 				query={getNumericRangeMappings}
-				presetQueryVariables="(NOT deleted:true)"
+				presetQueryVariables="(domain: * AND NOT deleted:true)"
 				type="numericRangeMappings"
 				coreType="numericRangeMappings"
 				columns={[
@@ -101,6 +102,23 @@ const AllNumericRange: NextPage = () => {
 						flex: 0.5,
 						filterOperators: standardFilters,
 					},
+					{
+						field: "last_imported",
+						headerName: t("common.mappings.last_imported"),
+						minWidth: 100,
+						flex: 0.5,
+						filterOperators: standardFilters,
+						valueGetter: (value: any, row: { lastImported: any }) => {
+							const lastImported = row.lastImported;
+							const formattedDate =
+								dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+							if (formattedDate == "Invalid Date") {
+								return "";
+							} else {
+								return formattedDate;
+							}
+						},
+					},
 				]}
 				noDataMessage={t("mappings.no_results")}
 				noResultsMessage={t("mappings.no_results")}
@@ -110,6 +128,9 @@ const AllNumericRange: NextPage = () => {
 				sortDirection="ASC"
 				sortAttribute="context"
 				disableHoverInteractions={true}
+				columnVisibilityModel={{
+					last_imported: false,
+				}}
 			/>
 			<Box>
 				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}
