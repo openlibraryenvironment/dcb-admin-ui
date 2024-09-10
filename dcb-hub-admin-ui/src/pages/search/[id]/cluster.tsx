@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import { useApolloClient, useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
 
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Tooltip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 
@@ -93,6 +93,9 @@ const Clusters: NextPage = () => {
 											</ul>
 										</dd>
 									</dl>
+									<br/>
+									<Tooltip title={`${JSON.stringify(instance.sourceRecord?.json,null,'  ')}`}>Source Record</Tooltip>
+									<Tooltip title={`${JSON.stringify(instance.canonicalMetadata,null,'  ')}`}>Canonical Metadata</Tooltip>
 					      </TableCell>
 				      </TableRow>
 			        <TableRow>
