@@ -69,6 +69,7 @@ const Items: NextPage = () => {
 						<TableCell>ID (Authority)</TableCell>
 						<TableCell>Status</TableCell>
 						<TableCell>Location</TableCell>
+						<TableCell>Context</TableCell>
 						<TableCell>Barcode (Call No)</TableCell>
 						<TableCell>Requestable</TableCell>
 						<TableCell>Suppressed</TableCell>
@@ -90,6 +91,7 @@ const Items: NextPage = () => {
 									{item.location.code}
 								</Tooltip>
 							</TableCell>
+							<TableCell>{item.owningContext}</TableCell>
 							<Tooltip title={item.callNumber}>
 								<TableCell>{item.barcode}</TableCell>
 							</Tooltip>
