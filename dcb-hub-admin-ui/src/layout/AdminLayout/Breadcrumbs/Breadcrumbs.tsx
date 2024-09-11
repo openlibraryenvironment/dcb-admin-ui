@@ -62,6 +62,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 			switch (topLevelKey) {
 				case "mappings":
 				case "settings":
+				case "search":
 				case "serviceInfo":
 					return "nav." + topLevelKey + ".name";
 				default:
@@ -76,6 +77,14 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				// UUIDs will also always be nested keys which is why this check works.
 				return pathArray.slice(-1)[0];
 			} else {
+				// Handle special cases for search pages
+				if (pathArray[0] === "search" && pathArray.length > 2) {
+					if (pathArray[2] === "cluster") {
+						return "nav.search.cluster";
+					} else if (pathArray[2] === "items") {
+						return "nav.search.items";
+					}
+				}
 				// Check for audits: the key is formulated slightly differently due to the URL
 				if (nestedKey == "patronRequests.audits") {
 					return "nav.auditLog";

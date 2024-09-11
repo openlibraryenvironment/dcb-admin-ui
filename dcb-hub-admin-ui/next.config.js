@@ -13,8 +13,7 @@ const nextConfig = {
 		// https://stackoverflow.com/a/70429669
 	},
 	eslint: {
-		// TO BE DISABLED BEFORE MERGING
-		ignoreDuringBuilds: true,
+		// ignoreDuringBuilds: true,
 		// Do not enable this unless absolutely necessary - if ESLint is flagging something up, go look at it.
 		// And if you think ESLint is wrong in a specific case, add eslint-ignore and a justification instead.
 	},

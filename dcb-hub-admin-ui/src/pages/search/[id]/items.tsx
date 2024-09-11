@@ -1,42 +1,26 @@
 import { AdminLayout } from "@layout";
-import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import getConfig from "next/config";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/router";
-import { useApolloClient, useQuery } from "@apollo/client";
-import { getClusters } from "src/queries/queries";
-import {
-	Tooltip,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
-	Paper,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
-
+import { DataGridPro, GridColDef } from "@mui/x-data-grid-pro";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: sess } = useSession();
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = router.query; // Access the dynamic id parameter
+	const { id } = router.query;
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
 
-	// lets fetch /items/availability?clusteredBibId={id}
 	useEffect(() => {
 		const fetchRecords = async () => {
-			console.log("Fetching records....{}", sess);
 			try {
 				const response = await axios.get<any[]>(
-					// query limit offset
 					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
 					{
 						headers: { Authorization: `Bearer ${sess?.accessToken}` },
@@ -48,74 +32,111 @@ const Items: NextPage = () => {
 				);
 				setAvailabilityResults(response.data);
 			} catch (error) {
-				console.error("problem", error);
-				// setError(true);
+				console.error("Error:", error);
 			}
 		};
-
-		console.log("Testing %o %o", id, sess);
 
 		if (id && sess?.accessToken) {
 			fetchRecords();
 		}
 	}, [sess, publicRuntimeConfig.DCB_API_BASE, id]);
 
+	const columns: GridColDef[] = useMemo(
+		() => [
+			{
+				field: "id",
+				headerName: "ID",
+				minWidth: 50,
+				flex: 0.3,
+				filterable: false,
+				sortable: false,
+			},
+			{
+				field: "status",
+				headerName: t("service.status"),
+				minWidth: 100,
+				filterable: false,
+				sortable: false,
+				flex: 0.5,
+				valueGetter: (value, row) => row?.status?.code,
+			},
+			{
+				field: "locationCode",
+				headerName: t("details.location_code"),
+				minWidth: 100,
+				filterable: false,
+				sortable: false,
+				flex: 0.3,
+				valueGetter: (value, row) => row?.location?.code,
+			},
+			{
+				field: "isRequestable",
+				headerName: t("search.requestable"),
+				minWidth: 50,
+				type: "boolean",
+				filterable: false,
+				sortable: false,
+				flex: 0.3,
+			},
+			{
+				field: "isSuppressed",
+				headerName: t("search.suppressed"),
+				minWidth: 50,
+				type: "boolean",
+				filterable: false,
+				sortable: false,
+				flex: 0.3,
+			},
+			{
+				field: "holdCount",
+				headerName: t("search.hold_count"),
+				minWidth: 50,
+				type: "number",
+				filterable: false,
+				sortable: false,
+				flex: 0.3,
+			},
+			{
+				field: "canonicalItemType",
+				headerName: t("details.supplier_ctype"),
+				minWidth: 150,
+				filterable: false,
+				sortable: false,
+				flex: 0.5,
+			},
+			{
+				field: "agencyCode",
+				headerName: t("details.agency_code"),
+				flex: 0.3,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => row?.agency?.code,
+			},
+		],
+		[t],
+	);
+
+	const rows = availabilityResults?.itemList || [];
+
 	return (
-		<AdminLayout title={t("nav.search.name")}>
-			Items available for cluster {id} <br />
-			<Table>
-				<TableHead>
-					<TableRow>
-						<TableCell>ID (Authority)</TableCell>
-						<TableCell>Status</TableCell>
-						<TableCell>Location</TableCell>
-						<TableCell>Context</TableCell>
-						<TableCell>Barcode (Call No)</TableCell>
-						<TableCell>Requestable</TableCell>
-						<TableCell>Suppressed</TableCell>
-						<TableCell>Hold Count</TableCell>
-						<TableCell>Canonical Item Type</TableCell>
-						<TableCell>Local Item Type</TableCell>
-						<TableCell>Agency (Name)</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{availabilityResults?.itemList?.map((item: any, i: number) => (
-						<TableRow>
-							<Tooltip title={`${item.hostLmsCode}:${item.id}`}>
-								<TableCell>{item.id}</TableCell>
-							</Tooltip>
-							<TableCell>{item.status.code}</TableCell>
-							<TableCell>
-								<Tooltip title={item.location.name}>
-									{item.location.code}
-								</Tooltip>
-							</TableCell>
-							<TableCell>{item.owningContext}</TableCell>
-							<Tooltip title={item.callNumber}>
-								<TableCell>{item.barcode}</TableCell>
-							</Tooltip>
-							<TableCell>{item.isRequestable ? "YES" : "NO"}</TableCell>
-							<TableCell>{item.isSuppressed ? "YES" : "NO"}</TableCell>
-							<TableCell>{item.holdCount}</TableCell>
-							<TableCell>{item.canonicalItemType}</TableCell>
-							<TableCell>
-								<Tooltip title={item.localItemType}>
-									{item.localItemTypeCode}
-								</Tooltip>
-							</TableCell>
-							<TableCell>
-								<Tooltip title={item?.agency?.description}>
-									{item?.agency?.code}
-								</Tooltip>
-							</TableCell>
-						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+		<AdminLayout title={`Items available for cluster ${id}`}>
+			<DataGridPro
+				rows={rows ?? []}
+				columns={columns}
+				getDetailPanelContent={({ row }) => (
+					<MasterDetail type="items" row={row} />
+				)}
+				getDetailPanelHeight={() => "auto"}
+				autoHeight
+				sx={{
+					"& .MuiDataGrid-detailPanel": {
+						overflow: "hidden", // Prevent scrollbars in the detail panel
+						height: "auto", // Adjust height automatically
+					},
+				}}
+			/>
 		</AdminLayout>
 	);
-	// availability: {JSON.stringify(availabilityResults)}
 };
 
 export const getServerSideProps: GetServerSideProps = async (context) => {

@@ -1,123 +1,160 @@
 import { AdminLayout } from "@layout";
-import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import getConfig from "next/config";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import Link from "@components/Link/Link";
+import SearchOnlyToolbar from "@components/ServerPaginatedGrid/components/SearchOnlyToolbar";
+import Error from "@components/Error/Error";
+import {
+	DataGridPro,
+	GridColDef,
+	GridPaginationModel,
+} from "@mui/x-data-grid-pro";
+import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
+// DCB Discovery page for searching records
+// This doesn't use ServerPaginatedGrid as that's only for GraphQL
+// Needs a custom 'first load' message and a custom error telling people to reload page
 
 const Search: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
-	const { data } = useSession();
+	const { data: session } = useSession();
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { query } = router; // Get the current query from the URL
+	const { query } = router;
 
-	const [searchResults, setSearchResults] = useState<any>({});
-	const [inputValue, setInputValue] = useState("");
+	const [searchResults, setSearchResults] = useState<any>({
+		instances: [],
+		totalRecords: 0,
+	});
 	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(false);
+	const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+		page: 0,
+		pageSize: 25,
+	});
+	const [searchQuery, setSearchQuery] = useState((query.q as string) || "");
 
-	useEffect(() => {
-		const fetchRecords = async () => {
+	const columns: GridColDef[] = [
+		{
+			field: "title",
+			headerName: t("ui.data_grid.title"),
+			minWidth: 300,
+			flex: 0.7,
+		},
+		{
+			field: "id",
+			headerName: t("search.cluster_id"),
+			minWidth: 100,
+			flex: 0.5,
+			renderCell: (params) => (
+				<Link href={`/search/${params.row.id}/cluster`}>{params.row.id}</Link>
+			),
+		},
+		{
+			field: "items",
+			headerName: t("search.items"),
+			minWidth: 100,
+			flex: 0.3,
+			renderCell: (params) => (
+				<Link href={`/search/${params.row.id}/items`}>
+					{t("ui.data_grid.view_items")}
+				</Link>
+			),
+		},
+	];
+
+	const fetchRecords = useCallback(
+		async (query: string, page: number, pageSize: number) => {
+			if (!query || !session?.accessToken) return;
+
 			try {
-				const response = await axios.get<any[]>(
-					// query limit offset
+				setLoading(true);
+				const response = await axios.get(
 					`${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`,
 					{
-						headers: { Authorization: `Bearer ${data?.accessToken}` },
+						headers: { Authorization: `Bearer ${session.accessToken}` },
 						params: {
-							query: `@keyword all "${query.q}"`,
-							offset: 0,
-							limit: 100,
+							query: `@keyword all "${query}"`,
+							offset: page * pageSize,
+							limit: pageSize,
 						},
 					},
 				);
-				setSearchResults(response.data);
+				setSearchResults({
+					instances: response.data.instances,
+					totalRecords: response.data.totalRecords,
+				});
 				setLoading(false);
 			} catch (error) {
-				// setError(true);
-				// setLoading(false);
+				setError(true);
+				setLoading(false);
 			}
-		};
+		},
+		[publicRuntimeConfig.DCB_SEARCH_BASE, session?.accessToken],
+	);
 
-		if (query.q && data?.accessToken) {
-			fetchRecords();
+	useEffect(() => {
+		fetchRecords(searchQuery, paginationModel.page, paginationModel.pageSize);
+	}, [fetchRecords, searchQuery, paginationModel]);
+
+	useEffect(() => {
+		if (query.q) {
+			setSearchQuery(query.q as string);
 		}
-	}, [
-		data?.accessToken,
-		publicRuntimeConfig.DCB_API_BASE,
-		publicRuntimeConfig.DCB_SEARCH_BASE,
-		query.q,
-	]);
+	}, [query.q]);
 
-	const handleInputChange = (e: any) => {
-		setInputValue(e.target.value);
+	const handleSearchChange = (value: string) => {
+		setSearchQuery(value);
+		router.push(`/search?q=${encodeURIComponent(value)}`, undefined, {
+			shallow: true,
+		});
 	};
 
-	const doSearch = () => {
-		console.log("doSearch");
-		router.push(`/search?q=${encodeURIComponent(inputValue)}`);
-		// setLoading(true);
-		// setQuery(inputValue);
-	};
-
-	const renderSearchResults = () => {
-		console.log("doSearch");
-		if (searchResults?.instances == null) return <div></div>;
-
-		return (
-			<div>
-				Total: {searchResults.totalRecords}
-				<ul>
-					{searchResults.instances.map((instance: any, i: number) => (
-						<li>
-							<table>
-								<tr>
-									<td>
-										{i} : {instance.title}
-									</td>
-								</tr>
-								<tr>
-									<td>
-										<Link
-											key="instance-cluster-details"
-											href={`/search/${instance.id}/cluster`}
-										>
-											ClusterInfo
-										</Link>
-										&nbsp;
-										<Link
-											key="instance-item-details"
-											href={`/search/${instance.id}/items`}
-										>
-											Item
-										</Link>
-										&nbsp;
-									</td>
-								</tr>
-							</table>
-						</li>
-					))}
-				</ul>
-			</div>
-		);
-	};
-
+	// change action to be reload
 	return (
 		<AdminLayout title={t("nav.search.name")}>
-			<input
-				type="text"
-				value={inputValue}
-				onChange={handleInputChange}
-				placeholder="Enter search query"
-			/>
-			<button onClick={doSearch}>Search -&gt;</button>
-			<hr />
-			{renderSearchResults()}
+			{error ? (
+				<Error
+					title={t("ui.error.search_failed")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.reload")}
+					action={t("ui.action.go_back")}
+					goBack="/search"
+				/>
+			) : (
+				<DataGridPro
+					rows={searchResults.instances ?? []}
+					columns={columns}
+					paginationModel={paginationModel}
+					onPaginationModelChange={setPaginationModel}
+					pageSizeOptions={[5, 10, 25, 50, 100, 200]}
+					rowCount={searchResults.totalRecords}
+					loading={loading}
+					pagination
+					paginationMode="server"
+					autoHeight={true}
+					slots={{
+						toolbar: SearchOnlyToolbar,
+						noRowsOverlay: () => (
+							<CustomNoDataOverlay noDataMessage={t("search.no_data")} />
+						),
+					}}
+					slotProps={{
+						toolbar: {
+							showQuickFilter: true,
+							quickFilterProps: { debounceMs: 500 },
+						},
+					}}
+					onFilterModelChange={(model) =>
+						handleSearchChange(model.quickFilterValues?.[0] || "")
+					}
+				/>
+			)}
 		</AdminLayout>
 	);
 };

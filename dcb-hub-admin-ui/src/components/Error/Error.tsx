@@ -8,6 +8,7 @@ interface ErrorProps {
 	description?: string;
 	action: string;
 	goBack?: string;
+	reload?: boolean;
 }
 export default function Error({
 	title,
@@ -15,6 +16,7 @@ export default function Error({
 	description,
 	action,
 	goBack,
+	reload,
 }: ErrorProps) {
 	const actionLink = goBack ? goBack : "/";
 	const router = useRouter();
@@ -22,6 +24,9 @@ export default function Error({
 
 	const handleReturn = () => {
 		router.push(actionLink);
+	};
+	const handleReload = () => {
+		location.reload();
 	};
 	return (
 		<Box
@@ -48,7 +53,11 @@ export default function Error({
 					{message}
 				</Typography>
 				<Typography variant="attributeText">{description}</Typography>
-				<Button variant="contained" onClick={handleReturn} size="large">
+				<Button
+					variant="contained"
+					onClick={reload ? handleReload : handleReturn}
+					size="large"
+				>
 					{action}
 				</Button>
 			</Stack>
