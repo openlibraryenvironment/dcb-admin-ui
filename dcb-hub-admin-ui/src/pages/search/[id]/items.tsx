@@ -105,8 +105,8 @@ const Items: NextPage = () => {
 								</Tooltip>
 							</TableCell>
 							<TableCell>
-								<Tooltip title={item.agency.description}>
-									{item.agency.code}
+								<Tooltip title={item?.agency?.description}>
+									{item?.agency?.code}
 								</Tooltip>
 							</TableCell>
 						</TableRow>
