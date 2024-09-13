@@ -15,6 +15,7 @@ type BreadcrumbType = {
 	href: string;
 	isCurrent: boolean;
 	key: string;
+	isUUID: boolean;
 };
 
 type BreadcrumbsType = {
@@ -24,6 +25,8 @@ type BreadcrumbsType = {
 export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 	const router = useRouter();
 	const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbType[]>([]);
+	const { t } = useTranslation();
+	const theme = useTheme();
 
 	useEffect(() => {
 		const pathWithoutQuery = router.asPath.split("?")[0];
@@ -38,15 +41,11 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				href,
 				isCurrent: index === pathArray.length - 1,
 				key: getKey(pathArray.slice(0, index + 1)),
+				isUUID: path.length === 36,
 			};
 		});
 		setBreadcrumbs(breadcrumbs);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		// Disabled because getKey is a stable function and will not change.
 	}, [router.asPath]);
-
-	const { t } = useTranslation();
-	const theme = useTheme();
 
 	const getKey = (pathArray: string[]): string => {
 		// This function formulates the correct translation key from the pathArray.
@@ -97,55 +96,56 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 
 	//this is used to either set the breadcrumb as a link if it is the last breadcrumb.
 	const mapBreadcrumbs = () => {
-		return breadcrumbs?.map((breadcrumb, index) =>
-			// check if the breadcrumb is not the last item in the array.
-			index < breadcrumbs.length - 1 ? (
-				// check if breadcrumb.href is defined and not null for the key.
-				// this is to get around build issues with the key value.
-				// performs if breadcrumbs is last in the array.
-				// This also checks for the audit log key and unsets the link, because there is no /audits page to link to
-				breadcrumb.href && breadcrumb.key != "nav.auditLog" ? (
-					<Link
-						sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
-						underline="hover"
+		return breadcrumbs?.map((breadcrumb, index) => {
+			const isSearchPage = router.pathname.startsWith("/search/[id]");
+			const isUUIDInSearchPage = isSearchPage && breadcrumb.isUUID;
+			const isLastBreadcrumb = index === breadcrumbs.length - 1;
+
+			if (isLastBreadcrumb) {
+				return (
+					<Typography
+						sx={{ color: "inherit", fontSize: "14px" }}
 						key={breadcrumb.href}
-						href={breadcrumb.href}
-						title={t(breadcrumb.key)}
+						title={
+							breadcrumb.key.length === 36 ? titleAttribute : t(breadcrumb.key)
+						}
+						aria-current="page"
 					>
-						{t(breadcrumb.key)}
-					</Link>
-				) : (
-					// if it is null then use index as the key.
+						{breadcrumb.key.length === 36
+							? titleAttribute
+								? titleAttribute.length > 36
+									? truncate(titleAttribute, { length: 36 })
+									: titleAttribute
+								: breadcrumb.key
+							: t(breadcrumb.key)}
+					</Typography>
+				);
+			}
+
+			if (isUUIDInSearchPage || breadcrumb.key === "nav.auditLog") {
+				return (
 					<Typography
 						sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
 						key={index}
 						title={t(breadcrumb.key)}
 					>
-						{t(breadcrumb.key)}
+						{breadcrumb.isUUID ? breadcrumb.key : t(breadcrumb.key)}
 					</Typography>
-				)
-			) : (
-				// renders if the breadcrumb is the last item.
-				// The logic here checks for if the key is a UUID. If it is, we know we're on the details page, and so we attempt to render the titleAttribute. If there is no titleAttribute, we fall back to the UUID.
-				// If it's not a UUID, we know we're not on the details page, and so we can safely translate the value.
-				<Typography
-					sx={{ color: "inherit", fontSize: "14px" }}
+				);
+			}
+
+			return (
+				<Link
+					sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
+					underline="hover"
 					key={breadcrumb.href}
-					title={
-						breadcrumb.key.length == 36 ? titleAttribute : t(breadcrumb.key)
-					}
-					aria-current="page"
+					href={breadcrumb.href}
+					title={t(breadcrumb.key)}
 				>
-					{breadcrumb.key.length == 36
-						? titleAttribute
-							? titleAttribute.length > 36
-								? truncate(titleAttribute, { length: 36 })
-								: titleAttribute
-							: breadcrumb.key
-						: t(breadcrumb.key)}
-				</Typography>
-			),
-		);
+					{t(breadcrumb.key)}
+				</Link>
+			);
+		});
 	};
 
 	return (

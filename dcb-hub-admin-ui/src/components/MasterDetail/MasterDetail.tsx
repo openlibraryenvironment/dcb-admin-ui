@@ -22,6 +22,7 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
+
 type MasterDetailType = {
 	row: any;
 	type: string;
@@ -102,24 +103,23 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid xs={4} sm={8} md={12}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.identifiers")}
 							</Typography>
-							<Typography variant="attributeText">
-								<List dense>
-									{row.canonicalMetadata.identifiers.map(
-										(id: { namespace: string; value: string }) => (
-											<ListItem key={`${id.namespace}-${id.value}`}>
-												<ListItemText
-													primary={`${id.namespace}: ${id.value}`}
-												/>
-											</ListItem>
-										),
-									)}
-								</List>
-							</Typography>
+							<List sx={{ pl: 0, ml: 0 }} dense disablePadding>
+								{row.canonicalMetadata.identifiers.map(
+									(id: { namespace: string; value: string }) => (
+										<ListItem
+											sx={{ pl: 0 }}
+											key={`${id.namespace}-${id.value}`}
+										>
+											<ListItemText primary={`${id.namespace}: ${id.value}`} />
+										</ListItem>
+									),
+								)}
+							</List>
 						</Stack>
 					</Grid>
 					<Grid xs={4} sm={8} md={12}>

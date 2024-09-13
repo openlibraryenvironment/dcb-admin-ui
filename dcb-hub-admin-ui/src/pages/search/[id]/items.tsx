@@ -7,8 +7,14 @@ import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/router";
-import { DataGridPro, GridColDef } from "@mui/x-data-grid-pro";
+import {
+	DataGridPro,
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+	GridColDef,
+} from "@mui/x-data-grid-pro";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
+import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: sess } = useSession();
@@ -44,8 +50,16 @@ const Items: NextPage = () => {
 	const columns: GridColDef[] = useMemo(
 		() => [
 			{
+				...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+				headerName: t("ui.data_grid.master_detail"),
+				renderCell: (params) => (
+					<DetailPanelToggle id={params.id} value={params.value} />
+				),
+				renderHeader: () => <DetailPanelHeader />,
+			},
+			{
 				field: "id",
-				headerName: "ID",
+				headerName: t("search.item_id"),
 				minWidth: 50,
 				flex: 0.3,
 				filterable: false,
@@ -119,7 +133,7 @@ const Items: NextPage = () => {
 	const rows = availabilityResults?.itemList || [];
 
 	return (
-		<AdminLayout title={`Items available for cluster ${id}`}>
+		<AdminLayout title={t("search.items_title", { cluster: id })}>
 			<DataGridPro
 				rows={rows ?? []}
 				columns={columns}
@@ -133,6 +147,7 @@ const Items: NextPage = () => {
 						overflow: "hidden", // Prevent scrollbars in the detail panel
 						height: "auto", // Adjust height automatically
 					},
+					border: "0",
 				}}
 			/>
 		</AdminLayout>

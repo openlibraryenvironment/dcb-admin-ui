@@ -10,11 +10,15 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Cancel } from "@mui/icons-material";
 import {
 	DataGridPro,
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
 	GridRenderCellParams,
 } from "@mui/x-data-grid-pro";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Error from "@components/Error/Error";
+import { MdExpandLess, MdExpandMore } from "react-icons/md";
+import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
+import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
@@ -43,18 +47,29 @@ const Clusters: NextPage = () => {
 		const present = instance.matchPoints.some((obj: any) => obj.value === mp);
 		return present ? (
 			<Tooltip
-				title={"Matchpoint is present for the title " + instance?.title}
+				sx={{ justifyContent: "center" }}
+				title={
+					"Matchpoint " + mp + " is present for the title " + instance?.title
+				}
 				aria-labelledby={
-					"Matchpoint is present for the title " + instance?.title
+					"Matchpoint " + mp + " is present for the title " + instance?.title
 				}
 			>
 				<CheckCircleIcon htmlColor={theme.palette.success.main} />
 			</Tooltip>
 		) : (
 			<Tooltip
-				title={"Matchpoint is not present for the title " + instance?.title}
+				title={
+					"Matchpoint " +
+					mp +
+					" is not present for the title " +
+					instance?.title
+				}
 				aria-labelledby={
-					"Matchpoint is not present for the title " + instance?.title
+					"Matchpoint " +
+					mp +
+					" is not present for the title " +
+					instance?.title
 				}
 			>
 				<Cancel htmlColor={theme.palette.error.main} />
@@ -70,6 +85,14 @@ const Clusters: NextPage = () => {
 		// 	flex: 0.5,
 		// },
 		// Shown in master detail instead ^^
+		{
+			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+			headerName: t("ui.data_grid.master_detail"),
+			renderCell: (params) => (
+				<DetailPanelToggle id={params.id} value={params.value} />
+			),
+			renderHeader: () => <DetailPanelHeader />,
+		},
 		{
 			field: "title",
 			headerName: t("ui.data_grid.title"),
@@ -100,7 +123,7 @@ const Clusters: NextPage = () => {
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
 					action={t("ui.action.go_back")}
-					goBack="/agencies"
+					goBack="/search"
 				/>
 			) : (
 				<Error
@@ -108,12 +131,14 @@ const Clusters: NextPage = () => {
 					message={t("ui.error.invalid_UUID")}
 					description={t("ui.info.check_address")}
 					action={t("ui.action.go_back")}
-					goBack="/agencies"
+					goBack="/search"
 				/>
 			)}
 		</AdminLayout>
 	) : (
-		<AdminLayout title={theCluster?.title}>
+		<AdminLayout
+			title={t("search.cluster_title", { record: theCluster?.title })}
+		>
 			<DataGridPro
 				loading={loading}
 				rows={rows ?? []}
@@ -128,6 +153,11 @@ const Clusters: NextPage = () => {
 						overflow: "hidden", // Prevent scrollbars in the detail panel
 						height: "auto", // Adjust height automatically
 					},
+					border: "0",
+				}}
+				slots={{
+					detailPanelExpandIcon: MdExpandMore,
+					detailPanelCollapseIcon: MdExpandLess,
 				}}
 			/>
 		</AdminLayout>
