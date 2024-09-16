@@ -16,6 +16,26 @@ const StyledAccordion = styled(Accordion)(() => ({
 	},
 }));
 
+const StyledDataGridAccordion = styled(Accordion)(({ theme }) => ({
+	boxShadow: "none",
+	backgroundColor: "transparent",
+	"&:before": {
+		display: "none",
+	},
+	"&:first-of-type": {
+		borderTop: `2px solid ${theme.palette.divider}`,
+	},
+}));
+
+const StyledDataGridAccordionSummary = styled(AccordionSummary)(() => ({
+	backgroundColor: "transparent",
+
+	minHeight: "auto",
+	"&.Mui-expanded": {
+		minHeight: "auto",
+	},
+}));
+
 StyledAccordion.defaultProps = {
 	TransitionProps: { timeout: 400 }, // Setting default timeout
 };
@@ -72,4 +92,6 @@ export {
 	SubAccordion,
 	SubAccordionSummary,
 	SubAccordionDetails,
+	StyledDataGridAccordion,
+	StyledDataGridAccordionSummary,
 };

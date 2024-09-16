@@ -55,7 +55,10 @@ const Clusters: NextPage = () => {
 					"Matchpoint " + mp + " is present for the title " + instance?.title
 				}
 			>
-				<CheckCircleIcon htmlColor={theme.palette.success.main} />
+				<CheckCircleIcon
+					sx={{ mt: 1.75 }}
+					htmlColor={theme.palette.success.main}
+				/>
 			</Tooltip>
 		) : (
 			<Tooltip
@@ -72,7 +75,7 @@ const Clusters: NextPage = () => {
 					instance?.title
 				}
 			>
-				<Cancel htmlColor={theme.palette.error.main} />
+				<Cancel sx={{ mt: 1.75 }} htmlColor={theme.palette.error.main} />
 			</Tooltip>
 		);
 	};

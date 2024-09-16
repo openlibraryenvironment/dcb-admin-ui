@@ -1,4 +1,5 @@
 import {
+	AccordionDetails,
 	Link,
 	List,
 	ListItem,
@@ -16,12 +17,10 @@ import dayjs from "dayjs";
 import { formatDuration } from "src/helpers/formatDuration";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import {
-	StyledAccordion,
-	StyledAccordionDetails,
-	StyledAccordionSummary,
+	StyledDataGridAccordion,
+	StyledDataGridAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
-import { IconContext } from "react-icons";
-import { MdExpandMore } from "react-icons/md";
+import { ExpandMore } from "@mui/icons-material";
 
 type MasterDetailType = {
 	row: any;
@@ -83,92 +82,85 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "cluster":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
-						<Stack direction={"column"}>
-							<Typography variant="attributeTitle">
-								{t("search.bib_record_id")}
-							</Typography>
-							<Link href={`/bibs/${row?.id}`}>
-								<RenderAttribute attribute={row?.id} />
-							</Link>
-						</Stack>
-					</Grid>
-					<Grid xs={2} sm={4} md={4}>
-						<Stack direction={"column"}>
-							<Typography variant="attributeTitle">
-								{t("details.author")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.author} />
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid xs={4} sm={8} md={12}>
-						<Stack direction={"column"}>
-							<Typography variant="attributeTitle">
-								{t("search.identifiers")}
-							</Typography>
-							<List sx={{ pl: 0, ml: 0 }} dense disablePadding>
-								{row.canonicalMetadata.identifiers.map(
-									(id: { namespace: string; value: string }) => (
-										<ListItem
-											sx={{ pl: 0 }}
-											key={`${id.namespace}-${id.value}`}
-										>
-											<ListItemText primary={`${id.namespace}: ${id.value}`} />
-										</ListItem>
-									),
-								)}
-							</List>
-						</Stack>
-					</Grid>
-					<Grid xs={4} sm={8} md={12}>
-						<StyledAccordion
-							variant="outlined"
-							defaultExpanded={false}
-							disableGutters
-						>
-							<StyledAccordionSummary
-								aria-controls="source-bibs-source-record-json-details"
-								id="source-bibs-source-record-json-details"
-								expandIcon={
-									<IconContext.Provider value={{ size: "2em" }}>
-										<MdExpandMore />
-									</IconContext.Provider>
-								}
-							>
-								<Typography variant="accordionSummary">
-									{t("details.source_record")}
+					<Grid container spacing={2} role="row">
+						<Grid xs={2} sm={4} md={4} role="gridcell">
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("search.bib_record_id")}
 								</Typography>
-							</StyledAccordionSummary>
-							<StyledAccordionDetails>
-								{JSON.stringify(row?.sourceRecord?.json, null, 2)}
-							</StyledAccordionDetails>
-						</StyledAccordion>
-					</Grid>
-					<Grid xs={4} sm={8} md={12}>
-						<StyledAccordion
-							variant="outlined"
-							defaultExpanded={false}
-							disableGutters
-						>
-							<StyledAccordionSummary
-								aria-controls="search-canonical-metadata-details"
-								id="search-canonical-metadata-details"
-								expandIcon={
-									<IconContext.Provider value={{ size: "2em" }}>
-										<MdExpandMore />
-									</IconContext.Provider>
-								}
-							>
-								<Typography variant="accordionSummary">
-									{t("details.canonical_metadata")}
+								<Typography variant="attributeText" component="div">
+									<Link
+										href={`/bibs/${row?.id}`}
+										underline="hover"
+										onClick={(e) => {
+											e.stopPropagation();
+										}}
+									>
+										<RenderAttribute attribute={row?.id} />
+									</Link>
 								</Typography>
-							</StyledAccordionSummary>
-							<StyledAccordionDetails>
-								{JSON.stringify(row?.canonicalMetadata, null, 2)}
-							</StyledAccordionDetails>
-						</StyledAccordion>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4} role="gridcell">
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("details.author")}
+								</Typography>
+								<Typography variant="attributeText">
+									<RenderAttribute attribute={row?.author} />
+								</Typography>
+							</Stack>
+						</Grid>
+						<Grid xs={4} sm={8} md={12} role="gridcell">
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("search.identifiers")}
+								</Typography>
+								<List sx={{ pl: 0, ml: 0 }} dense disablePadding>
+									{row.canonicalMetadata.identifiers.map(
+										(id: { namespace: string; value: string }) => (
+											<ListItem
+												sx={{ pl: 0 }}
+												key={`${id.namespace}-${id.value}`}
+												disablePadding
+											>
+												<ListItemText
+													primary={`${id.namespace}: ${id.value}`}
+												/>
+											</ListItem>
+										),
+									)}
+								</List>
+							</Stack>
+						</Grid>
+						<Grid xs={4} sm={8} md={12} role="gridcell">
+							<StyledDataGridAccordion elevation={0}>
+								<StyledDataGridAccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="source-bibs-source-record-json-content"
+									id="source-bibs-source-record-json-header"
+								>
+									<Typography>{t("details.source_record")}</Typography>
+								</StyledDataGridAccordionSummary>
+								<AccordionDetails id="source-bibs-source-record-json-content">
+									<pre>{JSON.stringify(row?.sourceRecord?.json, null, 2)}</pre>
+								</AccordionDetails>
+							</StyledDataGridAccordion>
+						</Grid>
+						<Grid xs={4} sm={8} md={12} role="gridcell">
+							<StyledDataGridAccordion elevation={0}>
+								<StyledDataGridAccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="search-canonical-metadata-content"
+									id="search-canonical-metadata-header"
+								>
+									<Typography>{t("details.canonical_metadata")}</Typography>
+								</StyledDataGridAccordionSummary>
+								<AccordionDetails id="search-canonical-metadata-content">
+									<pre>{JSON.stringify(row?.canonicalMetadata, null, 2)}</pre>
+								</AccordionDetails>
+							</StyledDataGridAccordion>
+						</Grid>
 					</Grid>
 				</MasterDetailLayout>
 			);
