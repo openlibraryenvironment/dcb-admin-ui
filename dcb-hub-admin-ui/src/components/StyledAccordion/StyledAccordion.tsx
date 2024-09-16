@@ -27,14 +27,19 @@ const StyledDataGridAccordion = styled(Accordion)(({ theme }) => ({
 	},
 }));
 
-const StyledDataGridAccordionSummary = styled(AccordionSummary)(() => ({
-	backgroundColor: "transparent",
-
-	minHeight: "auto",
-	"&.Mui-expanded": {
+const StyledDataGridAccordionSummary = styled(AccordionSummary)(
+	({ theme }) => ({
+		backgroundColor: "transparent",
+		flexDirection: "row-reverse",
 		minHeight: "auto",
-	},
-}));
+		"&.Mui-expanded": {
+			minHeight: "auto",
+		},
+		"& .MuiAccordionSummary-content": {
+			marginLeft: theme.spacing(1),
+		},
+	}),
+);
 
 StyledAccordion.defaultProps = {
 	TransitionProps: { timeout: 400 }, // Setting default timeout

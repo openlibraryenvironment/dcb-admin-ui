@@ -81,13 +81,6 @@ const Clusters: NextPage = () => {
 	};
 
 	const columns: GridColDef[] = [
-		// {
-		// 	field: "id",
-		// 	headerName: t("search.bib_record_id"),
-		// 	minWidth: 150,
-		// 	flex: 0.5,
-		// },
-		// Shown in master detail instead ^^
 		{
 			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 			headerName: t("ui.data_grid.master_detail"),
