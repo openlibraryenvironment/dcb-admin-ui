@@ -640,6 +640,7 @@
 		"hold_count": "Hold count",
 		"identifiers": "Identifiers",
 		"items": "Items",
+		"items_error_title": "We could not load the associated items",
 		"item_id": "Item ID",
 		"items_title": "Items available for cluster {{cluster}}",
 		"local_item_type_code": "Local item type code",

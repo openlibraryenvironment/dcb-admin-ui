@@ -6,6 +6,7 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import getConfig from "next/config";
 import { useEffect, useState, useMemo } from "react";
+import Error from "@components/Error/Error";
 import { useRouter } from "next/router";
 import {
 	DataGridPro,
@@ -22,9 +23,12 @@ const Items: NextPage = () => {
 	const router = useRouter();
 	const { id } = router.query;
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(false);
 
 	useEffect(() => {
 		const fetchRecords = async () => {
+			setLoading(true);
 			try {
 				const response = await axios.get<any[]>(
 					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
@@ -36,9 +40,12 @@ const Items: NextPage = () => {
 						},
 					},
 				);
+				setLoading(false);
 				setAvailabilityResults(response.data);
 			} catch (error) {
 				console.error("Error:", error);
+				setLoading(false);
+				setError(true);
 			}
 		};
 
@@ -134,22 +141,33 @@ const Items: NextPage = () => {
 
 	return (
 		<AdminLayout title={t("search.items_title", { cluster: id })}>
-			<DataGridPro
-				rows={rows ?? []}
-				columns={columns}
-				getDetailPanelContent={({ row }) => (
-					<MasterDetail type="items" row={row} />
-				)}
-				getDetailPanelHeight={() => "auto"}
-				autoHeight
-				sx={{
-					"& .MuiDataGrid-detailPanel": {
-						overflow: "hidden", // Prevent scrollbars in the detail panel
-						height: "auto", // Adjust height automatically
-					},
-					border: "0",
-				}}
-			/>
+			{error ? (
+				<Error
+					title={t("search.items_error_title")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.reload")}
+					action={t("ui.action.reload")}
+					reload
+				/>
+			) : (
+				<DataGridPro
+					rows={rows ?? []}
+					columns={columns}
+					getDetailPanelContent={({ row }) => (
+						<MasterDetail type="items" row={row} />
+					)}
+					getDetailPanelHeight={() => "auto"}
+					autoHeight
+					sx={{
+						"& .MuiDataGrid-detailPanel": {
+							overflow: "hidden", // Prevent scrollbars in the detail panel
+							height: "auto", // Adjust height automatically
+						},
+						border: "0",
+					}}
+					loading={loading}
+				/>
+			)}
 		</AdminLayout>
 	);
 };
