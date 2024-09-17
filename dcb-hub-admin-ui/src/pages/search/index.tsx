@@ -17,6 +17,7 @@ import {
 } from "@mui/x-data-grid-pro";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
 import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
+import getConfig from "next/config";
 
 const debouncedSearchFunction = debounce(
 	(term: string, callback: (term: string) => void) => {
@@ -85,6 +86,7 @@ const Search: NextPage = () => {
 	const router = useRouter();
 	const { t } = useTranslation();
 	const { data: session } = useSession();
+	const { publicRuntimeConfig } = getConfig();
 
 	const [searchResults, setSearchResults] = useState<any>({
 		instances: [],
@@ -128,7 +130,13 @@ const Search: NextPage = () => {
 
 	const fetchRecords = useCallback(
 		async (query: string, page: number, pageSize: number) => {
-			if (!session?.accessToken || !query) return;
+			if (
+				!session?.accessToken ||
+				!query ||
+				!publicRuntimeConfig.DCB_SEARCH_BASE
+			)
+				// If no access token, no query OR no SEARCH_BASE env variable configured, we can't send a request.
+				return;
 
 			setLoading(true);
 			try {
@@ -147,7 +155,7 @@ const Search: NextPage = () => {
 				setLoading(false);
 			}
 		},
-		[session?.accessToken],
+		[publicRuntimeConfig.DCB_SEARCH_BASE, session?.accessToken],
 	);
 
 	const handleSearch = useCallback(
@@ -174,7 +182,7 @@ const Search: NextPage = () => {
 		}
 	}, [router.query.q, handleSearch, paginationModel]);
 
-	return (
+	return publicRuntimeConfig.DCB_SEARCH_BASE ? (
 		<AdminLayout title={t("nav.search.name")}>
 			<SearchBar
 				initialTerm={router.query.q as string}
@@ -211,6 +219,14 @@ const Search: NextPage = () => {
 					/>
 				</>
 			)}
+		</AdminLayout>
+	) : (
+		<AdminLayout title={t("nav.search.name")}>
+			<Error
+				title={t("search.discovery_unavailable_title")}
+				message={t("search.discovery_unavailable_message")}
+				action={t("ui.action.go_back")}
+			/>
 		</AdminLayout>
 	);
 };
