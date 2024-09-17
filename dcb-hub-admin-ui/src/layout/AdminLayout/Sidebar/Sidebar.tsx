@@ -31,6 +31,7 @@ import {
 	MdMap,
 	MdInfo,
 	MdLocalLibrary,
+	MdSearch,
 } from "react-icons/md";
 
 const drawerWidth = 240;
@@ -111,7 +112,10 @@ const SidebarIcon = (indexVal: any, isSelected: boolean) => {
 		case 9:
 			return <MdSettings {...iconProps} />;
 		case 10:
+			return <MdSearch {...iconProps} />;
+		case 11:
 			return <MdInfo {...iconProps} />;
+
 		default:
 			return null;
 	}
@@ -133,6 +137,7 @@ const routes = [
 	{ path: "/libraries", translationKey: "nav.libraries" },
 	{ path: "/mappings", translationKey: "nav.mappings.name" },
 	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" },
+	{ path: "/search", translationKey: "nav.search.name" },
 	// currently unused, may be un-commented in the future
 	//{path: '/settings', translationKey: 'nav.settings.name'}
 ];

@@ -41,7 +41,7 @@ build-container-image:
   image: docker:stable
   stage: build
   only:
-    - container-release
+    - release
   tags:
     - ki-onprem
   script:

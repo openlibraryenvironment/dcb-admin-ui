@@ -109,12 +109,10 @@ export default function PatronRequestDetails({
 		);
 	};
 
-	// Check for the presence of a configured discovery scaffold URL. If it's there, render the URL: if not return blank.
-	const bibClusterRecordUrl = publicRuntimeConfig.DISCOVERY_SCAFFOLD_URL
-		? publicRuntimeConfig.DISCOVERY_SCAFFOLD_URL +
-			"resourceDescription/" +
-			patronRequest?.bibClusterId
+	const bibClusterRecordUrl = publicRuntimeConfig.DCB_SEARCH_BASE
+		? "/search?q=" + patronRequest?.bibClusterId
 		: "";
+
 	const updateUrl =
 		publicRuntimeConfig.DCB_API_BASE +
 		"/patrons/requests/" +

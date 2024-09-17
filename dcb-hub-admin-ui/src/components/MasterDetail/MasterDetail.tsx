@@ -1,4 +1,12 @@
-import { Stack, Typography } from "@mui/material";
+import {
+	AccordionDetails,
+	Link,
+	List,
+	ListItem,
+	ListItemText,
+	Stack,
+	Typography,
+} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useGridApiContext } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
@@ -8,6 +16,12 @@ import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
 import { formatDuration } from "src/helpers/formatDuration";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
+import {
+	StyledDataGridAccordion,
+	StyledDataGridAccordionSummary,
+} from "@components/StyledAccordion/StyledAccordion";
+import { ExpandMore } from "@mui/icons-material";
+
 type MasterDetailType = {
 	row: any;
 	type: string;
@@ -62,6 +76,91 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								<RenderAttribute attribute={row?.id} />
 							</Typography>
 						</Stack>
+					</Grid>
+				</MasterDetailLayout>
+			);
+		case "cluster":
+			return (
+				<MasterDetailLayout width={width}>
+					<Grid container spacing={2} role="row">
+						<Grid xs={2} sm={4} md={4} role="gridcell">
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("search.bib_record_id")}
+								</Typography>
+								<Typography variant="attributeText" component="div">
+									<Link
+										href={`/bibs/${row?.id}`}
+										underline="hover"
+										onClick={(e) => {
+											e.stopPropagation();
+										}}
+									>
+										<RenderAttribute attribute={row?.id} />
+									</Link>
+								</Typography>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4} role="gridcell">
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("details.author")}
+								</Typography>
+								<Typography variant="attributeText">
+									<RenderAttribute attribute={row?.author} />
+								</Typography>
+							</Stack>
+						</Grid>
+						<Grid xs={4} sm={8} md={12} role="gridcell">
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("search.identifiers")}
+								</Typography>
+								<List sx={{ pl: 0, ml: 0 }} dense disablePadding>
+									{row.canonicalMetadata.identifiers.map(
+										(id: { namespace: string; value: string }) => (
+											<ListItem
+												sx={{ pl: 0 }}
+												key={`${id.namespace}-${id.value}`}
+												disablePadding
+											>
+												<ListItemText
+													primary={`${id.namespace}: ${id.value}`}
+												/>
+											</ListItem>
+										),
+									)}
+								</List>
+							</Stack>
+						</Grid>
+						<Grid xs={4} sm={8} md={12} role="gridcell">
+							<StyledDataGridAccordion elevation={0}>
+								<StyledDataGridAccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="source-bibs-source-record-json-content"
+									id="source-bibs-source-record-json-header"
+								>
+									<Typography>{t("details.source_record")}</Typography>
+								</StyledDataGridAccordionSummary>
+								<AccordionDetails id="source-bibs-source-record-json-content">
+									<pre>{JSON.stringify(row?.sourceRecord?.json, null, 2)}</pre>
+								</AccordionDetails>
+							</StyledDataGridAccordion>
+						</Grid>
+						<Grid xs={4} sm={8} md={12} role="gridcell">
+							<StyledDataGridAccordion elevation={0}>
+								<StyledDataGridAccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="search-canonical-metadata-content"
+									id="search-canonical-metadata-header"
+								>
+									<Typography>{t("details.canonical_metadata")}</Typography>
+								</StyledDataGridAccordionSummary>
+								<AccordionDetails id="search-canonical-metadata-content">
+									<pre>{JSON.stringify(row?.canonicalMetadata, null, 2)}</pre>
+								</AccordionDetails>
+							</StyledDataGridAccordion>
+						</Grid>
 					</Grid>
 				</MasterDetailLayout>
 			);
@@ -383,6 +482,75 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								{t("details.request_uuid")}
 							</Typography>
 							<RenderAttribute attribute={row?.id} />
+						</Stack>
+					</Grid>
+				</MasterDetailLayout>
+			);
+		case "items":
+			return (
+				<MasterDetailLayout width={width}>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.context")}
+							</Typography>
+							<RenderAttribute attribute={row?.owningContext} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("details.agency_code")}
+							</Typography>
+							<RenderAttribute attribute={row?.agency?.code} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("details.agency_name")}
+							</Typography>
+							<RenderAttribute attribute={row?.agency?.description} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("details.location_name")}
+							</Typography>
+							<RenderAttribute attribute={row?.location?.name} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.barcode")}
+							</Typography>
+							<RenderAttribute attribute={row?.barcode} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.call_no")}
+							</Typography>
+							<RenderAttribute attribute={row?.callNumber} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.local_item_type_code")}
+							</Typography>
+							<RenderAttribute attribute={row?.localItemTypeCode} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.local_item_type_name")}
+							</Typography>
+							<RenderAttribute attribute={row?.localItemType} />
 						</Stack>
 					</Grid>
 				</MasterDetailLayout>

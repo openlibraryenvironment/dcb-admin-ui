@@ -27,6 +27,11 @@
 		},
 		"patronRequests": "Patron requests",
 		"profile": "Profile",
+		"search": {
+			"name": "DCB Discovery",
+			"cluster": "Cluster",
+			"items": "Items"
+		},
 		"serviceInfo": {
 			"bibRecordCountByHostLms": "Bib record count by host LMS",
 			"dataChangeLog": "Data change log",
@@ -55,7 +60,9 @@
 			"expand": "Expand",
 			"find_column": "Find column",
 			"master_detail": "Master detail",
-			"print_current_page": "Print current page"
+			"print_current_page": "Print current page",
+			"title": "Title",
+			"view_items": "View items"
 		},
 		"error": {
 			"401": {
@@ -78,6 +85,7 @@
 			},
 			"cannot_retrieve_record": "Unable to retrieve the record",
 			"cannot_find_record": "Unable to find the record",
+			"search_failed": "The search was not successful",
 			"something_wrong": "Something went wrong",
 			"summary": "Sorry, you do not have access to this page",
 			"too_long_load": "The record is taking too long to load",
@@ -619,6 +627,29 @@
 		"validation_expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“fromContext”</bold>, <bold>“fromCategory”</bold> and <bold>“fromValue”</bold>. Please correct the column headers and retry.</paragraph>",
 		"validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
 		"validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry."
+	},
+
+	"search": {
+		"barcode": "Barcode",
+		"bib_record_id": "Bib record UUID",
+		"call_no": "Call number",
+		"context": "Context",
+		"cluster_title": "Cluster details for {{record}}",
+		"cluster_tooltip": "View cluster record",
+		"cluster_id": "Cluster UUID",
+		"discovery_unavailable_title": "DCB Discovery is not configured on this system",
+		"discovery_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment",
+		"hold_count": "Hold count",
+		"identifiers": "Identifiers",
+		"items": "Items",
+		"items_error_title": "We could not load the associated items",
+		"item_id": "Item ID",
+		"items_title": "Items available for cluster {{cluster}}",
+		"local_item_type_code": "Local item type code",
+		"local_item_type_name": "Local item type name",
+		"no_data": "No data available. Please enter a search term, or change your current search.",
+		"requestable": "Requestable",
+		"suppressed": "Suppressed"
 	},
 
 	"404": {
