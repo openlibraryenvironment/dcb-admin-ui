@@ -4,7 +4,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
-import { getClusters } from "src/queries/queries";
+import { getClusters, getClustersLegacy } from "src/queries/queries";
 import { Tooltip, useTheme } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Cancel } from "@mui/icons-material";
@@ -19,14 +19,73 @@ import Error from "@components/Error/Error";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+import { useEffect, useState } from "react";
+import getConfig from "next/config";
+import axios from "axios";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { id } = router.query;
 	const theme = useTheme();
+	const { publicRuntimeConfig } = getConfig();
+	const [serviceVersion, setServiceVersion] = useState<string | null>(null);
+	const [isDev, setIsDev] = useState<boolean>(false);
 
+	// This page uses separate queries depending on whether the dcb-service version equals or exceeds 7.3.0
+	// This determines whether the matchpoints aspect of this page is rendered.
+	useEffect(() => {
+		const fetchDcbVersion = async () => {
+			try {
+				const response = await axios.get(
+					`${publicRuntimeConfig?.DCB_API_BASE}/info`,
+				);
+				console.log(response);
+				const version = response.data.git?.tags || null;
+				const systemType = response.data.env.code || "";
+				const branch = response.data.git?.branch || "";
+				console.log("System type: " + systemType + " and branch is" + branch);
+				if (systemType.includes("DEV") || branch.toLowerCase() == "main") {
+					setIsDev(true);
+				}
+				setServiceVersion(version);
+			} catch (error) {
+				console.error("Error fetching DCB Service version:", error);
+				setServiceVersion(null);
+			}
+		};
+
+		fetchDcbVersion();
+	}, [publicRuntimeConfig.DCB_API_BASE]);
+
+	const determineAcceptableVersion = (version: string | null) => {
+		// This is checking if version >= 7.3.0 - returns TRUE if we SHOULD render matchpoints, FALSE if not
+		// console.log(version);
+		// if (!version && !isDev) return false; // If version is null, assume it's an older version and thus default to safe rendering.
+		// // UNLESS we think this is dev - in which case go for it? But we don't have a way of knowing sometimes.
+		// Take the 'v' out of version
+		if (version) {
+			const numericVersion = version.substring(1);
+			const [major, minor] = numericVersion.split(".").map(Number);
+			console.log(major, minor, isDev);
+			return major >= 7 || (major == 7 && minor >= 3) || isDev;
+		} else {
+			// If dev, this is acceptable (as dev won't have a standard version, but will always be ahead of release.)
+			return isDev;
+		}
+	};
+	const useVersionAppropriateQuery = determineAcceptableVersion(serviceVersion)
+		? getClusters
+		: getClustersLegacy;
+
+	const { loading, error, data } = useQuery(useVersionAppropriateQuery, {
+		variables: { query: `id: ${id}` },
+	});
+
+	const theCluster = data?.instanceClusters?.content?.[0] ?? null;
 	const extractMatchpoints = (clusterRecord: { members: any[] }): string[] => {
+		if (!determineAcceptableVersion(serviceVersion)) return [];
+
 		const matchPointSet = new Set<string>();
 		clusterRecord.members.forEach((member) => {
 			member.matchPoints.forEach((matchPoint: any) => {
@@ -36,14 +95,10 @@ const Clusters: NextPage = () => {
 		return Array.from(matchPointSet);
 	};
 
-	const { loading, error, data } = useQuery(getClusters, {
-		variables: { query: `id: ${id}` },
-	});
-
-	const theCluster = data?.instanceClusters?.content?.[0] ?? null;
 	const matchpoints = theCluster ? extractMatchpoints(theCluster) : [];
 
 	const hasMatchpoint = (mp: string, instance: any) => {
+		if (!determineAcceptableVersion(serviceVersion)) return null;
 		const present = instance.matchPoints.some((obj: any) => obj.value === mp);
 		return present ? (
 			<Tooltip
@@ -109,6 +164,23 @@ const Clusters: NextPage = () => {
 		})),
 	];
 
+	const legacyColumns: GridColDef[] = [
+		{
+			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+			headerName: t("ui.data_grid.master_detail"),
+			renderCell: (params) => (
+				<DetailPanelToggle id={params.id} value={params.value} />
+			),
+			renderHeader: () => <DetailPanelHeader />,
+		},
+		{
+			field: "title",
+			headerName: t("ui.data_grid.title"),
+			minWidth: 300,
+			flex: 0.5,
+		},
+	];
+
 	const rows = theCluster?.members ?? [];
 
 	return error ? (
@@ -138,7 +210,9 @@ const Clusters: NextPage = () => {
 			<DataGridPro
 				loading={loading}
 				rows={rows ?? []}
-				columns={columns}
+				columns={
+					determineAcceptableVersion(serviceVersion) ? columns : legacyColumns
+				}
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="cluster" />
 				)}

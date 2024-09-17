@@ -1120,29 +1120,53 @@ export const getGroupById = gql`
 `;
 
 export const getClusters = gql`
-  query ClusterRecords($query: String!) {
-    instanceClusters(query: $query) {
-      content {
-        id
-        title
-        members { 
-          id
-          title
-          author
-          typeOfRecord
-          canonicalMetadata
-          clusterReason
-          sourceSystemId 
-          sourceRecordId
-          sourceRecord {
+	query ClusterRecords($query: String!) {
+		instanceClusters(query: $query) {
+			content {
+				id
+				title
+				members {
+					id
+					title
+					author
+					typeOfRecord
+					canonicalMetadata
+					clusterReason
+					sourceSystemId
+					sourceRecordId
+					sourceRecord {
 						json
 					}
-          matchPoints {
-            id
-            value
-          }
-        }
-      }
-    }
-  }
+					matchPoints {
+						id
+						value
+					}
+				}
+			}
+		}
+	}
+`;
+
+export const getClustersLegacy = gql`
+	query ClusterRecords($query: String!) {
+		instanceClusters(query: $query) {
+			content {
+				id
+				title
+				members {
+					id
+					title
+					author
+					typeOfRecord
+					canonicalMetadata
+					clusterReason
+					sourceSystemId
+					sourceRecordId
+					sourceRecord {
+						json
+					}
+				}
+			}
+		}
+	}
 `;
