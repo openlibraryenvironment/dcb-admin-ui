@@ -7,7 +7,6 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import getConfig from "next/config";
 import Link from "@components/Link/Link";
 import { Clear, Search as SearchIcon } from "@mui/icons-material";
 import Error from "@components/Error/Error";
@@ -86,7 +85,6 @@ const Search: NextPage = () => {
 	const router = useRouter();
 	const { t } = useTranslation();
 	const { data: session } = useSession();
-	const { publicRuntimeConfig } = getConfig();
 
 	const [searchResults, setSearchResults] = useState<any>({
 		instances: [],
@@ -134,17 +132,14 @@ const Search: NextPage = () => {
 
 			setLoading(true);
 			try {
-				const response = await axios.get(
-					`${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`,
-					{
-						headers: { Authorization: `Bearer ${session.accessToken}` },
-						params: {
-							query: `@keyword all "${query}"`,
-							offset: page * pageSize,
-							limit: pageSize,
-						},
+				const response = await axios.get(`/api/discovery`, {
+					headers: { Authorization: `Bearer ${session.accessToken}` },
+					params: {
+						query: `@keyword all "${query}"`,
+						offset: page * pageSize,
+						limit: pageSize,
 					},
-				);
+				});
 				return response.data;
 			} catch (error) {
 				setError(true);
@@ -152,7 +147,7 @@ const Search: NextPage = () => {
 				setLoading(false);
 			}
 		},
-		[publicRuntimeConfig.DCB_SEARCH_BASE, session?.accessToken],
+		[session?.accessToken],
 	);
 
 	const handleSearch = useCallback(
