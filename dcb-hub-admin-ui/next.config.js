@@ -29,7 +29,6 @@ const nextConfig = {
 		DCB_SEARCH_BASE: process.env.DCB_SEARCH_BASE,
 		DCB_API_BASE: process.env.DCB_API_BASE,
 		DCB_ES_URL: process.env.DCB_ES_URL,
-		DISCOVERY_SCAFFOLD_URL: process.env.DISCOVERY_SCAFFOLD_URL,
 		KEYCLOAK_URL: process.env.KEYCLOAK_URL ?? "", // This is only here so that a null KEYCLOAK_URL doesn't break the build.
 		version,
 		releaseDate,
