@@ -37,15 +37,26 @@ const Clusters: NextPage = () => {
 	useEffect(() => {
 		const fetchDcbVersion = async () => {
 			try {
+				// Get the DCB version
 				const response = await axios.get(
 					`${publicRuntimeConfig?.DCB_API_BASE}/info`,
 				);
-				console.log(response);
 				const version = response.data.git?.tags || null;
 				const systemType = response.data.env.code || "";
 				const branch = response.data.git?.branch || "";
-				console.log("System type: " + systemType + " and branch is" + branch);
+				// Tells us the version, the system type (DEV/PROD/etc) and the branch name
+				console.log(
+					"dcb-service version: " +
+						version +
+						" on system of type: " +
+						systemType +
+						" deployed from branch: " +
+						branch,
+				);
+				// branch name is used to spot DEV systems that don't tell us they're DEV
+				// as all other systems are deployed from a release (so HEAD not main)
 				if (systemType.includes("DEV") || branch.toLowerCase() == "main") {
+					// DEV systems will always be >7.3.0 so they're safe.
 					setIsDev(true);
 				}
 				setServiceVersion(version);
@@ -59,15 +70,13 @@ const Clusters: NextPage = () => {
 	}, [publicRuntimeConfig.DCB_API_BASE]);
 
 	const determineAcceptableVersion = (version: string | null) => {
-		// This is checking if version >= 7.3.0 - returns TRUE if we SHOULD render matchpoints, FALSE if not
-		// console.log(version);
-		// if (!version && !isDev) return false; // If version is null, assume it's an older version and thus default to safe rendering.
-		// // UNLESS we think this is dev - in which case go for it? But we don't have a way of knowing sometimes.
-		// Take the 'v' out of version
 		if (version) {
-			const numericVersion = version.substring(1);
+			const numericVersion = version.substring(1); // takes the v out of version so we can get major, minor
 			const [major, minor] = numericVersion.split(".").map(Number);
-			console.log(major, minor, isDev);
+			console.log(
+				"Major: " + major + ", minor: " + minor + ", dev system?",
+				isDev,
+			);
 			return major > 7 || (major == 7 && minor >= 3) || isDev;
 		} else {
 			// If dev, this is acceptable (as dev won't have a standard version, but will always be ahead of release.)
