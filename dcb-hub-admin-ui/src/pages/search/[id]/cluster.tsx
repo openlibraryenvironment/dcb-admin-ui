@@ -68,7 +68,7 @@ const Clusters: NextPage = () => {
 			const numericVersion = version.substring(1);
 			const [major, minor] = numericVersion.split(".").map(Number);
 			console.log(major, minor, isDev);
-			return major >= 7 || (major == 7 && minor >= 3) || isDev;
+			return major > 7 || (major == 7 && minor >= 3) || isDev;
 		} else {
 			// If dev, this is acceptable (as dev won't have a standard version, but will always be ahead of release.)
 			return isDev;
