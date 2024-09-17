@@ -122,7 +122,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				);
 			}
 
-			if (isUUIDInSearchPage || breadcrumb.key === "nav.auditLog") {
+			if (breadcrumb.key === "nav.auditLog") {
 				return (
 					<Typography
 						sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
@@ -139,7 +139,9 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 					sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
 					underline="hover"
 					key={breadcrumb.href}
-					href={breadcrumb.href}
+					href={
+						isUUIDInSearchPage ? "/search?q=" + breadcrumb.key : breadcrumb.href
+					}
 					title={t(breadcrumb.key)}
 				>
 					{t(breadcrumb.key)}
