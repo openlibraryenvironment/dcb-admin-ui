@@ -204,7 +204,7 @@ const Search: NextPage = () => {
 						pagination
 						paginationModel={paginationModel}
 						onPaginationModelChange={setPaginationModel}
-						pageSizeOptions={[25, 50, 100]}
+						pageSizeOptions={[10, 25, 50, 100, 200]}
 						rowCount={searchResults.totalRecords}
 						paginationMode="server"
 						loading={loading}
