@@ -34,18 +34,14 @@ export default async function handler(
 
 		res.status(200).json(response.data);
 	} catch (error) {
-		console.error("Error proxying request to the discovery service:", error);
+		console.error("Error proxying request to DCB Locate:", error);
 		if (axios.isAxiosError(error) && error.response) {
 			// Log more details about the error
-			console.error(
-				"Discovery service API error status:",
-				error.response.status,
-			);
-			console.error("Discovery service API error data:", error.response.data);
+			console.error("DCB Locate API error status:", error.response.status);
+			console.error("DCB Locate error data:", error.response.data);
 		}
 		res.status(500).json({
-			error:
-				"An error occurred while fetching data from the discovery service.",
+			error: "An error occurred while fetching data from DCB locate.",
 		});
 	}
 }
