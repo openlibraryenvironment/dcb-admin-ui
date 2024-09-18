@@ -28,7 +28,7 @@
 		"patronRequests": "Patron requests",
 		"profile": "Profile",
 		"search": {
-			"name": "DCB Discovery",
+			"name": "Shared index",
 			"cluster": "Cluster",
 			"items": "Items"
 		},
@@ -637,8 +637,8 @@
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",
-		"discovery_unavailable_title": "DCB Discovery is not configured on this system",
-		"discovery_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment",
+		"shared_index_unavailable_title": "Shared index is not configured on this system",
+		"shared_index_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment.",
 		"hold_count": "Hold count",
 		"identifiers": "Identifiers",
 		"items": "Items",

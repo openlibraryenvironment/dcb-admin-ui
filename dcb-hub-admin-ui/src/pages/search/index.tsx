@@ -140,7 +140,7 @@ const Search: NextPage = () => {
 
 			setLoading(true);
 			try {
-				const response = await axios.get(`/api/discovery`, {
+				const response = await axios.get(`/api/sharedIndex`, {
 					headers: { Authorization: `Bearer ${session.accessToken}` },
 					params: {
 						query: `@keyword all "${query}"`,
@@ -223,8 +223,8 @@ const Search: NextPage = () => {
 	) : (
 		<AdminLayout title={t("nav.search.name")}>
 			<Error
-				title={t("search.discovery_unavailable_title")}
-				message={t("search.discovery_unavailable_message")}
+				title={t("search.shared_index_unavailable_title")}
+				message={t("search.shared_index_unavailable_message")}
 				action={t("ui.action.go_back")}
 			/>
 		</AdminLayout>
