@@ -89,7 +89,6 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		console.log(active);
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
 			active == "borrowing"

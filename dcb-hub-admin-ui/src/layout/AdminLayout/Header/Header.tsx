@@ -12,6 +12,8 @@ import { Button, lighten } from "@mui/material";
 import consortiumLogo from "public/assets/brand/MOBIUS_Mark x36.jpg";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+import Head from "next/head";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -39,6 +41,7 @@ export default function Header({
 	const { status } = useSession();
 	const theme = useTheme();
 	const router = useRouter();
+	const { type } = useDCBServiceInfo();
 	const url = "/auth/logout";
 	const { t } = useTranslation();
 	const handleClick = () => {
@@ -49,151 +52,162 @@ export default function Header({
 			signIn();
 		}
 	};
+	const pageTitle = t("app.title", {
+		consortium_name: "MOBIUS",
+		environment: type,
+	});
 
 	return (
-		<Box sx={{ flexGrow: 1 }}>
-			{/* A maximum height of 70px is set to stop the header overlapping with the sidebar on small screen sizes */}
-			<AppBar
-				position="fixed"
-				sx={{
-					backgroundColor: theme.palette.primary.header,
-					maxHeight: "70px",
-				}}
-			>
-				{/* this width is the maxSize of the content */}
-				<Toolbar
-					disableGutters
+		<>
+			<Head>
+				<title>{pageTitle}</title>
+			</Head>
+			<Box sx={{ flexGrow: 1 }}>
+				{/* A maximum height of 70px is set to stop the header overlapping with the sidebar on small screen sizes */}
+				<AppBar
+					position="fixed"
 					sx={{
-						maxWidth: "1400px",
-						alignSelf: "center",
-						width: "100%",
-						padding: 0,
+						backgroundColor: theme.palette.primary.header,
 						maxHeight: "70px",
-						paddingLeft: iconsVisible != false ? "24px" : "16px",
-						paddingRight: iconsVisible != false ? "24px" : "16px",
 					}}
 				>
-					{/* This code handles the display of the consortium icon and sidebar icon.
+					{/* this width is the maxSize of the content */}
+					<Toolbar
+						disableGutters
+						sx={{
+							maxWidth: "1400px",
+							alignSelf: "center",
+							width: "100%",
+							padding: 0,
+							maxHeight: "70px",
+							paddingLeft: iconsVisible != false ? "24px" : "16px",
+							paddingRight: iconsVisible != false ? "24px" : "16px",
+						}}
+					>
+						{/* This code handles the display of the consortium icon and sidebar icon.
           By using iconsVisible, we can render the correct UI for the situation  */}
-					{iconsVisible != false ? (
-						<Box>
-							<IconButton
-								data-tid="sidebar-menu"
-								size="large"
-								edge="start"
-								aria-label="menu"
-								onClick={openStateFuncClosed}
-								sx={{
-									mr: 2,
-									color: theme.palette.primary.headerText,
-									":hover": {
-										backgroundColor:
-											theme.palette.mode == "light"
-												? lighten(theme.palette.primary.header, 0.08)
-												: lighten(theme.palette.primary.header, 0.16),
-									},
-									":active": {
-										backgroundColor:
-											theme.palette.mode == "light"
-												? lighten(theme.palette.primary.header, 0.16)
-												: lighten(theme.palette.primary.header, 0.24),
-									},
-								}}
-							>
-								<MdMenu size={20} data-tid="menu-icon" />
-							</IconButton>
-						</Box>
-					) : null}
-					{/* Render just the image if other header icons are visible, 
+						{iconsVisible != false ? (
+							<Box>
+								<IconButton
+									data-tid="sidebar-menu"
+									size="large"
+									edge="start"
+									aria-label="menu"
+									onClick={openStateFuncClosed}
+									sx={{
+										mr: 2,
+										color: theme.palette.primary.headerText,
+										":hover": {
+											backgroundColor:
+												theme.palette.mode == "light"
+													? lighten(theme.palette.primary.header, 0.08)
+													: lighten(theme.palette.primary.header, 0.16),
+										},
+										":active": {
+											backgroundColor:
+												theme.palette.mode == "light"
+													? lighten(theme.palette.primary.header, 0.16)
+													: lighten(theme.palette.primary.header, 0.24),
+										},
+									}}
+								>
+									<MdMenu size={20} data-tid="menu-icon" />
+								</IconButton>
+							</Box>
+						) : null}
+						{/* Render just the image if other header icons are visible, 
               or the image and additional padding if the icons have been hidden. */}
-					{iconsVisible != false ? (
-						<Image
-							src={consortiumLogo}
-							alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
-						/>
-					) : (
-						<Box sx={{ mt: 1 }}>
+						{iconsVisible != false ? (
 							<Image
 								src={consortiumLogo}
 								alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
 							/>
-						</Box>
-					)}
-					<Typography
-						data-tid="header-title"
-						variant="appTitle"
-						component="div"
-						sx={{
-							color: theme.palette.primary.headerText,
-							fontWeight: "bold",
-							flexGrow: 1,
-							pl: 2,
-						}}
-					>
-						{t("app.title", { consortium_name: "MOBIUS" })}
-					</Typography>
-					<div>
-						{iconsVisible != false ? (
-							<IconButton
-								size="large"
-								data-tid="profile-button"
-								aria-label="account of current user"
-								sx={{
-									color: theme.palette.primary.headerText,
-									":hover": {
-										backgroundColor:
-											theme.palette.mode == "light"
-												? lighten(theme.palette.primary.header, 0.08)
-												: lighten(theme.palette.primary.header, 0.16),
-									},
-									":active": {
-										backgroundColor:
-											theme.palette.mode == "light"
-												? lighten(theme.palette.primary.header, 0.16)
-												: lighten(theme.palette.primary.header, 0.24),
-									},
-								}}
-								LinkComponent={Link}
-								href="/profile"
-							>
-								<MdAccountCircle size={20} />
-							</IconButton>
-						) : null}
-						{iconsVisible != false ? (
-							<Button
-								data-tid="login-button"
-								aria-label={status === "authenticated" ? "Logout" : "Login"}
-								onClick={handleClick}
-								/* this removes default styling that was stopping the header and footer from being the same width
+						) : (
+							<Box sx={{ mt: 1 }}>
+								<Image
+									src={consortiumLogo}
+									alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
+								/>
+							</Box>
+						)}
+						<Typography
+							data-tid="header-title"
+							variant="appTitle"
+							component="div"
+							sx={{
+								color: theme.palette.primary.headerText,
+								fontWeight: "bold",
+								flexGrow: 1,
+								pl: 2,
+							}}
+						>
+							{t("app.title", { consortium_name: "MOBIUS", environment: type })}
+						</Typography>
+						<div>
+							{iconsVisible != false ? (
+								<IconButton
+									size="large"
+									data-tid="profile-button"
+									aria-label="account of current user"
+									sx={{
+										color: theme.palette.primary.headerText,
+										":hover": {
+											backgroundColor:
+												theme.palette.mode == "light"
+													? lighten(theme.palette.primary.header, 0.08)
+													: lighten(theme.palette.primary.header, 0.16),
+										},
+										":active": {
+											backgroundColor:
+												theme.palette.mode == "light"
+													? lighten(theme.palette.primary.header, 0.16)
+													: lighten(theme.palette.primary.header, 0.24),
+										},
+									}}
+									LinkComponent={Link}
+									href="/profile"
+								>
+									<MdAccountCircle size={20} />
+								</IconButton>
+							) : null}
+							{iconsVisible != false ? (
+								<Button
+									data-tid="login-button"
+									aria-label={status === "authenticated" ? "Logout" : "Login"}
+									onClick={handleClick}
+									/* this removes default styling that was stopping the header and footer from being the same width
                  it also sets the colour of the header text */
-								sx={{
-									color: theme.palette.primary.headerText,
-									p: 1,
-									// paddingInline: "0px",
-									minWidth: "0px",
-									"&.Mui-focusVisible": {
-										outlineColor: "#FFFFFF",
-									},
-									":hover": {
-										backgroundColor:
-											theme.palette.mode == "light"
-												? lighten(theme.palette.primary.header, 0.08)
-												: lighten(theme.palette.primary.header, 0.16),
-									},
-									":active": {
-										backgroundColor:
-											theme.palette.mode == "light"
-												? lighten(theme.palette.primary.header, 0.16)
-												: lighten(theme.palette.primary.header, 0.24),
-									},
-								}}
-							>
-								{status === "authenticated" ? t("nav.logout") : t("nav.login")}
-							</Button>
-						) : null}
-					</div>
-				</Toolbar>
-			</AppBar>
-		</Box>
+									sx={{
+										color: theme.palette.primary.headerText,
+										p: 1,
+										// paddingInline: "0px",
+										minWidth: "0px",
+										"&.Mui-focusVisible": {
+											outlineColor: "#FFFFFF",
+										},
+										":hover": {
+											backgroundColor:
+												theme.palette.mode == "light"
+													? lighten(theme.palette.primary.header, 0.08)
+													: lighten(theme.palette.primary.header, 0.16),
+										},
+										":active": {
+											backgroundColor:
+												theme.palette.mode == "light"
+													? lighten(theme.palette.primary.header, 0.16)
+													: lighten(theme.palette.primary.header, 0.24),
+										},
+									}}
+								>
+									{status === "authenticated"
+										? t("nav.logout")
+										: t("nav.login")}
+								</Button>
+							) : null}
+						</div>
+					</Toolbar>
+				</AppBar>
+			</Box>
+		</>
 	);
 }
