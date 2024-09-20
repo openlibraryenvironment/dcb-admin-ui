@@ -17,7 +17,7 @@
 			"discovery": "DCB Discovery",
 			"keycloak": "Keycloak"
 		},
-		"title": "$t(app.name) for {{consortium_name}}",
+		"title": "{{consortium_name}} {{environment}} | $t(app.name)",
 		"version": "Version"
 	},
 
