@@ -52,6 +52,68 @@ export const addLibraryToGroup = gql`
 	}
 `;
 
+export const deleteEntityQuery = gql`
+	mutation DeleteEntity($input: DeleteEntityInput!) {
+		deleteEntity(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
+export const deleteLibraryQuery = gql`
+	mutation DeleteLibrary($input: DeleteEntityInput!) {
+		deleteLibrary(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
+export const deleteLocationQuery = gql`
+	mutation DeleteLocation($input: DeleteEntityInput!) {
+		deleteLocation(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
+export const updateLibraryQuery = gql`
+	mutation UpdateLibrary($input: UpdateLibraryInput!) {
+		updateLibrary(input: $input) {
+			id
+			backupDowntimeSchedule
+			supportHours
+			latitude
+			longitude
+		}
+	}
+`;
+
+export const updateLocationQuery = gql`
+	mutation UpdateLocation($input: UpdateLocationInput!) {
+		updateLocation(input: $input) {
+			id
+			longitude
+			latitude
+			name
+		}
+	}
+`;
+
+export const updatePerson = gql`
+	mutation UpdatePerson($input: UpdatePersonInput!) {
+		updatePerson(input: $input) {
+			id
+			email
+			firstName
+			lastName
+			role
+			isPrimaryContact
+		}
+	}
+`;
 // QUERIES - Fetch data.
 
 // AGENCIES - these can be used as examples to understand our query structure
@@ -391,6 +453,7 @@ export const getLocations = gql`
 				code
 				name
 				type
+				isPickup
 				agency {
 					id
 					name
@@ -410,7 +473,7 @@ export const getLocations = gql`
 // This gets a location by its ID for the record / details page.
 // As such it must fetch everything a Location record contains.
 export const getLocationById = gql`
-	query LoadLocations($query: String!) {
+	query LoadLocation($query: String!) {
 		locations(query: $query) {
 			content {
 				id

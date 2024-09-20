@@ -520,3 +520,19 @@ export const exceptionPatronRequestColumnVisibility = {
 	outOfSequenceFlag: false,
 	dateUpdated: true,
 };
+
+export const locationPatronRequestColumnVisibility = {
+	status: true,
+	previousStatus: false,
+	nextExpectedStatus: false,
+	errorMessage: false,
+	elapsedTimeInCurrentStatus: false,
+	pollCountForCurrentStatus: false,
+	dateUpdated: false,
+	dateCreated: true,
+	patronHostlmsCode: false,
+	suppliers: false,
+	id: false,
+	outOfSequenceFlag: false,
+	isManuallySelectedItem: false,
+};

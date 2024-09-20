@@ -1,16 +1,28 @@
-import { Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
-import { getLocationById } from "src/queries/queries";
+import {
+	deleteLocationQuery,
+	getLocationById,
+	updateLocationQuery,
+} from "src/queries/queries";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Location } from "@models/Location";
-import { useQuery } from "@apollo/client";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useRef, useState } from "react";
+import EditableAttribute from "src/helpers/EditableAttribute/EditableAttribute";
+import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
+import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
+import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import { formatChangedFields } from "src/helpers/formatChangedFields";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 
 type LocationDetails = {
 	locationId: string;
@@ -20,7 +32,13 @@ type LocationDetails = {
 export default function LocationDetails({ locationId }: LocationDetails) {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { status } = useSession({
+	const theme = useTheme();
+	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
+	const [hasValidationError, setValidationError] = useState(false);
+	const [isDirty, setDirty] = useState(false);
+	const [errors, setErrors] = useState();
+
+	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
 			// Push to logout page if not authenticated.
@@ -36,6 +54,280 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		pollInterval: 120000,
 	});
 	const location: Location = data?.locations?.content?.[0];
+	const client = useApolloClient();
+	const saveButtonRef = useRef<HTMLButtonElement>(null);
+
+	const [alert, setAlert] = useState<any>({
+		open: false,
+		severity: "success",
+		text: null,
+		title: null,
+	});
+	const [editMode, setEditMode] = useState(false);
+	const [editKey, setEditKey] = useState(0);
+	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
+	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
+	const [editableFields, setEditableFields] = useState({
+		latitude: location?.latitude,
+		longitude: location?.longitude,
+		name: location?.name,
+	});
+	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
+
+	const isAnAdmin = session?.profile?.roles?.some(
+		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	);
+
+	const [updateLocation] = useMutation(updateLocationQuery, {
+		refetchQueries: ["LoadLocation", "LoadLocations"],
+	});
+	const [deleteLocation] = useMutation(deleteLocationQuery, {
+		refetchQueries: ["LoadLocations"],
+	});
+
+	const handleEdit = () => {
+		setEditableFields({
+			latitude: location?.latitude,
+			longitude: location?.longitude,
+			name: location?.name,
+		});
+		setEditMode(true);
+		setTimeout(() => {
+			if (firstEditableFieldRef.current) {
+				firstEditableFieldRef.current.focus();
+			}
+		}, 0);
+	};
+
+	const handleSave = () => {
+		if (Object.keys(changedFields).length === 0) {
+			setEditMode(false);
+			return;
+		}
+		setConfirmationEdit(true);
+	};
+
+	const {
+		showUnsavedChangesModal,
+		handleKeepEditing,
+		handleLeaveWithoutSaving,
+	} = useUnsavedChangesWarning({
+		isDirty,
+		hasValidationError,
+		onKeepEditing: () => {
+			setTimeout(() => {
+				if (saveButtonRef.current) {
+					saveButtonRef.current.focus();
+				}
+			}, 0);
+		},
+		onLeaveWithoutSaving: () => {
+			setDirty(false);
+			setChangedFields({});
+		},
+	});
+
+	const handleDeleteEntity = async (
+		id: string,
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
+		try {
+			const input = {
+				id: id,
+				reason: reason,
+				changeCategory: changeCategory,
+				changeReferenceUrl: changeReferenceUrl,
+			};
+			const { data } = await deleteLocation({
+				variables: {
+					input,
+				},
+			});
+			if (data.deleteLocation.success == true) {
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("ui.data_grid.delete_success", {
+						entity: t("locations.location_one").toLowerCase(),
+						name: location?.name,
+					}),
+					title: t("ui.data_grid.deleted"),
+				});
+				console.log(data.deleteLocation);
+				console.log("Entity deleted successfully");
+				setTimeout(() => {
+					router.push("/locations");
+				}, 100);
+			} else {
+				console.log(data?.deleteLocation);
+				console.log("Failed to delete entity");
+				setAlert({
+					open: true,
+					severity: "error",
+					text: t("ui.data_grid.delete_error", {
+						entity: t("locations.location_one").toLowerCase(),
+					}),
+				});
+			}
+		} catch (error) {
+			console.log(data?.deleteLocation);
+			console.error("Error deleting entity:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("ui.data_grid.delete_error", {
+					entity: t("locations.location_one").toLowerCase(),
+				}),
+			});
+		}
+	};
+
+	const handleConfirmSave = async (
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
+		try {
+			const { data } = await updateLocation({
+				variables: {
+					input: {
+						id: location.id,
+						...changedFields,
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					},
+				},
+			});
+
+			if (data.updateLocation) {
+				setEditMode(false);
+				setChangedFields({});
+				client.refetchQueries({
+					include: ["LoadLocation"],
+				});
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("ui.data_grid.edit_success", {
+						entity: t("locations.location_one"),
+						name: location?.name,
+					}),
+					title: t("ui.data_grid.updated"),
+				});
+			}
+		} catch (error) {
+			console.error("Error updating location:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("ui.data_grid.edit_error", {
+					entity: t("locations.location_one"),
+					name: location?.name,
+				}),
+				title: t("ui.data_grid.updated"),
+			});
+		} finally {
+			setConfirmationEdit(false);
+		}
+	};
+
+	const handleCancel = () => {
+		setEditMode(false);
+		setEditableFields({
+			name: location?.name,
+			longitude: location?.longitude,
+			latitude: location?.latitude,
+		});
+		setChangedFields({});
+		setDirty(false);
+		setValidationError(false);
+		setEditKey((prevKey) => prevKey + 1);
+	};
+
+	const updateField = (
+		field: keyof Location,
+		value: string | number | null,
+	) => {
+		setEditableFields((prev) => ({
+			...prev,
+			[field]: value,
+		}));
+
+		if (value !== location[field]) {
+			setChangedFields((prev) => ({
+				...prev,
+				[field]: value,
+			}));
+		} else {
+			setChangedFields((prev) => {
+				const newChangedFields = { ...prev };
+				delete newChangedFields[field];
+				return newChangedFields;
+			});
+		}
+	};
+
+	const viewModeActions = [
+		{
+			key: "edit",
+			onClick: handleEdit,
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.edit"),
+			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+		{
+			key: "delete",
+			onClick: () => setConfirmationDeletion(true),
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.delete_entity", {
+				entity: t("locations.location_one").toLowerCase(),
+			}),
+			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+	];
+
+	const editModeActions = [
+		<Button
+			key="save"
+			startIcon={<Save />}
+			onClick={handleSave}
+			disabled={hasValidationError || !isDirty}
+			ref={saveButtonRef}
+		>
+			{t("ui.data_grid.save")}
+		</Button>,
+		<Button key="cancel" startIcon={<Cancel />} onClick={handleCancel}>
+			{t("ui.data_grid.cancel")}
+		</Button>,
+		<MoreActionsMenu
+			key="more"
+			actions={[
+				{
+					key: "delete",
+					onClick: () => setConfirmationDeletion(true),
+					disabled: !isAnAdmin,
+					label: t("ui.data_grid.delete_entity", {
+						entity: t("locations.location_one").toLowerCase(),
+					}),
+					startIcon: (
+						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
+					),
+				},
+				{
+					key: "edit",
+					onClick: handleEdit,
+					disabled: true,
+					label: t("ui.data_grid.edit"),
+					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+				},
+			]}
+		/>,
+	];
+
+	const pageActions = editMode ? editModeActions : viewModeActions;
 
 	// If GraphQL is loading or session fetching is loading
 	if (loading || status === "loading") {
@@ -72,7 +364,11 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			)}
 		</AdminLayout>
 	) : (
-		<AdminLayout title={location?.name}>
+		<AdminLayout
+			title={location?.name}
+			pageActions={pageActions}
+			mode={editMode ? "edit" : "view"}
+		>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -81,10 +377,28 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors?.["name"] && editMode
+									? theme.palette.error.main
+									: theme.palette.common.black
+							}
+						>
 							{t("details.location_name")}
 						</Typography>
-						<RenderAttribute attribute={location?.name} />
+						<EditableAttribute
+							field="name"
+							key={`name-${editKey}`}
+							value={editableFields.name ?? location?.name}
+							updateField={updateField}
+							editMode={editMode}
+							type="string"
+							inputRef={firstEditableFieldRef}
+							setValidationError={setValidationError}
+							setDirty={setDirty}
+							setErrors={setErrors}
+						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
@@ -113,16 +427,52 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
-						<RenderAttribute attribute={location?.latitude} />
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors?.["latitude"] && editMode
+									? theme.palette.error.main
+									: theme.palette.common.black
+							}
+						>
+							{t("details.lat")}
+						</Typography>
+						<EditableAttribute
+							field="latitude"
+							key={`latitude-${editKey}`}
+							value={editableFields.latitude ?? location?.latitude}
+							updateField={updateField}
+							editMode={editMode}
+							type="latitude"
+							setValidationError={setValidationError}
+							setDirty={setDirty}
+							setErrors={setErrors}
+						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors?.["longitude"] && editMode
+									? theme.palette.error.main
+									: theme.palette.common.black
+							}
+						>
 							{t("details.long")}
 						</Typography>
-						<RenderAttribute attribute={location?.longitude} />
+						<EditableAttribute
+							field="longitude"
+							key={`longitude-${editKey}`}
+							value={editableFields.longitude ?? location?.longitude}
+							updateField={updateField}
+							editMode={editMode}
+							type="longitude"
+							setValidationError={setValidationError}
+							setDirty={setDirty}
+							setErrors={setErrors}
+						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
@@ -134,6 +484,50 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					</Stack>
 				</Grid>
 			</Grid>
+			<Confirmation
+				open={showConfirmationDeletion}
+				onClose={() => setConfirmationDeletion(false)}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
+					handleDeleteEntity(
+						location.id,
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					);
+					setConfirmationDeletion(false);
+				}}
+				type={"deletelocations"}
+				library={location?.name}
+				entityId={location?.id}
+			/>
+			<Confirmation
+				open={showConfirmationEdit}
+				onClose={() => setConfirmationEdit(false)}
+				onConfirm={handleConfirmSave}
+				type="pageEdit"
+				editInformation={formatChangedFields(changedFields, location)}
+				library={location?.name}
+				entity={t("locations.location_one")}
+				entityId={location?.id}
+			/>
+			<Confirmation
+				open={showUnsavedChangesModal}
+				onClose={handleKeepEditing}
+				onConfirm={handleLeaveWithoutSaving}
+				type="unsavedChanges"
+				library={location?.name}
+				entity={t("locations.location_one")}
+				entityId={location?.id}
+			/>
+			<TimedAlert
+				open={alert.open}
+				severityType={alert.severity}
+				autoHideDuration={6000}
+				alertText={alert.text}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
+				entity={t("locations.location_one")}
+				alertTitle={alert.title}
+			/>
 		</AdminLayout>
 	);
 }

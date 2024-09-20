@@ -25,7 +25,9 @@ export default function TimedAlert(props: any) {
 					severity={props.severityType}
 					onClose={props.onCloseFunc}
 				>
-					<AlertTitle>{capitalize(props.severityType)}</AlertTitle>
+					<AlertTitle>
+						{props.alertTitle ?? capitalize(props.severityType)}
+					</AlertTitle>
 					{props.alertText}
 				</SnackbarAlert>
 			</Snackbar>

@@ -2,7 +2,11 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "next-i18next";
-import { getLocations } from "src/queries/queries";
+import {
+	deleteLocationQuery,
+	getLocations,
+	updateLocationQuery,
+} from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import Loading from "@components/Loading/Loading";
@@ -38,13 +42,13 @@ const Locations: NextPage = () => {
 		);
 	}
 
-	// Master detail is commented out, but will be restored in future work.
 	return (
 		<AdminLayout title={t("nav.locations")}>
 			<ServerPaginationGrid
 				query={getLocations}
 				type="locations"
 				coreType="locations"
+				operationDataType="Location"
 				columns={[
 					...customColumns,
 					{
@@ -62,6 +66,7 @@ const Locations: NextPage = () => {
 						headerName: "Location name",
 						minWidth: 150,
 						flex: 0.6,
+						editable: true,
 						filterOperators: standardFilters,
 					},
 					{
@@ -91,6 +96,9 @@ const Locations: NextPage = () => {
 				sortModel={[{ field: "name", sort: "asc" }]}
 				sortDirection="ASC"
 				sortAttribute="name"
+				refetchQuery={["LoadLocations"]}
+				deleteQuery={deleteLocationQuery}
+				editQuery={updateLocationQuery}
 				// getDetailPanelContent={({ row }: any) => (
 				// 	<MasterDetail row={row} type="locations" />
 				// )}

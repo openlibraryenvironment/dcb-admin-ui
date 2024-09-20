@@ -24,7 +24,7 @@ declare module "@mui/material/styles" {
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
 		detailsAccordionSummary: string;
-		exclamationIcon?: string;
+		exclamationIcon: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
@@ -47,6 +47,8 @@ declare module "@mui/material/styles" {
 		pageContentBackground?: string;
 		loginButtonOutlineColor?: string;
 		outlineColor?: string;
+		editableFieldBackground?: string;
+		errorBackground?: string;
 	}
 
 	interface SimplePaletteColorOptions {
@@ -54,7 +56,7 @@ declare module "@mui/material/styles" {
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
 		detailsAccordionSummary: string;
-		exclamationIcon?: string;
+		exclamationIcon: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
@@ -77,6 +79,8 @@ declare module "@mui/material/styles" {
 		pageContentBackground?: string;
 		loginButtonOutlineColor?: string;
 		outlineColor?: string;
+		editableFieldBackground?: string;
+		errorBackground?: string;
 	}
 	interface TypographyVariants {
 		appTitle?: React.CSSProperties;

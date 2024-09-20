@@ -102,7 +102,8 @@ export default function DataChangeLogDetails({
 							{t("data_change_log.entity_id")}
 						</Typography>
 						{dataChangeLog?.entityType == "reference_value_mapping" ||
-						dataChangeLog?.entityType == "numeric_range_mapping" ? (
+						dataChangeLog?.entityType == "numeric_range_mapping" ||
+						dataChangeLog?.actionInfo == "DELETE" ? (
 							<RenderAttribute attribute={dataChangeLog?.entityId} />
 						) : (
 							<Link
@@ -189,6 +190,7 @@ export default function DataChangeLogDetails({
 					<ChangesSummary
 						changes={dataChangeLog?.changes}
 						action={dataChangeLog?.actionInfo}
+						context="dataChangeLog"
 					/>
 				</Grid>
 			</Grid>

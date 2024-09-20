@@ -89,7 +89,9 @@ const DataChangeLog: NextPage = () => {
 							const row = params.row;
 							if (
 								row?.entityType == "reference_value_mapping" ||
-								row?.entityType == "numeric_range_mapping"
+								row?.entityType == "numeric_range_mapping" ||
+								row?.actionInfo == "DELETE" ||
+								row?.changeCategory == "Membership ended"
 							) {
 								return params.value;
 							} else {
