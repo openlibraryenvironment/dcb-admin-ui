@@ -1,3 +1,6 @@
+import { capitalize } from "lodash";
+import { splitOnCapitals } from "./splitOnCapitals";
+
 export function calculateEntityLink(entityType: string) {
 	// Basically a translator for table names to DCB Admin references.
 	// Primarily intended for translating table names to links.
@@ -35,6 +38,8 @@ export function tableNameToEntityName(entityType: string) {
 			return "libraries.contacts.entity_name";
 		case "library_group":
 			return "groups.groups_one";
+		case "library_group_member":
+			return "groups.group_member";
 		case "location":
 			return "locations.location_one";
 		case "patron_request":
@@ -73,4 +78,28 @@ export function fieldNameToLabel(fieldName: string): string {
 
 	// Only capitalise the first letter of the whole string
 	return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+export function gridFieldNameToLabel(fieldName: string): string {
+	// Define any special cases that don't meet the standard rule.
+	const specialCases: { [key: string]: string } = {
+		id: "ID",
+		idp: "IDP",
+		url: "URL",
+		api: "API",
+		lms: "LMS",
+	};
+
+	// Split the words
+	const words = splitOnCapitals(fieldName);
+	// Check for special cases in the words
+	const processedWords = words.map(
+		(word) => specialCases[word.toLowerCase()] || word,
+	);
+
+	// Join the words with spaces, replacing underscores.
+	const label = processedWords.join(" ");
+
+	// Only capitalise the first letter of the whole string
+	return capitalize(label);
 }

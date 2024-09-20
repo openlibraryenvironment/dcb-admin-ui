@@ -1,9 +1,9 @@
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Trans, useTranslation } from "next-i18next";
 import Grid from "@mui/material/Unstable_Grid2";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import { AdminLayout } from "@layout";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
@@ -14,11 +14,14 @@ import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import {
+	deleteLibraryQuery,
 	getLibraryById,
 	getMappings,
 	getNumericRangeMappings,
 	getPatronRequests,
 	updateAgencyParticipationStatus,
+	updateLibraryQuery,
+	updatePerson,
 } from "src/queries/queries";
 import { Library } from "@models/Library";
 import { getILS } from "src/helpers/getILS";
@@ -51,6 +54,11 @@ import {
 import { useCustomColumns } from "src/helpers/useCustomColumns";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { Person } from "@models/Person";
+import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
+import EditableAttribute from "src/helpers/EditableAttribute/EditableAttribute";
+import { formatChangedFields } from "src/helpers/formatChangedFields";
+import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
+import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -62,6 +70,8 @@ const TOTAL_ACCORDIONS = 19; // Total number of accordions
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 	const customColumns = useCustomColumns();
+	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
+	const theme = useTheme();
 
 	// pollInterval is in ms - set to 2 mins
 	const { data, loading, error } = useQuery(getLibraryById, {
@@ -70,16 +80,25 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		},
 		pollInterval: 120000,
 	});
+	const { data: session }: { data: any } = useSession();
 
 	const [updateParticipation] = useMutation(updateAgencyParticipationStatus);
-	const [supplyDisabled, setSupplyDisabled] = useState(false);
-	const [supplyDisabledError, setSupplyDisabledError] = useState(false);
-	const [supplyEnabled, setSupplyEnabled] = useState(false);
-	const [supplyEnabledError, setSupplyEnabledError] = useState(false);
-	const [borrowDisabled, setBorrowDisabled] = useState(false);
-	const [borrowDisabledError, setBorrowDisabledError] = useState(false);
-	const [borrowEnabled, setBorrowEnabled] = useState(false);
-	const [borrowEnabledError, setBorrowEnabledError] = useState(false);
+	const [deleteLibrary] = useMutation(deleteLibraryQuery);
+	const [updateLibrary] = useMutation(updateLibraryQuery, {
+		refetchQueries: ["LoadLibrary", "LoadLibraries"],
+	});
+	const [alert, setAlert] = useState<any>({
+		open: false,
+		severity: "success",
+		text: null,
+		title: null,
+	});
+
+	const [changedFields, setChangedFields] = useState<Partial<Library>>({});
+
+	const isAnAdmin = session?.profile?.roles?.some(
+		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	);
 
 	// Handles toggling the library participation when a user clicks 'confirm'.
 	const handleParticipationConfirmation = (
@@ -89,7 +108,6 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		console.log(active);
 		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
 		const borrowInput =
 			active == "borrowing"
@@ -129,49 +147,289 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				// Handle successful response
 				console.log("Participation status updated:", response?.data);
 				// close the confirmation modal here - active determines the text shown
+				const successText = {
+					disableSupplying: t(
+						"libraries.circulation.confirmation.alert.supplying_disabled",
+					),
+					enableSupplying: t(
+						"libraries.circulation.confirmation.alert.supplying_enabled",
+					),
+					disableBorrowing: t(
+						"libraries.circulation.confirmation.alert.borrowing_disabled",
+					),
+					enableBorrowing: t(
+						"libraries.circulation.confirmation.alert.borrowing_enabled",
+					),
+				}[targetParticipation];
+
+				setAlert({
+					open: true,
+					severity: "success",
+					text: (
+						<Trans
+							i18nKey={successText}
+							values={{ library: library?.fullName }}
+							components={{ bold: <strong /> }}
+						/>
+					),
+				});
 				closeConfirmation(active);
-				// Makes sure we show the correct success alert.
-				switch (targetParticipation) {
-					case "disableSupplying":
-						setSupplyDisabled(true);
-						break;
-					case "enableSupplying":
-						setSupplyEnabled(true);
-						break;
-					case "disableBorrowing":
-						setBorrowDisabled(true);
-						break;
-					case "enableBorrowing":
-						setBorrowEnabled(true);
-						break;
-				}
 			})
 			.catch((error) => {
 				// Handle error
 				console.error("Error updating participation status:", error);
 				// Show the correct error alert.
-				switch (targetParticipation) {
-					case "disableSupplying":
-						setSupplyDisabledError(true);
-						break;
-					case "enableSupplying":
-						setSupplyEnabledError(true);
-						break;
-					case "disableBorrowing":
-						setBorrowDisabledError(true);
-						break;
-					case "enableBorrowing":
-						setBorrowEnabledError(true);
-						break;
-				}
+				const errorText = {
+					disableSupplying: t(
+						"libraries.circulation.confirmation.alert.supplying_disabled_fail",
+					),
+					enableSupplying: t(
+						"libraries.circulation.confirmation.alert.supplying_enabled_fail",
+					),
+					disableBorrowing: t(
+						"libraries.circulation.confirmation.alert.borrowing_disabled_fail",
+					),
+					enableBorrowing: t(
+						"libraries.circulation.confirmation.alert.borrowing_enabled_fail",
+					),
+				}[targetParticipation];
+				setAlert({
+					open: true,
+					severity: "error",
+					text: (
+						<Trans
+							i18nKey={errorText}
+							values={{ library: library?.fullName }}
+							components={{ bold: <strong /> }}
+						/>
+					),
+				});
 			});
+	};
+
+	const handleDeleteEntity = async (
+		id: string,
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
+		try {
+			const input = {
+				id: id,
+				reason: reason,
+				changeCategory: changeCategory,
+				changeReferenceUrl: changeReferenceUrl,
+			};
+			const { data } = await deleteLibrary({
+				variables: {
+					input,
+				},
+				update(cache, { data: mutationData }) {
+					// This will remove cached libraries if the delete is successful.
+					// Thus forcing them to be re-fetched before re-direction to the libraries page.
+					if (mutationData?.deleteLibrary.success) {
+						cache.modify({
+							fields: {
+								libraries(_, { DELETE }) {
+									return DELETE;
+								},
+							},
+						});
+					}
+				},
+			});
+			if (data.deleteLibrary.success == true) {
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("ui.data_grid.delete_success", {
+						entity: t("libraries.library").toLowerCase(),
+						name: library?.fullName,
+					}),
+					title: t("ui.data_grid.deleted"),
+				});
+				console.log(data.deleteLibrary);
+				console.log("Entity deleted successfully");
+				setTimeout(() => {
+					router.push("/libraries");
+				}, 100);
+			} else {
+				console.log(data?.deleteLibrary);
+				console.log("Failed to delete entity");
+				setAlert({
+					open: true,
+					severity: "error",
+					text: t("ui.data_grid.delete_error", {
+						entity: t("libraries.library").toLowerCase(),
+					}),
+				});
+			}
+		} catch (error) {
+			console.log(data?.deleteLibrary);
+			console.error("Error deleting entity:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("ui.data_grid.delete_error", {
+					entity: t("libraries.library").toLowerCase(),
+				}),
+			});
+		}
 	};
 
 	const client = useApolloClient();
 	const [showConfirmationBorrowing, setConfirmationBorrowing] = useState(false);
 	const [showConfirmationSupplying, setConfirmationSupplying] = useState(false);
+	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
+	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
+	const [hasValidationError, setValidationError] = useState(false);
+	const [isDirty, setDirty] = useState(false);
+	const [errors, setErrors] = useState();
 
 	const library: Library = data?.libraries?.content?.[0];
+
+	const [editMode, setEditMode] = useState(false);
+	const [editKey, setEditKey] = useState(0);
+	const [editableFields, setEditableFields] = useState({
+		backupDowntimeSchedule: library?.backupDowntimeSchedule,
+		supportHours: library?.supportHours,
+		latitude: library?.latitude,
+		longitude: library?.longitude,
+		fullName: library?.fullName,
+		shortName: library?.shortName,
+		abbreviatedName: library?.abbreviatedName,
+	});
+
+	const handleSave = () => {
+		if (Object.keys(changedFields).length === 0) {
+			setEditMode(false);
+			return;
+		}
+		setConfirmationEdit(true);
+	};
+	const handleCancel = () => {
+		setEditMode(false);
+		setEditableFields({
+			backupDowntimeSchedule: library?.backupDowntimeSchedule,
+			supportHours: library?.supportHours,
+			latitude: library?.latitude,
+			longitude: library?.longitude,
+			fullName: library?.fullName,
+			shortName: library?.shortName,
+			abbreviatedName: library?.abbreviatedName,
+		});
+		setChangedFields({});
+		setDirty(false);
+		setValidationError(false);
+		setEditKey((prevKey) => prevKey + 1); // This will change the keys of all EditableAttributes
+		// Thus re-setting their states on cancel.
+	};
+
+	const handleConfirmSave = async (
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
+		try {
+			const { data } = await updateLibrary({
+				variables: {
+					input: {
+						id: library.id,
+						...changedFields,
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					},
+				},
+			});
+
+			if (data.updateLibrary) {
+				setEditMode(false);
+				setChangedFields({});
+				client.refetchQueries({
+					include: ["LoadLibrary"],
+				});
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("ui.data_grid.edit_success", {
+						entity: t("libraries.library").toLowerCase(),
+						name: library?.fullName,
+					}),
+					title: t("ui.data_grid.updated"),
+				});
+			}
+		} catch (error) {
+			console.error("Error updating library:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("ui.data_grid.edit_error", {
+					entity: t("libraries.library").toLowerCase(),
+					name: library?.fullName,
+				}),
+				title: t("ui.data_grid.updated"),
+			});
+		} finally {
+			setConfirmationEdit(false);
+		}
+	};
+
+	const handleEdit = () => {
+		setEditableFields({
+			backupDowntimeSchedule: library?.backupDowntimeSchedule,
+			supportHours: library?.supportHours,
+			latitude: library?.latitude,
+			longitude: library?.longitude,
+			fullName: library?.fullName,
+			abbreviatedName: library?.abbreviatedName,
+			shortName: library?.shortName,
+		});
+		setEditMode(true);
+		expandAll();
+		setTimeout(() => {
+			if (firstEditableFieldRef.current) {
+				firstEditableFieldRef.current.focus();
+			}
+		}, 0);
+	};
+	const updateField = (field: keyof Library, value: string | number | null) => {
+		setEditableFields((prev) => ({
+			...prev,
+			[field]: value,
+		}));
+
+		if (value !== library[field]) {
+			setChangedFields((prev) => ({
+				...prev,
+				[field]: value,
+			}));
+		} else {
+			setChangedFields((prev) => {
+				const newChangedFields = { ...prev };
+				delete newChangedFields[field];
+				return newChangedFields;
+			});
+		}
+	};
+
+	const {
+		showUnsavedChangesModal,
+		handleKeepEditing,
+		handleLeaveWithoutSaving,
+	} = useUnsavedChangesWarning({
+		isDirty,
+		hasValidationError,
+		onKeepEditing: () => {
+			if (firstEditableFieldRef.current) {
+				firstEditableFieldRef.current.focus();
+			}
+		},
+		onLeaveWithoutSaving: () => {
+			setDirty(false);
+			setChangedFields({});
+		},
+	});
 
 	const router = useRouter();
 	const { status } = useSession({
@@ -195,6 +453,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			setConfirmationBorrowing(true);
 		} else if (participation === "supplying") {
 			setConfirmationSupplying(true);
+		} else if (participation === "deletion") {
+			setConfirmationDeletion(true);
 		}
 	};
 
@@ -203,6 +463,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			setConfirmationBorrowing(false);
 		} else if (participation === "supplying") {
 			setConfirmationSupplying(false);
+		} else if (participation === "deletion") {
+			setConfirmationDeletion(false);
 		}
 		// This refetches the LoadLibrary query to ensure we're up-to-date after confirmation.
 		client.refetchQueries({
@@ -213,6 +475,14 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const [expandedAccordions, setExpandedAccordions] = useState<boolean[]>(
 		getInitialAccordionState(INITIAL_EXPANDED_STATE, TOTAL_ACCORDIONS),
 	);
+
+	const expandAll = useCallback(() => {
+		setExpandedAccordions((prevExpanded) => prevExpanded.map(() => true));
+	}, []);
+
+	const collapseAll = useCallback(() => {
+		setExpandedAccordions((prevExpanded) => prevExpanded.map(() => false));
+	}, []);
 
 	const handleAccordionChange = useCallback(
 		(index: number) => () => {
@@ -225,13 +495,6 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		[],
 	);
 
-	const expandAll = useCallback(() => {
-		setExpandedAccordions((prevExpanded) => {
-			const allExpanded = prevExpanded.some((isExpanded) => !isExpanded);
-			return prevExpanded.map(() => allExpanded);
-		});
-	}, []);
-
 	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
 
 	const handleTotalSizeChange = useCallback((type: string, size: number) => {
@@ -240,6 +503,64 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			[type]: size,
 		}));
 	}, []);
+	// Actions for the menu - in both view and edit mode.
+	const viewModeActions = [
+		{
+			key: "edit",
+			onClick: handleEdit,
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.edit"),
+			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+		{
+			key: "delete",
+			onClick: () => openConfirmation("deletion"),
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.delete_entity", {
+				entity: t("libraries.library").toLowerCase(),
+			}),
+			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+	];
+
+	const editModeActions = [
+		<Button
+			key="save"
+			startIcon={<Save />}
+			onClick={handleSave}
+			disabled={hasValidationError || !isDirty}
+		>
+			{t("ui.data_grid.save")}
+		</Button>,
+		<Button key="cancel" startIcon={<Cancel />} onClick={handleCancel}>
+			{t("ui.data_grid.cancel")}
+		</Button>,
+		<MoreActionsMenu
+			key="more"
+			actions={[
+				{
+					key: "delete",
+					onClick: () => openConfirmation("deletion"),
+					disabled: !isAnAdmin,
+					label: t("ui.data_grid.delete_entity", {
+						entity: t("libraries.library").toLowerCase(),
+					}),
+					startIcon: (
+						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
+					),
+				},
+				{
+					key: "edit",
+					onClick: handleEdit,
+					disabled: true,
+					label: t("ui.data_grid.edit"),
+					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+				},
+			]}
+		/>,
+	];
+
+	const pageActions = editMode ? editModeActions : viewModeActions;
 
 	if (loading || status === "loading") {
 		return (
@@ -296,10 +617,22 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			)}
 		</AdminLayout>
 	) : (
-		<AdminLayout title={library?.fullName}>
+		<AdminLayout
+			title={library?.fullName}
+			pageActions={pageActions}
+			mode={editMode ? "edit" : "view"}
+		>
 			<Stack direction="row" justifyContent="end">
-				<StyledAccordionButton onClick={expandAll}>
-					{expandedAccordions[10] ? t("details.collapse") : t("details.expand")}
+				<StyledAccordionButton
+					onClick={
+						expandedAccordions.some((isExpanded) => !isExpanded)
+							? expandAll
+							: collapseAll
+					}
+				>
+					{expandedAccordions.some((isExpanded) => !isExpanded)
+						? t("details.expand")
+						: t("details.collapse")}
 				</StyledAccordionButton>
 			</Stack>
 			<StyledAccordion
@@ -329,26 +662,78 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors?.["fullName"] && editMode
+											? theme.palette.error.main
+											: theme.palette.common.black
+									}
+								>
 									{t("libraries.name")}
 								</Typography>
-								<RenderAttribute attribute={library?.fullName} />
+								<EditableAttribute
+									field="fullName"
+									value={library?.fullName}
+									updateField={updateField}
+									editMode={editMode}
+									type="string"
+									inputRef={firstEditableFieldRef}
+									setValidationError={setValidationError}
+									setDirty={setDirty}
+									setErrors={setErrors}
+									key={`fullName-${editKey}`}
+								/>
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors?.["shortName"] && editMode
+											? theme.palette.error.main
+											: theme.palette.common.black
+									}
+								>
 									{t("libraries.short_name")}
 								</Typography>
-								<RenderAttribute attribute={library?.shortName} />
+								<EditableAttribute
+									field="shortName"
+									value={library?.shortName}
+									updateField={updateField}
+									editMode={editMode}
+									type="string"
+									setValidationError={setValidationError}
+									setDirty={setDirty}
+									setErrors={setErrors}
+									key={`shortName-${editKey}`}
+								/>
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors?.["abbreviatedName"] && editMode
+											? theme.palette.error.main
+											: theme.palette.common.black
+									}
+								>
 									{t("libraries.abbreviated_name")}
 								</Typography>
-								<RenderAttribute attribute={library?.abbreviatedName} />
+								<EditableAttribute
+									field="abbreviatedName"
+									value={library?.abbreviatedName}
+									updateField={updateField}
+									editMode={editMode}
+									type="string"
+									setValidationError={setValidationError}
+									setDirty={setDirty}
+									setErrors={setErrors}
+									key={`abbreviatedName-${editKey}`}
+								/>
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
@@ -369,19 +754,55 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors?.["supportHours"] && editMode
+											? theme.palette.error.main
+											: theme.palette.common.black
+									}
+								>
 									{t("libraries.support_hours")}
 								</Typography>
-								{/* This may need special handling when we have real data and know what format it's coming in */}
-								<RenderAttribute attribute={library?.supportHours} />
+								<EditableAttribute
+									field="supportHours"
+									value={editableFields.supportHours ?? library?.supportHours}
+									updateField={updateField}
+									editMode={editMode}
+									type="string"
+									setValidationError={setValidationError}
+									setDirty={setDirty}
+									setErrors={setErrors}
+									key={`supportHours-${editKey}`}
+								/>
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors?.["backupDowntimeSchedule"] && editMode
+											? theme.palette.error.main
+											: theme.palette.common.black
+									}
+								>
 									{t("libraries.service.environments.backup_schedule")}
 								</Typography>
-								<RenderAttribute attribute={library?.backupDowntimeSchedule} />
+								<EditableAttribute
+									field="backupDowntimeSchedule"
+									value={
+										editableFields.backupDowntimeSchedule ??
+										library?.backupDowntimeSchedule
+									}
+									updateField={updateField}
+									editMode={editMode}
+									type="string"
+									setValidationError={setValidationError}
+									setDirty={setDirty}
+									setErrors={setErrors}
+									key={`backupDowntimeSchedule-${editKey}`}
+								/>
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
@@ -443,18 +864,51 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								</Grid>
 								<Grid xs={2} sm={4} md={4}>
 									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("libraries.primaryLocation.location")}
-										</Typography>
-										{/* This component handles lat/long in the same way as address - however we don't require both currently.
-										{/* <Location
-											latitude={library?.latitude}
-											longitude={library?.longitude}
-										/> */}
-										<RenderAttribute
-											attribute={
-												"" + library?.latitude + ", " + library?.longitude
+										<Typography
+											variant="attributeTitle"
+											color={
+												errors?.["latitude"] && editMode
+													? theme.palette.error.main
+													: theme.palette.common.black
 											}
+										>
+											{t("libraries.primaryLocation.latitude")}
+										</Typography>
+										<EditableAttribute
+											field="latitude"
+											value={editableFields.latitude ?? library?.latitude}
+											updateField={updateField}
+											editMode={editMode}
+											type="latitude"
+											setValidationError={setValidationError}
+											setDirty={setDirty}
+											setErrors={setErrors}
+											key={`latitude-${editKey}`}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography
+											variant="attributeTitle"
+											color={
+												errors?.["longitude"] && editMode
+													? theme.palette.error.main
+													: theme.palette.common.black
+											}
+										>
+											{t("libraries.primaryLocation.longitude")}
+										</Typography>
+										<EditableAttribute
+											field="longitude"
+											value={editableFields.longitude ?? library?.longitude}
+											updateField={updateField}
+											editMode={editMode}
+											type="longitude"
+											setValidationError={setValidationError}
+											setDirty={setDirty}
+											setErrors={setErrors}
+											key={`longitude-${editKey}`}
 										/>
 									</Stack>
 								</Grid>
@@ -575,37 +1029,49 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								field: "role",
 								headerName: t("libraries.contacts.role"),
 								minWidth: 50,
+								editable: true,
 								flex: 0.5,
 							},
 							{
 								field: "name",
 								headerName: t("libraries.contacts.name"),
 								minWidth: 50,
+								editable: true,
 								flex: 0.7,
-								valueGetter: (value: string, row: Person) =>
-									`${row.firstName} ${row.lastName}`,
+								valueGetter: (value: string, row: Person) => {
+									return `${row.firstName} ${row.lastName}`.trim();
+								},
+								valueSetter: (value: string, row: Person) => {
+									// if we can remove regex would be better
+									const [firstName, ...rest] = value.trim().split(/\s+/); // Split by any whitespace
+									const lastName = rest.join(" "); // Join the remaining parts as the last name
+									return { ...row, firstName, lastName };
+								},
 							},
 							{
 								field: "email",
 								headerName: t("libraries.contacts.email"),
 								minWidth: 50,
+								editable: true,
 								flex: 0.7,
 							},
 							{
 								field: "isPrimaryContact",
 								headerName: t("libraries.contacts.primary"),
 								minWidth: 50,
+								editable: true,
 								flex: 0.3,
 							},
 						]}
 						data={library?.contacts}
-						type="LibraryContacts"
-						// No need for click through on this grid
+						type="contact"
+						// No need for click through on this grid - fix translation keys
 						selectable={false}
 						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
-						noDataTitle={"No groups found for this library."}
+						noDataTitle={"No contacts found for this library."}
 						toolbarVisible="search-only"
 						disableHoverInteractions={true}
+						editQuery={updatePerson}
 					></ClientDataGrid>
 				</StyledAccordionDetails>
 			</StyledAccordion>
@@ -1158,7 +1624,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								<Button
 									onClick={() => openConfirmation("supplying")}
 									color="primary"
-									variant="contained"
+									variant="outlined"
+									sx={{ marginTop: 1 }}
 									type="submit"
 								>
 									{library?.agency?.isSupplyingAgency
@@ -1180,7 +1647,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								<Button
 									onClick={() => openConfirmation("borrowing")}
 									color="primary"
-									variant="contained"
+									variant="outlined"
+									sx={{ marginTop: 1 }}
 									type="submit"
 								>
 									{library?.agency?.isBorrowingAgency
@@ -1476,119 +1944,48 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					/>
 				) : null}
 			</Box>
-			{/* // Success alerts for toggling participation */}
+			{/* // One alert for all things */}
 			<TimedAlert
-				open={borrowEnabled}
-				severityType="success"
+				open={alert.open}
+				severityType={alert.severity}
 				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.borrowing_enabled"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"borrow-enabled-success-alert"}
-				onCloseFunc={() => setBorrowEnabled(false)}
+				alertText={alert.text}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
+				alertTitle={alert.title}
 			/>
-			<TimedAlert
-				open={borrowDisabled}
-				severityType="success"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.borrowing_disabled"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"borrow-disabled-success-alert"}
-				onCloseFunc={() => setBorrowDisabled(false)}
+			<Confirmation
+				open={showConfirmationDeletion}
+				onClose={() => setConfirmationDeletion(false)}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
+					handleDeleteEntity(
+						library.id,
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					);
+					setConfirmationDeletion(false);
+				}}
+				type={"deletelibraries"}
+				library={library?.fullName}
+				entity={t("libraries.library")}
 			/>
-			<TimedAlert
-				open={supplyEnabled}
-				severityType="success"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.supplying_enabled"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"supply-enabled-success-alert"}
-				onCloseFunc={() => setSupplyEnabled(false)}
+			<Confirmation
+				open={showConfirmationEdit}
+				onClose={() => setConfirmationEdit(false)}
+				onConfirm={handleConfirmSave}
+				type="pageEdit"
+				editInformation={formatChangedFields(changedFields, library)}
+				library={library?.fullName}
+				entity={t("libraries.library")}
 			/>
-			<TimedAlert
-				open={supplyDisabled}
-				severityType="success"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.supplying_disabled"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"supply-disabled-success-alert"}
-				onCloseFunc={() => setSupplyDisabled(false)}
-			/>
-			{/* // Error alerts for toggling participation */}
-			<TimedAlert
-				open={borrowEnabledError}
-				severityType="error"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.borrowing_enabled_fail"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"borrow-enabled-error-alert"}
-				onCloseFunc={() => setBorrowEnabledError(false)}
-			/>
-			<TimedAlert
-				open={supplyEnabledError}
-				severityType="error"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.supplying_enabled_fail"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"supply-enabled-error-alert"}
-				onCloseFunc={() => setSupplyEnabledError(false)}
-			/>
-			<TimedAlert
-				open={borrowDisabledError}
-				severityType="error"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.borrowing_disabled_fail"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"borrow-disabled-error-alert"}
-				onCloseFunc={() => setBorrowDisabledError(false)}
-			/>
-			<TimedAlert
-				open={supplyDisabledError}
-				severityType="error"
-				autoHideDuration={6000}
-				alertText={
-					<Trans
-						i18nKey="libraries.circulation.confirmation.alert.supplying_disabled_fail"
-						values={{ library: library?.fullName }}
-						components={{ bold: <strong /> }}
-					/>
-				}
-				key={"supply-disabled-error-alert"}
-				onCloseFunc={() => setSupplyDisabledError(false)}
+			<Confirmation
+				open={showUnsavedChangesModal}
+				onClose={handleKeepEditing}
+				onConfirm={handleLeaveWithoutSaving}
+				type="unsavedChanges"
+				library={library?.fullName}
+				entity={t("libraries.library")}
+				entityId={library?.id}
 			/>
 		</AdminLayout>
 	);

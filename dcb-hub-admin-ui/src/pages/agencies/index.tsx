@@ -48,6 +48,7 @@ const Agencies: NextPage = () => {
 					query={getAgencies}
 					type="agencies"
 					coreType="agencies"
+					operationDataType="Agency"
 					columnVisibilityModel={{
 						id: false,
 					}}

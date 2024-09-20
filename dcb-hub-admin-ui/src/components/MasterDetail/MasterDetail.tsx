@@ -167,7 +167,11 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "dataChangeLog":
 			return (
 				<MasterDetailLayout width={width}>
-					<ChangesSummary changes={row?.changes} action={row?.actionInfo} />
+					<ChangesSummary
+						changes={row?.changes}
+						action={row?.actionInfo}
+						context="dataChangeLog"
+					/>
 				</MasterDetailLayout>
 			);
 		case "groups":

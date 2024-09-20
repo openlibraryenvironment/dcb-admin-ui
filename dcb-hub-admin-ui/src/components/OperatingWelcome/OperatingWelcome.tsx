@@ -2,7 +2,11 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import { useTranslation } from "next-i18next";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
 import { getILS } from "src/helpers/getILS";
-import { getLibraries } from "src/queries/queries";
+import {
+	deleteLibraryQuery,
+	getLibraries,
+	updateLibraryQuery,
+} from "src/queries/queries";
 
 // This is the unique content for the 'welcome' page for when a consortium is operational
 export default function OperatingWelcome() {
@@ -11,8 +15,12 @@ export default function OperatingWelcome() {
 	return (
 		<ServerPaginationGrid
 			query={getLibraries}
+			editQuery={updateLibraryQuery}
+			refetchQuery={["LoadLibraries"]}
+			deleteQuery={deleteLibraryQuery}
 			coreType="libraries"
 			type="libraries"
+			operationDataType="Library"
 			columnVisibilityModel={{
 				id: false,
 				hostLmsCatalogue: false,
@@ -25,12 +33,14 @@ export default function OperatingWelcome() {
 					headerName: "Abbreviated name",
 					flex: 0.3,
 					filterOperators: standardFilters,
+					editable: true,
 				},
 				{
 					field: "fullName",
 					headerName: "Full name",
 					flex: 0.5,
 					filterOperators: standardFilters,
+					editable: true,
 				},
 				{
 					field: "agencyCode",

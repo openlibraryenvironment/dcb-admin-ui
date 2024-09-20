@@ -6,11 +6,17 @@ import Breadcrumbs from "./Breadcrumbs/Breadcrumbs";
 import { Stack, Typography, useTheme, Box } from "@mui/material";
 import Sidebar from "@layout/AdminLayout/Sidebar/Sidebar";
 import LinkedFooter from "./LinkedFooter/LinkedFooter";
+import PageActionsMenu, {
+	Action,
+} from "@components/PageActionsMenu/PageActionsMenu";
+import { useSession } from "next-auth/react";
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
 	hideTitleBox?: boolean;
 	hideBreadcrumbs?: boolean;
+	pageActions?: Action[] | ReactNode[];
+	mode?: "edit" | "view";
 }
 
 // This layout takes the following props: a title and components to be rendered as children
@@ -24,9 +30,15 @@ export default function AdminLayout({
 	children,
 	hideTitleBox,
 	hideBreadcrumbs,
+	pageActions,
+	mode,
 }: PropsWithChildren<AdminLayoutProps>) {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
+	const { data: session } = useSession();
+	const isAnAdmin = session?.profile?.roles?.some(
+		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	);
 	return (
 		<>
 			<Head>
@@ -105,13 +117,27 @@ export default function AdminLayout({
 										backgroundColor: theme.palette.primary.titleArea,
 									}}
 								>
-									{title != null ? (
-										<Typography id="page-title" p={3} pb={0} variant="h1">
-											{title}
-										</Typography>
-									) : null}
+									<Stack
+										direction="row"
+										alignItems="center"
+										justifyContent="space-between"
+										sx={{ p: 3, pb: 0 }} // Optional padding adjustments
+									>
+										{title != null ? (
+											<Typography id="page-title" variant="h1">
+												{title}
+											</Typography>
+										) : null}
+										{pageActions && isAnAdmin && (
+											<PageActionsMenu
+												actions={pageActions}
+												mode={mode || "view"}
+											/>
+										)}
+									</Stack>
 								</Box>
 							) : null}
+
 							<Box sx={{ pl: 3, pr: 3, paddingBottom: 3, height: "100%" }}>
 								{children}
 							</Box>

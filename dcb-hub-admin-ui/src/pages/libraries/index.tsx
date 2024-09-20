@@ -3,7 +3,11 @@ import { useTranslation } from "next-i18next";
 import { NextPage } from "next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getLibraries } from "src/queries/queries";
+import {
+	deleteLibraryQuery,
+	getLibraries,
+	updateLibraryQuery,
+} from "src/queries/queries";
 import { getILS } from "src/helpers/getILS";
 import Button from "@mui/material/Button";
 import { useState } from "react";
@@ -76,18 +80,19 @@ const Libraries: NextPage = () => {
 				}}
 				columns={[
 					...customColumns,
-
 					{
 						field: "abbreviatedName",
 						headerName: "Abbreviated name",
 						flex: 0.4,
 						filterOperators: standardFilters,
+						editable: true,
 					},
 					{
 						field: "fullName",
 						headerName: "Full name",
 						flex: 0.6,
 						filterOperators: standardFilters,
+						editable: true,
 					},
 					{
 						field: "ils",
@@ -201,8 +206,12 @@ const Libraries: NextPage = () => {
 				noResultsMessage={t("libraries.none_found")}
 				searchPlaceholder={t("libraries.search_placeholder")}
 				sortDirection="ASC"
-				sortAttribute="shortName"
-				sortModel={[{ field: "shortName", sort: "asc" }]}
+				sortAttribute="abbreviatedName"
+				sortModel={[{ field: "abbreviatedName", sort: "asc" }]}
+				deleteQuery={deleteLibraryQuery}
+				editQuery={updateLibraryQuery}
+				refetchQuery={["LoadLibraries"]}
+				operationDataType={t("libraries.library")}
 				// getDetailPanelContent={({ row }: any) => (
 				// 	<MasterDetail row={row} type="libraries" />
 				// )}
