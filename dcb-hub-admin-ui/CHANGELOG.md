@@ -1,3 +1,23 @@
+# [1.24.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.23.0...v1.24.0) (2024-09-20)
+
+
+### Bug Fixes
+
+* Add loading, error to items page ([4cc3c7f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4cc3c7fca94ae347d94a7c8f005d788b98f8e12e))
+* Add support for cluster page with dcb-service <7.3.0 ([d2f4137](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d2f4137f83118bb77ee0c5ed21c0c87de5704029))
+* Fix accessibility issues on cluster page ([916c2a1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/916c2a1b9f5e67557c2ec5ebe5a4689dccb2d3bf))
+* Fix issue with legacy query not being used for some v7 instances ([c6e07a6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c6e07a6202cd19653334d1f69b59bd6a3b8cbf8c))
+* Position accordion caret to the left ([666e1d4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/666e1d48678c21a1a78532158922f07cb7e34cd7))
+
+
+### Features
+
+* Add last imported as hidden column [DCB-1461] ([8013b57](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8013b57e0f85c5787e086b31b3deb53a64a8c8ee))
+* Display target environment in DCB Admin [DCB-1419] ([7f3d2b4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7f3d2b41a919b35912cee732f8818b1297222960))
+* Extend search to support multiple terms ([9ad5fc7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9ad5fc7144cb6740ed280f2353a241252ce8ae41))
+* Introduce data grids for DCB Discovery ([93d1c87](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/93d1c87bfd17ba02950b8b438bc35dbbe29fddc5))
+* Support editing and deletion of libraries, locations and contacts [DCB-1408] ([8dbf8d5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8dbf8d5c986cd50ecde2bc6359188be65b646128))
+
 # [1.23.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.22.0...v1.23.0) (2024-09-05)
 
 
