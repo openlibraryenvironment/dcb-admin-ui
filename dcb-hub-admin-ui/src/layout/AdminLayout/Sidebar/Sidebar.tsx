@@ -92,30 +92,29 @@ const SidebarIcon = (indexVal: any, isSelected: boolean) => {
 	const iconProps = { size: 20, color: isSelected ? "white" : "inherit" };
 	switch (indexVal) {
 		case 0:
-			return <MdHome {...iconProps} />;
+			return <MdHome {...iconProps} />; // Home
 		case 1:
-			return <MdOutput {...iconProps} />;
+			return <MdOutput {...iconProps} />; // Patron requests
 		case 2:
-			return <MdAccountBalance {...iconProps} />;
+			return <MdLocalLibrary {...iconProps} />; // Libraries
 		case 3:
-			return <MdDns {...iconProps} />;
+			return <MdAccountBalance {...iconProps} />; // Agencies
 		case 4:
-			return <MdLocationOn {...iconProps} />;
+			return <MdDns {...iconProps} />; // Host LMSs
 		case 5:
-			return <MdWorkspaces {...iconProps} />;
+			return <MdWorkspaces {...iconProps} />; // Groups
 		case 6:
-			return <MdBook {...iconProps} />;
+			return <MdLocationOn {...iconProps} />; // Locations
 		case 7:
-			return <MdLocalLibrary {...iconProps} />;
+			return <MdMap {...iconProps} />; // Mappings
 		case 8:
-			return <MdMap {...iconProps} />;
+			return <MdBook {...iconProps} />; //Bib records
 		case 9:
-			return <MdSettings {...iconProps} />;
+			return <MdSearch {...iconProps} />; // Search index
 		case 10:
-			return <MdSearch {...iconProps} />;
+			return <MdInfo {...iconProps} />; // Service info
 		case 11:
-			return <MdInfo {...iconProps} />;
-
+			return <MdSettings {...iconProps} />; // Settings
 		default:
 			return null;
 	}
@@ -127,19 +126,19 @@ type routes = {
 };
 
 const routes = [
-	{ path: "/", translationKey: "nav.home" },
-	{ path: "/patronRequests", translationKey: "nav.patronRequests" },
-	{ path: "/agencies", translationKey: "nav.agencies" },
-	{ path: "/hostlmss", translationKey: "nav.hostlmss" },
-	{ path: "/locations", translationKey: "nav.locations" },
-	{ path: "/groups", translationKey: "nav.groups" },
-	{ path: "/bibs", translationKey: "nav.bibs" },
-	{ path: "/libraries", translationKey: "nav.libraries" },
-	{ path: "/mappings", translationKey: "nav.mappings.name" },
-	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" },
-	{ path: "/search", translationKey: "nav.search.name" },
+	{ path: "/", translationKey: "nav.home" }, // Home
+	{ path: "/patronRequests", translationKey: "nav.patronRequests" }, // Patron requests
+	{ path: "/libraries", translationKey: "nav.libraries" }, // Libraries
+	{ path: "/agencies", translationKey: "nav.agencies" }, // Agencies
+	{ path: "/hostlmss", translationKey: "nav.hostlmss" }, // Host LMSs
+	{ path: "/groups", translationKey: "nav.groups" }, // Groups
+	{ path: "/locations", translationKey: "nav.locations" }, // Locations
+	{ path: "/mappings", translationKey: "nav.mappings.name" }, // Mappings
+	{ path: "/bibs", translationKey: "nav.bibs" }, // Bib records
+	{ path: "/search", translationKey: "nav.search.name" }, // Shared index
+	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" }, // Service Info
 	// currently unused, may be un-commented in the future
-	//{path: '/settings', translationKey: 'nav.settings.name'}
+	// { path: "/settings", translationKey: "nav.settings.name" }, // Settings
 ];
 
 export default function Sidebar(props: any) {
