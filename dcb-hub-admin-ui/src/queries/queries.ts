@@ -52,27 +52,9 @@ export const addLibraryToGroup = gql`
 	}
 `;
 
-export const deleteEntityQuery = gql`
-	mutation DeleteEntity($input: DeleteEntityInput!) {
-		deleteEntity(input: $input) {
-			success
-			message
-		}
-	}
-`;
-
 export const deleteLibraryQuery = gql`
 	mutation DeleteLibrary($input: DeleteEntityInput!) {
 		deleteLibrary(input: $input) {
-			success
-			message
-		}
-	}
-`;
-
-export const deleteLocationQuery = gql`
-	mutation DeleteLocation($input: DeleteEntityInput!) {
-		deleteLocation(input: $input) {
 			success
 			message
 		}
@@ -91,17 +73,6 @@ export const updateLibraryQuery = gql`
 	}
 `;
 
-export const updateLocationQuery = gql`
-	mutation UpdateLocation($input: UpdateLocationInput!) {
-		updateLocation(input: $input) {
-			id
-			longitude
-			latitude
-			name
-		}
-	}
-`;
-
 export const updatePerson = gql`
 	mutation UpdatePerson($input: UpdatePersonInput!) {
 		updatePerson(input: $input) {
@@ -114,6 +85,70 @@ export const updatePerson = gql`
 		}
 	}
 `;
+// Location mutations
+
+export const deleteLocationQuery = gql`
+	mutation DeleteLocation($input: DeleteEntityInput!) {
+		deleteLocation(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
+export const updateLocationQuery = gql`
+	mutation UpdateLocation($input: UpdateLocationInput!) {
+		updateLocation(input: $input) {
+			id
+			longitude
+			latitude
+			name
+		}
+	}
+`;
+
+// Reference value mapping mutations
+
+export const updateReferenceValueMapping = gql`
+	mutation UpdateReferenceValueMapping(
+		$input: UpdateReferenceValueMappingInput!
+	) {
+		updateReferenceValueMapping(input: $input) {
+			id
+			toValue
+		}
+	}
+`;
+
+export const deleteReferenceValueMapping = gql`
+	mutation DeleteReferenceValueMapping($input: DeleteEntityInput!) {
+		deleteReferenceValueMapping(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
+// Numeric range mapping mutations
+
+export const updateNumericRangeMapping = gql`
+	mutation UpdateNumericRangeMapping($input: UpdateNumericRangeMappingInput!) {
+		updateNumericRangeMapping(input: $input) {
+			id
+			mappedValue
+		}
+	}
+`;
+
+export const deleteNumericRangeMapping = gql`
+	mutation DeleteNumericRangeMapping($input: DeleteEntityInput!) {
+		deleteNumericRangeMapping(input: $input) {
+			success
+			message
+		}
+	}
+`;
+
 // QUERIES - Fetch data.
 
 // AGENCIES - these can be used as examples to understand our query structure

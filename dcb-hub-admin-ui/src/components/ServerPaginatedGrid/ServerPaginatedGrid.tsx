@@ -162,6 +162,14 @@ export default function ServerPaginationGrid({
 		"numericRangeMappings",
 	];
 
+	const nonClickableTypes = [
+		"referenceValueMappings",
+		"circulationStatus",
+		"numericRangeMappings",
+		"referenceValueMappingsForLibrary",
+		"numericRangeMappingsForLibrary",
+	];
+
 	// TODO in future work:
 	// Support filtering by date on Patron Requests
 
@@ -200,7 +208,12 @@ export default function ServerPaginationGrid({
 				setDeleteAlertSeverity("success");
 				setDeleteAlertText(
 					t("ui.data_grid.delete_success", {
-						entity: operationDataType?.toLowerCase(),
+						entity:
+							operationDataType === "ReferenceValueMapping"
+								? t("mappings.ref_value_one").toLowerCase()
+								: operationDataType === "NumericRangeMapping"
+									? t("mappings.num_range_one").toLowerCase()
+									: operationDataType?.toLowerCase(),
 						name: name,
 					}),
 				);
@@ -210,7 +223,12 @@ export default function ServerPaginationGrid({
 				setDeleteAlertSeverity("error");
 				setDeleteAlertText(
 					t("ui.data_grid.delete_error", {
-						entity: operationDataType?.toLowerCase(),
+						entity:
+							operationDataType === "ReferenceValueMapping"
+								? t("mappings.ref_value_one").toLowerCase()
+								: operationDataType === "NumericRangeMapping"
+									? t("mappings.num_range_one").toLowerCase()
+									: operationDataType?.toLowerCase(),
 						name: name,
 					}),
 				);
@@ -223,7 +241,12 @@ export default function ServerPaginationGrid({
 			setDeleteAlertSeverity("error");
 			setDeleteAlertText(
 				t("ui.data_grid.delete_error", {
-					entity: operationDataType?.toLowerCase(),
+					entity:
+						operationDataType === "ReferenceValueMapping"
+							? t("mappings.ref_value_one").toLowerCase()
+							: operationDataType === "NumericRangeMapping"
+								? t("mappings.num_range_one").toLowerCase()
+								: operationDataType?.toLowerCase(),
 					name: name,
 				}),
 			);
@@ -482,9 +505,18 @@ export default function ServerPaginationGrid({
 		setPromiseArguments(null);
 	};
 
-	const handleYes = async () => {
+	const handleYes = async (
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
 		const { newRow, oldRow, reject, resolve } = promiseArguments;
-		const input: Record<string, any> = { id: newRow.id };
+		const input: Record<string, any> = {
+			id: newRow.id,
+			reason: reason,
+			changeCategory: changeCategory,
+			changeReferenceUrl: changeReferenceUrl,
+		};
 
 		// Dynamically build the input object based on changed fields
 		Object.keys(newRow).forEach((key) => {
@@ -492,7 +524,9 @@ export default function ServerPaginationGrid({
 				input[key] = newRow[key];
 			}
 		});
+		// We need to get the reason, changeCategory and change category URL in here
 		const updateName = "update" + operationDataType;
+		console.log(updateName);
 		const name =
 			apiRef.current.getRow(newRow.id).name ??
 			apiRef.current.getRow(newRow.id).fullName;
@@ -507,8 +541,13 @@ export default function ServerPaginationGrid({
 				open: true,
 				severity: "success",
 				text: t("ui.data_grid.edit_success", {
-					entity: operationDataType?.toLowerCase(),
-					name: name,
+					entity:
+						operationDataType === "ReferenceValueMapping"
+							? t("mappings.ref_value_one").toLowerCase()
+							: operationDataType === "NumericRangeMapping"
+								? t("mappings.num_range_one").toLowerCase()
+								: operationDataType?.toLowerCase(),
+					name: name ?? "",
 				}),
 			});
 			resolve(data[updateName]);
@@ -518,8 +557,13 @@ export default function ServerPaginationGrid({
 				open: true,
 				severity: "error",
 				text: t("ui.data_grid.edit_error", {
-					entity: operationDataType?.toLowerCase(),
-					name: name,
+					entity:
+						operationDataType === "ReferenceValueMapping"
+							? t("mappings.ref_value_one").toLowerCase()
+							: operationDataType === "NumericRangeMapping"
+								? t("mappings.num_range_one").toLowerCase()
+								: operationDataType?.toLowerCase(),
+					name: name ?? "",
 				}),
 			});
 			reject(oldRow);
@@ -574,6 +618,7 @@ export default function ServerPaginationGrid({
 							key={t("ui.data_grid.open")}
 							showInMenu
 							icon={<Visibility />}
+							disabled={nonClickableTypes.includes(type)}
 							onClick={() => {
 								// Some grids, like the PRs on the library page, need special redirection
 								if (
@@ -636,7 +681,7 @@ export default function ServerPaginationGrid({
 							key={t("ui.data_grid.open")}
 							showInMenu
 							icon={<Visibility />}
-							disabled={isAnyRowEditing()}
+							disabled={isAnyRowEditing() || nonClickableTypes.includes(type)}
 							onClick={() => {
 								// Some grids, like the PRs on the library page, need special redirection
 								if (
@@ -674,7 +719,10 @@ export default function ServerPaginationGrid({
 	];
 
 	const allColumns = (
-		type === "libraries" || type === "locations"
+		type === "libraries" ||
+		type === "locations" ||
+		type === "referenceValueMappings" ||
+		type === "numericRangeMappings"
 			? [...columns, ...actionsColumn]
 			: columns
 	).map((col) => ({
@@ -752,7 +800,12 @@ export default function ServerPaginationGrid({
 						open: true,
 						severity: "error",
 						text: t("ui.data_grid.edit_error", {
-							entity: operationDataType?.toLowerCase(),
+							entity:
+								operationDataType === "ReferenceValueMapping"
+									? t("mappings.ref_value_one").toLowerCase()
+									: operationDataType === "NumericRangeMapping"
+										? t("mappings.num_range_one").toLowerCase()
+										: operationDataType?.toLowerCase(),
 							name: name,
 						}),
 					});
@@ -808,10 +861,6 @@ export default function ServerPaginationGrid({
 					data?.[coreType].content?.name ?? data?.[coreType].content?.fullName
 				}
 				entityId={data?.[coreType].content?.id}
-				// associatedPatronRequests={
-				// 	locationPatronRequests?.patronRequests?.content ?? []
-				// }
-				// associatedPatronRequestsLoading={locationPatronRequestsLoading}
 			/>
 
 			<TimedAlert
@@ -840,10 +889,6 @@ export default function ServerPaginationGrid({
 					}
 				}}
 				type={"delete" + coreType}
-				// associatedPatronRequests={
-				// 	locationPatronRequests?.patronRequests?.content ?? []
-				// }
-				// associatedPatronRequestsLoading={locationPatronRequestsLoading}
 				entity={operationDataType?.toLowerCase()}
 				entityId={entityToDelete ?? ""}
 			/>

@@ -15,13 +15,17 @@ import Loading from "@components/Loading/Loading";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import {
 	deleteLibraryQuery,
+	deleteNumericRangeMapping,
+	deleteReferenceValueMapping,
 	getLibraryById,
 	getMappings,
 	getNumericRangeMappings,
 	getPatronRequests,
 	updateAgencyParticipationStatus,
 	updateLibraryQuery,
+	updateNumericRangeMapping,
 	updatePerson,
+	updateReferenceValueMapping,
 } from "src/queries/queries";
 import { Library } from "@models/Library";
 import { getILS } from "src/helpers/getILS";
@@ -1279,9 +1283,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Typography>
 							<ServerPaginationGrid
 								query={getMappings}
+								editQuery={updateReferenceValueMapping}
+								deleteQuery={deleteReferenceValueMapping}
+								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValueItemTypeVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
+								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
@@ -1306,9 +1314,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							{library?.secondHostLms ? (
 								<ServerPaginationGrid
 									query={getMappings}
+									editQuery={updateReferenceValueMapping}
+									deleteQuery={deleteReferenceValueMapping}
+									refetchQuery={["LoadMappings"]}
 									presetQueryVariables={refValueItemTypeSecondHostLmsVariables}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
+									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
@@ -1331,9 +1343,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Typography>
 							<ServerPaginationGrid
 								query={getNumericRangeMappings}
+								editQuery={updateNumericRangeMapping}
+								deleteQuery={deleteNumericRangeMapping}
+								refetchQuery={["LoadNumericRangeMappings"]}
 								presetQueryVariables={numericRangeItemTypeVariables}
 								type="numericRangeMappingsForLibrary"
 								coreType="numericRangeMappings"
+								operationDataType="NumericRangeMapping"
 								columns={numRangeMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.no_results")}
 								noResultsMessage={t("mappings.no_results")}
@@ -1357,11 +1373,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							{library?.secondHostLms ? (
 								<ServerPaginationGrid
 									query={getNumericRangeMappings}
+									editQuery={updateNumericRangeMapping}
+									deleteQuery={deleteNumericRangeMapping}
+									refetchQuery={["LoadNumericMappings"]}
 									presetQueryVariables={
 										numericRangeItemTypeSecondHostLmsVariables
 									}
 									type="numericRangeMappingsForLibrary"
 									coreType="numericRangeMappings"
+									operationDataType="NumericRangeMapping"
 									columns={numRangeMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.no_results")}
 									noResultsMessage={t("mappings.no_results")}
@@ -1405,9 +1425,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Typography>
 							<ServerPaginationGrid
 								query={getMappings}
+								editQuery={updateReferenceValueMapping}
+								deleteQuery={deleteReferenceValueMapping}
+								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValueLocationVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
+								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
@@ -1432,11 +1456,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							{library?.secondHostLms ? (
 								<ServerPaginationGrid
 									query={getMappings}
+									editQuery={updateReferenceValueMapping}
+									deleteQuery={deleteReferenceValueMapping}
+									refetchQuery={["LoadMappings"]}
 									presetQueryVariables={
 										refValueLocationForLibrarySecondHostLmsVariables
 									}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
+									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
@@ -1481,9 +1509,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Typography>
 							<ServerPaginationGrid
 								query={getMappings}
+								editQuery={updateReferenceValueMapping}
+								deleteQuery={deleteReferenceValueMapping}
+								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValuePatronTypeVariables}
 								type="referenceValueMappingsForLibrary"
 								coreType="referenceValueMappings"
+								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.import_no_data")}
 								noResultsMessage={t("mappings.no_results")}
@@ -1508,11 +1540,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							{library?.secondHostLms ? (
 								<ServerPaginationGrid
 									query={getMappings}
+									editQuery={updateReferenceValueMapping}
+									deleteQuery={deleteReferenceValueMapping}
+									refetchQuery={["LoadMappings"]}
 									presetQueryVariables={
 										refValuePatronTypeSecondHostLmsVariables
 									}
 									type="referenceValueMappingsForLibrary"
 									coreType="referenceValueMappings"
+									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.import_no_data")}
 									noResultsMessage={t("mappings.no_results")}
@@ -1535,9 +1571,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							</Typography>
 							<ServerPaginationGrid
 								query={getNumericRangeMappings}
+								editQuery={updateNumericRangeMapping}
+								deleteQuery={deleteNumericRangeMapping}
+								refetchQuery={["LoadNumericRangeMappings"]}
 								presetQueryVariables={numericRangePatronTypeVariables}
 								type="numericRangeMappingsForLibrary"
 								coreType="numericRangeMappings"
+								operationDataType="NumericRangeMapping"
 								columns={numRangeMappingColumnsNoCategoryFilter}
 								noDataMessage={t("mappings.no_results")}
 								noResultsMessage={t("mappings.no_results")}
@@ -1561,11 +1601,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							{library?.secondHostLms ? (
 								<ServerPaginationGrid
 									query={getNumericRangeMappings}
+									editQuery={updateNumericRangeMapping}
+									deleteQuery={deleteNumericRangeMapping}
+									refetchQuery={["LoadNumericRangeMappings"]}
 									presetQueryVariables={
 										numericRangePatronTypeSecondHostLmsVariables
 									}
 									type="numericRangeMappingsForLibrary"
 									coreType="numericRangeMappings"
+									operationDataType="NumericRangeMapping"
 									columns={numRangeMappingColumnsNoCategoryFilter}
 									noDataMessage={t("mappings.no_results")}
 									noResultsMessage={t("mappings.no_results")}

@@ -9,7 +9,11 @@ import Import from "@components/Import/Import";
 // import dayjs from "dayjs";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getMappings } from "src/queries/queries";
+import {
+	deleteReferenceValueMapping,
+	getMappings,
+	updateReferenceValueMapping,
+} from "src/queries/queries";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -77,9 +81,13 @@ const AllMappings: NextPage = () => {
 			</Tooltip>
 			<ServerPaginationGrid
 				query={getMappings}
+				editQuery={updateReferenceValueMapping}
+				deleteQuery={deleteReferenceValueMapping}
+				refetchQuery={["LoadMappings"]}
 				presetQueryVariables="(fromContext: * AND NOT deleted:true)"
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
+				operationDataType="ReferenceValueMapping"
 				columns={[
 					{
 						field: "fromCategory",
@@ -116,6 +124,7 @@ const AllMappings: NextPage = () => {
 						flex: 0.5,
 						filterOperators: standardFilters,
 						valueGetter: (value, row: { toValue: string }) => row.toValue,
+						editable: true,
 					},
 					{
 						field: "last_imported",

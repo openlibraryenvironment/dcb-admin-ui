@@ -4,7 +4,11 @@ import { AdminLayout } from "@layout";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { getNumericRangeMappings } from "src/queries/queries";
+import {
+	deleteNumericRangeMapping,
+	getNumericRangeMappings,
+	updateNumericRangeMapping,
+} from "src/queries/queries";
 import { useState } from "react";
 import { useApolloClient } from "@apollo/client/react";
 import { Box, Button, Tooltip } from "@mui/material";
@@ -56,9 +60,13 @@ const AllNumericRange: NextPage = () => {
 			</Tooltip>
 			<ServerPaginationGrid
 				query={getNumericRangeMappings}
+				editQuery={updateNumericRangeMapping}
+				deleteQuery={deleteNumericRangeMapping}
+				refetchQuery={["LoadNumericRangeMappings"]}
 				presetQueryVariables="(domain: * AND NOT deleted:true)"
 				type="numericRangeMappings"
 				coreType="numericRangeMappings"
+				operationDataType="NumericRangeMapping"
 				columns={[
 					{
 						field: "domain",
@@ -101,6 +109,7 @@ const AllNumericRange: NextPage = () => {
 						minWidth: 50,
 						flex: 0.5,
 						filterOperators: standardFilters,
+						editable: true,
 					},
 					{
 						field: "last_imported",
