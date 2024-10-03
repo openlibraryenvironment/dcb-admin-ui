@@ -149,7 +149,7 @@ export default function OperatingWelcome() {
 				},
 			]}
 			selectable={true}
-			pageSize={10}
+			pageSize={200}
 			noDataMessage={t("libraries.none_available")}
 			noResultsMessage={t("libraries.none_found")}
 			searchPlaceholder={t("libraries.search_placeholder")}
