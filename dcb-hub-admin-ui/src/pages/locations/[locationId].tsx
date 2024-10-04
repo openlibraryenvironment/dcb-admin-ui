@@ -67,6 +67,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	const [editKey, setEditKey] = useState(0);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
+	const [showConfirmationPickup, setConfirmationPickup] = useState(false);
 	const [editableFields, setEditableFields] = useState({
 		latitude: location?.latitude,
 		longitude: location?.longitude,
@@ -84,6 +85,14 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	const [deleteLocation] = useMutation(deleteLocationQuery, {
 		refetchQueries: ["LoadLocations"],
 	});
+
+	const closeConfirmation = () => {
+		setConfirmationPickup(false);
+		// This refetches the LoadLibrary query to ensure we're up-to-date after confirmation.
+		client.refetchQueries({
+			include: ["LoadLocation"],
+		});
+	};
 
 	const handleEdit = () => {
 		setEditableFields({
@@ -126,6 +135,58 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			setChangedFields({});
 		},
 	});
+
+	const handlePickupConfirmation = (
+		pickup: string,
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
+		const input = {
+			id: location?.id,
+			isPickup: pickup === "enablePickup" ? true : false,
+			reason: reason,
+			changeCategory: changeCategory,
+			changeReferenceUrl: changeReferenceUrl,
+		};
+		updateLocation({
+			variables: {
+				input,
+			},
+		}).then((response) => {
+			if (response.data) {
+				setAlert({
+					open: true,
+					severity: "success",
+					text:
+						pickup == "disablePickup"
+							? t("details.location_pickup_disable_success", {
+									location: location?.name,
+								})
+							: t("details.location_pickup_enable_success", {
+									location: location?.name,
+								}),
+					title: t("ui.data_grid.updated"),
+				});
+				closeConfirmation();
+			} else {
+				setAlert({
+					open: true,
+					severity: "error",
+					text:
+						pickup == "disablePickup"
+							? t("details.location_pickup_error_disable", {
+									location: location?.name,
+								})
+							: t("details.location_pickup_error_enable", {
+									location: location?.name,
+								}),
+					title: t("ui.data_grid.error"),
+				});
+				closeConfirmation();
+			}
+		});
+	};
 
 	const handleDeleteEntity = async (
 		id: string,
@@ -483,6 +544,31 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						<RenderAttribute attribute={location?.agency?.id} />
 					</Stack>
 				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.location_pickup")}
+						</Typography>
+						{location?.isPickup
+							? t("details.location_pickup_enabled")
+							: location?.isPickup == false
+								? t("details.location_pickup_disabled")
+								: t("details.locaion_pickup_not_set")}
+					</Stack>
+					{isAnAdmin ? (
+						<Button
+							onClick={() => setConfirmationPickup(true)}
+							color="primary"
+							variant="outlined"
+							sx={{ marginTop: 1 }}
+							type="submit"
+						>
+							{location?.isPickup
+								? t("details.location_pickup_disable")
+								: t("details.location_pickup_enable")}
+						</Button>
+					) : null}
+				</Grid>
 			</Grid>
 			<Confirmation
 				open={showConfirmationDeletion}
@@ -518,6 +604,22 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				library={location?.name}
 				entity={t("locations.location_one")}
 				entityId={location?.id}
+			/>
+			<Confirmation
+				open={showConfirmationPickup}
+				onClose={() => closeConfirmation()}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
+					handlePickupConfirmation(
+						location?.isPickup ? "disablePickup" : "enablePickup",
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					)
+				}
+				type="pickup"
+				participation={location?.isPickup ? "disablePickup" : "enablePickup"}
+				library={location?.name}
+				code={location?.code}
 			/>
 			<TimedAlert
 				open={alert.open}
