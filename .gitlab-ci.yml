@@ -5,7 +5,7 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
 
 default:
-  image: node:20.15.1-bullseye
+  image: node:20.18.0-bullseye
   tags:
     - ki-onprem
 
@@ -23,7 +23,7 @@ cache:
 
 build:
   stage: build
-  image: node:20.15.1-bullseye
+  image: node:20.18.0-bullseye
   tags:
     - ki-onprem
   script:
