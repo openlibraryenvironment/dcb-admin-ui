@@ -269,6 +269,13 @@ const baseTheme: ThemeOptions = {
 				}),
 			},
 		},
+		MuiAlertTitle: {
+			styleOverrides: {
+				root: {
+					fontSize: "1.2rem",
+				},
+			},
+		},
 	},
 };
 

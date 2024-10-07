@@ -1,15 +1,9 @@
-import {
-	Alert as MUIAlert,
-	AlertTitle,
-	IconButton,
-	useTheme,
-} from "@mui/material";
+import { Alert as MUIAlert, AlertTitle, IconButton } from "@mui/material";
 import { capitalize } from "@mui/material/utils";
 import { useTranslation } from "next-i18next";
-import { MdClose, MdOutlineInfo } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 
 export default function Alert(props: any) {
-	const theme = useTheme();
 	const { t } = useTranslation();
 	return (
 		<>
@@ -17,9 +11,6 @@ export default function Alert(props: any) {
 				severity={props.severityType}
 				onClose={props.onCloseFunc}
 				variant={props.variant}
-				iconMapping={{
-					info: <MdOutlineInfo color={theme.palette.common.white} size={20} />,
-				}}
 				action={
 					<IconButton
 						size="small"

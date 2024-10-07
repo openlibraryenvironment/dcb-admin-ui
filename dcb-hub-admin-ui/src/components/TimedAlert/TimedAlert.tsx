@@ -9,7 +9,7 @@ import { forwardRef } from "react";
 
 const SnackbarAlert = forwardRef<HTMLDivElement, AlertProps>(
 	function Alert(props, ref) {
-		return <MUIAlert elevation={6} ref={ref} variant="filled" {...props} />;
+		return <MUIAlert elevation={6} ref={ref} {...props} />;
 	},
 );
 
@@ -24,6 +24,7 @@ export default function TimedAlert(props: any) {
 				<SnackbarAlert
 					severity={props.severityType}
 					onClose={props.onCloseFunc}
+					sx={{ maxWidth: "700px" }}
 				>
 					<AlertTitle>
 						{props.alertTitle ?? capitalize(props.severityType)}
