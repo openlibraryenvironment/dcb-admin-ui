@@ -345,6 +345,7 @@ export default function ClientDataGrid<T extends object>({
 		}),
 	);
 
+	// fix no data overlay - broken somehow.
 	return (
 		<div>
 			<MUIDataGrid
@@ -406,6 +407,7 @@ export default function ClientDataGrid<T extends object>({
 				// if we don't want to filter by a column, set filterable to false (turned on by default)
 				// And if we want to hide columns, pass the visibility model in
 				columns={allColumns}
+				autoHeight
 				columnVisibilityModel={columnVisibilityModel}
 				// we can make our own custom toolbar if necessary, potentially extending the default GridToolbar. Just pass it in here
 				rows={data ?? []}

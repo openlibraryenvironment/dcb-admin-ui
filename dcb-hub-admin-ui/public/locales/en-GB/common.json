@@ -48,10 +48,12 @@
 			"close_alert": "Close alert",
 			"contact_sysadmin": "contact your system administrator",
 			"go_home": "Go to $t(nav.home) page",
-			"reload": "Reload page",
-			"view_error_details": "View error details",
 			"go_back": "Go back",
-			"toggle_on": "Toggle onboarding mode"
+			"next": "Next",
+			"previous": "Previous",
+			"reload": "Reload page",
+			"toggle_on": "Toggle onboarding mode",
+			"view_error_details": "View error details"
 		},
 		"data_grid": {
 			"actions": "Actions",
@@ -122,13 +124,16 @@
 		},
 		"info": {
 			"connection_issue": "There may be a connection issue",
+			"description": "Description: {{description}}",
 			"loading": {
 				"document": "Loading {{document_type}}"
 			},
 			"reload": "Try reloading the page",
 			"try_later": "Please try again later",
 			"wait": "Please wait",
-			"check_address": "Please check the web address"
+			"check_address": "Please check the web address",
+			"no_next_audit": "This is the last audit entry in the log.",
+			"no_previous_audit": "This is the most recent audit entry in the log."
 		},
 		"logo": "{{owner}} logo",
 		"unsaved_changes": {
