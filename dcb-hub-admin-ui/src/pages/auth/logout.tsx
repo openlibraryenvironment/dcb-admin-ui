@@ -55,13 +55,9 @@ const Logout = () => {
 						>
 							<Alert
 								severityType="info"
-								variant={"filled"}
 								onCloseFunc={() => setAlertDisplayed(false)}
 								alertText={
-									<Typography
-										variant="loginCardText"
-										color={theme.palette.common.white}
-									>
+									<Typography variant="loginCardText">
 										<Trans
 											i18nKey={"loginout.logged_out"}
 											t={t}
@@ -70,7 +66,6 @@ const Logout = () => {
 										/>
 									</Typography>
 								}
-								textColor={theme.palette.common.white}
 								titleShown={false}
 							></Alert>
 						</Box>

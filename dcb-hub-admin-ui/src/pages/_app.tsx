@@ -55,15 +55,15 @@ declare module "@mui/material/styles" {
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
-		detailsAccordionSummary: string;
-		exclamationIcon: string;
+		detailsAccordionSummary?: string;
+		exclamationIcon?: string;
 		footerArea?: string;
 		footerText?: string;
 		foreground1?: string;
-		header: string;
+		header?: string;
 		headerText?: string;
 		hover?: string;
-		hoverOnSelectedPage: string;
+		hoverOnSelectedPage?: string;
 		link?: string;
 		linkText?: string;
 		landingBackground?: string;
@@ -71,7 +71,7 @@ declare module "@mui/material/styles" {
 		loginCard?: string;
 		loginText?: string;
 		selectedText?: string;
-		sidebar: string;
+		sidebar?: string;
 		titleArea?: string;
 		linkedFooterBackground?: string;
 		linkedFooterText?: string;

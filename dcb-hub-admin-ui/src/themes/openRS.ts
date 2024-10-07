@@ -1,7 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 import baseTheme from "./baseTheme";
 import { mergeThemeStyles } from "src/helpers/mergeThemeStyles";
-
 // only supply colours in this file. For changes to font, or components, use baseTheme.ts.
 
 const openRSLight = createTheme({
@@ -140,6 +139,46 @@ const openRSLight = createTheme({
 				},
 			},
 		},
+		MuiAlert: {
+			styleOverrides: {
+				standardSuccess: {
+					backgroundColor: "#D5EBDF",
+					color: "#274E13",
+					"& .MuiAlert-icon": {
+						color: "#274E13",
+						"padding-top": 8,
+					},
+					outline: "2px solid #274E13",
+				},
+				standardError: {
+					backgroundColor: "#FFDAE1",
+					color: "#660000",
+					"& .MuiAlert-icon": {
+						color: "#660000",
+						"padding-top": 8,
+					},
+					outline: "2px solid #660000",
+				},
+				standardWarning: {
+					backgroundColor: "#FFE4B2",
+					color: "#664200",
+					"& .MuiAlert-icon": {
+						color: "#664200",
+						"padding-top": 8,
+					},
+					outline: "2px solid #664200",
+				},
+				standardInfo: {
+					backgroundColor: "#E2EEF6",
+					color: "#0C4068",
+					"& .MuiAlert-icon": {
+						color: "#0C4068",
+						"padding-top": 8,
+					},
+					outline: "2px solid #0C4068",
+				},
+			},
+		},
 	}),
 });
 
@@ -239,6 +278,37 @@ const openRSDark = createTheme({
 				},
 				arrow: {
 					color: "#808080", // Arrow color to match the tooltip background
+				},
+			},
+		},
+		MuiAlert: {
+			styleOverrides: {
+				// changes the icon to the colour of text, and applies a light border for better contrast
+				standardSuccess: {
+					"& .MuiAlert-icon": {
+						color: "#D5EBDF",
+					},
+					outline: "1px solid #D5EBDF",
+				},
+				standardError: {
+					"& .MuiAlert-icon": {
+						color: "#FFDAE1",
+					},
+					outline: "1px solid #FFDAE1",
+				},
+				standardWarning: {
+					"& .MuiAlert-icon": {
+						color: "#FFE4B2",
+					},
+					outline: "1px solid #FFE4B2",
+				},
+				standardInfo: {
+					//#B8E7FB - default text color
+					color: "#E2EEF6",
+					"& .MuiAlert-icon": {
+						color: "#E2EEF6",
+					},
+					outline: "1px solid #E2EEF6",
 				},
 			},
 		},
