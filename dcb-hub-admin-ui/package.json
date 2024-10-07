@@ -56,8 +56,8 @@
 		"@parcel/watcher": "^2.4.1",
 		"@semantic-release/changelog": "^6.0.3",
 		"@semantic-release/git": "^10.0.1",
-		"@semantic-release/gitlab": "^12.1.1",
-		"@semantic-release/npm": "^11.0.3",
+		"@semantic-release/gitlab": "^13.0.0",
+		"@semantic-release/npm": "^12.0.0",
 		"@types/cookie": "^0.6.0",
 		"@types/node": "^20.14.10",
 		"@types/nprogress": "^0.2.3",
@@ -74,7 +74,7 @@
 		"lint-staged": "^15.2.7",
 		"prettier": "^3.3.2",
 		"sass": "^1.77.6",
-		"semantic-release": "^22.0.12",
+		"semantic-release": "^24.0.0",
 		"typescript": "^5.5.3",
 		"typescript-eslint": "^7.15.0"
 	}
