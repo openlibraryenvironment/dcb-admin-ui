@@ -84,6 +84,10 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 						return "nav.search.items";
 					}
 				}
+				if (nestedKey.includes("#auditlog")) {
+					// Catch cases where the URL is for the audit log section of the page
+					return nestedKey.substring(0, 36);
+				}
 				// Check for audits: the key is formulated slightly differently due to the URL
 				if (nestedKey == "patronRequests.audits") {
 					return "nav.auditLog";
