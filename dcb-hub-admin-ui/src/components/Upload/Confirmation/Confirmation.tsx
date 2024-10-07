@@ -159,6 +159,16 @@ const Confirmation = ({
 				});
 			case "unsavedChanges":
 				return t("ui.unsaved_changes.header");
+			case "pickup":
+				if (participation == "disablePickup") {
+					return t("details.location_pickup_disabled_confirmation_header", {
+						location: library,
+					});
+				} else {
+					return t("details.location_pickup_enabled_confirmation_header", {
+						location: library,
+					});
+				}
 			default:
 				return null;
 		}
@@ -260,6 +270,28 @@ const Confirmation = ({
 						</Typography>
 					</Stack>
 				);
+			case "pickup":
+				if (participation == "disablePickup") {
+					return (
+						<Box>
+							<Typography variant="body1">
+								{t("details.location_pickup_disabled_confirmation_body", {
+									location: library,
+								})}
+							</Typography>
+						</Box>
+					);
+				} else {
+					return (
+						<Box>
+							<Typography variant="body1">
+								{t("details.location_pickup_enabled_confirmation_body", {
+									location: library,
+								})}
+							</Typography>
+						</Box>
+					);
+				}
 			default:
 				return null;
 		}
@@ -296,6 +328,12 @@ const Confirmation = ({
 				}
 			case "unsavedChanges":
 				return t("ui.unsaved_changes.leave_without_saving");
+			case "pickup":
+				if (participation == "disablePickup") {
+					return t("details.location_pickup_disable");
+				} else {
+					return t("details.location_pickup_enable");
+				}
 			default:
 				return null;
 		}
