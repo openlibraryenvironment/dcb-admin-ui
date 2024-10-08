@@ -129,7 +129,6 @@ const Confirmation = ({
 		locationPatronRequests?.patronRequests?.content,
 	);
 
-	console.log(entity);
 	const getHeaderText = () => {
 		switch (type) {
 			case "gridEdit":

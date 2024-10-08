@@ -31,6 +31,7 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { computeMutation } from "src/helpers/computeMutation";
 import { CellEdit } from "@components/CellEdit/CellEdit";
+import { validateRow } from "src/helpers/validateRow";
 
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
@@ -95,6 +96,7 @@ export default function ServerPaginationGrid({
 	const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 	const [entityToDelete, setEntityToDelete] = useState<string | null>(null);
 	const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+
 	// const theme = useTheme();
 	const [deleteAlertSeverity, setDeleteAlertSeverity] = useState<
 		"success" | "error"
@@ -488,6 +490,24 @@ export default function ServerPaginationGrid({
 	const processRowUpdate = useCallback(
 		(newRow: GridRowModel, oldRow: GridRowModel) =>
 			new Promise<GridRowModel>((resolve, reject) => {
+				const editableColumns = apiRef.current
+					.getAllColumns()
+					.filter((column) => column.editable);
+				const rowValidationResult = validateRow(
+					newRow,
+					oldRow,
+					editableColumns,
+				);
+				if (rowValidationResult) {
+					setAlert({
+						open: true,
+						severity: "error",
+						text: t(rowValidationResult),
+						title: t("ui.data_grid.error"),
+					});
+					resolve(oldRow); // Validation failure: restore old row.
+					return;
+				}
 				const mutation = computeMutation(newRow, oldRow);
 				if (mutation) {
 					setEditRecord(mutation);
@@ -496,7 +516,7 @@ export default function ServerPaginationGrid({
 					resolve(oldRow); // Nothing changed so restore the old row
 				}
 			}),
-		[],
+		[apiRef, t],
 	);
 	const handleNo = () => {
 		const { oldRow, resolve } = promiseArguments;
@@ -540,6 +560,7 @@ export default function ServerPaginationGrid({
 			setAlert({
 				open: true,
 				severity: "success",
+				title: t("ui.data_grid.updated"),
 				text: t("ui.data_grid.edit_success", {
 					entity:
 						operationDataType === "ReferenceValueMapping"
@@ -586,7 +607,6 @@ export default function ServerPaginationGrid({
 			getActions: (params: GridRowParams) => {
 				const isInEditMode =
 					rowModesModel[params?.row?.id]?.mode === GridRowModes.Edit;
-
 				if (isInEditMode) {
 					return [
 						<Tooltip
@@ -869,7 +889,7 @@ export default function ServerPaginationGrid({
 				autoHideDuration={6000}
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
-				alertTitle={t("ui.data_grid.updated")}
+				alertTitle={alert.title ?? t("ui.data_grid.updated")}
 			/>
 			{/* May need to combine these 2 */}
 			<Confirmation
