@@ -29,7 +29,9 @@ import { formatChangedFields } from "src/helpers/formatChangedFields";
 import { useSession } from "next-auth/react";
 import { CellEdit } from "@components/CellEdit/CellEdit";
 import { ColumnsAndSearchToolbar } from "@components/ServerPaginatedGrid/components/ColumnsAndSearchToolbar";
-import { validateRow } from "src/helpers/validateRow";
+import { validateRow } from "src/helpers/DataGrid/validateRow";
+import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
+import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.
@@ -132,7 +134,7 @@ export default function ClientDataGrid<T extends object>({
 	const handleEditClick = (id: GridRowId) => () => {
 		setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
 		// This ensures focus goes to the first editable field.
-		const firstEditableField = findFirstEditableColumn();
+		const firstEditableField = findFirstEditableColumn(apiRef);
 		if (firstEditableField) {
 			// Use setTimeout to ensure the cell is in edit mode before focusing
 			setTimeout(() => {
@@ -140,12 +142,6 @@ export default function ClientDataGrid<T extends object>({
 			}, 0);
 		}
 	};
-	const findFirstEditableColumn = useCallback(() => {
-		const editableColumns = apiRef.current
-			.getAllColumns()
-			.filter((column) => column.editable);
-		return editableColumns.length > 0 ? editableColumns[0].field : null;
-	}, [apiRef]);
 
 	const handleSaveClick = (id: GridRowId) => () => {
 		setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
@@ -278,13 +274,6 @@ export default function ClientDataGrid<T extends object>({
 				: router.push(`/patronRequests/${params?.row?.id}`);
 		}
 	};
-	function getIdOfRow(row: any) {
-		if (type == "bibRecordCountByHostLMS") {
-			return row.sourceSystemId;
-		} else {
-			return row.id;
-		}
-	}
 	const actionsColumn: GridColDef[] = [
 		{
 			field: "actions",
@@ -437,7 +426,7 @@ export default function ClientDataGrid<T extends object>({
 					});
 				}}
 				apiRef={apiRef}
-				getRowId={getIdOfRow}
+				getRowId={(row) => getIdOfRow(row, type)}
 				editMode="row"
 				onCellDoubleClick={(params, event) => {
 					// Prevent default double-click edit behavior

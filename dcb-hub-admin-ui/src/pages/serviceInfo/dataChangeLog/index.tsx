@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { containsOnly, equalsOnly, standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
+import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import {

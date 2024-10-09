@@ -55,7 +55,7 @@ import {
 	refValueMappingColumnsNoCategoryFilter,
 	numRangeMappingColumnsNoCategoryFilter,
 } from "src/helpers/columns";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
+import { useCustomColumns } from "@hooks/useCustomColumns";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { Person } from "@models/Person";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";

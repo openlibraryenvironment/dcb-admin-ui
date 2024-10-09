@@ -16,8 +16,7 @@ import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
-// import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { useCustomColumns } from "@hooks/useCustomColumns"; // import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 const Libraries: NextPage = () => {
 	// State management for the adding library to group modal

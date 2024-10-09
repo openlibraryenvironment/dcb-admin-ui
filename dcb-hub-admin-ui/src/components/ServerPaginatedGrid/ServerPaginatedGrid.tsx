@@ -31,8 +31,18 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { computeMutation } from "src/helpers/computeMutation";
 import { CellEdit } from "@components/CellEdit/CellEdit";
-import { validateRow } from "src/helpers/validateRow";
-
+import { validateRow } from "src/helpers/DataGrid/validateRow";
+import { determineDataGridPathOnClick } from "src/helpers/DataGrid/determineDataGridPathOnClick";
+import {
+	actionsTypes,
+	nonClickableTypes,
+	presetTypes,
+	quickFieldMap,
+	specialRedirectionTypes,
+} from "src/constants/dataGridConstants";
+import { buildFilterQuery } from "src/helpers/DataGrid/buildFilterQuery";
+import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
+import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -96,35 +106,44 @@ export default function ServerPaginationGrid({
 	const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 	const [entityToDelete, setEntityToDelete] = useState<string | null>(null);
 	const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
-
-	// const theme = useTheme();
 	const [deleteAlertSeverity, setDeleteAlertSeverity] = useState<
 		"success" | "error"
 	>("success");
 	const [deleteAlertText, setDeleteAlertText] = useState("");
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-
-	const [updateRow] = useMutation(editQuery ?? updateLibraryQuery, {
-		refetchQueries: refetchQuery ?? ["LoadLibraries"],
-	});
 	const [editRecord, setEditRecord] = useState<any>(null);
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
 		text: null,
 	});
-
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	const { t } = useTranslation();
+	const apiRef = useGridApiRef(); // Use the API ref
+	const router = useRouter();
+	const [paginationModel, setPaginationModel] = useState({
+		page: 0,
+		pageSize: pageSize,
+	});
+	const { data: session }: { data: any } = useSession();
+
+	// Mutations
+	const [updateRow] = useMutation(editQuery ?? updateLibraryQuery, {
+		refetchQueries: refetchQuery ?? ["LoadLibraries"],
+	});
+	const [deleteEntity] = useMutation(deleteQuery ?? deleteLibraryQuery, {
+		refetchQueries: refetchQuery ?? ["LoadLibraries"],
+	});
+
 	const isAnyRowEditing = useCallback(() => {
 		return Object.values(rowModesModel).some(
 			(modeItem) => modeItem.mode === GridRowModes.Edit,
 		);
 	}, [rowModesModel]);
-
 	const handleEditClick = (id: GridRowId) => () => {
 		setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
 		// This ensures focus goes to the first editable field.
-		const firstEditableField = findFirstEditableColumn();
+		const firstEditableField = findFirstEditableColumn(apiRef);
 		if (firstEditableField) {
 			// Use setTimeout to ensure the cell is in edit mode before focusing
 			setTimeout(() => {
@@ -132,58 +151,19 @@ export default function ServerPaginationGrid({
 			}, 0);
 		}
 	};
-
 	const handleSaveClick = (id: GridRowId) => () => {
 		setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
 	};
-
 	const handleCancelClick = (id: GridRowId) => () => {
 		setRowModesModel({
 			...rowModesModel,
 			[id]: { mode: GridRowModes.View, ignoreModifications: true },
 		});
 	};
-
 	const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
 		setRowModesModel(newRowModesModel);
 	};
-
-	const { t } = useTranslation();
-	const apiRef = useGridApiRef(); // Use the API ref
-
-	const router = useRouter();
-	const presetTypes = [
-		"circulationStatus",
-		"patronRequestsLibraryException",
-		"patronRequestsLibraryActive",
-		"patronRequestsLibraryOutOfSequence",
-		"patronRequestsLibraryCompleted",
-		"referenceValueMappingsForLibrary",
-		"numericRangeMappingsForLibrary",
-		"referenceValueMappings",
-		"numericRangeMappings",
-	];
-
-	const nonClickableTypes = [
-		"referenceValueMappings",
-		"circulationStatus",
-		"numericRangeMappings",
-		"referenceValueMappingsForLibrary",
-		"numericRangeMappingsForLibrary",
-	];
-
-	// TODO in future work:
-	// Support filtering by date on Patron Requests
-
 	const getDetailPanelHeight = useCallback(() => "auto", []); // Should be able to take this out when master detail is expanded to all
-	const { data: session }: { data: any } = useSession();
-	const [paginationModel, setPaginationModel] = useState({
-		page: 0,
-		pageSize: pageSize,
-	});
-	const [deleteEntity] = useMutation(deleteQuery ?? deleteLibraryQuery, {
-		refetchQueries: refetchQuery ?? ["LoadLibraries"], // Expand as we add more.
-	});
 	const handleDeleteEntity = async (
 		id: string,
 		reason: string,
@@ -277,42 +257,6 @@ export default function ServerPaginationGrid({
 			const filters = filterModel?.items ?? [];
 			const quickFilterValues = filterModel?.quickFilterValues ?? [];
 			const logicOperator = filterModel?.logicOperator?.toUpperCase() ?? "AND";
-			// Helper function to process the individual filters
-			const buildFilterQuery = (
-				field: string,
-				operator: string,
-				value: string,
-			) => {
-				const replacedValue = value.replaceAll(" ", "?");
-				// Question marks are used to replace spaces in search terms- see Lucene docs https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
-				// Lucene powers our server-side querying so we need to get expressions into the right syntax.
-				// We're currently only supporting contains and equals, but other operators are possible - see docs.
-				// We will also need to introduce type handling - i.e. for UUIDs, numbers etc - based on the field.
-				const containsQuery = `${field}:*${replacedValue}*`;
-				const doesNotContainQuery = `*:* AND NOT (${containsQuery})`;
-				const equalsQuery = `${field}:${replacedValue}`;
-				const doesNotEqualQuery = `*:* AND NOT (${equalsQuery})`;
-				if (!field || !value) {
-					// Handle the case when the field or value is empty
-					return null;
-				}
-
-				switch (operator) {
-					case "contains":
-						return containsQuery;
-					case "equals":
-						return equalsQuery;
-					case "does not equal":
-						// Note - the NOT operator can not be used with just one term. So we have to improvise
-						// https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#not-heading
-						return doesNotEqualQuery;
-					case "does not contain":
-						return doesNotContainQuery;
-					default:
-						return equalsQuery;
-				}
-			};
-
 			// Build the filter query for all filters
 			let filterQuery = filters
 				.map((filter) => {
@@ -331,27 +275,6 @@ export default function ServerPaginationGrid({
 				const quickQueries = quickFilterValues.map((qv) =>
 					qv.replaceAll(" ", "?"),
 				);
-				const quickFieldMap: Record<string, string> = {
-					bibs: "sourceRecordId",
-					patronRequests: "errorMessage",
-					patronRequestsLibraryException: "errorMessage",
-					patronRequestsLibraryOutOfSequence: "status",
-					patronRequestsLibraryActive: "status",
-					patronRequestsLibraryCompleted: "status",
-					circulationStatus: "fromContext",
-					referenceValueMappings: "fromCategory",
-					referenceValueMappingsForLibrary: "fromCategory",
-					numericRangeMappings: "domain",
-					numericRangeMappingsForLibrary: "domain",
-					libraries: "fullName",
-					agencies: "name",
-					groups: "name",
-					hostlmss: "name",
-					locations: "name",
-					dataChangeLog: "actionInfo",
-					default: "id",
-				};
-
 				const quickField = quickFieldMap[type] ?? quickFieldMap.default;
 				const quickFilterQuery = quickQueries
 					.map((qv) => `${quickField}:*${qv}*`)
@@ -360,27 +283,14 @@ export default function ServerPaginationGrid({
 					? `${filterQuery} && ${quickFilterQuery}`
 					: quickFilterQuery;
 			}
-
 			// Add specific logic for types that need it.
 			// This is particularly useful for things like mappings, where we don't want to query deleted mappings unless explicitly stated.
-			switch (type) {
-				case "circulationStatus":
-				case "patronRequestLibrary":
-				case "patronRequestsLibraryException":
-				case "patronRequestsLibraryOutOfSequence":
-				case "patronRequestsLibraryActive":
-				case "patronRequestsLibraryCompleted":
-				case "referenceValueMappingsForLibrary":
-				case "numericRangeMappingsForLibrary":
-				case "referenceValueMappings":
-				case "numericRangeMappings":
-					filterQuery =
-						filterQuery != ""
-							? `${presetQueryVariables} && ${filterQuery}`
-							: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
-					break;
-			}
-
+			// And also for any other types of grid that have pre-set queries
+			if (presetTypes.includes(type))
+				filterQuery =
+					filterQuery != ""
+						? `${presetQueryVariables} && ${filterQuery}`
+						: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
 			// Set the final filter options
 			setFilterOptions(filterQuery);
 		},
@@ -406,20 +316,17 @@ export default function ServerPaginationGrid({
 	});
 
 	const totalSize = data?.[coreType]?.totalSize;
-
+	// Some API clients return undefined while loading
+	// Following lines are here to prevent `rowCountState` from being undefined during the loading
 	useEffect(() => {
 		if (totalSize !== undefined) {
 			setRowCountState(totalSize);
 			onTotalSizeChange?.(type, totalSize);
 		}
 	}, [totalSize, onTotalSizeChange, type]);
-
-	// Some API clients return undefined while loading
-	// Following lines are here to prevent `rowCountState` from being undefined during the loading
-
 	// the core type prop matches to the array name coming from GraphQL
-	// so CircStatus' coreType is referenceValueMappings
-	// thus avoiding the issue accessing the array that would otherwise occur.
+	// This isn't always the same as the "type" prop
+	// i.e. different types of mappings grids
 	const [rowCountState, setRowCountState] = useState(
 		data?.[coreType].totalSize || 0,
 	);
@@ -437,13 +344,7 @@ export default function ServerPaginationGrid({
 	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
 		if (rowModesModel[params?.row?.id]?.mode !== GridRowModes.Edit) {
 			// Some grids, like the PRs on the library page, need special redirection
-			if (
-				type === "patronRequestsLibraryActive" ||
-				type === "patronRequestsLibraryOutOfSequence" ||
-				type === "patronRequestsLibraryCompleted" ||
-				type === "patronRequestsLibraryException" ||
-				type === "dataChangeLog"
-			) {
+			if (specialRedirectionTypes.includes(type)) {
 				if (event.ctrlKey || event.metaKey)
 					if (type === "dataChangeLog") {
 						window.open(
@@ -461,11 +362,7 @@ export default function ServerPaginationGrid({
 					}
 			} else if (
 				// Others we don't want users to be able to click through on
-				type !== "referenceValueMappings" &&
-				type !== "circulationStatus" &&
-				type !== "numericRangeMappings" &&
-				type !== "referenceValueMappingsForLibrary" &&
-				type !== "numericRangeMappingsForLibrary"
+				!nonClickableTypes.includes(type)
 			) {
 				// Whereas most can just use this standard redirection based on type
 				if (event.ctrlKey || event.metaKey)
@@ -480,12 +377,6 @@ export default function ServerPaginationGrid({
 	};
 
 	// Finds the first editable column, in order to apply focus to it.
-	const findFirstEditableColumn = useCallback(() => {
-		const editableColumns = apiRef.current
-			.getAllColumns()
-			.filter((column) => column.editable);
-		return editableColumns.length > 0 ? editableColumns[0].field : null;
-	}, [apiRef]);
 
 	const processRowUpdate = useCallback(
 		(newRow: GridRowModel, oldRow: GridRowModel) =>
@@ -592,14 +483,6 @@ export default function ServerPaginationGrid({
 		}
 	};
 
-	function getIdOfRow(row: any) {
-		if (type == "bibRecordCountByHostLMS") {
-			return row.sourceSystemId;
-		} else {
-			return row.id;
-		}
-	}
-
 	const actionsColumn: GridColDef[] = [
 		{
 			field: "Actions",
@@ -632,46 +515,23 @@ export default function ServerPaginationGrid({
 							/>
 						</Tooltip>,
 					];
-				} else if (!isAnAdmin) {
+				} else if (!isAnAdmin && !nonClickableTypes.includes(type)) {
+					// If the user is not an admin AND the type of grid supports click-through to the details page.
 					return [
 						<GridActionsCellItem
 							key={t("ui.data_grid.open")}
 							showInMenu
 							icon={<Visibility />}
-							disabled={nonClickableTypes.includes(type)}
 							onClick={() => {
-								// Some grids, like the PRs on the library page, need special redirection
-								if (
-									type === "patronRequestsLibraryActive" ||
-									type === "patronRequestsLibraryOutOfSequence" ||
-									type === "patronRequestsLibraryCompleted" ||
-									type === "patronRequestsLibraryException" ||
-									type === "dataChangeLog"
-								) {
-									if (type === "dataChangeLog") {
-										router.push(
-											`/serviceInfo/dataChangeLog/${params?.row?.id}`,
-										);
-									} else {
-										router.push(`/patronRequests/${params?.row?.id}`);
-									}
-								} else if (
-									// Others we don't want users to be able to click through on
-									type !== "referenceValueMappings" &&
-									type !== "circulationStatus" &&
-									type !== "numericRangeMappings" &&
-									type !== "referenceValueMappingsForLibrary" &&
-									type !== "numericRangeMappingsForLibrary"
-								) {
-									// Whereas most can just use this standard redirection based on type
-									router.push(`/${type}/${params?.row?.id}`);
-								}
+								router.push(
+									determineDataGridPathOnClick(type, params?.row?.id),
+								);
 							}}
 							label={t("ui.data_grid.open")}
 						/>,
 					];
-				} else {
-					// If the user is an admin, and the grid is one on which editing is enabled, we should show all options.
+				} else if (isAnAdmin && nonClickableTypes.includes(type)) {
+					// If user is admin, but grid doesn't support click through
 					return [
 						<GridActionsCellItem
 							icon={<Edit />}
@@ -688,9 +548,31 @@ export default function ServerPaginationGrid({
 							onClick={() => {
 								if (isAnAdmin) {
 									setConfirmationModalOpen(true);
-									// if (type == "locations" && confirmationModalOpen) {
-									// 	handleFetchAssociatedRequests(params?.row?.id);
-									// }
+									setEntityToDelete(params?.row?.id);
+								}
+							}}
+							showInMenu
+							disabled={isAnyRowEditing()}
+						/>,
+					];
+				} else {
+					// If the user is an admin, the grid supports click through, and the grid is one on which editing is enabled, we should show all options.
+					return [
+						<GridActionsCellItem
+							icon={<Edit />}
+							onClick={handleEditClick(params?.row?.id)}
+							showInMenu
+							label={t("ui.data_grid.edit")}
+							key={t("ui.data_grid.edit")}
+							disabled={isAnyRowEditing()}
+						/>,
+						<GridActionsCellItem
+							icon={<Delete />}
+							label={t("ui.data_grid.delete")}
+							key={t("ui.data_grid.delete")}
+							onClick={() => {
+								if (isAnAdmin) {
+									setConfirmationModalOpen(true);
 									setEntityToDelete(params?.row?.id);
 								}
 							}}
@@ -703,31 +585,10 @@ export default function ServerPaginationGrid({
 							icon={<Visibility />}
 							disabled={isAnyRowEditing() || nonClickableTypes.includes(type)}
 							onClick={() => {
-								// Some grids, like the PRs on the library page, need special redirection
-								if (
-									type === "patronRequestsLibraryActive" ||
-									type === "patronRequestsLibraryOutOfSequence" ||
-									type === "patronRequestsLibraryCompleted" ||
-									type === "patronRequestsLibraryException" ||
-									type === "dataChangeLog"
-								) {
-									if (type === "dataChangeLog") {
-										router.push(
-											`/serviceInfo/dataChangeLog/${params?.row?.id}`,
-										);
-									} else {
-										router.push(`/patronRequests/${params?.row?.id}`);
-									}
-								} else if (
-									// Others we don't want users to be able to click through on
-									type !== "referenceValueMappings" &&
-									type !== "circulationStatus" &&
-									type !== "numericRangeMappings" &&
-									type !== "referenceValueMappingsForLibrary" &&
-									type !== "numericRangeMappingsForLibrary"
-								) {
-									// Whereas most can just use this standard redirection based on type
-									router.push(`/${type}/${params?.row?.id}`);
+								if (!nonClickableTypes.includes(type)) {
+									router.push(
+										determineDataGridPathOnClick(type, params?.row?.id),
+									);
 								}
 							}}
 							label={t("ui.data_grid.open")}
@@ -738,19 +599,38 @@ export default function ServerPaginationGrid({
 		},
 	];
 
+	// Different actions to show.
+	// WHERE USER IS ADMIN AND TYPE IS CLICKABLE AND TYPE IS AN 'ACTIONS' TYPE = SHOW ALL
+	// WHERE USER IS ADMIN AND TYPE IS NOT CLICKABLE AND TYPE IS AN 'ACTIONS' TYPE = SHOW EDIT AND DELETE
+	// WHERE USER IS NOT ADMIN AND TYPE IS CLICKABLE AND TYPE IS AN 'ACTIONS' TYPE = SHOW OPEN#
+	// WHERE USER IS NOT ADMIN AND TYPE IS NON CLICKABLE AND TYPE IS AN ACTIONS TYPE = DO NOT SHOW
+	// WHERE TYPE IS NOT AN ACTIONS TYPE = DO NOT SHOW
+
+	// If the type is not an actions type OR the type is an actions type, but a non-clickable one where the user is not an admin,
+	// Then do not show the actions column.
+	// The additional logic here is to stop the actions column appearing on mappings grids when the user is not an admin
 	const allColumns = (
-		type === "libraries" ||
-		type === "locations" ||
-		type === "referenceValueMappings" ||
-		type === "numericRangeMappings"
-			? [...columns, ...actionsColumn]
-			: columns
+		!actionsTypes.includes(type) ||
+		(!isAnAdmin &&
+			nonClickableTypes.includes(type) &&
+			actionsTypes.includes(type))
+			? columns
+			: [...columns, ...actionsColumn]
 	).map((col) => ({
 		...col,
 		renderEditCell: (params: GridRenderEditCellParams) => (
 			<CellEdit {...params} />
 		),
 	}));
+
+	// const allColumns = (
+	// 	actionsTypes.includes(type) ? [...columns, ...actionsColumn] : columns
+	// ).map((col) => ({
+	// 	...col,
+	// 	renderEditCell: (params: GridRenderEditCellParams) => (
+	// 		<CellEdit {...params} />
+	// 	),
+	// }));
 
 	return (
 		<div>
@@ -803,7 +683,7 @@ export default function ServerPaginationGrid({
 				}}
 				filterMode="server"
 				onRowClick={handleRowClick}
-				getRowId={getIdOfRow}
+				getRowId={(row) => getIdOfRow(row, type)}
 				onFilterModelChange={onFilterChange}
 				pageSizeOptions={[5, 10, 20, 30, 40, 50, 100, 200]}
 				pagination
@@ -882,7 +762,6 @@ export default function ServerPaginationGrid({
 				}
 				entityId={data?.[coreType].content?.id}
 			/>
-
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

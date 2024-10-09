@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
+import { useCustomColumns } from "@hooks/useCustomColumns";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 const Agencies: NextPage = () => {

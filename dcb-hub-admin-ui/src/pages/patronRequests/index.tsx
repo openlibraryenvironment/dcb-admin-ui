@@ -26,8 +26,7 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { useCallback, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
-
+import { useCustomColumns } from "@hooks/useCustomColumns";
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
