@@ -15,6 +15,7 @@ import {
 	GridRowId,
 	GridRowModesModel,
 	GridRenderEditCellParams,
+	GridSortModel,
 } from "@mui/x-data-grid-pro";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
@@ -32,6 +33,7 @@ import { ColumnsAndSearchToolbar } from "@components/ServerPaginatedGrid/compone
 import { validateRow } from "src/helpers/DataGrid/validateRow";
 import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
 import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
+import { useGridStore } from "@hooks/useDataGridOptionsStore";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.
@@ -109,6 +111,16 @@ export default function ClientDataGrid<T extends object>({
 	// It takes a title, message, and if needed a link for the user to take action.
 	// These must be supplied as props for each usage of the DataGrid that wishes to use them,
 	// or a blank screen will be displayed.
+	const {
+		sortOptions: storedSortOptions,
+		// filterOptions: storedFilterOptions,
+		// paginationModel: storedPaginationModel,
+		// columnVisibility: storedColumnVisibility,
+		setSortOptions,
+		// setFilterOptions,
+		// setPaginationModel,
+		// setColumnVisibility,
+	} = useGridStore();
 	const { t } = useTranslation();
 	const { data: session }: { data: any } = useSession();
 	const apiRef = useGridApiRef(); // Use the API ref to access editing, etc
@@ -117,6 +129,10 @@ export default function ClientDataGrid<T extends object>({
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
 
 	const [updateRow] = useMutation(editQuery ?? updatePerson);
+	const [sortOptions, setSortOptionsState] = useState({
+		field: storedSortOptions[type]?.field,
+		direction: storedSortOptions[type]?.direction,
+	});
 	const [editRecord, setEditRecord] = useState<any>(null);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -130,6 +146,21 @@ export default function ClientDataGrid<T extends object>({
 			(modeItem) => modeItem.mode === GridRowModes.Edit,
 		);
 	}, [rowModesModel]);
+
+	const handleSortModelChange = useCallback(
+		(sortModel: GridSortModel) => {
+			// sortDirection and sortAttributes are our defaults, passed in from each instance.
+			// They are intended for use on first load, or if the sortModel value is ever null or undefined.
+			const newField = sortModel[0]?.field;
+			const newDirection = sortModel[0]?.sort?.toUpperCase() ?? "";
+			setSortOptionsState({
+				field: newField,
+				direction: newDirection,
+			});
+			setSortOptions(type, newField, newDirection);
+		},
+		[setSortOptions, type],
+	);
 
 	const handleEditClick = (id: GridRowId) => () => {
 		setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -390,6 +421,7 @@ export default function ClientDataGrid<T extends object>({
 				onRowClick={handleRowClick}
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={handleRowModesModelChange}
+				onSortModelChange={handleSortModelChange}
 				initialState={{
 					filter: {
 						// initiate the filter models here
@@ -408,7 +440,14 @@ export default function ClientDataGrid<T extends object>({
 					},
 					// Handles default sort order- pass the relevant model in (see requests)
 					sorting: {
-						sortModel,
+						sortModel: sortOptions.field
+							? [
+									{
+										field: sortOptions.field,
+										sort: sortOptions.direction.toLowerCase(),
+									},
+								]
+							: sortModel,
 					},
 				}}
 				// if we don't want to filter by a column, set filterable to false (turned on by default)

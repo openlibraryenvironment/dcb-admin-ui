@@ -43,6 +43,8 @@ import {
 import { buildFilterQuery } from "src/helpers/DataGrid/buildFilterQuery";
 import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
 import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
+import { useGridStore } from "@hooks/useDataGridOptionsStore";
+
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -53,7 +55,7 @@ const staticSlots = {
 
 export default function ServerPaginationGrid({
 	query, // The query to fetch data for the grid
-	type, // The grid identifier
+	type, // The grid identifier. Used also for saving options on a per-grid basis.
 	selectable, // Whether checkbox selection should be allowed or not.
 	pageSize, // How many items should be included in a page.
 	columns, // Data structure for the grid's columns
@@ -99,9 +101,24 @@ export default function ServerPaginationGrid({
 	operationDataType?: string;
 	editQuery?: DocumentNode;
 }) {
+	const {
+		sortOptions: storedSortOptions,
+		// filterOptions: storedFilterOptions,
+		// paginationModel: storedPaginationModel,
+		// columnVisibility: storedColumnVisibility,
+		setSortOptions,
+		// setFilterOptions,
+		// setPaginationModel,
+		// setColumnVisibility,
+	} = useGridStore();
+
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
 	// GraphQL data comes in an array that's named after the core type, which causes problems
-	const [sortOptions, setSortOptions] = useState({ field: "", direction: "" });
+	// const [sortOptions, setSortOptions] = useState({ field: "", direction: "" });
+	const [sortOptions, setSortOptionsState] = useState({
+		field: storedSortOptions[type]?.field || sortAttribute,
+		direction: storedSortOptions[type]?.direction || sortDirection,
+	});
 	const [filterOptions, setFilterOptions] = useState("");
 	const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 	const [entityToDelete, setEntityToDelete] = useState<string | null>(null);
@@ -244,12 +261,15 @@ export default function ServerPaginationGrid({
 		(sortModel: GridSortModel) => {
 			// sortDirection and sortAttributes are our defaults, passed in from each instance.
 			// They are intended for use on first load, or if the sortModel value is ever null or undefined.
-			setSortOptions({
-				field: sortModel[0]?.field ?? sortAttribute,
-				direction: sortModel[0]?.sort?.toUpperCase() ?? sortDirection,
+			const newField = sortModel[0]?.field ?? sortAttribute;
+			const newDirection = sortModel[0]?.sort?.toUpperCase() ?? sortDirection;
+			setSortOptionsState({
+				field: newField,
+				direction: newDirection,
 			});
+			setSortOptions(type, newField, newDirection);
 		},
-		[sortDirection, sortAttribute],
+		[sortAttribute, sortDirection, setSortOptions, type],
 	);
 
 	const onFilterChange = useCallback(
@@ -351,12 +371,16 @@ export default function ServerPaginationGrid({
 							`/serviceInfo/dataChangeLog/${params?.row?.id}`,
 							"_blank",
 						);
+					} else if (type === "welcomeLibraries") {
+						window.open(`/libraries/${params?.row?.id}`, "_blank");
 					} else {
 						window.open(`/patronRequests/${params?.row?.id}`, "_blank");
 					}
 				if (!(event.ctrlKey || event.metaKey))
 					if (type === "dataChangeLog") {
 						router.push(`/serviceInfo/dataChangeLog/${params?.row?.id}`);
+					} else if (type === "welcomeLibraries") {
+						router.push(`/libraries/${params?.row?.id}`);
 					} else {
 						router.push(`/patronRequests/${params?.row?.id}`);
 					}
@@ -364,7 +388,6 @@ export default function ServerPaginationGrid({
 				// Others we don't want users to be able to click through on
 				!nonClickableTypes.includes(type)
 			) {
-				// Whereas most can just use this standard redirection based on type
 				if (event.ctrlKey || event.metaKey)
 					window.open(`/${type}/${params?.row?.id}`, "_blank");
 				if (!(event.ctrlKey || event.metaKey))
@@ -741,7 +764,14 @@ export default function ServerPaginationGrid({
 						columnVisibilityModel,
 					},
 					sorting: {
-						sortModel,
+						sortModel: sortOptions.field
+							? [
+									{
+										field: sortOptions.field,
+										sort: sortOptions.direction.toLowerCase(),
+									},
+								]
+							: sortModel,
 					},
 				}}
 				slotProps={{

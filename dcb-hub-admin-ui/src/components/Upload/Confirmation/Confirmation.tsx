@@ -3,7 +3,6 @@ import { useLazyQuery } from "@apollo/client";
 import Alert from "@components/Alert/Alert";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { ClientDataGrid } from "@components/ClientDataGrid";
-import { PatronRequest } from "@models/PatronRequest";
 import {
 	Dialog,
 	DialogTitle,
@@ -54,8 +53,6 @@ type ConfirmType = {
 	actionInfo?: string;
 	entity?: string;
 	entityId?: string;
-	associatedPatronRequests?: PatronRequest[];
-	associatedPatronRequestsLoading?: boolean;
 };
 
 const Confirmation = ({
@@ -214,6 +211,7 @@ const Confirmation = ({
 									data={locationPatronRequests.patronRequests.content}
 									selectable={false}
 									toolbarVisible="search-columns"
+									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 								/>
 							</>
 						) : null}

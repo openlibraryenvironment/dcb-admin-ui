@@ -1287,7 +1287,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteReferenceValueMapping}
 								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValueItemTypeVariables}
-								type="referenceValueMappingsForLibrary"
+								type="referenceValueMappingsForLibraryItemType"
 								coreType="referenceValueMappings"
 								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
@@ -1318,7 +1318,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									deleteQuery={deleteReferenceValueMapping}
 									refetchQuery={["LoadMappings"]}
 									presetQueryVariables={refValueItemTypeSecondHostLmsVariables}
-									type="referenceValueMappingsForLibrary"
+									type="referenceValueMappingsForLibraryItemTypeSecondHostLms"
 									coreType="referenceValueMappings"
 									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
@@ -1347,7 +1347,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteNumericRangeMapping}
 								refetchQuery={["LoadNumericRangeMappings"]}
 								presetQueryVariables={numericRangeItemTypeVariables}
-								type="numericRangeMappingsForLibrary"
+								type="numericRangeMappingsForLibraryItemType"
 								coreType="numericRangeMappings"
 								operationDataType="NumericRangeMapping"
 								columns={numRangeMappingColumnsNoCategoryFilter}
@@ -1379,7 +1379,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										numericRangeItemTypeSecondHostLmsVariables
 									}
-									type="numericRangeMappingsForLibrary"
+									type="numericRangeMappingsForLibraryItemTypeSecondHostLms"
 									coreType="numericRangeMappings"
 									operationDataType="NumericRangeMapping"
 									columns={numRangeMappingColumnsNoCategoryFilter}
@@ -1429,7 +1429,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteReferenceValueMapping}
 								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValueLocationVariables}
-								type="referenceValueMappingsForLibrary"
+								type="referenceValueMappingsForLibraryLocation"
 								coreType="referenceValueMappings"
 								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
@@ -1462,7 +1462,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										refValueLocationForLibrarySecondHostLmsVariables
 									}
-									type="referenceValueMappingsForLibrary"
+									type="referenceValueMappingsForLibraryLocationSecondHostLMS"
 									coreType="referenceValueMappings"
 									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
@@ -1513,7 +1513,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteReferenceValueMapping}
 								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValuePatronTypeVariables}
-								type="referenceValueMappingsForLibrary"
+								type="referenceValueMappingsForLibraryPatron"
 								coreType="referenceValueMappings"
 								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
@@ -1546,7 +1546,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										refValuePatronTypeSecondHostLmsVariables
 									}
-									type="referenceValueMappingsForLibrary"
+									type="referenceValueMappingsForLibraryPatronSecondHostLms"
 									coreType="referenceValueMappings"
 									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
@@ -1575,7 +1575,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteNumericRangeMapping}
 								refetchQuery={["LoadNumericRangeMappings"]}
 								presetQueryVariables={numericRangePatronTypeVariables}
-								type="numericRangeMappingsForLibrary"
+								type="numericRangeMappingsForLibraryPatron"
 								coreType="numericRangeMappings"
 								operationDataType="NumericRangeMapping"
 								columns={numRangeMappingColumnsNoCategoryFilter}
@@ -1607,7 +1607,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										numericRangePatronTypeSecondHostLmsVariables
 									}
-									type="numericRangeMappingsForLibrary"
+									type="numericRangeMappingsForLibraryPatronSecondHostLms"
 									coreType="numericRangeMappings"
 									operationDataType="NumericRangeMapping"
 									columns={numRangeMappingColumnsNoCategoryFilter}
