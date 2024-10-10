@@ -43,6 +43,7 @@ import {
 import { buildFilterQuery } from "src/helpers/DataGrid/buildFilterQuery";
 import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
 import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
+import { isEmpty } from "lodash";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -257,6 +258,9 @@ export default function ServerPaginationGrid({
 			const filters = filterModel?.items ?? [];
 			const quickFilterValues = filterModel?.quickFilterValues ?? [];
 			const logicOperator = filterModel?.logicOperator?.toUpperCase() ?? "AND";
+			// Needs to disregard wildcard of the preset and stick AND NOT deleted on the end of the query
+			// if on main grids: disregard preset and stick AND NOT
+
 			// Build the filter query for all filters
 			let filterQuery = filters
 				.map((filter) => {
@@ -286,11 +290,21 @@ export default function ServerPaginationGrid({
 			// Add specific logic for types that need it.
 			// This is particularly useful for things like mappings, where we don't want to query deleted mappings unless explicitly stated.
 			// And also for any other types of grid that have pre-set queries
-			if (presetTypes.includes(type))
+			if (
+				presetTypes.includes(type) &&
+				type != "referenceValueMappings" &&
+				type != "numericRangeMappings"
+			)
 				filterQuery =
 					filterQuery != ""
 						? `${presetQueryVariables} && ${filterQuery}`
 						: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
+			if (
+				!isEmpty(filterModel.items) &&
+				(type == "referenceValueMappings" || type == "numericRangeMappings")
+			) {
+				filterQuery = `(${filterQuery}) AND deleted:true`;
+			}
 			// Set the final filter options
 			setFilterOptions(filterQuery);
 		},
