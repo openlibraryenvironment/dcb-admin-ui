@@ -127,7 +127,7 @@ const AllMappings: NextPage = () => {
 						editable: true,
 					},
 					{
-						field: "last_imported",
+						field: "lastImported",
 						headerName: t("common.mappings.last_imported"),
 						minWidth: 100,
 						flex: 0.5,
@@ -156,7 +156,7 @@ const AllMappings: NextPage = () => {
 				pageSize={20}
 				disableHoverInteractions={true}
 				columnVisibilityModel={{
-					last_imported: false,
+					lastImported: false,
 				}}
 			/>
 			<div>
