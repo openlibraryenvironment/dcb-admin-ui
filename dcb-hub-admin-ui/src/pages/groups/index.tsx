@@ -13,8 +13,7 @@ import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
 import { standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
-
+import { useCustomColumns } from "@hooks/useCustomColumns";
 // Groups Feature Page Structure
 // This page shows the list of groups
 // New Group is the (modal) form to add a group

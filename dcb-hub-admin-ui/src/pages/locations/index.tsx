@@ -14,8 +14,7 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "src/helpers/useCustomColumns";
-
+import { useCustomColumns } from "@hooks/useCustomColumns";
 const Locations: NextPage = () => {
 	const { t } = useTranslation();
 

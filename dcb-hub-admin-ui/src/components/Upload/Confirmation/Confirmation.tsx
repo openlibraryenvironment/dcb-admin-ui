@@ -75,7 +75,6 @@ const Confirmation = ({
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
-	// console.log(entityId);
 	const validationSchema = useMemo(
 		() =>
 			Yup.object({
@@ -135,7 +134,13 @@ const Confirmation = ({
 			case "gridEdit":
 			case "pageEdit":
 				return t("ui.data_grid.edit_summary", {
-					entity: !library ? entity?.toLowerCase() : "",
+					entity: !library
+						? entity == "referencevaluemapping"
+							? t("mappings.ref_value_one").toLowerCase()
+							: entity == "numericrangemapping"
+								? t("mappings.num_range_one").toLowerCase()
+								: entity?.toLowerCase()
+						: "",
 					name: library ?? "",
 				});
 			case "mappings":
@@ -147,11 +152,20 @@ const Confirmation = ({
 					entity: !library ? entity?.toLowerCase() : "",
 					name: library,
 				});
-
 			case "deletelocations":
 				return t("ui.data_grid.delete_header", {
 					entity: !library ? entity?.toLowerCase() : "",
 					name: library,
+				});
+			case "deletereferenceValueMappings":
+				return t("ui.data_grid.delete_header", {
+					entity: t("mappings.ref_value_one").toLowerCase(),
+					name: "",
+				});
+			case "deletenumericRangeMappings":
+				return t("ui.data_grid.delete_header", {
+					entity: t("mappings.num_range_one").toLowerCase(),
+					name: "",
 				});
 			case "participationStatus":
 				return t(getConfirmationHeader(participation ?? ""), {
@@ -311,6 +325,14 @@ const Confirmation = ({
 			case "deletelocations":
 				return t("ui.data_grid.delete_entity", {
 					entity: t("locations.location_one").toLowerCase(),
+				});
+			case "deletereferenceValueMappings":
+				return t("ui.data_grid.delete_entity", {
+					entity: t("mappings.ref_value_one").toLowerCase(),
+				});
+			case "deletenumericRangeMappings":
+				return t("ui.data_grid.delete_entity", {
+					entity: t("mappings.num_range_one").toLowerCase(),
 				});
 			case "participationStatus":
 				switch (participation) {

@@ -72,6 +72,7 @@
 			"edit_long": "Enter a number between -180 and 180",
 			"edit_success": "The {{entity}} {{name}} has been updated.",
 			"edit_summary": "Edit {{entity}} {{name}}",
+			"error": "Error",
 			"expand": "Expand",
 			"delete": "Delete",
 			"delete_body": "To delete this {{entity}}, please provide the following details.",
@@ -93,6 +94,12 @@
 			"save": "Save",
 			"title": "Title",
 			"updated": "Updated",
+			"validation": {
+				"email": "This field must be an email address.",
+				"no_empty": "You cannot leave this field empty.",
+				"number": "This field only accepts numeric values.",
+				"required": "This field is required."
+			},
 			"view_items": "View items"
 		},
 		"error": {
