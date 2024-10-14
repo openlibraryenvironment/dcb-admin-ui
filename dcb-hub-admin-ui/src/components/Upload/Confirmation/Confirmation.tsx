@@ -50,6 +50,7 @@ type ConfirmType = {
 	participation?: string;
 	library?: string;
 	mappingCategory?: string;
+	mappingType?: string;
 	editInformation?: any;
 	actionInfo?: string;
 	entity?: string;
@@ -69,6 +70,7 @@ const Confirmation = ({
 	participation,
 	library,
 	mappingCategory,
+	mappingType,
 	editInformation,
 	entity,
 	entityId,
@@ -145,7 +147,8 @@ const Confirmation = ({
 				});
 			case "mappings":
 				return t("mappings.confirmation_header", {
-					category: mappingCategory?.toLowerCase(),
+					category:
+						mappingCategory?.toLowerCase() + " " + mappingType?.toLowerCase(),
 				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
@@ -244,7 +247,10 @@ const Confirmation = ({
 						<Trans
 							i18nKey="mappings.confirmation_body"
 							values={{
-								category: mappingCategory?.toLowerCase(),
+								category:
+									mappingCategory?.toLowerCase() +
+									" " +
+									mappingType?.toLowerCase(),
 								existingMappingCount,
 								code,
 								fileName,
@@ -254,7 +260,10 @@ const Confirmation = ({
 						<Alert
 							severityType="warning"
 							alertText={t("mappings.confirmation_warning", {
-								mappings: mappingCategory?.toLowerCase(),
+								mappings:
+									mappingCategory?.toLowerCase() +
+									" " +
+									mappingType?.toLowerCase(),
 							})}
 							textColor={theme.palette.common.black}
 						/>

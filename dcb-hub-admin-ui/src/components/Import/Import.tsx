@@ -17,10 +17,55 @@ type ImportForm = {
 	show: boolean;
 	onClose: any;
 };
+type MappingOption = {
+	displayKey: string; // Translation key for users
+	category: string; // This is what gets sent to the server for validation
+	type: string; // along with this to determine ref value vs numeric range
+};
+
+const MAPPING_OPTIONS: MappingOption[] = [
+	{
+		displayKey: "nav.mappings.allReferenceValue",
+		type: "Reference value mappings",
+		category: "all",
+	},
+	{
+		displayKey: "mappings.item_type_ref_value",
+		type: "Reference value mappings",
+		category: "ItemType",
+	},
+	{
+		displayKey: "mappings.location_ref_value",
+		type: "Reference value mappings",
+		category: "Location",
+	},
+	{
+		displayKey: "mappings.patron_type_ref_value",
+		type: "Reference value mappings",
+		category: "patronType",
+	},
+	{
+		displayKey: "nav.mappings.allNumericRange",
+		type: "Numeric range mappings",
+		category: "all",
+	},
+	{
+		displayKey: "mappings.item_type_num_range",
+		type: "Numeric range mappings",
+		category: "ItemType",
+	},
+	{
+		displayKey: "mappings.patron_type_num_range",
+		type: "Numeric range mappings",
+		category: "patronType",
+	},
+];
 
 export default function Import({ show, onClose }: ImportForm) {
 	const { t } = useTranslation();
 	const [category, setCategory] = useState("");
+	const [type, setType] = useState("");
+
 	const handleCloseImport = () => {
 		onClose();
 	};
@@ -62,16 +107,23 @@ export default function Import({ show, onClose }: ImportForm) {
 			<DialogContent>
 				<Stack spacing={1}>
 					<Autocomplete
-						options={[t("mappings.numeric_range"), t("mappings.ref_value")]}
-						onChange={(event, value) =>
-							setCategory(value ?? t("mappings.ref_value"))
-						} // Or set a default here
+						options={MAPPING_OPTIONS}
+						getOptionLabel={(option: any) => t(option.displayKey)}
+						onChange={(event, value) => {
+							setCategory(value?.category ?? "all");
+							setType(value?.type ?? "Reference value mappings");
+						}}
 						renderInput={(params) => (
 							<TextField {...params} required label={t("mappings.category")} />
 						)}
+						groupBy={(option) => option.type}
 					/>
 					<Selector optionsType="Host LMS" />
-					<Upload onCancel={handleCloseImport} category={category} />
+					<Upload
+						onCancel={handleCloseImport}
+						category={category}
+						type={type}
+					/>
 				</Stack>
 			</DialogContent>
 		</Dialog>

@@ -146,7 +146,7 @@ const openRSLight = createTheme({
 					color: "#274E13",
 					"& .MuiAlert-icon": {
 						color: "#274E13",
-						"padding-top": 8,
+						paddingTop: 8,
 					},
 					outline: "2px solid #274E13",
 				},
@@ -155,7 +155,7 @@ const openRSLight = createTheme({
 					color: "#660000",
 					"& .MuiAlert-icon": {
 						color: "#660000",
-						"padding-top": 8,
+						paddingTop: 8,
 					},
 					outline: "2px solid #660000",
 				},
@@ -164,7 +164,7 @@ const openRSLight = createTheme({
 					color: "#664200",
 					"& .MuiAlert-icon": {
 						color: "#664200",
-						"padding-top": 8,
+						paddingTop: 8,
 					},
 					outline: "2px solid #664200",
 				},
@@ -173,7 +173,7 @@ const openRSLight = createTheme({
 					color: "#0C4068",
 					"& .MuiAlert-icon": {
 						color: "#0C4068",
-						"padding-top": 8,
+						paddingTop: 8,
 					},
 					outline: "2px solid #0C4068",
 				},

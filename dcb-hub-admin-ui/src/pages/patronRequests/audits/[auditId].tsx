@@ -76,7 +76,6 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 							},
 						}),
 				);
-
 				// Execute all fetch promises
 				Promise.all(fetchPromises).catch((error) =>
 					console.error("Error fetching additional audit pages:", error),

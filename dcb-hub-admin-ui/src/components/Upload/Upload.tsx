@@ -20,7 +20,7 @@ import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
 const { publicRuntimeConfig } = getConfig();
 const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
 
-const FileUpload = ({ category, onCancel }: any) => {
+const FileUpload = ({ category, onCancel, type }: any) => {
 	const { t } = useTranslation();
 	const { data } = useSession();
 	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
@@ -50,18 +50,18 @@ const FileUpload = ({ category, onCancel }: any) => {
 			case message.includes("Empty value"):
 				return "mappings.validation_missing_values";
 			case message.includes("expected headers") &&
-				category == "Reference value mappings":
+				type == "Reference value mappings":
 				return "mappings.validation_expected_headers";
 			case message.includes("expected headers") &&
-				category == "Numeric range mappings":
+				type == "Numeric range mappings":
 				return "mappings.validation_expected_headers_nrm";
 			case message.includes("provide a Host LMS"):
 				return "mappings.validation_no_hostlms";
 			case message.includes("fromContext or toContext") &&
-				category == "Reference value mappings":
+				type == "Reference value mappings":
 				return "mappings.mismatched_context";
 			case message.includes("fromContext or toContext") &&
-				category == "Numeric range mappings":
+				type == "Numeric range mappings":
 				return "mappings.mismatched_context_nrm";
 			default:
 				return "mappings.unknown_error";
@@ -183,6 +183,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 		formData.append("file", addedFile);
 		formData.append("code", code);
 		formData.append("mappingCategory", category);
+		formData.append("mappingType", type);
 		console.log(changeCategory);
 		if (reason) {
 			formData.append("reason", reason);
@@ -244,8 +245,9 @@ const FileUpload = ({ category, onCancel }: any) => {
 
 		setUploadButtonClicked(true);
 
-		if (code && category) {
-			if (category === "Reference value mappings") {
+		if (code && type) {
+			console.log(type);
+			if (type === "Reference value mappings") {
 				console.log("DEV: Ref value check in handleupload");
 				checkMappingsPresent();
 			} else {
@@ -258,7 +260,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 	}, [
 		addedFile,
 		code,
-		category,
+		type,
 		checkMappingsPresent,
 		checkNumericRangeMappingsPresent,
 	]);
@@ -299,7 +301,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 				<div style={{ flex: "1 0 0" }} />
 				{/* // Button should be enabled only if category, code, filesAdded all true */}
 				<Button
-					disabled={!filesAdded || !code || !category}
+					disabled={!filesAdded || !code || !type || !category}
 					onClick={handleUpload}
 					color="primary"
 					variant="contained"
@@ -319,6 +321,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 				code={code}
 				type="mappings"
 				mappingCategory={category}
+				mappingType={type}
 			/>
 			<TimedAlert
 				open={isErrorDisplayed}
@@ -330,7 +333,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 						components={{ bold: <strong />, paragraph: <p /> }}
 						values={{
 							fileName: addedFile?.name,
-							category: category,
+							category: category + " " + type,
 							count: successCount,
 							code: code,
 							deletedMappingCount: existingMappingCount,
@@ -372,15 +375,15 @@ const FileUpload = ({ category, onCancel }: any) => {
 						i18nKey={
 							isSuccess && !replacement
 								? t("mappings.upload_success", {
-										category: category.toLowerCase(),
+										category: category + " " + type,
 										count: successCount,
 										code: code,
 									})
 								: t("mappings.upload_success_replacement", {
-										category: category.toLowerCase(),
+										category: category + " " + type,
 										addedCount: successCount,
 										code: code,
-										deletedMappingCount: existingMappingCount,
+										deletedMappingCount: existingMappingCount, // CHECK THIS
 									})
 						}
 						components={{ bold: <strong />, paragraph: <p /> }}
