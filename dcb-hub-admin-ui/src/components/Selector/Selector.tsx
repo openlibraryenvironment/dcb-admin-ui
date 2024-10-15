@@ -4,13 +4,10 @@ import { getHostLms } from "src/queries/queries";
 import { useQuery } from "@apollo/client/react";
 
 type SelectorType = {
-	optionsType?: string;
-	options?: any;
+	optionsType: string;
 };
 
-// This is a selector of HostLMS present on the DCB instance.
-// It can also be further genericised to support selecting any value -
-// for example requests, locations etc
+// Host LMS Selector: Provides the drop-down selection menu for Host LMS for mappings import
 
 export default function Selector({ optionsType }: SelectorType) {
 	const updateCode = useCode((state) => state.updateCode);
@@ -22,7 +19,7 @@ export default function Selector({ optionsType }: SelectorType) {
 			pagesize: 100,
 			pageno: 0,
 		},
-		fetchPolicy: "network-only", // This is needed to stop the selector getting out-of-date info, as it has no polling ability.
+		fetchPolicy: "cache-and-network", // This is needed to stop the selector getting out-of-date info, as it has no polling ability.
 		onCompleted: (data) => {
 			// Check if we have all the hostLms
 			if (data.hostLms.content.length < data.hostLms.totalSize) {

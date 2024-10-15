@@ -8,63 +8,22 @@ import {
 	Autocomplete,
 	TextField,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
 import Selector from "@components/Selector/Selector";
 import { useState } from "react";
+import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
+import { MappingOption } from "@models/MappingOption";
 
 type ImportForm = {
 	show: boolean;
 	onClose: any;
-};
-type MappingOption = {
-	displayKey: string; // Translation key for users
-	category: string; // This is what gets sent to the server for validation
-	type: string; // along with this to determine ref value vs numeric range
+	mappingType: "Reference value mappings" | "Numeric range mappings";
 };
 
-const MAPPING_OPTIONS: MappingOption[] = [
-	{
-		displayKey: "nav.mappings.allReferenceValue",
-		type: "Reference value mappings",
-		category: "all",
-	},
-	{
-		displayKey: "mappings.item_type_ref_value",
-		type: "Reference value mappings",
-		category: "ItemType",
-	},
-	{
-		displayKey: "mappings.location_ref_value",
-		type: "Reference value mappings",
-		category: "Location",
-	},
-	{
-		displayKey: "mappings.patron_type_ref_value",
-		type: "Reference value mappings",
-		category: "patronType",
-	},
-	{
-		displayKey: "nav.mappings.allNumericRange",
-		type: "Numeric range mappings",
-		category: "all",
-	},
-	{
-		displayKey: "mappings.item_type_num_range",
-		type: "Numeric range mappings",
-		category: "ItemType",
-	},
-	{
-		displayKey: "mappings.patron_type_num_range",
-		type: "Numeric range mappings",
-		category: "patronType",
-	},
-];
-
-export default function Import({ show, onClose }: ImportForm) {
+export default function Import({ show, onClose, mappingType }: ImportForm) {
 	const { t } = useTranslation();
 	const [category, setCategory] = useState("");
-	const [type, setType] = useState("");
 
 	const handleCloseImport = () => {
 		onClose();
@@ -83,13 +42,7 @@ export default function Import({ show, onClose }: ImportForm) {
 		>
 			<DialogTitle variant="modalTitle">
 				{t("mappings.import_title", {
-					profile:
-						category != ""
-							? category.toLowerCase()
-							: t(
-									"mappings.ref_value",
-									"Reference value mappings",
-								).toLowerCase(),
+					profile: mappingType.toLowerCase(),
 				})}
 			</DialogTitle>
 			<IconButton
@@ -105,24 +58,29 @@ export default function Import({ show, onClose }: ImportForm) {
 				<MdClose />
 			</IconButton>
 			<DialogContent>
-				<Stack spacing={1}>
+				<Stack spacing={2}>
+					<Trans
+						i18nKey={"mappings.import_body"}
+						t={t}
+						components={{
+							paragraph: <p />,
+						}}
+					/>
 					<Autocomplete
-						options={MAPPING_OPTIONS}
-						getOptionLabel={(option: any) => t(option.displayKey)}
+						options={MAPPING_OPTIONS[mappingType]}
+						getOptionLabel={(option: MappingOption) => t(option.displayKey)}
 						onChange={(event, value) => {
 							setCategory(value?.category ?? "all");
-							setType(value?.type ?? "Reference value mappings");
 						}}
 						renderInput={(params) => (
 							<TextField {...params} required label={t("mappings.category")} />
 						)}
-						groupBy={(option) => option.type}
 					/>
-					<Selector optionsType="Host LMS" />
+					<Selector optionsType={t("hostlms.hostlms_one")} />
 					<Upload
 						onCancel={handleCloseImport}
 						category={category}
-						type={type}
+						type={mappingType}
 					/>
 				</Stack>
 			</DialogContent>

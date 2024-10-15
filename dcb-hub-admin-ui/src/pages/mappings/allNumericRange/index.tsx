@@ -63,7 +63,7 @@ const AllNumericRange: NextPage = () => {
 				editQuery={updateNumericRangeMapping}
 				deleteQuery={deleteNumericRangeMapping}
 				refetchQuery={["LoadNumericRangeMappings"]}
-				presetQueryVariables="(domain: * AND NOT deleted:true)"
+				presetQueryVariables="(domain: * AND (NOT deleted:true))"
 				type="numericRangeMappings"
 				coreType="numericRangeMappings"
 				operationDataType="NumericRangeMapping"
@@ -142,7 +142,13 @@ const AllNumericRange: NextPage = () => {
 				}}
 			/>
 			<Box>
-				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}
+				{showImport ? (
+					<Import
+						show={showImport}
+						onClose={closeImport}
+						mappingType="Numeric range mappings"
+					/>
+				) : null}
 			</Box>
 		</AdminLayout>
 	);

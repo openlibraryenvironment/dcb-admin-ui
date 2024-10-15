@@ -303,7 +303,7 @@ export default function ServerPaginationGrid({
 				!isEmpty(filterModel.items) &&
 				(type == "referenceValueMappings" || type == "numericRangeMappings")
 			) {
-				filterQuery = `(${filterQuery}) AND deleted:true`;
+				filterQuery = `(${filterQuery}) AND (NOT deleted:true)`;
 			}
 			// Set the final filter options
 			setFilterOptions(filterQuery);

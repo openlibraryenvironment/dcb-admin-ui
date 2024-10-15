@@ -84,7 +84,7 @@ const AllMappings: NextPage = () => {
 				editQuery={updateReferenceValueMapping}
 				deleteQuery={deleteReferenceValueMapping}
 				refetchQuery={["LoadMappings"]}
-				presetQueryVariables="(fromContext: * AND NOT deleted:true)"
+				presetQueryVariables="(fromContext: * AND (NOT deleted:true))"
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
 				operationDataType="ReferenceValueMapping"
@@ -160,7 +160,13 @@ const AllMappings: NextPage = () => {
 				}}
 			/>
 			<div>
-				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}
+				{showImport ? (
+					<Import
+						show={showImport}
+						onClose={closeImport}
+						mappingType="Reference value mappings"
+					/>
+				) : null}
 			</div>
 		</AdminLayout>
 	);

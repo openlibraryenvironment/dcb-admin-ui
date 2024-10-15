@@ -3,6 +3,7 @@ import { useLazyQuery } from "@apollo/client";
 import Alert from "@components/Alert/Alert";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import Link from "@components/Link/Link";
 import { PatronRequest } from "@models/PatronRequest";
 import {
 	Dialog,
@@ -10,7 +11,6 @@ import {
 	DialogContent,
 	DialogActions,
 	Button,
-	useTheme,
 	Box,
 	Typography,
 	Divider,
@@ -76,7 +76,6 @@ const Confirmation = ({
 	entityId,
 }: ConfirmType) => {
 	const { t } = useTranslation();
-	const theme = useTheme();
 	const validationSchema = useMemo(
 		() =>
 			Yup.object({
@@ -130,6 +129,10 @@ const Confirmation = ({
 	const doPatronRequestsExist = !isEmpty(
 		locationPatronRequests?.patronRequests?.content,
 	);
+	const mappingExportLink =
+		mappingType == "Reference value mappings"
+			? "/referenceValueMappings"
+			: "/numericRangeMappings";
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -147,8 +150,7 @@ const Confirmation = ({
 				});
 			case "mappings":
 				return t("mappings.confirmation_header", {
-					category:
-						mappingCategory?.toLowerCase() + " " + mappingType?.toLowerCase(),
+					category: mappingCategory + " " + mappingType?.toLowerCase(),
 				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
@@ -243,32 +245,34 @@ const Confirmation = ({
 				);
 			case "mappings":
 				return (
-					<Box>
+					<Stack spacing={2}>
 						<Trans
 							i18nKey="mappings.confirmation_body"
 							values={{
-								category:
-									mappingCategory?.toLowerCase() +
-									" " +
-									mappingType?.toLowerCase(),
+								category: mappingCategory + " " + mappingType?.toLowerCase(),
 								existingMappingCount,
 								code,
 								fileName,
 							}}
 							components={{ paragraph: <p />, bold: <strong /> }}
 						/>
-						<Alert
+						<Alert // Disable close button on this one
 							severityType="warning"
-							alertText={t("mappings.confirmation_warning", {
-								mappings:
-									mappingCategory?.toLowerCase() +
-									" " +
-									mappingType?.toLowerCase(),
-							})}
-							textColor={theme.palette.common.black}
+							alertText={
+								<Trans
+									i18nKey={"mappings.confirmation_warning"}
+									values={{ type: mappingType?.toLowerCase() }}
+									components={{
+										linkComponent: (
+											<Link key="grid-export-link" href={mappingExportLink} />
+										),
+										paragraph: <p />,
+									}}
+								/>
+							}
 						/>
-						{t("mappings.confirmation_replace")}
-					</Box>
+						<Typography>{t("mappings.confirmation_replace")}</Typography>
+					</Stack>
 				);
 			case "participationStatus":
 				return (
