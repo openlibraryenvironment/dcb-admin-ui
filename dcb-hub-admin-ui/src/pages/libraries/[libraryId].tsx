@@ -593,12 +593,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND (NOT deleted:true)`;
 
 	// Add ones for second Host LMS here.
-	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
-	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
-	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "Location") AND (NOT deleted:true)`;
+	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
+	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
+	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND (NOT deleted:true)`;
 
-	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "patronType" AND (NOT deleted:true)`;
-	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "ItemType" AND (NOT deleted:true)`;
+	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "patronType" AND (NOT deleted:true)`;
+	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "ItemType" AND (NOT deleted:true)`;
 
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
