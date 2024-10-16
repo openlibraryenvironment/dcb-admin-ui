@@ -143,6 +143,16 @@ const AllMappings: NextPage = () => {
 							}
 						},
 					},
+					{
+						field: "toCategory",
+						headerName: "To category",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators: standardFilters,
+						editable: true,
+						valueGetter: (value: any, row: { toCategory: any }) =>
+							row?.toCategory,
+					},
 				]}
 				noDataMessage={t("mappings.import_mappings", {
 					category: t("mappings.ref_value").toLowerCase(),
@@ -157,6 +167,7 @@ const AllMappings: NextPage = () => {
 				disableHoverInteractions={true}
 				columnVisibilityModel={{
 					lastImported: false,
+					toCategory: false,
 				}}
 			/>
 			<div>

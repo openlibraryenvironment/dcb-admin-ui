@@ -13,7 +13,12 @@ import {
 	GridSortModel,
 	useGridApiRef,
 } from "@mui/x-data-grid-pro";
-import { DocumentNode, useMutation, useQuery } from "@apollo/client";
+import {
+	DocumentNode,
+	useLazyQuery,
+	useMutation,
+	useQuery,
+} from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
@@ -44,6 +49,9 @@ import { buildFilterQuery } from "src/helpers/DataGrid/buildFilterQuery";
 import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
 import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
 import { isEmpty } from "lodash";
+import { getFileNameForExport } from "src/helpers/DataGrid/getFileNameForExport";
+import { convertFileToString } from "src/helpers/DataGrid/convertFileToString";
+import ExportToolbar from "./components/ExportToolbar";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -119,6 +127,8 @@ export default function ServerPaginationGrid({
 		text: null,
 	});
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	const [fetchAllDataQuery, { loading: allDataLoading, fetchMore }] =
+		useLazyQuery(query);
 	const { t } = useTranslation();
 	const apiRef = useGridApiRef(); // Use the API ref
 	const router = useRouter();
@@ -164,6 +174,148 @@ export default function ServerPaginationGrid({
 	const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
 		setRowModesModel(newRowModesModel);
 	};
+
+	const fetchAllData = async () => {
+		const currentPage = 0;
+		const pageSize = 1000;
+
+		const { data } = await fetchAllDataQuery({
+			variables: {
+				pageno: currentPage,
+				pagesize: pageSize,
+				order: sortField,
+				orderBy: direction,
+				query:
+					presetTypes.includes(type) && filterOptions === ""
+						? presetQueryVariables
+						: filterOptions,
+			},
+		});
+
+		let allContent = data?.[coreType].content || [];
+
+		if (data?.[coreType].content.length < data?.[coreType].totalSize) {
+			const totalPages = Math.ceil(data?.[coreType].totalSize / 1000);
+
+			const fetchPromises = Array.from({ length: totalPages - 1 }, (_, index) =>
+				fetchMore({
+					variables: {
+						pageno: index + 1,
+					},
+				}),
+			);
+
+			try {
+				const results = await Promise.all(fetchPromises);
+				results.forEach((result) => {
+					allContent = [...allContent, ...result.data[coreType].content];
+				});
+			} catch (error) {
+				console.error("Error fetching additional audit pages:", error);
+			}
+		}
+
+		return { [coreType]: { ...data?.[coreType], content: allContent } };
+	};
+
+	const handleExport = async (fileType: string) => {
+		const allData = await fetchAllData();
+		console.log("ALL");
+		console.log(allData);
+		const delimiter = fileType === "csv" ? "," : "\t";
+		const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
+
+		const dataString = convertFileToString(
+			allData?.[coreType]?.content,
+			delimiter,
+			coreType,
+		);
+		console.log(dataString);
+
+		// Create a Blob with the data
+		const blob = new Blob([dataString], {
+			type: `text/${fileType};charset=utf-8;`,
+		});
+		console.log(blob);
+		const link = document.createElement("a");
+		if (link.download !== undefined) {
+			const url = URL.createObjectURL(blob);
+			link.setAttribute("href", url);
+			link.setAttribute("download", fileName);
+			link.style.visibility = "hidden";
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+	};
+
+	// const ExportToolbar = (props: GridToolbarContainerProps) => {
+	// 	const handleExport = async (fileType: string) => {
+	// 		const allData = await fetchAllData();
+	// 		const delimiter = fileType === "csv" ? "," : "\t";
+	// 		const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
+
+	// 		const dataString = convertFileToString(
+	// 			allData?.[coreType]?.content,
+	// 			delimiter,
+	// 			coreType,
+	// 		);
+
+	// 		// Create a Blob with the data
+	// 		const blob = new Blob([dataString], {
+	// 			type: `text/${fileType};charset=utf-8;`,
+	// 		});
+	// 		const link = document.createElement("a");
+	// 		if (link.download !== undefined) {
+	// 			const url = URL.createObjectURL(blob);
+	// 			link.setAttribute("href", url);
+	// 			link.setAttribute("download", fileName);
+	// 			link.style.visibility = "hidden";
+	// 			document.body.appendChild(link);
+	// 			link.click();
+	// 			document.body.removeChild(link);
+	// 		}
+	// 	};
+
+	// 	return (
+	// 		<Box
+	// 			sx={{
+	// 				p: 0.5,
+	// 				pb: 0,
+	// 			}}
+	// 		>
+	// 			<GridToolbarContainer {...props}>
+	// 				<GridToolbarColumnsButton />
+	// 				<GridToolbarFilterButton />
+	// 				<GridToolbarDensitySelector />
+	// 				<GridToolbarExportContainer {...props}>
+	// 					<MenuItem
+	// 						onClick={() => handleExport("csv")}
+	// 						disabled={allDataLoading}
+	// 					>
+	// 						{t("ui.data_grid.export_all_csv")}
+	// 					</MenuItem>
+	// 					<MenuItem
+	// 						onClick={() => handleExport("tsv")}
+	// 						disabled={allDataLoading}
+	// 					>
+	// 						{t("ui.data_grid.export_all_tsv")}
+	// 					</MenuItem>
+	// 				</GridToolbarExportContainer>
+	// 			</GridToolbarContainer>
+	// 			<GridToolbarQuickFilter
+	// 				debounceMs={100}
+	// 				quickFilterParser={(searchInput: string) =>
+	// 					searchInput
+	// 						.split(",")
+	// 						.map((value) => value.trim())
+	// 						.filter((value) => value !== "")
+	// 				}
+	// 			/>
+	// 		</Box>
+	// 	);
+	// };
+
 	const getDetailPanelHeight = useCallback(() => "auto", []); // Should be able to take this out when master detail is expanded to all
 	const handleDeleteEntity = async (
 		id: string,
@@ -645,6 +797,10 @@ export default function ServerPaginationGrid({
 	// 		<CellEdit {...params} />
 	// 	),
 	// }));
+	const isSpecialGrid =
+		coreType === "referenceValueMappings" || type === "numericRangeMappings";
+
+	const ToolbarComponent = isSpecialGrid ? ExportToolbar : QuickSearchToolbar;
 
 	return (
 		<div>
@@ -737,6 +893,7 @@ export default function ServerPaginationGrid({
 					noRowsOverlay: () => (
 						<CustomNoDataOverlay noDataMessage={noDataMessage} />
 					),
+					toolbar: ToolbarComponent,
 				}}
 				localeText={{
 					toolbarQuickFilterPlaceholder:
@@ -761,6 +918,8 @@ export default function ServerPaginationGrid({
 				slotProps={{
 					toolbar: {
 						showQuickFilter: true,
+						handleExport,
+						allDataLoading,
 					},
 				}}
 			/>

@@ -1302,6 +1302,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								columnVisibilityModel={{
 									fromCategory: false,
 									lastImported: false,
+									toCategory: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1333,6 +1334,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									columnVisibilityModel={{
 										fromCategory: false,
 										lastImported: false,
+										toCategory: false,
 									}}
 								/>
 							) : null}
@@ -1444,6 +1446,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								columnVisibilityModel={{
 									fromCategory: false,
 									lastImported: false,
+									toCategory: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1477,6 +1480,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									columnVisibilityModel={{
 										fromCategory: false,
 										lastImported: false,
+										toCategory: false,
 									}}
 								/>
 							) : null}
@@ -1528,6 +1532,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								columnVisibilityModel={{
 									fromCategory: false,
 									lastImported: false,
+									toCategory: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1561,6 +1566,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									columnVisibilityModel={{
 										fromCategory: false,
 										lastImported: false,
+										toCategory: false,
 									}}
 								/>
 							) : null}

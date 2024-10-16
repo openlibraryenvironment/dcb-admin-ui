@@ -72,6 +72,8 @@
 			"edit_long": "Enter a number between -180 and 180",
 			"edit_success": "The {{entity}} {{name}} has been updated.",
 			"edit_summary": "Edit {{entity}} {{name}}",
+			"export_all_csv": "Export all as CSV",
+			"export_all_tsv": "Export all as TSV",
 			"error": "Error",
 			"expand": "Expand",
 			"delete": "Delete",

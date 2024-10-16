@@ -59,6 +59,15 @@ export const standardRefValueMappingColumns = [
 			}
 		},
 	},
+	{
+		field: "toCategory",
+		headerName: "To category",
+		minWidth: 50,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		editable: true,
+		valueGetter: (value: any, row: { toCategory: any }) => row?.toCategory,
+	},
 ];
 
 export const refValueMappingColumnsNoCategoryFilter = [
@@ -114,6 +123,15 @@ export const refValueMappingColumnsNoCategoryFilter = [
 				return formattedDate;
 			}
 		},
+	},
+	{
+		field: "toCategory",
+		headerName: "To category",
+		minWidth: 50,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		editable: true,
+		valueGetter: (value: any, row: { toCategory: any }) => row?.toCategory,
 	},
 ];
 
