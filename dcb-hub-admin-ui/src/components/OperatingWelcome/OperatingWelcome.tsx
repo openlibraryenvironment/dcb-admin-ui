@@ -19,7 +19,7 @@ export default function OperatingWelcome() {
 			refetchQuery={["LoadLibraries"]}
 			deleteQuery={deleteLibraryQuery}
 			coreType="libraries"
-			type="libraries"
+			type="welcomeLibraries"
 			operationDataType="Library"
 			columnVisibilityModel={{
 				id: false,

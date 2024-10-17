@@ -1,3 +1,18 @@
+# [1.25.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.24.0...v1.25.0) (2024-10-10)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cookie to ^0.7.0 ([69de8cc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/69de8ccb2f6397f726ee2fd5d6fd7e539a774559))
+
+
+### Features
+
+* Add audit log navigation [DCB-1531] ([5b5f8a3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5b5f8a3d1664ec090e23ad0baf93981fe1db8b47))
+* Add isPickup toggle to DCB Admin [DCB-1578] ([d850dc1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d850dc17898a32cee9afda40e12d18805227cfec))
+* Persist sort options for a session [DCB-1087] ([3c58555](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3c5855537734a3cb45495ed2b65e8eb5f5bdbeee))
+* Support editing and deletion of mappings [DCB-1407] ([ce3473c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ce3473c78cb86debbb46fced4b67ff5495c5dc73))
+
 # [1.24.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.23.0...v1.24.0) (2024-09-20)
 
 

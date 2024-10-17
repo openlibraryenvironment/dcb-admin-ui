@@ -14,6 +14,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import Head from "next/head";
+import { useGridStore } from "@hooks/useDataGridOptionsStore";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -42,11 +43,14 @@ export default function Header({
 	const theme = useTheme();
 	const router = useRouter();
 	const { type } = useDCBServiceInfo();
+	const clearGridState = useGridStore((state) => state.clearGridState);
+
 	const url = "/auth/logout";
 	const { t } = useTranslation();
 	const handleClick = () => {
 		if (status === "authenticated") {
 			signOut({ redirect: false });
+			clearGridState();
 			router.push(url);
 		} else {
 			signIn();

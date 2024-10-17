@@ -121,7 +121,7 @@ const PatronRequests: NextPage = () => {
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.exception", {
-							number: totalSizes["patronRequestsLibraryException"],
+							number: totalSizes["patronRequestsException"],
 						})}
 					</Typography>
 				</StyledAccordionSummary>
@@ -129,7 +129,7 @@ const PatronRequests: NextPage = () => {
 					<ServerPaginationGrid
 						query={getPatronRequests}
 						presetQueryVariables={exceptionQueryVariables}
-						type="patronRequestsLibraryException"
+						type="patronRequestsException"
 						coreType="patronRequests"
 						columns={[...customColumns, ...patronRequestColumnsNoStatusFilter]}
 						selectable={true}
@@ -172,7 +172,7 @@ const PatronRequests: NextPage = () => {
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.out_of_sequence", {
-							number: totalSizes["patronRequestsLibraryOutOfSequence"],
+							number: totalSizes["patronRequestsOutOfSequence"],
 						})}
 					</Typography>
 				</StyledAccordionSummary>
@@ -180,7 +180,7 @@ const PatronRequests: NextPage = () => {
 					<ServerPaginationGrid
 						query={getPatronRequests}
 						presetQueryVariables={outOfSequenceQueryVariables}
-						type="patronRequestsLibraryOutOfSequence"
+						type="patronRequestsOutOfSequence"
 						coreType="patronRequests"
 						columns={allColumns}
 						selectable={true}
@@ -218,7 +218,7 @@ const PatronRequests: NextPage = () => {
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.active", {
-							number: totalSizes["patronRequestsLibraryActive"],
+							number: totalSizes["patronRequestsActive"],
 						})}
 					</Typography>
 				</StyledAccordionSummary>
@@ -226,7 +226,7 @@ const PatronRequests: NextPage = () => {
 					<ServerPaginationGrid
 						query={getPatronRequests}
 						presetQueryVariables={inProgressQueryVariables}
-						type="patronRequestsLibraryActive"
+						type="patronRequestsActive"
 						coreType="patronRequests"
 						columns={allColumns}
 						selectable={true}
@@ -264,7 +264,7 @@ const PatronRequests: NextPage = () => {
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.completed", {
-							number: totalSizes["patronRequestsLibraryCompleted"],
+							number: totalSizes["patronRequestsCompleted"],
 						})}
 					</Typography>
 				</StyledAccordionSummary>
@@ -272,7 +272,7 @@ const PatronRequests: NextPage = () => {
 					<ServerPaginationGrid
 						query={getPatronRequests}
 						presetQueryVariables={finishedQueryVariables}
-						type="patronRequestsLibraryCompleted"
+						type="patronRequestsCompleted"
 						coreType="patronRequests"
 						columns={allColumns}
 						selectable={true}

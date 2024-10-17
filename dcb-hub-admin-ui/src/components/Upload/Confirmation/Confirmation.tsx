@@ -55,8 +55,6 @@ type ConfirmType = {
 	actionInfo?: string;
 	entity?: string;
 	entityId?: string;
-	associatedPatronRequests?: PatronRequest[];
-	associatedPatronRequestsLoading?: boolean;
 };
 
 const Confirmation = ({
@@ -219,6 +217,7 @@ const Confirmation = ({
 									data={locationPatronRequests.patronRequests.content}
 									selectable={false}
 									toolbarVisible="search-columns"
+									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 								/>
 							</>
 						) : null}

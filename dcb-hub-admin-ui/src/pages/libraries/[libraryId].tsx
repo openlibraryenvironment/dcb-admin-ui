@@ -593,12 +593,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND (NOT deleted:true)`;
 
 	// Add ones for second Host LMS here.
-	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
-	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
-	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "Location") AND (NOT deleted:true)`;
+	const refValuePatronTypeSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
+	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
+	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND (NOT deleted:true)`;
 
-	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "patronType" AND (NOT deleted:true)`;
-	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.agency?.hostLms?.code}" AND domain: "ItemType" AND (NOT deleted:true)`;
+	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "patronType" AND (NOT deleted:true)`;
+	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "ItemType" AND (NOT deleted:true)`;
 
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
@@ -1287,7 +1287,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteReferenceValueMapping}
 								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValueItemTypeVariables}
-								type="referenceValueMappingsForLibrary"
+								type="referenceValueMappingsForLibraryItemType"
 								coreType="referenceValueMappings"
 								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
@@ -1319,7 +1319,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									deleteQuery={deleteReferenceValueMapping}
 									refetchQuery={["LoadMappings"]}
 									presetQueryVariables={refValueItemTypeSecondHostLmsVariables}
-									type="referenceValueMappingsForLibrary"
+									type="referenceValueMappingsForLibraryItemTypeSecondHostLms"
 									coreType="referenceValueMappings"
 									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
@@ -1349,7 +1349,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteNumericRangeMapping}
 								refetchQuery={["LoadNumericRangeMappings"]}
 								presetQueryVariables={numericRangeItemTypeVariables}
-								type="numericRangeMappingsForLibrary"
+								type="numericRangeMappingsForLibraryItemType"
 								coreType="numericRangeMappings"
 								operationDataType="NumericRangeMapping"
 								columns={numRangeMappingColumnsNoCategoryFilter}
@@ -1381,7 +1381,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										numericRangeItemTypeSecondHostLmsVariables
 									}
-									type="numericRangeMappingsForLibrary"
+									type="numericRangeMappingsForLibraryItemTypeSecondHostLms"
 									coreType="numericRangeMappings"
 									operationDataType="NumericRangeMapping"
 									columns={numRangeMappingColumnsNoCategoryFilter}
@@ -1431,7 +1431,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteReferenceValueMapping}
 								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValueLocationVariables}
-								type="referenceValueMappingsForLibrary"
+								type="referenceValueMappingsForLibraryLocation"
 								coreType="referenceValueMappings"
 								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
@@ -1465,7 +1465,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										refValueLocationForLibrarySecondHostLmsVariables
 									}
-									type="referenceValueMappingsForLibrary"
+									type="referenceValueMappingsForLibraryLocationSecondHostLMS"
 									coreType="referenceValueMappings"
 									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
@@ -1517,7 +1517,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteReferenceValueMapping}
 								refetchQuery={["LoadMappings"]}
 								presetQueryVariables={refValuePatronTypeVariables}
-								type="referenceValueMappingsForLibrary"
+								type="referenceValueMappingsForLibraryPatron"
 								coreType="referenceValueMappings"
 								operationDataType="ReferenceValueMapping"
 								columns={refValueMappingColumnsNoCategoryFilter}
@@ -1551,7 +1551,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										refValuePatronTypeSecondHostLmsVariables
 									}
-									type="referenceValueMappingsForLibrary"
+									type="referenceValueMappingsForLibraryPatronSecondHostLms"
 									coreType="referenceValueMappings"
 									operationDataType="ReferenceValueMapping"
 									columns={refValueMappingColumnsNoCategoryFilter}
@@ -1581,7 +1581,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								deleteQuery={deleteNumericRangeMapping}
 								refetchQuery={["LoadNumericRangeMappings"]}
 								presetQueryVariables={numericRangePatronTypeVariables}
-								type="numericRangeMappingsForLibrary"
+								type="numericRangeMappingsForLibraryPatron"
 								coreType="numericRangeMappings"
 								operationDataType="NumericRangeMapping"
 								columns={numRangeMappingColumnsNoCategoryFilter}
@@ -1613,7 +1613,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									presetQueryVariables={
 										numericRangePatronTypeSecondHostLmsVariables
 									}
-									type="numericRangeMappingsForLibrary"
+									type="numericRangeMappingsForLibraryPatronSecondHostLms"
 									coreType="numericRangeMappings"
 									operationDataType="NumericRangeMapping"
 									columns={numRangeMappingColumnsNoCategoryFilter}
