@@ -84,7 +84,7 @@ const AllMappings: NextPage = () => {
 				editQuery={updateReferenceValueMapping}
 				deleteQuery={deleteReferenceValueMapping}
 				refetchQuery={["LoadMappings"]}
-				presetQueryVariables="(fromContext: * AND (NOT deleted:true))"
+				presetQueryVariables="(fromContext: * AND NOT deleted:true)"
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
 				operationDataType="ReferenceValueMapping"
@@ -160,9 +160,9 @@ const AllMappings: NextPage = () => {
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				// This is how to set the default sort order
-				sortModel={[{ field: "fromContext", sort: "asc" }]}
-				sortDirection="ASC"
-				sortAttribute="fromContext"
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				sortDirection="DESC"
+				sortAttribute="lastImported"
 				pageSize={20}
 				disableHoverInteractions={true}
 				columnVisibilityModel={{

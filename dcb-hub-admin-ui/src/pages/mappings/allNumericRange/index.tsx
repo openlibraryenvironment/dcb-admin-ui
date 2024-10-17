@@ -63,7 +63,7 @@ const AllNumericRange: NextPage = () => {
 				editQuery={updateNumericRangeMapping}
 				deleteQuery={deleteNumericRangeMapping}
 				refetchQuery={["LoadNumericRangeMappings"]}
-				presetQueryVariables="(domain: * AND (NOT deleted:true))"
+				presetQueryVariables="(domain: * AND NOT deleted:true)"
 				type="numericRangeMappings"
 				coreType="numericRangeMappings"
 				operationDataType="NumericRangeMapping"
@@ -132,10 +132,10 @@ const AllNumericRange: NextPage = () => {
 				noDataMessage={t("mappings.no_results")}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
-				sortModel={[{ field: "context", sort: "asc" }]}
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
 				pageSize={20}
-				sortDirection="ASC"
-				sortAttribute="context"
+				sortDirection="DESC"
+				sortAttribute="lastImported"
 				disableHoverInteractions={true}
 				columnVisibilityModel={{
 					lastImported: false,

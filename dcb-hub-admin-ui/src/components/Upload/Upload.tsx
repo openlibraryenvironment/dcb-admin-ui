@@ -70,7 +70,7 @@ const FileUpload = ({
 			code +
 			" OR fromContext: " +
 			code +
-			") AND (NOT deleted:true)",
+			") AND NOT deleted:true",
 		pagesize: 200,
 	};
 
@@ -84,18 +84,18 @@ const FileUpload = ({
 			category +
 			" OR toCategory: " +
 			category +
-			") AND (NOT deleted:true)",
+			") AND NOT deleted:true",
 		pagesize: 200,
 	};
 
 	const numRangeVariablesAll = {
-		query: "context:" + code + " AND (NOT deleted:true)",
+		query: "context:" + code + " AND NOT deleted:true",
 		pagesize: 200,
 	};
 
 	const numRangeVariablesDomain = {
 		query:
-			"context:" + code + " AND domain:" + category + " AND (NOT deleted:true)",
+			"context:" + code + " AND domain:" + category + " AND NOT deleted:true",
 		pagesize: 200,
 	};
 
