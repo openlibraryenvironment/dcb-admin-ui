@@ -15,8 +15,8 @@ export const getFieldsForExport = (coreType: string) => {
 				"domain",
 				"lowerBound",
 				"upperBound",
-				"toValue",
-				"toContext",
+				"mappedValue",
+				"targetContext",
 			];
 		default:
 			return [];

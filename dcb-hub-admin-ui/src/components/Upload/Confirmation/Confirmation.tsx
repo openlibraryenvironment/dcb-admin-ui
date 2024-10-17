@@ -131,8 +131,8 @@ const Confirmation = ({
 	);
 	const mappingExportLink =
 		mappingType == "Reference value mappings"
-			? "/referenceValueMappings"
-			: "/numericRangeMappings";
+			? "/mappings/allReferenceValue"
+			: "/mappings/allNumericRange";
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -249,7 +249,10 @@ const Confirmation = ({
 						<Trans
 							i18nKey="mappings.confirmation_body"
 							values={{
-								category: mappingCategory + " " + mappingType?.toLowerCase(),
+								category:
+									mappingCategory == "all"
+										? mappingType?.toLowerCase()
+										: mappingCategory + " " + mappingType?.toLowerCase(),
 								existingMappingCount,
 								code,
 								fileName,

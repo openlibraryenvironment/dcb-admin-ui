@@ -268,7 +268,7 @@ const FileUpload = ({
 
 		if (code) {
 			if (type === "Reference value mappings") {
-				checkMappingsPresent(); // this may need altering based on category.
+				checkMappingsPresent();
 			} else {
 				checkNumericRangeMappingsPresent();
 			}
@@ -361,7 +361,10 @@ const FileUpload = ({
 						components={{ bold: <strong />, paragraph: <p /> }}
 						values={{
 							fileName: addedFile?.name,
-							category: category + " " + type,
+							category:
+								category == "all"
+									? type?.toLowerCase()
+									: category + " " + type?.toLowerCase(),
 							count: successCount,
 							code: code,
 							deletedMappingCount: deletedCount, // existingMappingCount
@@ -402,16 +405,22 @@ const FileUpload = ({
 						i18nKey={
 							isSuccess && !replacement
 								? t("mappings.upload_success", {
-										category: category + " " + type.toLowerCase(),
+										category:
+											category == "all"
+												? type?.toLowerCase()
+												: category + " " + type?.toLowerCase(),
 										count: successCount,
 										code: code,
 										ignoredCount: ignoredCount,
 									})
 								: t("mappings.upload_success_replacement", {
-										category: category + " " + type.toLowerCase(),
+										category:
+											category == "all"
+												? type?.toLowerCase()
+												: category + " " + type?.toLowerCase(),
 										addedCount: successCount,
 										code: code,
-										deletedMappingCount: deletedCount, // CHECK THIS
+										deletedMappingCount: deletedCount,
 									})
 						}
 						components={{ bold: <strong />, paragraph: <p /> }}
