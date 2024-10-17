@@ -4,7 +4,6 @@ import Alert from "@components/Alert/Alert";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
-import { PatronRequest } from "@models/PatronRequest";
 import {
 	Dialog,
 	DialogTitle,
@@ -129,8 +128,8 @@ const Confirmation = ({
 	);
 	const mappingExportLink =
 		mappingType == "Reference value mappings"
-			? "/mappings/allReferenceValue"
-			: "/mappings/allNumericRange";
+			? "/referenceValueMappings"
+			: "/numericRangeMappings";
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -248,10 +247,7 @@ const Confirmation = ({
 						<Trans
 							i18nKey="mappings.confirmation_body"
 							values={{
-								category:
-									mappingCategory == "all"
-										? mappingType?.toLowerCase()
-										: mappingCategory + " " + mappingType?.toLowerCase(),
+								category: mappingCategory + " " + mappingType?.toLowerCase(),
 								existingMappingCount,
 								code,
 								fileName,
