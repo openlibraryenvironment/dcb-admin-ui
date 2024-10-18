@@ -11,9 +11,9 @@ import {
 import { Trans, useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
 import Selector from "@components/Selector/Selector";
-import { useState } from "react";
 import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
+import useCode from "@hooks/useCode";
 
 type ImportForm = {
 	show: boolean;
@@ -23,11 +23,13 @@ type ImportForm = {
 
 export default function Import({ show, onClose, mappingType }: ImportForm) {
 	const { t } = useTranslation();
-	const [category, setCategory] = useState("");
+	const { category, updateCategory, resetAll } = useCode();
 
 	const handleCloseImport = () => {
+		resetAll(); // Reset both code and category when closing the import dialog
 		onClose();
 	};
+
 	// This method closes the import modal and is passed to Upload as a callback, so that Upload's cancel button can close the whole Import window.
 	// This means that the Cancel button in 'Upload' can be used to close this Import modal.
 	// Same principle can be used in other components - a callback can be passed to the child to affect behaviour in the parent.
@@ -70,7 +72,7 @@ export default function Import({ show, onClose, mappingType }: ImportForm) {
 						options={MAPPING_OPTIONS[mappingType]}
 						getOptionLabel={(option: MappingOption) => t(option.displayKey)}
 						onChange={(event, value) => {
-							setCategory(value?.category ?? "all");
+							updateCategory(value?.category ?? "");
 						}}
 						renderInput={(params) => (
 							<TextField {...params} required label={t("mappings.category")} />

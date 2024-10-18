@@ -236,8 +236,6 @@ export default function ServerPaginationGrid({
 
 	const handleExport = async (fileType: string) => {
 		const allData = await fetchAllData();
-		console.log("ALL");
-		console.log(allData);
 		const delimiter = fileType === "csv" ? "," : "\t";
 		const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
 
@@ -246,13 +244,10 @@ export default function ServerPaginationGrid({
 			delimiter,
 			coreType,
 		);
-		console.log(dataString);
-
 		// Create a Blob with the data
 		const blob = new Blob([dataString], {
 			type: `text/${fileType};charset=utf-8;`,
 		});
-		console.log(blob);
 		const link = document.createElement("a");
 		if (link.download !== undefined) {
 			const url = URL.createObjectURL(blob);
@@ -264,73 +259,6 @@ export default function ServerPaginationGrid({
 			document.body.removeChild(link);
 		}
 	};
-
-	// const ExportToolbar = (props: GridToolbarContainerProps) => {
-	// 	const handleExport = async (fileType: string) => {
-	// 		const allData = await fetchAllData();
-	// 		const delimiter = fileType === "csv" ? "," : "\t";
-	// 		const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
-
-	// 		const dataString = convertFileToString(
-	// 			allData?.[coreType]?.content,
-	// 			delimiter,
-	// 			coreType,
-	// 		);
-
-	// 		// Create a Blob with the data
-	// 		const blob = new Blob([dataString], {
-	// 			type: `text/${fileType};charset=utf-8;`,
-	// 		});
-	// 		const link = document.createElement("a");
-	// 		if (link.download !== undefined) {
-	// 			const url = URL.createObjectURL(blob);
-	// 			link.setAttribute("href", url);
-	// 			link.setAttribute("download", fileName);
-	// 			link.style.visibility = "hidden";
-	// 			document.body.appendChild(link);
-	// 			link.click();
-	// 			document.body.removeChild(link);
-	// 		}
-	// 	};
-
-	// 	return (
-	// 		<Box
-	// 			sx={{
-	// 				p: 0.5,
-	// 				pb: 0,
-	// 			}}
-	// 		>
-	// 			<GridToolbarContainer {...props}>
-	// 				<GridToolbarColumnsButton />
-	// 				<GridToolbarFilterButton />
-	// 				<GridToolbarDensitySelector />
-	// 				<GridToolbarExportContainer {...props}>
-	// 					<MenuItem
-	// 						onClick={() => handleExport("csv")}
-	// 						disabled={allDataLoading}
-	// 					>
-	// 						{t("ui.data_grid.export_all_csv")}
-	// 					</MenuItem>
-	// 					<MenuItem
-	// 						onClick={() => handleExport("tsv")}
-	// 						disabled={allDataLoading}
-	// 					>
-	// 						{t("ui.data_grid.export_all_tsv")}
-	// 					</MenuItem>
-	// 				</GridToolbarExportContainer>
-	// 			</GridToolbarContainer>
-	// 			<GridToolbarQuickFilter
-	// 				debounceMs={100}
-	// 				quickFilterParser={(searchInput: string) =>
-	// 					searchInput
-	// 						.split(",")
-	// 						.map((value) => value.trim())
-	// 						.filter((value) => value !== "")
-	// 				}
-	// 			/>
-	// 		</Box>
-	// 	);
-	// };
 
 	const getDetailPanelHeight = useCallback(() => "auto", []); // Should be able to take this out when master detail is expanded to all
 	const handleDeleteEntity = async (
@@ -811,14 +739,6 @@ export default function ServerPaginationGrid({
 		),
 	}));
 
-	// const allColumns = (
-	// 	actionsTypes.includes(type) ? [...columns, ...actionsColumn] : columns
-	// ).map((col) => ({
-	// 	...col,
-	// 	renderEditCell: (params: GridRenderEditCellParams) => (
-	// 		<CellEdit {...params} />
-	// 	),
-	// }));
 	const isSpecialGrid =
 		coreType === "referenceValueMappings" || type === "numericRangeMappings";
 

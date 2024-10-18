@@ -7,10 +7,15 @@ type SelectorType = {
 	optionsType: string;
 };
 
+type HostLmsOption = {
+	label: string;
+	value: string;
+};
+
 // Host LMS Selector: Provides the drop-down selection menu for Host LMS for mappings import
 
 export default function Selector({ optionsType }: SelectorType) {
-	const updateCode = useCode((state) => state.updateCode);
+	const { code, updateCode } = useCode();
 	const { data, loading, fetchMore } = useQuery(getHostLms, {
 		variables: {
 			query: "name: *",
@@ -58,28 +63,32 @@ export default function Selector({ optionsType }: SelectorType) {
 
 	// To extend this component further consider principles from https://mui.com/material-ui/react-autocomplete/#load-on-open
 	const hostLmsData = data?.hostLms?.content;
-	const codes = hostLmsData?.map((item: { code: string; id: string }) => ({
-		label: item.code,
-		value: item.id,
-	}));
-	// Here, we map across the names and associated IDs for each HostLMS option.
-	// This means that the ID will be available for us when we need to import for a specific HostLMS.
+	const options: HostLmsOption[] =
+		hostLmsData?.map((item: { code: string; id: string }) => ({
+			label: item.code,
+			value: item.id,
+		})) || [];
+
+	// Find the currently selected option based on the code in the Zustand store
+	const selectedOption =
+		options.find((option) => option.label === code) || null;
+
 	return (
 		<Autocomplete
-			onChange={(event, value) => {
-				updateCode(value?.label);
+			value={selectedOption}
+			onChange={(event, newValue: HostLmsOption | null) => {
+				updateCode(newValue?.label || "");
 			}}
-			// Here we can store the value to be used for import, and supply the necessary hostlms ID
 			disablePortal
 			loading={loading}
 			id="selector-combo-box"
-			options={codes ?? []}
-			getOptionLabel={(option: any) => option.label}
+			options={options}
+			getOptionLabel={(option: HostLmsOption) => option.label}
 			fullWidth
 			renderInput={(params: any) => (
 				<TextField {...params} required label={optionsType} />
 			)}
-			isOptionEqualToValue={(option, value) => option.id === value.id}
+			isOptionEqualToValue={(option, value) => option.value === value.value}
 		/>
 	);
 }

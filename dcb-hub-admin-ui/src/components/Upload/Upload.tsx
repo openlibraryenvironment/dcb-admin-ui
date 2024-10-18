@@ -1,6 +1,6 @@
 import { Button, Divider, Stack, Typography } from "@mui/material";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "next-i18next";
 import getConfig from "next/config";
 import useCode from "@hooks/useCode";
@@ -33,19 +33,6 @@ const FileUpload = ({
 }) => {
 	const { t } = useTranslation();
 	const { data } = useSession();
-	// const [importFeedback, setImportFeedback] = useState({
-	// 	uploadErrorMessage: "",
-	// 	validationErrorMessage: "",
-	// 	successCount: 0,
-	// 	ignoredCount: 0,
-	// 	deletedCount: 0,
-	// 	success: false,
-	// 	replacement: false,
-	// });
-	// const [interactionData, setInteractionData] = useState({
-	// 	isConfirmOpen: false,
-	// 	uploadButtonClicked: false,
-	// });
 	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
 	const [isValidationErrorDisplayed, setValidationErrorDisplayed] =
 		useState(false);
@@ -53,7 +40,7 @@ const FileUpload = ({
 	const [replacement, setReplacement] = useState(false);
 	const [existingMappingCount, setExistingMappingCount] = useState(0);
 	const [isConfirmOpen, setConfirmOpen] = useState(false);
-	const code = useCode((state) => state.code);
+	const { code, resetAll } = useCode();
 	const [uploadErrorMessage, setUploadErrorMessage] = useState("");
 	const [validationErrorMessage, setValidationErrorMessage] = useState("");
 	const [successCount, setSuccessCount] = useState(0);
@@ -122,10 +109,7 @@ const FileUpload = ({
 	const [checkNumericRangeMappingsPresent] = useLazyQuery(
 		checkExistingNumericRangeMappings,
 		{
-			variables:
-				category == "all" ? numRangeVariablesAll : numRangeVariablesDomain,
 			fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
-			pollInterval: 0, // This only ever needs to run when explicitly triggered - no polling needed
 			onCompleted: (data) => {
 				setExistingMappingCount(data?.numericRangeMappings?.totalSize);
 				if (uploadButtonClicked) {
@@ -175,6 +159,7 @@ const FileUpload = ({
 
 	const handleCancelUpload = () => {
 		setConfirmOpen(false);
+		setUploadButtonClicked(false); // Reset uploadButtonClicked when cancelling
 	};
 
 	const handleReset = () => {
@@ -227,6 +212,20 @@ const FileUpload = ({
 				setDeletedCount(response.data.recordsDeleted ?? 0);
 				setIgnoredCount(response.data.recordsIgnored ?? 0);
 				setUploadButtonClicked(false);
+				setTimeout(() => {
+					onCancel(); // Close the modal
+					resetAll(); // Clear all selected values
+					setAddedFile(null);
+					// Reset file input
+					const fileInput = document.getElementById(
+						"file-upload",
+					) as HTMLInputElement;
+					if (fileInput) {
+						fileInput.value = "";
+					}
+				}, 2000);
+
+				// clearSelections();
 			})
 			.catch((error) => {
 				// Error handling
@@ -253,35 +252,34 @@ const FileUpload = ({
 	useEffect(() => {
 		setUploadButtonClicked(false);
 		setConfirmOpen(false);
-	}, [code]);
+	}, [code, category]);
 
 	const filesAdded = addedFile !== null;
 
-	const handleUpload = useCallback(() => {
+	const handleUpload = () => {
 		if (!addedFile) {
 			setErrorDisplayed(true);
 			setUploadErrorMessage("No file selected for upload.");
 			return;
 		}
-
 		setUploadButtonClicked(true);
-
-		if (code) {
+		if (code && category) {
 			if (type === "Reference value mappings") {
-				checkMappingsPresent();
+				checkMappingsPresent({
+					variables:
+						category === "all" ? refVariablesAll : refVariablesCategory,
+				});
 			} else {
-				checkNumericRangeMappingsPresent();
+				checkNumericRangeMappingsPresent({
+					variables:
+						category === "all" ? numRangeVariablesAll : numRangeVariablesDomain,
+				});
 			}
 		} else {
 			setConfirmOpen(false);
+			setUploadButtonClicked(false); // Reset if there's no code
 		}
-	}, [
-		addedFile,
-		code,
-		type,
-		checkMappingsPresent,
-		checkNumericRangeMappingsPresent,
-	]);
+	};
 
 	return (
 		<Stack spacing={1}>

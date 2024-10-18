@@ -128,8 +128,8 @@ const Confirmation = ({
 	);
 	const mappingExportLink =
 		mappingType == "Reference value mappings"
-			? "/referenceValueMappings"
-			: "/numericRangeMappings";
+			? "/mappings/allReferenceValueMappings"
+			: "/mappings/allNumericRangeMappings";
 
 	const getHeaderText = () => {
 		switch (type) {
