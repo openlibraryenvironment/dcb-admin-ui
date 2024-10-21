@@ -37,7 +37,7 @@ export default function Import({ show, onClose, mappingType }: ImportForm) {
 	return (
 		<Dialog
 			open={show}
-			onClose={onClose}
+			onClose={handleCloseImport}
 			aria-labelledby="import-dialog"
 			fullWidth
 			maxWidth={"sm"}
@@ -49,7 +49,7 @@ export default function Import({ show, onClose, mappingType }: ImportForm) {
 			</DialogTitle>
 			<IconButton
 				aria-label="close"
-				onClick={onClose}
+				onClick={handleCloseImport}
 				sx={{
 					position: "absolute",
 					right: 8,

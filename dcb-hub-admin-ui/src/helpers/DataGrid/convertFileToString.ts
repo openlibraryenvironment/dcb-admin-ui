@@ -10,7 +10,6 @@ export const convertFileToString = (
 	const fieldsForExport = getFieldsForExport(coreType);
 
 	const headerRow = formattedHeaders.join(delimiter);
-	console.log(data);
 
 	const rows = data.map((item: any) =>
 		fieldsForExport
