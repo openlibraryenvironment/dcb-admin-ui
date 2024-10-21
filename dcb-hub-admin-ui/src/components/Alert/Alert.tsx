@@ -3,30 +3,48 @@ import { capitalize } from "@mui/material/utils";
 import { useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
 
-export default function Alert(props: any) {
+interface AlertProps {
+	severityType: any;
+	onCloseFunc?: any;
+	variant?: any;
+	textColor?: string;
+	titleShown?: boolean;
+	closeButtonShown?: boolean;
+	alertText?: any;
+}
+
+export default function Alert({
+	severityType,
+	onCloseFunc,
+	variant,
+	textColor,
+	titleShown,
+	closeButtonShown,
+	alertText,
+}: AlertProps) {
 	const { t } = useTranslation();
 	return (
 		<>
 			<MUIAlert
-				severity={props.severityType}
-				onClose={props.onCloseFunc}
-				variant={props.variant}
+				severity={severityType}
+				onClose={onCloseFunc}
+				variant={variant}
 				action={
-					<IconButton
-						size="small"
-						onClick={props.onCloseFunc}
-						title={t("ui.action.close_alert")}
-					>
-						<MdClose color={props.textColor} />
-					</IconButton>
+					closeButtonShown ? (
+						<IconButton
+							size="small"
+							onClick={onCloseFunc}
+							title={t("ui.action.close_alert")}
+						>
+							<MdClose color={textColor} />
+						</IconButton>
+					) : null
 				}
 			>
-				{props.titleShown != false ? (
-					<AlertTitle color={props.textColor}>
-						{capitalize(props.severityType)}
-					</AlertTitle>
+				{titleShown != false ? (
+					<AlertTitle color={textColor}>{capitalize(severityType)}</AlertTitle>
 				) : null}
-				{props.alertText}
+				{alertText}
 			</MUIAlert>
 		</>
 	);

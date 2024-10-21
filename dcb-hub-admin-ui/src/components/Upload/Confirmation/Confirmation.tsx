@@ -260,7 +260,8 @@ const Confirmation = ({
 							}}
 							components={{ paragraph: <p />, bold: <strong /> }}
 						/>
-						<Alert // Disable close button on this one
+						<Alert
+							closeButtonShown={false}
 							severityType="warning"
 							alertText={
 								<Trans
