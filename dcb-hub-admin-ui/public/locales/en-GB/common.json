@@ -649,8 +649,8 @@
 	"mappings": {
 		"add_success": "{{fileName}} has been added and is ready to be uploaded.",
 		"alert_text": "Failed to fetch the mappings, please refresh the page.",
-		"upload_success": "{{count}} {{category}} for {{code}} were added. Select “Close” to view the imported {{category}}.",
-		"upload_success_replacement": "{{addedCount}} {{category}} for {{code}} were added and {{deletedMappingCount}} mappings were deleted. Select “Close” to view the imported {{category}}",
+		"upload_success": "{{count}} {{category}} for {{code}} were added.",
+		"upload_success_replacement": "{{addedCount}} {{category}} for {{code}} were added and {{deletedMappingCount}} mappings were deleted.",
 		"drag_n_drop": "Drag and drop or click to select a file.",
 		"file": "File",
 		"file_empty": "{{fileName}} has no content. The file must not be empty. Please select a file with content.",

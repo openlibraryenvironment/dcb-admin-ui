@@ -19,8 +19,9 @@ export const getErrorMessageKey = (message: string, type: string): string => {
 		case message.includes("fromContext or toContext") &&
 			type == "Reference value mappings":
 			return "mappings.mismatched_context";
-		case message.includes("fromContext or toContext") &&
-			type == "Numeric range mappings":
+		case message.includes(
+			"The context does not match the Host LMS code you supplied.",
+		) && type == "Numeric range mappings":
 			return "mappings.mismatched_context_nrm";
 		default:
 			return "mappings.unknown_error";

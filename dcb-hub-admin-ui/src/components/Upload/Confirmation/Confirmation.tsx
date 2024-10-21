@@ -128,8 +128,8 @@ const Confirmation = ({
 	);
 	const mappingExportLink =
 		mappingType == "Reference value mappings"
-			? "/mappings/allReferenceValueMappings"
-			: "/mappings/allNumericRangeMappings";
+			? "/mappings/allReferenceValue"
+			: "/mappings/allNumericRange";
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -147,7 +147,10 @@ const Confirmation = ({
 				});
 			case "mappings":
 				return t("mappings.confirmation_header", {
-					category: mappingCategory + " " + mappingType?.toLowerCase(),
+					category:
+						mappingCategory == "all"
+							? mappingType?.toLowerCase()
+							: mappingCategory + " " + mappingType?.toLowerCase(),
 				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
@@ -247,7 +250,10 @@ const Confirmation = ({
 						<Trans
 							i18nKey="mappings.confirmation_body"
 							values={{
-								category: mappingCategory + " " + mappingType?.toLowerCase(),
+								category:
+									mappingCategory == "all"
+										? mappingType?.toLowerCase()
+										: mappingCategory + " " + mappingType?.toLowerCase(),
 								existingMappingCount,
 								code,
 								fileName,
@@ -262,7 +268,12 @@ const Confirmation = ({
 									values={{ type: mappingType?.toLowerCase() }}
 									components={{
 										linkComponent: (
-											<Link key="grid-export-link" href={mappingExportLink} />
+											<Link
+												key="grid-export-link"
+												href={mappingExportLink}
+												target="_blank"
+												rel="noopener noreferrer"
+											/>
 										),
 										paragraph: <p />,
 									}}
