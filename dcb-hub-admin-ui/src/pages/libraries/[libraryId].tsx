@@ -581,9 +581,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 
 	// These are pre-sets for the library Patron Request grids.
 	const exceptionQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND status: "ERROR"`;
-	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
-	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
-	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
+	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
+	const inProgressQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`;
+	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
 
 	const refValuePatronTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "patronType" OR fromCategory: "patronType") AND (NOT deleted:true)`;
 	const refValueItemTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
