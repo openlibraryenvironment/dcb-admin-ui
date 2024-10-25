@@ -2,6 +2,7 @@ import {
 	DataGridPro,
 	GridActionsCellItem,
 	GridColDef,
+	GridColumnVisibilityModel,
 	GridEventListener,
 	GridFilterModel,
 	GridRenderEditCellParams,
@@ -82,7 +83,7 @@ export default function ServerPaginationGrid({
 	selectable: boolean;
 	pageSize: number;
 	columns: GridColDef[];
-	columnVisibilityModel?: any;
+	columnVisibilityModel?: GridColumnVisibilityModel;
 	sortModel?: any;
 	noResultsMessage?: string;
 	noDataMessage?: string;
@@ -105,11 +106,11 @@ export default function ServerPaginationGrid({
 		sortOptions: storedSortOptions,
 		// filterOptions: storedFilterOptions,
 		// paginationModel: storedPaginationModel,
-		// columnVisibility: storedColumnVisibility,
+		columnVisibility: storedColumnVisibility,
 		setSortOptions,
 		// setFilterOptions,
 		// setPaginationModel,
-		// setColumnVisibility,
+		setColumnVisibility,
 	} = useGridStore();
 
 	// The core type differs from the regular type prop, because it is the 'core data type' - i.e. if type is CircStatus, details type is RefValueMappings
@@ -271,6 +272,12 @@ export default function ServerPaginationGrid({
 		},
 		[sortAttribute, sortDirection, setSortOptions, type],
 	);
+
+	const handleColumnVisibilityModelChange = (
+		newModel: GridColumnVisibilityModel,
+	) => {
+		setColumnVisibility(type, newModel);
+	};
 
 	const onFilterChange = useCallback(
 		(filterModel: GridFilterModel) => {
@@ -737,6 +744,7 @@ export default function ServerPaginationGrid({
 				// sortingOrder={['asc', 'desc']} // If enabled, this will remove the 'null' sorting option
 				onSortModelChange={handleSortModelChange}
 				onPaginationModelChange={setPaginationModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
 				autoHeight={true}
 				slots={{
 					...staticSlots,
@@ -761,7 +769,8 @@ export default function ServerPaginationGrid({
 				// https://stackoverflow.com/questions/75697255/how-to-change-mui-datagrid-toolbar-label-and-input-placeholder-text
 				initialState={{
 					columns: {
-						columnVisibilityModel,
+						columnVisibilityModel:
+							storedColumnVisibility[type] || columnVisibilityModel,
 					},
 					sorting: {
 						sortModel: sortOptions.field
