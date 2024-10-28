@@ -49,8 +49,8 @@
 			"contact_sysadmin": "contact your system administrator",
 			"go_home": "Go to $t(nav.home) page",
 			"go_back": "Go back",
-			"next": "Next",
-			"previous": "Previous",
+			"newer": "Newer",
+			"older": "Older",
 			"reload": "Reload page",
 			"toggle_on": "Toggle onboarding mode",
 			"view_error_details": "View error details"
@@ -141,8 +141,8 @@
 			"try_later": "Please try again later",
 			"wait": "Please wait",
 			"check_address": "Please check the web address",
-			"no_next_audit": "This is the last audit entry in the log.",
-			"no_previous_audit": "This is the most recent audit entry in the log."
+			"oldest_entry": "This is the oldest audit entry in the log.",
+			"newest_entry": "This is the most recent audit entry in the log."
 		},
 		"logo": "{{owner}} logo",
 		"unsaved_changes": {

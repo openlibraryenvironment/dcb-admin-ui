@@ -42,53 +42,67 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 		variables: {
 			query: "patronRequest:" + patronRequestId,
 			order: "auditDate",
-			orderBy: "DESC",
+			orderBy: "ASC",
 			pagesize: 100,
 			pageno: 0,
 		},
-		skip: !patronRequestId, // if patron request ID is undefined, do not run this query
-		onCompleted: (data) => {
-			// Check if we have all the audits
+		skip: !patronRequestId,
+		onCompleted: async (data) => {
 			if (data.audits.content.length < data.audits.totalSize) {
-				// Calculate how many pages we need to fetch - must match page size.
 				const totalPages = Math.ceil(data.audits.totalSize / 100);
-
-				// Create an array of promises for each additional page
-				// This ensures we get all the pages - when using standard fetchmore we were only getting a max of 2 additional pages.
-				const fetchPromises = Array.from(
-					{ length: totalPages - 1 },
-					(_, index) =>
-						fetchMore({
+				// Fetch pages in sequence to maintain the order - as order is key here
+				for (let page = 1; page < totalPages; page++) {
+					try {
+						await fetchMore({
 							variables: {
-								pageno: index + 1,
+								pageno: page,
 							},
 							updateQuery: (prev, { fetchMoreResult }) => {
 								if (!fetchMoreResult) return prev;
+								// Let's combine and sort all additional items by auditdate
+								const allContent = [
+									...prev.audits.content,
+									...fetchMoreResult.audits.content,
+								];
+
+								const sortedContent = allContent.sort((a, b) => {
+									return (
+										new Date(a.auditDate).getTime() -
+										new Date(b.auditDate).getTime()
+									);
+								});
+
 								return {
 									audits: {
 										...fetchMoreResult.audits,
-										content: [
-											...prev.audits.content,
-											...fetchMoreResult.audits.content,
-										],
+										content: sortedContent,
 									},
 								};
 							},
-						}),
-				);
-				// Execute all fetch promises
-				Promise.all(fetchPromises).catch((error) =>
-					console.error("Error fetching additional audit pages:", error),
-				);
+						});
+					} catch (error) {
+						console.error(`Error fetching page ${page}:`, error);
+						break; // There's an error: stop fetching
+					}
+				}
 			}
 		},
 	});
 	// Figure out our position in the list of audits
 	// We only need to understand 'next' and 'previous' and get their IDs so we can link.
 	const otherAudits = otherAuditsData?.audits?.content ?? [];
+	console.log(
+		"Audit dates in order:",
+		otherAudits.map((audit: { auditDate: any; id: any }) => ({
+			date: audit.auditDate,
+			id: audit.id,
+		})),
+	);
+
 	const currentAuditIndex = otherAudits.findIndex(
 		(item: AuditItem) => item.id === auditId,
 	);
+	console.log(currentAuditIndex);
 	// Then grab previous and next audit entries.
 	const previousAudit =
 		currentAuditIndex > 0 ? otherAudits[currentAuditIndex - 1] : null;
@@ -96,8 +110,12 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 		currentAuditIndex < otherAudits.length - 1
 			? otherAudits[currentAuditIndex + 1]
 			: null;
+
+	// previous is older
 	const previousAuditId =
 		currentAuditIndex > 0 ? otherAudits[currentAuditIndex - 1]?.id : null;
+
+	// next is newer
 	const nextAuditId =
 		currentAuditIndex < otherAudits.length - 1
 			? otherAudits[currentAuditIndex + 1]?.id
@@ -230,7 +248,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 										? t("ui.info.description", {
 												description: previousAudit?.briefDescription,
 											})
-										: t("ui.info.no_previous_audit")
+										: t("ui.info.oldest_entry")
 								}
 							>
 								<span>
@@ -246,7 +264,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 											)
 										}
 									>
-										{t("ui.action.previous")}
+										{t("ui.action.older")}
 									</Button>
 								</span>
 							</Tooltip>
@@ -256,7 +274,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 										? t("ui.info.description", {
 												description: nextAudit?.briefDescription,
 											})
-										: t("ui.info.no_next_audit")
+										: t("ui.info.newest_entry")
 								}
 							>
 								<span>
@@ -272,7 +290,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 											)
 										}
 									>
-										{t("ui.action.next")}
+										{t("ui.action.newer")}
 									</Button>
 								</span>
 							</Tooltip>
