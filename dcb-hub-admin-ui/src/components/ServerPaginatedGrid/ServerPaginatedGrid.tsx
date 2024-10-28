@@ -105,11 +105,11 @@ export default function ServerPaginationGrid({
 	const {
 		sortOptions: storedSortOptions,
 		// filterOptions: storedFilterOptions,
-		// paginationModel: storedPaginationModel,
+		paginationModel: storedPaginationModel,
 		columnVisibility: storedColumnVisibility,
 		setSortOptions,
 		// setFilterOptions,
-		// setPaginationModel,
+		setPaginationModel,
 		setColumnVisibility,
 	} = useGridStore();
 
@@ -139,10 +139,19 @@ export default function ServerPaginationGrid({
 	const { t } = useTranslation();
 	const apiRef = useGridApiRef(); // Use the API ref
 	const router = useRouter();
-	const [paginationModel, setPaginationModel] = useState({
-		page: 0,
-		pageSize: pageSize,
+	const [paginationModel, setPaginationModelState] = useState({
+		page: storedPaginationModel[type]?.page ?? 0,
+		pageSize: storedPaginationModel[type]?.pageSize ?? pageSize,
 	});
+
+	const handlePaginationModelChange = (newModel: {
+		page: number;
+		pageSize: number;
+	}) => {
+		setPaginationModelState(newModel);
+		setPaginationModel(type, newModel.page, newModel.pageSize);
+	};
+
 	const { data: session }: { data: any } = useSession();
 
 	// Mutations
@@ -743,7 +752,7 @@ export default function ServerPaginationGrid({
 				sortingMode="server"
 				// sortingOrder={['asc', 'desc']} // If enabled, this will remove the 'null' sorting option
 				onSortModelChange={handleSortModelChange}
-				onPaginationModelChange={setPaginationModel}
+				onPaginationModelChange={handlePaginationModelChange}
 				onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
 				autoHeight={true}
 				slots={{
