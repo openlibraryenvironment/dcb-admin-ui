@@ -1,5 +1,7 @@
 export const getErrorMessageKey = (message: string, type: string): string => {
 	switch (true) {
+		case message.includes("Invalid file type"):
+			return "mappings.invalid_file_type";
 		case message.includes("exceeds the limit"):
 			return "mappings.file_too_large";
 		case message.includes("File is empty"):

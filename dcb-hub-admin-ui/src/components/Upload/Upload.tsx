@@ -16,11 +16,16 @@ import { MdCloudUpload } from "react-icons/md";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
 import { getErrorMessageKey } from "src/helpers/MappingsImport/getErrorMessageKey";
 import Link from "next/link";
+import { checkValidFileType } from "src/helpers/checkValidFileType";
 
 // WIP: Re-implementing what was previously done for us by Uppy.
 // Long-term aim: feature parity with Uppy for what we need and a better UI.
 const { publicRuntimeConfig } = getConfig();
 const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
+const ALLOWED_FILE_TYPES = {
+	"text/csv": [".csv"],
+	"text/tab-separated-values": [".tsv"],
+};
 
 const FileUpload = ({
 	category,
@@ -142,6 +147,15 @@ const FileUpload = ({
 				setValidationErrorDisplayed(true);
 				setValidationErrorMessage("File is empty");
 				return;
+			} else if (!checkValidFileType(file, ALLOWED_FILE_TYPES)) {
+				setFailedFile(file);
+				setErrorDisplayed(true);
+				setValidationErrorDisplayed(true);
+				setValidationErrorMessage(
+					"Invalid file type. Only CSV and TSV files are allowed.",
+				);
+
+				return;
 			}
 			setAddedFile(file);
 			setErrorDisplayed(false);
@@ -223,9 +237,7 @@ const FileUpload = ({
 					if (fileInput) {
 						fileInput.value = "";
 					}
-				}, 2000);
-
-				// clearSelections();
+				}, 3000);
 			})
 			.catch((error) => {
 				// Error handling
@@ -302,7 +314,10 @@ const FileUpload = ({
 					t={t}
 					components={{
 						linkComponent: (
-							<Link key="import-user-guide" href="https://www.k-int.com/" />
+							<Link
+								key="import-user-guide"
+								href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
+							/>
 						),
 						paragraph: <p />,
 					}}
@@ -384,6 +399,7 @@ const FileUpload = ({
 								? getErrorMessageKey(validationErrorMessage, type)
 								: "mappings.file_size_generic"
 						}
+						components={{ bold: <strong />, paragraph: <p /> }}
 						values={{
 							fileName: failedFile ? failedFile.name : "",
 							fileSize: failedFile ? fileSizeConvertor(failedFile.size) : 0,
