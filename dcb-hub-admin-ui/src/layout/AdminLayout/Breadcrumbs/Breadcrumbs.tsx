@@ -82,6 +82,8 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 						return "nav.search.cluster";
 					} else if (pathArray[2] === "items") {
 						return "nav.search.items";
+					} else if (pathArray[2] === "identifiers") {
+						return "nav.search.identifiers";
 					}
 				}
 				if (nestedKey.includes("#auditlog")) {
