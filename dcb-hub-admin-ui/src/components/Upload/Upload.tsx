@@ -147,7 +147,7 @@ const FileUpload = ({
 				setValidationErrorDisplayed(true);
 				setValidationErrorMessage("File is empty");
 				return;
-			} else if (!checkValidFileType(file, ALLOWED_FILE_TYPES)) {
+			} else if (checkValidFileType(file, ALLOWED_FILE_TYPES) == false) {
 				setFailedFile(file);
 				setErrorDisplayed(true);
 				setValidationErrorDisplayed(true);
