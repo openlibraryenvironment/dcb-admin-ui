@@ -30,6 +30,7 @@
 		"search": {
 			"name": "Shared index",
 			"cluster": "Cluster",
+			"identifiers": "Identifiers",
 			"items": "Items"
 		},
 		"serviceInfo": {

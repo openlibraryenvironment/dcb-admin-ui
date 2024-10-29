@@ -124,6 +124,17 @@ const Search: NextPage = () => {
 				</Link>
 			),
 		},
+		{
+			field: "identifiers",
+			headerName: t("search.identifiers"),
+			minWidth: 100,
+			flex: 0.3,
+			renderCell: (params) => (
+				<Link href={`/search/${params.row.id}/identifiers`}>
+					{t("search.identifiers")}
+				</Link>
+			),
+		},
 	];
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
