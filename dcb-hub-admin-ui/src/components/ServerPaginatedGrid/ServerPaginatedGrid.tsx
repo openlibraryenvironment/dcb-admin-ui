@@ -104,11 +104,11 @@ export default function ServerPaginationGrid({
 }) {
 	const {
 		sortOptions: storedSortOptions,
-		// filterOptions: storedFilterOptions,
+		filterOptions: storedFilterOptions,
 		paginationModel: storedPaginationModel,
 		columnVisibility: storedColumnVisibility,
 		setSortOptions,
-		// setFilterOptions,
+		setFilterOptions,
 		setPaginationModel,
 		setColumnVisibility,
 	} = useGridStore();
@@ -120,7 +120,9 @@ export default function ServerPaginationGrid({
 		field: storedSortOptions[type]?.field || sortAttribute,
 		direction: storedSortOptions[type]?.direction || sortDirection,
 	});
-	const [filterOptions, setFilterOptions] = useState("");
+	const [filterOptions, setFilterOptionsState] = useState(
+		storedFilterOptions[type]?.filterString ?? "",
+	);
 	const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
 	const [entityToDelete, setEntityToDelete] = useState<string | null>(null);
 	const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
@@ -328,9 +330,10 @@ export default function ServerPaginationGrid({
 						? `${presetQueryVariables} && ${filterQuery}`
 						: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
 			// Set the final filter options
-			setFilterOptions(filterQuery);
+			setFilterOptionsState(filterQuery);
+			setFilterOptions(type, filterQuery, filterModel);
 		},
-		[presetQueryVariables, type],
+		[presetQueryVariables, setFilterOptions, type],
 	);
 
 	const sortField =
@@ -790,6 +793,9 @@ export default function ServerPaginationGrid({
 									},
 								]
 							: sortModel,
+					},
+					filter: {
+						filterModel: storedFilterOptions[type]?.filterModel,
 					},
 				}}
 				slotProps={{
