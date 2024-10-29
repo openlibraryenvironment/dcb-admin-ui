@@ -127,7 +127,7 @@ const AllMappings: NextPage = () => {
 						editable: true,
 					},
 					{
-						field: "last_imported",
+						field: "lastImported",
 						headerName: t("common.mappings.last_imported"),
 						minWidth: 100,
 						flex: 0.5,
@@ -143,6 +143,16 @@ const AllMappings: NextPage = () => {
 							}
 						},
 					},
+					{
+						field: "toCategory",
+						headerName: "To category",
+						minWidth: 50,
+						flex: 0.5,
+						filterOperators: standardFilters,
+						editable: true,
+						valueGetter: (value: any, row: { toCategory: any }) =>
+							row?.toCategory,
+					},
 				]}
 				noDataMessage={t("mappings.import_mappings", {
 					category: t("mappings.ref_value").toLowerCase(),
@@ -150,17 +160,24 @@ const AllMappings: NextPage = () => {
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
 				// This is how to set the default sort order
-				sortModel={[{ field: "fromContext", sort: "asc" }]}
-				sortDirection="ASC"
-				sortAttribute="fromContext"
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				sortDirection="DESC"
+				sortAttribute="lastImported"
 				pageSize={20}
 				disableHoverInteractions={true}
 				columnVisibilityModel={{
-					last_imported: false,
+					lastImported: false,
+					toCategory: false,
 				}}
 			/>
 			<div>
-				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}
+				{showImport ? (
+					<Import
+						show={showImport}
+						onClose={closeImport}
+						mappingType="Reference value mappings"
+					/>
+				) : null}
 			</div>
 		</AdminLayout>
 	);

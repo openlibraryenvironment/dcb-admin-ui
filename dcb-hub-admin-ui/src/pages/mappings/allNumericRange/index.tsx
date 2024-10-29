@@ -112,7 +112,7 @@ const AllNumericRange: NextPage = () => {
 						editable: true,
 					},
 					{
-						field: "last_imported",
+						field: "lastImported",
 						headerName: t("common.mappings.last_imported"),
 						minWidth: 100,
 						flex: 0.5,
@@ -132,17 +132,23 @@ const AllNumericRange: NextPage = () => {
 				noDataMessage={t("mappings.no_results")}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}
-				sortModel={[{ field: "context", sort: "asc" }]}
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
 				pageSize={20}
-				sortDirection="ASC"
-				sortAttribute="context"
+				sortDirection="DESC"
+				sortAttribute="lastImported"
 				disableHoverInteractions={true}
 				columnVisibilityModel={{
-					last_imported: false,
+					lastImported: false,
 				}}
 			/>
 			<Box>
-				{showImport ? <Import show={showImport} onClose={closeImport} /> : null}
+				{showImport ? (
+					<Import
+						show={showImport}
+						onClose={closeImport}
+						mappingType="Numeric range mappings"
+					/>
+				) : null}
 			</Box>
 		</AdminLayout>
 	);

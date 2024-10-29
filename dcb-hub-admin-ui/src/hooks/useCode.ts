@@ -1,8 +1,5 @@
 import { create } from "zustand";
 
-// For managing the few global state things not covered by Apollo
-// Won't stay as just 'code' - add as necessary.
-
 type State = {
 	code: string;
 	category: string;
@@ -11,14 +8,21 @@ type State = {
 type Action = {
 	updateCode: (code: State["code"]) => void;
 	updateCategory: (category: State["category"]) => void;
+	resetCode: () => void;
+	resetAll: () => void;
 };
 
-// Create the store, which includes both state and (optionally) actions https://docs.pmnd.rs/zustand/guides/updating-state
-const useCode = create<State & Action>((set) => ({
+const initialState: State = {
 	code: "",
-	category: "CirculationStatus",
-	updateCode: (code) => set(() => ({ code: code })),
-	updateCategory: (category) => set(() => ({ category: category })),
+	category: "",
+};
+
+const useCode = create<State & Action>((set) => ({
+	...initialState,
+	updateCode: (code) => set({ code }),
+	updateCategory: (category) => set({ category }),
+	resetCode: () => set({ code: "" }),
+	resetAll: () => set(initialState),
 }));
 
 export default useCode;

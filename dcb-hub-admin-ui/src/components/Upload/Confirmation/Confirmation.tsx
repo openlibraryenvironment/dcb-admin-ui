@@ -3,13 +3,13 @@ import { useLazyQuery } from "@apollo/client";
 import Alert from "@components/Alert/Alert";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import Link from "@components/Link/Link";
 import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
 	DialogActions,
 	Button,
-	useTheme,
 	Box,
 	Typography,
 	Divider,
@@ -49,6 +49,7 @@ type ConfirmType = {
 	participation?: string;
 	library?: string;
 	mappingCategory?: string;
+	mappingType?: string;
 	editInformation?: any;
 	actionInfo?: string;
 	entity?: string;
@@ -66,12 +67,12 @@ const Confirmation = ({
 	participation,
 	library,
 	mappingCategory,
+	mappingType,
 	editInformation,
 	entity,
 	entityId,
 }: ConfirmType) => {
 	const { t } = useTranslation();
-	const theme = useTheme();
 	const validationSchema = useMemo(
 		() =>
 			Yup.object({
@@ -125,6 +126,10 @@ const Confirmation = ({
 	const doPatronRequestsExist = !isEmpty(
 		locationPatronRequests?.patronRequests?.content,
 	);
+	const mappingExportLink =
+		mappingType == "Reference value mappings"
+			? "/mappings/allReferenceValue"
+			: "/mappings/allNumericRange";
 
 	const getHeaderText = () => {
 		switch (type) {
@@ -142,7 +147,10 @@ const Confirmation = ({
 				});
 			case "mappings":
 				return t("mappings.confirmation_header", {
-					category: mappingCategory?.toLowerCase(),
+					category:
+						mappingCategory == "all"
+							? mappingType?.toLowerCase()
+							: mappingCategory + " " + mappingType?.toLowerCase(),
 				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
@@ -238,11 +246,14 @@ const Confirmation = ({
 				);
 			case "mappings":
 				return (
-					<Box>
+					<Stack spacing={2}>
 						<Trans
 							i18nKey="mappings.confirmation_body"
 							values={{
-								category: mappingCategory?.toLowerCase(),
+								category:
+									mappingCategory == "all"
+										? mappingType?.toLowerCase()
+										: mappingCategory + " " + mappingType?.toLowerCase(),
 								existingMappingCount,
 								code,
 								fileName,
@@ -250,14 +261,28 @@ const Confirmation = ({
 							components={{ paragraph: <p />, bold: <strong /> }}
 						/>
 						<Alert
+							closeButtonShown={false}
 							severityType="warning"
-							alertText={t("mappings.confirmation_warning", {
-								mappings: mappingCategory?.toLowerCase(),
-							})}
-							textColor={theme.palette.common.black}
+							alertText={
+								<Trans
+									i18nKey={"mappings.confirmation_warning"}
+									values={{ type: mappingType?.toLowerCase() }}
+									components={{
+										linkComponent: (
+											<Link
+												key="grid-export-link"
+												href={mappingExportLink}
+												target="_blank"
+												rel="noopener noreferrer"
+											/>
+										),
+										paragraph: <p />,
+									}}
+								/>
+							}
 						/>
-						{t("mappings.confirmation_replace")}
-					</Box>
+						<Typography>{t("mappings.confirmation_replace")}</Typography>
+					</Stack>
 				);
 			case "participationStatus":
 				return (

@@ -44,7 +44,7 @@ export const standardRefValueMappingColumns = [
 		valueGetter: (value: any, row: { toValue: any }) => row?.toValue,
 	},
 	{
-		field: "last_imported",
+		field: "lastImported",
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
@@ -58,6 +58,15 @@ export const standardRefValueMappingColumns = [
 				return formattedDate;
 			}
 		},
+	},
+	{
+		field: "toCategory",
+		headerName: "To category",
+		minWidth: 50,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		editable: true,
+		valueGetter: (value: any, row: { toCategory: any }) => row?.toCategory,
 	},
 ];
 
@@ -100,7 +109,7 @@ export const refValueMappingColumnsNoCategoryFilter = [
 		valueGetter: (value: any, row: { toValue: any }) => row?.toValue,
 	},
 	{
-		field: "last_imported",
+		field: "lastImported",
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
@@ -114,6 +123,15 @@ export const refValueMappingColumnsNoCategoryFilter = [
 				return formattedDate;
 			}
 		},
+	},
+	{
+		field: "toCategory",
+		headerName: "To category",
+		minWidth: 50,
+		flex: 0.5,
+		filterOperators: standardFilters,
+		editable: true,
+		valueGetter: (value: any, row: { toCategory: any }) => row?.toCategory,
 	},
 ];
 
@@ -162,7 +180,7 @@ export const standardNumRangeMappingColumns = [
 		filterOperators: standardFilters,
 	},
 	{
-		field: "last_imported",
+		field: "lastImported",
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
@@ -224,7 +242,7 @@ export const numRangeMappingColumnsNoCategoryFilter = [
 		editable: true,
 	},
 	{
-		field: "last_imported",
+		field: "lastImported",
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,

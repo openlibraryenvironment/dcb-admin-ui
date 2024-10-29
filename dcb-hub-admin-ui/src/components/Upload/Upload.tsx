@@ -1,6 +1,6 @@
 import { Button, Divider, Stack, Typography } from "@mui/material";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "next-i18next";
 import getConfig from "next/config";
 import useCode from "@hooks/useCode";
@@ -14,13 +14,28 @@ import {
 } from "src/queries/queries";
 import { MdCloudUpload } from "react-icons/md";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
+import { getErrorMessageKey } from "src/helpers/MappingsImport/getErrorMessageKey";
+import Link from "next/link";
+import { checkValidFileType } from "src/helpers/checkValidFileType";
 
 // WIP: Re-implementing what was previously done for us by Uppy.
 // Long-term aim: feature parity with Uppy for what we need and a better UI.
 const { publicRuntimeConfig } = getConfig();
 const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
+const ALLOWED_FILE_TYPES = {
+	"text/csv": [".csv"],
+	"text/tab-separated-values": [".tsv"],
+};
 
-const FileUpload = ({ category, onCancel }: any) => {
+const FileUpload = ({
+	category,
+	onCancel,
+	type,
+}: {
+	category: string;
+	onCancel: () => void;
+	type: "Reference value mappings" | "Numeric range mappings";
+}) => {
 	const { t } = useTranslation();
 	const { data } = useSession();
 	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
@@ -30,55 +45,54 @@ const FileUpload = ({ category, onCancel }: any) => {
 	const [replacement, setReplacement] = useState(false);
 	const [existingMappingCount, setExistingMappingCount] = useState(0);
 	const [isConfirmOpen, setConfirmOpen] = useState(false);
-	const code = useCode((state) => state.code);
+	const { code, resetAll } = useCode();
 	const [uploadErrorMessage, setUploadErrorMessage] = useState("");
 	const [validationErrorMessage, setValidationErrorMessage] = useState("");
 	const [successCount, setSuccessCount] = useState(0);
+	const [ignoredCount, setIgnoredCount] = useState(0);
+	const [deletedCount, setDeletedCount] = useState(0);
 	const [addedFile, setAddedFile] = useState<File | null>(null);
 	const [failedFile, setFailedFile] = useState<File | null>(null);
 	const [uploadButtonClicked, setUploadButtonClicked] = useState(false);
 	const headers = { Authorization: `Bearer ${data?.accessToken}` };
 
-	const getErrorMessageKey = (message: string): string => {
-		switch (true) {
-			case message.includes("exceeds the limit"):
-				return "mappings.file_too_large";
-			case message.includes("File is empty"):
-				return "mappings.file_empty";
-			case message.includes("You can only upload"):
-				return "mappings.wrong_file_type";
-			case message.includes("Empty value"):
-				return "mappings.validation_missing_values";
-			case message.includes("expected headers") &&
-				category == "Reference value mappings":
-				return "mappings.validation_expected_headers";
-			case message.includes("expected headers") &&
-				category == "Numeric range mappings":
-				return "mappings.validation_expected_headers_nrm";
-			case message.includes("provide a Host LMS"):
-				return "mappings.validation_no_hostlms";
-			case message.includes("fromContext or toContext") &&
-				category == "Reference value mappings":
-				return "mappings.mismatched_context";
-			case message.includes("fromContext or toContext") &&
-				category == "Numeric range mappings":
-				return "mappings.mismatched_context_nrm";
-			default:
-				return "mappings.unknown_error";
-		}
+	const refVariablesAll = {
+		query:
+			"(toContext:" +
+			code +
+			" OR fromContext: " +
+			code +
+			") AND NOT deleted:true",
+		pagesize: 200,
+	};
+
+	const refVariablesCategory = {
+		query:
+			"(toContext:" +
+			code +
+			" OR fromContext: " +
+			code +
+			") AND (fromCategory: " +
+			category +
+			" OR toCategory: " +
+			category +
+			") AND NOT deleted:true",
+		pagesize: 200,
+	};
+
+	const numRangeVariablesAll = {
+		query: "context:" + code + " AND NOT deleted:true",
+		pagesize: 200,
+	};
+
+	const numRangeVariablesDomain = {
+		query:
+			"context:" + code + " AND domain:" + category + " AND NOT deleted:true",
+		pagesize: 200,
 	};
 
 	const [checkMappingsPresent] = useLazyQuery(checkExistingMappings, {
-		variables: {
-			query:
-				"(toContext:" +
-				code +
-				" OR fromContext: " +
-				code +
-				") AND deleted: false",
-			pagesize: 200,
-		},
-		pollInterval: 0, // This only ever needs to run when explicitly triggered - no polling needed
+		variables: category == "all" ? refVariablesAll : refVariablesCategory,
 		fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
 		onCompleted: (data) => {
 			setExistingMappingCount(data?.referenceValueMappings?.totalSize);
@@ -100,12 +114,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 	const [checkNumericRangeMappingsPresent] = useLazyQuery(
 		checkExistingNumericRangeMappings,
 		{
-			variables: {
-				query: "context:" + code + " AND deleted: false",
-				pagesize: 200,
-			},
 			fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
-			pollInterval: 0, // This only ever needs to run when explicitly triggered - no polling needed
 			onCompleted: (data) => {
 				setExistingMappingCount(data?.numericRangeMappings?.totalSize);
 				if (uploadButtonClicked) {
@@ -138,6 +147,15 @@ const FileUpload = ({ category, onCancel }: any) => {
 				setValidationErrorDisplayed(true);
 				setValidationErrorMessage("File is empty");
 				return;
+			} else if (checkValidFileType(file, ALLOWED_FILE_TYPES) == false) {
+				setFailedFile(file);
+				setErrorDisplayed(true);
+				setValidationErrorDisplayed(true);
+				setValidationErrorMessage(
+					"Invalid file type. Only CSV and TSV files are allowed.",
+				);
+
+				return;
 			}
 			setAddedFile(file);
 			setErrorDisplayed(false);
@@ -155,6 +173,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 
 	const handleCancelUpload = () => {
 		setConfirmOpen(false);
+		setUploadButtonClicked(false); // Reset uploadButtonClicked when cancelling
 	};
 
 	const handleReset = () => {
@@ -183,7 +202,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 		formData.append("file", addedFile);
 		formData.append("code", code);
 		formData.append("mappingCategory", category);
-		console.log(changeCategory);
+		formData.append("mappingType", type);
 		if (reason) {
 			formData.append("reason", reason);
 		} else {
@@ -203,8 +222,22 @@ const FileUpload = ({ category, onCancel }: any) => {
 			.then((response) => {
 				// Handle successful upload response
 				setSuccess(true);
-				setSuccessCount(response.data.recordsImported || 0);
+				setSuccessCount(response.data.recordsImported ?? 0);
+				setDeletedCount(response.data.recordsDeleted ?? 0);
+				setIgnoredCount(response.data.recordsIgnored ?? 0);
 				setUploadButtonClicked(false);
+				setTimeout(() => {
+					onCancel(); // Close the modal
+					resetAll(); // Clear all selected values
+					setAddedFile(null);
+					// Reset file input
+					const fileInput = document.getElementById(
+						"file-upload",
+					) as HTMLInputElement;
+					if (fileInput) {
+						fileInput.value = "";
+					}
+				}, 3000);
 			})
 			.catch((error) => {
 				// Error handling
@@ -231,37 +264,34 @@ const FileUpload = ({ category, onCancel }: any) => {
 	useEffect(() => {
 		setUploadButtonClicked(false);
 		setConfirmOpen(false);
-	}, [code]);
+	}, [code, category]);
 
 	const filesAdded = addedFile !== null;
 
-	const handleUpload = useCallback(() => {
+	const handleUpload = () => {
 		if (!addedFile) {
 			setErrorDisplayed(true);
 			setUploadErrorMessage("No file selected for upload.");
 			return;
 		}
-
 		setUploadButtonClicked(true);
-
 		if (code && category) {
-			if (category === "Reference value mappings") {
-				console.log("DEV: Ref value check in handleupload");
-				checkMappingsPresent();
+			if (type === "Reference value mappings") {
+				checkMappingsPresent({
+					variables:
+						category === "all" ? refVariablesAll : refVariablesCategory,
+				});
 			} else {
-				console.log("DEV: Numeric range check in handleupload");
-				checkNumericRangeMappingsPresent();
+				checkNumericRangeMappingsPresent({
+					variables:
+						category === "all" ? numRangeVariablesAll : numRangeVariablesDomain,
+				});
 			}
 		} else {
-			setConfirmOpen(false); // Close the confirmation modal if any condition is not met
+			setConfirmOpen(false);
+			setUploadButtonClicked(false); // Reset if there's no code
 		}
-	}, [
-		addedFile,
-		code,
-		category,
-		checkMappingsPresent,
-		checkNumericRangeMappingsPresent,
-	]);
+	};
 
 	return (
 		<Stack spacing={1}>
@@ -277,8 +307,21 @@ const FileUpload = ({ category, onCancel }: any) => {
 					{t("mappings.file")}
 				</Typography>
 				<Typography sx={{ fontWeight: "bold" }}>
-					{filesAdded ? addedFile.name : "No file selected"}
+					{filesAdded ? addedFile.name : t("mappings.no_file_selected")}
 				</Typography>
+				<Trans
+					i18nKey={"mappings.import_body_warning"}
+					t={t}
+					components={{
+						linkComponent: (
+							<Link
+								key="import-user-guide"
+								href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
+							/>
+						),
+						paragraph: <p />,
+					}}
+				/>
 				<Typography>{t("mappings.file_type_requirements")}</Typography>
 				<Typography> {t("mappings.file_size_requirements")}</Typography>
 				<label htmlFor="file-upload">
@@ -319,6 +362,7 @@ const FileUpload = ({ category, onCancel }: any) => {
 				code={code}
 				type="mappings"
 				mappingCategory={category}
+				mappingType={type}
 			/>
 			<TimedAlert
 				open={isErrorDisplayed}
@@ -326,14 +370,17 @@ const FileUpload = ({ category, onCancel }: any) => {
 				autoHideDuration={6000}
 				alertText={
 					<Trans
-						i18nKey={getErrorMessageKey(uploadErrorMessage)}
+						i18nKey={getErrorMessageKey(uploadErrorMessage, type)}
 						components={{ bold: <strong />, paragraph: <p /> }}
 						values={{
 							fileName: addedFile?.name,
-							category: category,
+							category:
+								category == "all"
+									? type?.toLowerCase()
+									: category + " " + type?.toLowerCase(),
 							count: successCount,
 							code: code,
-							deletedMappingCount: existingMappingCount,
+							deletedMappingCount: deletedCount, // existingMappingCount
 							addedCount: successCount,
 						}}
 					/>
@@ -345,14 +392,14 @@ const FileUpload = ({ category, onCancel }: any) => {
 				severityType="error"
 				open={isValidationErrorDisplayed}
 				autoHideDuration={6000}
-				// alertText={getErrorMessageKey(validationErrorMessage)}
 				alertText={
 					<Trans
 						i18nKey={
 							failedFile
-								? getErrorMessageKey(validationErrorMessage)
+								? getErrorMessageKey(validationErrorMessage, type)
 								: "mappings.file_size_generic"
 						}
+						components={{ bold: <strong />, paragraph: <p /> }}
 						values={{
 							fileName: failedFile ? failedFile.name : "",
 							fileSize: failedFile ? fileSizeConvertor(failedFile.size) : 0,
@@ -372,15 +419,22 @@ const FileUpload = ({ category, onCancel }: any) => {
 						i18nKey={
 							isSuccess && !replacement
 								? t("mappings.upload_success", {
-										category: category.toLowerCase(),
+										category:
+											category == "all"
+												? type?.toLowerCase()
+												: category + " " + type?.toLowerCase(),
 										count: successCount,
 										code: code,
+										ignoredCount: ignoredCount,
 									})
 								: t("mappings.upload_success_replacement", {
-										category: category.toLowerCase(),
+										category:
+											category == "all"
+												? type?.toLowerCase()
+												: category + " " + type?.toLowerCase(),
 										addedCount: successCount,
 										code: code,
-										deletedMappingCount: existingMappingCount,
+										deletedMappingCount: deletedCount,
 									})
 						}
 						components={{ bold: <strong />, paragraph: <p /> }}

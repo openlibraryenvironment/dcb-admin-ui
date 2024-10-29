@@ -1301,7 +1301,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								pageSize={20}
 								columnVisibilityModel={{
 									fromCategory: false,
-									last_imported: false,
+									lastImported: false,
+									toCategory: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1332,7 +1333,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									columnVisibilityModel={{
 										fromCategory: false,
-										last_imported: false,
+										lastImported: false,
+										toCategory: false,
 									}}
 								/>
 							) : null}
@@ -1360,7 +1362,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								sortAttribute="context"
 								columnVisibilityModel={{
 									domain: false,
-									last_imported: false,
+									lastImported: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1392,7 +1394,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortAttribute="context"
 									columnVisibilityModel={{
 										domain: false,
-										last_imported: false,
+										lastImported: false,
 									}}
 								/>
 							) : null}
@@ -1443,7 +1445,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								pageSize={20}
 								columnVisibilityModel={{
 									fromCategory: false,
-									last_imported: false,
+									lastImported: false,
+									toCategory: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1476,7 +1479,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									columnVisibilityModel={{
 										fromCategory: false,
-										last_imported: false,
+										lastImported: false,
+										toCategory: false,
 									}}
 								/>
 							) : null}
@@ -1527,7 +1531,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								pageSize={20}
 								columnVisibilityModel={{
 									fromCategory: false,
-									last_imported: false,
+									lastImported: false,
+									toCategory: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1560,7 +1565,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									pageSize={20}
 									columnVisibilityModel={{
 										fromCategory: false,
-										last_imported: false,
+										lastImported: false,
+										toCategory: false,
 									}}
 								/>
 							) : null}
@@ -1588,7 +1594,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								sortAttribute="context"
 								columnVisibilityModel={{
 									domain: false,
-									last_imported: false,
+									lastImported: false,
 								}}
 							/>
 							{library?.secondHostLms ? (
@@ -1620,7 +1626,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									sortAttribute="context"
 									columnVisibilityModel={{
 										domain: false,
-										last_imported: false,
+										lastImported: false,
 									}}
 								/>
 							) : null}

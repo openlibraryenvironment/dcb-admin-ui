@@ -8,22 +8,28 @@ import {
 	Autocomplete,
 	TextField,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
 import Selector from "@components/Selector/Selector";
-import { useState } from "react";
+import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
+import { MappingOption } from "@models/MappingOption";
+import useCode from "@hooks/useCode";
 
 type ImportForm = {
 	show: boolean;
 	onClose: any;
+	mappingType: "Reference value mappings" | "Numeric range mappings";
 };
 
-export default function Import({ show, onClose }: ImportForm) {
+export default function Import({ show, onClose, mappingType }: ImportForm) {
 	const { t } = useTranslation();
-	const [category, setCategory] = useState("");
+	const { category, updateCategory, resetAll } = useCode();
+
 	const handleCloseImport = () => {
+		resetAll(); // Reset both code and category when closing the import dialog
 		onClose();
 	};
+
 	// This method closes the import modal and is passed to Upload as a callback, so that Upload's cancel button can close the whole Import window.
 	// This means that the Cancel button in 'Upload' can be used to close this Import modal.
 	// Same principle can be used in other components - a callback can be passed to the child to affect behaviour in the parent.
@@ -31,25 +37,19 @@ export default function Import({ show, onClose }: ImportForm) {
 	return (
 		<Dialog
 			open={show}
-			onClose={onClose}
+			onClose={handleCloseImport}
 			aria-labelledby="import-dialog"
 			fullWidth
 			maxWidth={"sm"}
 		>
 			<DialogTitle variant="modalTitle">
 				{t("mappings.import_title", {
-					profile:
-						category != ""
-							? category.toLowerCase()
-							: t(
-									"mappings.ref_value",
-									"Reference value mappings",
-								).toLowerCase(),
+					profile: mappingType.toLowerCase(),
 				})}
 			</DialogTitle>
 			<IconButton
 				aria-label="close"
-				onClick={onClose}
+				onClick={handleCloseImport}
 				sx={{
 					position: "absolute",
 					right: 8,
@@ -60,18 +60,30 @@ export default function Import({ show, onClose }: ImportForm) {
 				<MdClose />
 			</IconButton>
 			<DialogContent>
-				<Stack spacing={1}>
+				<Stack spacing={2}>
+					<Trans
+						i18nKey={"mappings.import_body"}
+						t={t}
+						components={{
+							paragraph: <p />,
+						}}
+					/>
 					<Autocomplete
-						options={[t("mappings.numeric_range"), t("mappings.ref_value")]}
-						onChange={(event, value) =>
-							setCategory(value ?? t("mappings.ref_value"))
-						} // Or set a default here
+						options={MAPPING_OPTIONS[mappingType]}
+						getOptionLabel={(option: MappingOption) => t(option.displayKey)}
+						onChange={(event, value) => {
+							updateCategory(value?.category ?? "");
+						}}
 						renderInput={(params) => (
 							<TextField {...params} required label={t("mappings.category")} />
 						)}
 					/>
-					<Selector optionsType="Host LMS" />
-					<Upload onCancel={handleCloseImport} category={category} />
+					<Selector optionsType={t("hostlms.hostlms_one")} />
+					<Upload
+						onCancel={handleCloseImport}
+						category={category}
+						type={mappingType}
+					/>
 				</Stack>
 			</DialogContent>
 		</Dialog>
