@@ -1,16 +1,24 @@
+import { GridFilterModel } from "@mui/x-data-grid-pro";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 type GridState = {
 	sortOptions: Record<string, { field: string; direction: string }>;
-	filterOptions: Record<string, string>;
+	filterOptions: Record<
+		string,
+		{ filterString: string; filterModel: GridFilterModel }
+	>;
 	paginationModel: Record<string, { page: number; pageSize: number }>;
 	columnVisibility: Record<string, Record<string, boolean>>;
 };
 
 type GridActions = {
 	setSortOptions: (gridType: string, field: string, direction: string) => void;
-	setFilterOptions: (gridType: string, filterString: string) => void;
+	setFilterOptions: (
+		gridType: string,
+		filterString: string,
+		filterModel: GridFilterModel,
+	) => void;
 	setPaginationModel: (
 		gridType: string,
 		page: number,
@@ -39,11 +47,11 @@ export const useGridStore = create<GridState & GridActions>()(
 					},
 				})),
 
-			setFilterOptions: (gridType, filterString) =>
+			setFilterOptions: (gridType, filterString, filterModel) =>
 				set((state) => ({
 					filterOptions: {
 						...state.filterOptions,
-						[gridType]: filterString,
+						[gridType]: { filterString, filterModel },
 					},
 				})),
 
