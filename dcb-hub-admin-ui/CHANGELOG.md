@@ -1,3 +1,30 @@
+# [1.26.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.25.0...v1.26.0) (2024-10-31)
+
+
+### Bug Fixes
+
+* Address previous bugs with import process ([762bc23](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/762bc238a6e9e772ed959ae50c9df3677f69cd7d))
+* Change audit navigation to use newer/older [DCB-1633] ([39cb747](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/39cb747222dbf66365946874c24cfabf37bbc821))
+* Fix filtering issues with presets and OR operator [DCB-1620] ([2667b8a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2667b8a37d2951940d13b5f93247f0244d9bb92a))
+* Fix issues with file type checking [DCB-1620] ([d9e115b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d9e115bb775349b22f372b8ad43dded49f170c9a))
+* Fix issues with loading second Host LMS mappings on library page ([a3ce7cc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a3ce7cc655921cfeb8ffe4664e4505031bc77701))
+* Fix issues with numeric range export ([e9821a0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e9821a0f1f0b5b6a20a87a97314c477165e553f2))
+* Fix mappings display issues ([25c6335](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/25c6335215bd28b230e41cfcaf7d5fbad22dd757))
+* Fix sort on lastImported [DCB-1620] ([1da669c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1da669c7b86318b0a2a67973fefdee89649f62de))
+* Make sure closing import resets all values ([edca872](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/edca872d18b18ba4d658f417c0f38981be98a359))
+* Standardise role checking ([6780d56](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6780d56103be7652e970f0902cd9a085c4d0d3c8))
+
+
+### Features
+
+* Add error overview to DCB Admin [DCB-1662] ([f640eb6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f640eb6802aaf2ad65c28194736a4f7091662f6f))
+* Add identifiers page to shared index ([c4f1a2f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c4f1a2f58981ac5b12db6ad6acb3cb0f7c892891))
+* Implement TSV/CSV backup of mappings [DCB-1632] ([4d5b3c4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4d5b3c4a19bb68a8d0f3845d87df2ce938fc736d))
+* Persist the user's filter choices [DCB-1649] ([75846c9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/75846c92ad24c3b812cfa1aa0bbaf7f146675c3b))
+* Persist the user's pagination choices [DCB-1648] ([8716121](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8716121d1fd9306b5595f0c0ee678bf5b3cc06f1))
+* Persist user's column visibility choices [DCB-1648] ([b466564](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b4665649b019bc02b9f37eeb0c3ba605bbb5ef48))
+* Revamp import page to support upload by category [DCB-1620] ([81bd4b8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/81bd4b83c0b231ffdcbdc50366d4407c9160216d))
+
 # [1.25.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.24.0...v1.25.0) (2024-10-10)
 
 
