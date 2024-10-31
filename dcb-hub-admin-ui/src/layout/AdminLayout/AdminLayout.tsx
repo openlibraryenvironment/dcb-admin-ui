@@ -10,6 +10,7 @@ import PageActionsMenu, {
 	Action,
 } from "@components/PageActionsMenu/PageActionsMenu";
 import { useSession } from "next-auth/react";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
@@ -36,8 +37,8 @@ export default function AdminLayout({
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
 	const { data: session } = useSession();
-	const isAnAdmin = session?.profile?.roles?.some(
-		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
 	);
 	return (
 		<>

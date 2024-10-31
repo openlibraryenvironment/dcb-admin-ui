@@ -54,6 +54,7 @@ import { getFileNameForExport } from "src/helpers/DataGrid/getFileNameForExport"
 import { convertFileToString } from "src/helpers/DataGrid/convertFileToString";
 import ExportToolbar from "./components/ExportToolbar";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -345,8 +346,8 @@ export default function ServerPaginationGrid({
 		}
 	};
 	// Is either system admin or consortium admin: therefore can edit/delete items.
-	const isAnAdmin = session?.profile?.roles?.some(
-		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
 	);
 
 	const handleSortModelChange = useCallback(

@@ -16,6 +16,7 @@ import Import from "@components/Import/Import";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
 import dayjs from "dayjs";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 
 // Page for 'ALL' numeric range mappings of any category.
 
@@ -38,13 +39,15 @@ const AllNumericRange: NextPage = () => {
 		// https://www.apollographql.com/docs/react/data/refetching/#refetch-recipes
 	};
 	const { t } = useTranslation();
-	const isAdmin = session?.profile?.roles?.includes("ADMIN");
+	const isAValidAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
+	);
 
 	return (
 		<AdminLayout title={t("nav.mappings.allNumericRange")}>
 			<Tooltip
 				title={
-					isAdmin ? "" : t("mappings.import_disabled") // Tooltip text when disabled
+					isAValidAdmin ? "" : t("mappings.import_disabled") // Tooltip text when disabled
 				}
 			>
 				{/* Adding a span as a wrapper to enable tooltip on disabled button */}
@@ -52,7 +55,7 @@ const AllNumericRange: NextPage = () => {
 					<Button
 						variant="contained"
 						onClick={openImport}
-						disabled={!isAdmin} // Disable if not ADMIN
+						disabled={!isAValidAdmin} // Disable if not ADMIN
 					>
 						{t("mappings.import")}
 					</Button>

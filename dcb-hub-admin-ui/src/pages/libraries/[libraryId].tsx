@@ -63,6 +63,7 @@ import EditableAttribute from "src/helpers/EditableAttribute/EditableAttribute";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -100,8 +101,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 
 	const [changedFields, setChangedFields] = useState<Partial<Library>>({});
 
-	const isAnAdmin = session?.profile?.roles?.some(
-		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
 	);
 
 	// Handles toggling the library participation when a user clicks 'confirm'.

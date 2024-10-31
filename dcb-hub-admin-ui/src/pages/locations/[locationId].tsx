@@ -23,6 +23,7 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 
 type LocationDetails = {
 	locationId: string;
@@ -75,8 +76,8 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	});
 	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
 
-	const isAnAdmin = session?.profile?.roles?.some(
-		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
 	);
 
 	const [updateLocation] = useMutation(updateLocationQuery, {

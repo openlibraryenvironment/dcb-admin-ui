@@ -4,10 +4,15 @@ import { GetServerSideProps, NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 
 const ServiceInfo: NextPage = () => {
 	const { t } = useTranslation();
 	const { data: session } = useSession();
+	const isAValidAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
+	);
+
 	return (
 		<AdminLayout title={t("nav.serviceInfo.name")}>
 			<List component="nav" aria-labelledby="service-information">
@@ -26,8 +31,7 @@ const ServiceInfo: NextPage = () => {
 						<ListItemText primary={t("nav.serviceInfo.serviceStatus")} />
 					</ListItemButton>
 				</ListItem>
-				{session?.profile?.roles?.includes("CONSORTIUM_ADMIN") ||
-				session?.profile?.roles?.includes("ADMIN") ? (
+				{isAValidAdmin ? (
 					<ListItem component="nav" disablePadding>
 						<ListItemButton component="a" href="/serviceInfo/dataChangeLog">
 							<ListItemText primary={t("nav.serviceInfo.dataChangeLog")} />
