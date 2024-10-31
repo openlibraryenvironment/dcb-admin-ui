@@ -37,6 +37,10 @@
 			"bibRecordCountByHostLms": "Bib record count by host LMS",
 			"dataChangeLog": "Data change log",
 			"name": "Service info",
+			"requestErrors": {
+				"name": "Request errors",
+				"requests": "Requests"
+			},
 			"serviceStatus": "Service status"
 		},
 		"settings": {
@@ -645,6 +649,24 @@
 		"name": "Bib record count by host LMS",
 		"change_filter": "Try changing your filters or search terms.",
 		"no_results": "No bib record counts found. Try changing your search terms or filters."
+	},
+
+	"error_overview": {
+		"audit_url": "Audit URL",
+		"date": "Date",
+		"description": "Description",
+		"earliest": "Earliest",
+		"error_loading": "An error has occurred when trying to load this page.",
+		"most_recent": "Most recent",
+		"no_results": "No results found",
+		"named_sql": "Named SQL",
+		"requester": "Requester",
+		"request_id": "Request ID",
+		"request_url": "Request URL",
+		"related_ticket": "Related ticket",
+		"supplier": "Supplier",
+		"total": "Total",
+		"view_audit": "View audit {{audit}}"
 	},
 
 	"mappings": {

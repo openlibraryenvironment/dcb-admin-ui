@@ -91,6 +91,7 @@ export default function ClientDataGrid<T extends object>({
 	toolbarVisible,
 	disableHoverInteractions,
 	editQuery,
+	loading,
 }: {
 	data: Array<T>;
 	columns: any;
@@ -105,6 +106,7 @@ export default function ClientDataGrid<T extends object>({
 	toolbarVisible?: string;
 	disableHoverInteractions?: boolean;
 	editQuery?: DocumentNode;
+	loading?: boolean;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -454,6 +456,7 @@ export default function ClientDataGrid<T extends object>({
 				// And if we want to hide columns, pass the visibility model in
 				columns={allColumns}
 				autoHeight
+				loading={loading}
 				columnVisibilityModel={columnVisibilityModel}
 				// we can make our own custom toolbar if necessary, potentially extending the default GridToolbar. Just pass it in here
 				rows={data ?? []}
