@@ -10,6 +10,7 @@ import PageActionsMenu, {
 	Action,
 } from "@components/PageActionsMenu/PageActionsMenu";
 import { useSession } from "next-auth/react";
+import Link from "@components/Link/Link";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 interface AdminLayoutProps {
 	title?: string;
@@ -18,6 +19,7 @@ interface AdminLayoutProps {
 	hideBreadcrumbs?: boolean;
 	pageActions?: Action[] | ReactNode[];
 	mode?: "edit" | "view";
+	link?: string; // for when title needs to be a link
 }
 
 // This layout takes the following props: a title and components to be rendered as children
@@ -33,6 +35,7 @@ export default function AdminLayout({
 	hideBreadcrumbs,
 	pageActions,
 	mode,
+	link,
 }: PropsWithChildren<AdminLayoutProps>) {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
@@ -40,6 +43,38 @@ export default function AdminLayout({
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
+	const renderTitle = () => {
+		if (!link) {
+			return (
+				<Typography id="page-title" variant="h1">
+					{title}
+				</Typography>
+			);
+		}
+		if (!title) return null;
+		// Regex to match DCB ticket pattern for error overview title
+		const dcbMatch = title.match(/(DCB-\d+)/);
+		if (link && dcbMatch) {
+			const [dcbPart] = dcbMatch;
+			const beforeDcb = title.slice(0, dcbMatch.index);
+			const afterDcb = title.slice((dcbMatch.index ?? 0) + dcbPart.length);
+
+			return (
+				<Typography id="page-title" variant="h1">
+					{beforeDcb}
+					{dcbPart != "DCB-????" ? <Link href={link}>{dcbPart}</Link> : dcbPart}
+					{afterDcb}
+				</Typography>
+			);
+		}
+		// If no link or no DCB pattern, render title as before
+		return (
+			<Typography id="page-title" variant="h1">
+				{title}
+			</Typography>
+		);
+	};
+
 	return (
 		<>
 			<Head>
@@ -124,11 +159,7 @@ export default function AdminLayout({
 										justifyContent="space-between"
 										sx={{ p: 3, pb: 0 }} // Optional padding adjustments
 									>
-										{title != null ? (
-											<Typography id="page-title" variant="h1">
-												{title}
-											</Typography>
-										) : null}
+										{title != null ? renderTitle() : null}
 										{pageActions && isAnAdmin && (
 											<PageActionsMenu
 												actions={pageActions}

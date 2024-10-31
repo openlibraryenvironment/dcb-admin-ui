@@ -94,6 +94,13 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				if (nestedKey == "patronRequests.audits") {
 					return "nav.auditLog";
 				}
+				// Check for request errors
+				if (nestedKey == "serviceInfo.requestErrors") {
+					return "nav.serviceInfo.requestErrors.name";
+				}
+				if (nestedKey == "serviceInfo.requestErrors.requests") {
+					return titleAttribute ?? "nav.serviceInfo.requestErrors.requests";
+				}
 				// Not a UUID, formulate the translation key.
 				return "nav." + nestedKey;
 			}
