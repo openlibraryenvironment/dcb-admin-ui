@@ -42,9 +42,9 @@ const PatronRequests: NextPage = () => {
 	const allColumns = [...customColumns, ...standardPatronRequestColumns];
 
 	const exceptionQueryVariables = `status: "ERROR"`;
-	const outOfSequenceQueryVariables = `outOfSequenceFlag:true AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED"`;
-	const inProgressQueryVariables = `outOfSequenceFlag:false AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED"`;
-	const finishedQueryVariables = `(status: "NO_ITEMS_AVAILABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
+	const outOfSequenceQueryVariables = `outOfSequenceFlag:true AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED"`;
+	const inProgressQueryVariables = `outOfSequenceFlag:false AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED"`;
+	const finishedQueryVariables = `(status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
 
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
