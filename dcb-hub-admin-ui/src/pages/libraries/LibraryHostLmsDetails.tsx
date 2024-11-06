@@ -2,6 +2,7 @@ import PrivateData from "@components/PrivateData/PrivateData";
 import { StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
 import { Library } from "@models/Library";
 import { Divider, Stack, Typography } from "@mui/material";
+import Link from "@components/Link/Link";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
@@ -107,9 +108,9 @@ export default function LibraryHostLmsDetails({
 						<Typography variant="attributeTitle">
 							{t("libraries.service.environments.api")}
 						</Typography>
-						<RenderAttribute
-							attribute={firstHostLms?.clientConfig?.["base-url"]}
-						/>
+						<Link href={firstHostLms?.clientConfig?.["base-url"]}>
+							{firstHostLms?.clientConfig?.["base-url"]}
+						</Link>
 					</Stack>
 				</Grid>
 
@@ -307,9 +308,9 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.user_base_url")}
 							</Typography>
-							<RenderAttribute
-								attribute={firstHostLms?.clientConfig?.["user-base-url"]}
-							/>
+							<Link href={firstHostLms?.clientConfig?.["base-url"]}>
+								{firstHostLms?.clientConfig?.["base-url"]}
+							</Link>
 						</Stack>
 					</Grid>
 				) : null}
@@ -389,9 +390,9 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.api")}
 							</Typography>
-							<RenderAttribute
-								attribute={secondHostLms?.clientConfig?.["base-url"]}
-							/>
+							<Link href={secondHostLms?.clientConfig?.["base-url"]}>
+								{secondHostLms?.clientConfig?.["base-url"]}
+							</Link>
 						</Stack>
 					</Grid>
 				) : null}
@@ -548,9 +549,9 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.user_base_url")}
 							</Typography>
-							<RenderAttribute
-								attribute={secondHostLms?.clientConfig?.["user-base-url"]}
-							/>
+							<Link href={secondHostLms?.clientConfig?.["base-url"]}>
+								{secondHostLms?.clientConfig?.["base-url"]}
+							</Link>
 						</Stack>
 					</Grid>
 				) : null}

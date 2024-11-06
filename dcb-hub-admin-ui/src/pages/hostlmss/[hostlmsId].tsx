@@ -25,6 +25,7 @@ import {
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { getILS } from "src/helpers/getILS";
+import Link from "next/link";
 
 type HostLMSDetails = {
 	hostlmsId: any;
@@ -228,13 +229,13 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.base_application")}
 									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={
-												hostlms?.clientConfig?.["base-url-application-services"]
-											}
-										/>
-									</Typography>
+									<Link
+										href={
+											hostlms?.clientConfig?.["base-url-application-services"]
+										}
+									>
+										{hostlms?.clientConfig?.["base-url-application-services"]}
+									</Link>
 								</Stack>
 							</Grid>
 						)}
@@ -244,11 +245,9 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.base")}
 									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={hostlms?.clientConfig?.["base-url"]}
-										/>
-									</Typography>
+									<Link href={hostlms?.clientConfig?.["base-url"]}>
+										{hostlms?.clientConfig?.["base-url"]}
+									</Link>
 								</Stack>
 							</Grid>
 						)}
