@@ -175,7 +175,13 @@ export default function DataChangeLogDetails({
 						<Typography variant="attributeTitle">
 							{t("data_change_log.reference_url")}
 						</Typography>
-						<RenderAttribute attribute={dataChangeLog?.changeReferenceUrl} />
+						{dataChangeLog?.changeReferenceUrl ? (
+							<Link href={dataChangeLog?.changeReferenceUrl ?? ""}>
+								{dataChangeLog?.changeReferenceUrl}
+							</Link>
+						) : (
+							<RenderAttribute attribute={dataChangeLog?.changeReferenceUrl} />
+						)}
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>

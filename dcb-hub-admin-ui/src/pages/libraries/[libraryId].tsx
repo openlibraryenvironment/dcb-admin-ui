@@ -64,6 +64,7 @@ import { formatChangedFields } from "src/helpers/formatChangedFields";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { GridRenderCellParams } from "@mui/x-data-grid-pro";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -1059,6 +1060,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								editable: true,
 								flex: 0.7,
+								renderCell: (params: GridRenderCellParams) => {
+									const email = params.value ?? "";
+									return <Link href={`mailto:${email}`}>{email}</Link>;
+								},
 							},
 							{
 								field: "isPrimaryContact",
