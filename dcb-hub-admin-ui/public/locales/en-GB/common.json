@@ -12,6 +12,13 @@
 		"agencies": "Agencies",
 		"auditLog": "Audit log",
 		"bibs": "Bib records",
+		"consortium": {
+			"contacts": "Contacts",
+			"name": "Consortium",
+			"onboarding": "Onboarding",
+			"policies": "Policies",
+			"profile": "Profile"
+		},
 		"groups": "Groups",
 		"home": "Home",
 		"hostlmss": "Host LMSs",

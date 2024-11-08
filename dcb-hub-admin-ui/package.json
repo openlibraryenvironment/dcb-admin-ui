@@ -25,6 +25,7 @@
 		"@panva/hkdf": "^1.2.1",
 		"@types/lodash": "^4.17.6",
 		"@typescript-eslint/utils": "^7.15.0",
+		"@vercel/blob": "^0.26.0",
 		"axios": "^1.7.3",
 		"cookie": "^1.0.0",
 		"cookies-next": "^4.2.1",

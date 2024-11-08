@@ -24,8 +24,10 @@ export default withAuth(
 		const path = req.nextUrl.pathname;
 		// Get the request, get the roles, and figure out where it's going
 		const userRoles = token?.profile?.roles || [];
-
-		const adminOnlyRoutes = ["/serviceInfo/dataChangeLog"];
+		const adminOnlyRoutes = [
+			"/serviceInfo/dataChangeLog",
+			"/api/persistentAssets/imageUpload",
+		];
 		const adminRoles = ["ADMIN", "CONSORTIUM_ADMIN"];
 		// And if it's going to an admin only route and doesn't have the correct role, stop it.
 		// This is where we define route and role groupings.
