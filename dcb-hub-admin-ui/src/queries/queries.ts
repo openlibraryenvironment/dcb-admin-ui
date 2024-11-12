@@ -416,14 +416,49 @@ export const getBibSourceRecord = gql`
 // Fetches the consortia
 
 export const getConsortia = gql`
-	query LoadConsortia($order: String!, $orderBy: String!) {
+	query LoadConsortium($order: String!, $orderBy: String!) {
 		consortia(order: $order, orderBy: $orderBy) {
 			totalSize
 			content {
 				id
 				name
+				libraryGroup {
+					id
+				}
 				dateOfLaunch
+				headerImageUrl
+				headerImageUploader
+				headerImageUploaderEmail
+				aboutImageUrl
+				aboutImageUploader
+				aboutImageUploaderEmail
+				description
+				catalogueSearchUrl
+				websiteUrl
+				displayName
+				contacts {
+					email
+					id
+				}
 			}
+		}
+	}
+`;
+
+export const updateConsortiumQuery = gql`
+	mutation UpdateConsortium($input: UpdateConsortiumInput!) {
+		updateConsortium(input: $input) {
+			id
+			headerImageUrl
+			headerImageUploader
+			headerImageUploaderEmail
+			aboutImageUrl
+			aboutImageUploader
+			aboutImageUploaderEmail
+			description
+			catalogueSearchUrl
+			websiteUrl
+			displayName
 		}
 	}
 `;

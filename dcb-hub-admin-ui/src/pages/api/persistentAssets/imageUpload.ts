@@ -19,12 +19,7 @@ export default async function handler(
 
 				return {
 					allowedContentTypes: ["image/jpeg", "image/png", "image/gif"],
-					tokenPayload: JSON.stringify({
-						// optional, sent to your server on upload completion
-						// you could pass a user id from auth, or a value from clientPayload
-						// figure out how to pass user ID
-						userInfo: clientPayload,
-					}),
+					tokenPayload: clientPayload,
 				};
 			},
 			onUploadCompleted: async ({ blob, tokenPayload }) => {
@@ -38,6 +33,7 @@ export default async function handler(
 					// Run any logic after the file upload completed
 					// const { userId } = JSON.parse(tokenPayload);
 					// await db.update({ avatar: blob.url, userId });
+					// could call a consortium update here if it were possible
 				} catch (error) {
 					throw new Error("Could not update user");
 				}

@@ -143,6 +143,9 @@
 			"too_long_load": "The record is taking too long to load",
 			"invalid_UUID": "The record might have been deleted or the identifier could be wrong"
 		},
+		"file": {
+			"no_file_selected": "No file selected"
+		},
 		"info": {
 			"connection_issue": "There may be a connection issue",
 			"description": "Description: {{description}}",
@@ -576,11 +579,22 @@
 			}
 		},
 		"consortium": {
+			"description": "Description",
+			"display_name": "Display name",
 			"id": "Consortium UUID",
+			"landing_page_title": "DCB Admin landing page",
+			"landing_page_subheader": "Consortium related content to display to unauthenticated visitors",
+			"logo_about": "Logo for \"About\" section",
+			"logo_about_requirements": "Height: 48px. Max width: 180px. Supported formats: JPG and PNG",
+			"logo_app_header": "Logo for app header",
+			"logo_app_header_requirements": "Size: 36 x 36 px. Supported formats: JPG and PNG",
 			"member_ref": "Member reference",
 			"member_from_to": "Member from-to",
 			"name": "Consortium name",
-			"title": "Consortium"
+			"search_url": "DCB catalog search URL",
+			"select_image": "Select image",
+			"title": "Consortium",
+			"url": "Website URL"
 		},
 		"contacts": {
 			"email": "Email",

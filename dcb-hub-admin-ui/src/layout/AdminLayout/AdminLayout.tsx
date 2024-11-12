@@ -6,9 +6,7 @@ import Breadcrumbs from "./Breadcrumbs/Breadcrumbs";
 import { Stack, Typography, useTheme, Box } from "@mui/material";
 import Sidebar from "@layout/AdminLayout/Sidebar/Sidebar";
 import LinkedFooter from "./LinkedFooter/LinkedFooter";
-import PageActionsMenu, {
-	Action,
-} from "@components/PageActionsMenu/PageActionsMenu";
+import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
 import { useSession } from "next-auth/react";
 import Link from "@components/Link/Link";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
@@ -17,7 +15,7 @@ interface AdminLayoutProps {
 	children?: ReactNode;
 	hideTitleBox?: boolean;
 	hideBreadcrumbs?: boolean;
-	pageActions?: Action[] | ReactNode[];
+	pageActions?: any;
 	mode?: "edit" | "view";
 	link?: string; // for when title needs to be a link
 }
