@@ -403,7 +403,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			...prev,
 			[field]: value,
 		}));
-
+		console.log("Updaating field {} for library", field, value);
+		console.log("Value of library field is" + library[field]);
 		if (value !== library[field]) {
 			setChangedFields((prev) => ({
 				...prev,
@@ -683,7 +684,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									updateField={updateField}
 									editMode={editMode}
 									type="string"
-									inputRef={firstEditableFieldRef}
+									// inputRef={firstEditableFieldRef}
 									setValidationError={setValidationError}
 									setDirty={setDirty}
 									setErrors={setErrors}
@@ -803,6 +804,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									updateField={updateField}
 									editMode={editMode}
 									type="string"
+									inputRef={firstEditableFieldRef}
 									setValidationError={setValidationError}
 									setDirty={setDirty}
 									setErrors={setErrors}

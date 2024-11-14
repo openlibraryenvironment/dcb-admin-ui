@@ -18,7 +18,7 @@ const Onboarding: NextPage = () => {
 				router.push("/consortium");
 				break;
 			case 1:
-				router.push("/consortium/policies");
+				router.push("/consortium/functionalSettings");
 				break;
 			case 2:
 				router.push("/consortium/onboarding");
@@ -37,7 +37,7 @@ const Onboarding: NextPage = () => {
 				aria-label="Consortium Navigation"
 			>
 				<Tab label={t("nav.consortium.profile")} />
-				<Tab label={t("nav.consortium.policies")} />
+				<Tab label={t("nav.consortium.functionalSettings")} />
 				<Tab label={t("nav.consortium.onboarding")} />
 				<Tab label={t("nav.consortium.contacts")} />
 			</Tabs>

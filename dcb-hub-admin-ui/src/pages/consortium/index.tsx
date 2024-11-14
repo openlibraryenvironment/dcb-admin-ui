@@ -17,7 +17,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useState, useRef } from "react";
+import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import EditableAttribute from "src/helpers/EditableAttribute/EditableAttribute";
 import { getConsortia, updateConsortiumQuery } from "src/queries/queries";
@@ -39,10 +39,14 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 // If this ever needs to be extended to support multiple consortia
 // Change current flat structure to [id] structure similar to libraries
 // And have a consortium grid page
+// or only show active consortia
+
+// check upload button for image upload
 const ConsortiumPage: NextPage = () => {
 	const { t } = useTranslation();
 	const [tabIndex, setTabIndex] = useState(0);
@@ -94,11 +98,75 @@ const ConsortiumPage: NextPage = () => {
 	});
 	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
 
-	console.log(consortium);
-
 	const [updateConsortium] = useMutation(updateConsortiumQuery, {
 		refetchQueries: ["LoadConsortium"],
 	});
+	// const [selectedFileName, setSelectedFileName] = useState<string>("");
+
+	//setAboutImageURL
+
+	const { setHeaderImageURL, setDisplayName } = useConsortiumInfoStore();
+
+	const [appHeaderFileName, setAppHeaderFileName] = useState<string>("");
+	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState<string>("");
+	const [aboutFileName, setAboutFileName] = useState<string>("");
+	const [aboutPreviewUrl, setAboutPreviewUrl] = useState<string>("");
+
+	// Handlers for file selection
+	const handleAppHeaderFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			setAppHeaderFileName(file.name);
+			const objectUrl = URL.createObjectURL(file);
+			setAppHeaderPreviewUrl(objectUrl);
+		}
+	};
+
+	const handleAboutFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (file) {
+			setAboutFileName(file.name);
+			const objectUrl = URL.createObjectURL(file);
+			setAboutPreviewUrl(objectUrl);
+		}
+	};
+
+	const handleRemoveAbout = () => {
+		setAboutPreviewUrl("");
+
+		// Reset the file input
+		if (aboutFileRef && "current" in aboutFileRef && aboutFileRef.current) {
+			console.log("Reset the input ");
+			aboutFileRef.current.value = "";
+		}
+		setAboutFileName("");
+	};
+	// Pass in image sizes for the preview
+
+	const handleRemoveAppHeader = () => {
+		setAppHeaderPreviewUrl("");
+
+		// Reset the file input
+		if (
+			appHeaderFileRef &&
+			"current" in appHeaderFileRef &&
+			appHeaderFileRef.current
+		) {
+			appHeaderFileRef.current.value = "";
+		}
+		setAppHeaderFileName("");
+	};
+
+	useEffect(() => {
+		return () => {
+			if (appHeaderPreviewUrl) {
+				URL.revokeObjectURL(appHeaderPreviewUrl);
+			}
+			if (aboutPreviewUrl) {
+				URL.revokeObjectURL(aboutPreviewUrl);
+			}
+		};
+	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
 
 	// ONLY ALLOW ADMIN OR CONSORTIUM_ADMIN to edit.
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
@@ -119,18 +187,20 @@ const ConsortiumPage: NextPage = () => {
 			}, 0);
 		},
 		onLeaveWithoutSaving: () => {
-			console.log("LWS00");
 			setDirty(false);
 			setChangedFields({});
 		},
 	});
-	console.log("confirmation", changedFields);
 
 	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
+		if (changedFields.displayName) {
+			console.log("SET DN");
+			setDisplayName(changedFields.displayName);
+		}
 		await handleSaveConfirmation(
 			consortium,
 			changedFields,
@@ -175,7 +245,7 @@ const ConsortiumPage: NextPage = () => {
 				router.push("/consortium");
 				break;
 			case 1:
-				router.push("/consortium/policies");
+				router.push("/consortium/functionalSettings");
 				break;
 			case 2:
 				router.push("/consortium/onboarding");
@@ -251,6 +321,8 @@ const ConsortiumPage: NextPage = () => {
 		);
 	}
 
+	console.log(appHeaderBlob);
+
 	return error || consortium == null || consortium == undefined ? (
 		<AdminLayout hideBreadcrumbs>
 			{error ? (
@@ -290,7 +362,7 @@ const ConsortiumPage: NextPage = () => {
 						aria-label="Consortium Navigation"
 					>
 						<Tab label={t("nav.consortium.profile")} />
-						<Tab label={t("nav.consortium.policies")} />
+						<Tab label={t("nav.consortium.functionalSettings")} />
 						<Tab label={t("nav.consortium.onboarding")} />
 						<Tab label={t("nav.consortium.contacts")} />
 					</Tabs>
@@ -318,7 +390,7 @@ const ConsortiumPage: NextPage = () => {
 						<EditableAttribute
 							field="displayName"
 							key={`displayName-${editKey}`}
-							value={editableFields.displayName ?? consortium?.displayName}
+							value={editableFields?.displayName ?? consortium?.displayName}
 							updateField={updateFieldInApp}
 							editMode={editMode}
 							type="string"
@@ -336,18 +408,32 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography>
-						{appHeaderFileRef.current?.files
-							? appHeaderFileRef.current?.files[0].name
-							: t("mappings.no_file_selected")}
+						{/* Fix so file name is persisted even after it's removed from preview. Should be auto removed from preview on successful upload */}
+						{(appHeaderFileName ?? appHeaderBlob?.pathname) ||
+							t("mappings.no_file_selected")}
 					</Typography>
+					{appHeaderBlob && (
+						<Box sx={{ mt: 3 }}>
+							<Image
+								src={appHeaderBlob.url}
+								alt="Uploaded content"
+								width={36}
+								height={36}
+								style={{
+									maxWidth: "200px",
+									maxHeight: "200px",
+									objectFit: "contain",
+									marginTop: "8px",
+								}}
+							/>
+						</Box>
+					)}
 				</Grid>
-				{/* No file selected text goes here */}
 				<Grid xs={4} sm={8} md={12}>
 					<Typography>
 						{t("libraries.consortium.logo_app_header_requirements")}
 					</Typography>
 				</Grid>
-
 				<form
 					onSubmit={async (event) => {
 						setIsUploading(true);
@@ -368,6 +454,7 @@ const ConsortiumPage: NextPage = () => {
 						);
 						const newBlob = (await response.json()) as PutBlobResult;
 						setAppHeaderBlob(newBlob);
+						setHeaderImageURL(newBlob.url);
 						await updateConsortium({
 							variables: {
 								input: {
@@ -375,6 +462,8 @@ const ConsortiumPage: NextPage = () => {
 									headerImageUrl: newBlob.url,
 									headerImageUploader: username,
 									headerImageUploaderEmail: email,
+									reason: "Update of consortium header image",
+									changeCategory: "Initial setup",
 								},
 							},
 						});
@@ -388,28 +477,20 @@ const ConsortiumPage: NextPage = () => {
 							buttonText={t("libraries.consortium.select_image")}
 							href="#appHeaderUpload"
 							isUploading={isUploading}
+							onFileSelect={handleAppHeaderFileSelect}
+							previewUrl={appHeaderPreviewUrl}
+							handleRemove={handleRemoveAppHeader}
 						/>
+						<Button
+							variant="contained"
+							type="submit"
+							disabled={isUploading}
+							sx={{ mt: 2 }}
+						>
+							{isUploading ? "Uploading..." : "Upload"}
+						</Button>
 					</Grid>
 				</form>
-				<Grid xs={4} sm={8} md={12}>
-					{appHeaderBlob && (
-						<Box sx={{ mt: 3 }}>
-							<Typography variant="subtitle1">Uploaded Image:</Typography>
-							<Image
-								src={appHeaderBlob.url}
-								alt="Uploaded content"
-								width={36}
-								height={36}
-								style={{
-									maxWidth: "200px",
-									maxHeight: "200px",
-									objectFit: "contain",
-									marginTop: "8px",
-								}}
-							/>
-						</Box>
-					)}
-				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="h2">
 						{t("libraries.consortium.landing_page_title")}
@@ -430,7 +511,7 @@ const ConsortiumPage: NextPage = () => {
 									: theme.palette.common.black
 							}
 						>
-							{t("libraries.consortium.website_url")}
+							{t("libraries.consortium.url")}
 						</Typography>
 						<EditableAttribute
 							field="websiteUrl"
@@ -439,7 +520,6 @@ const ConsortiumPage: NextPage = () => {
 							updateField={updateFieldInApp}
 							editMode={editMode}
 							type="string"
-							inputRef={firstEditableFieldRef}
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
@@ -456,7 +536,7 @@ const ConsortiumPage: NextPage = () => {
 									: theme.palette.common.black
 							}
 						>
-							{t("libraries.consortium.catalogue_url")}
+							{t("libraries.consortium.search_url")}
 						</Typography>
 						<EditableAttribute
 							field="catalogueSearchUrl"
@@ -468,7 +548,6 @@ const ConsortiumPage: NextPage = () => {
 							updateField={updateFieldInApp}
 							editMode={editMode}
 							type="string"
-							inputRef={firstEditableFieldRef}
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
@@ -494,7 +573,6 @@ const ConsortiumPage: NextPage = () => {
 							updateField={updateFieldInApp}
 							editMode={editMode}
 							type="string"
-							inputRef={firstEditableFieldRef}
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
@@ -508,9 +586,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography>
-						{aboutFileRef.current?.files
-							? aboutFileRef.current?.files[0].name
-							: t("mappings.no_file_selected")}
+						{aboutFileName || t("mappings.no_file_selected")}
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
@@ -538,13 +614,16 @@ const ConsortiumPage: NextPage = () => {
 						);
 						const newBlob = (await response.json()) as PutBlobResult;
 						setAboutFileBlob(newBlob);
+						setAboutFileName(newBlob.url);
 						await updateConsortium({
 							variables: {
 								input: {
 									id: consortium.id,
-									headerImageUrl: newBlob.url,
-									headerImageUploader: username,
-									headerImageUploaderEmail: email,
+									aboutImageUrl: newBlob.url,
+									aboutImageUploader: username,
+									aboutImageUploaderEmail: email,
+									reason: "Update of consortium header image",
+									changeCategory: "Initial setup",
 								},
 							},
 						});
@@ -558,6 +637,9 @@ const ConsortiumPage: NextPage = () => {
 							buttonText={t("libraries.consortium.select_image")}
 							href="#aboutFileUpload"
 							isUploading={isUploading}
+							onFileSelect={handleAboutFileSelect}
+							previewUrl={aboutPreviewUrl}
+							handleRemove={handleRemoveAbout}
 						/>
 					</Grid>
 

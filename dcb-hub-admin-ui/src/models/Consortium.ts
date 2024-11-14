@@ -1,3 +1,4 @@
+import { FunctionalSetting } from "./FunctionalSetting";
 import { Group } from "./Group";
 import { Person } from "./Person";
 
@@ -17,4 +18,5 @@ export interface Consortium {
 	websiteUrl: string;
 	displayName: string;
 	contacts: [Person];
+	functionalSettings: [FunctionalSetting];
 }

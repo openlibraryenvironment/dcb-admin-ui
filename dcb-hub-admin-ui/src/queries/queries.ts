@@ -440,6 +440,49 @@ export const getConsortia = gql`
 					email
 					id
 				}
+				functionalSettings {
+					id
+					name
+					enabled
+				}
+			}
+		}
+	}
+`;
+
+export const getConsortiaFunctionalSettings = gql`
+	query LoadConsortiumFS($order: String!, $orderBy: String!) {
+		consortia(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				name
+				functionalSettings {
+					id
+					name
+					enabled
+					description
+				}
+			}
+		}
+	}
+`;
+
+export const getConsortiaContacts = gql`
+	query LoadConsortiumContacts($order: String!, $orderBy: String!) {
+		consortia(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				name
+				contacts {
+					id
+					firstName
+					lastName
+					role
+					isPrimaryContact
+					email
+				}
 			}
 		}
 	}
@@ -463,6 +506,16 @@ export const updateConsortiumQuery = gql`
 	}
 `;
 
+export const updateFunctionalSettingQuery = gql`
+	mutation UpdateFunctionalSetting($input: UpdateFunctionalSettingInput!) {
+		updateFunctionalSetting(input: $input) {
+			id
+			name
+			enabled
+			description
+		}
+	}
+`;
 // HOST LMS
 // Fetches a page of Host LMS for the data grid - same principles apply
 export const getHostLms = gql`

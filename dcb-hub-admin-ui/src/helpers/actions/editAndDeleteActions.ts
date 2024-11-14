@@ -1,5 +1,6 @@
 import { ApolloClient } from "@apollo/client";
 import { TFunction } from "i18next";
+import { isEmpty } from "lodash";
 import { Dispatch, RefObject, SetStateAction } from "react";
 
 export const handleSaveConfirmation = async (
@@ -96,22 +97,29 @@ export const updateField = (
 	setChangedFields: Dispatch<SetStateAction<any>>,
 	entity: any,
 ) => {
-	// why is value null
 	setEditableFields((prev: any) => ({
 		...prev,
 		[field]: value,
 	}));
-	console.log("UPDATEFIELD");
-	console.log(entity);
-	console.log(entity?.[field]);
-	console.log(value);
-
 	if (value !== entity[field]) {
-		setChangedFields((prev: any) => ({
-			...prev,
-			[field]: value,
-		}));
+		if (isEmpty(value) && entity[field] == null) {
+			// To ensure that empty values and null values are not mistakenly identified as different.
+			// i.e the field may be null when we get it from the server
+			// but value may be empty when we get it from the editable attribute
+			// this stops that being identified as a user change
+			setChangedFields((prev: any) => {
+				const newChangedFields = { ...prev };
+				delete newChangedFields[field];
+				return newChangedFields;
+			});
+		} else {
+			setChangedFields((prev: any) => ({
+				...prev,
+				[field]: value,
+			}));
+		}
 	} else {
+		// No change, throw away
 		setChangedFields((prev: any) => {
 			const newChangedFields = { ...prev };
 			delete newChangedFields[field];

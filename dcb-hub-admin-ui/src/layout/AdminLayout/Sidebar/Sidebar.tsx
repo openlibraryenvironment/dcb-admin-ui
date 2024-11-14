@@ -114,7 +114,7 @@ const SidebarIcon = (indexVal: any, isSelected: boolean) => {
 		case 10:
 			return <MdInfo {...iconProps} />; // Service info
 		case 11:
-			return <MdSettings {...iconProps} />; // Settings
+			return <MdSettings {...iconProps} />; // Consortium
 		default:
 			return null;
 	}
@@ -137,6 +137,7 @@ const routes = [
 	{ path: "/bibs", translationKey: "nav.bibs" }, // Bib records
 	{ path: "/search", translationKey: "nav.search.name" }, // Shared index
 	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" }, // Service Info
+	{ path: "/consortium", translationKey: "nav.consortium.name" }, //Consortium
 	// currently unused, may be un-commented in the future
 	// { path: "/settings", translationKey: "nav.settings.name" }, // Settings
 ];

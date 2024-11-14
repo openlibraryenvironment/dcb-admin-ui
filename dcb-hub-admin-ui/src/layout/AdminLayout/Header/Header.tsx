@@ -9,12 +9,13 @@ import { styled, useTheme } from "@mui/material/styles";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { useTranslation } from "next-i18next";
 import { Button, lighten } from "@mui/material";
-import consortiumLogo from "public/assets/brand/MOBIUS_Mark x36.jpg";
+// import consortiumLogo from "public/assets/brand/MOBIUS_Mark x36.jpg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import Head from "next/head";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -43,6 +44,7 @@ export default function Header({
 	const theme = useTheme();
 	const router = useRouter();
 	const { type } = useDCBServiceInfo();
+	const { headerImageURL, displayName } = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
 
 	const url = "/auth/logout";
@@ -51,13 +53,17 @@ export default function Header({
 		if (status === "authenticated") {
 			signOut({ redirect: false });
 			clearGridState();
+			// clearConsortiumStore();
 			router.push(url);
 		} else {
 			signIn();
 		}
 	};
+	console.log("Header image URL coming from the header", headerImageURL);
+	console.log(displayName);
+	console.log(type);
 	const pageTitle = t("app.title", {
-		consortium_name: "MOBIUS",
+		consortium_name: displayName,
 		environment: type,
 	});
 
@@ -123,14 +129,24 @@ export default function Header({
               or the image and additional padding if the icons have been hidden. */}
 						{iconsVisible != false ? (
 							<Image
-								src={consortiumLogo}
-								alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
+								src={headerImageURL}
+								alt="Uploaded content"
+								width={36}
+								height={36}
 							/>
 						) : (
 							<Box sx={{ mt: 1 }}>
 								<Image
-									src={consortiumLogo}
-									alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
+									src={headerImageURL}
+									alt="Uploaded content"
+									width={36}
+									height={36}
+									style={{
+										maxWidth: "200px",
+										maxHeight: "200px",
+										objectFit: "contain",
+										marginTop: "8px",
+									}}
 								/>
 							</Box>
 						)}
@@ -145,7 +161,10 @@ export default function Header({
 								pl: 2,
 							}}
 						>
-							{t("app.title", { consortium_name: "MOBIUS", environment: type })}
+							{t("app.title", {
+								consortium_name: displayName,
+								environment: type,
+							})}
 						</Typography>
 						<div>
 							{iconsVisible != false ? (

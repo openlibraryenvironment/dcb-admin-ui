@@ -13,7 +13,8 @@ import Image from "next/image";
 import Link from "@components/Link/Link";
 import kIntLogo from "public/assets/brand/Knowledge-Integration_48px.png";
 import openRSLogo from "public/assets/brand/OpenRS_48px.png";
-import mobiusLogo from "public/assets/brand/MOBIUS_48px.png";
+// import mobiusLogo from "public/assets/brand/MOBIUS_48px.png";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 // This component holds the UI elements shared between the 'landing' pages (login and logout)
 // It holds the 'three cards' and associated info.
@@ -22,6 +23,13 @@ export default function LandingCard() {
 	const { t } = useTranslation();
 	const theme = useTheme();
 	// Elevation of 3 applied to the cards for drop shadows: content spaced by '4' - 32 px
+	const {
+		displayName,
+		aboutImageURL,
+		searchCatalogueUrl,
+		websiteUrl,
+		description,
+	} = useConsortiumInfoStore();
 
 	return (
 		<Stack
@@ -151,19 +159,20 @@ export default function LandingCard() {
 				<CardContent>
 					<Stack direction={"column"} spacing={3}>
 						<CardMedia sx={{ justifyContent: "center", display: "flex" }}>
-							<a href="https://mobiusconsortium.org">
+							<a href={websiteUrl}>
 								<Image
-									src={mobiusLogo}
+									src={aboutImageURL ? aboutImageURL : ""}
 									height={48}
-									alt={t("ui.logo", { owner: "MOBIUS" })}
-									title={t("ui.logo", { owner: "MOBIUS" })}
+									alt={t("ui.logo", { owner: { displayName } })}
+									title={t("ui.logo", { owner: { displayName } })}
 								/>
 							</a>
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{t("consortium.about", { consortium: "MOBIUS" })}
+							{t("consortium.about", { consortium: displayName })}
 						</Typography>
 						<Typography variant="loginCardText">
+							{description}
 							<Trans
 								i18nKey={"consortium.description"}
 								t={t}
@@ -185,11 +194,11 @@ export default function LandingCard() {
 					<Button
 						size="medium"
 						type="text"
-						href="https://searchmobius.org/"
+						href={searchCatalogueUrl}
 						rel="noopener"
 					>
 						<Typography variant="cardActionText">
-							{t("consortium.search", { consortium: "MOBIUS" })}
+							{t("consortium.search", { consortium: displayName })}
 						</Typography>
 					</Button>
 				</CardActions>
