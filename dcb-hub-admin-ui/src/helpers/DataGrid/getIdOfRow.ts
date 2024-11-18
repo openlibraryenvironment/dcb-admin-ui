@@ -2,9 +2,11 @@ export function getIdOfRow(row: any, type: string) {
 	if (type == "bibRecordCountByHostLMS") {
 		return row.sourceSystemId;
 	} else if (type == "errorOverviewResults") {
-		return row.namedSql + row.description;
+		const id = String(row.namedSql).concat(row.description);
+		return id;
 	} else if (type == "errorOverviewPatronRequests") {
-		return String(row.requestId + row.auditUrl + row.date);
+		const id = String(row.RequestId).concat(row.URL);
+		return id;
 	} else {
 		return row.id;
 	}
