@@ -1,5 +1,5 @@
 import { AdminLayout } from "@layout";
-import { Tab, Tabs } from "@mui/material";
+import { Button, Tab, Tabs } from "@mui/material";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -10,10 +10,19 @@ import { getConsortiaContacts, updatePerson } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import { Person } from "@models/Person";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import NewContact from "./NewContact";
 
 const Contacts: NextPage = () => {
 	const { t } = useTranslation();
 	const [tabIndex, setTabIndex] = useState(3); // needs to match order of tab
+	const [showNewContact, setShowNewContact] = useState(false);
+	const openNewContact = () => {
+		setShowNewContact(true);
+	};
+	const closeNewContact = () => {
+		setShowNewContact(false);
+	};
+
 	const router = useRouter();
 	const { data } = useQuery(getConsortiaContacts, {
 		variables: {
@@ -67,6 +76,13 @@ const Contacts: NextPage = () => {
 					</Tabs>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
+					<Button
+						data-tid="new-contact-button"
+						variant="contained"
+						onClick={openNewContact}
+					>
+						{t("libraries.contacts.create_new")}
+					</Button>
 					<ClientDataGrid
 						columns={[
 							{
@@ -118,6 +134,13 @@ const Contacts: NextPage = () => {
 					/>
 				</Grid>
 			</Grid>
+			{showNewContact ? (
+				<NewContact
+					show={showNewContact}
+					onClose={closeNewContact}
+					consortiumId={data?.consortia?.content[0]?.id}
+				/>
+			) : null}
 		</AdminLayout>
 	);
 };

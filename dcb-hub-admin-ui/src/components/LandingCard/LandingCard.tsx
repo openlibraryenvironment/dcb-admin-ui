@@ -26,8 +26,8 @@ export default function LandingCard() {
 	const {
 		displayName,
 		aboutImageURL,
-		searchCatalogueUrl,
-		websiteUrl,
+		catalogueSearchURL,
+		websiteURL,
 		description,
 	} = useConsortiumInfoStore();
 
@@ -159,10 +159,11 @@ export default function LandingCard() {
 				<CardContent>
 					<Stack direction={"column"} spacing={3}>
 						<CardMedia sx={{ justifyContent: "center", display: "flex" }}>
-							<a href={websiteUrl}>
+							<a href={websiteURL}>
 								<Image
 									src={aboutImageURL ? aboutImageURL : ""}
 									height={48}
+									width={160}
 									alt={t("ui.logo", { owner: { displayName } })}
 									title={t("ui.logo", { owner: { displayName } })}
 								/>
@@ -173,7 +174,7 @@ export default function LandingCard() {
 						</Typography>
 						<Typography variant="loginCardText">
 							{description}
-							<Trans
+							{/* <Trans
 								i18nKey={"consortium.description"}
 								t={t}
 								values={{ consortium: "MOBIUS" }}
@@ -186,7 +187,7 @@ export default function LandingCard() {
 									),
 									paragraph: <p />,
 								}}
-							/>
+							/> */}
 						</Typography>
 					</Stack>
 				</CardContent>
@@ -194,7 +195,7 @@ export default function LandingCard() {
 					<Button
 						size="medium"
 						type="text"
-						href={searchCatalogueUrl}
+						href={catalogueSearchURL}
 						rel="noopener"
 					>
 						<Typography variant="cardActionText">

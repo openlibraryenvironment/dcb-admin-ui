@@ -30,6 +30,8 @@ export function tableNameToEntityName(entityType: string) {
 	switch (entityType) {
 		case "agency":
 			return "agencies.agencies_one";
+		case "consortium":
+			return "nav.consortium.name";
 		case "library":
 			return "libraries.library";
 		case "host_lms":

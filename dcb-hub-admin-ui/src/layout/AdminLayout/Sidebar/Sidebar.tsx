@@ -96,25 +96,25 @@ const SidebarIcon = (indexVal: any, isSelected: boolean) => {
 		case 1:
 			return <MdOutput {...iconProps} />; // Patron requests
 		case 2:
-			return <MdLocalLibrary {...iconProps} />; // Libraries
-		case 3:
-			return <MdAccountBalance {...iconProps} />; // Agencies
-		case 4:
-			return <MdDns {...iconProps} />; // Host LMSs
-		case 5:
-			return <MdWorkspaces {...iconProps} />; // Groups
-		case 6:
-			return <MdLocationOn {...iconProps} />; // Locations
-		case 7:
-			return <MdMap {...iconProps} />; // Mappings
-		case 8:
-			return <MdBook {...iconProps} />; //Bib records
-		case 9:
-			return <MdSearch {...iconProps} />; // Search index
-		case 10:
-			return <MdInfo {...iconProps} />; // Service info
-		case 11:
 			return <MdSettings {...iconProps} />; // Consortium
+		case 3:
+			return <MdLocalLibrary {...iconProps} />; // Libraries
+		case 4:
+			return <MdAccountBalance {...iconProps} />; // Agencies
+		case 5:
+			return <MdDns {...iconProps} />; // Host LMSs
+		case 6:
+			return <MdWorkspaces {...iconProps} />; // Groups
+		case 7:
+			return <MdLocationOn {...iconProps} />; // Locations
+		case 8:
+			return <MdMap {...iconProps} />; // Mappings
+		case 9:
+			return <MdBook {...iconProps} />; //Bib records
+		case 10:
+			return <MdSearch {...iconProps} />; // Search index
+		case 11:
+			return <MdInfo {...iconProps} />; // Service info
 		default:
 			return null;
 	}
@@ -128,6 +128,7 @@ type routes = {
 const routes = [
 	{ path: "/", translationKey: "nav.home" }, // Home
 	{ path: "/patronRequests", translationKey: "nav.patronRequests" }, // Patron requests
+	{ path: "/consortium", translationKey: "nav.consortium.name" }, //Consortium
 	{ path: "/libraries", translationKey: "nav.libraries" }, // Libraries
 	{ path: "/agencies", translationKey: "nav.agencies" }, // Agencies
 	{ path: "/hostlmss", translationKey: "nav.hostlmss" }, // Host LMSs
@@ -137,7 +138,6 @@ const routes = [
 	{ path: "/bibs", translationKey: "nav.bibs" }, // Bib records
 	{ path: "/search", translationKey: "nav.search.name" }, // Shared index
 	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" }, // Service Info
-	{ path: "/consortium", translationKey: "nav.consortium.name" }, //Consortium
 	// currently unused, may be un-commented in the future
 	// { path: "/settings", translationKey: "nav.settings.name" }, // Settings
 ];

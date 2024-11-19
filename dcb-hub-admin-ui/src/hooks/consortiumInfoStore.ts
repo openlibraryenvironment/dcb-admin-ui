@@ -8,14 +8,17 @@ type ConsortiumInfo = {
 	headerImageURL: string;
 	aboutImageURL: string;
 	description: string;
-	searchCatalogueUrl: string;
-	websiteUrl: string;
+	catalogueSearchURL: string;
+	websiteURL: string;
 };
 
 type ConsortiumActions = {
 	setHeaderImageURL: (headerImageURL: string) => void;
 	setAboutImageURL: (aboutImageURL: string) => void;
 	setDisplayName: (displayName: string) => void;
+	setWebsiteURL: (websiteUrl: string) => void;
+	setCatalogueSearchURL: (catalogueSearchUrl: string) => void;
+	setDescription: (description: string) => void;
 	clearConsortiumStore: () => void;
 };
 
@@ -30,12 +33,17 @@ export const useConsortiumInfoStore = create<
 			headerImageURL: "", // Somehow this needs to default to the existing URL on the DB
 			aboutImageURL: "",
 			description: "",
-			searchCatalogueUrl: "",
-			websiteUrl: "",
+			catalogueSearchURL: "",
+			websiteURL: "",
 
+			// Build a combined setter
 			setHeaderImageURL: (headerImageURL: string) => set({ headerImageURL }),
 			setAboutImageURL: (aboutImageURL: string) => set({ aboutImageURL }),
 			setDisplayName: (displayName: string) => set({ displayName }),
+			setWebsiteURL: (websiteURL: string) => set({ websiteURL }),
+			setCatalogueSearchURL: (catalogueSearchURL: string) =>
+				set({ catalogueSearchURL }),
+			setDescription: (description: string) => set({ description }),
 
 			// Do we need to call this on logout at all?
 			clearConsortiumStore: () =>
@@ -44,8 +52,8 @@ export const useConsortiumInfoStore = create<
 					headerImageURL: "",
 					aboutImageURL: "",
 					description: "",
-					searchCatalogueUrl: "",
-					websiteUrl: "",
+					catalogueSearchURL: "",
+					websiteURL: "",
 					displayName: "",
 				})),
 		}),

@@ -1,6 +1,9 @@
 import { put } from "@vercel/blob";
 import type { NextApiResponse, NextApiRequest, PageConfig } from "next";
-
+// Handles the upload of images and other assets to Vercel Blob.
+// Note that uploader information and image URLs are saved to DCB's DB,
+// but the images themselves are stored in Vercel Blob.
+// See consortium/index.tsx for more on the upload process
 export default async function handler(
 	request: NextApiRequest,
 	response: NextApiResponse,

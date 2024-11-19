@@ -29,7 +29,7 @@ import {
 	handleEdit,
 } from "src/helpers/actions/editAndDeleteActions";
 import { Consortium } from "@models/Consortium";
-import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
+// import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
@@ -103,9 +103,14 @@ const ConsortiumPage: NextPage = () => {
 	});
 	// const [selectedFileName, setSelectedFileName] = useState<string>("");
 
-	//setAboutImageURL
-
-	const { setHeaderImageURL, setDisplayName } = useConsortiumInfoStore();
+	const {
+		setHeaderImageURL,
+		setDisplayName,
+		setAboutImageURL,
+		setCatalogueSearchURL,
+		setWebsiteURL,
+		setDescription,
+	} = useConsortiumInfoStore();
 
 	const [appHeaderFileName, setAppHeaderFileName] = useState<string>("");
 	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState<string>("");
@@ -172,25 +177,27 @@ const ConsortiumPage: NextPage = () => {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
-	const {
-		showUnsavedChangesModal,
-		handleKeepEditing,
-		handleLeaveWithoutSaving,
-	} = useUnsavedChangesWarning({
-		isDirty,
-		hasValidationError,
-		onKeepEditing: () => {
-			setTimeout(() => {
-				if (saveButtonRef.current) {
-					saveButtonRef.current.focus();
-				}
-			}, 0);
-		},
-		onLeaveWithoutSaving: () => {
-			setDirty(false);
-			setChangedFields({});
-		},
-	});
+
+	// not working at present - investigate. Disabled for now.
+	// const {
+	// 	showUnsavedChangesModal,
+	// 	handleKeepEditing,
+	// 	handleLeaveWithoutSaving,
+	// } = useUnsavedChangesWarning({
+	// 	isDirty,
+	// 	hasValidationError,
+	// 	onKeepEditing: () => {
+	// 		setTimeout(() => {
+	// 			if (saveButtonRef.current) {
+	// 				saveButtonRef.current.focus();
+	// 			}
+	// 		}, 0);
+	// 	},
+	// 	onLeaveWithoutSaving: () => {
+	// 		setDirty(false);
+	// 		setChangedFields({});
+	// 	},
+	// });
 
 	const handleConfirmSave = async (
 		reason: string,
@@ -198,8 +205,16 @@ const ConsortiumPage: NextPage = () => {
 		changeReferenceUrl: string,
 	) => {
 		if (changedFields.displayName) {
-			console.log("SET DN");
 			setDisplayName(changedFields.displayName);
+		}
+		if (changedFields.catalogueSearchUrl) {
+			setCatalogueSearchURL(changedFields.catalogueSearchUrl);
+		}
+		if (changedFields.websiteUrl) {
+			setWebsiteURL(changedFields.websiteUrl);
+		}
+		if (changedFields.description) {
+			setDescription(changedFields.description);
 		}
 		await handleSaveConfirmation(
 			consortium,
@@ -615,6 +630,7 @@ const ConsortiumPage: NextPage = () => {
 						const newBlob = (await response.json()) as PutBlobResult;
 						setAboutFileBlob(newBlob);
 						setAboutFileName(newBlob.url);
+						setAboutImageURL(newBlob.url);
 						await updateConsortium({
 							variables: {
 								input: {
@@ -641,6 +657,14 @@ const ConsortiumPage: NextPage = () => {
 							previewUrl={aboutPreviewUrl}
 							handleRemove={handleRemoveAbout}
 						/>
+						<Button
+							variant="contained"
+							type="submit"
+							disabled={isUploading}
+							sx={{ mt: 2 }}
+						>
+							{isUploading ? "Uploading..." : "Upload"}
+						</Button>
 					</Grid>
 
 					<Grid xs={4} sm={8} md={12}>
@@ -674,7 +698,7 @@ const ConsortiumPage: NextPage = () => {
 				entity={t("nav.consortium.name")}
 				entityId={consortium?.id}
 			/>
-			<Confirmation
+			{/* <Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
@@ -682,7 +706,7 @@ const ConsortiumPage: NextPage = () => {
 				library={consortium?.displayName}
 				entity={t("nav.consortium.name")}
 				entityId={consortium?.id}
-			/>
+			/> */}
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

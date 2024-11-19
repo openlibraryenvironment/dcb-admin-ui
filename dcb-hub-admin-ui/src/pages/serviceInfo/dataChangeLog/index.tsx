@@ -90,6 +90,7 @@ const DataChangeLog: NextPage = () => {
 							if (
 								row?.entityType == "reference_value_mapping" ||
 								row?.entityType == "numeric_range_mapping" ||
+								row?.entityType == "person" ||
 								row?.actionInfo == "DELETE" ||
 								row?.changeCategory == "Membership ended"
 							) {

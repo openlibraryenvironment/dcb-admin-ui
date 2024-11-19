@@ -597,8 +597,11 @@
 			"url": "Website URL"
 		},
 		"contacts": {
+			"create_new": "Create new contact",
 			"email": "Email",
 			"entity_name": "Library contact",
+			"first_name": "First name",
+			"last_name": "Last name",
 			"location": "Location",
 			"name": "Name",
 			"primary": "Primary contact",

@@ -16,6 +16,9 @@ import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import Head from "next/head";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { getConsortiaKeyInfo } from "src/queries/queries";
+import { useQuery } from "@apollo/client";
+import { Consortium } from "@models/Consortium";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -44,7 +47,16 @@ export default function Header({
 	const theme = useTheme();
 	const router = useRouter();
 	const { type } = useDCBServiceInfo();
-	const { headerImageURL, displayName } = useConsortiumInfoStore();
+	const {
+		headerImageURL,
+		displayName,
+		setDisplayName,
+		setAboutImageURL,
+		setDescription,
+		setCatalogueSearchURL,
+		setWebsiteURL,
+		// setHeaderImageURL,
+	} = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
 
 	const url = "/auth/logout";
@@ -59,11 +71,40 @@ export default function Header({
 			signIn();
 		}
 	};
-	console.log("Header image URL coming from the header", headerImageURL);
-	console.log(displayName);
-	console.log(type);
+	// console.log("Header image URL coming from the header", headerImageURL);
+	// console.log(displayName);
+	// console.log(type);
+	// We need to stop this query constantly firing
+	const { data: headerContentData } = useQuery(getConsortiaKeyInfo, {
+		variables: {
+			order: "name",
+			orderBy: "ASC",
+			pagesize: 1,
+			pageno: 0,
+		},
+		onCompleted: (data) => {
+			console.log("On completed is firing");
+			const consortium: Consortium = data?.consortia.content[0];
+
+			// Use a memoization technique or check if data has actually changed
+			if (consortium && consortium.displayName !== displayName) {
+				setDisplayName(consortium.displayName);
+				setAboutImageURL(consortium.aboutImageUrl);
+				setDescription(consortium.description);
+				setCatalogueSearchURL(consortium.catalogueSearchUrl);
+				setWebsiteURL(consortium.websiteUrl);
+			}
+		},
+		fetchPolicy: "cache-and-network", // Fetch from cache first, then network
+		nextFetchPolicy: "cache-first", // Subsequent fetches prefer cache
+	});
+	// skip: headerImageURL != "",
+
+	const consortium: Consortium = headerContentData?.consortia.content[0];
+	const fetchedHeaderImageURL = consortium?.headerImageUrl;
+
 	const pageTitle = t("app.title", {
-		consortium_name: displayName,
+		consortium_name: consortium?.displayName ?? displayName,
 		environment: type,
 	});
 
@@ -129,16 +170,16 @@ export default function Header({
               or the image and additional padding if the icons have been hidden. */}
 						{iconsVisible != false ? (
 							<Image
-								src={headerImageURL}
-								alt="Uploaded content"
+								src={fetchedHeaderImageURL ?? headerImageURL}
+								alt={t("libraries.consortium.logo_app_header")}
 								width={36}
 								height={36}
 							/>
 						) : (
 							<Box sx={{ mt: 1 }}>
 								<Image
-									src={headerImageURL}
-									alt="Uploaded content"
+									src={fetchedHeaderImageURL ?? headerImageURL}
+									alt={t("libraries.consortium.logo_app_header")}
 									width={36}
 									height={36}
 									style={{
@@ -162,7 +203,7 @@ export default function Header({
 							}}
 						>
 							{t("app.title", {
-								consortium_name: displayName,
+								consortium_name: consortium?.displayName ?? displayName,
 								environment: type,
 							})}
 						</Typography>
