@@ -81,7 +81,7 @@ const Contacts: NextPage = () => {
 						variant="contained"
 						onClick={openNewContact}
 					>
-						{t("libraries.contacts.create_new")}
+						{t("libraries.consortium.new_contact.title")}
 					</Button>
 					<ClientDataGrid
 						columns={[
@@ -139,6 +139,7 @@ const Contacts: NextPage = () => {
 					show={showNewContact}
 					onClose={closeNewContact}
 					consortiumId={data?.consortia?.content[0]?.id}
+					consortiumName={data?.consortia?.content[0]?.displayName}
 				/>
 			) : null}
 		</AdminLayout>

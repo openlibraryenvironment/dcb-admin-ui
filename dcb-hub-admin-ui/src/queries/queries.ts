@@ -475,6 +475,7 @@ export const getConsortiaContacts = gql`
 			content {
 				id
 				name
+				displayName
 				contacts {
 					id
 					firstName

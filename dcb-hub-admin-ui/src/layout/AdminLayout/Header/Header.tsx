@@ -83,10 +83,9 @@ export default function Header({
 			pageno: 0,
 		},
 		onCompleted: (data) => {
-			console.log("On completed is firing");
 			const consortium: Consortium = data?.consortia.content[0];
-
-			// Use a memoization technique or check if data has actually changed
+			// console.log("Query has completed");
+			// Check for changes
 			if (consortium && consortium.displayName !== displayName) {
 				setDisplayName(consortium.displayName);
 				setAboutImageURL(consortium.aboutImageUrl);

@@ -250,7 +250,6 @@ const ConsortiumPage: NextPage = () => {
 	};
 
 	const username = session?.user?.name;
-	// const userId = session?.user?.id;
 	const email = session?.user?.email ?? "No email provided";
 
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -335,8 +334,6 @@ const ConsortiumPage: NextPage = () => {
 			</AdminLayout>
 		);
 	}
-
-	console.log(appHeaderBlob);
 
 	return error || consortium == null || consortium == undefined ? (
 		<AdminLayout hideBreadcrumbs>
@@ -496,14 +493,16 @@ const ConsortiumPage: NextPage = () => {
 							previewUrl={appHeaderPreviewUrl}
 							handleRemove={handleRemoveAppHeader}
 						/>
-						<Button
-							variant="contained"
-							type="submit"
-							disabled={isUploading}
-							sx={{ mt: 2 }}
-						>
-							{isUploading ? "Uploading..." : "Upload"}
-						</Button>
+						{appHeaderFileName ? (
+							<Button
+								variant="outlined"
+								type="submit"
+								disabled={isUploading}
+								sx={{ mt: 2 }}
+							>
+								{isUploading ? "Uploading..." : "Upload"}
+							</Button>
+						) : null}
 					</Grid>
 				</form>
 				<Grid xs={4} sm={8} md={12}>

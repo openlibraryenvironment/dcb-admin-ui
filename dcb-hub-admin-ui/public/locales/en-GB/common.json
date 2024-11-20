@@ -64,6 +64,7 @@
 			"newer": "Newer",
 			"older": "Older",
 			"reload": "Reload page",
+			"submitting": "Submitting",
 			"toggle_on": "Toggle onboarding mode",
 			"view_error_details": "View error details"
 		},
@@ -165,6 +166,11 @@
 			"keep_editing": "Keep editing",
 			"leave_without_saving": "Leave without saving",
 			"header": "You have unsaved changes"
+		},
+		"validation": {
+			"invalid_email": "Please supply a valid email.",
+			"max_length": "This field has a maximum length of {{length}} characters",
+			"required": "The field  “{{field}}” is required."
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
@@ -591,13 +597,17 @@
 			"member_ref": "Member reference",
 			"member_from_to": "Member from-to",
 			"name": "Consortium name",
+			"new_contact": {
+				"error": "There was an error creating the new contact for the {{consortium}} consortium.",
+				"title": "Create new contact",
+				"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
+			},
 			"search_url": "DCB catalog search URL",
 			"select_image": "Select image",
 			"title": "Consortium",
 			"url": "Website URL"
 		},
 		"contacts": {
-			"create_new": "Create new contact",
 			"email": "Email",
 			"entity_name": "Library contact",
 			"first_name": "First name",

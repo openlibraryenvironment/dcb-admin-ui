@@ -50,7 +50,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 			<Stack spacing={2}>
 				<Button
 					component="label"
-					variant="contained"
+					variant="outlined"
 					startIcon={icon}
 					href={href}
 				>

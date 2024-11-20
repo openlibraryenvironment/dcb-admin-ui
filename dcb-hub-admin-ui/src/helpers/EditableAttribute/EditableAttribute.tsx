@@ -144,6 +144,7 @@ export default function EditableAttribute({
 									? theme.palette.primary.errorBackground
 									: theme.palette.primary.editableFieldBackground,
 							}}
+							multiline={field == "description" ? true : false}
 						/>
 					)
 				}
