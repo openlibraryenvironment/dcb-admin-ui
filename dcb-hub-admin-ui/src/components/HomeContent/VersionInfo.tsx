@@ -10,27 +10,21 @@ import {
 	API_LINKS,
 	LOCAL_VERSION_LINKS,
 } from "../../../homeData/homeConfig";
-
-interface InnerObject {
-	tags: string;
-	name: string;
-}
-
-interface ServerData {
-	git: InnerObject;
-	name: string;
-	tag_name?: string;
-}
+import { InfoEndpointResponse } from "@models/GitResponseTypes";
+import { isEmpty } from "lodash";
 
 export default function VersionInfo() {
 	const { publicRuntimeConfig } = getConfig();
 	const { t } = useTranslation();
-	const [serviceData, setServiceData] = useState<ServerData | null>(null);
-
-	const [githubServiceData, setGithubServiceData] = useState<ServerData | null>(
+	const [serviceData, setServiceData] = useState<InfoEndpointResponse | null>(
 		null,
 	);
-	const [adminUiData, setAdminUiData] = useState<ServerData | null>(null);
+
+	const [githubServiceData, setGithubServiceData] =
+		useState<InfoEndpointResponse | null>(null);
+	const [adminUiData, setAdminUiData] = useState<InfoEndpointResponse | null>(
+		null,
+	);
 
 	const apiEndpoints = useMemo(
 		() => [
@@ -52,7 +46,7 @@ export default function VersionInfo() {
 					apiEndpoints.map(async ({ link, setter }) => {
 						try {
 							// Make API call and set the state with response data
-							const response = await axios.get<ServerData>(link);
+							const response = await axios.get<InfoEndpointResponse>(link);
 							setter(response.data);
 							return { status: "fulfilled" }; // Return status for the response
 						} catch (error) {
@@ -89,7 +83,11 @@ export default function VersionInfo() {
 					: t("environment.loading_release_info")}
 			</Link>,
 			serviceData
-				? renderVersionData(serviceData?.git?.tags)
+				? renderVersionData(
+						isEmpty(serviceData?.git?.tags)
+							? serviceData?.git?.closest?.tag?.name + " (Dev)"
+							: serviceData?.git?.tags,
+					)
 				: t("environment.loading_version_info"),
 		],
 		[

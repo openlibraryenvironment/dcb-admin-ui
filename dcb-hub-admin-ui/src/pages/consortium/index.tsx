@@ -347,9 +347,9 @@ const ConsortiumPage: NextPage = () => {
 				/>
 			) : (
 				<ErrorComponent
-					title={t("ui.error.record_not_found")}
-					message={t("ui.error.invalid_UUID")}
-					description={t("ui.info.check_address")}
+					title={t("ui.error.consortium_not_found")}
+					message={t("ui.error.consortium_not_present")}
+					description={t("ui.error.consortium_advice")}
 					action={t("ui.action.go_back")}
 					goBack="/locations"
 				/>

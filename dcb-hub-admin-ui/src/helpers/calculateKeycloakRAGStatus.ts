@@ -2,6 +2,7 @@ export function calculateKeycloakRAGStatus(
 	data: any,
 ): "Down" | "Partial" | "Up" | "Undefined" {
 	const checks = data?.checks || [];
+	console.log("KC", checks);
 
 	const allStatus = checks.map((check: any) => check.status);
 

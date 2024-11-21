@@ -161,6 +161,8 @@
 	"service": {
 		"name": "Service",
 		"environment": "Environment",
+		"environment_health": "Environment health",
+		"environment_health_error": "Error: {{error}}",
 		"address": "Address",
 		"status": "Status",
 		"state": {

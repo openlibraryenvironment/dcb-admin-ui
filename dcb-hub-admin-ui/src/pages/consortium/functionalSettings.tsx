@@ -42,8 +42,6 @@ const FunctionalSettings: NextPage = () => {
 	const consortiumFunctionalSettings: FunctionalSetting[] =
 		data?.consortia?.content[0]?.functionalSettings;
 
-	console.log(consortiumFunctionalSettings);
-
 	const pickupAnywhere = consortiumFunctionalSettings?.find(
 		(fs) => fs.name == "PICKUP_ANYWHERE",
 	);

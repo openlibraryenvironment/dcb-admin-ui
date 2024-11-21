@@ -142,7 +142,10 @@
 			"something_wrong": "Something went wrong",
 			"summary": "Sorry, you do not have access to this page",
 			"too_long_load": "The record is taking too long to load",
-			"invalid_UUID": "The record might have been deleted or the identifier could be wrong"
+			"invalid_UUID": "The record might have been deleted or the identifier could be wrong",
+			"consortium_not_found": "Unable to find the consortium",
+			"consortium_not_present": "No consortium exists on this DCB instance.",
+			"consortium_advice": "Please set up your consortium and try again."
 		},
 		"file": {
 			"no_file_selected": "No file selected"
@@ -602,6 +605,7 @@
 				"title": "Create new contact",
 				"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
 			},
+			"onboarding": "Onboarding your consortium",
 			"search_url": "DCB catalog search URL",
 			"select_image": "Select image",
 			"title": "Consortium",

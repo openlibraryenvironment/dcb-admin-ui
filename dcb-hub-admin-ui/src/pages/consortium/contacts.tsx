@@ -34,8 +34,6 @@ const Contacts: NextPage = () => {
 	});
 
 	const consortiumContacts: Person[] = data?.consortia?.content[0]?.contacts;
-	console.log(consortiumContacts);
-	// Need custom tab components for accessibility + more
 
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
 		setTabIndex(newValue);
