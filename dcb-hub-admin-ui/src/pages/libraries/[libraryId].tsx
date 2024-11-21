@@ -939,14 +939,14 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.consortium.title")}
+									{t("consortium.title")}
 								</Typography>
 							</SubAccordionSummary>
 							<SubAccordionDetails>
 								<Grid xs={2} sm={4} md={4}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
-											{t("libraries.consortium.name")}
+											{t("consortium.name")}
 										</Typography>
 										<RenderAttribute
 											attribute={findConsortium(library?.membership)?.name}

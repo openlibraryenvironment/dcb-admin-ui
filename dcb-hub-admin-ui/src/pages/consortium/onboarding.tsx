@@ -33,7 +33,7 @@ const Onboarding: NextPage = () => {
 	};
 
 	return (
-		<AdminLayout title={t("nav.consortium.name")}>
+		<AdminLayout title={t("nav.consortium.onboarding")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -51,9 +51,7 @@ const Onboarding: NextPage = () => {
 					<Tab label={t("nav.consortium.contacts")} />
 				</Tabs>
 				<Grid xs={4} sm={8} md={12}>
-					<Typography variant="h2">
-						{t("libraries.consortium.onboarding")}
-					</Typography>
+					<Typography variant="h2">{t("consortium.onboarding")}</Typography>
 				</Grid>
 
 				<Grid xs={4} sm={8} md={12}>

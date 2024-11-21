@@ -54,7 +54,7 @@ const Contacts: NextPage = () => {
 	};
 
 	return (
-		<AdminLayout title={t("nav.consortium.name")}>
+		<AdminLayout title={t("nav.consortium.contacts")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -79,7 +79,7 @@ const Contacts: NextPage = () => {
 						variant="contained"
 						onClick={openNewContact}
 					>
-						{t("libraries.consortium.new_contact.title")}
+						{t("consortium.new_contact.title")}
 					</Button>
 					<ClientDataGrid
 						columns={[

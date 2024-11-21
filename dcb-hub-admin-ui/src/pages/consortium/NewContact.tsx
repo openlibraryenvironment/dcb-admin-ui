@@ -145,7 +145,7 @@ export default function NewContact({
 				setAlert({
 					open: true,
 					severity: "success",
-					text: t("libraries.consortium.new_contact.success", {
+					text: t("consortium.new_contact.success", {
 						consortium: consortiumName,
 					}),
 				});
@@ -161,7 +161,7 @@ export default function NewContact({
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("libraries.consortium.new_contact.error", {
+				text: t("consortium.new_contact.error", {
 					consortium: consortiumName,
 				}),
 			});
@@ -178,7 +178,7 @@ export default function NewContact({
 				aria-labelledby="new-contact-modal"
 			>
 				<DialogTitle variant="modalTitle">
-					{t("libraries.consortium.new_contact.title")}
+					{t("consortium.new_contact.title")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>
@@ -342,7 +342,7 @@ export default function NewContact({
 					>
 						{loading
 							? t("ui.action.submitting")
-							: t("libraries.consortium.new_contact.title")}
+							: t("consortium.new_contact.title")}
 					</Button>
 				</DialogActions>
 			</Dialog>

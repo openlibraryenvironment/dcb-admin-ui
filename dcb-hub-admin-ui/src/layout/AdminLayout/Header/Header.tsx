@@ -170,7 +170,7 @@ export default function Header({
 						{iconsVisible != false ? (
 							<Image
 								src={fetchedHeaderImageURL ?? headerImageURL}
-								alt={t("libraries.consortium.logo_app_header")}
+								alt={t("consortium.logo_app_header")}
 								width={36}
 								height={36}
 							/>
@@ -178,7 +178,7 @@ export default function Header({
 							<Box sx={{ mt: 1 }}>
 								<Image
 									src={fetchedHeaderImageURL ?? headerImageURL}
-									alt={t("libraries.consortium.logo_app_header")}
+									alt={t("consortium.logo_app_header")}
 									width={36}
 									height={36}
 									style={{

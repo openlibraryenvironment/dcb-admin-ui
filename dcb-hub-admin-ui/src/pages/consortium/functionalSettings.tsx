@@ -1,6 +1,7 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { AdminLayout } from "@layout";
 import { FunctionalSetting } from "@models/FunctionalSetting";
 import { Button, Stack, Tab, Tabs, Typography } from "@mui/material";
@@ -21,13 +22,56 @@ const FunctionalSettings: NextPage = () => {
 	const [tabIndex, setTabIndex] = useState(1);
 	const router = useRouter();
 	const client = useApolloClient();
-	const [showConfirmation, setShowConfirmation] = useState(false);
+	const { displayName } = useConsortiumInfoStore();
 
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
 		text: null,
 		title: null,
+		type: "",
+	});
+
+	const getAlertText = (
+		functionalSetting: FunctionalSetting,
+		success: boolean,
+	) => {
+		switch (success) {
+			case true:
+				console.log(functionalSetting);
+				if (functionalSetting?.enabled) {
+					return t("consortium.settings.enable_success", {
+						setting: functionalSetting.name,
+						consortium: displayName,
+					});
+				} else {
+					return t("consortium.settings.disable_success", {
+						setting: functionalSetting.name,
+						consortium: displayName,
+					});
+				}
+			case false:
+				if (functionalSetting.enabled) {
+					return t("consortium.settings.enable_error", {
+						setting: functionalSetting.name,
+						consortium: displayName,
+					});
+				} else {
+					return t("consortium.settings.disable_error", {
+						setting: functionalSetting.name,
+						consortium: displayName,
+					});
+				}
+		}
+	};
+	const [confirmation, setConfirmation] = useState<any>({
+		open: false,
+		headerText: "",
+		buttonText: "",
+		bodyText: "",
+		type: "functionalSettings",
+		entity: t("consortium.settings.one"),
+		activeSetting: null,
 	});
 	const { data } = useQuery(getConsortiaFunctionalSettings, {
 		variables: {
@@ -45,8 +89,18 @@ const FunctionalSettings: NextPage = () => {
 	const pickupAnywhere = consortiumFunctionalSettings?.find(
 		(fs) => fs.name == "PICKUP_ANYWHERE",
 	);
+	const reResolution = consortiumFunctionalSettings?.find(
+		(fs) => fs.name == "RE_RESOLUTION",
+	);
 	const closeConfirmation = () => {
-		setShowConfirmation(false);
+		setConfirmation({
+			open: false,
+			headerText: "",
+			buttonText: "",
+			bodyText: "",
+			type: "",
+			entity: "",
+		});
 		// This ensures we're up-to-date after confirmation closes
 		client.refetchQueries({
 			include: ["LoadConsortiumFS"],
@@ -75,7 +129,7 @@ const FunctionalSettings: NextPage = () => {
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
-		functionalSetting?: FunctionalSetting,
+		functionalSetting: FunctionalSetting,
 	) => {
 		const input = {
 			id: functionalSetting?.id,
@@ -88,38 +142,117 @@ const FunctionalSettings: NextPage = () => {
 			variables: {
 				input,
 			},
-		}).then((response) => {
-			if (response.data) {
-				setAlert({
-					open: true,
-					severity: "success",
-					text: "Successfully changed functional setting",
-					title: t("ui.data_grid.updated"),
-				});
-				closeConfirmation();
-			} else {
+		})
+			.then((response) => {
+				if (response.data) {
+					console.log(response.data);
+					const updatedFunctionalSetting: FunctionalSetting =
+						response.data.updateFunctionalSetting;
+					setAlert({
+						open: true,
+						severity: "success",
+						text: getAlertText(updatedFunctionalSetting, true),
+						title: t("ui.data_grid.updated"),
+					});
+					closeConfirmation();
+				} else {
+					setAlert({
+						open: true,
+						severity: "error",
+						text: getAlertText(functionalSetting, false),
+						title: t("ui.data_grid.error"),
+					});
+					closeConfirmation();
+				}
+			})
+			.catch((error) => {
+				console.error(error);
 				setAlert({
 					open: true,
 					severity: "error",
-					text: "Failed to change functional setting",
+					text: getAlertText(functionalSetting, false),
 					title: t("ui.data_grid.error"),
 				});
 				closeConfirmation();
-			}
-		});
+			});
 	};
 
-	const openConfirmation = (functionalSettingName: string) => {
-		if (functionalSettingName === "pickupAnywhere") {
-			setShowConfirmation(true);
-		} else {
-			// Expand with other functional settings as they are devised.
-			setShowConfirmation(true);
+	const openConfirmation = (
+		functionalSettingName: string,
+		enabled: boolean,
+	) => {
+		switch (functionalSettingName) {
+			case "pickupAnywhere":
+				if (!enabled) {
+					setConfirmation({
+						open: true,
+						headerText: t("consortium.settings.enable", {
+							setting: t("consortium.settings.pickup_anywhere"),
+						}),
+						buttonText: t("consortium.settings.enable", {
+							setting: t("consortium.settings.pickup_anywhere"),
+						}),
+						bodyText: t("consortium.settings.enable_body", {
+							setting: t("consortium.settings.pickup_anywhere"),
+							consortium: displayName,
+						}),
+						activeSetting: pickupAnywhere,
+					});
+				} else {
+					setConfirmation({
+						open: true,
+						headerText: t("consortium.settings.disable", {
+							setting: t("consortium.settings.pickup_anywhere"),
+						}),
+						buttonText: t("consortium.settings.disable", {
+							setting: t("consortium.settings.pickup_anywhere"),
+						}),
+						bodyText: t("consortium.settings.disable_body", {
+							setting: t("consortium.settings.pickup_anywhere"),
+							consortium: displayName,
+						}),
+						activeSetting: pickupAnywhere,
+					});
+				}
+				break;
+			case "reResolution":
+				if (!enabled) {
+					setConfirmation({
+						open: true,
+						headerText: t("consortium.settings.enable", {
+							setting: t("consortium.settings.re_resolution"),
+						}),
+						buttonText: t("consortium.settings.enable", {
+							setting: t("consortium.settings.re_resolution"),
+						}),
+						bodyText: t("consortium.settings.enable_body", {
+							setting: t("consortium.settings.re_resolution"),
+							consortium: displayName,
+						}),
+						activeSetting: reResolution,
+					});
+				} else {
+					setConfirmation({
+						open: true,
+						headerText: t("consortium.settings.disable", {
+							setting: t("consortium.settings.re_resolution"),
+						}),
+						buttonText: t("consortium.settings.disable", {
+							setting: t("consortium.settings.re_resolution"),
+						}),
+						bodyText: t("consortium.settings.disable_body", {
+							setting: t("consortium.settings.re_resolution"),
+							consortium: displayName,
+						}),
+						activeSetting: reResolution,
+					});
+				}
+				break;
 		}
 	};
 
 	return (
-		<AdminLayout title={t("nav.consortium.name")}>
+		<AdminLayout title={t("nav.consortium.functionalSettings")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -139,41 +272,83 @@ const FunctionalSettings: NextPage = () => {
 					</Tabs>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
+					<Typography variant="attributeText">
+						{t("consortium.settings.introduction")}
+					</Typography>
+				</Grid>
+				<Grid xs={4} sm={8} md={12}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							Pickup anywhere enabled?
+							{t("consortium.settings.pickup_anywhere_enabled")}
 						</Typography>
 						<RenderAttribute attribute={pickupAnywhere?.enabled} />
-						<Button
-							onClick={() => openConfirmation("pickupAnywhere")}
-							color="primary"
-							variant="outlined"
-							sx={{ marginTop: 1 }}
-							type="submit"
-						>
-							{pickupAnywhere?.enabled
-								? t("consortium.settings.disable_pickup_anywhere")
-								: t(
-										"libraries.circulation.confirmation.enable_pickup_anywhere",
-									)}
-						</Button>
 					</Stack>
+					<Button
+						onClick={() =>
+							openConfirmation("pickupAnywhere", !!pickupAnywhere?.enabled)
+						}
+						color="primary"
+						variant="outlined"
+						sx={{
+							marginTop: 1,
+						}}
+						type="submit"
+					>
+						{pickupAnywhere?.enabled
+							? t("consortium.settings.disable", {
+									setting: t("consortium.settings.pickup_anywhere"),
+								})
+							: t("consortium.settings.enable", {
+									setting: t("consortium.settings.pickup_anywhere"),
+								})}
+					</Button>
+				</Grid>
+				<Grid xs={4} sm={8} md={12}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("consortium.settings.re_resolution_enabled")}
+						</Typography>
+						<RenderAttribute attribute={reResolution?.enabled} />
+					</Stack>
+					<Button
+						onClick={() =>
+							openConfirmation("reResolution", !!reResolution?.enabled)
+						}
+						color="primary"
+						variant="outlined"
+						sx={{
+							marginTop: 1,
+							// width: "fit-content", // Stops button filling whole container
+						}}
+						type="submit"
+					>
+						{reResolution?.enabled
+							? t("consortium.settings.disable", {
+									setting: t("consortium.settings.re_resolution"),
+								})
+							: t("consortium.settings.enable", {
+									setting: t("consortium.settings.re_resolution"),
+								})}
+					</Button>
 				</Grid>
 			</Grid>
 			<Confirmation
-				open={showConfirmation}
+				open={confirmation.open}
 				onClose={() => closeConfirmation()}
 				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
 					handleFunctionalSettingConfirmation(
 						reason,
 						changeCategory,
 						changeReferenceUrl,
-						pickupAnywhere,
+						confirmation.activeSetting,
 					)
 				}
-				type="updatePickupAnywhere"
+				type={confirmation.type ?? "functionalSettings"}
 				library={pickupAnywhere?.name}
-				entity={t("nav.consortium")}
+				entity={confirmation.entity}
+				headerText={confirmation.headerText}
+				buttonText={confirmation.buttonText}
+				bodyText={confirmation.bodyText}
 			/>
 			<TimedAlert
 				open={alert.open}

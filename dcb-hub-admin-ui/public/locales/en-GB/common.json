@@ -360,6 +360,47 @@
 		"search_placeholder": "Search by name"
 	},
 
+	"consortium": {
+		"description_title": "Description",
+		"display_name": "Display name",
+		"id": "Consortium UUID",
+		"landing_page_title": "DCB Admin landing page",
+		"landing_page_subheader": "Consortium related content to display to unauthenticated visitors",
+		"logo_about": "Logo for \"About\" section",
+		"logo_about_requirements": "Height: 48px. Max width: 180px. Supported formats: JPG and PNG",
+		"logo_app_header": "Logo for app header",
+		"logo_app_header_requirements": "Size: 36 x 36 px. Supported formats: JPG and PNG",
+		"member_ref": "Member reference",
+		"member_from_to": "Member from-to",
+		"name": "Consortium name",
+		"new_contact": {
+			"error": "There was an error creating the new contact for the {{consortium}} consortium.",
+			"title": "Create new contact",
+			"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
+		},
+		"onboarding": "Onboarding your consortium",
+		"search_url": "DCB catalog search URL",
+		"select_image": "Select image",
+		"settings": {
+			"introduction": "These are the functional settings for your consortium. To enable or disable certain functionality for your consortium, use the toggles on this page.",
+			"enable": "Enable {{setting}}",
+			"enable_body": "The {{setting}} functionality will be enabled for the {{consortium}} consortium.",
+			"enable_error": "An error has occurred and {{setting}} could not be enabled for the {{consortium}} consortium.",
+			"enable_success": "{{setting}} was enabled successfully for the {{consortium}} consortium. ",
+			"disable": "Disable {{setting}}",
+			"disable_body": "The {{setting}} functionality will be disabled for the {{consortium}} consortium.",
+			"disable_error": "An error has occcurred and {{setting}} could not be disabled for the {{consortium}} consortium.",
+			"disable_success": "{{setting}} was disabled successfully for the {{consortium}} consortium.",
+			"one": "Functional setting",
+			"pickup_anywhere": "“Pickup anywhere”",
+			"pickup_anywhere_enabled": "Pickup anywhere enabled?",
+			"re_resolution": "“Re-resolution”",
+			"re_resolution_enabled": "Re-resolution enabled?"
+		},
+		"title": "Consortium",
+		"url": "Website URL"
+	},
+
 	"data_change_log": {
 		"action": "Action",
 		"category": "Change category",
@@ -586,30 +627,6 @@
 				"test_secret": "Test patron authentication secret",
 				"title": "Patron authentication"
 			}
-		},
-		"consortium": {
-			"description": "Description",
-			"display_name": "Display name",
-			"id": "Consortium UUID",
-			"landing_page_title": "DCB Admin landing page",
-			"landing_page_subheader": "Consortium related content to display to unauthenticated visitors",
-			"logo_about": "Logo for \"About\" section",
-			"logo_about_requirements": "Height: 48px. Max width: 180px. Supported formats: JPG and PNG",
-			"logo_app_header": "Logo for app header",
-			"logo_app_header_requirements": "Size: 36 x 36 px. Supported formats: JPG and PNG",
-			"member_ref": "Member reference",
-			"member_from_to": "Member from-to",
-			"name": "Consortium name",
-			"new_contact": {
-				"error": "There was an error creating the new contact for the {{consortium}} consortium.",
-				"title": "Create new contact",
-				"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
-			},
-			"onboarding": "Onboarding your consortium",
-			"search_url": "DCB catalog search URL",
-			"select_image": "Select image",
-			"title": "Consortium",
-			"url": "Website URL"
 		},
 		"contacts": {
 			"email": "Email",

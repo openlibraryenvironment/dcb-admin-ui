@@ -54,6 +54,9 @@ type ConfirmType = {
 	actionInfo?: string;
 	entity?: string;
 	entityId?: string;
+	headerText?: string;
+	buttonText?: string;
+	bodyText?: string;
 };
 
 const Confirmation = ({
@@ -71,6 +74,9 @@ const Confirmation = ({
 	editInformation,
 	entity,
 	entityId,
+	headerText,
+	buttonText,
+	bodyText,
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const validationSchema = useMemo(
@@ -89,6 +95,7 @@ const Confirmation = ({
 			}),
 		[t],
 	);
+	console.log(type, headerText);
 	const getCharCountHelperText = (
 		value: string,
 		maxLength: number,
@@ -188,6 +195,8 @@ const Confirmation = ({
 						location: library,
 					});
 				}
+			case "functionalSettings":
+				return headerText;
 			default:
 				return null;
 		}
@@ -329,6 +338,12 @@ const Confirmation = ({
 						</Box>
 					);
 				}
+			case "functionalSettings":
+				return (
+					<Box>
+						<Typography variant="body1">{bodyText}</Typography>
+					</Box>
+				);
 			default:
 				return null;
 		}
@@ -379,6 +394,8 @@ const Confirmation = ({
 				} else {
 					return t("details.location_pickup_enable");
 				}
+			case "functionalSettings":
+				return buttonText;
 			default:
 				return null;
 		}

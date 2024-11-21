@@ -382,7 +382,7 @@ const ConsortiumPage: NextPage = () => {
 				<Grid xs={4} sm={8} md={12}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("libraries.consortium.name")}
+							{t("consortium.name")}
 						</Typography>
 						<RenderAttribute attribute={consortium?.name} />
 					</Stack>
@@ -397,7 +397,7 @@ const ConsortiumPage: NextPage = () => {
 									: theme.palette.common.black
 							}
 						>
-							{t("libraries.consortium.display_name")}
+							{t("consortium.display_name")}
 						</Typography>
 						<EditableAttribute
 							field="displayName"
@@ -415,7 +415,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="attributeTitle">
-						{t("libraries.consortium.logo_app_header")}
+						{t("consortium.logo_app_header")}
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
@@ -443,7 +443,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography>
-						{t("libraries.consortium.logo_app_header_requirements")}
+						{t("consortium.logo_app_header_requirements")}
 					</Typography>
 				</Grid>
 				<form
@@ -486,7 +486,7 @@ const ConsortiumPage: NextPage = () => {
 						<FileUploadButton
 							ref={appHeaderFileRef}
 							icon={<CloudUpload />}
-							buttonText={t("libraries.consortium.select_image")}
+							buttonText={t("consortium.select_image")}
 							href="#appHeaderUpload"
 							isUploading={isUploading}
 							onFileSelect={handleAppHeaderFileSelect}
@@ -507,12 +507,12 @@ const ConsortiumPage: NextPage = () => {
 				</form>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="h2">
-						{t("libraries.consortium.landing_page_title")}
+						{t("consortium.landing_page_title")}
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="body1">
-						{t("libraries.consortium.landing_page_subheader")}
+						{t("consortium.landing_page_subheader")}
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
@@ -525,7 +525,7 @@ const ConsortiumPage: NextPage = () => {
 									: theme.palette.common.black
 							}
 						>
-							{t("libraries.consortium.url")}
+							{t("consortium.url")}
 						</Typography>
 						<EditableAttribute
 							field="websiteUrl"
@@ -550,7 +550,7 @@ const ConsortiumPage: NextPage = () => {
 									: theme.palette.common.black
 							}
 						>
-							{t("libraries.consortium.search_url")}
+							{t("consortium.search_url")}
 						</Typography>
 						<EditableAttribute
 							field="catalogueSearchUrl"
@@ -578,7 +578,7 @@ const ConsortiumPage: NextPage = () => {
 									: theme.palette.common.black
 							}
 						>
-							{t("libraries.consortium.description")}
+							{t("consortium.description_title")}
 						</Typography>
 						<EditableAttribute
 							field="description"
@@ -595,7 +595,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="attributeTitle">
-						{t("libraries.consortium.logo_about")}
+						{t("consortium.logo_about")}
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
@@ -605,7 +605,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="attributeText">
-						{t("libraries.consortium.logo_about_requirements")}
+						{t("consortium.logo_about_requirements")}
 					</Typography>
 				</Grid>
 				<form
@@ -649,7 +649,7 @@ const ConsortiumPage: NextPage = () => {
 						<FileUploadButton
 							ref={aboutFileRef}
 							icon={<CloudUpload />}
-							buttonText={t("libraries.consortium.select_image")}
+							buttonText={t("consortium.select_image")}
 							href="#aboutFileUpload"
 							isUploading={isUploading}
 							onFileSelect={handleAboutFileSelect}

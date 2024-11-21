@@ -189,7 +189,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("libraries.consortium.name")}
+									{t("consortium.name")}
 								</Typography>
 								<RenderAttribute attribute={row?.consortium?.name} />
 							</Stack>
@@ -199,7 +199,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("libraries.consortium.id")}
+									{t("consortium.id")}
 								</Typography>
 								<RenderAttribute attribute={row?.consortium?.id} />
 							</Stack>
