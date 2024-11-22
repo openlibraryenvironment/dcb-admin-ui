@@ -9,7 +9,6 @@ import { styled, useTheme } from "@mui/material/styles";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { useTranslation } from "next-i18next";
 import { Button, lighten } from "@mui/material";
-// import consortiumLogo from "public/assets/brand/MOBIUS_Mark x36.jpg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";

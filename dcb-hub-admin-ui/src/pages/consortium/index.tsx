@@ -230,6 +230,7 @@ const ConsortiumPage: NextPage = () => {
 			changeCategory,
 			changeReferenceUrl,
 			"updateConsortium",
+			t("nav.consortium.name").toLowerCase(),
 		);
 	};
 

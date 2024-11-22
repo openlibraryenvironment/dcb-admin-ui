@@ -178,7 +178,7 @@ export default function NewContact({
 				aria-labelledby="new-contact-modal"
 			>
 				<DialogTitle variant="modalTitle">
-					{t("consortium.new_contact.title")}
+					{t("consortium.new_contact.consortium")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>
@@ -263,17 +263,7 @@ export default function NewContact({
 									onChange={(_, newValue) => {
 										field.onChange(newValue);
 									}}
-									options={[
-										t("data_change_log.categories.error_correction"),
-										t("data_change_log.categories.details_changed"),
-										t("data_change_log.categories.new_member"),
-										t("data_change_log.categories.membership_ended"),
-										t("data_change_log.categories.additional_information"),
-										t("data_change_log.categories.changing_status"),
-										t("data_change_log.categories.initial_setup"),
-										t("data_change_log.categories.mappings_replacement"),
-										t("data_change_log.categories.other"),
-									]}
+									options={[t("data_change_log.new_contact")]}
 									renderInput={(params) => (
 										<TextField
 											{...params}

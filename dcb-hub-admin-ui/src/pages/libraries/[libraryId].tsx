@@ -1068,6 +1068,11 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								editable: true,
 								flex: 0.3,
+								type: "singleSelect",
+								valueOptions: [
+									{ value: true, label: t("ui.action.yes") },
+									{ value: false, label: t("ui.action.no") },
+								],
 							},
 						]}
 						data={library?.contacts}

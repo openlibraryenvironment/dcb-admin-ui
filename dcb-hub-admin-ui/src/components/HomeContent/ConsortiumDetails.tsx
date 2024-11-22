@@ -2,9 +2,11 @@ import SimpleTable from "@components/SimpleTable/SimpleTable";
 import { useTranslation } from "next-i18next"; //localisation
 import Link from "@components/Link/Link";
 import { ONBOARDING_LINKS } from "homeData/homeConfig";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 export default function ConsortiumDetails() {
 	const { t } = useTranslation();
+	const { displayName } = useConsortiumInfoStore();
 
 	//values in t() to be replaced by dynamic values
 	const ConsortiumDetails = [
@@ -19,7 +21,7 @@ export default function ConsortiumDetails() {
 			<>
 				{t("onboarding.stage.introduce_libraries.status_known", {
 					count: 81,
-					consortium_name: "MOBIUS",
+					consortium_name: displayName,
 				})}
 				<br />
 				<br />
@@ -40,7 +42,7 @@ export default function ConsortiumDetails() {
 			<>
 				{t("onboarding.stage.provision_systems.status_known", {
 					count: 51,
-					consortium_name: "MOBIUS",
+					consortium_name: displayName,
 				})}
 				<br />
 				<br />

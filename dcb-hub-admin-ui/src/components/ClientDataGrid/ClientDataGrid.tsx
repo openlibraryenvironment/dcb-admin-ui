@@ -202,7 +202,9 @@ export default function ClientDataGrid<T extends object>({
 					setAlert({
 						open: true,
 						severity: "error",
-						text: t(rowValidationResult),
+						text: t(rowValidationResult.translationKey, {
+							field: rowValidationResult.field,
+						}),
 					});
 					resolve(oldRow);
 					return;
@@ -261,6 +263,7 @@ export default function ClientDataGrid<T extends object>({
 			resolve(data.updatePerson);
 			setPromiseArguments(null);
 		} catch (error) {
+			console.log("Error" + error);
 			setAlert({
 				open: true,
 				severity: "error",
@@ -307,13 +310,21 @@ export default function ClientDataGrid<T extends object>({
 				: router.push(`/patronRequests/${params?.row?.id}`);
 		}
 	};
+
 	const actionsColumn: GridColDef[] = [
 		{
 			field: "actions",
 			type: "actions",
-			// renderHeader: ActionsColumnHeader, // Add custom header
 			getActions: ({ id }) => {
 				const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+				// List of types that support opening
+				const openActionTypes = [
+					"Audit",
+					"libraryGroupMembers",
+					"groupsOfLibrary",
+					"patronRequestsForLocation",
+				];
+
 				if (isInEditMode) {
 					return [
 						<Tooltip
@@ -323,7 +334,6 @@ export default function ClientDataGrid<T extends object>({
 							<GridActionsCellItem
 								icon={<Save />}
 								label={t("ui.data_grid.save")}
-								key={t("ui.data_grid.save")}
 								onClick={handleSaveClick(id)}
 							/>
 						</Tooltip>,
@@ -334,36 +344,39 @@ export default function ClientDataGrid<T extends object>({
 							<GridActionsCellItem
 								icon={<Cancel />}
 								label={t("ui.data_grid.cancel")}
-								key={t("ui.data_grid.cancel")}
 								onClick={handleCancelClick(id)}
 							/>
 						</Tooltip>,
 					];
 				}
-				return [
-					<GridActionsCellItem
-						key="Open"
-						showInMenu
-						disabled={
-							!(
-								type === "libraryGroupMembers" ||
-								type === "groupsOfLibrary" ||
-								type == "libraryGroupMembers"
-							) || isAnyRowEditing()
-						}
-						icon={<Visibility />}
-						onClick={() => {
-							// Some grids, like the PRs on the library page, need special redirection
-							if (type == "Audit") {
-								router.push(`/patronRequests/audits/${id}`);
-							} else if (type == "libraryGroupMembers") {
-								router.push(`/libraries/${id}`);
-							} else if (type == "groupsOfLibrary") {
-								router.push(`/groups/${id}`);
-							}
-						}}
-						label={t("ui.data_grid.open")}
-					/>,
+
+				const actions = [];
+
+				// Only add the open action where it is relevant
+				if (openActionTypes.includes(type)) {
+					actions.push(
+						<GridActionsCellItem
+							key="Open"
+							showInMenu
+							disabled={isAnyRowEditing()}
+							icon={<Visibility />}
+							onClick={() => {
+								if (type == "Audit") {
+									router.push(`/patronRequests/audits/${id}`);
+								} else if (type == "libraryGroupMembers") {
+									router.push(`/libraries/${id}`);
+								} else if (type == "groupsOfLibrary") {
+									router.push(`/groups/${id}`);
+								} else if (type == "patronRequestsForLocation") {
+									router.push(`/patronRequests/${id}`);
+								}
+							}}
+							label={t("ui.data_grid.open")}
+						/>,
+					);
+				}
+
+				actions.push(
 					<GridActionsCellItem
 						key="Edit"
 						icon={<Edit />}
@@ -372,7 +385,9 @@ export default function ClientDataGrid<T extends object>({
 						showInMenu
 						disabled={!isAnAdmin || isAnyRowEditing()}
 					/>,
-				];
+				);
+
+				return actions;
 			},
 		},
 	];

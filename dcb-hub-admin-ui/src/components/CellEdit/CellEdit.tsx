@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, TextField, useTheme } from "@mui/material";
+import { Box, MenuItem, Select, TextField, useTheme } from "@mui/material";
 import { GridRenderEditCellParams } from "@mui/x-data-grid-pro";
 
 export const CellEdit = (params: GridRenderEditCellParams) => {
@@ -20,6 +20,37 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 			inputRef.current?.focus();
 		}
 	}, [hasFocus]);
+
+	if (colDef?.type === "singleSelect") {
+		return (
+			<Box style={{ height: "100%", display: "flex", alignItems: "center" }}>
+				<Select
+					value={value.toString()} // Convert boolean to string
+					onChange={(event: any) => {
+						// Convert string back to boolean
+						handleChange({
+							...event,
+							target: {
+								...event.target,
+								value: event.target.value === "true",
+							},
+						});
+					}}
+					fullWidth
+					inputProps={{
+						"aria-label": colDef?.headerName,
+					}}
+					sx={{
+						height: "100%",
+						backgroundColor: theme.palette.primary.editableFieldBackground,
+					}}
+				>
+					<MenuItem value="true">Yes</MenuItem>
+					<MenuItem value="false">No</MenuItem>
+				</Select>
+			</Box>
+		);
+	}
 
 	return (
 		<Box

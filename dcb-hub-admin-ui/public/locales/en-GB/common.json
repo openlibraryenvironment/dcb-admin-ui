@@ -62,11 +62,13 @@
 			"go_home": "Go to $t(nav.home) page",
 			"go_back": "Go back",
 			"newer": "Newer",
+			"no": "No",
 			"older": "Older",
 			"reload": "Reload page",
 			"submitting": "Submitting",
 			"toggle_on": "Toggle onboarding mode",
-			"view_error_details": "View error details"
+			"view_error_details": "View error details",
+			"yes": "Yes"
 		},
 		"data_grid": {
 			"actions": "Actions",
@@ -110,10 +112,10 @@
 			"title": "Title",
 			"updated": "Updated",
 			"validation": {
-				"email": "This field must be an email address.",
-				"no_empty": "You cannot leave this field empty.",
-				"number": "This field only accepts numeric values.",
-				"required": "This field is required."
+				"email": "The field “{{field}}” must be an email address.",
+				"no_empty": "You cannot leave the “{{field}}” field empty.",
+				"number": "The field “{{field}}” only accepts numeric values.",
+				"required": "The field  “{{field}}” is required."
 			},
 			"view_items": "View items"
 		},
@@ -361,6 +363,9 @@
 	},
 
 	"consortium": {
+		"contacts": {
+			"no_contacts": "There are no contacts available for this consortium"
+		},
 		"description_title": "Description",
 		"display_name": "Display name",
 		"id": "Consortium UUID",
@@ -374,6 +379,7 @@
 		"member_from_to": "Member from-to",
 		"name": "Consortium name",
 		"new_contact": {
+			"consortium": "New consortium contact",
 			"error": "There was an error creating the new contact for the {{consortium}} consortium.",
 			"title": "Create new contact",
 			"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
@@ -413,6 +419,7 @@
 			"initial_setup": "Initial setup",
 			"mappings_replacement": "Mappings replacement",
 			"membership_ended": "Membership ended",
+			"new_contact": "New contact",
 			"new_member": "New member",
 			"other": "Other"
 		},

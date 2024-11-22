@@ -95,7 +95,6 @@ const Confirmation = ({
 			}),
 		[t],
 	);
-	console.log(type, headerText);
 	const getCharCountHelperText = (
 		value: string,
 		maxLength: number,
@@ -445,6 +444,10 @@ const Confirmation = ({
 								{getDialogContent()}
 								{type !== "unsavedChanges" ? (
 									<Box>
+										<Typography mb={2} variant="subtitle2">
+											{t("nav.serviceInfo.dataChangeLog")}
+										</Typography>
+
 										<Autocomplete
 											options={[
 												t("data_change_log.categories.error_correction"),

@@ -16,6 +16,7 @@ import Link from "@components/Link/Link";
 import Alert from "@components/Alert/Alert";
 import { useState } from "react";
 import LandingCard from "@components/LandingCard/LandingCard";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 // This is the page shown after logout in DCB Admin. It is very similar to login, but has the logout alert and other logout-specific behaviours.
 // Shared UI elements have been refactored into the LandingCard component.
@@ -24,6 +25,7 @@ const Logout = () => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const [alertDisplayed, setAlertDisplayed] = useState(true);
+	const { displayName } = useConsortiumInfoStore();
 
 	const handleSignIn = async (provider: string) => {
 		await signIn(provider, { callbackUrl: "/" }); // Redirect to home page after sign-in
@@ -62,7 +64,7 @@ const Logout = () => {
 											i18nKey={"loginout.logged_out"}
 											t={t}
 											components={{ bold: <strong />, break: <br /> }}
-											values={{ appName: "DCB Admin", consortium: "MOBIUS" }}
+											values={{ appName: "DCB Admin", consortium: displayName }}
 										/>
 									</Typography>
 								}

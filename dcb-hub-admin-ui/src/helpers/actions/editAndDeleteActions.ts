@@ -17,6 +17,7 @@ export const handleSaveConfirmation = async (
 	changeCategory: string,
 	changeReferenceUrl: string,
 	updateName: string,
+	entityType: string,
 ) => {
 	try {
 		const { data } = await updateEntity({
@@ -39,12 +40,13 @@ export const handleSaveConfirmation = async (
 			client.refetchQueries({
 				include: [`Load${entity.constructor.name}`],
 			});
+			console.log(entityType);
 
 			setAlert({
 				open: true,
 				severity: "success",
 				text: t("ui.data_grid.edit_success", {
-					entity: t(`entities.${entity.constructor.name.toLowerCase()}.one`),
+					entity: entityType,
 					name: entity.name ?? entity.id, // Use name if available, fall back to id if not
 				}),
 				title: t("ui.data_grid.updated"),

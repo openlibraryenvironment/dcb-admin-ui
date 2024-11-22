@@ -88,6 +88,7 @@ const Contacts: NextPage = () => {
 								headerName: t("libraries.contacts.role"),
 								minWidth: 50,
 								editable: true,
+								type: "string",
 								flex: 0.5,
 							},
 							{
@@ -96,6 +97,7 @@ const Contacts: NextPage = () => {
 								minWidth: 50,
 								editable: true,
 								flex: 0.7,
+								type: "string",
 								valueGetter: (value: string, row: Person) => {
 									return `${row.firstName} ${row.lastName}`.trim();
 								},
@@ -119,13 +121,18 @@ const Contacts: NextPage = () => {
 								minWidth: 50,
 								editable: true,
 								flex: 0.3,
+								type: "singleSelect",
+								valueOptions: [
+									{ value: true, label: t("ui.action.yes") },
+									{ value: false, label: t("ui.action.no") },
+								],
 							},
 						]}
 						data={consortiumContacts}
-						type="consortiumContact"
+						type="consortium contact"
 						selectable={false}
 						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
-						noDataTitle={"No contacts found for this consortium."}
+						noDataTitle={t("consortium.contacts.no_contacts")}
 						toolbarVisible="search-only"
 						disableHoverInteractions={true}
 						editQuery={updatePerson}

@@ -13,7 +13,6 @@ import Image from "next/image";
 import Link from "@components/Link/Link";
 import kIntLogo from "public/assets/brand/Knowledge-Integration_48px.png";
 import openRSLogo from "public/assets/brand/OpenRS_48px.png";
-// import mobiusLogo from "public/assets/brand/MOBIUS_48px.png";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 // This component holds the UI elements shared between the 'landing' pages (login and logout)
