@@ -480,7 +480,13 @@ export const getConsortiaContacts = gql`
 					id
 					firstName
 					lastName
-					role
+					role {
+						id
+						name
+						description
+						displayName
+						keycloakRole
+					}
 					isPrimaryContact
 					email
 				}
@@ -860,7 +866,13 @@ export const getLibraryById = gql`
 					id
 					firstName
 					lastName
-					role
+					role {
+						id
+						name
+						description
+						displayName
+						keycloakRole
+					}
 					isPrimaryContact
 					email
 				}

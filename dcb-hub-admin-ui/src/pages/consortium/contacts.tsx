@@ -90,6 +90,9 @@ const Contacts: NextPage = () => {
 								editable: true,
 								type: "string",
 								flex: 0.5,
+								valueGetter: (value: { displayName: string; name: string }) => {
+									return value.displayName ?? name;
+								},
 							},
 							{
 								field: "name",

@@ -242,14 +242,32 @@ export default function NewContact({
 							name="role"
 							control={control}
 							render={({ field }) => (
-								<TextField
+								<Autocomplete
 									{...field}
-									label={t("libraries.contacts.role")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.role}
-									helperText={errors.role?.message}
+									value={field.value || null}
+									onChange={(_, newValue) => {
+										field.onChange(newValue);
+									}}
+									options={[
+										t("libraries.contacts.roles.implementation"),
+										t("libraries.contacts.roles.library_service_admin"),
+										t("libraries.contacts.roles.operations"),
+										t("libraries.contacts.roles.sign_off"),
+										t("libraries.contacts.roles.support"),
+										t("libraries.contacts.roles.technical"),
+									]}
+									renderInput={(params) => (
+										<TextField
+											{...params}
+											required
+											label={t("libraries.contacts.role")}
+											error={!!errors.role}
+											helperText={errors.role?.message}
+										/>
+									)}
+									isOptionEqualToValue={(option, value) =>
+										option === value || (!option && !value)
+									}
 								/>
 							)}
 						/>

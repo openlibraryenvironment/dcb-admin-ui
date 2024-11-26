@@ -529,7 +529,7 @@ export default function ServerPaginationGrid({
 					setAlert({
 						open: true,
 						severity: "error",
-						text: t(rowValidationResult),
+						text: t(rowValidationResult.translationKey),
 						title: t("ui.data_grid.error"),
 					});
 					resolve(oldRow); // Validation failure: restore old row.

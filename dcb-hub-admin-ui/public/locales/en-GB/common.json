@@ -644,6 +644,15 @@
 			"name": "Name",
 			"primary": "Primary contact",
 			"role": "Role",
+			"roles": {
+				"implementation": "Implementation Contact",
+				"library_service_admin": "Library Service Administrator",
+				"operations": "Operations Contact",
+				"sponsor": "Sponsor",
+				"sign_off": "Sign-Off Authority",
+				"support": "Support",
+				"technical": "Technical contact"
+			},
 			"time_zone": "Time zone",
 			"title": "Contacts"
 		},
