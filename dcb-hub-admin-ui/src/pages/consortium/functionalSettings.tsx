@@ -7,10 +7,12 @@ import { FunctionalSetting } from "@models/FunctionalSetting";
 import { Button, Stack, Tab, Tabs, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { adminOnly } from "src/constants/roles";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import {
 	getConsortiaFunctionalSettings,
@@ -23,6 +25,7 @@ const FunctionalSettings: NextPage = () => {
 	const router = useRouter();
 	const client = useApolloClient();
 	const { displayName } = useConsortiumInfoStore();
+	const { data: session } = useSession();
 
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -31,6 +34,10 @@ const FunctionalSettings: NextPage = () => {
 		title: null,
 		type: "",
 	});
+
+	const isAdminOnly = session?.profile?.roles?.some(
+		(role: string) => role == adminOnly,
+	);
 
 	const getAlertText = (
 		functionalSetting: FunctionalSetting,
@@ -379,28 +386,30 @@ const FunctionalSettings: NextPage = () => {
 							</Typography>
 							<RenderAttribute attribute={selectUnavailable?.enabled} />
 						</Stack>
-						<Button
-							onClick={() =>
-								openConfirmation(
-									"selectUnavailable",
-									!!selectUnavailable?.enabled,
-								)
-							}
-							color="primary"
-							variant="outlined"
-							sx={{
-								marginTop: 1,
-							}}
-							type="submit"
-						>
-							{selectUnavailable?.enabled
-								? t("consortium.settings.disable", {
-										setting: t("consortium.settings.select_unavailable"),
-									})
-								: t("consortium.settings.enable", {
-										setting: t("consortium.settings.select_unavailable"),
-									})}
-						</Button>
+						{isAdminOnly ? (
+							<Button
+								onClick={() =>
+									openConfirmation(
+										"selectUnavailable",
+										!!selectUnavailable?.enabled,
+									)
+								}
+								color="primary"
+								variant="outlined"
+								sx={{
+									marginTop: 1,
+								}}
+								type="submit"
+							>
+								{selectUnavailable?.enabled
+									? t("consortium.settings.disable", {
+											setting: t("consortium.settings.select_unavailable"),
+										})
+									: t("consortium.settings.enable", {
+											setting: t("consortium.settings.select_unavailable"),
+										})}
+							</Button>
+						) : null}
 					</Grid>
 				) : null}
 			</Grid>
