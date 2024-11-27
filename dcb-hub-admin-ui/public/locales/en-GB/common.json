@@ -401,7 +401,9 @@
 			"pickup_anywhere": "“Pickup anywhere”",
 			"pickup_anywhere_enabled": "Pickup anywhere enabled?",
 			"re_resolution": "“Re-resolution”",
-			"re_resolution_enabled": "Re-resolution enabled?"
+			"re_resolution_enabled": "Re-resolution enabled?",
+			"select_unavailable": "Select unavailable items",
+			"select_unavailable_enabled": "Select unavailable items enabled?"
 		},
 		"title": "Consortium",
 		"url": "Website URL"

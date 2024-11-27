@@ -92,6 +92,10 @@ const FunctionalSettings: NextPage = () => {
 	const reResolution = consortiumFunctionalSettings?.find(
 		(fs) => fs.name == "RE_RESOLUTION",
 	);
+
+	const selectUnavailable = consortiumFunctionalSettings?.find(
+		(fs) => fs.name == "SELECT_UNAVAILABLE_ITEMS",
+	);
 	const closeConfirmation = () => {
 		setConfirmation({
 			open: false,
@@ -248,6 +252,39 @@ const FunctionalSettings: NextPage = () => {
 					});
 				}
 				break;
+			case "selectUnavailable":
+				if (!enabled) {
+					setConfirmation({
+						open: true,
+						headerText: t("consortium.settings.enable", {
+							setting: t("consortium.settings.select_unavailable"),
+						}),
+						buttonText: t("consortium.settings.enable", {
+							setting: t("consortium.settings.select_unavailable"),
+						}),
+						bodyText: t("consortium.settings.enable_body", {
+							setting: t("consortium.settings.select_unavailable"),
+							consortium: displayName,
+						}),
+						activeSetting: selectUnavailable,
+					});
+				} else {
+					setConfirmation({
+						open: true,
+						headerText: t("consortium.settings.disable", {
+							setting: t("consortium.settings.select_unavailable"),
+						}),
+						buttonText: t("consortium.settings.disable", {
+							setting: t("consortium.settings.select_unavailable"),
+						}),
+						bodyText: t("consortium.settings.disable_body", {
+							setting: t("consortium.settings.select_unavailable"),
+							consortium: displayName,
+						}),
+						activeSetting: selectUnavailable,
+					});
+				}
+				break;
 		}
 	};
 
@@ -276,61 +313,96 @@ const FunctionalSettings: NextPage = () => {
 						{t("consortium.settings.introduction")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("consortium.settings.pickup_anywhere_enabled")}
-						</Typography>
-						<RenderAttribute attribute={pickupAnywhere?.enabled} />
-					</Stack>
-					<Button
-						onClick={() =>
-							openConfirmation("pickupAnywhere", !!pickupAnywhere?.enabled)
-						}
-						color="primary"
-						variant="outlined"
-						sx={{
-							marginTop: 1,
-						}}
-						type="submit"
-					>
-						{pickupAnywhere?.enabled
-							? t("consortium.settings.disable", {
-									setting: t("consortium.settings.pickup_anywhere"),
-								})
-							: t("consortium.settings.enable", {
-									setting: t("consortium.settings.pickup_anywhere"),
-								})}
-					</Button>
-				</Grid>
-				<Grid xs={4} sm={8} md={12}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("consortium.settings.re_resolution_enabled")}
-						</Typography>
-						<RenderAttribute attribute={reResolution?.enabled} />
-					</Stack>
-					<Button
-						onClick={() =>
-							openConfirmation("reResolution", !!reResolution?.enabled)
-						}
-						color="primary"
-						variant="outlined"
-						sx={{
-							marginTop: 1,
-							// width: "fit-content", // Stops button filling whole container
-						}}
-						type="submit"
-					>
-						{reResolution?.enabled
-							? t("consortium.settings.disable", {
-									setting: t("consortium.settings.re_resolution"),
-								})
-							: t("consortium.settings.enable", {
-									setting: t("consortium.settings.re_resolution"),
-								})}
-					</Button>
-				</Grid>
+				{pickupAnywhere ? (
+					<Grid xs={4} sm={8} md={12}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("consortium.settings.pickup_anywhere_enabled")}
+							</Typography>
+							<RenderAttribute attribute={pickupAnywhere?.enabled} />
+						</Stack>
+						<Button
+							onClick={() =>
+								openConfirmation("pickupAnywhere", !!pickupAnywhere?.enabled)
+							}
+							color="primary"
+							variant="outlined"
+							sx={{
+								marginTop: 1,
+							}}
+							type="submit"
+						>
+							{pickupAnywhere?.enabled
+								? t("consortium.settings.disable", {
+										setting: t("consortium.settings.pickup_anywhere"),
+									})
+								: t("consortium.settings.enable", {
+										setting: t("consortium.settings.pickup_anywhere"),
+									})}
+						</Button>
+					</Grid>
+				) : null}
+				{reResolution ? (
+					<Grid xs={4} sm={8} md={12}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("consortium.settings.re_resolution_enabled")}
+							</Typography>
+							<RenderAttribute attribute={reResolution?.enabled} />
+						</Stack>
+						<Button
+							onClick={() =>
+								openConfirmation("reResolution", !!reResolution?.enabled)
+							}
+							color="primary"
+							variant="outlined"
+							sx={{
+								marginTop: 1,
+							}}
+							type="submit"
+						>
+							{reResolution?.enabled
+								? t("consortium.settings.disable", {
+										setting: t("consortium.settings.re_resolution"),
+									})
+								: t("consortium.settings.enable", {
+										setting: t("consortium.settings.re_resolution"),
+									})}
+						</Button>
+					</Grid>
+				) : null}
+				{selectUnavailable ? (
+					<Grid xs={4} sm={8} md={12}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("consortium.settings.select_unavailable_enabled")}
+							</Typography>
+							<RenderAttribute attribute={selectUnavailable?.enabled} />
+						</Stack>
+						<Button
+							onClick={() =>
+								openConfirmation(
+									"selectUnavailable",
+									!!selectUnavailable?.enabled,
+								)
+							}
+							color="primary"
+							variant="outlined"
+							sx={{
+								marginTop: 1,
+							}}
+							type="submit"
+						>
+							{selectUnavailable?.enabled
+								? t("consortium.settings.disable", {
+										setting: t("consortium.settings.select_unavailable"),
+									})
+								: t("consortium.settings.enable", {
+										setting: t("consortium.settings.select_unavailable"),
+									})}
+						</Button>
+					</Grid>
+				) : null}
 			</Grid>
 			<Confirmation
 				open={confirmation.open}
