@@ -270,31 +270,6 @@ export default function NewContact({
 							/>
 						</Box>
 						<Controller
-							name="changeCategory"
-							control={control}
-							render={({ field }) => (
-								<Autocomplete
-									{...field}
-									value={field.value || null}
-									onChange={(_, newValue) => {
-										field.onChange(newValue);
-									}}
-									options={[t("data_change_log.new_contact")]}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											label={t("data_change_log.category")}
-											error={!!errors.changeCategory}
-											helperText={errors.changeCategory?.message}
-										/>
-									)}
-									isOptionEqualToValue={(option, value) =>
-										option === value || (!option && !value)
-									}
-								/>
-							)}
-						/>
-						<Controller
 							name="reason"
 							control={control}
 							render={({ field }) => (
