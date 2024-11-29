@@ -271,6 +271,18 @@ export default function NewContact({
 								/>
 							)}
 						/>
+						<Box>
+							<Controller
+								name="isPrimaryContact"
+								control={control}
+								render={({ field }) => (
+									<FormControlLabel
+										control={<Checkbox {...field} checked={field.value} />}
+										label={t("libraries.contacts.primary")}
+									/>
+								)}
+							/>
+						</Box>
 						<Controller
 							name="changeCategory"
 							control={control}
@@ -303,10 +315,9 @@ export default function NewContact({
 							render={({ field }) => (
 								<TextField
 									{...field}
-									label={t("data_change_log.reason")}
+									label={t("data_change_log.reason_addition")}
 									variant="outlined"
 									fullWidth
-									required
 									error={!!errors.reason}
 									helperText={errors.reason?.message}
 								/>
@@ -322,18 +333,6 @@ export default function NewContact({
 							error={!!errors.changeReferenceUrl}
 							helperText={errors.changeReferenceUrl?.message}
 						/>
-						<Box>
-							<Controller
-								name="isPrimaryContact"
-								control={control}
-								render={({ field }) => (
-									<FormControlLabel
-										control={<Checkbox {...field} checked={field.value} />}
-										label={t("libraries.contacts.primary")}
-									/>
-								)}
-							/>
-						</Box>
 					</Box>
 				</DialogContent>
 				<DialogActions sx={{ p: 2 }}>

@@ -1039,7 +1039,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								editable: true,
 								flex: 0.5,
 								valueGetter: (value: { displayName: string; name: string }) => {
-									return value.displayName ?? name;
+									return value.displayName ?? value.name;
 								},
 							},
 							{

@@ -9,6 +9,9 @@ export const validateRow = (
 	oldRow: GridValidRowModel,
 	editableColumns: any,
 ): ValidationResult | null => {
+	// For debugging purposes. Commented out by default
+	// console.log("New Row:", JSON.stringify(newRow, null, 2));
+	// console.log("Old Row:", JSON.stringify(oldRow, null, 2));
 	// Special handling for "name" column which is actually two fields
 	const oldFirstName = oldRow.firstName;
 	const newFirstName = newRow.firstName;
@@ -33,6 +36,20 @@ export const validateRow = (
 	for (const column of editableColumns) {
 		const newValue = newRow[column.field];
 		const oldValue = oldRow[column.field];
+		if (column.field === "role") {
+			// Compare role names instead of entire objects
+			const newRoleName = newValue?.name;
+			const oldRoleName = oldValue?.name;
+			if (newRoleName !== oldRoleName) {
+				// Perform any specific role validation if needed
+				if (!newRoleName) {
+					return {
+						field: column.field,
+						translationKey: "ui.data_grid.validation.required",
+					};
+				}
+			}
+		}
 		// Only validate if the value has changed
 		if (newValue !== oldValue) {
 			switch (column.type) {

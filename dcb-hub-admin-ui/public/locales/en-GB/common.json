@@ -445,6 +445,7 @@
 		"old_data": "Old data",
 		"old_value": "Old value",
 		"reason": "Reason for change",
+		"reason_addition": "Reason for adding",
 		"reason_required": "Please provide a reason for this change.",
 		"reference_url": "Change reference URL",
 		"ref_url_helper": "The URL of the ticket describing the change requested, if applicable.",

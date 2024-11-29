@@ -63,7 +63,6 @@ function SearchOnlyToolbar() {
 function computeMutation(newRow: GridRowModel, oldRow: GridRowModel) {
 	const changedFields: Partial<GridRowModel> = {};
 	const originalFields: Partial<GridRowModel> = {};
-
 	Object.keys(newRow).forEach((key) => {
 		if (newRow[key] !== oldRow[key]) {
 			changedFields[key] = newRow[key];
@@ -210,6 +209,7 @@ export default function ClientDataGrid<T extends object>({
 					return;
 				}
 				const mutation = computeMutation(newRow, oldRow);
+				// Handle role change as change to role.name
 				if (mutation) {
 					setEditRecord(mutation);
 					setPromiseArguments({ resolve, reject, newRow, oldRow });
@@ -243,7 +243,7 @@ export default function ClientDataGrid<T extends object>({
 			email: newRow.email,
 			firstName: newRow.firstName,
 			lastName: newRow.lastName,
-			role: newRow.role,
+			role: newRow.role.name,
 			isPrimaryContact: newRow.isPrimaryContact,
 			// fullName: newRow.fullName,
 			// abbreviatedName: newRow.abbreviatedName,
@@ -263,7 +263,6 @@ export default function ClientDataGrid<T extends object>({
 			resolve(data.updatePerson);
 			setPromiseArguments(null);
 		} catch (error) {
-			console.log("Error" + error);
 			setAlert({
 				open: true,
 				severity: "error",

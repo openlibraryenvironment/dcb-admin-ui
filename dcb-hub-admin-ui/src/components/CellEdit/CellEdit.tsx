@@ -1,40 +1,104 @@
-import React, { useEffect, useRef } from "react";
-import { Box, MenuItem, Select, TextField, useTheme } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import {
+	Autocomplete,
+	Box,
+	MenuItem,
+	Select,
+	TextField,
+	useTheme,
+} from "@mui/material";
 import { GridRenderEditCellParams } from "@mui/x-data-grid-pro";
+import { useLazyQuery } from "@apollo/client";
+import { getRoles } from "src/queries/queries";
+import { useTranslation } from "next-i18next";
 
 export const CellEdit = (params: GridRenderEditCellParams) => {
 	const { id, field, value, api, colDef, hasFocus } = params;
+	const { t } = useTranslation();
+
 	const theme = useTheme();
 	const inputRef = useRef<HTMLInputElement>(null);
+	const [selectedRole, setSelectedRole] = useState<any>(null);
+	const [autocompleteLoading, setAutocompleteLoading] = useState(true);
 
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const newValue = event.target.value;
-		api.setEditCellValue(
-			{ id, field, value: newValue, debounceMs: 100 },
-			event,
-		);
-	};
+	// Set initial value based on grid's existing value
+	useEffect(() => {
+		if (value) {
+			setSelectedRole(
+				typeof value === "object" && value.name ? value : { name: value },
+			);
+		}
+	}, [value]);
+	const [availableOptions, setAvailableOptions] = useState<any>([]);
+
+	const [optionsData] = useLazyQuery(getRoles, {
+		variables: {
+			order: "name",
+			orderBy: "DESC",
+			pagesize: 100,
+		},
+		onCompleted: (data) => {
+			setAvailableOptions(data?.roles?.content);
+			setAutocompleteLoading(false);
+		},
+	});
 
 	useEffect(() => {
 		if (hasFocus) {
 			inputRef.current?.focus();
 		}
 	}, [hasFocus]);
+	if (colDef?.field === "role") {
+		return (
+			<Autocomplete
+				options={availableOptions}
+				loading={autocompleteLoading}
+				value={selectedRole}
+				onOpen={() => {
+					optionsData();
+				}}
+				getOptionLabel={(option: any) => option?.name || value || ""}
+				isOptionEqualToValue={(option, currentValue) =>
+					option?.name === (currentValue?.name || currentValue)
+				}
+				onChange={(event, newValue) => {
+					setSelectedRole(newValue);
+					api.setEditCellValue({
+						id,
+						field,
+						value: newValue || null,
+						debounceMs: 100,
+					});
+				}}
+				renderInput={(params) => (
+					<TextField
+						{...params}
+						variant="outlined"
+						fullWidth
+						helperText={autocompleteLoading ? t("common.loading") : ""}
+					/>
+				)}
+				disableClearable
+				fullWidth
+			/>
+		);
+	}
 
-	if (colDef?.type === "singleSelect") {
+	if (colDef?.type === "singleSelect" && colDef.field == "isPrimaryContact") {
 		return (
 			<Box style={{ height: "100%", display: "flex", alignItems: "center" }}>
 				<Select
-					value={value.toString()} // Convert boolean to string
+					value={value.toString()}
 					onChange={(event: any) => {
-						// Convert string back to boolean
-						handleChange({
-							...event,
-							target: {
-								...event.target,
+						api.setEditCellValue(
+							{
+								id,
+								field,
 								value: event.target.value === "true",
+								debounceMs: 100,
 							},
-						});
+							event,
+						);
 					}}
 					fullWidth
 					inputProps={{
@@ -63,29 +127,18 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 			<TextField
 				inputRef={inputRef}
 				value={value}
-				onChange={handleChange}
+				onChange={(event) => {
+					api.setEditCellValue(
+						{ id, field, value: event.target.value, debounceMs: 100 },
+						event,
+					);
+				}}
 				size="medium"
-				aria-labelledby={colDef?.headerName}
 				variant="outlined"
 				fullWidth
-				inputProps={{
-					"aria-label": colDef?.headerName,
-				}}
 				sx={{
 					height: "100%",
 					backgroundColor: theme.palette.primary.editableFieldBackground,
-					"& .MuiOutlinedInput-root": {
-						height: "100%",
-						"& fieldset": {
-							borderColor: theme.palette.primary.main,
-						},
-						"&:hover fieldset": {
-							borderColor: theme.palette.primary.dark,
-						},
-						"&.Mui-focused fieldset": {
-							borderColor: theme.palette.primary.main,
-						},
-					},
 				}}
 			/>
 		</Box>

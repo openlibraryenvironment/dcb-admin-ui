@@ -80,7 +80,11 @@ export const updatePerson = gql`
 			email
 			firstName
 			lastName
-			role
+			role {
+				id
+				name
+				displayName
+			}
 			isPrimaryContact
 		}
 	}
@@ -1311,6 +1315,23 @@ export const getNumericRangeMappings = gql`
 			pageable {
 				number
 				offset
+			}
+		}
+	}
+`;
+
+// ROLES
+
+export const getRoles = gql`
+	query LoadRoles($order: String!, $orderBy: String!, $pagesize: Int!) {
+		roles(order: $order, orderBy: $orderBy, pagesize: $pagesize) {
+			totalSize
+			content {
+				id
+				name
+				keycloakRole
+				description
+				displayName
 			}
 		}
 	}
