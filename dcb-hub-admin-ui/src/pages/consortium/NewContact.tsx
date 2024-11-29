@@ -28,9 +28,9 @@ interface NewContactFormData {
 	lastName: string;
 	email: string;
 	role: string;
-	isPrimaryContact: boolean;
-	reason: string;
-	changeCategory: string;
+	isPrimaryContact?: boolean;
+	reason?: string;
+	changeCategory?: string;
 	changeReferenceUrl?: string;
 }
 
@@ -85,20 +85,6 @@ export default function NewContact({
 				}),
 			)
 			.max(128, t("ui.validation.max_length", { length: 128 })),
-		isPrimaryContact: Yup.boolean().required(),
-		reason: Yup.string()
-			.trim()
-			.required(
-				t("ui.validation.required", {
-					field: t("data_change_log.reason"),
-				}),
-			)
-			.max(100, t("ui.validation.max_length", { length: 100 })),
-		changeCategory: Yup.string().required(
-			t("ui.validation.required", {
-				field: t("data_change_log.category"),
-			}),
-		),
 	});
 
 	const {
@@ -118,7 +104,7 @@ export default function NewContact({
 			isPrimaryContact: false,
 		},
 		resolver: yupResolver(validationSchema),
-		mode: "onBlur",
+		mode: "onChange",
 	});
 
 	const [createNewContact, { loading }] = useMutation(createConsortiumContact, {
@@ -297,7 +283,6 @@ export default function NewContact({
 									renderInput={(params) => (
 										<TextField
 											{...params}
-											required
 											label={t("data_change_log.category")}
 											error={!!errors.changeCategory}
 											helperText={errors.changeCategory?.message}
