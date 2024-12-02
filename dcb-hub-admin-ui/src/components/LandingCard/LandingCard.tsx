@@ -197,20 +197,6 @@ export default function LandingCard() {
 							) : (
 								description
 							)}
-							{/* <Trans
-								i18nKey={"consortium.description"}
-								t={t}
-								values={{ consortium: "MOBIUS" }}
-								components={{
-									linkComponent: (
-										<Link
-											key="dcb-info"
-											href="https://www.mobiusconsortium.org"
-										/>
-									),
-									paragraph: <p />,
-								}}
-							/> */}
 						</Typography>
 					</Stack>
 				</CardContent>
