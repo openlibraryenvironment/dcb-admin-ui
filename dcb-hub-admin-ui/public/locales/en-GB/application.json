@@ -153,7 +153,9 @@
 
 	"consortium": {
 		"about": "About {{consortium}}",
+		"about_generic": "About Consortia",
 		"description": "<linkComponent>MOBIUS</linkComponent> is a vibrant, collaborative partnership of libraries that has transformed library services for the citizens of Missouri and nearby states. <paragraph/> As a founder member of OpenRS and pioneer adopter of DCB, the consortium is proactively pursuing its goal to create equal access to materials and information for all its users.<paragraph/>",
+		"description_generic": "Consortia that use OpenRS DCB can include any combination of public, academic and specialist libraries and collections. <paragraph/>DCB connects libraries across ILS, LMS and Discovery products to handle resource sharing at scale, whether they choose to use the same or a mix of commercial or open source interfaces and central indexes.<paragraph/>",
 		"search": "Search {{consortium}}",
 		"your": "Your consortium"
 	},

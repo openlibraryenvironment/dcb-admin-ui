@@ -18,6 +18,7 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { getConsortiaKeyInfo } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import { Consortium } from "@models/Consortium";
+import { isEmpty } from "lodash";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -54,7 +55,8 @@ export default function Header({
 		setDescription,
 		setCatalogueSearchURL,
 		setWebsiteURL,
-		// setHeaderImageURL,
+		setName,
+		setHeaderImageURL,
 	} = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
 
@@ -83,11 +85,14 @@ export default function Header({
 		},
 		onCompleted: (data) => {
 			const consortium: Consortium = data?.consortia.content[0];
+			console.log("This query has completed.");
 			// console.log("Query has completed");
 			// Check for changes
 			if (consortium && consortium.displayName !== displayName) {
+				setName(consortium.name);
 				setDisplayName(consortium.displayName);
 				setAboutImageURL(consortium.aboutImageUrl);
+				setHeaderImageURL(consortium.headerImageUrl);
 				setDescription(consortium.description);
 				setCatalogueSearchURL(consortium.catalogueSearchUrl);
 				setWebsiteURL(consortium.websiteUrl);
@@ -101,8 +106,18 @@ export default function Header({
 	const consortium: Consortium = headerContentData?.consortia.content[0];
 	const fetchedHeaderImageURL = consortium?.headerImageUrl;
 
+	console.log(
+		"Header URL",
+		headerImageURL,
+		" and fetched URL",
+		fetchedHeaderImageURL,
+	);
+
 	const pageTitle = t("app.title", {
-		consortium_name: consortium?.displayName ?? displayName,
+		// consortium_name: consortium?.displayName ?? displayName,
+		consortium_name: isEmpty(displayName)
+			? consortium?.displayName
+			: displayName,
 		environment: type,
 	});
 
@@ -168,7 +183,11 @@ export default function Header({
               or the image and additional padding if the icons have been hidden. */}
 						{iconsVisible != false ? (
 							<Image
-								src={fetchedHeaderImageURL ?? headerImageURL}
+								src={
+									isEmpty(headerImageURL)
+										? fetchedHeaderImageURL
+										: headerImageURL
+								}
 								alt={t("consortium.logo_app_header")}
 								width={36}
 								height={36}
@@ -176,7 +195,11 @@ export default function Header({
 						) : (
 							<Box sx={{ mt: 1 }}>
 								<Image
-									src={fetchedHeaderImageURL ?? headerImageURL}
+									src={
+										isEmpty(headerImageURL)
+											? fetchedHeaderImageURL
+											: headerImageURL
+									}
 									alt={t("consortium.logo_app_header")}
 									width={36}
 									height={36}

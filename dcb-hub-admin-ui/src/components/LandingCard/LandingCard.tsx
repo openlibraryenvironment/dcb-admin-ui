@@ -30,6 +30,8 @@ export default function LandingCard() {
 		description,
 	} = useConsortiumInfoStore();
 
+	console.log(displayName);
+
 	return (
 		<Stack
 			direction={{ xs: "column", sm: "column", md: "row", lg: "row" }}
@@ -158,21 +160,43 @@ export default function LandingCard() {
 				<CardContent>
 					<Stack direction={"column"} spacing={3}>
 						<CardMedia sx={{ justifyContent: "center", display: "flex" }}>
-							<a href={websiteURL}>
+							{websiteURL ? (
+								<a href={websiteURL}>
+									<Image
+										src={aboutImageURL}
+										height={48}
+										width={160}
+										alt={t("ui.logo", { owner: { displayName } })}
+										title={t("ui.logo", { owner: { displayName } })}
+									/>
+								</a>
+							) : (
 								<Image
-									src={aboutImageURL ? aboutImageURL : ""}
+									src={aboutImageURL}
 									height={48}
 									width={160}
 									alt={t("ui.logo", { owner: { displayName } })}
 									title={t("ui.logo", { owner: { displayName } })}
 								/>
-							</a>
+							)}
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{t("consortium.about", { consortium: displayName })}
+							{!(displayName == "OpenRS Consortium")
+								? t("consortium.about", { consortium: displayName })
+								: t("consortium.about_generic")}
 						</Typography>
 						<Typography variant="loginCardText">
-							{description}
+							{description == "" ? (
+								<Trans
+									i18nKey={"consortium.description_generic"}
+									t={t}
+									components={{
+										paragraph: <p />,
+									}}
+								/>
+							) : (
+								description
+							)}
 							{/* <Trans
 								i18nKey={"consortium.description"}
 								t={t}
@@ -190,18 +214,20 @@ export default function LandingCard() {
 						</Typography>
 					</Stack>
 				</CardContent>
-				<CardActions disableSpacing sx={{ mt: "auto" }}>
-					<Button
-						size="medium"
-						type="text"
-						href={catalogueSearchURL}
-						rel="noopener"
-					>
-						<Typography variant="cardActionText">
-							{t("consortium.search", { consortium: displayName })}
-						</Typography>
-					</Button>
-				</CardActions>
+				{catalogueSearchURL ? (
+					<CardActions disableSpacing sx={{ mt: "auto" }}>
+						<Button
+							size="medium"
+							type="text"
+							href={catalogueSearchURL}
+							rel="noopener"
+						>
+							<Typography variant="cardActionText">
+								{t("consortium.search", { consortium: displayName })}
+							</Typography>
+						</Button>
+					</CardActions>
+				) : null}
 			</Card>
 		</Stack>
 	);

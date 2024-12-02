@@ -12,7 +12,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { adminOnly } from "src/constants/roles";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import {
 	getConsortiaFunctionalSettings,
@@ -35,8 +35,8 @@ const FunctionalSettings: NextPage = () => {
 		type: "",
 	});
 
-	const isAdminOnly = session?.profile?.roles?.some(
-		(role: string) => role == adminOnly,
+	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
 	);
 
 	const getAlertText = (
@@ -386,7 +386,7 @@ const FunctionalSettings: NextPage = () => {
 							</Typography>
 							<RenderAttribute attribute={selectUnavailable?.enabled} />
 						</Stack>
-						{isAdminOnly ? (
+						{isAnAdmin ? (
 							<Button
 								onClick={() =>
 									openConfirmation(
