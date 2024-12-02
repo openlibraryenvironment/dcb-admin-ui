@@ -1038,7 +1038,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								editable: true,
 								flex: 0.5,
-								valueGetter: (value: { displayName: string; name: string }) => {
+								valueFormatter: (value: {
+									displayName: string;
+									name: string;
+								}) => {
 									return value.displayName ?? value.name;
 								},
 							},

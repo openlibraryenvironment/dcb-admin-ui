@@ -89,8 +89,11 @@ const Contacts: NextPage = () => {
 								minWidth: 50,
 								editable: true,
 								flex: 0.5,
-								valueGetter: (value: { displayName: string; name: string }) => {
-									return value.name;
+								valueFormatter: (value: {
+									displayName: string;
+									name: string;
+								}) => {
+									return value.displayName ?? value.name;
 								},
 							},
 							{
