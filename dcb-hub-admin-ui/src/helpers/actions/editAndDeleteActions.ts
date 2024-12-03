@@ -40,7 +40,6 @@ export const handleSaveConfirmation = async (
 			client.refetchQueries({
 				include: [`Load${entity.constructor.name}`],
 			});
-			console.log(entityType);
 
 			setAlert({
 				open: true,
@@ -200,10 +199,8 @@ export const handleSave = (
 	setEditMode: Dispatch<SetStateAction<boolean>>,
 	setConfirmationEdit: Dispatch<SetStateAction<boolean>>,
 ) => {
-	console.log("HANDLE SAVE", changedFields);
 	// NO CHANGED FIELDS
 	if (Object.keys(changedFields).length === 0) {
-		console.log("WAARIO");
 		setEditMode(false);
 		return;
 	}

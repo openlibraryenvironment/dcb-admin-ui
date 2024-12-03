@@ -11,7 +11,6 @@ export default async function handler(
 	const blob = await put(request.query.filename as string, request, {
 		access: "public",
 	});
-	console.log("Blob upload:" + response.status);
 
 	return response.status(200).json(blob);
 }

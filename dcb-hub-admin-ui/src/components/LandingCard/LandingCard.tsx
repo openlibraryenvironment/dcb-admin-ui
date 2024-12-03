@@ -14,6 +14,7 @@ import Link from "@components/Link/Link";
 import kIntLogo from "public/assets/brand/Knowledge-Integration_48px.png";
 import openRSLogo from "public/assets/brand/OpenRS_48px.png";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import ReactMarkdown from "react-markdown";
 
 // This component holds the UI elements shared between the 'landing' pages (login and logout)
 // It holds the 'three cards' and associated info.
@@ -29,8 +30,6 @@ export default function LandingCard() {
 		websiteURL,
 		description,
 	} = useConsortiumInfoStore();
-
-	console.log(displayName);
 
 	return (
 		<Stack
@@ -185,8 +184,8 @@ export default function LandingCard() {
 								? t("consortium.about", { consortium: displayName })
 								: t("consortium.about_generic")}
 						</Typography>
-						<Typography variant="loginCardText">
-							{description == "" ? (
+						{description == "" ? (
+							<Typography variant="loginCardText">
 								<Trans
 									i18nKey={"consortium.description_generic"}
 									t={t}
@@ -194,10 +193,18 @@ export default function LandingCard() {
 										paragraph: <p />,
 									}}
 								/>
-							) : (
-								description
-							)}
-						</Typography>
+							</Typography>
+						) : (
+							<ReactMarkdown
+								components={{
+									p: ({ children }) => (
+										<Typography variant="loginCardText">{children}</Typography>
+									),
+								}}
+							>
+								{description || ""}
+							</ReactMarkdown>
+						)}
 					</Stack>
 				</CardContent>
 				{catalogueSearchURL ? (

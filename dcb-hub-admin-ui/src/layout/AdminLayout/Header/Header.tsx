@@ -56,7 +56,6 @@ export default function Header({
 		setCatalogueSearchURL,
 		setWebsiteURL,
 		setName,
-		setHeaderImageURL,
 	} = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
 
@@ -72,10 +71,6 @@ export default function Header({
 			signIn();
 		}
 	};
-	// console.log("Header image URL coming from the header", headerImageURL);
-	// console.log(displayName);
-	// console.log(type);
-	// We need to stop this query constantly firing
 	const { data: headerContentData } = useQuery(getConsortiaKeyInfo, {
 		variables: {
 			order: "name",
@@ -85,17 +80,19 @@ export default function Header({
 		},
 		onCompleted: (data) => {
 			const consortium: Consortium = data?.consortia.content[0];
-			console.log("This query has completed.");
-			// console.log("Query has completed");
 			// Check for changes
 			if (consortium && consortium.displayName !== displayName) {
 				setName(consortium.name);
 				setDisplayName(consortium.displayName);
-				setAboutImageURL(consortium.aboutImageUrl);
-				setHeaderImageURL(consortium.headerImageUrl);
 				setDescription(consortium.description);
 				setCatalogueSearchURL(consortium.catalogueSearchUrl);
 				setWebsiteURL(consortium.websiteUrl);
+				if (!isEmpty(consortium?.aboutImageUrl)) {
+					setAboutImageURL(consortium.aboutImageUrl);
+				}
+				if (!isEmpty(consortium?.headerImageUrl)) {
+					setAboutImageURL(consortium.headerImageUrl);
+				}
 			}
 		},
 		fetchPolicy: "cache-and-network", // Fetch from cache first, then network
@@ -105,14 +102,6 @@ export default function Header({
 
 	const consortium: Consortium = headerContentData?.consortia.content[0];
 	const fetchedHeaderImageURL = consortium?.headerImageUrl;
-
-	console.log(
-		"Header URL",
-		headerImageURL,
-		" and fetched URL",
-		fetchedHeaderImageURL,
-	);
-
 	const pageTitle = t("app.title", {
 		// consortium_name: consortium?.displayName ?? displayName,
 		consortium_name: isEmpty(displayName)
@@ -120,6 +109,8 @@ export default function Header({
 			: displayName,
 		environment: type,
 	});
+
+	console.log("HF", headerImageURL, fetchedHeaderImageURL);
 
 	return (
 		<>

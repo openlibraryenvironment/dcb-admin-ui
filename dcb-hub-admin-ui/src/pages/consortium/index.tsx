@@ -141,7 +141,6 @@ const ConsortiumPage: NextPage = () => {
 
 		// Reset the file input
 		if (aboutFileRef && "current" in aboutFileRef && aboutFileRef.current) {
-			console.log("Reset the input ");
 			aboutFileRef.current.value = "";
 		}
 		setAboutFileName("");
@@ -177,27 +176,6 @@ const ConsortiumPage: NextPage = () => {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
-
-	// not working at present - investigate. Disabled for now.
-	// const {
-	// 	showUnsavedChangesModal,
-	// 	handleKeepEditing,
-	// 	handleLeaveWithoutSaving,
-	// } = useUnsavedChangesWarning({
-	// 	isDirty,
-	// 	hasValidationError,
-	// 	onKeepEditing: () => {
-	// 		setTimeout(() => {
-	// 			if (saveButtonRef.current) {
-	// 				saveButtonRef.current.focus();
-	// 			}
-	// 		}, 0);
-	// 	},
-	// 	onLeaveWithoutSaving: () => {
-	// 		setDirty(false);
-	// 		setChangedFields({});
-	// 	},
-	// });
 
 	const handleConfirmSave = async (
 		reason: string,
@@ -328,7 +306,7 @@ const ConsortiumPage: NextPage = () => {
 			<AdminLayout>
 				<Loading
 					title={t("ui.info.loading.document", {
-						document_type: t("locations.location_one"),
+						document_type: t("nav.consortium.name").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
@@ -587,7 +565,7 @@ const ConsortiumPage: NextPage = () => {
 							value={editableFields.description ?? consortium?.description}
 							updateField={updateFieldInApp}
 							editMode={editMode}
-							type="string"
+							type="markdown"
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
