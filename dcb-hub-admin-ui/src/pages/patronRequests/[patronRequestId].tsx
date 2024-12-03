@@ -492,6 +492,16 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("details.resolution_count")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.resolutionCount?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("details.error")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.errorMessage} />

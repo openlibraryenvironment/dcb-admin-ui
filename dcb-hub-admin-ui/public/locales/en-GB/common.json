@@ -305,6 +305,7 @@
 		"requestor_uuid": "Patron UUID at requesting agency",
 		"requestor_note": "Requestor note",
 		"request_updated": "Request updated",
+		"resolution_count": "Resolution count",
 		"selected_bib_uuid": "Selected bib UUID",
 		"source_bib_uuid": "Source bib UUID",
 		"source_bib_title": "Title",
