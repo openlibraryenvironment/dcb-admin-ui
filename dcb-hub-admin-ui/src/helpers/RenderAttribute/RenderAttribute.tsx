@@ -1,7 +1,8 @@
+import Link from "@components/Link/Link";
 import Typography from "@mui/material/Typography";
 import { useTranslation } from "next-i18next";
 
-export default function RenderAttribute({ attribute, title }: any) {
+export default function RenderAttribute({ attribute, title, type }: any) {
 	const { t } = useTranslation();
 
 	// Handle booleans and make sure they are correctly displayed.
@@ -23,6 +24,20 @@ export default function RenderAttribute({ attribute, title }: any) {
 			<Typography variant="body2">
 				{attribute.displayName ?? attribute.name}
 			</Typography>
+		);
+	}
+
+	if (
+		type == "url" &&
+		attribute !== null &&
+		attribute !== "" &&
+		attribute !== undefined &&
+		attribute !== "Invalid Date"
+	) {
+		return (
+			<Link href={attribute} title={title}>
+				{attribute}
+			</Link>
 		);
 	}
 

@@ -512,7 +512,7 @@ const ConsortiumPage: NextPage = () => {
 							value={editableFields.websiteUrl ?? consortium?.websiteUrl}
 							updateField={updateFieldInApp}
 							editMode={editMode}
-							type="string"
+							type="url"
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
@@ -540,7 +540,7 @@ const ConsortiumPage: NextPage = () => {
 							}
 							updateField={updateFieldInApp}
 							editMode={editMode}
-							type="string"
+							type="url"
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
@@ -676,15 +676,6 @@ const ConsortiumPage: NextPage = () => {
 				entity={t("nav.consortium.name")}
 				entityId={consortium?.id}
 			/>
-			{/* <Confirmation
-				open={showUnsavedChangesModal}
-				onClose={handleKeepEditing}
-				onConfirm={handleLeaveWithoutSaving}
-				type="unsavedChanges"
-				library={consortium?.displayName}
-				entity={t("nav.consortium.name")}
-				entityId={consortium?.id}
-			/> */}
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

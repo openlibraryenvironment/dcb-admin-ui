@@ -52,6 +52,11 @@ export default function EditableAttribute({
 				return Yup.number()
 					.integer(t("ui.data_grid.edit_int"))
 					.typeError(t("ui.data_grid.edit_int"));
+			case "url":
+				return Yup.string()
+					.url(t("ui.data_grid.edit_url"))
+					.typeError(t("ui.data_grid.edit_url"))
+					.required(t("ui.data_grid.edit_url_required"));
 			default:
 				return Yup.string();
 		}
@@ -85,7 +90,7 @@ export default function EditableAttribute({
 		if (type == "markdown") {
 			return <ReactMarkdown>{value || ""}</ReactMarkdown>;
 		} else {
-			return <RenderAttribute attribute={value} />;
+			return <RenderAttribute attribute={value} type={type} />;
 		}
 	}
 
