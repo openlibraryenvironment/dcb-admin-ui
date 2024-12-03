@@ -930,6 +930,7 @@ export const getPatronRequestById = gql`
 				localItemHostlmsCode
 				localItemAgencyCode
 				isManuallySelectedItem
+				resolutionCount
 				patron {
 					id
 				}
