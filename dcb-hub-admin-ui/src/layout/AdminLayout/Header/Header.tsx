@@ -110,8 +110,6 @@ export default function Header({
 		environment: type,
 	});
 
-	console.log("HF", headerImageURL, fetchedHeaderImageURL);
-
 	return (
 		<>
 			<Head>
@@ -199,6 +197,10 @@ export default function Header({
 										maxHeight: "200px",
 										objectFit: "contain",
 										marginTop: "8px",
+									}}
+									onError={(e) => {
+										// Fallback to default image if remote image fails to load
+										e.currentTarget.src = headerImageURL;
 									}}
 								/>
 							</Box>

@@ -7,6 +7,7 @@ import * as Yup from "yup";
 import { useTranslation } from "next-i18next";
 import ReactMarkdown from "react-markdown";
 import { CustomLink } from "@components/MarkdownInput/MarkdownInput";
+import { isEmpty } from "lodash";
 
 interface EditableAttributeProps {
 	field: string;
@@ -87,7 +88,7 @@ export default function EditableAttribute({
 	};
 
 	if (!editMode) {
-		if (type == "markdown") {
+		if (type == "markdown" && !isEmpty(value)) {
 			return <ReactMarkdown>{value || ""}</ReactMarkdown>;
 		} else {
 			return <RenderAttribute attribute={value} type={type} />;

@@ -1,14 +1,6 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
-import {
-	Box,
-	Button,
-	Stack,
-	Tab,
-	Tabs,
-	Typography,
-	useTheme,
-} from "@mui/material";
+import { Button, Stack, Tab, Tabs, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { PutBlobResult } from "@vercel/blob";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
@@ -40,6 +32,7 @@ import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { isEmpty } from "lodash";
 
 // If this ever needs to be extended to support multiple consortia
 // Change current flat structure to [id] structure similar to libraries
@@ -55,12 +48,6 @@ const ConsortiumPage: NextPage = () => {
 	const appHeaderFileRef = useRef<HTMLInputElement>(null);
 	const aboutFileRef = useRef<HTMLInputElement>(null);
 
-	const [appHeaderBlob, setAppHeaderBlob] = useState<PutBlobResult | null>(
-		null,
-	);
-	const [aboutFileBlob, setAboutFileBlob] = useState<PutBlobResult | null>(
-		null,
-	);
 	const [isUploading, setIsUploading] = useState(false);
 
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
@@ -112,16 +99,13 @@ const ConsortiumPage: NextPage = () => {
 		setDescription,
 	} = useConsortiumInfoStore();
 
-	const [appHeaderFileName, setAppHeaderFileName] = useState<string>("");
 	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState<string>("");
-	const [aboutFileName, setAboutFileName] = useState<string>("");
 	const [aboutPreviewUrl, setAboutPreviewUrl] = useState<string>("");
 
 	// Handlers for file selection
 	const handleAppHeaderFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			setAppHeaderFileName(file.name);
 			const objectUrl = URL.createObjectURL(file);
 			setAppHeaderPreviewUrl(objectUrl);
 		}
@@ -130,7 +114,6 @@ const ConsortiumPage: NextPage = () => {
 	const handleAboutFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (file) {
-			setAboutFileName(file.name);
 			const objectUrl = URL.createObjectURL(file);
 			setAboutPreviewUrl(objectUrl);
 		}
@@ -143,7 +126,6 @@ const ConsortiumPage: NextPage = () => {
 		if (aboutFileRef && "current" in aboutFileRef && aboutFileRef.current) {
 			aboutFileRef.current.value = "";
 		}
-		setAboutFileName("");
 	};
 	// Pass in image sizes for the preview
 
@@ -158,7 +140,127 @@ const ConsortiumPage: NextPage = () => {
 		) {
 			appHeaderFileRef.current.value = "";
 		}
-		setAppHeaderFileName("");
+	};
+
+	const handleAppHeaderFileUpload = async (
+		event: React.FormEvent<HTMLFormElement>,
+	) => {
+		event.preventDefault();
+		setIsUploading(true);
+		try {
+			if (!appHeaderFileRef.current?.files) {
+				throw new Error("No file selected");
+			}
+			const file = appHeaderFileRef.current.files[0];
+			const newName = `consortium${consortium.displayName}user${username}.png`;
+			const response = await fetch(
+				`/api/persistentAssets/serverUpload?filename=${newName}`,
+				{
+					method: "POST",
+					body: file,
+				},
+			);
+			if (!response.ok) {
+				throw new Error("Upload failed");
+			}
+			const newBlob = (await response.json()) as PutBlobResult;
+			// Update state and perform mutation
+			setHeaderImageURL(newBlob.url);
+			await updateConsortium({
+				variables: {
+					input: {
+						id: consortium.id,
+						headerImageUrl: newBlob.url,
+						headerImageUploader: username,
+						headerImageUploaderEmail: email,
+						reason: "Update of consortium header image",
+						changeCategory: "Initial setup",
+					},
+				},
+			});
+			// Clear preview and file selection
+			setAppHeaderPreviewUrl("");
+			if (appHeaderFileRef.current) {
+				appHeaderFileRef.current.value = "";
+			}
+			setAlert({
+				open: true,
+				severity: "success",
+				text: t("consortium.logo_app_header_success"),
+				title: t("ui.data_grid.updated"),
+			});
+		} catch (error) {
+			console.error("Upload error:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("consortium.logo_app_header_error"),
+				title: t("ui.data_grid.error"),
+			});
+		} finally {
+			setIsUploading(false);
+		}
+	};
+
+	const handleAboutFileUpload = async (
+		event: React.FormEvent<HTMLFormElement>,
+	) => {
+		event.preventDefault();
+		setIsUploading(true);
+
+		try {
+			if (!aboutFileRef.current?.files) {
+				throw new Error("No file selected");
+			}
+			const file = aboutFileRef.current.files[0];
+			const newName = `consortium${consortium.displayName}user${username}.png`;
+			const response = await fetch(
+				`/api/persistentAssets/serverUpload?filename=${newName}`,
+				{
+					method: "POST",
+					body: file,
+				},
+			);
+			if (!response.ok) {
+				throw new Error("Upload failed");
+			}
+			const newBlob = (await response.json()) as PutBlobResult;
+			// Update state and perform mutation
+			setAboutImageURL(newBlob.url);
+			await updateConsortium({
+				variables: {
+					input: {
+						id: consortium.id,
+						aboutImageUrl: newBlob.url,
+						aboutImageUploader: username,
+						aboutImageUploaderEmail: email,
+						reason: "Update of consortium about image",
+						changeCategory: "Initial setup",
+					},
+				},
+			});
+			// Clear preview and file selection
+			setAboutPreviewUrl("");
+			if (aboutFileRef.current) {
+				aboutFileRef.current.value = "";
+			}
+			setAlert({
+				open: true,
+				severity: "success",
+				text: t("consortium.logo_about_success"),
+				title: t("ui.data_grid.updated"),
+			});
+		} catch (error) {
+			console.error("Upload error:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("consortium.logo_about_error"),
+				title: t("consortium.logo_about_error"),
+			});
+		} finally {
+			setIsUploading(false);
+		}
 	};
 
 	useEffect(() => {
@@ -398,26 +500,23 @@ const ConsortiumPage: NextPage = () => {
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
-					<Typography>
-						{/* Fix so file name is persisted even after it's removed from preview. Should be auto removed from preview on successful upload */}
-						{(appHeaderFileName ?? appHeaderBlob?.pathname) ||
-							t("mappings.no_file_selected")}
-					</Typography>
-					{appHeaderBlob && (
-						<Box sx={{ mt: 3 }}>
-							<Image
-								src={appHeaderBlob.url}
-								alt="Uploaded content"
-								width={36}
-								height={36}
-								style={{
-									maxWidth: "200px",
-									maxHeight: "200px",
-									objectFit: "contain",
-									marginTop: "8px",
-								}}
-							/>
-						</Box>
+					{!isEmpty(consortium?.headerImageUrl) ? (
+						<Image
+							src={consortium?.headerImageUrl}
+							alt="Uploaded content"
+							width={36}
+							height={36}
+							style={{
+								maxWidth: "200px",
+								maxHeight: "200px",
+								objectFit: "contain",
+								marginTop: "8px",
+							}}
+						/>
+					) : (
+						<Typography variant="attributeText">
+							{t("mappings.no_file_uploaded")}
+						</Typography>
 					)}
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
@@ -427,38 +526,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<form
 					onSubmit={async (event) => {
-						setIsUploading(true);
-						event.preventDefault();
-						if (!appHeaderFileRef.current?.files) {
-							throw new Error("No file selected");
-						}
-						const file = appHeaderFileRef.current.files[0];
-						const newName =
-							file.name +
-							`consortium${consortium.displayName}user${username}.png`;
-						const response = await fetch(
-							`/api/persistentAssets/serverUpload?filename=${newName}`,
-							{
-								method: "POST",
-								body: file,
-							},
-						);
-						const newBlob = (await response.json()) as PutBlobResult;
-						setAppHeaderBlob(newBlob);
-						setHeaderImageURL(newBlob.url);
-						await updateConsortium({
-							variables: {
-								input: {
-									id: consortium.id,
-									headerImageUrl: newBlob.url,
-									headerImageUploader: username,
-									headerImageUploaderEmail: email,
-									reason: "Update of consortium header image",
-									changeCategory: "Initial setup",
-								},
-							},
-						});
-						setIsUploading(false);
+						handleAppHeaderFileUpload(event);
 					}}
 				>
 					<Grid xs={4} sm={8} md={12}>
@@ -472,7 +540,7 @@ const ConsortiumPage: NextPage = () => {
 							previewUrl={appHeaderPreviewUrl}
 							handleRemove={handleRemoveAppHeader}
 						/>
-						{appHeaderFileName ? (
+						{appHeaderPreviewUrl ? (
 							<Button
 								variant="outlined"
 								type="submit"
@@ -578,9 +646,24 @@ const ConsortiumPage: NextPage = () => {
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
-					<Typography>
-						{aboutFileName || t("mappings.no_file_selected")}
-					</Typography>
+					{!isEmpty(consortium?.aboutImageUrl) ? (
+						<Image
+							src={consortium?.aboutImageUrl}
+							alt="Uploaded image for the about section"
+							width={160}
+							height={48}
+							style={{
+								maxWidth: "200px",
+								maxHeight: "200px",
+								objectFit: "contain",
+								marginTop: "8px",
+							}}
+						/>
+					) : (
+						<Typography variant="attributeText">
+							{t("mappings.no_file_uploaded")}
+						</Typography>
+					)}
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="attributeText">
@@ -589,39 +672,7 @@ const ConsortiumPage: NextPage = () => {
 				</Grid>
 				<form
 					onSubmit={async (event) => {
-						setIsUploading(true);
-						event.preventDefault();
-						if (!aboutFileRef.current?.files) {
-							throw new Error("Could not update user");
-						}
-						const file = aboutFileRef.current.files[0];
-						const newName =
-							file.name +
-							`consortium${consortium.displayName}user${username}.png`;
-						const response = await fetch(
-							`/api/persistentAssets/serverUpload?filename=${newName}`,
-							{
-								method: "POST",
-								body: file,
-							},
-						);
-						const newBlob = (await response.json()) as PutBlobResult;
-						setAboutFileBlob(newBlob);
-						setAboutFileName(newBlob.url);
-						setAboutImageURL(newBlob.url);
-						await updateConsortium({
-							variables: {
-								input: {
-									id: consortium.id,
-									aboutImageUrl: newBlob.url,
-									aboutImageUploader: username,
-									aboutImageUploaderEmail: email,
-									reason: "Update of consortium header image",
-									changeCategory: "Initial setup",
-								},
-							},
-						});
-						setIsUploading(false);
+						handleAboutFileUpload(event);
 					}}
 				>
 					<Grid xs={4} sm={8} md={12}>
@@ -643,26 +694,6 @@ const ConsortiumPage: NextPage = () => {
 						>
 							{isUploading ? "Uploading..." : "Upload"}
 						</Button>
-					</Grid>
-
-					<Grid xs={4} sm={8} md={12}>
-						{aboutFileBlob && (
-							<Box sx={{ mt: 3 }}>
-								<Typography variant="subtitle1">Uploaded Image:</Typography>
-								<Image
-									src={aboutFileBlob.url}
-									alt="Uploaded content"
-									width={36}
-									height={36}
-									style={{
-										maxWidth: "200px",
-										maxHeight: "200px",
-										objectFit: "contain",
-										marginTop: "8px",
-									}}
-								/>
-							</Box>
-						)}
 					</Grid>
 				</form>
 			</Grid>
@@ -709,49 +740,3 @@ export const getServerSideProps: GetServerSideProps = async (
 };
 
 export default ConsortiumPage;
-
-{
-	/* <form
-				onSubmit={async (event) => {
-					setIsUploading(true);
-					event.preventDefault();
-
-					if (!inputFileRef.current?.files) {
-						throw new Error("No file selected");
-					}
-
-					const file = inputFileRef.current.files[0];
-
-					const newBlob = await upload(file.name, file, {
-						access: "public",
-						handleUploadUrl: "/api/persistentAssets/imageUpload",
-						clientPayload: JSON.stringify({
-							userId: userId,
-							username: username,
-							email: email,
-						}),
-					});
-
-					setBlob(newBlob);
-					setIsUploading(false);
-				}}
-			>
-				<input name="file" ref={inputFileRef} type="file" required />
-				<Button
-					variant="contained"
-					type="submit"
-					disabled={isUploading || !isAnAdmin}
-					sx={{ mt: 2 }}
-				>
-					{isUploading ? "Uploading..." : "Upload"}
-				</Button>
-			</form> */
-}
-{
-	/* <Grid xs={4} sm={8} md={12}>
-						<input name="file" ref={appHeaderFileRef} type="file" required />
-					</Grid>
-					<Grid xs={4} sm={8} md={12}>
-						<button type="submit">Upload</button>
-					</Grid> */
-}

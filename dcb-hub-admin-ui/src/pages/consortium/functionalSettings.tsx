@@ -45,7 +45,6 @@ const FunctionalSettings: NextPage = () => {
 	) => {
 		switch (success) {
 			case true:
-				console.log(functionalSetting);
 				if (functionalSetting?.enabled) {
 					return t("consortium.settings.enable_success", {
 						setting: functionalSetting.name,
@@ -156,7 +155,6 @@ const FunctionalSettings: NextPage = () => {
 		})
 			.then((response) => {
 				if (response.data) {
-					console.log(response.data);
 					const updatedFunctionalSetting: FunctionalSetting =
 						response.data.updateFunctionalSetting;
 					setAlert({
