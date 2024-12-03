@@ -34,7 +34,7 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 	const [optionsData] = useLazyQuery(getRoles, {
 		variables: {
 			order: "name",
-			orderBy: "DESC",
+			orderBy: "ASC",
 			pagesize: 100,
 		},
 		onCompleted: (data) => {
@@ -57,7 +57,7 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 				onOpen={() => {
 					optionsData();
 				}}
-				getOptionLabel={(option: any) => option?.name || value || ""}
+				getOptionLabel={(option: any) => option?.displayName || value || ""}
 				isOptionEqualToValue={(option, currentValue) =>
 					option?.name === (currentValue?.name || currentValue)
 				}
