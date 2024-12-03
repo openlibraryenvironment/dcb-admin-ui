@@ -54,12 +54,26 @@ const ConsortiumPage: NextPage = () => {
 	const [hasValidationError, setValidationError] = useState(false);
 	const [isDirty, setDirty] = useState(false);
 	const [errors, setErrors] = useState();
+	const {
+		setHeaderImageURL,
+		setDisplayName,
+		setAboutImageURL,
+		setCatalogueSearchURL,
+		setWebsiteURL,
+		setDescription,
+	} = useConsortiumInfoStore();
 	const { data, loading, error } = useQuery(getConsortia, {
 		variables: {
 			order: "id",
 			orderBy: "DESC",
 			pageno: 0,
 			pagesize: 10,
+		},
+		onCompleted: (data) => {
+			setDescription(data.consortia?.content[0]?.description);
+			setWebsiteURL(data.consortia?.content[0]?.websiteUrl);
+			setCatalogueSearchURL(data.consortia?.content[0]?.catalogueSearchUrl);
+			setDisplayName(data.consortia?.content[0]?.displayName);
 		},
 	});
 	// Make sure this only gets the first consortia
@@ -88,17 +102,6 @@ const ConsortiumPage: NextPage = () => {
 	const [updateConsortium] = useMutation(updateConsortiumQuery, {
 		refetchQueries: ["LoadConsortium"],
 	});
-	// const [selectedFileName, setSelectedFileName] = useState<string>("");
-
-	const {
-		setHeaderImageURL,
-		setDisplayName,
-		setAboutImageURL,
-		setCatalogueSearchURL,
-		setWebsiteURL,
-		setDescription,
-	} = useConsortiumInfoStore();
-
 	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState<string>("");
 	const [aboutPreviewUrl, setAboutPreviewUrl] = useState<string>("");
 
