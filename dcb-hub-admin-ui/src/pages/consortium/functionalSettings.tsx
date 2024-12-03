@@ -1,4 +1,5 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
@@ -317,6 +318,54 @@ const FunctionalSettings: NextPage = () => {
 					<Typography variant="attributeText">
 						{t("consortium.settings.introduction")}
 					</Typography>
+				</Grid>
+				<Grid xs={4} sm={8} md={12}>
+					{/* <Button
+						data-tid="new-fs-button"
+						variant="contained"
+						onClick={openNewFS}
+					>
+						{t("consortium.new_functional_setting.title")}
+					</Button> */}
+					<ClientDataGrid
+						columns={[
+							{
+								field: "name",
+								headerName: t("consortium.functional_settings.name"),
+								minWidth: 50,
+								editable: false,
+								flex: 0.5,
+							},
+							{
+								field: "description",
+								headerName: t("consortium.settings.description"),
+								minWidth: 50,
+								editable: true,
+								flex: 0.7,
+								type: "string",
+							},
+							{
+								field: "enabled",
+								headerName: t("consortium.settings.enabled"),
+								minWidth: 50,
+								editable: true,
+								flex: 0.3,
+								type: "singleSelect",
+								valueOptions: [
+									{ value: true, label: t("ui.action.yes") },
+									{ value: false, label: t("ui.action.no") },
+								],
+							},
+						]}
+						data={consortiumFunctionalSettings}
+						type="consortiumFunctionalSettings"
+						selectable={false}
+						sortModel={[{ field: "name", sort: "asc" }]}
+						noDataTitle={t("consortium.settings.not_available")}
+						toolbarVisible="search-only"
+						disableHoverInteractions={true}
+						editQuery={updateFunctionalSettingQuery} // add description into thiss
+					/>
 				</Grid>
 				{pickupAnywhere ? (
 					<Grid xs={4} sm={8} md={12}>
