@@ -97,7 +97,7 @@ export default function Header({
 		},
 		fetchPolicy: "cache-and-network", // Fetch from cache first, then network
 		nextFetchPolicy: "cache-first", // Subsequent fetches prefer cache
-		skip: !isEmpty(headerImageURL),
+		// skip: !isEmpty(headerImageURL),
 	});
 
 	const consortium: Consortium = headerContentData?.consortia.content[0];
