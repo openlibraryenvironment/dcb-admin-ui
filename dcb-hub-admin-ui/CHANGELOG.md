@@ -1,3 +1,29 @@
+# [1.27.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.26.0...v1.27.0) (2024-12-05)
+
+
+### Bug Fixes
+
+* Clarify error messages and fix image display issue [DCB-1638] ([e34fadc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e34fadca654050dd1d412a5173aa286fe6409f7e))
+* **deps:** update dependency cookie to v1 ([45f669a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/45f669a6334d7addb4053e97862bc03285e66bc9))
+* **deps:** update dependency swc-plugin-coverage-instrument to ^0.0.25 ([13338bf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/13338bf52d5b7402076853991887359d4b30fc3d))
+* Fix issue where role validation caused editing to fail [DCB-1697] ([eefe67d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/eefe67dda73c2791f666194527c3932e7afe7616))
+* Fix issues with new contact form [DCB-1697] ([6d3d89a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6d3d89aaf91f87ac00b07e898d7834a9ede9f186))
+* Prevent repeated rows on 'request errors' page [DCB-1671] ([e46ed80](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e46ed805bea648046d4162257e1bc40858cabd94))
+* Support new role object structure, fix drop-downs [DCB-1697] ([41a3ef9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/41a3ef9086516441169278d79df4eec4da7e865c))
+
+
+### Features
+
+* Add consortium functional settings grid [DCB-1746] ([a884656](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a884656ee94cf5675bc6ec4b6b3f1b8974576eda))
+* Add form for adding functional settings [DCB-1638] ([002b8b7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/002b8b7f91bb208cf9be922529fb302b232c60c1))
+* Add role dropdown and adapt for new role object [DCB-1697] ([2951ed8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2951ed8f1a3f7a7b072435814995497ea84a529e))
+* Add support for adding consortium contacts [DCB-1697] ([810b30f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/810b30f802b36bbbe59e7d83fa87af68a668e14c))
+* Add support for changing select unavailable items [DCB-1732] ([42358be](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/42358bee5668ed95b41d980c0700b1add86e09fa))
+* Add support for editing consortium config  [DCB-1638] ([664bcf8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/664bcf8673a0cae584252e3e295a2a2a36e0ce31))
+* Initial consortium page structure [DCB-1638] ([605ced2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/605ced2f959410ab509039ef7bc3e241d0cb6758))
+* Introduce consortium profile page [DCB-1638] ([59885e6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/59885e67c4e4f4e5b1016ab24e82649259dcdfa2))
+* Support markdown descriptions [DCB-1638] ([292454e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/292454e5c395eff0abfc51add21a4ab28264c228))
+
 # [1.26.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.25.0...v1.26.0) (2024-10-31)
 
 
