@@ -23,6 +23,13 @@ const nextConfig = {
 	},
 	images: {
 		domains: ["img.pokemondb.net"],
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "djlwg7trj3cacjdl.public.blob.vercel-storage.com",
+				port: "",
+			},
+		],
 	},
 	i18n,
 	publicRuntimeConfig: {

@@ -1,58 +1,74 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { calculateDCBRAGStatus } from "src/helpers/calculateDCBRAGStatus";
 import { calculateKeycloakRAGStatus } from "src/helpers/calculateKeycloakRAGStatus";
+import Loading from "@components/Loading/Loading";
+import { useTranslation } from "next-i18next";
+import { Typography } from "@mui/material";
+import { Environment } from "@models/Environment";
 
-export default function EnvironmentHealth(props: {
+export default function EnvironmentHealth({
+	apiLink,
+	environment,
+}: {
 	apiLink: string;
-	environment: string;
+	environment: Environment;
 }) {
 	const [healthData, setHealthData] = useState<any | null>(null);
-	const [RAGStatus, setRAGStatus] = useState<
-		"Down" | "Partial" | "Up" | "Undefined"
-	>();
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const { t } = useTranslation();
 
-	// Fetch health data from the API endpoint when the component mounts or when healthData changes
+	const calculateRAGStatus = useMemo(() => {
+		if (!healthData) return "Undefined";
+
+		switch (environment) {
+			case Environment.DCB:
+				return calculateDCBRAGStatus(healthData);
+			case Environment.Keycloak:
+				return calculateKeycloakRAGStatus(healthData);
+			default:
+				return "Undefined";
+		}
+	}, [healthData, environment]);
+
 	useEffect(() => {
 		const fetchHealthData = async () => {
 			try {
-				const responseDCBHealth = await axios.get(props.apiLink);
-				setHealthData(responseDCBHealth.data);
+				setIsLoading(true);
+				const response = await axios.get(apiLink);
+				setHealthData(response.data);
 			} catch (error: any) {
 				if (error.response) {
-					/*The error may trigger even though the data is valid, in these situations
-                we set healthData to the response data
-                */
-					setHealthData(error?.response?.data);
+					// If there's a response, set the health data from the response
+					setHealthData(error.response.data);
 				} else {
-					console.error("Unexpected error occurred with health data:", error);
+					// Set a more informative error
+					setError(error.message || "Failed to fetch health data");
 				}
+			} finally {
+				setIsLoading(false);
 			}
 		};
-		if (!healthData) {
-			fetchHealthData();
-		}
-	}, [healthData, props.apiLink]);
 
-	// if dependencies change, recalculate function
-	useEffect(() => {
-		if (healthData) {
-			if (props.environment == "dcb") {
-				const calculatedRAGStatus = calculateDCBRAGStatus(healthData);
-				setRAGStatus(calculatedRAGStatus);
-			} else if (props.environment == "keycloak") {
-				const calculatedRAGStatus = calculateKeycloakRAGStatus(healthData);
-				setRAGStatus(calculatedRAGStatus);
-			} else {
-				setRAGStatus("Undefined");
-			}
-		}
-	}, [healthData, props.environment]); // Dependency on healthData triggers a recalculation when healthData changes
+		fetchHealthData();
+	}, [apiLink]);
 
-	return (
-		<>
-			{/* Displays the calculated status */}
-			{RAGStatus}
-		</>
-	);
+	if (isLoading)
+		return (
+			<Loading
+				title={t("ui.info.loading.document", {
+					document_type: t("service.environment_health").toLowerCase(),
+				})}
+				subtitle={t("ui.info_wait")}
+			/>
+		);
+	if (error)
+		return (
+			<Typography>
+				{t("service.environment_health_error", { error: error })}
+			</Typography>
+		);
+
+	return <>{calculateRAGStatus}</>;
 }

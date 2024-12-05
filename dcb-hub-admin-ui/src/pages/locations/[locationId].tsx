@@ -417,7 +417,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				/>
 			) : (
 				<Error
-					title={t("ui.error.record_not_found")}
+					title={t("ui.error.cannot_find_record")}
 					message={t("ui.error.invalid_UUID")}
 					description={t("ui.info.check_address")}
 					action={t("ui.action.go_back")}
@@ -584,8 +584,10 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					setConfirmationDeletion(false);
 				}}
 				type={"deletelocations"}
-				library={location?.name}
+				entityName={location?.name}
 				entityId={location?.id}
+				entity={t("locations.location_one")}
+				gridEdit={false}
 			/>
 			<Confirmation
 				open={showConfirmationEdit}
@@ -593,18 +595,20 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				onConfirm={handleConfirmSave}
 				type="pageEdit"
 				editInformation={formatChangedFields(changedFields, location)}
-				library={location?.name}
+				entityName={location?.name}
 				entity={t("locations.location_one")}
 				entityId={location?.id}
+				gridEdit={false}
 			/>
 			<Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
 				type="unsavedChanges"
-				library={location?.name}
+				entityName={location?.name}
 				entity={t("locations.location_one")}
 				entityId={location?.id}
+				gridEdit={false}
 			/>
 			<Confirmation
 				open={showConfirmationPickup}
@@ -619,8 +623,10 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				}
 				type="pickup"
 				participation={location?.isPickup ? "disablePickup" : "enablePickup"}
-				library={location?.name}
+				entityName={location?.name}
+				entity={t("locations.location_one")}
 				code={location?.code}
+				gridEdit={false}
 			/>
 			<TimedAlert
 				open={alert.open}

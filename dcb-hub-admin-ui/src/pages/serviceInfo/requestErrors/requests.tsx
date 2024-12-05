@@ -138,6 +138,7 @@ const Requests = () => {
 					selectable={false}
 					noDataTitle={t("error_overview.no_results")}
 					sortModel={[{ field: "Date", sort: "desc" }]}
+					operationDataType="PatronRequest"
 				/>
 			)}
 		</AdminLayout>

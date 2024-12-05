@@ -63,6 +63,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				case "settings":
 				case "search":
 				case "serviceInfo":
+				case "consortium":
 					return "nav." + topLevelKey + ".name";
 				default:
 					return "nav." + topLevelKey;

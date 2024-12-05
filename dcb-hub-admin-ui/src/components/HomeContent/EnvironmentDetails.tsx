@@ -14,6 +14,7 @@ import Typography from "@mui/material/Typography";
 import VersionInfo from "./VersionInfo";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import { Environment } from "@models/Environment";
 
 export default function EnvironmentDetails() {
 	const [environmentDescription, setEnvironmentDescription] = useState<
@@ -54,7 +55,7 @@ export default function EnvironmentDetails() {
 					<EnvironmentHealth
 						key={"serviceHealth"}
 						apiLink={LOCAL_VERSION_LINKS.SERVICE_HEALTH}
-						environment="dcb"
+						environment={Environment.DCB}
 					/>
 				}
 			</Link>,
@@ -73,7 +74,7 @@ export default function EnvironmentDetails() {
 					<EnvironmentHealth
 						key={"keycloakHealth"}
 						apiLink={LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH}
-						environment="keycloak"
+						environment={Environment.Keycloak}
 					/>
 				}
 			</Link>,

@@ -42,10 +42,6 @@ const useDCBVersionStore = create<DCBVersionState>()(
 					const systemType = response.data.env.code || "NOT SET";
 					const branch = response.data.git?.branch || "";
 
-					// console.log(
-					// 	`dcb-service version: ${version} on system of type: ${systemType} deployed from branch: ${branch}`,
-					// );
-
 					const isDev =
 						systemType.includes("DEV") || branch.toLowerCase() === "main";
 
@@ -56,9 +52,6 @@ const useDCBVersionStore = create<DCBVersionState>()(
 						if (version) {
 							const numericVersion = version.substring(1);
 							const [major, minor] = numericVersion.split(".").map(Number);
-							// console.log(
-							// 	`Major: ${major}, minor: ${minor}, dev system? ${isDev}`,
-							// );
 							return major > 7 || (major === 7 && minor >= 3) || isDev;
 						} else {
 							return isDev;

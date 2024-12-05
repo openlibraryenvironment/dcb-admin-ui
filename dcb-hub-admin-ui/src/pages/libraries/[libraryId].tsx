@@ -403,7 +403,6 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			...prev,
 			[field]: value,
 		}));
-
 		if (value !== library[field]) {
 			setChangedFields((prev) => ({
 				...prev,
@@ -683,7 +682,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									updateField={updateField}
 									editMode={editMode}
 									type="string"
-									inputRef={firstEditableFieldRef}
+									// inputRef={firstEditableFieldRef}
 									setValidationError={setValidationError}
 									setDirty={setDirty}
 									setErrors={setErrors}
@@ -803,6 +802,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									updateField={updateField}
 									editMode={editMode}
 									type="string"
+									inputRef={firstEditableFieldRef}
 									setValidationError={setValidationError}
 									setDirty={setDirty}
 									setErrors={setErrors}
@@ -937,14 +937,14 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								}
 							>
 								<Typography variant="h3" fontWeight={"bold"}>
-									{t("libraries.consortium.title")}
+									{t("consortium.title")}
 								</Typography>
 							</SubAccordionSummary>
 							<SubAccordionDetails>
 								<Grid xs={2} sm={4} md={4}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
-											{t("libraries.consortium.name")}
+											{t("consortium.name")}
 										</Typography>
 										<RenderAttribute
 											attribute={findConsortium(library?.membership)?.name}
@@ -1002,6 +1002,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 									noDataTitle={t("groups.none_for_library")}
 									toolbarVisible="not-visible"
 									sortModel={[{ field: "name", sort: "asc" }]}
+									operationDataType="Group"
 								/>
 							</Grid>
 						</SubAccordionDetails>
@@ -1036,6 +1037,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								editable: true,
 								flex: 0.5,
+								valueFormatter: (value: {
+									displayName: string;
+									name: string;
+								}) => {
+									return value.displayName ?? value.name;
+								},
 							},
 							{
 								field: "name",
@@ -1066,6 +1073,11 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								editable: true,
 								flex: 0.3,
+								type: "singleSelect",
+								valueOptions: [
+									{ value: true, label: t("ui.action.yes") },
+									{ value: false, label: t("ui.action.no") },
+								],
 							},
 						]}
 						data={library?.contacts}
@@ -1077,6 +1089,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						toolbarVisible="search-only"
 						disableHoverInteractions={true}
 						editQuery={updatePerson}
+						operationDataType="Person"
 					></ClientDataGrid>
 				</StyledAccordionDetails>
 			</StyledAccordion>
@@ -1965,8 +1978,10 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								? "disableBorrowing"
 								: "enableBorrowing"
 						}
-						library={library?.shortName}
+						entity={t("libraries.library")}
+						entityName={library?.shortName}
 						code={library?.agency?.code}
+						gridEdit={false}
 					/>
 				) : null}
 				{showConfirmationSupplying ? (
@@ -1985,13 +2000,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							)
 						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
 						type={"participationStatus"}
+						entity={t("libraries.library")}
 						participation={
 							library?.agency?.isSupplyingAgency
 								? "disableSupplying"
 								: "enableSupplying"
 						}
-						library={library?.fullName}
+						entityName={library?.fullName}
 						code={library?.agency?.code}
+						gridEdit={false}
 					/>
 				) : null}
 			</Box>
@@ -2017,8 +2034,9 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					setConfirmationDeletion(false);
 				}}
 				type={"deletelibraries"}
-				library={library?.fullName}
+				entityName={library?.fullName}
 				entity={t("libraries.library")}
+				gridEdit={false}
 			/>
 			<Confirmation
 				open={showConfirmationEdit}
@@ -2026,17 +2044,19 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				onConfirm={handleConfirmSave}
 				type="pageEdit"
 				editInformation={formatChangedFields(changedFields, library)}
-				library={library?.fullName}
+				entityName={library?.fullName}
 				entity={t("libraries.library")}
+				gridEdit={false}
 			/>
 			<Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
 				type="unsavedChanges"
-				library={library?.fullName}
+				entityName={library?.fullName}
 				entity={t("libraries.library")}
 				entityId={library?.id}
+				gridEdit={false}
 			/>
 		</AdminLayout>
 	);

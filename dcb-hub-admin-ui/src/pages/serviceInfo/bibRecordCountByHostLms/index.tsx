@@ -114,6 +114,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 				noDataTitle={t("bibRecordCountByHostLms.no_results")}
 				// This is how to set the default sort order
 				sortModel={[{ field: "sourceSystemName", sort: "asc" }]}
+				operationDataType="BibRecord"
 			/>
 		</AdminLayout>
 	);

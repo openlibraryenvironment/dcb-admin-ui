@@ -80,7 +80,11 @@ export const updatePerson = gql`
 			email
 			firstName
 			lastName
-			role
+			role {
+				id
+				name
+				displayName
+			}
 			isPrimaryContact
 		}
 	}
@@ -416,13 +420,154 @@ export const getBibSourceRecord = gql`
 // Fetches the consortia
 
 export const getConsortia = gql`
-	query LoadConsortia($order: String!, $orderBy: String!) {
+	query LoadConsortium($order: String!, $orderBy: String!) {
 		consortia(order: $order, orderBy: $orderBy) {
 			totalSize
 			content {
 				id
 				name
+				libraryGroup {
+					id
+				}
 				dateOfLaunch
+				headerImageUrl
+				headerImageUploader
+				headerImageUploaderEmail
+				aboutImageUrl
+				aboutImageUploader
+				aboutImageUploaderEmail
+				description
+				catalogueSearchUrl
+				websiteUrl
+				displayName
+				contacts {
+					email
+					id
+				}
+				functionalSettings {
+					id
+					name
+					enabled
+				}
+			}
+		}
+	}
+`;
+
+export const getConsortiaFunctionalSettings = gql`
+	query LoadConsortiumFS($order: String!, $orderBy: String!) {
+		consortia(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				name
+				displayName
+				functionalSettings {
+					id
+					name
+					enabled
+					description
+				}
+			}
+		}
+	}
+`;
+
+export const getConsortiaContacts = gql`
+	query LoadConsortiumContacts($order: String!, $orderBy: String!) {
+		consortia(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				name
+				displayName
+				contacts {
+					id
+					firstName
+					lastName
+					role {
+						id
+						name
+						description
+						displayName
+						keycloakRole
+					}
+					isPrimaryContact
+					email
+				}
+			}
+		}
+	}
+`;
+
+export const getConsortiaKeyInfo = gql`
+	query LoadConsortiumHeader($order: String!, $orderBy: String!) {
+		consortia(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				name
+				displayName
+				headerImageUrl
+				aboutImageUrl
+				description
+				catalogueSearchUrl
+				websiteUrl
+			}
+		}
+	}
+`;
+
+export const updateConsortiumQuery = gql`
+	mutation UpdateConsortium($input: UpdateConsortiumInput!) {
+		updateConsortium(input: $input) {
+			id
+			headerImageUrl
+			headerImageUploader
+			headerImageUploaderEmail
+			aboutImageUrl
+			aboutImageUploader
+			aboutImageUploaderEmail
+			description
+			catalogueSearchUrl
+			websiteUrl
+			displayName
+		}
+	}
+`;
+
+export const updateFunctionalSettingQuery = gql`
+	mutation UpdateFunctionalSetting($input: UpdateFunctionalSettingInput!) {
+		updateFunctionalSetting(input: $input) {
+			id
+			name
+			enabled
+			description
+		}
+	}
+`;
+
+export const addFunctionalSettingQuery = gql`
+	mutation AddFunctionalSetting($input: FunctionalSettingInput!) {
+		createFunctionalSetting(input: $input) {
+			id
+			name
+			enabled
+			description
+		}
+	}
+`;
+
+export const createConsortiumContact = gql`
+	mutation CreateConsortiumContact($input: ConsortiumContactInput!) {
+		createContact(input: $input) {
+			id
+			person {
+				firstName
+				lastName
+			}
+			consortium {
+				id
 			}
 		}
 	}
@@ -738,7 +883,13 @@ export const getLibraryById = gql`
 					id
 					firstName
 					lastName
-					role
+					role {
+						id
+						name
+						description
+						displayName
+						keycloakRole
+					}
 					isPrimaryContact
 					email
 				}
@@ -1178,6 +1329,23 @@ export const getNumericRangeMappings = gql`
 			pageable {
 				number
 				offset
+			}
+		}
+	}
+`;
+
+// ROLES
+
+export const getRoles = gql`
+	query LoadRoles($order: String!, $orderBy: String!, $pagesize: Int!) {
+		roles(order: $order, orderBy: $orderBy, pagesize: $pagesize) {
+			totalSize
+			content {
+				id
+				name
+				keycloakRole
+				description
+				displayName
 			}
 		}
 	}

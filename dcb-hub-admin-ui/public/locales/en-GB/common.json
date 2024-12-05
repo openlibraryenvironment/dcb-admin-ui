@@ -12,6 +12,13 @@
 		"agencies": "Agencies",
 		"auditLog": "Audit log",
 		"bibs": "Bib records",
+		"consortium": {
+			"contacts": "Contacts",
+			"name": "Consortium",
+			"onboarding": "Onboarding",
+			"functionalSettings": "Functional settings",
+			"profile": "Profile"
+		},
 		"groups": "Groups",
 		"home": "Home",
 		"hostlmss": "Host LMSs",
@@ -55,10 +62,13 @@
 			"go_home": "Go to $t(nav.home) page",
 			"go_back": "Go back",
 			"newer": "Newer",
+			"no": "No",
 			"older": "Older",
 			"reload": "Reload page",
+			"submitting": "Submitting",
 			"toggle_on": "Toggle onboarding mode",
-			"view_error_details": "View error details"
+			"view_error_details": "View error details",
+			"yes": "Yes"
 		},
 		"data_grid": {
 			"actions": "Actions",
@@ -71,12 +81,14 @@
 			"edit": "Edit",
 			"editable_cell": "Click to edit",
 			"edit_float": "Enter a decimal number",
-			"edit_error": "The edit operation for the {{entity}} {{name}} could not be completed. Please try again",
+			"edit_error": "The edit operation for the {{entity}} {{name}} could not be completed. Please try again.",
 			"edit_int": "Enter a whole number",
 			"edit_lat": "Enter a number between -90 and 90",
 			"edit_long": "Enter a number between -180 and 180",
 			"edit_success": "The {{entity}} {{name}} has been updated.",
-			"edit_summary": "Edit {{entity}} {{name}}",
+			"edit_summary": "Edit {{entity}}",
+			"edit_url": "Enter a valid URL",
+			"edit_url_required": "A valid URL is required.",
 			"export_all_csv": "Export all as CSV",
 			"export_all_tsv": "Export all as TSV",
 			"error": "Error",
@@ -102,10 +114,10 @@
 			"title": "Title",
 			"updated": "Updated",
 			"validation": {
-				"email": "This field must be an email address.",
-				"no_empty": "You cannot leave this field empty.",
-				"number": "This field only accepts numeric values.",
-				"required": "This field is required."
+				"email": "The field “{{field}}” must be an email address.",
+				"no_empty": "You cannot leave the “{{field}}” field empty.",
+				"number": "The field “{{field}}” only accepts numeric values.",
+				"required": "The field  “{{field}}” is required."
 			},
 			"view_items": "View items"
 		},
@@ -134,7 +146,13 @@
 			"something_wrong": "Something went wrong",
 			"summary": "Sorry, you do not have access to this page",
 			"too_long_load": "The record is taking too long to load",
-			"invalid_UUID": "The record might have been deleted or the identifier could be wrong"
+			"invalid_UUID": "The record might have been deleted or the identifier could be wrong",
+			"consortium_not_found": "Unable to find the consortium",
+			"consortium_not_present": "No consortium exists on this DCB instance.",
+			"consortium_advice": "Please set up your consortium and try again."
+		},
+		"file": {
+			"no_file_selected": "No file selected"
 		},
 		"info": {
 			"connection_issue": "There may be a connection issue",
@@ -155,6 +173,11 @@
 			"keep_editing": "Keep editing",
 			"leave_without_saving": "Leave without saving",
 			"header": "You have unsaved changes"
+		},
+		"validation": {
+			"invalid_email": "Please supply a valid email.",
+			"max_length": "This field has a maximum length of {{length}} characters",
+			"required": "The field  “{{field}}” is required."
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
@@ -342,6 +365,72 @@
 		"search_placeholder": "Search by name"
 	},
 
+	"consortium": {
+		"contacts": {
+			"no_contacts": "There are no contacts available for this consortium"
+		},
+		"description_title": "Description",
+		"display_name": "Display name",
+		"id": "Consortium UUID",
+		"image_size_error_header": "The app header image must be 36 x 36 pixels. Please provide another image with these dimensions.",
+		"image_size_error_about": "The image for the logo for the \"About\" section should have a height of 48px and a maximum width of 180px . Please provide another image with these dimensions.",
+		"invalid_file_type": "This image is not valid. Please provide an image with one of the allowed file types: {{allowedTypes}}.",
+		"landing_page_title": "DCB Admin landing page",
+		"landing_page_subheader": "Consortium related content to display to unauthenticated visitors",
+		"logo_about": "Logo for \"About\" section",
+		"logo_about_error": "An error occured when uploading the logo for \"About\" section",
+		"logo_about_success": "The logo for the \"About\" section was uploaded successfully",
+		"logo_about_requirements": "Height: 48px. Max width: 180px. Supported formats: JPG and PNG",
+		"logo_app_header": "Logo for app header",
+		"logo_app_header_error": "An error occurred when uploading the logo for the app header.",
+		"logo_app_header_success": "The logo for the app header was uploaded successfuly",
+		"logo_app_header_requirements": "Size: 36 x 36 px. Supported formats: JPG and PNG",
+		"member_ref": "Member reference",
+		"member_from_to": "Member from-to",
+		"name": "Consortium name",
+		"new_contact": {
+			"consortium": "New consortium contact",
+			"error": "There was an error creating the new contact for the {{consortium}} consortium.",
+			"title": "New contact",
+			"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
+		},
+		"new_functional_setting": {
+			"error": "There was an error adding the new functional setting for the {{consortium}} consortium.",
+			"title": "Add new functional setting",
+			"success": "The new functional setting was successfully added for the {{consortium}} consortium."
+		},
+		"no_file_uploaded": "No file uploaded",
+		"onboarding": "Onboarding your consortium",
+		"remove_image": "Remove image",
+		"search_url": "DCB catalog search URL",
+		"select_image": "Select image",
+		"settings": {
+			"enable": "Enable {{setting}}",
+			"enabled": "Enabled",
+			"enabled_header": "Enabled?",
+			"enable_body": "The {{setting}} functionality will be enabled for the {{consortium}} consortium.",
+			"enable_error": "An error has occurred and {{setting}} could not be enabled for the {{consortium}} consortium.",
+			"enable_success": "{{setting}} was enabled successfully for the {{consortium}} consortium. ",
+			"description": "Description",
+			"disable": "Disable {{setting}}",
+			"disabled": "Disabled",
+			"disable_body": "The {{setting}} functionality will be disabled for the {{consortium}} consortium.",
+			"disable_error": "An error has occcurred and {{setting}} could not be disabled for the {{consortium}} consortium.",
+			"disable_success": "{{setting}} was disabled successfully for the {{consortium}} consortium.",
+			"introduction": "These are the functional settings for your consortium. To enable or disable certain functionality for your consortium, use the toggles on this page.",
+			"name": "Name",
+			"not_available": "There are no functional settings for this consortium. If you're expecting to see functional settings here, please refresh the page",
+			"one": "Functional setting",
+			"pickup_anywhere": "Pickup anywhere",
+			"re_resolution": "Re-resolution",
+			"select_unavailable": "Select unavailable items",
+			"update": "Update consortium functional setting",
+			"update_button": "Update functional setting"
+		},
+		"title": "Consortium",
+		"url": "Website URL"
+	},
+
 	"data_change_log": {
 		"action": "Action",
 		"category": "Change category",
@@ -354,6 +443,7 @@
 			"initial_setup": "Initial setup",
 			"mappings_replacement": "Mappings replacement",
 			"membership_ended": "Membership ended",
+			"new_contact": "New contact",
 			"new_member": "New member",
 			"other": "Other"
 		},
@@ -377,6 +467,7 @@
 		"old_data": "Old data",
 		"old_value": "Old value",
 		"reason": "Reason for change",
+		"reason_addition": "Reason for adding",
 		"reason_required": "Please provide a reason for this change.",
 		"reference_url": "Change reference URL",
 		"ref_url_helper": "The URL of the ticket describing the change requested, if applicable.",
@@ -569,20 +660,25 @@
 				"title": "Patron authentication"
 			}
 		},
-		"consortium": {
-			"id": "Consortium UUID",
-			"member_ref": "Member reference",
-			"member_from_to": "Member from-to",
-			"name": "Consortium name",
-			"title": "Consortium"
-		},
 		"contacts": {
 			"email": "Email",
 			"entity_name": "Library contact",
+			"first_name": "First name",
+			"last_name": "Last name",
 			"location": "Location",
 			"name": "Name",
+			"one": "Contact",
 			"primary": "Primary contact",
 			"role": "Role",
+			"roles": {
+				"implementation": "Implementation Contact",
+				"library_service_admin": "Library Services Administrator",
+				"operations": "Operations Contact",
+				"sponsor": "Sponsor",
+				"sign_off": "Sign-Off Authority",
+				"support": "Support",
+				"technical": "Technical contact"
+			},
 			"time_zone": "Time zone",
 			"title": "Contacts"
 		},

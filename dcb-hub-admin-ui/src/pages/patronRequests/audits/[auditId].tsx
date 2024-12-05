@@ -166,7 +166,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 				/>
 			) : (
 				<Error
-					title={t("ui.error.record_not_found")}
+					title={t("ui.error.cannot_find_record")}
 					message={t("ui.error.invalid_UUID")}
 					description={t("ui.info.check_address")}
 					action={t("ui.action.go_back")}

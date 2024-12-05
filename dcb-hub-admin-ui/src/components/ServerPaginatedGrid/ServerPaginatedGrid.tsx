@@ -529,7 +529,7 @@ export default function ServerPaginationGrid({
 					setAlert({
 						open: true,
 						severity: "error",
-						text: t(rowValidationResult),
+						text: t(rowValidationResult.translationKey),
 						title: t("ui.data_grid.error"),
 					});
 					resolve(oldRow); // Validation failure: restore old row.
@@ -903,11 +903,12 @@ export default function ServerPaginationGrid({
 				onConfirm={handleYes}
 				type="gridEdit"
 				editInformation={editRecord}
-				entity={operationDataType?.toLowerCase()}
-				library={
+				entity={operationDataType?.toLowerCase() ?? ""}
+				entityName={
 					data?.[coreType].content?.name ?? data?.[coreType].content?.fullName
 				}
 				entityId={data?.[coreType].content?.id}
+				gridEdit
 			/>
 			<TimedAlert
 				open={alert.open}
@@ -935,8 +936,9 @@ export default function ServerPaginationGrid({
 					}
 				}}
 				type={"delete" + coreType}
-				entity={operationDataType?.toLowerCase()}
+				entity={operationDataType?.toLowerCase() ?? ""}
 				entityId={entityToDelete ?? ""}
+				gridEdit
 			/>
 			<TimedAlert
 				open={deleteAlertOpen}

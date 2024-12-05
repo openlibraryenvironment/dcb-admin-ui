@@ -9,12 +9,17 @@ import { styled, useTheme } from "@mui/material/styles";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { useTranslation } from "next-i18next";
 import { Button, lighten } from "@mui/material";
-import consortiumLogo from "public/assets/brand/MOBIUS_Mark x36.jpg";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import Head from "next/head";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { getConsortiaKeyInfo } from "src/queries/queries";
+import { useQuery } from "@apollo/client";
+import { Consortium } from "@models/Consortium";
+import { isEmpty } from "lodash";
+import fallbackHeader from "public/assets/brand/fallback-header.png";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -43,6 +48,17 @@ export default function Header({
 	const theme = useTheme();
 	const router = useRouter();
 	const { type } = useDCBServiceInfo();
+	const {
+		headerImageURL,
+		displayName,
+		setDisplayName,
+		setAboutImageURL,
+		setDescription,
+		setCatalogueSearchURL,
+		setWebsiteURL,
+		setName,
+		setHeaderImageURL,
+	} = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
 
 	const url = "/auth/logout";
@@ -51,13 +67,45 @@ export default function Header({
 		if (status === "authenticated") {
 			signOut({ redirect: false });
 			clearGridState();
+			// clearConsortiumStore();
 			router.push(url);
 		} else {
 			signIn();
 		}
 	};
+	const { data: headerContentData } = useQuery(getConsortiaKeyInfo, {
+		variables: {
+			order: "name",
+			orderBy: "ASC",
+			pagesize: 1,
+			pageno: 0,
+		},
+		onCompleted: (data) => {
+			const consortium: Consortium = data?.consortia.content[0];
+			// Check for changes
+			if (consortium && consortium.displayName !== displayName) {
+				setName(consortium.name);
+				setDisplayName(consortium.displayName);
+				setDescription(consortium.description);
+				setCatalogueSearchURL(consortium.catalogueSearchUrl);
+				setWebsiteURL(consortium.websiteUrl);
+				setHeaderImageURL(consortium?.headerImageUrl);
+				if (!isEmpty(consortium?.aboutImageUrl)) {
+					setAboutImageURL(consortium.aboutImageUrl);
+				}
+			}
+		},
+		fetchPolicy: "cache-and-network", // Fetch from cache first, then network
+		nextFetchPolicy: "cache-first", // Subsequent fetches prefer cache
+		// skip: !isEmpty(headerImageURL),
+	});
+
+	const consortium: Consortium = headerContentData?.consortia.content[0];
 	const pageTitle = t("app.title", {
-		consortium_name: "MOBIUS",
+		// consortium_name: consortium?.displayName ?? displayName,
+		consortium_name: isEmpty(displayName)
+			? consortium?.displayName
+			: displayName,
 		environment: type,
 	});
 
@@ -123,14 +171,20 @@ export default function Header({
               or the image and additional padding if the icons have been hidden. */}
 						{iconsVisible != false ? (
 							<Image
-								src={consortiumLogo}
-								alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
+								src={isEmpty(headerImageURL) ? fallbackHeader : headerImageURL}
+								alt={t("consortium.logo_app_header")}
+								width={36}
+								height={36}
 							/>
 						) : (
 							<Box sx={{ mt: 1 }}>
 								<Image
-									src={consortiumLogo}
-									alt={t("header.consortium.alt", { consortium: "MOBIUS" })}
+									src={
+										isEmpty(headerImageURL) ? fallbackHeader : headerImageURL
+									}
+									alt={t("consortium.logo_app_header")}
+									width={36}
+									height={36}
 								/>
 							</Box>
 						)}
@@ -145,7 +199,10 @@ export default function Header({
 								pl: 2,
 							}}
 						>
-							{t("app.title", { consortium_name: "MOBIUS", environment: type })}
+							{t("app.title", {
+								consortium_name: consortium?.displayName ?? displayName,
+								environment: type,
+							})}
 						</Typography>
 						<div>
 							{iconsVisible != false ? (

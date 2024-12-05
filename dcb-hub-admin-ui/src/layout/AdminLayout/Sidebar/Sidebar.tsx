@@ -96,25 +96,25 @@ const SidebarIcon = (indexVal: any, isSelected: boolean) => {
 		case 1:
 			return <MdOutput {...iconProps} />; // Patron requests
 		case 2:
-			return <MdLocalLibrary {...iconProps} />; // Libraries
+			return <MdSettings {...iconProps} />; // Consortium
 		case 3:
-			return <MdAccountBalance {...iconProps} />; // Agencies
+			return <MdLocalLibrary {...iconProps} />; // Libraries
 		case 4:
-			return <MdDns {...iconProps} />; // Host LMSs
+			return <MdAccountBalance {...iconProps} />; // Agencies
 		case 5:
-			return <MdWorkspaces {...iconProps} />; // Groups
+			return <MdDns {...iconProps} />; // Host LMSs
 		case 6:
-			return <MdLocationOn {...iconProps} />; // Locations
+			return <MdWorkspaces {...iconProps} />; // Groups
 		case 7:
-			return <MdMap {...iconProps} />; // Mappings
+			return <MdLocationOn {...iconProps} />; // Locations
 		case 8:
-			return <MdBook {...iconProps} />; //Bib records
+			return <MdMap {...iconProps} />; // Mappings
 		case 9:
-			return <MdSearch {...iconProps} />; // Search index
+			return <MdBook {...iconProps} />; //Bib records
 		case 10:
-			return <MdInfo {...iconProps} />; // Service info
+			return <MdSearch {...iconProps} />; // Search index
 		case 11:
-			return <MdSettings {...iconProps} />; // Settings
+			return <MdInfo {...iconProps} />; // Service info
 		default:
 			return null;
 	}
@@ -128,6 +128,7 @@ type routes = {
 const routes = [
 	{ path: "/", translationKey: "nav.home" }, // Home
 	{ path: "/patronRequests", translationKey: "nav.patronRequests" }, // Patron requests
+	{ path: "/consortium", translationKey: "nav.consortium.name" }, //Consortium
 	{ path: "/libraries", translationKey: "nav.libraries" }, // Libraries
 	{ path: "/agencies", translationKey: "nav.agencies" }, // Agencies
 	{ path: "/hostlmss", translationKey: "nav.hostlmss" }, // Host LMSs

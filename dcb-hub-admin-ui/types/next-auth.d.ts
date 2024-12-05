@@ -20,6 +20,7 @@ interface IUser extends DefaultUser {
 	email_verified: boolean;
 	roles: string[]; // TODO: If someone knows all of the current types make this a strict list of values to get a real benefit of using Typescript
 	name: string;
+	id: string;
 	preferred_username: string;
 	given_name: string;
 	family_name: string;
@@ -33,6 +34,7 @@ declare module "next-auth" {
 		isAdmin: boolean;
 		error: string;
 		profile: KeycloakProfile;
+		user: IUser;
 	}
 
 	interface KeycloakProfile {
