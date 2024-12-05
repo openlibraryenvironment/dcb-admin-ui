@@ -26,6 +26,7 @@ import {
 	locationPatronRequestColumnVisibility,
 	standardPatronRequestColumns,
 } from "src/helpers/columns";
+import { getEntityText } from "src/helpers/DataGrid/getEntityText";
 import {
 	getConfirmationFirstPara,
 	getConfirmationHeader,
@@ -47,16 +48,17 @@ type ConfirmType = {
 	type: string;
 	fileName?: string;
 	participation?: string;
-	library?: string;
+	entityName?: string;
 	mappingCategory?: string;
 	mappingType?: string;
 	editInformation?: any;
 	actionInfo?: string;
-	entity?: string;
+	entity: string;
 	entityId?: string;
 	headerText?: string;
 	buttonText?: string;
 	bodyText?: string;
+	gridEdit: boolean;
 };
 
 const Confirmation = ({
@@ -68,7 +70,7 @@ const Confirmation = ({
 	existingMappingCount,
 	fileName,
 	participation,
-	library,
+	entityName,
 	mappingCategory,
 	mappingType,
 	editInformation,
@@ -77,6 +79,7 @@ const Confirmation = ({
 	headerText,
 	buttonText,
 	bodyText,
+	gridEdit,
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const validationSchema = useMemo(
@@ -142,14 +145,17 @@ const Confirmation = ({
 			case "gridEdit":
 			case "pageEdit":
 				return t("ui.data_grid.edit_summary", {
-					entity: !library
-						? entity == "referencevaluemapping"
-							? t("mappings.ref_value_one").toLowerCase()
-							: entity == "numericrangemapping"
-								? t("mappings.num_range_one").toLowerCase()
-								: entity?.toLowerCase()
-						: "",
-					name: library ?? "",
+					// entity: !library
+					// 	? entity == "referencevaluemapping"
+					// 		? t("mappings.ref_value_one").toLowerCase()
+					// 		: entity == "numericrangemapping"
+					// 			? t("mappings.num_range_one").toLowerCase()
+					// 			: entity?.toLowerCase()
+					// 	: "",
+					entity: gridEdit
+						? t(getEntityText(entity, entityName, gridEdit)).toLowerCase()
+						: entityName,
+					// name: entityName ?? "",
 				});
 			case "mappings":
 				return t("mappings.confirmation_header", {
@@ -160,13 +166,13 @@ const Confirmation = ({
 				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
-					entity: !library ? entity?.toLowerCase() : "",
-					name: library,
+					entity: !entityName ? entity?.toLowerCase() : "",
+					name: entityName,
 				});
 			case "deletelocations":
 				return t("ui.data_grid.delete_header", {
-					entity: !library ? entity?.toLowerCase() : "",
-					name: library,
+					entity: !entityName ? entity?.toLowerCase() : "",
+					name: entityName,
 				});
 			case "deletereferenceValueMappings":
 				return t("ui.data_grid.delete_header", {
@@ -180,18 +186,18 @@ const Confirmation = ({
 				});
 			case "participationStatus":
 				return t(getConfirmationHeader(participation ?? ""), {
-					library: library,
+					library: entityName,
 				});
 			case "unsavedChanges":
 				return t("ui.unsaved_changes.header");
 			case "pickup":
 				if (participation == "disablePickup") {
 					return t("details.location_pickup_disabled_confirmation_header", {
-						location: library,
+						location: entityName,
 					});
 				} else {
 					return t("details.location_pickup_enabled_confirmation_header", {
-						location: library,
+						location: entityName,
 					});
 				}
 			case "functionalSettings":
@@ -228,6 +234,7 @@ const Confirmation = ({
 									selectable={false}
 									toolbarVisible="search-columns"
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
+									operationDataType="PatronRequest"
 								/>
 							</>
 						) : null}
@@ -298,7 +305,7 @@ const Confirmation = ({
 						<Typography component={"p"} mb={1}>
 							<Trans
 								i18nKey={getConfirmationFirstPara(participation ?? "")}
-								values={{ library }}
+								values={{ library: entityName }}
 								components={{ bold: <strong /> }}
 							/>
 							<Typography mt={1}>
@@ -321,7 +328,7 @@ const Confirmation = ({
 						<Box>
 							<Typography variant="body1">
 								{t("details.location_pickup_disabled_confirmation_body", {
-									location: library,
+									location: entityName,
 								})}
 							</Typography>
 						</Box>
@@ -331,7 +338,7 @@ const Confirmation = ({
 						<Box>
 							<Typography variant="body1">
 								{t("details.location_pickup_enabled_confirmation_body", {
-									location: library,
+									location: entityName,
 								})}
 							</Typography>
 						</Box>

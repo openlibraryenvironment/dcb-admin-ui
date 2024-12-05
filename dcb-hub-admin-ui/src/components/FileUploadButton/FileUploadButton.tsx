@@ -1,4 +1,4 @@
-import { RemoveCircle } from "@mui/icons-material";
+import { CancelRounded } from "@mui/icons-material";
 import {
 	Box,
 	Button,
@@ -6,7 +6,9 @@ import {
 	Stack,
 	styled,
 	SvgIconProps,
+	Tooltip,
 } from "@mui/material";
+import { useTranslation } from "next-i18next";
 import { forwardRef, ReactElement, ChangeEvent } from "react";
 
 const VisuallyHiddenInput = styled("input")`
@@ -46,6 +48,8 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 		},
 		ref,
 	) => {
+		const { t } = useTranslation();
+
 		return (
 			<Stack spacing={2}>
 				<Button
@@ -77,18 +81,27 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 							mt: 2,
 							maxWidth: "200px",
 							maxHeight: "200",
+							position: "relative", // Add this to position the remove button
 							overflow: "hidden",
 							borderRadius: 1,
 							border: "1px solid",
 							borderColor: "divider",
 						}}
 					>
-						<Button
-							onClick={handleRemove}
-							aria-label="Remove image"
-							className="absolute top-2 right-2 p-1 bg-white rounded-full shadow-lg hover:bg-gray-100"
-							startIcon={<RemoveCircle />}
-						></Button>
+						<Tooltip title={t("consortium.remove_image")}>
+							<Button
+								onClick={handleRemove}
+								aria-label="Remove image"
+								sx={{
+									position: "absolute",
+									top: 0,
+									right: 0,
+									zIndex: 10,
+								}}
+							>
+								<CancelRounded />
+							</Button>
+						</Tooltip>
 						{/* Just until we figure out the issues with <Image */}
 						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img

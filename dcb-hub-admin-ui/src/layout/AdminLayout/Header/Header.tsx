@@ -19,6 +19,7 @@ import { getConsortiaKeyInfo } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import { Consortium } from "@models/Consortium";
 import { isEmpty } from "lodash";
+import fallbackHeader from "public/assets/brand/fallback-header.png";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -56,6 +57,7 @@ export default function Header({
 		setCatalogueSearchURL,
 		setWebsiteURL,
 		setName,
+		setHeaderImageURL,
 	} = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
 
@@ -87,21 +89,18 @@ export default function Header({
 				setDescription(consortium.description);
 				setCatalogueSearchURL(consortium.catalogueSearchUrl);
 				setWebsiteURL(consortium.websiteUrl);
+				setHeaderImageURL(consortium?.headerImageUrl);
 				if (!isEmpty(consortium?.aboutImageUrl)) {
 					setAboutImageURL(consortium.aboutImageUrl);
-				}
-				if (!isEmpty(consortium?.headerImageUrl)) {
-					setAboutImageURL(consortium.headerImageUrl);
 				}
 			}
 		},
 		fetchPolicy: "cache-and-network", // Fetch from cache first, then network
 		nextFetchPolicy: "cache-first", // Subsequent fetches prefer cache
+		skip: !isEmpty(headerImageURL),
 	});
-	// skip: headerImageURL != "",
 
 	const consortium: Consortium = headerContentData?.consortia.content[0];
-	const fetchedHeaderImageURL = consortium?.headerImageUrl;
 	const pageTitle = t("app.title", {
 		// consortium_name: consortium?.displayName ?? displayName,
 		consortium_name: isEmpty(displayName)
@@ -172,11 +171,7 @@ export default function Header({
               or the image and additional padding if the icons have been hidden. */}
 						{iconsVisible != false ? (
 							<Image
-								src={
-									isEmpty(headerImageURL)
-										? fetchedHeaderImageURL
-										: headerImageURL
-								}
+								src={isEmpty(headerImageURL) ? fallbackHeader : headerImageURL}
 								alt={t("consortium.logo_app_header")}
 								width={36}
 								height={36}
@@ -185,23 +180,11 @@ export default function Header({
 							<Box sx={{ mt: 1 }}>
 								<Image
 									src={
-										isEmpty(headerImageURL)
-											? fetchedHeaderImageURL
-											: headerImageURL
+										isEmpty(headerImageURL) ? fallbackHeader : headerImageURL
 									}
 									alt={t("consortium.logo_app_header")}
 									width={36}
 									height={36}
-									style={{
-										maxWidth: "200px",
-										maxHeight: "200px",
-										objectFit: "contain",
-										marginTop: "8px",
-									}}
-									onError={(e) => {
-										// Fallback to default image if remote image fails to load
-										e.currentTarget.src = headerImageURL;
-									}}
 								/>
 							</Box>
 						)}

@@ -48,7 +48,8 @@ const ConsortiumPage: NextPage = () => {
 	const appHeaderFileRef = useRef<HTMLInputElement>(null);
 	const aboutFileRef = useRef<HTMLInputElement>(null);
 
-	const [isUploading, setIsUploading] = useState(false);
+	const [headerIsUploading, setHeaderIsUploading] = useState(false);
+	const [aboutIsUploading, setAboutIsUploading] = useState(false);
 
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 	const [hasValidationError, setValidationError] = useState(false);
@@ -70,10 +71,13 @@ const ConsortiumPage: NextPage = () => {
 			pagesize: 10,
 		},
 		onCompleted: (data) => {
+			// Ensure our cache for unauthenticated display is up to date
 			setDescription(data.consortia?.content[0]?.description);
 			setWebsiteURL(data.consortia?.content[0]?.websiteUrl);
 			setCatalogueSearchURL(data.consortia?.content[0]?.catalogueSearchUrl);
 			setDisplayName(data.consortia?.content[0]?.displayName);
+			setHeaderImageURL(data.consortia?.content[0]?.headerImageUrl);
+			setAboutImageURL(data.consortia?.content[0]?.headerImageUrl);
 		},
 	});
 	// Make sure this only gets the first consortia
@@ -104,6 +108,36 @@ const ConsortiumPage: NextPage = () => {
 	});
 	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState<string>("");
 	const [aboutPreviewUrl, setAboutPreviewUrl] = useState<string>("");
+
+	const validateImageSize = (
+		file: File,
+		width: number,
+		height: number,
+	): Promise<boolean> => {
+		const allowedTypes = ["image/png", "image/jpeg"];
+		if (!allowedTypes.includes(file.type)) {
+			return Promise.resolve(false);
+		}
+		return new Promise((resolve, reject) => {
+			// Create an image element with proper type
+			const img = document.createElement("img");
+			img.onload = () => {
+				// Revoke object URL to prevent memory leaks
+				URL.revokeObjectURL(img.src);
+
+				const isValidSize = img.width === width && img.height === height;
+				resolve(isValidSize);
+			};
+			img.onerror = (error) => {
+				// Revoke object URL in case of error
+				URL.revokeObjectURL(img.src);
+				console.log(error);
+				reject(new Error("Failed to load image"));
+			};
+			// Create object URL for the file
+			img.src = URL.createObjectURL(file);
+		});
+	};
 
 	// Handlers for file selection
 	const handleAppHeaderFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
@@ -149,12 +183,33 @@ const ConsortiumPage: NextPage = () => {
 		event: React.FormEvent<HTMLFormElement>,
 	) => {
 		event.preventDefault();
-		setIsUploading(true);
+		setHeaderIsUploading(true);
 		try {
 			if (!appHeaderFileRef.current?.files) {
 				throw new Error("No file selected");
 			}
 			const file = appHeaderFileRef.current.files[0];
+			// Validate image size now.
+			const isValidSize = await validateImageSize(file, 36, 36);
+			if (!isValidSize) {
+				const allowedTypes = ["image/png", "image/jpeg"];
+				const isWrongType = !allowedTypes.includes(file.type);
+				setAlert({
+					open: true,
+					severity: "error",
+					text: isWrongType
+						? t("consortium.invalid_file_type", {
+								allowedTypes: "PNG, JPG",
+							})
+						: t("consortium.image_size_error_header", {
+								width: 36,
+								height: 36,
+							}),
+					title: t("ui.data_grid.error"),
+				});
+				setHeaderIsUploading(false);
+				return;
+			}
 			const newName = `consortium${consortium.displayName}user${username}.png`;
 			const response = await fetch(
 				`/api/persistentAssets/serverUpload?filename=${newName}`,
@@ -201,7 +256,7 @@ const ConsortiumPage: NextPage = () => {
 				title: t("ui.data_grid.error"),
 			});
 		} finally {
-			setIsUploading(false);
+			setHeaderIsUploading(false);
 		}
 	};
 
@@ -209,13 +264,34 @@ const ConsortiumPage: NextPage = () => {
 		event: React.FormEvent<HTMLFormElement>,
 	) => {
 		event.preventDefault();
-		setIsUploading(true);
+		setAboutIsUploading(true);
 
 		try {
 			if (!aboutFileRef.current?.files) {
 				throw new Error("No file selected");
 			}
 			const file = aboutFileRef.current.files[0];
+
+			const isValidSize = await validateImageSize(file, 160, 48);
+			if (!isValidSize) {
+				const allowedTypes = ["image/png", "image/jpeg"];
+				const isWrongType = !allowedTypes.includes(file.type);
+				setAlert({
+					open: true,
+					severity: "error",
+					text: isWrongType
+						? t("consortium.invalid_file_type", {
+								allowedTypes: "PNG, JPG",
+							})
+						: t("consortium.image_size_error_about", {
+								width: 160,
+								height: 48,
+							}),
+					title: t("ui.data_grid.error"),
+				});
+				setAboutIsUploading(false);
+				return;
+			}
 			const newName = `consortium${consortium.displayName}user${username}.png`;
 			const response = await fetch(
 				`/api/persistentAssets/serverUpload?filename=${newName}`,
@@ -262,7 +338,7 @@ const ConsortiumPage: NextPage = () => {
 				title: t("consortium.logo_about_error"),
 			});
 		} finally {
-			setIsUploading(false);
+			setAboutIsUploading(false);
 		}
 	};
 
@@ -518,7 +594,7 @@ const ConsortiumPage: NextPage = () => {
 						/>
 					) : (
 						<Typography variant="attributeText">
-							{t("mappings.no_file_uploaded")}
+							{t("consortium.no_file_uploaded")}
 						</Typography>
 					)}
 				</Grid>
@@ -538,7 +614,7 @@ const ConsortiumPage: NextPage = () => {
 							icon={<CloudUpload />}
 							buttonText={t("consortium.select_image")}
 							href="#appHeaderUpload"
-							isUploading={isUploading}
+							isUploading={headerIsUploading}
 							onFileSelect={handleAppHeaderFileSelect}
 							previewUrl={appHeaderPreviewUrl}
 							handleRemove={handleRemoveAppHeader}
@@ -547,10 +623,10 @@ const ConsortiumPage: NextPage = () => {
 							<Button
 								variant="outlined"
 								type="submit"
-								disabled={isUploading}
+								disabled={headerIsUploading}
 								sx={{ mt: 2 }}
 							>
-								{isUploading ? "Uploading..." : "Upload"}
+								{headerIsUploading ? t("common.uploading") : t("common.upload")}
 							</Button>
 						) : null}
 					</Grid>
@@ -664,7 +740,7 @@ const ConsortiumPage: NextPage = () => {
 						/>
 					) : (
 						<Typography variant="attributeText">
-							{t("mappings.no_file_uploaded")}
+							{t("consortium.no_file_uploaded")}
 						</Typography>
 					)}
 				</Grid>
@@ -684,19 +760,21 @@ const ConsortiumPage: NextPage = () => {
 							icon={<CloudUpload />}
 							buttonText={t("consortium.select_image")}
 							href="#aboutFileUpload"
-							isUploading={isUploading}
+							isUploading={aboutIsUploading}
 							onFileSelect={handleAboutFileSelect}
 							previewUrl={aboutPreviewUrl}
 							handleRemove={handleRemoveAbout}
 						/>
-						<Button
-							variant="contained"
-							type="submit"
-							disabled={isUploading}
-							sx={{ mt: 2 }}
-						>
-							{isUploading ? "Uploading..." : "Upload"}
-						</Button>
+						{aboutPreviewUrl ? (
+							<Button
+								variant="contained"
+								type="submit"
+								disabled={aboutIsUploading}
+								sx={{ mt: 2 }}
+							>
+								{aboutIsUploading ? t("common.uploading") : t("common.upload")}
+							</Button>
+						) : null}
 					</Grid>
 				</form>
 			</Grid>
@@ -706,9 +784,10 @@ const ConsortiumPage: NextPage = () => {
 				onConfirm={handleConfirmSave}
 				type="pageEdit"
 				editInformation={formatChangedFields(changedFields, consortium)}
-				library={consortium?.displayName}
+				entityName={consortium?.displayName}
 				entity={t("nav.consortium.name")}
 				entityId={consortium?.id}
+				gridEdit={false}
 			/>
 			<TimedAlert
 				open={alert.open}

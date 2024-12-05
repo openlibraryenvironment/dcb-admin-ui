@@ -56,8 +56,7 @@ export default function EditableAttribute({
 			case "url":
 				return Yup.string()
 					.url(t("ui.data_grid.edit_url"))
-					.typeError(t("ui.data_grid.edit_url"))
-					.required(t("ui.data_grid.edit_url_required"));
+					.typeError(t("ui.data_grid.edit_url"));
 			default:
 				return Yup.string();
 		}
@@ -186,6 +185,7 @@ export default function EditableAttribute({
 											: ""
 							}
 							disabled={!editMode}
+							fullWidth={type == "url" ? true : false}
 							variant="outlined"
 							type="text"
 							inputMode={

@@ -32,7 +32,9 @@
 		"na": "NA",
 		"placeholder_text": "Note: this page contains placeholder data.",
 		"placeholder_tip": "Caution: example placeholder data",
-		"unknown": "Unknown"
+		"unknown": "Unknown",
+		"upload": "Upload",
+		"uploading": "Uploading"
 	},
 
 	"openrs": {

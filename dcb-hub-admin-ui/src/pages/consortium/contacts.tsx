@@ -134,13 +134,14 @@ const Contacts: NextPage = () => {
 							},
 						]}
 						data={consortiumContacts}
-						type="consortium contact"
+						type="consortiumContact"
 						selectable={false}
 						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
 						noDataTitle={t("consortium.contacts.no_contacts")}
 						toolbarVisible="search-only"
 						disableHoverInteractions={true}
 						editQuery={updatePerson}
+						operationDataType="Person"
 					/>
 				</Grid>
 			</Grid>

@@ -903,11 +903,12 @@ export default function ServerPaginationGrid({
 				onConfirm={handleYes}
 				type="gridEdit"
 				editInformation={editRecord}
-				entity={operationDataType?.toLowerCase()}
-				library={
+				entity={operationDataType?.toLowerCase() ?? ""}
+				entityName={
 					data?.[coreType].content?.name ?? data?.[coreType].content?.fullName
 				}
 				entityId={data?.[coreType].content?.id}
+				gridEdit
 			/>
 			<TimedAlert
 				open={alert.open}
@@ -935,8 +936,9 @@ export default function ServerPaginationGrid({
 					}
 				}}
 				type={"delete" + coreType}
-				entity={operationDataType?.toLowerCase()}
+				entity={operationDataType?.toLowerCase() ?? ""}
 				entityId={entityToDelete ?? ""}
+				gridEdit
 			/>
 			<TimedAlert
 				open={deleteAlertOpen}

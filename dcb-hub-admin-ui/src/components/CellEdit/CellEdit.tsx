@@ -76,6 +76,10 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 						variant="outlined"
 						fullWidth
 						helperText={autocompleteLoading ? t("common.loading") : ""}
+						inputProps={{
+							...params.inputProps, // So we don't lose the previous input props
+							"aria-label": "role-autocomplete",
+						}}
 					/>
 				)}
 				disableClearable
@@ -84,10 +88,14 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 		);
 	}
 
-	if (colDef?.type === "singleSelect" && colDef.field == "isPrimaryContact") {
+	if (
+		colDef?.type === "singleSelect" &&
+		(colDef.field == "isPrimaryContact" || colDef.field == "enabled")
+	) {
 		return (
 			<Box style={{ height: "100%", display: "flex", alignItems: "center" }}>
 				<Select
+					title={colDef?.field ?? "Select"}
 					value={value.toString()}
 					onChange={(event: any) => {
 						api.setEditCellValue(
@@ -125,6 +133,7 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 			}}
 		>
 			<TextField
+				title={colDef?.field ?? "Data grid cell edit text field"}
 				inputRef={inputRef}
 				value={value}
 				onChange={(event) => {
@@ -135,6 +144,9 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 				}}
 				size="medium"
 				variant="outlined"
+				inputProps={{
+					"aria-label": colDef?.headerName,
+				}}
 				fullWidth
 				sx={{
 					height: "100%",

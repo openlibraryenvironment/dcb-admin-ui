@@ -23,20 +23,16 @@ type ConsortiumActions = {
 	clearConsortiumStore: () => void;
 };
 
-// Do we need to do a fetch in here?
 export const useConsortiumInfoStore = create<
 	ConsortiumInfo & ConsortiumActions
 >()(
 	persist(
 		(set) => ({
-			// Intended to display when no consortium is available.
+			// Intended to display when no consortium is available
 			name: "OpenRS Consortium",
 			displayName: "OpenRS Consortium",
-			headerImageURL:
-				"https://djlwg7trj3cacjdl.public.blob.vercel-storage.com/openRS%20icon%2036x36-TOMOoGP4vWmtfOKjXyq7BKLaDmOiJO.png", // Somehow this needs to default to the existing URL on the DB
-			aboutImageURL:
-				"https://djlwg7trj3cacjdl.public.blob.vercel-storage.com/OpenDCB%20logo%20x48-xwNhL87RH5fpgHPlbffsfvJAp9gOXz.png",
-			// aboutImageURL: "",
+			headerImageURL: "",
+			aboutImageURL: "",
 			description: "",
 			catalogueSearchURL: "",
 			websiteURL: "",

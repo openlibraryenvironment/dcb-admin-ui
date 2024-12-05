@@ -34,6 +34,7 @@ import { validateRow } from "src/helpers/DataGrid/validateRow";
 import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
 import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
+import { getEntityText } from "src/helpers/DataGrid/getEntityText";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.
@@ -91,6 +92,7 @@ export default function ClientDataGrid<T extends object>({
 	disableHoverInteractions,
 	editQuery,
 	loading,
+	operationDataType,
 }: {
 	data: Array<T>;
 	columns: any;
@@ -106,6 +108,7 @@ export default function ClientDataGrid<T extends object>({
 	disableHoverInteractions?: boolean;
 	editQuery?: DocumentNode;
 	loading?: boolean;
+	operationDataType: string;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -234,40 +237,58 @@ export default function ClientDataGrid<T extends object>({
 		setPromiseArguments(null);
 	};
 
-	const handleYes = async () => {
+	const handleYes = async (
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
 		const { newRow, oldRow, reject, resolve } = promiseArguments;
-		// This will need to be built conditionally for different types etc
-		// Person-only at the minute.
-		const input = {
-			id: newRow.id, // This will be a constant as it's always required.
-			email: newRow.email,
-			firstName: newRow.firstName,
-			lastName: newRow.lastName,
-			role: newRow.role.name,
-			isPrimaryContact: newRow.isPrimaryContact,
-			// fullName: newRow.fullName,
-			// abbreviatedName: newRow.abbreviatedName,
+		const input: Record<string, any> = {
+			id: newRow.id,
+			reason: reason,
+			changeCategory: changeCategory,
+			changeReferenceUrl: changeReferenceUrl,
 		};
 
+		// Dynamically build the input object based on changed fields
+		// But don't send the whole role object
+		Object.keys(newRow).forEach((key) => {
+			if (newRow[key] !== oldRow[key]) {
+				if (key == "role") {
+					input[key] = newRow[key].name;
+				} else {
+					input[key] = newRow[key];
+				}
+			}
+		});
+		const updateName = "update" + operationDataType;
+		const name =
+			apiRef.current.getRow(newRow.id).name ??
+			apiRef.current.getRow(newRow.id).fullName;
 		try {
-			// Make the GraphQL mutation to update the row. Variables will need to be conditional.
+			// Await the updateRow mutation
 			const { data } = await updateRow({
 				variables: { input },
 			});
 			setAlert({
 				open: true,
 				severity: "success",
-				text: t("ui.data_grid.edit_success", { entity: type, name: "" }),
 				title: t("ui.data_grid.updated"),
+				text: t("ui.data_grid.edit_success", {
+					entity: t(getEntityText(operationDataType)).toLowerCase(),
+					name: name ?? "",
+				}),
 			});
-			resolve(data.updatePerson);
+			resolve(data[updateName]);
 			setPromiseArguments(null);
 		} catch (error) {
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("ui.data_grid.edit_error", { entity: type, name: "" }),
-				title: t("ui.data_grid.error"),
+				text: t("ui.data_grid.edit_error", {
+					entity: t(getEntityText(operationDataType)).toLowerCase(),
+					name: name ?? "",
+				}),
 			});
 			reject(oldRow);
 			setPromiseArguments(null);
@@ -310,6 +331,13 @@ export default function ClientDataGrid<T extends object>({
 		}
 	};
 
+	const openActionTypes = [
+		"Audit",
+		"libraryGroupMembers",
+		"groupsOfLibrary",
+		"patronRequestsForLocation",
+	];
+
 	const actionsColumn: GridColDef[] = [
 		{
 			field: "actions",
@@ -350,7 +378,6 @@ export default function ClientDataGrid<T extends object>({
 				}
 
 				const actions = [];
-
 				// Only add the open action where it is relevant
 				if (openActionTypes.includes(type)) {
 					actions.push(
@@ -374,30 +401,36 @@ export default function ClientDataGrid<T extends object>({
 						/>,
 					);
 				}
-
-				actions.push(
-					<GridActionsCellItem
-						key="Edit"
-						icon={<Edit />}
-						label={t("ui.data_grid.edit")}
-						onClick={handleEditClick(id)}
-						showInMenu
-						disabled={!isAnAdmin || isAnyRowEditing()}
-					/>,
-				);
+				if (isAnAdmin && editQuery) {
+					actions.push(
+						<GridActionsCellItem
+							key="Edit"
+							icon={<Edit />}
+							label={t("ui.data_grid.edit")}
+							onClick={handleEditClick(id)}
+							showInMenu
+							disabled={!isAnAdmin || isAnyRowEditing()}
+						/>,
+					);
+				}
 
 				return actions;
 			},
 		},
 	];
-	const allColumns = (editQuery ? [...columns, ...actionsColumn] : columns).map(
-		(col: any) => ({
-			...col,
-			renderEditCell: (params: GridRenderEditCellParams) => (
-				<CellEdit {...params} />
-			),
-		}),
-	);
+
+	const allColumns = (
+		editQuery && isAnAdmin
+			? [...columns, ...actionsColumn]
+			: openActionTypes.includes(type)
+				? [...columns, ...actionsColumn]
+				: columns
+	).map((col: any) => ({
+		...col,
+		renderEditCell: (params: GridRenderEditCellParams) => (
+			<CellEdit {...params} />
+		),
+	}));
 
 	// fix no data overlay - broken somehow.
 	return (
@@ -480,7 +513,9 @@ export default function ClientDataGrid<T extends object>({
 					setAlert({
 						open: true,
 						severity: "error",
-						text: t("ui.data_grid.edit_error", { entity: type, library: "" }),
+						text: t("ui.data_grid.edit_error", {
+							entity: t(getEntityText(operationDataType)).toLowerCase(),
+						}),
 					});
 				}}
 				apiRef={apiRef}
@@ -521,6 +556,7 @@ export default function ClientDataGrid<T extends object>({
 				type="gridEdit"
 				editInformation={editRecord}
 				entity={type}
+				gridEdit
 			/>
 
 			<TimedAlert

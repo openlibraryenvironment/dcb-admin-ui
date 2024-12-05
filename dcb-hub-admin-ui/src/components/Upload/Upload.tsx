@@ -363,6 +363,12 @@ const FileUpload = ({
 				type="mappings"
 				mappingCategory={category}
 				mappingType={type}
+				entity={
+					type == "Reference value mappings"
+						? t("mappings.ref_value_one")
+						: t("mappings.num_range_one")
+				}
+				gridEdit={false}
 			/>
 			<TimedAlert
 				open={isErrorDisplayed}

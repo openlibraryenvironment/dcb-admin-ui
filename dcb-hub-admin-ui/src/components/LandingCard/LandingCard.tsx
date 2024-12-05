@@ -13,8 +13,10 @@ import Image from "next/image";
 import Link from "@components/Link/Link";
 import kIntLogo from "public/assets/brand/Knowledge-Integration_48px.png";
 import openRSLogo from "public/assets/brand/OpenRS_48px.png";
+import fallbackAbout from "public/assets/brand/fallback-about.png";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import ReactMarkdown from "react-markdown";
+import { isEmpty } from "lodash";
 
 // This component holds the UI elements shared between the 'landing' pages (login and logout)
 // It holds the 'three cards' and associated info.
@@ -162,7 +164,7 @@ export default function LandingCard() {
 							{websiteURL ? (
 								<a href={websiteURL}>
 									<Image
-										src={aboutImageURL}
+										src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
 										height={48}
 										width={160}
 										alt={t("ui.logo", { owner: { displayName } })}
@@ -171,7 +173,7 @@ export default function LandingCard() {
 								</a>
 							) : (
 								<Image
-									src={aboutImageURL}
+									src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
 									height={48}
 									width={160}
 									alt={t("ui.logo", { owner: { displayName } })}

@@ -150,6 +150,7 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 				noDataTitle={t("groups.no_members")}
 				// This is how to set the default sort order
 				sortModel={[{ field: "fullName", sort: "asc" }]}
+				operationDataType="Library"
 			/>
 		</AdminLayout>
 	);
