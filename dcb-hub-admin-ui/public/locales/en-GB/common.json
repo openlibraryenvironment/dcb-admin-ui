@@ -372,7 +372,7 @@
 		"display_name": "Display name",
 		"id": "Consortium UUID",
 		"image_size_error_header": "The app header image must be 36 x 36 pixels. Please provide another image with these dimensions.",
-		"image_size_error_about": "The image for the logo for the \"About\" section must be 160 x 48 pixels. Please provide another image with these dimensions.",
+		"image_size_error_about": "The image for the logo for the \"About\" section should have a height of 48px and a maximum width of 180px . Please provide another image with these dimensions.",
 		"invalid_file_type": "This image is not valid. Please provide an image with one of the allowed file types: {{allowedTypes}}.",
 		"landing_page_title": "DCB Admin landing page",
 		"landing_page_subheader": "Consortium related content to display to unauthenticated visitors",
@@ -392,6 +392,11 @@
 			"error": "There was an error creating the new contact for the {{consortium}} consortium.",
 			"title": "New contact",
 			"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
+		},
+		"new_functional_setting": {
+			"error": "There was an error adding the new functional setting for the {{consortium}} consortium.",
+			"title": "Add new functional setting",
+			"success": "The new functional setting was successfully added for the {{consortium}} consortium."
 		},
 		"no_file_uploaded": "No file uploaded",
 		"onboarding": "Onboarding your consortium",
@@ -666,7 +671,7 @@
 			"role": "Role",
 			"roles": {
 				"implementation": "Implementation Contact",
-				"library_service_admin": "Library Service Administrator",
+				"library_service_admin": "Library Services Administrator",
 				"operations": "Operations Contact",
 				"sponsor": "Sponsor",
 				"sign_off": "Sign-Off Authority",

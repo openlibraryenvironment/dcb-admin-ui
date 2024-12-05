@@ -77,7 +77,7 @@ const ConsortiumPage: NextPage = () => {
 			setCatalogueSearchURL(data.consortia?.content[0]?.catalogueSearchUrl);
 			setDisplayName(data.consortia?.content[0]?.displayName);
 			setHeaderImageURL(data.consortia?.content[0]?.headerImageUrl);
-			setAboutImageURL(data.consortia?.content[0]?.headerImageUrl);
+			setAboutImageURL(data.consortia?.content[0]?.aboutImageUrl);
 		},
 	});
 	// Make sure this only gets the first consortia
@@ -125,7 +125,7 @@ const ConsortiumPage: NextPage = () => {
 				// Revoke object URL to prevent memory leaks
 				URL.revokeObjectURL(img.src);
 
-				const isValidSize = img.width === width && img.height === height;
+				const isValidSize = img.width <= width && img.height === height;
 				resolve(isValidSize);
 			};
 			img.onerror = (error) => {
@@ -272,7 +272,7 @@ const ConsortiumPage: NextPage = () => {
 			}
 			const file = aboutFileRef.current.files[0];
 
-			const isValidSize = await validateImageSize(file, 160, 48);
+			const isValidSize = await validateImageSize(file, 180, 48);
 			if (!isValidSize) {
 				const allowedTypes = ["image/png", "image/jpeg"];
 				const isWrongType = !allowedTypes.includes(file.type);

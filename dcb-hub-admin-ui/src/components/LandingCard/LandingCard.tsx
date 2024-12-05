@@ -166,7 +166,7 @@ export default function LandingCard() {
 									<Image
 										src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
 										height={48}
-										width={160}
+										width={180}
 										alt={t("ui.logo", { owner: { displayName } })}
 										title={t("ui.logo", { owner: { displayName } })}
 									/>
@@ -175,7 +175,7 @@ export default function LandingCard() {
 								<Image
 									src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
 									height={48}
-									width={160}
+									width={180}
 									alt={t("ui.logo", { owner: { displayName } })}
 									title={t("ui.logo", { owner: { displayName } })}
 								/>
