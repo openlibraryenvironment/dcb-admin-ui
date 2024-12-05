@@ -2,9 +2,10 @@ import { useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { FunctionalSetting } from "@models/FunctionalSetting";
-import { Tab, Tabs, Typography } from "@mui/material";
+import { Button, Tab, Tabs, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
+import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -13,10 +14,19 @@ import {
 	getConsortiaFunctionalSettings,
 	updateFunctionalSettingQuery,
 } from "src/queries/queries";
+import NewFunctionalSetting from "./NewFunctionalSetting";
 
 const FunctionalSettings: NextPage = () => {
 	const { t } = useTranslation();
 	const [tabIndex, setTabIndex] = useState(1);
+	const [showNewFunctionalSetting, setShowNewFunctionalSetting] =
+		useState(false);
+	const openNewFunctionalSetting = () => {
+		setShowNewFunctionalSetting(true);
+	};
+	const closeNewFunctionalSetting = () => {
+		setShowNewFunctionalSetting(false);
+	};
 	const router = useRouter();
 	const { data } = useQuery(getConsortiaFunctionalSettings, {
 		variables: {
@@ -26,6 +36,11 @@ const FunctionalSettings: NextPage = () => {
 			pagesize: 10,
 		},
 	});
+	const { data: session }: { data: any } = useSession();
+
+	const isAnAdmin = session?.profile?.roles?.some(
+		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	);
 	const consortiumFunctionalSettings: FunctionalSetting[] =
 		data?.consortia?.content[0]?.functionalSettings;
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -72,6 +87,15 @@ const FunctionalSettings: NextPage = () => {
 					</Typography>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
+					{isAnAdmin ? (
+						<Button
+							data-tid="new-functional-setting-button"
+							variant="contained"
+							onClick={openNewFunctionalSetting}
+						>
+							{t("consortium.new_functional_setting.title")}
+						</Button>
+					) : null}
 					<ClientDataGrid
 						columns={[
 							{
@@ -120,6 +144,14 @@ const FunctionalSettings: NextPage = () => {
 					/>
 				</Grid>
 			</Grid>
+			{showNewFunctionalSetting ? (
+				<NewFunctionalSetting
+					show={showNewFunctionalSetting}
+					onClose={closeNewFunctionalSetting}
+					consortiumName={data?.consortia?.content[0]?.name}
+					consortiumDisplayName={data?.consortia?.content[0]?.displayName}
+				/>
+			) : null}
 		</AdminLayout>
 	);
 };

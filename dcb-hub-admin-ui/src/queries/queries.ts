@@ -461,6 +461,7 @@ export const getConsortiaFunctionalSettings = gql`
 			content {
 				id
 				name
+				displayName
 				functionalSettings {
 					id
 					name
@@ -545,6 +546,18 @@ export const updateFunctionalSettingQuery = gql`
 		}
 	}
 `;
+
+export const addFunctionalSettingQuery = gql`
+	mutation AddFunctionalSetting($input: FunctionalSettingInput!) {
+		createFunctionalSetting(input: $input) {
+			id
+			name
+			enabled
+			description
+		}
+	}
+`;
+
 export const createConsortiumContact = gql`
 	mutation CreateConsortiumContact($input: ConsortiumContactInput!) {
 		createContact(input: $input) {
