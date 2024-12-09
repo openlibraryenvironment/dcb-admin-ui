@@ -663,6 +663,7 @@ export const getLocations = gql`
 				name
 				type
 				isPickup
+				printLabel
 				agency {
 					id
 					name

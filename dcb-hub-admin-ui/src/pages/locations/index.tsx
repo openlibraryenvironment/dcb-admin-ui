@@ -69,6 +69,14 @@ const Locations: NextPage = () => {
 						filterOperators: standardFilters,
 					},
 					{
+						field: "printLabel",
+						headerName: "Print label",
+						minWidth: 150,
+						flex: 0.6,
+						editable: true,
+						filterOperators: standardFilters,
+					},
+					{
 						field: "code",
 						headerName: "Location code",
 						minWidth: 50,
