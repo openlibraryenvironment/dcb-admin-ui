@@ -176,9 +176,11 @@ export default function DataChangeLogDetails({
 							{t("data_change_log.reference_url")}
 						</Typography>
 						{dataChangeLog?.changeReferenceUrl ? (
-							<Link href={dataChangeLog?.changeReferenceUrl ?? ""}>
-								{dataChangeLog?.changeReferenceUrl}
-							</Link>
+							<RenderAttribute
+								attribute={dataChangeLog?.changeReferenceUrl}
+								title={dataChangeLog?.changeReferenceUrl}
+								type="url"
+							/>
 						) : (
 							<RenderAttribute attribute={dataChangeLog?.changeReferenceUrl} />
 						)}

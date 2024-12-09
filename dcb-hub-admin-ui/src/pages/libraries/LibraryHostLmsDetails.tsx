@@ -2,7 +2,6 @@ import PrivateData from "@components/PrivateData/PrivateData";
 import { StyledAccordionDetails } from "@components/StyledAccordion/StyledAccordion";
 import { Library } from "@models/Library";
 import { Divider, Stack, Typography } from "@mui/material";
-import Link from "@components/Link/Link";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
@@ -108,9 +107,11 @@ export default function LibraryHostLmsDetails({
 						<Typography variant="attributeTitle">
 							{t("libraries.service.environments.api")}
 						</Typography>
-						<Link href={firstHostLms?.clientConfig?.["base-url"]}>
-							{firstHostLms?.clientConfig?.["base-url"]}
-						</Link>
+						<RenderAttribute
+							attribute={firstHostLms?.clientConfig?.["base-url"]}
+							title={firstHostLms?.clientConfig?.["base-url"]}
+							type="url"
+						/>
 					</Stack>
 				</Grid>
 
@@ -308,9 +309,11 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.user_base_url")}
 							</Typography>
-							<Link href={firstHostLms?.clientConfig?.["base-url"]}>
-								{firstHostLms?.clientConfig?.["base-url"]}
-							</Link>
+							<RenderAttribute
+								attribute={firstHostLms?.clientConfig?.["user-base-url"]}
+								title={firstHostLms?.clientConfig?.["user-base-url"]}
+								type="url"
+							/>
 						</Stack>
 					</Grid>
 				) : null}
@@ -390,9 +393,11 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.api")}
 							</Typography>
-							<Link href={secondHostLms?.clientConfig?.["base-url"]}>
-								{secondHostLms?.clientConfig?.["base-url"]}
-							</Link>
+							<RenderAttribute
+								attribute={secondHostLms?.clientConfig?.["base-url"]}
+								title={secondHostLms?.clientConfig?.["base-url"]}
+								type="url"
+							/>
 						</Stack>
 					</Grid>
 				) : null}
@@ -549,9 +554,11 @@ export default function LibraryHostLmsDetails({
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.user_base_url")}
 							</Typography>
-							<Link href={secondHostLms?.clientConfig?.["base-url"]}>
-								{secondHostLms?.clientConfig?.["base-url"]}
-							</Link>
+							<RenderAttribute
+								attribute={secondHostLms?.clientConfig?.["user-base-url"]}
+								title={secondHostLms?.clientConfig?.["user-base-url"]}
+								type="url"
+							/>
 						</Stack>
 					</Grid>
 				) : null}

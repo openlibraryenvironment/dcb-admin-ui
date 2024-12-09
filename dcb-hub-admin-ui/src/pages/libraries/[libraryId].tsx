@@ -8,7 +8,6 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import { ClientDataGrid } from "@components/ClientDataGrid";
-import Link from "@components/Link/Link";
 import AddressLink from "@components/Address/AddressLink";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
@@ -1069,7 +1068,13 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								flex: 0.7,
 								renderCell: (params: GridRenderCellParams) => {
 									const email = params.value ?? "";
-									return <Link href={`mailto:${email}`}>{email}</Link>;
+									return (
+										<RenderAttribute
+											attribute={`mailto:${email}`}
+											title="email"
+											type="url"
+										/>
+									);
 								},
 							},
 							{
@@ -1165,12 +1170,11 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 											{t("libraries.service.systems.patron_site")}
 										</Typography>
 										{library?.patronWebsite ? (
-											<Link
-												href={library?.patronWebsite}
+											<RenderAttribute
+												attribute={library?.patronWebsite}
 												title="Link to patron website"
-											>
-												{library?.patronWebsite}
-											</Link>
+												type="url"
+											/>
 										) : (
 											<Typography variant="attributeText">-</Typography>
 										)}
