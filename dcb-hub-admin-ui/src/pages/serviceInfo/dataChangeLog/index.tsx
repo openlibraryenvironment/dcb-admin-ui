@@ -20,6 +20,7 @@ import {
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 import Link from "@components/Link/Link";
 import { GridRenderCellParams } from "@mui/x-data-grid-pro";
+import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 
 const DataChangeLog: NextPage = () => {
 	const { t } = useTranslation();
@@ -144,13 +145,13 @@ const DataChangeLog: NextPage = () => {
 						filterOperators: standardFilters,
 						renderCell: (params: GridRenderCellParams) => {
 							const changeReferenceUrl = params.value;
-							if (changeReferenceUrl) {
-								return (
-									<Link href={changeReferenceUrl}>{changeReferenceUrl}</Link>
-								);
-							} else {
-								return null;
-							}
+							return (
+								<RenderAttribute
+									attribute={changeReferenceUrl}
+									type="url"
+									title={changeReferenceUrl}
+								/>
+							);
 						},
 					},
 					{
