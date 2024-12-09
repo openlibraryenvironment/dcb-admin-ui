@@ -73,6 +73,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		latitude: location?.latitude,
 		longitude: location?.longitude,
 		name: location?.name,
+		printLabel: location?.printLabel,
 	});
 	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
 
@@ -100,6 +101,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			latitude: location?.latitude,
 			longitude: location?.longitude,
 			name: location?.name,
+			printLabel: location?.printLabel,
 		});
 		setEditMode(true);
 		setTimeout(() => {
@@ -302,6 +304,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			name: location?.name,
 			longitude: location?.longitude,
 			latitude: location?.latitude,
+			printLabel: location?.printLabel,
 		});
 		setChangedFields({});
 		setDirty(false);
@@ -465,18 +468,35 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.location_code")}
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors?.["printLabel"] && editMode
+									? theme.palette.error.main
+									: theme.palette.common.black
+							}
+						>
+							{t("details.location_printlabel")}
 						</Typography>
-						<RenderAttribute attribute={location?.code} />
+						<EditableAttribute
+							field="printLabel"
+							key={`printLabel-${editKey}`}
+							value={editableFields.printLabel ?? location?.printLabel}
+							updateField={updateField}
+							editMode={editMode}
+							type="string"
+							setValidationError={setValidationError}
+							setDirty={setDirty}
+							setErrors={setErrors}
+						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.location_uuid")}
+							{t("details.location_code")}
 						</Typography>
-						<RenderAttribute attribute={location?.id} />
+						<RenderAttribute attribute={location?.code} />
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
@@ -540,15 +560,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.location_agency")}
-						</Typography>
-						<RenderAttribute attribute={location?.agency?.id} />
-					</Stack>
-				</Grid>
-				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.location_pickup")}
+							{t("details.location_pickup_available")}
 						</Typography>
 						{location?.isPickup
 							? t("details.location_pickup_enabled")
@@ -569,6 +581,22 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 								: t("details.location_pickup_enable")}
 						</Button>
 					) : null}
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.location_agency")}
+						</Typography>
+						<RenderAttribute attribute={location?.agency?.id} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.location_uuid")}
+						</Typography>
+						<RenderAttribute attribute={location?.id} />
+					</Stack>
 				</Grid>
 			</Grid>
 			<Confirmation
