@@ -25,6 +25,8 @@ export const getErrorMessageKey = (message: string, type: string): string => {
 			"The context does not match the Host LMS code you supplied.",
 		) && type == "Numeric range mappings":
 			return "mappings.mismatched_context_nrm";
+		case message.includes("mandatory field"):
+			return "mappings.mandatory_field_blank";
 		default:
 			return "mappings.unknown_error";
 	}

@@ -795,6 +795,7 @@
 		"patron_type_num_range": "Patron type numeric range mappings",
 		"patron_type_ref_value": "Patron type reference value mappings",
 		"loading_msg": "Loading mappings...",
+		"mandatory_field_blank": "A mandatory field has been left blank on line {{lineNumber}} of the file you have provided. Please correct and try again.",
 		"mappings": "Mappings",
 		"max_size": "Maximum size {{maxSize}}",
 		"mismatched_context": "The selected Host LMS <bold>{{code}}</bold> does not match the <bold>fromContext</bold> or <bold>toContext</bold> values in the mappings file. Please correct and try again.",

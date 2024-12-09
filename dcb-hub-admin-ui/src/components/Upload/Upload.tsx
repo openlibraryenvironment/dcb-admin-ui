@@ -51,6 +51,7 @@ const FileUpload = ({
 	const [successCount, setSuccessCount] = useState(0);
 	const [ignoredCount, setIgnoredCount] = useState(0);
 	const [deletedCount, setDeletedCount] = useState(0);
+	const [lineNumber, setLineNumber] = useState(0);
 	const [addedFile, setAddedFile] = useState<File | null>(null);
 	const [failedFile, setFailedFile] = useState<File | null>(null);
 	const [uploadButtonClicked, setUploadButtonClicked] = useState(false);
@@ -248,6 +249,8 @@ const FileUpload = ({
 					console.error("Server responded with status:", error.response.status);
 					console.error("Response data:", error.response.data);
 					setUploadErrorMessage(error.response.data);
+					const lineNoMatch1 = error.response.data.match(/line (\d+)/i) ?? "";
+					setLineNumber(lineNoMatch1[1]);
 					setErrorDisplayed(true);
 				} else if (error.request) {
 					// The request was made but no response was received
@@ -388,6 +391,7 @@ const FileUpload = ({
 							code: code,
 							deletedMappingCount: deletedCount, // existingMappingCount
 							addedCount: successCount,
+							lineNumber: lineNumber,
 						}}
 					/>
 				}
