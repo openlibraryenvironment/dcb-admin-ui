@@ -16,6 +16,7 @@ import {
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+import dayjs from "dayjs";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: sess } = useSession();
@@ -65,6 +66,14 @@ const Items: NextPage = () => {
 				renderHeader: () => <DetailPanelHeader />,
 			},
 			{
+				field: "agencyCode",
+				headerName: t("details.agency_code"),
+				flex: 0.3,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => row?.agency?.code ?? "-",
+			},
+			{
 				field: "id",
 				headerName: t("search.item_id"),
 				minWidth: 50,
@@ -78,17 +87,8 @@ const Items: NextPage = () => {
 				minWidth: 100,
 				filterable: false,
 				sortable: false,
-				flex: 0.5,
+				flex: 0.4,
 				valueGetter: (value, row) => row?.status?.code,
-			},
-			{
-				field: "locationCode",
-				headerName: t("details.location_code"),
-				minWidth: 100,
-				filterable: false,
-				sortable: false,
-				flex: 0.3,
-				valueGetter: (value, row) => row?.location?.code,
 			},
 			{
 				field: "isRequestable",
@@ -118,20 +118,38 @@ const Items: NextPage = () => {
 				flex: 0.3,
 			},
 			{
+				field: "dueDate",
+				headerName: t("search.date_due"),
+				minWidth: 100,
+				flex: 0.4,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value: any, row: { dueDate: string }) => {
+					const dateDue = row?.dueDate;
+					return dateDue ? dayjs(dateDue).format("YYYY-MM-DD") : "-";
+				},
+			},
+			{
+				field: "availabilityDate",
+				headerName: t("search.date_available"),
+				minWidth: 100,
+				flex: 0.4,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value: any, row: { availabilityDate: string }) => {
+					const dateAvailable = row?.availabilityDate;
+					return dateAvailable
+						? dayjs(dateAvailable).format("YYYY-MM-DD")
+						: "-";
+				},
+			},
+			{
 				field: "canonicalItemType",
 				headerName: t("details.supplier_ctype"),
-				minWidth: 150,
+				minWidth: 100,
 				filterable: false,
 				sortable: false,
 				flex: 0.5,
-			},
-			{
-				field: "agencyCode",
-				headerName: t("details.agency_code"),
-				flex: 0.3,
-				filterable: false,
-				sortable: false,
-				valueGetter: (value, row) => row?.agency?.code,
 			},
 		],
 		[t],
