@@ -528,6 +528,14 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid xs={2} sm={4} md={4}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
+								{t("details.location_code")}
+							</Typography>
+							<RenderAttribute attribute={row?.location?.code} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
 								{t("search.barcode")}
 							</Typography>
 							<RenderAttribute attribute={row?.barcode} />

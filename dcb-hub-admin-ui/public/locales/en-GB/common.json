@@ -836,6 +836,8 @@
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",
+		"date_available": "Date available",
+		"date_due": "Date due",
 		"shared_index_unavailable_title": "Shared index is not configured on this system",
 		"shared_index_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment.",
 		"hold_count": "Hold count",
