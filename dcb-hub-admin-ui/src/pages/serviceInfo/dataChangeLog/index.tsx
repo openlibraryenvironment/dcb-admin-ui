@@ -19,6 +19,8 @@ import {
 } from "src/helpers/dataChangeLogHelperFunctions";
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 import Link from "@components/Link/Link";
+import { GridRenderCellParams } from "@mui/x-data-grid-pro";
+import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 
 const DataChangeLog: NextPage = () => {
 	const { t } = useTranslation();
@@ -141,6 +143,16 @@ const DataChangeLog: NextPage = () => {
 						minWidth: 50,
 						flex: 0.6,
 						filterOperators: standardFilters,
+						renderCell: (params: GridRenderCellParams) => {
+							const changeReferenceUrl = params.value;
+							return (
+								<RenderAttribute
+									attribute={changeReferenceUrl}
+									type="url"
+									title={changeReferenceUrl}
+								/>
+							);
+						},
 					},
 					{
 						field: "id",

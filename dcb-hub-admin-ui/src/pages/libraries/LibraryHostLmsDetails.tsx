@@ -109,6 +109,8 @@ export default function LibraryHostLmsDetails({
 						</Typography>
 						<RenderAttribute
 							attribute={firstHostLms?.clientConfig?.["base-url"]}
+							title={firstHostLms?.clientConfig?.["base-url"]}
+							type="url"
 						/>
 					</Stack>
 				</Grid>
@@ -309,6 +311,8 @@ export default function LibraryHostLmsDetails({
 							</Typography>
 							<RenderAttribute
 								attribute={firstHostLms?.clientConfig?.["user-base-url"]}
+								title={firstHostLms?.clientConfig?.["user-base-url"]}
+								type="url"
 							/>
 						</Stack>
 					</Grid>
@@ -391,6 +395,8 @@ export default function LibraryHostLmsDetails({
 							</Typography>
 							<RenderAttribute
 								attribute={secondHostLms?.clientConfig?.["base-url"]}
+								title={secondHostLms?.clientConfig?.["base-url"]}
+								type="url"
 							/>
 						</Stack>
 					</Grid>
@@ -550,6 +556,8 @@ export default function LibraryHostLmsDetails({
 							</Typography>
 							<RenderAttribute
 								attribute={secondHostLms?.clientConfig?.["user-base-url"]}
+								title={secondHostLms?.clientConfig?.["user-base-url"]}
+								type="url"
 							/>
 						</Stack>
 					</Grid>

@@ -2,6 +2,19 @@ import Link from "@components/Link/Link";
 import Typography from "@mui/material/Typography";
 import { useTranslation } from "next-i18next";
 
+const isValidLink = (url: string): boolean => {
+	try {
+		const parsedUrl = new URL(url);
+		const validProtocols = ["http:", "https:", "mailto:"];
+		return (
+			validProtocols.includes(parsedUrl.protocol) &&
+			parsedUrl.hostname.length > 0
+		);
+	} catch (error) {
+		return false;
+	}
+};
+
 export default function RenderAttribute({ attribute, title, type }: any) {
 	const { t } = useTranslation();
 
@@ -34,6 +47,15 @@ export default function RenderAttribute({ attribute, title, type }: any) {
 		attribute !== undefined &&
 		attribute !== "Invalid Date"
 	) {
+		// If link is invalid, render as plain text
+		if (!isValidLink(attribute)) {
+			return (
+				<Typography variant="attributeText" title={title}>
+					{attribute}
+				</Typography>
+			);
+		}
+
 		return (
 			<Link href={attribute} title={title}>
 				{attribute}

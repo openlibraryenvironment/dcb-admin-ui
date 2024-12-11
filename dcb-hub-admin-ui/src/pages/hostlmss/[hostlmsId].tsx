@@ -228,13 +228,15 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.base_application")}
 									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={
-												hostlms?.clientConfig?.["base-url-application-services"]
-											}
-										/>
-									</Typography>
+									<RenderAttribute
+										attribute={
+											hostlms?.clientConfig?.["base-url-application-services"]
+										}
+										type="url"
+										title={
+											hostlms?.clientConfig?.["base-url-application-services"]
+										}
+									/>
 								</Stack>
 							</Grid>
 						)}
@@ -244,11 +246,11 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.base")}
 									</Typography>
-									<Typography variant="attributeText">
-										<RenderAttribute
-											attribute={hostlms?.clientConfig?.["base-url"]}
-										/>
-									</Typography>
+									<RenderAttribute
+										attribute={hostlms?.clientConfig?.["base-url"]}
+										type="url"
+										title={hostlms?.clientConfig?.["base-url"]}
+									/>
 								</Stack>
 							</Grid>
 						)}

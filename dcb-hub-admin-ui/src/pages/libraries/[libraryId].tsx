@@ -8,7 +8,6 @@ import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
 import { ClientDataGrid } from "@components/ClientDataGrid";
-import Link from "@components/Link/Link";
 import AddressLink from "@components/Address/AddressLink";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
@@ -64,6 +63,7 @@ import { formatChangedFields } from "src/helpers/formatChangedFields";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { GridRenderCellParams } from "@mui/x-data-grid-pro";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -1066,6 +1066,16 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								editable: true,
 								flex: 0.7,
+								renderCell: (params: GridRenderCellParams) => {
+									const email = params.value ?? "";
+									return (
+										<RenderAttribute
+											attribute={`mailto:${email}`}
+											title="email"
+											type="url"
+										/>
+									);
+								},
 							},
 							{
 								field: "isPrimaryContact",
@@ -1160,12 +1170,11 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 											{t("libraries.service.systems.patron_site")}
 										</Typography>
 										{library?.patronWebsite ? (
-											<Link
-												href={library?.patronWebsite}
+											<RenderAttribute
+												attribute={library?.patronWebsite}
 												title="Link to patron website"
-											>
-												{library?.patronWebsite}
-											</Link>
+												type="url"
+											/>
 										) : (
 											<Typography variant="attributeText">-</Typography>
 										)}
