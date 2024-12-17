@@ -61,7 +61,7 @@
 		"@semantic-release/gitlab": "^13.0.0",
 		"@semantic-release/npm": "^12.0.0",
 		"@types/cookie": "^0.6.0",
-		"@types/node": "^20.14.10",
+		"@types/node": "^22.10.2",
 		"@types/nprogress": "^0.2.3",
 		"@types/react": "^18.3.3",
 		"@types/react-dom": "^18.3.0",
