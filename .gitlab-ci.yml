@@ -5,7 +5,7 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
 
 default:
-  image: node:20.18.1-bullseye
+  image: node:22.12.0-bullseye
   tags:
     - ki-onprem
 
@@ -23,7 +23,7 @@ cache:
 
 build:
   stage: build
-  image: node:20.18.1-bullseye
+  image: node:22.12.0-bullseye
   tags:
     - ki-onprem
   script:
@@ -55,4 +55,3 @@ build-container-image:
     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest
     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1
     - docker images
-
