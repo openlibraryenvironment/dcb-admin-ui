@@ -176,7 +176,7 @@ export default function NewFunctionalSetting({
 									}}
 									options={[
 										"PICKUP_ANYWHERE",
-										"RE-RESOLUTION",
+										"RE_RESOLUTION",
 										"SELECT_UNAVAILABLE_ITEMS",
 									]}
 									renderInput={(params) => (
