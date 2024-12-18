@@ -103,22 +103,22 @@ const FunctionalSettings: NextPage = () => {
 								headerName: t("consortium.settings.name"),
 								minWidth: 75,
 								editable: false,
-								flex: 0.4,
+								flex: 0.75,
 							},
 							{
 								field: "description",
 								headerName: t("consortium.settings.description"),
-								minWidth: 100,
+								minWidth: 150,
 								editable: true,
-								flex: 0.6,
+								flex: 1,
 								type: "string",
 							},
 							{
 								field: "enabled",
 								headerName: t("consortium.settings.enabled_header"),
-								minWidth: 75,
+								minWidth: 50,
 								editable: true,
-								flex: 0.6,
+								flex: 0.4,
 								valueFormatter: (value: boolean) => {
 									if (value) {
 										return t("consortium.settings.enabled");

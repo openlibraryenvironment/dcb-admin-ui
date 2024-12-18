@@ -82,6 +82,7 @@ export default function NewFunctionalSetting({
 		defaultValues: {
 			description: "",
 			name: "",
+			enabled: false,
 			reason: "",
 			changeCategory: "",
 			changeReferenceUrl: "",
@@ -178,6 +179,7 @@ export default function NewFunctionalSetting({
 										"PICKUP_ANYWHERE",
 										"RE_RESOLUTION",
 										"SELECT_UNAVAILABLE_ITEMS",
+										"OWN_LIBRARY_BORROWING",
 									]}
 									renderInput={(params) => (
 										<TextField
