@@ -3,13 +3,11 @@ import Typography from "@mui/material/Typography";
 import { useTranslation } from "next-i18next";
 
 const isValidLink = (url: string): boolean => {
+	console.log(url);
 	try {
 		const parsedUrl = new URL(url);
 		const validProtocols = ["http:", "https:", "mailto:"];
-		return (
-			validProtocols.includes(parsedUrl.protocol) &&
-			parsedUrl.hostname.length > 0
-		);
+		return validProtocols.includes(parsedUrl.protocol);
 	} catch (error) {
 		return false;
 	}

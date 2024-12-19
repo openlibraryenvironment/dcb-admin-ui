@@ -11,6 +11,8 @@ import { useQuery } from "@apollo/client";
 import { Person } from "@models/Person";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import NewContact from "./NewContact";
+import { GridRenderCellParams } from "@mui/x-data-grid-pro";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 const Contacts: NextPage = () => {
 	const { t } = useTranslation();
@@ -119,6 +121,16 @@ const Contacts: NextPage = () => {
 								minWidth: 50,
 								editable: true,
 								flex: 0.7,
+								renderCell: (params: GridRenderCellParams) => {
+									const email = params.value ?? "";
+									return (
+										<RenderAttribute
+											attribute={`mailto:${email}`}
+											title="email"
+											type="url"
+										/>
+									);
+								},
 							},
 							{
 								field: "isPrimaryContact",
