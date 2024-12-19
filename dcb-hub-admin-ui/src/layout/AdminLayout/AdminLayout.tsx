@@ -131,7 +131,7 @@ export default function AdminLayout({
 							spacing={2}
 							sx={{ height: "100%", width: "100%", marginTop: 9 }}
 						>
-							{hideBreadcrumbs != true ? (
+							{hideBreadcrumbs != true && title ? (
 								<Box>
 									<Breadcrumbs titleAttribute={title} />
 								</Box>

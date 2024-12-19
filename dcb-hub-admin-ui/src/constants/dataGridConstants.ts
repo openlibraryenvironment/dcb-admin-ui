@@ -5,8 +5,10 @@ export const presetTypes = [
 	"patronRequestsLibraryActive",
 	"patronRequestsLibraryOutOfSequence",
 	"patronRequestsLibraryCompleted",
+	"patronRequestsLibraryAll",
 	"patronRequestsException",
 	"patronRequestsActive",
+	"patronRequestsAll",
 	"patronRequestsOutOfSequence",
 	"patronRequestsCompleted",
 	"referenceValueMappings",
@@ -21,6 +23,10 @@ export const presetTypes = [
 	"numericRangeMappingsForLibraryPatronSecondHostLms",
 	"numericRangeMappingsForLibraryItemTypeSecondHostLms",
 	"numericRangeMappingsForLibraryItemType",
+	"numericRangeMappingsForLibraryAll",
+	"numericRangeMappingsForLibraryAllSecondHostLms",
+	"referenceValueMappingsForLibraryAll",
+	"referenceValueMappingsForLibraryAllSecondHostLms",
 ];
 
 // Types of data grid where users cannot click through to a details page
@@ -38,6 +44,11 @@ export const nonClickableTypes = [
 	"numericRangeMappingsForLibraryPatronSecondHostLms",
 	"numericRangeMappingsForLibraryItemTypeSecondHostLms",
 	"numericRangeMappingsForLibraryItemType",
+	"numericRangeMappingsForLibraryItemTypeSecondHostLms",
+	"numericRangeMappingsForLibraryAll",
+	"numericRangeMappingsForLibraryAllSecondHostLms",
+	"referenceValueMappingsForLibraryAll",
+	"referenceValueMappingsForLibraryAllSecondHostLms",
 ];
 
 // Types of data grid where users can click through to a details page,

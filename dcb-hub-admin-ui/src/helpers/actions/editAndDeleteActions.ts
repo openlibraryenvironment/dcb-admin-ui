@@ -1,6 +1,7 @@
 import { ApolloClient } from "@apollo/client";
 import { TFunction } from "i18next";
 import { isEmpty } from "lodash";
+import { NextRouter } from "next/router";
 import { Dispatch, RefObject, SetStateAction } from "react";
 
 export const handleSaveConfirmation = async (
@@ -11,6 +12,7 @@ export const handleSaveConfirmation = async (
 	setEditMode: Dispatch<SetStateAction<boolean>>,
 	setChangedFields: Dispatch<SetStateAction<any>>,
 	setAlert: Dispatch<SetStateAction<any>>,
+	setDirty: Dispatch<SetStateAction<boolean>>,
 	setConfirmationEdit: Dispatch<SetStateAction<any>>,
 	t: TFunction<"common" | "application" | "validation">,
 	reason: string,
@@ -18,6 +20,7 @@ export const handleSaveConfirmation = async (
 	changeReferenceUrl: string,
 	updateName: string,
 	entityType: string,
+	refetchQuery: string,
 ) => {
 	try {
 		const { data } = await updateEntity({
@@ -28,7 +31,6 @@ export const handleSaveConfirmation = async (
 					reason: reason,
 					changeReferenceUrl: changeReferenceUrl,
 					...changedFields,
-					// Add any other fields needed for the update
 				},
 			},
 		});
@@ -36,9 +38,10 @@ export const handleSaveConfirmation = async (
 		if (data?.[updateName]) {
 			setEditMode(false);
 			setChangedFields({});
+			setDirty(false);
 			// Refetch the data for the updated entity
 			client.refetchQueries({
-				include: [`Load${entity.constructor.name}`],
+				include: [refetchQuery],
 			});
 
 			setAlert({
@@ -46,19 +49,22 @@ export const handleSaveConfirmation = async (
 				severity: "success",
 				text: t("ui.data_grid.edit_success", {
 					entity: entityType,
-					name: entity.name ?? entity.id, // Use name if available, fall back to id if not
+					name: entity.name ?? (entity.fullName ? entity.fullName : entity.id), // Use name if available, fall back to id if not
 				}),
 				title: t("ui.data_grid.updated"),
 			});
 		}
 	} catch (error) {
-		console.error(`Error updating ${entity.constructor.name}:`, error);
+		console.error(
+			`Error updating ${entity.name ?? (entity.fullName ? entity.fullName : entity.id)}:`,
+			error,
+		);
 		setAlert({
 			open: true,
 			severity: "error",
 			text: t("ui.data_grid.edit_error", {
-				entity: t(`entities.${entity.constructor.name.toLowerCase()}.one`),
-				name: entity.name ?? entity.id,
+				entity: entityType,
+				name: entity.name ?? (entity.fullName ? entity.fullName : entity.id),
 			}),
 			title: t("ui.data_grid.updated"),
 		});
@@ -70,7 +76,7 @@ export const handleSaveConfirmation = async (
 export const closeConfirmation = (
 	setConfirmation: Dispatch<SetStateAction<boolean>>,
 	client: ApolloClient<object>,
-	entityName: string,
+	refetchQuery: string,
 	setConfirmationEdit?: Dispatch<SetStateAction<boolean>>,
 	setPickupConfirmation?: Dispatch<SetStateAction<boolean>>,
 	setConfirmationDeletion?: Dispatch<SetStateAction<boolean>>,
@@ -87,9 +93,38 @@ export const closeConfirmation = (
 		setConfirmationDeletion(false);
 	}
 	client.refetchQueries({
-		include: [`Load${entityName}`], // Replace with the appropriate query name
+		include: [`${refetchQuery}`],
 	});
 };
+
+// export const updateField = (
+// 	field: keyof any,
+// 	value: any,
+// 	setEditableFields: Dispatch<SetStateAction<any>>,
+// 	setChangedFields: Dispatch<SetStateAction<any>>,
+// 	entity: any,
+// ) => {
+// 	setEditableFields((prev: any) => ({
+// 		...prev,
+// 		[field]: value,
+// 	}));
+
+// 	// Use JSON.stringify to compare values more reliably
+// 	const isChanged = JSON.stringify(value) !== JSON.stringify(entity[field]);
+
+// 	if (isChanged) {
+// 		setChangedFields((prev: any) => ({
+// 			...prev,
+// 			[field]: value,
+// 		}));
+// 	} else {
+// 		setChangedFields((prev: any) => {
+// 			const newChangedFields = { ...prev };
+// 			delete newChangedFields[field];
+// 			return newChangedFields;
+// 		});
+// 	}
+// };
 
 export const updateField = (
 	field: keyof any,
@@ -205,4 +240,148 @@ export const handleSave = (
 		return;
 	}
 	setConfirmationEdit(true);
+};
+
+export const handleDeleteEntity = async (
+	id: string,
+	reason: string,
+	changeCategory: string,
+	changeReferenceUrl: string,
+	setAlert: Dispatch<SetStateAction<any>>,
+	deleteMutation: any,
+	t: TFunction<"common" | "application" | "validation">,
+	router: NextRouter,
+	name: string,
+	operationType: string,
+	redirect: string,
+) => {
+	try {
+		const input = {
+			id: id,
+			reason: reason,
+			changeCategory: changeCategory,
+			changeReferenceUrl: changeReferenceUrl,
+		};
+		const { data } = await deleteMutation({
+			variables: {
+				input,
+			},
+			update(
+				cache: {
+					modify: (arg0: {
+						fields:
+							| { libraries(_: any, { DELETE }: { DELETE: any }): any }
+							| { locations(_: any, { DELETE }: { DELETE: any }): any };
+					}) => void;
+				},
+				{ data: mutationData }: any,
+			) {
+				// This will remove cached libraries if the delete is successful.
+				// Thus forcing them to be re-fetched before re-direction to the libraries page.
+				// based on type
+				switch (operationType) {
+					case "deleteLibrary":
+						if (mutationData?.deleteLibrary.success) {
+							cache.modify({
+								fields: {
+									libraries(_, { DELETE }) {
+										return DELETE;
+									},
+								},
+							});
+						}
+						break;
+					case "deleteLocation":
+						if (mutationData?.deleteLocation.success) {
+							cache.modify({
+								fields: {
+									locations(_, { DELETE }) {
+										return DELETE;
+									},
+								},
+							});
+						}
+				}
+			},
+		});
+		if (data?.[operationType].success == true) {
+			switch (operationType) {
+				case "deleteLibrary":
+					console.log("Attempting to set alert");
+					setAlert({
+						open: true,
+						severity: "success",
+						text: t("ui.data_grid.delete_success", {
+							entity: t("libraries.library").toLowerCase(),
+							name: name,
+						}),
+						title: t("ui.data_grid.deleted"),
+					});
+					console.log("Entity deleted successfully");
+					setTimeout(() => {
+						router.push(redirect);
+					}, 100);
+					break;
+				case "deleteLocation":
+					setAlert({
+						open: true,
+						severity: "success",
+						text: t("ui.data_grid.delete_success", {
+							entity: t("locations.location_one").toLowerCase(),
+							name: name,
+						}),
+						title: t("ui.data_grid.deleted"),
+					});
+					console.log("Entity deleted successfully");
+					setTimeout(() => {
+						router.push(redirect);
+					}, 100);
+					break;
+			}
+		} else {
+			console.log("Failed to delete entity");
+			switch (operationType) {
+				case "deleteLibrary":
+					setAlert({
+						open: true,
+						severity: "error",
+						text: t("ui.data_grid.delete_error", {
+							entity: t("libraries.library").toLowerCase(),
+						}),
+					});
+					break;
+				case "deleteLocation":
+					setAlert({
+						open: true,
+						severity: "error",
+						text: t("ui.data_grid.delete_error", {
+							entity: t("locations.location_one").toLowerCase(),
+						}),
+					});
+					break;
+			}
+		}
+	} catch (error) {
+		console.error("Error deleting entity:", error);
+		switch (operationType) {
+			case "deleteLibrary":
+				setAlert({
+					open: true,
+					severity: "error",
+					text: t("ui.data_grid.delete_error", {
+						entity: t("libraries.library").toLowerCase(),
+					}),
+				});
+				break;
+			case "deleteLocation":
+				setAlert({
+					open: true,
+					severity: "error",
+					text: t("ui.data_grid.delete_error", {
+						entity: t("locations.location_one").toLowerCase(),
+					}),
+				});
+				break;
+		}
+	}
 };

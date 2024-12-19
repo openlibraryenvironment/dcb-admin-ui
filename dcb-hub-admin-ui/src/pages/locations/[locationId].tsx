@@ -10,13 +10,14 @@ import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Location } from "@models/Location";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
-import EditableAttribute from "src/helpers/EditableAttribute/EditableAttribute";
+import EditableAttribute from "@components/EditableAttribute/EditableAttribute";
+
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
@@ -24,6 +25,7 @@ import { formatChangedFields } from "src/helpers/formatChangedFields";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { handleDeleteEntity } from "src/helpers/actions/editAndDeleteActions";
 
 type LocationDetails = {
 	locationId: string;
@@ -191,63 +193,6 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		});
 	};
 
-	const handleDeleteEntity = async (
-		id: string,
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		try {
-			const input = {
-				id: id,
-				reason: reason,
-				changeCategory: changeCategory,
-				changeReferenceUrl: changeReferenceUrl,
-			};
-			const { data } = await deleteLocation({
-				variables: {
-					input,
-				},
-			});
-			if (data.deleteLocation.success == true) {
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("ui.data_grid.delete_success", {
-						entity: t("locations.location_one").toLowerCase(),
-						name: location?.name,
-					}),
-					title: t("ui.data_grid.deleted"),
-				});
-				console.log(data.deleteLocation);
-				console.log("Entity deleted successfully");
-				setTimeout(() => {
-					router.push("/locations");
-				}, 100);
-			} else {
-				console.log(data?.deleteLocation);
-				console.log("Failed to delete entity");
-				setAlert({
-					open: true,
-					severity: "error",
-					text: t("ui.data_grid.delete_error", {
-						entity: t("locations.location_one").toLowerCase(),
-					}),
-				});
-			}
-		} catch (error) {
-			console.log(data?.deleteLocation);
-			console.error("Error deleting entity:", error);
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("ui.data_grid.delete_error", {
-					entity: t("locations.location_one").toLowerCase(),
-				}),
-			});
-		}
-	};
-
 	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
@@ -397,7 +342,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	// If GraphQL is loading or session fetching is loading
 	if (loading || status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("locations.location_one"),
@@ -407,7 +352,6 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			</AdminLayout>
 		);
 	}
-
 	return error || location == null || location == undefined ? (
 		<AdminLayout hideBreadcrumbs>
 			{error ? (
@@ -608,6 +552,13 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						reason,
 						changeCategory,
 						changeReferenceUrl,
+						setAlert,
+						deleteLocation,
+						t,
+						router,
+						location.name,
+						"deleteLocation",
+						"/locations",
 					);
 					setConfirmationDeletion(false);
 				}}

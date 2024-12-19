@@ -25,7 +25,7 @@ const HostLmss: NextPage = () => {
 
 	if (status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.hostlmss").toLowerCase(),

@@ -84,7 +84,7 @@ const PatronRequests: NextPage = () => {
 
 	if (status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.patronRequests").toLowerCase(),

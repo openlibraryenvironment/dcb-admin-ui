@@ -20,7 +20,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { AdminLayout } from "@layout";
 import { useSession } from "next-auth/react";
-import FormatArrayAsList from "src/helpers/FormatArrayAsList/FormatArrayAsList";
+import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 
 const Profile: NextPage = () => {
 	const { data: session }: { data: any } = useSession();

@@ -434,6 +434,7 @@ export default function ServerPaginationGrid({
 		sortOptions.direction !== "" ? sortOptions.field : sortAttribute;
 	const direction =
 		sortOptions.direction !== "" ? sortOptions.direction : sortDirection;
+
 	const { loading, data } = useQuery(query, {
 		variables: {
 			// Fixes 'ghost page' issue.
@@ -573,7 +574,6 @@ export default function ServerPaginationGrid({
 		});
 		// We need to get the reason, changeCategory and change category URL in here
 		const updateName = "update" + operationDataType;
-		console.log(updateName);
 		const name =
 			apiRef.current.getRow(newRow.id).name ??
 			apiRef.current.getRow(newRow.id).fullName;

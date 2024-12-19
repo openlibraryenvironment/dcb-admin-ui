@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 //localisation
 import { useTranslation } from "next-i18next";
 import { truncate } from "lodash";
+import { formatBreadcrumbTitles } from "src/helpers/formatBreadcrumbTitles";
 
 type BreadcrumbType = {
 	href: string;
@@ -48,6 +49,48 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 	}, [router.asPath]);
 
 	const getKey = (pathArray: string[]): string => {
+		if (
+			pathArray[0] == "libraries" &&
+			pathArray.length == 2 &&
+			titleAttribute
+		) {
+			// return formatBreadcrumbTitles(titleAttribute ?? pathArray[1]) ?? pathArray[1];
+			if (titleAttribute) return formatBreadcrumbTitles(titleAttribute);
+			else {
+				return pathArray[1];
+			}
+		}
+		if (pathArray[0] === "libraries" && pathArray.length > 2) {
+			// First, check for library ID (UUID)
+			if (pathArray[1].length === 36) {
+				// For library-specific pages, handle different nested routes
+				switch (pathArray[2]) {
+					case "patronRequests":
+						if (pathArray[3] == "active") {
+							return "nav.libraries.patronRequests.active";
+						} else if (pathArray[3] == "outOfSequence")
+							return "nav.libraries.patronRequests.out_of_sequence";
+						else if (pathArray[3] == "exception")
+							return "nav.libraries.patronRequests.exception";
+						else if (pathArray[3] == "completed")
+							return "nav.libraries.patronRequests.completed";
+						else if (pathArray[3] == "all")
+							return "nav.libraries.patronRequests.all";
+						return "nav.libraries.patronRequests.name";
+					case "referenceValueMappings":
+						if (pathArray[3]) {
+							return `nav.libraries.referenceValueMappings.${pathArray[3]}`;
+						}
+						return "mappings.ref_value";
+					case "numericRangeMappings":
+						if (pathArray[3]) {
+							return `nav.libraries.numericRangeMappings.${pathArray[3]}`;
+						}
+						return "mappings.numeric_range";
+				}
+			}
+		}
+
 		// This function formulates the correct translation key from the pathArray.
 		// For nested keys (like circulation status mappings) we just need to use .join
 		const nestedKey = pathArray.join(".");
@@ -63,6 +106,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				case "settings":
 				case "search":
 				case "serviceInfo":
+				case "libraries":
 				case "consortium":
 					return "nav." + topLevelKey + ".name";
 				default:
@@ -78,13 +122,27 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				return pathArray.slice(-1)[0];
 			} else {
 				// Handle special cases for search pages
-				if (pathArray[0] === "search" && pathArray.length > 2) {
-					if (pathArray[2] === "cluster") {
-						return "nav.search.cluster";
-					} else if (pathArray[2] === "items") {
-						return "nav.search.items";
-					} else if (pathArray[2] === "identifiers") {
-						return "nav.search.identifiers";
+				if (pathArray.length > 2) {
+					if (pathArray[0] === "search") {
+						if (pathArray[2] === "cluster") {
+							return "nav.search.cluster";
+						} else if (pathArray[2] === "items") {
+							return "nav.search.items";
+						} else if (pathArray[2] === "identifiers") {
+							return "nav.search.identifiers";
+						}
+					} else if (pathArray[0] == "libraries") {
+						if (pathArray[1].length == 36 && pathArray.length == 2) {
+							return titleAttribute ?? pathArray[1];
+						}
+						switch (pathArray[2]) {
+							case "contacts":
+								return "nav.libraries.contacts";
+							case "service":
+								return "nav.libraries.service";
+							case "settings":
+								return "nav.libraries.settings";
+						}
 					}
 				}
 				if (nestedKey.includes("#auditlog")) {

@@ -6,7 +6,7 @@ import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useQuery } from "@apollo/client";
 import { Agency } from "@models/Agency";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
@@ -37,7 +37,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 
 	if (loading || status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("agencies.agencies_one"),

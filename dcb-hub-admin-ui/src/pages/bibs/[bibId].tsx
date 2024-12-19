@@ -9,7 +9,7 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import { getBibMainDetails, getBibSourceRecord } from "src/queries/queries";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import {
@@ -89,7 +89,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 	};
 	if (loading || status == "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("bibRecords.bibs_one").toLowerCase(),

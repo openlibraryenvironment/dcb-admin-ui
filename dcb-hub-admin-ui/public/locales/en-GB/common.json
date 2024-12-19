@@ -22,7 +22,33 @@
 		"groups": "Groups",
 		"home": "Home",
 		"hostlmss": "Host LMSs",
-		"libraries": "Libraries",
+		"libraries": {
+			"configuration": "Configuration",
+			"contacts": "Contacts",
+			"patronRequests": {
+				"active": "Active",
+				"all": "All",
+				"completed": "Completed",
+				"exception": "Exception",
+				"name": "Patron requests",
+				"out_of_sequence": "Out of sequence"
+			},
+			"profile": "Profile",
+			"referenceValueMappings": {
+				"all": "All reference value mappings",
+				"itemType": "Item type",
+				"location": "Location",
+				"patronType": "Patron type"
+			},
+			"numericRangeMappings": {
+				"all": "All numeric range mappings",
+				"itemType": "Item type",
+				"patronType": "Patron type"
+			},
+			"service": "Service",
+			"settings": "Settings",
+			"name": "Libraries"
+		},
 		"locations": "Locations",
 		"login": "Login",
 		"logout": "Logout",
@@ -587,6 +613,7 @@
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",
 		"search_placeholder": "Search by name",
+		"settings_title": "Settings for {{name}}",
 		"site_designation": "Site designation",
 		"short_name": "Short name",
 		"support_hours": "Support office hours",
@@ -640,14 +667,19 @@
 					"title": "Locations"
 				},
 				"mappings": {
+					"all_ref_value": "All reference value mappings for {{hostLms}}",
+					"all_num_range": "All numeric range mappings for {{hostLms}}",
 					"dcb_item": "DCB -> Item Type Mapping",
 					"dcb_patron": "DCB -> Patron Type Mapping",
 					"item_dcb": "Item Type -> DCB Mapping",
 					"patron_dcb": "Patron Type -> DCB Mapping",
 					"name": "Mappings",
-					"item_type": "Item type mappings",
-					"location": "Location mappings",
-					"patron_type": "Patron type mappings"
+					"item_type_num_range": "Item type numeric range mappings for {{hostLms}}",
+					"item_type_ref_value": "Item type reference value mappings for {{hostLms}}",
+					"location": "Location mappings for {{hostLms}}",
+					"patron_type_num_range": "Patron type numeric range mappings for {{hostLms}}",
+					"patron_type_ref_value": "Patron type reference value mappings for {{hostLms}}",
+					"title": "Mappings for {{libraryName}}"
 				}
 			},
 			"patronAuth": {
@@ -681,14 +713,20 @@
 				"technical": "Technical contact"
 			},
 			"time_zone": "Time zone",
-			"title": "Contacts"
+			"title": "Contacts for {{name}}"
 		},
 		"patronRequests": {
 			"active": "Active requests ({{number}})",
+			"active_short": "Active ({{number}})",
 			"all": "All requests ({{number}})",
+			"all_short": "All ({{number}})",
 			"completed": "Completed requests ({{number}})",
+			"completed_short": "Completed ({{number}})",
 			"exception": "Exception requests ({{number}})",
-			"out_of_sequence": "Out of sequence requests ({{number}})"
+			"exception_short": "Exception ({{number}})",
+			"out_of_sequence": "Out of sequence requests ({{number}})",
+			"out_of_sequence_short": "Out of sequence ({{number}})",
+			"title": "Patron requests for {{library}}"
 		},
 		"primaryLocation": {
 			"address": "Address",
@@ -698,7 +736,7 @@
 			"title": "Primary location"
 		},
 		"service": {
-			"title": "Service",
+			"title": "Service for {{name}}",
 			"hostlms_title": "Host LMS - {{name}}",
 			"systems": {
 				"discovery": "Discovery system/PAC(s)",
@@ -770,6 +808,8 @@
 	"mappings": {
 		"add_success": "{{fileName}} has been added and is ready to be uploaded.",
 		"alert_text": "Failed to fetch the mappings, please refresh the page.",
+		"all_ref_value_short": "All reference",
+		"all_num_range_short": "All numeric",
 		"upload_success": "<bold>{{count}} {{category}}</bold> for <bold>{{code}}</bold> have been imported successfully.",
 		"upload_success_replacement": "<bold>{{addedCount}} {{category}}</bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> mappings were deleted.",
 		"drag_n_drop": "Drag and drop or click to select a file.",
@@ -790,10 +830,15 @@
 		"import_title": "Import {{profile}}",
 		"invalid_file_type": "The file type is invalid. Only <bold>CSV</bold> and <bold>TSV</bold> files are supported. Please try again.",
 		"item_type_num_range": "Item type numeric range mappings",
+		"item_type_num_range_short": "Item type numeric",
 		"item_type_ref_value": "Item type reference value mappings",
+		"item_type_ref_value_short": "Item type",
 		"location_ref_value": "Location reference value mappings",
+		"location_ref_value_short": "Location",
 		"patron_type_num_range": "Patron type numeric range mappings",
+		"patron_type_num_range_short": "Patron type numeric",
 		"patron_type_ref_value": "Patron type reference value mappings",
+		"patron_type_ref_value_short": "Patron type",
 		"loading_msg": "Loading mappings...",
 		"mandatory_field_blank": "A mandatory field has been left blank on line {{lineNumber}} of the file you have provided. Please correct and try again.",
 		"mappings": "Mappings",

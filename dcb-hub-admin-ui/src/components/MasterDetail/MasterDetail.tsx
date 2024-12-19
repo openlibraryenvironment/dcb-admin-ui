@@ -11,7 +11,7 @@ import Grid from "@mui/material/Unstable_Grid2";
 import { useGridApiContext } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
 import { useCallback, useEffect, useState } from "react";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
 import { formatDuration } from "src/helpers/formatDuration";

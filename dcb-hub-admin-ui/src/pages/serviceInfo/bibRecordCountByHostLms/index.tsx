@@ -64,7 +64,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 
 	if (loading || status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						//make the first character lowercase

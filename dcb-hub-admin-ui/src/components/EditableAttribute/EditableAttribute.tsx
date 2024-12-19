@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Box, Switch, TextField, useTheme } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import RenderAttribute from "../RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import * as Yup from "yup";
 import { useTranslation } from "next-i18next";
 import ReactMarkdown from "react-markdown";

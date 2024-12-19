@@ -22,7 +22,7 @@ import getConfig from "next/config";
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { getPatronRequestById } from "src/queries/queries";
 import {
 	StyledAccordion,

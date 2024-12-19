@@ -45,10 +45,10 @@ const Libraries: NextPage = () => {
 
 	if (status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
-						document_type: t("nav.libraries").toLowerCase(),
+						document_type: t("nav.libraries.name").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
@@ -57,7 +57,7 @@ const Libraries: NextPage = () => {
 	}
 
 	return (
-		<AdminLayout title={t("nav.libraries")}>
+		<AdminLayout title={t("nav.libraries.name")}>
 			<Button
 				data-tid="add-library-to-group"
 				variant="contained"
