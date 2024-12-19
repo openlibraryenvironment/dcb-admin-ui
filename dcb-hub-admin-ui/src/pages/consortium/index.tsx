@@ -11,7 +11,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import EditableAttribute from "src/helpers/EditableAttribute/EditableAttribute";
+import EditableAttribute from "@components/EditableAttribute/EditableAttribute";
 import { getConsortia, updateConsortiumQuery } from "src/queries/queries";
 import {
 	handleSaveConfirmation,
@@ -21,8 +21,8 @@ import {
 	handleEdit,
 } from "src/helpers/actions/editAndDeleteActions";
 import { Consortium } from "@models/Consortium";
-// import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
 import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
@@ -100,6 +100,23 @@ const ConsortiumPage: NextPage = () => {
 		websiteUrl: consortium?.websiteUrl,
 		catalogueSearchUrl: consortium?.catalogueSearchUrl,
 		description: consortium?.description,
+	});
+	const {
+		showUnsavedChangesModal,
+		handleKeepEditing,
+		handleLeaveWithoutSaving,
+	} = useUnsavedChangesWarning({
+		isDirty,
+		hasValidationError,
+		onKeepEditing: () => {
+			if (firstEditableFieldRef.current) {
+				firstEditableFieldRef.current.focus();
+			}
+		},
+		onLeaveWithoutSaving: () => {
+			setDirty(false);
+			setChangedFields({});
+		},
 	});
 	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
 
@@ -383,6 +400,7 @@ const ConsortiumPage: NextPage = () => {
 			setEditMode,
 			setChangedFields,
 			setAlert,
+			setDirty,
 			setConfirmationEdit,
 			t,
 			reason,
@@ -390,6 +408,7 @@ const ConsortiumPage: NextPage = () => {
 			changeReferenceUrl,
 			"updateConsortium",
 			t("nav.consortium.name").toLowerCase(),
+			"LoadConsortium",
 		);
 	};
 
@@ -484,7 +503,7 @@ const ConsortiumPage: NextPage = () => {
 	const pageActions = editMode ? editModeActions : viewModeActions;
 	if (loading) {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.consortium.name").toLowerCase(),
@@ -784,6 +803,16 @@ const ConsortiumPage: NextPage = () => {
 				onConfirm={handleConfirmSave}
 				type="pageEdit"
 				editInformation={formatChangedFields(changedFields, consortium)}
+				entityName={consortium?.displayName}
+				entity={t("nav.consortium.name")}
+				entityId={consortium?.id}
+				gridEdit={false}
+			/>
+			<Confirmation
+				open={showUnsavedChangesModal}
+				onClose={handleKeepEditing}
+				onConfirm={handleLeaveWithoutSaving}
+				type="unsavedChanges"
 				entityName={consortium?.displayName}
 				entity={t("nav.consortium.name")}
 				entityId={consortium?.id}

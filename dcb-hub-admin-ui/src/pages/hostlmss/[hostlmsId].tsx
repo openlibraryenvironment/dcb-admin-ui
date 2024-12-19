@@ -12,7 +12,7 @@ import Loading from "@components/Loading/Loading";
 import PrivateData from "@components/PrivateData/PrivateData";
 import { getHostLmsById } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
 	StyledAccordion,
 	StyledAccordionSummary,
@@ -80,7 +80,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	};
 	if (loading || status == "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("hostlms.hostlms_one"),

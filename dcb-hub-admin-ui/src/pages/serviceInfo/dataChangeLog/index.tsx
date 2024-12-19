@@ -20,7 +20,7 @@ import {
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 import Link from "@components/Link/Link";
 import { GridRenderCellParams } from "@mui/x-data-grid-pro";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 const DataChangeLog: NextPage = () => {
 	const { t } = useTranslation();
@@ -37,7 +37,7 @@ const DataChangeLog: NextPage = () => {
 
 	if (status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.serviceInfo.dataChangeLog").toLowerCase(),

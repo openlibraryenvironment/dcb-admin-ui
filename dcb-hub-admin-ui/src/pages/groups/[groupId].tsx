@@ -9,7 +9,7 @@ import { ClientDataGrid } from "@components/ClientDataGrid";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { useQuery } from "@apollo/client";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
@@ -38,7 +38,7 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 
 	if (loading || status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("groups.groups_one"),

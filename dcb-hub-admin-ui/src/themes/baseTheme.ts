@@ -91,9 +91,15 @@ const baseTheme: ThemeOptions = {
 			fontSize: 20,
 			fontWeight: 700,
 		},
+		subTabTitle: {
+			fontSize: 12,
+		},
 	},
 	components: {
 		MuiButton: {
+			defaultProps: {
+				disableRipple: true, // This can also be toggled on a per-variant basis
+			},
 			styleOverrides: {
 				root: {
 					"&.Mui-focusVisible": {
@@ -171,12 +177,10 @@ const baseTheme: ThemeOptions = {
 				},
 			],
 		},
-		MuiButtonBase: {
-			defaultProps: {
-				disableRipple: true, // Disable ripple effect for all buttons
-			},
-		},
 		MuiIconButton: {
+			defaultProps: {
+				disableRipple: true,
+			},
 			styleOverrides: {
 				root: ({ theme }) => ({
 					"&.Mui-focusVisible": {
@@ -198,6 +202,9 @@ const baseTheme: ThemeOptions = {
 			},
 		},
 		MuiListItemButton: {
+			defaultProps: {
+				disableRipple: true,
+			},
 			styleOverrides: {
 				root: {
 					"&.Mui-focusVisible": {
@@ -274,6 +281,18 @@ const baseTheme: ThemeOptions = {
 				root: {
 					fontSize: "1.2rem",
 				},
+			},
+		},
+		MuiTab: {
+			styleOverrides: {
+				root: ({ theme }) => ({
+					"&.Mui-focusVisible": {
+						outline: "2px solid", // For keyboard focus
+						boxSizing: "border-box",
+						borderColor: theme.palette.primary.outlineColor,
+						outlineOffset: "-2px",
+					},
+				}),
 			},
 		},
 	},

@@ -899,6 +899,121 @@ export const getLibraryById = gql`
 	}
 `;
 
+export const getLibraryServiceInfo = gql`
+	query LoadLibraryServiceInfo($query: String!) {
+		libraries(query: $query) {
+			content {
+				id
+				fullName
+				patronWebsite
+				discoverySystem
+				backupDowntimeSchedule
+				hostLmsConfiguration
+				agency {
+					id
+					authProfile
+					hostLms {
+						id
+						code
+						name
+						clientConfig
+						lmsClientClass
+						itemSuppressionRulesetName
+						suppressionRulesetName
+					}
+				}
+				secondHostLms {
+					id
+					code
+					name
+					clientConfig
+					lmsClientClass
+					itemSuppressionRulesetName
+					suppressionRulesetName
+				}
+			}
+		}
+	}
+`;
+export const getLibraryContacts = gql`
+	query LoadLibraryContacts(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		libraries(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			content {
+				id
+				fullName
+				shortName
+				contacts {
+					id
+					firstName
+					lastName
+					role {
+						id
+						name
+						description
+						displayName
+						keycloakRole
+					}
+					isPrimaryContact
+					email
+				}
+			}
+		}
+	}
+`;
+
+export const getLibraryBasics = gql`
+	query LoadLibraryBasics($query: String!) {
+		libraries(query: $query) {
+			content {
+				id
+				fullName
+				shortName
+				agencyCode
+				agency {
+					id
+					code
+					name
+					authProfile
+					isSupplyingAgency
+					isBorrowingAgency
+				}
+			}
+		}
+	}
+`;
+
+export const getLibraryBasicsPR = gql`
+	query LoadLibraryServiceInfo($query: String!) {
+		libraries(query: $query) {
+			content {
+				id
+				fullName
+				agencyCode
+				agency {
+					id
+					authProfile
+					hostLms {
+						id
+						code
+						name
+					}
+				}
+			}
+		}
+	}
+`;
 // 'LIBRARY' GROUPS
 
 export const getLibraryGroups = gql`

@@ -129,7 +129,7 @@ const routes = [
 	{ path: "/", translationKey: "nav.home" }, // Home
 	{ path: "/patronRequests", translationKey: "nav.patronRequests" }, // Patron requests
 	{ path: "/consortium", translationKey: "nav.consortium.name" }, //Consortium
-	{ path: "/libraries", translationKey: "nav.libraries" }, // Libraries
+	{ path: "/libraries", translationKey: "nav.libraries.name" }, // Libraries
 	{ path: "/agencies", translationKey: "nav.agencies" }, // Agencies
 	{ path: "/hostlmss", translationKey: "nav.hostlmss" }, // Host LMSs
 	{ path: "/groups", translationKey: "nav.groups" }, // Groups

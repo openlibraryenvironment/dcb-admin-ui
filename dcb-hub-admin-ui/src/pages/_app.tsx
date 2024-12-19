@@ -98,6 +98,7 @@ declare module "@mui/material/styles" {
 		linkedFooterHeader?: React.CSSProperties;
 		loadingText?: React.CSSProperties;
 		accordionSummary?: React.CSSProperties;
+		subTabTitle?: React.CSSProperties;
 	}
 	interface TypographyVariantsOptions {
 		appTitle?: React.CSSProperties;
@@ -116,6 +117,7 @@ declare module "@mui/material/styles" {
 		linkedFooterHeader?: React.CSSProperties;
 		loadingText?: React.CSSProperties;
 		accordionSummary?: React.CSSProperties;
+		subTabTitle?: React.CSSProperties;
 	}
 }
 declare module "@mui/material/Typography" {
@@ -136,6 +138,7 @@ declare module "@mui/material/Typography" {
 		linkedFooterHeader: true;
 		loadingText: true;
 		accordionSummary: true;
+		subTabTitle: true;
 	}
 }
 

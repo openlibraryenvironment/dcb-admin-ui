@@ -1,5 +1,5 @@
 import Link from "@components/Link/Link";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 interface LocationProps {
 	latitude: number;
 	longitude: number;

@@ -8,7 +8,7 @@ import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { getAuditById, getAuditsByPatronRequest } from "src/queries/queries";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -143,7 +143,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 		`/patronRequests/${audit?.patronRequest?.id}` + `#auditlog`;
 	if (loading || status === "loading") {
 		return (
-			<AdminLayout>
+			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("details.audit").toLowerCase(),

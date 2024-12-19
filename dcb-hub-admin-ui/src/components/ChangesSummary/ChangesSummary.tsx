@@ -13,7 +13,7 @@ import {
 	fieldNameToLabel,
 	gridFieldNameToLabel,
 } from "src/helpers/dataChangeLogHelperFunctions";
-import RenderAttribute from "src/helpers/RenderAttribute/RenderAttribute";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 type ChangesSummaryType = {
 	action: string;
