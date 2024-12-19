@@ -1,3 +1,19 @@
+# [1.28.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.27.0...v1.28.0) (2024-12-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @vercel/blob to ^0.27.0 ([34ea7a1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/34ea7a1d415ea2b57fb0f129dbe9e3ab761e2426))
+* Fix contacts email URL regression [DCB-1756] ([b6bf203](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b6bf2031fb18acacc81e490d1aece43a6b332ff3))
+* Fix typo on new functional setting selection ([5056ad4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5056ad491c7b02895b56e41c1f5f51d42f44c35e))
+
+
+### Features
+
+* Introduce tab navigation on library page [DCB-1756] ([4559fad](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4559fad3ddedb8083b1455bdacbabb985e9af2da))
+* Make links in data grids clickable [DCB-1672] ([923dc31](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/923dc311924451155af48ad98e4a9f5e95425c5d))
+* Make links in data grids clickable [DCB-1672] ([3d64e3b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3d64e3b49175f6183dfd27b5d591aebbfbaf5397))
+
 # [1.27.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.26.0...v1.27.0) (2024-12-05)
 
 
