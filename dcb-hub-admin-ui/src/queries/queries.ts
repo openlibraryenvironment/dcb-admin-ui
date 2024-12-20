@@ -133,6 +133,17 @@ export const deleteReferenceValueMapping = gql`
 	}
 `;
 
+export const createReferenceValueMapping = gql`
+	mutation CreateReferenceValueMapping(
+		$input: CreateReferenceValueMappingInput!
+	) {
+		createReferenceValueMapping(input: $input) {
+			id
+			toValue
+		}
+	}
+`;
+
 // Numeric range mapping mutations
 
 export const updateNumericRangeMapping = gql`

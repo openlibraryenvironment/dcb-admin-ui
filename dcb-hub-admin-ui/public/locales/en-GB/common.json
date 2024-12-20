@@ -845,6 +845,25 @@
 		"max_size": "Maximum size {{maxSize}}",
 		"mismatched_context": "The selected Host LMS <bold>{{code}}</bold> does not match the <bold>fromContext</bold> or <bold>toContext</bold> values in the mappings file. Please correct and try again.",
 		"mismatched_context_nrm": "The selected Host LMS <bold>{{code}}</bold> does not match the <bold>context</bold> value in the mappings file. Please correct and try again.",
+		"new": {
+			"error": {
+				"generic": "An error occurred creating a mapping for {{library}}. Please try again.",
+				"validation": {
+					"invalid_from_item_type": "The 'fromValue' for this item type mapping is invalid. Please change it to one of the following: 'CIRC', 'NONCIRC' or 'CIRCAV'.",
+					"invalid_to_item_type": "The 'toValue' for this item type mapping is invalid. Please change it to one of the following: 'ADULT', 'CHILD', 'FACULTY', 'GRADUATE', 'NOT_ELIGIBLE', 'PATRON', 'POSTDOC', 'SENIOR', 'STAFF', 'UNDERGRADUATE' or 'YOUNG_ADULT'.",
+					"location_dcb": "A mapping of type 'Location' must have a 'toContext' value of 'DCB'. Please correct and try again.",
+					"no_duplicate": "You cannot create a mapping with duplicate 'from' values for {{library}}. Please correct these values and try again."
+				}
+			},
+			"from_category": "From category",
+			"from_context": "From context",
+			"from_value": "From value",
+			"success": "The new mapping was successfully created",
+			"to_category": "To category",
+			"to_context": "To context",
+			"to_value": "To value",
+			"title": "Add new mapping"
+		},
 		"no_file_selected": "No file selected",
 		"no_results": "No results found",
 		"suggested_formats": "Suggested formats: CSV, TSV",

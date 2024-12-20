@@ -1,6 +1,6 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import { Library } from "@models/Library";
-import { Typography, useTheme } from "@mui/material";
+import { Button, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -28,6 +28,8 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
+import NewMapping from "src/pages/mappings/NewMapping";
+import { NewMappingData } from "@models/NewMappingData";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -51,6 +53,13 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 		severity: "success",
 		text: null,
 		title: null,
+	});
+	const [newMapping, setNewMapping] = useState<NewMappingData>({
+		show: false,
+		category: "",
+		hostLmsCode: "",
+		agencyCode: "",
+		libraryName: "",
 	});
 	const client = useApolloClient();
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
@@ -144,6 +153,23 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 							hostLms: library?.agency?.hostLms?.code,
 						})}
 					</Typography>
+					{isAnAdmin ? (
+						<Button
+							data-tid="new-mapping-button-first-hostlms"
+							variant="contained"
+							onClick={() => {
+								setNewMapping({
+									show: true,
+									category: "ItemType",
+									hostLmsCode: library?.agency?.hostLms?.code,
+									agencyCode: library?.agencyCode,
+									libraryName: library?.fullName,
+								});
+							}}
+						>
+							{t("mappings.new.title")}
+						</Button>
+					) : null}
 					<ServerPaginationGrid
 						query={getMappings}
 						editQuery={updateReferenceValueMapping}
@@ -177,6 +203,23 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 								hostLms: library?.secondHostLms?.code,
 							})}
 						</Typography>
+						{isAnAdmin ? (
+							<Button
+								data-tid="new-mapping-button-second-hostlms"
+								variant="contained"
+								onClick={() => {
+									setNewMapping({
+										show: true,
+										category: "ItemType",
+										hostLmsCode: library?.secondHostLms?.code,
+										agencyCode: library?.agencyCode,
+										libraryName: library?.fullName,
+									});
+								}}
+							>
+								{t("mappings.new.title")}
+							</Button>
+						) : null}
 						<ServerPaginationGrid
 							query={getMappings}
 							editQuery={updateReferenceValueMapping}
@@ -204,6 +247,24 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 			</Grid>
+			{newMapping.show ? (
+				<NewMapping
+					show={newMapping.show}
+					onClose={() => {
+						setNewMapping({
+							show: false,
+							category: "",
+							hostLmsCode: "",
+							agencyCode: "",
+							libraryName: "",
+						});
+					}}
+					category={newMapping.category}
+					hostLmsCode={newMapping.hostLmsCode}
+					agencyCode={newMapping.agencyCode}
+					libraryName={newMapping.libraryName}
+				/>
+			) : null}
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
