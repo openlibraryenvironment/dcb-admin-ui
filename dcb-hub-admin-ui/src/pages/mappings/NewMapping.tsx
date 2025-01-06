@@ -16,6 +16,13 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { createReferenceValueMapping, getMappings } from "src/queries/queries";
+import { isEmpty } from "lodash";
+import {
+	canonicalItemTypes,
+	canonicalPatronTypes,
+	validCategories,
+} from "src/constants/mappingsImportConstants";
+import { mappingsCategoryConverter } from "src/helpers/mappingsCategoryConverter";
 
 interface NewMappingFormData {
 	toValue: string;
@@ -89,6 +96,7 @@ export default function NewMapping({
 }: NewMappingFormType) {
 	const { t } = useTranslation();
 	const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
+	const contextOptions = ["DCB", hostLmsCode];
 
 	const validationSchema = Yup.object().shape({
 		fromCategory: Yup.string()
@@ -97,11 +105,18 @@ export default function NewMapping({
 					field: t("mappings.new.from_category"),
 				}),
 			)
+			.oneOf(validCategories)
 			.max(64, t("ui.validation.max_length", { length: 64 })),
 		fromContext: Yup.string()
 			.required(
 				t("ui.validation.required", {
 					field: t("mappings.new.from_context"),
+				}),
+			)
+			.oneOf(
+				contextOptions,
+				t("mappings.new.error.validation.invalid_from_context", {
+					code: hostLmsCode,
 				}),
 			)
 			.max(64, t("ui.validation.max_length", { length: 64 })),
@@ -111,6 +126,24 @@ export default function NewMapping({
 					field: t("mappings.new.from_value"),
 				}),
 			)
+			.when(["fromContext", "fromCategory"], {
+				is: (fromContext: string, fromCategory: string) =>
+					fromContext === "DCB" && fromCategory === "ItemType",
+				then: (schema) =>
+					schema.oneOf(
+						canonicalItemTypes,
+						t("mappings.new.error.validation.invalid_from_item_type"),
+					),
+			})
+			.when(["fromContext", "fromCategory"], {
+				is: (fromContext: string, fromCategory: string) =>
+					fromContext === "DCB" && fromCategory === "patronType",
+				then: (schema) =>
+					schema.oneOf(
+						canonicalPatronTypes,
+						t("mappings.new.error.validation.invalid_from_patron_type"),
+					),
+			})
 			.max(255, t("ui.validation.max_length", { length: 255 })),
 		toCategory: Yup.string()
 			.required(
@@ -125,6 +158,20 @@ export default function NewMapping({
 					field: t("mappings.new.to_context"),
 				}),
 			)
+			.oneOf(
+				contextOptions,
+				t("mappings.new.error.validation.invalid_to_context", {
+					code: hostLmsCode,
+				}),
+			)
+			.when("fromContext", {
+				is: (fromContext: string) => fromContext,
+				then: (schema) =>
+					schema.notOneOf(
+						[Yup.ref("fromContext")],
+						t("mappings.new.error.validation.same_contexts"),
+					),
+			})
 			.max(64, t("ui.validation.max_length", { length: 64 })),
 		toValue: Yup.string()
 			.required(
@@ -132,6 +179,24 @@ export default function NewMapping({
 					field: t("mappings.new.to_value"),
 				}),
 			)
+			.when(["toContext", "toCategory"], {
+				is: (toContext: string, toCategory: string) =>
+					toContext === "DCB" && toCategory === "ItemType",
+				then: (schema) =>
+					schema.oneOf(
+						canonicalItemTypes,
+						t("mappings.new.error.validation.invalid_to_item_type"),
+					),
+			})
+			.when(["toContext", "toCategory"], {
+				is: (toContext: string, toCategory: string) =>
+					toContext === "DCB" && toCategory === "patronType",
+				then: (schema) =>
+					schema.oneOf(
+						canonicalPatronTypes,
+						t("mappings.new.error.validation.invalid_to_patron_type"),
+					),
+			})
 			.max(255, t("ui.validation.max_length", { length: 255 })),
 	});
 
@@ -212,8 +277,43 @@ export default function NewMapping({
 			}
 		}
 	};
-	const getFieldError = (fieldName: keyof NewMappingFormData) => {
-		return errors[fieldName]?.message || serverErrors[fieldName];
+	const getFieldErrorKey = (fieldName: keyof NewMappingFormData): string => {
+		// Needs to be server only, as yup handles the rest
+		// If the error is coming from the server-side validation, we must translate the error message.
+		switch (fieldName) {
+			case "toValue":
+				switch (category) {
+					case "ItemType":
+						return "mappings.new.error.validation.invalid_to_item_type";
+					case "Location":
+						return "mappings.new.error.validation.invalid_to_location";
+					case "patronType":
+						return "mappings.new.error.validation.invalid_to_patron_type";
+					default:
+						return "mappings.new.error.generic";
+				}
+			case "fromValue":
+				switch (category) {
+					case "ItemType":
+						return "mappings.new.error.validation.invalid_from_item_type";
+					case "Location":
+						return "mappings.new.error.validation.invalid_from_location";
+					case "patronType":
+						return "mappings.new.error.validation.invalid_from_patron_type";
+					default:
+						return "mappings.new.error.generic";
+				}
+			case "toCategory":
+				return "mappings.new.error.validation_invalid_to_category";
+			case "toContext":
+				return "mappings.new.error.validation.invalid_to_context_server";
+			case "fromCategory":
+				return "mappings.new.error.validation_invalid_from_category";
+			case "fromContext":
+				return "mappings.new.error.validation_invalid_from_context";
+			default:
+				return "mappings.new.error.generic";
+		}
 	};
 
 	return (
@@ -226,7 +326,10 @@ export default function NewMapping({
 				aria-labelledby="new-mapping-modal"
 			>
 				<DialogTitle variant="modalTitle">
-					{t("mappings.new.title")}
+					{t("mappings.new.title_modal", {
+						category: mappingsCategoryConverter(category),
+						code: hostLmsCode,
+					})}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>
@@ -251,8 +354,11 @@ export default function NewMapping({
 									fullWidth
 									required
 									error={!!errors.fromContext || !!serverErrors.fromContext}
-									// helperText={errors.fromContext?.message}
-									helperText={getFieldError("fromContext")}
+									helperText={
+										errors.fromContext?.type == "server"
+											? t(getFieldErrorKey("fromContext"))
+											: errors.fromContext?.message
+									}
 								/>
 							)}
 						/>
@@ -266,9 +372,13 @@ export default function NewMapping({
 									variant="outlined"
 									fullWidth
 									required
+									disabled={!isEmpty(category)}
 									error={!!errors.fromCategory || !!errors.fromCategory}
-									// helperText={errors.fromCategory?.message}
-									helperText={getFieldError("fromCategory")}
+									helperText={
+										errors.fromCategory?.type == "server"
+											? t(getFieldErrorKey("fromCategory"))
+											: errors.fromCategory?.message
+									}
 								/>
 							)}
 						/>
@@ -283,8 +393,11 @@ export default function NewMapping({
 									fullWidth
 									required
 									error={!!errors.fromValue || !!errors.fromValue}
-									// helperText={errors.fromValue?.message}
-									helperText={getFieldError("fromValue")}
+									helperText={
+										errors.fromValue?.type == "server"
+											? t(getFieldErrorKey("fromValue"))
+											: errors.fromValue?.message
+									}
 								/>
 							)}
 						/>
@@ -299,8 +412,11 @@ export default function NewMapping({
 									fullWidth
 									required
 									error={!!errors.toContext || !!serverErrors.toContext}
-									// helperText={errors.toContext?.message}
-									helperText={getFieldError("toContext")}
+									helperText={
+										errors.toContext?.type == "server"
+											? t(getFieldErrorKey("toContext"))
+											: errors.toContext?.message
+									}
 								/>
 							)}
 						/>
@@ -314,9 +430,13 @@ export default function NewMapping({
 									variant="outlined"
 									fullWidth
 									required
+									disabled={!isEmpty(category)}
 									error={!!errors.toCategory || !!serverErrors.toCategory}
-									// helperText={errors.toCategory?.message}
-									helperText={getFieldError("toCategory")}
+									helperText={
+										errors.toCategory?.type == "server"
+											? t(getFieldErrorKey("toCategory"))
+											: errors.toCategory?.message
+									}
 								/>
 							)}
 						/>
@@ -331,8 +451,11 @@ export default function NewMapping({
 									fullWidth
 									required
 									error={!!errors.toValue || !!serverErrors.toValue}
-									// helperText={errors.toValue?.message}
-									helperText={getFieldError("toValue")}
+									helperText={
+										errors.toValue?.type == "server"
+											? t(getFieldErrorKey("toValue"))
+											: errors.toValue?.message
+									}
 								/>
 							)}
 						/>

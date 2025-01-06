@@ -156,7 +156,7 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 					{isAnAdmin ? (
 						<Button
 							data-tid="new-mapping-button-first-hostlms"
-							variant="contained"
+							variant="outlined"
 							onClick={() => {
 								setNewMapping({
 									show: true,
@@ -206,7 +206,7 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 						{isAnAdmin ? (
 							<Button
 								data-tid="new-mapping-button-second-hostlms"
-								variant="contained"
+								variant="outlined"
 								onClick={() => {
 									setNewMapping({
 										show: true,

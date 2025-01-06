@@ -847,12 +847,21 @@
 		"mismatched_context_nrm": "The selected Host LMS <bold>{{code}}</bold> does not match the <bold>context</bold> value in the mappings file. Please correct and try again.",
 		"new": {
 			"error": {
-				"generic": "An error occurred creating a mapping for {{library}}. Please try again.",
+				"generic": "An error occurred creating a mapping for {{library}}. Please check your supplied values and try again.",
 				"validation": {
+					"invalid_from_category": "The 'fromCategory' value for this mapping is invalid. Please change it to one of the following: 'ItemType', 'patronType' or 'Location'. ",
+					"invalid_from_context": "The 'fromContext' value must be one of 'DCB' or {{code}} for this mapping",
 					"invalid_from_item_type": "The 'fromValue' for this item type mapping is invalid. Please change it to one of the following: 'CIRC', 'NONCIRC' or 'CIRCAV'.",
-					"invalid_to_item_type": "The 'toValue' for this item type mapping is invalid. Please change it to one of the following: 'ADULT', 'CHILD', 'FACULTY', 'GRADUATE', 'NOT_ELIGIBLE', 'PATRON', 'POSTDOC', 'SENIOR', 'STAFF', 'UNDERGRADUATE' or 'YOUNG_ADULT'.",
+					"invalid_from_patron_type": "The 'fromValue' for this patron type mapping is invalid. Please change it to one of the following: 'ADULT', 'CHILD', 'FACULTY', 'GRADUATE', 'NOT_ELIGIBLE', 'PATRON', 'POSTDOC', 'SENIOR', 'STAFF', 'UNDERGRADUATE' or 'YOUNG_ADULT'",
+					"invalid_to_category": "The 'toCategory' value for this mapping is invalid. Please change it to one of the following: 'ItemType', 'patronType' or 'Location'. ",
+					"invalid_to_context": "The 'toContext' value must be one of 'DCB' or {{code}} for this mapping. Please correct and try again.",
+					"invalid_to_context_server": "The 'toContext' value must be 'DCB' or a valid agency code. Please correct and try again.",
+					"invalid_to_item_type": "The 'toValue' for this item type mapping is invalid. Please change it to one of the following: 'CIRC', 'NONCIRC' or 'CIRCAV'.",
+					"invalid_to_location": "The 'toValue' for this location mapping must be a valid agency code. Please correct and try again.",
+					"invalid_to_patron_type": "The 'toValue' for this item type mapping is invalid. Please change it to one of the following: 'ADULT', 'CHILD', 'FACULTY', 'GRADUATE', 'NOT_ELIGIBLE', 'PATRON', 'POSTDOC', 'SENIOR', 'STAFF', 'UNDERGRADUATE' or 'YOUNG_ADULT'.",
 					"location_dcb": "A mapping of type 'Location' must have a 'toContext' value of 'DCB'. Please correct and try again.",
-					"no_duplicate": "You cannot create a mapping with duplicate 'from' values for {{library}}. Please correct these values and try again."
+					"no_duplicate": "You cannot create a mapping with duplicate 'from' values for {{library}}. Please correct these values and try again.",
+					"same_contexts": "The 'fromContext' and 'toContext' values cannot be the same. Please correct and try again."
 				}
 			},
 			"from_category": "From category",
@@ -862,7 +871,8 @@
 			"to_category": "To category",
 			"to_context": "To context",
 			"to_value": "To value",
-			"title": "Add new mapping"
+			"title": "Add new mapping",
+			"title_modal": "Add new {{category}} mapping for {{code}}"
 		},
 		"no_file_selected": "No file selected",
 		"no_results": "No results found",

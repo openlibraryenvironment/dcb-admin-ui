@@ -156,11 +156,11 @@ export default function PatronType({ libraryId }: LibraryDetails) {
 					{isAnAdmin ? (
 						<Button
 							data-tid="new-mapping-button-first-hostlms"
-							variant="contained"
+							variant="outlined"
 							onClick={() => {
 								setNewMapping({
 									show: true,
-									category: "Location",
+									category: "patronType",
 									hostLmsCode: library?.agency?.hostLms?.code,
 									agencyCode: library?.agencyCode,
 									libraryName: library?.fullName,
@@ -206,11 +206,11 @@ export default function PatronType({ libraryId }: LibraryDetails) {
 						{isAnAdmin ? (
 							<Button
 								data-tid="new-mapping-button-second-hostlms"
-								variant="contained"
+								variant="outlined"
 								onClick={() => {
 									setNewMapping({
 										show: true,
-										category: "Location",
+										category: "patronType",
 										hostLmsCode: library?.secondHostLms?.code,
 										agencyCode: library?.agencyCode,
 										libraryName: library?.fullName,
