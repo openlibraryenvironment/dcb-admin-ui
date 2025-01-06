@@ -17,6 +17,10 @@ To get started with this project, simply clone it into your IDE of choice. You w
 
 To see the application running, please visit https://admin.dcbdev.lsphost.com/ - this is based upon the _main_ branch. https://admin.dcbqa.lsphost.com/ currently plays host to our release branch deployment, which is typically behind main.
 
+## Deployment 
+
+See deployment guidance at https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2853470224/How+to+deploy+DCB+Admin.
+
 ## Documentation
 
 See [developer guidance](https://openlibraryfoundation.atlassian.net/wiki/label/DCB/dcb-admin) for DCB Admin documentation.
