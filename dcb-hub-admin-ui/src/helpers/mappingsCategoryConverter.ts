@@ -5,7 +5,7 @@ export const mappingsCategoryConverter = (category: string): string => {
 		case "Location":
 			return "location";
 		case "patronType":
-			return "patronType";
+			return "patron type";
 		default:
 			return "";
 	}

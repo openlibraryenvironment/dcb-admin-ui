@@ -8,7 +8,9 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
+	Stack,
 	TextField,
+	Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useState } from "react";
@@ -23,6 +25,7 @@ import {
 	validCategories,
 } from "src/constants/mappingsImportConstants";
 import { mappingsCategoryConverter } from "src/helpers/mappingsCategoryConverter";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 interface NewMappingFormData {
 	toValue: string;
@@ -343,6 +346,64 @@ export default function NewMapping({
 							mt: 2,
 						}}
 					>
+						{isEmpty(category) ? (
+							<Controller
+								name="fromCategory"
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										label={t("mappings.new.from_category")}
+										variant="outlined"
+										fullWidth
+										required
+										disabled={!isEmpty(category)}
+										error={!!errors.fromCategory || !!errors.fromCategory}
+										helperText={
+											errors.fromCategory?.type == "server"
+												? t(getFieldErrorKey("fromCategory"))
+												: errors.fromCategory?.message
+										}
+									/>
+								)}
+							/>
+						) : (
+							<Stack>
+								<Typography variant="attributeTitle">
+									{t("mappings.new.from_category")}
+								</Typography>
+								<RenderAttribute attribute={category} />
+							</Stack>
+						)}
+						{isEmpty(category) ? (
+							<Controller
+								name="toCategory"
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										label={t("mappings.new.to_category")}
+										variant="outlined"
+										fullWidth
+										required
+										disabled={!isEmpty(category)}
+										error={!!errors.toCategory || !!serverErrors.toCategory}
+										helperText={
+											errors.toCategory?.type == "server"
+												? t(getFieldErrorKey("toCategory"))
+												: errors.toCategory?.message
+										}
+									/>
+								)}
+							/>
+						) : (
+							<Stack>
+								<Typography variant="attributeTitle">
+									{t("mappings.new.to_category")}
+								</Typography>
+								<RenderAttribute attribute={category} />
+							</Stack>
+						)}
 						<Controller
 							name="fromContext"
 							control={control}
@@ -358,26 +419,6 @@ export default function NewMapping({
 										errors.fromContext?.type == "server"
 											? t(getFieldErrorKey("fromContext"))
 											: errors.fromContext?.message
-									}
-								/>
-							)}
-						/>
-						<Controller
-							name="fromCategory"
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("mappings.new.from_category")}
-									variant="outlined"
-									fullWidth
-									required
-									disabled={!isEmpty(category)}
-									error={!!errors.fromCategory || !!errors.fromCategory}
-									helperText={
-										errors.fromCategory?.type == "server"
-											? t(getFieldErrorKey("fromCategory"))
-											: errors.fromCategory?.message
 									}
 								/>
 							)}
@@ -416,26 +457,6 @@ export default function NewMapping({
 										errors.toContext?.type == "server"
 											? t(getFieldErrorKey("toContext"))
 											: errors.toContext?.message
-									}
-								/>
-							)}
-						/>
-						<Controller
-							name="toCategory"
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("mappings.new.to_category")}
-									variant="outlined"
-									fullWidth
-									required
-									disabled={!isEmpty(category)}
-									error={!!errors.toCategory || !!serverErrors.toCategory}
-									helperText={
-										errors.toCategory?.type == "server"
-											? t(getFieldErrorKey("toCategory"))
-											: errors.toCategory?.message
 									}
 								/>
 							)}
