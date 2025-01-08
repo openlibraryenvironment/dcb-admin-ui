@@ -143,7 +143,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									<Typography>{t("details.source_record")}</Typography>
 								</StyledDataGridAccordionSummary>
 								<AccordionDetails id="source-bibs-source-record-json-content">
-									<pre>{JSON.stringify(row?.sourceRecord?.json, null, 2)}</pre>
+									<pre>{JSON.stringify(row?.sourceRecord, null, 2)}</pre>
 								</AccordionDetails>
 							</StyledDataGridAccordion>
 						</Grid>
