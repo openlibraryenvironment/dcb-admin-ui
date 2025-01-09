@@ -994,6 +994,32 @@ export const getLibraryBasics = gql`
 	}
 `;
 
+export const getLibraryBasicsLocation = gql`
+	query LoadLibraryBasics($query: String!) {
+		libraries(query: $query) {
+			content {
+				id
+				fullName
+				shortName
+				agencyCode
+				agency {
+					id
+					code
+					hostLms {
+						id
+						code
+					}
+				}
+				secondHostLms {
+					code
+					name
+					id
+				}
+			}
+		}
+	}
+`;
+
 export const getLibraryBasicsPR = gql`
 	query LoadLibraryServiceInfo($query: String!) {
 		libraries(query: $query) {
