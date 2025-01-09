@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "next-i18next";
 import { truncate } from "lodash";
 import { formatBreadcrumbTitles } from "src/helpers/formatBreadcrumbTitles";
+import { getSpecialRedirects } from "src/helpers/breadcrumbs/getSpecialRedirects";
 
 type BreadcrumbType = {
 	href: string;
@@ -138,6 +139,8 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 						switch (pathArray[2]) {
 							case "contacts":
 								return "nav.libraries.contacts";
+							case "locations":
+								return "nav.locations";
 							case "service":
 								return "nav.libraries.service";
 							case "settings":
@@ -169,8 +172,8 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 	//this is used to either set the breadcrumb as a link if it is the last breadcrumb.
 	const mapBreadcrumbs = () => {
 		return breadcrumbs?.map((breadcrumb, index) => {
-			const isSearchPage = router.pathname.startsWith("/search/[id]");
-			const isUUIDInSearchPage = isSearchPage && breadcrumb.isUUID;
+			const isUUIDInSearchPage =
+				router.pathname.startsWith("/search/[id]") && breadcrumb.isUUID;
 			const isLastBreadcrumb = index === breadcrumbs.length - 1;
 
 			if (isLastBreadcrumb) {
@@ -211,9 +214,11 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 					sx={{ color: theme.palette.primary.breadcrumbs, fontSize: "14px" }}
 					underline="hover"
 					key={breadcrumb.href}
-					href={
-						isUUIDInSearchPage ? "/search?q=" + breadcrumb.key : breadcrumb.href
-					}
+					href={getSpecialRedirects(
+						breadcrumb.key,
+						breadcrumb.href,
+						isUUIDInSearchPage,
+					)}
 					title={t(breadcrumb.key)}
 				>
 					{t(breadcrumb.key)}

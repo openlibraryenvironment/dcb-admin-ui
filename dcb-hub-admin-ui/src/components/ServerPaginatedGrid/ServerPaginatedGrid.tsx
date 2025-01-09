@@ -487,6 +487,8 @@ export default function ServerPaginationGrid({
 						);
 					} else if (type === "welcomeLibraries") {
 						window.open(`/libraries/${params?.row?.id}`, "_blank");
+					} else if (type == "libraryLocations") {
+						window.open(`/locations/${params?.row?.id}`, "_blank");
 					} else {
 						window.open(`/patronRequests/${params?.row?.id}`, "_blank");
 					}
@@ -495,6 +497,8 @@ export default function ServerPaginationGrid({
 						router.push(`/serviceInfo/dataChangeLog/${params?.row?.id}`);
 					} else if (type === "welcomeLibraries") {
 						router.push(`/libraries/${params?.row?.id}`);
+					} else if (type == "libraryLocations") {
+						router.push(`/locations/${params?.row?.id}`);
 					} else {
 						router.push(`/patronRequests/${params?.row?.id}`);
 					}

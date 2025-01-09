@@ -28,6 +28,8 @@ export const handleTabChange = (
 		case 5:
 			router.push(`/libraries/${id}/contacts`);
 			break;
+		case 6:
+			router.push(`/libraries/${id}/locations`);
 	}
 };
 

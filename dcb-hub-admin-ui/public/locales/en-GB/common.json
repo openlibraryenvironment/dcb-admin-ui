@@ -715,6 +715,9 @@
 			"time_zone": "Time zone",
 			"title": "Contacts for {{name}}"
 		},
+		"locations": {
+			"title": "Locations for {{name}}"
+		},
 		"patronRequests": {
 			"active": "Active requests ({{number}})",
 			"active_short": "Active ({{number}})",

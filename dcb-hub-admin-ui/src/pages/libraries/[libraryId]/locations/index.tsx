@@ -1,42 +1,42 @@
-import { Library } from "@models/Library";
-import { Tab, Tabs, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
-import { useTranslation } from "next-i18next";
-import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
-import {
-	deleteLibraryQuery,
-	getLibraryContacts,
-	updatePerson,
-} from "src/queries/queries";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { AdminLayout } from "@layout";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import { useState } from "react";
-import { Delete } from "@mui/icons-material";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { handleTabChange } from "src/helpers/navigation/handleTabChange";
+import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import { AdminLayout } from "@layout";
+import { Library } from "@models/Library";
+import { Delete } from "@mui/icons-material";
+import { Tab, Tabs, useTheme } from "@mui/material";
+import Grid from "@mui/material/Unstable_Grid2";
+import { useSession } from "next-auth/react";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
 	closeConfirmation,
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
-import { ClientDataGrid } from "@components/ClientDataGrid";
-import { GridRenderCellParams } from "@mui/x-data-grid-pro";
-import { Person } from "@models/Person";
-
+import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { handleTabChange } from "src/helpers/navigation/handleTabChange";
+import {
+	deleteLibraryQuery,
+	deleteLocationQuery,
+	getLibraryBasicsLocation,
+	getLocations,
+	updateLocationQuery,
+} from "src/queries/queries";
 type LibraryDetails = {
-	libraryId: any;
+	libraryId: string;
 };
 
-export default function Contacts({ libraryId }: LibraryDetails) {
+export default function Locations({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
-	const [tabIndex, setTabIndex] = useState(5);
+	const [tabIndex, setTabIndex] = useState(6);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -44,7 +44,8 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		text: null,
 		title: null,
 	});
-	const { data, loading, error } = useQuery(getLibraryContacts, {
+	// First we need to get the library
+	const { data, loading, error } = useQuery(getLibraryBasicsLocation, {
 		variables: {
 			query: "id:" + libraryId,
 			pageno: 0,
@@ -54,10 +55,14 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		},
 		pollInterval: 120000,
 	});
+	const library: Library = data?.libraries?.content?.[0];
+
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
 	const router = useRouter();
+	const customColumns = useCustomColumns();
+
 	const client = useApolloClient();
 	const { data: session, status } = useSession({
 		required: true,
@@ -68,22 +73,6 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
-	// Will change when the query changes
-	const library: Library = data?.libraries?.content?.[0];
-	const contacts: Person[] = library?.contacts ?? [];
-
-	if (loading || status === "loading") {
-		return (
-			<AdminLayout hideBreadcrumbs>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("libraries.library").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
-		);
-	}
 
 	const pageActions = [
 		{
@@ -97,7 +86,24 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	return error || contacts == null || contacts == undefined ? (
+	const presetQueryVariables = library?.secondHostLms
+		? `hostSystem: ${library?.agency?.hostLms?.id} OR hostSystem: ${library?.secondHostLms?.id}`
+		: `hostSystem: ${library?.agency?.hostLms?.id}`;
+
+	if (loading || status === "loading") {
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.locations").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || library == null || library == undefined ? (
 		<AdminLayout>
 			{error ? (
 				<Error
@@ -119,7 +125,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.contacts.title", { name: library?.fullName })}
+			title={t("libraries.locations.title", { name: library?.fullName })}
 			pageActions={pageActions}
 			mode={"view"}
 		>
@@ -146,77 +152,76 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 					</Tabs>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
-					<ClientDataGrid
+					<ServerPaginationGrid
+						query={getLocations}
+						type="libraryLocations"
+						coreType="locations"
+						presetQueryVariables={presetQueryVariables}
+						operationDataType="Location"
 						columns={[
+							...customColumns,
 							{
-								field: "role",
-								headerName: t("libraries.contacts.role"),
-								minWidth: 50,
-								editable: true,
-								flex: 0.5,
-								valueFormatter: (value: {
-									displayName: string;
-									name: string;
-								}) => {
-									return value.displayName ?? value.name;
-								},
+								field: "hostSystemName",
+								headerName: "Host LMS name",
+								minWidth: 150,
+								flex: 0.6,
+								filterable: false,
+								sortable: false,
+								valueGetter: (value, row: { hostSystem: { name: string } }) =>
+									row?.hostSystem?.name,
 							},
 							{
 								field: "name",
-								headerName: t("libraries.contacts.name"),
-								minWidth: 50,
+								headerName: "Location name",
+								minWidth: 150,
+								flex: 0.6,
 								editable: true,
-								flex: 0.7,
-								valueGetter: (value: string, row: Person) => {
-									return `${row.firstName} ${row.lastName}`.trim();
-								},
-								valueSetter: (value: string, row: Person) => {
-									// if we can remove regex would be better
-									const [firstName, ...rest] = value.trim().split(/\s+/); // Split by any whitespace
-									const lastName = rest.join(" "); // Join the remaining parts as the last name
-									return { ...row, firstName, lastName };
-								},
+								filterOperators: standardFilters,
 							},
 							{
-								field: "email",
-								headerName: t("libraries.contacts.email"),
-								minWidth: 50,
+								field: "printLabel",
+								headerName: "Print label",
+								minWidth: 150,
+								flex: 0.6,
 								editable: true,
-								flex: 0.7,
-								renderCell: (params: GridRenderCellParams) => {
-									const email = params.value ?? "";
-									return (
-										<RenderAttribute
-											attribute={`mailto:${email}`}
-											title="email"
-											type="url"
-										/>
-									);
-								},
+								filterOperators: standardFilters,
 							},
 							{
-								field: "isPrimaryContact",
-								headerName: t("libraries.contacts.primary"),
+								field: "code",
+								headerName: "Location code",
 								minWidth: 50,
-								editable: true,
-								flex: 0.3,
-								type: "singleSelect",
-								valueOptions: [
-									{ value: true, label: t("ui.action.yes") },
-									{ value: false, label: t("ui.action.no") },
-								],
+								flex: 0.4,
+								filterOperators: standardFilters,
+							},
+							{
+								field: "isPickup",
+								headerName: "Enabled for pickup",
+								minWidth: 50,
+								flex: 0.4,
+								filterOperators: equalsOnly,
+							},
+							{
+								field: "id",
+								headerName: "Location UUID",
+								minWidth: 50,
+								flex: 0.8,
+								filterOperators: standardFilters,
 							},
 						]}
-						data={contacts}
-						type="contact"
-						// No need for click through on this grid - fix translation keys
-						selectable={false}
-						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
-						noDataTitle={"No contacts found for this library."}
-						toolbarVisible="search-only"
-						disableHoverInteractions={true}
-						editQuery={updatePerson}
-						operationDataType="Person"
+						selectable={true}
+						pageSize={200}
+						noDataMessage={t("locations.no_rows")}
+						noResultsMessage={t("locations.no_results")}
+						searchPlaceholder={t("locations.search_placeholder")}
+						columnVisibilityModel={{
+							id: false,
+						}}
+						sortModel={[{ field: "name", sort: "asc" }]}
+						sortDirection="ASC"
+						sortAttribute="name"
+						refetchQuery={["LoadLocations"]}
+						deleteQuery={deleteLocationQuery}
+						editQuery={updateLocationQuery}
 					/>
 				</Grid>
 			</Grid>
@@ -257,6 +262,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	);
 }
+
 export async function getServerSideProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};

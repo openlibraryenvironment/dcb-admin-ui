@@ -27,6 +27,7 @@ export const presetTypes = [
 	"numericRangeMappingsForLibraryAllSecondHostLms",
 	"referenceValueMappingsForLibraryAll",
 	"referenceValueMappingsForLibraryAllSecondHostLms",
+	"libraryLocations",
 ];
 
 // Types of data grid where users cannot click through to a details page
@@ -64,6 +65,7 @@ export const specialRedirectionTypes = [
 	"patronRequestsException",
 	"dataChangeLog",
 	"welcomeLibraries",
+	"libraryLocations",
 ];
 
 // Types of data grid where we show the actions menu to the user.
@@ -118,6 +120,7 @@ export const quickFieldMap: Record<string, string> = {
 	groups: "name",
 	hostlmss: "name",
 	locations: "name",
+	libraryLocations: "name",
 	dataChangeLog: "actionInfo",
 	default: "id",
 };

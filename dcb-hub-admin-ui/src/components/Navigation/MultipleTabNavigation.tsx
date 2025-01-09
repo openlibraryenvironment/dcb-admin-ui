@@ -124,9 +124,10 @@ export default function MultipleTabNavigation({
 					<Tab label={t("nav.libraries.profile")} />
 					<Tab label={t("nav.libraries.service")} />
 					<Tab label={t("nav.libraries.settings")} />
-					<Tab label={t("nav.libraries.configuration")} />
+					<Tab label={t("nav.mappings.name")} />
 					<Tab label={t("nav.libraries.patronRequests.name")} />
 					<Tab label={t("nav.libraries.contacts")} />
+					<Tab label={t("nav.locations")} />
 				</Tabs>
 				<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 					{type == "mappings"

@@ -99,7 +99,7 @@ const Locations: NextPage = () => {
 					},
 				]}
 				selectable={true}
-				pageSize={10}
+				pageSize={200}
 				noDataMessage={t("locations.no_rows")}
 				noResultsMessage={t("locations.no_results")}
 				searchPlaceholder={t("locations.search_placeholder")}

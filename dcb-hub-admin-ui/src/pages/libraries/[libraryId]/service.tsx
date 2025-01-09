@@ -139,6 +139,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.configuration")} />
 						<Tab label={t("nav.libraries.patronRequests.name")} />
 						<Tab label={t("nav.libraries.contacts")} />
+						<Tab label={t("nav.locations")} />
 					</Tabs>
 				</Grid>
 				<Grid xs={4} sm={8} md={12} lg={16}>
