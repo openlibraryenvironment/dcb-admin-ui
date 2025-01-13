@@ -664,6 +664,7 @@ export const getLocations = gql`
 				type
 				isPickup
 				printLabel
+				localId
 				agency {
 					id
 					name
@@ -676,6 +677,15 @@ export const getLocations = gql`
 				number
 				offset
 			}
+		}
+	}
+`;
+
+export const createLocation = gql`
+	mutation CreateLocation($input: CreateLocationInput!) {
+		createLocation(input: $input) {
+			id
+			name
 		}
 	}
 `;
@@ -1008,12 +1018,14 @@ export const getLibraryBasicsLocation = gql`
 					hostLms {
 						id
 						code
+						lmsClientClass
 					}
 				}
 				secondHostLms {
 					code
 					name
 					id
+					lmsClientClass
 				}
 			}
 		}

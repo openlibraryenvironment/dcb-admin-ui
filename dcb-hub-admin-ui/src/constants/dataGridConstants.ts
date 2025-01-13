@@ -86,6 +86,7 @@ export const actionsTypes = [
 	"numericRangeMappingsForLibraryPatronSecondHostLms",
 	"numericRangeMappingsForLibraryItemTypeSecondHostLms",
 	"numericRangeMappingsForLibraryItemType",
+	"libraryLocations",
 ];
 
 // Map for quick filter (search) values for different types of data grid

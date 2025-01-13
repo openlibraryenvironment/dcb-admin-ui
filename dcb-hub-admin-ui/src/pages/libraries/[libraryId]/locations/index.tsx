@@ -8,7 +8,7 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import { AdminLayout } from "@layout";
 import { Library } from "@models/Library";
 import { Delete } from "@mui/icons-material";
-import { Tab, Tabs, useTheme } from "@mui/material";
+import { Button, Tab, Tabs, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -29,10 +29,19 @@ import {
 	getLocations,
 	updateLocationQuery,
 } from "src/queries/queries";
+import NewLocation from "./NewLocation";
+import { getILS } from "src/helpers/getILS";
 type LibraryDetails = {
 	libraryId: string;
 };
 
+interface NewLocationData {
+	show: boolean;
+	hostLmsCode: string;
+	agencyCode: string;
+	libraryName: string;
+	ils: string;
+}
 export default function Locations({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
@@ -74,6 +83,13 @@ export default function Locations({ libraryId }: LibraryDetails) {
 		adminOrConsortiumAdmin.includes(role),
 	);
 
+	const [newLocation, setNewLocation] = useState<NewLocationData>({
+		show: false,
+		hostLmsCode: "",
+		agencyCode: "",
+		libraryName: "",
+		ils: "",
+	});
 	const pageActions = [
 		{
 			key: "delete",
@@ -125,7 +141,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.locations.title", { name: library?.fullName })}
+			title={t("locations.new.page_title", { name: library?.fullName })}
 			pageActions={pageActions}
 			mode={"view"}
 		>
@@ -152,6 +168,25 @@ export default function Locations({ libraryId }: LibraryDetails) {
 					</Tabs>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
+					{isAnAdmin ? (
+						<Button
+							data-tid="new-location-button"
+							variant="outlined"
+							onClick={() => {
+								setNewLocation({
+									show: true,
+									hostLmsCode: library?.agency?.hostLms?.code,
+									agencyCode: library?.agencyCode,
+									libraryName: library?.fullName,
+									ils: library?.agency?.hostLms?.lmsClientClass
+										? getILS(library?.agency?.hostLms?.lmsClientClass)
+										: "",
+								});
+							}}
+						>
+							{t("locations.new.button")}
+						</Button>
+					) : null}
 					<ServerPaginationGrid
 						query={getLocations}
 						type="libraryLocations"
@@ -225,6 +260,25 @@ export default function Locations({ libraryId }: LibraryDetails) {
 					/>
 				</Grid>
 			</Grid>
+			{newLocation.show ? (
+				<NewLocation
+					show={newLocation.show}
+					onClose={() => {
+						setNewLocation({
+							show: false,
+							hostLmsCode: "",
+							agencyCode: "",
+							libraryName: "",
+							ils: "",
+						});
+					}}
+					hostLmsCode={newLocation.hostLmsCode}
+					agencyCode={newLocation.agencyCode}
+					libraryName={newLocation.libraryName}
+					type={"Pickup"}
+					ils={newLocation.ils}
+				/>
+			) : null}
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
