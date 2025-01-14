@@ -408,7 +408,11 @@ export const getBibSourceRecord = gql`
 					id
 					hostLmsId
 					remoteId
-					json
+					lastFetched
+					lastProcessed
+					processingState
+					processingInformation
+					sourceRecordData
 				}
 			}
 		}
@@ -1275,7 +1279,11 @@ export const getPatronRequestById = gql`
 							id
 							hostLmsId
 							remoteId
-							json
+							lastFetched
+							lastProcessed
+							processingState
+							processingInformation
+							sourceRecordData
 						}
 					}
 				}
@@ -1573,7 +1581,14 @@ export const getClusters = gql`
 					sourceSystemId
 					sourceRecordId
 					sourceRecord {
-						json
+						id
+						hostLmsId
+						remoteId
+						lastFetched
+						lastProcessed
+						processingState
+						processingInformation
+						sourceRecordData
 					}
 					matchPoints {
 						id
@@ -1601,7 +1616,14 @@ export const getClustersLegacy = gql`
 					sourceSystemId
 					sourceRecordId
 					sourceRecord {
-						json
+						id
+						hostLmsId
+						remoteId
+						lastFetched
+						lastProcessed
+						processingState
+						processingInformation
+						sourceRecordData
 					}
 				}
 			}
