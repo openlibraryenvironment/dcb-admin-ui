@@ -70,7 +70,9 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 		variables: {
 			query: "id:" + libraryId,
 		},
-		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		// Disable polling on these
+		// pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		// Not just the polling. Something is causing it to switch to 'loading' instead of polling.
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
@@ -155,7 +157,12 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 					</Typography>
 					{isAnAdmin ? (
 						<Button
-							data-tid="new-mapping-button-first-hostlms"
+							data-tid="new-mapping-button-first-hostlms-itemType"
+							aria-labelledby={
+								"Add item type reference value mapping for " +
+								library?.agency?.hostLms?.code
+							}
+							sx={{ mt: 1 }}
 							variant="outlined"
 							onClick={() => {
 								setNewMapping({
@@ -205,8 +212,13 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 						</Typography>
 						{isAnAdmin ? (
 							<Button
-								data-tid="new-mapping-button-second-hostlms"
+								data-tid="new-mapping-button-second-hostlms-item-type"
 								variant="outlined"
+								aria-labelledby={
+									"Add item type reference value mapping for " +
+									library?.secondHostLms?.code
+								}
+								sx={{ mt: 1 }}
 								onClick={() => {
 									setNewMapping({
 										show: true,

@@ -155,8 +155,13 @@ export default function All({ libraryId }: LibraryDetails) {
 					</Typography>
 					{isAnAdmin ? (
 						<Button
-							data-tid="new-mapping-button-first-hostlms"
+							data-tid="new-mapping-button-first-hostlms-all-mappings"
+							aria-labelledby={
+								"Add a reference value mapping of any category for " +
+								library?.agency?.hostLms?.code
+							}
 							variant="outlined"
+							sx={{ mt: 1 }}
 							onClick={() => {
 								setNewMapping({
 									show: true,
@@ -204,8 +209,13 @@ export default function All({ libraryId }: LibraryDetails) {
 						</Typography>
 						{isAnAdmin ? (
 							<Button
-								data-tid="new-mapping-button-second-hostlms"
+								data-tid="new-mapping-button-second-hostlms-all-mappings"
 								variant="outlined"
+								aria-labelledby={
+									"Add a reference value mapping of any category for " +
+									library?.secondHostLms?.code
+								}
+								sx={{ mt: 1 }}
 								onClick={() => {
 									setNewMapping({
 										show: true,

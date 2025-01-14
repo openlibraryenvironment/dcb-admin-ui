@@ -155,7 +155,11 @@ export default function Location({ libraryId }: LibraryDetails) {
 					</Typography>
 					{isAnAdmin ? (
 						<Button
-							data-tid="new-mapping-button-first-hostlms"
+							data-tid="new-mapping-button-first-hostlms-location"
+							aria-labelledby={
+								"Add a location reference value mapping for " +
+								library?.agency?.hostLms?.code
+							}
 							variant="outlined"
 							onClick={() => {
 								setNewMapping({
@@ -166,6 +170,7 @@ export default function Location({ libraryId }: LibraryDetails) {
 									libraryName: library?.fullName,
 								});
 							}}
+							sx={{ mt: 1 }}
 						>
 							{t("mappings.new.title")}
 						</Button>
@@ -204,7 +209,11 @@ export default function Location({ libraryId }: LibraryDetails) {
 						</Typography>
 						{isAnAdmin ? (
 							<Button
-								data-tid="new-mapping-button-second-hostlms"
+								data-tid="new-mapping-button-second-hostlms-location"
+								aria-labelledby={
+									"Add a location reference value mapping for " +
+									library?.secondHostLms?.code
+								}
 								variant="outlined"
 								onClick={() => {
 									setNewMapping({
@@ -215,6 +224,7 @@ export default function Location({ libraryId }: LibraryDetails) {
 										libraryName: library?.fullName,
 									});
 								}}
+								sx={{ mt: 1 }}
 							>
 								{t("mappings.new.title")}
 							</Button>

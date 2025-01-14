@@ -8,6 +8,11 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
+	FormControl,
+	FormHelperText,
+	InputLabel,
+	MenuItem,
+	Select,
 	Stack,
 	TextField,
 	Typography,
@@ -26,6 +31,7 @@ import {
 } from "src/constants/mappingsImportConstants";
 import { mappingsCategoryConverter } from "src/helpers/mappingsCategoryConverter";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import Grid from "@mui/material/Unstable_Grid2";
 
 interface NewMappingFormData {
 	toValue: string;
@@ -66,6 +72,9 @@ const parseServerError = (error: any): ServerError => {
 	const itemTypeMatch = message.match(/ItemType.*values for this mapping are/);
 	const locationMatch = message.match(/Location mapping must have/);
 	const duplicateMatch = message.match(/duplicate 'from' values/);
+	const alreadyExistsForLms = message.match(
+		/A mapping with fromValue.* already exists for/,
+	);
 	const blankMatch = message.match(/blank values/);
 	const toValueMatch = message.match(/to value/);
 	const fromValueMatch = message.match(/from value/);
@@ -81,6 +90,8 @@ const parseServerError = (error: any): ServerError => {
 	} else if (locationMatch) {
 		return { message, field: "toContext" };
 	} else if (duplicateMatch) {
+		return { message, field: "fromValue" };
+	} else if (alreadyExistsForLms) {
 		return { message, field: "fromValue" };
 	} else if (blankMatch) {
 		return { message, field: "fromValue" };
@@ -99,7 +110,7 @@ export default function NewMapping({
 }: NewMappingFormType) {
 	const { t } = useTranslation();
 	const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-	const contextOptions = ["DCB", hostLmsCode];
+	const contextOptions = ["DCB", hostLmsCode]; // toContext can ONLY be DCB when location
 
 	const validationSchema = Yup.object().shape({
 		fromCategory: Yup.string()
@@ -210,6 +221,7 @@ export default function NewMapping({
 		setError,
 		formState: { errors, isValid, isDirty },
 		register,
+		watch,
 	} = useForm<NewMappingFormData>({
 		defaultValues: {
 			toValue: category == "Location" ? agencyCode : "", // pre-populate as agency code for location mapping
@@ -242,6 +254,23 @@ export default function NewMapping({
 		severity: "success",
 		text: null,
 	});
+
+	const fromContext = watch("fromContext");
+	const fromCategory = watch("fromCategory");
+	const toContext = watch("toContext");
+	const toCategory = watch("toCategory");
+
+	// Helper function to get available values for dropdowns
+	const getAvailableValues = (context: string, category: string) => {
+		if (context === "DCB") {
+			if (category === "ItemType") return canonicalItemTypes;
+			if (category === "patronType") return canonicalPatronTypes;
+		}
+		return null; // Return null if no restricted values
+	};
+
+	const fromValues = getAvailableValues(fromContext, fromCategory);
+	const toValues = getAvailableValues(toContext, toCategory);
 
 	const onSubmit = async (data: NewMappingFormData) => {
 		try {
@@ -280,7 +309,10 @@ export default function NewMapping({
 			}
 		}
 	};
-	const getFieldErrorKey = (fieldName: keyof NewMappingFormData): string => {
+	const getFieldErrorKey = (
+		fieldName: keyof NewMappingFormData,
+		message?: string,
+	): string => {
 		// Needs to be server only, as yup handles the rest
 		// If the error is coming from the server-side validation, we must translate the error message.
 		switch (fieldName) {
@@ -296,6 +328,9 @@ export default function NewMapping({
 						return "mappings.new.error.generic";
 				}
 			case "fromValue":
+				if (message && message.includes("already exists")) {
+					return "mappings.new.error.validation.no_duplicate";
+				}
 				switch (category) {
 					case "ItemType":
 						return "mappings.new.error.validation.invalid_from_item_type";
@@ -346,139 +381,205 @@ export default function NewMapping({
 							mt: 2,
 						}}
 					>
-						{isEmpty(category) ? (
-							<Controller
-								name="fromCategory"
-								control={control}
-								render={({ field }) => (
-									<TextField
-										{...field}
-										label={t("mappings.new.from_category")}
-										variant="outlined"
-										fullWidth
-										required
-										disabled={!isEmpty(category)}
-										error={!!errors.fromCategory || !!errors.fromCategory}
-										helperText={
-											errors.fromCategory?.type == "server"
-												? t(getFieldErrorKey("fromCategory"))
-												: errors.fromCategory?.message
-										}
-									/>
-								)}
-							/>
+						{!isEmpty(category) ? (
+							<Grid
+								container
+								spacing={{ xs: 2, md: 3 }}
+								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+								mb={1}
+							>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack>
+										<Typography variant="attributeTitle">
+											{t("mappings.new.from_category")}
+										</Typography>
+										<RenderAttribute attribute={category} />
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack>
+										<Typography variant="attributeTitle">
+											{t("mappings.new.to_category")}
+										</Typography>
+										<RenderAttribute
+											attribute={category == "Location" ? "AGENCY" : category}
+										/>
+									</Stack>
+								</Grid>
+							</Grid>
 						) : (
-							<Stack>
-								<Typography variant="attributeTitle">
-									{t("mappings.new.from_category")}
-								</Typography>
-								<RenderAttribute attribute={category} />
-							</Stack>
-						)}
-						{isEmpty(category) ? (
-							<Controller
-								name="toCategory"
-								control={control}
-								render={({ field }) => (
-									<TextField
-										{...field}
-										label={t("mappings.new.to_category")}
-										variant="outlined"
-										fullWidth
-										required
-										disabled={!isEmpty(category)}
-										error={!!errors.toCategory || !!serverErrors.toCategory}
-										helperText={
-											errors.toCategory?.type == "server"
-												? t(getFieldErrorKey("toCategory"))
-												: errors.toCategory?.message
-										}
-									/>
-								)}
-							/>
-						) : (
-							<Stack>
-								<Typography variant="attributeTitle">
-									{t("mappings.new.to_category")}
-								</Typography>
-								<RenderAttribute attribute={category} />
-							</Stack>
+							<Box>
+								<Controller
+									name="fromCategory"
+									control={control}
+									render={({ field }) => (
+										<TextField
+											{...field}
+											label={t("mappings.new.from_category")}
+											variant="outlined"
+											fullWidth
+											required
+											disabled={!isEmpty(category)}
+											error={!!errors.fromCategory || !!errors.fromCategory}
+											helperText={
+												errors.fromCategory?.type == "server"
+													? t(getFieldErrorKey("fromCategory"))
+													: errors.fromCategory?.message
+											}
+										/>
+									)}
+								/>
+								<Controller
+									name="toCategory"
+									control={control}
+									render={({ field }) => (
+										<TextField
+											{...field}
+											label={t("mappings.new.to_category")}
+											variant="outlined"
+											fullWidth
+											required
+											disabled={!isEmpty(category)}
+											error={!!errors.toCategory || !!serverErrors.toCategory}
+											helperText={
+												errors.toCategory?.type == "server"
+													? t(getFieldErrorKey("toCategory"))
+													: errors.toCategory?.message
+											}
+										/>
+									)}
+								/>
+							</Box>
 						)}
 						<Controller
 							name="fromContext"
 							control={control}
 							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("mappings.new.from_context")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.fromContext || !!serverErrors.fromContext}
-									helperText={
-										errors.fromContext?.type == "server"
-											? t(getFieldErrorKey("fromContext"))
-											: errors.fromContext?.message
-									}
-								/>
+								<FormControl fullWidth error={!!errors.fromContext}>
+									<InputLabel>{t("mappings.new.from_context")}</InputLabel>
+									<Select {...field} label={t("mappings.new.from_context")}>
+										{contextOptions.map((option) => (
+											<MenuItem key={option} value={option}>
+												{option}
+											</MenuItem>
+										))}
+									</Select>
+									{errors.fromContext && (
+										<FormHelperText>
+											{errors.fromContext?.type == "server"
+												? t(getFieldErrorKey("fromContext"))
+												: errors.fromContext?.message}
+										</FormHelperText>
+									)}
+								</FormControl>
 							)}
 						/>
 						<Controller
 							name="fromValue"
 							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("mappings.new.from_value")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.fromValue || !!errors.fromValue}
-									helperText={
-										errors.fromValue?.type == "server"
-											? t(getFieldErrorKey("fromValue"))
-											: errors.fromValue?.message
-									}
-								/>
-							)}
+							render={({ field }) =>
+								fromValues ? (
+									<FormControl fullWidth error={!!errors.fromValue}>
+										<InputLabel>{t("mappings.new.from_value")}</InputLabel>
+										<Select {...field} label={t("mappings.new.from_value")}>
+											{fromValues.map((value) => (
+												<MenuItem key={value} value={value}>
+													{value}
+												</MenuItem>
+											))}
+										</Select>
+										{errors.fromValue && (
+											<FormHelperText>
+												{errors.fromValue?.type == "server"
+													? t(getFieldErrorKey("fromValue"))
+													: errors.fromValue?.message}
+											</FormHelperText>
+										)}
+									</FormControl>
+								) : (
+									<TextField
+										{...field}
+										label={t("mappings.new.from_value")}
+										variant="outlined"
+										fullWidth
+										required
+										error={!!errors.fromValue}
+										helperText={
+											errors.fromValue?.type == "server"
+												? t(
+														getFieldErrorKey(
+															"fromValue",
+															errors.fromValue?.message,
+														),
+													)
+												: errors.fromValue?.message
+										}
+									/>
+								)
+							}
 						/>
 						<Controller
 							name="toContext"
 							control={control}
 							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("mappings.new.to_context")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.toContext || !!serverErrors.toContext}
-									helperText={
-										errors.toContext?.type == "server"
-											? t(getFieldErrorKey("toContext"))
-											: errors.toContext?.message
-									}
-								/>
+								<FormControl fullWidth error={!!errors.toContext}>
+									<InputLabel>{t("mappings.new.to_context")}</InputLabel>
+									<Select {...field} label={t("mappings.new.to_context")}>
+										{contextOptions.map((option: string) => (
+											<MenuItem key={option} value={option}>
+												{option}
+											</MenuItem>
+										))}
+									</Select>
+									{errors.toContext && (
+										<FormHelperText>
+											{errors.toContext?.type == "server"
+												? t(getFieldErrorKey("toContext"))
+												: errors.toContext?.message}
+										</FormHelperText>
+									)}
+								</FormControl>
 							)}
 						/>
+
 						<Controller
 							name="toValue"
 							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("mappings.new.to_value")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.toValue || !!serverErrors.toValue}
-									helperText={
-										errors.toValue?.type == "server"
-											? t(getFieldErrorKey("toValue"))
-											: errors.toValue?.message
-									}
-								/>
-							)}
+							render={({ field }) =>
+								toValues ? (
+									<FormControl fullWidth error={!!errors.toValue}>
+										<InputLabel>{t("mappings.new.to_value")}</InputLabel>
+										<Select {...field} label={t("mappings.new.to_value")}>
+											{toValues.map((value) => (
+												<MenuItem key={value} value={value}>
+													{value}
+												</MenuItem>
+											))}
+										</Select>
+										{errors.toValue && (
+											<FormHelperText>
+												{errors.toValue?.type == "server"
+													? t(getFieldErrorKey("toValue"))
+													: errors.toValue?.message}
+											</FormHelperText>
+										)}
+									</FormControl>
+								) : (
+									<TextField
+										{...field}
+										label={t("mappings.new.to_value")}
+										variant="outlined"
+										fullWidth
+										required
+										error={!!errors.toValue}
+										helperText={
+											errors.toValue?.type == "server"
+												? t(getFieldErrorKey("toValue"))
+												: errors.toValue?.message
+										}
+									/>
+								)
+							}
 						/>
 						<Controller
 							name="reason"

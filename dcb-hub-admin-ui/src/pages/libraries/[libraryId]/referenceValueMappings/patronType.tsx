@@ -155,8 +155,13 @@ export default function PatronType({ libraryId }: LibraryDetails) {
 					</Typography>
 					{isAnAdmin ? (
 						<Button
-							data-tid="new-mapping-button-first-hostlms"
+							data-tid="new-mapping-button-first-hostlms-patron-type"
 							variant="outlined"
+							aria-labelledby={
+								"Add a patron type reference value mapping for " +
+								library?.agency?.hostLms?.code
+							}
+							sx={{ mt: 1 }}
 							onClick={() => {
 								setNewMapping({
 									show: true,
@@ -205,7 +210,12 @@ export default function PatronType({ libraryId }: LibraryDetails) {
 						</Typography>
 						{isAnAdmin ? (
 							<Button
-								data-tid="new-mapping-button-second-hostlms"
+								data-tid="new-mapping-button-second-hostlms-patron-type"
+								aria-labelledby={
+									"Add a patron type reference value mapping for " +
+									library?.secondHostLms?.code
+								}
+								sx={{ mt: 1 }}
 								variant="outlined"
 								onClick={() => {
 									setNewMapping({
