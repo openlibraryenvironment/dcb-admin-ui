@@ -1,3 +1,15 @@
+# [1.29.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.28.0...v1.29.0) (2025-01-14)
+
+
+### Bug Fixes
+
+* Remove extra Dockerfile [DCB-1788] ([b2d6e46](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b2d6e466ba646a046ec3a20ddb997a99516866c5))
+
+
+### Features
+
+* Add pickup locations to library details view [DCB-1781] ([744124b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/744124b4621378a49d6ddca4501a700b249f0cbe))
+
 # [1.28.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.27.0...v1.28.0) (2024-12-19)
 
 
