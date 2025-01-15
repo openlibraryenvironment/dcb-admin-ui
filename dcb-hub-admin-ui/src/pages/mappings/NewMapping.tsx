@@ -226,7 +226,7 @@ export default function NewMapping({
 		defaultValues: {
 			toValue: category == "Location" ? agencyCode : "", // pre-populate as agency code for location mapping
 			toContext: category == "Location" ? "DCB" : "", // Pre-populate as DCB  for new location mapping
-			toCategory: category,
+			toCategory: category == "Location" ? "AGENCY" : category,
 			fromValue: "",
 			fromCategory: category,
 			fromContext: category == "Location" ? hostLmsCode : "", // Pre-populate as catalogue Host LMS code for new Location mapping
@@ -393,7 +393,7 @@ export default function NewMapping({
 										<Typography variant="attributeTitle">
 											{t("mappings.new.from_category")}
 										</Typography>
-										<RenderAttribute attribute={category} />
+										<RenderAttribute attribute={fromCategory} />
 									</Stack>
 								</Grid>
 								<Grid xs={2} sm={4} md={4}>
@@ -401,14 +401,34 @@ export default function NewMapping({
 										<Typography variant="attributeTitle">
 											{t("mappings.new.to_category")}
 										</Typography>
-										<RenderAttribute
-											attribute={category == "Location" ? "AGENCY" : category}
-										/>
+										<RenderAttribute attribute={toCategory} />
 									</Stack>
 								</Grid>
+								{category == "Location" ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack>
+											<Typography variant="attributeTitle">
+												{t("mappings.new.from_context")}
+											</Typography>
+											<RenderAttribute attribute={fromContext} />
+										</Stack>
+									</Grid>
+								) : null}
+								{category == "Location" ? (
+									<Grid xs={2} sm={4} md={4}>
+										<Stack>
+											<Typography variant="attributeTitle">
+												{t("mappings.new.to_context")}
+											</Typography>
+											<RenderAttribute attribute={toContext} />
+										</Stack>
+									</Grid>
+								) : null}
 							</Grid>
 						) : (
-							<Box>
+							<Box
+								sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
+							>
 								<Controller
 									name="fromCategory"
 									control={control}
@@ -451,29 +471,31 @@ export default function NewMapping({
 								/>
 							</Box>
 						)}
-						<Controller
-							name="fromContext"
-							control={control}
-							render={({ field }) => (
-								<FormControl fullWidth error={!!errors.fromContext}>
-									<InputLabel>{t("mappings.new.from_context")}</InputLabel>
-									<Select {...field} label={t("mappings.new.from_context")}>
-										{contextOptions.map((option) => (
-											<MenuItem key={option} value={option}>
-												{option}
-											</MenuItem>
-										))}
-									</Select>
-									{errors.fromContext && (
-										<FormHelperText>
-											{errors.fromContext?.type == "server"
-												? t(getFieldErrorKey("fromContext"))
-												: errors.fromContext?.message}
-										</FormHelperText>
-									)}
-								</FormControl>
-							)}
-						/>
+						{category != "Location" ? (
+							<Controller
+								name="fromContext"
+								control={control}
+								render={({ field }) => (
+									<FormControl fullWidth error={!!errors.fromContext}>
+										<InputLabel>{t("mappings.new.from_context")}</InputLabel>
+										<Select {...field} label={t("mappings.new.from_context")}>
+											{contextOptions.map((option) => (
+												<MenuItem key={option} value={option}>
+													{option}
+												</MenuItem>
+											))}
+										</Select>
+										{errors.fromContext && (
+											<FormHelperText>
+												{errors.fromContext?.type == "server"
+													? t(getFieldErrorKey("fromContext"))
+													: errors.fromContext?.message}
+											</FormHelperText>
+										)}
+									</FormControl>
+								)}
+							/>
+						) : null}
 						<Controller
 							name="fromValue"
 							control={control}
@@ -518,29 +540,31 @@ export default function NewMapping({
 								)
 							}
 						/>
-						<Controller
-							name="toContext"
-							control={control}
-							render={({ field }) => (
-								<FormControl fullWidth error={!!errors.toContext}>
-									<InputLabel>{t("mappings.new.to_context")}</InputLabel>
-									<Select {...field} label={t("mappings.new.to_context")}>
-										{contextOptions.map((option: string) => (
-											<MenuItem key={option} value={option}>
-												{option}
-											</MenuItem>
-										))}
-									</Select>
-									{errors.toContext && (
-										<FormHelperText>
-											{errors.toContext?.type == "server"
-												? t(getFieldErrorKey("toContext"))
-												: errors.toContext?.message}
-										</FormHelperText>
-									)}
-								</FormControl>
-							)}
-						/>
+						{category != "Location" ? (
+							<Controller
+								name="toContext"
+								control={control}
+								render={({ field }) => (
+									<FormControl fullWidth error={!!errors.toContext}>
+										<InputLabel>{t("mappings.new.to_context")}</InputLabel>
+										<Select {...field} label={t("mappings.new.to_context")}>
+											{contextOptions.map((option: string) => (
+												<MenuItem key={option} value={option}>
+													{option}
+												</MenuItem>
+											))}
+										</Select>
+										{errors.toContext && (
+											<FormHelperText>
+												{errors.toContext?.type == "server"
+													? t(getFieldErrorKey("toContext"))
+													: errors.toContext?.message}
+											</FormHelperText>
+										)}
+									</FormControl>
+								)}
+							/>
+						) : null}
 
 						<Controller
 							name="toValue"
