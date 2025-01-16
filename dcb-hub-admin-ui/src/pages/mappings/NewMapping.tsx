@@ -131,7 +131,16 @@ export default function NewMapping({
 					code: hostLmsCode,
 				}),
 			)
-			.max(64, t("ui.validation.max_length", { length: 64 })),
+			.max(64, t("ui.validation.max_length", { length: 64 }))
+			.test(
+				"not-same-context",
+				t("mappings.new.error.validation.same_contexts"),
+				function (value) {
+					const toContext = this.parent.toContext;
+					if (!toContext || !value) return true;
+					return toContext !== value;
+				},
+			),
 		fromValue: Yup.string()
 			.required(
 				t("ui.validation.required", {
