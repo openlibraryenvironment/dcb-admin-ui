@@ -1228,6 +1228,8 @@ export const getPatronRequestById = gql`
 				localItemAgencyCode
 				isManuallySelectedItem
 				resolutionCount
+				renewalCount
+				localRenewalCount
 				patron {
 					id
 				}
@@ -1304,6 +1306,7 @@ export const getPatronRequestById = gql`
 					localItemStatus
 					localItemType
 					localId
+					localRenewalCount
 					localStatus
 					localAgency
 					rawLocalItemStatus
