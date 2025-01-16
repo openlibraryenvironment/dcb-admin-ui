@@ -72,9 +72,7 @@ const parseServerError = (error: any): ServerError => {
 	const itemTypeMatch = message.match(/ItemType.*values for this mapping are/);
 	const locationMatch = message.match(/Location mapping must have/);
 	const duplicateMatch = message.match(/duplicate 'from' values/);
-	const alreadyExistsForLms = message.match(
-		/A mapping with fromValue.* already exists for/,
-	);
+	const alreadyExistsForLms = message.match(/already exists for the/);
 	const blankMatch = message.match(/blank values/);
 	const toValueMatch = message.match(/to value/);
 	const fromValueMatch = message.match(/from value/);
@@ -444,7 +442,11 @@ export default function NewMapping({
 											helperText={
 												errors.fromCategory?.type == "server"
 													? t(getFieldErrorKey("fromCategory"))
-													: errors.fromCategory?.message
+													: errors.fromCategory
+														? errors.fromCategory?.message
+														: t("ui.validation.case_sensitive", {
+																field: "fromCategory",
+															})
 											}
 										/>
 									)}
@@ -464,7 +466,11 @@ export default function NewMapping({
 											helperText={
 												errors.toCategory?.type == "server"
 													? t(getFieldErrorKey("toCategory"))
-													: errors.toCategory?.message
+													: errors.toCategory
+														? errors.toCategory?.message
+														: t("ui.validation.case_sensitive", {
+																field: "toCategory",
+															})
 											}
 										/>
 									)}
@@ -489,7 +495,11 @@ export default function NewMapping({
 											<FormHelperText>
 												{errors.fromContext?.type == "server"
 													? t(getFieldErrorKey("fromContext"))
-													: errors.fromContext?.message}
+													: errors.fromContext
+														? errors.fromContext?.message
+														: t("ui.validation.case_sensitive", {
+																field: "fromContext",
+															})}
 											</FormHelperText>
 										)}
 									</FormControl>
@@ -513,8 +523,17 @@ export default function NewMapping({
 										{errors.fromValue && (
 											<FormHelperText>
 												{errors.fromValue?.type == "server"
-													? t(getFieldErrorKey("fromValue"))
-													: errors.fromValue?.message}
+													? t(
+															getFieldErrorKey(
+																"fromValue",
+																errors.fromValue?.message,
+															),
+														)
+													: errors.fromValue
+														? errors.fromValue?.message
+														: t("ui.validation.case_sensitive", {
+																field: "fromValue",
+															})}
 											</FormHelperText>
 										)}
 									</FormControl>
@@ -534,7 +553,11 @@ export default function NewMapping({
 															errors.fromValue?.message,
 														),
 													)
-												: errors.fromValue?.message
+												: errors.fromValue
+													? errors.fromValue?.message
+													: t("ui.validation.case_sensitive", {
+															field: "fromValue",
+														})
 										}
 									/>
 								)
@@ -599,7 +622,11 @@ export default function NewMapping({
 										helperText={
 											errors.toValue?.type == "server"
 												? t(getFieldErrorKey("toValue"))
-												: errors.toValue?.message
+												: errors.toValue
+													? errors.toValue?.message
+													: t("ui.validation.case_sensitive", {
+															field: "toValue",
+														})
 										}
 									/>
 								)
