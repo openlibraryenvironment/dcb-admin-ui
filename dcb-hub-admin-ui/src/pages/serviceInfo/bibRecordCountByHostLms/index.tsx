@@ -12,6 +12,7 @@ import Alert from "@components/Alert/Alert";
 import Link from "@components/Link/Link";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
+import { ProcessState } from "@models/ProcessState";
 
 const BibRecordCountByHostLms: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
@@ -30,7 +31,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 		const fetchRecords = async () => {
 			try {
 				const response = await axios.get<any[]>(
-					`${publicRuntimeConfig.DCB_API_BASE}/admin/recordCounts`,
+					`${publicRuntimeConfig.DCB_API_BASE}/hostlmss/importIngestDetails`,
 					{
 						headers: { Authorization: `Bearer ${data?.accessToken}` },
 					},
@@ -58,10 +59,51 @@ const BibRecordCountByHostLms: NextPage = () => {
 	});
 
 	const columns: GridColDef[] = [
-		{ field: "sourceSystemName", headerName: "Source system name", flex: 1 },
-		{ field: "recordCount", headerName: "Bib record count", flex: 1 },
+		{ field: "name", headerName: "Source system name", flex: 1 },
+		{ field: "bibRecordCount", headerName: "Bib record count", flex: 1 },
+		{ field: "ingestEnabled", headerName: "Ingest enabled", flex: 1 },
+		{
+			field: "failed",
+			headerName: "Failed",
+			flex: 1,
+			valueGetter: (value, row) => {
+				const states: ProcessState[] = row?.processStates || [];
+				const failure = states.find(
+					(state: ProcessState) => state.value === "FAILURE",
+				);
+				return failure ? failure.count : 0;
+			},
+		},
+		{
+			field: "ingested",
+			headerName: "Ingested",
+			flex: 1,
+			valueGetter: (value, row) => {
+				const states: ProcessState[] = row?.processStates || [];
+				const failure = states.find(
+					(state: ProcessState) => state.value === "SUCCESS",
+				);
+				return failure ? failure.count : 0;
+			},
+		},
+		{
+			field: "awaiting",
+			headerName: "Awaiting ingest",
+			flex: 1,
+			valueGetter: (value, row) => {
+				const states: ProcessState[] = row?.processStates || [];
+				const failure = states.find(
+					(state: ProcessState) => state.value === "PROCESSING_REQUIRED",
+				);
+				return failure ? failure.count : 0;
+			},
+		},
+		{ field: "sourceRecordCount", headerName: "Source record count", flex: 1 },
+		{ field: "id", headerName: "Source system ID", flex: 1 },
+		{ field: "checkpointId", headerName: "Checkpoint ID", flex: 1 },
 	];
 
+	console.log(records);
 	if (loading || status === "loading") {
 		return (
 			<AdminLayout hideBreadcrumbs>
@@ -113,7 +155,11 @@ const BibRecordCountByHostLms: NextPage = () => {
 				selectable={false}
 				noDataTitle={t("bibRecordCountByHostLms.no_results")}
 				// This is how to set the default sort order
-				sortModel={[{ field: "sourceSystemName", sort: "asc" }]}
+				sortModel={[{ field: "name", sort: "asc" }]}
+				columnVisibilityModel={{
+					id: false,
+					checkpointId: false,
+				}}
 				operationDataType="BibRecord"
 			/>
 		</AdminLayout>
