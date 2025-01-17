@@ -788,9 +788,18 @@
 	},
 
 	"bibRecordCountByHostLms": {
-		"name": "Bib record count by host LMS",
+		"await": "Awaiting ingest",
 		"change_filter": "Try changing your filters or search terms.",
-		"no_results": "No bib record counts found. Try changing your search terms or filters."
+		"checkpoint_id": "Checkpoint ID",
+		"count": "Bib record count",
+		"failed": "Failed",
+		"ingest": "Ingest enabled",
+		"ingested": "Ingested",
+		"name": "Bib record count by host LMS",
+		"no_results": "No bib record counts found. Try changing your search terms or filters.",
+		"source_count": "Source record count",
+		"source_system": "Source system name",
+		"source_system_id": "Source system ID"
 	},
 
 	"error_overview": {

@@ -59,13 +59,25 @@ const BibRecordCountByHostLms: NextPage = () => {
 	});
 
 	const columns: GridColDef[] = [
-		{ field: "name", headerName: "Source system name", flex: 1 },
-		{ field: "bibRecordCount", headerName: "Bib record count", flex: 1 },
-		{ field: "ingestEnabled", headerName: "Ingest enabled", flex: 1 },
+		{
+			field: "name",
+			headerName: t("bibRecordCountByHostLms.source_system"),
+			flex: 0.75,
+		},
+		{
+			field: "ingestEnabled",
+			headerName: t("bibRecordCountByHostLms.ingest"),
+			flex: 0.5,
+		},
+		{
+			field: "bibRecordCount",
+			headerName: t("bibRecordCountByHostLms.count"),
+			flex: 0.5,
+		},
 		{
 			field: "failed",
-			headerName: "Failed",
-			flex: 1,
+			headerName: t("bibRecordCountByHostLms.failed"),
+			flex: 0.5,
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
 				const failure = states.find(
@@ -76,8 +88,8 @@ const BibRecordCountByHostLms: NextPage = () => {
 		},
 		{
 			field: "ingested",
-			headerName: "Ingested",
-			flex: 1,
+			headerName: t("bibRecordCountByHostLms.ingested"),
+			flex: 0.5,
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
 				const failure = states.find(
@@ -88,8 +100,8 @@ const BibRecordCountByHostLms: NextPage = () => {
 		},
 		{
 			field: "awaiting",
-			headerName: "Awaiting ingest",
-			flex: 1,
+			headerName: t("bibRecordCountByHostLms.await"),
+			flex: 0.5,
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
 				const failure = states.find(
@@ -98,12 +110,23 @@ const BibRecordCountByHostLms: NextPage = () => {
 				return failure ? failure.count : 0;
 			},
 		},
-		{ field: "sourceRecordCount", headerName: "Source record count", flex: 1 },
-		{ field: "id", headerName: "Source system ID", flex: 1 },
-		{ field: "checkpointId", headerName: "Checkpoint ID", flex: 1 },
+		{
+			field: "sourceRecordCount",
+			headerName: t("bibRecordCountByHostLms.source_count"),
+			flex: 0.75,
+		},
+		{
+			field: "id",
+			headerName: t("bibRecordCountByHostLms.source_system_id"),
+			flex: 1,
+		},
+		{
+			field: "checkPointId",
+			headerName: t("bibRecordCountByHostLms.checkpoint_id"),
+			flex: 1,
+		},
 	];
 
-	console.log(records);
 	if (loading || status === "loading") {
 		return (
 			<AdminLayout hideBreadcrumbs>
