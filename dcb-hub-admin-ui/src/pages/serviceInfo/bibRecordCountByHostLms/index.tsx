@@ -181,7 +181,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 				sortModel={[{ field: "name", sort: "asc" }]}
 				columnVisibilityModel={{
 					id: false,
-					checkpointId: false,
+					checkPointId: false,
 				}}
 				operationDataType="BibRecord"
 			/>
