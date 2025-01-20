@@ -201,7 +201,7 @@
 			"header": "You have unsaved changes"
 		},
 		"validation": {
-			"case_sensitive": "The field {{field}} is case sensitive",
+			"case_sensitive": "{{field}} is case sensitive",
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
 			"required": "The field  “{{field}}” is required."

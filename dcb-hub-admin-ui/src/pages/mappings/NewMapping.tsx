@@ -479,7 +479,7 @@ export default function NewMapping({
 													: errors.fromCategory
 														? errors.fromCategory?.message
 														: t("ui.validation.case_sensitive", {
-																field: "fromCategory",
+																field: t("mappings.new.from_category"),
 															})
 											}
 										/>
@@ -503,7 +503,7 @@ export default function NewMapping({
 													: errors.toCategory
 														? errors.toCategory?.message
 														: t("ui.validation.case_sensitive", {
-																field: "toCategory",
+																field: t("mappings.new.to_category"),
 															})
 											}
 										/>
@@ -536,7 +536,7 @@ export default function NewMapping({
 													: errors.fromContext
 														? errors.fromContext?.message
 														: t("ui.validation.case_sensitive", {
-																field: "fromContext",
+																field: t("mappings.new.from_context"),
 															})}
 											</FormHelperText>
 										)}
@@ -570,7 +570,7 @@ export default function NewMapping({
 													: errors.fromValue
 														? errors.fromValue?.message
 														: t("ui.validation.case_sensitive", {
-																field: "fromValue",
+																field: t("mappings.new.from_value"),
 															})}
 											</FormHelperText>
 										)}
@@ -594,7 +594,7 @@ export default function NewMapping({
 												: errors.fromValue
 													? errors.fromValue?.message
 													: t("ui.validation.case_sensitive", {
-															field: "fromValue",
+															field: t("mappings.new.from_value"),
 														})
 										}
 									/>
@@ -663,7 +663,7 @@ export default function NewMapping({
 												: errors.toValue
 													? errors.toValue?.message
 													: t("ui.validation.case_sensitive", {
-															field: "toValue",
+															field: t("mappings.new.to_value"),
 														})
 										}
 									/>
