@@ -359,7 +359,7 @@ export default function NewLocation({
 								/>
 							)}
 						/>
-						<Controller
+						{/* <Controller
 							name="printLabel"
 							control={control}
 							render={({ field }) => (
@@ -372,7 +372,7 @@ export default function NewLocation({
 									helperText={errors.printLabel?.message}
 								/>
 							)}
-						/>
+						/> */}
 						<Controller
 							name="longitude"
 							control={control}
