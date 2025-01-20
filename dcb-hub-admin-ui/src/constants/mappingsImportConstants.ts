@@ -13,3 +13,19 @@ export const MAPPING_OPTIONS: Record<string, MappingOption[]> = {
 		{ displayKey: "mappings.patron_type_num_range", category: "patronType" },
 	],
 };
+
+export const validCategories = ["ItemType", "patronType", "Location"];
+export const canonicalItemTypes = ["CIRC", "NONCIRC", "CIRCAV"];
+export const canonicalPatronTypes = [
+	"ADULT",
+	"CHILD",
+	"FACULTY",
+	"GRADUATE",
+	"NOT_ELIGIBLE",
+	"PATRON",
+	"POSTDOC",
+	"SENIOR",
+	"STAFF",
+	"UNDERGRADUATE",
+	"YOUNG_ADULT",
+];
