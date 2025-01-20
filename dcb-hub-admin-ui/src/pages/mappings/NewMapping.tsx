@@ -18,7 +18,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -229,6 +229,8 @@ export default function NewMapping({
 		formState: { errors, isValid, isDirty },
 		register,
 		watch,
+		trigger,
+		setValue,
 	} = useForm<NewMappingFormData>({
 		defaultValues: {
 			toValue: category == "Location" ? agencyCode : "", // pre-populate as agency code for location mapping
@@ -250,6 +252,29 @@ export default function NewMapping({
 		{
 			refetchQueries: [getMappings], // Probably needs specific library query, add parameters when we have them.
 		},
+	);
+	const handleFromContextChange = useCallback(
+		(field: any, event: any) => {
+			const newValue = event.target.value;
+
+			field.onChange(event);
+			if (newValue === "DCB") {
+				setValue("toContext", hostLmsCode, {
+					shouldValidate: false,
+				});
+			} else if (newValue === hostLmsCode) {
+				setValue("toContext", "DCB", {
+					shouldValidate: false,
+				});
+			}
+
+			// Finally, trigger validation for both fields together
+			// This is a bit of a hack, the intent is to ensure validation doesn't run before it needs to
+			// Which would then give an incorrect validation message
+			// i.e. by saying values are the same when they've actually been updated
+			Promise.all([trigger("fromContext"), trigger("toContext")]);
+		},
+		[trigger, setValue, hostLmsCode],
 	);
 
 	const [alert, setAlert] = useState<{
@@ -493,7 +518,11 @@ export default function NewMapping({
 								render={({ field }) => (
 									<FormControl fullWidth error={!!errors.fromContext}>
 										<InputLabel>{t("mappings.new.from_context")}</InputLabel>
-										<Select {...field} label={t("mappings.new.from_context")}>
+										<Select
+											{...field}
+											label={t("mappings.new.from_context")}
+											onChange={(e) => handleFromContextChange(field, e)}
+										>
 											{contextOptions.map((option) => (
 												<MenuItem key={option} value={option}>
 													{option}
