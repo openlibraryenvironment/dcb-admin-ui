@@ -202,15 +202,15 @@
 		},
 		"validation": {
 			"locations": {
-				"lat": "Latitude value must be a number between -90 and 90.",
-				"long": "Longitude value must be a number between -180 and 180.",
-				"local_id_folio": "localId must be a valid UUID for FOLIO systems.",
-				"local_id_polaris": "localId must be a non-negative integer for Polaris systems",
-				"local_id_sierra": "localId must be a non-negative integer for Sierra systems if provided"
+				"lat": "Enter the latitude: a number between -90 and 90.",
+				"long": "Enter the longitude: a number between -180 and 180",
+				"local_id_folio": "FOLIO service point ID must be a valid UUID.",
+				"local_id_polaris": "Polaris org ID must be a non-negative integer",
+				"local_id_sierra": "Sierra location ID must be a non-negative integer"
 			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
-			"required": "The field  “{{field}}” is required."
+			"required": "Enter a value for “{{field}}”."
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
@@ -613,7 +613,7 @@
 			"page_title": "Locations for {{name}}",
 			"pickup_disabled": "Disabled for pickup",
 			"pickup_enabled": "Enabled for pickup",
-			"pickup_status": "Pickup status?",
+			"pickup_status": "Pickup status",
 			"polaris_org": "Polaris org ID",
 			"service_point": "FOLIO service point ID",
 			"sierra": "Sierra location ID",

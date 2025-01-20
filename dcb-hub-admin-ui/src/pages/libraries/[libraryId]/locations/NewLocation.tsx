@@ -131,14 +131,16 @@ export default function NewLocation({
 			t("ui.validation.max_length", { length: 128 }),
 		),
 		latitude: Yup.number()
-			.required(
-				t("ui.validation.required", {
-					field: t("details.lat"),
-				}),
-			)
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			) // Stops a weird bug where Yup would attempt to convert an empty string to a number
+			.required(t("ui.validation.locations.lat"))
 			.min(-90, t("ui.validation.locations.lat"))
 			.max(90, t("ui.validation.locations.lat")),
 		longitude: Yup.number()
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			) //
 			.required(
 				t("ui.validation.required", {
 					field: t("details.long"),
@@ -224,6 +226,8 @@ export default function NewLocation({
 		formState: { errors, isValid, isDirty },
 		register,
 		setError,
+		watch,
+		setValue,
 	} = useForm<NewLocationFormData>({
 		defaultValues: {
 			code: "",
@@ -233,8 +237,6 @@ export default function NewLocation({
 			reason: "",
 			changeCategory: "",
 			changeReferenceUrl: "",
-			latitude: 0,
-			longitude: 0,
 			isPickup: false,
 		},
 		resolver: yupResolver(validationSchema),
@@ -331,6 +333,14 @@ export default function NewLocation({
 									required
 									error={!!errors.name}
 									helperText={errors.name?.message}
+									onBlur={(e) => {
+										field.onBlur(); // Handle original blur
+										const printLabel = watch("printLabel");
+										// Only set printLabel if it's empty
+										if (!printLabel) {
+											setValue("printLabel", e.target.value);
+										}
+									}}
 								/>
 							)}
 						/>
@@ -358,7 +368,6 @@ export default function NewLocation({
 									label={t("details.location_printlabel")}
 									variant="outlined"
 									fullWidth
-									required
 									error={!!errors.printLabel}
 									helperText={errors.printLabel?.message}
 								/>
@@ -403,7 +412,7 @@ export default function NewLocation({
 									label={t(getLocalId(ils))}
 									variant="outlined"
 									fullWidth
-									required
+									required={ils == "Sierra" ? false : true}
 									error={!!errors.localId}
 									helperText={errors.localId?.message}
 								/>
