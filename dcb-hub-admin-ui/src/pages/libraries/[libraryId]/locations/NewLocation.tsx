@@ -190,6 +190,7 @@ export default function NewLocation({
 		const alreadyExists = message.match(
 			/Location with this localId already exists/,
 		);
+		const codeExists = message.match(/Location with this code already exists/);
 		// could return keys instead
 		if (folioIDRequired || folioMustBeId) {
 			return {
@@ -215,6 +216,8 @@ export default function NewLocation({
 			return { message: t("ui.validation.locations.lat"), field: "latitude" };
 		} else if (invalidLong) {
 			return { message: t("ui.validation.locations.long"), field: "longitude" };
+		} else if (codeExists) {
+			return { message: t("locations.new.error.code_exists"), field: "code" };
 		}
 		return { message };
 	};

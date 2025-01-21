@@ -608,6 +608,7 @@
 			"button": "New location",
 			"error": {
 				"already_exists": "A location with this localId already exists. Please correct and try again.",
+				"code_exists": "A location with this code already exists. Please correct and try again.",
 				"generic": "There was an error creating the new location for {{name}}"
 			},
 			"page_title": "Locations for {{name}}",
