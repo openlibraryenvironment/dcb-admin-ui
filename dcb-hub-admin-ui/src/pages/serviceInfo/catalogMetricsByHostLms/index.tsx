@@ -14,7 +14,7 @@ import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { ProcessState } from "@models/ProcessState";
 
-const BibRecordCountByHostLms: NextPage = () => {
+const CatalogMetricsByHostLms: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data } = useSession();
 	const { t } = useTranslation();
@@ -61,22 +61,34 @@ const BibRecordCountByHostLms: NextPage = () => {
 	const columns: GridColDef[] = [
 		{
 			field: "name",
-			headerName: t("bibRecordCountByHostLms.source_system"),
+			headerName: t("catalogMetricsByHostLms.source_system"),
 			flex: 0.75,
 		},
 		{
 			field: "ingestEnabled",
-			headerName: t("bibRecordCountByHostLms.ingest"),
+			headerName: t("catalogMetricsByHostLms.harvest_enabled"),
 			flex: 0.5,
 		},
 		{
-			field: "bibRecordCount",
-			headerName: t("bibRecordCountByHostLms.count"),
+			field: "sourceRecordCount",
+			headerName: t("catalogMetricsByHostLms.harvested"),
 			flex: 0.5,
+		},
+		{
+			field: "awaiting",
+			headerName: t("catalogMetricsByHostLms.await"),
+			flex: 0.5,
+			valueGetter: (value, row) => {
+				const states: ProcessState[] = row?.processStates || [];
+				const failure = states.find(
+					(state: ProcessState) => state.value === "PROCESSING_REQUIRED",
+				);
+				return failure ? failure.count : 0;
+			},
 		},
 		{
 			field: "failed",
-			headerName: t("bibRecordCountByHostLms.failed"),
+			headerName: t("catalogMetricsByHostLms.failed"),
 			flex: 0.5,
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
@@ -88,7 +100,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 		},
 		{
 			field: "ingested",
-			headerName: t("bibRecordCountByHostLms.ingested"),
+			headerName: t("catalogMetricsByHostLms.ingested"),
 			flex: 0.5,
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
@@ -99,30 +111,27 @@ const BibRecordCountByHostLms: NextPage = () => {
 			},
 		},
 		{
-			field: "awaiting",
-			headerName: t("bibRecordCountByHostLms.await"),
+			field: "bibRecordCount",
+			headerName: t("nav.bibs"),
 			flex: 0.5,
+		},
+		{
+			field: "difference",
+			headerName: t("catalogMetricsByHostLms.difference"),
+			flex: 0.75,
 			valueGetter: (value, row) => {
-				const states: ProcessState[] = row?.processStates || [];
-				const failure = states.find(
-					(state: ProcessState) => state.value === "PROCESSING_REQUIRED",
-				);
-				return failure ? failure.count : 0;
+				const difference: number = row.sourceRecordCount - row.bibRecordCount;
+				return difference;
 			},
 		},
 		{
-			field: "sourceRecordCount",
-			headerName: t("bibRecordCountByHostLms.source_count"),
-			flex: 0.75,
-		},
-		{
 			field: "id",
-			headerName: t("bibRecordCountByHostLms.source_system_id"),
+			headerName: t("catalogMetricsByHostLms.source_system_id"),
 			flex: 1,
 		},
 		{
 			field: "checkPointId",
-			headerName: t("bibRecordCountByHostLms.checkpoint_id"),
+			headerName: t("catalogMetricsByHostLms.checkpoint_id"),
 			flex: 1,
 		},
 	];
@@ -134,8 +143,8 @@ const BibRecordCountByHostLms: NextPage = () => {
 					title={t("ui.info.loading.document", {
 						//make the first character lowercase
 						document_type:
-							t("bibRecordCountByHostLms.name").charAt(0).toLowerCase() +
-							t("bibRecordCountByHostLms.name").slice(1),
+							t("catalogMetricsByHostLms.name").charAt(0).toLowerCase() +
+							t("catalogMetricsByHostLms.name").slice(1),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
@@ -143,7 +152,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 		);
 	}
 	return error ? (
-		<AdminLayout title={t("nav.serviceInfo.bibRecordCountByHostLms")}>
+		<AdminLayout title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
 			<Alert
 				severityType="error"
 				alertText={
@@ -151,7 +160,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 						i18nKey={"common.error_loading"}
 						t={t}
 						values={{
-							page_title: t("nav.serviceInfo.bibRecordCountByHostLms"),
+							page_title: t("nav.serviceInfo.catalogMetricsByHostLms"),
 						}}
 						components={{
 							linkComponent: (
@@ -159,7 +168,7 @@ const BibRecordCountByHostLms: NextPage = () => {
 									onClick={handleReload}
 									title={t("ui.action.reload")}
 									key={t("ui.action.reload")}
-									href="bibRecordCountByHostLms"
+									href="catalogMetricsByHostLms"
 								/>
 							),
 						}}
@@ -169,19 +178,24 @@ const BibRecordCountByHostLms: NextPage = () => {
 			/>
 		</AdminLayout>
 	) : (
-		<AdminLayout title={t("nav.serviceInfo.bibRecordCountByHostLms")}>
+		<AdminLayout
+			title={t("nav.serviceInfo.catalogMetricsByHostLms")}
+			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
+			subtitle={t("reference.catalog_build")}
+		>
 			<ClientDataGrid
 				columns={columns}
 				data={records}
-				type="bibRecordCountByHostLMS"
+				type="catalogMetricsByHostLms"
 				// We don't want click-through on this grid.
 				selectable={false}
-				noDataTitle={t("bibRecordCountByHostLms.no_results")}
+				noDataTitle={t("catalogMetricsByHostLms.no_results")}
 				// This is how to set the default sort order
 				sortModel={[{ field: "name", sort: "asc" }]}
 				columnVisibilityModel={{
 					id: false,
 					checkPointId: false,
+					sourceSystemId: false,
 				}}
 				operationDataType="BibRecord"
 			/>
@@ -206,4 +220,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	};
 };
 
-export default BibRecordCountByHostLms;
+export default CatalogMetricsByHostLms;

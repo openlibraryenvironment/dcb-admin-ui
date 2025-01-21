@@ -67,7 +67,7 @@
 			"items": "Items"
 		},
 		"serviceInfo": {
-			"bibRecordCountByHostLms": "Bib record count by host LMS",
+			"catalogMetricsByHostLms": "Catalog metrics by host LMS",
 			"dataChangeLog": "Data change log",
 			"name": "Service info",
 			"requestErrors": {
@@ -787,19 +787,20 @@
 		"search_placeholder": "Search by sourceRecordId"
 	},
 
-	"bibRecordCountByHostLms": {
+	"catalogMetricsByHostLms": {
 		"await": "Awaiting ingest",
 		"change_filter": "Try changing your filters or search terms.",
-		"checkpoint_id": "Checkpoint ID",
+		"checkpoint_id": "Checkpoint UUID",
 		"count": "Bib record count",
+		"difference": "Source/bib difference",
 		"failed": "Failed",
-		"ingest": "Ingest enabled",
+		"harvest_enabled": "Harvest enabled",
+		"harvested": "Harvested",
 		"ingested": "Ingested",
-		"name": "Bib record count by host LMS",
-		"no_results": "No bib record counts found. Try changing your search terms or filters.",
-		"source_count": "Source record count",
+		"name": "Catalog metrics by Host LMS",
+		"no_results": "No catalog metrics found. Try changing your search terms or filters.",
 		"source_system": "Source system name",
-		"source_system_id": "Source system ID"
+		"source_system_id": "Source system UUID"
 	},
 
 	"error_overview": {
@@ -886,6 +887,9 @@
 		"validation_expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“fromContext”</bold>, <bold>“fromCategory”</bold> and <bold>“fromValue”</bold>. Please correct the column headers and retry.</paragraph>",
 		"validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
 		"validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry."
+	},
+	"reference": {
+		"catalog_build": "Reference: Catalog build"
 	},
 
 	"search": {

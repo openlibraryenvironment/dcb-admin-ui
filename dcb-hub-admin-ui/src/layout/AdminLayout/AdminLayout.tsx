@@ -3,13 +3,14 @@ import Head from "next/head";
 import Footer from "@layout/AdminLayout/Footer/Footer";
 import Header from "./Header/Header";
 import Breadcrumbs from "./Breadcrumbs/Breadcrumbs";
-import { Stack, Typography, useTheme, Box } from "@mui/material";
+import { Stack, Typography, useTheme, Box, Button } from "@mui/material";
 import Sidebar from "@layout/AdminLayout/Sidebar/Sidebar";
 import LinkedFooter from "./LinkedFooter/LinkedFooter";
 import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
 import { useSession } from "next-auth/react";
 import Link from "@components/Link/Link";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { BookOutlined } from "@mui/icons-material";
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
@@ -18,6 +19,8 @@ interface AdminLayoutProps {
 	pageActions?: any;
 	mode?: "edit" | "view";
 	link?: string; // for when title needs to be a link
+	docLink?: string;
+	subtitle?: string;
 }
 
 // This layout takes the following props: a title and components to be rendered as children
@@ -34,6 +37,8 @@ export default function AdminLayout({
 	pageActions,
 	mode,
 	link,
+	docLink,
+	subtitle,
 }: PropsWithChildren<AdminLayoutProps>) {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
@@ -157,7 +162,26 @@ export default function AdminLayout({
 										justifyContent="space-between"
 										sx={{ p: 3, pb: 0 }} // Optional padding adjustments
 									>
-										{title != null ? renderTitle() : null}
+										{title ? (
+											<Stack
+												direction={"column"}
+												spacing={1}
+												alignItems="baseline"
+											>
+												{title != null ? renderTitle() : null}
+												{docLink ? (
+													<Button
+														variant="outlined"
+														startIcon={<BookOutlined />}
+														href={docLink}
+														size="small"
+													>
+														{subtitle ? subtitle : docLink}
+													</Button>
+												) : null}
+											</Stack>
+										) : null}
+
 										{pageActions && isAnAdmin && (
 											<PageActionsMenu
 												actions={pageActions}
