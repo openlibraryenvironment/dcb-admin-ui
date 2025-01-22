@@ -8,6 +8,7 @@ import { useTranslation } from "next-i18next";
 import ReactMarkdown from "react-markdown";
 import { CustomLink } from "@components/MarkdownInput/MarkdownInput";
 import { isEmpty } from "lodash";
+import { getRequiredTranslationKey } from "src/helpers/getRequiredTranslationKey";
 
 interface EditableAttributeProps {
 	field: string;
@@ -57,6 +58,12 @@ export default function EditableAttribute({
 				return Yup.string()
 					.url(t("ui.data_grid.edit_url"))
 					.typeError(t("ui.data_grid.edit_url"));
+			case "nonBlankString":
+				return Yup.string().required(
+					t("ui.validation.required", {
+						field: t(getRequiredTranslationKey(field)).toLowerCase(),
+					}),
+				);
 			default:
 				return Yup.string();
 		}
