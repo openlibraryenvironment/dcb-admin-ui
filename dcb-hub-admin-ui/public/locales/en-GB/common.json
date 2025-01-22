@@ -204,7 +204,7 @@
 			"case_sensitive": "{{field}} is case sensitive",
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
-			"required": "The field  “{{field}}” is required."
+			"required": "Enter the {{field}}."
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
