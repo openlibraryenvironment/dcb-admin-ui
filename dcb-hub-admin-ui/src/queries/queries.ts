@@ -701,6 +701,7 @@ export const getLocationById = gql`
 				name
 				type
 				isPickup
+				localId
 				longitude
 				latitude
 				agency {

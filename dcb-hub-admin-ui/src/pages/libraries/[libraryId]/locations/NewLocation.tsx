@@ -135,6 +135,7 @@ export default function NewLocation({
 				originalValue === "" ? null : value,
 			) // Stops a weird bug where Yup would attempt to convert an empty string to a number
 			.required(t("ui.validation.locations.lat"))
+			.typeError(t("ui.validation.locations.lat"))
 			.min(-90, t("ui.validation.locations.lat"))
 			.max(90, t("ui.validation.locations.lat")),
 		longitude: Yup.number()
@@ -146,6 +147,7 @@ export default function NewLocation({
 					field: t("details.long"),
 				}),
 			)
+			.typeError(t("ui.validation.locations.long"))
 			.min(-180, t("ui.validation.locations.long"))
 			.max(180, t("ui.validation.locations.long")),
 		reason: Yup.string().max(
@@ -156,10 +158,10 @@ export default function NewLocation({
 			200,
 			t("ui.validation.max_length", { length: 200 }),
 		),
-		changeReferenceUrl: Yup.string().max(
-			200,
-			t("ui.validation.max_length", { length: 200 }),
-		),
+		changeReferenceUrl: Yup.string()
+			.url(t("ui.data_grid.edit_url"))
+			.typeError(t("ui.data_grid.edit_url"))
+			.max(200, t("ui.validation.max_length", { length: 200 })),
 		isPickup: Yup.boolean().required(
 			t("ui.validation.required", {
 				field: t("details.is_pickup"),
@@ -240,7 +242,7 @@ export default function NewLocation({
 			reason: "",
 			changeCategory: "",
 			changeReferenceUrl: "",
-			isPickup: false,
+			isPickup: true,
 		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
@@ -430,7 +432,7 @@ export default function NewLocation({
 									<Select
 										{...field}
 										label={t("locations.new.pickup_status")}
-										value={field.value?.toString() ?? "false"}
+										value={field.value?.toString() ?? "true"}
 										onChange={(e) => {
 											field.onChange(e.target.value === "true");
 										}}

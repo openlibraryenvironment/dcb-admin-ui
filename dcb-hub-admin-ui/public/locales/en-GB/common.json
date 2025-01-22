@@ -210,7 +210,7 @@
 			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
-			"required": "Enter a value for “{{field}}”."
+			"required": "Enter the “{{field}}”."
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",

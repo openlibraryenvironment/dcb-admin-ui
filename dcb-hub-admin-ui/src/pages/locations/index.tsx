@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+
 const Locations: NextPage = () => {
 	const { t } = useTranslation();
 
@@ -85,10 +86,19 @@ const Locations: NextPage = () => {
 					},
 					{
 						field: "isPickup",
-						headerName: "Enabled for pickup",
+						headerName: t("locations.new.pickup_status"),
 						minWidth: 50,
 						flex: 0.4,
 						filterOperators: equalsOnly,
+						valueFormatter: (value: boolean) => {
+							if (value == true) {
+								return t("consortium.settings.enabled");
+							} else if (value == false) {
+								return t("consortium.settings.disabled");
+							} else {
+								return t("details.location_pickup_not_set");
+							}
+						},
 					},
 					{
 						field: "id",

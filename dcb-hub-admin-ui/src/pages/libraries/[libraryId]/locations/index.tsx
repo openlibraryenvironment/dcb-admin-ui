@@ -275,7 +275,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 					hostLmsCode={newLocation.hostLmsCode}
 					agencyCode={newLocation.agencyCode}
 					libraryName={newLocation.libraryName}
-					type={"Pickup"}
+					type={"PICKUP"}
 					ils={newLocation.ils}
 				/>
 			) : null}
