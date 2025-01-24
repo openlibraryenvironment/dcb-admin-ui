@@ -793,7 +793,7 @@
 		"checkpoint_id": "Checkpoint UUID",
 		"count": "Bib record count",
 		"difference": "Source/bib difference",
-		"failed": "Failed",
+		"failed": "Ingest failed",
 		"harvest_enabled": "Harvest enabled",
 		"harvested": "Harvested",
 		"ingested": "Ingested",
