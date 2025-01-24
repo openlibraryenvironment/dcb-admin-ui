@@ -19,10 +19,10 @@ const ServiceInfo: NextPage = () => {
 				<ListItem component="nav" disablePadding>
 					<ListItemButton
 						component="a"
-						href="/serviceInfo/bibRecordCountByHostLms"
+						href="/serviceInfo/catalogMetricsByHostLms"
 					>
 						<ListItemText
-							primary={t("nav.serviceInfo.bibRecordCountByHostLms")}
+							primary={t("nav.serviceInfo.catalogMetricsByHostLms")}
 						/>
 					</ListItemButton>
 				</ListItem>

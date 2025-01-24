@@ -1,7 +1,5 @@
 export function getIdOfRow(row: any, type: string) {
-	if (type == "bibRecordCountByHostLMS") {
-		return row.sourceSystemId;
-	} else if (type == "errorOverviewResults") {
+	if (type == "errorOverviewResults") {
 		const id = String(row.namedSql).concat(row.description);
 		return id;
 	} else if (type == "errorOverviewPatronRequests") {

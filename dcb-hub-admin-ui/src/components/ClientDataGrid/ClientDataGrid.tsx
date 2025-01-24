@@ -16,6 +16,7 @@ import {
 	GridRowModesModel,
 	GridRenderEditCellParams,
 	GridSortModel,
+	GridColumnVisibilityModel,
 } from "@mui/x-data-grid-pro";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
@@ -119,11 +120,11 @@ export default function ClientDataGrid<T extends object>({
 		sortOptions: storedSortOptions,
 		// filterOptions: storedFilterOptions,
 		// paginationModel: storedPaginationModel,
-		// columnVisibility: storedColumnVisibility,
+		columnVisibility: storedColumnVisibility,
 		setSortOptions,
 		// setFilterOptions,
 		// setPaginationModel,
-		// setColumnVisibility,
+		setColumnVisibility,
 	} = useGridStore();
 	const { t } = useTranslation();
 	const { data: session }: { data: any } = useSession();
@@ -165,6 +166,11 @@ export default function ClientDataGrid<T extends object>({
 		},
 		[setSortOptions, type],
 	);
+	const handleColumnVisibilityModelChange = (
+		newModel: GridColumnVisibilityModel,
+	) => {
+		setColumnVisibility(type, newModel);
+	};
 
 	const handleEditClick = (id: GridRowId) => () => {
 		setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
@@ -485,7 +491,8 @@ export default function ClientDataGrid<T extends object>({
 					},
 					// Handles whether columns are visible or not - pass the relevant model in (see requests)
 					columns: {
-						columnVisibilityModel,
+						columnVisibilityModel:
+							storedColumnVisibility[type] || columnVisibilityModel,
 					},
 					// Handles default sort order- pass the relevant model in (see requests)
 					sorting: {
@@ -504,7 +511,7 @@ export default function ClientDataGrid<T extends object>({
 				columns={allColumns}
 				autoHeight
 				loading={loading}
-				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityModelChange}
 				// we can make our own custom toolbar if necessary, potentially extending the default GridToolbar. Just pass it in here
 				rows={data ?? []}
 				processRowUpdate={processRowUpdate}
