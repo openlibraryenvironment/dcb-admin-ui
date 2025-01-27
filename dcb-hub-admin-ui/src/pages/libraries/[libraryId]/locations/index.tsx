@@ -234,6 +234,15 @@ export default function Locations({ libraryId }: LibraryDetails) {
 								minWidth: 50,
 								flex: 0.4,
 								filterOperators: equalsOnly,
+								valueFormatter: (value: boolean) => {
+									if (value == true) {
+										return t("consortium.settings.enabled");
+									} else if (value == false) {
+										return t("consortium.settings.disabled");
+									} else {
+										return t("details.location_pickup_not_set");
+									}
+								},
 							},
 							{
 								field: "id",

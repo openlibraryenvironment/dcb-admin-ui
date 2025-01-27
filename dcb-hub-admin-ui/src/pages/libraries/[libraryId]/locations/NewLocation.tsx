@@ -229,7 +229,6 @@ export default function NewLocation({
 		handleSubmit,
 		reset,
 		formState: { errors, isValid, isDirty },
-		register,
 		setError,
 		watch,
 		setValue,
@@ -240,7 +239,7 @@ export default function NewLocation({
 			printLabel: "",
 			deliveryStops: "",
 			reason: "",
-			changeCategory: "",
+			changeCategory: "Location creation",
 			changeReferenceUrl: "",
 			isPickup: true,
 		},
@@ -472,14 +471,19 @@ export default function NewLocation({
 							)}
 						/>
 
-						<TextField
-							{...register("changeReferenceUrl")}
-							fullWidth
-							variant="outlined"
-							label={t("data_change_log.reference_url")}
-							name={t("data_change_log.reference_url")}
-							error={!!errors.changeReferenceUrl}
-							helperText={errors.changeReferenceUrl?.message}
+						<Controller
+							name="changeReferenceUrl"
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									fullWidth
+									variant="outlined"
+									label={t("data_change_log.reference_url")}
+									error={!!errors.changeReferenceUrl}
+									helperText={errors.changeReferenceUrl?.message}
+								/>
+							)}
 						/>
 					</Box>
 				</DialogContent>
