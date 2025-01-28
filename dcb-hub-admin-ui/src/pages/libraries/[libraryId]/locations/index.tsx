@@ -230,7 +230,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 							},
 							{
 								field: "isPickup",
-								headerName: "Enabled for pickup",
+								headerName: t("locations.new.pickup_status"),
 								minWidth: 50,
 								flex: 0.4,
 								filterOperators: equalsOnly,
