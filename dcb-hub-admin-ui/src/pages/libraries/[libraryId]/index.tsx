@@ -379,7 +379,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							value={library?.fullName}
 							updateField={updateField}
 							editMode={editMode}
-							type="string"
+							type="nonBlankString"
 							inputRef={firstEditableFieldRef}
 							setValidationError={setValidationError}
 							setDirty={setDirty}
@@ -405,7 +405,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							value={library?.shortName}
 							updateField={updateField}
 							editMode={editMode}
-							type="string"
+							type="nonBlankString"
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}
@@ -430,7 +430,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							value={library?.abbreviatedName}
 							updateField={updateField}
 							editMode={editMode}
-							type="string"
+							type="nonBlankString"
 							setValidationError={setValidationError}
 							setDirty={setDirty}
 							setErrors={setErrors}

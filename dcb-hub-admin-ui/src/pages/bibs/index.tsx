@@ -111,7 +111,11 @@ const Bibs: NextPage = () => {
 		);
 	};
 	return (
-		<AdminLayout title={t("nav.bibs")}>
+		<AdminLayout
+			title={t("nav.bibs")}
+			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
+			subtitle={t("reference.catalog_build")}
+		>
 			<BibsDisplay />
 		</AdminLayout>
 	);

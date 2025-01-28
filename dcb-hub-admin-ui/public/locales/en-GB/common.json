@@ -67,7 +67,7 @@
 			"items": "Items"
 		},
 		"serviceInfo": {
-			"bibRecordCountByHostLms": "Bib record count by host LMS",
+			"catalogMetricsByHostLms": "Catalog metrics by host LMS",
 			"dataChangeLog": "Data change log",
 			"name": "Service info",
 			"requestErrors": {
@@ -210,7 +210,8 @@
 			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
-			"required": "Enter the “{{field}}”."
+			"required": "Enter the {{field}}.",
+			"case_sensitive": "{{field}} is case sensitive"
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
@@ -358,6 +359,9 @@
 		"pickup_request_status": "Pickup request status",
 		"record_created": "Record created",
 		"record_updated": "Record updated",
+		"renewal_count": "Renewal count",
+		"renewal_count_borrower": "Borrower renewal count",
+		"renewal_count_supplier": "Supplier renewal count",
 		"request_created": "Request created",
 		"request_uuid": "Request UUID",
 		"requestor_uuid": "Patron UUID at requesting agency",
@@ -806,10 +810,20 @@
 		"search_placeholder": "Search by sourceRecordId"
 	},
 
-	"bibRecordCountByHostLms": {
-		"name": "Bib record count by host LMS",
+	"catalogMetricsByHostLms": {
+		"await": "Awaiting ingest",
 		"change_filter": "Try changing your filters or search terms.",
-		"no_results": "No bib record counts found. Try changing your search terms or filters."
+		"checkpoint_id": "Checkpoint UUID",
+		"count": "Bib record count",
+		"difference": "Source/bib difference",
+		"failed": "Ingest failed",
+		"harvest_enabled": "Harvest enabled",
+		"harvested": "Harvested",
+		"ingested": "Ingested",
+		"name": "Catalog metrics by Host LMS",
+		"no_results": "No catalog metrics found. Try changing your search terms or filters.",
+		"source_system": "Source system name",
+		"source_system_id": "Source system UUID"
 	},
 
 	"error_overview": {
@@ -870,6 +884,35 @@
 		"max_size": "Maximum size {{maxSize}}",
 		"mismatched_context": "The selected Host LMS <bold>{{code}}</bold> does not match the <bold>fromContext</bold> or <bold>toContext</bold> values in the mappings file. Please correct and try again.",
 		"mismatched_context_nrm": "The selected Host LMS <bold>{{code}}</bold> does not match the <bold>context</bold> value in the mappings file. Please correct and try again.",
+		"new": {
+			"error": {
+				"generic": "An error occurred creating a mapping for {{library}}. Please check your supplied values and try again.",
+				"validation": {
+					"invalid_from_category": "The 'fromCategory' value for this mapping is invalid. Please change it to one of the following: 'ItemType', 'patronType' or 'Location'. ",
+					"invalid_from_context": "The 'fromContext' value must be one of 'DCB' or {{code}} for this mapping",
+					"invalid_from_item_type": "The 'fromValue' for this item type mapping is invalid. Please change it to one of the following: 'CIRC', 'NONCIRC' or 'CIRCAV'.",
+					"invalid_from_patron_type": "The 'fromValue' for this patron type mapping is invalid. Please change it to one of the following: 'ADULT', 'CHILD', 'FACULTY', 'GRADUATE', 'NOT_ELIGIBLE', 'PATRON', 'POSTDOC', 'SENIOR', 'STAFF', 'UNDERGRADUATE' or 'YOUNG_ADULT'",
+					"invalid_to_category": "The 'toCategory' value for this mapping is invalid. Please change it to one of the following: 'ItemType', 'patronType' or 'Location'. ",
+					"invalid_to_context": "The 'toContext' value must be one of 'DCB' or {{code}} for this mapping. Please correct and try again.",
+					"invalid_to_context_server": "The 'toContext' value must be 'DCB' or a valid agency code. Please correct and try again.",
+					"invalid_to_item_type": "The 'toValue' for this item type mapping is invalid. Please change it to one of the following: 'CIRC', 'NONCIRC' or 'CIRCAV'.",
+					"invalid_to_location": "The 'toValue' for this location mapping must be a valid agency code. Please correct and try again.",
+					"invalid_to_patron_type": "The 'toValue' for this item type mapping is invalid. Please change it to one of the following: 'ADULT', 'CHILD', 'FACULTY', 'GRADUATE', 'NOT_ELIGIBLE', 'PATRON', 'POSTDOC', 'SENIOR', 'STAFF', 'UNDERGRADUATE' or 'YOUNG_ADULT'.",
+					"location_dcb": "A mapping of type 'Location' must have a 'toContext' value of 'DCB'. Please correct and try again.",
+					"no_duplicate": "There is already a mapping with this fromValue and category for this library. Please correct and try again.",
+					"same_contexts": "The 'fromContext' and 'toContext' values cannot be the same. Please correct and try again."
+				}
+			},
+			"from_category": "From category",
+			"from_context": "From context",
+			"from_value": "From value",
+			"success": "The new mapping was successfully created",
+			"to_category": "To category",
+			"to_context": "To context",
+			"to_value": "To value",
+			"title": "New mapping",
+			"title_modal": "Add new {{category}} mapping for {{code}}"
+		},
 		"no_file_selected": "No file selected",
 		"no_results": "No results found",
 		"suggested_formats": "Suggested formats: CSV, TSV",
@@ -896,6 +939,9 @@
 		"validation_expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“fromContext”</bold>, <bold>“fromCategory”</bold> and <bold>“fromValue”</bold>. Please correct the column headers and retry.</paragraph>",
 		"validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
 		"validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry."
+	},
+	"reference": {
+		"catalog_build": "Reference: Catalog build"
 	},
 
 	"search": {

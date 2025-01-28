@@ -1,3 +1,29 @@
+# [1.30.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.29.0...v1.30.0) (2025-01-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency zustand to v5 ([35f2c4f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/35f2c4f48960829501d1f03c5f4e715727b75e00))
+* Prevent blank library names [DCB-1790] ([714dc6d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/714dc6db3d1bf7349b2acf6592fc65b1f017059e))
+
+
+### Features
+
+* Support creation of reference value mappings [DCB-1619] ([b886265](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b88626572a19ad0b5bc1967eb261fbbf59045c2d))
+* Update bib record count page [DCB-1789] ([a1eb679](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a1eb679ef91b0d316533a3bb6ccae37f7caa0904))
+
+# [1.29.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.28.0...v1.29.0) (2025-01-14)
+
+
+### Bug Fixes
+
+* Remove extra Dockerfile [DCB-1788] ([b2d6e46](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b2d6e466ba646a046ec3a20ddb997a99516866c5))
+
+
+### Features
+
+* Add pickup locations to library details view [DCB-1781] ([744124b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/744124b4621378a49d6ddca4501a700b249f0cbe))
+
 # [1.28.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.27.0...v1.28.0) (2024-12-19)
 
 

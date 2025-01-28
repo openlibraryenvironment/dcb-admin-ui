@@ -502,6 +502,16 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("details.renewal_count")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.renewalCount?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("details.error")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.errorMessage} />
@@ -885,6 +895,16 @@ export default function PatronRequestDetails({
 								<Grid xs={2} sm={4} md={4}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
+											{t("details.renewal_count_supplier")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.suppliers[0]?.localRenewalCount?.toString()}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
 											{t("details.local_item_type")}
 										</Typography>
 										<RenderAttribute
@@ -1240,6 +1260,16 @@ export default function PatronRequestDetails({
 											{t("details.borrowing_virtual_bib_id")}
 										</Typography>
 										<RenderAttribute attribute={patronRequest?.localBibId} />
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.renewal_count_borrower")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.localRenewalCount?.toString()}
+										/>
 									</Stack>
 								</Grid>
 							</Grid>

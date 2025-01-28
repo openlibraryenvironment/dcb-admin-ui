@@ -133,6 +133,17 @@ export const deleteReferenceValueMapping = gql`
 	}
 `;
 
+export const createReferenceValueMapping = gql`
+	mutation CreateReferenceValueMapping(
+		$input: CreateReferenceValueMappingInput!
+	) {
+		createReferenceValueMapping(input: $input) {
+			id
+			toValue
+		}
+	}
+`;
+
 // Numeric range mapping mutations
 
 export const updateNumericRangeMapping = gql`
@@ -408,7 +419,11 @@ export const getBibSourceRecord = gql`
 					id
 					hostLmsId
 					remoteId
-					json
+					lastFetched
+					lastProcessed
+					processingState
+					processingInformation
+					sourceRecordData
 				}
 			}
 		}
@@ -1237,6 +1252,8 @@ export const getPatronRequestById = gql`
 				localItemAgencyCode
 				isManuallySelectedItem
 				resolutionCount
+				renewalCount
+				localRenewalCount
 				patron {
 					id
 				}
@@ -1288,7 +1305,11 @@ export const getPatronRequestById = gql`
 							id
 							hostLmsId
 							remoteId
-							json
+							lastFetched
+							lastProcessed
+							processingState
+							processingInformation
+							sourceRecordData
 						}
 					}
 				}
@@ -1309,6 +1330,7 @@ export const getPatronRequestById = gql`
 					localItemStatus
 					localItemType
 					localId
+					localRenewalCount
 					localStatus
 					localAgency
 					rawLocalItemStatus
@@ -1586,7 +1608,14 @@ export const getClusters = gql`
 					sourceSystemId
 					sourceRecordId
 					sourceRecord {
-						json
+						id
+						hostLmsId
+						remoteId
+						lastFetched
+						lastProcessed
+						processingState
+						processingInformation
+						sourceRecordData
 					}
 					matchPoints {
 						id
@@ -1614,7 +1643,14 @@ export const getClustersLegacy = gql`
 					sourceSystemId
 					sourceRecordId
 					sourceRecord {
-						json
+						id
+						hostLmsId
+						remoteId
+						lastFetched
+						lastProcessed
+						processingState
+						processingInformation
+						sourceRecordData
 					}
 				}
 			}
