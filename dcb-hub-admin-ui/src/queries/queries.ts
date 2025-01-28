@@ -679,6 +679,7 @@ export const getLocations = gql`
 				type
 				isPickup
 				printLabel
+				localId
 				agency {
 					id
 					name
@@ -695,6 +696,15 @@ export const getLocations = gql`
 	}
 `;
 
+export const createLocation = gql`
+	mutation CreateLocation($input: CreateLocationInput!) {
+		createLocation(input: $input) {
+			id
+			name
+		}
+	}
+`;
+
 // This gets a location by its ID for the record / details page.
 // As such it must fetch everything a Location record contains.
 export const getLocationById = gql`
@@ -706,6 +716,7 @@ export const getLocationById = gql`
 				name
 				type
 				isPickup
+				localId
 				longitude
 				latitude
 				agency {
@@ -1023,12 +1034,14 @@ export const getLibraryBasicsLocation = gql`
 					hostLms {
 						id
 						code
+						lmsClientClass
 					}
 				}
 				secondHostLms {
 					code
 					name
 					id
+					lmsClientClass
 				}
 			}
 		}

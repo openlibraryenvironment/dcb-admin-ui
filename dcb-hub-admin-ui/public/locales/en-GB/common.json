@@ -201,10 +201,17 @@
 			"header": "You have unsaved changes"
 		},
 		"validation": {
-			"case_sensitive": "{{field}} is case sensitive",
+			"locations": {
+				"lat": "Enter the latitude: a number between -90 and 90.",
+				"long": "Enter the longitude: a number between -180 and 180",
+				"local_id_folio": "FOLIO service point ID must be a valid UUID.",
+				"local_id_polaris": "Polaris org ID must be a non-negative integer",
+				"local_id_sierra": "Sierra location ID must be a non-negative integer"
+			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
-			"required": "Enter the {{field}}."
+			"required": "Enter the {{field}}.",
+			"case_sensitive": "{{field}} is case sensitive"
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",
@@ -278,6 +285,7 @@
 		"general": "General",
 		"id": "ID",
 		"is_transition_out_of_sequence": "Transition out of sequence?",
+		"is_pickup": "isPickup",
 		"item": "Item",
 		"item_manual_agency_code": "Manually selected agency code",
 		"item_manual_hostlms_code": "Manually selected host LMS code",
@@ -600,6 +608,23 @@
 		"location_one": "location",
 		"loading_msg": "Loading locations....",
 		"alert_text": "Failed to fetch the locations, please refresh the page.",
+		"new": {
+			"button": "New location",
+			"error": {
+				"already_exists": "A location with this localId already exists. Please correct and try again.",
+				"code_exists": "A location with this code already exists. Please correct and try again.",
+				"generic": "There was an error creating the new location for {{name}}"
+			},
+			"page_title": "Locations for {{name}}",
+			"pickup_disabled": "Disabled for pickup",
+			"pickup_enabled": "Enabled for pickup",
+			"pickup_status": "Pickup status",
+			"polaris_org": "Polaris org ID",
+			"service_point": "FOLIO service point ID",
+			"sierra": "Sierra location ID",
+			"success": "The new location was successfully created for {{name}}",
+			"title": "Add new location for {{name}}"
+		},
 		"no_results": "No locations were found. Try changing your search terms or filters.",
 		"no_rows": "No locations available. If you're expecting data to be here, please refresh the page.",
 		"search_placeholder": "Search by name"
@@ -718,9 +743,6 @@
 			},
 			"time_zone": "Time zone",
 			"title": "Contacts for {{name}}"
-		},
-		"locations": {
-			"title": "Locations for {{name}}"
 		},
 		"patronRequests": {
 			"active": "Active requests ({{number}})",

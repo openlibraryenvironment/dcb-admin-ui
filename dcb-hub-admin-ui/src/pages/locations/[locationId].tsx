@@ -26,6 +26,8 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { handleDeleteEntity } from "src/helpers/actions/editAndDeleteActions";
+import { getILS } from "src/helpers/getILS";
+import { getLocalId } from "src/helpers/getLocalId";
 
 type LocationDetails = {
 	locationId: string;
@@ -78,6 +80,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		printLabel: location?.printLabel,
 	});
 	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
+	const ils = getILS(location?.hostSystem?.lmsClientClass);
 
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
@@ -504,13 +507,13 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
-							{t("details.location_pickup_available")}
+							{t("locations.new.pickup_status")}
 						</Typography>
 						{location?.isPickup
-							? t("details.location_pickup_enabled")
+							? t("locations.new.pickup_enabled")
 							: location?.isPickup == false
-								? t("details.location_pickup_disabled")
-								: t("details.locaion_pickup_not_set")}
+								? t("locations.new.pickup_disabled")
+								: t("details.location_pickup_not_set")}
 					</Stack>
 					{isAnAdmin ? (
 						<Button
@@ -540,6 +543,14 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							{t("details.location_uuid")}
 						</Typography>
 						<RenderAttribute attribute={location?.id} />
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t(getLocalId(ils))}
+						</Typography>
+						<RenderAttribute attribute={location?.localId} />
 					</Stack>
 				</Grid>
 			</Grid>
