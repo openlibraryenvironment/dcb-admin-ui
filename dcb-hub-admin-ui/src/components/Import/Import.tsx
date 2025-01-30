@@ -7,6 +7,7 @@ import {
 	Stack,
 	Autocomplete,
 	TextField,
+	Typography,
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
@@ -14,14 +15,27 @@ import Selector from "@components/Selector/Selector";
 import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
 import useCode from "@hooks/useCode";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import Grid from "@mui/material/Unstable_Grid2";
 
 type ImportForm = {
 	show: boolean;
 	onClose: any;
-	mappingType: "Reference value mappings" | "Numeric range mappings";
+	type: "Reference value mappings" | "Numeric range mappings" | "Locations";
+	presetHostLms?: string;
+	presetHostLmsId?: string;
+	libraryName?: string;
 };
+// This could be generic for locations. Upload maybe not.
 
-export default function Import({ show, onClose, mappingType }: ImportForm) {
+export default function Import({
+	show,
+	onClose,
+	type,
+	presetHostLms,
+	presetHostLmsId,
+	libraryName,
+}: ImportForm) {
 	const { t } = useTranslation();
 	const { category, updateCategory, resetAll } = useCode();
 
@@ -44,7 +58,7 @@ export default function Import({ show, onClose, mappingType }: ImportForm) {
 		>
 			<DialogTitle variant="modalTitle">
 				{t("mappings.import_title", {
-					profile: mappingType.toLowerCase(),
+					profile: type.toLowerCase(),
 				})}
 			</DialogTitle>
 			<IconButton
@@ -68,21 +82,55 @@ export default function Import({ show, onClose, mappingType }: ImportForm) {
 							paragraph: <p />,
 						}}
 					/>
-					<Autocomplete
-						options={MAPPING_OPTIONS[mappingType]}
-						getOptionLabel={(option: MappingOption) => t(option.displayKey)}
-						onChange={(event, value) => {
-							updateCategory(value?.category ?? "");
-						}}
-						renderInput={(params) => (
-							<TextField {...params} required label={t("mappings.category")} />
-						)}
-					/>
-					<Selector optionsType={t("hostlms.hostlms_one")} />
+
+					{type == "Locations" && presetHostLms ? (
+						<Grid
+							container
+							// spacing={{ xs: 2, sm: 3, md: 3, lg: 3 }}
+							columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+						>
+							<Grid xs={2} sm={4} md={6}>
+								<Stack>
+									<Typography variant="attributeTitle">
+										{t("mappings.category")}
+									</Typography>
+									<RenderAttribute attribute={type} />
+								</Stack>
+							</Grid>
+							<Grid xs={2} sm={4} md={4}>
+								<Stack>
+									<Typography variant="attributeTitle">
+										{t("hostlms.hostlms_one")}
+									</Typography>
+									<RenderAttribute attribute={presetHostLms} />
+								</Stack>
+							</Grid>
+						</Grid>
+					) : (
+						<Autocomplete
+							options={MAPPING_OPTIONS[type]}
+							getOptionLabel={(option: MappingOption) => t(option.displayKey)}
+							onChange={(event, value) => {
+								updateCategory(value?.category ?? "");
+							}}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									required
+									label={t("mappings.category")}
+								/>
+							)}
+						/>
+					)}
+					{type != "Locations" && !presetHostLms ? (
+						<Selector optionsType={t("hostlms.hostlms_one")} />
+					) : null}
 					<Upload
 						onCancel={handleCloseImport}
 						category={category}
-						type={mappingType}
+						type={type}
+						presetHostLmsId={presetHostLmsId}
+						libraryName={libraryName}
 					/>
 				</Stack>
 			</DialogContent>
