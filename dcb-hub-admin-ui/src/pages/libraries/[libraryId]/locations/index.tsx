@@ -239,6 +239,16 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						columns={[
 							...customColumns,
 							{
+								field: "agencyCode",
+								headerName: "Agency code",
+								minWidth: 150,
+								flex: 0.6,
+								filterable: false,
+								sortable: false,
+								valueGetter: (value, row: { agency: { code: string } }) =>
+									row?.agency?.code,
+							},
+							{
 								field: "hostSystemName",
 								headerName: "Host LMS name",
 								minWidth: 150,
@@ -320,6 +330,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						columnVisibilityModel={{
 							id: false,
 							lastImported: false,
+							agencyCode: false,
 						}}
 						sortModel={[{ field: "name", sort: "asc" }]}
 						sortDirection="ASC"

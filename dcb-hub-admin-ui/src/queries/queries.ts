@@ -682,6 +682,8 @@ export const getLocations = gql`
 				localId
 				deliveryStops
 				lastImported
+				latitude
+				longitude
 				agency {
 					id
 					name

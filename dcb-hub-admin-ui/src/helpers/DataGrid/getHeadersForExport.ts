@@ -18,6 +18,21 @@ export const getHeadersForExport = (coreType: string) => {
 				"toValue",
 				"toContext",
 			];
+		case "locations":
+			return [
+				"Agency Code",
+				"Location Code",
+				"Display Name",
+				"Print Name",
+				"DeliveryStop_Ignore",
+				"Lat",
+				"Lon",
+				"isPickup",
+				"LOCTYPE",
+				"CHK_Ignore",
+				"Address_Ignore",
+				"id",
+			];
 		default:
 			return [];
 	}

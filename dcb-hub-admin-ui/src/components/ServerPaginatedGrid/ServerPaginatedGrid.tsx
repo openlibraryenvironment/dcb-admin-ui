@@ -764,7 +764,9 @@ export default function ServerPaginationGrid({
 	}));
 
 	const isSpecialGrid =
-		coreType === "referenceValueMappings" || type === "numericRangeMappings";
+		coreType === "referenceValueMappings" ||
+		type === "numericRangeMappings" ||
+		coreType == "locations";
 
 	const ToolbarComponent = isSpecialGrid ? ExportToolbar : QuickSearchToolbar;
 

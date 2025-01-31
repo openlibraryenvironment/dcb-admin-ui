@@ -238,12 +238,20 @@ const FileUpload = ({
 		if (reason) {
 			formData.append("reason", reason);
 		} else {
-			formData.append("reason", "Initial upload of mappings");
+			if (type == "Locations") {
+				formData.append("reason", "Pickup locations upload");
+			} else {
+				formData.append("reason", "Initial upload of mappings");
+			}
 		}
 		if (changeCategory) {
 			formData.append("changeCategory", changeCategory);
 		} else {
-			formData.append("changeCategory", "Initial mappings upload");
+			if (type == "Locations") {
+				formData.append("changeCategory", "Pickup locations upload");
+			} else {
+				formData.append("changeCategory", "Initial mappings upload");
+			}
 		}
 		if (changeReferenceUrl) {
 			formData.append("changeReferenceUrl", changeReferenceUrl);
@@ -483,7 +491,20 @@ const FileUpload = ({
 									: category + " " + type?.toLowerCase(),
 							libraryName: libraryName,
 						}}
-						components={{ bold: <strong />, paragraph: <p /> }}
+						components={{
+							bold: <strong />,
+							paragraph: <p />,
+							linkComponent: (
+								<Link
+									key="import-user-guide"
+									href={
+										type == "Locations"
+											? "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3411804195/Importing+pickup+locations+in+DCB+Admin"
+											: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
+									}
+								/>
+							),
+						}}
 					/>
 				}
 				key={"upload-successful"}

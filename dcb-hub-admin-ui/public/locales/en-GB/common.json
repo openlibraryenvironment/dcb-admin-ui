@@ -620,9 +620,9 @@
 			"header": "Import pickup locations for {{library}}",
 			"replace": "Replace locations",
 			"success": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully.",
-			"success_ignored": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully. {{ignoredCount}} pickup locations did not pass validation and were not imported.",
+			"success_ignored": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully. {{ignoredCount}} pickup locations did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information",
 			"successful_replacement": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted.",
-			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup locations did not pass validation and were not imported."
+			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup locations did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information."
 		},
 		"new": {
 			"button": "New location",
