@@ -136,9 +136,9 @@ const Locations: NextPage = () => {
 					lastImported: false,
 				}}
 				// This is how to set the default sort order
-				sortModel={[{ field: "name", sort: "asc" }]}
-				sortDirection="ASC"
-				sortAttribute="name"
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				sortDirection="DESC"
+				sortAttribute="lastImported"
 				refetchQuery={["LoadLocations"]}
 				deleteQuery={deleteLocationQuery}
 				editQuery={updateLocationQuery}

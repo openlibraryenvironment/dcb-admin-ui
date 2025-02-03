@@ -332,9 +332,9 @@ export default function Locations({ libraryId }: LibraryDetails) {
 							lastImported: false,
 							agencyCode: false,
 						}}
-						sortModel={[{ field: "name", sort: "asc" }]}
-						sortDirection="ASC"
-						sortAttribute="name"
+						sortModel={[{ field: "lastImported", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="lastImported"
 						refetchQuery={["LoadLocations"]}
 						deleteQuery={deleteLocationQuery}
 						editQuery={updateLocationQuery}
