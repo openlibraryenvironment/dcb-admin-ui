@@ -1,3 +1,17 @@
+# [1.31.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.30.0...v1.31.0) (2025-02-05)
+
+
+### Bug Fixes
+
+* Ensure data change log info is included [DCB-1778] ([ee2183b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ee2183b21bf2bd27fa73e7d23a2337714f8124b2))
+* Fix case of location type [DCB-1778] ([5e4fc9b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5e4fc9b3c259aa2874edcce5aec135f961b36be5))
+* Rename isPickup column [DCB-1778] ([24a39a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/24a39a55327dcf74feb71a469828a24cc313ef65))
+
+
+### Features
+
+* Create pickup locations [DCB-1778] ([7c15bc2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7c15bc2b5967dd94504e490605690f3210ac907e))
+
 # [1.30.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.29.0...v1.30.0) (2025-01-24)
 
 
