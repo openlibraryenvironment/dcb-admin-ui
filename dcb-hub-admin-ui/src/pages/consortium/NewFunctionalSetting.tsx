@@ -176,10 +176,11 @@ export default function NewFunctionalSetting({
 										field.onChange(newValue);
 									}}
 									options={[
+										"OWN_LIBRARY_BORROWING",
 										"PICKUP_ANYWHERE",
 										"RE_RESOLUTION",
 										"SELECT_UNAVAILABLE_ITEMS",
-										"OWN_LIBRARY_BORROWING",
+                    "TRIGGER_SUPPLIER_RENEWAL",
 									]}
 									renderInput={(params) => (
 										<TextField
