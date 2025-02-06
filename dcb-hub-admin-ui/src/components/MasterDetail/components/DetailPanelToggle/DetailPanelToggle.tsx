@@ -5,8 +5,9 @@ import {
 	useGridApiContext,
 	useGridSelector,
 	gridDetailPanelExpandedRowsContentCacheSelector,
+	GridApiPro,
 } from "@mui/x-data-grid-pro";
-import { isValidElement } from "react";
+import { isValidElement, MutableRefObject } from "react";
 import { useTranslation } from "next-i18next";
 
 export function DetailPanelToggle(
@@ -15,7 +16,7 @@ export function DetailPanelToggle(
 	const { t } = useTranslation();
 
 	const { id, value: isExpanded } = props;
-	const apiRef = useGridApiContext();
+	const apiRef = useGridApiContext() as MutableRefObject<GridApiPro>;
 
 	// To avoid calling ´getDetailPanelContent` all the time, the following selector
 	// gives an object with the detail panel content for each row id.

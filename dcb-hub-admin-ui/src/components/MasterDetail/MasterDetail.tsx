@@ -8,9 +8,9 @@ import {
 	Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-import { useGridApiContext } from "@mui/x-data-grid-pro";
+import { GridApiPro, useGridApiContext } from "@mui/x-data-grid-pro";
 import { useTranslation } from "next-i18next";
-import { useCallback, useEffect, useState } from "react";
+import { MutableRefObject, useCallback, useEffect, useState } from "react";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
@@ -28,7 +28,7 @@ type MasterDetailType = {
 };
 
 export default function MasterDetail({ row, type }: MasterDetailType) {
-	const apiRef = useGridApiContext();
+	const apiRef = useGridApiContext() as MutableRefObject<GridApiPro>;
 	const [width, setWidth] = useState(() => {
 		const dimensions = apiRef.current.getRootDimensions();
 		return dimensions?.viewportInnerSize.width;

@@ -1,4 +1,4 @@
-import { GridColDef } from "@mui/x-data-grid";
+import { GridColDef } from "@mui/x-data-grid-pro";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import axios from "axios";
 import { useRouter } from "next/router";
