@@ -8,7 +8,7 @@ import {
 	Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
-import { GridApiPro, useGridApiContext } from "@mui/x-data-grid-pro";
+import { GridApiPro, useGridApiContext } from "@mui/x-data-grid-premium";
 import { useTranslation } from "next-i18next";
 import { MutableRefObject, useCallback, useEffect, useState } from "react";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";

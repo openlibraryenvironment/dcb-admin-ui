@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { DataGridPro, GridColDef } from "@mui/x-data-grid-pro";
+import { DataGridPremium, GridColDef } from "@mui/x-data-grid-premium";
 import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
@@ -112,7 +112,7 @@ const Identifiers: NextPage = () => {
 		</AdminLayout>
 	) : (
 		<AdminLayout title="Identifiers">
-			<DataGridPro rows={rows} columns={columns} loading={loading} />
+			<DataGridPremium rows={rows} columns={columns} loading={loading} />
 		</AdminLayout>
 	);
 };

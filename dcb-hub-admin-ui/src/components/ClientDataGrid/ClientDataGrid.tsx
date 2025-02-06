@@ -3,7 +3,7 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import {
-	DataGridPro as MUIDataGrid,
+	DataGridPremium as MUIDataGrid,
 	GridToolbar,
 	GridEventListener,
 	GridToolbarQuickFilter,
@@ -17,7 +17,7 @@ import {
 	GridRenderEditCellParams,
 	GridSortModel,
 	GridColumnVisibilityModel,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { useCallback, useState } from "react";

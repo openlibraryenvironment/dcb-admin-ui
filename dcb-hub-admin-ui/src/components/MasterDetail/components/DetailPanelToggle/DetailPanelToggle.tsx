@@ -6,7 +6,7 @@ import {
 	useGridSelector,
 	gridDetailPanelExpandedRowsContentCacheSelector,
 	GridApiPro,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import { isValidElement, MutableRefObject } from "react";
 import { useTranslation } from "next-i18next";
 

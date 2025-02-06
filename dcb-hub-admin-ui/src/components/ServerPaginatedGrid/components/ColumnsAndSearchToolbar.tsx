@@ -3,7 +3,7 @@ import {
 	GridToolbarColumnsButton,
 	GridToolbarContainer,
 	GridToolbarQuickFilter,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 
 export function ColumnsAndSearchToolbar() {
 	return (

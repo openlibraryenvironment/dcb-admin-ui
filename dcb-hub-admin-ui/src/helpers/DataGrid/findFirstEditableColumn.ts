@@ -1,4 +1,4 @@
-import { GridApiPro } from "@mui/x-data-grid-pro";
+import { GridApiPro } from "@mui/x-data-grid-premium";
 import { MutableRefObject } from "react";
 // Finds the first editable column, in order to apply focus to it.
 export const findFirstEditableColumn = (

@@ -1,4 +1,4 @@
-import { GridRowId } from "@mui/x-data-grid-pro";
+import { GridRowId } from "@mui/x-data-grid-premium";
 import { determineDataGridPathOnClick } from "./determineDataGridPathOnClick";
 
 export const createActionItems = (

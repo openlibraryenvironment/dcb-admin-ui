@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { Trans, useTranslation } from "next-i18next";
 import getConfig from "next/config";
 import { useEffect, useState } from "react";
-import { GridColDef } from "@mui/x-data-grid-pro";
+import { GridColDef } from "@mui/x-data-grid-premium";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";

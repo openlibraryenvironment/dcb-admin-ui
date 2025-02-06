@@ -7,7 +7,7 @@ import {
 	TextField,
 	useTheme,
 } from "@mui/material";
-import { GridRenderEditCellParams } from "@mui/x-data-grid-pro";
+import { GridRenderEditCellParams } from "@mui/x-data-grid-premium";
 import { useLazyQuery } from "@apollo/client";
 import { getRoles } from "src/queries/queries";
 import { useTranslation } from "next-i18next";

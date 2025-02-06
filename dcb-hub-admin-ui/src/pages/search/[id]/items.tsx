@@ -9,10 +9,10 @@ import { useEffect, useState, useMemo } from "react";
 import Error from "@components/Error/Error";
 import { useRouter } from "next/router";
 import {
-	DataGridPro,
+	DataGridPremium,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
@@ -168,7 +168,7 @@ const Items: NextPage = () => {
 					reload
 				/>
 			) : (
-				<DataGridPro
+				<DataGridPremium
 					rows={rows ?? []}
 					columns={columns}
 					getDetailPanelContent={({ row }) => (

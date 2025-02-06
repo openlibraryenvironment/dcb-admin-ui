@@ -1,4 +1,4 @@
-import { GridFilterModel } from "@mui/x-data-grid-pro";
+import { GridFilterModel } from "@mui/x-data-grid-premium";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 

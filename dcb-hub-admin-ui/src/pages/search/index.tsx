@@ -11,10 +11,10 @@ import Link from "@components/Link/Link";
 import { Clear, Search as SearchIcon } from "@mui/icons-material";
 import Error from "@components/Error/Error";
 import {
-	DataGridPro,
+	DataGridPremium,
 	GridColDef,
 	GridPaginationModel,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
 import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
 import getConfig from "next/config";
@@ -209,7 +209,7 @@ const Search: NextPage = () => {
 				/>
 			) : (
 				<>
-					<DataGridPro
+					<DataGridPremium
 						rows={searchResults.instances}
 						columns={columns}
 						pagination

@@ -9,11 +9,11 @@ import { Tooltip, useTheme } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Cancel } from "@mui/icons-material";
 import {
-	DataGridPro,
+	DataGridPremium,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
 	GridRenderCellParams,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Error from "@components/Error/Error";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
@@ -216,7 +216,7 @@ const Clusters: NextPage = () => {
 		<AdminLayout
 			title={t("search.cluster_title", { record: theCluster?.title })}
 		>
-			<DataGridPro
+			<DataGridPremium
 				loading={loading}
 				rows={rows ?? []}
 				columns={
