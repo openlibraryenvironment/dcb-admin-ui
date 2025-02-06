@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 import { ThemeOptions, darken, lighten } from "@mui/material/styles";
-import type {} from "@mui/x-data-grid-pro/themeAugmentation";
+import type {} from "@mui/x-data-grid-premium/themeAugmentation";
 
 // We have switched to using Next local fonts due to Next.js having issues fetching Google Fonts that were causing strange behaviour in dev mode
 // See here https://github.com/vercel/next.js/issues/45080

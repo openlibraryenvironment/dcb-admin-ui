@@ -1,7 +1,7 @@
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
 import { AdminLayout } from "@layout";
-import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid-premium";
 import axios from "axios";
 import { GetServerSideProps, NextPage } from "next";
 import { useSession } from "next-auth/react";

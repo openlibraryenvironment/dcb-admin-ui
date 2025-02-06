@@ -1,17 +1,19 @@
 import { IconButton, Tooltip } from "@mui/material";
 import {
-	useGridApiContext,
 	useGridSelector,
 	gridDetailPanelExpandedRowIdsSelector,
 	gridDetailPanelExpandedRowsContentCacheSelector,
 	gridRowsLookupSelector,
 	GridRowId,
-} from "@mui/x-data-grid-pro";
+	useGridApiContext,
+	GridApiPro,
+} from "@mui/x-data-grid-premium";
 import { useTranslation } from "next-i18next";
+import { MutableRefObject } from "react";
 import { MdUnfoldLess, MdUnfoldMore } from "react-icons/md";
 
 export default function DetailPanelHeader() {
-	const apiRef = useGridApiContext();
+	const apiRef = useGridApiContext() as MutableRefObject<GridApiPro>;
 	const { t } = useTranslation();
 
 	const expandedRowIds = useGridSelector(

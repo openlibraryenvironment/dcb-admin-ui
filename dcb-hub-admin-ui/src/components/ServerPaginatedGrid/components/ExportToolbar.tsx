@@ -6,7 +6,7 @@ import {
 	GridToolbarExportContainer,
 	GridToolbarFilterButton,
 	GridToolbarQuickFilter,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import { useTranslation } from "next-i18next";
 
 interface ExportToolbarProps {

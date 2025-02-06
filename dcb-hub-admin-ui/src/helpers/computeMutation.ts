@@ -1,4 +1,4 @@
-import { GridRowModel } from "@mui/x-data-grid-pro";
+import { GridRowModel } from "@mui/x-data-grid-premium";
 import { formatChangedFields } from "./formatChangedFields";
 
 export function computeMutation(newRow: GridRowModel, oldRow: GridRowModel) {

@@ -11,7 +11,7 @@ import { useQuery } from "@apollo/client";
 import { Person } from "@models/Person";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import NewContact from "./NewContact";
-import { GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 const Contacts: NextPage = () => {

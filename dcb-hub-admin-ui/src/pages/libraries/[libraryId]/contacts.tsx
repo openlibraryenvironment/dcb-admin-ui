@@ -26,7 +26,7 @@ import {
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
 import { ClientDataGrid } from "@components/ClientDataGrid";
-import { GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import { Person } from "@models/Person";
 
 type LibraryDetails = {

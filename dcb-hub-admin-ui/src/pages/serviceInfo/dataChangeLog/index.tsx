@@ -19,7 +19,7 @@ import {
 } from "src/helpers/dataChangeLogHelperFunctions";
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 import Link from "@components/Link/Link";
-import { GridRenderCellParams } from "@mui/x-data-grid-pro";
+import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 const DataChangeLog: NextPage = () => {

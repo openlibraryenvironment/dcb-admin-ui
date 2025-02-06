@@ -1,4 +1,4 @@
-import { GridValidRowModel } from "@mui/x-data-grid-pro";
+import { GridValidRowModel } from "@mui/x-data-grid-premium";
 type ValidationResult = {
 	field: string;
 	translationKey: string;

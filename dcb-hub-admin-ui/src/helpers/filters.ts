@@ -3,7 +3,7 @@ import {
 	GridCellParams,
 	GridFilterInputValue,
 	GridFilterOperator,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 // Bear in mind there are also numeric operators for those columns.
 
 // The logic for these custom filters is actually contained in the ServerPaginatedGrid for most cases

@@ -1,5 +1,5 @@
 import {
-	DataGridPro,
+	DataGridPremium,
 	GridActionsCellItem,
 	GridColDef,
 	GridColumnVisibilityModel,
@@ -13,7 +13,7 @@ import {
 	GridRowParams,
 	GridSortModel,
 	useGridApiRef,
-} from "@mui/x-data-grid-pro";
+} from "@mui/x-data-grid-premium";
 import {
 	DocumentNode,
 	useLazyQuery,
@@ -770,7 +770,7 @@ export default function ServerPaginationGrid({
 
 	return (
 		<div>
-			<DataGridPro
+			<DataGridPremium
 				apiRef={apiRef}
 				// Makes sure scrollbars aren't visible
 				sx={{
