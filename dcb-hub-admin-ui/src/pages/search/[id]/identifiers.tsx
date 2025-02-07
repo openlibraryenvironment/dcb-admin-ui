@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { DataGridPremium, GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-pro";
 import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
@@ -8,6 +8,7 @@ import { getClustersLegacy } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { AdminLayout } from "@layout";
 import Error from "@components/Error/Error";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 
 interface Identifier {
 	namespace: string;
@@ -57,11 +58,22 @@ const Identifiers: NextPage = () => {
 					sourceRecordId: member.sourceRecordId || "",
 					sourceSystemId: member.sourceSystemId || "",
 				};
-
 				const identifiers = member.canonicalMetadata?.identifiers || [];
-				identifiers.forEach((identifier: any) => {
-					namespaces.add(identifier.namespace);
-					baseRow[identifier.namespace] = identifier.value;
+				// Group identifiers by namespace
+				const groupedIdentifiers = identifiers.reduce(
+					(acc: Record<string, string[]>, identifier: any) => {
+						if (!acc[identifier.namespace]) {
+							acc[identifier.namespace] = [];
+						}
+						acc[identifier.namespace].push(identifier.value);
+						return acc;
+					},
+					{},
+				);
+				// Add namespaces and join multiple values with line breaks
+				Object.entries(groupedIdentifiers).forEach(([namespace, values]) => {
+					namespaces.add(namespace);
+					baseRow[namespace] = values.join("\n");
 				});
 
 				return baseRow;
@@ -112,7 +124,15 @@ const Identifiers: NextPage = () => {
 		</AdminLayout>
 	) : (
 		<AdminLayout title="Identifiers">
-			<DataGridPremium rows={rows} columns={columns} loading={loading} />
+			<ClientDataGrid
+				data={rows}
+				autoRowHeight={true}
+				columns={columns}
+				loading={loading}
+				type="Identifiers"
+				operationDataType="identifiers"
+				selectable={false}
+			/>
 		</AdminLayout>
 	);
 };

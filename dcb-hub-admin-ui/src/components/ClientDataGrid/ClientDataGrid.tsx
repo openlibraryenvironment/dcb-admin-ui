@@ -94,6 +94,7 @@ export default function ClientDataGrid<T extends object>({
 	editQuery,
 	loading,
 	operationDataType,
+	autoRowHeight,
 }: {
 	data: Array<T>;
 	columns: any;
@@ -110,6 +111,7 @@ export default function ClientDataGrid<T extends object>({
 	editQuery?: DocumentNode;
 	loading?: boolean;
 	operationDataType: string;
+	autoRowHeight?: boolean;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -527,6 +529,12 @@ export default function ClientDataGrid<T extends object>({
 				}}
 				apiRef={apiRef}
 				getRowId={(row) => getIdOfRow(row, type)}
+				getRowHeight={() => {
+					if (autoRowHeight) {
+						return "auto";
+					} else return null;
+				}}
+				// getRowHeight={autoRowHeight ? () => "auto" : null}
 				editMode="row"
 				onCellDoubleClick={(params, event) => {
 					// Prevent default double-click edit behavior
