@@ -305,6 +305,13 @@ export default function Locations({ libraryId }: LibraryDetails) {
 								filterOperators: standardFilters,
 							},
 							{
+								field: "localId",
+								headerName: "local UUID",
+								minWidth: 50,
+								flex: 0.8,
+								filterOperators: standardFilters,
+							},
+							{
 								field: "lastImported",
 								headerName: "Last imported",
 								minWidth: 100,

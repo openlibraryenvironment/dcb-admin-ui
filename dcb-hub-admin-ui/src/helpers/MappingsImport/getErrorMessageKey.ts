@@ -22,7 +22,7 @@ export const getErrorMessageKey = (message: string, type: string): string => {
 			type == "Numeric range mappings":
 			return "mappings.validation_expected_headers_nrm";
 		case message.includes("expected headers") && type == "Locations":
-			return "mappings.validation_expected_headers_nrm";
+			return "locations.import.error.expected_headers";
 		case message.includes("provide a Host LMS"):
 			return "mappings.validation_no_hostlms";
 		case message.includes("fromContext or toContext") &&
@@ -36,11 +36,19 @@ export const getErrorMessageKey = (message: string, type: string): string => {
 			return "mappings.mandatory_field_blank";
 		case message.includes("fewer columns"):
 			return "locations.import.error.column_numbers";
+		case message.includes("Agency not found"):
+			return "locations.import.error.no_agency";
+		case message.includes("A location with localId"):
+			return "locations.import.error.local_id";
 		case message.includes(
 			"The fromCategory or toCategory of this mapping does not match the category you have specified",
 		):
 			return "mappings.new.error.validation.invalid_category";
 		default:
-			return "mappings.unknown_error";
+			if (type == "Locations") {
+				return "locations.import.error.generic";
+			} else {
+				return "mappings.unknown_error";
+			}
 	}
 };

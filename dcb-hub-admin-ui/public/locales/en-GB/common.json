@@ -609,20 +609,23 @@
 		"loading_msg": "Loading locations....",
 		"alert_text": "Failed to fetch the locations, please refresh the page.",
 		"import": {
-			"button": "Import from file",
+			"button": "Import",
 			"confirmation_body": "<paragraph> <bold>{{existingMappingCount}}</bold> pickup locations for {{libraryName}} will be <bold>deleted</bold> and replaced with pickup locations from the file “{{fileName}}.”</paragraph>",
 			"confirmation_warning": "<paragraph> It will not be possible to undo the import. Please backup your pickup locations before continuing.</paragraph> <paragraph> A backup can be exported from the <linkComponent>{{type}} grid</linkComponent> </paragraph>",
 			"confirmation_replace": "To go ahead, select “Replace locations.",
 			"error": {
 				"column_numbers": "The file you have provided doesn't have the correct number of columns. Please check the expected column headers, correct, and retry.",
-				"expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“Agency Code”</bold>, <bold>“Location Code”</bold> and <bold>“Display Name”</bold>. Please correct the column headers and retry.</paragraph>"
+				"expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“Agency Code”</bold>, <bold>“Location Code”</bold> and <bold>“Display Name”</bold>. Please correct the column headers and retry.</paragraph>",
+				"generic": "An error occurred whilst importing locations. Please try again.",
+				"local_id": "A location already exists for this host system with the localId value specified in your file. Please correct and retry.",
+				"no_agency": "One or more <bold>agency codes</bold> is invalid. Please correct and retry."
 			},
 			"header": "Import pickup locations for {{library}}",
 			"replace": "Replace locations",
 			"success": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully.",
-			"success_ignored": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully. {{ignoredCount}} pickup locations did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information",
+			"success_ignored": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully. {{ignoredCount}} pickup location(s) did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information",
 			"successful_replacement": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted.",
-			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup locations did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information."
+			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup location(s) did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information."
 		},
 		"new": {
 			"button": "New location",

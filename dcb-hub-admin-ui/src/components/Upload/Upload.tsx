@@ -475,7 +475,7 @@ const FileUpload = ({
 			<TimedAlert
 				severityType="success"
 				open={isSuccess}
-				autoHideDuration={6000}
+				autoHideDuration={12000}
 				alertText={
 					<Trans
 						i18nKey={getSuccessKey(type, replacement, ignoredCount)}

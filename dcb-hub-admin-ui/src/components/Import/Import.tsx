@@ -84,11 +84,7 @@ export default function Import({
 					/>
 
 					{type == "Locations" && presetHostLms ? (
-						<Grid
-							container
-							// spacing={{ xs: 2, sm: 3, md: 3, lg: 3 }}
-							columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-						>
+						<Grid container columns={{ xs: 4, sm: 8, md: 12 }}>
 							<Grid xs={2} sm={4} md={6}>
 								<Stack>
 									<Typography variant="attributeTitle">
@@ -97,7 +93,7 @@ export default function Import({
 									<RenderAttribute attribute={type} />
 								</Stack>
 							</Grid>
-							<Grid xs={2} sm={4} md={4}>
+							<Grid xs={2} sm={4} md={6}>
 								<Stack>
 									<Typography variant="attributeTitle">
 										{t("hostlms.hostlms_one")}
