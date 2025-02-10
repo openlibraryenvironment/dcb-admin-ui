@@ -238,6 +238,8 @@ const Clusters: NextPage = () => {
 					detailPanelExpandIcon: MdExpandMore,
 					detailPanelCollapseIcon: MdExpandLess,
 				}}
+				disableAggregation={true}
+				disableRowGrouping={true}
 			/>
 		</AdminLayout>
 	);

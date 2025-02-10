@@ -235,6 +235,8 @@ const Confirmation = ({
 									toolbarVisible="search-columns"
 									sortModel={[{ field: "dateCreated", sort: "desc" }]}
 									operationDataType="PatronRequest"
+									disableAggregation={true}
+									disableRowGrouping={true}
 								/>
 							</>
 						) : null}

@@ -132,6 +132,8 @@ const Identifiers: NextPage = () => {
 				type="Identifiers"
 				operationDataType="identifiers"
 				selectable={false}
+				disableAggregation={true}
+				disableRowGrouping={true}
 			/>
 		</AdminLayout>
 	);

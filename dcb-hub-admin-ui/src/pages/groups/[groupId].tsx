@@ -151,6 +151,8 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 				// This is how to set the default sort order
 				sortModel={[{ field: "fullName", sort: "asc" }]}
 				operationDataType="Library"
+				disableAggregation={true}
+				disableRowGrouping={true}
 			/>
 		</AdminLayout>
 	);

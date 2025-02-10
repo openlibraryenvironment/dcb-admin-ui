@@ -132,6 +132,8 @@ const RequestErrors: NextPage = () => {
 					noDataTitle={t("error_overview.no_results")}
 					sortModel={[{ field: "total", sort: "desc" }]}
 					operationDataType="ErrorOverview"
+					disableAggregation={true}
+					disableRowGrouping={true}
 				/>
 			)}
 		</AdminLayout>

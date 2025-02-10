@@ -652,6 +652,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						toolbarVisible="not-visible"
 						sortModel={[{ field: "name", sort: "asc" }]}
 						operationDataType="Group"
+						disableAggregation={true}
+						disableRowGrouping={true}
 					/>
 				</Grid>
 			</Grid>
