@@ -267,6 +267,7 @@ const FileUpload = ({
 				setSuccessCount(response.data.recordsImported ?? 0);
 				setDeletedCount(response.data.recordsDeleted ?? 0);
 				setIgnoredCount(response.data.recordsIgnored ?? 0);
+				console.log(response.data.ignoredConfigItems);
 				setUploadButtonClicked(false);
 				setTimeout(() => {
 					onCancel(); // Close the modal
@@ -279,7 +280,7 @@ const FileUpload = ({
 					if (fileInput) {
 						fileInput.value = "";
 					}
-				}, 3000);
+				}, 6000);
 			})
 			.catch((error) => {
 				// Error handling
