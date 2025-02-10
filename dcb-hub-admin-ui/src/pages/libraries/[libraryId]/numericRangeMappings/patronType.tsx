@@ -78,8 +78,8 @@ export default function PatronType({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	const numericRangePatronTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "patronType" AND (NOT deleted:true)`;
-	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "patronType" AND (NOT deleted:true)`;
+	const numericRangePatronTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "patronType" AND NOT deleted:true`;
+	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "patronType" AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (
