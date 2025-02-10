@@ -306,7 +306,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 							},
 							{
 								field: "localId",
-								headerName: "local UUID",
+								headerName: "Local ID",
 								minWidth: 50,
 								flex: 0.8,
 								filterOperators: standardFilters,
@@ -338,6 +338,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 							id: false,
 							lastImported: false,
 							agencyCode: false,
+							localId: false,
 						}}
 						sortModel={[{ field: "lastImported", sort: "desc" }]}
 						sortDirection="DESC"
