@@ -154,6 +154,8 @@ const Contacts: NextPage = () => {
 						disableHoverInteractions={true}
 						editQuery={updatePerson}
 						operationDataType="Person"
+						disableAggregation={true}
+						disableRowGrouping={true}
 					/>
 				</Grid>
 			</Grid>

@@ -217,6 +217,8 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 						disableHoverInteractions={true}
 						editQuery={updatePerson}
 						operationDataType="Person"
+						disableAggregation={true}
+						disableRowGrouping={true}
 					/>
 				</Grid>
 			</Grid>

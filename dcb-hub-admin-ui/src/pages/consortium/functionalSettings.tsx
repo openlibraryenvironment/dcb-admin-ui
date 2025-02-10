@@ -141,6 +141,8 @@ const FunctionalSettings: NextPage = () => {
 						disableHoverInteractions={true}
 						editQuery={updateFunctionalSettingQuery}
 						operationDataType="FunctionalSetting"
+						disableAggregation={true}
+						disableRowGrouping={true}
 					/>
 				</Grid>
 			</Grid>

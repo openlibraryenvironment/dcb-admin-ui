@@ -900,6 +900,8 @@ export default function ServerPaginationGrid({
 						allDataLoading,
 					},
 				}}
+				disableAggregation={true}
+				disableRowGrouping={true}
 			/>
 			<Confirmation
 				open={!!promiseArguments}

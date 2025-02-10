@@ -3,7 +3,7 @@ import { Box, Tooltip, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import {
-	DataGridPremium as MUIDataGrid,
+	DataGridPremium,
 	GridToolbar,
 	GridEventListener,
 	GridToolbarQuickFilter,
@@ -95,6 +95,8 @@ export default function ClientDataGrid<T extends object>({
 	loading,
 	operationDataType,
 	autoRowHeight,
+	disableAggregation,
+	disableRowGrouping,
 }: {
 	data: Array<T>;
 	columns: any;
@@ -112,6 +114,8 @@ export default function ClientDataGrid<T extends object>({
 	loading?: boolean;
 	operationDataType: string;
 	autoRowHeight?: boolean;
+	disableAggregation: boolean;
+	disableRowGrouping: boolean;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -443,7 +447,7 @@ export default function ClientDataGrid<T extends object>({
 	// fix no data overlay - broken somehow.
 	return (
 		<div>
-			<MUIDataGrid
+			<DataGridPremium
 				// Makes sure scrollbars aren't visible
 				sx={{
 					border: "0",
@@ -479,7 +483,19 @@ export default function ClientDataGrid<T extends object>({
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={handleRowModesModelChange}
 				onSortModelChange={handleSortModelChange}
+				disableAggregation={disableAggregation}
+				disableRowGrouping={disableRowGrouping}
 				initialState={{
+					aggregation: {
+						model: {
+							sourceRecordCount: "sum",
+							awaiting: "sum",
+							failed: "sum",
+							ingested: "sum",
+							bibRecordCount: "sum",
+							difference: "sum",
+						},
+					},
 					filter: {
 						// initiate the filter models here
 						filterModel: {
@@ -563,7 +579,7 @@ export default function ClientDataGrid<T extends object>({
 					toolbarExportCSV: t("ui.data_grid.download_current_page"),
 					toolbarExportPrint: t("ui.data_grid.print_current_page"),
 				}}
-			></MUIDataGrid>
+			/>
 			<Confirmation
 				open={!!promiseArguments}
 				onClose={handleNo}

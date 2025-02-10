@@ -227,6 +227,8 @@ const Search: NextPage = () => {
 								<CustomNoDataOverlay noDataMessage={t("search.no_data")} />
 							),
 						}}
+						disableAggregation={true}
+						disableRowGrouping={true}
 					/>
 				</>
 			)}

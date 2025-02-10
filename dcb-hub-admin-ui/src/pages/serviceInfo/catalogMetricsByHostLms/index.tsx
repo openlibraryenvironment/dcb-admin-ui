@@ -73,11 +73,15 @@ const CatalogMetricsByHostLms: NextPage = () => {
 			field: "sourceRecordCount",
 			headerName: t("catalogMetricsByHostLms.harvested"),
 			flex: 0.5,
+			type: "number",
+			groupable: false,
 		},
 		{
 			field: "awaiting",
 			headerName: t("catalogMetricsByHostLms.await"),
 			flex: 0.5,
+			groupable: false,
+			type: "number",
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
 				const failure = states.find(
@@ -90,6 +94,8 @@ const CatalogMetricsByHostLms: NextPage = () => {
 			field: "failed",
 			headerName: t("catalogMetricsByHostLms.failed"),
 			flex: 0.5,
+			groupable: false,
+			type: "number",
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
 				const failure = states.find(
@@ -102,6 +108,8 @@ const CatalogMetricsByHostLms: NextPage = () => {
 			field: "ingested",
 			headerName: t("catalogMetricsByHostLms.ingested"),
 			flex: 0.5,
+			groupable: false,
+			type: "number",
 			valueGetter: (value, row) => {
 				const states: ProcessState[] = row?.processStates || [];
 				const failure = states.find(
@@ -114,11 +122,15 @@ const CatalogMetricsByHostLms: NextPage = () => {
 			field: "bibRecordCount",
 			headerName: t("nav.bibs"),
 			flex: 0.5,
+			type: "number",
+			groupable: false,
 		},
 		{
 			field: "difference",
 			headerName: t("catalogMetricsByHostLms.difference"),
 			flex: 0.75,
+			type: "number",
+			groupable: false,
 			valueGetter: (value, row) => {
 				const difference: number = row.sourceRecordCount - row.bibRecordCount;
 				return difference;
@@ -198,6 +210,8 @@ const CatalogMetricsByHostLms: NextPage = () => {
 					sourceSystemId: false,
 				}}
 				operationDataType="BibRecord"
+				disableAggregation={false}
+				disableRowGrouping={true}
 			/>
 		</AdminLayout>
 	);

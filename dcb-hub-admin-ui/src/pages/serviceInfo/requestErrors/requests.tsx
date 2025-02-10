@@ -139,6 +139,8 @@ const Requests = () => {
 					noDataTitle={t("error_overview.no_results")}
 					sortModel={[{ field: "Date", sort: "desc" }]}
 					operationDataType="PatronRequest"
+					disableAggregation={true}
+					disableRowGrouping={true}
 				/>
 			)}
 		</AdminLayout>

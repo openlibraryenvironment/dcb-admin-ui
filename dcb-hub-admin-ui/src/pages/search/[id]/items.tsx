@@ -184,6 +184,8 @@ const Items: NextPage = () => {
 						border: "0",
 					}}
 					loading={loading}
+					disableAggregation={true}
+					disableRowGrouping={true}
 				/>
 			)}
 		</AdminLayout>
