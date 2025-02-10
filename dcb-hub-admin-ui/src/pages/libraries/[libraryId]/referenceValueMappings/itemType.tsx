@@ -89,8 +89,8 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	const refValueItemTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
-	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND (NOT deleted:true)`;
+	const refValueItemTypeVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND NOT deleted:true`;
+	const refValueItemTypeSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "ItemType" OR fromCategory: "ItemType") AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (

@@ -87,8 +87,8 @@ export default function Location({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	const refValueLocationVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND (NOT deleted:true)`;
-	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND (NOT deleted:true)`;
+	const refValueLocationVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND NOT deleted:true`;
+	const refValueLocationForLibrarySecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (toCategory: "Location" OR fromCategory: "Location") AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (

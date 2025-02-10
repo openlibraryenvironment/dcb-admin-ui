@@ -78,8 +78,8 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND (NOT deleted:true)`;
-	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "ItemType" AND (NOT deleted:true)`;
+	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND NOT deleted:true`;
+	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "ItemType" AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (

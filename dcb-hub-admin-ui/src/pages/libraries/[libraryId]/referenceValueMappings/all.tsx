@@ -87,8 +87,8 @@ export default function All({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	const refValueAllVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND (NOT deleted:true)`;
-	const refValueAllSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND (NOT deleted:true)`;
+	const refValueAllVariables = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:${library?.agency?.hostLms?.code}) AND NOT deleted:true`;
+	const refValueAllSecondHostLmsVariables = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:${library?.secondHostLms?.code}) AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (

@@ -78,8 +78,8 @@ export default function All({ libraryId }: LibraryDetails) {
 		},
 	];
 
-	const numericRangeAll = `context:${library?.agency?.hostLms?.code} AND (NOT deleted:true)`;
-	const numericRangeAllSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND (NOT deleted:true)`;
+	const numericRangeAll = `context:${library?.agency?.hostLms?.code} AND NOT deleted:true`;
+	const numericRangeAllSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (
