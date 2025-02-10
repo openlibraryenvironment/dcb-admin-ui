@@ -21,6 +21,7 @@ import {
 	StyledDataGridAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
 import { ExpandMore } from "@mui/icons-material";
+import { LocationCell } from "@components/LocationCell/LocationCell";
 
 type MasterDetailType = {
 	row: any;
@@ -395,6 +396,14 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								{t("details.supplying_agency_code")}
 							</Typography>
 							<RenderAttribute attribute={row?.suppliers[0]?.localAgency} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("patron_requests.pickup_location_name")}
+							</Typography>
+							<LocationCell locationId={row?.pickupLocationCode} />
 						</Stack>
 					</Grid>
 					<Grid xs={2} sm={4} md={4}>

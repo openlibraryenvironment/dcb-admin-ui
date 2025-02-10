@@ -310,6 +310,43 @@ export const standardPatronRequestColumns = [
 		},
 	},
 	{
+		field: "canonicalPtype",
+		headerName: "DCB canonical patron type",
+		minWidth: 100,
+		flex: 0.5,
+		filterable: false,
+		sortable: false,
+		valueGetter: (value: any, row: PatronRequest) => {
+			const requestingIdentity = row?.requestingIdentity;
+			return requestingIdentity?.canonicalPtype ?? "";
+		},
+	},
+	{
+		field: "canonicalItemType",
+		headerName: "DCB canonical item type",
+		minWidth: 100,
+		flex: 0.5,
+		filterable: false,
+		sortable: false,
+		valueGetter: (
+			value: any,
+			row: { suppliers: Array<{ canonicalItemType: string }> },
+		) => {
+			if (row.suppliers.length > 0) {
+				return row.suppliers[0].canonicalItemType;
+			} else {
+				return ""; // This allows us to handle the array being empty, and any related type errors.
+			}
+		},
+	},
+	{
+		field: "pickupLocationCode",
+		headerName: "Pickup location name",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: equalsOnly,
+	},
+	{
 		field: "previousStatus",
 		headerName: "Previous status",
 		minWidth: 100,
@@ -433,6 +470,43 @@ export const patronRequestColumnsNoStatusFilter = [
 		},
 	},
 	{
+		field: "canonicalPtype",
+		headerName: "DCB canonical patron type",
+		minWidth: 100,
+		flex: 0.5,
+		filterable: false,
+		sortable: false,
+		valueGetter: (value: any, row: PatronRequest) => {
+			const requestingIdentity = row?.requestingIdentity;
+			return requestingIdentity?.canonicalPtype ?? "";
+		},
+	},
+	{
+		field: "canonicalItemType",
+		headerName: "DCB canonical item type",
+		minWidth: 100,
+		flex: 0.5,
+		filterable: false,
+		sortable: false,
+		valueGetter: (
+			value: any,
+			row: { suppliers: Array<{ canonicalItemType: string }> },
+		) => {
+			if (row.suppliers.length > 0) {
+				return row.suppliers[0].canonicalItemType;
+			} else {
+				return ""; // This allows us to handle the array being empty, and any related type errors.
+			}
+		},
+	},
+	{
+		field: "pickupLocationCode",
+		headerName: "Pickup location name",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: equalsOnly,
+	},
+	{
 		field: "previousStatus",
 		headerName: "Previous status",
 		minWidth: 100,
@@ -507,6 +581,9 @@ export const patronRequestColumnsNoStatusFilter = [
 ];
 
 export const defaultPatronRequestLibraryColumnVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
 	patronHostlmsCode: false,
 	previousStatus: false,
 	nextExpectedStatus: false,
@@ -518,6 +595,9 @@ export const defaultPatronRequestLibraryColumnVisibility = {
 };
 
 export const defaultPatronRequestColumnVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
 	previousStatus: false,
 	nextExpectedStatus: false,
 	errorMessage: false,
@@ -528,12 +608,18 @@ export const defaultPatronRequestColumnVisibility = {
 };
 
 export const finishedPatronRequestColumnVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
 	elapsedTimeInCurrentStatus: false,
 	pollCountForCurrentStatus: false,
 	outOfSequenceFlag: false,
 };
 
 export const exceptionPatronRequestColumnVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
 	previousStatus: true,
 	status: false,
 	errorMessage: true,
@@ -544,6 +630,9 @@ export const exceptionPatronRequestColumnVisibility = {
 };
 
 export const locationPatronRequestColumnVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
 	status: true,
 	previousStatus: false,
 	nextExpectedStatus: false,

@@ -36,6 +36,7 @@ import {
 import { useRouter } from "next/router";
 import { formatDuration } from "src/helpers/formatDuration";
 import { cleanupStatuses, untrackedStatuses } from "src/helpers/statuses";
+import { LocationCell } from "@components/LocationCell/LocationCell";
 
 type PatronRequestDetails = {
 	patronRequestId: string;
@@ -1305,16 +1306,12 @@ export default function PatronRequestDetails({
 						<Grid xs={2} sm={4} md={4}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.pickup_code_uuid")}
+									{t("patron_requests.pickup_location_name")}
 								</Typography>
 								{patronRequest?.pickupLocationCode ? (
-									<Link
-										href={`/locations/${patronRequest?.pickupLocationCode}`}
-									>
-										<RenderAttribute
-											attribute={patronRequest?.pickupLocationCode}
-										/>
-									</Link>
+									<LocationCell
+										locationId={patronRequest?.pickupLocationCode}
+									/>
 								) : (
 									<RenderAttribute
 										attribute={patronRequest?.pickupLocationCode}
