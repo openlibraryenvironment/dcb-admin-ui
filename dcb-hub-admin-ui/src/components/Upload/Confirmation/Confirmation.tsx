@@ -59,6 +59,7 @@ type ConfirmType = {
 	buttonText?: string;
 	bodyText?: string;
 	gridEdit: boolean;
+	libraryName?: string;
 };
 
 const Confirmation = ({
@@ -80,6 +81,7 @@ const Confirmation = ({
 	buttonText,
 	bodyText,
 	gridEdit,
+	libraryName,
 }: ConfirmType) => {
 	const { t } = useTranslation();
 	const validationSchema = useMemo(
@@ -140,6 +142,8 @@ const Confirmation = ({
 			? "/mappings/allReferenceValue"
 			: "/mappings/allNumericRange";
 
+	// May need library ID/specific info to personalise this
+	const locationExportLink = "/locations";
 	const getHeaderText = () => {
 		switch (type) {
 			case "gridEdit":
@@ -164,6 +168,8 @@ const Confirmation = ({
 							? mappingType?.toLowerCase()
 							: mappingCategory + " " + mappingType?.toLowerCase(),
 				});
+			case "locations":
+				return t("locations.import.header", { library: libraryName });
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
 					entity: !entityName ? entity?.toLowerCase() : "",
@@ -260,6 +266,44 @@ const Confirmation = ({
 							context="edit"
 						/>
 					</Box>
+				);
+			case "locations":
+				return (
+					<Stack spacing={2}>
+						<Trans
+							i18nKey="locations.import.confirmation_body"
+							values={{
+								existingMappingCount,
+								libraryName,
+								fileName,
+							}}
+							components={{ paragraph: <p />, bold: <strong /> }}
+						/>
+						<Alert
+							closeButtonShown={false}
+							severityType="warning"
+							alertText={
+								<Trans
+									i18nKey={"locations.import.confirmation_warning"}
+									values={{ type: mappingType?.toLowerCase() }}
+									components={{
+										linkComponent: (
+											<Link
+												key="grid-export-link"
+												href={locationExportLink}
+												target="_blank"
+												rel="noopener noreferrer"
+											/>
+										),
+										paragraph: <p />,
+									}}
+								/>
+							}
+						/>
+						<Typography>
+							{t("locations.import.confirmation_replace")}
+						</Typography>
+					</Stack>
 				);
 			case "mappings":
 				return (
@@ -364,6 +408,8 @@ const Confirmation = ({
 				return t("ui.data_grid.confirm_changes");
 			case "mappings":
 				return t("mappings.confirmation_replace_mappings");
+			case "locations":
+				return t("locations.import.replace");
 			case "deletelibraries":
 				return t("ui.data_grid.delete_entity", {
 					entity: t("libraries.library").toLowerCase(),
@@ -456,7 +502,6 @@ const Confirmation = ({
 										<Typography mb={2} variant="subtitle2">
 											{t("nav.serviceInfo.dataChangeLog")}
 										</Typography>
-
 										<Autocomplete
 											options={[
 												t("data_change_log.categories.error_correction"),

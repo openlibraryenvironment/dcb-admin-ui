@@ -18,6 +18,21 @@ export const getFieldsForExport = (coreType: string) => {
 				"mappedValue",
 				"targetContext",
 			];
+		case "locations":
+			return [
+				"agencyCode",
+				"code",
+				"name",
+				"printLabel",
+				"deliveryStops",
+				"latitude",
+				"longitude",
+				"isPickup",
+				"type",
+				"type",
+				"address",
+				"localId",
+			];
 		default:
 			return [];
 	}

@@ -178,7 +178,7 @@ const AllMappings: NextPage = () => {
 					<Import
 						show={showImport}
 						onClose={closeImport}
-						mappingType="Reference value mappings"
+						type="Reference value mappings"
 					/>
 				) : null}
 			</div>

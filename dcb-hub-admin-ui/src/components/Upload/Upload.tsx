@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react";
 import Confirmation from "./Confirmation/Confirmation";
 import { useLazyQuery } from "@apollo/client/react";
 import {
+	checkExistingLocations,
 	checkExistingMappings,
 	checkExistingNumericRangeMappings,
 } from "src/queries/queries";
@@ -17,11 +18,14 @@ import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
 import { getErrorMessageKey } from "src/helpers/MappingsImport/getErrorMessageKey";
 import Link from "next/link";
 import { checkValidFileType } from "src/helpers/checkValidFileType";
+import { getSuccessKey } from "src/helpers/MappingsImport/getSuccessMessageKey";
 
 // WIP: Re-implementing what was previously done for us by Uppy.
 // Long-term aim: feature parity with Uppy for what we need and a better UI.
 const { publicRuntimeConfig } = getConfig();
 const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
+
+const locationUrl = publicRuntimeConfig.DCB_API_BASE + "/locations/upload";
 const ALLOWED_FILE_TYPES = {
 	"text/csv": [".csv"],
 	"text/tab-separated-values": [".tsv"],
@@ -31,10 +35,14 @@ const FileUpload = ({
 	category,
 	onCancel,
 	type,
+	presetHostLmsId,
+	libraryName,
 }: {
 	category: string;
 	onCancel: () => void;
-	type: "Reference value mappings" | "Numeric range mappings";
+	type: "Reference value mappings" | "Numeric range mappings" | "Locations";
+	presetHostLmsId?: string;
+	libraryName?: string;
 }) => {
 	const { t } = useTranslation();
 	const { data } = useSession();
@@ -92,6 +100,11 @@ const FileUpload = ({
 		pagesize: 200,
 	};
 
+	const locationVariables = {
+		query: "hostSystem:" + presetHostLmsId,
+		pagesize: 200,
+	};
+
 	const [checkMappingsPresent] = useLazyQuery(checkExistingMappings, {
 		variables: category == "all" ? refVariablesAll : refVariablesCategory,
 		fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
@@ -132,6 +145,22 @@ const FileUpload = ({
 		},
 	);
 
+	const [checkLocationsPresent] = useLazyQuery(checkExistingLocations, {
+		fetchPolicy: "network-only",
+		onCompleted: (data) => {
+			setExistingMappingCount(data?.locations?.totalSize);
+			if (uploadButtonClicked) {
+				// Add this condition
+				if (data?.locations?.totalSize == 0 || data.isEmpty) {
+					setConfirmOpen(false);
+					uploadFile();
+				} else {
+					setConfirmOpen(true);
+					setReplacement(true);
+				}
+			}
+		},
+	});
 	const handleFileChange = (event: any) => {
 		const file = event.target.files[0];
 		if (file) {
@@ -202,30 +231,43 @@ const FileUpload = ({
 		const formData = new FormData();
 		formData.append("file", addedFile);
 		formData.append("code", code);
-		formData.append("mappingCategory", category);
-		formData.append("mappingType", type);
+		if (type != "Locations") {
+			formData.append("category", category);
+		}
+		formData.append("type", type);
 		if (reason) {
 			formData.append("reason", reason);
 		} else {
-			formData.append("reason", "Initial upload of mappings");
+			if (type == "Locations") {
+				formData.append("reason", "Pickup locations upload");
+			} else {
+				formData.append("reason", "Initial upload of mappings");
+			}
 		}
 		if (changeCategory) {
 			formData.append("changeCategory", changeCategory);
 		} else {
-			formData.append("changeCategory", "Initial mappings upload");
+			if (type == "Locations") {
+				formData.append("changeCategory", "Pickup locations upload");
+			} else {
+				formData.append("changeCategory", "Initial mappings upload");
+			}
 		}
 		if (changeReferenceUrl) {
 			formData.append("changeReferenceUrl", changeReferenceUrl);
 		}
 
 		axios
-			.post(url, formData, { headers })
+			.post(type == "Locations" ? locationUrl : url, formData, {
+				headers,
+			})
 			.then((response) => {
 				// Handle successful upload response
 				setSuccess(true);
 				setSuccessCount(response.data.recordsImported ?? 0);
 				setDeletedCount(response.data.recordsDeleted ?? 0);
 				setIgnoredCount(response.data.recordsIgnored ?? 0);
+				console.log(response.data.ignoredConfigItems);
 				setUploadButtonClicked(false);
 				setTimeout(() => {
 					onCancel(); // Close the modal
@@ -238,7 +280,7 @@ const FileUpload = ({
 					if (fileInput) {
 						fileInput.value = "";
 					}
-				}, 3000);
+				}, 6000);
 			})
 			.catch((error) => {
 				// Error handling
@@ -284,6 +326,10 @@ const FileUpload = ({
 					variables:
 						category === "all" ? refVariablesAll : refVariablesCategory,
 				});
+			} else if (type == "Locations" && presetHostLmsId) {
+				checkLocationsPresent({
+					variables: locationVariables,
+				});
 			} else {
 				checkNumericRangeMappingsPresent({
 					variables:
@@ -319,7 +365,11 @@ const FileUpload = ({
 						linkComponent: (
 							<Link
 								key="import-user-guide"
-								href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
+								href={
+									type == "Locations"
+										? "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3411804195/Importing+pickup+locations+in+DCB+Admin"
+										: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
+								}
 							/>
 						),
 						paragraph: <p />,
@@ -363,15 +413,18 @@ const FileUpload = ({
 				existingMappingCount={existingMappingCount}
 				fileName={addedFile?.name}
 				code={code}
-				type="mappings"
+				type={type == "Locations" ? "locations" : "mappings"}
 				mappingCategory={category}
 				mappingType={type}
 				entity={
 					type == "Reference value mappings"
 						? t("mappings.ref_value_one")
-						: t("mappings.num_range_one")
+						: type == "Numeric range mappings"
+							? t("mappings.num_range_one")
+							: t("locations.location_one")
 				}
 				gridEdit={false}
+				libraryName={libraryName}
 			/>
 			<TimedAlert
 				open={isErrorDisplayed}
@@ -423,31 +476,36 @@ const FileUpload = ({
 			<TimedAlert
 				severityType="success"
 				open={isSuccess}
-				autoHideDuration={6000}
+				autoHideDuration={12000}
 				alertText={
 					<Trans
-						i18nKey={
-							isSuccess && !replacement
-								? t("mappings.upload_success", {
-										category:
-											category == "all"
-												? type?.toLowerCase()
-												: category + " " + type?.toLowerCase(),
-										count: successCount,
-										code: code,
-										ignoredCount: ignoredCount,
-									})
-								: t("mappings.upload_success_replacement", {
-										category:
-											category == "all"
-												? type?.toLowerCase()
-												: category + " " + type?.toLowerCase(),
-										addedCount: successCount,
-										code: code,
-										deletedMappingCount: deletedCount,
-									})
-						}
-						components={{ bold: <strong />, paragraph: <p /> }}
+						i18nKey={getSuccessKey(type, replacement, ignoredCount)}
+						values={{
+							count: successCount,
+							code: code,
+							ignoredCount: ignoredCount,
+							deletedMappingCount: deletedCount,
+							addedCount: successCount,
+							category:
+								category == "all"
+									? type?.toLowerCase()
+									: category + " " + type?.toLowerCase(),
+							libraryName: libraryName,
+						}}
+						components={{
+							bold: <strong />,
+							paragraph: <p />,
+							linkComponent: (
+								<Link
+									key="import-user-guide"
+									href={
+										type == "Locations"
+											? "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3411804195/Importing+pickup+locations+in+DCB+Admin"
+											: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
+									}
+								/>
+							),
+						}}
 					/>
 				}
 				key={"upload-successful"}

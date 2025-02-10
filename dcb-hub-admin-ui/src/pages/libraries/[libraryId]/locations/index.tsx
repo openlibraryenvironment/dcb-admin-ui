@@ -8,14 +8,14 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import { AdminLayout } from "@layout";
 import { Library } from "@models/Library";
 import { Delete } from "@mui/icons-material";
-import { Button, Tab, Tabs, useTheme } from "@mui/material";
+import { Button, Stack, Tab, Tabs, Tooltip, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { adminOrConsortiumAdmin, allAdmins } from "src/constants/roles";
 import {
 	closeConfirmation,
 	handleDeleteEntity,
@@ -31,6 +31,9 @@ import {
 } from "src/queries/queries";
 import NewLocation from "./NewLocation";
 import { getILS } from "src/helpers/getILS";
+import Import from "@components/Import/Import";
+import useCode from "@hooks/useCode";
+import dayjs from "dayjs";
 type LibraryDetails = {
 	libraryId: string;
 };
@@ -47,6 +50,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 
 	const [tabIndex, setTabIndex] = useState(6);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
+	const [showImport, setImport] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
@@ -73,6 +77,8 @@ export default function Locations({ libraryId }: LibraryDetails) {
 	const customColumns = useCustomColumns();
 
 	const client = useApolloClient();
+	const { updateCategory, updateCode, resetAll } = useCode();
+
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -82,6 +88,22 @@ export default function Locations({ libraryId }: LibraryDetails) {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
+	const isMinLibraryAdmin = session?.profile?.roles?.some((role: string) =>
+		allAdmins.includes(role),
+	);
+	const closeImport = () => {
+		setImport(false);
+		resetAll();
+		client.refetchQueries({
+			include: ["LoadLocations"],
+		});
+	};
+
+	const openImport = () => {
+		updateCategory("Locations");
+		updateCode(library?.agency?.hostLms?.code);
+		setImport(true);
+	};
 
 	const [newLocation, setNewLocation] = useState<NewLocationData>({
 		show: false,
@@ -169,24 +191,45 @@ export default function Locations({ libraryId }: LibraryDetails) {
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
 					{isAnAdmin ? (
-						<Button
-							data-tid="new-location-button"
-							variant="outlined"
-							onClick={() => {
-								setNewLocation({
-									show: true,
-									hostLmsCode: library?.agency?.hostLms?.code,
-									agencyCode: library?.agencyCode,
-									libraryName: library?.fullName,
-									ils: library?.agency?.hostLms?.lmsClientClass
-										? getILS(library?.agency?.hostLms?.lmsClientClass)
-										: "",
-								});
-							}}
-						>
-							{t("locations.new.button")}
-						</Button>
+						<Stack spacing={4} direction={"row"}>
+							<Button
+								data-tid="new-location-button"
+								variant="outlined"
+								onClick={() => {
+									setNewLocation({
+										show: true,
+										hostLmsCode: library?.agency?.hostLms?.code,
+										agencyCode: library?.agencyCode,
+										libraryName: library?.fullName,
+										ils: library?.agency?.hostLms?.lmsClientClass
+											? getILS(library?.agency?.hostLms?.lmsClientClass)
+											: "",
+									});
+								}}
+							>
+								{t("locations.new.button")}
+							</Button>
+							<Tooltip
+								title={
+									isMinLibraryAdmin ? "" : t("mappings.import_disabled") // Tooltip text when disabled
+								}
+							>
+								{/* Adding a span as a wrapper to enable tooltip on disabled button */}
+								<span>
+									<Button
+										variant="outlined"
+										onClick={() => {
+											openImport();
+										}}
+										disabled={!isMinLibraryAdmin} // Disable if not ADMIN
+									>
+										{t("locations.import.button")}
+									</Button>
+								</span>
+							</Tooltip>
+						</Stack>
 					) : null}
+
 					<ServerPaginationGrid
 						query={getLocations}
 						type="libraryLocations"
@@ -195,6 +238,16 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						operationDataType="Location"
 						columns={[
 							...customColumns,
+							{
+								field: "agencyCode",
+								headerName: "Agency code",
+								minWidth: 150,
+								flex: 0.6,
+								filterable: false,
+								sortable: false,
+								valueGetter: (value, row: { agency: { code: string } }) =>
+									row?.agency?.code,
+							},
 							{
 								field: "hostSystemName",
 								headerName: "Host LMS name",
@@ -251,6 +304,30 @@ export default function Locations({ libraryId }: LibraryDetails) {
 								flex: 0.8,
 								filterOperators: standardFilters,
 							},
+							{
+								field: "localId",
+								headerName: "Local ID",
+								minWidth: 50,
+								flex: 0.8,
+								filterOperators: standardFilters,
+							},
+							{
+								field: "lastImported",
+								headerName: "Last imported",
+								minWidth: 100,
+								flex: 0.5,
+								filterOperators: standardFilters,
+								valueGetter: (value: any, row: { lastImported: any }) => {
+									const lastImported = row.lastImported;
+									const formattedDate =
+										dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+									if (formattedDate == "Invalid Date") {
+										return "";
+									} else {
+										return formattedDate;
+									}
+								},
+							},
 						]}
 						selectable={true}
 						pageSize={200}
@@ -259,10 +336,13 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						searchPlaceholder={t("locations.search_placeholder")}
 						columnVisibilityModel={{
 							id: false,
+							lastImported: false,
+							agencyCode: false,
+							localId: false,
 						}}
-						sortModel={[{ field: "name", sort: "asc" }]}
-						sortDirection="ASC"
-						sortAttribute="name"
+						sortModel={[{ field: "lastImported", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="lastImported"
 						refetchQuery={["LoadLocations"]}
 						deleteQuery={deleteLocationQuery}
 						editQuery={updateLocationQuery}
@@ -286,6 +366,17 @@ export default function Locations({ libraryId }: LibraryDetails) {
 					libraryName={newLocation.libraryName}
 					type={"Pickup"}
 					ils={newLocation.ils}
+				/>
+			) : null}
+			{/* We'll also need to pass in library specific stuff here - host lms code, agency code etc */}
+			{showImport ? (
+				<Import
+					show={showImport}
+					onClose={closeImport}
+					type="Locations"
+					presetHostLms={library?.agency?.hostLms?.code}
+					presetHostLmsId={library?.agency?.hostLms?.id}
+					libraryName={library?.fullName}
 				/>
 			) : null}
 			<TimedAlert

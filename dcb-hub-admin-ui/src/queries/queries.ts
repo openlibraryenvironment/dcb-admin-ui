@@ -680,9 +680,14 @@ export const getLocations = gql`
 				isPickup
 				printLabel
 				localId
+				deliveryStops
+				lastImported
+				latitude
+				longitude
 				agency {
 					id
 					name
+					code
 				}
 				hostSystem {
 					name
@@ -692,6 +697,14 @@ export const getLocations = gql`
 				number
 				offset
 			}
+		}
+	}
+`;
+
+export const checkExistingLocations = gql`
+	query CheckExistingLocations($pagesize: Int!, $query: String!) {
+		locations(pagesize: $pagesize, query: $query) {
+			totalSize
 		}
 	}
 `;

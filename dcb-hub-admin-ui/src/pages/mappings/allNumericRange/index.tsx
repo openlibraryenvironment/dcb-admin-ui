@@ -149,7 +149,7 @@ const AllNumericRange: NextPage = () => {
 					<Import
 						show={showImport}
 						onClose={closeImport}
-						mappingType="Numeric range mappings"
+						type="Numeric range mappings"
 					/>
 				) : null}
 			</Box>

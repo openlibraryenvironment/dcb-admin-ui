@@ -15,6 +15,7 @@ import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+import dayjs from "dayjs";
 
 const Locations: NextPage = () => {
 	const { t } = useTranslation();
@@ -107,6 +108,23 @@ const Locations: NextPage = () => {
 						flex: 0.8,
 						filterOperators: standardFilters,
 					},
+					{
+						field: "lastImported",
+						headerName: "Last imported",
+						minWidth: 100,
+						flex: 0.5,
+						filterOperators: standardFilters,
+						valueGetter: (value: any, row: { lastImported: any }) => {
+							const lastImported = row.lastImported;
+							const formattedDate =
+								dayjs(lastImported).format("YYYY-MM-DD HH:mm");
+							if (formattedDate == "Invalid Date") {
+								return "";
+							} else {
+								return formattedDate;
+							}
+						},
+					},
 				]}
 				selectable={true}
 				pageSize={200}
@@ -115,11 +133,12 @@ const Locations: NextPage = () => {
 				searchPlaceholder={t("locations.search_placeholder")}
 				columnVisibilityModel={{
 					id: false,
+					lastImported: false,
 				}}
 				// This is how to set the default sort order
-				sortModel={[{ field: "name", sort: "asc" }]}
-				sortDirection="ASC"
-				sortAttribute="name"
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				sortDirection="DESC"
+				sortAttribute="lastImported"
 				refetchQuery={["LoadLocations"]}
 				deleteQuery={deleteLocationQuery}
 				editQuery={updateLocationQuery}
