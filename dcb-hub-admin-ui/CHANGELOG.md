@@ -1,3 +1,22 @@
+# [1.32.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.31.0...v1.32.0) (2025-02-10)
+
+
+### Bug Fixes
+
+* Display multiple ISBN values on identifiers page [DCB-1807] ([4c81fb8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4c81fb860979996f9a769ddd089b5fbaf32bd552))
+* Don't show localId column [DCB-1777] ([3c9aeee](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/3c9aeee8264524562ecf6fbfea0527b29ee9f592))
+* Fix deleted mappings showing up on library mapping pages [DCB-1819] ([9d8420d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9d8420d2abba26524096085a1acc70511e594e3f))
+* Increase alert visible time for uploads [DCB-1777] ([019006e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/019006e3eaecec4c4cc982429d392b318b612724))
+* Upgrade MUI-X, apply manual casting for useGridApiContext [DCB-1816] ([727ed19](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/727ed19af778e49c3cffbe05008b24f0ed3dc7c4))
+
+
+### Features
+
+* Add  totals to catalogMetricsByHostLms [DCB-1797] ([ff34482](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ff3448232da99dee877fac633dec79652b747964))
+* Add location name lookup to patron request grids [DCB-1813] ([de69521](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/de695217ea33b38c55e7a2aed3050fc5009db684))
+* Import pickup locations for a library [DCB-1777] ([5530e16](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5530e160dc6f306662a5e0cd1ac3ff22843a49f7))
+* Support exporting pickup locations [DCB-1777] ([5907b8a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5907b8ac250f0bb79a44eeaa24d5a0f440811ab0))
+
 # [1.31.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.30.0...v1.31.0) (2025-02-05)
 
 
