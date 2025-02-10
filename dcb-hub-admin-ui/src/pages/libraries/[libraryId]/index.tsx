@@ -353,6 +353,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.settings")} />
 						<Tab label={t("nav.mappings.name")} />
 						<Tab label={t("nav.libraries.patronRequests.name")} />
+						<Tab label={t("nav.libraries.supplierRequests.name")} />
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
 					</Tabs>

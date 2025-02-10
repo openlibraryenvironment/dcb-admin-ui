@@ -36,7 +36,7 @@ type LibraryDetails = {
 export default function Contacts({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
-	const [tabIndex, setTabIndex] = useState(5);
+	const [tabIndex, setTabIndex] = useState(6);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -141,6 +141,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.settings")} />
 						<Tab label={t("nav.mappings.name")} />
 						<Tab label={t("nav.libraries.patronRequests.name")} />
+						<Tab label={t("nav.libraries.supplierRequests.name")} />
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
 					</Tabs>

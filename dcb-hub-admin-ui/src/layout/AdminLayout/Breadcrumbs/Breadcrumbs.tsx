@@ -88,6 +88,11 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 							return `nav.libraries.numericRangeMappings.${pathArray[3]}`;
 						}
 						return "mappings.numeric_range";
+					case "supplierRequests":
+						if (pathArray[3] == "all") {
+							return "nav.libraries.supplierRequests.all";
+						}
+						return "nav.libraries.supplierRequests.name";
 				}
 			}
 		}

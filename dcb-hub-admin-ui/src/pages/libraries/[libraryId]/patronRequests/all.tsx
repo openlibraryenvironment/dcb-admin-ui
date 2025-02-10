@@ -145,6 +145,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 					hostLmsCode={library?.agency?.hostLms?.code}
 					libraryId={libraryId}
 					type="patronRequests"
+					agencyCode={library?.agencyCode}
 				/>
 
 				<Grid xs={4} sm={8} md={12}>

@@ -580,6 +580,88 @@ export const patronRequestColumnsNoStatusFilter = [
 	},
 ];
 
+export const supplierRequestColumnsLibrary = [
+	{
+		field: "dateCreated",
+		headerName: "Request created",
+		minWidth: 150,
+		filterable: false,
+		valueGetter: (value: any, row: { dateCreated: string }) => {
+			const requestCreated = row.dateCreated;
+			return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+		},
+	},
+	{
+		field: "dateUpdated",
+		headerName: "Request updated",
+		minWidth: 150,
+		filterable: false,
+		valueGetter: (value: any, row: { dateUpdated: string }) => {
+			const requestUpdated = row.dateUpdated;
+			return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+		},
+	},
+	{
+		field: "canonicalItemType",
+		headerName: "DCB canonical item type",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "hostLmsCode",
+		headerName: "Host LMS code",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "isActive",
+		headerName: "Is active?",
+		filterOperators: equalsOnly,
+		flex: 0.5,
+	},
+	{
+		field: "localItemId",
+		headerName: "Local item ID",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "localBibId",
+		headerName: "Local bib ID",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "localStatus",
+		headerName: "Local status",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "localAgency",
+		headerName: "Local agency",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "rawLocalStatus",
+		headerName: "Raw local status",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "patronRequestId",
+		headerName: "Patron request UUID",
+		filterable: false,
+		groupable: true,
+		flex: 0.5,
+		valueGetter: (value: any, row: { patronRequest: PatronRequest }) => {
+			const id = row?.patronRequest.id;
+			return id;
+		},
+	},
+];
+
 export const defaultPatronRequestLibraryColumnVisibility = {
 	canonicalItemType: false,
 	canonicalPtype: false,
@@ -592,6 +674,21 @@ export const defaultPatronRequestLibraryColumnVisibility = {
 	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
+};
+
+export const defaultSupplierRequestLibraryColumnVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
+	patronHostlmsCode: true,
+	previousStatus: false,
+	nextExpectedStatus: false,
+	errorMessage: false,
+	outOfSequenceFlag: false,
+	isManuallySelectedItem: false,
+	dateUpdated: false,
+	id: false,
+	suppliers: false,
 };
 
 export const defaultPatronRequestColumnVisibility = {
