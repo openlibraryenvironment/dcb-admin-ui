@@ -6,4 +6,5 @@ export interface PatronRequest {
 	bibClusterId: string;
 	pickupLocationCode: string;
 	statusCode: string;
+	suppliers: any;
 }

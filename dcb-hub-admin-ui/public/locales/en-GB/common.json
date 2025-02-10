@@ -792,6 +792,7 @@
 		"cleanup_info": "Bypass circulation; clean up and finalise request",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
+		"pickup_location_name": "Pickup location name",
 		"pr_one": "patron request",
 		"loading_msg": "Loading requests....",
 		"alert_text": "Failed to fetch the requests, please refresh the page.",

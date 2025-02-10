@@ -762,6 +762,20 @@ export const getLocationById = gql`
 	}
 `;
 
+// This gets very specialised location attributes to display in the patron request grid
+
+export const getLocationForPatronRequestGrid = gql`
+	query LoadLocation($query: String!) {
+		locations(query: $query) {
+			content {
+				id
+				code
+				name
+			}
+		}
+	}
+`;
+
 // Libraries
 // A query to load a page of Libraries for display in the data grid
 
@@ -1197,9 +1211,11 @@ export const getPatronRequests = gql`
 					id
 					localId
 					localBarcode
+					canonicalPtype
 				}
 				suppliers {
 					localAgency
+					canonicalItemType
 				}
 				clusterRecord {
 					id
