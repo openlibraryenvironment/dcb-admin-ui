@@ -96,13 +96,14 @@ const RequestErrors: NextPage = () => {
 			field: "mostRecent",
 			headerName: t("error_overview.most_recent"),
 			minWidth: 50,
-			flex: 0.3,
+			flex: 0.4,
 		},
 		{
 			field: "total",
 			headerName: t("error_overview.total"),
 			minWidth: 50,
 			flex: 0.3,
+			type: "number",
 		},
 		{
 			field: "namedSql",
