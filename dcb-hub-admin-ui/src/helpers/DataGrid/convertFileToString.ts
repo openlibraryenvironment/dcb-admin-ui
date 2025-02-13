@@ -1,9 +1,98 @@
 import { getFieldsForExport } from "./getFieldsForExport";
 import { getHeadersForExport } from "./getHeadersForExport";
 
+// type for nested field paths
+type SimpleField = string;
+type NestedField = {
+	field: string;
+	path: string[];
+	arrayHandler?: (value: any[]) => any;
+};
+type FieldPath = SimpleField | NestedField;
+
+const isNestedField = (field: FieldPath): field is NestedField => {
+	return typeof field === "object" && "path" in field;
+};
+// function to get value from nested path
+const getNestedValue = (item: any, path: string[]): any => {
+	return path.reduce((obj, key) => (obj ? obj[key] : undefined), item);
+};
+
+// Helper function to format cell value
+const formatCellValue = (value: any, delimiter: string): string => {
+	if (value === null || value === undefined) {
+		return "";
+	}
+	const stringValue = value.toString();
+	if (
+		stringValue.includes(delimiter) ||
+		stringValue.includes('"') ||
+		stringValue.includes("\n")
+	) {
+		return `"${stringValue.replace(/"/g, '""')}"`;
+	}
+	return stringValue;
+};
+// Array handlers for cases like supplying agency where we need to get the first value in an array
+const arrayHandlers = {
+	firstItem: (arr: any[]) => (arr && arr.length > 0 ? arr[0] : undefined),
+};
+
+// Define field mappings for complex nested fields - add new ones here
+const getFieldMapping = (field: string): FieldPath => {
+	const fieldMappings: Record<string, FieldPath> = {
+		agencyCode: { field: "agencyCode", path: ["agency", "code"] },
+		clusterRecordTitle: {
+			field: "clusterRecordTitle",
+			path: ["clusterRecord", "title"],
+		},
+		localBarcode: {
+			field: "localBarcode",
+			path: ["requestingIdentity", "localBarcode"],
+		},
+		canonicalPtype: {
+			field: "canonicalPtype",
+			path: ["requestingIdentity", "canonicalPtype"],
+		},
+		supplyingAgency: {
+			field: "supplyingAgency",
+			path: ["suppliers"],
+			arrayHandler: (suppliers) => {
+				const firstSupplier = arrayHandlers.firstItem(suppliers);
+				return firstSupplier?.localAgency;
+			},
+		},
+		canonicalItemType: {
+			field: "canonicalItemType",
+			path: ["suppliers"],
+			arrayHandler: (suppliers) => {
+				const firstSupplier = arrayHandlers.firstItem(suppliers);
+				return firstSupplier?.canonicalItemType;
+			},
+		},
+	};
+
+	return fieldMappings[field] || field;
+};
+
+const getFieldValue = (item: any, fieldMapping: FieldPath): any => {
+	if (!isNestedField(fieldMapping)) {
+		console.log(fieldMapping, "is NOT a nested field");
+		return item[fieldMapping]; // For simple fields, no need to call the getNestedValue method
+	}
+
+	const nestedValue = getNestedValue(item, fieldMapping.path);
+
+	if (fieldMapping.arrayHandler && Array.isArray(nestedValue)) {
+		return fieldMapping.arrayHandler(nestedValue);
+	}
+
+	return nestedValue;
+};
+
 export const convertFileToString = (
-	data: any,
-	delimiter: any,
+	data: any[],
+	delimiter: string,
 	coreType: string,
 ) => {
 	const formattedHeaders = getHeadersForExport(coreType);
@@ -13,36 +102,10 @@ export const convertFileToString = (
 
 	const rows = data.map((item: any) =>
 		fieldsForExport
-			.map((field: string | number) => {
-				if (field == "agencyCode") {
-					let cell = item.agency.code;
-					if (cell === null || cell === undefined) {
-						return "";
-					}
-					cell = cell.toString();
-					if (
-						cell.includes(delimiter) ||
-						cell.includes('"') ||
-						cell.includes("\n")
-					) {
-						return `"${cell.replace(/"/g, '""')}"`;
-					}
-					return cell;
-				} else {
-					let cell = item[field];
-					if (cell === null || cell === undefined) {
-						return "";
-					}
-					cell = cell.toString();
-					if (
-						cell.includes(delimiter) ||
-						cell.includes('"') ||
-						cell.includes("\n")
-					) {
-						return `"${cell.replace(/"/g, '""')}"`;
-					}
-					return cell;
-				}
+			.map((field: string) => {
+				const fieldMapping = getFieldMapping(field);
+				const value = getFieldValue(item, fieldMapping);
+				return formatCellValue(value, delimiter);
 			})
 			.join(delimiter),
 	);

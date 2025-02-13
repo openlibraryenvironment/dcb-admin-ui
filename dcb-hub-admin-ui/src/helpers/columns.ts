@@ -294,13 +294,10 @@ export const standardPatronRequestColumns = [
 			row?.clusterRecord?.title,
 	},
 	{
-		field: "suppliers",
+		field: "supplyingAgency",
 		headerName: "Supplying agency",
 		filterable: false,
-		valueGetter: (
-			value: any,
-			row: { suppliers: Array<{ localAgency: string }> },
-		) => {
+		valueGetter: (value: any, row: PatronRequest) => {
 			// Check if suppliers array is not empty
 			if (row.suppliers.length > 0) {
 				return row.suppliers[0].localAgency;
@@ -454,7 +451,7 @@ export const patronRequestColumnsNoStatusFilter = [
 			row?.clusterRecord?.title,
 	},
 	{
-		field: "suppliers",
+		field: "supplyingAgency",
 		headerName: "Supplying agency",
 		filterable: false,
 		valueGetter: (
