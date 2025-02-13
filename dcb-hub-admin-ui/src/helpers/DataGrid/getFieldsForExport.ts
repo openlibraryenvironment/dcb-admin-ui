@@ -33,6 +33,27 @@ export const getFieldsForExport = (coreType: string) => {
 				"address",
 				"localId",
 			];
+		case "patronRequests":
+			return [
+				"dateCreated",
+				"dateUpdated",
+				"patronHostlmsCode",
+				"localBarcode",
+				"clusterRecordTitle",
+				"supplyingAgency",
+				"canonicalPtype",
+				"canonicalItemType",
+				"pickupLocationCode",
+				"previousStatus",
+				"status",
+				"nextExpectedStatus",
+				"errorMessage",
+				"outOfSequenceFlag",
+				"pollCountForCurrentStatus",
+				"elapsedTimeInCurrentStatus",
+				"isManuallySelectedItem",
+				"id",
+			];
 		default:
 			return [];
 	}

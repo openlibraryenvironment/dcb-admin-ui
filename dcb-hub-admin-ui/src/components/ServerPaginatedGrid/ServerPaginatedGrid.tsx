@@ -204,7 +204,27 @@ export default function ServerPaginationGrid({
 		setRowModesModel(newRowModesModel);
 	};
 
-	const fetchAllData = async () => {
+	const getExportQuery = (exportMode: string) => {
+		const defaultQuery =
+			presetTypes.includes(type) && filterOptions === ""
+				? presetQueryVariables
+				: filterOptions;
+		const exportAllQuery = presetTypes.includes(type)
+			? presetQueryVariables
+			: "";
+		switch (exportMode) {
+			case "all":
+				return exportAllQuery;
+			case "default":
+				return defaultQuery;
+			case "filtered":
+				return defaultQuery;
+			default:
+				return defaultQuery;
+		}
+	};
+
+	const fetchAllData = async (exportMode: string) => {
 		const currentPage = 0;
 		const pageSize = 1000;
 
@@ -214,10 +234,7 @@ export default function ServerPaginationGrid({
 				pagesize: pageSize,
 				order: sortField,
 				orderBy: direction,
-				query:
-					presetTypes.includes(type) && filterOptions === ""
-						? presetQueryVariables
-						: filterOptions,
+				query: getExportQuery(exportMode),
 			},
 		});
 
@@ -240,15 +257,23 @@ export default function ServerPaginationGrid({
 					allContent = [...allContent, ...result.data[coreType].content];
 				});
 			} catch (error) {
-				console.error("Error fetching additional audit pages:", error);
+				console.error("Error fetching additional pages:", error);
 			}
 		}
 
 		return { [coreType]: { ...data?.[coreType], content: allContent } };
 	};
 
-	const handleExport = async (fileType: string) => {
-		const allData = await fetchAllData();
+	const handleExport = async (fileType: string, exportMode: string) => {
+		if (exportMode == "current") {
+			apiRef.current.exportDataAsCsv();
+			return;
+		}
+		if (exportMode == "print") {
+			apiRef.current.exportDataAsPrint();
+			return;
+		}
+		const allData = await fetchAllData(exportMode);
 		const delimiter = fileType === "csv" ? "," : "\t";
 		const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
 
@@ -767,12 +792,15 @@ export default function ServerPaginationGrid({
 		),
 	}));
 
-	const isSpecialGrid =
+	const gridIsExportable =
 		coreType === "referenceValueMappings" ||
 		type === "numericRangeMappings" ||
-		coreType == "locations";
+		coreType == "locations" ||
+		coreType == "patronRequests";
 
-	const ToolbarComponent = isSpecialGrid ? ExportToolbar : QuickSearchToolbar;
+	const ToolbarComponent = gridIsExportable
+		? ExportToolbar
+		: QuickSearchToolbar;
 
 	return (
 		<div>
@@ -903,7 +931,9 @@ export default function ServerPaginationGrid({
 					toolbar: {
 						showQuickFilter: true,
 						handleExport,
+						excelOptions: { disableToolbarButton: true },
 						allDataLoading,
+						type: coreType,
 					},
 				}}
 				disableAggregation={true}
