@@ -302,7 +302,7 @@ export default function MultipleTabNavigation({
 						<Tab
 							label={
 								<Typography variant="subTabTitle">
-									{t("libraries.patronRequests.all_supplier_short", {
+									{t("libraries.patronRequests.all_short", {
 										number: totalSizes.supplier,
 									})}
 								</Typography>

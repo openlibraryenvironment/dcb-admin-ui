@@ -179,7 +179,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="h3" fontWeight={"bold"}>
-						{t("libraries.patronRequests.all_supplier", {
+						{t("libraries.patronRequests.all", {
 							number: totalSizes["supplierRequestsLibrary"],
 						})}
 					</Typography>

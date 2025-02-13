@@ -772,8 +772,6 @@
 			"active_short": "Active ({{number}})",
 			"all": "All requests ({{number}})",
 			"all_short": "All ({{number}})",
-			"all_supplier": "All supplier requests ({{number}})",
-			"all_supplier_short": "All supplier ({{number}})",
 			"completed": "Completed requests ({{number}})",
 			"completed_short": "Completed ({{number}})",
 			"exception": "Exception requests ({{number}})",
