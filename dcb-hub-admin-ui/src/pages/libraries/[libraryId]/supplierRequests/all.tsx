@@ -9,17 +9,20 @@ import { useRouter } from "next/router";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
 	deleteLibraryQuery,
-	deleteNumericRangeMapping,
-	getLibraryById,
-	getNumericRangeMappings,
-	updateNumericRangeMapping,
+	getLibraryBasicsPR,
+	getPatronRequests,
+	getSupplierRequests,
 } from "src/queries/queries";
-import { numRangeMappingColumnsNoCategoryFilter } from "src/helpers/columns";
+import {
+	defaultSupplierRequestLibraryColumnVisibility,
+	standardPatronRequestColumns,
+} from "src/helpers/columns";
+import { useCustomColumns } from "@hooks/useCustomColumns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { Delete } from "@mui/icons-material";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
 	closeConfirmation,
 	handleDeleteEntity,
@@ -28,13 +31,15 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
 
+// group by patron request ID?
 type LibraryDetails = {
 	libraryId: any;
 };
-export default function ItemType({ libraryId }: LibraryDetails) {
+export default function PatronRequests({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
-
+	const customColumns = useCustomColumns();
 	const theme = useTheme();
 	const router = useRouter();
 	const { data: session, status } = useSession({
@@ -43,8 +48,8 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 			router.push("/auth/logout");
 		},
 	});
-	const [tabIndex, setTabIndex] = useState(3);
-	const [subTabIndex, setSubTabIndex] = useState(1);
+	const [tabIndex, setTabIndex] = useState(5);
+	const [subTabIndex, setSubTabIndex] = useState(0);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -56,16 +61,52 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
-
-	const { data, loading, error } = useQuery(getLibraryById, {
+	const { data, loading, error } = useQuery(getLibraryBasicsPR, {
 		variables: {
 			query: "id:" + libraryId,
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
-
 	const library: Library = data?.libraries?.content?.[0];
+	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
+	const agencyCode = library?.agencyCode;
+
+	const supplierVariables = `localAgency: "${agencyCode}"`;
+	// Query to get the supplier requests patron ids
+	// which we then use to fill a patron request grid
+	// because we can't filter normally on supplying agency
+
+	const { data: supplierData } = useQuery(getSupplierRequests, {
+		variables: {
+			query: supplierVariables,
+			pageno: 0,
+			pagesize: 10000,
+			order: "dateCreated",
+			orderBy: "DESC",
+		},
+		skip: !agencyCode,
+	});
+	// Try and map the supplier request patron IDs
+
+	const patronRequestIds = supplierData?.supplierRequests?.content
+		?.map((request: any) => request.patronRequest?.id)
+		.filter(Boolean);
+
+	// Attempt to formulate a query
+	const patronRequestQuery = patronRequestIds?.length
+		? patronRequestIds.map((id: string) => `id:${id}`).join(" OR ")
+		: "";
+
+	console.log(patronRequestQuery);
+
+	const handleTotalSizeChange = useCallback((type: string, size: number) => {
+		setTotalSizes((prevTotalSizes) => ({
+			...prevTotalSizes,
+			[type]: size,
+		}));
+	}, []);
+
 	const pageActions = [
 		{
 			key: "delete",
@@ -77,9 +118,6 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
 	];
-
-	const numericRangeItemTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "ItemType" AND NOT deleted:true`;
-	const numericRangeItemTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "ItemType" AND NOT deleted:true`;
 
 	if (loading || status === "loading") {
 		return (
@@ -116,8 +154,8 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.config.data.mappings.title", {
-				libraryName: library?.fullName,
+			title={t("libraries.patronRequests.supplier", {
+				library: library?.fullName,
 			})}
 			pageActions={pageActions}
 			mode={"view"}
@@ -127,78 +165,49 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
-					<MultipleTabNavigation
-						tabIndex={tabIndex}
-						subTabIndex={subTabIndex}
-						setTabIndex={setTabIndex}
-						setSubTabIndex={setSubTabIndex}
-						hostLmsCode={library?.agency?.hostLms?.code}
-						libraryId={libraryId}
-						type="mappings"
-						agencyCode={library?.agencyCode}
-					/>
-				</Grid>
+				<MultipleTabNavigation
+					tabIndex={tabIndex}
+					subTabIndex={subTabIndex}
+					setTabIndex={setTabIndex}
+					setSubTabIndex={setSubTabIndex}
+					hostLmsCode={library?.agency?.hostLms?.code}
+					libraryId={libraryId}
+					type="supplierRequests"
+					agencyCode={library?.agencyCode}
+					presetTotal={totalSizes["supplierRequestsLibrary"]}
+				/>
+
 				<Grid xs={4} sm={8} md={12}>
 					<Typography variant="h3" fontWeight={"bold"}>
-						{t("libraries.config.data.mappings.item_type_num_range", {
-							hostLms: library?.agency?.hostLms?.code,
+						{t("libraries.patronRequests.all", {
+							number: totalSizes["supplierRequestsLibrary"],
 						})}
 					</Typography>
 					<ServerPaginationGrid
-						query={getNumericRangeMappings}
-						editQuery={updateNumericRangeMapping}
-						deleteQuery={deleteNumericRangeMapping}
-						refetchQuery={["LoadNumericRangeMappings"]}
-						presetQueryVariables={numericRangeItemTypeVariables}
-						type="numericRangeMappingsForLibraryItemType"
-						coreType="numericRangeMappings"
-						operationDataType="NumericRangeMapping"
-						columns={numRangeMappingColumnsNoCategoryFilter}
-						noDataMessage={t("mappings.no_results")}
-						noResultsMessage={t("mappings.no_results")}
-						selectable={false}
-						sortModel={[{ field: "context", sort: "asc" }]}
-						pageSize={200}
-						sortDirection="ASC"
-						sortAttribute="context"
-						columnVisibilityModel={{
-							domain: false,
-							lastImported: false,
-						}}
+						query={getPatronRequests}
+						presetQueryVariables={"(" + patronRequestQuery + ")"}
+						type="supplierRequestsLibrary"
+						coreType="patronRequests"
+						columns={[...customColumns, ...standardPatronRequestColumns]}
+						selectable={true}
+						pageSize={20}
+						noDataMessage={t("patron_requests.no_rows")}
+						noResultsMessage={t("patron_requests.no_results")}
+						searchPlaceholder={t("patron_requests.search_placeholder_status")}
+						columnVisibilityModel={
+							defaultSupplierRequestLibraryColumnVisibility
+						}
+						scrollbarVisible={true}
+						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
+						sortModel={[{ field: "dateCreated", sort: "desc" }]}
+						sortDirection="DESC"
+						sortAttribute="dateCreated"
+						onTotalSizeChange={handleTotalSizeChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
 					/>
 				</Grid>
-				{library?.secondHostLms ? (
-					<Grid xs={4} sm={8} md={12}>
-						<Typography variant="h3" fontWeight={"bold"}>
-							{t("libraries.config.data.mappings.item_type_num_range", {
-								hostLms: library?.secondHostLms?.code,
-							})}
-						</Typography>
-						<ServerPaginationGrid
-							query={getNumericRangeMappings}
-							editQuery={updateNumericRangeMapping}
-							deleteQuery={deleteNumericRangeMapping}
-							refetchQuery={["LoadNumericMappings"]}
-							presetQueryVariables={numericRangeItemTypeSecondHostLmsVariables}
-							type="numericRangeMappingsForLibraryItemTypeSecondHostLms"
-							coreType="numericRangeMappings"
-							operationDataType="NumericRangeMapping"
-							columns={numRangeMappingColumnsNoCategoryFilter}
-							noDataMessage={t("mappings.no_results")}
-							noResultsMessage={t("mappings.no_results")}
-							selectable={false}
-							sortModel={[{ field: "context", sort: "asc" }]}
-							pageSize={200}
-							sortDirection="ASC"
-							sortAttribute="context"
-							columnVisibilityModel={{
-								domain: false,
-								lastImported: false,
-							}}
-						/>
-					</Grid>
-				) : null}
 			</Grid>
 			<TimedAlert
 				open={alert.open}

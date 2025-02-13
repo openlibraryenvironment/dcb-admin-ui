@@ -48,7 +48,7 @@ interface NewLocationData {
 export default function Locations({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
-	const [tabIndex, setTabIndex] = useState(6);
+	const [tabIndex, setTabIndex] = useState(7);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showImport, setImport] = useState(false);
 	const [alert, setAlert] = useState<any>({
@@ -185,6 +185,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.settings")} />
 						<Tab label={t("nav.mappings.name")} />
 						<Tab label={t("nav.libraries.patronRequests.name")} />
+						<Tab label={t("nav.libraries.supplierRequests.name")} />
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
 					</Tabs>

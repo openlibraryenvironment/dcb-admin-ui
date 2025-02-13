@@ -9,7 +9,8 @@ export const getSpecialRedirects = (
 	} else if (
 		key == "mappings.numeric_range" ||
 		key == "mappings.ref_value" ||
-		key == "nav.libraries.patronRequests.name"
+		key == "nav.libraries.patronRequests.name" ||
+		key == "nav.libraries.supplierRequests.name"
 	) {
 		return href + "/all";
 	} else {

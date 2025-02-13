@@ -28,6 +28,7 @@ export const presetTypes = [
 	"referenceValueMappingsForLibraryAll",
 	"referenceValueMappingsForLibraryAllSecondHostLms",
 	"libraryLocations",
+	"supplierRequestsLibrary",
 ];
 
 // Types of data grid where users cannot click through to a details page
@@ -66,6 +67,7 @@ export const specialRedirectionTypes = [
 	"dataChangeLog",
 	"welcomeLibraries",
 	"libraryLocations",
+	"supplierRequestsLibrary",
 ];
 
 // Types of data grid where we show the actions menu to the user.
@@ -123,5 +125,6 @@ export const quickFieldMap: Record<string, string> = {
 	locations: "name",
 	libraryLocations: "name",
 	dataChangeLog: "actionInfo",
+	supplierRequestsLibrary: "status",
 	default: "id",
 };

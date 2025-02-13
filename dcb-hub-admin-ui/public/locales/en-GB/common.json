@@ -33,6 +33,10 @@
 				"name": "Patron requests",
 				"out_of_sequence": "Out of sequence"
 			},
+			"supplierRequests": {
+				"all": "All",
+				"name": "Supplier requests"
+			},
 			"profile": "Profile",
 			"referenceValueMappings": {
 				"all": "All reference value mappings",
@@ -774,6 +778,7 @@
 			"exception_short": "Exception ({{number}})",
 			"out_of_sequence": "Out of sequence requests ({{number}})",
 			"out_of_sequence_short": "Out of sequence ({{number}})",
+			"supplier": "Supplier requests for {{library}}",
 			"title": "Patron requests for {{library}}"
 		},
 		"primaryLocation": {

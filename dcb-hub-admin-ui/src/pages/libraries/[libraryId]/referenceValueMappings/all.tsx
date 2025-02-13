@@ -145,6 +145,7 @@ export default function All({ libraryId }: LibraryDetails) {
 						hostLmsCode={library?.agency?.hostLms?.code}
 						libraryId={libraryId}
 						type="mappings"
+						agencyCode={library?.agencyCode}
 					/>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>

@@ -135,6 +135,7 @@ export default function PatronType({ libraryId }: LibraryDetails) {
 						setSubTabIndex={setSubTabIndex}
 						hostLmsCode={library?.agency?.hostLms?.code}
 						libraryId={libraryId}
+						agencyCode={library?.agencyCode}
 						type="mappings"
 					/>
 				</Grid>

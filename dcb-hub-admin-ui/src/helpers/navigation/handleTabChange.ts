@@ -26,9 +26,12 @@ export const handleTabChange = (
 			router.push(`/libraries/${id}/patronRequests/exception`);
 			break;
 		case 5:
-			router.push(`/libraries/${id}/contacts`);
+			router.push(`/libraries/${id}/supplierRequests/all`);
 			break;
 		case 6:
+			router.push(`/libraries/${id}/contacts`);
+			break;
+		case 7:
 			router.push(`/libraries/${id}/locations`);
 	}
 };
@@ -56,6 +59,21 @@ export const handlePatronRequestTabChange = (
 			break;
 		case 4:
 			router.push(`/libraries/${id}/patronRequests/all`);
+			break;
+	}
+};
+
+export const handleSupplierRequestTabChange = (
+	event: React.SyntheticEvent,
+	newValue: number,
+	router: NextRouter,
+	setTabIndex: Dispatch<SetStateAction<number>>,
+	id: string,
+) => {
+	setTabIndex(newValue);
+	switch (newValue) {
+		case 0:
+			router.push(`/libraries/${id}/supplierRequests/all`);
 			break;
 	}
 };

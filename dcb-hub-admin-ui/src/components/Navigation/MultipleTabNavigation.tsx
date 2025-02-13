@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction } from "react";
 import {
 	handleMappingsTabChange,
 	handlePatronRequestTabChange,
+	handleSupplierRequestTabChange,
 	handleTabChange,
 } from "src/helpers/navigation/handleTabChange";
 import { getPatronRequests } from "src/queries/queries";
@@ -19,6 +20,8 @@ type MultipleTabNavType = {
 	hostLmsCode: string;
 	libraryId: string;
 	type: string;
+	agencyCode: string;
+	presetTotal?: number;
 };
 
 export default function MultipleTabNavigation({
@@ -29,6 +32,8 @@ export default function MultipleTabNavigation({
 	hostLmsCode,
 	libraryId,
 	type,
+	agencyCode,
+	presetTotal,
 }: MultipleTabNavType) {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -38,6 +43,8 @@ export default function MultipleTabNavigation({
 		outOfSequence: `patronHostlmsCode: "${hostLmsCode}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`,
 		inProgress: `patronHostlmsCode: "${hostLmsCode}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`,
 		finished: `patronHostlmsCode: "${hostLmsCode}"AND (status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`,
+		supplier: `localAgency: "${agencyCode}"`,
+
 		// Add mapping queries here when we want to display totals
 	};
 
@@ -97,11 +104,14 @@ export default function MultipleTabNavigation({
 		},
 	);
 
+	console.log(presetTotal);
+
 	const totalSizes = {
 		exception: exceptionData?.patronRequests?.totalSize || 0,
 		outOfSequence: outOfSequenceData?.patronRequests?.totalSize || 0,
 		inProgress: inProgressData?.patronRequests?.totalSize || 0,
 		finished: finishedData?.patronRequests?.totalSize || 0,
+		supplier: presetTotal || 0,
 		all:
 			(exceptionData?.patronRequests?.totalSize || 0) +
 			(outOfSequenceData?.patronRequests?.totalSize || 0) +
@@ -126,13 +136,16 @@ export default function MultipleTabNavigation({
 					<Tab label={t("nav.libraries.settings")} />
 					<Tab label={t("nav.mappings.name")} />
 					<Tab label={t("nav.libraries.patronRequests.name")} />
+					<Tab label={t("nav.libraries.supplierRequests.name")} />
 					<Tab label={t("nav.libraries.contacts")} />
 					<Tab label={t("nav.locations")} />
 				</Tabs>
 				<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 					{type == "mappings"
 						? t("nav.mappings.name")
-						: t("nav.patronRequests")}
+						: type == "patronRequests"
+							? t("nav.patronRequests")
+							: t("nav.libraries.supplierRequests.name")}
 				</Typography>
 
 				{type == "mappings" ? (
@@ -266,6 +279,31 @@ export default function MultipleTabNavigation({
 								<Typography variant="subTabTitle">
 									{t("libraries.patronRequests.all_short", {
 										number: totalSizes.all,
+									})}
+								</Typography>
+							}
+						/>
+					</Tabs>
+				) : null}
+				{type == "supplierRequests" ? (
+					<Tabs
+						value={subTabIndex}
+						onChange={(event, value) => {
+							handleSupplierRequestTabChange(
+								event,
+								value,
+								router,
+								setSubTabIndex,
+								libraryId,
+							);
+						}}
+						aria-label={"Library supplier request navigation"}
+					>
+						<Tab
+							label={
+								<Typography variant="subTabTitle">
+									{t("libraries.patronRequests.all_short", {
+										number: totalSizes.supplier,
 									})}
 								</Typography>
 							}
