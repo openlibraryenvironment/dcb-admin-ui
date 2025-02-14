@@ -340,13 +340,6 @@ export const standardPatronRequestColumns = [
 		},
 	},
 	{
-		field: "pickupLocationCode",
-		headerName: "Pickup location name",
-		minWidth: 100,
-		flex: 0.5,
-		filterOperators: equalsOnly,
-	},
-	{
 		field: "previousStatus",
 		headerName: "Previous status",
 		minWidth: 100,
@@ -498,13 +491,6 @@ export const patronRequestColumnsNoStatusFilter = [
 				return ""; // This allows us to handle the array being empty, and any related type errors.
 			}
 		},
-	},
-	{
-		field: "pickupLocationCode",
-		headerName: "Pickup location name",
-		minWidth: 100,
-		flex: 0.5,
-		filterOperators: equalsOnly,
 	},
 	{
 		field: "previousStatus",

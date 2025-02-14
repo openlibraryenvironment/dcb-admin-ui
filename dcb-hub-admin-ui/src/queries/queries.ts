@@ -778,13 +778,30 @@ export const getLocationById = gql`
 // This gets very specialised location attributes to display in the patron request grid
 
 export const getLocationForPatronRequestGrid = gql`
-	query LoadLocation($query: String!) {
-		locations(query: $query) {
+	query LoadLocation(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		locations(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
 			content {
 				id
 				code
 				name
 			}
+			pageable {
+				number
+				offset
+			}
+			totalSize
 		}
 	}
 `;
