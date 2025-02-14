@@ -1311,6 +1311,7 @@ export default function PatronRequestDetails({
 								{patronRequest?.pickupLocationCode ? (
 									<LocationCell
 										locationId={patronRequest?.pickupLocationCode}
+										linkable
 									/>
 								) : (
 									<RenderAttribute

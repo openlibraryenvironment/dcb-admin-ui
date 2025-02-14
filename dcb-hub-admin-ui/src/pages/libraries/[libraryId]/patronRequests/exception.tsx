@@ -16,6 +16,7 @@ import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
 	deleteLibraryQuery,
 	getLibraryBasicsPR,
+	getLocationForPatronRequestGrid,
 	getPatronRequests,
 } from "src/queries/queries";
 
@@ -34,6 +35,8 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
+import { equalsOnly } from "src/helpers/filters";
+import { Location } from "@models/Location";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -68,6 +71,54 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 	});
+	const { data: locationsData, fetchMore } = useQuery(
+		getLocationForPatronRequestGrid,
+		{
+			variables: {
+				query: "",
+				order: "name",
+				orderBy: "ASC",
+				pagesize: 100,
+				pageno: 0,
+			},
+			// Adjust the query as needed to get all locations
+			onCompleted: (data) => {
+				if (data.locations.content.length < data.locations.totalSize) {
+					// Calculate how many pages we need to fetch - must match page size above^^.
+					const totalPages = Math.ceil(data.locations.totalSize / 100);
+					// Create an array of promises for each additional page
+					// This ensures we get all the pages - when using standard fetchmore we were only getting a max of 2 additional pages.
+					const fetchPromises = Array.from(
+						{ length: totalPages - 1 },
+						(_, index) =>
+							fetchMore({
+								variables: {
+									pageno: index + 1,
+								},
+								updateQuery: (prev, { fetchMoreResult }) => {
+									if (!fetchMoreResult) return prev;
+									return {
+										locations: {
+											...fetchMoreResult.locations,
+											content: [
+												...prev.locations.content,
+												...fetchMoreResult.locations.content,
+											],
+										},
+									};
+								},
+							}),
+					);
+					// Execute all fetch promises
+					Promise.all(fetchPromises).catch((error) =>
+						console.error("Error fetching additional locations:", error),
+					);
+				}
+			},
+		},
+	);
+	const patronRequestLocations: Location[] = locationsData?.locations.content;
+
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 	const library: Library = data?.libraries?.content?.[0];
 	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
@@ -91,6 +142,35 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 			}),
 			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
+	];
+
+	const pickupLocationColumn = {
+		field: "pickupLocationCode",
+		headerName: "Pickup location code",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		valueGetter: (value: string) => {
+			const locationId = value;
+			if (!locationId) return "";
+			if (Array.isArray(patronRequestLocations)) {
+				// If array of locations is returned
+				return (
+					patronRequestLocations.find((loc: Location) => loc.id === locationId)
+						?.name || locationId
+				);
+			}
+
+			return locationId;
+		},
+	};
+	const supplierIndex = patronRequestColumnsNoStatusFilter.findIndex(
+		(col) => col.field === "suppliers",
+	);
+	const exceptionColumns = [
+		...patronRequestColumnsNoStatusFilter.slice(0, supplierIndex + 1),
+		pickupLocationColumn,
+		...patronRequestColumnsNoStatusFilter.slice(supplierIndex + 1),
 	];
 
 	if (loading || status === "loading") {
@@ -160,7 +240,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 						presetQueryVariables={exceptionQueryVariables}
 						type="patronRequestsLibraryException"
 						coreType="patronRequests"
-						columns={[...customColumns, ...patronRequestColumnsNoStatusFilter]}
+						columns={[...customColumns, ...exceptionColumns]}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}

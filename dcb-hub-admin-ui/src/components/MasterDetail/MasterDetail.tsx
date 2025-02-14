@@ -403,7 +403,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Typography variant="attributeTitle">
 								{t("patron_requests.pickup_location_name")}
 							</Typography>
-							<LocationCell locationId={row?.pickupLocationCode} />
+							<LocationCell locationId={row?.pickupLocationCode} linkable />
 						</Stack>
 					</Grid>
 					<Grid xs={2} sm={4} md={4}>

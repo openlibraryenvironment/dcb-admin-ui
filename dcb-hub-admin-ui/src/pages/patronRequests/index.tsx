@@ -2,7 +2,10 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "next-i18next";
-import { getPatronRequests } from "src/queries/queries";
+import {
+	getLocationForPatronRequestGrid,
+	getPatronRequests,
+} from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { useSession } from "next-auth/react";
@@ -27,6 +30,9 @@ import { MdExpandMore } from "react-icons/md";
 import { useCallback, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+import { equalsOnly } from "src/helpers/filters";
+import { useQuery } from "@apollo/client";
+import { Location } from "@models/Location";
 
 const PatronRequests: NextPage = () => {
 	const { t } = useTranslation();
@@ -45,8 +51,93 @@ const PatronRequests: NextPage = () => {
 	const inProgressQueryVariables = `outOfSequenceFlag:false AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED"`;
 	const finishedQueryVariables = `(status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
 
+	// Make sure you do fetch all data
+	const { data: locationsData, fetchMore } = useQuery(
+		getLocationForPatronRequestGrid,
+		{
+			variables: {
+				query: "",
+				order: "name",
+				orderBy: "ASC",
+				pagesize: 100,
+				pageno: 0,
+			},
+			// Adjust the query as needed to get all locations
+			onCompleted: (data) => {
+				if (data.locations.content.length < data.locations.totalSize) {
+					// Calculate how many pages we need to fetch - must match page size above^^.
+					const totalPages = Math.ceil(data.locations.totalSize / 100);
+					// Create an array of promises for each additional page
+					// This ensures we get all the pages - when using standard fetchmore we were only getting a max of 2 additional pages.
+					const fetchPromises = Array.from(
+						{ length: totalPages - 1 },
+						(_, index) =>
+							fetchMore({
+								variables: {
+									pageno: index + 1,
+								},
+								updateQuery: (prev, { fetchMoreResult }) => {
+									if (!fetchMoreResult) return prev;
+									return {
+										locations: {
+											...fetchMoreResult.locations,
+											content: [
+												...prev.locations.content,
+												...fetchMoreResult.locations.content,
+											],
+										},
+									};
+								},
+							}),
+					);
+					// Execute all fetch promises
+					Promise.all(fetchPromises).catch((error) =>
+						console.error("Error fetching additional locations:", error),
+					);
+				}
+			},
+		},
+	);
+
+	const patronRequestLocations: Location[] = locationsData?.locations.content;
+
+	// Combines standard columns with master detail , pickup location checkbox columns
+	const pickupLocationColumn = {
+		field: "pickupLocationCode",
+		headerName: "Pickup location code",
+		minWidth: 100,
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		valueGetter: (value: string) => {
+			const locationId = value;
+			if (!locationId) return "";
+			if (Array.isArray(patronRequestLocations)) {
+				// If array of locations is returned
+				return (
+					patronRequestLocations.find((loc: Location) => loc.id === locationId)
+						?.name || locationId
+				);
+			}
+
+			return locationId;
+		},
+	};
+	const supplierIndex = patronRequestColumnsNoStatusFilter.findIndex(
+		(col) => col.field === "suppliers",
+	);
+	const noStatusColumns = [
+		...patronRequestColumnsNoStatusFilter.slice(0, supplierIndex + 1),
+		pickupLocationColumn,
+		...patronRequestColumnsNoStatusFilter.slice(supplierIndex + 1),
+	];
+	const standardColumns = [
+		...standardPatronRequestColumns.slice(0, supplierIndex + 1),
+		pickupLocationColumn,
+		...standardPatronRequestColumns.slice(supplierIndex + 1),
+	];
 	// Combines standard columns with master detail and checkbox columns
-	const allColumns = [...customColumns, ...standardPatronRequestColumns];
+
+	const allColumns = [...customColumns, ...standardColumns];
 
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
@@ -133,7 +224,7 @@ const PatronRequests: NextPage = () => {
 						presetQueryVariables={exceptionQueryVariables}
 						type="patronRequestsException"
 						coreType="patronRequests"
-						columns={[...customColumns, ...patronRequestColumnsNoStatusFilter]}
+						columns={[...customColumns, ...noStatusColumns]}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}
