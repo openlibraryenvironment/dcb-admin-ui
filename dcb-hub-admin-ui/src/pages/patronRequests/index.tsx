@@ -66,7 +66,7 @@ const PatronRequests: NextPage = () => {
 			onCompleted: (data) => {
 				if (data.locations.content.length < data.locations.totalSize) {
 					// Calculate how many pages we need to fetch - must match page size above^^.
-					const totalPages = Math.ceil(data.locations.totalSize / 100);
+					const totalPages = Math.ceil(data.locations.totalSize / 1000);
 					// Create an array of promises for each additional page
 					// This ensures we get all the pages - when using standard fetchmore we were only getting a max of 2 additional pages.
 					const fetchPromises = Array.from(
