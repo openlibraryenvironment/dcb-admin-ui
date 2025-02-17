@@ -32,7 +32,11 @@ import QuickSearchToolbar from "./components/QuickSearchToolbar";
 import { Cancel, Delete, Edit, Save, Visibility } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import { useSession } from "next-auth/react";
-import { deleteLibraryQuery, updateLibraryQuery } from "src/queries/queries";
+import {
+	deleteLibraryQuery,
+	getLocationById,
+	updateLibraryQuery,
+} from "src/queries/queries";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { computeMutation } from "src/helpers/computeMutation";
@@ -55,6 +59,8 @@ import { convertFileToString } from "src/helpers/DataGrid/convertFileToString";
 import ExportToolbar from "./components/ExportToolbar";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { PatronRequest } from "@models/PatronRequest";
+import { Location } from "@models/Location";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -149,6 +155,7 @@ export default function ServerPaginationGrid({
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [fetchAllDataQuery, { loading: allDataLoading, fetchMore }] =
 		useLazyQuery(query);
+	const [getLocationForPatronRequestQuery] = useLazyQuery(getLocationById);
 	const { t } = useTranslation();
 	const apiRef = useGridApiRef(); // Use the API ref
 	const router = useRouter();
@@ -258,6 +265,61 @@ export default function ServerPaginationGrid({
 				});
 			} catch (error) {
 				console.error("Error fetching additional pages:", error);
+			}
+		}
+
+		// Insert secondary location query to get the pickup location names
+		if (coreType === "patronRequests") {
+			// Extract unique pickup location codes
+			const uniqueLocationCodes = Array.from(
+				new Set(
+					allContent
+						.map((request: PatronRequest) => request.pickupLocationCode)
+						.filter(Boolean),
+				),
+			);
+
+			// If we have location codes to look up
+			if (uniqueLocationCodes.length > 0) {
+				// Build the query string with OR operators
+				const locationQuery = uniqueLocationCodes
+					.map((id) => `id:${id}`)
+					.join(" OR ");
+
+				try {
+					// Single query for all locations
+					const { data: locationData } = await getLocationForPatronRequestQuery(
+						{
+							variables: {
+								query: locationQuery,
+								// Include pagination variables to get all results
+								pageno: 0,
+								pagesize: uniqueLocationCodes.length,
+							},
+						},
+					);
+
+					// Create mapping of location IDs to names
+					const locationMap = new Map(
+						locationData?.locations?.content?.map((location: Location) => [
+							location.id,
+							location.name,
+						]) || [],
+					);
+
+					// Replace location codes with names in the content
+					allContent = allContent.map((item: any) => ({
+						...item,
+						pickupLocationCode:
+							locationMap.get(item.pickupLocationCode) ||
+							item.pickupLocationCode,
+						pickupLocationName:
+							locationMap.get(item.pickupLocationCode) ||
+							item.pickupLocationCode,
+					}));
+				} catch (error) {
+					console.error("Error fetching location names:", error);
+				}
 			}
 		}
 

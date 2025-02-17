@@ -36,14 +36,13 @@ export const getFieldsForExport = (coreType: string) => {
 		case "patronRequests":
 			return [
 				"dateCreated",
-				"dateUpdated",
 				"patronHostlmsCode",
 				"localBarcode",
 				"clusterRecordTitle",
 				"supplyingAgency",
+				"pickupLocationCode",
 				"canonicalPtype",
 				"canonicalItemType",
-				"pickupLocationCode",
 				"previousStatus",
 				"status",
 				"nextExpectedStatus",
@@ -52,6 +51,7 @@ export const getFieldsForExport = (coreType: string) => {
 				"pollCountForCurrentStatus",
 				"elapsedTimeInCurrentStatus",
 				"isManuallySelectedItem",
+				"dateUpdated",
 				"id",
 			];
 		default:

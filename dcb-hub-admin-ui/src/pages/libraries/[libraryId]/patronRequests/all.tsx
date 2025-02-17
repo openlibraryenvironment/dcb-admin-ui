@@ -165,7 +165,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 		},
 	};
 	const supplierIndex = standardPatronRequestColumns.findIndex(
-		(col) => col.field === "suppliers",
+		(col) => col.field === "supplyingAgency",
 	);
 	const standardColumns = [
 		...standardPatronRequestColumns.slice(0, supplierIndex + 1),
