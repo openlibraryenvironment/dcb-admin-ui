@@ -142,7 +142,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 	];
 	const pickupLocationColumn = {
 		field: "pickupLocationCode",
-		headerName: "Pickup location code",
+		headerName: t("patron_requests.pickup_location_name"),
 		minWidth: 100,
 		flex: 0.5,
 		filterOperators: equalsOnly,
