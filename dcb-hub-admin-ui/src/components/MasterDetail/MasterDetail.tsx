@@ -336,6 +336,14 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid xs={2} sm={4} md={4}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
+								{t("details.location_uuid")}
+							</Typography>
+							<RenderAttribute attribute={row?.id} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
 								{t("details.location_type")}
 							</Typography>
 							<RenderAttribute attribute={row?.type} />
