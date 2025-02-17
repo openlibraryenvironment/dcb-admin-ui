@@ -36,7 +36,6 @@ export const getHeadersForExport = (coreType: string) => {
 		case "patronRequests":
 			return [
 				"Date created",
-				"Date updated",
 				"Patron Host LMS code",
 				"Local barcode",
 				"Title",
@@ -52,6 +51,7 @@ export const getHeadersForExport = (coreType: string) => {
 				"Poll count for current status",
 				"Elapsed time in current status",
 				"Is manually selected item?",
+				"Date updated",
 				"DCB Patron request UUID",
 			];
 		default:
