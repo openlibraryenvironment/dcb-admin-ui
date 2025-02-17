@@ -13,12 +13,18 @@ export const LocationCell = ({
 }) => {
 	const { t } = useTranslation();
 	const { loading, error, data } = useQuery(getLocationForPatronRequestGrid, {
-		variables: { query: `id:${locationId}` },
+		variables: {
+			query: `id:${locationId}`,
+			pageno: 0,
+			pagesize: 100,
+			orderBy: "DESC",
+			order: "name",
+		},
 		skip: !locationId,
 	});
 
 	if (loading) return t("common.loading");
-	if (error) return t("locations.not_found");
+	if (error || data.locations.totalSize == 0) return t("locations.not_found");
 
 	const location: Location = data?.locations?.content?.[0];
 	return location && linkable ? (
