@@ -123,7 +123,7 @@ const PatronRequests: NextPage = () => {
 		},
 	};
 	const supplierIndex = patronRequestColumnsNoStatusFilter.findIndex(
-		(col) => col.field === "suppliers",
+		(col) => col.field === "supplyingAgency",
 	);
 	const noStatusColumns = [
 		...patronRequestColumnsNoStatusFilter.slice(0, supplierIndex + 1),

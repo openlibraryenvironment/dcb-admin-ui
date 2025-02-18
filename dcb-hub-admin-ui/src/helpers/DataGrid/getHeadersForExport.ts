@@ -33,6 +33,27 @@ export const getHeadersForExport = (coreType: string) => {
 				"Address_Ignore",
 				"id",
 			];
+		case "patronRequests":
+			return [
+				"Date created",
+				"Patron Host LMS code",
+				"Patron barcode",
+				"Title",
+				"Supplying agency",
+				"Pickup location name",
+				"DCB Canonical patron type",
+				"DCB Canonical item type",
+				"Previous status",
+				"Status",
+				"Next expected status",
+				"Error message",
+				"Out of sequence?",
+				"Poll count for current status",
+				"Elapsed time in current status",
+				"Is manually selected item?",
+				"Date updated",
+				"DCB Patron request UUID",
+			];
 		default:
 			return [];
 	}
