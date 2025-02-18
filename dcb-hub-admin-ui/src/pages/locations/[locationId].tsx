@@ -78,6 +78,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		longitude: location?.longitude,
 		name: location?.name,
 		printLabel: location?.printLabel,
+		localId: location?.localId,
 	});
 	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
 	const ils = getILS(location?.hostSystem?.lmsClientClass);
@@ -107,6 +108,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			longitude: location?.longitude,
 			name: location?.name,
 			printLabel: location?.printLabel,
+			localId: location?.localId,
 		});
 		setEditMode(true);
 		setTimeout(() => {
@@ -253,6 +255,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			longitude: location?.longitude,
 			latitude: location?.latitude,
 			printLabel: location?.printLabel,
+			localId: location?.localId,
 		});
 		setChangedFields({});
 		setDirty(false);
@@ -532,6 +535,24 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
+							{t(getLocalId(ils))}
+						</Typography>
+						<EditableAttribute
+							field="localId"
+							key={`localId-${editKey}`}
+							value={editableFields.localId ?? location?.localId}
+							updateField={updateField}
+							editMode={editMode}
+							type="string"
+							setValidationError={setValidationError}
+							setDirty={setDirty}
+							setErrors={setErrors}
+						/>
+					</Stack>
+				</Grid>
+				<Grid xs={2} sm={4} md={4}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
 							{t("details.location_agency")}
 						</Typography>
 						<RenderAttribute attribute={location?.agency?.id} />
@@ -543,14 +564,6 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							{t("details.location_uuid")}
 						</Typography>
 						<RenderAttribute attribute={location?.id} />
-					</Stack>
-				</Grid>
-				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t(getLocalId(ils))}
-						</Typography>
-						<RenderAttribute attribute={location?.localId} />
 					</Stack>
 				</Grid>
 			</Grid>

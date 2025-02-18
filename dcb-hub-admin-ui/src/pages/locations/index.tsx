@@ -102,11 +102,19 @@ const Locations: NextPage = () => {
 						},
 					},
 					{
+						field: "localId",
+						headerName: t("details.local_id"),
+						minWidth: 50,
+						flex: 0.8,
+						filterOperators: equalsOnly,
+						editable: true,
+					},
+					{
 						field: "id",
 						headerName: "Location UUID",
 						minWidth: 50,
 						flex: 0.8,
-						filterOperators: standardFilters,
+						filterOperators: equalsOnly,
 					},
 					{
 						field: "lastImported",
@@ -134,6 +142,7 @@ const Locations: NextPage = () => {
 				columnVisibilityModel={{
 					id: false,
 					lastImported: false,
+					localId: false,
 				}}
 				// This is how to set the default sort order
 				sortModel={[{ field: "lastImported", sort: "desc" }]}

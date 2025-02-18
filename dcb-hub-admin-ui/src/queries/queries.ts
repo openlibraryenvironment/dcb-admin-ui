@@ -234,6 +234,7 @@ export const getAgencyById = gql`
 					locationReference
 					deliveryStops
 					printLabel
+					localId
 				}
 			}
 		}
