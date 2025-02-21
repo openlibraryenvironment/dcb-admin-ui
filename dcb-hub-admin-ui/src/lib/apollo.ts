@@ -1,5 +1,13 @@
-import { useRef } from "react";
-import { ApolloClient, HttpLink, InMemoryCache, from } from "@apollo/client";
+// import { useMemo, useRef } from "react";
+import { useMemo } from "react";
+
+import {
+	ApolloClient,
+	HttpLink,
+	InMemoryCache,
+	NormalizedCacheObject,
+	from,
+} from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
 import merge from "deepmerge";
@@ -9,7 +17,7 @@ import getConfig from "next/config";
 
 export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
-let apolloClient;
+let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 const { publicRuntimeConfig } = getConfig();
 
@@ -17,7 +25,7 @@ const { publicRuntimeConfig } = getConfig();
 const errorLink = onError(
 	({ graphQLErrors, networkError, operation, forward }) => {
 		if (graphQLErrors) {
-			for (let err of graphQLErrors) {
+			for (const err of graphQLErrors) {
 				// Handle 401 errors by attempting to refresh the token
 				if (err.extensions?.code === "UNAUTHENTICATED") {
 					// Retry the query once after attempting to refresh the token
@@ -95,21 +103,20 @@ export function initializeApollo(initialState = null) {
 	return _apolloClient;
 }
 
-export function addApolloState(client, pageProps) {
+export function addApolloState(
+	client: ApolloClient<NormalizedCacheObject>,
+	pageProps: any,
+) {
 	if (pageProps?.props) {
 		pageProps.props[APOLLO_STATE_PROP_NAME] = client.cache.extract();
 	}
 	return pageProps;
 }
 
-export function useApollo(pageProps) {
+export function useApollo(pageProps: any) {
 	// Add null check and default value for pageProps
 	const state = pageProps?.[APOLLO_STATE_PROP_NAME] ?? null;
-	const storeRef = useRef();
+	const client = useMemo(() => initializeApollo(state), [state]);
 
-	if (!storeRef.current) {
-		storeRef.current = initializeApollo(state);
-	}
-
-	return storeRef.current;
+	return client;
 }
