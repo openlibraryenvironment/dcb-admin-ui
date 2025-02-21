@@ -539,6 +539,7 @@
 		"code": "Group code",
 		"id": "Group UUID",
 		"type": "Group type",
+		"new_group_error": "An error has occurred while trying to create this group. Please try again.",
 		"new_group_success": "Success: New group created!",
 		"no_results": "No groups were found. Try changing your search terms or filters.",
 		"no_members": "No group members were found. Try changing your search terms or filters.",

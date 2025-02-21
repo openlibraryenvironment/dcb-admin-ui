@@ -151,7 +151,7 @@ export default NextAuth({
 			// Uncomment this if you want to check if the JWT callback is working properly
 			// console.log("JWT callback at" + dayjs().format());
 			// To stop 'last minute refreshes' - in milliseconds.
-			const bufferTime = 60 * 1000;
+			const bufferTime = 5 * 60 * 1000; // 5 minutes instead of 1
 			// on initial sign in
 			if (account && user) {
 				console.log(

@@ -46,7 +46,7 @@ export const ApolloProviderWrapper = ({ children }: PropsWithChildren) => {
 			cache: new InMemoryCache(),
 			ssrMode: true,
 		});
-	}, [url, session?.accessToken]);
+	}, [url]);
 
 	// Wait to initialise the client until the session has loaded.
 	// This means nothing will be rendered until then.
