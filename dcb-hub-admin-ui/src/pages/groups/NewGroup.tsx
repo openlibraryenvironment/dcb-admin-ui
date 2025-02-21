@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useFormik } from "formik";
 import { useMutation } from "@apollo/client";
 import * as Yup from "yup";
 import { createLibraryGroup } from "src/queries/queries";
@@ -10,13 +9,16 @@ import {
 	IconButton,
 	Button,
 	TextField,
-	useTheme,
+	Box,
+	DialogActions,
 } from "@mui/material";
-import Alert from "@components/Alert/Alert";
 import { MdClose } from "react-icons/md";
 //localisation
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, useForm } from "react-hook-form";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
 
 interface FormData {
 	name: string;
@@ -57,33 +59,26 @@ const validationSchema = Yup.object().shape({
 
 // sort Group typings
 export default function NewGroup({ show, onClose }: NewGroupType) {
-	const [isSuccess, setSuccess] = useState(false);
-	const [isError, setError] = useState(false);
-	const [errorMessage, setErrorMessage] = useState("");
 	const { t } = useTranslation();
-	const theme = useTheme();
-
-	const [createGroupMutation] = useMutation<CreateGroupResponse>(
+	const [createGroupMutation, { loading }] = useMutation<CreateGroupResponse>(
 		createLibraryGroup,
 		{
 			refetchQueries: ["LoadGroups"],
-			onCompleted: () => {
-				setSuccess(true);
-				onClose();
-			},
-			onError: (error) => {
-				setError(true);
-				setErrorMessage(
-					"Failed to create a new group. Please retry, and if this issue persists, sign out and back in again.",
-				);
-				console.error("Error:", error);
-			},
 		},
 	);
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: "success" | "error";
+		text: string | null;
+	}>({
+		open: false,
+		severity: "success",
+		text: null,
+	});
 
-	const handleSubmit = async (values: FormData) => {
+	const onSubmit = async (values: FormData) => {
 		try {
-			await createGroupMutation({
+			const result = await createGroupMutation({
 				variables: {
 					input: {
 						name: values.name,
@@ -92,114 +87,161 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 					},
 				},
 			});
-			onClose(); // this is supposed to auto-close on success
+			if (result.data) {
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("groups.new_group_success"),
+				});
+
+				// Delay the modal closing and form reset to ensure the alert is visible
+				setTimeout(() => {
+					reset();
+					onClose();
+				}, 1000);
+			} else {
+				console.error("Error creating new group");
+				setAlert({
+					open: true,
+					severity: "error",
+					text: t("groups.new_group_error"),
+				});
+			}
 		} catch (error) {
 			// We should bear in mind that GraphQL errors often come as '200' responses.
-			console.error("Error creating a new group:", error);
+			console.error("Error creating new group:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("groups.new_group_error"),
+			});
 		}
 	};
 
-	const FormikMaterial = () => {
-		const formik = useFormik({
-			initialValues: {
-				name: "",
-				code: "",
-				type: "",
-			},
-			validationSchema: validationSchema,
-			onSubmit: handleSubmit,
-		});
-		return (
-			<div>
-				<form id="new-group-form" onSubmit={formik.handleSubmit}>
-					<TextField
-						fullWidth
-						data-tid="new-group-name"
-						id="name"
-						name="name"
-						label="Group name"
-						value={formik.values.name}
-						onChange={formik.handleChange}
-						onBlur={formik.handleBlur}
-						error={formik.touched.name && Boolean(formik.errors.name)}
-						helperText={formik.touched.name && formik.errors.name}
-					/>
-					<TextField
-						fullWidth
-						data-tid="new-group-code"
-						id="code"
-						name="code"
-						label="Group Code"
-						value={formik.values.code}
-						onChange={formik.handleChange}
-						onBlur={formik.handleBlur}
-						error={formik.touched.code && Boolean(formik.errors.code)}
-						helperText={formik.touched.code && formik.errors.code}
-					/>
-					<TextField
-						fullWidth
-						data-tid="new-group-type"
-						id="type"
-						name="type"
-						label="Group type"
-						value={formik.values.type}
-						onChange={formik.handleChange}
-						onBlur={formik.handleBlur}
-						error={formik.touched.type && Boolean(formik.errors.type)}
-						helperText={formik.touched.type && formik.errors.type}
-					/>
-					<Button
-						data-tid="new-group-submit"
-						color="primary"
-						variant="contained"
-						fullWidth
-						type="submit"
-					>
-						{t("general.submit", "Submit")}
-					</Button>
-				</form>
-			</div>
-		);
-	};
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isValid, isDirty },
+	} = useForm<FormData>({
+		defaultValues: {
+			name: "",
+			code: "",
+			type: "",
+		},
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+	});
 
 	return (
-		<Dialog open={show} onClose={onClose} aria-labelledby="new-group-dialog">
-			<DialogTitle data-tid="new-group-title" variant="modalTitle">
-				{t("groups.type_new")}
-			</DialogTitle>
-			<IconButton
-				data-tid="new-group-close"
-				aria-label="close"
-				onClick={onClose}
-				sx={{
-					position: "absolute",
-					right: 8,
-					top: 8,
-					color: (theme) => theme.palette.grey[500],
-				}}
+		<>
+			<Dialog
+				open={show}
+				onClose={onClose}
+				aria-labelledby="new-group-modal"
+				fullWidth
+				maxWidth="sm"
 			>
-				<MdClose />
-			</IconButton>
-			<DialogContent>
-				<FormikMaterial />
-			</DialogContent>
-			{isSuccess && (
-				<Alert
-					severityType="success"
-					onCloseFunc={() => setSuccess(false)}
-					alertText={t("groups.new_group_success")}
-					textColor={theme.palette.common.black}
-				/>
-			)}
-			{isError && (
-				<Alert
-					severityType="error"
-					onCloseFunc={() => setError(false)}
-					alertText={errorMessage}
-					textColor={theme.palette.common.black}
-				/>
-			)}
-		</Dialog>
+				<DialogTitle data-tid="new-group-title" variant="modalTitle">
+					{t("groups.type_new")}
+				</DialogTitle>
+				<IconButton
+					data-tid="new-group-close"
+					aria-label="close"
+					onClick={onClose}
+					sx={{
+						position: "absolute",
+						right: 8,
+						top: 8,
+						color: (theme) => theme.palette.grey[500],
+					}}
+				>
+					<MdClose />
+				</IconButton>
+				<DialogContent>
+					<Box
+						component="form"
+						onSubmit={handleSubmit(onSubmit)}
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							gap: 2,
+							mt: 2,
+						}}
+					>
+						<Controller
+							name="name"
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label={t("groups.name")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.name}
+									helperText={errors.name?.message}
+								/>
+							)}
+						/>
+						<Controller
+							name="code"
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label={t("groups.code")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.code}
+									helperText={errors.code?.message}
+								/>
+							)}
+						/>
+						<Controller
+							name="type"
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label={t("groups.type")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.type}
+									helperText={errors.type?.message}
+								/>
+							)}
+						/>
+					</Box>
+				</DialogContent>
+				<DialogActions sx={{ p: 2 }}>
+					<Button onClick={onClose} variant="outlined" color="primary">
+						{t("mappings.cancel")}
+					</Button>
+					<div style={{ flex: "1 0 0" }} />
+					<Button
+						type="submit"
+						variant="contained"
+						color="primary"
+						disabled={!isValid || !isDirty || loading}
+						onClick={handleSubmit(onSubmit)}
+					>
+						{loading
+							? t("ui.action.submitting")
+							: t("consortium.new_contact.title")}
+					</Button>
+				</DialogActions>
+			</Dialog>
+			<TimedAlert
+				open={alert.open}
+				severityType={alert.severity}
+				autoHideDuration={6000}
+				alertText={alert.text}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
+			/>
+		</>
 	);
 }
 

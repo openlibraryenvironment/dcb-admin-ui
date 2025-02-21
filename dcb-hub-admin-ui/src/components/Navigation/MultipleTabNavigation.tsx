@@ -104,8 +104,6 @@ export default function MultipleTabNavigation({
 		},
 	);
 
-	console.log(presetTotal);
-
 	const totalSizes = {
 		exception: exceptionData?.patronRequests?.totalSize || 0,
 		outOfSequence: outOfSequenceData?.patronRequests?.totalSize || 0,

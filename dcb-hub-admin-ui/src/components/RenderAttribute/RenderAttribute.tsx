@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import { useTranslation } from "next-i18next";
 
 const isValidLink = (url: string): boolean => {
-	console.log(url);
 	try {
 		const parsedUrl = new URL(url);
 		const validProtocols = ["http:", "https:", "mailto:"];

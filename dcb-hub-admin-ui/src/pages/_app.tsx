@@ -5,7 +5,6 @@ import "@styles/globals.scss";
 import { LicenseInfo } from "@mui/x-license";
 import { SessionProvider } from "next-auth/react";
 import { ProgressBar } from "@components/ProgressBar";
-import { ApolloProviderWrapper } from "@components/ApolloProviderWrapper/ApolloProviderWrapper";
 
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -18,6 +17,8 @@ import { useMediaQuery } from "@mui/material";
 
 import { appWithTranslation } from "next-i18next";
 import { openRSLight, openRSDark } from "src/themes/openRS";
+import { ApolloProvider } from "@apollo/client";
+import { useApollo } from "@lib/apollo";
 declare module "@mui/material/styles" {
 	interface PaletteColor {
 		breadcrumbs?: string;
@@ -155,6 +156,7 @@ LicenseInfo.setLicenseKey(String(process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY));
 function MyApp(props: AppProps) {
 	const { Component, pageProps } = props;
 	const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+	const apolloClient = useApollo(pageProps);
 
 	// set the theme here
 	// For multi-theme, do as follows:
@@ -179,17 +181,15 @@ function MyApp(props: AppProps) {
 				session={pageProps.session}
 				refetchOnWindowFocus={true}
 				refetchWhenOffline={false}
-				refetchInterval={3.7 * 60} // This is how often we check the session. Maximum interval is probably 29 mins (just under maxAge)
-				// Checking just under every 4 mins to try and fix the issues we've been seeing + provide up-to-date session info.
-				// Was previously exactly 4 but that can interfere with the refreshes.
+				refetchInterval={15 * 60} // Must match token expiry on Keycloak
 			>
-				<ApolloProviderWrapper>
+				<ApolloProvider client={apolloClient}>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
 						<ProgressBar />
 						<Component {...pageProps} />
 					</ThemeProvider>
-				</ApolloProviderWrapper>
+				</ApolloProvider>
 			</SessionProvider>
 		</AppCacheProvider>
 	);

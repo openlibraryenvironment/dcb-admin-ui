@@ -4,6 +4,7 @@ import Alert from "@components/Alert/Alert";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
 	Dialog,
 	DialogTitle,
@@ -18,10 +19,10 @@ import {
 	Autocomplete,
 	CircularProgress,
 } from "@mui/material";
-import { Form, Formik } from "formik";
 import { isEmpty } from "lodash";
 import { Trans, useTranslation } from "next-i18next";
 import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
 	locationPatronRequestColumnVisibility,
 	standardPatronRequestColumns,
@@ -62,6 +63,12 @@ type ConfirmType = {
 	libraryName?: string;
 };
 
+type ConfirmationData = {
+	reason: string;
+	changeCategory: string;
+	changeReferenceUrl?: string;
+};
+
 const Confirmation = ({
 	open,
 	onClose,
@@ -93,10 +100,10 @@ const Confirmation = ({
 				changeCategory: Yup.string()
 					.required(t("data_change_log.category_required"))
 					.max(200, t("data_change_log.max_length_exceeded")),
-				changeReferenceUrl: Yup.string().max(
-					200,
-					t("data_change_log.max_length_exceeded"),
-				),
+				changeReferenceUrl: Yup.string()
+					.url(t("ui.data_grid.edit_url"))
+					.typeError(t("ui.data_grid.edit_url"))
+					.max(200, t("data_change_log.max_length_exceeded")),
 			}),
 		[t],
 	);
@@ -137,6 +144,22 @@ const Confirmation = ({
 	const doPatronRequestsExist = !isEmpty(
 		locationPatronRequests?.patronRequests?.content,
 	);
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isValid, isDirty, isSubmitting },
+	} = useForm<ConfirmationData>({
+		defaultValues: {
+			reason: "",
+			changeCategory: "",
+			changeReferenceUrl: "",
+		},
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+	});
+
 	const mappingExportLink =
 		mappingType == "Reference value mappings"
 			? "/mappings/allReferenceValue"
@@ -149,17 +172,9 @@ const Confirmation = ({
 			case "gridEdit":
 			case "pageEdit":
 				return t("ui.data_grid.edit_summary", {
-					// entity: !library
-					// 	? entity == "referencevaluemapping"
-					// 		? t("mappings.ref_value_one").toLowerCase()
-					// 		: entity == "numericrangemapping"
-					// 			? t("mappings.num_range_one").toLowerCase()
-					// 			: entity?.toLowerCase()
-					// 	: "",
 					entity: gridEdit
 						? t(getEntityText(entity, entityName, gridEdit)).toLowerCase()
 						: entityName,
-					// name: entityName ?? "",
 				});
 			case "mappings":
 				return t("mappings.confirmation_header", {
@@ -455,10 +470,19 @@ const Confirmation = ({
 		}
 	};
 
+	const onSubmit = async (data: ConfirmationData) => {
+		onConfirm(data.reason, data.changeCategory, data.changeReferenceUrl ?? "");
+		reset();
+	};
+	const handleClose = () => {
+		reset();
+		onClose();
+	};
+
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
 			aria-labelledby="confirmation-modal"
 			fullWidth
 		>
@@ -466,43 +490,26 @@ const Confirmation = ({
 			<DialogTitle variant="modalTitle">{getHeaderText()}</DialogTitle>
 			<Divider aria-hidden="true"></Divider>
 			<DialogContent>
-				<Formik
-					initialValues={{
-						reason: "",
-						changeCategory: "",
-						changeReferenceUrl: "",
-					}}
-					validationSchema={validationSchema}
-					validateOnMount
-					onSubmit={(values) => {
-						onConfirm(
-							values.reason,
-							values.changeCategory,
-							values.changeReferenceUrl,
-						);
+				<Box
+					component="form"
+					onSubmit={handleSubmit(onSubmit)}
+					sx={{
+						display: "flex",
+						flexDirection: "column",
+						gap: 2,
+						mt: 2,
 					}}
 				>
-					{({
-						values,
-						errors,
-						touched,
-						dirty,
-						handleChange,
-						handleBlur,
-						setFieldValue,
-						setFieldTouched,
-						isValid,
-						isSubmitting,
-					}) => (
-						<Form>
-							<Stack direction="column" spacing={2}>
-								{getDialogContent()}
-								{type !== "unsavedChanges" ? (
-									<Box>
-										<Typography mb={2} variant="subtitle2">
-											{t("nav.serviceInfo.dataChangeLog")}
-										</Typography>
+					<Stack direction="column" spacing={2}>
+						{getDialogContent()}
+						{type !== "unsavedChanges" ? (
+							<>
+								<Controller
+									name="changeCategory"
+									control={control}
+									render={({ field }) => (
 										<Autocomplete
+											{...field}
 											options={[
 												t("data_change_log.categories.error_correction"),
 												t("data_change_log.categories.details_changed"),
@@ -514,128 +521,116 @@ const Confirmation = ({
 												t("data_change_log.categories.mappings_replacement"),
 												t("data_change_log.categories.other"),
 											]}
-											value={values.changeCategory || null}
-											onChange={(event, newValue) => {
-												setFieldValue("changeCategory", newValue || "");
-											}}
-											onBlur={() => setFieldTouched("changeCategory", true)}
+											value={field.value || null}
+											onChange={(_, newValue) => field.onChange(newValue)}
 											disabled={doPatronRequestsExist}
 											renderInput={(params) => (
 												<TextField
 													{...params}
 													required
-													name="changeCategory"
 													label={t("data_change_log.category")}
-													helperText={
-														touched.changeCategory && errors.changeCategory
-															? errors.changeCategory
-															: null
-													}
-													error={
-														touched.changeCategory &&
-														Boolean(errors.changeCategory)
-													}
+													error={!!errors.changeCategory}
+													helperText={errors.changeCategory?.message}
 												/>
 											)}
 											isOptionEqualToValue={(option, value) =>
 												option === value || (!option && !value)
 											}
 										/>
+									)}
+								/>
+								<Controller
+									name="reason"
+									control={control}
+									render={({ field }) => (
 										<TextField
+											{...field}
 											fullWidth
 											required
 											multiline
 											variant="outlined"
 											label={t("data_change_log.reason")}
-											name="reason"
-											value={values.reason}
-											onChange={handleChange}
-											onBlur={handleBlur}
 											margin="normal"
 											disabled={doPatronRequestsExist}
-											error={
-												touched.reason &&
-												(Boolean(errors.reason) || values.reason.length >= 200)
-											}
-											helperText={
-												touched.reason && errors.reason ? errors.reason : null
-											}
+											error={!!errors.reason}
+											helperText={errors.reason?.message}
 											inputProps={{ maxLength: 200 }}
 										/>
+									)}
+								/>
+
+								<Controller
+									name="changeReferenceUrl"
+									control={control}
+									render={({ field }) => (
 										<TextField
+											{...field}
 											fullWidth
 											variant="outlined"
 											label={t("data_change_log.reference_url")}
-											name="changeReferenceUrl"
-											value={values.changeReferenceUrl}
-											onChange={handleChange}
-											onBlur={handleBlur}
 											margin="normal"
 											disabled={doPatronRequestsExist}
-											error={
-												touched.changeReferenceUrl &&
-												(Boolean(errors.changeReferenceUrl) ||
-													values.changeReferenceUrl.length >= 200)
-											}
+											error={!!errors.changeReferenceUrl}
 											helperText={
-												touched.changeReferenceUrl && errors.changeReferenceUrl
-													? errors.changeReferenceUrl
-													: getCharCountHelperText(
-															values.changeReferenceUrl,
-															200,
-															t("data_change_log.ref_url_helper"),
-														)
+												errors.changeReferenceUrl?.message ||
+												getCharCountHelperText(
+													field.value ?? "",
+													200,
+													t("data_change_log.ref_url_helper"),
+												)
 											}
 											inputProps={{ maxLength: 200 }}
 										/>
-									</Box>
-								) : null}
-							</Stack>
-							<DialogActions>
-								<Button onClick={onClose} variant="outlined" color="primary">
-									{type == "unsavedChanges"
-										? t("ui.unsaved_changes.keep_editing")
-										: t("mappings.cancel")}
-								</Button>
-								<div style={{ flex: "1 0 0" }} />
-								{type == "unsavedChanges" ? (
-									<Button
-										onClick={() => {
-											onConfirm("", "", "");
-										}}
-										color="primary"
-										variant="contained"
-									>
-										{getButtonText()}
-									</Button>
-								) : (
-									<Button
-										type="submit"
-										color="primary"
-										variant="contained"
-										disabled={
-											!isValid ||
-											!dirty ||
-											!values.reason ||
-											!values.changeCategory ||
-											isSubmitting ||
-											doPatronRequestsExist
-										}
-									>
-										{getButtonText()}
-										{isSubmitting ? (
-											<CircularProgress
-												color="inherit"
-												size={13}
-												sx={{ marginLeft: "10px" }}
-											/>
-										) : null}
-									</Button>
-								)}
-							</DialogActions>
-						</Form>
+									)}
+								/>
+							</>
+						) : null}
+					</Stack>
+				</Box>
+				<DialogActions>
+					<Button onClick={handleClose} variant="outlined" color="primary">
+						{type == "unsavedChanges"
+							? t("ui.unsaved_changes.keep_editing")
+							: t("mappings.cancel")}
+					</Button>
+					<div style={{ flex: "1 0 0" }} />
+					{type == "unsavedChanges" ? (
+						<Button
+							onClick={() => {
+								onConfirm("", "", "");
+								reset();
+							}}
+							color="primary"
+							variant="contained"
+						>
+							{getButtonText()}
+						</Button>
+					) : (
+						<Button
+							type="submit"
+							color="primary"
+							variant="contained"
+							onClick={handleSubmit(onSubmit)}
+							disabled={
+								!isValid ||
+								!isDirty ||
+								// !values.reason ||
+								// !values.changeCategory ||
+								isSubmitting ||
+								doPatronRequestsExist
+							}
+						>
+							{getButtonText()}
+							{isSubmitting ? (
+								<CircularProgress
+									color="inherit"
+									size={13}
+									sx={{ marginLeft: "10px" }}
+								/>
+							) : null}
+						</Button>
 					)}
-				</Formik>
+				</DialogActions>
 			</DialogContent>
 		</Dialog>
 	);
