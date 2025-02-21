@@ -1,7 +1,7 @@
 import { LibraryGroupMember } from "./LibraryGroupMember";
 import { Consortium } from "./Consortium";
 export interface Group {
-	id: number;
+	id: string;
 	code: string;
 	name: string;
 	type: string;
