@@ -1,3 +1,20 @@
+# [1.33.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.32.0...v1.33.0) (2025-02-24)
+
+
+### Bug Fixes
+
+* Fix incorrect sort on request errors total [DCB-1822] ([ca84fd2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ca84fd2e09083c8ab63c60c81b9e7472d71bbe73))
+* Fix pickup location code regression [DCB-1823] ([28a7c91](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/28a7c914f47da4191f06ef8ebfd773b3987a77ff))
+* Restore original LocationCell behaviour [DCB-1823] ([41c3b7e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/41c3b7e0a47586868411835747a37e80a6bea6f7))
+* Show pickup location name in columns [DCB-1823] ([bfe97ef](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/bfe97efffd8943a4c41248456c04221d797ce9e9))
+
+
+### Features
+
+* Add supplier request grid for libraries [DCB-1815] ([08934a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/08934a508c733649d792a58b556e27ad06c737a7))
+* Extend export for patron request grids [DCB=1815] ([7196086](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7196086b33d18116f709b8f8fa5f1ccdacba485b))
+* Extend export for patron request grids [DCB=1815] ([8f1480b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8f1480ba74227fb6ac4ca199133bc0fc89a055d2))
+
 # [1.32.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.31.0...v1.32.0) (2025-02-10)
 
 
