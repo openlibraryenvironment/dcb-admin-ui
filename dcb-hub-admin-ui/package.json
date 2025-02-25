@@ -1,6 +1,6 @@
 {
 	"name": "nextjs-dashboard",
-	"version": "1.33.0",
+	"version": "1.33.1",
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
@@ -48,7 +48,7 @@
 		"react-icons": "^5.2.1",
 		"react-markdown": "^9.0.1",
 		"sharp": "^0.33.4",
-		"swc-plugin-coverage-instrument": "^0.0.25",
+		"swc-plugin-coverage-instrument": "^0.0.26",
 		"yup": "^1.4.0",
 		"zustand": "^5.0.0"
 	},
