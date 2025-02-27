@@ -209,8 +209,9 @@
 		},
 		"validation": {
 			"locations": {
-				"lat": "Enter the latitude: a number between -90 and 90.",
-				"long": "Enter the longitude: a number between -180 and 180",
+				"name": "Enter the location name: a non-blank string with less than 255 characters",
+				"lat": "Enter the latitude: a number between -90 and 90, with no more than five numbers after the decimal point.",
+				"long": "Enter the longitude: a number between -180 and 180, with no more than five numbers after the decimal point.",
 				"local_id_folio": "FOLIO service point ID must be a valid UUID.",
 				"local_id_polaris": "Polaris org ID must be a non-negative integer",
 				"local_id_sierra": "Sierra location ID must be a non-negative integer"

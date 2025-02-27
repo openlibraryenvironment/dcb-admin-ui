@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, useTheme } from "@mui/material";
+import { Button, Stack, TextField, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import {
@@ -16,7 +16,6 @@ import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useRef, useState } from "react";
-import EditableAttribute from "@components/EditableAttribute/EditableAttribute";
 
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
@@ -28,20 +27,28 @@ import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { handleDeleteEntity } from "src/helpers/actions/editAndDeleteActions";
 import { getILS } from "src/helpers/getILS";
 import { getLocalId } from "src/helpers/getLocalId";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, useForm } from "react-hook-form";
+import * as Yup from "yup";
+import { isEmpty } from "lodash";
 
 type LocationDetails = {
 	locationId: string;
 };
 // Coming in, we know the ID. So we need to query our GraphQL server to get the associated data.
-
+interface LocationFormFields {
+	name: string;
+	printLabel?: string;
+	latitude?: number;
+	longitude?: number;
+	localId?: string;
+}
+// Needs a parser and the decimal logic extending to the data change log also.
 export default function LocationDetails({ locationId }: LocationDetails) {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const theme = useTheme();
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
-	const [hasValidationError, setValidationError] = useState(false);
-	const [isDirty, setDirty] = useState(false);
-	const [errors, setErrors] = useState();
 
 	const { data: session, status } = useSession({
 		required: true,
@@ -57,7 +64,19 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			query: "id:" + locationId,
 		},
 		pollInterval: 120000,
+		onCompleted: (data) => {
+			const location = data?.locations?.content?.[0];
+			// This is needed because default values don't always load in time.
+			reset({
+				name: location?.name ?? "",
+				printLabel: location?.printLabel ?? "",
+				latitude: Number(Number(location?.latitude).toFixed(5)),
+				longitude: Number(Number(location?.longitude).toFixed(5)),
+				localId: location?.localId ?? "",
+			});
+		},
 	});
+
 	const location: Location = data?.locations?.content?.[0];
 	const client = useApolloClient();
 	const saveButtonRef = useRef<HTMLButtonElement>(null);
@@ -69,23 +88,120 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		title: null,
 	});
 	const [editMode, setEditMode] = useState(false);
-	const [editKey, setEditKey] = useState(0);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
 	const [showConfirmationPickup, setConfirmationPickup] = useState(false);
-	const [editableFields, setEditableFields] = useState({
-		latitude: location?.latitude,
-		longitude: location?.longitude,
-		name: location?.name,
-		printLabel: location?.printLabel,
-		localId: location?.localId,
-	});
+
 	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
 	const ils = getILS(location?.hostSystem?.lmsClientClass);
 
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
+
+	const validationSchema = Yup.object().shape({
+		name: Yup.string()
+			.trim()
+			.nonNullable(t("ui.validation.locations.name"))
+			.required(t("ui.validation.locations.name"))
+			.max(255, t("ui.validation.max_length", { length: 255 })),
+		printLabel: Yup.string()
+			.trim()
+			.max(128, t("ui.validation.max_length", { length: 128 })),
+		latitude: Yup.number()
+			.test(
+				"sixDecimalPlaceLimit",
+				t("ui.validation.locations.lat"),
+				(latitude) => /^-?\d+(\.\d{1,5})?$/.test(String(latitude)),
+				// ideally this would be clever enough to take the sign into account
+			)
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			)
+			.nonNullable(t("ui.validation.locations.lat"))
+			.typeError(t("ui.validation.locations.lat"))
+			.min(-90, t("ui.validation.locations.lat"))
+			.max(90, t("ui.validation.locations.lat")),
+		// Needs validation now to prevent more than 6dp
+		// As DB can't handle it
+		longitude: Yup.number()
+			.test(
+				"sixDecimalPlaceLimit",
+				t("ui.validation.locations.long"),
+				(longitude) => /^-?\d+(\.\d{1,5})?$/.test(String(longitude)),
+			)
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			)
+			.nonNullable(t("ui.validation.locations.long"))
+			.typeError(t("ui.validation.locations.long"))
+			.min(-180, t("ui.validation.locations.long"))
+			.max(180, t("ui.validation.locations.long")),
+		localId: Yup.string()
+			// Required when Polaris or FOLIO.
+			.max(64, t("ui.validation.max_length", { length: 64 }))
+			.when("$ils", {
+				is: "FOLIO",
+				then: (schema) =>
+					schema
+						.required(
+							t("ui.validation.required", { field: t("details.local_id") }),
+						)
+						.matches(
+							/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+							t("ui.validation.locations.local_id_folio"),
+						),
+			})
+			.when("$ils", {
+				is: "Polaris",
+				then: (schema) =>
+					schema
+						.required(
+							t("ui.validation.required", { field: t("details.local_id") }),
+						)
+						.matches(/^\d+$/, t("ui.validation.locations.local_id_polaris"))
+						.test(
+							"non-negative",
+							t("ui.validation.locations.local_id_polaris"),
+							(value) =>
+								value === undefined || value === "" || parseInt(value) >= 0,
+						),
+			})
+			.when("$ils", {
+				is: "Sierra",
+				then: (schema) =>
+					schema
+						.optional()
+						.nullable()
+						.test(
+							"non-negative-if-provided",
+							t("ui.validation.locations.local_id_sierra"),
+							(value) =>
+								value === undefined ||
+								value === "" ||
+								value === null ||
+								(/^\d+$/.test(value) && parseInt(value) >= 0),
+						),
+			}),
+	});
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isDirty },
+	} = useForm<LocationFormFields>({
+		defaultValues: {
+			name: location?.name,
+			printLabel: location?.printLabel,
+			latitude: Number(Number(location?.latitude).toFixed(5)),
+			longitude: Number(Number(location?.longitude).toFixed(5)),
+			localId: location?.localId,
+		},
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+		context: { ils: ils },
+	});
 
 	const [updateLocation] = useMutation(updateLocationQuery, {
 		refetchQueries: ["LoadLocation", "LoadLocations"],
@@ -103,13 +219,6 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	};
 
 	const handleEdit = () => {
-		setEditableFields({
-			latitude: location?.latitude,
-			longitude: location?.longitude,
-			name: location?.name,
-			printLabel: location?.printLabel,
-			localId: location?.localId,
-		});
 		setEditMode(true);
 		setTimeout(() => {
 			if (firstEditableFieldRef.current) {
@@ -118,21 +227,12 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		}, 0);
 	};
 
-	const handleSave = () => {
-		if (Object.keys(changedFields).length === 0) {
-			setEditMode(false);
-			return;
-		}
-		setConfirmationEdit(true);
-	};
-
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
 		handleLeaveWithoutSaving,
 	} = useUnsavedChangesWarning({
 		isDirty,
-		hasValidationError,
 		onKeepEditing: () => {
 			setTimeout(() => {
 				if (saveButtonRef.current) {
@@ -141,10 +241,35 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 			}, 0);
 		},
 		onLeaveWithoutSaving: () => {
-			setDirty(false);
 			setChangedFields({});
+			reset();
 		},
 	});
+
+	const onSubmit = (data: Partial<Location>) => {
+		const newChangedFields = Object.keys(data).reduce((acc, key) => {
+			const field = key as keyof LocationFormFields;
+			const currentValue = data[field];
+			const originalValue = location[field];
+
+			if (currentValue !== originalValue && currentValue !== undefined) {
+				if (
+					Number(Number(originalValue).toFixed(5)) == currentValue &&
+					(field == "latitude" || field == "longitude")
+				) {
+					return acc;
+				}
+				(acc[field] as typeof currentValue) = currentValue;
+			}
+			return acc;
+		}, {} as Partial<LocationFormFields>);
+		setChangedFields(newChangedFields);
+		if (Object.keys(newChangedFields).length === 0) {
+			setEditMode(false);
+			return;
+		}
+		setConfirmationEdit(true);
+	};
 
 	const handlePickupConfirmation = (
 		pickup: string,
@@ -215,13 +340,26 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					},
 				},
 			});
-
 			if (data.updateLocation) {
-				setEditMode(false);
 				setChangedFields({});
-				client.refetchQueries({
+				setEditMode(false);
+				await client.refetchQueries({
 					include: ["LoadLocation"],
 				});
+				// Reset the form with the latest data
+				// Otherwise react-hook-form may believe it's still dirty
+				// And unsaved changes warning will pop up
+				const location = data.updateLocation;
+				reset(
+					{
+						name: location?.name ?? "",
+						printLabel: location?.printLabel ?? "",
+						latitude: Number(Number(location?.latitude).toFixed(5)),
+						longitude: Number(Number(location?.longitude).toFixed(5)),
+						localId: location?.localId,
+					},
+					{ keepValues: false },
+				);
 				setAlert({
 					open: true,
 					severity: "success",
@@ -250,40 +388,8 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 
 	const handleCancel = () => {
 		setEditMode(false);
-		setEditableFields({
-			name: location?.name,
-			longitude: location?.longitude,
-			latitude: location?.latitude,
-			printLabel: location?.printLabel,
-			localId: location?.localId,
-		});
 		setChangedFields({});
-		setDirty(false);
-		setValidationError(false);
-		setEditKey((prevKey) => prevKey + 1);
-	};
-
-	const updateField = (
-		field: keyof Location,
-		value: string | number | null,
-	) => {
-		setEditableFields((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-
-		if (value !== location[field]) {
-			setChangedFields((prev) => ({
-				...prev,
-				[field]: value,
-			}));
-		} else {
-			setChangedFields((prev) => {
-				const newChangedFields = { ...prev };
-				delete newChangedFields[field];
-				return newChangedFields;
-			});
-		}
+		reset();
 	};
 
 	const viewModeActions = [
@@ -309,8 +415,8 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		<Button
 			key="save"
 			startIcon={<Save />}
-			onClick={handleSave}
-			disabled={hasValidationError || !isDirty}
+			onClick={handleSubmit(onSubmit)}
+			disabled={!isEmpty(errors) || !isDirty}
 			ref={saveButtonRef}
 		>
 			{t("ui.data_grid.save")}
@@ -389,55 +495,69 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
+				component={"form"}
+				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["name"] && editMode
+								errors.name
 									? theme.palette.error.main
 									: theme.palette.common.black
 							}
 						>
 							{t("details.location_name")}
 						</Typography>
-						<EditableAttribute
-							field="name"
-							key={`name-${editKey}`}
-							value={editableFields.name ?? location?.name}
-							updateField={updateField}
-							editMode={editMode}
-							type="string"
-							inputRef={firstEditableFieldRef}
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="name"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										inputRef={firstEditableFieldRef}
+										fullWidth
+										variant="outlined"
+										error={!!errors.name}
+										helperText={errors.name?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={location?.name} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["printLabel"] && editMode
+								errors.printLabel
 									? theme.palette.error.main
 									: theme.palette.common.black
 							}
 						>
 							{t("details.location_printlabel")}
 						</Typography>
-						<EditableAttribute
-							field="printLabel"
-							key={`printLabel-${editKey}`}
-							value={editableFields.printLabel ?? location?.printLabel}
-							updateField={updateField}
-							editMode={editMode}
-							type="string"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="printLabel"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.printLabel}
+										helperText={errors.printLabel?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={location?.printLabel} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -458,52 +578,70 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["latitude"] && editMode
+								errors.latitude
 									? theme.palette.error.main
 									: theme.palette.common.black
 							}
 						>
 							{t("details.lat")}
 						</Typography>
-						<EditableAttribute
-							field="latitude"
-							key={`latitude-${editKey}`}
-							value={editableFields.latitude ?? location?.latitude}
-							updateField={updateField}
-							editMode={editMode}
-							type="latitude"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="latitude"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.latitude}
+										helperText={errors.latitude?.message}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={location?.latitude}
+										type="number"
+									/>
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["longitude"] && editMode
+								errors.longitude
 									? theme.palette.error.main
 									: theme.palette.common.black
 							}
 						>
 							{t("details.long")}
 						</Typography>
-						<EditableAttribute
-							field="longitude"
-							key={`longitude-${editKey}`}
-							value={editableFields.longitude ?? location?.longitude}
-							updateField={updateField}
-							editMode={editMode}
-							type="longitude"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="longitude"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.longitude}
+										helperText={errors.longitude?.message}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={location?.longitude}
+										type="number"
+									/>
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -533,20 +671,34 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					) : null}
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
+					<Stack direction="column">
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.localId
+									? theme.palette.error.main
+									: theme.palette.common.black
+							}
+						>
 							{t(getLocalId(ils))}
 						</Typography>
-						<EditableAttribute
-							field="localId"
-							key={`localId-${editKey}`}
-							value={editableFields.localId ?? location?.localId}
-							updateField={updateField}
-							editMode={editMode}
-							type="string"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="localId"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										variant="outlined"
+										fullWidth
+										required={ils == "Sierra" ? false : true}
+										error={!!errors.localId}
+										helperText={errors.localId?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={location?.localId} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>

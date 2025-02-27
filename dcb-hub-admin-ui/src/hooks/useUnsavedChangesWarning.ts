@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 
 interface UseUnsavedChangesWarningProps {
 	isDirty: boolean;
-	hasValidationError: boolean;
+	hasValidationError?: boolean; // To be phased out with switch over to individual page forms
 	onKeepEditing: () => void;
 	onLeaveWithoutSaving: () => void;
 }
