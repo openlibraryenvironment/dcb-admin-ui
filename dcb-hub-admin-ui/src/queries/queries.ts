@@ -107,6 +107,8 @@ export const updateLocationQuery = gql`
 			longitude
 			latitude
 			name
+			localId
+			printLabel
 		}
 	}
 `;
