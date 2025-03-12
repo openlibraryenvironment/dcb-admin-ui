@@ -10,7 +10,7 @@ import {
 	handleSupplierRequestTabChange,
 	handleTabChange,
 } from "src/helpers/navigation/handleTabChange";
-import { getPatronRequests } from "src/queries/queries";
+import { getPatronRequestTotals } from "src/queries/queries";
 
 type MultipleTabNavType = {
 	tabIndex: number;
@@ -49,12 +49,12 @@ export default function MultipleTabNavigation({
 	};
 
 	const { data: exceptionData, loading: exceptionLoading } = useQuery(
-		getPatronRequests,
+		getPatronRequestTotals,
 		{
 			variables: {
 				query: queries.exception,
 				pageno: 0,
-				pagesize: 10000,
+				pagesize: 100000,
 				order: "dateCreated",
 				orderBy: "DESC",
 			},
@@ -63,7 +63,7 @@ export default function MultipleTabNavigation({
 	);
 
 	const { data: outOfSequenceData, loading: outOfSequenceLoading } = useQuery(
-		getPatronRequests,
+		getPatronRequestTotals,
 		{
 			variables: {
 				query: queries.outOfSequence,
@@ -77,7 +77,7 @@ export default function MultipleTabNavigation({
 	);
 
 	const { data: inProgressData, loading: inProgressLoading } = useQuery(
-		getPatronRequests,
+		getPatronRequestTotals,
 		{
 			variables: {
 				query: queries.inProgress,
@@ -91,7 +91,7 @@ export default function MultipleTabNavigation({
 	);
 
 	const { data: finishedData, loading: finishedLoading } = useQuery(
-		getPatronRequests,
+		getPatronRequestTotals,
 		{
 			variables: {
 				query: queries.finished,

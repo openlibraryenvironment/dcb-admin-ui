@@ -77,7 +77,6 @@ const getFieldMapping = (field: string): FieldPath => {
 
 const getFieldValue = (item: any, fieldMapping: FieldPath): any => {
 	if (!isNestedField(fieldMapping)) {
-		console.log(fieldMapping, "is NOT a nested field");
 		return item[fieldMapping]; // For simple fields, no need to call the getNestedValue method
 	}
 

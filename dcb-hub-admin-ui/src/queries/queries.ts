@@ -1264,6 +1264,89 @@ export const getPatronRequests = gql`
 	}
 `;
 
+export const getPatronRequestsForExport = gql`
+	query LoadPatronRequests(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		patronRequests(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			content {
+				id
+				dateCreated
+				dateUpdated
+				patronHostlmsCode
+				pickupLocationCode
+				description
+				status
+				previousStatus
+				nextExpectedStatus
+				errorMessage
+				outOfSequenceFlag
+				elapsedTimeInCurrentStatus
+				pollCountForCurrentStatus
+				isManuallySelectedItem
+				requestingIdentity {
+					localBarcode
+					canonicalPtype
+				}
+				suppliers {
+					localAgency
+					canonicalItemType
+				}
+				clusterRecord {
+					title
+				}
+			}
+			pageable {
+				number
+				offset
+			}
+			totalSize
+		}
+	}
+`;
+export const getPatronRequestTotals = gql`
+	query LoadPatronRequests(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		patronRequests(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			content {
+				id
+				dateCreated
+				dateUpdated
+				status
+				patronHostlmsCode
+				localAgency
+				outOfSequenceFlag
+			}
+			pageable {
+				number
+				offset
+			}
+			totalSize
+		}
+	}
+`;
+
 export const getPatronRequestById = gql`
 	query LoadPatronRequestsById($query: String!) {
 		patronRequests(query: $query) {

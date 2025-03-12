@@ -1,5 +1,11 @@
 import { FileDownloadOutlined, PrintOutlined } from "@mui/icons-material";
-import { Box, ListItemIcon, ListItemText, MenuItem } from "@mui/material";
+import {
+	Box,
+	CircularProgress,
+	ListItemIcon,
+	ListItemText,
+	MenuItem,
+} from "@mui/material";
 import {
 	GridToolbarColumnsButton,
 	GridToolbarContainer,
@@ -39,7 +45,11 @@ export default function ExportToolbar({
 							disabled={allDataLoading}
 						>
 							<ListItemIcon>
-								<FileDownloadOutlined />
+								{allDataLoading ? (
+									<CircularProgress />
+								) : (
+									<FileDownloadOutlined />
+								)}
 							</ListItemIcon>
 							<ListItemText>{t("ui.data_grid.export_all_csv")}</ListItemText>
 						</MenuItem>

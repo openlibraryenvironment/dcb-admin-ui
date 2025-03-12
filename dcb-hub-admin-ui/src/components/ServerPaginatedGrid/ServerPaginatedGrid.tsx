@@ -34,7 +34,8 @@ import { Tooltip } from "@mui/material";
 import { useSession } from "next-auth/react";
 import {
 	deleteLibraryQuery,
-	getLocationById,
+	getLocations,
+	getPatronRequestsForExport,
 	updateLibraryQuery,
 } from "src/queries/queries";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
@@ -61,6 +62,7 @@ import { useGridStore } from "@hooks/useDataGridOptionsStore";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { PatronRequest } from "@models/PatronRequest";
 import { Location } from "@models/Location";
+import { ExportProgressDialog } from "./components/ExportProgressDialog";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -147,15 +149,22 @@ export default function ServerPaginationGrid({
 	const [deleteAlertText, setDeleteAlertText] = useState("");
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
 	const [editRecord, setEditRecord] = useState<any>(null);
+	const [exportProgress, setExportProgress] = useState<any>({
+		isExporting: false,
+		progress: 0,
+		totalRecords: 0,
+	});
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
 		text: null,
 	});
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	const fetchQuery =
+		coreType == "patronRequests" ? getPatronRequestsForExport : query;
 	const [fetchAllDataQuery, { loading: allDataLoading, fetchMore }] =
-		useLazyQuery(query);
-	const [getLocationForPatronRequestQuery] = useLazyQuery(getLocationById);
+		useLazyQuery(fetchQuery);
+	const [getLocationForPatronRequestQuery] = useLazyQuery(getLocations);
 	const { t } = useTranslation();
 	const apiRef = useGridApiRef(); // Use the API ref
 	const router = useRouter();
@@ -234,6 +243,7 @@ export default function ServerPaginationGrid({
 	const fetchAllData = async (exportMode: string) => {
 		const currentPage = 0;
 		const pageSize = 1000;
+		setExportProgress({ isExporting: true, progress: 0, totalRecords: 0 });
 
 		const { data } = await fetchAllDataQuery({
 			variables: {
@@ -245,26 +255,40 @@ export default function ServerPaginationGrid({
 			},
 		});
 
+		const totalSize = data?.[coreType].totalSize || 0;
+		const totalPages = Math.ceil(totalSize / pageSize);
+
+		// Update progress with total record count
+		setExportProgress((prev: any) => ({
+			...prev,
+			totalRecords: totalSize,
+			progress: Math.round((data?.[coreType].content.length / totalSize) * 100),
+		}));
+
 		let allContent = data?.[coreType].content || [];
 
-		if (data?.[coreType].content.length < data?.[coreType].totalSize) {
-			const totalPages = Math.ceil(data?.[coreType].totalSize / 1000);
-
-			const fetchPromises = Array.from({ length: totalPages - 1 }, (_, index) =>
-				fetchMore({
-					variables: {
-						pageno: index + 1,
-					},
-				}),
-			);
-
+		// Fetch remaining pages in sequence to avoid overwhelming the server
+		for (let page = 1; page < totalPages; page++) {
 			try {
-				const results = await Promise.all(fetchPromises);
-				results.forEach((result) => {
-					allContent = [...allContent, ...result.data[coreType].content];
+				const result = await fetchMore({
+					variables: {
+						pageno: page,
+						pagesize: pageSize,
+					},
 				});
+
+				if (result.data?.[coreType]?.content) {
+					allContent = [...allContent, ...result.data[coreType].content];
+					// Update progress after each chunk
+					setExportProgress((prev: any) => ({
+						...prev,
+						progress: Math.round((allContent.length / totalSize) * 100),
+					}));
+				}
 			} catch (error) {
-				console.error("Error fetching additional pages:", error);
+				console.error(`Error fetching page ${page}:`, error);
+				// Continue with what we have so far rather than failing completely
+				// But flag up an alert
 			}
 		}
 
@@ -278,7 +302,6 @@ export default function ServerPaginationGrid({
 						.filter(Boolean),
 				),
 			);
-
 			// If we have location codes to look up
 			if (uniqueLocationCodes.length > 0) {
 				// Build the query string with OR operators
@@ -295,6 +318,8 @@ export default function ServerPaginationGrid({
 								// Include pagination variables to get all results
 								pageno: 0,
 								pagesize: uniqueLocationCodes.length,
+								order: "name",
+								orderBy: "ASC",
 							},
 						},
 					);
@@ -327,36 +352,62 @@ export default function ServerPaginationGrid({
 	};
 
 	const handleExport = async (fileType: string, exportMode: string) => {
-		if (exportMode == "current") {
+		if (exportMode === "current") {
 			apiRef.current.exportDataAsCsv();
 			return;
 		}
-		if (exportMode == "print") {
+		if (exportMode === "print") {
 			apiRef.current.exportDataAsPrint();
 			return;
 		}
-		const allData = await fetchAllData(exportMode);
-		const delimiter = fileType === "csv" ? "," : "\t";
-		const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
 
-		const dataString = convertFileToString(
-			allData?.[coreType]?.content,
-			delimiter,
-			coreType,
-		);
-		// Create a Blob with the data
-		const blob = new Blob([dataString], {
-			type: `text/${fileType};charset=utf-8;`,
-		});
-		const link = document.createElement("a");
-		if (link.download !== undefined) {
-			const url = URL.createObjectURL(blob);
-			link.setAttribute("href", url);
-			link.setAttribute("download", fileName);
-			link.style.visibility = "hidden";
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
+		try {
+			const allData = await fetchAllData(exportMode);
+			const delimiter = fileType === "csv" ? "," : "\t";
+			const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
+
+			const dataString = convertFileToString(
+				allData?.[coreType]?.content,
+				delimiter,
+				coreType,
+			);
+
+			// Create and download the file
+			const blob = new Blob([dataString], {
+				type: `text/${fileType};charset=utf-8;`,
+			});
+			const link = document.createElement("a");
+			if (link.download !== undefined) {
+				const url = URL.createObjectURL(blob);
+				link.setAttribute("href", url);
+				link.setAttribute("download", fileName);
+				link.style.visibility = "hidden";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				setTimeout(() => {
+					setAlert({
+						open: true,
+						severity: "success",
+						text: t("ui.data_grid.export_success", {
+							count: allData?.[coreType]?.totalSize,
+						}),
+						title: t("ui.data_grid.success"),
+					});
+				}, 1000);
+			}
+		} catch (error) {
+			console.error("Export failed:", error);
+			setTimeout(() => {
+				setAlert({
+					open: true,
+					severity: "error",
+					text: t("ui.data_grid.export_failed"),
+					title: t("ui.data_grid.error"),
+				});
+			}, 100);
+		} finally {
+			setExportProgress({ isExporting: false, progress: 0, totalRecords: 0 });
 		}
 	};
 
@@ -1051,6 +1102,11 @@ export default function ServerPaginationGrid({
 				alertTitle={t("ui.data_grid.deleted")}
 				autoHideDuration={5000}
 				onCloseFunc={() => setDeleteAlertOpen(false)}
+			/>
+			<ExportProgressDialog
+				open={exportProgress.isExporting}
+				progress={exportProgress.progress}
+				totalRecords={exportProgress.totalRecords}
 			/>
 		</div>
 	);
