@@ -1,3 +1,18 @@
+# [1.34.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.33.0...v1.34.0) (2025-03-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency jose to v6 ([7b4c240](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7b4c2403230b04f4437545595087ff4ffe3b7044))
+* **deps:** update dependency react-markdown to v10 ([4b9227b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4b9227b6fc5a88770822a98b975efa8196d6e6d4))
+* **deps:** update dependency swc-plugin-coverage-instrument to ^0.0.26 ([292037e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/292037e4eac011a8af341d8dac0cd3b6b3d1a689))
+* Fix incorrect unsaved changes warning on location page [DCB-1811] ([634b93b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/634b93b33a03c69e37bfdb66d588209beaac1a6b))
+
+
+### Features
+
+* Add export window, improve support for large exports [DCB-1851] ([c1869b3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c1869b313cd395a4c9dd83fb4c22713973206348))
+
 # [1.33.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.32.0...v1.33.0) (2025-02-24)
 
 
