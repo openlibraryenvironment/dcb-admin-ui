@@ -11,7 +11,7 @@ import {
 import { getILS } from "src/helpers/getILS";
 import Button from "@mui/material/Button";
 import { useState } from "react";
-import AddLibraryToGroup from "./AddLibraryToGroup";
+import AddLibraryToGroup from "../../forms/AddLibraryToGroup/AddLibraryToGroup";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";

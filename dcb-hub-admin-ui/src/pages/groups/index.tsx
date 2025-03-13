@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AdminLayout } from "@layout";
 import { Button } from "@mui/material";
-import NewGroup from "./NewGroup";
+import NewGroup from "../../forms/NewGroup/NewGroup";
 import { getLibraryGroups } from "src/queries/queries";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 //localisation

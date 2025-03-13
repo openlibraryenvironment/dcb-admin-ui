@@ -10,7 +10,7 @@ import { getConsortiaContacts, updatePerson } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import { Person } from "@models/Person";
 import { ClientDataGrid } from "@components/ClientDataGrid";
-import NewContact from "./NewContact";
+import NewContact from "../../forms/NewContact/NewContact";
 import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 

@@ -15,7 +15,7 @@ import {
 import { MdClose } from "react-icons/md";
 //localisation
 import { useTranslation } from "next-i18next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Controller, useForm } from "react-hook-form";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -245,14 +245,14 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 	);
 }
 
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
-}
+// export async function getStaticProps({ locale }: { locale: string }) {
+// 	return {
+// 		props: {
+// 			...(await serverSideTranslations(locale, [
+// 				"application",
+// 				"common",
+// 				"validation",
+// 			])),
+// 		},
+// 	};
+// }

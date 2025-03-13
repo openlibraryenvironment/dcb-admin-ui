@@ -29,7 +29,7 @@ import {
 	getLocations,
 	updateLocationQuery,
 } from "src/queries/queries";
-import NewLocation from "./NewLocation";
+import NewLocation from "../../../../forms/NewLocation/NewLocation";
 import { getILS } from "src/helpers/getILS";
 import Import from "@components/Import/Import";
 import useCode from "@hooks/useCode";

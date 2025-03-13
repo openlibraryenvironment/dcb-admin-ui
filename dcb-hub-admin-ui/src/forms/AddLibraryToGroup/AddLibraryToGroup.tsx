@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { Library } from "@models/Library";
 import { Group } from "@models/Group";
@@ -275,14 +275,14 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 	);
 }
 
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
-}
+// export async function getStaticProps({ locale }: { locale: string }) {
+// 	return {
+// 		props: {
+// 			...(await serverSideTranslations(locale, [
+// 				"application",
+// 				"common",
+// 				"validation",
+// 			])),
+// 		},
+// 	};
+// }

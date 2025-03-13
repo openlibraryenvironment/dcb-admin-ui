@@ -180,7 +180,7 @@ export default function NewFunctionalSetting({
 										"PICKUP_ANYWHERE",
 										"RE_RESOLUTION",
 										"SELECT_UNAVAILABLE_ITEMS",
-                    "TRIGGER_SUPPLIER_RENEWAL",
+										"TRIGGER_SUPPLIER_RENEWAL",
 									]}
 									renderInput={(params) => (
 										<TextField

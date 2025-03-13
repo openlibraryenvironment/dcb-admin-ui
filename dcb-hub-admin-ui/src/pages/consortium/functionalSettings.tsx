@@ -14,7 +14,7 @@ import {
 	getConsortiaFunctionalSettings,
 	updateFunctionalSettingQuery,
 } from "src/queries/queries";
-import NewFunctionalSetting from "./NewFunctionalSetting";
+import NewFunctionalSetting from "../../forms/NewFunctionalSetting/NewFunctionalSetting";
 
 const FunctionalSettings: NextPage = () => {
 	const { t } = useTranslation();

@@ -29,7 +29,7 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
 import { NewMappingData } from "@models/NewMappingData";
-import NewMapping from "src/pages/mappings/NewMapping";
+import NewMapping from "src/forms/NewMapping/NewMapping";
 
 type LibraryDetails = {
 	libraryId: any;
