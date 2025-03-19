@@ -121,7 +121,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 	const library: Library = data?.libraries?.content?.[0];
 	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
 
-	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED")`;
+	const finishedQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}"AND (status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED" OR status:"HANDED_OFF_AS_LOCAL")`;
 
 	const handleTotalSizeChange = useCallback((type: string, size: number) => {
 		setTotalSizes((prevTotalSizes) => ({
