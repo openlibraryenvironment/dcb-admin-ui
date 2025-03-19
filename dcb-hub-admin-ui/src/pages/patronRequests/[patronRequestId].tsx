@@ -1438,6 +1438,26 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.pickup_item_status_raw")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.rawPickupItemStatus}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.pickup_bib_id")}
+										</Typography>
+										<RenderAttribute
+											attribute={patronRequest?.pickupBibId}
+										/>
+									</Stack>
+								</Grid>
 							</Grid>
 						</SubAccordionDetails>
 					</SubAccordion>
