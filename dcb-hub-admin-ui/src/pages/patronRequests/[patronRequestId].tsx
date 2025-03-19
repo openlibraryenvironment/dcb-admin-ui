@@ -1338,6 +1338,16 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_request_status_raw")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.rawPickupRequestStatus}
+								/>
+							</Stack>
+						</Grid>
 					</Grid>
 					<SubAccordion
 						variant="outlined"
