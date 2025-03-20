@@ -23,7 +23,7 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { getPatronRequestById } from "src/queries/queries";
+import { getPatronIdentities, getPatronRequestById } from "src/queries/queries";
 import {
 	StyledAccordion,
 	StyledAccordionSummary,
@@ -77,6 +77,24 @@ export default function PatronRequestDetails({
 
 	const patronRequest = data?.patronRequests?.content?.[0];
 	const members = patronRequest?.clusterRecord?.members;
+
+	// pickup data
+
+	const { loading: patronIdentitiesLoading, data: patronIdentitiesData, error: patronIdentitiesError } = useQuery(getPatronIdentities, {
+		variables: {
+			query: "localId:" + patronRequest?.pickupPatronId,
+			pageno: 0,
+			pagesize: 10,
+			order: "localId",
+			orderBy: "ASC",
+		},
+		pollInterval: 180000,
+		skip: !patronRequest?.pickupPatronId
+	});
+
+	const pickupPatronIdentity = patronIdentitiesData?.patronIdentities?.content?.[0];
+
+	// end of pickup data
 
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true, // General
@@ -1380,6 +1398,42 @@ export default function PatronRequestDetails({
 										</Typography>
 										<RenderAttribute
 											attribute={patronRequest?.pickupPatronId}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.local_barcode")}
+										</Typography>
+										<RenderAttribute
+											attribute={
+												pickupPatronIdentity?.localBarcode
+											}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{t("details.borrowing_patron_type")}
+										</Typography>
+										<RenderAttribute
+											attribute={
+												pickupPatronIdentity?.localPtype
+											}
+										/>
+									</Stack>
+								</Grid>
+								<Grid xs={2} sm={4} md={4}>
+									<Stack direction={"column"}>
+										<Typography variant="attributeTitle">
+											{"DCB patron type"}
+										</Typography>
+										<RenderAttribute
+											attribute={
+												pickupPatronIdentity?.canonicalPtype
+											}
 										/>
 									</Stack>
 								</Grid>

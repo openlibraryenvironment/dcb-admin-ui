@@ -1264,6 +1264,41 @@ export const getPatronRequests = gql`
 	}
 `;
 
+export const getPatronIdentities = gql`
+  query LoadPatronIdentities(
+    $pageno: Int!
+    $pagesize: Int!
+    $order: String!
+    $query: String!
+    $orderBy: String!
+  ) {
+    patronIdentities(
+      pageno: $pageno
+      pagesize: $pagesize
+      order: $order
+      query: $query
+      orderBy: $orderBy
+    ) {
+      content {
+        id
+        localId
+        homeIdentity
+        localBarcode
+        localNames
+        localPtype
+        canonicalPtype
+        localHomeLibraryCode
+        lastValidated
+      }
+      pageable {
+        number
+        offset
+      }
+      totalSize
+    }
+  }
+`;
+
 export const getPatronRequestsForExport = gql`
 	query LoadPatronRequests(
 		$pageno: Int!
