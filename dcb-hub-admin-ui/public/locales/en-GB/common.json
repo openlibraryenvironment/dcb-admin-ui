@@ -374,6 +374,8 @@
 		"pickup_request_id": "Pickup request ID",
 		"pickup_request_status": "Pickup request status",
 		"pickup_request_status_raw": "Raw pickup request status",
+		"pickup_agency_code": "Pickup agency code",
+		"pickup_hostlms_code": "Pickup host LMS",
 		"record_created": "Record created",
 		"record_updated": "Record updated",
 		"renewal_count": "Renewal count",

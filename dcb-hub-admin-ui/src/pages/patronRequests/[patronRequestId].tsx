@@ -23,7 +23,7 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { MdExpandMore } from "react-icons/md";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { getPatronIdentities, getPatronRequestById } from "src/queries/queries";
+import { getLocationById, getPatronIdentities, getPatronRequestById } from "src/queries/queries";
 import {
 	StyledAccordion,
 	StyledAccordionSummary,
@@ -93,6 +93,21 @@ export default function PatronRequestDetails({
 	});
 
 	const pickupPatronIdentity = patronIdentitiesData?.patronIdentities?.content?.[0];
+
+	const { data: pickupLocationData } = useQuery(getLocationById, {
+		variables: {
+			// Note: pickupLocationCode is expected to be the location id (UUID)
+			query: "id:" + patronRequest?.pickupLocationCode,
+			pageno: 0,
+			pagesize: 10,
+			order: "id",
+			orderBy: "ASC",
+		},
+		pollInterval: 120000,
+		skip: !patronRequest?.pickupLocationCode,
+	});
+
+	const pickupLocation = pickupLocationData?.locations?.content?.[0];
 
 	// end of pickup data
 
@@ -280,6 +295,36 @@ export default function PatronRequestDetails({
 								</Typography>
 								<RenderAttribute
 									attribute={patronRequest?.suppliers[0]?.localAgency}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_agency_code")}
+								</Typography>
+								<RenderAttribute
+									attribute={pickupLocation?.agency?.code}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_hostlms_code")}
+								</Typography>
+								<RenderAttribute
+									attribute={pickupLocation?.hostSystem?.code}
+								/>
+							</Stack>
+						</Grid>
+						<Grid xs={2} sm={4} md={4}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_requests.pickup_location_name")}
+								</Typography>
+								<RenderAttribute
+									attribute={pickupLocation?.name}
 								/>
 							</Stack>
 						</Grid>
