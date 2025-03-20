@@ -80,7 +80,7 @@ export default function PatronRequestDetails({
 
 	// pickup data
 
-	const { loading: patronIdentitiesLoading, data: patronIdentitiesData, error: patronIdentitiesError } = useQuery(getPatronIdentities, {
+	const { data: patronIdentitiesData} = useQuery(getPatronIdentities, {
 		variables: {
 			query: "localId:" + patronRequest?.pickupPatronId,
 			pageno: 0,
@@ -89,7 +89,7 @@ export default function PatronRequestDetails({
 			orderBy: "ASC",
 		},
 		pollInterval: 180000,
-		skip: !patronRequest?.pickupPatronId
+		skip: !patronRequest?.pickupPatronId,
 	});
 
 	const pickupPatronIdentity = patronIdentitiesData?.patronIdentities?.content?.[0];
