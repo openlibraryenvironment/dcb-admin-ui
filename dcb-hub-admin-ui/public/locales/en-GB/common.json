@@ -1009,7 +1009,9 @@
 		"local_item_type_name": "Local item type name",
 		"no_data": "No data available. Please enter a search term, or change your current search.",
 		"requestable": "Requestable",
-		"suppressed": "Suppressed"
+		"suppressed": "Suppressed",
+		"volume_parsed": "Parsed volume statement",
+		"volume_raw": "Raw volume statement"
 	},
 
 	"404": {

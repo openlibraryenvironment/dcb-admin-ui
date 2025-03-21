@@ -582,6 +582,22 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.localItemType} />
 						</Stack>
 					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.volume_raw")}
+							</Typography>
+							<RenderAttribute attribute={row?.rawVolumeStatement} />
+						</Stack>
+					</Grid>
+					<Grid xs={2} sm={4} md={4}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.volume_parsed")}
+							</Typography>
+							<RenderAttribute attribute={row?.parsedVolumeStatement} />
+						</Stack>
+					</Grid>
 				</MasterDetailLayout>
 			);
 
