@@ -407,6 +407,14 @@ export const standardPatronRequestColumns = [
 		flex: 0.5,
 		filterOperators: equalsOnly,
 	},
+	{
+		field: "activeWorkflow",
+		headerName: "Active workflow",
+		minWidth: 100,
+		hidden: true,
+		sortable: true,
+		filterable: true,
+	},
 ];
 
 export const patronRequestColumnsNoStatusFilter = [
@@ -561,6 +569,14 @@ export const patronRequestColumnsNoStatusFilter = [
 		flex: 0.5,
 		filterOperators: equalsOnly,
 	},
+	{
+		field: "activeWorkflow",
+		headerName: "Active workflow",
+		minWidth: 100,
+		hidden: true,
+		sortable: true,
+		filterable: true,
+	},
 ];
 
 export const supplierRequestColumnsLibrary = [
@@ -657,6 +673,7 @@ export const defaultPatronRequestLibraryColumnVisibility = {
 	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
+	activeWorkflow: false,
 };
 
 export const defaultSupplierRequestLibraryColumnVisibility = {
@@ -685,6 +702,8 @@ export const defaultPatronRequestColumnVisibility = {
 	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
+	pickupLocationName: false,
+	activeWorkflow: false,
 };
 
 export const finishedPatronRequestColumnVisibility = {

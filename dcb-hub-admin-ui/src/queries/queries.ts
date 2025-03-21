@@ -1237,6 +1237,7 @@ export const getPatronRequests = gql`
 				elapsedTimeInCurrentStatus
 				pollCountForCurrentStatus
 				isManuallySelectedItem
+				activeWorkflow
 				patron {
 					id
 				}
