@@ -586,7 +586,7 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("details.requestor_note")}
 								</Typography>
-								<RenderAttribute attribute={patronRequest?.requestorNote} />
+								<RenderAttribute attribute={patronRequest?.requesterNote} />
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
