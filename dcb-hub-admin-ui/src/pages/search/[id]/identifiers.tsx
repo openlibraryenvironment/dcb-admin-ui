@@ -4,7 +4,7 @@ import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
-import { getClustersLegacy } from "src/queries/queries";
+import { getClusters } from "src/queries/queries";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { AdminLayout } from "@layout";
 import Error from "@components/Error/Error";
@@ -39,8 +39,9 @@ const Identifiers: NextPage = () => {
 	const router = useRouter();
 	const { id } = router.query;
 
-	const { loading, error, data } = useQuery(getClustersLegacy, {
+	const { loading, error, data } = useQuery(getClusters, {
 		variables: { query: `id: ${id}` },
+		skip: !id,
 	});
 
 	const theCluster = data?.instanceClusters?.content?.[0] ?? null;

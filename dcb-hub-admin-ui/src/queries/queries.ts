@@ -89,6 +89,7 @@ export const updatePerson = gql`
 		}
 	}
 `;
+
 // Location mutations
 
 export const deleteLocationQuery = gql`
@@ -194,6 +195,39 @@ export const getAgencies = gql`
 				id
 				code
 				name
+			}
+			pageable {
+				number
+				offset
+			}
+		}
+	}
+`;
+
+export const getAgenciesForStaffRequest = gql`
+	query LoadAgencies(
+		$pageno: Int!
+		$pagesize: Int!
+		$order: String!
+		$query: String!
+		$orderBy: String!
+	) {
+		agencies(
+			pageno: $pageno
+			pagesize: $pagesize
+			order: $order
+			query: $query
+			orderBy: $orderBy
+		) {
+			totalSize
+			content {
+				id
+				code
+				name
+				hostLms {
+					id
+					code
+				}
 			}
 			pageable {
 				number
@@ -866,6 +900,11 @@ export const getLibraries = gql`
 							id
 							name
 							dateOfLaunch
+							functionalSettings {
+								id
+								name
+								enabled
+							}
 						}
 					}
 				}
@@ -1203,6 +1242,26 @@ export const getLibraryGroupById = gql`
 	}
 `;
 
+// patron identities
+export const getPatronIdentities = gql`
+	query LoadPatronIdentities($order: String!, $orderBy: String!) {
+		patronIdentities(order: $order, orderBy: $orderBy) {
+			totalSize
+			content {
+				id
+				localId
+				homeIdentity
+				localBarcode
+				localNames
+				localPtype
+				canonicalPtype
+				localHomeLibraryCode
+				lastValidated
+			}
+		}
+	}
+`;
+
 // PATRON REQUESTS
 // A query to load a page of PatronRequests for display in the data grid.
 
@@ -1265,41 +1324,6 @@ export const getPatronRequests = gql`
 	}
 `;
 
-export const getPatronIdentities = gql`
-  query LoadPatronIdentities(
-    $pageno: Int!
-    $pagesize: Int!
-    $order: String!
-    $query: String!
-    $orderBy: String!
-  ) {
-    patronIdentities(
-      pageno: $pageno
-      pagesize: $pagesize
-      order: $order
-      query: $query
-      orderBy: $orderBy
-    ) {
-      content {
-        id
-        localId
-        homeIdentity
-        localBarcode
-        localNames
-        localPtype
-        canonicalPtype
-        localHomeLibraryCode
-        lastValidated
-      }
-      pageable {
-        number
-        offset
-      }
-      totalSize
-    }
-  }
-`;
-
 export const getPatronRequestsForExport = gql`
 	query LoadPatronRequests(
 		$pageno: Int!
@@ -1330,6 +1354,11 @@ export const getPatronRequestsForExport = gql`
 				elapsedTimeInCurrentStatus
 				pollCountForCurrentStatus
 				isManuallySelectedItem
+				requesterNote
+				activeWorkflow
+				patron {
+					id
+				}
 				requestingIdentity {
 					localBarcode
 					canonicalPtype
@@ -1350,6 +1379,7 @@ export const getPatronRequestsForExport = gql`
 		}
 	}
 `;
+
 export const getPatronRequestTotals = gql`
 	query LoadPatronRequests(
 		$pageno: Int!
@@ -1848,37 +1878,6 @@ export const getClusters = gql`
 					matchPoints {
 						id
 						value
-					}
-				}
-			}
-		}
-	}
-`;
-
-export const getClustersLegacy = gql`
-	query ClusterRecords($query: String!) {
-		instanceClusters(query: $query) {
-			content {
-				id
-				title
-				members {
-					id
-					title
-					author
-					typeOfRecord
-					canonicalMetadata
-					clusterReason
-					sourceSystemId
-					sourceRecordId
-					sourceRecord {
-						id
-						hostLmsId
-						remoteId
-						lastFetched
-						lastProcessed
-						processingState
-						processingInformation
-						sourceRecordData
 					}
 				}
 			}

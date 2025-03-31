@@ -19,7 +19,7 @@ import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHe
 import dayjs from "dayjs";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
-	const { data: sess } = useSession();
+	const { data: session } = useSession();
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { id } = router.query;
@@ -34,7 +34,7 @@ const Items: NextPage = () => {
 				const response = await axios.get<any[]>(
 					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
 					{
-						headers: { Authorization: `Bearer ${sess?.accessToken}` },
+						headers: { Authorization: `Bearer ${session?.accessToken}` },
 						params: {
 							clusteredBibId: id,
 							filters: "none",
@@ -50,10 +50,10 @@ const Items: NextPage = () => {
 			}
 		};
 
-		if (id && sess?.accessToken) {
+		if (id && session?.accessToken) {
 			fetchRecords();
 		}
-	}, [sess, publicRuntimeConfig.DCB_API_BASE, id]);
+	}, [session?.accessToken, publicRuntimeConfig.DCB_API_BASE, id]);
 
 	const columns: GridColDef[] = useMemo(
 		() => [

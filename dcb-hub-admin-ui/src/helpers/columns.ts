@@ -401,6 +401,30 @@ export const standardPatronRequestColumns = [
 		},
 	},
 	{
+		field: "description",
+		headerName: "Description",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "requesterNote",
+		headerName: "Requester note",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "description",
+		headerName: "Description",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "requesterNote",
+		headerName: "Requester note",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
 		field: "id",
 		headerName: "Request UUID",
 		minWidth: 100,
@@ -563,6 +587,18 @@ export const patronRequestColumnsNoStatusFilter = [
 		},
 	},
 	{
+		field: "description",
+		headerName: "Description",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "requesterNote",
+		headerName: "Requester note",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
 		field: "id",
 		headerName: "Request UUID",
 		minWidth: 100,
@@ -649,6 +685,18 @@ export const supplierRequestColumnsLibrary = [
 		flex: 0.5,
 	},
 	{
+		field: "description",
+		headerName: "Description",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
+		field: "requesterNote",
+		headerName: "Requester note",
+		filterOperators: standardFilters,
+		flex: 0.5,
+	},
+	{
 		field: "patronRequestId",
 		headerName: "Patron request UUID",
 		filterable: false,
@@ -673,6 +721,8 @@ export const defaultPatronRequestLibraryColumnVisibility = {
 	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
+	description: false,
+	requesterNote: false,
 	activeWorkflow: false,
 };
 
@@ -689,6 +739,8 @@ export const defaultSupplierRequestLibraryColumnVisibility = {
 	dateUpdated: false,
 	id: false,
 	suppliers: false,
+	description: false,
+	requesterNote: false,
 };
 
 export const defaultPatronRequestColumnVisibility = {
@@ -702,6 +754,8 @@ export const defaultPatronRequestColumnVisibility = {
 	isManuallySelectedItem: false,
 	dateUpdated: false,
 	id: false,
+	description: false,
+	requesterNote: false,
 	pickupLocationName: false,
 	activeWorkflow: false,
 };
@@ -713,6 +767,8 @@ export const finishedPatronRequestColumnVisibility = {
 	elapsedTimeInCurrentStatus: false,
 	pollCountForCurrentStatus: false,
 	outOfSequenceFlag: false,
+	description: false,
+	requesterNote: false,
 };
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -726,6 +782,8 @@ export const exceptionPatronRequestColumnVisibility = {
 	pollCountForCurrentStatus: false,
 	outOfSequenceFlag: false,
 	dateUpdated: true,
+	description: false,
+	requesterNote: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -745,4 +803,6 @@ export const locationPatronRequestColumnVisibility = {
 	id: false,
 	outOfSequenceFlag: false,
 	isManuallySelectedItem: false,
+	description: false,
+	requesterNote: false,
 };

@@ -18,6 +18,8 @@ import {
 import { IconButton, InputAdornment, TextField } from "@mui/material";
 import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
 import getConfig from "next/config";
+import { validate } from "uuid";
+import { determineAcceptableVersion } from "src/helpers/determineVersion";
 
 const debouncedSearchFunction = debounce(
 	(term: string, callback: (term: string) => void) => {
@@ -87,6 +89,7 @@ const Search: NextPage = () => {
 	const { t } = useTranslation();
 	const { data: session } = useSession();
 	const { publicRuntimeConfig } = getConfig();
+	const [locateVersion, setLocateVersion] = useState<string | null>(null);
 
 	const [searchResults, setSearchResults] = useState<any>({
 		instances: [],
@@ -139,6 +142,32 @@ const Search: NextPage = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
 
+	useEffect(() => {
+		const fetchDcbVersion = async () => {
+			try {
+				// Get the DCB Locate version
+				const response = await axios.get(
+					`${publicRuntimeConfig?.DCB_SEARCH_BASE}/info`,
+				);
+				const version = response.data.git?.tags || null;
+				setLocateVersion(version);
+			} catch (error) {
+				console.error("Error fetching DCB Locate version:", error);
+				setLocateVersion(null);
+			}
+		};
+
+		fetchDcbVersion();
+	}, [publicRuntimeConfig.DCB_API_BASE, publicRuntimeConfig?.DCB_SEARCH_BASE]);
+
+	// Locate versions from 2.6.0 onwards need special handling to deal with UUIDs
+	// As requests to the old location won't handle them properly, which breaks the breadcrumb navigation
+	// and can lead to a false returning of zero results when the user tries to go back
+	const isSupportedLocateVersion = determineAcceptableVersion(
+		locateVersion,
+		"2.6.0",
+	);
+
 	const fetchRecords = useCallback(
 		async (query: string, page: number, pageSize: number) => {
 			if (
@@ -150,14 +179,26 @@ const Search: NextPage = () => {
 				return;
 
 			setLoading(true);
+			const isUUID = query.length == 36 ? validate(query) : false;
+			const requestURL =
+				isUUID && isSupportedLocateVersion
+					? `${publicRuntimeConfig.DCB_SEARCH_BASE}/public/opac-inventory/instances/${query}`
+					: `${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`;
+			const queryParams = {
+				query: `@keyword all "${query}"`,
+				offset: page * pageSize,
+				limit: pageSize,
+			};
+			console.log(
+				isSupportedLocateVersion
+					? "Version " + locateVersion + " is greater than or equal to 2.6.0 "
+					: "Version " + locateVersion + " is less than 2.6.0",
+			);
+
 			try {
-				const response = await axios.get(`/api/sharedIndex`, {
+				const response = await axios.get(requestURL, {
 					headers: { Authorization: `Bearer ${session.accessToken}` },
-					params: {
-						query: `@keyword all "${query}"`,
-						offset: page * pageSize,
-						limit: pageSize,
-					},
+					params: isUUID && isSupportedLocateVersion ? {} : queryParams,
 				});
 				return response.data;
 			} catch (error) {
@@ -166,7 +207,12 @@ const Search: NextPage = () => {
 				setLoading(false);
 			}
 		},
-		[publicRuntimeConfig.DCB_SEARCH_BASE, session?.accessToken],
+		[
+			isSupportedLocateVersion,
+			publicRuntimeConfig.DCB_SEARCH_BASE,
+			session?.accessToken,
+			locateVersion,
+		],
 	);
 
 	const handleSearch = useCallback(
@@ -177,9 +223,25 @@ const Search: NextPage = () => {
 				paginationModel.pageSize,
 			);
 			if (data) {
+				if (data.instances) {
+					setSearchResults({
+						instances: data.instances || [],
+						totalRecords: data.totalRecords || 1,
+					});
+				} else {
+					if (data.totalRecords == 0) {
+						setSearchResults({ instances: [], totalRecords: 0 });
+					} else {
+						setSearchResults({
+							instances: [data],
+							totalRecords: data.totalRecords || 1,
+						});
+					}
+				}
+			} else {
 				setSearchResults({
-					instances: data.instances || [],
-					totalRecords: data.totalRecords || 0,
+					instances: [],
+					totalRecords: 0,
 				});
 			}
 		},
@@ -192,6 +254,8 @@ const Search: NextPage = () => {
 			handleSearch(query);
 		}
 	}, [router.query.q, handleSearch, paginationModel]);
+
+	const rows = searchResults.instances || [];
 
 	return publicRuntimeConfig.DCB_SEARCH_BASE ? (
 		<AdminLayout title={t("nav.search.name")}>
@@ -210,7 +274,7 @@ const Search: NextPage = () => {
 			) : (
 				<>
 					<DataGridPremium
-						rows={searchResults.instances}
+						rows={rows}
 						columns={columns}
 						pagination
 						paginationModel={paginationModel}
