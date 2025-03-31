@@ -41,6 +41,8 @@ export const getFieldsForExport = (coreType: string) => {
 				"clusterRecordTitle",
 				"supplyingAgency",
 				"pickupLocationCode",
+				"pickupRequestId",
+				"pickupItemId",
 				"canonicalPtype",
 				"canonicalItemType",
 				"previousStatus",

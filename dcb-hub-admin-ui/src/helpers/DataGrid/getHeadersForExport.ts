@@ -41,6 +41,8 @@ export const getHeadersForExport = (coreType: string) => {
 				"Title",
 				"Supplying agency",
 				"Pickup location name",
+				"Pickup request ID",
+				"Pickup item ID",
 				"DCB Canonical patron type",
 				"DCB Canonical item type",
 				"Previous status",
