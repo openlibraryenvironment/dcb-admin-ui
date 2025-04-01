@@ -90,6 +90,7 @@ const Search: NextPage = () => {
 	const { data: session } = useSession();
 	const { publicRuntimeConfig } = getConfig();
 	const [locateVersion, setLocateVersion] = useState<string | null>(null);
+	const [versionLoaded, setVersionLoaded] = useState(false);
 
 	const [searchResults, setSearchResults] = useState<any>({
 		instances: [],
@@ -149,16 +150,19 @@ const Search: NextPage = () => {
 				const response = await axios.get(
 					`${publicRuntimeConfig?.DCB_SEARCH_BASE}/info`,
 				);
-				const version = response.data.git?.tags || null;
+				const version = response.data.git?.tags;
 				setLocateVersion(version);
 			} catch (error) {
 				console.error("Error fetching DCB Locate version:", error);
 				setLocateVersion(null);
+			} finally {
+				// Mark that we've completed the version check, regardless of success/failure
+				setVersionLoaded(true);
 			}
 		};
 
 		fetchDcbVersion();
-	}, [publicRuntimeConfig.DCB_API_BASE, publicRuntimeConfig?.DCB_SEARCH_BASE]);
+	}, [publicRuntimeConfig?.DCB_SEARCH_BASE]);
 
 	// Locate versions from 2.6.0 onwards need special handling to deal with UUIDs
 	// As requests to the old location won't handle them properly, which breaks the breadcrumb navigation
@@ -173,7 +177,8 @@ const Search: NextPage = () => {
 			if (
 				!session?.accessToken ||
 				!query ||
-				!publicRuntimeConfig.DCB_SEARCH_BASE
+				!publicRuntimeConfig.DCB_SEARCH_BASE ||
+				!versionLoaded
 			)
 				// If no access token, no query OR no SEARCH_BASE env variable configured, we can't send a request.
 				return;
@@ -208,9 +213,10 @@ const Search: NextPage = () => {
 			}
 		},
 		[
-			isSupportedLocateVersion,
-			publicRuntimeConfig.DCB_SEARCH_BASE,
 			session?.accessToken,
+			publicRuntimeConfig.DCB_SEARCH_BASE,
+			versionLoaded,
+			isSupportedLocateVersion,
 			locateVersion,
 		],
 	);
@@ -282,7 +288,7 @@ const Search: NextPage = () => {
 						pageSizeOptions={[10, 25, 50, 100, 200]}
 						rowCount={searchResults.totalRecords}
 						paginationMode="server"
-						loading={loading}
+						loading={loading || !versionLoaded}
 						autoHeight
 						getRowId={(row) => row.id}
 						sx={{ border: 0 }}

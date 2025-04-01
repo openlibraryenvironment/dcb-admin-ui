@@ -11,7 +11,7 @@ export const determineAcceptableVersion = (
 			major > targetMajor || (major == targetMajor && minor >= targetMinor)
 		);
 	} else {
-		// If dev, this is acceptable (as dev won't have a standard version, but will always be ahead of release.)
-		return true;
+		// If no specified version, fall back
+		return false;
 	}
 };
