@@ -1,3 +1,10 @@
+## [1.35.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.35.0...v1.35.1) (2025-04-01)
+
+
+### Bug Fixes
+
+* Wait for Locate version to load before validating [DCB-1535] ([f26f695](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f26f6954c373efa9156bbeb86e67318861d30d3d))
+
 # [1.35.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.34.0...v1.35.0) (2025-04-01)
 
 
