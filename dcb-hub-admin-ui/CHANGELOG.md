@@ -1,3 +1,20 @@
+# [1.35.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.34.0...v1.35.0) (2025-04-01)
+
+
+### Bug Fixes
+
+* remove unneeded params in patron identities useQuery ([5bd6e4f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5bd6e4f42b1902d9be504ace0c38d3067fcf32a2))
+
+
+### Features
+
+* add raw pickup request status to pickup accordion [DCB-1679] ([037997d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/037997d1eb885830107eb573ac88f10ceb2b3915))
+* extend details summary section with pickup up data [DCB-1679] ([79c1539](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/79c15398601a21db1a7799a75c143ae01186417d))
+* extend patron request grid columns to include active workflow [DCB-1679] ([f487894](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f4878942dc403a692268685745f45306dc7fb842))
+* extend pickup virtual item section [DCB-1679] ([e9325c6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e9325c62d4ae278b7faf5645ec3a45606e3cb310))
+* extend pickup virtual patron section [DCB-1679] ([dbd54bb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/dbd54bbaf7af0d74216787b6aac94a7a40d0f8fb))
+* Introduce staff requesting [DCB-1535] ([0c59606](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0c5960689272318cff23cd9372150b5a24f06d65))
+
 # [1.34.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.33.0...v1.34.0) (2025-03-13)
 
 
