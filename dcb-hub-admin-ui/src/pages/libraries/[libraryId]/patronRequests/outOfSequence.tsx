@@ -122,7 +122,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 	const library: Library = data?.libraries?.content?.[0];
 	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
 
-	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`;
+	const outOfSequenceQueryVariables = `patronHostlmsCode: "${library?.agency?.hostLms?.code}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND NOT status: "HANDED_OFF_AS_LOCAL" AND outOfSequenceFlag:true`;
 
 	const handleTotalSizeChange = useCallback((type: string, size: number) => {
 		setTotalSizes((prevTotalSizes) => ({
