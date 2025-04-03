@@ -17,7 +17,7 @@ import {
 	finishedPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
 	patronRequestColumnsNoStatusFilter,
-} from "src/helpers/columns";
+} from "src/helpers/DataGrid/columns";
 import { Stack, Typography } from "@mui/material";
 import {
 	StyledAccordion,
@@ -30,7 +30,7 @@ import { MdExpandMore } from "react-icons/md";
 import { useCallback, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { equalsOnly } from "src/helpers/filters";
+import { equalsOnly } from "src/helpers/DataGrid/filters";
 import { useQuery } from "@apollo/client";
 import { Location } from "@models/Location";
 

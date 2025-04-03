@@ -1,6 +1,6 @@
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { useTranslation } from "next-i18next";
-import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 import { getILS } from "src/helpers/getILS";
 import {
 	deleteLibraryQuery,

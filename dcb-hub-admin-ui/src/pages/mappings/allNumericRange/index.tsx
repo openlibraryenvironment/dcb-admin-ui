@@ -14,7 +14,7 @@ import { useApolloClient } from "@apollo/client/react";
 import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
 import { useSession } from "next-auth/react";
-import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 import dayjs from "dayjs";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 

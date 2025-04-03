@@ -14,7 +14,7 @@ import {
 	getNumericRangeMappings,
 	updateNumericRangeMapping,
 } from "src/queries/queries";
-import { numRangeMappingColumnsNoCategoryFilter } from "src/helpers/columns";
+import { numRangeMappingColumnsNoCategoryFilter } from "src/helpers/DataGrid/columns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";

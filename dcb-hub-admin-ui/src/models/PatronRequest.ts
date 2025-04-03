@@ -7,4 +7,5 @@ export interface PatronRequest {
 	pickupLocationCode: string;
 	statusCode: string;
 	suppliers: any;
+	elapsedTimeInCurrentStatus: number;
 }
