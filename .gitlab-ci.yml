@@ -5,7 +5,10 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
 
 default:
-  image: node:22.12.0-bullseye
+  image: 
+    name: node:22.12.0-bullseye
+    pull_policy: if-not-present
+
   tags:
     - ki-onprem
 
@@ -23,7 +26,9 @@ cache:
 
 build:
   stage: build
-  image: node:22.12.0-bullseye
+  image: 
+    name: node:22.12.0-bullseye
+    pull_policy: if-not-present
   tags:
     - ki-onprem
   script:
@@ -38,7 +43,9 @@ build:
     - npm run semantic-release
 
 build-container-image:
-  image: docker:stable
+  image: 
+    name: docker:stable
+    pull_policy: if-not-present
   stage: build
   only:
     - release
