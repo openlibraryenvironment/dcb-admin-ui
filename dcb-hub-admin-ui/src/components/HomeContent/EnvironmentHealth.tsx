@@ -60,7 +60,7 @@ export default function EnvironmentHealth({
 				title={t("ui.info.loading.document", {
 					document_type: t("service.environment_health").toLowerCase(),
 				})}
-				subtitle={t("ui.info_wait")}
+				subtitle={t("ui.info.wait")}
 			/>
 		);
 	if (error)
