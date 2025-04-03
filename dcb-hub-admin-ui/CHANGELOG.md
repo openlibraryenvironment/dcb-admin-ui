@@ -1,3 +1,16 @@
+# [1.36.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.35.1...v1.36.0) (2025-04-03)
+
+
+### Bug Fixes
+
+* Fix duplicate translation keys ([452bee1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/452bee11617b0e08aad9ae4a8a688a47942522d8))
+* Fix untranslated key ([dd8e43b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/dd8e43b0da7cdba8112d10e67eeb46d950aa9837))
+
+
+### Features
+
+* Publish circulation exception reports [DCB-1536] ([b75aac8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b75aac82f4b3c6ca8bb5f560a7a28ccfaf54d00c))
+
 ## [1.35.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.35.0...v1.35.1) (2025-04-01)
 
 
