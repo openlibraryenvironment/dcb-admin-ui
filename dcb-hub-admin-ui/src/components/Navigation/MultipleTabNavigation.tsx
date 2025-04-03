@@ -40,7 +40,7 @@ export default function MultipleTabNavigation({
 
 	const queries = {
 		exception: `patronHostlmsCode: "${hostLmsCode}"AND status: "ERROR"`,
-		outOfSequence: `patronHostlmsCode: "${hostLmsCode}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:true`,
+		outOfSequence: `patronHostlmsCode: "${hostLmsCode}" AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status:"CANCELLED" AND NOT status:"FINALISED" AND NOT status:"COMPLETED" AND NOT status:"HANDED_OFF_AS_LOCAL" AND outOfSequenceFlag:true`,
 		inProgress: `patronHostlmsCode: "${hostLmsCode}"AND NOT status:"ERROR" AND NOT status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" AND NOT status: "CANCELLED" AND NOT status: "FINALISED" AND NOT status:"COMPLETED" AND outOfSequenceFlag:false`,
 		finished: `patronHostlmsCode: "${hostLmsCode}"AND (status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED" OR status: "HANDED_OFF_AS_LOCAL")`,
 		supplier: `localAgency: "${agencyCode}"`,
