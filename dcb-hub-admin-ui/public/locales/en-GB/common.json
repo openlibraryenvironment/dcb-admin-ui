@@ -1063,44 +1063,6 @@
 		},
 		"select_pickup": "We have succesfully validated the patron provided. Please choose a pickup location and click 'Submit' to finish placing this staff request."
 	},
-	"staff_request": {
-		"new": "New request",
-		"patron": {
-			"affiliated": "Affiliated institution",
-			"barcode": "Patron barcode",
-			"description": "Please provide the barcode and the library of the patron you would like to make a staff request for.",
-			"error": {
-				"no_brackets": "Please remove any brackets from the barcode.",
-				"request": {
-					"duplicate": "A request already exists for this patron at this library within the time window of 900 seconds.",
-					"generic": "Error: {{code}}. More info: {{description}}"
-				},
-				"validation_failure": "We were unable to validate this patron. Please correct the barcode and/or affiliated institution, and try again.",
-				"validate_first": "You must validate a patron before attempting to make a staff request on their behalf."
-			},
-			"item_agency_code": "Item agency",
-			"item_host_lms": "Item Host LMS",
-			"item_library": "Item library",
-			"item_local_id": "Item local ID",
-			"item_select": "Item {{id}} - Location: {{name}}, Barcode: {{barcode}}",
-			"pickup_location": "Pickup location",
-			"requester_note": "Requester note",
-			"selection": {
-				"automatic": "Automatic",
-				"automatic_context": "DCB will automatically select an item to fulfil this request.",
-				"manual": "Manual",
-				"manual_context": "DCB will use the criteria provided to select an item to fulfil this request",
-				"type": "Selection type"
-			},
-			"success": {
-				"lookup": "The patron {{barcode}} has been successfully validated for {{library}}.",
-				"request": "Your staff request has been successfully placed and can be tracked in DCB Admin <linkComponent> here </linkComponent>."
-			},
-			"validate": "Validate patron",
-			"validating": "Validating patron"
-		},
-		"select_pickup": "We have succesfully validated the patron provided. Please choose a pickup location and click 'Submit' to finish placing this staff request."
-	},
 
 	"404": {
 		"page_title": "404",
