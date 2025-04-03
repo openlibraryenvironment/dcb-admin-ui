@@ -8,7 +8,7 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 const HostLmss: NextPage = () => {

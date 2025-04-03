@@ -8,7 +8,11 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { containsOnly, equalsOnly, standardFilters } from "src/helpers/filters";
+import {
+	containsOnly,
+	equalsOnly,
+	standardFilters,
+} from "src/helpers/DataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";

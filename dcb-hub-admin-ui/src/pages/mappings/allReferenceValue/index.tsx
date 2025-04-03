@@ -17,7 +17,7 @@ import {
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { standardFilters } from "src/helpers/filters";
+import { standardFilters } from "src/helpers/DataGrid/filters";
 import dayjs from "dayjs";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 

@@ -12,6 +12,7 @@ import {
 	GridRowModesModel,
 	GridRowParams,
 	GridSortModel,
+	gridVisibleColumnFieldsSelector,
 	useGridApiRef,
 } from "@mui/x-data-grid-premium";
 import {
@@ -365,11 +366,20 @@ export default function ServerPaginationGrid({
 			const allData = await fetchAllData(exportMode);
 			const delimiter = fileType === "csv" ? "," : "\t";
 			const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
-
+			// get visible columns, pass in
+			const visibleColumns = gridVisibleColumnFieldsSelector(apiRef);
+			const usefulColumns =
+				exportMode == "all" || exportMode == "default"
+					? null
+					: visibleColumns.filter(
+							(value) =>
+								value != "__detail_panel_toggle__" && value != "__check__",
+						);
 			const dataString = convertFileToString(
 				allData?.[coreType]?.content,
 				delimiter,
 				coreType,
+				usefulColumns,
 			);
 
 			// Create and download the file
@@ -516,7 +526,6 @@ export default function ServerPaginationGrid({
 			const logicOperator = filterModel?.logicOperator?.toUpperCase() ?? "AND";
 			// Needs to disregard wildcard of the preset and stick AND NOT deleted on the end of the query
 			// if on main grids: disregard preset and stick AND NOT
-
 			// Build the filter query for all filters
 			let filterQuery = filters
 				.map((filter) => {
@@ -1015,6 +1024,13 @@ export default function ServerPaginationGrid({
 					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
 					toolbarExportCSV: t("ui.data_grid.download_current_page"),
 					toolbarExportPrint: t("ui.data_grid.print_current_page"),
+					filterOperatorDoesNotEqual: t("ui.data_grid.filters.not_equal"),
+					"filterOperator!=": t("ui.data_grid.filters.not_equal"),
+					"filterOperator=": t("ui.data_grid.filters.equals"),
+					"filterOperator>": t("ui.data_grid.filters.greater_than_exclusive"),
+					"filterOperator>=": t("ui.data_grid.filters.greater_than_inclusive"),
+					"filterOperator<": t("ui.data_grid.filters.less_than_exclusive"),
+					"filterOperator<=": t("ui.data_grid.filters.less_than_inclusive"),
 				}}
 				getDetailPanelContent={getDetailPanelContent}
 				getDetailPanelHeight={getDetailPanelHeight}

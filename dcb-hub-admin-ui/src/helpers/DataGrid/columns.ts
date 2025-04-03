@@ -1,11 +1,20 @@
 import dayjs from "dayjs";
-import { containsOnly, equalsOnly, standardFilters } from "./filters";
-import { formatDuration } from "./formatDuration";
+import {
+	containsOnly,
+	durationFilters,
+	equalsOnly,
+	standardFilters,
+} from "./filters";
+import { formatDuration } from "../formatDuration";
 import { PatronRequest } from "@models/PatronRequest";
+import {
+	GridColDef,
+	GridColumnVisibilityModel,
+} from "@mui/x-data-grid-premium";
 
 // Handles standard columns so we don't have to re-declare them everywhere
 
-export const standardRefValueMappingColumns = [
+export const standardRefValueMappingColumns: GridColDef[] = [
 	{
 		field: "fromCategory",
 		headerName: "Category",
@@ -70,7 +79,7 @@ export const standardRefValueMappingColumns = [
 	},
 ];
 
-export const refValueMappingColumnsNoCategoryFilter = [
+export const refValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 	{
 		field: "fromCategory",
 		headerName: "Category",
@@ -135,7 +144,7 @@ export const refValueMappingColumnsNoCategoryFilter = [
 	},
 ];
 
-export const standardNumRangeMappingColumns = [
+export const standardNumRangeMappingColumns: GridColDef[] = [
 	{
 		field: "domain",
 		headerName: "Category",
@@ -197,7 +206,7 @@ export const standardNumRangeMappingColumns = [
 	},
 ];
 
-export const numRangeMappingColumnsNoCategoryFilter = [
+export const numRangeMappingColumnsNoCategoryFilter: GridColDef[] = [
 	{
 		field: "domain",
 		headerName: "Category",
@@ -259,7 +268,7 @@ export const numRangeMappingColumnsNoCategoryFilter = [
 	},
 ];
 
-export const standardPatronRequestColumns = [
+export const standardPatronRequestColumns: GridColDef[] = [
 	{
 		field: "dateCreated",
 		headerName: "Request created",
@@ -297,6 +306,7 @@ export const standardPatronRequestColumns = [
 		field: "supplyingAgency",
 		headerName: "Supplying agency",
 		filterable: false,
+		sortable: false,
 		valueGetter: (value: any, row: PatronRequest) => {
 			// Check if suppliers array is not empty
 			if (row.suppliers.length > 0) {
@@ -378,11 +388,15 @@ export const standardPatronRequestColumns = [
 	},
 	{
 		field: "elapsedTimeInCurrentStatus",
-		headerName: "Time in state",
+		headerName: "Time in state (days)",
+		description:
+			"The time the request has been in its current status, in the format dd:hh:mm:ss",
 		minWidth: 50,
-		filterOperators: equalsOnly,
-		valueGetter: (value: any, row: { elapsedTimeInCurrentStatus: number }) =>
-			formatDuration(row.elapsedTimeInCurrentStatus),
+		type: "number",
+		filterOperators: durationFilters,
+		valueGetter: (value: any, row: { elapsedTimeInCurrentStatus: number }) => {
+			return formatDuration(row.elapsedTimeInCurrentStatus);
+		},
 	},
 	{
 		field: "isManuallySelectedItem",
@@ -413,18 +427,6 @@ export const standardPatronRequestColumns = [
 		flex: 0.5,
 	},
 	{
-		field: "description",
-		headerName: "Description",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "requesterNote",
-		headerName: "Requester note",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
 		field: "id",
 		headerName: "Request UUID",
 		minWidth: 100,
@@ -435,13 +437,12 @@ export const standardPatronRequestColumns = [
 		field: "activeWorkflow",
 		headerName: "Active workflow",
 		minWidth: 100,
-		hidden: true,
 		sortable: true,
 		filterable: true,
 	},
 ];
 
-export const patronRequestColumnsNoStatusFilter = [
+export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 	{
 		field: "dateCreated",
 		headerName: "Request created",
@@ -479,6 +480,7 @@ export const patronRequestColumnsNoStatusFilter = [
 		field: "supplyingAgency",
 		headerName: "Supplying agency",
 		filterable: false,
+		sortable: false,
 		valueGetter: (
 			value: any,
 			row: { suppliers: Array<{ localAgency: string }> },
@@ -564,9 +566,12 @@ export const patronRequestColumnsNoStatusFilter = [
 	},
 	{
 		field: "elapsedTimeInCurrentStatus",
-		headerName: "Time in state",
+		headerName: "Time in state (days)",
+		description:
+			"The time the request has been in its current status, measured in days",
 		minWidth: 50,
-		filterOperators: equalsOnly,
+		type: "number",
+		filterOperators: durationFilters,
 		valueGetter: (value: any, row: { elapsedTimeInCurrentStatus: number }) =>
 			formatDuration(row.elapsedTimeInCurrentStatus),
 	},
@@ -609,13 +614,12 @@ export const patronRequestColumnsNoStatusFilter = [
 		field: "activeWorkflow",
 		headerName: "Active workflow",
 		minWidth: 100,
-		hidden: true,
 		sortable: true,
 		filterable: true,
 	},
 ];
 
-export const supplierRequestColumnsLibrary = [
+export const supplierRequestColumnsLibrary: GridColDef[] = [
 	{
 		field: "dateCreated",
 		headerName: "Request created",
@@ -709,41 +713,38 @@ export const supplierRequestColumnsLibrary = [
 	},
 ];
 
-export const defaultPatronRequestLibraryColumnVisibility = {
-	canonicalItemType: false,
-	canonicalPtype: false,
-	pickupLocationCode: false,
-	patronHostlmsCode: false,
-	previousStatus: false,
-	nextExpectedStatus: false,
-	errorMessage: false,
-	outOfSequenceFlag: false,
-	isManuallySelectedItem: false,
-	dateUpdated: false,
-	id: false,
-	description: false,
-	requesterNote: false,
-	activeWorkflow: false,
-};
+export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityModel =
+	{
+		canonicalItemType: false,
+		canonicalPtype: false,
+		pickupLocationCode: false,
+		patronHostlmsCode: false,
+		previousStatus: false,
+		nextExpectedStatus: false,
+		errorMessage: false,
+		outOfSequenceFlag: false,
+		isManuallySelectedItem: false,
+		dateUpdated: false,
+		id: false,
+	};
 
-export const defaultSupplierRequestLibraryColumnVisibility = {
-	canonicalItemType: false,
-	canonicalPtype: false,
-	pickupLocationCode: false,
-	patronHostlmsCode: true,
-	previousStatus: false,
-	nextExpectedStatus: false,
-	errorMessage: false,
-	outOfSequenceFlag: false,
-	isManuallySelectedItem: false,
-	dateUpdated: false,
-	id: false,
-	suppliers: false,
-	description: false,
-	requesterNote: false,
-};
+export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
+	{
+		canonicalItemType: false,
+		canonicalPtype: false,
+		pickupLocationCode: false,
+		patronHostlmsCode: true,
+		previousStatus: false,
+		nextExpectedStatus: false,
+		errorMessage: false,
+		outOfSequenceFlag: false,
+		isManuallySelectedItem: false,
+		dateUpdated: false,
+		id: false,
+		suppliers: false,
+	};
 
-export const defaultPatronRequestColumnVisibility = {
+export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	canonicalItemType: false,
 	canonicalPtype: false,
 	pickupLocationCode: false,
@@ -760,16 +761,15 @@ export const defaultPatronRequestColumnVisibility = {
 	activeWorkflow: false,
 };
 
-export const finishedPatronRequestColumnVisibility = {
-	canonicalItemType: false,
-	canonicalPtype: false,
-	pickupLocationCode: false,
-	elapsedTimeInCurrentStatus: false,
-	pollCountForCurrentStatus: false,
-	outOfSequenceFlag: false,
-	description: false,
-	requesterNote: false,
-};
+export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
+	{
+		canonicalItemType: false,
+		canonicalPtype: false,
+		pickupLocationCode: false,
+		elapsedTimeInCurrentStatus: false,
+		pollCountForCurrentStatus: false,
+		outOfSequenceFlag: false,
+	};
 
 export const exceptionPatronRequestColumnVisibility = {
 	canonicalItemType: false,

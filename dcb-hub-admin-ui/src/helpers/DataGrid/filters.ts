@@ -1,4 +1,6 @@
+import { betweenFilterOperator } from "src/helpers/DataGrid/rangeFilterOperator";
 import {
+	getGridNumericOperators,
 	getGridStringOperators,
 	GridCellParams,
 	GridFilterInputValue,
@@ -12,7 +14,7 @@ import {
 // and two - to filter in situations where the ClientDataGrid is used.
 
 const doesNotEqualFilter: GridFilterOperator = {
-	label: "does not equal",
+	label: "Does not equal",
 	value: "does not equal",
 	getApplyFilterFn: (filterItem) => {
 		if (!filterItem.field || !filterItem.value || !filterItem.operator) {
@@ -42,7 +44,7 @@ const doesNotContainFilter: GridFilterOperator = {
 	InputComponent: GridFilterInputValue,
 };
 
-export const standardFilters = [
+export const standardFilters: GridFilterOperator[] = [
 	...getGridStringOperators().filter(({ value }) =>
 		["equals", "contains"].includes(value),
 	),
@@ -50,14 +52,30 @@ export const standardFilters = [
 	doesNotContainFilter,
 ];
 
-export const equalsOnly = [
+export const equalsOnly: GridFilterOperator[] = [
 	...getGridStringOperators().filter(({ value }) => ["equals"].includes(value)),
 	doesNotEqualFilter,
 ];
 
-export const containsOnly = [
+export const containsOnly: GridFilterOperator[] = [
 	...getGridStringOperators().filter(({ value }) =>
 		["contains"].includes(value),
 	),
 	doesNotContainFilter,
+];
+
+// For more exact numeric values
+export const numericFilters: GridFilterOperator[] = [
+	...getGridNumericOperators().filter((operator) =>
+		["<=", ">=", "<", ">", "=", "!="].includes(operator.value),
+	),
+	betweenFilterOperator,
+];
+
+// For durations, which are shown in days and don't need the same precision.
+export const durationFilters: GridFilterOperator[] = [
+	...getGridNumericOperators().filter((operator) =>
+		["<", ">"].includes(operator.value),
+	),
+	betweenFilterOperator,
 ];

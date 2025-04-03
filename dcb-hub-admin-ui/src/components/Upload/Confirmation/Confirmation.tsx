@@ -26,7 +26,7 @@ import { Controller, useForm } from "react-hook-form";
 import {
 	locationPatronRequestColumnVisibility,
 	standardPatronRequestColumns,
-} from "src/helpers/columns";
+} from "src/helpers/DataGrid/columns";
 import { getEntityText } from "src/helpers/DataGrid/getEntityText";
 import {
 	getConfirmationFirstPara,

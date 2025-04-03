@@ -1,3 +1,4 @@
+import { formatDuration } from "../formatDuration";
 import { getFieldsForExport } from "./getFieldsForExport";
 import { getHeadersForExport } from "./getHeadersForExport";
 
@@ -19,7 +20,11 @@ const getNestedValue = (item: any, path: string[]): any => {
 };
 
 // Helper function to format cell value
-const formatCellValue = (value: any, delimiter: string): string => {
+const formatCellValue = (
+	value: any,
+	delimiter: string,
+	field: string,
+): string => {
 	if (value === null || value === undefined) {
 		return "";
 	}
@@ -30,6 +35,9 @@ const formatCellValue = (value: any, delimiter: string): string => {
 		stringValue.includes("\n")
 	) {
 		return `"${stringValue.replace(/"/g, '""')}"`;
+	}
+	if (field == "elapsedTimeInCurrentStatus") {
+		return formatDuration(value);
 	}
 	return stringValue;
 };
@@ -93,9 +101,14 @@ export const convertFileToString = (
 	data: any[],
 	delimiter: string,
 	coreType: string,
+	usefulColumns: string[] | null,
 ) => {
-	const formattedHeaders = getHeadersForExport(coreType);
-	const fieldsForExport = getFieldsForExport(coreType);
+	const fieldsForExport = usefulColumns
+		? usefulColumns
+		: getFieldsForExport(coreType);
+	const formattedHeaders = usefulColumns
+		? getHeadersForExport(coreType, fieldsForExport)
+		: getHeadersForExport(coreType);
 
 	const headerRow = formattedHeaders.join(delimiter);
 
@@ -104,7 +117,7 @@ export const convertFileToString = (
 			.map((field: string) => {
 				const fieldMapping = getFieldMapping(field);
 				const value = getFieldValue(item, fieldMapping);
-				return formatCellValue(value, delimiter);
+				return formatCellValue(value, delimiter, field);
 			})
 			.join(delimiter),
 	);

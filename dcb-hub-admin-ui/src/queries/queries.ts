@@ -195,6 +195,8 @@ export const getAgencies = gql`
 				id
 				code
 				name
+				latitude
+				longitude
 			}
 			pageable {
 				number

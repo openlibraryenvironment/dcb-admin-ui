@@ -16,7 +16,7 @@ import {
 import {
 	standardPatronRequestColumns,
 	defaultPatronRequestLibraryColumnVisibility,
-} from "src/helpers/columns";
+} from "src/helpers/DataGrid/columns";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
@@ -32,7 +32,7 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
-import { equalsOnly } from "src/helpers/filters";
+import { equalsOnly } from "src/helpers/DataGrid/filters";
 import { Location } from "@models/Location";
 
 type LibraryDetails = {

@@ -2,7 +2,7 @@ import {
 	defaultPatronRequestLibraryColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
 	patronRequestColumnsNoStatusFilter,
-} from "src/helpers/columns";
+} from "src/helpers/DataGrid/columns";
 
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import { Library } from "@models/Library";
@@ -35,7 +35,7 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
-import { equalsOnly } from "src/helpers/filters";
+import { equalsOnly } from "src/helpers/DataGrid/filters";
 import { Location } from "@models/Location";
 
 type LibraryDetails = {

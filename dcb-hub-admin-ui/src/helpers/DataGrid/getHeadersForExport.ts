@@ -1,62 +1,74 @@
-export const getHeadersForExport = (coreType: string) => {
-	switch (coreType) {
-		case "referenceValueMappings":
-			return [
-				"fromContext",
-				"fromCategory",
-				"fromValue",
-				"toContext",
-				"toCategory",
-				"toValue",
-			];
-		case "numericRangeMappings":
-			return [
-				"context",
-				"domain",
-				"lowerBound",
-				"upperBound",
-				"toValue",
-				"toContext",
-			];
-		case "locations":
-			return [
-				"Agency Code",
-				"Location Code",
-				"Display Name",
-				"Print Name",
-				"DeliveryStop_Ignore",
-				"Lat",
-				"Lon",
-				"isPickup",
-				"LOCTYPE",
-				"CHK_Ignore",
-				"Address_Ignore",
-				"id",
-			];
-		case "patronRequests":
-			return [
-				"Date created",
-				"Patron Host LMS code",
-				"Patron barcode",
-				"Title",
-				"Supplying agency",
-				"Pickup location name",
-				"Pickup request ID",
-				"Pickup item ID",
-				"DCB Canonical patron type",
-				"DCB Canonical item type",
-				"Previous status",
-				"Status",
-				"Next expected status",
-				"Error message",
-				"Out of sequence?",
-				"Poll count for current status",
-				"Elapsed time in current status",
-				"Is manually selected item?",
-				"Date updated",
-				"DCB Patron request UUID",
-			];
-		default:
-			return [];
+// These are the header mappings in the export for each field.
+// Per type so we have more control over individual field display.
+const headerMappings: Record<string, Record<string, string>> = {
+	referenceValueMappings: {
+		fromContext: "fromContext",
+		fromCategory: "fromCategory",
+		fromValue: "fromValue",
+		toContext: "toContext",
+		toCategory: "toCategory",
+		toValue: "toValue",
+	},
+	numericRangeMappings: {
+		context: "context",
+		domain: "domain",
+		lowerBound: "lowerBound",
+		upperBound: "upperBound",
+		toValue: "toValue",
+		toContext: "toContext",
+	},
+	locations: {
+		agencyCode: "Agency Code",
+		locationCode: "Location Code",
+		name: "Display Name",
+		printLabel: "Print name",
+		deliveryStops: "DeliveryStop_Ignore",
+		latitude: "Lat",
+		longitude: "Lon",
+		isPickup: "isPickup",
+		type: "LOCTYPE",
+		chk: "CHK_Ignore",
+		address: "Address_Ignore",
+		id: "id",
+	},
+	patronRequests: {
+		dateCreated: "Date created",
+		patronHostlmsCode: "Patron Host LMS code",
+		localBarcode: "Patron barcode",
+		clusterRecordTitle: "Title",
+		supplyingAgency: "Supplying agency",
+		pickupLocationName: "Pickup location name",
+		pickupRequestId: "Pickup request ID",
+		pickupItemId: "Pickup item ID",
+		canonicalPtype: "DCB Canonical patron type",
+		canonicalItemType: "DCB Canonical item type",
+		previousStatus: "Previous status",
+		status: "Status",
+		nextExpectedStatus: "Next expected status",
+		errorMessage: "Error message",
+		outOfSequence: "Out of sequence?",
+		pollCountForCurrentStatus: "Poll count for current status",
+		elapsedTimeInCurrentStatus: "Time in state (days)",
+		isManuallySelectedItem: "Is manually selected item?",
+		dateUpdated: "Date updated",
+		id: "DCB Patron request UUID",
+	},
+};
+
+export const getHeadersForExport = (
+	coreType: string,
+	usefulColumns?: string[],
+) => {
+	const mappings = headerMappings[coreType] || {};
+	console.log(usefulColumns);
+
+	// If no usefulColumns are provided, return all headers
+	if (!usefulColumns || usefulColumns.length === 0) {
+		return Object.values(mappings);
 	}
+
+	// Otherwise, return only the headers for the specified columns
+	return usefulColumns
+		.map((column) => mappings[column])
+		.filter((header) => header !== undefined);
 };

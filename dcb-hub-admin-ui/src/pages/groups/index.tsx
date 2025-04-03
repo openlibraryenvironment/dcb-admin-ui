@@ -11,7 +11,7 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Loading from "@components/Loading/Loading";
-import { standardFilters } from "src/helpers/filters";
+import { standardFilters } from "src/helpers/DataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 // Groups Feature Page Structure

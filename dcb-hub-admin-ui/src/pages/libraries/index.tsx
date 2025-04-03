@@ -15,7 +15,7 @@ import AddLibraryToGroup from "../../forms/AddLibraryToGroup/AddLibraryToGroup";
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 import { useCustomColumns } from "@hooks/useCustomColumns"; // import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 const Libraries: NextPage = () => {

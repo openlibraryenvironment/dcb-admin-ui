@@ -16,7 +16,7 @@ import {
 import {
 	defaultSupplierRequestLibraryColumnVisibility,
 	standardPatronRequestColumns,
-} from "src/helpers/columns";
+} from "src/helpers/DataGrid/columns";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";

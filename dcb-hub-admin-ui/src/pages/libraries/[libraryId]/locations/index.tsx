@@ -20,7 +20,7 @@ import {
 	closeConfirmation,
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
-import { equalsOnly, standardFilters } from "src/helpers/filters";
+import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 import { handleTabChange } from "src/helpers/navigation/handleTabChange";
 import {
 	deleteLibraryQuery,

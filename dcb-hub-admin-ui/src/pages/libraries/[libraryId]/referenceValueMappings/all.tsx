@@ -14,7 +14,7 @@ import {
 	getMappings,
 	updateReferenceValueMapping,
 } from "src/queries/queries";
-import { refValueMappingColumnsNoCategoryFilter } from "src/helpers/columns";
+import { refValueMappingColumnsNoCategoryFilter } from "src/helpers/DataGrid/columns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
