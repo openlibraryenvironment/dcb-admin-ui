@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { Close } from "@mui/icons-material";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { getLibraries, getLocations } from "src/queries/queries";
 import axios from "axios";
@@ -864,16 +863,4 @@ export default function StaffRequest({
 			/>
 		</>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }
