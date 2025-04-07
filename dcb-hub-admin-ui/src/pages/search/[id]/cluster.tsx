@@ -21,7 +21,7 @@ import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPan
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import { useState } from "react";
 
-import StaffRequest from "../StaffRequest";
+import StaffRequest from "../../../forms/StaffRequest/StaffRequest";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();

@@ -10,22 +10,18 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	FormControl,
-	FormControlLabel,
-	FormHelperText,
-	FormLabel,
 	IconButton,
-	Radio,
-	RadioGroup,
 	TextField,
-	Tooltip,
 	Typography,
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { MdClose } from "react-icons/md";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { getLibraries, getLocations } from "src/queries/queries";
+import {
+	getLibraries,
+	getLocations,
+	getPatronRequestEssentials,
+} from "src/queries/queries";
 import axios from "axios";
 import getConfig from "next/config";
 import { useSession } from "next-auth/react";
@@ -38,8 +34,11 @@ import { findConsortium } from "src/helpers/findConsortium";
 import { Location } from "@models/Location";
 import { isEmpty } from "lodash";
 import { Item } from "@models/Item";
+import { ClientDataGrid } from "@components/ClientDataGrid";
+import dayjs from "dayjs";
 
-// WHEN WE INTRODUCE DCB ADMIN FOR LIBRARIES THIS DROP DOWN FOR LIBRARIES MUST BE RESTRICTED TO ONLY THE LIBRARY THE USER IS MANAGING
+// Cut this down as we won't need all of it
+
 type PatronLookupResponse = {
 	status: string; // if not VALID, cannot make request
 	localPatronId: string; // this is the localId that gets sent to /place request
@@ -48,15 +47,14 @@ type PatronLookupResponse = {
 	homeLocationCode: string; // this is homeLibraryCode
 };
 
-interface StaffRequestFormData {
+interface OnSiteBorrowingFormData {
 	patronBarcode: string;
 	agencyCode: string;
 	pickupLocationId: string;
 	requesterNote?: string;
-	selectionType: string;
-	itemLocalId?: string;
-	itemLocalSystemCode?: string;
-	itemAgencyCode?: string;
+	itemLocalId: string;
+	itemLocalSystemCode: string;
+	itemAgencyCode: string;
 }
 
 type StaffRequestFormType = {
@@ -87,7 +85,7 @@ type PlaceRequestResponse = {
 	};
 };
 
-export default function StaffRequest({
+export default function ExpeditedCheckout({
 	show,
 	onClose,
 	bibClusterId,
@@ -118,6 +116,26 @@ export default function StaffRequest({
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
 	const [itemsLoading, setItemsLoading] = useState(false);
 	const [itemsError, setItemsError] = useState(false);
+	const [patronRequestWaiting, setPatronRequestWaiting] = useState(false);
+
+	const [
+		fetchPatronRequest,
+		{ loading: patronRequestLoading, data: patronRequestData },
+	] = useLazyQuery(getPatronRequestEssentials, {
+		variables: {},
+		onCompleted: (data) => {
+			if (data?.patronRequests?.content?.[0].status == "RETURN_TRANSIT") {
+				console.log("PR has achieved Return transit");
+				setPatronRequestWaiting(false);
+				// We should poll until we reach this - we'll have to display loading / some kind of progress indicator while we do it
+				// But when we do reach return transit, we must trigger a second alert and re-direct to the new patron request.
+				// As the request has been checked out
+			}
+		},
+	});
+	console.log(patronRequestData, patronRequestLoading);
+
+	const patronRequest = patronRequestData?.patronRequests?.content?.[0];
 
 	const validationSchema = Yup.object().shape({
 		patronBarcode: Yup.string()
@@ -143,31 +161,17 @@ export default function StaffRequest({
 			}),
 		),
 		requesterNote: Yup.string(),
-		selectionType: Yup.string().required(
+		itemLocalId: Yup.string().required(
 			t("ui.validation.required", {
-				field: t("staff_request.patron.selection.type").toLowerCase(),
+				field: t("staff_request.patron.item_local_id").toLowerCase(),
 			}),
 		),
-		itemLocalId: Yup.string().when("selectionType", {
-			is: "manual",
-			then: (schema) =>
-				schema.required(
-					t("ui.validation.required", {
-						field: t("staff_request.patron.item_local_id").toLowerCase(),
-					}),
-				),
-			otherwise: (schema) => schema.notRequired(),
-		}),
-		itemAgencyCode: Yup.string().when("selectionType", {
-			is: "manual",
-			then: (schema) =>
-				schema.required(
-					t("ui.validation.required", {
-						field: t("staff_request.patron.item_library").toLowerCase(),
-					}),
-				),
-			otherwise: (schema) => schema.notRequired(),
-		}),
+		itemLocalSystemCode: Yup.string().required(),
+		itemAgencyCode: Yup.string().required(
+			t("ui.validation.required", {
+				field: t("staff_request.patron.item_library").toLowerCase(),
+			}),
+		),
 	});
 
 	const {
@@ -177,13 +181,12 @@ export default function StaffRequest({
 		watch,
 		setValue,
 		formState: { errors, isValid },
-	} = useForm<StaffRequestFormData>({
+	} = useForm<OnSiteBorrowingFormData>({
 		defaultValues: {
 			patronBarcode: "",
 			agencyCode: "",
 			pickupLocationId: "",
-			requesterNote: "Staff Request: ",
-			selectionType: "automatic",
+			requesterNote: "On-site-borrowing: ",
 			itemLocalId: "",
 			itemLocalSystemCode: "",
 			itemAgencyCode: "",
@@ -191,7 +194,6 @@ export default function StaffRequest({
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
 	});
-	const selectionType = watch("selectionType");
 	const agencyCode = watch("agencyCode");
 	const itemAgencyCode = watch("itemAgencyCode");
 
@@ -285,7 +287,6 @@ export default function StaffRequest({
 				},
 			);
 			setItemsLoading(false);
-
 			setAvailabilityResults(response.data);
 		} catch (error) {
 			console.error("Error:", error);
@@ -389,7 +390,7 @@ export default function StaffRequest({
 		}
 	};
 
-	const onSubmit = async (data: StaffRequestFormData) => {
+	const onSubmit = async (data: OnSiteBorrowingFormData) => {
 		if (!patronData || patronData.status !== "VALID") {
 			setAlert({
 				open: true,
@@ -406,21 +407,6 @@ export default function StaffRequest({
 				(option) => option.value === data.pickupLocationId,
 			);
 
-			const requestPayload = {
-				citation: {
-					bibClusterId: bibClusterId,
-				},
-				requestor: {
-					localSystemCode: patronData.systemCode,
-					localId: patronData.localPatronId[0], // Possibly make a note if there were multiple of these - not sure why it has array type
-					homeLibraryCode: patronData.homeLocationCode,
-				},
-				pickupLocation: {
-					code: selectedLocation?.value || "",
-				},
-				description: "Staff Request" + data.requesterNote,
-				requesterNote: data.requesterNote || "Staff Request",
-			};
 			const manualSelectionPayload = {
 				citation: {
 					bibClusterId: bibClusterId,
@@ -440,11 +426,12 @@ export default function StaffRequest({
 					localSystemCode: data.itemLocalSystemCode || "", // The Host LMS code for the item's Host LMS
 					agencyCode: data.itemAgencyCode || "", // The agency code of the item
 				},
+				isExpeditedCheckout: true,
 			};
 
 			const response = await axios.post(
-				`${publicRuntimeConfig.DCB_API_BASE}/patrons/requests/place`,
-				selectionType == "manual" ? manualSelectionPayload : requestPayload,
+				`${publicRuntimeConfig.DCB_API_BASE}/patrons/requests/place/expeditedCheckout`,
+				manualSelectionPayload,
 				{
 					headers: {
 						"Content-Type": "application/json",
@@ -461,13 +448,21 @@ export default function StaffRequest({
 				text: t("staff_request.patron.success.request"),
 				patronRequestLink: patronRequestLink,
 			});
+			setPatronRequestWaiting(true);
+			fetchPatronRequest({
+				variables: {
+					query: "id:" + requestId,
+				},
+				pollInterval: 10000,
+			});
 
 			setTimeout(() => {
 				reset();
 				setPatronValidated(false);
 				setPatronData(null);
-				onClose();
+				// onClose();
 			}, 6000);
+			// onClose needs to kick in eventually
 		} catch (error: any) {
 			console.error("Error submitting patron request:", error.response?.data);
 			setAlert({
@@ -500,7 +495,7 @@ export default function StaffRequest({
 				maxWidth="sm"
 			>
 				<DialogTitle id="form-dialog-title" variant="modalTitle">
-					{t("staff_request.new")}
+					{t("expedited_checkout.title_on_site")}
 				</DialogTitle>
 				<IconButton
 					aria-label="close"
@@ -515,100 +510,82 @@ export default function StaffRequest({
 					<MdClose />
 				</IconButton>
 				<DialogContent>
-					<Typography variant="body1">
-						{patronValidated
-							? t("staff_request.select_pickup")
-							: t("staff_request.patron.description")}
-					</Typography>
-					<form onSubmit={handleSubmit(onSubmit)}>
-						<Controller
-							name="agencyCode"
-							control={control}
-							render={({ field: { onChange, value } }) => (
-								<Autocomplete
-									value={
-										value
-											? libraryOptions.find(
-													(option) => option.value === value,
-												) || null
-											: null
-									}
-									onChange={(_, newValue: AutocompleteOption | null) => {
-										onChange(newValue?.value || "");
-									}}
-									options={libraryOptions}
-									getOptionLabel={(option: AutocompleteOption) => option.label}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											margin="normal"
-											required
-											label={t("staff_request.patron.affiliated")}
-											error={!!errors.agencyCode}
-											helperText={errors.agencyCode?.message}
-										/>
-									)}
-									isOptionEqualToValue={(option, value) =>
-										option.value === value.value
-									}
-									disabled={patronValidated}
-								/>
-							)}
-						/>
-						<Controller
-							name="patronBarcode"
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									margin="normal"
-									required
-									fullWidth
-									id="patronBarcode"
-									label={t("staff_request.patron.barcode")}
-									error={!!errors.patronBarcode}
-									helperText={errors.patronBarcode?.message}
-									disabled={patronValidated}
-								/>
-							)}
-						/>
-						{!patronValidated ? (
-							<Button
-								color="primary"
-								variant="contained"
-								fullWidth
-								sx={{ mt: 2 }}
-								onClick={validatePatron}
-								disabled={
-									isValidatingPatron ||
-									!watch("patronBarcode") ||
-									!watch("agencyCode")
-								}
-							>
-								{isValidatingPatron
-									? t("staff_request.patron.validating")
-									: t("staff_request.patron.validate")}
-							</Button>
-						) : (
-							<>
+					{patronRequestWaiting ? (
+						<>
+							<CircularProgress />
+							Your patron request is currently in the status
+							{patronRequest?.status}
+							<ClientDataGrid
+								data={patronRequest?.audit}
+								columns={[
+									{
+										field: "auditDate",
+										headerName: "Audit date",
+										minWidth: 60,
+										flex: 0.2,
+										valueGetter: (
+											value: string,
+											row: { auditDate: string },
+										) => {
+											const auditDate = row.auditDate;
+											return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
+										},
+									},
+									{
+										field: "briefDescription",
+										headerName: "Description",
+										minWidth: 100,
+										flex: 0.4,
+									},
+									{
+										field: "fromStatus",
+										headerName: "fromStatus",
+										minWidth: 50,
+										flex: 0.25,
+									},
+									{
+										field: "toStatus",
+										headerName: "toStatus",
+										minWidth: 50,
+										flex: 0.25,
+									},
+								]}
+								type="Audit"
+								// This grid could show click-through details of its own for each audit log entry
+								selectable={true}
+								noDataTitle={t("details.audit_log_no_data")}
+								noDataMessage={t("details.audit_log_no_rows")}
+								sortModel={[{ field: "auditDate", sort: "desc" }]}
+								operationDataType="Audit"
+								disableAggregation={true}
+								disableRowGrouping={true}
+							/>
+						</>
+					) : (
+						<>
+							<Typography variant="body1">
+								{patronValidated
+									? t("staff_request.select_pickup")
+									: t("expedited_checkout.description")}
+							</Typography>
+
+							<form onSubmit={handleSubmit(onSubmit)}>
 								<Controller
-									name="pickupLocationId"
+									name="agencyCode"
 									control={control}
 									render={({ field: { onChange, value } }) => (
 										<Autocomplete
 											value={
-												pickupLocationOptions.find(
-													(option) => option.value === value,
-												) || null
+												value
+													? libraryOptions.find(
+															(option) => option.value === value,
+														) || null
+													: null
 											}
 											onChange={(_, newValue: AutocompleteOption | null) => {
 												onChange(newValue?.value || "");
 											}}
-											options={pickupLocationOptions}
-											onOpen={() => {
-												getPickupLocations();
-											}}
-											loading={pickupLocationsLoading}
+											options={libraryOptions}
 											getOptionLabel={(option: AutocompleteOption) =>
 												option.label
 											}
@@ -617,62 +594,95 @@ export default function StaffRequest({
 													{...params}
 													margin="normal"
 													required
-													label={t("staff_request.patron.pickup_location")}
-													error={!!errors.pickupLocationId}
-													helperText={errors.pickupLocationId?.message}
+													label={t("staff_request.patron.affiliated")}
+													error={!!errors.agencyCode}
+													helperText={errors.agencyCode?.message}
 												/>
 											)}
 											isOptionEqualToValue={(option, value) =>
 												option.value === value.value
 											}
+											disabled={patronValidated}
 										/>
 									)}
 								/>
-
 								<Controller
-									name="selectionType"
+									name="patronBarcode"
 									control={control}
 									render={({ field }) => (
-										<FormControl component="fieldset" margin="normal">
-											<FormLabel component="legend">
-												{t("staff_request.patron.selection.type")}
-											</FormLabel>
-											<RadioGroup row {...field}>
-												<Tooltip
-													title={t(
-														"staff_request.patron.selection.automatic_context",
-													)}
-												>
-													<FormControlLabel
-														value="automatic"
-														control={<Radio />}
-														label={t(
-															"staff_request.patron.selection.automatic",
-														)}
-													/>
-												</Tooltip>
-												<Tooltip
-													title={t(
-														"staff_request.patron.selection.manual_context",
-													)}
-												>
-													<FormControlLabel
-														value="manual"
-														control={<Radio />}
-														label={t("staff_request.patron.selection.manual")}
-													/>
-												</Tooltip>
-											</RadioGroup>
-											{errors.selectionType && (
-												<FormHelperText error>
-													{errors.selectionType.message}
-												</FormHelperText>
-											)}
-										</FormControl>
+										<TextField
+											{...field}
+											margin="normal"
+											required
+											fullWidth
+											id="patronBarcode"
+											label={t("staff_request.patron.barcode")}
+											error={!!errors.patronBarcode}
+											helperText={errors.patronBarcode?.message}
+											disabled={patronValidated}
+										/>
 									)}
 								/>
-								{selectionType === "manual" && (
+								{!patronValidated ? (
+									<Button
+										color="primary"
+										variant="contained"
+										fullWidth
+										sx={{ mt: 2 }}
+										onClick={validatePatron}
+										disabled={
+											isValidatingPatron ||
+											!watch("patronBarcode") ||
+											!watch("agencyCode")
+										}
+									>
+										{isValidatingPatron
+											? t("staff_request.patron.validating")
+											: t("staff_request.patron.validate")}
+									</Button>
+								) : (
 									<>
+										<Controller
+											name="pickupLocationId"
+											control={control}
+											render={({ field: { onChange, value } }) => (
+												<Autocomplete
+													value={
+														pickupLocationOptions.find(
+															(option) => option.value === value,
+														) || null
+													}
+													onChange={(
+														_,
+														newValue: AutocompleteOption | null,
+													) => {
+														onChange(newValue?.value || "");
+													}}
+													options={pickupLocationOptions}
+													onOpen={() => {
+														getPickupLocations();
+													}}
+													loading={pickupLocationsLoading}
+													getOptionLabel={(option: AutocompleteOption) =>
+														option.label
+													}
+													renderInput={(params) => (
+														<TextField
+															{...params}
+															margin="normal"
+															required
+															label={t("staff_request.patron.pickup_location")}
+															error={!!errors.pickupLocationId}
+															helperText={errors.pickupLocationId?.message}
+														/>
+													)}
+													isOptionEqualToValue={(option, value) =>
+														option.value === value.value
+													}
+												/>
+											)}
+										/>
+
 										<Controller
 											name="itemAgencyCode"
 											control={control}
@@ -693,7 +703,7 @@ export default function StaffRequest({
 														// Set the Host LMS code ("localSystemCode") also - this now defaults only to the agency's Host LMS code.
 														setValue(
 															"itemLocalSystemCode",
-															newValue?.hostLmsCode,
+															newValue?.hostLmsCode ?? "",
 														);
 													}}
 													options={itemLibraryOptions}
@@ -800,44 +810,44 @@ export default function StaffRequest({
 												/>
 											)}
 										/>
+
+										<Controller
+											name="requesterNote"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													margin="normal"
+													fullWidth
+													id="requesterNote"
+													label={t("staff_request.patron.requester_note")}
+													multiline
+													rows={2}
+													error={!!errors.requesterNote}
+													helperText={errors.requesterNote?.message}
+												/>
+											)}
+										/>
+
+										<Button
+											type="submit"
+											color="primary"
+											variant="contained"
+											fullWidth
+											sx={{ mt: 2 }}
+											disabled={
+												!isValid || isSubmitting || !watch("pickupLocationId")
+											}
+										>
+											{isSubmitting
+												? t("ui.action.submitting")
+												: t("general.submit")}
+										</Button>
 									</>
 								)}
-
-								<Controller
-									name="requesterNote"
-									control={control}
-									render={({ field }) => (
-										<TextField
-											{...field}
-											margin="normal"
-											fullWidth
-											id="requesterNote"
-											label={t("staff_request.patron.requester_note")}
-											multiline
-											rows={2}
-											error={!!errors.requesterNote}
-											helperText={errors.requesterNote?.message}
-										/>
-									)}
-								/>
-
-								<Button
-									type="submit"
-									color="primary"
-									variant="contained"
-									fullWidth
-									sx={{ mt: 2 }}
-									disabled={
-										!isValid || isSubmitting || !watch("pickupLocationId")
-									}
-								>
-									{isSubmitting
-										? t("ui.action.submitting")
-										: t("general.submit")}
-								</Button>
-							</>
-						)}
-					</form>
+							</form>
+						</>
+					)}
 				</DialogContent>
 			</Dialog>
 			<TimedAlert
@@ -864,16 +874,4 @@ export default function StaffRequest({
 			/>
 		</>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }

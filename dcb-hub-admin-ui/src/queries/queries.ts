@@ -886,12 +886,6 @@ export const getLibraries = gql`
 					isSupplyingAgency
 					isBorrowingAgency
 				}
-				secondHostLms {
-					id
-					code
-					clientConfig
-					lmsClientClass
-				}
 				membership {
 					libraryGroup {
 						id
@@ -1547,6 +1541,46 @@ export const getPatronRequestById = gql`
 						lastValidated
 					}
 				}
+			}
+		}
+	}
+`;
+
+export const getPatronRequestEssentials = gql`
+	query LoadPatronRequestsById($query: String!) {
+		patronRequests(query: $query) {
+			content {
+				id
+				dateUpdated
+				patronHostlmsCode
+				bibClusterId
+				status
+				localRequestId
+				localRequestStatus
+				localItemId
+				localItemStatus
+				localItemType
+				localBibId
+				rawLocalItemStatus
+				rawLocalRequestStatus
+				description
+				nextScheduledPoll
+				errorMessage
+				previousStatus
+				pollCountForCurrentStatus
+				currentStatusTimestamp
+				nextExpectedStatus
+				outOfSequenceFlag
+				elapsedTimeInCurrentStatus
+				localItemHostlmsCode
+				localItemAgencyCode
+				isManuallySelectedItem
+				resolutionCount
+				renewalCount
+				localRenewalCount
+				dateCreated
+				activeWorkflow
+				requesterNote
 			}
 		}
 	}

@@ -15,11 +15,12 @@ import {
 	GridColDef,
 	GridPaginationModel,
 } from "@mui/x-data-grid-premium";
-import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { Button, IconButton, InputAdornment, TextField } from "@mui/material";
 import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
 import getConfig from "next/config";
 import { validate } from "uuid";
 import { determineAcceptableVersion } from "src/helpers/determineVersion";
+import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
 
 const debouncedSearchFunction = debounce(
 	(term: string, callback: (term: string) => void) => {
@@ -91,6 +92,7 @@ const Search: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const [locateVersion, setLocateVersion] = useState<string | null>(null);
 	const [versionLoaded, setVersionLoaded] = useState(false);
+	const [showExpeditedCheckout, setShowExpeditedCheckout] = useState(false);
 
 	const [searchResults, setSearchResults] = useState<any>({
 		instances: [],
@@ -270,13 +272,15 @@ const Search: NextPage = () => {
 				onSearch={handleSearch}
 			/>
 			{error ? (
-				<Error
-					title={t("ui.error.search_failed")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.reload")}
-					action={t("ui.action.reload")}
-					reload
-				/>
+				<>
+					<Error
+						title={t("ui.error.search_failed")}
+						message={t("ui.info.connection_issue")}
+						description={t("ui.info.reload")}
+						action={t("ui.action.reload")}
+						reload
+					/>
+				</>
 			) : (
 				<>
 					<DataGridPremium
@@ -300,6 +304,18 @@ const Search: NextPage = () => {
 						disableAggregation={true}
 						disableRowGrouping={true}
 					/>
+					<Button
+						data-tid="expedited-checkout-button"
+						variant="contained"
+						onClick={() => setShowExpeditedCheckout(true)}
+					>
+						{t("staff_request.new")}
+					</Button>
+					<ExpeditedCheckout
+						show={showExpeditedCheckout}
+						onClose={() => setShowExpeditedCheckout(false)}
+						bibClusterId="239d5b6a-e1fe-42ed-8dd2-1c5518474227"
+					/>
 				</>
 			)}
 		</AdminLayout>
@@ -309,6 +325,18 @@ const Search: NextPage = () => {
 				title={t("search.shared_index_unavailable_title")}
 				message={t("search.shared_index_unavailable_message")}
 				action={t("ui.action.go_back")}
+			/>
+			<Button
+				data-tid="expedited-checkout-button"
+				variant="contained"
+				onClick={() => setShowExpeditedCheckout(true)}
+			>
+				{t("staff_request.new")}
+			</Button>
+			<ExpeditedCheckout
+				show={showExpeditedCheckout}
+				onClose={() => setShowExpeditedCheckout(false)}
+				bibClusterId="239d5b6a-e1fe-42ed-8dd2-1c5518474227"
 			/>
 		</AdminLayout>
 	);
