@@ -757,7 +757,6 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	id: false,
 	description: false,
 	requesterNote: false,
-	pickupLocationName: false,
 	activeWorkflow: false,
 };
 
