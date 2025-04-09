@@ -370,7 +370,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["fullName"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.name")}
@@ -396,7 +396,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["shortName"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.short_name")}
@@ -421,7 +421,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["abbreviatedName"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.abbreviated_name")}
@@ -462,7 +462,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["supportHours"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.support_hours")}
@@ -487,7 +487,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["backupDowntimeSchedule"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.service.environments.backup_schedule")}
@@ -551,7 +551,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["latitude"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.primaryLocation.latitude")}
@@ -576,7 +576,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							color={
 								errors?.["longitude"] && editMode
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("libraries.primaryLocation.longitude")}

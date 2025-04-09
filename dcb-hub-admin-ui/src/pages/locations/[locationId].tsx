@@ -505,7 +505,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							color={
 								errors.name
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("details.location_name")}
@@ -537,7 +537,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							color={
 								errors.printLabel
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("details.location_printlabel")}
@@ -584,7 +584,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							color={
 								errors.latitude
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("details.lat")}
@@ -618,7 +618,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							color={
 								errors.longitude
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t("details.long")}
@@ -677,7 +677,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 							color={
 								errors.localId
 									? theme.palette.error.main
-									: theme.palette.common.black
+									: theme.palette.primary.headerText
 							}
 						>
 							{t(getLocalId(ils))}
