@@ -317,6 +317,20 @@ export const standardPatronRequestColumns: GridColDef[] = [
 		},
 	},
 	{
+		field: "pickupRequestId",
+		headerName: "Pickup request UUID",
+		minWidth: 100,
+		sortable: true,
+		filterable: true,
+	},
+	{
+		field: "pickupRequestStatus",
+		headerName: "Pickup request status",
+		minWidth: 100,
+		sortable: true,
+		filterable: true,
+	},
+	{
 		field: "canonicalPtype",
 		headerName: "DCB canonical patron type",
 		minWidth: 100,
@@ -492,6 +506,20 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 				return ""; // This allows us to handle the array being empty, and any related type errors.
 			}
 		},
+	},
+	{
+		field: "pickupRequestId",
+		headerName: "Pickup request UUID",
+		minWidth: 100,
+		sortable: true,
+		filterable: true,
+	},
+	{
+		field: "pickupRequestStatus",
+		headerName: "Pickup request status",
+		minWidth: 100,
+		sortable: true,
+		filterable: true,
 	},
 	{
 		field: "canonicalPtype",
@@ -726,6 +754,8 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		isManuallySelectedItem: false,
 		dateUpdated: false,
 		id: false,
+		pickupRequestId: false,
+		pickupRequestStatus: false,
 	};
 
 export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -742,6 +772,8 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		dateUpdated: false,
 		id: false,
 		suppliers: false,
+		pickupRequestId: false,
+		pickupRequestStatus: false,
 	};
 
 export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
@@ -758,6 +790,8 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	description: false,
 	requesterNote: false,
 	activeWorkflow: false,
+	pickupRequestId: false,
+	pickupRequestStatus: false,
 };
 
 export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
@@ -768,6 +802,8 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		elapsedTimeInCurrentStatus: false,
 		pollCountForCurrentStatus: false,
 		outOfSequenceFlag: false,
+		pickupRequestId: false,
+		pickupRequestStatus: false,
 	};
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -783,6 +819,8 @@ export const exceptionPatronRequestColumnVisibility = {
 	dateUpdated: true,
 	description: false,
 	requesterNote: false,
+	pickupRequestId: false,
+	pickupRequestStatus: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -804,4 +842,6 @@ export const locationPatronRequestColumnVisibility = {
 	isManuallySelectedItem: false,
 	description: false,
 	requesterNote: false,
+	pickupRequestId: false,
+	pickupRequestStatus: false,
 };

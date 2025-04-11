@@ -43,6 +43,7 @@ export const getFieldsForExport = (coreType: string) => {
 				"pickupLocationCode",
 				"pickupRequestId",
 				"pickupItemId",
+				"pickupRequestStatus",
 				"canonicalPtype",
 				"canonicalItemType",
 				"previousStatus",
@@ -53,8 +54,11 @@ export const getFieldsForExport = (coreType: string) => {
 				"pollCountForCurrentStatus",
 				"elapsedTimeInCurrentStatus",
 				"isManuallySelectedItem",
+				"description",
+				"requesterNote",
 				"dateUpdated",
 				"id",
+				"activeWorkflow",
 			];
 		default:
 			return [];

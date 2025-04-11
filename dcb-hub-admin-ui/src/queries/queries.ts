@@ -1358,6 +1358,9 @@ export const getPatronRequestsForExport = gql`
 				isManuallySelectedItem
 				requesterNote
 				activeWorkflow
+				pickupRequestId
+				pickupRequestStatus
+				pickupItemId
 				patron {
 					id
 				}
