@@ -1,3 +1,12 @@
+## [1.36.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.0...v1.36.1) (2025-04-11)
+
+
+### Bug Fixes
+
+* Fix incorrect dark mode column headers ([173a087](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/173a08706c8ed682bd97df249461c35c4faec512))
+* Make sure all columns are included in export all [DCB-1868] ([fe9b1ad](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fe9b1ad0eb9e13f141398a8af3601552d539eba6))
+* Restore missing headers in filtered export [DCB-1868] ([d8e2a19](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d8e2a19c9c3a7e0fdfd4115462e59ca40b08cabf))
+
 # [1.36.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.35.1...v1.36.0) (2025-04-03)
 
 
