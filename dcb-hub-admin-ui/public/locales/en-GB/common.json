@@ -1101,6 +1101,13 @@
 
 	"expedited_checkout": {
 		"description": "Welcome to DCB on-site borrowing. Please provide the barcode and the library of the patron you would like to make a request for. Provided that the patron's details are valid and the item exists and is available at your library, DCB will instantly check out this item to the specified patron.",
+		"feedback": {
+			"current_status": "The current status of your request is {{status}}",
+			"in_progress": "Your on-site borrowing request has been placed and DCB is now attempting to check it out",
+			"success": "Your on-site borrowing request has been checked out successfully and can be tracked in DCB Admin <linkComponent> here </linkComponent>.",
+			"time_elapsed": "Time elapsed: {{time}}"
+		},
+		"request_title": "On-site borrowing request",
 		"title_on_site": "On site borrowing"
 	},
 

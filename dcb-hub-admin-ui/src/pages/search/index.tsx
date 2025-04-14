@@ -264,7 +264,7 @@ const Search: NextPage = () => {
 						disableRowGrouping={true}
 					/>
 					<Button
-						data-tid="expedited-checkout-button"
+						data-tid="eee"
 						variant="contained"
 						onClick={() => setShowExpeditedCheckout(true)}
 					>
@@ -273,7 +273,7 @@ const Search: NextPage = () => {
 					<ExpeditedCheckout
 						show={showExpeditedCheckout}
 						onClose={() => setShowExpeditedCheckout(false)}
-						bibClusterId="239d5b6a-e1fe-42ed-8dd2-1c5518474227"
+						bibClusterId="80d7d8c4-203b-4c68-9df3-235d4238fd33"
 					/>
 				</>
 			)}
@@ -295,7 +295,7 @@ const Search: NextPage = () => {
 			<ExpeditedCheckout
 				show={showExpeditedCheckout}
 				onClose={() => setShowExpeditedCheckout(false)}
-				bibClusterId="239d5b6a-e1fe-42ed-8dd2-1c5518474227"
+				bibClusterId="80d7d8c4-203b-4c68-9df3-235d4238fd33"
 			/>
 		</AdminLayout>
 	);
