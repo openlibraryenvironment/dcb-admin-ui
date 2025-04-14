@@ -1,16 +1,19 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLazyQuery, useQuery } from "@apollo/client";
 import * as Yup from "yup";
 import {
 	Autocomplete,
+	Box,
 	Button,
 	CircularProgress,
 	Dialog,
 	DialogContent,
 	DialogTitle,
 	IconButton,
+	LinearProgress,
+	Paper,
 	TextField,
 	Typography,
 } from "@mui/material";
@@ -34,8 +37,7 @@ import { findConsortium } from "src/helpers/findConsortium";
 import { Location } from "@models/Location";
 import { isEmpty } from "lodash";
 import { Item } from "@models/Item";
-import { ClientDataGrid } from "@components/ClientDataGrid";
-import dayjs from "dayjs";
+import { useRouter } from "next/router";
 
 // Cut this down as we won't need all of it
 
@@ -106,6 +108,7 @@ export default function ExpeditedCheckout({
 	});
 
 	const { publicRuntimeConfig } = getConfig();
+	const router = useRouter();
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isValidatingPatron, setIsValidatingPatron] = useState(false);
@@ -117,25 +120,83 @@ export default function ExpeditedCheckout({
 	const [itemsLoading, setItemsLoading] = useState(false);
 	const [itemsError, setItemsError] = useState(false);
 	const [patronRequestWaiting, setPatronRequestWaiting] = useState(false);
+	const [requestStartTime, setRequestStartTime] = useState<Date | null>(null);
+	const [elapsedTime, setElapsedTime] = useState(0);
+	const [checkoutCompleted, setCheckoutCompleted] = useState(false);
+	const timerRef = useRef<NodeJS.Timeout | null>(null);
 
 	const [
 		fetchPatronRequest,
 		{ loading: patronRequestLoading, data: patronRequestData },
 	] = useLazyQuery(getPatronRequestEssentials, {
 		variables: {},
+		fetchPolicy: "network-only",
+		notifyOnNetworkStatusChange: true,
 		onCompleted: (data) => {
-			if (data?.patronRequests?.content?.[0].status == "RETURN_TRANSIT") {
-				console.log("PR has achieved Return transit");
+			const status = data?.patronRequests?.content?.[0]?.status;
+			console.log(status);
+			if (status === "RETURN_TRANSIT" && patronRequestWaiting == true) {
+				console.log("Return transit");
+				// Request has reached completion state
 				setPatronRequestWaiting(false);
-				// We should poll until we reach this - we'll have to display loading / some kind of progress indicator while we do it
-				// But when we do reach return transit, we must trigger a second alert and re-direct to the new patron request.
-				// As the request has been checked out
+				setCheckoutCompleted(true);
+
+				// Clear timer
+				if (timerRef.current) {
+					clearInterval(timerRef.current);
+				}
+
+				// Show success alert
+				const requestId = data?.patronRequests?.content?.[0]?.id;
+				const patronRequestLink = "/patronRequests/" + requestId;
+				console.log(
+					"Waiting?" +
+						patronRequestWaiting +
+						" and completed" +
+						checkoutCompleted,
+				);
+
+				setTimeout(() => {
+					setAlert({
+						open: true,
+						severity: "success",
+						text: t("expedited_checkout.feedback.successs"),
+						patronRequestLink: patronRequestLink,
+					});
+				}, 6000);
+
+				// Prepare for form reset
+				setTimeout(() => {
+					router.push(patronRequestLink);
+					reset();
+					setPatronValidated(false);
+					setPatronData(null);
+					// onClose();
+				}, 6000);
 			}
 		},
 	});
 	console.log(patronRequestData, patronRequestLoading);
 
 	const patronRequest = patronRequestData?.patronRequests?.content?.[0];
+	useEffect(() => {
+		if (patronRequestWaiting && requestStartTime) {
+			// Set up timer that updates elapsed time every second
+			timerRef.current = setInterval(() => {
+				const now = new Date();
+				const elapsed = Math.floor(
+					(now.getTime() - requestStartTime.getTime()) / 1000,
+				);
+				setElapsedTime(elapsed);
+			}, 1000);
+		}
+
+		return () => {
+			if (timerRef.current) {
+				clearInterval(timerRef.current);
+			}
+		};
+	}, [patronRequestWaiting, requestStartTime]);
 
 	const validationSchema = Yup.object().shape({
 		patronBarcode: Yup.string()
@@ -224,9 +285,11 @@ export default function ExpeditedCheckout({
 			}),
 		) || [];
 
+	console.log(libraryOptions);
 	const selectedLibrary = libraryOptions.find(
 		(option) => option.value === agencyCode,
 	);
+	console.log(selectedLibrary);
 	const isPickupAnywhere = !!selectedLibrary?.functionalSettings?.some(
 		(setting) => setting.name === "PICKUP_ANYWHERE" && setting.enabled === true,
 		// If the setting PICKUP_ANYWHERE is present and enabled, show all locations.
@@ -250,7 +313,6 @@ export default function ExpeditedCheckout({
 					" locations were returned.",
 			);
 		},
-
 		variables: {
 			order: "name",
 			orderBy: "ASC",
@@ -479,10 +541,73 @@ export default function ExpeditedCheckout({
 	};
 
 	const handleClose = () => {
+		// Clear timers
+		if (timerRef.current) {
+			clearInterval(timerRef.current);
+		}
+
+		// Reset state
 		reset();
 		setPatronValidated(false);
 		setPatronData(null);
+		setPatronRequestWaiting(false);
+		setRequestStartTime(null);
+		setElapsedTime(0);
+		setCheckoutCompleted(false);
+
 		onClose();
+	};
+	const formatTime = (seconds: number): string => {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	};
+
+	const ProgressScreen = () => {
+		return (
+			<Box sx={{ p: 2 }}>
+				<Typography variant="h6" gutterBottom>
+					{checkoutCompleted
+						? t("expedited_checkout.feedback.success")
+						: t("expedited_checkout.feedback.in_progress")}
+				</Typography>
+
+				<LinearProgress
+					variant={checkoutCompleted ? "determinate" : "indeterminate"}
+					value={checkoutCompleted ? 100 : undefined}
+					sx={{ mb: 3, mt: 1 }}
+				/>
+
+				<Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
+					<Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+						{t("expedited_checkout.request_title")}
+					</Typography>
+
+					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+						<Typography variant="body2">
+							{t("expedited_checkout.feedback.current_status", {
+								values: { status: patronRequest?.status },
+							})}
+						</Typography>
+						<Typography
+							variant="body2"
+							fontWeight="bold"
+							color={checkoutCompleted ? "success.main" : "primary.main"}
+						>
+							{t("expedited_checkout.feedback.current_status", {
+								values: { status: patronRequest?.status ?? "UNKNOWN" },
+							})}
+						</Typography>
+						<Typography variant="body2">
+							{t("expedited_checkout.feedback.time_elapsed", {
+								values: formatTime(elapsedTime),
+							})}
+						</Typography>
+					</Box>
+				</Paper>
+				{/** If we can figure out a way of putting live-updating audits, that would be good */}
+			</Box>
+		);
 	};
 
 	return (
@@ -512,54 +637,7 @@ export default function ExpeditedCheckout({
 				<DialogContent>
 					{patronRequestWaiting ? (
 						<>
-							<CircularProgress />
-							Your patron request is currently in the status
-							{patronRequest?.status}
-							<ClientDataGrid
-								data={patronRequest?.audit}
-								columns={[
-									{
-										field: "auditDate",
-										headerName: "Audit date",
-										minWidth: 60,
-										flex: 0.2,
-										valueGetter: (
-											value: string,
-											row: { auditDate: string },
-										) => {
-											const auditDate = row.auditDate;
-											return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
-										},
-									},
-									{
-										field: "briefDescription",
-										headerName: "Description",
-										minWidth: 100,
-										flex: 0.4,
-									},
-									{
-										field: "fromStatus",
-										headerName: "fromStatus",
-										minWidth: 50,
-										flex: 0.25,
-									},
-									{
-										field: "toStatus",
-										headerName: "toStatus",
-										minWidth: 50,
-										flex: 0.25,
-									},
-								]}
-								type="Audit"
-								// This grid could show click-through details of its own for each audit log entry
-								selectable={true}
-								noDataTitle={t("details.audit_log_no_data")}
-								noDataMessage={t("details.audit_log_no_rows")}
-								sortModel={[{ field: "auditDate", sort: "desc" }]}
-								operationDataType="Audit"
-								disableAggregation={true}
-								disableRowGrouping={true}
-							/>
+							<ProgressScreen />
 						</>
 					) : (
 						<>
