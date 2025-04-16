@@ -31,66 +31,24 @@ import { useSession } from "next-auth/react";
 import Link from "@components/Link/Link";
 import { getRequestError } from "src/helpers/getRequestError";
 import { Agency } from "@models/Agency";
-import { FunctionalSetting } from "@models/FunctionalSetting";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { findConsortium } from "src/helpers/findConsortium";
 import { Location } from "@models/Location";
 import { isEmpty } from "lodash";
 import { Item } from "@models/Item";
+import { PatronRequestFormType } from "@models/PatronRequestFormType";
+import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
+import { PatronLookupResponse } from "@models/PatronLookupResponse";
+import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
+import { StaffRequestFormData } from "@models/StaffRequestFormData";
 
 // WHEN WE INTRODUCE DCB ADMIN FOR LIBRARIES THIS DROP DOWN FOR LIBRARIES MUST BE RESTRICTED TO ONLY THE LIBRARY THE USER IS MANAGING
-type PatronLookupResponse = {
-	status: string; // if not VALID, cannot make request
-	localPatronId: string; // this is the localId that gets sent to /place request
-	agencyCode: string; // agency code
-	systemCode: string; // this is localSystemCode
-	homeLocationCode: string; // this is homeLibraryCode
-};
-
-interface StaffRequestFormData {
-	patronBarcode: string;
-	agencyCode: string;
-	pickupLocationId: string;
-	requesterNote?: string;
-	selectionType: string;
-	itemLocalId?: string;
-	itemLocalSystemCode?: string;
-	itemAgencyCode?: string;
-}
-
-type StaffRequestFormType = {
-	show: boolean;
-	onClose: () => void;
-	bibClusterId: string;
-};
-
-type AutocompleteOption = {
-	label: string;
-	value: string;
-	agencyId?: string;
-	functionalSettings?: FunctionalSetting[];
-	hostLmsCode?: string;
-};
-
-type PlaceRequestResponse = {
-	id: string;
-	citation: {
-		bibClusterId: string;
-	};
-	pickupLocation: {
-		code: string;
-	};
-	requestor: {
-		localId: string;
-		localSystemCode: string;
-	};
-};
 
 export default function StaffRequest({
 	show,
 	onClose,
 	bibClusterId,
-}: StaffRequestFormType) {
+}: PatronRequestFormType) {
 	const { t } = useTranslation();
 	const { data: session } = useSession();
 
@@ -203,7 +161,7 @@ export default function StaffRequest({
 			query: "",
 		},
 	});
-	const libraryOptions: AutocompleteOption[] =
+	const libraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
 				fullName: string;
@@ -299,7 +257,7 @@ export default function StaffRequest({
 		(item) => item.agency.code == itemAgencyCode,
 	);
 
-	const pickupLocationOptions: AutocompleteOption[] =
+	const pickupLocationOptions: PatronRequestAutocompleteOption[] =
 		pickupLocations?.locations?.content?.map(
 			(item: { name: string; id: string; code: string }) => ({
 				label: item.name,
@@ -308,7 +266,7 @@ export default function StaffRequest({
 			}),
 		) || [];
 
-	const itemLibraryOptions: AutocompleteOption[] =
+	const itemLibraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: { fullName: string; agencyCode: string; agency: Agency }) => ({
 				label: item.fullName,
@@ -317,7 +275,7 @@ export default function StaffRequest({
 			}),
 		) || [];
 
-	const itemOptions: AutocompleteOption[] =
+	const itemOptions: PatronRequestAutocompleteOption[] =
 		filteredItems?.map(
 			(item: {
 				id: string;
@@ -503,7 +461,7 @@ export default function StaffRequest({
 				</DialogTitle>
 				<IconButton
 					aria-label="close"
-					onClick={onClose}
+					onClick={handleClose}
 					sx={{
 						position: "absolute",
 						right: 8,
@@ -532,11 +490,16 @@ export default function StaffRequest({
 												) || null
 											: null
 									}
-									onChange={(_, newValue: AutocompleteOption | null) => {
+									onChange={(
+										_,
+										newValue: PatronRequestAutocompleteOption | null,
+									) => {
 										onChange(newValue?.value || "");
 									}}
 									options={libraryOptions}
-									getOptionLabel={(option: AutocompleteOption) => option.label}
+									getOptionLabel={(option: PatronRequestAutocompleteOption) =>
+										option.label
+									}
 									renderInput={(params) => (
 										<TextField
 											{...params}
@@ -600,7 +563,10 @@ export default function StaffRequest({
 													(option) => option.value === value,
 												) || null
 											}
-											onChange={(_, newValue: AutocompleteOption | null) => {
+											onChange={(
+												_,
+												newValue: PatronRequestAutocompleteOption | null,
+											) => {
 												onChange(newValue?.value || "");
 											}}
 											options={pickupLocationOptions}
@@ -608,9 +574,9 @@ export default function StaffRequest({
 												getPickupLocations();
 											}}
 											loading={pickupLocationsLoading}
-											getOptionLabel={(option: AutocompleteOption) =>
-												option.label
-											}
+											getOptionLabel={(
+												option: PatronRequestAutocompleteOption,
+											) => option.label}
 											renderInput={(params) => (
 												<TextField
 													{...params}
@@ -686,7 +652,7 @@ export default function StaffRequest({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 														// Set the Host LMS code ("localSystemCode") also - this now defaults only to the agency's Host LMS code.
@@ -696,9 +662,9 @@ export default function StaffRequest({
 														);
 													}}
 													options={itemLibraryOptions}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -752,14 +718,14 @@ export default function StaffRequest({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 													}}
 													options={itemOptions}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
