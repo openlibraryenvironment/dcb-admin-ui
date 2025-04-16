@@ -15,6 +15,7 @@ import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
 import { isEmpty } from "lodash";
 import { ArrowLeft, ArrowRight } from "@mui/icons-material";
+import dayjs from "dayjs";
 
 type AuditDetails = {
 	auditId: string;
@@ -194,7 +195,11 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						<Typography variant="attributeTitle">
 							{t("details.audit_date")}
 						</Typography>
-						<RenderAttribute attribute={audit?.auditDate} />
+						<RenderAttribute
+							attribute={dayjs(audit?.auditDate).format(
+								"YYYY-MM-DD HH:mm:ss.SSS",
+							)}
+						/>
 					</Stack>
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
