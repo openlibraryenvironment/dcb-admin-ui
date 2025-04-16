@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLazyQuery, useQuery } from "@apollo/client";
 import * as Yup from "yup";
 import {
 	Autocomplete,
-	Box,
 	Button,
 	CircularProgress,
 	Dialog,
@@ -13,12 +12,11 @@ import {
 	DialogTitle,
 	IconButton,
 	LinearProgress,
-	Paper,
+	Stack,
 	TextField,
 	Typography,
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
-import { MdClose } from "react-icons/md";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import {
 	getLibraries,
@@ -31,67 +29,24 @@ import { useSession } from "next-auth/react";
 import Link from "@components/Link/Link";
 import { getRequestError } from "src/helpers/getRequestError";
 import { Agency } from "@models/Agency";
-import { FunctionalSetting } from "@models/FunctionalSetting";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { findConsortium } from "src/helpers/findConsortium";
 import { Location } from "@models/Location";
 import { isEmpty } from "lodash";
 import { Item } from "@models/Item";
 import { useRouter } from "next/router";
-
-// Cut this down as we won't need all of it
-
-type PatronLookupResponse = {
-	status: string; // if not VALID, cannot make request
-	localPatronId: string; // this is the localId that gets sent to /place request
-	agencyCode: string; // agency code
-	systemCode: string; // this is localSystemCode
-	homeLocationCode: string; // this is homeLibraryCode
-};
-
-interface OnSiteBorrowingFormData {
-	patronBarcode: string;
-	agencyCode: string;
-	pickupLocationId: string;
-	requesterNote?: string;
-	itemLocalId: string;
-	itemLocalSystemCode: string;
-	itemAgencyCode: string;
-}
-
-type StaffRequestFormType = {
-	show: boolean;
-	onClose: () => void;
-	bibClusterId: string;
-};
-
-type AutocompleteOption = {
-	label: string;
-	value: string;
-	agencyId?: string;
-	functionalSettings?: FunctionalSetting[];
-	hostLmsCode?: string;
-};
-
-type PlaceRequestResponse = {
-	id: string;
-	citation: {
-		bibClusterId: string;
-	};
-	pickupLocation: {
-		code: string;
-	};
-	requestor: {
-		localId: string;
-		localSystemCode: string;
-	};
-};
+import { PatronRequestFormType } from "@models/PatronRequestFormType";
+import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
+import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
+import { PatronLookupResponse } from "@models/PatronLookupResponse";
+import { OnSiteBorrowingFormData } from "@models/OnSiteBorrowingFormData";
+import { Close } from "@mui/icons-material";
 
 export default function ExpeditedCheckout({
 	show,
 	onClose,
 	bibClusterId,
-}: StaffRequestFormType) {
+}: PatronRequestFormType) {
 	const { t } = useTranslation();
 	const { data: session } = useSession();
 
@@ -120,83 +75,39 @@ export default function ExpeditedCheckout({
 	const [itemsLoading, setItemsLoading] = useState(false);
 	const [itemsError, setItemsError] = useState(false);
 	const [patronRequestWaiting, setPatronRequestWaiting] = useState(false);
-	const [requestStartTime, setRequestStartTime] = useState<Date | null>(null);
-	const [elapsedTime, setElapsedTime] = useState(0);
 	const [checkoutCompleted, setCheckoutCompleted] = useState(false);
-	const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-	const [
-		fetchPatronRequest,
-		{ loading: patronRequestLoading, data: patronRequestData },
-	] = useLazyQuery(getPatronRequestEssentials, {
-		variables: {},
-		fetchPolicy: "network-only",
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data) => {
-			const status = data?.patronRequests?.content?.[0]?.status;
-			console.log(status);
-			if (status === "RETURN_TRANSIT" && patronRequestWaiting == true) {
-				console.log("Return transit");
-				// Request has reached completion state
-				setPatronRequestWaiting(false);
-				setCheckoutCompleted(true);
-
-				// Clear timer
-				if (timerRef.current) {
-					clearInterval(timerRef.current);
-				}
-
-				// Show success alert
-				const requestId = data?.patronRequests?.content?.[0]?.id;
-				const patronRequestLink = "/patronRequests/" + requestId;
-				console.log(
-					"Waiting?" +
-						patronRequestWaiting +
-						" and completed" +
-						checkoutCompleted,
-				);
-
-				setTimeout(() => {
+	const [fetchPatronRequest, { data: patronRequestData }] = useLazyQuery(
+		getPatronRequestEssentials,
+		{
+			variables: {},
+			fetchPolicy: "network-only",
+			notifyOnNetworkStatusChange: true,
+			onCompleted: (data) => {
+				const status = data?.patronRequests?.content?.[0]?.status;
+				if (status === "RETURN_TRANSIT" && patronRequestWaiting == true) {
+					// Request has reached completion state
+					setPatronRequestWaiting(false);
+					setCheckoutCompleted(true);
+					const requestId = data?.patronRequests?.content?.[0]?.id;
+					const patronRequestLink = "/patronRequests/" + requestId;
 					setAlert({
 						open: true,
 						severity: "success",
-						text: t("expedited_checkout.feedback.successs"),
+						text: t("expedited_checkout.feedback.success"),
 						patronRequestLink: patronRequestLink,
 					});
-				}, 6000);
 
-				// Prepare for form reset
-				setTimeout(() => {
-					router.push(patronRequestLink);
-					reset();
-					setPatronValidated(false);
-					setPatronData(null);
-					// onClose();
-				}, 6000);
-			}
+					setTimeout(() => {
+						router.push(patronRequestLink);
+					}, 6000);
+					handleClose();
+				}
+			},
 		},
-	});
-	console.log(patronRequestData, patronRequestLoading);
+	);
 
 	const patronRequest = patronRequestData?.patronRequests?.content?.[0];
-	useEffect(() => {
-		if (patronRequestWaiting && requestStartTime) {
-			// Set up timer that updates elapsed time every second
-			timerRef.current = setInterval(() => {
-				const now = new Date();
-				const elapsed = Math.floor(
-					(now.getTime() - requestStartTime.getTime()) / 1000,
-				);
-				setElapsedTime(elapsed);
-			}, 1000);
-		}
-
-		return () => {
-			if (timerRef.current) {
-				clearInterval(timerRef.current);
-			}
-		};
-	}, [patronRequestWaiting, requestStartTime]);
 
 	const validationSchema = Yup.object().shape({
 		patronBarcode: Yup.string()
@@ -267,7 +178,7 @@ export default function ExpeditedCheckout({
 			query: "",
 		},
 	});
-	const libraryOptions: AutocompleteOption[] =
+	const libraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
 				fullName: string;
@@ -285,20 +196,32 @@ export default function ExpeditedCheckout({
 			}),
 		) || [];
 
-	console.log(libraryOptions);
 	const selectedLibrary = libraryOptions.find(
 		(option) => option.value === agencyCode,
 	);
-	console.log(selectedLibrary);
 	const isPickupAnywhere = !!selectedLibrary?.functionalSettings?.some(
 		(setting) => setting.name === "PICKUP_ANYWHERE" && setting.enabled === true,
 		// If the setting PICKUP_ANYWHERE is present and enabled, show all locations.
 		// Otherwise limit to patron agency locations
 	);
 
+	const itemLibraryOptions: PatronRequestAutocompleteOption[] =
+		libraries?.libraries?.content?.map(
+			(item: { fullName: string; agencyCode: string; agency: Agency }) => ({
+				label: item.fullName,
+				value: item.agencyCode,
+				hostLmsCode: item?.agency?.hostLms?.code,
+				agencyId: item?.agency?.id,
+			}),
+		) || [];
+
+	const selectedItemLibrary = itemLibraryOptions.find(
+		(option) => option.value === itemAgencyCode,
+	);
+
 	const locationQuery = isPickupAnywhere
 		? ""
-		: "agency:" + selectedLibrary?.agencyId;
+		: "agency:" + selectedItemLibrary?.agencyId;
 
 	const [
 		getPickupLocations,
@@ -363,7 +286,7 @@ export default function ExpeditedCheckout({
 		(item) => item.agency.code == itemAgencyCode,
 	);
 
-	const pickupLocationOptions: AutocompleteOption[] =
+	const pickupLocationOptions: PatronRequestAutocompleteOption[] =
 		pickupLocations?.locations?.content?.map(
 			(item: { name: string; id: string; code: string }) => ({
 				label: item.name,
@@ -372,16 +295,7 @@ export default function ExpeditedCheckout({
 			}),
 		) || [];
 
-	const itemLibraryOptions: AutocompleteOption[] =
-		libraries?.libraries?.content?.map(
-			(item: { fullName: string; agencyCode: string; agency: Agency }) => ({
-				label: item.fullName,
-				value: item.agencyCode,
-				hostLmsCode: item?.agency?.hostLms?.code,
-			}),
-		) || [];
-
-	const itemOptions: AutocompleteOption[] =
+	const itemOptions: PatronRequestAutocompleteOption[] =
 		filteredItems?.map(
 			(item: {
 				id: string;
@@ -481,8 +395,8 @@ export default function ExpeditedCheckout({
 				pickupLocation: {
 					code: selectedLocation?.value || "",
 				},
-				description: "Staff Request with manual selection" + data.requesterNote,
-				requesterNote: data.requesterNote || "Staff Request",
+				description: "On site borrowing request" + data.requesterNote,
+				requesterNote: data.requesterNote || "On site borrowing request",
 				item: {
 					localId: data.itemLocalId || "", // The local ID of the specific item
 					localSystemCode: data.itemLocalSystemCode || "", // The Host LMS code for the item's Host LMS
@@ -503,12 +417,14 @@ export default function ExpeditedCheckout({
 			);
 			const placeRequestData: PlaceRequestResponse = response.data;
 			const requestId = placeRequestData.id;
-			const patronRequestLink = "/patronRequests/" + requestId;
+			console.log(
+				"The expedited checkout request was placed ",
+				placeRequestData,
+			);
 			setAlert({
 				open: true,
 				severity: "success",
-				text: t("staff_request.patron.success.request"),
-				patronRequestLink: patronRequestLink,
+				text: t("expedited_checkout.feedback.in_progress"),
 			});
 			setPatronRequestWaiting(true);
 			fetchPatronRequest({
@@ -517,14 +433,6 @@ export default function ExpeditedCheckout({
 				},
 				pollInterval: 10000,
 			});
-
-			setTimeout(() => {
-				reset();
-				setPatronValidated(false);
-				setPatronData(null);
-				// onClose();
-			}, 6000);
-			// onClose needs to kick in eventually
 		} catch (error: any) {
 			console.error("Error submitting patron request:", error.response?.data);
 			setAlert({
@@ -541,72 +449,39 @@ export default function ExpeditedCheckout({
 	};
 
 	const handleClose = () => {
-		// Clear timers
-		if (timerRef.current) {
-			clearInterval(timerRef.current);
-		}
-
 		// Reset state
 		reset();
 		setPatronValidated(false);
 		setPatronData(null);
 		setPatronRequestWaiting(false);
-		setRequestStartTime(null);
-		setElapsedTime(0);
 		setCheckoutCompleted(false);
-
 		onClose();
-	};
-	const formatTime = (seconds: number): string => {
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 	};
 
 	const ProgressScreen = () => {
 		return (
-			<Box sx={{ p: 2 }}>
-				<Typography variant="h6" gutterBottom>
-					{checkoutCompleted
-						? t("expedited_checkout.feedback.success")
-						: t("expedited_checkout.feedback.in_progress")}
+			<Stack direction="column" spacing={2}>
+				<Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+					{t("expedited_checkout.request_title")}
 				</Typography>
-
 				<LinearProgress
 					variant={checkoutCompleted ? "determinate" : "indeterminate"}
 					value={checkoutCompleted ? 100 : undefined}
 					sx={{ mb: 3, mt: 1 }}
 				/>
-
-				<Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
-					<Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-						{t("expedited_checkout.request_title")}
-					</Typography>
-
-					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-						<Typography variant="body2">
-							{t("expedited_checkout.feedback.current_status", {
-								values: { status: patronRequest?.status },
-							})}
-						</Typography>
-						<Typography
-							variant="body2"
-							fontWeight="bold"
-							color={checkoutCompleted ? "success.main" : "primary.main"}
-						>
-							{t("expedited_checkout.feedback.current_status", {
-								values: { status: patronRequest?.status ?? "UNKNOWN" },
-							})}
-						</Typography>
-						<Typography variant="body2">
-							{t("expedited_checkout.feedback.time_elapsed", {
-								values: formatTime(elapsedTime),
-							})}
-						</Typography>
-					</Box>
-				</Paper>
-				{/** If we can figure out a way of putting live-updating audits, that would be good */}
-			</Box>
+				<Typography variant="body2" fontWeight="bold">
+					{t("expedited_checkout.feedback.in_progress_explanation")}
+				</Typography>
+				<Typography
+					color={checkoutCompleted ? "success.main" : "primary.main"}
+					fontWeight="bold"
+					variant="body2"
+				>
+					{t("expedited_checkout.feedback.current_status", {
+						status: patronRequest?.status ?? "UNKNOWN",
+					})}
+				</Typography>
+			</Stack>
 		);
 	};
 
@@ -622,18 +497,20 @@ export default function ExpeditedCheckout({
 				<DialogTitle id="form-dialog-title" variant="modalTitle">
 					{t("expedited_checkout.title_on_site")}
 				</DialogTitle>
-				<IconButton
-					aria-label="close"
-					onClick={onClose}
-					sx={{
-						position: "absolute",
-						right: 8,
-						top: 8,
-						color: (theme) => theme.palette.grey[500],
-					}}
-				>
-					<MdClose />
-				</IconButton>
+				{!patronRequestWaiting ? (
+					<IconButton
+						aria-label="close"
+						onClick={handleClose}
+						sx={{
+							position: "absolute",
+							right: 8,
+							top: 8,
+							color: (theme) => theme.palette.grey[500],
+						}}
+					>
+						<Close />
+					</IconButton>
+				) : null}
 				<DialogContent>
 					{patronRequestWaiting ? (
 						<>
@@ -642,9 +519,17 @@ export default function ExpeditedCheckout({
 					) : (
 						<>
 							<Typography variant="body1">
-								{patronValidated
-									? t("staff_request.select_pickup")
-									: t("expedited_checkout.description")}
+								{patronValidated ? (
+									t("staff_request.select_pickup")
+								) : (
+									<Trans
+										t={t}
+										i18nKey={"expedited_checkout.description"}
+										components={{
+											paragraph: <p />,
+										}}
+									/>
+								)}
 							</Typography>
 
 							<form onSubmit={handleSubmit(onSubmit)}>
@@ -660,13 +545,16 @@ export default function ExpeditedCheckout({
 														) || null
 													: null
 											}
-											onChange={(_, newValue: AutocompleteOption | null) => {
+											onChange={(
+												_,
+												newValue: PatronRequestAutocompleteOption | null,
+											) => {
 												onChange(newValue?.value || "");
 											}}
 											options={libraryOptions}
-											getOptionLabel={(option: AutocompleteOption) =>
-												option.label
-											}
+											getOptionLabel={(
+												option: PatronRequestAutocompleteOption,
+											) => option.label}
 											renderInput={(params) => (
 												<TextField
 													{...params}
@@ -732,7 +620,7 @@ export default function ExpeditedCheckout({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 													}}
@@ -741,9 +629,9 @@ export default function ExpeditedCheckout({
 														getPickupLocations();
 													}}
 													loading={pickupLocationsLoading}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -775,7 +663,7 @@ export default function ExpeditedCheckout({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 														// Set the Host LMS code ("localSystemCode") also - this now defaults only to the agency's Host LMS code.
@@ -785,9 +673,9 @@ export default function ExpeditedCheckout({
 														);
 													}}
 													options={itemLibraryOptions}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -841,14 +729,14 @@ export default function ExpeditedCheckout({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 													}}
 													options={itemOptions}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -948,7 +836,7 @@ export default function ExpeditedCheckout({
 						}}
 					/>
 				}
-				key="staff-request-alert"
+				key="expedited-checkout-alert"
 			/>
 		</>
 	);
