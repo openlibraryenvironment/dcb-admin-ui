@@ -273,7 +273,7 @@ const Search: NextPage = () => {
 					<ExpeditedCheckout
 						show={showExpeditedCheckout}
 						onClose={() => setShowExpeditedCheckout(false)}
-						bibClusterId="80d7d8c4-203b-4c68-9df3-235d4238fd33"
+						bibClusterId="873b7267-8263-430a-84f2-c453008e60fc"
 					/>
 				</>
 			)}
@@ -295,7 +295,7 @@ const Search: NextPage = () => {
 			<ExpeditedCheckout
 				show={showExpeditedCheckout}
 				onClose={() => setShowExpeditedCheckout(false)}
-				bibClusterId="80d7d8c4-203b-4c68-9df3-235d4238fd33"
+				bibClusterId="873b7267-8263-430a-84f2-c453008e60fc"
 			/>
 		</AdminLayout>
 	);

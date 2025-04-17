@@ -13,6 +13,9 @@ import {
 	IconButton,
 	LinearProgress,
 	Stack,
+	Step,
+	StepLabel,
+	Stepper,
 	TextField,
 	Typography,
 } from "@mui/material";
@@ -40,7 +43,7 @@ import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocomple
 import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
 import { PatronLookupResponse } from "@models/PatronLookupResponse";
 import { OnSiteBorrowingFormData } from "@models/OnSiteBorrowingFormData";
-import { Close } from "@mui/icons-material";
+import { CheckCircle, Close } from "@mui/icons-material";
 
 export default function ExpeditedCheckout({
 	show,
@@ -61,6 +64,12 @@ export default function ExpeditedCheckout({
 		text: null,
 		patronRequestLink: "",
 	});
+	const [activeStep, setActiveStep] = useState(0);
+	const steps = [
+		t("expedited_checkout.steps.patron_validation"),
+		t("expedited_checkout.steps.request_creation"),
+		t("expedited_checkout.steps.checkout"),
+	];
 
 	const { publicRuntimeConfig } = getConfig();
 	const router = useRouter();
@@ -167,7 +176,9 @@ export default function ExpeditedCheckout({
 		mode: "onChange",
 	});
 	const agencyCode = watch("agencyCode");
+	console.log("Agency code is" + agencyCode);
 	const itemAgencyCode = watch("itemAgencyCode");
+	console.log(itemAgencyCode);
 
 	const { data: libraries } = useQuery(getLibraries, {
 		variables: {
@@ -315,6 +326,7 @@ export default function ExpeditedCheckout({
 	const validatePatron = async () => {
 		const patronBarcode = watch("patronBarcode");
 		const agencyCode = watch("agencyCode");
+		console.log("Second agency code is" + agencyCode);
 
 		setIsValidatingPatron(true);
 		const validatePatronPayload = {
@@ -347,6 +359,7 @@ export default function ExpeditedCheckout({
 						library: agencyCode,
 					}),
 				});
+				setActiveStep(1);
 			} else {
 				setAlert({
 					open: true,
@@ -433,14 +446,15 @@ export default function ExpeditedCheckout({
 				},
 				pollInterval: 10000,
 			});
+			setActiveStep(2);
 		} catch (error: any) {
 			console.error("Error submitting patron request:", error.response?.data);
 			setAlert({
 				open: true,
 				severity: "error",
 				text: t(getRequestError(error.response?.data?.failedChecks), {
-					code: error?.response?.data?.failedChecks[0].code,
-					description: error?.response?.data?.failedChecks[0].description,
+					code: error?.response?.data?.failedChecks?.[0]?.code,
+					description: error?.response?.data?.failedChecks?.[0]?.description,
 				}),
 			});
 		} finally {
@@ -451,6 +465,7 @@ export default function ExpeditedCheckout({
 	const handleClose = () => {
 		// Reset state
 		reset();
+		setActiveStep(0);
 		setPatronValidated(false);
 		setPatronData(null);
 		setPatronRequestWaiting(false);
@@ -458,7 +473,315 @@ export default function ExpeditedCheckout({
 		onClose();
 	};
 
-	const ProgressScreen = () => {
+	// const handleBack = () => {
+	// 	setActiveStep((prevStep) => prevStep - 1);
+	// };
+
+	// View request handler
+	const handleViewRequest = () => {
+		const requestId = patronRequest?.id;
+		router.push(`/patronRequests/${requestId}`);
+	};
+
+	// Break the form down into steps
+
+	console.log(pickupLocationOptions);
+	// Step 1: Validation
+	const PatronValidationStep = () => (
+		<>
+			<Typography variant="body1" paragraph>
+				<Trans
+					t={t}
+					i18nKey={"expedited_checkout.description"}
+					components={{
+						paragraph: <p />,
+					}}
+				/>
+			</Typography>
+
+			<Controller
+				name="agencyCode"
+				control={control}
+				render={({ field: { onChange, value } }) => (
+					<Autocomplete
+						value={
+							value
+								? libraryOptions.find((option) => option.value === value) ||
+									null
+								: null
+						}
+						onChange={(_, newValue: PatronRequestAutocompleteOption | null) => {
+							onChange(newValue?.value || "");
+						}}
+						options={libraryOptions}
+						getOptionLabel={(option: PatronRequestAutocompleteOption) =>
+							option.label
+						}
+						renderInput={(params) => (
+							<TextField
+								{...params}
+								margin="normal"
+								required
+								label={t("staff_request.patron.affiliated")}
+								error={!!errors.agencyCode}
+								helperText={errors.agencyCode?.message}
+								disabled={patronValidated}
+							/>
+						)}
+						isOptionEqualToValue={(option, value) =>
+							option.value === value.value
+						}
+					/>
+				)}
+			/>
+
+			<Controller
+				name="patronBarcode"
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						margin="normal"
+						required
+						fullWidth
+						id="patronBarcode"
+						label={t("staff_request.patron.barcode")}
+						error={!!errors.patronBarcode}
+						helperText={errors.patronBarcode?.message}
+						disabled={patronValidated}
+					/>
+				)}
+			/>
+			<Stack spacing={1} direction={"row"}>
+				<Button variant="outlined" onClick={handleClose}>
+					{t("mappings.cancel")}
+				</Button>
+				<div style={{ flex: "1 0 0" }} />
+				<Button
+					color="primary"
+					variant="contained"
+					onClick={validatePatron}
+					disabled={
+						isValidatingPatron ||
+						!watch("patronBarcode") ||
+						!watch("agencyCode")
+					}
+				>
+					{isValidatingPatron
+						? t("staff_request.patron.validating")
+						: t("staff_request.patron.validate")}
+				</Button>
+			</Stack>
+		</>
+	);
+
+	// Step two: request creation / placing
+	const RequestCreationStep = () => {
+		return (
+			<>
+				<Controller
+					name="itemAgencyCode"
+					control={control}
+					render={({ field: { onChange, value } }) => (
+						<Autocomplete
+							value={
+								value
+									? itemLibraryOptions.find(
+											(option) => option.value === value,
+										) || null
+									: null
+							}
+							onChange={(
+								_,
+								newValue: PatronRequestAutocompleteOption | null,
+							) => {
+								onChange(newValue?.value || "");
+								// Set the Host LMS code ("localSystemCode") also - this now defaults only to the agency's Host LMS code.
+								setValue("itemLocalSystemCode", newValue?.hostLmsCode ?? "");
+							}}
+							options={itemLibraryOptions}
+							getOptionLabel={(option: PatronRequestAutocompleteOption) =>
+								option.label
+							}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									margin="normal"
+									required
+									fullWidth
+									id="itemAgencyCode"
+									label={t("staff_request.patron.item_library")}
+									error={!!errors.itemAgencyCode || itemsError}
+									helperText={errors.itemAgencyCode?.message}
+									InputProps={{
+										...params.InputProps,
+										endAdornment: (
+											<>
+												{itemLibraryLoading ? (
+													<CircularProgress color="inherit" size={20} />
+												) : null}
+												{params.InputProps.endAdornment}
+											</>
+										),
+									}}
+								/>
+							)}
+							isOptionEqualToValue={(option, value) =>
+								option.value === value.value
+							}
+							onOpen={() => {
+								if (!itemLibraryData) {
+									getItemLibraryData();
+								}
+							}}
+							loading={itemLibraryLoading}
+						/>
+					)}
+				/>
+				<Typography variant="body1" paragraph>
+					{t("staff_request.select_pickup")}
+				</Typography>
+
+				<Controller
+					name="pickupLocationId"
+					control={control}
+					render={({ field: { onChange, value } }) => (
+						<Autocomplete
+							value={
+								pickupLocationOptions.find(
+									(option) => option.value === value,
+								) || null
+							}
+							onChange={(
+								_,
+								newValue: PatronRequestAutocompleteOption | null,
+							) => {
+								onChange(newValue?.value || "");
+							}}
+							options={pickupLocationOptions}
+							onOpen={() => {
+								getPickupLocations();
+							}}
+							loading={pickupLocationsLoading}
+							getOptionLabel={(option: PatronRequestAutocompleteOption) =>
+								option.label
+							}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									margin="normal"
+									required
+									label={t("staff_request.patron.pickup_location")}
+									error={!!errors.pickupLocationId}
+									helperText={errors.pickupLocationId?.message}
+								/>
+							)}
+							isOptionEqualToValue={(option, value) =>
+								option.value === value.value
+							}
+							disabled={isEmpty(itemAgencyCode)}
+						/>
+					)}
+				/>
+				<Controller
+					name="itemLocalId"
+					control={control}
+					disabled={isEmpty(itemAgencyCode)}
+					render={({ field: { onChange, value } }) => (
+						<Autocomplete
+							value={
+								value
+									? itemOptions.find((option) => option.value === value) || null
+									: null
+							}
+							onChange={(
+								_,
+								newValue: PatronRequestAutocompleteOption | null,
+							) => {
+								onChange(newValue?.value || "");
+							}}
+							options={itemOptions}
+							getOptionLabel={(option: PatronRequestAutocompleteOption) =>
+								option.label
+							}
+							disabled={isEmpty(itemAgencyCode)}
+							renderInput={(params) => (
+								<TextField
+									{...params}
+									margin="normal"
+									required
+									fullWidth
+									id="itemLocalId"
+									label={t("staff_request.patron.item_local_id")}
+									error={!!errors.itemLocalId}
+									helperText={errors.itemLocalId?.message}
+									InputProps={{
+										...params.InputProps,
+										endAdornment: (
+											<>
+												{itemsLoading ? (
+													<CircularProgress color="inherit" size={20} />
+												) : null}
+												{params.InputProps.endAdornment}
+											</>
+										),
+									}}
+								/>
+							)}
+							isOptionEqualToValue={(option, value) =>
+								option.value === value.value
+							}
+							onOpen={() => {
+								if (isEmpty(itemsData)) {
+									fetchRecords();
+								}
+							}}
+							loading={itemsLoading}
+						/>
+					)}
+				/>
+
+				<Controller
+					name="requesterNote"
+					control={control}
+					render={({ field }) => (
+						<TextField
+							{...field}
+							margin="normal"
+							fullWidth
+							id="requesterNote"
+							label={t("staff_request.patron.requester_note")}
+							multiline
+							rows={2}
+							error={!!errors.requesterNote}
+							helperText={errors.requesterNote?.message}
+						/>
+					)}
+				/>
+				<Stack spacing={1} direction={"row"}>
+					<Button variant="outlined" onClick={handleClose}>
+						{t("mappings.cancel")}
+					</Button>
+					<div style={{ flex: "1 0 0" }} />
+					<Button
+						type="submit"
+						color="primary"
+						variant="contained"
+						sx={{ mt: 2 }}
+						disabled={!isValid || isSubmitting || !watch("pickupLocationId")}
+					>
+						{isSubmitting
+							? t("expedited_checkout.creating_request")
+							: t("expedited_checkout.create_request")}
+					</Button>
+				</Stack>
+			</>
+		);
+	};
+
+	// Step 3: Progress
+
+	const CheckoutStep = () => {
 		return (
 			<Stack direction="column" spacing={2}>
 				<Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -467,7 +790,15 @@ export default function ExpeditedCheckout({
 				<LinearProgress
 					variant={checkoutCompleted ? "determinate" : "indeterminate"}
 					value={checkoutCompleted ? 100 : undefined}
-					sx={{ mb: 3, mt: 1 }}
+					sx={{
+						mb: 3,
+						mt: 1,
+						"& .MuiLinearProgress-bar": {
+							backgroundColor: checkoutCompleted
+								? "success.main"
+								: "primary.main",
+						},
+					}}
 				/>
 				<Typography variant="body2" fontWeight="bold">
 					{t("expedited_checkout.feedback.in_progress_explanation")}
@@ -481,8 +812,32 @@ export default function ExpeditedCheckout({
 						status: patronRequest?.status ?? "UNKNOWN",
 					})}
 				</Typography>
+				{checkoutCompleted && (
+					<Button
+						variant="contained"
+						color="success"
+						startIcon={<CheckCircle />}
+						onClick={handleViewRequest}
+					>
+						{t("expedited_checkout.view_request")}
+					</Button>
+				)}
 			</Stack>
 		);
+	};
+
+	// Steps:
+	const getStepContent = (step: number) => {
+		switch (step) {
+			case 0:
+				return <PatronValidationStep />;
+			case 1:
+				return <RequestCreationStep />;
+			case 2:
+				return <CheckoutStep />;
+			default:
+				return "Unknown step"; // probably just default to patron validation step;
+		}
 	};
 
 	return (
@@ -495,6 +850,52 @@ export default function ExpeditedCheckout({
 				maxWidth="sm"
 			>
 				<DialogTitle id="form-dialog-title" variant="modalTitle">
+					{t("expedited_checkout.title_on_site")}
+				</DialogTitle>
+
+				{(!patronRequestWaiting || checkoutCompleted) && (
+					<IconButton
+						aria-label="close"
+						onClick={handleClose}
+						sx={{
+							position: "absolute",
+							right: 8,
+							top: 8,
+							color: (theme) => theme.palette.grey[500],
+						}}
+					>
+						<Close />
+					</IconButton>
+				)}
+
+				<DialogContent>
+					<Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+						{steps.map((label, index) => {
+							const stepProps: { completed?: boolean } = {};
+							const labelProps: { optional?: React.ReactNode } = {};
+
+							if (index === 2 && checkoutCompleted) {
+								labelProps.optional = (
+									<Typography variant="caption" color="success.main">
+										{t("expedited_checkout.step.completed")}
+									</Typography>
+								);
+							}
+
+							return (
+								<Step key={label} {...stepProps}>
+									<StepLabel {...labelProps}>{label}</StepLabel>
+								</Step>
+							);
+						})}
+					</Stepper>
+
+					<form onSubmit={handleSubmit(onSubmit)}>
+						{getStepContent(activeStep)}
+					</form>
+				</DialogContent>
+			</Dialog>
+			{/* <DialogTitle id="form-dialog-title" variant="modalTitle">
 					{t("expedited_checkout.title_on_site")}
 				</DialogTitle>
 				{!patronRequestWaiting ? (
@@ -514,7 +915,7 @@ export default function ExpeditedCheckout({
 				<DialogContent>
 					{patronRequestWaiting ? (
 						<>
-							<ProgressScreen />
+							<CheckoutStep />
 						</>
 					) : (
 						<>
@@ -815,7 +1216,7 @@ export default function ExpeditedCheckout({
 						</>
 					)}
 				</DialogContent>
-			</Dialog>
+			</Dialog> */}
 			<TimedAlert
 				severityType={alert.severity}
 				open={alert.open}
