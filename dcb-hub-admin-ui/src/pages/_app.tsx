@@ -21,6 +21,7 @@ import { ApolloProvider } from "@apollo/client";
 import { useApollo } from "@lib/apollo";
 declare module "@mui/material/styles" {
 	interface PaletteColor {
+		attributeTitle?: string;
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
@@ -53,6 +54,7 @@ declare module "@mui/material/styles" {
 	}
 
 	interface SimplePaletteColorOptions {
+		attributeTitle?: string;
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;

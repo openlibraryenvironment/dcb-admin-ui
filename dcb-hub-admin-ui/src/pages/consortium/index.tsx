@@ -573,7 +573,7 @@ const ConsortiumPage: NextPage = () => {
 							color={
 								errors?.["name"] && editMode
 									? theme.palette.error.main
-									: theme.palette.primary.headerText
+									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.display_name")}
@@ -667,7 +667,7 @@ const ConsortiumPage: NextPage = () => {
 							color={
 								errors?.["name"] && editMode
 									? theme.palette.error.main
-									: theme.palette.primary.headerText
+									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.url")}
@@ -692,7 +692,7 @@ const ConsortiumPage: NextPage = () => {
 							color={
 								errors?.["name"] && editMode
 									? theme.palette.error.main
-									: theme.palette.primary.headerText
+									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.search_url")}
@@ -720,7 +720,7 @@ const ConsortiumPage: NextPage = () => {
 							color={
 								errors?.["name"] && editMode
 									? theme.palette.error.main
-									: theme.palette.primary.headerText
+									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.description_title")}

@@ -10,6 +10,7 @@ const openRSLight = createTheme({
 		mode: "light",
 		primary: {
 			main: "#287BAF",
+			attributeTitle: "#000000",
 			breadcrumbs: "#246F9E",
 			buttonForSelectedChildPage: "#707070",
 			buttonForSelectedPage: "#287BAF",
@@ -189,6 +190,7 @@ const openRSDark = createTheme({
 		mode: "dark",
 		primary: {
 			main: "#35B7FF",
+			attributeTitle: "#FFFFFF",
 			breadcrumbs: "#35B7FF",
 			buttonForSelectedChildPage: "#999999",
 			buttonForSelectedPage: "#287BAF",
