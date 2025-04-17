@@ -1,3 +1,11 @@
+## [1.36.2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.1...v1.36.2) (2025-04-17)
+
+
+### Bug Fixes
+
+* Ensure audit date is correctly formatted ([b145dce](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b145dcee3df1b0d5274b5af254a2be7abd90b3c4))
+* Fix issue with titles in light mode ([baba416](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/baba416c6571bd5c1348094033c643a7db9cd439))
+
 ## [1.36.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.0...v1.36.1) (2025-04-11)
 
 
