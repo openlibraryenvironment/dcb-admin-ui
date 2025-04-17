@@ -247,15 +247,15 @@ const openRSDark = createTheme({
 					},
 					"&.MuiButton-contained": {
 						"&:disabled": {
-							background: "#393939",
-							color: "#727374",
+							background: "#444444",
+							color: "#8c8c8c",
 							border: "none",
 						},
 					},
 					"&.MuiButton-outlined": {
 						"&:disabled": {
-							background: "#393939",
-							color: "#727374",
+							background: "#444444",
+							color: "#8c8c8c",
 							border: "none",
 						},
 					},
@@ -267,6 +267,15 @@ const openRSDark = createTheme({
 				root: {
 					"&.Mui-focusVisible": {
 						borderColor: "#FFFFFF",
+					},
+				},
+			},
+		},
+		MuiTextField: {
+			styleOverrides: {
+				root: {
+					":active": {
+						background: "#424242",
 					},
 				},
 			},
