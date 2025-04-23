@@ -1061,6 +1061,9 @@
 		"volume_raw": "Raw volume statement"
 	},
 	"staff_request": {
+		"actions": {
+			"place": "Place a staff request"
+		},
 		"new": "New request",
 		"patron": {
 			"affiliated": "Affiliated institution",
@@ -1116,10 +1119,11 @@
 			"checkout_failure": "Item checkout is taking too long. Please view the request and use the 'check for updates' option to refresh its status.",
 			"checkout_success": "The item has been successfully checked out, and all steps are complete.",
 			"checkout_waiting": "The request has been created. Please wait while we attempt to check out the item.",
+			"complete": "All steps complete!",
 			"patron_validation": "Patron validation",
-			"patron_validation_instruction": "Please provide the barcode and the affiliated institution of the patron",
+			"patron_validation_instruction": "Please provide the barcode and the affiliated institution of the patron.",
 			"request_creation": "Request creation",
-			"request_creation_instruction": "The patron is valid. Please now provide the remaining details."
+			"request_creation_instruction": "The patron barcode is valid. Please now provide the remaining details."
 		},
 		"title_on_site": "Item checkout",
 		"view_request": "View request"
