@@ -25,6 +25,8 @@ const openRSLight = createTheme({
 			headerText: "#FFFFFF",
 			hover: "#EEEEEE",
 			hoverOnSelectedPage: "#A9A9A9",
+			iconSymbol: "#FFFFFF", // The color of symbols within icons - i.e. the cross in an error icon
+			inactiveBackground: "#8C8C8C",
 			link: "#0C4068",
 			linkText: "#246F9E",
 			landingBackground: "#F9F9F9",
@@ -203,6 +205,8 @@ const openRSDark = createTheme({
 			headerText: "#FFFFFF",
 			hover: "#424242",
 			hoverOnSelectedPage: "#424242",
+			iconSymbol: "#FFFFFF",
+			inactiveBackground: "#8C8C8C",
 			link: "#B3E5FC",
 			linkText: "#35B7FF",
 			landingBackground: "#000000",
