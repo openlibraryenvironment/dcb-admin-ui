@@ -4,7 +4,7 @@ import LinearProgress, {
 } from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { MdFilePresent, MdClose } from "react-icons/md";
+import { FilePresent, Close } from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import { styled } from "@mui/material/styles";
 import { useState, useEffect } from "react";
@@ -68,7 +68,7 @@ const RenderFileUploadStatus = (props: any) => {
 				minWidth: 300,
 			}}
 		>
-			<MdFilePresent size={25} style={{ marginRight: 2, minWidth: 25 }} />
+			<FilePresent sx={{ marginRight: 2, minWidth: 25, size: 25 }} />
 			<Box sx={{ mx: "auto", width: "85%" }}>
 				<Typography
 					sx={{
@@ -98,7 +98,7 @@ const RenderFileUploadStatus = (props: any) => {
 					aria-label="close-file-upload-component"
 					onClick={props.hideComponent}
 				>
-					<MdClose />
+					<Close />
 				</IconButton>
 			</Box>
 		</Box>

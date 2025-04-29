@@ -25,8 +25,7 @@ import {
 	StyledAccordionDetails,
 	StyledAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
-import { IconContext } from "react-icons";
-import { MdExpandMore } from "react-icons/md";
+import { ExpandMore } from "@mui/icons-material";
 import { useCallback, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
@@ -206,11 +205,7 @@ const PatronRequests: NextPage = () => {
 				<StyledAccordionSummary
 					aria-controls="exceptionRequests"
 					id="exceptionRequests"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.exception", {
@@ -257,11 +252,7 @@ const PatronRequests: NextPage = () => {
 				<StyledAccordionSummary
 					aria-controls="outOfSequenceRequests"
 					id="outOfSequenceRequests"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.out_of_sequence", {
@@ -303,11 +294,7 @@ const PatronRequests: NextPage = () => {
 				<StyledAccordionSummary
 					aria-controls="active"
 					id="activeRequests"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.active", {
@@ -349,11 +336,7 @@ const PatronRequests: NextPage = () => {
 				<StyledAccordionSummary
 					aria-controls="completedPatronRequests"
 					id="completedPatronRequests"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.completed", {
@@ -398,11 +381,7 @@ const PatronRequests: NextPage = () => {
 				<StyledAccordionSummary
 					aria-controls="allRequests"
 					id="allRequests"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.all", {

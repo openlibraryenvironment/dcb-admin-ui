@@ -6,8 +6,12 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
 import { Button, Tooltip, useTheme } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Cancel } from "@mui/icons-material";
+import {
+	Cancel,
+	ExpandLess,
+	ExpandMore,
+	CheckCircle,
+} from "@mui/icons-material";
 import {
 	DataGridPremium,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
@@ -16,7 +20,6 @@ import {
 } from "@mui/x-data-grid-premium";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Error from "@components/Error/Error";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import { useState } from "react";
@@ -60,10 +63,7 @@ const Clusters: NextPage = () => {
 					"Matchpoint " + mp + " is present for the title " + instance?.title
 				}
 			>
-				<CheckCircleIcon
-					sx={{ mt: 1.75 }}
-					htmlColor={theme.palette.success.main}
-				/>
+				<CheckCircle sx={{ mt: 1.75 }} htmlColor={theme.palette.success.main} />
 			</Tooltip>
 		) : (
 			<Tooltip
@@ -173,8 +173,8 @@ const Clusters: NextPage = () => {
 					border: "0",
 				}}
 				slots={{
-					detailPanelExpandIcon: MdExpandMore,
-					detailPanelCollapseIcon: MdExpandLess,
+					detailPanelExpandIcon: ExpandMore,
+					detailPanelCollapseIcon: ExpandLess,
 				}}
 				disableAggregation={true}
 				disableRowGrouping={true}

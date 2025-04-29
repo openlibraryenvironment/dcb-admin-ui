@@ -5,8 +5,7 @@ import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { HostLMS } from "@models/HostLMS";
 import { useState } from "react";
-import { IconContext } from "react-icons";
-import { MdExpandMore } from "react-icons/md";
+import { ExpandMore } from "@mui/icons-material";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import PrivateData from "@components/PrivateData/PrivateData";
@@ -130,11 +129,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					}}
 					aria-controls="hostlms-general-details"
 					id="hostlms_details_general"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.general")}
@@ -204,11 +199,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 					}}
 					aria-controls="hostlms-client-config-details"
 					id="hostlms_details_client_config"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("hostlms.client_config.title")}
@@ -513,11 +504,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							<SubAccordionSummary
 								aria-controls="hostlms-client-config-details-item"
 								id="hostlms_details_client_config_item"
-								expandIcon={
-									<IconContext.Provider value={{ size: "2em" }}>
-										<MdExpandMore />
-									</IconContext.Provider>
-								}
+								expandIcon={<ExpandMore fontSize="large" />}
 							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.item")}
@@ -663,11 +650,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							<SubAccordionSummary
 								aria-controls="hostlms-client-config-details-papi"
 								id="hostlms_details_client_config_papi"
-								expandIcon={
-									<IconContext.Provider value={{ size: "2em" }}>
-										<MdExpandMore />
-									</IconContext.Provider>
-								}
+								expandIcon={<ExpandMore fontSize="large" />}
 							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.papi")}
@@ -752,11 +735,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							<SubAccordionSummary
 								aria-controls="hostlms-client-config-details-services"
 								id="hostlms_details_client_config_services"
-								expandIcon={
-									<IconContext.Provider value={{ size: "2em" }}>
-										<MdExpandMore />
-									</IconContext.Provider>
-								}
+								expandIcon={<ExpandMore fontSize="large" />}
 							>
 								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 									{t("hostlms.client_config.services")}

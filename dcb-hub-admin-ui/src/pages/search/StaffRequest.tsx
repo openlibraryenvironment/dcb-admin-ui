@@ -22,7 +22,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
-import { MdClose } from "react-icons/md";
+import { Close } from "@mui/icons-material";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { getLibraries, getLocations } from "src/queries/queries";
@@ -512,7 +512,7 @@ export default function StaffRequest({
 						color: (theme) => theme.palette.grey[500],
 					}}
 				>
-					<MdClose />
+					<Close />
 				</IconButton>
 				<DialogContent>
 					<Typography variant="body1">

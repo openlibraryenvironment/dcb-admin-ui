@@ -24,13 +24,20 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
-import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import {
 	CustomNoDataOverlay,
 	CustomNoResultsOverlay,
 } from "./components/DynamicOverlays";
 import QuickSearchToolbar from "./components/QuickSearchToolbar";
-import { Cancel, Delete, Edit, Save, Visibility } from "@mui/icons-material";
+import {
+	Cancel,
+	Delete,
+	Edit,
+	Save,
+	Visibility,
+	ExpandLess,
+	ExpandMore,
+} from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import { useSession } from "next-auth/react";
 import {
@@ -68,8 +75,8 @@ import { ExportProgressDialog } from "./components/ExportProgressDialog";
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
 	toolbar: QuickSearchToolbar,
-	detailPanelExpandIcon: MdExpandMore,
-	detailPanelCollapseIcon: MdExpandLess,
+	detailPanelExpandIcon: ExpandMore,
+	detailPanelCollapseIcon: ExpandLess,
 };
 
 export default function ServerPaginationGrid({

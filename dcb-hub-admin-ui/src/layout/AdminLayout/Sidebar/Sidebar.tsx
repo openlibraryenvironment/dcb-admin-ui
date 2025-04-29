@@ -19,20 +19,20 @@ import ListItemText from "@mui/material/ListItemText";
 import Link from "@components/Link/Link";
 import { useRouter } from "next/router";
 import {
-	MdLocationOn,
-	MdMenu,
-	MdSettings,
-	MdBook,
-	MdHome,
-	MdOutput,
-	MdDns,
-	MdAccountBalance,
-	MdWorkspaces,
-	MdMap,
-	MdInfo,
-	MdLocalLibrary,
-	MdSearch,
-} from "react-icons/md";
+	LocationOn,
+	Menu as MenuIcon,
+	Settings,
+	Book,
+	Home,
+	Output,
+	Dns,
+	AccountBalance,
+	Workspaces,
+	Map,
+	Info,
+	LocalLibrary,
+	Search,
+} from "@mui/icons-material";
 
 const drawerWidth = 240;
 
@@ -89,32 +89,91 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 const SidebarIcon = (indexVal: any, isSelected: boolean) => {
-	const iconProps = { size: 20, color: isSelected ? "white" : "inherit" };
 	switch (indexVal) {
 		case 0:
-			return <MdHome {...iconProps} />; // Home
+			return (
+				<Home
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			);
 		case 1:
-			return <MdOutput {...iconProps} />; // Patron requests
+			return (
+				<Output
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Patron requests
 		case 2:
-			return <MdSettings {...iconProps} />; // Consortium
+			return (
+				<Settings
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Consortium
 		case 3:
-			return <MdLocalLibrary {...iconProps} />; // Libraries
+			return (
+				<LocalLibrary
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Libraries
 		case 4:
-			return <MdAccountBalance {...iconProps} />; // Agencies
+			return (
+				<AccountBalance
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Agencies
 		case 5:
-			return <MdDns {...iconProps} />; // Host LMSs
+			return (
+				<Dns
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Host LMSs
 		case 6:
-			return <MdWorkspaces {...iconProps} />; // Groups
+			return (
+				<Workspaces
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Groups
 		case 7:
-			return <MdLocationOn {...iconProps} />; // Locations
+			return (
+				<LocationOn
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Locations
 		case 8:
-			return <MdMap {...iconProps} />; // Mappings
+			return (
+				<Map
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Mappings
 		case 9:
-			return <MdBook {...iconProps} />; //Bib records
+			return (
+				<Book
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); //Bib records
 		case 10:
-			return <MdSearch {...iconProps} />; // Search index
+			return (
+				<Search
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Search index
 		case 11:
-			return <MdInfo {...iconProps} />; // Service info
+			return (
+				<Info
+					fontSize="small"
+					sx={{ color: isSelected ? "white" : "inherit" }}
+				/>
+			); // Service info
 		default:
 			return null;
 	}
@@ -206,7 +265,7 @@ export default function Sidebar(props: any) {
 									ml: 0.65,
 								}}
 							>
-								<MdMenu />
+								<MenuIcon />
 							</IconButton>
 						</DrawerHeader>
 					)}

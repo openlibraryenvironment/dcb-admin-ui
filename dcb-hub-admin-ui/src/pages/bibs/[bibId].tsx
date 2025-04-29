@@ -6,8 +6,7 @@ import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
-import { IconContext } from "react-icons";
-import { MdExpandMore } from "react-icons/md";
+import { ExpandMore } from "@mui/icons-material";
 import { getBibMainDetails, getBibSourceRecord } from "src/queries/queries";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
@@ -199,11 +198,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				<StyledAccordionSummary
 					aria-controls="source-bibs-json-details"
 					id="source-bibs-json-details"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.canonical_metadata")}
@@ -222,11 +217,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				<StyledAccordionSummary
 					aria-controls="source-bibs-source-record-json-details"
 					id="source-bibs-source-record-json-details"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.source_record")}
