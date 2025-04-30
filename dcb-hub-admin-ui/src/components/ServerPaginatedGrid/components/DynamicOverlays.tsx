@@ -1,8 +1,10 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Link, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 type OverlayType = {
 	noDataMessage?: string;
+	noDataTitle?: string;
+	noDataLink?: string;
 	noResultsMessage?: string;
 };
 
@@ -14,11 +16,23 @@ const StyledOverlay = styled("div")(() => ({
 	height: "100%",
 }));
 
-export function CustomNoDataOverlay({ noDataMessage }: OverlayType) {
+export function CustomNoDataOverlay({
+	noDataMessage,
+	noDataTitle,
+	noDataLink,
+}: OverlayType) {
 	return (
 		<StyledOverlay>
 			<Box sx={{ mt: 1 }}>
-				<Typography variant="body1"> {noDataMessage} </Typography>
+				{noDataTitle ? (
+					<Typography variant="body1"> {noDataTitle} </Typography>
+				) : null}
+
+				{noDataLink ? (
+					<Link href={noDataLink}> {noDataMessage} </Link>
+				) : (
+					<Typography variant="body1"> {noDataMessage} </Typography>
+				)}
 			</Box>
 		</StyledOverlay>
 	);

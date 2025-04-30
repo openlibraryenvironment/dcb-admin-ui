@@ -134,6 +134,7 @@ const Requests = () => {
 					columns={columns}
 					data={requestData ?? []}
 					type="errorOverviewPatronRequests"
+					coreType="ErrorOverviewResults"
 					loading={loading}
 					selectable={false}
 					noDataTitle={t("error_overview.no_results")}

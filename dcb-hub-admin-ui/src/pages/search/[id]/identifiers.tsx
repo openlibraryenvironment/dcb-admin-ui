@@ -131,6 +131,7 @@ const Identifiers: NextPage = () => {
 				columns={columns}
 				loading={loading}
 				type="Identifiers"
+				coreType="ClusterRecord"
 				operationDataType="identifiers"
 				selectable={false}
 				disableAggregation={true}

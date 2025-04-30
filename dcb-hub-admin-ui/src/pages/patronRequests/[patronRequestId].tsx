@@ -1553,6 +1553,7 @@ export default function PatronRequestDetails({
 							},
 						]}
 						type="Audit"
+						coreType="Audit"
 						// This grid could show click-through details of its own for each audit log entry
 						selectable={true}
 						noDataTitle={t("details.audit_log_no_data")}

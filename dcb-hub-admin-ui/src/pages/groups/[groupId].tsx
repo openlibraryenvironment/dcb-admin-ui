@@ -146,6 +146,7 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 					},
 				]}
 				type="libraryGroupMembers"
+				coreType="LibraryGroupMember"
 				selectable={true}
 				noDataTitle={t("groups.no_members")}
 				// This is how to set the default sort order

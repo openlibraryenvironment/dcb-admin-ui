@@ -68,7 +68,7 @@ const RenderFileUploadStatus = (props: any) => {
 				minWidth: 300,
 			}}
 		>
-			<FilePresent sx={{ marginRight: 2, minWidth: 25, size: 25 }} />
+			<FilePresent sx={{ marginRight: 2, minWidth: 25, fontSize: 25 }} />
 			<Box sx={{ mx: "auto", width: "85%" }}>
 				<Typography
 					sx={{

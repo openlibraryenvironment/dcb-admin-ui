@@ -32,6 +32,8 @@ export function tableNameToEntityName(entityType: string) {
 			return "agencies.agencies_one";
 		case "consortium":
 			return "nav.consortium.name";
+		case "consortium_contact":
+			return "consortium.contacts.entity";
 		case "functional_setting":
 			return "consortium.settings.one";
 		case "library":

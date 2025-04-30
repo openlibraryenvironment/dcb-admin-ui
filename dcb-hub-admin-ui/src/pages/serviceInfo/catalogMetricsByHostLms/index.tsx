@@ -199,6 +199,7 @@ const CatalogMetricsByHostLms: NextPage = () => {
 				columns={columns}
 				data={records}
 				type="catalogMetricsByHostLms"
+				coreType="BibRecord"
 				// We don't want click-through on this grid.
 				selectable={false}
 				noDataTitle={t("catalogMetricsByHostLms.no_results")}

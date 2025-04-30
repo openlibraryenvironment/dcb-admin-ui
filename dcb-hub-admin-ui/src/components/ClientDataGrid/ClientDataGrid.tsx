@@ -1,12 +1,9 @@
-import Link from "@components/Link/Link";
-import { Box, Tooltip, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Tooltip } from "@mui/material";
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import {
 	DataGridPremium,
 	GridToolbar,
 	GridEventListener,
-	GridToolbarQuickFilter,
 	useGridApiRef,
 	GridRowModel,
 	GridColDef,
@@ -17,13 +14,14 @@ import {
 	GridRenderEditCellParams,
 	GridSortModel,
 	GridColumnVisibilityModel,
+	GridRowParams,
 } from "@mui/x-data-grid-premium";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { updatePerson } from "src/queries/queries";
-import { Cancel, Edit, Save, Visibility } from "@mui/icons-material";
+import { deleteLibraryContact, updatePerson } from "src/queries/queries";
+import { Cancel, Delete, Edit, Save, Visibility } from "@mui/icons-material";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { DocumentNode } from "graphql";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -36,31 +34,16 @@ import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableC
 import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
 import { getEntityText } from "src/helpers/DataGrid/getEntityText";
+import {
+	CustomNoDataOverlay,
+	CustomNoResultsOverlay,
+} from "@components/ServerPaginatedGrid/components/DynamicOverlays";
+import SearchOnlyToolbar from "@components/ServerPaginatedGrid/components/SearchOnlyToolbar";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.
 // For example, displaying Agency Group Members.
 // A long term goal is to unite this with the ServerPaginatedGrid due to the amount of shared code.
-const StyledOverlay = styled("div")(() => ({
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-	justifyContent: "center",
-	height: "100%",
-}));
-
-function SearchOnlyToolbar() {
-	return (
-		<Box
-			sx={{
-				p: 0.5,
-				pb: 0,
-			}}
-		>
-			<GridToolbarQuickFilter />
-		</Box>
-	);
-}
 
 function computeMutation(newRow: GridRowModel, oldRow: GridRowModel) {
 	const changedFields: Partial<GridRowModel> = {};
@@ -82,6 +65,7 @@ export default function ClientDataGrid<T extends object>({
 	data = [],
 	columns,
 	type,
+	coreType,
 	selectable,
 	// slots,
 	noDataTitle,
@@ -92,15 +76,19 @@ export default function ClientDataGrid<T extends object>({
 	toolbarVisible,
 	disableHoverInteractions,
 	editQuery,
+	deleteQuery,
+	refetchQuery,
 	loading,
 	operationDataType,
 	autoRowHeight,
 	disableAggregation,
 	disableRowGrouping,
+	parentEntityId,
 }: {
 	data: Array<T>;
 	columns: any;
 	type: string;
+	coreType: string;
 	selectable: boolean;
 	slots?: any;
 	noDataTitle?: string;
@@ -111,11 +99,14 @@ export default function ClientDataGrid<T extends object>({
 	toolbarVisible?: string;
 	disableHoverInteractions?: boolean;
 	editQuery?: DocumentNode;
+	deleteQuery?: DocumentNode;
+	refetchQuery?: string[];
 	loading?: boolean;
 	operationDataType: string;
 	autoRowHeight?: boolean;
 	disableAggregation: boolean;
 	disableRowGrouping: boolean;
+	parentEntityId?: string;
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -138,8 +129,19 @@ export default function ClientDataGrid<T extends object>({
 	const router = useRouter();
 
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
+	const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+
+	const [entityToDelete, setEntityToDelete] = useState<string | null>(null);
+	const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+	const [deleteAlertSeverity, setDeleteAlertSeverity] = useState<
+		"success" | "error"
+	>("success");
+	const [deleteAlertText, setDeleteAlertText] = useState("");
 
 	const [updateRow] = useMutation(editQuery ?? updatePerson);
+	const [deleteEntity] = useMutation(deleteQuery ?? deleteLibraryContact, {
+		refetchQueries: refetchQuery ?? ["LoadLibraries"],
+	});
 	const [sortOptions, setSortOptionsState] = useState({
 		field: storedSortOptions[type]?.field,
 		direction: storedSortOptions[type]?.direction,
@@ -306,21 +308,90 @@ export default function ClientDataGrid<T extends object>({
 			setPromiseArguments(null);
 		}
 	};
-
-	function CustomNoDataOverlay() {
-		return (
-			<StyledOverlay>
-				<Box>
-					<Typography variant="body1"> {noDataTitle} </Typography>
-					{noDataLink ? (
-						<Link href={noDataLink}> {noDataMessage} </Link>
-					) : (
-						<Typography variant="body1"> {noDataMessage} </Typography>
-					)}
-				</Box>
-			</StyledOverlay>
-		);
-	}
+	const handleDeleteEntity = async (
+		id: string,
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+		operationDataType?: string,
+	) => {
+		const name =
+			apiRef.current.getRow(id).name ?? apiRef.current.getRow(id).fullName;
+		try {
+			const baseInput = {
+				id: id,
+				reason: reason,
+				changeCategory: changeCategory,
+				changeReferenceUrl: changeReferenceUrl,
+			};
+			const libraryContactInput = {
+				personId: id,
+				libraryId: parentEntityId,
+				reason: reason,
+				changeCategory: changeCategory,
+				changeReferenceUrl: changeReferenceUrl,
+			};
+			const consortiumContactInput = {
+				personId: id,
+				consortiumId: parentEntityId,
+				reason: reason,
+				changeCategory: changeCategory,
+				changeReferenceUrl: changeReferenceUrl,
+			};
+			const input =
+				coreType == "LibraryContact"
+					? libraryContactInput
+					: coreType == "ConsortiumContact"
+						? consortiumContactInput
+						: baseInput;
+			const { data } = await deleteEntity({
+				variables: {
+					input,
+				},
+			});
+			const operation =
+				coreType == "ConsortiumContact" ? "deleteContact" : "delete" + coreType;
+			if (data?.[operation].success == true) {
+				setDeleteAlertSeverity("success");
+				setDeleteAlertText(
+					t("ui.data_grid.delete_success", {
+						entity:
+							coreType == "ConsortiumContact" || coreType == "LibraryContact"
+								? t("ui.info.contact")
+								: operationDataType?.toLowerCase(),
+						name: name,
+					}),
+				);
+			} else {
+				console.log(data?.[operation]);
+				console.log("Failed to delete entity");
+				setDeleteAlertSeverity("error");
+				setDeleteAlertText(
+					t("ui.data_grid.delete_error", {
+						entity:
+							coreType == "ConsortiumContact" || coreType == "LibraryContact"
+								? t("ui.info.contact")
+								: operationDataType?.toLowerCase(),
+						name: name,
+					}),
+				);
+			}
+			setDeleteAlertOpen(true);
+		} catch (error) {
+			console.error("Error deleting entity:", error);
+			setDeleteAlertSeverity("error");
+			setDeleteAlertText(
+				t("ui.data_grid.delete_error", {
+					entity:
+						coreType == "ConsortiumContact" || coreType == "LibraryContact"
+							? t("ui.info.contact")
+							: operationDataType?.toLowerCase(),
+					name: name,
+				}),
+			);
+			setDeleteAlertOpen(true);
+		}
+	};
 
 	// If certain types, allow a click-through so the user can access more info
 	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
@@ -354,7 +425,8 @@ export default function ClientDataGrid<T extends object>({
 		{
 			field: "actions",
 			type: "actions",
-			getActions: ({ id }) => {
+			getActions: (params: GridRowParams) => {
+				const id = params?.row?.id;
 				const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 				// List of types that support opening
 				const openActionTypes = [
@@ -420,6 +492,21 @@ export default function ClientDataGrid<T extends object>({
 							icon={<Edit />}
 							label={t("ui.data_grid.edit")}
 							onClick={handleEditClick(id)}
+							showInMenu
+							disabled={!isAnAdmin || isAnyRowEditing()}
+						/>,
+					);
+				}
+				if (isAnAdmin && deleteQuery) {
+					actions.push(
+						<GridActionsCellItem
+							key="Delete"
+							icon={<Delete />}
+							label={t("ui.data_grid.delete")}
+							onClick={() => {
+								setConfirmationModalOpen(true);
+								setEntityToDelete(id);
+							}}
 							showInMenu
 							disabled={!isAnAdmin || isAnyRowEditing()}
 						/>,
@@ -566,8 +653,16 @@ export default function ClientDataGrid<T extends object>({
 								: toolbarVisible == "not-visible"
 									? null
 									: GridToolbar, // Grid toolbar is default.
-					noRowsOverlay: CustomNoDataOverlay,
-					noResultsOverlay: CustomNoDataOverlay,
+					noResultsOverlay: () => (
+						<CustomNoResultsOverlay noResultsMessage={noDataMessage} />
+					),
+					noRowsOverlay: () => (
+						<CustomNoDataOverlay
+							noDataMessage={noDataMessage}
+							noDataLink={noDataLink}
+							noDataTitle={noDataTitle}
+						/>
+					),
 				}}
 				// and we can also pass a custom footer component in 'slots'. This might work for NewGroup or addAgency buttons
 				slotProps={{
@@ -589,7 +684,27 @@ export default function ClientDataGrid<T extends object>({
 				entity={type}
 				gridEdit
 			/>
-
+			<Confirmation
+				open={confirmationModalOpen}
+				onClose={() => setConfirmationModalOpen(false)}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
+					if (entityToDelete) {
+						handleDeleteEntity(
+							entityToDelete,
+							reason,
+							changeCategory,
+							changeReferenceUrl,
+							operationDataType,
+						);
+						setConfirmationModalOpen(false);
+						setEntityToDelete(null);
+					}
+				}}
+				type={"delete" + coreType}
+				entity={operationDataType?.toLowerCase() ?? ""}
+				entityId={entityToDelete ?? ""}
+				gridEdit
+			/>
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
@@ -597,6 +712,14 @@ export default function ClientDataGrid<T extends object>({
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 				alertTitle={alert.title}
+			/>
+			<TimedAlert
+				open={deleteAlertOpen}
+				severityType={deleteAlertSeverity}
+				alertText={deleteAlertText}
+				alertTitle={t("ui.data_grid.deleted")}
+				autoHideDuration={5000}
+				onCloseFunc={() => setDeleteAlertOpen(false)}
 			/>
 		</div>
 	);

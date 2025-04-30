@@ -128,6 +128,7 @@ const RequestErrors: NextPage = () => {
 					columns={columns}
 					data={errorOverviewResults?.hits ?? []}
 					type="errorOverviewResults"
+					coreType="ErrorOverviewResults"
 					loading={loading}
 					selectable={false}
 					noDataTitle={t("error_overview.no_results")}
