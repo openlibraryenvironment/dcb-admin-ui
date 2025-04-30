@@ -20,10 +20,13 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import getConfig from "next/config";
 import { useState } from "react";
-import { IconContext } from "react-icons";
-import { MdExpandMore } from "react-icons/md";
+import { ExpandMore } from "@mui/icons-material";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { getLocationById, getPatronIdentities, getPatronRequestById } from "src/queries/queries";
+import {
+	getLocationById,
+	getPatronIdentities,
+	getPatronRequestById,
+} from "src/queries/queries";
 import {
 	StyledAccordion,
 	StyledAccordionSummary,
@@ -80,7 +83,7 @@ export default function PatronRequestDetails({
 
 	// pickup data
 
-	const { data: patronIdentitiesData} = useQuery(getPatronIdentities, {
+	const { data: patronIdentitiesData } = useQuery(getPatronIdentities, {
 		variables: {
 			query: "localId:" + patronRequest?.pickupPatronId,
 			pageno: 0,
@@ -92,7 +95,8 @@ export default function PatronRequestDetails({
 		skip: !patronRequest?.pickupPatronId,
 	});
 
-	const pickupPatronIdentity = patronIdentitiesData?.patronIdentities?.content?.[0];
+	const pickupPatronIdentity =
+		patronIdentitiesData?.patronIdentities?.content?.[0];
 
 	const { data: pickupLocationData } = useQuery(getLocationById, {
 		variables: {
@@ -254,11 +258,7 @@ export default function PatronRequestDetails({
 				<StyledAccordionSummary
 					aria-controls="request-general-details"
 					id="request_details_general"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.general")}
@@ -303,9 +303,7 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("details.pickup_agency_code")}
 								</Typography>
-								<RenderAttribute
-									attribute={pickupLocation?.agency?.code}
-								/>
+								<RenderAttribute attribute={pickupLocation?.agency?.code} />
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
@@ -313,9 +311,7 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("details.pickup_hostlms_code")}
 								</Typography>
-								<RenderAttribute
-									attribute={pickupLocation?.hostSystem?.code}
-								/>
+								<RenderAttribute attribute={pickupLocation?.hostSystem?.code} />
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
@@ -323,9 +319,7 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("patron_requests.pickup_location_name")}
 								</Typography>
-								<RenderAttribute
-									attribute={pickupLocation?.name}
-								/>
+								<RenderAttribute attribute={pickupLocation?.name} />
 							</Stack>
 						</Grid>
 						<Grid xs={2} sm={4} md={4}>
@@ -617,11 +611,7 @@ export default function PatronRequestDetails({
 				<StyledAccordionSummary
 					aria-controls="request-bib-record"
 					id="request_bib_record"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.bib_record")}
@@ -727,11 +717,7 @@ export default function PatronRequestDetails({
 						<SubAccordionSummary
 							aria-controls="request-source-record"
 							id="request_source_record"
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 						>
 							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 								{t("details.source_record")}
@@ -768,11 +754,7 @@ export default function PatronRequestDetails({
 				<StyledAccordionSummary
 					aria-controls="request-supplier-details"
 					id="request_details_supplier"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.supplying")}
@@ -894,11 +876,7 @@ export default function PatronRequestDetails({
 						onChange={handleAccordionChange(8)}
 					>
 						<SubAccordionSummary
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 							aria-controls={"supplying-item"}
 							id={"supplying-item"}
 						>
@@ -1035,11 +1013,7 @@ export default function PatronRequestDetails({
 						onChange={handleAccordionChange(9)}
 					>
 						<SubAccordionSummary
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 							aria-controls={"supplying-virtual-patron"}
 							id={"supplying-virtual-patron"}
 						>
@@ -1116,11 +1090,7 @@ export default function PatronRequestDetails({
 				<StyledAccordionSummary
 					aria-controls="request-details-borrowing"
 					id="request_details_borrowing"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.borrowing", "Borrowing")}
@@ -1177,11 +1147,7 @@ export default function PatronRequestDetails({
 						<SubAccordionSummary
 							aria-controls="request-patron-details"
 							id="request_details_patron"
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 						>
 							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 								{t("details.patron")}
@@ -1264,11 +1230,7 @@ export default function PatronRequestDetails({
 						onChange={handleAccordionChange(10)}
 					>
 						<SubAccordionSummary
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 							aria-controls={"borrowing-patron"}
 							id={"borrowing-virtual-item"}
 						>
@@ -1350,11 +1312,7 @@ export default function PatronRequestDetails({
 				<StyledAccordionSummary
 					aria-controls="request-pickup-details"
 					id="request_details_pickup"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="accordionSummary">
 						{t("details.pickup")}
@@ -1418,11 +1376,7 @@ export default function PatronRequestDetails({
 						onChange={handleAccordionChange(11)}
 					>
 						<SubAccordionSummary
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 							aria-controls={"pickup-virtual-patron"}
 							id={"pickup-virtual-patron"}
 						>
@@ -1452,9 +1406,7 @@ export default function PatronRequestDetails({
 											{t("details.local_barcode")}
 										</Typography>
 										<RenderAttribute
-											attribute={
-												pickupPatronIdentity?.localBarcode
-											}
+											attribute={pickupPatronIdentity?.localBarcode}
 										/>
 									</Stack>
 								</Grid>
@@ -1464,9 +1416,7 @@ export default function PatronRequestDetails({
 											{t("details.borrowing_patron_type")}
 										</Typography>
 										<RenderAttribute
-											attribute={
-												pickupPatronIdentity?.localPtype
-											}
+											attribute={pickupPatronIdentity?.localPtype}
 										/>
 									</Stack>
 								</Grid>
@@ -1476,9 +1426,7 @@ export default function PatronRequestDetails({
 											{"DCB patron type"}
 										</Typography>
 										<RenderAttribute
-											attribute={
-												pickupPatronIdentity?.canonicalPtype
-											}
+											attribute={pickupPatronIdentity?.canonicalPtype}
 										/>
 									</Stack>
 								</Grid>
@@ -1491,11 +1439,7 @@ export default function PatronRequestDetails({
 						onChange={handleAccordionChange(12)}
 					>
 						<SubAccordionSummary
-							expandIcon={
-								<IconContext.Provider value={{ size: "2em" }}>
-									<MdExpandMore />
-								</IconContext.Provider>
-							}
+							expandIcon={<ExpandMore fontSize="large" />}
 							aria-controls={"pickup-virtual-item"}
 							id={"pickup-virtual-item"}
 						>
@@ -1552,9 +1496,7 @@ export default function PatronRequestDetails({
 										<Typography variant="attributeTitle">
 											{t("details.pickup_bib_id")}
 										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.pickupBibId}
-										/>
+										<RenderAttribute attribute={patronRequest?.pickupBibId} />
 									</Stack>
 								</Grid>
 							</Grid>
@@ -1571,11 +1513,7 @@ export default function PatronRequestDetails({
 				<StyledAccordionSummary
 					aria-controls="request-audit_log"
 					id="request_audit_log"
-					expandIcon={
-						<IconContext.Provider value={{ size: "2em" }}>
-							<MdExpandMore />
-						</IconContext.Provider>
-					}
+					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography id="auditlog" variant="accordionSummary">
 						{t("details.audit_log")}

@@ -12,7 +12,7 @@ import {
 	Box,
 	DialogActions,
 } from "@mui/material";
-import { MdClose } from "react-icons/md";
+import { Close } from "@mui/icons-material";
 //localisation
 import { useTranslation } from "next-i18next";
 // import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -156,7 +156,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 						color: (theme) => theme.palette.grey[500],
 					}}
 				>
-					<MdClose />
+					<Close />
 				</IconButton>
 				<DialogContent>
 					<Box

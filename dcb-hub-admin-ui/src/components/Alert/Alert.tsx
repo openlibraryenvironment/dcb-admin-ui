@@ -1,7 +1,7 @@
 import { Alert as MUIAlert, AlertTitle, IconButton } from "@mui/material";
 import { capitalize } from "@mui/material/utils";
 import { useTranslation } from "next-i18next";
-import { MdClose } from "react-icons/md";
+import { Close } from "@mui/icons-material";
 
 interface AlertProps {
 	severityType: any;
@@ -36,7 +36,7 @@ export default function Alert({
 							onClick={onCloseFunc}
 							title={t("ui.action.close_alert")}
 						>
-							<MdClose color={textColor} />
+							<Close htmlColor={textColor} />
 						</IconButton>
 					) : null
 				}

@@ -10,7 +10,7 @@ import {
 } from "@mui/x-data-grid-premium";
 import { useTranslation } from "next-i18next";
 import { MutableRefObject } from "react";
-import { MdUnfoldLess, MdUnfoldMore } from "react-icons/md";
+import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
 
 export default function DetailPanelHeader() {
 	const apiRef = useGridApiContext() as MutableRefObject<GridApiPro>;
@@ -38,7 +38,7 @@ export default function DetailPanelHeader() {
 		);
 	};
 
-	const Icon = noDetailPanelsOpen ? MdUnfoldMore : MdUnfoldLess;
+	const Icon = noDetailPanelsOpen ? UnfoldMore : UnfoldLess;
 
 	return (
 		<Tooltip

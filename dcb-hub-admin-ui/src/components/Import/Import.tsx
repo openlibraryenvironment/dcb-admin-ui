@@ -10,7 +10,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
-import { MdClose } from "react-icons/md";
+import { Close } from "@mui/icons-material";
 import Selector from "@components/Selector/Selector";
 import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
@@ -71,7 +71,7 @@ export default function Import({
 					color: (theme) => theme.palette.grey[500],
 				}}
 			>
-				<MdClose />
+				<Close />
 			</IconButton>
 			<DialogContent>
 				<Stack spacing={2}>

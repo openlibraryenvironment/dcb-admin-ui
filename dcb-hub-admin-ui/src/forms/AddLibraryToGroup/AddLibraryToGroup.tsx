@@ -19,7 +19,7 @@ import {
 	TextField,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { MdClose } from "react-icons/md";
+import { Close } from "@mui/icons-material";
 // import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { Library } from "@models/Library";
@@ -189,7 +189,7 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 						color: (theme) => theme.palette.grey[500],
 					}}
 				>
-					<MdClose />
+					<Close />
 				</IconButton>
 				<DialogContent>
 					<form onSubmit={handleSubmit(onSubmit)}>

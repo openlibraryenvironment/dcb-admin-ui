@@ -13,7 +13,7 @@ import {
 	checkExistingMappings,
 	checkExistingNumericRangeMappings,
 } from "src/queries/queries";
-import { MdCloudUpload } from "react-icons/md";
+import { CloudUpload } from "@mui/icons-material";
 import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
 import { getErrorMessageKey } from "src/helpers/MappingsImport/getErrorMessageKey";
 import Link from "next/link";
@@ -379,7 +379,7 @@ const FileUpload = ({
 				<Typography> {t("mappings.file_size_requirements")}</Typography>
 				<label htmlFor="file-upload">
 					<Button
-						startIcon={<MdCloudUpload />}
+						startIcon={<CloudUpload />}
 						variant="outlined"
 						component="span"
 					>

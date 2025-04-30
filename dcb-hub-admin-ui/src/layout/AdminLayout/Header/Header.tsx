@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import { MdMenu, MdAccountCircle } from "react-icons/md";
+import { Menu, AccountCircle } from "@mui/icons-material";
 import Link from "@components/Link/Link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { styled, useTheme } from "@mui/material/styles";
@@ -163,7 +163,7 @@ export default function Header({
 										},
 									}}
 								>
-									<MdMenu size={20} data-tid="menu-icon" />
+									<Menu sx={{ size: 20 }} data-tid="menu-icon" />
 								</IconButton>
 							</Box>
 						) : null}
@@ -228,7 +228,7 @@ export default function Header({
 									LinkComponent={Link}
 									href="/profile"
 								>
-									<MdAccountCircle size={20} />
+									<AccountCircle sx={{ size: 20 }} />
 								</IconButton>
 							) : null}
 							{iconsVisible != false ? (

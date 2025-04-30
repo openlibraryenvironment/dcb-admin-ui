@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import { useRouter } from "next/router";
-import { MdErrorOutline } from "react-icons/md";
+import { ErrorOutline } from "@mui/icons-material";
 
 interface ErrorProps {
 	title: string;
@@ -44,9 +44,9 @@ export default function Error({
 				alignSelf={"center"}
 				spacing={2}
 			>
-				<MdErrorOutline
-					size={200}
-					color={theme.palette.primary.exclamationIcon}
+				<ErrorOutline
+					sx={{ size: 200 }}
+					htmlColor={theme.palette.primary.exclamationIcon}
 				/>
 				<Typography variant="h1">{title}</Typography>
 				<Typography variant="componentSubheading" sx={{ fontWeight: "bold" }}>

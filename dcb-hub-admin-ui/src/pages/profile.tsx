@@ -9,12 +9,12 @@ import {
 	useTheme,
 } from "@mui/material";
 import {
-	MdPersonOutline,
-	MdOutlineMail,
-	MdOutlineMarkEmailRead,
-	MdThumbUpOffAlt,
-	MdOutlineSupervisorAccount,
-} from "react-icons/md";
+	PersonOutline,
+	MailOutline,
+	MarkEmailReadOutlined,
+	ThumbUpOffAlt,
+	SupervisorAccountOutlined,
+} from "@mui/icons-material";
 //localisation
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -42,7 +42,7 @@ const Profile: NextPage = () => {
 				</ListSubheader>
 				<ListItem>
 					<ListItemIcon>
-						<MdPersonOutline />
+						<PersonOutline />
 					</ListItemIcon>
 					<ListItemText>
 						<Typography variant="attributeTitle">
@@ -53,7 +53,7 @@ const Profile: NextPage = () => {
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						<MdOutlineMail />
+						<MailOutline />
 					</ListItemIcon>
 					<ListItemText>
 						<Typography variant="attributeTitle">
@@ -64,7 +64,7 @@ const Profile: NextPage = () => {
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						<MdOutlineMarkEmailRead />
+						<MarkEmailReadOutlined />
 					</ListItemIcon>
 					<ListItemText>
 						<Typography variant="attributeTitle">
@@ -75,7 +75,7 @@ const Profile: NextPage = () => {
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						<MdThumbUpOffAlt />
+						<ThumbUpOffAlt />
 					</ListItemIcon>
 					<ListItemText>
 						<Typography variant="attributeTitle">
@@ -86,7 +86,7 @@ const Profile: NextPage = () => {
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						<MdOutlineSupervisorAccount />
+						<SupervisorAccountOutlined />
 					</ListItemIcon>
 					<Typography variant="attributeTitle">{t("profile.roles")}</Typography>
 					<FormatArrayAsList roles={session?.profile?.roles} />

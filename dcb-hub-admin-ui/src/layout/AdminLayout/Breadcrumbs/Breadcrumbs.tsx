@@ -3,7 +3,7 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
-import { MdArrowForwardIos } from "react-icons/md";
+import { ArrowForwardIos } from "@mui/icons-material";
 import Link from "@components/Link/Link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -236,7 +236,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 		<MUIBreadcrumbs
 			aria-label={t("a11y.is_breadcrumb")}
 			sx={{ pl: 3, pr: 3 }}
-			separator={<MdArrowForwardIos />}
+			separator={<ArrowForwardIos sx={{ fontSize: "1em" }} />}
 		>
 			{/* Check if we're on the home page - if we are, unset the 'Home' link */}
 			{/* Breadcrumb length will always be 0 on the home page as it is at the base URL */}

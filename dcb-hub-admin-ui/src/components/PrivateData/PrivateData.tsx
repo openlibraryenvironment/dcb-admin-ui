@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
 	InputAdornment,
 	InputLabel,
@@ -60,7 +60,7 @@ export default function PrivateData({
 								onClick={() => setShowPrivateData((show) => !show)}
 								onMouseDown={handleMouseDownPrivateData}
 							>
-								{showPrivateData ? <MdVisibilityOff /> : <MdVisibility />}
+								{showPrivateData ? <VisibilityOff /> : <Visibility />}
 							</IconButton>
 						</Tooltip>
 					</InputAdornment>
