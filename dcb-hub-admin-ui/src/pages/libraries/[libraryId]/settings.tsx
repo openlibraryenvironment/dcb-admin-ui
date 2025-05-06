@@ -147,10 +147,18 @@ export default function Settings({ libraryId }: LibraryDetails) {
 						/>
 					),
 				});
-				if (active.includes("Supplying")) {
-					closeConfirmation(setConfirmationSupplying, client, "LoadLibrary");
+				if (active.includes("Supplying") || active.includes("supplying")) {
+					closeConfirmation(
+						() => setConfirmationSupplying(false),
+						client,
+						"LoadLibrary",
+					);
 				} else {
-					closeConfirmation(setConfirmationBorrowing, client, "LoadLibrary");
+					closeConfirmation(
+						() => setConfirmationBorrowing(false),
+						client,
+						"LoadLibrary",
+					);
 				}
 			})
 			.catch((error) => {
