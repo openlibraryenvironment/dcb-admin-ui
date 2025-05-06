@@ -5,6 +5,7 @@ import {
 	Stack,
 	Tab,
 	Tabs,
+	Tooltip,
 	Typography,
 	useTheme,
 } from "@mui/material";
@@ -274,17 +275,44 @@ export default function Settings({ libraryId }: LibraryDetails) {
 								? t("libraries.circulation.disabled_supply")
 								: t("libraries.circulation.not_set")}
 					</Stack>
-					<Button
-						onClick={() => setConfirmationSupplying(true)}
-						color="primary"
-						variant="outlined"
-						sx={{ marginTop: 1 }}
-						type="submit"
-					>
-						{library?.agency?.isSupplyingAgency
-							? t("libraries.circulation.confirmation.disable_supplying")
-							: t("libraries.circulation.confirmation.enable_supplying")}
-					</Button>
+					{!isAnAdmin ? (
+						<Tooltip
+							title={t(
+								"libraries.circulation.confirmation.admin_required_supplying",
+							)}
+							key={t(
+								"libraries.circulation.confirmation.admin_required_supplying",
+							)}
+						>
+							<span>
+								<Button
+									onClick={() => setConfirmationSupplying(true)}
+									color="primary"
+									variant="outlined"
+									sx={{ marginTop: 1 }}
+									type="submit"
+									disabled={!isAnAdmin}
+								>
+									{library?.agency?.isSupplyingAgency
+										? t("libraries.circulation.confirmation.disable_supplying")
+										: t("libraries.circulation.confirmation.enable_supplying")}
+								</Button>
+							</span>
+						</Tooltip>
+					) : (
+						<Button
+							onClick={() => setConfirmationSupplying(true)}
+							color="primary"
+							variant="outlined"
+							sx={{ marginTop: 1 }}
+							type="submit"
+							disabled={!isAnAdmin}
+						>
+							{library?.agency?.isSupplyingAgency
+								? t("libraries.circulation.confirmation.disable_supplying")
+								: t("libraries.circulation.confirmation.enable_supplying")}
+						</Button>
+					)}
 				</Grid>
 				<Grid xs={2} sm={4} md={4}>
 					<Stack direction={"column"}>
@@ -297,17 +325,44 @@ export default function Settings({ libraryId }: LibraryDetails) {
 								? t("libraries.circulation.disabled_borrow")
 								: t("libraries.circulation.not_set")}
 					</Stack>
-					<Button
-						onClick={() => setConfirmationBorrowing(true)}
-						color="primary"
-						variant="outlined"
-						sx={{ marginTop: 1 }}
-						type="submit"
-					>
-						{library?.agency?.isBorrowingAgency
-							? t("libraries.circulation.confirmation.disable_borrowing")
-							: t("libraries.circulation.confirmation.enable_borrowing")}
-					</Button>
+					{!isAnAdmin ? (
+						<Tooltip
+							title={t(
+								"libraries.circulation.confirmation.admin_required_borrowing",
+							)}
+							key={t(
+								"libraries.circulation.confirmation.admin_required_borrowing",
+							)}
+						>
+							<span>
+								<Button
+									onClick={() => setConfirmationBorrowing(true)}
+									color="primary"
+									variant="outlined"
+									sx={{ marginTop: 1 }}
+									type="submit"
+									disabled={!isAnAdmin}
+								>
+									{library?.agency?.isBorrowingAgency
+										? t("libraries.circulation.confirmation.disable_borrowing")
+										: t("libraries.circulation.confirmation.enable_borrowing")}
+								</Button>
+							</span>
+						</Tooltip>
+					) : (
+						<Button
+							onClick={() => setConfirmationBorrowing(true)}
+							color="primary"
+							variant="outlined"
+							sx={{ marginTop: 1 }}
+							type="submit"
+							disabled={!isAnAdmin}
+						>
+							{library?.agency?.isBorrowingAgency
+								? t("libraries.circulation.confirmation.disable_borrowing")
+								: t("libraries.circulation.confirmation.enable_borrowing")}
+						</Button>
+					)}
 				</Grid>
 			</Grid>
 

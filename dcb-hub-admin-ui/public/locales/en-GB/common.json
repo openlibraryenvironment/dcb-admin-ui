@@ -709,6 +709,8 @@
 			"supplying_status": "Library supplying status",
 			"title": "Circulation",
 			"confirmation": {
+				"admin_required_borrowing": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's borrowing status.",
+				"admin_required_supplying": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's supplying status.",
 				"disable_borrowing": "Disable patron borrowing",
 				"disable_supplying": "Disable supplying",
 				"enable_borrowing": "Enable patron borrowing",
