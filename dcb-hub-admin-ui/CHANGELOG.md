@@ -1,3 +1,10 @@
+## [1.36.3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.2...v1.36.3) (2025-05-06)
+
+
+### Bug Fixes
+
+* Participation status modal now auto-closes [DCB-1567] ([17d9b8b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/17d9b8b99394ac7df198e90475faf6a4e0e089f2))
+
 ## [1.36.2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.1...v1.36.2) (2025-04-17)
 
 
