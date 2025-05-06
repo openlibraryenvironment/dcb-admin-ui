@@ -92,6 +92,7 @@
 			"go_home": "Go to $t(nav.home) page",
 			"go_back": "Go back",
 			"newer": "Newer",
+			"next": "Next",
 			"no": "No",
 			"older": "Older",
 			"reload": "Reload page",
@@ -696,6 +697,10 @@
 		"new_contact": {
 			"error": "There was an error creating the new contact for the library {{library}}.",
 			"success": "New contact successfully created for {{library}}"
+		},
+		"new": {
+			"agency": "Associated agency",
+			"title": "New library"
 		},
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",

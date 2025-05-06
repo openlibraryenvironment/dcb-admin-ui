@@ -9,7 +9,7 @@ import {
 	updateLibraryQuery,
 } from "src/queries/queries";
 import { getILS } from "src/helpers/getILS";
-import Button from "@mui/material/Button";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { useState } from "react";
 import AddLibraryToGroup from "../../forms/AddLibraryToGroup/AddLibraryToGroup";
 import Loading from "@components/Loading/Loading";
@@ -17,17 +17,38 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 import { useCustomColumns } from "@hooks/useCustomColumns"; // import MasterDetail from "@components/MasterDetail/MasterDetail";
+import NewLibrary from "src/forms/NewLibrary/NewLibrary";
 
 const Libraries: NextPage = () => {
+	const { t } = useTranslation();
+	const { data: session }: { data: any } = useSession();
+
+	const isAnAdmin = session?.profile?.roles?.some(
+		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	);
 	// State management for the adding library to group modal
 	const [addToGroup, setAddToGroup] = useState(false);
-	const openAddToGroup = () => {
-		setAddToGroup(true);
-	};
+	const [showNewLibrary, setShowNewLibrary] = useState(false);
+	const { displayName } = useConsortiumInfoStore();
+
 	const closeAddToGroup = () => {
 		setAddToGroup(false);
 	};
-	const { t } = useTranslation();
+
+	const pageActions = [
+		{
+			key: "addToGroup",
+			onClick: () => setAddToGroup(true),
+			disabled: !isAnAdmin,
+			label: t("libraries.add_to_group"),
+		},
+		{
+			key: "newLibrary",
+			onClick: () => setShowNewLibrary(true),
+			disabled: !isAnAdmin,
+			label: t("libraries.new"),
+		},
+	];
 	const customColumns = useCustomColumns();
 
 	const router = useRouter();
@@ -57,14 +78,7 @@ const Libraries: NextPage = () => {
 	}
 
 	return (
-		<AdminLayout title={t("nav.libraries.name")}>
-			<Button
-				data-tid="add-library-to-group"
-				variant="contained"
-				onClick={openAddToGroup}
-			>
-				{t("libraries.add_to_group")}
-			</Button>
+		<AdminLayout title={t("nav.libraries.name")} pageActions={pageActions}>
 			<ServerPaginationGrid
 				query={getLibraries}
 				coreType="libraries"
@@ -217,6 +231,13 @@ const Libraries: NextPage = () => {
 			/>
 			{addToGroup ? (
 				<AddLibraryToGroup show={addToGroup} onClose={closeAddToGroup} />
+			) : null}
+			{showNewLibrary ? (
+				<NewLibrary
+					show={showNewLibrary}
+					onClose={closeAddToGroup}
+					consortiumName={displayName}
+				/>
 			) : null}
 		</AdminLayout>
 	);
