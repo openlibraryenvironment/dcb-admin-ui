@@ -1117,7 +1117,7 @@
 		"steps": {
 			"checkout": "Check out item",
 			"checkout_failure": "Item checkout is taking too long. Please view the request and use the 'check for updates' option to refresh its status.",
-			"checkout_success": "The item has been successfully checked out, and all steps are complete.",
+			"checkout_success": "The item has been successfully checked out, and all steps are complete. The due date for this item is {{dueDate}}",
 			"checkout_waiting": "The request has been created. Please wait while we attempt to check out the item.",
 			"complete": "All steps complete!",
 			"patron_validation": "Patron validation",

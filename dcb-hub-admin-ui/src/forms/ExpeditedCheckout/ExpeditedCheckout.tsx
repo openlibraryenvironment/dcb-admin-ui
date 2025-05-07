@@ -275,7 +275,7 @@ export default function ExpeditedCheckout({
 					headers: { Authorization: `Bearer ${session?.accessToken}` },
 					params: {
 						clusteredBibId: bibClusterId,
-						filters: "none",
+						// filters: "none",
 					},
 				},
 			);
@@ -332,7 +332,6 @@ export default function ExpeditedCheckout({
 	const selectedItem = itemOptions.find(
 		(option) => option.value === itemLocalId,
 	);
-	console.log("The selected item is", selectedItem);
 
 	// This is a timeout effect for the checkout stage (step 2)
 	// After 60s we can see that instant checkout has not occurred.
@@ -577,6 +576,7 @@ export default function ExpeditedCheckout({
 						checkoutCompleted={checkoutCompleted}
 						stepError={stepError}
 						t={t}
+						dueDate={selectedItem?.dueDate ?? ""}
 					/>
 				);
 			default:

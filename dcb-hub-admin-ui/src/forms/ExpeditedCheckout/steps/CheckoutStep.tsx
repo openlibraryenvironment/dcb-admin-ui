@@ -9,12 +9,14 @@ type CheckoutStep = {
 	stepError: number | null;
 	handleViewRequest: () => void;
 	t: TFunction;
+	dueDate: string;
 };
 export const CheckoutStep = ({
 	checkoutCompleted,
 	stepError,
 	handleViewRequest,
 	t,
+	dueDate,
 }: CheckoutStep) => {
 	const isButtonEnabled = checkoutCompleted || stepError === 2;
 
@@ -26,7 +28,8 @@ export const CheckoutStep = ({
 	return (
 		<Stack direction="column" spacing={2}>
 			<Typography>
-				{checkoutCompleted && t("expedited_checkout.steps.checkout_success")}
+				{checkoutCompleted &&
+					t("expedited_checkout.steps.checkout_success", { dueDate: dueDate })}
 				{!checkoutCompleted &&
 					stepError !== 2 &&
 					t("expedited_checkout.steps.checkout_waiting")}
