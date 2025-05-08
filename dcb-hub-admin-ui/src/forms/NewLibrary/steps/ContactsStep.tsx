@@ -1,9 +1,10 @@
 import { NewLibraryFormData } from "@models/NewLibraryFormData";
-import { Add, CheckBox, Delete } from "@mui/icons-material";
+import { Add, Delete } from "@mui/icons-material";
 import {
 	Autocomplete,
 	Box,
 	Button,
+	Checkbox,
 	FormControlLabel,
 	IconButton,
 	Paper,
@@ -24,7 +25,9 @@ type ContactsStepType = {
 	errors: FieldErrors<NewLibraryFormData>;
 	t: TFunction;
 	handleClose: () => void;
-	handleNext: () => void;
+	handleSubmit: () => void;
+	isValid: boolean;
+	loading: boolean;
 };
 
 export default function ContactsStep({
@@ -32,7 +35,9 @@ export default function ContactsStep({
 	errors,
 	t,
 	handleClose,
-	handleNext,
+	handleSubmit,
+	loading,
+	isValid,
 }: ContactsStepType) {
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -62,7 +67,7 @@ export default function ContactsStep({
 				<Paper key={field.id} sx={{ p: 2 }}>
 					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
 						<Typography variant="h6">
-							{t("libraries.contacts.contact")} #{index + 1}
+							{t("libraries.contacts.one")} #{index + 1}
 						</Typography>
 						{fields.length > 1 && (
 							<IconButton
@@ -159,7 +164,7 @@ export default function ContactsStep({
 							control={control}
 							render={({ field }) => (
 								<FormControlLabel
-									control={<CheckBox {...field} checked={field.value} />}
+									control={<Checkbox {...field} checked={field.value} />}
 									label={t("libraries.contacts.primary")}
 								/>
 							)}
@@ -176,7 +181,7 @@ export default function ContactsStep({
 					color="primary"
 					sx={{ alignSelf: "flex-start" }}
 				>
-					{t("libraries.contacts.add_contact")}
+					{t("consortium.new_contact.title")}
 				</Button>
 			)}
 
@@ -190,8 +195,14 @@ export default function ContactsStep({
 					{t("mappings.cancel")}
 				</Button>
 				<div style={{ flex: "1 0 0" }} />
-				<Button color="primary" variant="contained" onClick={handleNext}>
-					{t("ui.action.next")}
+				<Button
+					type="submit"
+					variant="contained"
+					color="primary"
+					disabled={!isValid || loading}
+					onClick={handleSubmit}
+				>
+					{loading ? t("ui.action.submitting") : t("libraries.new.title")}
 				</Button>
 			</Stack>
 		</>

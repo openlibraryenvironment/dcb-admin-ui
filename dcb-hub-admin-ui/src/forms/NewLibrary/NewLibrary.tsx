@@ -2,9 +2,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import {
 	Box,
-	Button,
 	Dialog,
-	DialogActions,
 	DialogContent,
 	DialogTitle,
 	Divider,
@@ -19,10 +17,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { createLibrary, getLibraries, getAgencies } from "src/queries/queries";
 import * as Yup from "yup";
 import { NewLibraryFormData } from "@models/NewLibraryFormData";
-import { BasicInfoStep } from "./steps/BasicInfoStep";
-import { TechnicalDetailsStep } from "./steps/TechnicalDetailsStep";
+import { ProfileStep } from "./steps/ProfileStep";
+import { LocationAndServiceStep } from "./steps/LocationAndServiceStep";
 import ContactsStep from "./steps/ContactsStep";
-import ReviewStep from "./steps/ReviewStep";
+import GroupStep from "./steps/GroupStep";
 
 type NewLibraryType = {
 	show: boolean;
@@ -38,14 +36,15 @@ export default function NewLibrary({
 	const { t } = useTranslation();
 	const [activeStep, setActiveStep] = useState(0);
 	const steps = [
-		t("library.steps.basic_info"),
-		t("library.steps.technical_details"),
-		t("library.steps.contacts"),
-		t("library.steps.review"),
+		t("libraries.steps.profile"),
+		t("libraries.steps.service"),
+		t("libraries.steps.contacts"),
+		t("libraries.steps.group"),
 	];
 
+	const [libraryId, setLibraryId] = useState("");
 	// Form validation schema based on steps
-	const basicInfoSchema = Yup.object().shape({
+	const profileSchema = Yup.object().shape({
 		fullName: Yup.string()
 			.trim()
 			.required(
@@ -80,19 +79,6 @@ export default function NewLibrary({
 			.max(50, t("ui.validation.max_length", { length: 50 })),
 		supportHours: Yup.string()
 			.trim()
-			.required(
-				t("ui.validation.required", {
-					field: t("libraries.details.supportHours"),
-				}),
-			)
-			.max(255, t("ui.validation.max_length", { length: 255 })),
-		address: Yup.string()
-			.trim()
-			.required(
-				t("ui.validation.required", {
-					field: t("libraries.details.address"),
-				}),
-			)
 			.max(255, t("ui.validation.max_length", { length: 255 })),
 		type: Yup.string()
 			.trim()
@@ -103,13 +89,34 @@ export default function NewLibrary({
 			),
 	});
 
-	const technicalDetailsSchema = Yup.object().shape({
+	const locationAndServiceSchema = Yup.object().shape({
+		address: Yup.string()
+			.required(
+				t("ui.validation.required", {
+					field: t("libraries.primaryLocation.address"),
+				}),
+			)
+			.max(255, t("ui.validation.max_length", { length: 255 })),
 		latitude: Yup.number()
-			.notRequired()
-			.typeError(t("ui.validation.must_be_number")),
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			) // Stops a weird bug where Yup would attempt to convert an empty string to a number
+			.required(t("ui.validation.locations.lat"))
+			.typeError(t("ui.validation.locations.lat"))
+			.min(-90, t("ui.validation.locations.lat"))
+			.max(90, t("ui.validation.locations.lat")),
 		longitude: Yup.number()
-			.notRequired()
-			.typeError(t("ui.validation.must_be_number")),
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			) //
+			.required(
+				t("ui.validation.required", {
+					field: t("details.long"),
+				}),
+			)
+			.typeError(t("ui.validation.locations.long"))
+			.min(-180, t("ui.validation.locations.long"))
+			.max(180, t("ui.validation.locations.long")),
 		patronWebsite: Yup.string().nullable().url(t("ui.data_grid.edit_url")),
 		hostLmsConfiguration: Yup.string().nullable(),
 		discoverySystem: Yup.string().nullable(),
@@ -153,11 +160,11 @@ export default function NewLibrary({
 	});
 
 	const finalSchema = Yup.object().shape({
-		...basicInfoSchema.fields,
-		...technicalDetailsSchema.fields,
+		...profileSchema.fields,
+		...locationAndServiceSchema.fields,
 		contacts: Yup.array()
 			.of(contactSchema)
-			.min(1, t("library.validation.min_one_contact")),
+			.min(1, t("libraries.contacts.minimum")),
 		reason: Yup.string().required(
 			t("ui.validation.required", {
 				field: t("data_change_log.reason"),
@@ -168,12 +175,13 @@ export default function NewLibrary({
 	});
 
 	// Use different validation schema based on the active step
-	const getValidationSchema = () => {
+	const getValidationSchema = (): Yup.ObjectSchema<any> => {
+		// Or a more specific partial type
 		switch (activeStep) {
 			case 0:
-				return basicInfoSchema;
+				return profileSchema;
 			case 1:
-				return technicalDetailsSchema;
+				return locationAndServiceSchema;
 			case 2:
 				return Yup.object().shape({
 					contacts: Yup.array()
@@ -198,9 +206,7 @@ export default function NewLibrary({
 		handleSubmit,
 		reset,
 		trigger,
-		getValues,
 		formState: { errors, isValid },
-		register,
 	} = useForm<NewLibraryFormData>({
 		defaultValues: {
 			fullName: "",
@@ -210,8 +216,6 @@ export default function NewLibrary({
 			supportHours: "",
 			address: "",
 			type: "",
-			latitude: undefined,
-			longitude: undefined,
 			patronWebsite: "",
 			hostLmsConfiguration: "",
 			discoverySystem: "",
@@ -235,6 +239,10 @@ export default function NewLibrary({
 
 	const [createNewLibrary, { loading }] = useMutation(createLibrary, {
 		refetchQueries: [getLibraries],
+		onCompleted: (data) => {
+			console.log(data);
+			setLibraryId(data?.createLibrary?.id);
+		},
 	});
 
 	const [alert, setAlert] = useState<{
@@ -254,9 +262,6 @@ export default function NewLibrary({
 		}
 	};
 
-	const handleBack = () => {
-		setActiveStep((prevStep) => prevStep - 1);
-	};
 	const handleClose = () => {
 		// Reset state
 		reset();
@@ -274,7 +279,7 @@ export default function NewLibrary({
 				setAlert({
 					open: true,
 					severity: "success",
-					text: t("consortium.new_library.success", {
+					text: t("libraries.new.success", {
 						consortium: consortiumName,
 					}),
 				});
@@ -282,8 +287,8 @@ export default function NewLibrary({
 				// Delay the modal closing and form reset to ensure the alert is visible
 				setTimeout(() => {
 					reset();
-					setActiveStep(0);
-					onClose();
+					setActiveStep(3);
+					// onClose();
 				}, 1000);
 			}
 		} catch (error) {
@@ -291,9 +296,7 @@ export default function NewLibrary({
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("consortium.new_library.error", {
-					consortium: consortiumName,
-				}),
+				text: t("libraries.new.error"),
 			});
 		}
 	};
@@ -315,14 +318,14 @@ export default function NewLibrary({
 				value: item.code,
 			}),
 		) || [];
-	const formValues = getValues();
+	// const formValues = getValues();
 
 	// Render the active step content
 	const getStepContent = (step: number) => {
 		switch (step) {
 			case 0:
 				return (
-					<BasicInfoStep
+					<ProfileStep
 						control={control}
 						agencyOptions={agencyOptions}
 						agenciesLoading={agenciesLoading}
@@ -330,16 +333,18 @@ export default function NewLibrary({
 						t={t}
 						handleClose={handleClose}
 						handleNext={handleNext}
+						isValid={isValid}
 					/>
 				);
 			case 1:
 				return (
-					<TechnicalDetailsStep
+					<LocationAndServiceStep
 						control={control}
 						t={t}
 						errors={errors}
 						handleClose={handleClose}
 						handleNext={handleNext}
+						isValid={isValid}
 					/>
 				);
 			case 2:
@@ -349,24 +354,11 @@ export default function NewLibrary({
 						t={t}
 						errors={errors}
 						handleClose={handleClose}
-						handleNext={handleNext}
-					/>
-				);
-			case 3:
-				return (
-					<ReviewStep
-						control={control}
-						t={t}
-						errors={errors}
-						formValues={formValues}
-						register={register}
 						handleSubmit={handleSubmit(onSubmit)}
 						loading={loading}
 						isValid={isValid}
-					/>
+					/> // At this point, the library should be submitted.
 				);
-			default:
-				return "Unknown step";
 		}
 	};
 
@@ -380,7 +372,7 @@ export default function NewLibrary({
 				aria-labelledby="new-library-modal"
 			>
 				<DialogTitle variant="modalTitle">
-					{t("consortium.new_library.title")}
+					{t("libraries.new.title")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 
@@ -393,9 +385,14 @@ export default function NewLibrary({
 						))}
 					</Stepper>
 
-					<Box component="form" onSubmit={handleSubmit(onSubmit)}>
-						{getStepContent(activeStep)}
-					</Box>
+					{activeStep < 3 ? (
+						<Box component="form" onSubmit={handleSubmit(onSubmit)}>
+							{getStepContent(activeStep)}
+						</Box>
+					) : (
+						// Render GroupStep outside of form when it's the active step. Avoids nested forms which can cause issues
+						<GroupStep handleClose={handleClose} t={t} libraryId={libraryId} />
+					)}
 				</DialogContent>
 			</Dialog>
 

@@ -46,7 +46,7 @@ const Libraries: NextPage = () => {
 			key: "newLibrary",
 			onClick: () => setShowNewLibrary(true),
 			disabled: !isAnAdmin,
-			label: t("libraries.new"),
+			label: t("libraries.new.title"),
 		},
 	];
 	const customColumns = useCustomColumns();
@@ -235,7 +235,9 @@ const Libraries: NextPage = () => {
 			{showNewLibrary ? (
 				<NewLibrary
 					show={showNewLibrary}
-					onClose={closeAddToGroup}
+					onClose={() => {
+						setShowNewLibrary(false);
+					}}
 					consortiumName={displayName}
 				/>
 			) : null}

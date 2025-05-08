@@ -4,21 +4,40 @@ import TextField from "@mui/material/TextField";
 import { TFunction } from "next-i18next";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 
-type TechnicalDetailsStep = {
+type LocationAndServiceStep = {
 	control: Control<NewLibraryFormData, any>;
 	errors: FieldErrors<NewLibraryFormData>;
 	t: TFunction;
 	handleClose: () => void;
 	handleNext: () => void;
+	isValid: boolean;
 };
-export const TechnicalDetailsStep = ({
+export const LocationAndServiceStep = ({
 	control,
 	errors,
 	t,
 	handleClose,
 	handleNext,
-}: TechnicalDetailsStep) => (
+	isValid,
+}: LocationAndServiceStep) => (
 	<Stack spacing={1} direction="column">
+		{/* 		/* Location info */}
+
+		<Controller
+			name="address"
+			control={control}
+			render={({ field }) => (
+				<TextField
+					{...field}
+					label={t("libraries.primaryLocation.address")}
+					variant="outlined"
+					fullWidth
+					required
+					error={!!errors.address}
+					helperText={errors.address?.message}
+				/>
+			)}
+		/>
 		<Controller
 			name="latitude"
 			control={control}
@@ -55,6 +74,9 @@ export const TechnicalDetailsStep = ({
 				/>
 			)}
 		/>
+
+		{/* 		/* Service info */}
+
 		<Controller
 			name="patronWebsite"
 			control={control}
@@ -79,7 +101,6 @@ export const TechnicalDetailsStep = ({
 					variant="outlined"
 					fullWidth
 					multiline
-					rows={2}
 					error={!!errors.hostLmsConfiguration}
 					helperText={errors.hostLmsConfiguration?.message}
 				/>
@@ -99,19 +120,33 @@ export const TechnicalDetailsStep = ({
 				/>
 			)}
 		/>
+
 		<Controller
-			name="backupDowntimeSchedule"
+			name="reason"
 			control={control}
 			render={({ field }) => (
 				<TextField
 					{...field}
-					label={t("libraries.service.environments.backup_schedule")}
+					label={t("data_change_log.reason_addition")}
 					variant="outlined"
 					fullWidth
-					multiline
-					rows={2}
-					error={!!errors.backupDowntimeSchedule}
-					helperText={errors.backupDowntimeSchedule?.message}
+					error={!!errors.reason}
+					helperText={errors.reason?.message}
+				/>
+			)}
+		/>
+
+		<Controller
+			name="changeReferenceUrl"
+			control={control}
+			render={({ field }) => (
+				<TextField
+					{...field}
+					fullWidth
+					variant="outlined"
+					label={t("data_change_log.reference_url")}
+					error={!!errors.changeReferenceUrl}
+					helperText={errors.changeReferenceUrl?.message}
 				/>
 			)}
 		/>
@@ -120,7 +155,12 @@ export const TechnicalDetailsStep = ({
 				{t("mappings.cancel")}
 			</Button>
 			<div style={{ flex: "1 0 0" }} />
-			<Button color="primary" variant="contained" onClick={handleNext}>
+			<Button
+				color="primary"
+				variant="contained"
+				onClick={handleNext}
+				disabled={!isValid}
+			>
 				{t("ui.action.next")}
 			</Button>
 		</Stack>

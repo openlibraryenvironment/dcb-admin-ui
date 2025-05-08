@@ -6,13 +6,13 @@ export interface NewLibraryFormData {
 	shortName: string;
 	abbreviatedName: string;
 	agencyCode: string;
-	supportHours: string;
+	supportHours?: string;
 	address: string;
 	type: string;
 
 	// Location and Technical Details
-	latitude?: number;
-	longitude?: number;
+	latitude: number;
+	longitude: number;
 	patronWebsite?: string;
 	hostLmsConfiguration?: string;
 	discoverySystem?: string;

@@ -9,7 +9,7 @@ type AgencyOption = {
 	label: string;
 };
 
-type BasicInfoStepType = {
+type ProfileStepType = {
 	control: Control<NewLibraryFormData, any>;
 	agencyOptions: AgencyOption[];
 	agenciesLoading: boolean;
@@ -17,9 +17,9 @@ type BasicInfoStepType = {
 	t: TFunction;
 	handleClose: () => void;
 	handleNext: () => void;
+	isValid: boolean;
 };
-// Ensure button can't be clicked w/o required valies
-export const BasicInfoStep = ({
+export const ProfileStep = ({
 	control,
 	errors,
 	agencyOptions,
@@ -27,7 +27,8 @@ export const BasicInfoStep = ({
 	t,
 	handleClose,
 	handleNext,
-}: BasicInfoStepType) => (
+	isValid,
+}: ProfileStepType) => (
 	<Stack direction="column" spacing={1}>
 		<Controller
 			name="fullName"
@@ -121,18 +122,20 @@ export const BasicInfoStep = ({
 				/>
 			)}
 		/>
+
 		<Controller
-			name="address"
+			name="backupDowntimeSchedule"
 			control={control}
 			render={({ field }) => (
 				<TextField
 					{...field}
-					label={t("libraries.address")}
+					label={t("libraries.service.environments.backup_schedule")}
 					variant="outlined"
 					fullWidth
-					required
-					error={!!errors.address}
-					helperText={errors.address?.message}
+					multiline
+					rows={2}
+					error={!!errors.backupDowntimeSchedule}
+					helperText={errors.backupDowntimeSchedule?.message}
 				/>
 			)}
 		/>
@@ -156,7 +159,12 @@ export const BasicInfoStep = ({
 				{t("mappings.cancel")}
 			</Button>
 			<div style={{ flex: "1 0 0" }} />
-			<Button color="primary" variant="contained" onClick={handleNext}>
+			<Button
+				color="primary"
+				variant="contained"
+				onClick={handleNext}
+				disabled={!isValid}
+			>
 				{t("ui.action.next")}
 			</Button>
 		</Stack>

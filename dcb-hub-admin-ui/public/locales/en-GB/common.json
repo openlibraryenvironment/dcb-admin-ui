@@ -238,6 +238,7 @@
 			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
+			"number": "Please supply a valid number.",
 			"required": "Enter the {{field}}.",
 			"case_sensitive": "{{field}} is case sensitive"
 		},
@@ -700,14 +701,24 @@
 		},
 		"new": {
 			"agency": "Associated agency",
-			"title": "New library"
+			"close_no_group": "Close without adding to a group",
+			"group_explanation": "Please add your new library to a group. ",
+			"error": "There was an error creating a new library",
+			"success": "The new library was successfully created",
+			"title": "Create a new library"
 		},
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",
 		"search_placeholder": "Search by name",
 		"settings_title": "Settings for {{name}}",
-		"site_designation": "Site designation",
 		"short_name": "Short name",
+		"site_designation": "Site designation",
+		"steps": {
+			"contacts": "Contacts",
+			"group": "Groups",
+			"profile": "Profile",
+			"service": "Location and Service Information"
+		},
 		"support_hours": "Support office hours",
 		"type": "Type",
 		"circulation": {
@@ -793,9 +804,11 @@
 			"first_name": "First name",
 			"last_name": "Last name",
 			"location": "Location",
+			"minimum": "You must provide at least one contact for a library",
 			"name": "Name",
 			"one": "Contact",
 			"primary": "Primary contact",
+			"remove": "Remove contact",
 			"role": "Role",
 			"roles": {
 				"implementation": "Implementation Contact",
