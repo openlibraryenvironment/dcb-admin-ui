@@ -109,6 +109,12 @@ export const convertFileToString = (
 	const formattedHeaders = usefulColumns
 		? getHeadersForExport(coreType, fieldsForExport)
 		: getHeadersForExport(coreType);
+	const fieldToHeaderMap: Record<string, string> = {};
+	fieldsForExport.forEach((field, index) => {
+		if (formattedHeaders[index]) {
+			fieldToHeaderMap[field] = formattedHeaders[index];
+		}
+	});
 
 	const headerRow = formattedHeaders.join(delimiter);
 

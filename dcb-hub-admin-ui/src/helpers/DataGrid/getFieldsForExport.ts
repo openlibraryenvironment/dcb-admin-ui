@@ -54,9 +54,9 @@ export const getFieldsForExport = (coreType: string) => {
 				"pollCountForCurrentStatus",
 				"elapsedTimeInCurrentStatus",
 				"isManuallySelectedItem",
+				"dateUpdated",
 				"description",
 				"requesterNote",
-				"dateUpdated",
 				"id",
 				"activeWorkflow",
 			];

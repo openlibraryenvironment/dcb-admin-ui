@@ -373,7 +373,8 @@ export default function ServerPaginationGrid({
 			const allData = await fetchAllData(exportMode);
 			const delimiter = fileType === "csv" ? "," : "\t";
 			const fileName = `${getFileNameForExport(type, filterOptions)}.${fileType}`;
-			// get visible columns, pass in
+			// get visible columns, pass in - this ensures that for exports that are not "export all",
+			// the export reflects the user's column selection.
 			const visibleColumns = gridVisibleColumnFieldsSelector(apiRef);
 			const usefulColumns =
 				exportMode == "all" || exportMode == "default"
