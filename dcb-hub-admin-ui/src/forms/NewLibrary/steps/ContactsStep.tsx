@@ -71,7 +71,6 @@ export default function ContactsStep({
 						</Typography>
 						{fields.length > 1 && (
 							<IconButton
-								color="error"
 								onClick={() => handleRemoveContact(index)}
 								aria-label={t("libraries.contacts.remove")}
 							>

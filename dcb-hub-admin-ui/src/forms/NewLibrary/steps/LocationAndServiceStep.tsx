@@ -47,6 +47,7 @@ export const LocationAndServiceStep = ({
 					label={t("libraries.primaryLocation.latitude")}
 					variant="outlined"
 					fullWidth
+					required
 					error={!!errors.latitude}
 					helperText={errors.latitude?.message}
 					onChange={(e) => {
@@ -65,6 +66,7 @@ export const LocationAndServiceStep = ({
 					label={t("libraries.primaryLocation.longitude")}
 					variant="outlined"
 					fullWidth
+					required
 					error={!!errors.longitude}
 					helperText={errors.longitude?.message}
 					onChange={(e) => {
@@ -130,6 +132,7 @@ export const LocationAndServiceStep = ({
 					label={t("data_change_log.reason_addition")}
 					variant="outlined"
 					fullWidth
+					required
 					error={!!errors.reason}
 					helperText={errors.reason?.message}
 				/>

@@ -689,6 +689,7 @@
 	"libraries": {
 		"abbreviated_name": "Abbreviated name",
 		"add_to_group": "Add library to a group",
+		"add_to_group_explanation": "Please select a library to add to a group. You can also use this form to add a library to a consortium by selecting the relevant consortium group.",
 		"alert_text_success": "Library successfully added to group",
 		"error_adding_to_group": "Error adding library to group. Please try again.",
 		"groups": "Groups",
@@ -702,7 +703,7 @@
 		"new": {
 			"agency": "Associated agency",
 			"close_no_group": "Close without adding to a group",
-			"group_explanation": "Please add your new library to a group. ",
+			"group_explanation": "If this new library is part of your consortium, or any other group, you can add it now.",
 			"error": "There was an error creating a new library",
 			"success": "The new library was successfully created",
 			"title": "Create a new library"

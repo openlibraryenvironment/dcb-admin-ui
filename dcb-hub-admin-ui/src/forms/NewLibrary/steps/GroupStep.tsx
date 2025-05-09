@@ -1,6 +1,12 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Autocomplete, Button, Stack, TextField } from "@mui/material";
+import {
+	Autocomplete,
+	Button,
+	Stack,
+	TextField,
+	Typography,
+} from "@mui/material";
 import { TFunction } from "next-i18next";
 import * as Yup from "yup";
 import { useState } from "react";
@@ -58,7 +64,11 @@ export default function GroupStep({
 	});
 	const validationSchema = Yup.object().shape({
 		groupId: Yup.string().required(t("Group is required")),
-		libraryId: Yup.string().required(t("Library is required")),
+		libraryId: Yup.string().required(
+			t("ui.validation.required", {
+				field: t("groups.group_one"),
+			}),
+		),
 	});
 
 	const {
@@ -69,7 +79,7 @@ export default function GroupStep({
 	} = useForm<AddLibraryFormData>({
 		defaultValues: {
 			groupId: "",
-			libraryId: "",
+			libraryId: libraryId,
 		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
@@ -85,7 +95,6 @@ export default function GroupStep({
 		},
 	});
 
-	console.log(libraryId);
 	const groupsData: Group[] = groups?.libraryGroups?.content;
 
 	const groupOptions: AutocompleteOption[] =
@@ -143,34 +152,37 @@ export default function GroupStep({
 	return (
 		<>
 			<form onSubmit={handleSubmit(onSubmit)}>
-				<Controller
-					name="groupId"
-					control={control}
-					render={({ field: { onChange, value } }) => (
-						<Autocomplete
-							value={
-								groupOptions.find((option) => option.value === value) || null
-							}
-							onChange={(_, newValue: AutocompleteOption | null) => {
-								onChange(newValue?.value || "");
-							}}
-							options={groupOptions}
-							getOptionLabel={(option: AutocompleteOption) => option.label}
-							renderInput={(params) => (
-								<TextField
-									{...params}
-									required
-									label={t("groups.name")}
-									error={!!errors.groupId}
-									helperText={errors.groupId?.message}
-								/>
-							)}
-							isOptionEqualToValue={(option, value) =>
-								option.value === value.value
-							}
-						/>
-					)}
-				/>
+				<Stack spacing={1} mb={2}>
+					<Typography> {t("libraries.new.group_explanation")}</Typography>
+					<Controller
+						name="groupId"
+						control={control}
+						render={({ field: { onChange, value } }) => (
+							<Autocomplete
+								value={
+									groupOptions.find((option) => option.value === value) || null
+								}
+								onChange={(_, newValue: AutocompleteOption | null) => {
+									onChange(newValue?.value || "");
+								}}
+								options={groupOptions}
+								getOptionLabel={(option: AutocompleteOption) => option.label}
+								renderInput={(params) => (
+									<TextField
+										{...params}
+										required
+										label={t("groups.name")}
+										error={!!errors.groupId}
+										helperText={errors.groupId?.message}
+									/>
+								)}
+								isOptionEqualToValue={(option, value) =>
+									option.value === value.value
+								}
+							/>
+						)}
+					/>
+				</Stack>
 
 				<Stack spacing={1} direction={"row"}>
 					<Button variant="outlined" onClick={handleClose}>
@@ -181,7 +193,6 @@ export default function GroupStep({
 						type="submit"
 						color="primary"
 						variant="contained"
-						fullWidth
 						disabled={!isValid || !isDirty || loading}
 					>
 						{loading ? t("ui.action.submitting") : t("general.submit")}

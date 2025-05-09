@@ -121,6 +121,13 @@ export default function NewLibrary({
 		hostLmsConfiguration: Yup.string().nullable(),
 		discoverySystem: Yup.string().nullable(),
 		backupDowntimeSchedule: Yup.string().nullable(),
+		reason: Yup.string().required(
+			t("ui.validation.required", {
+				field: t("data_change_log.reason"),
+			}),
+		),
+		changeCategory: Yup.string().nullable(),
+		changeReferenceUrl: Yup.string().nullable(),
 	});
 
 	const contactSchema = Yup.object().shape({
@@ -165,13 +172,6 @@ export default function NewLibrary({
 		contacts: Yup.array()
 			.of(contactSchema)
 			.min(1, t("libraries.contacts.minimum")),
-		reason: Yup.string().required(
-			t("ui.validation.required", {
-				field: t("data_change_log.reason"),
-			}),
-		),
-		changeCategory: Yup.string().nullable(),
-		changeReferenceUrl: Yup.string().nullable(),
 	});
 
 	// Use different validation schema based on the active step
@@ -240,7 +240,6 @@ export default function NewLibrary({
 	const [createNewLibrary, { loading }] = useMutation(createLibrary, {
 		refetchQueries: [getLibraries],
 		onCompleted: (data) => {
-			console.log(data);
 			setLibraryId(data?.createLibrary?.id);
 		},
 	});
@@ -368,7 +367,7 @@ export default function NewLibrary({
 				open={show}
 				onClose={handleClose}
 				fullWidth
-				maxWidth="md"
+				maxWidth="sm"
 				aria-labelledby="new-library-modal"
 			>
 				<DialogTitle variant="modalTitle">
