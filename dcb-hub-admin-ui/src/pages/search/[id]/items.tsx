@@ -9,7 +9,6 @@ import { useEffect, useState, useMemo } from "react";
 import Error from "@components/Error/Error";
 import { useRouter } from "next/router";
 import {
-	DataGridPremium,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
 } from "@mui/x-data-grid-premium";
@@ -17,6 +16,7 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import dayjs from "dayjs";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: session } = useSession();
@@ -37,7 +37,6 @@ const Items: NextPage = () => {
 						headers: { Authorization: `Bearer ${session?.accessToken}` },
 						params: {
 							clusteredBibId: id,
-							filters: "none",
 						},
 					},
 				);
@@ -168,24 +167,19 @@ const Items: NextPage = () => {
 					reload
 				/>
 			) : (
-				<DataGridPremium
-					rows={rows ?? []}
+				<ClientDataGrid
+					data={rows ?? []}
 					columns={columns}
-					getDetailPanelContent={({ row }) => (
+					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail type="items" row={row} />
 					)}
-					getDetailPanelHeight={() => "auto"}
-					autoHeight
-					sx={{
-						"& .MuiDataGrid-detailPanel": {
-							overflow: "hidden", // Prevent scrollbars in the detail panel
-							height: "auto", // Adjust height automatically
-						},
-						border: "0",
-					}}
 					loading={loading}
 					disableAggregation={true}
 					disableRowGrouping={true}
+					type="Items"
+					coreType="Items"
+					operationDataType="Items"
+					selectable={false}
 				/>
 			)}
 		</AdminLayout>

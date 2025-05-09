@@ -21,7 +21,15 @@ import { useTranslation } from "next-i18next";
 import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { deleteLibraryContact, updatePerson } from "src/queries/queries";
-import { Cancel, Delete, Edit, Save, Visibility } from "@mui/icons-material";
+import {
+	Cancel,
+	Delete,
+	Edit,
+	ExpandLess,
+	ExpandMore,
+	Save,
+	Visibility,
+} from "@mui/icons-material";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { DocumentNode } from "graphql";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -61,6 +69,11 @@ function computeMutation(newRow: GridRowModel, oldRow: GridRowModel) {
 	return null;
 }
 
+const staticSlots = {
+	detailPanelExpandIcon: ExpandMore,
+	detailPanelCollapseIcon: ExpandLess,
+};
+
 export default function ClientDataGrid<T extends object>({
 	data = [],
 	columns,
@@ -84,6 +97,7 @@ export default function ClientDataGrid<T extends object>({
 	disableAggregation,
 	disableRowGrouping,
 	parentEntityId,
+	getDetailPanelContent, // The content to display for the master detail panel, where applicable.
 }: {
 	data: Array<T>;
 	columns: any;
@@ -107,6 +121,7 @@ export default function ClientDataGrid<T extends object>({
 	disableAggregation: boolean;
 	disableRowGrouping: boolean;
 	parentEntityId?: string;
+	getDetailPanelContent?: any; // The content to display for the master detail panel, where applicable.
 }) {
 	// The slots prop allows for customisation https://mui.com/x/react-data-grid/components/
 	// This overlay displays when there is no data in the grid.
@@ -308,6 +323,8 @@ export default function ClientDataGrid<T extends object>({
 			setPromiseArguments(null);
 		}
 	};
+
+	const getDetailPanelHeight = useCallback(() => "auto", []);
 	const handleDeleteEntity = async (
 		id: string,
 		reason: string,
@@ -570,6 +587,8 @@ export default function ClientDataGrid<T extends object>({
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={handleRowModesModelChange}
 				onSortModelChange={handleSortModelChange}
+				getDetailPanelContent={getDetailPanelContent}
+				getDetailPanelHeight={getDetailPanelHeight}
 				disableAggregation={disableAggregation}
 				disableRowGrouping={disableRowGrouping}
 				initialState={{
@@ -645,6 +664,7 @@ export default function ClientDataGrid<T extends object>({
 				}}
 				// And if we ever need to distinguish between no data and no results (i.e. from search) we'd just pass different overlays here.
 				slots={{
+					...staticSlots,
 					toolbar:
 						toolbarVisible === "search-columns"
 							? ColumnsAndSearchToolbar
