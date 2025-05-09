@@ -187,7 +187,9 @@ export default function NewContact({
 				aria-labelledby="new-contact-modal"
 			>
 				<DialogTitle variant="modalTitle">
-					{t("consortium.new_contact.consortium")}
+					{entity == "Consortium"
+						? t("consortium.new_contact.consortium")
+						: t("consortium.new_contact.library")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>

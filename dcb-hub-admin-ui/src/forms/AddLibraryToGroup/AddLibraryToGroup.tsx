@@ -16,7 +16,9 @@ import {
 	DialogContent,
 	DialogTitle,
 	IconButton,
+	Stack,
 	TextField,
+	Typography,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { Close } from "@mui/icons-material";
@@ -176,7 +178,7 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 				fullWidth
 				maxWidth="sm"
 			>
-				<DialogTitle id="form-dialog-title">
+				<DialogTitle variant="modalTitle" id="form-dialog-title">
 					{t("libraries.add_to_group")}
 				</DialogTitle>
 				<IconButton
@@ -193,73 +195,79 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 				</IconButton>
 				<DialogContent>
 					<form onSubmit={handleSubmit(onSubmit)}>
-						<Controller
-							name="groupId"
-							control={control}
-							render={({ field: { onChange, value } }) => (
-								<Autocomplete
-									value={
-										groupOptions.find((option) => option.value === value) ||
-										null
-									}
-									onChange={(_, newValue: AutocompleteOption | null) => {
-										onChange(newValue?.value || "");
-									}}
-									options={groupOptions}
-									getOptionLabel={(option: AutocompleteOption) => option.label}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											required
-											label={t("groups.name")}
-											error={!!errors.groupId}
-											helperText={errors.groupId?.message}
-										/>
-									)}
-									isOptionEqualToValue={(option, value) =>
-										option.value === value.value
-									}
-								/>
-							)}
-						/>
-						<Controller
-							name="libraryId"
-							control={control}
-							render={({ field: { onChange, value } }) => (
-								<Autocomplete
-									value={
-										libraryOptions.find((option) => option.value === value) ||
-										null
-									}
-									onChange={(_, newValue: AutocompleteOption | null) => {
-										onChange(newValue?.value || "");
-									}}
-									options={libraryOptions}
-									getOptionLabel={(option: AutocompleteOption) => option.label}
-									renderInput={(params) => (
-										<TextField
-											{...params}
-											required
-											label={t("libraries.library")}
-											error={!!errors.libraryId}
-											helperText={errors.libraryId?.message}
-										/>
-									)}
-									isOptionEqualToValue={(option, value) =>
-										option.value === value.value
-									}
-								/>
-							)}
-						/>
-						<Button
-							type="submit"
-							color="primary"
-							variant="contained"
-							fullWidth
-							disabled={!isValid || !isDirty || loading}
-						>
-							{loading ? t("ui.action.submitting") : t("general.submit")}
-						</Button>
+						<Stack spacing={2} direction={"column"}>
+							<Typography>{t("libraries.add_to_group_explanation")}</Typography>
+							<Controller
+								name="groupId"
+								control={control}
+								render={({ field: { onChange, value } }) => (
+									<Autocomplete
+										value={
+											groupOptions.find((option) => option.value === value) ||
+											null
+										}
+										onChange={(_, newValue: AutocompleteOption | null) => {
+											onChange(newValue?.value || "");
+										}}
+										options={groupOptions}
+										getOptionLabel={(option: AutocompleteOption) =>
+											option.label
+										}
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												required
+												label={t("groups.name")}
+												error={!!errors.groupId}
+												helperText={errors.groupId?.message}
+											/>
+										)}
+										isOptionEqualToValue={(option, value) =>
+											option.value === value.value
+										}
+									/>
+								)}
+							/>
+							<Controller
+								name="libraryId"
+								control={control}
+								render={({ field: { onChange, value } }) => (
+									<Autocomplete
+										value={
+											libraryOptions.find((option) => option.value === value) ||
+											null
+										}
+										onChange={(_, newValue: AutocompleteOption | null) => {
+											onChange(newValue?.value || "");
+										}}
+										options={libraryOptions}
+										getOptionLabel={(option: AutocompleteOption) =>
+											option.label
+										}
+										renderInput={(params) => (
+											<TextField
+												{...params}
+												required
+												label={t("libraries.library")}
+												error={!!errors.libraryId}
+												helperText={errors.libraryId?.message}
+											/>
+										)}
+										isOptionEqualToValue={(option, value) =>
+											option.value === value.value
+										}
+									/>
+								)}
+							/>
+							<Button
+								type="submit"
+								color="primary"
+								variant="contained"
+								disabled={!isValid || !isDirty || loading}
+							>
+								{loading ? t("ui.action.submitting") : t("general.submit")}
+							</Button>
+						</Stack>
 					</form>
 				</DialogContent>
 			</Dialog>

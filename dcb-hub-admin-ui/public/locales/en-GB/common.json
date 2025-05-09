@@ -92,6 +92,7 @@
 			"go_home": "Go to $t(nav.home) page",
 			"go_back": "Go back",
 			"newer": "Newer",
+			"next": "Next",
 			"no": "No",
 			"older": "Older",
 			"reload": "Reload page",
@@ -237,6 +238,7 @@
 			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
+			"number": "Please supply a valid number.",
 			"required": "Enter the {{field}}.",
 			"case_sensitive": "{{field}} is case sensitive"
 		},
@@ -462,6 +464,7 @@
 		"name": "Consortium name",
 		"new_contact": {
 			"consortium": "New consortium contact",
+			"library": "New library contact",
 			"error": "There was an error creating the new contact for the {{consortium}} consortium.",
 			"title": "New contact",
 			"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
@@ -687,6 +690,7 @@
 	"libraries": {
 		"abbreviated_name": "Abbreviated name",
 		"add_to_group": "Add library to a group",
+		"add_to_group_explanation": "Please select a library to add to a group. You can also use this form to add a library to a consortium by selecting the relevant consortium group.",
 		"alert_text_success": "Library successfully added to group",
 		"error_adding_to_group": "Error adding library to group. Please try again.",
 		"groups": "Groups",
@@ -697,12 +701,26 @@
 			"error": "There was an error creating the new contact for the library {{library}}.",
 			"success": "New contact successfully created for {{library}}"
 		},
+		"new": {
+			"agency": "Associated agency",
+			"close_no_group": "Close without adding to a group",
+			"group_explanation": "If this new library is part of your consortium, or any other group, you can add it now.",
+			"error": "There was an error creating a new library",
+			"success": "The new library was successfully created",
+			"title": "Create a new library"
+		},
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",
 		"search_placeholder": "Search by name",
 		"settings_title": "Settings for {{name}}",
-		"site_designation": "Site designation",
 		"short_name": "Short name",
+		"site_designation": "Site designation",
+		"steps": {
+			"contacts": "Contacts",
+			"group": "Groups",
+			"profile": "Profile",
+			"service": "Location and Service Information"
+		},
 		"support_hours": "Support office hours",
 		"type": "Type",
 		"circulation": {
@@ -788,9 +806,11 @@
 			"first_name": "First name",
 			"last_name": "Last name",
 			"location": "Location",
+			"minimum": "You must provide at least one contact for a library",
 			"name": "Name",
 			"one": "Contact",
 			"primary": "Primary contact",
+			"remove": "Remove contact",
 			"role": "Role",
 			"roles": {
 				"implementation": "Implementation Contact",

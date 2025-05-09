@@ -46,6 +46,16 @@ export const deleteLibraryContact = gql`
 	}
 `;
 
+export const createLibrary = gql`
+	mutation CreateLibrary($input: LibraryInput!) {
+		createLibrary(input: $input) {
+			id
+			fullName
+			type
+		}
+	}
+`;
+
 export const createLibraryGroup = gql`
 	mutation CreateLibraryGroup($input: LibraryGroupInput!) {
 		createLibraryGroup(input: $input) {
