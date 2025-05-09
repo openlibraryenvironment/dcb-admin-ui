@@ -9,7 +9,6 @@ import { useEffect, useState, useMemo } from "react";
 import Error from "@components/Error/Error";
 import { useRouter } from "next/router";
 import {
-	DataGridPremium,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
 } from "@mui/x-data-grid-premium";
@@ -17,6 +16,7 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import dayjs from "dayjs";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: session } = useSession();
@@ -37,7 +37,6 @@ const Items: NextPage = () => {
 						headers: { Authorization: `Bearer ${session?.accessToken}` },
 						params: {
 							clusteredBibId: id,
-							filters: "none",
 						},
 					},
 				);
@@ -69,8 +68,6 @@ const Items: NextPage = () => {
 				field: "agencyCode",
 				headerName: t("details.agency_code"),
 				flex: 0.3,
-				filterable: false,
-				sortable: false,
 				valueGetter: (value, row) => row?.agency?.code ?? "-",
 			},
 			{
@@ -78,15 +75,11 @@ const Items: NextPage = () => {
 				headerName: t("search.item_id"),
 				minWidth: 50,
 				flex: 0.3,
-				filterable: false,
-				sortable: false,
 			},
 			{
 				field: "status",
 				headerName: t("service.status"),
 				minWidth: 100,
-				filterable: false,
-				sortable: false,
 				flex: 0.4,
 				valueGetter: (value, row) => row?.status?.code,
 			},
@@ -95,8 +88,6 @@ const Items: NextPage = () => {
 				headerName: t("search.requestable"),
 				minWidth: 50,
 				type: "boolean",
-				filterable: false,
-				sortable: false,
 				flex: 0.3,
 			},
 			{
@@ -104,8 +95,6 @@ const Items: NextPage = () => {
 				headerName: t("search.suppressed"),
 				minWidth: 50,
 				type: "boolean",
-				filterable: false,
-				sortable: false,
 				flex: 0.3,
 			},
 			{
@@ -113,8 +102,6 @@ const Items: NextPage = () => {
 				headerName: t("search.hold_count"),
 				minWidth: 50,
 				type: "number",
-				filterable: false,
-				sortable: false,
 				flex: 0.3,
 			},
 			{
@@ -122,8 +109,6 @@ const Items: NextPage = () => {
 				headerName: t("search.date_due"),
 				minWidth: 100,
 				flex: 0.4,
-				filterable: false,
-				sortable: false,
 				valueGetter: (value: any, row: { dueDate: string }) => {
 					const dateDue = row?.dueDate;
 					return dateDue ? dayjs(dateDue).format("YYYY-MM-DD") : "-";
@@ -134,8 +119,6 @@ const Items: NextPage = () => {
 				headerName: t("search.date_available"),
 				minWidth: 100,
 				flex: 0.4,
-				filterable: false,
-				sortable: false,
 				valueGetter: (value: any, row: { availabilityDate: string }) => {
 					const dateAvailable = row?.availabilityDate;
 					return dateAvailable
@@ -147,8 +130,6 @@ const Items: NextPage = () => {
 				field: "canonicalItemType",
 				headerName: t("details.supplier_ctype"),
 				minWidth: 100,
-				filterable: false,
-				sortable: false,
 				flex: 0.5,
 			},
 		],
@@ -168,24 +149,19 @@ const Items: NextPage = () => {
 					reload
 				/>
 			) : (
-				<DataGridPremium
-					rows={rows ?? []}
+				<ClientDataGrid
+					data={rows ?? []}
 					columns={columns}
-					getDetailPanelContent={({ row }) => (
+					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail type="items" row={row} />
 					)}
-					getDetailPanelHeight={() => "auto"}
-					autoHeight
-					sx={{
-						"& .MuiDataGrid-detailPanel": {
-							overflow: "hidden", // Prevent scrollbars in the detail panel
-							height: "auto", // Adjust height automatically
-						},
-						border: "0",
-					}}
 					loading={loading}
 					disableAggregation={true}
 					disableRowGrouping={true}
+					type="Items"
+					coreType="Items"
+					operationDataType="Items"
+					selectable={false}
 				/>
 			)}
 		</AdminLayout>
