@@ -464,6 +464,7 @@
 		"name": "Consortium name",
 		"new_contact": {
 			"consortium": "New consortium contact",
+			"library": "New library contact",
 			"error": "There was an error creating the new contact for the {{consortium}} consortium.",
 			"title": "New contact",
 			"success": "The new consortium contact was successfully created for the {{consortium}} consortium."
