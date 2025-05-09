@@ -20,7 +20,31 @@ export const updateAgencyParticipationStatus = gql`
 	}
 `;
 
-// Libraries and LibraryGroups
+// Libraries, Library Contacts and LibraryGroups
+
+export const createLibraryContact = gql`
+	mutation CreateLibraryContact($input: CreateLibraryContactInput!) {
+		createLibraryContact(input: $input) {
+			id
+			person {
+				firstName
+				lastName
+			}
+			library {
+				id
+			}
+		}
+	}
+`;
+
+export const deleteLibraryContact = gql`
+	mutation DeleteLibraryContact($input: DeleteLibraryContactInput!) {
+		deleteLibraryContact(input: $input) {
+			success
+			message
+		}
+	}
+`;
 
 export const createLibraryGroup = gql`
 	mutation CreateLibraryGroup($input: LibraryGroupInput!) {
@@ -527,6 +551,14 @@ export const getConsortiaFunctionalSettings = gql`
 	}
 `;
 
+export const deleteConsortiumContact = gql`
+	mutation DeleteLibraryContact($input: DeleteConsortiumContactInput!) {
+		deleteContact(input: $input) {
+			success
+			message
+		}
+	}
+`;
 export const getConsortiaContacts = gql`
 	query LoadConsortiumContacts($order: String!, $orderBy: String!) {
 		consortia(order: $order, orderBy: $orderBy) {

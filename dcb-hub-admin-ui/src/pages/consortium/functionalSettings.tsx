@@ -135,6 +135,7 @@ const FunctionalSettings: NextPage = () => {
 						]}
 						data={consortiumFunctionalSettings}
 						type="consortiumFunctionalSettings"
+						coreType="ConsortiumFunctionalSetting"
 						selectable={false}
 						sortModel={[{ field: "name", sort: "asc" }]}
 						noDataTitle={t("consortium.settings.not_available")}

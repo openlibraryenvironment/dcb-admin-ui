@@ -45,7 +45,7 @@ export default function Error({
 				spacing={2}
 			>
 				<ErrorOutline
-					sx={{ size: 200 }}
+					sx={{ fontSize: 200 }}
 					htmlColor={theme.palette.primary.exclamationIcon}
 				/>
 				<Typography variant="h1">{title}</Typography>

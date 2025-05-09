@@ -648,6 +648,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						]}
 						data={libraryGroups}
 						type="groupsOfLibrary"
+						coreType="LibraryGroup"
 						selectable={false}
 						noDataTitle={t("groups.none_for_library")}
 						toolbarVisible="not-visible"

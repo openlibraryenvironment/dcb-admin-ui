@@ -1,11 +1,12 @@
 import { Library } from "@models/Library";
-import { Tab, Tabs, useTheme } from "@mui/material";
+import { Button, Tab, Tabs, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import {
+	deleteLibraryContact,
 	deleteLibraryQuery,
 	getLibraryContacts,
 	updatePerson,
@@ -28,6 +29,7 @@ import {
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import { Person } from "@models/Person";
+import NewContact from "src/forms/NewContact/NewContact";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -37,6 +39,13 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
 	const [tabIndex, setTabIndex] = useState(6);
+	const [showNewContact, setShowNewContact] = useState(false);
+	const openNewContact = () => {
+		setShowNewContact(true);
+	};
+	const closeNewContact = () => {
+		setShowNewContact(false);
+	};
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -147,6 +156,13 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 					</Tabs>
 				</Grid>
 				<Grid xs={4} sm={8} md={12}>
+					<Button
+						data-tid="new-library-contact-button"
+						variant="contained"
+						onClick={openNewContact}
+					>
+						{t("consortium.new_contact.title")}
+					</Button>
 					<ClientDataGrid
 						columns={[
 							{
@@ -210,6 +226,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 						]}
 						data={contacts}
 						type="contact"
+						coreType="LibraryContact"
 						// No need for click through on this grid - fix translation keys
 						selectable={false}
 						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
@@ -217,12 +234,24 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 						toolbarVisible="search-only"
 						disableHoverInteractions={true}
 						editQuery={updatePerson}
+						deleteQuery={deleteLibraryContact}
+						refetchQuery={["LoadLibraryContacts"]}
 						operationDataType="Person"
 						disableAggregation={true}
 						disableRowGrouping={true}
+						parentEntityId={library?.id}
 					/>
 				</Grid>
 			</Grid>
+			{showNewContact ? (
+				<NewContact
+					show={showNewContact}
+					onClose={closeNewContact}
+					id={library?.id}
+					name={library?.fullName}
+					entity="Library"
+				/>
+			) : null}
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

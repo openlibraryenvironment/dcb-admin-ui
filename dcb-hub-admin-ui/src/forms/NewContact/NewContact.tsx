@@ -19,7 +19,9 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
 	createConsortiumContact,
+	createLibraryContact,
 	getConsortiaContacts,
+	getLibraryContacts,
 } from "src/queries/queries";
 import * as Yup from "yup";
 
@@ -37,15 +39,17 @@ interface NewContactFormData {
 type NewContactType = {
 	show: boolean;
 	onClose: () => void;
-	consortiumId: string;
-	consortiumName: string;
+	id: string;
+	name: string;
+	entity: "Library" | "Consortium"; // The entity we're creating a new contact for. Determines the mutation to use.
 };
 
 export default function NewContact({
 	show,
 	onClose,
-	consortiumId,
-	consortiumName,
+	id,
+	name,
+	entity,
 }: NewContactType) {
 	const { t } = useTranslation();
 
@@ -107,9 +111,14 @@ export default function NewContact({
 		mode: "onChange",
 	});
 
-	const [createNewContact, { loading }] = useMutation(createConsortiumContact, {
-		refetchQueries: [getConsortiaContacts],
-	});
+	const [createNewContact, { loading }] = useMutation(
+		entity == "Consortium" ? createConsortiumContact : createLibraryContact,
+		{
+			refetchQueries: [
+				entity == "Consortium" ? getConsortiaContacts : getLibraryContacts,
+			],
+		},
+	);
 
 	const [alert, setAlert] = useState<{
 		open: boolean;
@@ -122,18 +131,27 @@ export default function NewContact({
 	});
 
 	const onSubmit = async (data: NewContactFormData) => {
+		const payload =
+			entity == "Consortium"
+				? { ...data, consortiumId: id }
+				: { ...data, libraryId: id };
 		try {
 			const result = await createNewContact({
-				variables: { input: { ...data, consortiumId } },
+				variables: { input: payload },
 			});
 
 			if (result.data) {
 				setAlert({
 					open: true,
 					severity: "success",
-					text: t("consortium.new_contact.success", {
-						consortium: consortiumName,
-					}),
+					text:
+						entity == "Consortium"
+							? t("consortium.new_contact.success", {
+									consortium: name,
+								})
+							: t("libraries.new_contact.success", {
+									library: name,
+								}),
 				});
 
 				// Delay the modal closing and form reset to ensure the alert is visible
@@ -147,9 +165,14 @@ export default function NewContact({
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("consortium.new_contact.error", {
-					consortium: consortiumName,
-				}),
+				text:
+					entity == "Consortium"
+						? t("consortium.new_contact.error", {
+								consortium: name,
+							})
+						: t("libraries.new_contact.error", {
+								library: name,
+							}),
 			});
 		}
 	};

@@ -163,7 +163,7 @@ export default function Header({
 										},
 									}}
 								>
-									<Menu sx={{ size: 20 }} data-tid="menu-icon" />
+									<Menu sx={{ fontSize: 20 }} data-tid="menu-icon" />
 								</IconButton>
 							</Box>
 						) : null}
@@ -228,7 +228,7 @@ export default function Header({
 									LinkComponent={Link}
 									href="/profile"
 								>
-									<AccountCircle sx={{ size: 20 }} />
+									<AccountCircle sx={{ fontSize: 20 }} />
 								</IconButton>
 							) : null}
 							{iconsVisible != false ? (

@@ -6,7 +6,11 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import Grid from "@mui/material/Unstable_Grid2";
 import { useState } from "react";
-import { getConsortiaContacts, updatePerson } from "src/queries/queries";
+import {
+	deleteConsortiumContact,
+	getConsortiaContacts,
+	updatePerson,
+} from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import { Person } from "@models/Person";
 import { ClientDataGrid } from "@components/ClientDataGrid";
@@ -146,6 +150,7 @@ const Contacts: NextPage = () => {
 							},
 						]}
 						data={consortiumContacts}
+						coreType="ConsortiumContact"
 						type="consortiumContact"
 						selectable={false}
 						sortModel={[{ field: "isPrimaryContact", sort: "desc" }]}
@@ -153,9 +158,12 @@ const Contacts: NextPage = () => {
 						toolbarVisible="search-only"
 						disableHoverInteractions={true}
 						editQuery={updatePerson}
+						deleteQuery={deleteConsortiumContact}
+						refetchQuery={["LoadConsortiumContacts"]}
 						operationDataType="Person"
 						disableAggregation={true}
 						disableRowGrouping={true}
+						parentEntityId={data?.consortia?.content[0]?.id}
 					/>
 				</Grid>
 			</Grid>
@@ -163,8 +171,9 @@ const Contacts: NextPage = () => {
 				<NewContact
 					show={showNewContact}
 					onClose={closeNewContact}
-					consortiumId={data?.consortia?.content[0]?.id}
-					consortiumName={data?.consortia?.content[0]?.displayName}
+					id={data?.consortia?.content[0]?.id}
+					name={data?.consortia?.content[0]?.displayName}
+					entity="Consortium"
 				/>
 			) : null}
 		</AdminLayout>

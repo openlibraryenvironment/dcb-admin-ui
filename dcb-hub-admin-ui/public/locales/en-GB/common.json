@@ -206,6 +206,7 @@
 			"no_file_selected": "No file selected"
 		},
 		"info": {
+			"contact": "contact",
 			"connection_issue": "There may be a connection issue",
 			"description": "Description: {{description}}",
 			"loading": {
@@ -437,6 +438,7 @@
 
 	"consortium": {
 		"contacts": {
+			"entity": "Consortium contact",
 			"no_contacts": "There are no contacts available for this consortium"
 		},
 		"description_title": "Description",
@@ -691,6 +693,10 @@
 		"library": "Library",
 		"library_id": "Library UUID",
 		"name": "Full name",
+		"new_contact": {
+			"error": "There was an error creating the new contact for the library {{library}}.",
+			"success": "New contact successfully created for {{library}}"
+		},
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",
 		"search_placeholder": "Search by name",

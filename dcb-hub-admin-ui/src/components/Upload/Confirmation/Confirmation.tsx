@@ -167,6 +167,7 @@ const Confirmation = ({
 
 	// May need library ID/specific info to personalise this
 	const locationExportLink = "/locations";
+
 	const getHeaderText = () => {
 		switch (type) {
 			case "gridEdit":
@@ -185,6 +186,13 @@ const Confirmation = ({
 				});
 			case "locations":
 				return t("locations.import.header", { library: libraryName });
+			case "deletePerson":
+			case "deleteLibraryContact":
+			case "deleteConsortiumContact":
+				return t("ui.data_grid.delete_header", {
+					entity: t("ui.info.contact"),
+					name: entityName,
+				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_header", {
 					entity: !entityName ? entity?.toLowerCase() : "",
@@ -248,6 +256,7 @@ const Confirmation = ({
 									{t("ui.data_grid.delete_location_with_requests")}
 								</Typography>
 								<ClientDataGrid
+									coreType="PatronRequest"
 									type="patronRequestsForLocation"
 									columns={standardPatronRequestColumns}
 									columnVisibilityModel={locationPatronRequestColumnVisibility}
@@ -425,6 +434,12 @@ const Confirmation = ({
 				return t("mappings.confirmation_replace_mappings");
 			case "locations":
 				return t("locations.import.replace");
+			case "deletePerson":
+			case "deleteLibraryContact":
+			case "deleteConsortiumContact":
+				return t("ui.data_grid.delete_entity", {
+					entity: t("ui.info.contact").toLowerCase(),
+				});
 			case "deletelibraries":
 				return t("ui.data_grid.delete_entity", {
 					entity: t("libraries.library").toLowerCase(),
