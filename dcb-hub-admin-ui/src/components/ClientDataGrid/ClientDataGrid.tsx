@@ -578,6 +578,10 @@ export default function ClientDataGrid<T extends object>({
 					"& .MuiDataGrid-cell:focus": {
 						outline: disableHoverInteractions ? "none" : "",
 					},
+					"& .MuiDataGrid-detailPanel": {
+						overflow: "hidden", // Prevent scrollbars in the detail panel
+						height: "auto", // Adjust height automatically
+					},
 				}}
 				//DCB-396 (https://mui.com/x/react-data-grid/accessibility/#accessibility-changes-in-v7)
 				checkboxSelection={selectable}

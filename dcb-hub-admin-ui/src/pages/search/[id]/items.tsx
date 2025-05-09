@@ -68,8 +68,6 @@ const Items: NextPage = () => {
 				field: "agencyCode",
 				headerName: t("details.agency_code"),
 				flex: 0.3,
-				filterable: false,
-				sortable: false,
 				valueGetter: (value, row) => row?.agency?.code ?? "-",
 			},
 			{
@@ -77,15 +75,11 @@ const Items: NextPage = () => {
 				headerName: t("search.item_id"),
 				minWidth: 50,
 				flex: 0.3,
-				filterable: false,
-				sortable: false,
 			},
 			{
 				field: "status",
 				headerName: t("service.status"),
 				minWidth: 100,
-				filterable: false,
-				sortable: false,
 				flex: 0.4,
 				valueGetter: (value, row) => row?.status?.code,
 			},
@@ -94,8 +88,6 @@ const Items: NextPage = () => {
 				headerName: t("search.requestable"),
 				minWidth: 50,
 				type: "boolean",
-				filterable: false,
-				sortable: false,
 				flex: 0.3,
 			},
 			{
@@ -103,8 +95,6 @@ const Items: NextPage = () => {
 				headerName: t("search.suppressed"),
 				minWidth: 50,
 				type: "boolean",
-				filterable: false,
-				sortable: false,
 				flex: 0.3,
 			},
 			{
@@ -112,8 +102,6 @@ const Items: NextPage = () => {
 				headerName: t("search.hold_count"),
 				minWidth: 50,
 				type: "number",
-				filterable: false,
-				sortable: false,
 				flex: 0.3,
 			},
 			{
@@ -121,8 +109,6 @@ const Items: NextPage = () => {
 				headerName: t("search.date_due"),
 				minWidth: 100,
 				flex: 0.4,
-				filterable: false,
-				sortable: false,
 				valueGetter: (value: any, row: { dueDate: string }) => {
 					const dateDue = row?.dueDate;
 					return dateDue ? dayjs(dateDue).format("YYYY-MM-DD") : "-";
@@ -133,8 +119,6 @@ const Items: NextPage = () => {
 				headerName: t("search.date_available"),
 				minWidth: 100,
 				flex: 0.4,
-				filterable: false,
-				sortable: false,
 				valueGetter: (value: any, row: { availabilityDate: string }) => {
 					const dateAvailable = row?.availabilityDate;
 					return dateAvailable
@@ -146,8 +130,6 @@ const Items: NextPage = () => {
 				field: "canonicalItemType",
 				headerName: t("details.supplier_ctype"),
 				minWidth: 100,
-				filterable: false,
-				sortable: false,
 				flex: 0.5,
 			},
 		],
