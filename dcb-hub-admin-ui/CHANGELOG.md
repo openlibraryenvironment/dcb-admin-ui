@@ -1,3 +1,19 @@
+# [1.37.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.3...v1.37.0) (2025-05-09)
+
+
+### Bug Fixes
+
+* Correct library contact title [DCB-1883] ([f7a3120](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f7a3120b7a6bdc79136449c4542ce05b7ad9208d))
+* Fix export data in the wrong columns ([fb21df2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fb21df21cd9a1b5abbb24402c7796e4c8458c4a5))
+* Prevent duplicate items showing up in 'Items' view [DCB-1827] ([e733dee](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e733dee276207481ae2ead31f17908e5710afd17))
+
+
+### Features
+
+* Add filters to items view [DCB-1827] ([2afbb5f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2afbb5fa92aa5fa87907f26aacd37db2bc0277f6))
+* Add form for adding new libraries [DCB-1883] ([7988c84](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7988c84c1915767b7ccfe537ff5ee60c4023aee2))
+* Add support for adding and deleting contacts [DCB-1744] ([23aedf5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/23aedf5bff248debeb58ee571a23c593b5e10d22))
+
 ## [1.36.3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.2...v1.36.3) (2025-05-06)
 
 
