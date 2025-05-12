@@ -2,8 +2,7 @@ import { useQuery } from "@apollo/client";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { FunctionalSetting } from "@models/FunctionalSetting";
-import { Button, Tab, Tabs, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Button, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -69,7 +68,7 @@ const FunctionalSettings: NextPage = () => {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={handleTabChange}
@@ -81,12 +80,12 @@ const FunctionalSettings: NextPage = () => {
 						<Tab label={t("nav.consortium.contacts")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeText">
 						{t("consortium.settings.introduction")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					{isAnAdmin ? (
 						<Button
 							data-tid="new-functional-setting-button"

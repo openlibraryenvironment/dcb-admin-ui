@@ -1,5 +1,4 @@
-import { Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { getDataChangeLogById } from "src/queries/queries";
 import { AdminLayout } from "@layout";
@@ -88,7 +87,7 @@ export default function DataChangeLogDetails({
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.id")}
@@ -96,7 +95,7 @@ export default function DataChangeLogDetails({
 						<RenderAttribute attribute={dataChangeLog?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.entity_id")}
@@ -114,7 +113,7 @@ export default function DataChangeLogDetails({
 						)}
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.timestamp")}
@@ -126,7 +125,7 @@ export default function DataChangeLogDetails({
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.entity_type")}
@@ -138,7 +137,7 @@ export default function DataChangeLogDetails({
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.table_name")}
@@ -146,7 +145,7 @@ export default function DataChangeLogDetails({
 						<RenderAttribute attribute={dataChangeLog?.entityType} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.user")}
@@ -154,7 +153,7 @@ export default function DataChangeLogDetails({
 						<RenderAttribute attribute={dataChangeLog?.lastEditedBy} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.reason")}
@@ -162,7 +161,7 @@ export default function DataChangeLogDetails({
 						<RenderAttribute attribute={dataChangeLog?.reason} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.category")}
@@ -170,7 +169,7 @@ export default function DataChangeLogDetails({
 						<RenderAttribute attribute={dataChangeLog?.changeCategory} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.reference_url")}
@@ -186,7 +185,7 @@ export default function DataChangeLogDetails({
 						)}
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("data_change_log.action")}
@@ -194,7 +193,7 @@ export default function DataChangeLogDetails({
 						<RenderAttribute attribute={dataChangeLog?.actionInfo} />
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<ChangesSummary
 						changes={dataChangeLog?.changes}
 						action={dataChangeLog?.actionInfo}

@@ -1,6 +1,5 @@
 import { Library } from "@models/Library";
-import { Button, Tab, Tabs, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Button, Grid, Tab, Tabs, useTheme } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -137,7 +136,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={(event, value) => {
@@ -155,7 +154,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.locations")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Button
 						data-tid="new-library-contact-button"
 						variant="contained"

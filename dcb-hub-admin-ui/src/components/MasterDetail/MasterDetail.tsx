@@ -1,5 +1,6 @@
 import {
 	AccordionDetails,
+	Grid,
 	Link,
 	List,
 	ListItem,
@@ -7,10 +8,9 @@ import {
 	Stack,
 	Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
-import { GridApiPro, useGridApiContext } from "@mui/x-data-grid-premium";
+import { useGridApiContext } from "@mui/x-data-grid-premium";
 import { useTranslation } from "next-i18next";
-import { MutableRefObject, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
@@ -29,7 +29,7 @@ type MasterDetailType = {
 };
 
 export default function MasterDetail({ row, type }: MasterDetailType) {
-	const apiRef = useGridApiContext() as MutableRefObject<GridApiPro>;
+	const apiRef = useGridApiContext();
 	const [width, setWidth] = useState(() => {
 		const dimensions = apiRef.current.getRootDimensions();
 		return dimensions?.viewportInnerSize.width;
@@ -53,7 +53,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "agencies":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.agency_uuid")}
@@ -68,7 +68,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "bibs":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.source_bib_uuid")}
@@ -84,7 +84,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid container spacing={2} role="row">
-						<Grid xs={2} sm={4} md={4} role="gridcell">
+						<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("search.bib_record_id")}
@@ -102,7 +102,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4} role="gridcell">
+						<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("details.author")}
@@ -112,7 +112,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid xs={4} sm={8} md={12} role="gridcell">
+						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("search.identifiers")}
@@ -134,7 +134,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</List>
 							</Stack>
 						</Grid>
-						<Grid xs={4} sm={8} md={12} role="gridcell">
+						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
 							<StyledDataGridAccordion elevation={0}>
 								<StyledDataGridAccordionSummary
 									expandIcon={<ExpandMore />}
@@ -148,7 +148,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</AccordionDetails>
 							</StyledDataGridAccordion>
 						</Grid>
-						<Grid xs={4} sm={8} md={12} role="gridcell">
+						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
 							<StyledDataGridAccordion elevation={0}>
 								<StyledDataGridAccordionSummary
 									expandIcon={<ExpandMore />}
@@ -178,7 +178,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "groups":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">{t("groups.id")}</Typography>
 							<Typography variant="attributeText">
@@ -187,7 +187,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					{row?.type?.toLowerCase() === "consortium" ? (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("consortium.name")}
@@ -197,7 +197,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Grid>
 					) : null}
 					{row?.type?.toLowerCase() === "consortium" ? (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("consortium.id")}
@@ -211,7 +211,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "hostlmss":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.id")}
@@ -222,7 +222,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					{row?.clientConfig?.["base-url-application-services"] != null && (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.base_application")}
@@ -238,7 +238,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Grid>
 					)}
 					{row?.clientConfig?.["base-url"] != null && (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.base")}
@@ -252,7 +252,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Grid>
 					)}
 					{row?.clientConfig?.roles != null && (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.roles")}
@@ -266,7 +266,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Grid>
 					)}
 					{row?.clientConfig?.["contextHierarchy"] != null && (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.context_hierarchy")}
@@ -280,7 +280,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Grid>
 					)}
 					{row?.clientConfig?.["default-agency-code"] != null && (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.default_agency_code")}
@@ -294,7 +294,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Grid>
 					)}
 					{row?.clientConfig?.ingest != null && (
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.ingest")}
@@ -312,7 +312,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "libraries":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.library_id")}
@@ -325,7 +325,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "locations":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.location_uuid")}
@@ -333,7 +333,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.id} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.location_uuid")}
@@ -341,7 +341,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.id} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.location_type")}
@@ -349,7 +349,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.type} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.location_agency_name")}
@@ -362,7 +362,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "patronRequests":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.request_created")}
@@ -372,7 +372,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.patron_hostlms")}
@@ -380,7 +380,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.patronHostlmsCode} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.borrowing_patron_barcode")}
@@ -390,7 +390,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.title")}
@@ -398,7 +398,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.clusterRecord?.title} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.supplying_agency_code")}
@@ -406,7 +406,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.suppliers[0]?.localAgency} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("patron_requests.pickup_location_name")}
@@ -414,7 +414,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<LocationCell locationId={row?.pickupLocationCode} linkable />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.previous_status")}
@@ -422,7 +422,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.previousStatus} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.status")}
@@ -430,7 +430,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.status} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.next_expected_status")}
@@ -440,7 +440,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.error")}
@@ -448,7 +448,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.errorMessage} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.is_transition_out_of_sequence")}
@@ -457,7 +457,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.polling_checks_in_status")}
@@ -467,7 +467,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.time_in_status")}
@@ -477,7 +477,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.item_manually_selected")}
@@ -487,7 +487,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.request_updated")}
@@ -497,7 +497,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							/>
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.request_uuid")}
@@ -510,7 +510,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "items":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.context")}
@@ -518,7 +518,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.owningContext} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.agency_code")}
@@ -526,7 +526,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.agency?.code} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.agency_name")}
@@ -534,7 +534,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.agency?.description} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.location_name")}
@@ -542,7 +542,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.location?.name} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("details.location_code")}
@@ -550,7 +550,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.location?.code} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.barcode")}
@@ -558,7 +558,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.barcode} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.call_no")}
@@ -566,7 +566,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.callNumber} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.local_item_type_code")}
@@ -574,7 +574,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.localItemTypeCode} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.local_item_type_name")}
@@ -582,7 +582,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.localItemType} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.volume_raw")}
@@ -590,7 +590,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.rawVolumeStatement} />
 						</Stack>
 					</Grid>
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("search.volume_parsed")}

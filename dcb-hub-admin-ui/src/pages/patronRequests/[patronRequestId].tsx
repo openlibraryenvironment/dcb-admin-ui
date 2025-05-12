@@ -8,11 +8,11 @@ import { AdminLayout } from "@layout";
 import {
 	Stack,
 	Button,
+	Grid,
 	Typography,
 	CircularProgress,
 	Tooltip,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
@@ -270,7 +270,7 @@ export default function PatronRequestDetails({
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.patron_hostlms")}
@@ -278,7 +278,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.borrowing_patron_barcode")}
@@ -288,7 +288,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.supplying_agency_code")}
@@ -298,7 +298,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.pickup_agency_code")}
@@ -306,7 +306,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={pickupLocation?.agency?.code} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.pickup_hostlms_code")}
@@ -314,7 +314,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={pickupLocation?.hostSystem?.code} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("patron_requests.pickup_location_name")}
@@ -322,7 +322,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={pickupLocation?.name} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.request_created")}
@@ -334,7 +334,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.request_updated")}
@@ -346,7 +346,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.next_poll")}
@@ -434,7 +434,7 @@ export default function PatronRequestDetails({
 								}
 							/>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.previous_status")}
@@ -442,7 +442,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.previousStatus} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.status")}
@@ -485,7 +485,7 @@ export default function PatronRequestDetails({
 								</Tooltip>
 							) : null}
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.next_expected_status")}
@@ -495,7 +495,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.status_changed")}
@@ -507,7 +507,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.time_in_status")}
@@ -519,7 +519,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.polling_checks_in_status")}
@@ -529,7 +529,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.active_workflow")}
@@ -537,7 +537,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.activeWorkflow} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.is_transition_out_of_sequence")}
@@ -547,7 +547,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.resolution_count")}
@@ -557,7 +557,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.renewal_count")}
@@ -567,7 +567,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.error")}
@@ -575,7 +575,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.errorMessage} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.requestor_note")}
@@ -583,7 +583,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.requesterNote} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.description")}
@@ -591,7 +591,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.description} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.request_uuid")}
@@ -623,7 +623,7 @@ export default function PatronRequestDetails({
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.title")}
@@ -633,7 +633,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.record_created")}
@@ -645,7 +645,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.record_updated")}
@@ -657,7 +657,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.bib_cluster_uuid")}
@@ -675,7 +675,7 @@ export default function PatronRequestDetails({
 								)}
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.selected_bib_uuid")}
@@ -685,7 +685,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.source_record_id")}
@@ -697,7 +697,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.source_system_id")}
@@ -767,7 +767,7 @@ export default function PatronRequestDetails({
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.supplying_agency_code")}
@@ -777,7 +777,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.code")}
@@ -787,7 +787,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.active")}
@@ -797,7 +797,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.date_created")}
@@ -809,7 +809,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.date_updated")}
@@ -821,7 +821,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.local_request_status")}
@@ -831,7 +831,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.local_request_status_raw")}
@@ -841,7 +841,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.supplier_uuid")}
@@ -849,7 +849,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.suppliers[0]?.id} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.local_bib_id")}
@@ -859,7 +859,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.local_supplier_id")}
@@ -890,7 +890,7 @@ export default function PatronRequestDetails({
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_item_barcode")}
@@ -900,7 +900,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_item_loc")}
@@ -912,7 +912,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_item_status")}
@@ -922,7 +922,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_item_status_raw")}
@@ -934,7 +934,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.renewal_count_supplier")}
@@ -944,7 +944,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_item_type")}
@@ -954,7 +954,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.supplier_ctype")}
@@ -964,7 +964,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_item_id")}
@@ -974,7 +974,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.item_manually_selected")}
@@ -984,7 +984,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.item_manual_agency_code")}
@@ -994,7 +994,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.item_manual_hostlms_code")}
@@ -1027,7 +1027,7 @@ export default function PatronRequestDetails({
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_id")}
@@ -1039,7 +1039,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_barcode")}
@@ -1051,7 +1051,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_patron_type")}
@@ -1063,7 +1063,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{"DCB patron type"}
@@ -1102,7 +1102,7 @@ export default function PatronRequestDetails({
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.code")}
@@ -1110,7 +1110,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.borrowing_request_id")}
@@ -1118,7 +1118,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.localRequestId} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.borrowing_request_status")}
@@ -1128,7 +1128,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.borrowing_request_status_raw")}
@@ -1159,7 +1159,7 @@ export default function PatronRequestDetails({
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_patron_id")}
@@ -1169,7 +1169,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_patron_barcode")}
@@ -1181,7 +1181,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_patron_type")}
@@ -1191,7 +1191,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.patron_canonical_ptype")}
@@ -1203,7 +1203,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.patron_uuid")}
@@ -1211,7 +1211,7 @@ export default function PatronRequestDetails({
 										<RenderAttribute attribute={patronRequest?.patron?.id} />
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.requestor_uuid")}
@@ -1244,7 +1244,7 @@ export default function PatronRequestDetails({
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_virtual_id")}
@@ -1252,7 +1252,7 @@ export default function PatronRequestDetails({
 										<RenderAttribute attribute={patronRequest?.localItemId} />
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_virtual_type")}
@@ -1260,7 +1260,7 @@ export default function PatronRequestDetails({
 										<RenderAttribute attribute={patronRequest?.localItemType} />
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_virtual_item_status")}
@@ -1270,7 +1270,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_virtual_item_status_raw")}
@@ -1280,7 +1280,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_virtual_bib_id")}
@@ -1288,7 +1288,7 @@ export default function PatronRequestDetails({
 										<RenderAttribute attribute={patronRequest?.localBibId} />
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.renewal_count_borrower")}
@@ -1324,7 +1324,7 @@ export default function PatronRequestDetails({
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("patron_requests.pickup_location_name")}
@@ -1341,7 +1341,7 @@ export default function PatronRequestDetails({
 								)}
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.pickup_request_id")}
@@ -1349,7 +1349,7 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.pickupRequestId} />
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.pickup_request_status")}
@@ -1359,7 +1359,7 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("details.pickup_request_status_raw")}
@@ -1390,7 +1390,7 @@ export default function PatronRequestDetails({
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.pickup_patron_id")}
@@ -1400,7 +1400,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.local_barcode")}
@@ -1410,7 +1410,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.borrowing_patron_type")}
@@ -1420,7 +1420,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{"DCB patron type"}
@@ -1453,7 +1453,7 @@ export default function PatronRequestDetails({
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.pickup_item_id")}
@@ -1461,7 +1461,7 @@ export default function PatronRequestDetails({
 										<RenderAttribute attribute={patronRequest?.pickupItemId} />
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.pickup_item_type")}
@@ -1471,7 +1471,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.pickup_item_status")}
@@ -1481,7 +1481,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.pickup_item_status_raw")}
@@ -1491,7 +1491,7 @@ export default function PatronRequestDetails({
 										/>
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack direction={"column"}>
 										<Typography variant="attributeTitle">
 											{t("details.pickup_bib_id")}

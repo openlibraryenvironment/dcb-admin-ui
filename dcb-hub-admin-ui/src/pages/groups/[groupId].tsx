@@ -1,5 +1,4 @@
-import { Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { getLibraryGroupById } from "src/queries/queries";
 import { AdminLayout } from "@layout";
@@ -76,32 +75,32 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">{t("groups.name")}</Typography>
 						<RenderAttribute attribute={group?.name} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">{t("groups.code")}</Typography>
 						<RenderAttribute attribute={group?.code} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">{t("groups.type")}</Typography>
 						<RenderAttribute attribute={group?.type} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">{t("groups.id")}</Typography>
 						<RenderAttribute attribute={group?.id} />
 					</Stack>
 				</Grid>
 				{group?.type?.toLowerCase() === "consortium" ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("consortium.name")}
@@ -111,7 +110,7 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 					</Grid>
 				) : null}
 				{group?.type?.toLowerCase() === "consortium" ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("consortium.id")}

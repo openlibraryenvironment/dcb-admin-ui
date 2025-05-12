@@ -1,10 +1,14 @@
 import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { AuditItem } from "@models/AuditItem";
-import { Button, CircularProgress, Stack, Tooltip } from "@mui/material";
-import Typography from "@mui/material/Typography";
-import Grid from "@mui/material/Unstable_Grid2";
-
+import {
+	Button,
+	CircularProgress,
+	Grid,
+	Stack,
+	Tooltip,
+	Typography,
+} from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -182,7 +186,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 2, sm: 2, md: 2, lg: 2 }}
 			>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.audit_uuid")}
@@ -190,7 +194,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						<RenderAttribute attribute={audit?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.audit_date")}
@@ -202,7 +206,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.audit_description")}
@@ -210,7 +214,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						<RenderAttribute attribute={audit?.briefDescription} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.audit_from_status")}
@@ -218,7 +222,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						<RenderAttribute attribute={audit?.fromStatus} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.audit_to_status")}
@@ -226,7 +230,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						<RenderAttribute attribute={audit?.toStatus} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.patron_request_uuid")}
@@ -234,11 +238,11 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 						<RenderAttribute attribute={audit?.patronRequest?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Typography variant="attributeTitle">{t("details.audit")}</Typography>
 					<pre>{JSON.stringify(audit?.auditData, null, 2)}</pre>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="row" justifyContent="space-between" width="100%">
 						{/* Left side */}
 						<Button variant="contained" onClick={handleReturn}>

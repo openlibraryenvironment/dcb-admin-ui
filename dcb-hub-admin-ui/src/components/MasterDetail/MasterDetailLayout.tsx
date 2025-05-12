@@ -1,5 +1,4 @@
-import { Box, Divider } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Box, Grid, Divider } from "@mui/material";
 
 export default function MasterDetailLayout({ children, width }: any) {
 	return (
@@ -20,7 +19,7 @@ export default function MasterDetailLayout({ children, width }: any) {
 			>
 				{children}
 			</Grid>
-			<Grid xs={4} sm={8} md={12} lg={16}>
+			<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 				<Divider aria-hidden="true"></Divider>
 			</Grid>
 		</Box>

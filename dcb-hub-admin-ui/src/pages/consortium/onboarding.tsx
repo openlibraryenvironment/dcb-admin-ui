@@ -1,11 +1,10 @@
 import { AdminLayout } from "@layout";
-import { Tab, Tabs, Typography } from "@mui/material";
+import { Grid, Tab, Tabs, Typography } from "@mui/material";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import Grid from "@mui/material/Unstable_Grid2";
 import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
 import EnvironmentDetails from "@components/HomeContent/EnvironmentDetails";
 
@@ -50,20 +49,20 @@ const Onboarding: NextPage = () => {
 					<Tab label={t("nav.consortium.onboarding")} />
 					<Tab label={t("nav.consortium.contacts")} />
 				</Tabs>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h2">{t("consortium.onboarding")}</Typography>
 				</Grid>
 
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="homePageText">
 						{t("common.placeholder_text")}
 					</Typography>
 				</Grid>
 
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<ConsortiumDetails />
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<EnvironmentDetails />
 				</Grid>
 			</Grid>

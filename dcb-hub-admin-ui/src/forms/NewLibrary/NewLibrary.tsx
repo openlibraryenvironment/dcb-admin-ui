@@ -348,6 +348,7 @@ export default function NewLibrary({
 				);
 			case 2:
 				return (
+					// At this point, the library should be submitted.
 					<ContactsStep
 						control={control}
 						t={t}
@@ -356,7 +357,7 @@ export default function NewLibrary({
 						handleSubmit={handleSubmit(onSubmit)}
 						loading={loading}
 						isValid={isValid}
-					/> // At this point, the library should be submitted.
+					/>
 				);
 		}
 	};
@@ -394,7 +395,6 @@ export default function NewLibrary({
 					)}
 				</DialogContent>
 			</Dialog>
-
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

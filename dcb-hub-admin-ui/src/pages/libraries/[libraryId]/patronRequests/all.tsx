@@ -1,7 +1,6 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import { Library } from "@models/Library";
-import { Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Typography, useTheme } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -230,7 +229,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 					agencyCode={library?.agencyCode}
 				/>
 
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.all", {
 							number: totalSizes["patronRequestsLibraryAll"],

@@ -1,8 +1,7 @@
 import { useLazyQuery, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import { Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -132,7 +131,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.source_bib_uuid")}
@@ -140,7 +139,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<RenderAttribute attribute={bib?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.title")}
@@ -148,7 +147,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<RenderAttribute attribute={bib?.title} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.author")}
@@ -156,7 +155,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<RenderAttribute attribute={bib?.author} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.source_system_uuid")}
@@ -164,7 +163,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<RenderAttribute attribute={bib?.sourceSystemId} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.source_record_id")}
@@ -172,7 +171,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<RenderAttribute attribute={bib?.sourceRecordId} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.contributor_uuid")}
@@ -180,7 +179,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<RenderAttribute attribute={bib?.contributesTo?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.contributor_title")}

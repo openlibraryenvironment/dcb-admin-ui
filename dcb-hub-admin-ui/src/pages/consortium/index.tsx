@@ -1,7 +1,14 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
-import { Button, Stack, Tab, Tabs, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import {
+	Button,
+	Grid,
+	Stack,
+	Tab,
+	Tabs,
+	Typography,
+	useTheme,
+} from "@mui/material";
 import { PutBlobResult } from "@vercel/blob";
 import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useSession } from "next-auth/react";
@@ -130,7 +137,7 @@ const ConsortiumPage: NextPage = () => {
 		file: File,
 		width: number,
 		height: number,
-	): Promise<boolean> => {
+	): Promise<any> => {
 		const allowedTypes = ["image/png", "image/jpeg"];
 		if (!allowedTypes.includes(file.type)) {
 			return Promise.resolve(false);
@@ -157,16 +164,18 @@ const ConsortiumPage: NextPage = () => {
 	};
 
 	// Handlers for file selection
-	const handleAppHeaderFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
+	const handleAppHeaderFileSelect = (event: ChangeEvent) => {
+		const target = event.target as HTMLInputElement;
+		const file = target?.files?.[0];
 		if (file) {
 			const objectUrl = URL.createObjectURL(file);
 			setAppHeaderPreviewUrl(objectUrl);
 		}
 	};
 
-	const handleAboutFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
+	const handleAboutFileSelect = (event: ChangeEvent) => {
+		const target = event.target as HTMLInputElement;
+		const file = target?.files?.[0];
 		if (file) {
 			const objectUrl = URL.createObjectURL(file);
 			setAboutPreviewUrl(objectUrl);
@@ -196,9 +205,7 @@ const ConsortiumPage: NextPage = () => {
 		}
 	};
 
-	const handleAppHeaderFileUpload = async (
-		event: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handleAppHeaderFileUpload = async (event: React.FormEvent) => {
 		event.preventDefault();
 		setHeaderIsUploading(true);
 		try {
@@ -277,9 +284,7 @@ const ConsortiumPage: NextPage = () => {
 		}
 	};
 
-	const handleAboutFileUpload = async (
-		event: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handleAboutFileUpload = async (event: React.FormEvent) => {
 		event.preventDefault();
 		setAboutIsUploading(true);
 
@@ -546,7 +551,7 @@ const ConsortiumPage: NextPage = () => {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={handleTabChange}
@@ -558,7 +563,7 @@ const ConsortiumPage: NextPage = () => {
 						<Tab label={t("nav.consortium.contacts")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("consortium.name")}
@@ -566,7 +571,7 @@ const ConsortiumPage: NextPage = () => {
 						<RenderAttribute attribute={consortium?.name} />
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -592,12 +597,12 @@ const ConsortiumPage: NextPage = () => {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeTitle">
 						{t("consortium.logo_app_header")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					{!isEmpty(consortium?.headerImageUrl) ? (
 						<Image
 							src={consortium?.headerImageUrl}
@@ -617,7 +622,7 @@ const ConsortiumPage: NextPage = () => {
 						</Typography>
 					)}
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography>
 						{t("consortium.logo_app_header_requirements")}
 					</Typography>
@@ -627,7 +632,7 @@ const ConsortiumPage: NextPage = () => {
 						handleAppHeaderFileUpload(event);
 					}}
 				>
-					<Grid xs={4} sm={8} md={12}>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<FileUploadButton
 							ref={appHeaderFileRef}
 							icon={<CloudUpload />}
@@ -650,17 +655,17 @@ const ConsortiumPage: NextPage = () => {
 						) : null}
 					</Grid>
 				</form>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h2">
 						{t("consortium.landing_page_title")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="body1">
 						{t("consortium.landing_page_subheader")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -685,7 +690,7 @@ const ConsortiumPage: NextPage = () => {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -713,7 +718,7 @@ const ConsortiumPage: NextPage = () => {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -738,12 +743,12 @@ const ConsortiumPage: NextPage = () => {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeTitle">
 						{t("consortium.logo_about")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					{!isEmpty(consortium?.aboutImageUrl) ? (
 						<Image
 							src={consortium?.aboutImageUrl}
@@ -763,7 +768,7 @@ const ConsortiumPage: NextPage = () => {
 						</Typography>
 					)}
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeText">
 						{t("consortium.logo_about_requirements")}
 					</Typography>
@@ -773,7 +778,7 @@ const ConsortiumPage: NextPage = () => {
 						handleAboutFileUpload(event);
 					}}
 				>
-					<Grid xs={4} sm={8} md={12}>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<FileUploadButton
 							ref={aboutFileRef}
 							icon={<CloudUpload />}

@@ -13,7 +13,8 @@ import {
 	GridRowParams,
 	GridSortModel,
 	gridVisibleColumnFieldsSelector,
-	useGridApiRef,
+	// useGridApiContext, // v8 only
+	useGridApiRef, // useGridApiContext inside the data grid, and useGridApiRef outside of it
 } from "@mui/x-data-grid-premium";
 import {
 	DocumentNode,
@@ -174,7 +175,7 @@ export default function ServerPaginationGrid({
 		useLazyQuery(fetchQuery);
 	const [getLocationForPatronRequestQuery] = useLazyQuery(getLocations);
 	const { t } = useTranslation();
-	const apiRef = useGridApiRef(); // Use the API ref
+	const apiRef = useGridApiRef();
 	const router = useRouter();
 	const [paginationModel, setPaginationModelState] = useState({
 		page: storedPaginationModel[type]?.page ?? 0,
@@ -764,6 +765,7 @@ export default function ServerPaginationGrid({
 			resolve(data[updateName]);
 			setPromiseArguments(null);
 		} catch (error) {
+			console.log(error);
 			setAlert({
 				open: true,
 				severity: "error",

@@ -1,6 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { Stack, Tab, Tabs, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { Dispatch, SetStateAction } from "react";
@@ -118,7 +117,7 @@ export default function MultipleTabNavigation({
 	};
 
 	return (
-		<Grid xs={4} sm={8} md={12}>
+		<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 			<Stack spacing={1}>
 				<Tabs
 					value={tabIndex}

@@ -1,7 +1,6 @@
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import { Library } from "@models/Library";
-import { Button, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Button, Grid, Typography, useTheme } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -136,7 +135,7 @@ export default function All({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<MultipleTabNavigation
 						tabIndex={tabIndex}
 						subTabIndex={subTabIndex}
@@ -148,7 +147,7 @@ export default function All({ libraryId }: LibraryDetails) {
 						agencyCode={library?.agencyCode}
 					/>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.config.data.mappings.all_ref_value", {
 							hostLms: library?.agency?.hostLms?.code,
@@ -202,7 +201,7 @@ export default function All({ libraryId }: LibraryDetails) {
 					/>
 				</Grid>
 				{library?.secondHostLms ? (
-					<Grid xs={4} sm={8} md={12}>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<Typography variant="h3" fontWeight={"bold"}>
 							{t("libraries.config.data.mappings.all_ref_value", {
 								hostLms: library?.secondHostLms?.code,
