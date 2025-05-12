@@ -6,14 +6,8 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
 import { Button, Tooltip, useTheme } from "@mui/material";
+import { Cancel, CheckCircle } from "@mui/icons-material";
 import {
-	Cancel,
-	ExpandLess,
-	ExpandMore,
-	CheckCircle,
-} from "@mui/icons-material";
-import {
-	DataGridPremium,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
 	GridRenderCellParams,
@@ -25,6 +19,7 @@ import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHe
 import { useState } from "react";
 
 import StaffRequest from "../StaffRequest";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
@@ -156,28 +151,19 @@ const Clusters: NextPage = () => {
 					/>
 				) : null}
 			</div>
-			<DataGridPremium
+			<ClientDataGrid
 				loading={loading}
-				rows={rows ?? []}
+				data={rows ?? []}
 				columns={columns}
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="cluster" />
 				)}
-				getDetailPanelHeight={() => "auto"}
-				autoHeight
-				sx={{
-					"& .MuiDataGrid-detailPanel": {
-						overflow: "hidden", // Prevent scrollbars in the detail panel
-						height: "auto", // Adjust height automatically
-					},
-					border: "0",
-				}}
-				slots={{
-					detailPanelExpandIcon: ExpandMore,
-					detailPanelCollapseIcon: ExpandLess,
-				}}
 				disableAggregation={true}
 				disableRowGrouping={true}
+				type="Cluster"
+				coreType="Cluster"
+				operationDataType="Cluster"
+				selectable={false}
 			/>
 		</AdminLayout>
 	);

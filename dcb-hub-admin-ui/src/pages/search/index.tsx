@@ -168,6 +168,7 @@ const Search: NextPage = () => {
 				});
 				return response.data;
 			} catch (error) {
+				console.log(error);
 				setError(true);
 			} finally {
 				setLoading(false);

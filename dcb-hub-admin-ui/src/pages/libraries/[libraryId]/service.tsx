@@ -1,7 +1,14 @@
 import PrivateData from "@components/PrivateData/PrivateData";
 import { Library } from "@models/Library";
-import { Divider, Stack, Tab, Tabs, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import {
+	Divider,
+	Grid,
+	Stack,
+	Tab,
+	Tabs,
+	Typography,
+	useTheme,
+} from "@mui/material";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
@@ -125,7 +132,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={(event, value) => {
@@ -143,12 +150,12 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.locations")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12} lg={16}>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<Typography variant="accordionSummary">
 						{t("nav.libraries.service")}
 					</Typography>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.service.systems.ils")}
@@ -156,7 +163,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={ils} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.service.systems.discovery")}
@@ -164,7 +171,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={library?.discoverySystem} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.service.systems.patron_site")}
@@ -182,7 +189,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						)}
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.config.patronAuth.title")}
 					</Typography>
@@ -193,7 +200,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={library?.agency?.authProfile} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("hostlms.configuration")}
@@ -202,12 +209,12 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Stack>
 				</Grid>
 				{firstHostLms ? (
-					<Grid xs={4} sm={8} md={12} lg={16}>
+					<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 						<Divider aria-hidden="true"></Divider>
 					</Grid>
 				) : null}
 				{firstHostLms ? (
-					<Grid xs={4} sm={8} md={12} lg={16}>
+					<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 						<Typography variant="h3" fontWeight={"bold"}>
 							{t("libraries.service.hostlms_title", {
 								name: firstHostLms?.name,
@@ -215,7 +222,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Typography>
 					</Grid>
 				) : null}
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("hostlms.name")}
@@ -223,7 +230,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={firstHostLms?.name} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("hostlms.code")}
@@ -232,7 +239,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Stack>
 				</Grid>
 				{/* Handle multi-roles and separate them */}
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("hostlms.roles")}
@@ -244,14 +251,14 @@ export default function Service({ libraryId }: LibraryDetails) {
 						}
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">{t("hostlms.id")}</Typography>
 						<RenderAttribute attribute={firstHostLms?.id} />
 					</Stack>
 				</Grid>
 
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("hostlms.client_config.ingest")}
@@ -264,7 +271,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* Suppression rulesets */}
 				{firstHostLms?.suppressionRulesetName != null && (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.bibSuppressionRulesetName")}
@@ -278,7 +285,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				)}
 				{firstHostLms?.itemSuppressionRulesetName != null && (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.itemSuppressionRulesetName")}
@@ -292,7 +299,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				)}
 
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.service.environments.api")}
@@ -305,7 +312,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Stack>
 				</Grid>
 
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("hostlms.client_config.context_hierarchy")}
@@ -318,7 +325,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
 				{firstHostLms?.clientConfig?.apikey ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_key")}
 							hiddenTextValue={firstHostLms?.clientConfig?.apikey}
@@ -329,7 +336,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* For Polaris libraries it's the 'access key' attribute*/}
 				{firstHostLms?.clientConfig?.["access-key"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_key")}
 							hiddenTextValue={firstHostLms?.clientConfig?.["access-key"]}
@@ -340,7 +347,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* And for Sierra libraries it is the 'key' attribute*/}
 				{firstHostLms?.clientConfig?.key ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_key")}
 							hiddenTextValue={firstHostLms?.clientConfig?.key}
@@ -350,7 +357,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{firstHostLms?.clientConfig?.secret ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_secret")}
 							hiddenTextValue={firstHostLms?.clientConfig?.secret}
@@ -360,7 +367,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{firstHostLms?.clientConfig?.defaultAgency ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.default_agency")}
@@ -375,7 +382,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				{/* Sierra specific values*/}
 
 				{firstHostLms?.clientConfig?.holdPolicy ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.hold_policy")}
@@ -388,7 +395,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{firstHostLms?.clientConfig?.["page-size"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.page_size")}
@@ -403,7 +410,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				{/* Polaris-specific values*/}
 
 				{firstHostLms?.clientConfig?.["domain-id"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.polaris_domain")}
@@ -415,7 +422,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{firstHostLms?.clientConfig?.["domain-id"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.polaris_username")}
@@ -427,7 +434,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{firstHostLms?.clientConfig?.["staff-password"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t(
 								"libraries.service.environments.polaris_password",
@@ -438,7 +445,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{firstHostLms?.clientConfig?.services?.["organisation-id"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.polaris_org_id")}
@@ -455,7 +462,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				{/* FOLIO Specific values: folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
 
 				{firstHostLms?.clientConfig?.["folio-tenant"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.folio_tenant")}
@@ -468,7 +475,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{firstHostLms?.clientConfig?.["metadata-prefix"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.metadata")}
@@ -481,7 +488,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{firstHostLms?.clientConfig?.["record-syntax"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.record_syntax")}
@@ -494,7 +501,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{firstHostLms?.clientConfig?.["user-base-url"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.user_base_url")}
@@ -510,12 +517,12 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* Second Host LMS section - if exists - conditionally render */}
 				{secondHostLms ? (
-					<Grid xs={4} sm={8} md={12} lg={16}>
+					<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 						<Divider aria-hidden="true"></Divider>
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={4} sm={8} md={12} lg={16}>
+					<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 						<Typography variant="h3" fontWeight={"bold"}>
 							{t("libraries.service.hostlms_title", {
 								name: secondHostLms?.name,
@@ -524,7 +531,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.name")}
@@ -534,7 +541,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.code")}
@@ -544,7 +551,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.roles")}
@@ -556,7 +563,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.id")}
@@ -566,7 +573,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.ingest")}
@@ -578,7 +585,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.api")}
@@ -592,7 +599,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.context_hierarchy")}
@@ -606,7 +613,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
 				{secondHostLms?.clientConfig?.apikey ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_key")}
 							hiddenTextValue={secondHostLms?.clientConfig?.apikey}
@@ -617,7 +624,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* For Polaris libraries it's the 'access key' attribute*/}
 				{secondHostLms?.clientConfig?.["access-key"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_key")}
 							hiddenTextValue={secondHostLms?.clientConfig?.["access-key"]}
@@ -628,7 +635,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 				{/* And for Sierra libraries it is the 'key' attribute*/}
 				{secondHostLms?.clientConfig?.key ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_key")}
 							hiddenTextValue={secondHostLms?.clientConfig?.key}
@@ -637,7 +644,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms?.clientConfig?.secret ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t("libraries.service.environments.api_secret")}
 							hiddenTextValue={secondHostLms?.clientConfig?.secret}
@@ -649,7 +656,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				{/* Polaris specific values - Second Host LMS */}
 
 				{secondHostLms?.clientConfig?.["domain-id"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.polaris_domain")}
@@ -661,7 +668,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms?.clientConfig?.["staff-username"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.polaris_username")}
@@ -673,7 +680,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms?.clientConfig?.["staff-password"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
 							clientConfigType={t(
 								"libraries.service.environments.polaris_password",
@@ -684,7 +691,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{secondHostLms?.clientConfig?.services?.["organisation-id"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("libraries.service.environments.polaris_org_id")}
@@ -700,7 +707,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				{/* FOLIO Specific values (Second Host LMS): folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
 
 				{secondHostLms?.clientConfig?.["folio-tenant"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.folio_tenant")}
@@ -713,7 +720,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{secondHostLms?.clientConfig?.["metadata-prefix"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.metadata")}
@@ -726,7 +733,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{secondHostLms?.clientConfig?.["record-syntax"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.record_syntax")}
@@ -739,7 +746,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{secondHostLms?.clientConfig?.["user-base-url"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.user_base_url")}
@@ -755,7 +762,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				{/* Sierra specific values*/}
 
 				{secondHostLms?.clientConfig?.holdPolicy ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.hold_policy")}
@@ -768,7 +775,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 				) : null}
 
 				{secondHostLms?.clientConfig?.["page-size"] ? (
-					<Grid xs={2} sm={4} md={4}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("hostlms.client_config.page_size")}

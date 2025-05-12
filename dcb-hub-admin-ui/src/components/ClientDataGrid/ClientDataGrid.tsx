@@ -2,9 +2,7 @@ import { Tooltip } from "@mui/material";
 // Import styled separately because of this issue https://github.com/vercel/next.js/issues/55663 - should be fixed in Next 13.5.5
 import {
 	DataGridPremium,
-	GridToolbar,
 	GridEventListener,
-	useGridApiRef,
 	GridRowModel,
 	GridColDef,
 	GridActionsCellItem,
@@ -15,6 +13,9 @@ import {
 	GridSortModel,
 	GridColumnVisibilityModel,
 	GridRowParams,
+	// useGridApiContext, v8 only
+	useGridApiRef,
+	GridToolbar,
 } from "@mui/x-data-grid-premium";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
@@ -25,8 +26,8 @@ import {
 	Cancel,
 	Delete,
 	Edit,
-	ExpandLess,
 	ExpandMore,
+	ExpandLess,
 	Save,
 	Visibility,
 } from "@mui/icons-material";
@@ -47,6 +48,7 @@ import {
 	CustomNoResultsOverlay,
 } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
 import SearchOnlyToolbar from "@components/ServerPaginatedGrid/components/SearchOnlyToolbar";
+import QuickSearchToolbar from "@components/ServerPaginatedGrid/components/QuickSearchToolbar";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.
@@ -70,7 +72,8 @@ function computeMutation(newRow: GridRowModel, oldRow: GridRowModel) {
 }
 
 const staticSlots = {
-	detailPanelExpandIcon: ExpandMore,
+	toolbar: QuickSearchToolbar,
+	detailPanelExpandIcon: ExpandMore, // These will need to change to the 'Grid' versions in v8
 	detailPanelCollapseIcon: ExpandLess,
 };
 
@@ -140,7 +143,7 @@ export default function ClientDataGrid<T extends object>({
 	} = useGridStore();
 	const { t } = useTranslation();
 	const { data: session }: { data: any } = useSession();
-	const apiRef = useGridApiRef(); // Use the API ref to access editing, etc
+	const apiRef = useGridApiRef(); // use api ref to support custom editing methods, etc
 	const router = useRouter();
 
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
@@ -167,7 +170,6 @@ export default function ClientDataGrid<T extends object>({
 		severity: "success",
 		text: null,
 	});
-
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const isAnyRowEditing = useCallback(() => {
 		return Object.values(rowModesModel).some(
@@ -311,6 +313,7 @@ export default function ClientDataGrid<T extends object>({
 			resolve(data[updateName]);
 			setPromiseArguments(null);
 		} catch (error) {
+			console.log(error);
 			setAlert({
 				open: true,
 				severity: "error",
@@ -413,21 +416,32 @@ export default function ClientDataGrid<T extends object>({
 	// If certain types, allow a click-through so the user can access more info
 	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
 		if (type == "Audit") {
-			event.ctrlKey || event.metaKey
-				? window.open(`/patronRequests/audits/${params?.row?.id}`, "_blank")
-				: router.push(`/patronRequests/audits/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey) {
+				window.open(`/patronRequests/audits/${params?.row?.id}`, "_blank");
+			} else {
+				router.push(`/patronRequests/audits/${params?.row?.id}`);
+			}
 		} else if (type == "libraryGroupMembers") {
-			event.ctrlKey || event.metaKey
-				? window.open(`/libraries/${params?.row?.id}`)
-				: router.push(`/libraries/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey) {
+				window.open(`/libraries/${params?.row?.id}`);
+			} else {
+				router.push(`/libraries/${params?.row?.id}`);
+			}
 		} else if (type == "groupsOfLibrary") {
-			event.ctrlKey || event.metaKey
-				? window.open(`/groups/${params?.row?.id}`)
-				: router.push(`/groups/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey) {
+				window.open(`/groups/${params?.row?.id}`);
+			} else {
+				router.push(`/groups/${params?.row?.id}`);
+			}
 		} else if (type == "patronRequestsForLocation") {
-			event.ctrlKey || event.metaKey
-				? window.open(`/patronRequests/${params?.row?.id}`, "_blank")
-				: router.push(`/patronRequests/${params?.row?.id}`);
+			if (event.ctrlKey || event.metaKey) {
+				window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+			} else {
+				router.push(`/patronRequests/${params?.row?.id}`);
+			}
+		} else {
+			// Don't let them navigate away if editing is present
+			event.defaultMuiPrevented = true;
 		}
 	};
 
@@ -666,6 +680,7 @@ export default function ClientDataGrid<T extends object>({
 					// Prevent default double-click edit behavior
 					event.defaultMuiPrevented = true;
 				}}
+				// showToolbar={toolbarVisible != "not-visible"} v8 only
 				// And if we ever need to distinguish between no data and no results (i.e. from search) we'd just pass different overlays here.
 				slots={{
 					...staticSlots,
@@ -675,7 +690,7 @@ export default function ClientDataGrid<T extends object>({
 							: toolbarVisible === "search-only"
 								? SearchOnlyToolbar
 								: toolbarVisible == "not-visible"
-									? null
+									? undefined
 									: GridToolbar, // Grid toolbar is default.
 					noResultsOverlay: () => (
 						<CustomNoResultsOverlay noResultsMessage={noDataMessage} />

@@ -1,9 +1,9 @@
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
-import Grid from "@mui/material/Unstable_Grid2";
 import {
 	Button,
 	Divider,
+	Grid,
 	Stack,
 	Tab,
 	Tabs,
@@ -340,7 +340,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={(event, value) => {
@@ -358,12 +358,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.locations")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="accordionSummary">
 						{t("libraries.library")}
 					</Typography>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -389,7 +389,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -414,7 +414,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -439,7 +439,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.type")}
@@ -447,7 +447,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={library?.type} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.agency_code")}
@@ -455,7 +455,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={library?.agencyCode} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -480,7 +480,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -508,7 +508,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.site_designation")}
@@ -521,7 +521,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.library_id")}
@@ -530,12 +530,12 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</Stack>
 				</Grid>
 				{/* /* 'Primary location' title goes here/* */}
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.primaryLocation.title")}
 					</Typography>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.primaryLocation.address")}
@@ -544,7 +544,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<AddressLink address={library?.address} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -569,7 +569,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography
 							variant="attributeTitle"
@@ -594,18 +594,18 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={4} sm={8} md={12} lg={16}>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<Divider aria-hidden="true"></Divider>
 				</Grid>
 				{isConsortiumGroupMember ? (
-					<Grid xs={4} sm={8} md={12}>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<Typography variant="h3" fontWeight={"bold"}>
 							{t("consortium.title")}
 						</Typography>
 					</Grid>
 				) : null}
 				{isConsortiumGroupMember ? (
-					<Grid xs={4} sm={8} md={12}>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<Stack direction={"column"}>
 							<Typography variant="attributeTitle">
 								{t("consortium.name")}
@@ -616,15 +616,15 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-				<Grid xs={4} sm={8} md={12} lg={16}>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<Divider aria-hidden="true"></Divider>
 				</Grid>
-				<Grid xs={4} sm={8} md={12} lg={16}>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.groups")}
 					</Typography>
 				</Grid>
-				<Grid xs={4} sm={8} md={12} lg={16}>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<ClientDataGrid
 						columns={[
 							{

@@ -1,5 +1,4 @@
-import { Stack, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Stack, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -141,7 +140,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.code")}
@@ -151,7 +150,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.name")}
@@ -161,7 +160,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.id")}
@@ -171,7 +170,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid xs={2} sm={4} md={4}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
 									{t("hostlms.lms_client")}
@@ -214,7 +213,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						{/* START: meta config properties */}
 						{hostlms?.clientConfig?.["base-url-application-services"] !=
 							null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.base_application")}
@@ -232,7 +231,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Grid>
 						)}
 						{hostlms?.clientConfig?.["base-url"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.base")}
@@ -246,7 +245,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Grid>
 						)}
 						{hostlms?.clientConfig?.roles != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.roles")}
@@ -260,7 +259,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Grid>
 						)}
 						{hostlms?.clientConfig?.["contextHierarchy"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.context_hierarchy")}
@@ -276,7 +275,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Grid>
 						)}
 						{hostlms?.clientConfig?.["default-agency-code"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.default_agency_code")}
@@ -292,7 +291,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						{/* END: meta. START: credentials */}
 						{/* apikey: FOLIO tenant api key */}
 						{hostlms?.clientConfig?.apikey != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<PrivateData
 									clientConfigType={t("hostlms.client_config.api")}
 									hiddenTextValue={hostlms?.clientConfig?.apikey}
@@ -302,7 +301,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* access-id: Polaris api principal credential */}
 						{hostlms?.clientConfig?.["access-id"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.access_id")}
@@ -317,7 +316,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* access-key: Polaris api key */}
 						{hostlms?.clientConfig?.["access-key"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<PrivateData
 									clientConfigType={t("hostlms.client_config.access_key")}
 									hiddenTextValue={hostlms?.clientConfig?.["access-key"]}
@@ -327,7 +326,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* domain-id: Polaris staff account domain */}
 						{hostlms?.clientConfig?.["domain-id"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.domain_id")}
@@ -342,7 +341,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* domain-id: Polaris staff account principal credential */}
 						{hostlms?.clientConfig?.["staff-username"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.staff_username")}
@@ -357,7 +356,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* domain-id: Polaris staff account secret credential */}
 						{hostlms?.clientConfig?.["staff-password"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								{
 									<PrivateData
 										clientConfigType={t("hostlms.client_config.staff_password")}
@@ -369,7 +368,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* logon-branch-id: Polaris only */}
 						{hostlms?.clientConfig?.["logon-branch-id"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.logon_branch_id")}
@@ -384,7 +383,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* logon-user-id: Polaris only */}
 						{hostlms?.clientConfig?.["logon-user-id"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.logon_user_id")}
@@ -399,7 +398,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* key: Sierra api key */}
 						{hostlms?.clientConfig?.key != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<PrivateData
 									clientConfigType={t("hostlms.client_config.key")}
 									hiddenTextValue={hostlms?.clientConfig?.key}
@@ -409,7 +408,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* key: Sierra api secret */}
 						{hostlms?.clientConfig?.secret != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<PrivateData
 									clientConfigType={t("hostlms.client_config.secret")}
 									hiddenTextValue={hostlms?.clientConfig?.secret}
@@ -419,7 +418,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* END: credentials. START: ingest. */}
 						{hostlms?.clientConfig?.ingest != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.ingest")}
@@ -434,7 +433,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* Suppression rulesets */}
 						{hostlms?.suppressionRulesetName != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.bibSuppressionRulesetName")}
@@ -448,7 +447,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Grid>
 						)}
 						{hostlms?.itemSuppressionRulesetName != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.itemSuppressionRulesetName")}
@@ -463,7 +462,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* record-syntax: FOLIO only */}
 						{hostlms?.clientConfig?.["record-syntax"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.record_syntax")}
@@ -478,7 +477,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 						)}
 						{/* metadata-prefix: FOLIO only */}
 						{hostlms?.clientConfig?.["metadata-prefix"] != null && (
-							<Grid xs={2} sm={4} md={4}>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
 										{t("hostlms.client_config.metadata")}
@@ -517,7 +516,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 								>
 									{hostlms?.clientConfig?.item?.["barcode-prefix"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.barcode_prefix")}
@@ -533,7 +532,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 									{hostlms?.clientConfig?.item?.["ill-location-id"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.ill_location_id")}
@@ -549,7 +548,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 									{hostlms?.clientConfig?.item?.["fine-code-id"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.fine")}
@@ -565,7 +564,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 									{hostlms?.clientConfig?.item?.["renewal-limit"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.renewal_limit")}
@@ -582,7 +581,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									)}
 									{hostlms?.clientConfig?.item?.["history-action-id"] !=
 										null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.history_action_id")}
@@ -599,7 +598,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									)}
 									{hostlms?.clientConfig?.item?.["shelving-scheme-id"] !=
 										null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.shelving_scheme_id")}
@@ -618,7 +617,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									)}
 									{hostlms?.clientConfig?.item?.["loan-period-code-id"] !=
 										null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.loan_id")}
@@ -663,7 +662,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 								>
 									{hostlms?.clientConfig?.papi?.["app-id"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.papi_app_id")}
@@ -677,7 +676,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 									{hostlms?.clientConfig?.papi?.["org-id"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.papi_org_id")}
@@ -691,7 +690,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 									{hostlms?.clientConfig?.papi?.["lang-id"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.papi_lang_id")}
@@ -705,7 +704,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									)}
 									{hostlms?.clientConfig?.papi?.["papi-version"] != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.papi_version")}
@@ -749,7 +748,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 								>
 									{hostlms?.clientConfig?.services?.["organisation-id"] !=
 									null ? (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.services_organisation_id")}
@@ -767,7 +766,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									) : null}
 									{hostlms?.clientConfig?.services?.["site-domain"] != null ? (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.services_site_domain")}
@@ -784,7 +783,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									) : null}
 									{hostlms?.clientConfig?.services?.["patron-barcode-prefix"] !=
 									null ? (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t(
@@ -804,7 +803,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									) : null}
 									{hostlms?.clientConfig?.services?.["product-id"] != null ? (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.services_product_id")}
@@ -821,7 +820,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									) : null}
 									{hostlms?.clientConfig?.services?.["workstation-id"] !=
 									null ? (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.services_workstation_id")}
@@ -840,7 +839,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 									) : null}
 									{hostlms?.clientConfig?.services?.["services-version"] !=
 									null ? (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.services_version")}
@@ -858,7 +857,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 										</Grid>
 									) : null}
 									{hostlms?.clientConfig?.services?.language != null && (
-										<Grid xs={2} sm={4} md={4}>
+										<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 											<Stack direction={"column"}>
 												<Typography variant="attributeTitle">
 													{t("hostlms.client_config.services_language")}

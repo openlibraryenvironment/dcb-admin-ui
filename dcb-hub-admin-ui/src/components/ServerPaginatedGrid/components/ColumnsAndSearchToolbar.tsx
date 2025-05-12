@@ -14,3 +14,17 @@ export function ColumnsAndSearchToolbar() {
 		</GridToolbarContainer>
 	);
 }
+
+// V8 implementation
+// import { Box, Toolbar } from "@mui/material";
+// import { ColumnsPanelTrigger, QuickFilter } from "@mui/x-data-grid-premium";
+
+// export function ColumnsAndSearchToolbar() {
+// 	return (
+// 		<Toolbar>
+// 			<QuickFilter />
+// 			<Box sx={{ flexGrow: 1 }} />
+// 			<ColumnsPanelTrigger />
+// 		</Toolbar>
+// 	);
+// }

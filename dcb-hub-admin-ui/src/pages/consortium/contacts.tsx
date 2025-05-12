@@ -4,7 +4,7 @@ import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
-import Grid from "@mui/material/Unstable_Grid2";
+import Grid from "@mui/material/Grid";
 import { useState } from "react";
 import {
 	deleteConsortiumContact,
@@ -67,7 +67,7 @@ const Contacts: NextPage = () => {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={handleTabChange}
@@ -79,7 +79,7 @@ const Contacts: NextPage = () => {
 						<Tab label={t("nav.consortium.contacts")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Button
 						data-tid="new-contact-button"
 						variant="contained"

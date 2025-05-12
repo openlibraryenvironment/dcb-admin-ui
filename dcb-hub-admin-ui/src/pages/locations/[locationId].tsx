@@ -1,5 +1,11 @@
-import { Button, Stack, TextField, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import {
+	Button,
+	Grid,
+	Stack,
+	TextField,
+	Typography,
+	useTheme,
+} from "@mui/material";
 import { useTranslation } from "next-i18next";
 import {
 	deleteLocationQuery,
@@ -92,7 +98,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
 	const [showConfirmationPickup, setConfirmationPickup] = useState(false);
 
-	const [changedFields, setChangedFields] = useState<Partial<Location>>({});
+	const [changedFields, setChangedFields] = useState<Partial<any>>({});
 	const ils = getILS(location?.hostSystem?.lmsClientClass);
 
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
@@ -262,7 +268,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				(acc[field] as typeof currentValue) = currentValue;
 			}
 			return acc;
-		}, {} as Partial<LocationFormFields>);
+		}, {} as Partial<Location>);
 		setChangedFields(newChangedFields);
 		if (Object.keys(newChangedFields).length === 0) {
 			setEditMode(false);
@@ -498,7 +504,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				component={"form"}
 				onSubmit={handleSubmit(onSubmit)}
 			>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
@@ -530,7 +536,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
@@ -561,7 +567,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.location_code")}
@@ -569,7 +575,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						<RenderAttribute attribute={location?.code} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.location_type")}
@@ -577,7 +583,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						<RenderAttribute attribute={location?.type} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
@@ -611,7 +617,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
@@ -645,7 +651,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("locations.new.pickup_status")}
@@ -670,7 +676,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						</Button>
 					) : null}
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
@@ -702,7 +708,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						/>
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.location_agency")}
@@ -710,7 +716,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 						<RenderAttribute attribute={location?.agency?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.location_uuid")}

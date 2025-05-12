@@ -1,5 +1,4 @@
-import { Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import { Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { getAgencyById } from "src/queries/queries";
 import { AdminLayout } from "@layout";
@@ -76,7 +75,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.agency_name")}
@@ -84,7 +83,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={agency?.name} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.agency_uuid")}
@@ -92,7 +91,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={agency?.id} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.agency_code")}
@@ -100,7 +99,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={agency?.code} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.agency_hostlms")}
@@ -108,7 +107,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={agency?.hostLms?.code} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("agencies.supplying")}
@@ -116,7 +115,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={String(agency?.isSupplyingAgency)} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("agencies.borrowing")}
@@ -124,7 +123,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={String(agency?.isBorrowingAgency)} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.agency_auth")}
@@ -132,7 +131,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={agency?.authProfile} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("details.long")}
@@ -140,7 +139,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 						<RenderAttribute attribute={agency?.longitude} />
 					</Stack>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
 						<RenderAttribute attribute={agency?.latitude} />

@@ -2,6 +2,7 @@ import Upload from "@components/Upload/Upload";
 import {
 	Dialog,
 	DialogTitle,
+	Grid,
 	IconButton,
 	DialogContent,
 	Stack,
@@ -16,7 +17,6 @@ import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
 import useCode from "@hooks/useCode";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import Grid from "@mui/material/Unstable_Grid2";
 
 type ImportForm = {
 	show: boolean;
@@ -85,7 +85,7 @@ export default function Import({
 
 					{type == "Locations" && presetHostLms ? (
 						<Grid container columns={{ xs: 4, sm: 8, md: 12 }}>
-							<Grid xs={2} sm={4} md={6}>
+							<Grid size={{ xs: 2, sm: 4, md: 6 }}>
 								<Stack>
 									<Typography variant="attributeTitle">
 										{t("mappings.category")}
@@ -93,7 +93,7 @@ export default function Import({
 									<RenderAttribute attribute={type} />
 								</Stack>
 							</Grid>
-							<Grid xs={2} sm={4} md={6}>
+							<Grid size={{ xs: 2, sm: 4, md: 6 }}>
 								<Stack>
 									<Typography variant="attributeTitle">
 										{t("hostlms.hostlms_one")}

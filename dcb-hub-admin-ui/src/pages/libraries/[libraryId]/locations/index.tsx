@@ -8,8 +8,15 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import { AdminLayout } from "@layout";
 import { Library } from "@models/Library";
 import { Delete } from "@mui/icons-material";
-import { Button, Stack, Tab, Tabs, Tooltip, useTheme } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
+import {
+	Button,
+	Grid,
+	Stack,
+	Tab,
+	Tabs,
+	Tooltip,
+	useTheme,
+} from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -172,7 +179,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={(event, value) => {
@@ -190,7 +197,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.locations")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					{isAnAdmin ? (
 						<Stack spacing={4} direction={"row"}>
 							<Button

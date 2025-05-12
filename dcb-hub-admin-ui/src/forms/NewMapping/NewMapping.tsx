@@ -10,6 +10,7 @@ import {
 	Divider,
 	FormControl,
 	FormHelperText,
+	Grid,
 	InputLabel,
 	MenuItem,
 	Select,
@@ -31,7 +32,6 @@ import {
 } from "src/constants/mappingsImportConstants";
 import { mappingsCategoryConverter } from "src/helpers/mappingsCategoryConverter";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import Grid from "@mui/material/Unstable_Grid2";
 
 interface NewMappingFormData {
 	toValue: string;
@@ -107,7 +107,7 @@ export default function NewMapping({
 	libraryName,
 }: NewMappingFormType) {
 	const { t } = useTranslation();
-	const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
+	const [serverErrors, setServerErrors] = useState<Record<any, any>>({});
 	const contextOptions = ["DCB", hostLmsCode]; // toContext can ONLY be DCB when location
 
 	const validationSchema = Yup.object().shape({
@@ -420,7 +420,7 @@ export default function NewMapping({
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 								mb={1}
 							>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack>
 										<Typography variant="attributeTitle">
 											{t("mappings.new.from_category")}
@@ -428,7 +428,7 @@ export default function NewMapping({
 										<RenderAttribute attribute={fromCategory} />
 									</Stack>
 								</Grid>
-								<Grid xs={2} sm={4} md={4}>
+								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack>
 										<Typography variant="attributeTitle">
 											{t("mappings.new.to_category")}
@@ -437,7 +437,7 @@ export default function NewMapping({
 									</Stack>
 								</Grid>
 								{category == "Location" ? (
-									<Grid xs={2} sm={4} md={4}>
+									<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 										<Stack>
 											<Typography variant="attributeTitle">
 												{t("mappings.new.from_context")}
@@ -447,7 +447,7 @@ export default function NewMapping({
 									</Grid>
 								) : null}
 								{category == "Location" ? (
-									<Grid xs={2} sm={4} md={4}>
+									<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 										<Stack>
 											<Typography variant="attributeTitle">
 												{t("mappings.new.to_context")}

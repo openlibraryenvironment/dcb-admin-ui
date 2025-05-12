@@ -2,6 +2,7 @@ import { Library } from "@models/Library";
 import {
 	Box,
 	Button,
+	Grid,
 	Stack,
 	Tab,
 	Tabs,
@@ -9,7 +10,6 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
 import { Trans, useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
@@ -249,7 +249,7 @@ export default function Settings({ libraryId }: LibraryDetails) {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Grid xs={4} sm={8} md={12}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
 						onChange={(event, value) => {
@@ -267,12 +267,12 @@ export default function Settings({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.locations")} />
 					</Tabs>
 				</Grid>
-				<Grid xs={4} sm={8} md={12} lg={16}>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<Typography variant="accordionSummary">
 						{t("libraries.circulation.title")}
 					</Typography>
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.circulation.supplying_status")}
@@ -322,7 +322,7 @@ export default function Settings({ libraryId }: LibraryDetails) {
 						</Button>
 					)}
 				</Grid>
-				<Grid xs={2} sm={4} md={4}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
 							{t("libraries.circulation.borrowing_status")}
