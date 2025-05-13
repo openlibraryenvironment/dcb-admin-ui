@@ -230,7 +230,7 @@ export default function PatronRequestDetails({
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
 					action={t("ui.action.go_back")}
-					goBack="/patronRequests"
+					goBack="/patronRequests/exception"
 				/>
 			) : (
 				<Error
@@ -238,7 +238,7 @@ export default function PatronRequestDetails({
 					message={t("ui.error.invalid_UUID")}
 					description={t("ui.info.check_address")}
 					action={t("ui.action.go_back")}
-					goBack="/patronRequests"
+					goBack="/patronRequests/exception"
 				/>
 			)}
 		</AdminLayout>

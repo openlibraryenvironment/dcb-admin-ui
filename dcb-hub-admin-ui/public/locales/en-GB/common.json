@@ -62,7 +62,14 @@
 			"allNumericRange": "All numeric range",
 			"circulationStatus": "Circulation status"
 		},
-		"patronRequests": "Patron requests",
+		"patronRequests": {
+			"active": "Active",
+			"all": "All",
+			"completed": "Completed",
+			"exception": "Exception",
+			"name": "Patron requests",
+			"outOfSequence": "Out of sequence"
+		},
 		"profile": "Profile",
 		"search": {
 			"name": "Shared index",

@@ -141,7 +141,7 @@ export default function MultipleTabNavigation({
 					{type == "mappings"
 						? t("nav.mappings.name")
 						: type == "patronRequests"
-							? t("nav.patronRequests")
+							? t("nav.patronRequests.name")
 							: t("nav.libraries.supplierRequests.name")}
 				</Typography>
 

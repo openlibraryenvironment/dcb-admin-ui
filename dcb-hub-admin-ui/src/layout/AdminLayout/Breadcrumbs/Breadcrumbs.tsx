@@ -113,6 +113,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				case "search":
 				case "serviceInfo":
 				case "libraries":
+				case "patronRequests":
 				case "consortium":
 					return "nav." + topLevelKey + ".name";
 				default:

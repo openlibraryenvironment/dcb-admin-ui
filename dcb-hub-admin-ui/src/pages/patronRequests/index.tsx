@@ -179,7 +179,7 @@ const PatronRequests: NextPage = () => {
 			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
-						document_type: t("nav.patronRequests").toLowerCase(),
+						document_type: t("nav.patronRequests.name").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
@@ -188,7 +188,7 @@ const PatronRequests: NextPage = () => {
 	}
 
 	return (
-		<AdminLayout title={t("nav.patronRequests")}>
+		<AdminLayout title={t("nav.patronRequests.name")}>
 			<Stack direction="row" justifyContent="end">
 				<StyledAccordionButton onClick={expandAll}>
 					{expandedAccordions[0] && expandedAccordions[1]
