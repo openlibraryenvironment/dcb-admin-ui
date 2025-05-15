@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -24,6 +24,7 @@ import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { handleTopLevelPatronRequestTabChange } from "src/helpers/navigation/handleTabChange";
 import { queries } from "src/constants/patronRequestGridQueries";
+import { FilterAltOutlined } from "@mui/icons-material";
 
 export default function All() {
 	const { t } = useTranslation();
@@ -42,6 +43,10 @@ export default function All() {
 		finished: 0,
 		all: 0,
 	});
+	const [unfilteredAllCount, setUnfilteredAllCount] = useState<number | null>(
+		null,
+	);
+	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
 	// Helper function to update a specific count while preserving other counts
 	const updateCount = useCallback((key: string, count: number) => {
@@ -103,11 +108,29 @@ export default function All() {
 
 	// Callback for when the grid reports its total size
 	const handleTotalSizeChange = useCallback(
-		(type: string, size: number) => {
-			// Update the grid's total size (patronRequestsLibraryAll)
-			updateCount(type, size);
+		(gridType: string, currentGridSize: number) => {
+			if (gridType === "patronRequests") {
+				updateCount("all", currentGridSize);
+
+				if (unfilteredAllCount === null) {
+					setUnfilteredAllCount(currentGridSize);
+					setIsFilterApplied(false); // No filter applied on initial load
+				} else {
+					setIsFilterApplied(currentGridSize < unfilteredAllCount);
+				}
+			} else {
+				// This handles other grid types if they were to use this callback.
+				// For this page, we're primarily concerned with "patronRequests".
+				updateCount(gridType, currentGridSize);
+			}
 		},
-		[updateCount],
+		// Add all dependencies that are used inside the callback
+		[
+			updateCount,
+			unfilteredAllCount,
+			setUnfilteredAllCount,
+			setIsFilterApplied,
+		],
 	);
 
 	const patronRequestLocations: Location[] = locationsData?.locations.content;
@@ -278,11 +301,31 @@ export default function All() {
 					/>
 					<Tab
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.all_short", {
-									number: totalSizes.all,
-								})}
-							</Typography>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 0.5,
+								}}
+							>
+								<Typography variant="subTabTitle">
+									{t("libraries.patronRequests.all_short", {
+										number:
+											inProgressLoading && unfilteredAllCount === null // Show loading until initial count is fetched
+												? t("common.loading")
+												: totalSizes.all,
+									})}
+								</Typography>
+								{isFilterApplied && (
+									<FilterAltOutlined
+										aria-label={t(
+											"common.filterIsApplied",
+											"Filter is applied",
+										)}
+										fontSize="small"
+									/>
+								)}
+							</Box>
 						}
 					/>
 				</Tabs>

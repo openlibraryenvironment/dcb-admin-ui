@@ -1,4 +1,4 @@
-import { Grid, Stack, Typography, useTheme } from "@mui/material";
+import { Grid, Stack, Tab, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { AdminLayout } from "@layout";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -12,17 +12,16 @@ import { getHostLmsById } from "src/queries/queries";
 import { useQuery } from "@apollo/client";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
-	StyledAccordion,
-	StyledAccordionSummary,
-	StyledAccordionDetails,
 	SubAccordion,
 	SubAccordionDetails,
 	SubAccordionSummary,
-	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { getILS } from "src/helpers/getILS";
+import TabPanel from "@mui/lab/TabPanel";
+import TabList from "@mui/lab/TabList";
+import TabContext from "@mui/lab/TabContext";
 
 type HostLMSDetails = {
 	hostlmsId: any;
@@ -30,8 +29,6 @@ type HostLMSDetails = {
 
 export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	const { t } = useTranslation();
-	const theme = useTheme();
-
 	// pollInterval is in ms - set to 2 mins
 	const { loading, data, error } = useQuery(getHostLmsById, {
 		variables: {
@@ -40,7 +37,11 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 		pollInterval: 120000,
 	});
 	const hostlms: HostLMS = data?.hostLms?.content?.[0];
+	const [activeTab, setActiveTab] = useState(0);
 
+	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+		setActiveTab(newValue);
+	};
 	const router = useRouter();
 	const { status } = useSession({
 		required: true,
@@ -71,11 +72,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	};
 
 	// Works for closing + expanding as it sets values to their opposite
-	const expandAll = () => {
-		setExpandedAccordions((prevExpanded) =>
-			prevExpanded.map(() => !prevExpanded[0]),
-		);
-	};
+
 	if (loading || status == "loading") {
 		return (
 			<AdminLayout hideBreadcrumbs>
@@ -111,35 +108,23 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout title={hostlms?.name}>
-			<Stack direction="row" justifyContent="end">
-				<StyledAccordionButton onClick={expandAll}>
-					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
-				</StyledAccordionButton>
-			</Stack>
-			<StyledAccordion
-				variant="outlined"
-				expanded={expandedAccordions[0]}
-				onChange={handleAccordionChange(0)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
-					aria-controls="hostlms-general-details"
-					id="hostlms_details_general"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("details.general")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
+			<TabContext value={activeTab}>
+				<TabList onChange={handleTabChange} variant="scrollable">
+					<Tab label={t("details.general")} />
+					<Tab label={t("hostlms.client_config.title")} />
+				</TabList>
+
+				<TabPanel value={0}>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("details.general")}
+							</Typography>
+						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -184,32 +169,18 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</Stack>
 						</Grid>
 					</Grid>
-				</StyledAccordionDetails>
-			</StyledAccordion>
-			<StyledAccordion
-				variant="outlined"
-				expanded={expandedAccordions[1]}
-				onChange={handleAccordionChange(1)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					sx={{
-						backgroundColor: theme.palette.primary.detailsAccordionSummary,
-					}}
-					aria-controls="hostlms-client-config-details"
-					id="hostlms_details_client_config"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("hostlms.client_config.title")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
+				</TabPanel>
+				<TabPanel value={1}>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("hostlms.client_config.title")}
+							</Typography>
+						</Grid>
 						{/* START: meta config properties */}
 						{hostlms?.clientConfig?.["base-url-application-services"] !=
 							null && (
@@ -876,8 +847,8 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 							</SubAccordionDetails>
 						</SubAccordion>
 					) : null}
-				</StyledAccordionDetails>
-			</StyledAccordion>
+				</TabPanel>
+			</TabContext>
 		</AdminLayout>
 	);
 }

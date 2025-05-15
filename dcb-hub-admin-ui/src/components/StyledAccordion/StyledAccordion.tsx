@@ -41,31 +41,6 @@ const StyledDataGridAccordionSummary = styled(AccordionSummary)(
 	}),
 );
 
-StyledAccordion.defaultProps = {
-	TransitionProps: { timeout: 400 }, // Setting default timeout
-};
-
-// Ideally this would be a variant of the Accordion Summary, and all components in here would also be variants defined at theme level.
-// however it doesn't seem that the MUI AccordionSummary fully supports that at this time.
-// As such we have to apply the lighten / darken rules at this level.
-
-// to be removed and integrated into the theme, in theming cleanup ticket: https://openlibraryfoundation.atlassian.net/browse/DCB-1304
-const StyledAccordionSummary = styled(AccordionSummary)(() => ({
-	// backgroundColor: theme.palette.primary.detailsAccordionSummary,
-	// ":hover": {
-	// 	backgroundColor:
-	// 		theme.palette.mode == "light"
-	// 			? darken(theme.palette.primary.detailsAccordionSummary, 0.08)
-	// 			: lighten(theme.palette.primary.detailsAccordionSummary, 0.08),
-	// },
-	// ":active": {
-	// 	backgroundColor:
-	// 		theme.palette.mode == "light"
-	// 			? darken(theme.palette.primary.detailsAccordionSummary, 0.16)
-	// 			: lighten(theme.palette.primary.detailsAccordionSummary, 0.16),
-	// },
-}));
-
 const StyledAccordionDetails = styled(AccordionDetails)(() => ({
 	marginTop: "16px",
 }));
@@ -91,7 +66,6 @@ const SubAccordionDetails = styled(AccordionDetails)(() => ({
 
 export {
 	StyledAccordion,
-	StyledAccordionSummary,
 	StyledAccordionDetails,
 	StyledAccordionButton,
 	SubAccordion,

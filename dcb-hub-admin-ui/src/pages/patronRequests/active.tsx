@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -24,6 +24,7 @@ import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { handleTopLevelPatronRequestTabChange } from "src/helpers/navigation/handleTabChange";
 import { queries } from "src/constants/patronRequestGridQueries";
+import { FilterAltOutlined } from "@mui/icons-material";
 
 export default function Active() {
 	const { t } = useTranslation();
@@ -42,6 +43,10 @@ export default function Active() {
 		finished: 0,
 		all: 0,
 	});
+	const [unfilteredInProgressCount, setUnfilteredInProgressCount] = useState<
+		number | null
+	>(null);
+	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
 	// Helper function to update a specific count while preserving other counts
 	const updateCount = useCallback((key: string, count: number) => {
@@ -103,11 +108,22 @@ export default function Active() {
 
 	// Callback for when the grid reports its total size
 	const handleTotalSizeChange = useCallback(
-		(type: string, size: number) => {
-			// Update the grid's total size (patronRequestsLibraryAll)
-			updateCount(type, size);
+		(gridType: string, currentGridSize: number) => {
+			if (gridType === "patronRequestsActive") {
+				// Update the count for the "inProgress" tab to reflect the grid's current size
+				updateCount("inProgress", currentGridSize);
+
+				if (unfilteredInProgressCount !== null) {
+					setIsFilterApplied(currentGridSize < unfilteredInProgressCount);
+				} else {
+					setIsFilterApplied(false);
+				}
+			} else {
+				// Handle other grids if they also use this callback with different types
+				updateCount(gridType, currentGridSize);
+			}
 		},
-		[updateCount],
+		[updateCount, unfilteredInProgressCount],
 	);
 
 	const patronRequestLocations: Location[] = locationsData?.locations.content;
@@ -151,6 +167,7 @@ export default function Active() {
 		},
 		onCompleted: (data) => {
 			updateCount("inProgress", data?.patronRequests?.totalSize || 0);
+			setUnfilteredInProgressCount(data?.patronRequests?.totalSize); // Store the true unfiltered count
 		},
 	});
 
@@ -256,13 +273,31 @@ export default function Active() {
 					/>
 					<Tab
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.active_short", {
-									number: inProgressLoading
-										? t("common.loading")
-										: totalSizes.inProgress,
-								})}
-							</Typography>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 0.5,
+								}}
+							>
+								<Typography variant="subTabTitle">
+									{t("libraries.patronRequests.active_short", {
+										number:
+											inProgressLoading && unfilteredInProgressCount === null // Show loading until initial count is fetched
+												? t("common.loading")
+												: totalSizes.inProgress, // This will be the grid's current count
+									})}
+								</Typography>
+								{isFilterApplied && ( // Conditionally show the icon
+									<FilterAltOutlined
+										aria-label={t(
+											"common.filterIsApplied",
+											"Filter is applied",
+										)}
+										fontSize="small"
+									/>
+								)}
+							</Box>
 						}
 					/>
 					<Tab

@@ -1,5 +1,5 @@
 import { useQuery } from "@apollo/client";
-import { Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -24,6 +24,7 @@ import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { handleTopLevelPatronRequestTabChange } from "src/helpers/navigation/handleTabChange";
 import { queries } from "src/constants/patronRequestGridQueries";
+import { FilterAltOutlined } from "@mui/icons-material";
 
 export default function OutOfSequence() {
 	const { t } = useTranslation();
@@ -42,6 +43,10 @@ export default function OutOfSequence() {
 		finished: 0,
 		all: 0,
 	});
+
+	const [unfilteredOutOfSequenceCount, setUnfilteredOutOfSequenceCount] =
+		useState<number | null>(null);
+	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
 	// Helper function to update a specific count while preserving other counts
 	const updateCount = useCallback((key: string, count: number) => {
@@ -103,11 +108,22 @@ export default function OutOfSequence() {
 
 	// Callback for when the grid reports its total size
 	const handleTotalSizeChange = useCallback(
-		(type: string, size: number) => {
-			// Update the grid's total size (all)
-			updateCount(type, size);
+		(gridType: string, currentGridSize: number) => {
+			if (gridType === "patronRequestsActive") {
+				// Update the count for the "inProgress" tab to reflect the grid's current size
+				updateCount("outOfSequence", currentGridSize);
+
+				if (unfilteredOutOfSequenceCount !== null) {
+					setIsFilterApplied(currentGridSize < unfilteredOutOfSequenceCount);
+				} else {
+					setIsFilterApplied(false);
+				}
+			} else {
+				// Handle other grids if they also use this callback with different types
+				updateCount(gridType, currentGridSize);
+			}
 		},
-		[updateCount],
+		[updateCount, unfilteredOutOfSequenceCount],
 	);
 
 	const patronRequestLocations: Location[] = locationsData?.locations.content;
@@ -137,6 +153,7 @@ export default function OutOfSequence() {
 		},
 		onCompleted: (data) => {
 			updateCount("outOfSequence", data?.patronRequests?.totalSize || 0);
+			setUnfilteredOutOfSequenceCount(data?.patronRequests?.totalSize);
 		},
 	});
 
@@ -245,13 +262,30 @@ export default function OutOfSequence() {
 					/>
 					<Tab
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.out_of_sequence_short", {
-									number: outOfSequenceLoading
-										? t("common.loading")
-										: totalSizes.outOfSequence,
-								})}
-							</Typography>
+							<Box
+								sx={{
+									display: "flex",
+									alignItems: "center",
+									gap: 0.5,
+								}}
+							>
+								<Typography variant="subTabTitle">
+									{t("libraries.patronRequests.out_of_sequence_short", {
+										number: outOfSequenceLoading
+											? t("common.loading")
+											: totalSizes.outOfSequence,
+									})}
+								</Typography>
+								{isFilterApplied && ( // Conditionally show the icon
+									<FilterAltOutlined
+										aria-label={t(
+											"common.filterIsApplied",
+											"Filter is applied",
+										)}
+										fontSize="small"
+									/>
+								)}
+							</Box>
 						}
 					/>
 					<Tab
