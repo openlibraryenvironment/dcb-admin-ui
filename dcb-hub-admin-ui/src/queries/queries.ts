@@ -1449,7 +1449,6 @@ export const getPatronRequestTotals = gql`
 				dateUpdated
 				status
 				patronHostlmsCode
-				localAgency
 				outOfSequenceFlag
 			}
 			pageable {

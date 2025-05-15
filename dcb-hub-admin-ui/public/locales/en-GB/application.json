@@ -24,6 +24,7 @@
 	"common": {
 		"about": "About",
 		"error_loading": "An error has occurred while loading {{page_title}}. Please <linkComponent>reload</linkComponent> the page.",
+		"filter_applied": "Filter(s) are applied",
 		"loading": "Loading ...",
 		"mappings": {
 			"last_imported": "Last imported"

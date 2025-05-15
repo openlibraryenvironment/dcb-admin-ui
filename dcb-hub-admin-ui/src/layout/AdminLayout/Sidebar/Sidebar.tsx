@@ -186,7 +186,10 @@ type routes = {
 
 const routes = [
 	{ path: "/", translationKey: "nav.home" }, // Home
-	{ path: "/patronRequests", translationKey: "nav.patronRequests" }, // Patron requests
+	{
+		path: "/patronRequests/exception",
+		translationKey: "nav.patronRequests.name",
+	}, // Patron requests
 	{ path: "/consortium", translationKey: "nav.consortium.name" }, //Consortium
 	{ path: "/libraries", translationKey: "nav.libraries.name" }, // Libraries
 	{ path: "/agencies", translationKey: "nav.agencies" }, // Agencies

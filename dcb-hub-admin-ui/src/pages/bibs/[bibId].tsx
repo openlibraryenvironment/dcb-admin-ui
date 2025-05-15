@@ -1,7 +1,7 @@
 import { useLazyQuery, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import { Grid, Stack, Typography } from "@mui/material";
+import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -12,7 +12,6 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import {
 	StyledAccordion,
-	StyledAccordionSummary,
 	StyledAccordionDetails,
 	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
@@ -194,15 +193,15 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				onChange={handleAccordionChange(0)}
 				disableGutters
 			>
-				<StyledAccordionSummary
+				<AccordionSummary
 					aria-controls="source-bibs-json-details"
 					id="source-bibs-json-details"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
-					<Typography variant="accordionSummary">
+					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 						{t("details.canonical_metadata")}
 					</Typography>
-				</StyledAccordionSummary>
+				</AccordionSummary>
 				<StyledAccordionDetails>
 					<pre>{JSON.stringify(bib?.canonicalMetadata, null, 2)}</pre>
 				</StyledAccordionDetails>
@@ -213,15 +212,15 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 				onChange={handleAccordionChange(8)}
 				disableGutters
 			>
-				<StyledAccordionSummary
+				<AccordionSummary
 					aria-controls="source-bibs-source-record-json-details"
 					id="source-bibs-source-record-json-details"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
-					<Typography variant="accordionSummary">
+					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 						{t("details.source_record")}
 					</Typography>
-				</StyledAccordionSummary>
+				</AccordionSummary>
 				<StyledAccordionDetails>
 					{sourceRecordLoading ? (
 						<Loading

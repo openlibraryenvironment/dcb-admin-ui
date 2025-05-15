@@ -6,7 +6,7 @@ export const handleTabChange = (
 	newValue: number,
 	router: NextRouter,
 	setTabIndex: Dispatch<SetStateAction<number>>,
-	id: string,
+	id?: string,
 ) => {
 	setTabIndex(newValue);
 	switch (newValue) {
@@ -41,7 +41,7 @@ export const handlePatronRequestTabChange = (
 	newValue: number,
 	router: NextRouter,
 	setTabIndex: Dispatch<SetStateAction<number>>,
-	id: string,
+	id?: string,
 ) => {
 	setTabIndex(newValue);
 	switch (newValue) {
@@ -68,7 +68,7 @@ export const handleSupplierRequestTabChange = (
 	newValue: number,
 	router: NextRouter,
 	setTabIndex: Dispatch<SetStateAction<number>>,
-	id: string,
+	id?: string,
 ) => {
 	setTabIndex(newValue);
 	switch (newValue) {
@@ -83,7 +83,7 @@ export const handleMappingsTabChange = (
 	newValue: number,
 	router: NextRouter,
 	setTabIndex: Dispatch<SetStateAction<number>>,
-	id: string,
+	id?: string,
 ) => {
 	setTabIndex(newValue);
 	switch (newValue) {
@@ -107,6 +107,32 @@ export const handleMappingsTabChange = (
 			break;
 		case 6:
 			router.push(`/libraries/${id}/numericRangeMappings/all`);
+			break;
+	}
+};
+
+export const handleTopLevelPatronRequestTabChange = (
+	event: React.SyntheticEvent,
+	newValue: number,
+	router: NextRouter,
+	setTabIndex: Dispatch<SetStateAction<number>>,
+) => {
+	setTabIndex(newValue);
+	switch (newValue) {
+		case 0:
+			router.push(`/patronRequests/exception`);
+			break;
+		case 1:
+			router.push(`/patronRequests/outOfSequence`);
+			break;
+		case 2:
+			router.push(`/patronRequests/active`);
+			break;
+		case 3:
+			router.push(`/patronRequests/completed`);
+			break;
+		case 4:
+			router.push(`/patronRequests/all`);
 			break;
 	}
 };

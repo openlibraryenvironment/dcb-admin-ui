@@ -12,6 +12,8 @@ import {
 	Typography,
 	CircularProgress,
 	Tooltip,
+	Tab,
+	Divider,
 } from "@mui/material";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -28,18 +30,17 @@ import {
 	getPatronRequestById,
 } from "src/queries/queries";
 import {
-	StyledAccordion,
-	StyledAccordionSummary,
-	StyledAccordionDetails,
 	SubAccordion,
 	SubAccordionSummary,
 	SubAccordionDetails,
-	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
 import { useRouter } from "next/router";
 import { formatDuration } from "src/helpers/formatDuration";
 import { cleanupStatuses, untrackedStatuses } from "src/helpers/statuses";
 import { LocationCell } from "@components/LocationCell/LocationCell";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
 
 type PatronRequestDetails = {
 	patronRequestId: string;
@@ -112,39 +113,12 @@ export default function PatronRequestDetails({
 	});
 
 	const pickupLocation = pickupLocationData?.locations?.content?.[0];
-
 	// end of pickup data
 
-	const [expandedAccordions, setExpandedAccordions] = useState([
-		true, // General
-		false, // Borrowing -> Patron
-		false, // Pickup
-		true, // Supplying
-		true, // Borrowing
-		true, // Audit log
-		false, // Bib record
-		false, // Bib source record
-		false, // Supplying -> Item
-		false, // Supplying -> Patron
-		false, // Borrowing -> Virtual item
-		false, // Pickup -> Virtual patron
-		false, // Pickup -> Virtual item
-	]);
+	const [activeTab, setActiveTab] = useState(0);
 
-	// Functions to handle expanding both individual accordions and all accordions
-	const handleAccordionChange = (index: number) => () => {
-		setExpandedAccordions((prevExpanded) => {
-			const newExpanded = [...prevExpanded];
-			newExpanded[index] = !newExpanded[index];
-			return newExpanded;
-		});
-	};
-
-	// Works for closing + expanding as it sets values to their opposite
-	const expandAll = () => {
-		setExpandedAccordions((prevExpanded) =>
-			prevExpanded.map(() => !prevExpanded[0]),
-		);
+	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+		setActiveTab(newValue);
 	};
 
 	const bibClusterRecordUrl = publicRuntimeConfig.DCB_SEARCH_BASE
@@ -230,7 +204,7 @@ export default function PatronRequestDetails({
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
 					action={t("ui.action.go_back")}
-					goBack="/patronRequests"
+					goBack="/patronRequests/exception"
 				/>
 			) : (
 				<Error
@@ -238,38 +212,33 @@ export default function PatronRequestDetails({
 					message={t("ui.error.invalid_UUID")}
 					description={t("ui.info.check_address")}
 					action={t("ui.action.go_back")}
-					goBack="/patronRequests"
+					goBack="/patronRequests/exception"
 				/>
 			)}
 		</AdminLayout>
 	) : (
 		<AdminLayout title={patronRequest?.clusterRecord?.title}>
-			<Stack direction="row" justifyContent="end">
-				<StyledAccordionButton onClick={expandAll}>
-					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
-				</StyledAccordionButton>
-			</Stack>
-			<StyledAccordion // General
-				variant="outlined"
-				expanded={expandedAccordions[0]}
-				onChange={handleAccordionChange(0)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="request-general-details"
-					id="request_details_general"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("details.general")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
+			<TabContext value={activeTab}>
+				<TabList onChange={handleTabChange} variant="scrollable">
+					<Tab label={t("details.general")} />
+					<Tab label={t("details.bib_record")} />
+					<Tab label={t("details.supplying")} />
+					<Tab label={t("details.borrowing")} />
+					<Tab label={t("details.pickup")} />
+					<Tab label={t("details.audit_log")} />
+				</TabList>
+
+				<TabPanel value={0}>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("details.general")}
+							</Typography>
+						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -600,29 +569,19 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-				</StyledAccordionDetails>
-			</StyledAccordion>
-			<StyledAccordion // Bib record
-				variant="outlined"
-				expanded={expandedAccordions[6]}
-				onChange={handleAccordionChange(6)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="request-bib-record"
-					id="request_bib_record"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("details.bib_record")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
+				</TabPanel>
+
+				<TabPanel value={1}>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("details.bib_record")}
+							</Typography>
+						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -708,12 +667,7 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[7]}
-						onChange={handleAccordionChange(7)}
-						disableGutters
-					>
+					<SubAccordion variant="outlined" disableGutters>
 						<SubAccordionSummary
 							aria-controls="request-source-record"
 							id="request_source_record"
@@ -743,30 +697,20 @@ export default function PatronRequestDetails({
 							)}
 						</SubAccordionDetails>
 					</SubAccordion>
-				</StyledAccordionDetails>
-			</StyledAccordion>
-			<StyledAccordion // Supplying
-				variant="outlined"
-				expanded={expandedAccordions[3]}
-				onChange={handleAccordionChange(3)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="request-supplier-details"
-					id="request_details_supplier"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("details.supplying")}
-					</Typography>
-				</StyledAccordionSummary>
-				{/* We may have to change this for multiple suppliers. Could make it a grid. */}
-				<StyledAccordionDetails>
+				</TabPanel>
+
+				<TabPanel value={2}>
+					{/* We may have to change this for multiple suppliers. Could make it a grid. */}
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("details.supplying")}
+							</Typography>
+						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -870,238 +814,206 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[8]}
-						onChange={handleAccordionChange(8)}
-					>
-						<SubAccordionSummary
-							expandIcon={<ExpandMore fontSize="large" />}
-							aria-controls={"supplying-item"}
-							id={"supplying-item"}
-						>
-							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-								{t("details.item")}
-							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_item_barcode")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.suppliers[0]?.localItemBarcode}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_item_loc")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.suppliers[0]?.localItemLocationCode
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_item_status")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.suppliers[0]?.localItemStatus}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_item_status_raw")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.suppliers[0]?.rawLocalItemStatus
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.renewal_count_supplier")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.suppliers[0]?.localRenewalCount?.toString()}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_item_type")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.suppliers[0]?.localItemType}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.supplier_ctype")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.suppliers[0]?.canonicalItemType}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_item_id")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.suppliers[0]?.localItemId}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.item_manually_selected")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest.isManuallySelectedItem?.toString()}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.item_manual_agency_code")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.localItemAgencyCode}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.item_manual_hostlms_code")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.localItemHostlmsCode}
-										/>
-									</Stack>
-								</Grid>
-							</Grid>
-						</SubAccordionDetails>
-					</SubAccordion>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[9]}
-						onChange={handleAccordionChange(9)}
-					>
-						<SubAccordionSummary
-							expandIcon={<ExpandMore fontSize="large" />}
-							aria-controls={"supplying-virtual-patron"}
-							id={"supplying-virtual-patron"}
-						>
-							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-								{t("details.virtual_patron")}
-							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_id")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.suppliers[0]?.virtualPatron?.localId
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_barcode")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_patron_type")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.suppliers[0]?.virtualPatron?.localPtype
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{"DCB patron type"}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.suppliers[0]?.virtualPatron
-													?.canonicalPtype
-											}
-										/>
-									</Stack>
-								</Grid>
-							</Grid>
-						</SubAccordionDetails>
-					</SubAccordion>
-				</StyledAccordionDetails>
-			</StyledAccordion>
-			<StyledAccordion // Borrowing
-				variant="outlined"
-				expanded={expandedAccordions[4]}
-				onChange={handleAccordionChange(4)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="request-details-borrowing"
-					id="request_details_borrowing"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("details.borrowing", "Borrowing")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
+
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+							<Divider aria-hidden="true"></Divider>
+						</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+								{t("details.item")}
+							</Typography>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_item_barcode")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localItemBarcode}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_item_loc")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localItemLocationCode}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_item_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localItemStatus}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_item_status_raw")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.rawLocalItemStatus}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.renewal_count_supplier")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localRenewalCount?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_item_type")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localItemType}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.supplier_ctype")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.canonicalItemType}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_item_id")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localItemId}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.item_manually_selected")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest.isManuallySelectedItem?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.item_manual_agency_code")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.localItemAgencyCode}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.item_manual_hostlms_code")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.localItemHostlmsCode}
+								/>
+							</Stack>
+						</Grid>
+					</Grid>
+
+					<Grid
+						container
+						spacing={{ xs: 2, md: 3 }}
+						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+							<Divider aria-hidden="true"></Divider>
+						</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+								{t("details.virtual_patron")}
+							</Typography>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_id")}
+								</Typography>
+								<RenderAttribute
+									attribute={
+										patronRequest?.suppliers[0]?.virtualPatron?.localId
+									}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_barcode")}
+								</Typography>
+								<RenderAttribute
+									attribute={
+										patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
+									}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_patron_type")}
+								</Typography>
+								<RenderAttribute
+									attribute={
+										patronRequest?.suppliers[0]?.virtualPatron?.localPtype
+									}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{"DCB patron type"}
+								</Typography>
+								<RenderAttribute
+									attribute={
+										patronRequest?.suppliers[0]?.virtualPatron?.canonicalPtype
+									}
+								/>
+							</Stack>
+						</Grid>
+					</Grid>
+				</TabPanel>
+				<TabPanel value={3}>
+					<Grid
+						container
+						spacing={{ xs: 2, md: 3 }}
+						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("details.borrowing", "Borrowing")}
+							</Typography>
+						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -1138,192 +1050,139 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-					</Grid>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[1]}
-						onChange={handleAccordionChange(1)}
-					>
-						<SubAccordionSummary
-							aria-controls="request-patron-details"
-							id="request_details_patron"
-							expandIcon={<ExpandMore fontSize="large" />}
-						>
-							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-								{t("details.patron")}
-							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_patron_id")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.requestingIdentity?.localId}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_patron_barcode")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.requestingIdentity?.localBarcode
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_patron_type")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.requestingIdentity?.localPtype}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.patron_canonical_ptype")}
-										</Typography>
-										<RenderAttribute
-											attribute={
-												patronRequest?.requestingIdentity?.canonicalPtype
-											}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.patron_uuid")}
-										</Typography>
-										<RenderAttribute attribute={patronRequest?.patron?.id} />
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.requestor_uuid")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.requestingIdentity?.id}
-										/>
-									</Stack>
-								</Grid>
-							</Grid>
-						</SubAccordionDetails>
-					</SubAccordion>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[10]}
-						onChange={handleAccordionChange(10)}
-					>
-						<SubAccordionSummary
-							expandIcon={<ExpandMore fontSize="large" />}
-							aria-controls={"borrowing-patron"}
-							id={"borrowing-virtual-item"}
-						>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_patron_id")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.localId}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_patron_barcode")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.localBarcode}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_patron_type")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.localPtype}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.patron_canonical_ptype")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.canonicalPtype}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.patron_uuid")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.patron?.id} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.requestor_uuid")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.id}
+								/>
+							</Stack>
+						</Grid>
+
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+							<Divider aria-hidden="true"></Divider>
+						</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 								{t("details.virtual_item")}
 							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_virtual_id")}
-										</Typography>
-										<RenderAttribute attribute={patronRequest?.localItemId} />
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_virtual_type")}
-										</Typography>
-										<RenderAttribute attribute={patronRequest?.localItemType} />
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_virtual_item_status")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.localItemStatus}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_virtual_item_status_raw")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.rawLocalItemStatus}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_virtual_bib_id")}
-										</Typography>
-										<RenderAttribute attribute={patronRequest?.localBibId} />
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.renewal_count_borrower")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.localRenewalCount?.toString()}
-										/>
-									</Stack>
-								</Grid>
-							</Grid>
-						</SubAccordionDetails>
-					</SubAccordion>
-				</StyledAccordionDetails>
-			</StyledAccordion>
-			<StyledAccordion // Pickup
-				variant="outlined"
-				expanded={expandedAccordions[2]}
-				onChange={handleAccordionChange(2)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="request-pickup-details"
-					id="request_details_pickup"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
-					<Typography variant="accordionSummary">
-						{t("details.pickup")}
-					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_virtual_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.localItemId} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_virtual_type")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.localItemType} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_virtual_item_status")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.localItemStatus} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_virtual_item_status_raw")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.rawLocalItemStatus}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_virtual_bib_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.localBibId} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.renewal_count_borrower")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.localRenewalCount?.toString()}
+								/>
+							</Stack>
+						</Grid>
+					</Grid>
+				</TabPanel>
+				<TabPanel value={4}>
 					<Grid
 						container
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+							<Typography variant="accordionSummary">
+								{t("details.pickup")}
+							</Typography>
+						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -1369,157 +1228,109 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
-					</Grid>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[11]}
-						onChange={handleAccordionChange(11)}
-					>
-						<SubAccordionSummary
-							expandIcon={<ExpandMore fontSize="large" />}
-							aria-controls={"pickup-virtual-patron"}
-							id={"pickup-virtual-patron"}
-						>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+							<Divider aria-hidden="true"></Divider>
+						</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 								{t("details.virtual_patron")}
 							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.pickup_patron_id")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.pickupPatronId}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.local_barcode")}
-										</Typography>
-										<RenderAttribute
-											attribute={pickupPatronIdentity?.localBarcode}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.borrowing_patron_type")}
-										</Typography>
-										<RenderAttribute
-											attribute={pickupPatronIdentity?.localPtype}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{"DCB patron type"}
-										</Typography>
-										<RenderAttribute
-											attribute={pickupPatronIdentity?.canonicalPtype}
-										/>
-									</Stack>
-								</Grid>
-							</Grid>
-						</SubAccordionDetails>
-					</SubAccordion>
-					<SubAccordion
-						variant="outlined"
-						expanded={expandedAccordions[12]}
-						onChange={handleAccordionChange(12)}
-					>
-						<SubAccordionSummary
-							expandIcon={<ExpandMore fontSize="large" />}
-							aria-controls={"pickup-virtual-item"}
-							id={"pickup-virtual-item"}
-						>
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_patron_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupPatronId} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_barcode")}
+								</Typography>
+								<RenderAttribute
+									attribute={pickupPatronIdentity?.localBarcode}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.borrowing_patron_type")}
+								</Typography>
+								<RenderAttribute attribute={pickupPatronIdentity?.localPtype} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{"DCB patron type"}
+								</Typography>
+								<RenderAttribute
+									attribute={pickupPatronIdentity?.canonicalPtype}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+							<Divider aria-hidden="true"></Divider>
+						</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 								{t("details.virtual_item")}
 							</Typography>
-						</SubAccordionSummary>
-						<SubAccordionDetails>
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.pickup_item_id")}
-										</Typography>
-										<RenderAttribute attribute={patronRequest?.pickupItemId} />
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.pickup_item_type")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.pickupItemType}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.pickup_item_status")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.pickupItemStatus}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.pickup_item_status_raw")}
-										</Typography>
-										<RenderAttribute
-											attribute={patronRequest?.rawPickupItemStatus}
-										/>
-									</Stack>
-								</Grid>
-								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-									<Stack direction={"column"}>
-										<Typography variant="attributeTitle">
-											{t("details.pickup_bib_id")}
-										</Typography>
-										<RenderAttribute attribute={patronRequest?.pickupBibId} />
-									</Stack>
-								</Grid>
-							</Grid>
-						</SubAccordionDetails>
-					</SubAccordion>
-				</StyledAccordionDetails>
-			</StyledAccordion>
-			<StyledAccordion // Audit log
-				variant="outlined"
-				expanded={expandedAccordions[5]}
-				onChange={handleAccordionChange(5)}
-				disableGutters
-			>
-				<StyledAccordionSummary
-					aria-controls="request-audit_log"
-					id="request_audit_log"
-					expandIcon={<ExpandMore fontSize="large" />}
-				>
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_item_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupItemId} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_item_type")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupItemType} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_item_status")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupItemStatus} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_item_status_raw")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.rawPickupItemStatus}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_bib_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupBibId} />
+							</Stack>
+						</Grid>
+					</Grid>
+				</TabPanel>
+
+				<TabPanel value={5}>
 					<Typography id="auditlog" variant="accordionSummary">
 						{t("details.audit_log")}
 					</Typography>
-				</StyledAccordionSummary>
-				<StyledAccordionDetails>
 					<ClientDataGrid
 						data={patronRequest?.audit}
 						columns={[
@@ -1564,8 +1375,8 @@ export default function PatronRequestDetails({
 						disableRowGrouping={true}
 					/>
 					<pre>{JSON.stringify(patronRequest?.audit?.auditData, null, 2)}</pre>
-				</StyledAccordionDetails>
-			</StyledAccordion>
+				</TabPanel>
+			</TabContext>
 		</AdminLayout>
 	);
 }

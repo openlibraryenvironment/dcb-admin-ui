@@ -96,6 +96,11 @@ const baseTheme: ThemeOptions = {
 		},
 	},
 	components: {
+		MuiAccordion: {
+			defaultProps: {
+				slotProps: { transition: { timeout: 400 } },
+			},
+		},
 		MuiButton: {
 			defaultProps: {
 				disableRipple: true, // This can also be toggled on a per-variant basis

@@ -10,7 +10,8 @@ export const getSpecialRedirects = (
 		key == "mappings.numeric_range" ||
 		key == "mappings.ref_value" ||
 		key == "nav.libraries.patronRequests.name" ||
-		key == "nav.libraries.supplierRequests.name"
+		key == "nav.libraries.supplierRequests.name" ||
+		key == "nav.patronRequests.name"
 	) {
 		return href + "/all";
 	} else {
