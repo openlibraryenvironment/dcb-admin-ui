@@ -240,7 +240,7 @@ export default function Settings({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.settings_title", { name: library?.fullName })}
+			title={library?.fullName}
 			pageActions={pageActions}
 			mode={"view"}
 		>
@@ -266,6 +266,11 @@ export default function Settings({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
 					</Tabs>
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
+						{t("nav.libraries.settings")}
+					</Typography>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 					<Typography variant="accordionSummary">

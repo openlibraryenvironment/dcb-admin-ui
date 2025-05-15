@@ -359,6 +359,11 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 					</Tabs>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography variant="h2" fontWeight={"bold"}>
+						{t("nav.libraries.profile")}
+					</Typography>
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="accordionSummary">
 						{t("libraries.library")}
 					</Typography>

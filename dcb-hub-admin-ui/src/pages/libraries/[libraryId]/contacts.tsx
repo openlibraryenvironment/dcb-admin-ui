@@ -1,5 +1,5 @@
 import { Library } from "@models/Library";
-import { Button, Grid, Tab, Tabs, useTheme } from "@mui/material";
+import { Button, Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -127,7 +127,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.contacts.title", { name: library?.fullName })}
+			title={library?.fullName}
 			pageActions={pageActions}
 			mode={"view"}
 		>
@@ -153,6 +153,11 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
 					</Tabs>
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography variant="h2" fontWeight={"bold"}>
+						{t("nav.libraries.contacts")}
+					</Typography>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Button

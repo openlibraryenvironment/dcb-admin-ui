@@ -207,9 +207,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.patronRequests.title", {
-				library: library?.fullName,
-			})}
+			title={library?.fullName}
 			pageActions={pageActions}
 			mode={"view"}
 		>

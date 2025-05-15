@@ -123,7 +123,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.service.title", { name: library?.fullName })}
+			title={library?.fullName}
 			pageActions={pageActions}
 			mode={"view"}
 		>
@@ -151,8 +151,13 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Tabs>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-					<Typography variant="accordionSummary">
+					<Typography variant="h2" fontWeight="bold">
 						{t("nav.libraries.service")}
+					</Typography>
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+					<Typography variant="accordionSummary" fontWeight="bold">
+						{t("details.general")}
 					</Typography>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>

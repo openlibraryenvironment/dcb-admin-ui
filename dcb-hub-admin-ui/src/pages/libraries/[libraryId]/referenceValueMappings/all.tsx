@@ -124,9 +124,7 @@ export default function All({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("libraries.config.data.mappings.title", {
-				libraryName: library?.fullName,
-			})}
+			title={library?.fullName}
 			pageActions={pageActions}
 			mode={"view"}
 		>

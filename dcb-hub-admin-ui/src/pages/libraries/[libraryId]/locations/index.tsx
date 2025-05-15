@@ -15,6 +15,7 @@ import {
 	Tab,
 	Tabs,
 	Tooltip,
+	Typography,
 	useTheme,
 } from "@mui/material";
 import { useSession } from "next-auth/react";
@@ -170,7 +171,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	) : (
 		<AdminLayout
-			title={t("locations.new.page_title", { name: library?.fullName })}
+			title={library?.fullName}
 			pageActions={pageActions}
 			mode={"view"}
 		>
@@ -196,6 +197,11 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
 					</Tabs>
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography variant="h2" fontWeight={"bold"}>
+						{t("nav.locations")}
+					</Typography>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					{isAnAdmin ? (
