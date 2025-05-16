@@ -251,7 +251,7 @@ export default function ExpeditedCheckout({
 
 	const locationQuery = isPickupAnywhere
 		? ""
-		: "agency:" + selectedItemLibrary?.agencyId;
+		: "agency:" + selectedLibrary?.agencyId;
 
 	const { data: pickupLocations, loading: pickupLocationsLoading } = useQuery(
 		getLocations,
@@ -275,7 +275,6 @@ export default function ExpeditedCheckout({
 					headers: { Authorization: `Bearer ${session?.accessToken}` },
 					params: {
 						clusteredBibId: bibClusterId,
-						// filters: "none",
 					},
 				},
 			);
