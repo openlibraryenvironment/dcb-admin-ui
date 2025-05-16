@@ -1,4 +1,4 @@
-import EnvironmentDetails from "@components/HomeContent/EnvironmentDetails";
+import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { GetServerSideProps, NextPage } from "next";
@@ -25,7 +25,7 @@ const ServiceStatus: NextPage = () => {
 
 	return (
 		<AdminLayout title={t("nav.serviceInfo.serviceStatus")}>
-			<EnvironmentDetails />
+			<CombinedEnvironmentComponent />
 		</AdminLayout>
 	);
 };

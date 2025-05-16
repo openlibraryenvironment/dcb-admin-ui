@@ -6,7 +6,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
-import EnvironmentDetails from "@components/HomeContent/EnvironmentDetails";
+import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 
 const Onboarding: NextPage = () => {
 	const { t } = useTranslation();
@@ -63,7 +63,7 @@ const Onboarding: NextPage = () => {
 					<ConsortiumDetails />
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<EnvironmentDetails />
+					<CombinedEnvironmentComponent />
 				</Grid>
 			</Grid>
 		</AdminLayout>

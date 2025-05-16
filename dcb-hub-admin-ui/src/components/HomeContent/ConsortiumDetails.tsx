@@ -1,8 +1,8 @@
-import SimpleTable from "@components/SimpleTable/SimpleTable";
 import { useTranslation } from "next-i18next"; //localisation
 import Link from "@components/Link/Link";
 import { ONBOARDING_LINKS } from "homeData/homeConfig";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 
 export default function ConsortiumDetails() {
 	const { t } = useTranslation();
@@ -106,13 +106,38 @@ export default function ConsortiumDetails() {
 	];
 
 	return (
-		<SimpleTable
-			column_names={[
-				t("onboarding.summary.stage"),
-				t("onboarding.summary.action"),
-				t("onboarding.summary.status"),
+		<ClientDataGrid
+			selectable={false}
+			toolbarVisible="not-visible"
+			disableAggregation
+			disableRowGrouping
+			coreType="consortiumDetails"
+			operationDataType="consortiumDetails"
+			type="consortiumDetails"
+			columns={[
+				{
+					field: "stage",
+					headerName: t("onboarding.summary.stage"),
+					filterable: false,
+					sortable: false,
+					editable: false,
+				},
+				{
+					field: "action",
+					headerName: t("onboarding.summary.action"),
+					filterable: false,
+					sortable: false,
+					editable: false,
+				},
+				{
+					field: "status",
+					headerName: t("onboarding.summary.status"),
+					filterable: false,
+					sortable: false,
+					editable: false,
+				},
 			]}
-			row_data={ConsortiumDetails}
+			data={ConsortiumDetails}
 		/>
 	);
 }

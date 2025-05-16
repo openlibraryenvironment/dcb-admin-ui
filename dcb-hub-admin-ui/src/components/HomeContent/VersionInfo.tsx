@@ -1,115 +1,160 @@
-import getConfig from "next/config";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useEffect, useState, useMemo } from "react";
-import SimpleTable from "@components/SimpleTable/SimpleTable";
-import Link from "@components/Link/Link";
-import { useTranslation } from "next-i18next"; //localisation
+import getConfig from "next/config";
+import { GridColDef } from "@mui/x-data-grid-premium";
+import { LOCAL_VERSION_LINKS } from "homeData/homeConfig";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 import {
-	REPO_LINKS,
-	RELEASE_PAGE_LINKS,
-	API_LINKS,
-	LOCAL_VERSION_LINKS,
-} from "../../../homeData/homeConfig";
-import { InfoEndpointResponse } from "@models/GitResponseTypes";
-import { isEmpty } from "lodash";
+	Release,
+	ServiceInfo,
+	Tag,
+	VersionData,
+} from "@models/VersionInfoTypes";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
 
-export default function VersionInfo() {
-	const { publicRuntimeConfig } = getConfig();
-	const { t } = useTranslation();
-	const [serviceData, setServiceData] = useState<InfoEndpointResponse | null>(
-		null,
-	);
+const VersionInfo: React.FC = () => {
+	const [loading, setLoading] = useState<boolean>(true);
+	const [error, setError] = useState<string | null>(null);
+	const [versionData, setVersionData] = useState<VersionData[]>([]);
+	console.log(error);
+	const { publicRuntimeConfig } = getConfig() || {
+		publicRuntimeConfig: { version: "unknown" },
+	};
 
-	const [githubServiceData, setGithubServiceData] = useState<any>(null);
-	const [adminUiData, setAdminUiData] = useState<InfoEndpointResponse | null>(
-		null,
-	);
-
-	const apiEndpoints = useMemo(
-		() => [
-			{ link: LOCAL_VERSION_LINKS.SERVICE_INFO, setter: setServiceData },
-			{ link: API_LINKS.SERVICE, setter: setGithubServiceData },
-			{ link: API_LINKS.ADMIN_UI, setter: setAdminUiData },
-		],
-		[],
-	);
-
+	// Fetch data from all sources
 	useEffect(() => {
-		const getServerInformation = async () => {
+		const fetchData = async () => {
 			try {
-				// Perform multiple API calls at the same time using Promise.allSettled
-				// Disabled because removing the unused var will necessitate re-working the page.
-				// Which should be done separately.
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const responses = await Promise.allSettled(
-					apiEndpoints.map(async ({ link, setter }) => {
-						try {
-							// Make API call and set the state with response data
-							const response = await axios.get<InfoEndpointResponse>(link);
-							setter(response.data);
-							return { status: "fulfilled" }; // Return status for the response
-						} catch (error) {
-							// Log error if fetching data from an endpoint fails
-							console.error(`Error fetching data from ${link}`, error);
-							return { status: "rejected", reason: error };
-						}
-					}),
+				setLoading(true);
+
+				// Initialize data array with loading state
+				setVersionData([
+					{
+						id: 1,
+						repository: "dcb-service",
+						latestVersion: "Loading...",
+						currentVersion: "Loading...",
+						status: "loading",
+						detailType: "tag",
+					},
+					{
+						id: 2,
+						repository: "dcb-admin-ui",
+						latestVersion: "Loading...",
+						currentVersion: "Loading...",
+						status: "loading",
+						detailType: "release",
+					},
+				]);
+
+				// Fetch all the required data in parallel
+				const [serviceTags, serviceInfo, adminRelease] = await Promise.all([
+					axios.get<Tag[]>(
+						"https://api.github.com/repos/openlibraryenvironment/dcb-service/tags",
+					),
+					axios.get<ServiceInfo>(LOCAL_VERSION_LINKS.SERVICE_INFO),
+					axios.get<Release>(
+						"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
+					),
+				]);
+				console.log(serviceTags);
+
+				// Update with actual data
+				const newVersionData: VersionData[] = [
+					{
+						id: 1,
+						repository: "dcb-service",
+						latestVersion: serviceTags.data[0]?.name || "Unknown",
+						currentVersion: serviceInfo.data?.app?.version || "Unknown",
+						status:
+							serviceTags.data[0]?.name === serviceInfo.data?.app?.version
+								? "current"
+								: "outdated",
+						latestData: serviceTags.data[0],
+						currentData: serviceInfo?.data,
+						detailType: "tag",
+					},
+					{
+						id: 2,
+						repository: "dcb-admin-ui",
+						latestVersion: adminRelease.data?.tag_name || "Unknown",
+						currentVersion: publicRuntimeConfig?.version || "Unknown",
+						status:
+							adminRelease.data?.tag_name === publicRuntimeConfig?.version
+								? "current"
+								: "outdated",
+						latestData: adminRelease.data,
+						currentData: publicRuntimeConfig?.version,
+						detailType: "release",
+					},
+				];
+				if (
+					!serviceTags.data ||
+					serviceTags.data.length === 0 ||
+					serviceInfo.data?.git?.closest === "" ||
+					!serviceInfo.data?.git?.closest
+				) {
+					// Check branch information
+					if (serviceInfo.data?.git?.branch === "main") {
+						// Default to latest version with "-Dev" suffix
+						newVersionData[0].currentVersion = serviceTags.data[0]?.name
+							? `${serviceTags.data[0].name}-Dev`
+							: `${adminRelease.data?.tag_name || "Unknown"}-Dev`;
+					}
+				}
+				setVersionData(newVersionData);
+				setLoading(false);
+			} catch (err) {
+				console.error("Error fetching version information:", err);
+				setError(
+					"Failed to fetch version information. Please try again later.",
 				);
-			} catch (error) {
-				// Catch any unhandled exceptions during the API calls
-				console.error("Error fetching version information", error);
+				setLoading(false);
 			}
 		};
 
-		getServerInformation();
-	}, [apiEndpoints]);
+		fetchData();
+	}, [publicRuntimeConfig?.version]);
 
-	const renderVersionData = (data: any) => {
-		if (typeof data === "string" && data.trim() !== "") {
-			return data;
-		}
-		return "NA";
-	};
-
-	const VersionData = [
-		[
-			<Link key="dcb-service" href={REPO_LINKS.SERVICE}>
-				{t("app.component.service")}
-			</Link>,
-			<Link key="dcb-service-version" href={RELEASE_PAGE_LINKS.SERVICE}>
-				{githubServiceData
-					? renderVersionData(githubServiceData?.[0]?.name)
-					: t("environment.loading_release_info")}
-			</Link>,
-			serviceData
-				? renderVersionData(
-						isEmpty(serviceData?.git?.tags)
-							? githubServiceData?.[0]?.name + " (Dev)"
-							: githubServiceData?.[0]?.name,
-					)
-				: t("environment.loading_version_info"),
-		],
-		[
-			<Link key="dcb-admin-ui" href={REPO_LINKS.ADMIN_UI}>
-				{t("app.component.admin")}
-			</Link>,
-			<Link key="dcb-admin-ui-version" href={RELEASE_PAGE_LINKS.ADMIN_UI}>
-				{adminUiData
-					? renderVersionData(adminUiData?.tag_name)
-					: t("environment.loading_release_info")}
-			</Link>,
-			publicRuntimeConfig?.version,
-		],
+	// Column definitions for the data grid
+	const columns: GridColDef[] = [
+		{
+			field: "repository",
+			headerName: "Repository",
+			flex: 1,
+			sortable: false,
+		},
+		{
+			field: "latestVersion",
+			headerName: "Latest Version",
+			flex: 1,
+			sortable: false,
+		},
+		{
+			field: "currentVersion",
+			headerName: "Current Version",
+			flex: 1,
+			sortable: false,
+		},
 	];
 
 	return (
-		<SimpleTable
-			column_names={[
-				t("environment.component"),
-				t("environment.latest_version"),
-				t("environment.your_version"),
-			]}
-			row_data={VersionData}
+		<ClientDataGrid
+			data={versionData ?? []}
+			columns={columns}
+			loading={loading}
+			selectable={false}
+			type="versionInfo"
+			coreType="versionInfo"
+			operationDataType="versionInfo"
+			disableAggregation
+			disableRowGrouping
+			getDetailPanelContent={({ row }: any) => (
+				<MasterDetail row={row} type="versionInfo" />
+			)}
+			toolbarVisible="not-visible"
 		/>
 	);
-}
+};
+
+export default VersionInfo;
