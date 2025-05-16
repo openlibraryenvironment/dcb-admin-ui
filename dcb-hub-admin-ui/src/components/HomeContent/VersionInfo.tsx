@@ -20,8 +20,7 @@ export default function VersionInfo() {
 		null,
 	);
 
-	const [githubServiceData, setGithubServiceData] =
-		useState<InfoEndpointResponse | null>(null);
+	const [githubServiceData, setGithubServiceData] = useState<any>(null);
 	const [adminUiData, setAdminUiData] = useState<InfoEndpointResponse | null>(
 		null,
 	);
@@ -79,14 +78,14 @@ export default function VersionInfo() {
 			</Link>,
 			<Link key="dcb-service-version" href={RELEASE_PAGE_LINKS.SERVICE}>
 				{githubServiceData
-					? renderVersionData(githubServiceData?.name)
+					? renderVersionData(githubServiceData?.[0]?.name)
 					: t("environment.loading_release_info")}
 			</Link>,
 			serviceData
 				? renderVersionData(
 						isEmpty(serviceData?.git?.tags)
-							? serviceData?.git?.closest?.tag?.name + " (Dev)"
-							: serviceData?.git?.tags,
+							? githubServiceData?.[0]?.name + " (Dev)"
+							: githubServiceData?.[0]?.name,
 					)
 				: t("environment.loading_version_info"),
 		],
