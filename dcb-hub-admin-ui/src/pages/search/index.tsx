@@ -19,7 +19,6 @@ import { IconButton, InputAdornment, TextField } from "@mui/material";
 import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
 import getConfig from "next/config";
 import { validate } from "uuid";
-import { determineAcceptableVersion } from "src/helpers/determineVersion";
 
 const debouncedSearchFunction = debounce(
 	(term: string, callback: (term: string) => void) => {
@@ -89,8 +88,6 @@ const Search: NextPage = () => {
 	const { t } = useTranslation();
 	const { data: session } = useSession();
 	const { publicRuntimeConfig } = getConfig();
-	const [locateVersion, setLocateVersion] = useState<string | null>(null);
-	const [versionLoaded, setVersionLoaded] = useState(false);
 
 	const [searchResults, setSearchResults] = useState<any>({
 		instances: [],

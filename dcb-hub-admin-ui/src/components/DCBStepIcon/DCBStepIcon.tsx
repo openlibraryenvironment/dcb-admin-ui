@@ -9,7 +9,6 @@ export default function DCBStepIcon(props: StepIconProps) {
 	const iconSize = 28;
 
 	if (error) {
-		("bol");
 		return (
 			<Avatar
 				sx={{

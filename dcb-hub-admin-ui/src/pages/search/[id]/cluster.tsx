@@ -6,8 +6,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
 import { Tooltip, useTheme } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Cancel } from "@mui/icons-material";
+import { Cancel, CheckCircle } from "@mui/icons-material";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
@@ -21,6 +20,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import StaffRequest from "../../../forms/StaffRequest/StaffRequest";
 import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
+import { ClientDataGrid } from "@components/ClientDataGrid";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
@@ -175,7 +175,7 @@ const Clusters: NextPage = () => {
 					/>
 				) : null}
 			</div>
-			<DataGridPremium
+			<ClientDataGrid
 				loading={loading}
 				data={rows ?? []}
 				columns={columns}
