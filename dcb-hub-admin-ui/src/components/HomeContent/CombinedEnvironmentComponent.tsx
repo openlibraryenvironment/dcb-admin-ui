@@ -43,21 +43,21 @@ export default function CombinedEnvironmentComponent() {
 	const { t } = useTranslation();
 
 	// Function to calculate RAG status
-	const calculateRAGStatus = (healthData: any, environment: Environment) => {
-		if (!healthData) return "Undefined";
-
-		switch (environment) {
-			case Environment.DCB:
-				return calculateDCBRAGStatus(healthData);
-			case Environment.Keycloak:
-				return calculateKeycloakRAGStatus(healthData);
-			default:
-				return "Undefined";
-		}
-	};
 
 	// Fetch environment data
 	useEffect(() => {
+		const calculateRAGStatus = (healthData: any, environment: Environment) => {
+			if (!healthData) return t("common.unknown");
+
+			switch (environment) {
+				case Environment.DCB:
+					return calculateDCBRAGStatus(healthData);
+				case Environment.Keycloak:
+					return calculateKeycloakRAGStatus(healthData);
+				default:
+					return t("common.unknown");
+			}
+		};
 		const fetchEnvironmentData = async () => {
 			try {
 				setIsLoading(true);
@@ -67,15 +67,62 @@ export default function CombinedEnvironmentComponent() {
 					LOCAL_VERSION_LINKS.SERVICE_INFO,
 				);
 
-				// Fetch DCB health status
+				// Fetch DCB health status with liveness fallback and timeout
 				let dcbHealthData;
-				try {
-					const dcbHealthResponse = await axios.get(
-						LOCAL_VERSION_LINKS.SERVICE_HEALTH,
+				let dcbHealthStatus;
+				let dcbHealthLink = LOCAL_VERSION_LINKS.SERVICE_HEALTH;
+
+				// Set up a timeout promise that rejects after 10 seconds
+				const healthTimeout = new Promise((_, reject) => {
+					setTimeout(
+						() => reject(new Error("Health endpoint timeout after 10 seconds")),
+						10000,
 					);
+				});
+
+				try {
+					// Race the health request against the timeout
+					const dcbHealthResponse = (await Promise.race([
+						axios.get(LOCAL_VERSION_LINKS.SERVICE_HEALTH),
+						healthTimeout,
+					])) as any;
+
+					// If the health request completed successfully before the timeout
 					dcbHealthData = dcbHealthResponse.data;
+					dcbHealthStatus = calculateRAGStatus(dcbHealthData, Environment.DCB);
 				} catch (err: any) {
-					dcbHealthData = err.response?.data || null;
+					// If there was an error (timeout or API error), try the liveness endpoint
+					console.log("Falling back to liveness endpoint due to:", err.message);
+
+					try {
+						// Assuming liveness endpoint is at this path - adjust if needed
+						const livenessEndpoint = LOCAL_VERSION_LINKS.SERVICE_HEALTH.replace(
+							"/health",
+							"/health/liveness",
+						);
+						const livenessResponse = await axios.get(livenessEndpoint);
+
+						// If we get a 200 status code, mark as "Up"
+						if (livenessResponse.status === 200) {
+							dcbHealthStatus = "Up";
+							dcbHealthLink = livenessEndpoint;
+						} else {
+							// If liveness check doesn't return 200, fallback to original error data
+							dcbHealthData = err.response?.data || null;
+							dcbHealthStatus = calculateRAGStatus(
+								dcbHealthData,
+								Environment.DCB,
+							);
+						}
+					} catch (livenessErr) {
+						console.log(livenessErr);
+						// If liveness check also fails, use original error data
+						dcbHealthData = err.response?.data || null;
+						dcbHealthStatus = calculateRAGStatus(
+							dcbHealthData,
+							Environment.DCB,
+						);
+					}
 				}
 
 				// Fetch Keycloak health status
@@ -98,8 +145,8 @@ export default function CombinedEnvironmentComponent() {
 							responseDCBDescription.data?.env?.description ||
 							t("common.loading"),
 						address: LOCAL_VERSION_LINKS.SERVICE,
-						healthStatus: calculateRAGStatus(dcbHealthData, Environment.DCB),
-						healthLink: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
+						healthStatus: dcbHealthStatus,
+						healthLink: dcbHealthLink,
 						environmentType: Environment.DCB,
 					},
 					{
@@ -142,20 +189,26 @@ export default function CombinedEnvironmentComponent() {
 		{
 			field: "serviceName",
 			headerName: t("service.name"),
-			flex: 1,
+			flex: 0.3,
 			sortable: false,
+			filterable: false,
+			editable: false,
 		},
 		{
 			field: "environment",
 			headerName: t("service.environment"),
-			flex: 1,
+			flex: 0.7,
 			sortable: false,
+			filterable: false,
+			editable: false,
 		},
 		{
 			field: "address",
 			headerName: t("service.address"),
-			flex: 1,
+			flex: 0.5,
 			sortable: false,
+			filterable: false,
+			editable: false,
 			renderCell: (params) => (
 				<Link
 					href={
@@ -171,8 +224,10 @@ export default function CombinedEnvironmentComponent() {
 		{
 			field: "healthStatus",
 			headerName: t("service.status"),
-			flex: 1,
+			flex: 0.3,
 			sortable: false,
+			filterable: false,
+			editable: false,
 			renderCell: (params) => (
 				<Link href={params.row.healthLink}>{params.value}</Link>
 			),

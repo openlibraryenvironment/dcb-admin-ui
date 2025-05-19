@@ -142,6 +142,7 @@
 
 	"environment": {
 		"your": "Your $t(app.dcb) environment",
+		"changelog": "Changelog",
 		"configured_for": "This installation of $t(app.name) is configured for",
 		"compare_components": "The latest versions of $t(app.dcb) system components are",
 		"component": "Component",

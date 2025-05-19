@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import getConfig from "next/config";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import {
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+	GridColDef,
+} from "@mui/x-data-grid-premium";
 import { LOCAL_VERSION_LINKS } from "homeData/homeConfig";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import {
@@ -11,12 +14,15 @@ import {
 	VersionData,
 } from "@models/VersionInfoTypes";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
+import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+import { useTranslation } from "next-i18next";
 
 const VersionInfo: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<string | null>(null);
 	const [versionData, setVersionData] = useState<VersionData[]>([]);
-	console.log(error);
+	const { t } = useTranslation();
+
 	const { publicRuntimeConfig } = getConfig() || {
 		publicRuntimeConfig: { version: "unknown" },
 	};
@@ -57,7 +63,6 @@ const VersionInfo: React.FC = () => {
 						"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
 					),
 				]);
-				console.log(serviceTags);
 
 				// Update with actual data
 				const newVersionData: VersionData[] = [
@@ -65,7 +70,9 @@ const VersionInfo: React.FC = () => {
 						id: 1,
 						repository: "dcb-service",
 						latestVersion: serviceTags.data[0]?.name || "Unknown",
-						currentVersion: serviceInfo.data?.app?.version || "Unknown",
+						currentVersion: serviceInfo.data?.git?.closest?.tag?.name
+							? serviceInfo.data?.git?.closest?.tag?.name
+							: serviceInfo.data?.git?.tags || "Unknown",
 						status:
 							serviceTags.data[0]?.name === serviceInfo.data?.app?.version
 								? "current"
@@ -106,9 +113,7 @@ const VersionInfo: React.FC = () => {
 				setLoading(false);
 			} catch (err) {
 				console.error("Error fetching version information:", err);
-				setError(
-					"Failed to fetch version information. Please try again later.",
-				);
+
 				setLoading(false);
 			}
 		};
@@ -118,6 +123,14 @@ const VersionInfo: React.FC = () => {
 
 	// Column definitions for the data grid
 	const columns: GridColDef[] = [
+		{
+			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+			headerName: t("ui.data_grid.master_detail"),
+			renderCell: (params) => (
+				<DetailPanelToggle id={params.id} value={params.value} />
+			),
+			renderHeader: () => <DetailPanelHeader />,
+		},
 		{
 			field: "repository",
 			headerName: "Repository",

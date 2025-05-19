@@ -23,7 +23,6 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import { ExpandMore } from "@mui/icons-material";
 import { LocationCell } from "@components/LocationCell/LocationCell";
-import { Release, Tag } from "@models/VersionInfoTypes";
 import ReactMarkdown from "react-markdown";
 
 type MasterDetailType = {
@@ -51,10 +50,6 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 	}, [apiRef, handleViewportInnerSizeChange]);
 
 	const { t } = useTranslation();
-
-	const tagData = row?.latestData as Tag;
-	const releaseData = row?.latestData as Release;
-	console.log(row);
 
 	switch (type) {
 		case "agencies":
@@ -617,7 +612,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									<Typography variant="attributeTitle">
 										{t("environment.latest_version")}
 									</Typography>
-									<RenderAttribute attribute={tagData?.name} />
+									<RenderAttribute attribute={row?.latestData?.name} />
 								</Stack>
 							</Grid>
 
@@ -629,7 +624,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									<RenderAttribute
 										attribute={
 											"https://github.com/openlibraryenvironment/dcb-service/releases/tag/" +
-											tagData?.name
+											row?.latestData?.name
 										}
 										type="url"
 									/>
@@ -638,12 +633,11 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
-										{t("environment.last_commit_url")}
+										{t("environment.changelog")}
 									</Typography>
 									<RenderAttribute
 										attribute={
-											"https://github.com/openlibraryenvironment/dcb-service/commit/" +
-											tagData?.commit?.sha
+											"https://github.com/openlibraryenvironment/dcb-service/blob/main/changelog.md"
 										}
 										type="url"
 									/>
@@ -658,7 +652,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 										{t("environment.latest_version_released")}
 									</Typography>
 									<RenderAttribute
-										attribute={dayjs(releaseData?.published_at).format(
+										attribute={dayjs(row?.latestData?.published_at).format(
 											"YYYY-MM-DD HH:mm",
 										)}
 									/>
@@ -667,9 +661,23 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
 									<Typography variant="attributeTitle">
+										{t("environment.latest_version_github")}
+									</Typography>
+									<RenderAttribute
+										attribute={
+											"https://github.com/openlibraryenvironment/dcb-admin-ui/releases/" +
+											row?.latestData?.name
+										}
+										type="url"
+									/>
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
 										{t("details.author")}
 									</Typography>
-									<RenderAttribute attribute={releaseData?.author?.login} />
+									<RenderAttribute attribute={row?.latestData?.author?.login} />
 								</Stack>
 							</Grid>
 							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
@@ -679,7 +687,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									</StyledDataGridAccordionSummary>
 									<StyledAccordionDetails>
 										<ReactMarkdown>
-											{releaseData?.body || "No release notes available."}
+											{row?.latestData?.body || "No release notes available."}
 										</ReactMarkdown>
 									</StyledAccordionDetails>
 								</StyledDataGridAccordion>
