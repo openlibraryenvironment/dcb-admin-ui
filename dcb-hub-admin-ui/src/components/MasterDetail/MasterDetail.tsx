@@ -17,11 +17,13 @@ import dayjs from "dayjs";
 import { formatDuration } from "src/helpers/formatDuration";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import {
+	StyledAccordionDetails,
 	StyledDataGridAccordion,
 	StyledDataGridAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
 import { ExpandMore } from "@mui/icons-material";
 import { LocationCell } from "@components/LocationCell/LocationCell";
+import ReactMarkdown from "react-markdown";
 
 type MasterDetailType = {
 	row: any;
@@ -598,6 +600,100 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.parsedVolumeStatement} />
 						</Stack>
 					</Grid>
+				</MasterDetailLayout>
+			);
+		case "versionInfo":
+			return (
+				<MasterDetailLayout width={width}>
+					{row?.repository === "dcb-service" ? (
+						<>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("environment.latest_version")}
+									</Typography>
+									<RenderAttribute attribute={row?.latestData?.name} />
+								</Stack>
+							</Grid>
+
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("environment.latest_version_github")}
+									</Typography>
+									<RenderAttribute
+										attribute={
+											"https://github.com/openlibraryenvironment/dcb-service/releases/tag/" +
+											row?.latestData?.name
+										}
+										type="url"
+									/>
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("environment.changelog")}
+									</Typography>
+									<RenderAttribute
+										attribute={
+											"https://github.com/openlibraryenvironment/dcb-service/blob/main/changelog.md"
+										}
+										type="url"
+									/>
+								</Stack>
+							</Grid>
+						</>
+					) : (
+						<>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("environment.latest_version_released")}
+									</Typography>
+									<RenderAttribute
+										attribute={dayjs(row?.latestData?.published_at).format(
+											"YYYY-MM-DD HH:mm",
+										)}
+									/>
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("environment.latest_version_github")}
+									</Typography>
+									<RenderAttribute
+										attribute={
+											"https://github.com/openlibraryenvironment/dcb-admin-ui/releases/" +
+											row?.latestData?.name
+										}
+										type="url"
+									/>
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("details.author")}
+									</Typography>
+									<RenderAttribute attribute={row?.latestData?.author?.login} />
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+								<StyledDataGridAccordion>
+									<StyledDataGridAccordionSummary expandIcon={<ExpandMore />}>
+										<Typography>{t("openrs.dcb.release_notes")}</Typography>
+									</StyledDataGridAccordionSummary>
+									<StyledAccordionDetails>
+										<ReactMarkdown>
+											{row?.latestData?.body || "No release notes available."}
+										</ReactMarkdown>
+									</StyledAccordionDetails>
+								</StyledDataGridAccordion>
+							</Grid>
+						</>
+					)}
 				</MasterDetailLayout>
 			);
 

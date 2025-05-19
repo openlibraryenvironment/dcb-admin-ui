@@ -4,7 +4,7 @@ const { publicRuntimeConfig } = getConfig();
 
 const API_LINKS = {
 	SERVICE:
-		"https://api.github.com/repos/openlibraryenvironment/dcb-service/releases/latest",
+		"https://api.github.com/repos/openlibraryenvironment/dcb-service/tags",
 	ADMIN_UI:
 		"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
 };
