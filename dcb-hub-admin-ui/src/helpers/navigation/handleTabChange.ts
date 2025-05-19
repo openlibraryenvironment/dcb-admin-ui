@@ -136,3 +136,26 @@ export const handleTopLevelPatronRequestTabChange = (
 			break;
 	}
 };
+
+export const handleConsortiumTabChange = (
+	event: React.SyntheticEvent,
+	newValue: number,
+	router: NextRouter,
+	setTabIndex: Dispatch<SetStateAction<number>>,
+) => {
+	setTabIndex(newValue);
+	switch (newValue) {
+		case 0:
+			router.push("/consortium");
+			break;
+		case 1:
+			router.push("/consortium/functionalSettings");
+			break;
+		case 2:
+			router.push("/consortium/onboarding");
+			break;
+		case 3:
+			router.push("/consortium/contacts");
+			break;
+	}
+};

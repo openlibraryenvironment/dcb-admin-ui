@@ -7,29 +7,12 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
 import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
+import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
 
 const Onboarding: NextPage = () => {
 	const { t } = useTranslation();
 	const [tabIndex, setTabIndex] = useState(2);
 	const router = useRouter();
-
-	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-		setTabIndex(newValue);
-		switch (newValue) {
-			case 0:
-				router.push("/consortium");
-				break;
-			case 1:
-				router.push("/consortium/functionalSettings");
-				break;
-			case 2:
-				router.push("/consortium/onboarding");
-				break;
-			case 3:
-				router.push("/consortium/contacts");
-				break;
-		}
-	};
 
 	return (
 		<AdminLayout title={t("nav.consortium.onboarding")}>
@@ -41,7 +24,9 @@ const Onboarding: NextPage = () => {
 			>
 				<Tabs
 					value={tabIndex}
-					onChange={handleTabChange}
+					onChange={(event, value) => {
+						handleConsortiumTabChange(event, value, router, setTabIndex);
+					}}
 					aria-label="Consortium Navigation"
 				>
 					<Tab label={t("nav.consortium.profile")} />

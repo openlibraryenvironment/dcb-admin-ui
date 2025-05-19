@@ -17,6 +17,7 @@ import { ClientDataGrid } from "@components/ClientDataGrid";
 import NewContact from "../../forms/NewContact/NewContact";
 import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
 
 const Contacts: NextPage = () => {
 	const { t } = useTranslation();
@@ -41,24 +42,6 @@ const Contacts: NextPage = () => {
 
 	const consortiumContacts: Person[] = data?.consortia?.content[0]?.contacts;
 
-	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-		setTabIndex(newValue);
-		switch (newValue) {
-			case 0:
-				router.push("/consortium");
-				break;
-			case 1:
-				router.push("/consortium/functionalSettings");
-				break;
-			case 2:
-				router.push("/consortium/onboarding");
-				break;
-			case 3:
-				router.push("/consortium/contacts");
-				break;
-		}
-	};
-
 	return (
 		<AdminLayout title={t("nav.consortium.contacts")}>
 			<Grid
@@ -70,7 +53,9 @@ const Contacts: NextPage = () => {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
-						onChange={handleTabChange}
+						onChange={(event, value) => {
+							handleConsortiumTabChange(event, value, router, setTabIndex);
+						}}
 						aria-label="Consortium Navigation"
 					>
 						<Tab label={t("nav.consortium.profile")} />

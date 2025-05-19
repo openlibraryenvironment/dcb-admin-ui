@@ -1,75 +1,139 @@
 import { ApolloClient } from "@apollo/client";
 import { TFunction } from "i18next";
-import { isEmpty } from "lodash";
 import { NextRouter } from "next/router";
 import { Dispatch, RefObject, SetStateAction } from "react";
+import { UseFormReset } from "react-hook-form";
 
+/**
+ * Generic function to handle confirmation and saving of entity changes
+ * @param entityId - ID of the entity being updated
+ * @param changedFields - Object containing the changed field values
+ * @param updateMutation - Apollo mutation function to execute
+ * @param client - Apollo client for refetching queries
+ * @param setters - Object containing state setters
+ * @param displayInfo - Object containing display information
+ * @param changeMetadata - Object containing metadata about the change
+ * @param refetchQueries - Array of query names to refetch
+ * @param storeUpdates - Optional function to update any external stores with new values
+ * @param reset - Optional form reset function from react-hook-form
+ * @param resetValues - Optional values to use when resetting the form
+ */
 export const handleSaveConfirmation = async (
-	entity: any,
+	entityId: string,
 	changedFields: any,
-	updateEntity: any,
+	updateMutation: any,
 	client: ApolloClient<object>,
-	setEditMode: Dispatch<SetStateAction<boolean>>,
-	setChangedFields: Dispatch<SetStateAction<any>>,
-	setAlert: Dispatch<SetStateAction<any>>,
-	setDirty: Dispatch<SetStateAction<boolean>>,
-	setConfirmationEdit: Dispatch<SetStateAction<any>>,
-	t: TFunction<"common" | "application" | "validation">,
-	reason: string,
-	changeCategory: string,
-	changeReferenceUrl: string,
-	updateName: string,
-	entityType: string,
-	refetchQuery: string,
+	setters: {
+		setEditMode: Dispatch<SetStateAction<boolean>>;
+		setChangedFields: Dispatch<SetStateAction<any>>;
+		setAlert: Dispatch<SetStateAction<any>>;
+		setConfirmation?: Dispatch<SetStateAction<boolean>>;
+	},
+	displayInfo: {
+		entityName: string;
+		entityType: string;
+		mutationName: string;
+		t: TFunction<any>;
+	},
+	changeMetadata: {
+		reason: string;
+		changeCategory: string;
+		changeReferenceUrl?: string;
+	},
+	refetchQueries: string[],
+	reset: UseFormReset<any>,
+	resetOptions?: string[],
+	storeUpdates?: (changedFields: any) => void,
 ) => {
+	const { setEditMode, setChangedFields, setAlert, setConfirmation } = setters;
+	const { entityName, entityType, mutationName, t } = displayInfo;
+	const { reason, changeCategory, changeReferenceUrl } = changeMetadata;
+
 	try {
-		const { data } = await updateEntity({
+		// Update store values if provided (for UI consistency before refetch)
+		if (storeUpdates) {
+			storeUpdates(changedFields);
+		}
+		const { data } = await updateMutation({
 			variables: {
 				input: {
-					id: entity.id,
-					changeCategory: changeCategory,
-					reason: reason,
-					changeReferenceUrl: changeReferenceUrl,
+					id: entityId,
 					...changedFields,
+					reason,
+					changeCategory,
+					changeReferenceUrl,
 				},
 			},
 		});
 
-		if (data?.[updateName]) {
+		// Check if mutation was successful
+		if (data?.[mutationName]) {
 			setEditMode(false);
 			setChangedFields({});
-			setDirty(false);
-			// Refetch the data for the updated entity
-			client.refetchQueries({
-				include: [refetchQuery],
-			});
+
+			// Refetch queries to update data
+			if (refetchQueries.length > 0) {
+				await client.refetchQueries({
+					include: refetchQueries,
+				});
+			}
+
+			// Reset the form with the latest data
+			// Otherwise react-hook-form may believe it's still dirty
+			// And unsaved changes warning will pop up
+
+			if (resetOptions && resetOptions.length > 0) {
+				const responseData = data[mutationName];
+				// Create an object with only the fields we want to reset from the response
+				const fieldsToReset = resetOptions.reduce(
+					(acc, fieldName) => {
+						if (responseData && fieldName in responseData) {
+							acc[fieldName] = responseData[fieldName];
+						}
+						return acc;
+					},
+					{} as Record<string, any>,
+				);
+
+				// Reset form with the selected fields from the response
+				if (Object.keys(fieldsToReset).length > 0) {
+					console.log(fieldsToReset);
+					reset(fieldsToReset, { keepValues: false });
+				} else {
+					// Fall back to standard reset if no fields were found in the response
+					reset();
+				}
+			} else {
+				console.log("Standard reset");
+				reset();
+			}
 
 			setAlert({
 				open: true,
 				severity: "success",
 				text: t("ui.data_grid.edit_success", {
 					entity: entityType,
-					name: entity.name ?? (entity.fullName ? entity.fullName : entity.id), // Use name if available, fall back to id if not
+					name: entityName,
 				}),
 				title: t("ui.data_grid.updated"),
 			});
 		}
 	} catch (error) {
-		console.error(
-			`Error updating ${entity.name ?? (entity.fullName ? entity.fullName : entity.id)}:`,
-			error,
-		);
+		console.error(`Error updating ${entityType} ${entityName}:`, error);
 		setAlert({
 			open: true,
 			severity: "error",
 			text: t("ui.data_grid.edit_error", {
 				entity: entityType,
-				name: entity.name ?? (entity.fullName ? entity.fullName : entity.id),
+				name: entityName,
 			}),
-			title: t("ui.data_grid.updated"),
+			title: t("ui.data_grid.error"),
 		});
 	} finally {
-		setConfirmationEdit(false);
+		// Close any confirmation dialogs
+		if (setConfirmation) {
+			setConfirmation(false);
+		}
 	}
 };
 
@@ -97,150 +161,44 @@ export const closeConfirmation = (
 	});
 };
 
-// export const updateField = (
-// 	field: keyof any,
-// 	value: any,
-// 	setEditableFields: Dispatch<SetStateAction<any>>,
-// 	setChangedFields: Dispatch<SetStateAction<any>>,
-// 	entity: any,
-// ) => {
-// 	setEditableFields((prev: any) => ({
-// 		...prev,
-// 		[field]: value,
-// 	}));
-
-// 	// Use JSON.stringify to compare values more reliably
-// 	const isChanged = JSON.stringify(value) !== JSON.stringify(entity[field]);
-
-// 	if (isChanged) {
-// 		setChangedFields((prev: any) => ({
-// 			...prev,
-// 			[field]: value,
-// 		}));
-// 	} else {
-// 		setChangedFields((prev: any) => {
-// 			const newChangedFields = { ...prev };
-// 			delete newChangedFields[field];
-// 			return newChangedFields;
-// 		});
-// 	}
-// };
-
-export const updateField = (
-	field: keyof any,
-	value: any,
-	setEditableFields: Dispatch<SetStateAction<any>>,
-	setChangedFields: Dispatch<SetStateAction<any>>,
-	entity: any,
+/**
+ * Handle cancellation of editing mode
+ * @param setters - Object containing state setters
+ * @param reset - Form reset function from react-hook-form
+ * @param resetValues - Specific values to reset the form to (optional)
+ */
+export const handleCancel = (
+	setters: {
+		setEditMode: Dispatch<SetStateAction<boolean>>;
+		setChangedFields: Dispatch<SetStateAction<any>>;
+	},
+	reset: UseFormReset<any>,
+	resetValues?: any,
 ) => {
-	setEditableFields((prev: any) => ({
-		...prev,
-		[field]: value,
-	}));
-	if (value !== entity[field]) {
-		if (isEmpty(value) && entity[field] == null) {
-			// To ensure that empty values and null values are not mistakenly identified as different.
-			// i.e the field may be null when we get it from the server
-			// but value may be empty when we get it from the editable attribute
-			// this stops that being identified as a user change
-			setChangedFields((prev: any) => {
-				const newChangedFields = { ...prev };
-				delete newChangedFields[field];
-				return newChangedFields;
-			});
-		} else {
-			setChangedFields((prev: any) => ({
-				...prev,
-				[field]: value,
-			}));
-		}
-	} else {
-		// No change, throw away
-		setChangedFields((prev: any) => {
-			const newChangedFields = { ...prev };
-			delete newChangedFields[field];
-			return newChangedFields;
-		});
-	}
-};
-
-// const updateField = (field: keyof Location, value: string | number | null) => {
-// 	setEditableFields((prev) => ({
-// 		...prev,
-// 		[field]: value,
-// 	}));
-
-// 	if (value !== location[field]) {
-// 		setChangedFields((prev) => ({
-// 			...prev,
-// 			[field]: value,
-// 		}));
-// 	} else {
-// 		setChangedFields((prev) => {
-// 			const newChangedFields = { ...prev };
-// 			delete newChangedFields[field];
-// 			return newChangedFields;
-// 		});
-// 	}
-// };
-
-export const handleCancellation = (
-	setEditMode: Dispatch<SetStateAction<boolean>>,
-	setEditableFields: any,
-	entity: any,
-	setChangedFields: Dispatch<SetStateAction<any>>,
-	setDirty: Dispatch<SetStateAction<boolean>>,
-	setValidationError: Dispatch<SetStateAction<boolean>>,
-	setEditKey: Dispatch<SetStateAction<number>>,
-) => {
+	const { setEditMode, setChangedFields } = setters;
 	setEditMode(false);
-	// if this does not work then just pass in the editable fields manually
-	setEditableFields(
-		entity
-			? Object.fromEntries(
-					Object.entries(entity).filter(([key]) => !key.startsWith("__")),
-				)
-			: {},
-	);
 	setChangedFields({});
-	setDirty(false);
-	setValidationError(false);
-	setEditKey((prevKey) => prevKey + 1);
-};
 
-export const handleEdit = (
-	entity: any,
-	setEditMode: Dispatch<SetStateAction<boolean>>,
-	setEditableFields: Dispatch<SetStateAction<any>>,
-	firstEditableFieldRef: RefObject<HTMLInputElement>,
-) => {
-	setEditableFields(
-		entity
-			? Object.fromEntries(
-					Object.entries(entity).filter(([key]) => !key.startsWith("__")),
-				)
-			: {},
-	);
-	setEditMode(true);
-	setTimeout(() => {
-		if (firstEditableFieldRef.current) {
-			firstEditableFieldRef.current.focus();
-		}
-	}, 0);
-};
-
-export const handleSave = (
-	changedFields: any,
-	setEditMode: Dispatch<SetStateAction<boolean>>,
-	setConfirmationEdit: Dispatch<SetStateAction<boolean>>,
-) => {
-	// NO CHANGED FIELDS
-	if (Object.keys(changedFields).length === 0) {
-		setEditMode(false);
-		return;
+	if (resetValues) {
+		reset(resetValues, { keepValues: false });
+	} else {
+		reset();
 	}
-	setConfirmationEdit(true);
 };
+
+export const handleEdit =
+	(
+		setEditMode: Dispatch<SetStateAction<boolean>>,
+		firstEditableFieldRef: RefObject<HTMLInputElement>,
+	) =>
+	() => {
+		setEditMode(true);
+		setTimeout(() => {
+			if (firstEditableFieldRef.current) {
+				firstEditableFieldRef.current.focus();
+			}
+		}, 0);
+	};
 
 export const handleDeleteEntity = async (
 	id: string,

@@ -7,6 +7,7 @@ import {
 	Stack,
 	Tab,
 	Tabs,
+	TextField,
 	Typography,
 	useTheme,
 } from "@mui/material";
@@ -29,23 +30,37 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
-import EditableAttribute from "@components/EditableAttribute/EditableAttribute";
-
+import * as Yup from "yup";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
 	closeConfirmation,
+	handleCancel,
 	handleDeleteEntity,
+	handleEdit,
+	handleSaveConfirmation,
 } from "src/helpers/actions/editAndDeleteActions";
 import { handleTabChange } from "src/helpers/navigation/handleTabChange";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { isEmpty } from "lodash";
 
 type LibraryDetails = {
 	libraryId: any;
 };
+
+interface LibraryFormFields {
+	fullName: string;
+	shortName: string;
+	abbreviatedName: string;
+	backupDowntimeSchedule?: string;
+	supportHours?: string;
+	latitude?: number;
+	longitude?: number;
+}
 
 export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
@@ -68,6 +83,19 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 			query: "id:" + libraryId,
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		onCompleted: (data) => {
+			const library = data?.libraries?.content?.[0];
+			// This is needed because default values don't always load in time.
+			reset({
+				fullName: library?.fullName ?? "",
+				shortName: library?.shortName ?? "",
+				abbreviatedName: library?.abbreviatedName ?? "",
+				backupDowntimeSchedule: library?.backupDowntimeSchedule ?? "",
+				supportHours: library?.supportHours ?? "",
+				latitude: library?.latitude,
+				longitude: library?.longitude,
+			});
+		},
 	});
 	const library: Library = data?.libraries?.content?.[0];
 	const isConsortiumGroupMember: boolean =
@@ -92,156 +120,160 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	const [changedFields, setChangedFields] = useState<Partial<Library>>({});
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
-	const [hasValidationError, setValidationError] = useState(false);
-	const [isDirty, setDirty] = useState(false);
-	const [errors, setErrors] = useState();
-	const [editMode, setEditMode] = useState(false);
-	const [editKey, setEditKey] = useState(0);
-	const [editableFields, setEditableFields] = useState({
-		backupDowntimeSchedule: library?.backupDowntimeSchedule,
-		supportHours: library?.supportHours,
-		latitude: library?.latitude,
-		longitude: library?.longitude,
-		fullName: library?.fullName,
-		shortName: library?.shortName,
-		abbreviatedName: library?.abbreviatedName,
-	});
+	const saveButtonRef = useRef<HTMLButtonElement>(null);
 
-	const handleSave = () => {
-		if (Object.keys(changedFields).length === 0) {
-			setEditMode(false);
-			return;
-		}
-		setConfirmationEdit(true);
-	};
-	const handleCancel = () => {
-		setEditMode(false);
-		setEditableFields({
+	const [editMode, setEditMode] = useState(false);
+
+	const validationSchema = Yup.object().shape({
+		fullName: Yup.string()
+			.trim()
+			.nonNullable(
+				t("ui.data_grid.validation.no_empty", {
+					field: t("libraries.full_name"),
+				}),
+			)
+			.required(
+				t("ui.validation.required", { field: t("libraries.full_name") }),
+			)
+			.max(200, t("ui.validation.max_length", { length: 200 })),
+		shortName: Yup.string()
+			.trim()
+			.nonNullable(
+				t("ui.data_grid.validation.no_empty", {
+					field: t("libraries.short_name"),
+				}),
+			)
+			.required(
+				t("ui.validation.required", { field: t("libraries.short_name") }),
+			)
+			.max(100, t("ui.validation.max_length", { length: 100 })),
+		abbreviatedName: Yup.string()
+			.trim()
+			.nonNullable(
+				t("ui.data_grid.validation.no_empty", {
+					field: t("libraries.abbreviated_name"),
+				}),
+			)
+			.required(
+				t("ui.validation.required", { field: t("libraries.abbreviated_name") }),
+			)
+			.max(32, t("ui.validation.max_length", { length: 32 })),
+		backupDowntimeSchedule: Yup.string()
+			.trim()
+			.max(200, t("ui.validation.max_length", { length: 200 })),
+		supportHours: Yup.string()
+			.trim()
+			.max(200, t("ui.validation.max_length", { length: 200 })),
+		latitude: Yup.number()
+			.typeError(t("ui.validation.locations.lat"))
+			.min(-90, t("ui.validation.locations.lat"))
+			.max(90, t("ui.validation.locations.lat")),
+		longitude: Yup.number()
+			.typeError(t("ui.validation.locations.long"))
+			.min(-180, t("ui.validation.locations.long"))
+			.max(180, t("ui.validation.locations.long")),
+	});
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isDirty },
+	} = useForm<LibraryFormFields>({
+		defaultValues: {
+			fullName: library?.fullName,
+			shortName: library?.shortName,
+			abbreviatedName: library?.abbreviatedName,
 			backupDowntimeSchedule: library?.backupDowntimeSchedule,
 			supportHours: library?.supportHours,
 			latitude: library?.latitude,
 			longitude: library?.longitude,
-			fullName: library?.fullName,
-			shortName: library?.shortName,
-			abbreviatedName: library?.abbreviatedName,
-		});
-		setChangedFields({});
-		setDirty(false);
-		setValidationError(false);
-		setEditKey((prevKey) => prevKey + 1); // This will change the keys of all EditableAttributes
-		// Thus re-setting their states on cancel.
-	};
+		},
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+	});
 
 	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		try {
-			const { data } = await updateLibrary({
-				variables: {
-					input: {
-						id: library.id,
-						...changedFields,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-			});
-
-			if (data.updateLibrary) {
-				setEditMode(false);
-				setChangedFields({});
-				setDirty(false);
-				client.refetchQueries({
-					include: ["LoadLibrary"],
-				});
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("ui.data_grid.edit_success", {
-						entity: t("libraries.library").toLowerCase(),
-						name: library?.fullName,
-					}),
-					title: t("ui.data_grid.updated"),
-				});
-			}
-		} catch (error) {
-			console.error("Error updating library:", error);
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("ui.data_grid.edit_error", {
-					entity: t("libraries.library").toLowerCase(),
-					name: library?.fullName,
-				}),
-				title: t("ui.data_grid.updated"),
-			});
-		} finally {
-			setConfirmationEdit(false);
-		}
+		handleSaveConfirmation(
+			library.id,
+			changedFields,
+			updateLibrary,
+			client,
+			{
+				setEditMode,
+				setChangedFields,
+				setAlert,
+				setConfirmation: setConfirmationEdit,
+			},
+			{
+				entityName: library?.fullName,
+				entityType: t("libraries.library"),
+				mutationName: "updateLibrary",
+				t,
+			},
+			{
+				reason,
+				changeCategory,
+				changeReferenceUrl,
+			},
+			["LoadLibrary"],
+			reset,
+			[
+				"fullName",
+				"shortName",
+				"abbreviatedName",
+				"backupDowntimeSchedule",
+				"supportHours",
+				"latitude",
+				"longitude",
+			],
+		);
 	};
-
-	const handleEdit = () => {
-		setEditableFields({
-			backupDowntimeSchedule: library?.backupDowntimeSchedule,
-			supportHours: library?.supportHours,
-			latitude: library?.latitude,
-			longitude: library?.longitude,
-			fullName: library?.fullName,
-			abbreviatedName: library?.abbreviatedName,
-			shortName: library?.shortName,
-		});
-		setEditMode(true);
-		setTimeout(() => {
-			if (firstEditableFieldRef.current) {
-				firstEditableFieldRef.current.focus();
-			}
-		}, 0);
-	};
-	const updateField = (field: keyof Library, value: string | number | null) => {
-		setEditableFields((prev) => ({
-			...prev,
-			[field]: value,
-		}));
-		if (value !== library[field]) {
-			setChangedFields((prev) => ({
-				...prev,
-				[field]: value,
-			}));
-		} else {
-			setChangedFields((prev) => {
-				const newChangedFields = { ...prev };
-				delete newChangedFields[field];
-				return newChangedFields;
-			});
-		}
-	};
-
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
 		handleLeaveWithoutSaving,
 	} = useUnsavedChangesWarning({
 		isDirty,
-		hasValidationError,
 		onKeepEditing: () => {
-			if (firstEditableFieldRef.current) {
-				firstEditableFieldRef.current.focus();
-			}
+			setTimeout(() => {
+				if (saveButtonRef.current) {
+					saveButtonRef.current.focus();
+				}
+			}, 0);
 		},
 		onLeaveWithoutSaving: () => {
-			setDirty(false);
 			setChangedFields({});
+			reset();
 		},
 	});
 
+	const onSubmit = (data: Partial<Library>) => {
+		const newChangedFields = Object.keys(data).reduce((acc, key) => {
+			const field = key as keyof LibraryFormFields;
+			const currentValue = data[field];
+			const originalValue = library[field];
+
+			if (currentValue !== originalValue && currentValue !== undefined) {
+				(acc[field] as typeof currentValue) = currentValue;
+			}
+			return acc;
+		}, {} as Partial<Library>);
+		setChangedFields(newChangedFields);
+		if (Object.keys(newChangedFields).length === 0) {
+			setEditMode(false);
+			return;
+		}
+		setConfirmationEdit(true);
+	};
 	// Actions for the menu - in both view and edit mode.
 	const viewModeActions = [
 		{
 			key: "edit",
-			onClick: handleEdit,
+			onClick: handleEdit(setEditMode, firstEditableFieldRef),
 			disabled: !isAnAdmin,
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
@@ -261,12 +293,25 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 		<Button
 			key="save"
 			startIcon={<Save />}
-			onClick={handleSave}
-			disabled={hasValidationError || !isDirty}
+			onClick={handleSubmit(onSubmit)}
+			disabled={!isEmpty(errors) || !isDirty}
+			ref={saveButtonRef}
 		>
 			{t("ui.data_grid.save")}
 		</Button>,
-		<Button key="cancel" startIcon={<Cancel />} onClick={handleCancel}>
+		<Button
+			key="cancel"
+			startIcon={<Cancel />}
+			onClick={() =>
+				handleCancel(
+					{
+						setEditMode,
+						setChangedFields,
+					},
+					reset,
+				)
+			}
+		>
 			{t("ui.data_grid.cancel")}
 		</Button>,
 		<MoreActionsMenu
@@ -285,7 +330,7 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				},
 				{
 					key: "edit",
-					onClick: handleEdit,
+					onClick: () => handleEdit(setEditMode, firstEditableFieldRef),
 					disabled: true,
 					label: t("ui.data_grid.edit"),
 					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
@@ -339,6 +384,8 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 				container
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+				component={"form"}
+				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
@@ -373,24 +420,30 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["fullName"] && editMode
+								errors.fullName
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.name")}
 						</Typography>
-						<EditableAttribute
-							field="fullName"
-							value={library?.fullName}
-							updateField={updateField}
-							editMode={editMode}
-							type="nonBlankString"
-							inputRef={firstEditableFieldRef}
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`fullName-${editKey}`}
+						<Controller
+							name="fullName"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										inputRef={firstEditableFieldRef}
+										fullWidth
+										variant="outlined"
+										error={!!errors.fullName}
+										helperText={errors.fullName?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={library?.fullName} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -399,23 +452,29 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["shortName"] && editMode
+								errors.shortName
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.short_name")}
 						</Typography>
-						<EditableAttribute
-							field="shortName"
-							value={library?.shortName}
-							updateField={updateField}
-							editMode={editMode}
-							type="nonBlankString"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`shortName-${editKey}`}
+						<Controller
+							name="shortName"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.shortName}
+										helperText={errors.shortName?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={library?.shortName} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -424,23 +483,29 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["abbreviatedName"] && editMode
+								errors.abbreviatedName
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.abbreviated_name")}
 						</Typography>
-						<EditableAttribute
-							field="abbreviatedName"
-							value={library?.abbreviatedName}
-							updateField={updateField}
-							editMode={editMode}
-							type="nonBlankString"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`abbreviatedName-${editKey}`}
+						<Controller
+							name="abbreviatedName"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.abbreviatedName}
+										helperText={errors.abbreviatedName?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={library?.abbreviatedName} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -465,23 +530,29 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["supportHours"] && editMode
+								errors.supportHours
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.support_hours")}
 						</Typography>
-						<EditableAttribute
-							field="supportHours"
-							value={editableFields.supportHours ?? library?.supportHours}
-							updateField={updateField}
-							editMode={editMode}
-							type="string"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`supportHours-${editKey}`}
+						<Controller
+							name="supportHours"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.supportHours}
+										helperText={errors.supportHours?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={library?.supportHours} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -490,26 +561,31 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["backupDowntimeSchedule"] && editMode
+								errors.backupDowntimeSchedule
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.service.environments.backup_schedule")}
 						</Typography>
-						<EditableAttribute
-							field="backupDowntimeSchedule"
-							value={
-								editableFields.backupDowntimeSchedule ??
-								library?.backupDowntimeSchedule
+						<Controller
+							name="backupDowntimeSchedule"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.backupDowntimeSchedule}
+										helperText={errors.backupDowntimeSchedule?.message}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={library?.backupDowntimeSchedule}
+									/>
+								)
 							}
-							updateField={updateField}
-							editMode={editMode}
-							type="string"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`backupDowntimeSchedule-${editKey}`}
 						/>
 					</Stack>
 				</Grid>
@@ -554,23 +630,29 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["latitude"] && editMode
+								errors.latitude
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.primaryLocation.latitude")}
 						</Typography>
-						<EditableAttribute
-							field="latitude"
-							value={editableFields.latitude ?? library?.latitude}
-							updateField={updateField}
-							editMode={editMode}
-							type="latitude"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`latitude-${editKey}`}
+						<Controller
+							name="latitude"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.latitude}
+										helperText={errors.latitude?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={library?.latitude} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -579,23 +661,29 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["longitude"] && editMode
+								errors.longitude
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("libraries.primaryLocation.longitude")}
 						</Typography>
-						<EditableAttribute
-							field="longitude"
-							value={editableFields.longitude ?? library?.longitude}
-							updateField={updateField}
-							editMode={editMode}
-							type="longitude"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-							key={`longitude-${editKey}`}
+						<Controller
+							name="longitude"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.longitude}
+										helperText={errors.longitude?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={library?.longitude} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>

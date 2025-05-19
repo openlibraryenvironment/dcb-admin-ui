@@ -14,6 +14,7 @@ import {
 	updateFunctionalSettingQuery,
 } from "src/queries/queries";
 import NewFunctionalSetting from "../../forms/NewFunctionalSetting/NewFunctionalSetting";
+import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
 
 const FunctionalSettings: NextPage = () => {
 	const { t } = useTranslation();
@@ -42,23 +43,6 @@ const FunctionalSettings: NextPage = () => {
 	);
 	const consortiumFunctionalSettings: FunctionalSetting[] =
 		data?.consortia?.content[0]?.functionalSettings;
-	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-		setTabIndex(newValue);
-		switch (newValue) {
-			case 0:
-				router.push("/consortium");
-				break;
-			case 1:
-				router.push("/consortium/functionalSettings");
-				break;
-			case 2:
-				router.push("/consortium/onboarding");
-				break;
-			case 3:
-				router.push("/consortium/contacts");
-				break;
-		}
-	};
 
 	return (
 		<AdminLayout title={t("nav.consortium.functionalSettings")}>
@@ -71,7 +55,9 @@ const FunctionalSettings: NextPage = () => {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
 						value={tabIndex}
-						onChange={handleTabChange}
+						onChange={(event, value) => {
+							handleConsortiumTabChange(event, value, router, setTabIndex);
+						}}
 						aria-label="Consortium Navigation"
 					>
 						<Tab label={t("nav.consortium.profile")} />

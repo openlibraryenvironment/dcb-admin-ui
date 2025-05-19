@@ -6,6 +6,7 @@ import {
 	Stack,
 	Tab,
 	Tabs,
+	TextField,
 	Typography,
 	useTheme,
 } from "@mui/material";
@@ -18,13 +19,10 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState, useRef, ChangeEvent, useEffect } from "react";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import EditableAttribute from "@components/EditableAttribute/EditableAttribute";
 import { getConsortia, updateConsortiumQuery } from "src/queries/queries";
 import {
 	handleSaveConfirmation,
-	handleCancellation,
-	updateField,
-	handleSave,
+	handleCancel,
 	handleEdit,
 } from "src/helpers/actions/editAndDeleteActions";
 import { Consortium } from "@models/Consortium";
@@ -40,12 +38,22 @@ import ErrorComponent from "@components/Error/Error";
 import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { isEmpty } from "lodash";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
 
 // If this ever needs to be extended to support multiple consortia
 // Change current flat structure to [id] structure similar to libraries
 // And have a consortium grid page
 // or only show active consortia
 
+interface ConsortiumFormFields {
+	displayName: string;
+	websiteUrl?: string;
+	catalogueSearchUrl?: string;
+	description?: string;
+}
 // check upload button for image upload
 const ConsortiumPage: NextPage = () => {
 	const { t } = useTranslation();
@@ -59,9 +67,7 @@ const ConsortiumPage: NextPage = () => {
 	const [aboutIsUploading, setAboutIsUploading] = useState(false);
 
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
-	const [hasValidationError, setValidationError] = useState(false);
-	const [isDirty, setDirty] = useState(false);
-	const [errors, setErrors] = useState();
+
 	const {
 		setHeaderImageURL,
 		setDisplayName,
@@ -78,13 +84,20 @@ const ConsortiumPage: NextPage = () => {
 			pagesize: 10,
 		},
 		onCompleted: (data) => {
+			const consortium: Consortium = data.consortia?.content[0];
 			// Ensure our cache for unauthenticated display is up to date
-			setDescription(data.consortia?.content[0]?.description);
-			setWebsiteURL(data.consortia?.content[0]?.websiteUrl);
-			setCatalogueSearchURL(data.consortia?.content[0]?.catalogueSearchUrl);
-			setDisplayName(data.consortia?.content[0]?.displayName);
-			setHeaderImageURL(data.consortia?.content[0]?.headerImageUrl);
-			setAboutImageURL(data.consortia?.content[0]?.aboutImageUrl);
+			setDescription(consortium?.description);
+			setWebsiteURL(consortium?.websiteUrl);
+			setCatalogueSearchURL(consortium?.catalogueSearchUrl);
+			setDisplayName(consortium?.displayName);
+			setHeaderImageURL(consortium?.headerImageUrl);
+			setAboutImageURL(consortium?.aboutImageUrl);
+			reset({
+				displayName: consortium?.displayName ?? "",
+				description: consortium?.description ?? "",
+				websiteUrl: consortium?.websiteUrl ?? "",
+				catalogueSearchUrl: consortium?.catalogueSearchUrl,
+			});
 		},
 	});
 	// Make sure this only gets the first consortia
@@ -99,33 +112,85 @@ const ConsortiumPage: NextPage = () => {
 		title: null,
 	});
 	const [editMode, setEditMode] = useState(false);
-	const [editKey, setEditKey] = useState(0);
 	const theme = useTheme();
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
-	const [editableFields, setEditableFields] = useState({
-		displayName: consortium?.displayName,
-		websiteUrl: consortium?.websiteUrl,
-		catalogueSearchUrl: consortium?.catalogueSearchUrl,
-		description: consortium?.description,
+	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
+	const validationSchema = Yup.object().shape({
+		displayName: Yup.string()
+			.trim()
+			.nonNullable(
+				t("ui.data_grid.validation.no_empty", {
+					field: t("consortium.display_name"),
+				}),
+			)
+			.required(
+				t("ui.validation.required", { field: t("consortium.display_name") }),
+			)
+			.max(200, t("ui.validation.max_length", { length: 200 })),
+		description: Yup.string()
+			.trim()
+			.max(400, t("ui.validation.max_length", { length: 128 })),
+		websiteUrl: Yup.string()
+			.trim()
+			.max(200, t("ui.validation.max_length", { length: 128 })),
+		catalogueSearchUrl: Yup.string()
+			.trim()
+			.max(200, t("ui.validation.max_length", { length: 128 })),
 	});
+
+	const onSubmit = (data: Partial<Consortium>) => {
+		const newChangedFields = Object.keys(data).reduce((acc, key) => {
+			const field = key as keyof ConsortiumFormFields;
+			const currentValue = data[field];
+			const originalValue = consortium[field];
+
+			if (currentValue !== originalValue && currentValue !== undefined) {
+				(acc[field] as typeof currentValue) = currentValue;
+			}
+			return acc;
+		}, {} as Partial<Consortium>);
+		setChangedFields(newChangedFields);
+		if (Object.keys(newChangedFields).length === 0) {
+			setEditMode(false);
+			return;
+		}
+		setConfirmationEdit(true);
+	};
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isDirty },
+	} = useForm<ConsortiumFormFields>({
+		defaultValues: {
+			displayName: consortium?.displayName,
+			description: consortium?.description,
+			websiteUrl: consortium?.websiteUrl,
+			catalogueSearchUrl: consortium?.catalogueSearchUrl,
+		},
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+	});
+
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
 		handleLeaveWithoutSaving,
 	} = useUnsavedChangesWarning({
 		isDirty,
-		hasValidationError,
 		onKeepEditing: () => {
-			if (firstEditableFieldRef.current) {
-				firstEditableFieldRef.current.focus();
-			}
+			setTimeout(() => {
+				if (saveButtonRef.current) {
+					saveButtonRef.current.focus();
+				}
+			}, 0);
 		},
 		onLeaveWithoutSaving: () => {
-			setDirty(false);
 			setChangedFields({});
+			reset();
 		},
 	});
-	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
 
 	const [updateConsortium] = useMutation(updateConsortiumQuery, {
 		refetchQueries: ["LoadConsortium"],
@@ -379,91 +444,56 @@ const ConsortiumPage: NextPage = () => {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
-
 	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		if (changedFields.displayName) {
-			setDisplayName(changedFields.displayName);
-		}
-		if (changedFields.catalogueSearchUrl) {
-			setCatalogueSearchURL(changedFields.catalogueSearchUrl);
-		}
-		if (changedFields.websiteUrl) {
-			setWebsiteURL(changedFields.websiteUrl);
-		}
-		if (changedFields.description) {
-			setDescription(changedFields.description);
-		}
-		await handleSaveConfirmation(
-			consortium,
+		handleSaveConfirmation(
+			consortium.id,
 			changedFields,
 			updateConsortium,
 			client,
-			setEditMode,
-			setChangedFields,
-			setAlert,
-			setDirty,
-			setConfirmationEdit,
-			t,
-			reason,
-			changeCategory,
-			changeReferenceUrl,
-			"updateConsortium",
-			t("nav.consortium.name").toLowerCase(),
-			"LoadConsortium",
+			{
+				setEditMode,
+				setChangedFields,
+				setAlert,
+				setConfirmation: setConfirmationEdit,
+			},
+			{
+				entityName: consortium?.displayName,
+				entityType: t("nav.consortium.name"),
+				mutationName: "updateConsortium",
+				t,
+			},
+			{
+				reason,
+				changeCategory,
+				changeReferenceUrl,
+			},
+			["LoadConsortium"],
+			reset,
+			["displayName", "catalogueSearchUrl", "websiteUrl", "description"],
+			(updatedFields) => {
+				// Update your store values here
+				if (updatedFields.displayName)
+					setDisplayName(updatedFields.displayName);
+				if (updatedFields.catalogueSearchUrl)
+					setCatalogueSearchURL(updatedFields.catalogueSearchUrl);
+				if (updatedFields.websiteUrl) setWebsiteURL(updatedFields.websiteUrl);
+				if (updatedFields.description)
+					setDescription(updatedFields.description);
+			},
 		);
-	};
-
-	const handleCancel = () => {
-		handleCancellation(
-			setEditMode,
-			setEditableFields,
-			consortium,
-			setChangedFields,
-			setDirty,
-			setValidationError,
-			setEditKey,
-		);
-	};
-
-	const updateFieldInApp = (field: string, value: any) => {
-		updateField(field, value, setEditableFields, setChangedFields, consortium);
 	};
 
 	const username = session?.user?.name;
 	const email = session?.user?.email ?? "No email provided";
 
-	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-		setTabIndex(newValue);
-		switch (newValue) {
-			case 0:
-				router.push("/consortium");
-				break;
-			case 1:
-				router.push("/consortium/functionalSettings");
-				break;
-			case 2:
-				router.push("/consortium/onboarding");
-				break;
-			case 3:
-				router.push("/consortium/contacts");
-				break;
-		}
-	};
 	const viewModeActions = [
 		{
 			key: "edit",
-			onClick: () => {
-				handleEdit(
-					consortium,
-					setEditMode,
-					setEditableFields,
-					firstEditableFieldRef,
-				);
-			},
+			onClick: handleEdit(setEditMode, firstEditableFieldRef),
 			disabled: !isAnAdmin,
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
@@ -474,15 +504,25 @@ const ConsortiumPage: NextPage = () => {
 		<Button
 			key="save"
 			startIcon={<Save />}
-			onClick={() => {
-				handleSave(changedFields, setEditMode, setConfirmationEdit);
-			}}
-			disabled={hasValidationError || !isDirty}
+			onClick={handleSubmit(onSubmit)}
+			disabled={!isEmpty(errors) || !isDirty}
 			ref={saveButtonRef}
 		>
 			{t("ui.data_grid.save")}
 		</Button>,
-		<Button key="cancel" startIcon={<Cancel />} onClick={handleCancel}>
+		<Button
+			key="cancel"
+			startIcon={<Cancel />}
+			onClick={() =>
+				handleCancel(
+					{
+						setEditMode,
+						setChangedFields,
+					},
+					reset,
+				)
+			}
+		>
 			{t("ui.data_grid.cancel")}
 		</Button>,
 		<MoreActionsMenu
@@ -490,14 +530,7 @@ const ConsortiumPage: NextPage = () => {
 			actions={[
 				{
 					key: "edit",
-					onClick: () => {
-						handleEdit(
-							consortium,
-							setEditMode,
-							setEditableFields,
-							firstEditableFieldRef,
-						);
-					},
+					onClick: handleEdit(setEditMode, firstEditableFieldRef),
 					disabled: true,
 					label: t("ui.data_grid.edit"),
 					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
@@ -551,51 +584,68 @@ const ConsortiumPage: NextPage = () => {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 				sx={{ marginBottom: "5px" }}
 			>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={tabIndex}
-						onChange={handleTabChange}
-						aria-label="Consortium Navigation"
-					>
-						<Tab label={t("nav.consortium.profile")} />
-						<Tab label={t("nav.consortium.functionalSettings")} />
-						<Tab label={t("nav.consortium.onboarding")} />
-						<Tab label={t("nav.consortium.contacts")} />
-					</Tabs>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("consortium.name")}
-						</Typography>
-						<RenderAttribute attribute={consortium?.name} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors?.["name"] && editMode
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
+				<Grid
+					container
+					spacing={{ xs: 2, md: 3 }}
+					columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+					sx={{ marginBottom: "5px" }}
+					component={"form"}
+					onSubmit={handleSubmit(onSubmit)}
+				>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<Tabs
+							value={tabIndex}
+							onChange={(event, value) => {
+								handleConsortiumTabChange(event, value, router, setTabIndex);
+							}}
+							aria-label="Consortium Navigation"
 						>
-							{t("consortium.display_name")}
-						</Typography>
-						<EditableAttribute
-							field="displayName"
-							key={`displayName-${editKey}`}
-							value={editableFields?.displayName ?? consortium?.displayName}
-							updateField={updateFieldInApp}
-							editMode={editMode}
-							type="string"
-							inputRef={firstEditableFieldRef}
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
-						/>
-					</Stack>
+							<Tab label={t("nav.consortium.profile")} />
+							<Tab label={t("nav.consortium.functionalSettings")} />
+							<Tab label={t("nav.consortium.onboarding")} />
+							<Tab label={t("nav.consortium.contacts")} />
+						</Tabs>
+					</Grid>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("consortium.name")}
+							</Typography>
+							<RenderAttribute attribute={consortium?.name} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<Stack direction={"column"}>
+							<Typography
+								variant="attributeTitle"
+								color={
+									errors?.displayName && editMode
+										? theme.palette.error.main
+										: theme.palette.primary.attributeTitle
+								}
+							>
+								{t("consortium.display_name")}
+							</Typography>
+							<Controller
+								name="displayName"
+								control={control}
+								render={({ field }) =>
+									editMode ? (
+										<TextField
+											{...field}
+											inputRef={firstEditableFieldRef}
+											fullWidth
+											variant="outlined"
+											error={!!errors.displayName}
+											helperText={errors.displayName?.message}
+										/>
+									) : (
+										<RenderAttribute attribute={consortium?.displayName} />
+									)
+								}
+							/>
+						</Stack>
+					</Grid>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeTitle">
@@ -670,23 +720,29 @@ const ConsortiumPage: NextPage = () => {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["name"] && editMode
+								errors?.websiteUrl && editMode
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.url")}
 						</Typography>
-						<EditableAttribute
-							field="websiteUrl"
-							key={`websiteUrl-${editKey}`}
-							value={editableFields.websiteUrl ?? consortium?.websiteUrl}
-							updateField={updateFieldInApp}
-							editMode={editMode}
-							type="url"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="websiteUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.websiteUrl}
+										helperText={errors.websiteUrl?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium?.websiteUrl} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
@@ -695,26 +751,29 @@ const ConsortiumPage: NextPage = () => {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["name"] && editMode
+								errors?.catalogueSearchUrl && editMode
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.search_url")}
 						</Typography>
-						<EditableAttribute
-							field="catalogueSearchUrl"
-							key={`catalogueSearchUrl-${editKey}`}
-							value={
-								editableFields.catalogueSearchUrl ??
-								consortium?.catalogueSearchUrl
+						<Controller
+							name="catalogueSearchUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.catalogueSearchUrl}
+										helperText={errors.catalogueSearchUrl?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium?.catalogueSearchUrl} />
+								)
 							}
-							updateField={updateFieldInApp}
-							editMode={editMode}
-							type="url"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
 						/>
 					</Stack>
 				</Grid>
@@ -723,23 +782,29 @@ const ConsortiumPage: NextPage = () => {
 						<Typography
 							variant="attributeTitle"
 							color={
-								errors?.["name"] && editMode
+								errors?.description && editMode
 									? theme.palette.error.main
 									: theme.palette.primary.attributeTitle
 							}
 						>
 							{t("consortium.description_title")}
 						</Typography>
-						<EditableAttribute
-							field="description"
-							key={`description-${editKey}`}
-							value={editableFields.description ?? consortium?.description}
-							updateField={updateFieldInApp}
-							editMode={editMode}
-							type="markdown"
-							setValidationError={setValidationError}
-							setDirty={setDirty}
-							setErrors={setErrors}
+						<Controller
+							name="description"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										variant="outlined"
+										error={!!errors.description}
+										helperText={errors.description?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium?.description} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
