@@ -30,7 +30,12 @@ import { formatChangedFields } from "src/helpers/formatChangedFields";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import { handleDeleteEntity } from "src/helpers/actions/editAndDeleteActions";
+import {
+	handleCancel,
+	handleDeleteEntity,
+	handleEdit,
+	handleSaveConfirmation,
+} from "src/helpers/actions/editAndDeleteActions";
 import { getILS } from "src/helpers/getILS";
 import { getLocalId } from "src/helpers/getLocalId";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -224,15 +229,6 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		});
 	};
 
-	const handleEdit = () => {
-		setEditMode(true);
-		setTimeout(() => {
-			if (firstEditableFieldRef.current) {
-				firstEditableFieldRef.current.focus();
-			}
-		}, 0);
-	};
-
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
@@ -334,74 +330,38 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		try {
-			const { data } = await updateLocation({
-				variables: {
-					input: {
-						id: location.id,
-						...changedFields,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-			});
-			if (data.updateLocation) {
-				setChangedFields({});
-				setEditMode(false);
-				await client.refetchQueries({
-					include: ["LoadLocation"],
-				});
-				// Reset the form with the latest data
-				// Otherwise react-hook-form may believe it's still dirty
-				// And unsaved changes warning will pop up
-				const location = data.updateLocation;
-				reset(
-					{
-						name: location?.name ?? "",
-						printLabel: location?.printLabel ?? "",
-						latitude: Number(Number(location?.latitude).toFixed(5)),
-						longitude: Number(Number(location?.longitude).toFixed(5)),
-						localId: location?.localId,
-					},
-					{ keepValues: false },
-				);
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("ui.data_grid.edit_success", {
-						entity: t("locations.location_one"),
-						name: location?.name,
-					}),
-					title: t("ui.data_grid.updated"),
-				});
-			}
-		} catch (error) {
-			console.error("Error updating location:", error);
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("ui.data_grid.edit_error", {
-					entity: t("locations.location_one"),
-					name: location?.name,
-				}),
-				title: t("ui.data_grid.updated"),
-			});
-		} finally {
-			setConfirmationEdit(false);
-		}
-	};
-
-	const handleCancel = () => {
-		setEditMode(false);
-		setChangedFields({});
-		reset();
+		handleSaveConfirmation(
+			location.id,
+			changedFields,
+			updateLocation,
+			client,
+			{
+				setEditMode,
+				setChangedFields,
+				setAlert,
+				setConfirmation: setConfirmationEdit,
+			},
+			{
+				entityName: location?.name,
+				entityType: t("locations.location_one"),
+				mutationName: "updateLocation",
+				t,
+			},
+			{
+				reason,
+				changeCategory,
+				changeReferenceUrl,
+			},
+			["LoadLocation"],
+			reset,
+			["name", "printLabel", "latitude", "longitude", "localId"],
+		);
 	};
 
 	const viewModeActions = [
 		{
 			key: "edit",
-			onClick: handleEdit,
+			onClick: handleEdit(setEditMode, firstEditableFieldRef),
 			disabled: !isAnAdmin,
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
@@ -427,7 +387,19 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		>
 			{t("ui.data_grid.save")}
 		</Button>,
-		<Button key="cancel" startIcon={<Cancel />} onClick={handleCancel}>
+		<Button
+			key="cancel"
+			startIcon={<Cancel />}
+			onClick={() =>
+				handleCancel(
+					{
+						setEditMode,
+						setChangedFields,
+					},
+					reset,
+				)
+			}
+		>
 			{t("ui.data_grid.cancel")}
 		</Button>,
 		<MoreActionsMenu
@@ -446,7 +418,7 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				},
 				{
 					key: "edit",
-					onClick: handleEdit,
+					onClick: () => handleEdit(setEditMode, firstEditableFieldRef),
 					disabled: true,
 					label: t("ui.data_grid.edit"),
 					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
