@@ -1,3 +1,16 @@
+# [1.38.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.37.0...v1.38.0) (2025-05-22)
+
+
+### Bug Fixes
+
+* Fix incorrect DCB Service version number [DCB-1389] ([0eb5948](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0eb59485694cfc1bb144ff5b2a142477420073ac))
+* Fix staff request incorrect translation key [DCB-1555] ([40f3590](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/40f3590898293abe0d999ca9b8f6843d39a90ff8))
+
+
+### Features
+
+* Re-work service status page and components [DCB-1389] ([f68f816](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f68f816af95abc5ea2536afc11ca974780bf1aa5))
+
 # [1.37.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.36.3...v1.37.0) (2025-05-09)
 
 
