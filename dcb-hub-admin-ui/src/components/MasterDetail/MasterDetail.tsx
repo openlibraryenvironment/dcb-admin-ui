@@ -67,6 +67,40 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					</Grid>
 				</MasterDetailLayout>
 			);
+		case "alarms":
+			return (
+				<MasterDetailLayout width={width}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("alarms.code")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.code} />
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("alarms.expires")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.expires} />
+							</Typography>
+						</Stack>
+					</Grid>
+
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("alarms.details")}
+							</Typography>
+							<pre>{JSON.stringify(row?.alarmDetails, null, 2)}</pre>
+						</Stack>
+					</Grid>
+				</MasterDetailLayout>
+			);
 		case "bibs":
 			return (
 				<MasterDetailLayout width={width}>
