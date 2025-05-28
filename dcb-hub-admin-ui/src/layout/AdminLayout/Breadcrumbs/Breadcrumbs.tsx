@@ -162,9 +162,12 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				if (nestedKey == "patronRequests.audits") {
 					return "nav.auditLog";
 				}
-				// Check for request errors
+				// Check for service info keys
 				if (nestedKey == "serviceInfo.requestErrors") {
 					return "nav.serviceInfo.requestErrors.name";
+				}
+				if (nestedKey == "serviceInfo.alarms") {
+					return "nav.serviceInfo.alarms.name";
 				}
 				if (nestedKey == "serviceInfo.requestErrors.requests") {
 					return titleAttribute ?? "nav.serviceInfo.requestErrors.requests";

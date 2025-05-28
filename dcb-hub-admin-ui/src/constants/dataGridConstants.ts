@@ -51,6 +51,7 @@ export const nonClickableTypes = [
 	"numericRangeMappingsForLibraryAllSecondHostLms",
 	"referenceValueMappingsForLibraryAll",
 	"referenceValueMappingsForLibraryAllSecondHostLms",
+	"alarms",
 ];
 
 // Types of data grid where users can click through to a details page,

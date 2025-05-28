@@ -78,6 +78,9 @@
 			"items": "Items"
 		},
 		"serviceInfo": {
+			"alarms": {
+				"name": "Alarms"
+			},
 			"catalogMetricsByHostLms": "Catalog metrics by host LMS",
 			"dataChangeLog": "Data change log",
 			"name": "Service info",
@@ -267,6 +270,16 @@
 	"header": {
 		"language_switcher_title": "Language",
 		"consortium_icon": "The icon of the {{consortium}} consortium."
+	},
+
+	"alarms": {
+		"code": "Alarm code",
+		"created": "Alarm raised",
+		"details": "Details",
+		"expires": "Expires",
+		"id": "Alarm UUID",
+		"last_seen": "Last seen",
+		"repeat_count": "Repeat count"
 	},
 
 	"details": {
