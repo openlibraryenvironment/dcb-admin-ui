@@ -195,15 +195,18 @@ export default function StaffRequest({
 	const agencyCode = watch("agencyCode");
 	const itemAgencyCode = watch("itemAgencyCode");
 
-	const { data: libraries } = useQuery(getLibraries, {
-		variables: {
-			order: "fullName",
-			orderBy: "ASC",
-			pageno: 0,
-			pagesize: 1000,
-			query: "",
+	const { data: libraries, loading: librariesLoading } = useQuery(
+		getLibraries,
+		{
+			variables: {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			},
 		},
-	});
+	);
 	const libraryOptions: AutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
@@ -537,6 +540,7 @@ export default function StaffRequest({
 										onChange(newValue?.value || "");
 									}}
 									options={libraryOptions}
+									loading={librariesLoading}
 									getOptionLabel={(option: AutocompleteOption) => option.label}
 									renderInput={(params) => (
 										<TextField
