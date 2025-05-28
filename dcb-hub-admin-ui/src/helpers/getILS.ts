@@ -3,6 +3,8 @@ export function getILS(lmsClientClass: string): string {
 	// for libraries with 2 host lms
 	// also translation keys etc
 	switch (true) {
+		case lmsClientClass?.toLowerCase().includes("alma"):
+			return "Alma";
 		case lmsClientClass?.toLowerCase().includes("folio"):
 			return "FOLIO";
 		case lmsClientClass?.toLowerCase().includes("polaris"):
