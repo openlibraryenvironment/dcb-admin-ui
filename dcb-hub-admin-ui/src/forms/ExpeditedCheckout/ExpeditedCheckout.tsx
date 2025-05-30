@@ -13,7 +13,6 @@ import {
 	StepLabel,
 	Stepper,
 	Typography,
-	useTheme,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import {
@@ -178,7 +177,6 @@ export default function ExpeditedCheckout({
 	const itemAgencyCode = formValues.itemAgencyCode;
 	const pickupLocationId = formValues.pickupLocationId;
 	const itemLocalId = formValues.itemLocalId;
-	const theme = useTheme();
 
 	const { data: libraries, loading: librariesLoading } = useQuery(
 		getLibraries,
@@ -634,7 +632,6 @@ export default function ExpeditedCheckout({
 							<StatusStepConnector
 								stepError={stepError}
 								activeStep={activeStep}
-								theme={theme}
 							/>
 						}
 					>
