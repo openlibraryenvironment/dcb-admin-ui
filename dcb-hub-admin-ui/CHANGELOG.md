@@ -1,3 +1,16 @@
+# [1.39.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.38.0...v1.39.0) (2025-05-30)
+
+
+### Bug Fixes
+
+* display the alma ils for libraries [DCB-1914] ([d402b82](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d402b821f4e7a9eead702e31185f9bd126ecb272))
+* Fix loading indicator on staff request patron validation [DCB-1833] ([2919ca1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2919ca147ece48496727900ade26ab9e5ce1afd3))
+
+
+### Features
+
+* Support for a future live diagnostics page [DCB-1915] ([a0eb185](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a0eb185f7bd0f9577ddc439b8db9cef657e3b47e))
+
 # [1.38.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.37.0...v1.38.0) (2025-05-22)
 
 
