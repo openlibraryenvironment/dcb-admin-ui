@@ -1,3 +1,15 @@
+# [1.40.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.39.0...v1.40.0) (2025-06-11)
+
+
+### Bug Fixes
+
+* Prevent non-requestable items showing in staff request [DCB-1932] ([a312d66](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a312d667d254cdfc72cacf174b893b112c81e202))
+
+
+### Features
+
+* Toggle pickup anywhere eligibility for a location ([763ad1f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/763ad1fea63baa843c619af0fa20cbdb862c64dd))
+
 # [1.39.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.38.0...v1.39.0) (2025-05-30)
 
 
