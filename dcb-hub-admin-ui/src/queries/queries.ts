@@ -147,6 +147,8 @@ export const updateLocationQuery = gql`
 			name
 			localId
 			printLabel
+			isPickup
+			isEnabledForPickupAnywhere
 		}
 	}
 `;
@@ -304,6 +306,7 @@ export const getAgencyById = gql`
 					name
 					type
 					isPickup
+					isEnabledForPickupAnywhere
 					longitude
 					latitude
 					locationReference
@@ -797,6 +800,7 @@ export const getLocations = gql`
 				name
 				type
 				isPickup
+				isEnabledForPickupAnywhere
 				printLabel
 				localId
 				deliveryStops
@@ -848,6 +852,7 @@ export const getLocationById = gql`
 				name
 				type
 				isPickup
+				isEnabledForPickupAnywhere
 				localId
 				longitude
 				latitude
@@ -865,6 +870,7 @@ export const getLocationById = gql`
 					name
 					type
 					isPickup
+					isEnabledForPickupAnywhere
 					longitude
 					latitude
 					dateCreated

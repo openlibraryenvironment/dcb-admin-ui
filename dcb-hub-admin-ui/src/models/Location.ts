@@ -15,4 +15,5 @@ export interface Location {
 	deliveryStops: string;
 	printLabel: string;
 	hostSystem: HostLMS;
+	isEnabledForPickupAnywhere: boolean;
 }

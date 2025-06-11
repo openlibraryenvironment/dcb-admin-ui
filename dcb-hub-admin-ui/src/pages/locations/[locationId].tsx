@@ -102,6 +102,8 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
 	const [showConfirmationPickup, setConfirmationPickup] = useState(false);
+	const [showConfirmationPickupAnywhere, setConfirmationPickupAnywhere] =
+		useState(false);
 
 	const [changedFields, setChangedFields] = useState<Partial<any>>({});
 	const ils = getILS(location?.hostSystem?.lmsClientClass);
@@ -229,6 +231,14 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 		});
 	};
 
+	const closeConfirmationPickupAnywhere = () => {
+		setConfirmationPickupAnywhere(false);
+		// This refetches the LoadLibrary query to ensure we're up-to-date after confirmation.
+		client.refetchQueries({
+			include: ["LoadLocation"],
+		});
+	};
+
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
@@ -321,6 +331,59 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					title: t("ui.data_grid.error"),
 				});
 				closeConfirmation();
+			}
+		});
+	};
+
+	const handlePickupAnywhereConfirmation = (
+		pickupAnywhere: string,
+		reason: string,
+		changeCategory: string,
+		changeReferenceUrl: string,
+	) => {
+		const input = {
+			id: location?.id,
+			isEnabledForPickupAnywhere:
+				pickupAnywhere === "enablePickupAnywhere" ? true : false,
+			reason: reason,
+			changeCategory: changeCategory,
+			changeReferenceUrl: changeReferenceUrl,
+		};
+		updateLocation({
+			variables: {
+				input,
+			},
+		}).then((response) => {
+			if (response.data) {
+				setAlert({
+					open: true,
+					severity: "success",
+					text:
+						pickupAnywhere == "disablePickupAnywhere"
+							? t("details.location_pickup_anywhere_disable_success", {
+									location: location?.name,
+								})
+							: t("details.location_pickup_anywhere_enable_success", {
+									location: location?.name,
+								}),
+					title: t("ui.data_grid.updated"),
+				});
+				closeConfirmationPickupAnywhere();
+			} else {
+				setAlert({
+					open: true,
+					severity: "error",
+					text:
+						pickupAnywhere == "disablePickupAnywhere"
+							? t("details.location_pickup_anywhere_error_disable", {
+									location: location?.name,
+								})
+							: t("details.location_pickup_anywhere_error_enable", {
+									location: location?.name,
+								}),
+					title: t("ui.data_grid.error"),
+				});
+				closeConfirmationPickupAnywhere();
 			}
 		});
 	};
@@ -649,6 +712,31 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 					) : null}
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("locations.new.pickup_anywhere_status")}
+						</Typography>
+						{location?.isEnabledForPickupAnywhere
+							? t("locations.new.pickup_anywhere_enabled")
+							: location?.isEnabledForPickupAnywhere == false
+								? t("locations.new.pickup_anywhere_disabled")
+								: t("details.location_pickup_anywhere_not_set")}
+					</Stack>
+					{isAnAdmin ? (
+						<Button
+							onClick={() => setConfirmationPickupAnywhere(true)}
+							color="primary"
+							variant="outlined"
+							sx={{ marginTop: 1 }}
+							type="submit"
+						>
+							{location?.isEnabledForPickupAnywhere
+								? t("details.location_pickup_anywhere_disable")
+								: t("details.location_pickup_anywhere_enable")}
+						</Button>
+					) : null}
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
@@ -756,6 +844,30 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 				}
 				type="pickup"
 				participation={location?.isPickup ? "disablePickup" : "enablePickup"}
+				entityName={location?.name}
+				entity={t("locations.location_one")}
+				code={location?.code}
+				gridEdit={false}
+			/>
+			<Confirmation
+				open={showConfirmationPickupAnywhere}
+				onClose={() => closeConfirmationPickupAnywhere()}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
+					handlePickupAnywhereConfirmation(
+						location?.isEnabledForPickupAnywhere
+							? "disablePickupAnywhere"
+							: "enablePickupAnywhere",
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					)
+				}
+				type="pickupAnywhere"
+				participation={
+					location?.isEnabledForPickupAnywhere
+						? "disablePickupAnywhere"
+						: "enablePickupAnywhere"
+				}
 				entityName={location?.name}
 				entity={t("locations.location_one")}
 				code={location?.code}

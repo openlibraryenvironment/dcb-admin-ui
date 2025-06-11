@@ -29,6 +29,7 @@ interface NewLocationFormData {
 	isPickup: boolean;
 	latitude: number;
 	longitude: number;
+	isEnabledForPickupAnywhere: boolean;
 	printLabel?: string;
 	localId?: string;
 	deliveryStops?: string;
@@ -165,6 +166,11 @@ export default function NewLocation({
 		isPickup: Yup.boolean().required(
 			t("ui.validation.required", {
 				field: t("details.is_pickup"),
+			}),
+		),
+		isEnabledForPickupAnywhere: Yup.boolean().required(
+			t("ui.validation.required", {
+				field: t("details.is_pickup_anywhere"),
 			}),
 		),
 	});
@@ -451,6 +457,47 @@ export default function NewLocation({
 									</Select>
 									{errors.isPickup && (
 										<FormHelperText>{errors.isPickup?.message}</FormHelperText>
+									)}
+								</FormControl>
+							)}
+						/>
+
+						<Controller
+							name="isEnabledForPickupAnywhere"
+							control={control}
+							render={({ field }) => (
+								<FormControl
+									fullWidth
+									error={!!errors.isEnabledForPickupAnywhere}
+								>
+									<InputLabel>
+										{t("locations.new.pickup_anywhere_status")}
+									</InputLabel>
+									<Select
+										{...field}
+										label={t("locations.new.pickup_anywhere_status")}
+										value={field.value?.toString() ?? "true"}
+										onChange={(e) => {
+											field.onChange(e.target.value === "true");
+										}}
+									>
+										<MenuItem
+											key={t("locations.new.pickup_anywhere_enabled")}
+											value="true"
+										>
+											{t("locations.new.pickup_anywhere_enabled")}
+										</MenuItem>
+										<MenuItem
+											key={t("locations.new.pickup_anywhere_disabled")}
+											value="false"
+										>
+											{t("locations.new.pickup_anywhere_disabled")}
+										</MenuItem>
+									</Select>
+									{errors.isEnabledForPickupAnywhere && (
+										<FormHelperText>
+											{errors.isEnabledForPickupAnywhere?.message}
+										</FormHelperText>
 									)}
 								</FormControl>
 							)}

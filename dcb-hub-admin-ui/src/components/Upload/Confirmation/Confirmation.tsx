@@ -229,6 +229,22 @@ const Confirmation = ({
 						location: entityName,
 					});
 				}
+			case "pickupAnywhere":
+				if (participation == "disablePickupAnywhere") {
+					return t(
+						"details.location_pickup_anywhere_disabled_confirmation_header",
+						{
+							location: entityName,
+						},
+					);
+				} else {
+					return t(
+						"details.location_pickup_anywhere_enabled_confirmation_header",
+						{
+							location: entityName,
+						},
+					);
+				}
 			case "functionalSettings":
 				return headerText;
 			default:
@@ -414,6 +430,34 @@ const Confirmation = ({
 						</Box>
 					);
 				}
+			case "pickupAnywhere":
+				if (participation == "disablePickupAnywhere") {
+					return (
+						<Box>
+							<Typography variant="body1">
+								{t(
+									"details.location_pickup_anywhere_disabled_confirmation_body",
+									{
+										location: entityName,
+									},
+								)}
+							</Typography>
+						</Box>
+					);
+				} else {
+					return (
+						<Box>
+							<Typography variant="body1">
+								{t(
+									"details.location_pickup_anywhere_enabled_confirmation_body",
+									{
+										location: entityName,
+									},
+								)}
+							</Typography>
+						</Box>
+					);
+				}
 			case "functionalSettings":
 				return (
 					<Box>
@@ -477,6 +521,12 @@ const Confirmation = ({
 					return t("details.location_pickup_disable");
 				} else {
 					return t("details.location_pickup_enable");
+				}
+			case "pickupAnywhere":
+				if (participation == "disablePickupAnywhere") {
+					return t("details.location_pickup_anywhere_disable");
+				} else {
+					return t("details.location_pickup_anywhere_enable");
 				}
 			case "functionalSettings":
 				return buttonText;
