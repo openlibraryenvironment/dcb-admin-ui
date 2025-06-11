@@ -300,7 +300,10 @@ export default function StaffRequest({
 	const itemsData: Item[] = availabilityResults?.itemList || [];
 	// filter on agency code - from user selected library
 	const filteredItems = itemsData.filter(
-		(item) => item.agency.code == itemAgencyCode,
+		(item) =>
+			item.agency.code === itemAgencyCode &&
+			item.isRequestable &&
+			!item.isSuppressed,
 	);
 
 	const pickupLocationOptions: AutocompleteOption[] =

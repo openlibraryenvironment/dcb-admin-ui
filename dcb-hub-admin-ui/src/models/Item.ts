@@ -15,7 +15,7 @@ export interface Item {
 	localItemTypeCode: string;
 	canonicalItemType: string;
 	deleted: boolean;
-	suppressed: boolean;
+	isSuppressed: boolean;
 	agency: Agency;
 	owningContext: string;
 	availableDate: string;
