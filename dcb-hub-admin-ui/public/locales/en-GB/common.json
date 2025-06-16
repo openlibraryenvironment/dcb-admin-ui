@@ -1073,6 +1073,7 @@
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",
+		"cluster_deleted": "Is cluster deleted?",
 		"date_available": "Date available",
 		"date_due": "Date due",
 		"shared_index_unavailable_title": "Shared index is not configured on this system",

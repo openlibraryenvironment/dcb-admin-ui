@@ -1947,6 +1947,10 @@ export const getClusters = gql`
 			content {
 				id
 				title
+				selectedBib
+				isDeleted
+				dateCreated
+				dateUpdated
 				members {
 					id
 					title
