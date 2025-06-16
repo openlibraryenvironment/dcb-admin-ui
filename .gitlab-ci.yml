@@ -42,23 +42,23 @@ build:
     - npm install
     - npm run semantic-release
 
-build-container-image:
-  image: 
-    name: docker:stable
-    pull_policy: if-not-present
-  stage: build
-  only:
-    - release
-  tags:
-    - ki-onprem
-  script:
-    - echo Building container image
-    - pwd
-    - ls
-    - cd dcb-hub-admin-ui
-    - docker info
-    - docker login -u $NEXUS_USER -p $NEXUS_PASS docker.libsdev.k-int.com
-    - docker build -f ./docker/production/Dockerfile -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1 .
-    - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest
-    - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1
-    - docker images
+# build-container-image:
+#   image: 
+#     name: docker:stable
+#     pull_policy: if-not-present
+#   stage: build
+#   only:
+#     - release
+#   tags:
+#     - ki-onprem
+#   script:
+#     - echo Building container image
+#     - pwd
+#     - ls
+#     - cd dcb-hub-admin-ui
+#     - docker info
+#     - docker login -u $NEXUS_USER -p $NEXUS_PASS docker.libsdev.k-int.com
+#     - docker build -f ./docker/production/Dockerfile -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1 .
+#     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest
+#     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1
+#     - docker images
