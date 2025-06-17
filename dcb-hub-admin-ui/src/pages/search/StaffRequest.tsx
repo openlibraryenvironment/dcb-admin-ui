@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLazyQuery, useQuery } from "@apollo/client";
@@ -71,6 +71,7 @@ type AutocompleteOption = {
 	agencyId?: string;
 	functionalSettings?: FunctionalSetting[];
 	hostLmsCode?: string;
+	agencyName?: string;
 };
 
 type PlaceRequestResponse = {
@@ -253,8 +254,8 @@ export default function StaffRequest({
 		},
 
 		variables: {
-			order: "name",
-			orderBy: "ASC",
+			order: "agency",
+			orderBy: "DESC",
 			pageno: 0,
 			pagesize: 1000,
 			query: locationQuery,
@@ -308,12 +309,53 @@ export default function StaffRequest({
 
 	const pickupLocationOptions: AutocompleteOption[] =
 		pickupLocations?.locations?.content?.map(
-			(item: { name: string; id: string; code: string }) => ({
+			(item: { name: string; id: string; code: string; agency: Agency }) => ({
 				label: item.name,
 				value: item.id,
 				code: item.code,
+				agencyName: item.agency.name,
 			}),
 		) || [];
+
+	const sortedPickupLocationOptions = useMemo(() => {
+		// Return an empty array if there are no locations to process
+		if (!pickupLocations?.locations?.content) {
+			return [];
+		}
+
+		// Map the raw data to the AutocompleteOption structure, including agencyCode
+		const options = pickupLocations.locations.content.map(
+			(item: {
+				name: string;
+				id: string;
+				agency: { name: string; code: string };
+			}) => ({
+				label: item.name,
+				value: item.id,
+				agencyName: item.agency.name,
+				agencyCode: item.agency.code,
+			}),
+		);
+
+		// Sort the array of options
+		return options.sort((a: any, b: any) => {
+			const isAUserAgency = a.agencyCode === agencyCode;
+			const isBUserAgency = b.agencyCode === agencyCode;
+
+			// Rule 1: The user's selected agency locations always come first.
+			if (isAUserAgency && !isBUserAgency) return -1;
+			if (!isAUserAgency && isBUserAgency) return 1;
+
+			// Rule 2: For all other locations (or within the user's agency group),
+			// sort the groups alphabetically by agency name.
+			if (a.agencyName && b.agencyName && a.agencyName !== b.agencyName) {
+				return a.agencyName.localeCompare(b.agencyName);
+			}
+
+			// Rule 3: Within each agency group, sort locations alphabetically by name.
+			return a.label.localeCompare(b.label);
+		});
+	}, [pickupLocations, agencyCode]);
 
 	const itemLibraryOptions: AutocompleteOption[] =
 		libraries?.libraries?.content?.map(
@@ -604,14 +646,15 @@ export default function StaffRequest({
 									render={({ field: { onChange, value } }) => (
 										<Autocomplete
 											value={
-												pickupLocationOptions.find(
-													(option) => option.value === value,
+												sortedPickupLocationOptions.find(
+													(option: AutocompleteOption) =>
+														option.value === value,
 												) || null
 											}
 											onChange={(_, newValue: AutocompleteOption | null) => {
 												onChange(newValue?.value || "");
 											}}
-											options={pickupLocationOptions}
+											options={sortedPickupLocationOptions}
 											onOpen={() => {
 												getPickupLocations();
 											}}
@@ -619,6 +662,7 @@ export default function StaffRequest({
 											getOptionLabel={(option: AutocompleteOption) =>
 												option.label
 											}
+											groupBy={(option) => option.agencyName || ""}
 											renderInput={(params) => (
 												<TextField
 													{...params}
@@ -679,6 +723,11 @@ export default function StaffRequest({
 									)}
 								/>
 								{selectionType === "manual" && (
+									// This should only really give you the option for libraries with items.
+									// Match on agencyCode
+									// To avoid the "No Items" screen, we should hit live availability on the cluster screen and disallow clicking the button
+									// But put a tooltip to explain.
+									// Don't disallow clicking the button IF SELECT_UNAVAILABLE_ITEMS is enabled.
 									<>
 										<Controller
 											name="itemAgencyCode"
