@@ -50,7 +50,6 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 	}, [apiRef, handleViewportInnerSizeChange]);
 
 	const { t } = useTranslation();
-	console.log(row);
 
 	switch (type) {
 		case "agencies":

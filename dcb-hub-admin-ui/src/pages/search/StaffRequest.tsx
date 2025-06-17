@@ -324,7 +324,7 @@ export default function StaffRequest({
 		}
 
 		// Map the raw data to the AutocompleteOption structure, including agencyCode
-		const options = pickupLocations.locations.content.map(
+		const options = pickupLocations?.locations?.content.map(
 			(item: {
 				name: string;
 				id: string;
@@ -332,8 +332,10 @@ export default function StaffRequest({
 			}) => ({
 				label: item.name,
 				value: item.id,
-				agencyName: item.agency.name,
-				agencyCode: item.agency.code,
+				agencyName:
+					item?.agency?.name ??
+					t("staff_request.patron.pickup_location_no_agency"),
+				agencyCode: item?.agency?.code,
 			}),
 		);
 
@@ -355,7 +357,7 @@ export default function StaffRequest({
 			// Rule 3: Within each agency group, sort locations alphabetically by name.
 			return a.label.localeCompare(b.label);
 		});
-	}, [pickupLocations, agencyCode]);
+	}, [pickupLocations?.locations?.content, t, agencyCode]);
 
 	const itemLibraryOptions: AutocompleteOption[] =
 		libraries?.libraries?.content?.map(
