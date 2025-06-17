@@ -318,12 +318,9 @@ export default function StaffRequest({
 		) || [];
 
 	const sortedPickupLocationOptions = useMemo(() => {
-		// Return an empty array if there are no locations to process
 		if (!pickupLocations?.locations?.content) {
 			return [];
 		}
-
-		// Map the raw data to the AutocompleteOption structure, including agencyCode
 		const options = pickupLocations?.locations?.content.map(
 			(item: {
 				name: string;
@@ -344,17 +341,17 @@ export default function StaffRequest({
 			const isAUserAgency = a.agencyCode === agencyCode;
 			const isBUserAgency = b.agencyCode === agencyCode;
 
-			// Rule 1: The user's selected agency locations always come first.
+			// #1: The user's selected agency locations always come first.
 			if (isAUserAgency && !isBUserAgency) return -1;
 			if (!isAUserAgency && isBUserAgency) return 1;
 
-			// Rule 2: For all other locations (or within the user's agency group),
+			// #2: For all other locations (or within the user's agency group),
 			// sort the groups alphabetically by agency name.
 			if (a.agencyName && b.agencyName && a.agencyName !== b.agencyName) {
 				return a.agencyName.localeCompare(b.agencyName);
 			}
 
-			// Rule 3: Within each agency group, sort locations alphabetically by name.
+			// #3: Within each agency group, sort locations alphabetically by name.
 			return a.label.localeCompare(b.label);
 		});
 	}, [pickupLocations?.locations?.content, t, agencyCode]);
@@ -730,6 +727,7 @@ export default function StaffRequest({
 									// To avoid the "No Items" screen, we should hit live availability on the cluster screen and disallow clicking the button
 									// But put a tooltip to explain.
 									// Don't disallow clicking the button IF SELECT_UNAVAILABLE_ITEMS is enabled.
+									// And if SELECT_UNAVAILABLE_ITEMS is turned on, perhaps we should hit live availability with filters="none"
 									<>
 										<Controller
 											name="itemAgencyCode"
