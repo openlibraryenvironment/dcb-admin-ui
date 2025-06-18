@@ -5,7 +5,14 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
-import { Tooltip, useTheme } from "@mui/material";
+import {
+	Grid,
+	Link,
+	Stack,
+	Tooltip,
+	Typography,
+	useTheme,
+} from "@mui/material";
 import { Cancel, CheckCircle } from "@mui/icons-material";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
@@ -21,6 +28,7 @@ import { useSession } from "next-auth/react";
 import StaffRequest from "../../../forms/StaffRequest/StaffRequest";
 import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
@@ -175,20 +183,72 @@ const Clusters: NextPage = () => {
 					/>
 				) : null}
 			</div>
-			<ClientDataGrid
-				loading={loading}
-				data={rows ?? []}
-				columns={columns}
-				getDetailPanelContent={({ row }: any) => (
-					<MasterDetail row={row} type="cluster" />
-				)}
-				disableAggregation={true}
-				disableRowGrouping={true}
-				type="Cluster"
-				coreType="Cluster"
-				operationDataType="Cluster"
-				selectable={false}
-			/>
+			<Grid container spacing={2} role="row">
+				<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.date_created")}
+						</Typography>
+						<Typography variant="attributeText">
+							<RenderAttribute attribute={theCluster?.dateCreated} />
+						</Typography>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.date_updated")}
+						</Typography>
+						<Typography variant="attributeText">
+							<RenderAttribute attribute={theCluster?.dateUpdated} />
+						</Typography>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.selected_bib_uuid")}
+						</Typography>
+						<Typography variant="attributeText" component="div">
+							<Link
+								href={`/bibs/${theCluster?.selectedBib}`}
+								underline="hover"
+								onClick={(e) => {
+									e.stopPropagation();
+								}}
+							>
+								<RenderAttribute attribute={theCluster?.selectedBib} />
+							</Link>
+						</Typography>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("search.cluster_deleted")}
+						</Typography>
+						<Typography variant="attributeText">
+							<RenderAttribute attribute={theCluster?.isDeleted} />
+						</Typography>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 8, sm: 12, md: 12 }} role="gridcell">
+					<ClientDataGrid
+						loading={loading}
+						data={rows ?? []}
+						columns={columns}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="cluster" />
+						)}
+						disableAggregation={true}
+						disableRowGrouping={true}
+						type="Cluster"
+						coreType="Cluster"
+						operationDataType="Cluster"
+						selectable={false}
+					/>
+				</Grid>
+			</Grid>
 		</AdminLayout>
 	);
 };

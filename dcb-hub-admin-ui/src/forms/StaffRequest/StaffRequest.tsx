@@ -257,7 +257,10 @@ export default function StaffRequest({
 	const itemsData: Item[] = availabilityResults?.itemList || [];
 	// filter on agency code - from user selected library
 	const filteredItems = itemsData.filter(
-		(item) => item?.agency?.code == itemAgencyCode,
+		(item) =>
+			item.agency.code === itemAgencyCode &&
+			item.isRequestable &&
+			!item.isSuppressed,
 	);
 
 	const pickupLocationOptions: PatronRequestAutocompleteOption[] =
@@ -688,6 +691,7 @@ export default function StaffRequest({
 									// To avoid the "No Items" screen, we should hit live availability on the cluster screen and disallow clicking the button
 									// But put a tooltip to explain.
 									// Don't disallow clicking the button IF SELECT_UNAVAILABLE_ITEMS is enabled.
+									// And if SELECT_UNAVAILABLE_ITEMS is turned on, perhaps we should hit live availability with filters="none"
 
 									<>
 										<Controller
