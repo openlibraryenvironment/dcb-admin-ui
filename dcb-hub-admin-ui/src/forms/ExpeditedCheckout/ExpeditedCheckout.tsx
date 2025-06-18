@@ -163,7 +163,7 @@ export default function ExpeditedCheckout({
 			patronBarcode: "",
 			agencyCode: "",
 			pickupLocationId: "",
-			requesterNote: "On-site-borrowing: ",
+			requesterNote: "On-site borrowing: ",
 			itemLocalId: "",
 			itemLocalSystemCode: "",
 			itemAgencyCode: "",
