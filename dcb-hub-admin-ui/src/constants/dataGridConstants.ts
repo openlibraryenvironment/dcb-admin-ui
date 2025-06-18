@@ -61,6 +61,7 @@ export const specialRedirectionTypes = [
 	"patronRequestsLibraryOutOfSequence",
 	"patronRequestsLibraryCompleted",
 	"patronRequestsLibraryException",
+	"patronRequestsLibraryAll",
 	"patronRequestsActive",
 	"patronRequestsOutOfSequence",
 	"patronRequestsCompleted",
