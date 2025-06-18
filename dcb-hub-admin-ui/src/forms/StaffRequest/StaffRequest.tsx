@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLazyQuery, useQuery } from "@apollo/client";
@@ -152,15 +152,18 @@ export default function StaffRequest({
 	const agencyCode = watch("agencyCode");
 	const itemAgencyCode = watch("itemAgencyCode");
 
-	const { data: libraries } = useQuery(getLibraries, {
-		variables: {
-			order: "fullName",
-			orderBy: "ASC",
-			pageno: 0,
-			pagesize: 1000,
-			query: "",
+	const { data: libraries, loading: librariesLoading } = useQuery(
+		getLibraries,
+		{
+			variables: {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			},
 		},
-	});
+	);
 	const libraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
@@ -207,8 +210,8 @@ export default function StaffRequest({
 		},
 
 		variables: {
-			order: "name",
-			orderBy: "ASC",
+			order: "agency",
+			orderBy: "DESC",
 			pageno: 0,
 			pagesize: 1000,
 			query: locationQuery,
@@ -259,12 +262,52 @@ export default function StaffRequest({
 
 	const pickupLocationOptions: PatronRequestAutocompleteOption[] =
 		pickupLocations?.locations?.content?.map(
-			(item: { name: string; id: string; code: string }) => ({
+			(item: { name: string; id: string; code: string; agency: Agency }) => ({
 				label: item.name,
 				value: item.id,
 				code: item.code,
+				agencyName: item.agency.name,
 			}),
 		) || [];
+
+	const sortedPickupLocationOptions = useMemo(() => {
+		if (!pickupLocations?.locations?.content) {
+			return [];
+		}
+		const options = pickupLocations?.locations?.content.map(
+			(item: {
+				name: string;
+				id: string;
+				agency: { name: string; code: string };
+			}) => ({
+				label: item.name,
+				value: item.id,
+				agencyName:
+					item?.agency?.name ??
+					t("staff_request.patron.pickup_location_no_agency"),
+				agencyCode: item?.agency?.code,
+			}),
+		);
+
+		// Sort the array of options
+		return options.sort((a: any, b: any) => {
+			const isAUserAgency = a.agencyCode === agencyCode;
+			const isBUserAgency = b.agencyCode === agencyCode;
+
+			// #1: The user's selected agency locations always come first.
+			if (isAUserAgency && !isBUserAgency) return -1;
+			if (!isAUserAgency && isBUserAgency) return 1;
+
+			// #2: For all other locations (or within the user's agency group),
+			// sort the groups alphabetically by agency name.
+			if (a.agencyName && b.agencyName && a.agencyName !== b.agencyName) {
+				return a.agencyName.localeCompare(b.agencyName);
+			}
+
+			// #3: Within each agency group, sort locations alphabetically by name.
+			return a.label.localeCompare(b.label);
+		});
+	}, [pickupLocations?.locations?.content, t, agencyCode]);
 
 	const itemLibraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
@@ -497,6 +540,7 @@ export default function StaffRequest({
 										onChange(newValue?.value || "");
 									}}
 									options={libraryOptions}
+									loading={librariesLoading}
 									getOptionLabel={(option: PatronRequestAutocompleteOption) =>
 										option.label
 									}
@@ -559,8 +603,9 @@ export default function StaffRequest({
 									render={({ field: { onChange, value } }) => (
 										<Autocomplete
 											value={
-												pickupLocationOptions.find(
-													(option) => option.value === value,
+												sortedPickupLocationOptions.find(
+													(option: PatronRequestAutocompleteOption) =>
+														option.value === value,
 												) || null
 											}
 											onChange={(
@@ -569,7 +614,7 @@ export default function StaffRequest({
 											) => {
 												onChange(newValue?.value || "");
 											}}
-											options={pickupLocationOptions}
+											options={sortedPickupLocationOptions}
 											onOpen={() => {
 												getPickupLocations();
 											}}
@@ -577,6 +622,7 @@ export default function StaffRequest({
 											getOptionLabel={(
 												option: PatronRequestAutocompleteOption,
 											) => option.label}
+											groupBy={(option) => option.agencyName || ""}
 											renderInput={(params) => (
 												<TextField
 													{...params}
@@ -637,6 +683,12 @@ export default function StaffRequest({
 									)}
 								/>
 								{selectionType === "manual" && (
+									// This should only really give you the option for libraries with items.
+									// Match on agencyCode
+									// To avoid the "No Items" screen, we should hit live availability on the cluster screen and disallow clicking the button
+									// But put a tooltip to explain.
+									// Don't disallow clicking the button IF SELECT_UNAVAILABLE_ITEMS is enabled.
+
 									<>
 										<Controller
 											name="itemAgencyCode"

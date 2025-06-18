@@ -1084,6 +1084,7 @@
 			"item_local_id": "Item local ID",
 			"item_select": "Item {{id}} - Location: {{name}}, Barcode: {{barcode}}",
 			"pickup_location": "Pickup location",
+			"pickup_location_no_agency": "Other locations",
 			"requester_note": "Requester note",
 			"selection": {
 				"automatic": "Automatic",

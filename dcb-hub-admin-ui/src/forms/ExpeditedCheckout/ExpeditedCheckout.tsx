@@ -310,6 +310,45 @@ export default function ExpeditedCheckout({
 			}),
 		) || [];
 
+	const sortedPickupLocationOptions = useMemo(() => {
+		if (!pickupLocations?.locations?.content) {
+			return [];
+		}
+		const options = pickupLocations?.locations?.content.map(
+			(item: {
+				name: string;
+				id: string;
+				agency: { name: string; code: string };
+			}) => ({
+				label: item.name,
+				value: item.id,
+				agencyName:
+					item?.agency?.name ??
+					t("staff_request.patron.pickup_location_no_agency"),
+				agencyCode: item?.agency?.code,
+			}),
+		);
+
+		// Sort the array of options
+		return options.sort((a: any, b: any) => {
+			const isAUserAgency = a.agencyCode === agencyCode;
+			const isBUserAgency = b.agencyCode === agencyCode;
+
+			// #1: The user's selected agency locations always come first.
+			if (isAUserAgency && !isBUserAgency) return -1;
+			if (!isAUserAgency && isBUserAgency) return 1;
+
+			// #2: For all other locations (or within the user's agency group),
+			// sort the groups alphabetically by agency name.
+			if (a.agencyName && b.agencyName && a.agencyName !== b.agencyName) {
+				return a.agencyName.localeCompare(b.agencyName);
+			}
+
+			// #3: Within each agency group, sort locations alphabetically by name.
+			return a.label.localeCompare(b.label);
+		});
+	}, [pickupLocations?.locations?.content, t, agencyCode]);
+
 	const itemOptions: PatronRequestAutocompleteOption[] =
 		filteredItems?.map(
 			(item: {
@@ -556,7 +595,7 @@ export default function ExpeditedCheckout({
 						itemLibraryOptions={itemLibraryOptions}
 						itemLibrariesLoading={itemLibrariesLoading}
 						setValue={setValue}
-						pickupLocationOptions={pickupLocationOptions}
+						pickupLocationOptions={sortedPickupLocationOptions}
 						pickupLocationsLoading={pickupLocationsLoading}
 						itemOptions={itemOptions}
 						itemsLoading={itemsLoading}

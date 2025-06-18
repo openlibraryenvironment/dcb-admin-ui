@@ -7,4 +7,5 @@ export interface PatronRequestAutocompleteOption {
 	functionalSettings?: FunctionalSetting[];
 	hostLmsCode?: string;
 	dueDate?: string;
+	agencyName?: string;
 }
