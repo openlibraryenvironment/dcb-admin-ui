@@ -1,3 +1,10 @@
+## [1.41.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.41.0...v1.41.1) (2025-06-18)
+
+
+### Bug Fixes
+
+* Fix library patron request navigation ([719eceb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/719ecebf1ca3f2fd6b7aa71e3c95dc09a8a62469))
+
 # [1.41.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.40.0...v1.41.0) (2025-06-18)
 
 
