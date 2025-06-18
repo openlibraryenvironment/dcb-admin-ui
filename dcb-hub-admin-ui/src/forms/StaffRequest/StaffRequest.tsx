@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import { Trans, useTranslation } from "next-i18next";
 import { Close } from "@mui/icons-material";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { getLibraries, getLocations } from "src/queries/queries";
 import axios from "axios";
@@ -32,67 +31,24 @@ import { useSession } from "next-auth/react";
 import Link from "@components/Link/Link";
 import { getRequestError } from "src/helpers/getRequestError";
 import { Agency } from "@models/Agency";
-import { FunctionalSetting } from "@models/FunctionalSetting";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { findConsortium } from "src/helpers/findConsortium";
 import { Location } from "@models/Location";
 import { isEmpty } from "lodash";
 import { Item } from "@models/Item";
+import { PatronRequestFormType } from "@models/PatronRequestFormType";
+import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
+import { PatronLookupResponse } from "@models/PatronLookupResponse";
+import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
+import { StaffRequestFormData } from "@models/StaffRequestFormData";
 
 // WHEN WE INTRODUCE DCB ADMIN FOR LIBRARIES THIS DROP DOWN FOR LIBRARIES MUST BE RESTRICTED TO ONLY THE LIBRARY THE USER IS MANAGING
-type PatronLookupResponse = {
-	status: string; // if not VALID, cannot make request
-	localPatronId: string; // this is the localId that gets sent to /place request
-	agencyCode: string; // agency code
-	systemCode: string; // this is localSystemCode
-	homeLocationCode: string; // this is homeLibraryCode
-};
-
-interface StaffRequestFormData {
-	patronBarcode: string;
-	agencyCode: string;
-	pickupLocationId: string;
-	requesterNote?: string;
-	selectionType: string;
-	itemLocalId?: string;
-	itemLocalSystemCode?: string;
-	itemAgencyCode?: string;
-}
-
-type StaffRequestFormType = {
-	show: boolean;
-	onClose: () => void;
-	bibClusterId: string;
-};
-
-type AutocompleteOption = {
-	label: string;
-	value: string;
-	agencyId?: string;
-	functionalSettings?: FunctionalSetting[];
-	hostLmsCode?: string;
-	agencyName?: string;
-};
-
-type PlaceRequestResponse = {
-	id: string;
-	citation: {
-		bibClusterId: string;
-	};
-	pickupLocation: {
-		code: string;
-	};
-	requestor: {
-		localId: string;
-		localSystemCode: string;
-	};
-};
 
 export default function StaffRequest({
 	show,
 	onClose,
 	bibClusterId,
-}: StaffRequestFormType) {
+}: PatronRequestFormType) {
 	const { t } = useTranslation();
 	const { data: session } = useSession();
 
@@ -208,7 +164,7 @@ export default function StaffRequest({
 			},
 		},
 	);
-	const libraryOptions: AutocompleteOption[] =
+	const libraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
 				fullName: string;
@@ -307,7 +263,7 @@ export default function StaffRequest({
 			!item.isSuppressed,
 	);
 
-	const pickupLocationOptions: AutocompleteOption[] =
+	const pickupLocationOptions: PatronRequestAutocompleteOption[] =
 		pickupLocations?.locations?.content?.map(
 			(item: { name: string; id: string; code: string; agency: Agency }) => ({
 				label: item.name,
@@ -356,7 +312,7 @@ export default function StaffRequest({
 		});
 	}, [pickupLocations?.locations?.content, t, agencyCode]);
 
-	const itemLibraryOptions: AutocompleteOption[] =
+	const itemLibraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: { fullName: string; agencyCode: string; agency: Agency }) => ({
 				label: item.fullName,
@@ -365,7 +321,7 @@ export default function StaffRequest({
 			}),
 		) || [];
 
-	const itemOptions: AutocompleteOption[] =
+	const itemOptions: PatronRequestAutocompleteOption[] =
 		filteredItems?.map(
 			(item: {
 				id: string;
@@ -551,7 +507,7 @@ export default function StaffRequest({
 				</DialogTitle>
 				<IconButton
 					aria-label="close"
-					onClick={onClose}
+					onClick={handleClose}
 					sx={{
 						position: "absolute",
 						right: 8,
@@ -580,12 +536,17 @@ export default function StaffRequest({
 												) || null
 											: null
 									}
-									onChange={(_, newValue: AutocompleteOption | null) => {
+									onChange={(
+										_,
+										newValue: PatronRequestAutocompleteOption | null,
+									) => {
 										onChange(newValue?.value || "");
 									}}
 									options={libraryOptions}
 									loading={librariesLoading}
-									getOptionLabel={(option: AutocompleteOption) => option.label}
+									getOptionLabel={(option: PatronRequestAutocompleteOption) =>
+										option.label
+									}
 									renderInput={(params) => (
 										<TextField
 											{...params}
@@ -646,11 +607,14 @@ export default function StaffRequest({
 										<Autocomplete
 											value={
 												sortedPickupLocationOptions.find(
-													(option: AutocompleteOption) =>
+													(option: PatronRequestAutocompleteOption) =>
 														option.value === value,
 												) || null
 											}
-											onChange={(_, newValue: AutocompleteOption | null) => {
+											onChange={(
+												_,
+												newValue: PatronRequestAutocompleteOption | null,
+											) => {
 												onChange(newValue?.value || "");
 											}}
 											options={sortedPickupLocationOptions}
@@ -658,9 +622,9 @@ export default function StaffRequest({
 												getPickupLocations();
 											}}
 											loading={pickupLocationsLoading}
-											getOptionLabel={(option: AutocompleteOption) =>
-												option.label
-											}
+											getOptionLabel={(
+												option: PatronRequestAutocompleteOption,
+											) => option.label}
 											groupBy={(option) => option.agencyName || ""}
 											renderInput={(params) => (
 												<TextField
@@ -743,7 +707,7 @@ export default function StaffRequest({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 														// Set the Host LMS code ("localSystemCode") also - this now defaults only to the agency's Host LMS code.
@@ -753,9 +717,9 @@ export default function StaffRequest({
 														);
 													}}
 													options={itemLibraryOptions}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -809,14 +773,14 @@ export default function StaffRequest({
 													}
 													onChange={(
 														_,
-														newValue: AutocompleteOption | null,
+														newValue: PatronRequestAutocompleteOption | null,
 													) => {
 														onChange(newValue?.value || "");
 													}}
 													options={itemOptions}
-													getOptionLabel={(option: AutocompleteOption) =>
-														option.label
-													}
+													getOptionLabel={(
+														option: PatronRequestAutocompleteOption,
+													) => option.label}
 													renderInput={(params) => (
 														<TextField
 															{...params}
@@ -920,16 +884,4 @@ export default function StaffRequest({
 			/>
 		</>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }

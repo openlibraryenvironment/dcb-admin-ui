@@ -26,6 +26,8 @@ const openRSLight = createTheme({
 			headerText: "#FFFFFF",
 			hover: "#EEEEEE",
 			hoverOnSelectedPage: "#A9A9A9",
+			iconSymbol: "#FFFFFF", // The color of symbols within icons - i.e. the cross in an error icon
+			inactiveBackground: "#8C8C8C",
 			link: "#0C4068",
 			linkText: "#246F9E",
 			landingBackground: "#F9F9F9",
@@ -205,6 +207,8 @@ const openRSDark = createTheme({
 			headerText: "#FFFFFF",
 			hover: "#424242",
 			hoverOnSelectedPage: "#424242",
+			iconSymbol: "#FFFFFF",
+			inactiveBackground: "#8C8C8C",
 			link: "#B3E5FC",
 			linkText: "#35B7FF",
 			landingBackground: "#000000",
@@ -249,15 +253,15 @@ const openRSDark = createTheme({
 					},
 					"&.MuiButton-contained": {
 						"&:disabled": {
-							background: "#393939",
-							color: "#727374",
+							background: "#444444",
+							color: "#8c8c8c",
 							border: "none",
 						},
 					},
 					"&.MuiButton-outlined": {
 						"&:disabled": {
-							background: "#393939",
-							color: "#727374",
+							background: "#444444",
+							color: "#8c8c8c",
 							border: "none",
 						},
 					},
@@ -269,6 +273,15 @@ const openRSDark = createTheme({
 				root: {
 					"&.Mui-focusVisible": {
 						borderColor: "#FFFFFF",
+					},
+				},
+			},
+		},
+		MuiTextField: {
+			styleOverrides: {
+				root: {
+					":active": {
+						background: "#424242",
 					},
 				},
 			},

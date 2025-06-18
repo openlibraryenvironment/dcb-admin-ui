@@ -6,8 +6,8 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
 import {
-	Button,
 	Grid,
+	Link,
 	Stack,
 	Tooltip,
 	Typography,
@@ -24,11 +24,11 @@ import Error from "@components/Error/Error";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import { useState } from "react";
-
-import StaffRequest from "../StaffRequest";
+import { useSession } from "next-auth/react";
+import StaffRequest from "../../../forms/StaffRequest/StaffRequest";
+import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import Link from "@components/Link/Link";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
@@ -36,6 +36,7 @@ const Clusters: NextPage = () => {
 	const { id } = router.query;
 	const theme = useTheme();
 	const [showStaffRequest, setShowStaffRequest] = useState(false);
+	const [showExpeditedCheckout, setShowExpeditedCheckout] = useState(false);
 
 	const { loading, error, data } = useQuery(getClusters, {
 		variables: { query: `id: ${id}` },
@@ -52,8 +53,27 @@ const Clusters: NextPage = () => {
 		});
 		return Array.from(matchPointSet);
 	};
+	const { data: session }: { data: any } = useSession();
+
+	const isAnAdmin = session?.profile?.roles?.some(
+		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
+	);
 
 	const matchpoints = theCluster ? extractMatchpoints(theCluster) : [];
+	const pageActions = [
+		{
+			key: "staffRequest",
+			onClick: () => setShowStaffRequest(true),
+			disabled: !isAnAdmin,
+			label: t("staff_request.actions.place"),
+		},
+		{
+			key: "expeditedCheckout",
+			onClick: () => setShowExpeditedCheckout(true),
+			disabled: !isAnAdmin,
+			label: t("expedited_checkout.steps.checkout"),
+		},
+	];
 
 	const hasMatchpoint = (mp: string, instance: any) => {
 		const present = instance.matchPoints.some((obj: any) => obj.value === mp);
@@ -143,21 +163,23 @@ const Clusters: NextPage = () => {
 	) : (
 		<AdminLayout
 			title={t("search.cluster_title", { record: theCluster?.title })}
+			pageActions={pageActions}
 		>
-			<Button
-				data-tid="staff-request-button"
-				variant="contained"
-				onClick={() => setShowStaffRequest(true)}
-				sx={{ mb: 2 }}
-			>
-				{t("staff_request.new")}
-			</Button>
 			<div>
 				{showStaffRequest ? (
 					<StaffRequest
 						show={showStaffRequest}
 						onClose={() => setShowStaffRequest(false)}
 						bibClusterId={id as string} // fix this, typing is weird
+					/>
+				) : null}
+			</div>
+			<div>
+				{showExpeditedCheckout ? (
+					<ExpeditedCheckout
+						show={showExpeditedCheckout}
+						onClose={() => setShowExpeditedCheckout(false)}
+						bibClusterId={id as string}
 					/>
 				) : null}
 			</div>

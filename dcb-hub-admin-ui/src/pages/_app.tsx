@@ -34,6 +34,8 @@ declare module "@mui/material/styles" {
 		headerText?: string;
 		hover?: string;
 		hoverOnSelectedPage: string;
+		iconSymbol?: string;
+		inactiveBackground?: string;
 		link?: string;
 		linkText?: string;
 		landingBackground?: string;
@@ -67,6 +69,8 @@ declare module "@mui/material/styles" {
 		headerText?: string;
 		hover?: string;
 		hoverOnSelectedPage?: string;
+		iconSymbol?: string;
+		inactiveBackground?: string;
 		link?: string;
 		linkText?: string;
 		landingBackground?: string;

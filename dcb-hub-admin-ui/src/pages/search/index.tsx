@@ -226,13 +226,15 @@ const Search: NextPage = () => {
 				onSearch={handleSearch}
 			/>
 			{error ? (
-				<Error
-					title={t("ui.error.search_failed")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.reload")}
-					action={t("ui.action.reload")}
-					reload
-				/>
+				<>
+					<Error
+						title={t("ui.error.search_failed")}
+						message={t("ui.info.connection_issue")}
+						description={t("ui.info.reload")}
+						action={t("ui.action.reload")}
+						reload
+					/>
+				</>
 			) : (
 				<>
 					<DataGridPremium

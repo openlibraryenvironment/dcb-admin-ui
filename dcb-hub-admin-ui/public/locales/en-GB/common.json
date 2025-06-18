@@ -1093,6 +1093,9 @@
 		"volume_raw": "Raw volume statement"
 	},
 	"staff_request": {
+		"actions": {
+			"place": "Place a staff request"
+		},
 		"new": "New request",
 		"patron": {
 			"affiliated": "Affiliated institution",
@@ -1130,6 +1133,33 @@
 			"validating": "Validating patron"
 		},
 		"select_pickup": "We have succesfully validated the patron provided. Please choose a pickup location and click 'Submit' to finish placing this staff request."
+	},
+
+	"expedited_checkout": {
+		"create_request": "Create request",
+		"creating_request": "Creating request ...",
+		"description": "Welcome to DCB on-site borrowing. Please provide the barcode and the library of the patron you would like to make a request for. <paragraph>Provided that the patron's details are valid and the item exists and is available at your library, DCB will instantly check out this item to the specified patron.</paragraph>",
+		"feedback": {
+			"current_status": "Current status: {{status}}",
+			"in_progress": "Your on-site borrowing request has been successfully placed and DCB is now attempting to check it out.",
+			"in_progress_explanation": "Your on-site borrowing request has been successfully placed and DCB is now attempting to check it out.",
+			"success": "Your on-site borrowing request has been checked out successfully and can be tracked in DCB Admin <linkComponent> here </linkComponent>.",
+			"time_elapsed": "Time elapsed: {{time}}"
+		},
+		"request_title": "On-site borrowing request",
+		"steps": {
+			"checkout": "Check out item",
+			"checkout_failure": "Item checkout is taking too long. Please view the request and use the 'check for updates' option to refresh its status.",
+			"checkout_success": "The item has been successfully checked out, and all steps are complete. The due date for this item is {{dueDate}}",
+			"checkout_waiting": "The request has been created. Please wait while we attempt to check out the item.",
+			"complete": "All steps complete!",
+			"patron_validation": "Patron validation",
+			"patron_validation_instruction": "Please provide the barcode and the affiliated institution of the patron.",
+			"request_creation": "Request creation",
+			"request_creation_instruction": "The patron barcode is valid. Please now provide the remaining details."
+		},
+		"title_on_site": "Item checkout",
+		"view_request": "View request"
 	},
 
 	"404": {
