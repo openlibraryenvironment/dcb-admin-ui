@@ -1,3 +1,20 @@
+# [1.41.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.40.0...v1.41.0) (2025-06-18)
+
+
+### Bug Fixes
+
+* Fix for styling issue on stepconnector ([fba4f7b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fba4f7b6cedcf39ca2ebba5d9fbee2def45f77b4))
+* Improve support for non-pickup-anywhere situations [DCB-1555] ([0415fed](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0415fed8eab1fe8f354497509d2d853c358042f3))
+* Prevent non-requestable items showing in item selector [DCB-1932] ([580e39a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/580e39aebe65ee9022c102c87916eec383bacb4c))
+
+
+### Features
+
+* Filter on-site-borrowing requests [DCB-1555] ([f61d6a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f61d6a5ec7e127711afbcf951d6c41e417419b3d))
+* Group pickup locations by agency for requesting [DCB-1939] ([2f615d8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2f615d8d068114c827daa15312f4cc5c2601dba1))
+* Implement on-site borrowing [DCB-1555] ([23db5b4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/23db5b442dabd9f88e06921e05095d85001c6334))
+* Implement on-site borrowing [DCB-1555] ([483cabe](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/483cabe084ad65970e4df9cf688ed1caac826ebb))
+
 # [1.40.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.39.0...v1.40.0) (2025-06-11)
 
 
