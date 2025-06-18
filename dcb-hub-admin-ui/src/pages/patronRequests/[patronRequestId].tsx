@@ -568,6 +568,16 @@ export default function PatronRequestDetails({
 								<RenderAttribute attribute={patronRequest?.id} />
 							</Stack>
 						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("expedited_checkout.request_title")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.isExpeditedCheckout}
+								/>
+							</Stack>
+						</Grid>
 					</Grid>
 				</TabPanel>
 

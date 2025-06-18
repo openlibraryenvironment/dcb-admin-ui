@@ -454,6 +454,14 @@ export const standardPatronRequestColumns: GridColDef[] = [
 		sortable: true,
 		filterable: true,
 	},
+	{
+		field: "isExpeditedCheckout",
+		headerName: "On-site borrowing request?",
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		filterable: true,
+		sortable: true,
+	},
 ];
 
 export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
@@ -645,6 +653,14 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 		sortable: true,
 		filterable: true,
 	},
+	{
+		field: "isExpeditedCheckout",
+		headerName: "On-site borrowing request?",
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		filterable: true,
+		sortable: true,
+	},
 ];
 
 export const supplierRequestColumnsLibrary: GridColDef[] = [
@@ -739,6 +755,15 @@ export const supplierRequestColumnsLibrary: GridColDef[] = [
 			return id;
 		},
 	},
+	{
+		field: "isExpeditedCheckout",
+		headerName: "On-site borrowing request?",
+		flex: 0.5,
+		valueGetter: (value: any, row: { patronRequest: PatronRequest }) => {
+			const isExpeditedCheckout = row?.patronRequest?.isExpeditedCheckout;
+			return isExpeditedCheckout;
+		},
+	},
 ];
 
 export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -756,6 +781,7 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		id: false,
 		pickupRequestId: false,
 		pickupRequestStatus: false,
+		isExpeditedCheckout: false,
 	};
 
 export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -774,6 +800,7 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		suppliers: false,
 		pickupRequestId: false,
 		pickupRequestStatus: false,
+		isExpeditedCheckout: false,
 	};
 
 export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
@@ -792,6 +819,7 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	activeWorkflow: false,
 	pickupRequestId: false,
 	pickupRequestStatus: false,
+	isExpeditedCheckout: false,
 };
 
 export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
@@ -804,6 +832,7 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		outOfSequenceFlag: false,
 		pickupRequestId: false,
 		pickupRequestStatus: false,
+		isExpeditedCheckout: false,
 	};
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -821,6 +850,7 @@ export const exceptionPatronRequestColumnVisibility = {
 	requesterNote: false,
 	pickupRequestId: false,
 	pickupRequestStatus: false,
+	isExpeditedCheckout: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -844,4 +874,5 @@ export const locationPatronRequestColumnVisibility = {
 	requesterNote: false,
 	pickupRequestId: false,
 	pickupRequestStatus: false,
+	isExpeditedCheckout: false,
 };

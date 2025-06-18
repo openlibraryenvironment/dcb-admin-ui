@@ -127,6 +127,7 @@ export const RequestCreationStep = ({
 						getOptionLabel={(option: PatronRequestAutocompleteOption) =>
 							option.label
 						}
+						groupBy={(option) => option.agencyName || ""}
 						renderInput={(params) => (
 							<TextField
 								{...params}

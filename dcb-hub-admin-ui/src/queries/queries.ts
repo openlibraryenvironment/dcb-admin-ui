@@ -1380,6 +1380,7 @@ export const getPatronRequests = gql`
 				isManuallySelectedItem
 				requesterNote
 				activeWorkflow
+				isExpeditedCheckout
 				patron {
 					id
 				}
@@ -1442,6 +1443,7 @@ export const getPatronRequestsForExport = gql`
 				pickupRequestId
 				pickupRequestStatus
 				pickupItemId
+				isExpeditedCheckout
 				patron {
 					id
 				}
@@ -1487,6 +1489,7 @@ export const getPatronRequestTotals = gql`
 				dateUpdated
 				status
 				patronHostlmsCode
+				isExpeditedCheckout
 				outOfSequenceFlag
 			}
 			pageable {
@@ -1519,6 +1522,7 @@ export const getPatronRequestById = gql`
 				localItemId
 				localItemStatus
 				localItemType
+				isExpeditedCheckout
 				localBibId
 				rawLocalItemStatus
 				rawLocalRequestStatus
@@ -1664,6 +1668,7 @@ export const getPatronRequestEssentials = gql`
 				localItemHostlmsCode
 				localItemAgencyCode
 				isManuallySelectedItem
+				isExpeditedCheckout
 				resolutionCount
 				renewalCount
 				localRenewalCount
@@ -1724,6 +1729,7 @@ export const getSupplierRequests = gql`
 				}
 				patronRequest {
 					id
+					isExpeditedCheckout
 				}
 			}
 			pageable {

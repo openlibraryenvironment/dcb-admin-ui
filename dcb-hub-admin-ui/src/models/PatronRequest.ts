@@ -8,4 +8,5 @@ export interface PatronRequest {
 	statusCode: string;
 	suppliers: any;
 	elapsedTimeInCurrentStatus: number;
+	isExpeditedCheckout: boolean;
 }

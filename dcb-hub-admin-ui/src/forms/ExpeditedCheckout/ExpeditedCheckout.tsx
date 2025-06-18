@@ -221,14 +221,6 @@ export default function ExpeditedCheckout({
 					?.functionalSettings,
 			}),
 		) || [];
-	const selectedLibrary = libraryOptions.find(
-		(option) => option.value === agencyCode,
-	);
-	const isPickupAnywhere = !!selectedLibrary?.functionalSettings?.some(
-		(setting) => setting.name === "PICKUP_ANYWHERE" && setting.enabled === true,
-		// If the setting PICKUP_ANYWHERE is present and enabled, show all locations.
-		// Otherwise limit to patron agency locations
-	);
 
 	const itemLibraryOptions: PatronRequestAutocompleteOption[] = useMemo(
 		() =>
@@ -243,13 +235,15 @@ export default function ExpeditedCheckout({
 		[itemLibraries],
 	);
 
+	// A.K.A the staff library - where the actual item is
 	const selectedItemLibrary = libraryOptions.find(
 		(option) => option.value === itemAgencyCode,
 	);
 
-	const locationQuery = isPickupAnywhere
-		? ""
-		: "agency:" + selectedLibrary?.agencyId;
+	const locationQuery = "agency:" + selectedItemLibrary?.agencyId;
+	// With expedited checkout, you can only place a request to be picked up at the staff library
+	// Because that's where the actual item + the staff user are.
+	// The patron can come from any OpenRS library
 
 	const { data: pickupLocations, loading: pickupLocationsLoading } = useQuery(
 		getLocations,
