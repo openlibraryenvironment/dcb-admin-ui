@@ -1,3 +1,10 @@
+# [1.42.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.41.1...v1.42.0) (2025-06-24)
+
+
+### Features
+
+* Display 'Items not shown' for comparison [DCB-1947] ([6646066](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/664606687e70b9a670f2cac7d5fb19b4e9cdd378))
+
 ## [1.41.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.41.0...v1.41.1) (2025-06-18)
 
 
