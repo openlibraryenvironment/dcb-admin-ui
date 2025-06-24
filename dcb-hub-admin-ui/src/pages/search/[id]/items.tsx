@@ -17,6 +17,19 @@ import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPan
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import dayjs from "dayjs";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
+	List,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	Stack,
+	Typography,
+} from "@mui/material";
+import { ExpandMore, InfoOutline } from "@mui/icons-material";
+import { Item } from "@models/Item";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: session } = useSession();
@@ -24,35 +37,68 @@ const Items: NextPage = () => {
 	const router = useRouter();
 	const { id } = router.query;
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
+	const [comparisonResults, setComparisonResults] = useState<any>({});
+
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
+	const [isItemsAccordionExpanded, setIsItemsAccordionExpanded] =
+		useState(false);
 
 	useEffect(() => {
 		const fetchRecords = async () => {
+			if (!id || !session?.accessToken) return;
 			setLoading(true);
+			setError(false);
 			try {
-				const response = await axios.get<any[]>(
+				const standardRequest = axios.get<any[]>(
 					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
 					{
 						headers: { Authorization: `Bearer ${session?.accessToken}` },
-						params: {
-							clusteredBibId: id,
-						},
+						params: { clusteredBibId: id },
 					},
 				);
-				setLoading(false);
-				setAvailabilityResults(response.data);
-			} catch (error) {
-				console.error("Error:", error);
-				setLoading(false);
+
+				const noFilterRequest = axios.get<any[]>(
+					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
+					{
+						headers: { Authorization: `Bearer ${session?.accessToken}` },
+						params: { clusteredBibId: id, filters: "none" },
+					},
+				);
+
+				const [standardResponse, noFilterResponse] = await Promise.all([
+					standardRequest,
+					noFilterRequest,
+				]);
+
+				setAvailabilityResults(standardResponse.data);
+				setComparisonResults(noFilterResponse.data);
+			} catch (err) {
+				console.error("Error fetching item data:", err);
 				setError(true);
+			} finally {
+				setLoading(false);
 			}
 		};
 
-		if (id && session?.accessToken) {
-			fetchRecords();
+		fetchRecords();
+	}, [publicRuntimeConfig.DCB_API_BASE, id, session?.accessToken]);
+
+	const itemsNotShown = useMemo(() => {
+		if (!availabilityResults.itemList || !comparisonResults.itemList) {
+			if (comparisonResults?.itemList) {
+				return comparisonResults?.itemList;
+			} else return [];
 		}
-	}, [session?.accessToken, publicRuntimeConfig.DCB_API_BASE, id]);
+
+		const availabilityItemIds = new Set(
+			availabilityResults?.itemList.map((item: Item) => item.id),
+		);
+
+		return comparisonResults?.itemList.filter(
+			(comparisonItem: Item) => !availabilityItemIds.has(comparisonItem.id),
+		);
+	}, [availabilityResults, comparisonResults]);
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -149,20 +195,83 @@ const Items: NextPage = () => {
 					reload
 				/>
 			) : (
-				<ClientDataGrid
-					data={rows ?? []}
-					columns={columns}
-					getDetailPanelContent={({ row }: any) => (
-						<MasterDetail type="items" row={row} />
+				<>
+					<Stack direction="row"></Stack>
+					<ClientDataGrid
+						data={rows ?? []}
+						columns={columns}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail type="items" row={row} />
+						)}
+						loading={loading}
+						disableAggregation={true}
+						disableRowGrouping={true}
+						type="Items"
+						coreType="Items"
+						operationDataType="Items"
+						selectable={false}
+					/>
+					{itemsNotShown?.length > 0 && !loading && (
+						<Accordion
+							expanded={isItemsAccordionExpanded}
+							onChange={() =>
+								setIsItemsAccordionExpanded(!isItemsAccordionExpanded)
+							}
+							sx={{ mt: 2 }}
+						>
+							<AccordionSummary
+								expandIcon={<ExpandMore />}
+								aria-controls="items-not-shown-content"
+								id="not-shown-header"
+							>
+								<Typography variant="h6">
+									{t("search.items_not_shown", {
+										number: itemsNotShown.length,
+									})}
+								</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<Stack spacing={1} direction="column">
+									<Typography>
+										{t("search.items_not_shown_resolution")}
+									</Typography>
+									<List dense>
+										<ListItem>
+											<ListItemIcon>
+												<InfoOutline />
+											</ListItemIcon>
+											<ListItemText
+												primary={t("search.items_not_shown_helper_item")}
+											/>
+										</ListItem>
+										<ListItem>
+											<ListItemIcon>
+												<InfoOutline />
+											</ListItemIcon>
+											<ListItemText
+												primary={t("search.items_not_shown_helper_location")}
+											/>
+										</ListItem>
+									</List>
+									<ClientDataGrid
+										data={itemsNotShown ?? []}
+										columns={columns}
+										getDetailPanelContent={({ row }: any) => (
+											<MasterDetail type="items" row={row} />
+										)}
+										loading={loading}
+										disableAggregation={true}
+										disableRowGrouping={true}
+										type="ItemsNotShown"
+										coreType="Items"
+										operationDataType="Items"
+										selectable={false}
+									/>
+								</Stack>
+							</AccordionDetails>
+						</Accordion>
 					)}
-					loading={loading}
-					disableAggregation={true}
-					disableRowGrouping={true}
-					type="Items"
-					coreType="Items"
-					operationDataType="Items"
-					selectable={false}
-				/>
+				</>
 			)}
 		</AdminLayout>
 	);
