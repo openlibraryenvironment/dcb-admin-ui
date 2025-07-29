@@ -1,6 +1,7 @@
 // Step 3: Progress to checkout.
 
 import { Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import { TFunction } from "next-i18next";
 
 // The align items on the stack is to prevent the button taking up full width of the container.
@@ -29,7 +30,9 @@ export const CheckoutStep = ({
 		<Stack direction="column" spacing={2}>
 			<Typography>
 				{checkoutCompleted &&
-					t("expedited_checkout.steps.checkout_success", { dueDate: dueDate })}
+					t("expedited_checkout.steps.checkout_success", {
+						dueDate: dayjs(dueDate).format("dddd, MMMM D, YYYY h:mm A"),
+					})}
 				{!checkoutCompleted &&
 					stepError !== 2 &&
 					t("expedited_checkout.steps.checkout_waiting")}

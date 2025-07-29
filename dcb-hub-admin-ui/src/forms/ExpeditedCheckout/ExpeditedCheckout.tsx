@@ -361,10 +361,7 @@ export default function ExpeditedCheckout({
 				dueDate: item?.dueDate,
 			}),
 		) || [];
-	// For due date when we can eventually test it.
-	const selectedItem = itemOptions.find(
-		(option) => option.value === itemLocalId,
-	);
+	const checkedOutItem = itemsData.find((item) => item.id === itemLocalId);
 
 	// This is a timeout effect for the checkout stage (step 2)
 	// After 60s we can see that instant checkout has not occurred.
@@ -609,7 +606,7 @@ export default function ExpeditedCheckout({
 						checkoutCompleted={checkoutCompleted}
 						stepError={stepError}
 						t={t}
-						dueDate={selectedItem?.dueDate ?? ""}
+						dueDate={checkedOutItem?.dueDate ?? ""}
 					/>
 				);
 			default:
