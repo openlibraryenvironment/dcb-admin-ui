@@ -514,11 +514,27 @@ export const getBibMainDetails = gql`
 				title
 				author
 				canonicalMetadata
-				sourceSystemId
-				sourceRecordId
+				processVersion
+				metadataScore
+				processVersion
+				placeOfPublication
+				publisher
+				dateOfPublication
+				edition
+				isLargePrint
+				clusterReason
+				typeOfRecord
+				metadataScore
 				contributesTo {
 					id
 					title
+				}
+				sourceSystemId
+				sourceRecordId
+				matchPoints {
+					id
+					bibId
+					value
 				}
 			}
 		}

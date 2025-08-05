@@ -1,7 +1,7 @@
 import { useLazyQuery, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
+import { AccordionSummary, Grid, Link, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -17,6 +17,7 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import getConfig from "next/config";
 
 type BibDetails = {
 	bibId: Bib;
@@ -30,6 +31,7 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 		},
 		// pollInterval: 600000, // Polling disabled on bib record page to reduce server load.
 	});
+	const { publicRuntimeConfig } = getConfig();
 
 	const [
 		fetchSourceRecord,
@@ -175,7 +177,21 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<Typography variant="attributeTitle">
 							{t("details.contributor_uuid")}
 						</Typography>
-						<RenderAttribute attribute={bib?.contributesTo?.id} />
+						{publicRuntimeConfig.DCB_SEARCH_BASE ? (
+							<Typography variant="attributeText" component="div">
+								<Link
+									href={`/search/${bib?.contributesTo?.id}/cluster`}
+									underline="hover"
+									onClick={(e) => {
+										e.stopPropagation();
+									}}
+								>
+									<RenderAttribute attribute={bib?.contributesTo?.id} />
+								</Link>
+							</Typography>
+						) : (
+							<RenderAttribute attribute={bib?.contributesTo?.id} />
+						)}
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -184,6 +200,94 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 							{t("details.contributor_title")}
 						</Typography>
 						<RenderAttribute attribute={bib?.contributesTo?.title} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.process_version")}
+						</Typography>
+						<RenderAttribute attribute={bib?.processVersion} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.metadata_score")}
+						</Typography>
+						<RenderAttribute attribute={bib?.metadataScore} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.publisher")}
+						</Typography>
+						<RenderAttribute attribute={bib?.publisher} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.publication_place")}
+						</Typography>
+						<RenderAttribute attribute={bib?.placeOfPublication} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.publication_date")}
+						</Typography>
+						<RenderAttribute attribute={bib?.dateOfPublication} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.edition")}
+						</Typography>
+						<RenderAttribute attribute={bib?.edition} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.large_print")}
+						</Typography>
+						<RenderAttribute attribute={bib?.isLargePrint} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.cluster_reason")}
+						</Typography>
+						<RenderAttribute attribute={bib?.clusterReason} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.record_type")}
+						</Typography>
+						<RenderAttribute attribute={bib?.typeOfRecord} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.date_created")}
+						</Typography>
+						<RenderAttribute attribute={bib?.dateCreated} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.date_updated")}
+						</Typography>
+						<RenderAttribute attribute={bib?.dateUpdated} />
 					</Stack>
 				</Grid>
 			</Grid>
