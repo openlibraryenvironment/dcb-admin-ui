@@ -1,3 +1,15 @@
+# [1.43.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.42.0...v1.43.0) (2025-08-05)
+
+
+### Bug Fixes
+
+* Fix due date presentation [DCB-1555] ([2db9793](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2db9793f9e0e94f57bc68a5989685e7e6213873e))
+
+
+### Features
+
+* Re-work bib page ([ab3bd65](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ab3bd6554b554c9cd97d16815e82784770ec6b44))
+
 # [1.42.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.41.1...v1.42.0) (2025-06-24)
 
 
