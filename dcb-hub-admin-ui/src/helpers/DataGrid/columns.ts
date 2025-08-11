@@ -305,7 +305,7 @@ export const standardPatronRequestColumns: GridColDef[] = [
 	{
 		field: "supplyingAgencyCode",
 		headerName: "Supplying agency",
-		filterable: true,
+		filterOperators: equalsOnly,
 		sortable: false,
 		valueGetter: (value: any, row: PatronRequest) => {
 			// Check if suppliers array is not empty
