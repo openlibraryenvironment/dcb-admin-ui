@@ -462,6 +462,21 @@ export const standardPatronRequestColumns: GridColDef[] = [
 		filterable: true,
 		sortable: true,
 	},
+	{
+		field: "itemBarcode",
+		headerName: "Item barcode",
+		filterable: false,
+		sortable: false,
+		flex: 0.3,
+		valueGetter: (value: any, row: PatronRequest) => {
+			// Check if suppliers array is not empty
+			if (row.suppliers.length > 0) {
+				return row.suppliers[0].localItemBarcode;
+			} else {
+				return ""; // This allows us to handle the array being empty, and any related type errors.
+			}
+		},
+	},
 ];
 
 export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
@@ -661,6 +676,21 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 		filterable: true,
 		sortable: true,
 	},
+	{
+		field: "itemBarcode",
+		headerName: "Item barcode",
+		filterable: false,
+		sortable: false,
+		flex: 0.3,
+		valueGetter: (value: any, row: PatronRequest) => {
+			// Check if suppliers array is not empty
+			if (row.suppliers.length > 0) {
+				return row.suppliers[0].localItemBarcode;
+			} else {
+				return ""; // This allows us to handle the array being empty, and any related type errors.
+			}
+		},
+	},
 ];
 
 export const supplierRequestColumnsLibrary: GridColDef[] = [
@@ -764,6 +794,21 @@ export const supplierRequestColumnsLibrary: GridColDef[] = [
 			return isExpeditedCheckout;
 		},
 	},
+	{
+		field: "itemBarcode",
+		headerName: "Item barcode",
+		filterable: false,
+		sortable: false,
+		flex: 0.3,
+		valueGetter: (value: any, row: PatronRequest) => {
+			// Check if suppliers array is not empty
+			if (row.suppliers.length > 0) {
+				return row.suppliers[0].localItemBarcode;
+			} else {
+				return ""; // This allows us to handle the array being empty, and any related type errors.
+			}
+		},
+	},
 ];
 
 export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -782,6 +827,7 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		pickupRequestId: false,
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
+		itemBarcode: false,
 	};
 
 export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -801,6 +847,7 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		pickupRequestId: false,
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
+		itemBarcode: false,
 	};
 
 export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
@@ -820,6 +867,7 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	pickupRequestId: false,
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
+	itemBarcode: false,
 };
 
 export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
@@ -833,6 +881,7 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		pickupRequestId: false,
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
+		itemBarcode: false,
 	};
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -851,6 +900,7 @@ export const exceptionPatronRequestColumnVisibility = {
 	pickupRequestId: false,
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
+	itemBarcode: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -875,4 +925,5 @@ export const locationPatronRequestColumnVisibility = {
 	pickupRequestId: false,
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
+	itemBarcode: false,
 };

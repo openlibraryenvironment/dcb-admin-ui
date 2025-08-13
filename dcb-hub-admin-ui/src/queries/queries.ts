@@ -1409,6 +1409,7 @@ export const getPatronRequests = gql`
 				suppliers {
 					localAgency
 					canonicalItemType
+					localItemBarcode
 				}
 				clusterRecord {
 					id
@@ -1470,6 +1471,7 @@ export const getPatronRequestsForExport = gql`
 				suppliers {
 					localAgency
 					canonicalItemType
+					localItemBarcode
 				}
 				clusterRecord {
 					title
