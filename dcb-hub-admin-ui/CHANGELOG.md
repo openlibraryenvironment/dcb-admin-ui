@@ -1,3 +1,10 @@
+# [1.44.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.43.0...v1.44.0) (2025-08-13)
+
+
+### Features
+
+* Filter by supplying agency [DCB-1973] ([1272692](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/12726925c8aef84a150dadff793a132b67d2a956))
+
 # [1.43.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.42.0...v1.43.0) (2025-08-05)
 
 
