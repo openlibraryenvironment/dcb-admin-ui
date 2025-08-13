@@ -59,6 +59,8 @@ export const getFieldsForExport = (coreType: string) => {
 				"requesterNote",
 				"id",
 				"activeWorkflow",
+				"isExpeditedCheckout",
+				"itemBarcode",
 			];
 		default:
 			return [];

@@ -56,6 +56,8 @@ const headerMappings: Record<string, Record<string, string>> = {
 		requesterNote: "Requester note",
 		id: "DCB Patron request UUID",
 		activeWorkflow: "Active workflow",
+		isExpeditedCheckout: "Walk-up request?",
+		itemBarcode: "Item barcode",
 	},
 };
 
