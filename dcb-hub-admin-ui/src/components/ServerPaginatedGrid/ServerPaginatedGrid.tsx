@@ -384,6 +384,7 @@ export default function ServerPaginationGrid({
 							(value) =>
 								value != "__detail_panel_toggle__" && value != "__check__",
 						);
+			console.log(usefulColumns);
 			const dataString = convertFileToString(
 				allData?.[coreType]?.content,
 				delimiter,

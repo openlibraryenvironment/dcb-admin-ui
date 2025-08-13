@@ -39,7 +39,7 @@ export const getFieldsForExport = (coreType: string) => {
 				"patronHostlmsCode",
 				"localBarcode",
 				"clusterRecordTitle",
-				"supplyingAgency",
+				"supplyingAgencyCode",
 				"pickupLocationCode",
 				"pickupRequestId",
 				"pickupItemId",

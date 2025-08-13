@@ -36,7 +36,7 @@ const headerMappings: Record<string, Record<string, string>> = {
 		patronHostlmsCode: "Patron Host LMS code",
 		localBarcode: "Patron barcode",
 		clusterRecordTitle: "Title",
-		supplyingAgency: "Supplying agency",
+		supplyingAgencyCode: "Supplying agency",
 		pickupLocationCode: "Pickup location name",
 		pickupRequestId: "Pickup request UUID",
 		pickupRequestStatus: "Pickup request status",

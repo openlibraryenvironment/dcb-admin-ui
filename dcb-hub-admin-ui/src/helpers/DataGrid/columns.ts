@@ -514,7 +514,7 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 			row?.clusterRecord?.title,
 	},
 	{
-		field: "supplyingAgency",
+		field: "supplyingAgencyCode",
 		headerName: "Supplying agency",
 		filterable: false,
 		sortable: false,

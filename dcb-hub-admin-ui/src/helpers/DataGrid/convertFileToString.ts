@@ -62,8 +62,8 @@ const getFieldMapping = (field: string): FieldPath => {
 			field: "canonicalPtype",
 			path: ["requestingIdentity", "canonicalPtype"],
 		},
-		supplyingAgency: {
-			field: "supplyingAgency",
+		supplyingAgencyCode: {
+			field: "supplyingAgencyCode",
 			path: ["suppliers"],
 			arrayHandler: (suppliers) => {
 				const firstSupplier = arrayHandlers.firstItem(suppliers);
