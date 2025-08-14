@@ -1,3 +1,10 @@
+## [1.44.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.44.0...v1.44.1) (2025-08-14)
+
+
+### Bug Fixes
+
+* Improvements to patron request export [DCB-2002] ([9a208ba](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9a208ba58c037f8569d25b3af0f06d6c70bfc005))
+
 # [1.44.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.43.0...v1.44.0) (2025-08-13)
 
 
