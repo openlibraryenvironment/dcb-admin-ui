@@ -749,6 +749,7 @@ export const getHostLms = gql`
 				code
 				name
 				clientConfig
+				lmsClientClass
 			}
 			pageable {
 				number
@@ -1397,6 +1398,7 @@ export const getPatronRequests = gql`
 				requesterNote
 				activeWorkflow
 				isExpeditedCheckout
+				isTooLong
 				patron {
 					id
 				}
@@ -1410,6 +1412,8 @@ export const getPatronRequests = gql`
 					localAgency
 					canonicalItemType
 					localItemBarcode
+					localHoldCount
+					localRenewable
 				}
 				clusterRecord {
 					id
@@ -1559,6 +1563,7 @@ export const getPatronRequestById = gql`
 				resolutionCount
 				renewalCount
 				localRenewalCount
+				isTooLong
 				patron {
 					id
 				}
@@ -1639,6 +1644,8 @@ export const getPatronRequestById = gql`
 					localStatus
 					localAgency
 					rawLocalItemStatus
+					localHoldCount
+					localRenewable
 					rawLocalStatus
 					virtualPatron {
 						id

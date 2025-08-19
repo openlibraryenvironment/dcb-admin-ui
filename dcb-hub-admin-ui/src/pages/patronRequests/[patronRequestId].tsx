@@ -823,6 +823,26 @@ export default function PatronRequestDetails({
 								/>
 							</Stack>
 						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_supplier_renewable")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localRenewable}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.local_hold_count")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localHoldCount}
+								/>
+							</Stack>
+						</Grid>
 					</Grid>
 
 					<Grid
