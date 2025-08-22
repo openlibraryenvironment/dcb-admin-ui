@@ -222,6 +222,7 @@
 			"contact": "contact",
 			"connection_issue": "There may be a connection issue",
 			"description": "Description: {{description}}",
+			"field": "Field",
 			"loading": {
 				"document": "Loading {{document_type}}"
 			},
@@ -1080,6 +1081,9 @@
 	},
 
 	"search": {
+		"add_field": "Add field",
+		"add_field_tooltip": "Add a field to your search. Available operators: AND, OR.",
+		"author": "Author",
 		"barcode": "Barcode",
 		"bib_record_id": "Bib record UUID",
 		"call_no": "Call number",
@@ -1095,6 +1099,8 @@
 		"shared_index_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment.",
 		"hold_count": "Hold count",
 		"identifiers": "Identifiers",
+		"isbn": "ISBN",
+		"issn": "ISSN",
 		"items": "Items",
 		"items_error_title": "We could not load the associated items",
 		"item_id": "Item ID",
@@ -1104,11 +1110,16 @@
 		"items_not_shown_long": "{{number}} item(s) not shown for cluster {{id}}. You may have missing mappings or other configuration issues.",
 		"items_not_shown_resolution": "If the item(s) below should be available to users, please review the mappings for their library / libraries in the 'Mappings' section. Incorrect or missing mappings are usually responsible for items not showing correctly in DCB.",
 		"items_title": "Items available for cluster {{cluster}}",
+		"keyword": "Keyword",
+		"language": "Language",
 		"local_item_type_code": "Local item type code",
 		"local_item_type_name": "Local item type name",
 		"no_data": "No data available. Please enter a search term, or change your current search.",
+		"operator_selection": "Operator selection",
 		"requestable": "Requestable",
+		"subject": "Subject",
 		"suppressed": "Suppressed",
+		"title": "Title",
 		"volume_parsed": "Parsed volume statement",
 		"volume_raw": "Raw volume statement"
 	},
