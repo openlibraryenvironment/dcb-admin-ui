@@ -21,10 +21,11 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import getConfig from "next/config";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
+	getLegacyPatronRequestById,
 	getLocationById,
 	getPatronIdentities,
 	getPatronRequestById,
@@ -41,6 +42,9 @@ import { LocationCell } from "@components/LocationCell/LocationCell";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+import Alert from "@components/Alert/Alert";
+import { determineAcceptableVersion } from "src/helpers/determineVersion";
 
 type PatronRequestDetails = {
 	patronRequestId: string;
@@ -59,6 +63,14 @@ export default function PatronRequestDetails({
 			router.push("/auth/logout");
 		},
 	});
+	const { version } = useDCBServiceInfo();
+
+	// Is version 8.46.0 or greater
+	const nonLegacyBehaviour = determineAcceptableVersion(
+		version ? version : "NONE",
+		"8.46.0",
+	);
+
 	const [loadingUpdate, setLoadingUpdate] = useState(false);
 	const [loadingCleanup, setLoadingCleanup] = useState(false);
 	const [updateSuccessAlertVisibility, setUpdateSuccessAlertVisibility] =
@@ -68,19 +80,34 @@ export default function PatronRequestDetails({
 	const [updateErrorAlertVisibility, setErrorAlertVisibility] = useState(false);
 	const [cleanupErrorAlertVisibility, setCleanupErrorAlertVisibility] =
 		useState(false);
+	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
+		useState(false);
 	const router = useRouter();
 
-	const { loading, data, error } = useQuery(getPatronRequestById, {
-		variables: {
-			query: "id:" + patronRequestId,
+	const { loading, data, error } = useQuery(
+		nonLegacyBehaviour ? getPatronRequestById : getLegacyPatronRequestById,
+		{
+			variables: {
+				query: "id:" + patronRequestId,
+			},
+			pollInterval: 180000,
+			errorPolicy: "all",
 		},
-		pollInterval: 180000,
-	});
+	);
+
+	useEffect(() => {
+		if (error?.message?.includes("Source emitted")) {
+			setSourceRecordErrorAlertDisplayed(true);
+		}
+	}, [error]);
 
 	// define PR data type.
 
 	const patronRequest = data?.patronRequests?.content?.[0];
 	const members = patronRequest?.clusterRecord?.members;
+
+	const sourceRecordError = error?.message?.includes("Source emitted");
+	const standardError = error && !sourceRecordError;
 
 	// pickup data
 
@@ -196,9 +223,11 @@ export default function PatronRequestDetails({
 		);
 	}
 
-	return error || patronRequest == null || patronRequest == undefined ? (
+	return standardError ||
+		patronRequest == null ||
+		patronRequest == undefined ? (
 		<AdminLayout hideBreadcrumbs>
-			{error ? (
+			{standardError ? (
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
 					message={t("ui.info.connection_issue")}
@@ -677,6 +706,17 @@ export default function PatronRequestDetails({
 							</Stack>
 						</Grid>
 					</Grid>
+					{sourceRecordErrorAlertDisplayed ? (
+						<Alert
+							severityType="info"
+							onCloseFunc={() => setSourceRecordErrorAlertDisplayed(false)}
+							alertText={
+								<Typography variant="attributeText">
+									{t("patron_requests.source_record_error")}
+								</Typography>
+							}
+						/>
+					) : null}
 					<SubAccordion variant="outlined" disableGutters>
 						<SubAccordionSummary
 							aria-controls="request-source-record"
