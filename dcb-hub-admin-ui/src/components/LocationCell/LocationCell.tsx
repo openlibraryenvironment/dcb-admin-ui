@@ -19,6 +19,7 @@ export const LocationCell = ({
 			pagesize: 100,
 			orderBy: "DESC",
 			order: "name",
+			errorPolicy: "all",
 		},
 		skip: !locationId,
 	});

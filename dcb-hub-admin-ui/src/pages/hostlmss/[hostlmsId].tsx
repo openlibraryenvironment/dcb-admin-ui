@@ -35,6 +35,7 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 			query: "id:" + hostlmsId,
 		},
 		pollInterval: 120000,
+		errorPolicy: "all",
 	});
 	const hostlms: HostLMS = data?.hostLms?.content?.[0];
 	const [activeTab, setActiveTab] = useState(0);

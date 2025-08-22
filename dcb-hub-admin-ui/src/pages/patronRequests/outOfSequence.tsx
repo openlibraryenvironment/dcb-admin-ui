@@ -103,6 +103,7 @@ export default function OutOfSequence() {
 					);
 				}
 			},
+			errorPolicy: "all",
 		},
 	);
 

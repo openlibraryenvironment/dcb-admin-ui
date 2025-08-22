@@ -97,6 +97,7 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 			pagesize: 1000,
 			query: "",
 		},
+		errorPolicy: "all",
 	});
 
 	const { data: groups } = useQuery(getGroupsSelection, {
@@ -107,6 +108,7 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 			pagesize: 1000,
 			query: "",
 		},
+		errorPolicy: "all",
 	});
 	const librariesData: Library[] = libraries?.libraries?.content;
 	const groupsData: Group[] = groups?.libraryGroups?.content;

@@ -93,6 +93,7 @@ export default function GroupStep({
 			pagesize: 1000,
 			query: "",
 		},
+		errorPolicy: "all",
 	});
 
 	const groupsData: Group[] = groups?.libraryGroups?.content;

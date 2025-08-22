@@ -65,6 +65,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 			query: "id:" + libraryId,
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		errorPolicy: "all",
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 	const library: Library = data?.libraries?.content?.[0];
@@ -85,6 +86,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 			orderBy: "DESC",
 		},
 		skip: !agencyCode,
+		errorPolicy: "all",
 	});
 	// Try and map the supplier request patron IDs
 

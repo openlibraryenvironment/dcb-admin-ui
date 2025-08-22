@@ -38,6 +38,7 @@ const Contacts: NextPage = () => {
 			pageno: 0,
 			pagesize: 10,
 		},
+		errorPolicy: "all",
 	});
 
 	const consortiumContacts: Person[] = data?.consortia?.content[0]?.contacts;

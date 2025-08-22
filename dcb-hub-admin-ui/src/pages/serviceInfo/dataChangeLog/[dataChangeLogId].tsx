@@ -42,6 +42,7 @@ export default function DataChangeLogDetails({
 			query: "id:" + dataChangeLogId,
 		},
 		pollInterval: 120000,
+		errorPolicy: "all",
 	});
 	const dataChangeLog: any = data?.dataChangeLog?.content?.[0]; // Add type
 

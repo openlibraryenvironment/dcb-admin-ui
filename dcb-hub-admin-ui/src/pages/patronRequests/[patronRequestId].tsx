@@ -121,6 +121,7 @@ export default function PatronRequestDetails({
 		},
 		pollInterval: 180000,
 		skip: !patronRequest?.pickupPatronId,
+		errorPolicy: "all",
 	});
 
 	const pickupPatronIdentity =
@@ -137,6 +138,7 @@ export default function PatronRequestDetails({
 		},
 		pollInterval: 120000,
 		skip: !patronRequest?.pickupLocationCode,
+		errorPolicy: "all",
 	});
 
 	const pickupLocation = pickupLocationData?.locations?.content?.[0];

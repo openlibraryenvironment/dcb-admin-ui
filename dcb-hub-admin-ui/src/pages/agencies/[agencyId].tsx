@@ -22,6 +22,7 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 			query: "id:" + agencyId,
 		},
 		pollInterval: 120000,
+		errorPolicy: "all",
 	});
 	const agency: Agency = data?.agencies?.content?.[0];
 

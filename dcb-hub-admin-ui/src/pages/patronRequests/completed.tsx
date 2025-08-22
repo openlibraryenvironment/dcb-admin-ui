@@ -104,6 +104,7 @@ export default function Active() {
 					);
 				}
 			},
+			errorPolicy: "all",
 		},
 	);
 
@@ -141,6 +142,7 @@ export default function Active() {
 		onCompleted: (data) => {
 			updateCount("exception", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	// Query for Out of Sequence tab count
@@ -155,6 +157,7 @@ export default function Active() {
 		onCompleted: (data) => {
 			updateCount("outOfSequence", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	// Query for In Progress tab count
@@ -169,6 +172,7 @@ export default function Active() {
 		onCompleted: (data) => {
 			updateCount("inProgress", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	// Query for Finished tab count
@@ -184,6 +188,7 @@ export default function Active() {
 			updateCount("finished", data?.patronRequests?.totalSize || 0);
 			setUnfilteredCompletedCount(data?.patronRequests?.totalSize);
 		},
+		errorPolicy: "all",
 	});
 
 	const pickupLocationColumn = {
@@ -203,6 +208,7 @@ export default function Active() {
 			}
 			return locationId;
 		},
+		errorPolicy: "all",
 	};
 
 	const customColumns = useCustomColumns();

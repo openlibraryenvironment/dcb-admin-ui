@@ -80,6 +80,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 				pagesize: 100,
 				pageno: 0,
 			},
+			errorPolicy: "all",
 			// Adjust the query as needed to get all locations
 			onCompleted: (data) => {
 				if (data.locations.content.length < data.locations.totalSize) {

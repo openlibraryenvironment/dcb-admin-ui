@@ -61,6 +61,7 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 			orderBy: "DESC",
 		},
 		pollInterval: 120000,
+		errorPolicy: "all",
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 

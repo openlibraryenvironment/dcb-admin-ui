@@ -162,6 +162,7 @@ export default function StaffRequest({
 				pagesize: 1000,
 				query: "",
 			},
+			errorPolicy: "all",
 		},
 	);
 	const libraryOptions: PatronRequestAutocompleteOption[] =

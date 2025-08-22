@@ -23,6 +23,7 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 			query: "id:" + groupId,
 		},
 		pollInterval: 120000,
+		errorPolicy: "all",
 	});
 	const group: Group = data?.libraryGroups?.content?.[0];
 

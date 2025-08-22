@@ -23,12 +23,13 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Error from "@components/Error/Error";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import StaffRequest from "../../../forms/StaffRequest/StaffRequest";
 import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import Alert from "@components/Alert/Alert";
 
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
@@ -37,11 +38,23 @@ const Clusters: NextPage = () => {
 	const theme = useTheme();
 	const [showStaffRequest, setShowStaffRequest] = useState(false);
 	const [showExpeditedCheckout, setShowExpeditedCheckout] = useState(false);
+	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
+		useState(false);
 
 	const { loading, error, data } = useQuery(getClusters, {
 		variables: { query: `id: ${id}` },
 		skip: !id,
+		errorPolicy: "all",
 	});
+
+	useEffect(() => {
+		if (error?.message?.includes("Source emitted")) {
+			setSourceRecordErrorAlertDisplayed(true);
+		}
+	}, [error]);
+
+	const sourceRecordError = error?.message?.includes("Source emitted");
+	const standardError = error && !sourceRecordError;
 
 	const theCluster = data?.instanceClusters?.content?.[0] ?? null;
 	const extractMatchpoints = (clusterRecord: { members: any[] }): string[] => {
@@ -140,7 +153,7 @@ const Clusters: NextPage = () => {
 
 	const rows = theCluster?.members ?? [];
 
-	return error ? (
+	return standardError ? (
 		<AdminLayout hideBreadcrumbs>
 			{error ? (
 				<Error
@@ -232,6 +245,19 @@ const Clusters: NextPage = () => {
 						</Typography>
 					</Stack>
 				</Grid>
+				{sourceRecordErrorAlertDisplayed ? (
+					<Grid size={{ xs: 8, sm: 12, md: 12 }} role="gridcell">
+						<Alert
+							severityType="info"
+							onCloseFunc={() => setSourceRecordErrorAlertDisplayed(false)}
+							alertText={
+								<Typography variant="attributeText">
+									{t("search.cluster_bib_multiple_records")}
+								</Typography>
+							}
+						/>
+					</Grid>
+				) : null}
 				<Grid size={{ xs: 8, sm: 12, md: 12 }} role="gridcell">
 					<ClientDataGrid
 						loading={loading}

@@ -83,6 +83,7 @@ const ConsortiumPage: NextPage = () => {
 			pageno: 0,
 			pagesize: 10,
 		},
+		errorPolicy: "all",
 		onCompleted: (data) => {
 			const consortium: Consortium = data.consortia?.content[0];
 			// Ensure our cache for unauthenticated display is up to date

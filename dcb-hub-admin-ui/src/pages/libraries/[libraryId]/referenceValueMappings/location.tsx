@@ -70,6 +70,7 @@ export default function Location({ libraryId }: LibraryDetails) {
 			query: "id:" + libraryId,
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		errorPolicy: "all",
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 

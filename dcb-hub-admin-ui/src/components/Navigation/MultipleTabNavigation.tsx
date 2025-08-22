@@ -58,6 +58,7 @@ export default function MultipleTabNavigation({
 				orderBy: "DESC",
 			},
 			skip: !hostLmsCode || type != "patronRequests",
+			errorPolicy: "all",
 		},
 	);
 

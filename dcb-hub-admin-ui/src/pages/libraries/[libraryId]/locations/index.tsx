@@ -74,6 +74,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 			order: "fullName",
 			orderBy: "DESC",
 		},
+		errorPolicy: "all",
 		pollInterval: 120000,
 	});
 	const library: Library = data?.libraries?.content?.[0];

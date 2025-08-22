@@ -188,6 +188,7 @@ export default function ExpeditedCheckout({
 				pagesize: 1000,
 				query: "",
 			},
+			errorPolicy: "all",
 		},
 	);
 	const { data: itemLibraries, loading: itemLibrariesLoading } = useQuery(
@@ -200,6 +201,7 @@ export default function ExpeditedCheckout({
 				pagesize: 1000,
 				query: "",
 			},
+			errorPolicy: "all",
 		},
 	);
 
@@ -255,6 +257,7 @@ export default function ExpeditedCheckout({
 				pagesize: 1000,
 				query: locationQuery,
 			},
+			errorPolicy: "all",
 			skip: !selectedItemLibrary?.agencyId,
 		},
 	);

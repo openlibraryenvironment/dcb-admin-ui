@@ -147,6 +147,7 @@ export default function All() {
 		onCompleted: (data) => {
 			updateCount("exception", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	// Query for Out of Sequence tab count
@@ -161,6 +162,7 @@ export default function All() {
 		onCompleted: (data) => {
 			updateCount("outOfSequence", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	// Query for In Progress tab count
@@ -175,6 +177,7 @@ export default function All() {
 		onCompleted: (data) => {
 			updateCount("inProgress", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	// Query for Finished tab count
@@ -189,6 +192,7 @@ export default function All() {
 		onCompleted: (data) => {
 			updateCount("finished", data?.patronRequests?.totalSize || 0);
 		},
+		errorPolicy: "all",
 	});
 
 	const pickupLocationColumn = {
@@ -208,6 +212,7 @@ export default function All() {
 			}
 			return locationId;
 		},
+		errorPolicy: "all",
 	};
 
 	const customColumns = useCustomColumns();

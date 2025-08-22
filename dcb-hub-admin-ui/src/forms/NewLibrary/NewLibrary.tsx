@@ -308,6 +308,7 @@ export default function NewLibrary({
 			pagesize: 1000,
 			query: "",
 		},
+		errorPolicy: "all",
 	});
 
 	const agencyOptions =

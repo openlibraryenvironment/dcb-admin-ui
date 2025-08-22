@@ -35,6 +35,7 @@ const FunctionalSettings: NextPage = () => {
 			pageno: 0,
 			pagesize: 10,
 		},
+		errorPolicy: "all",
 	});
 	const { data: session }: { data: any } = useSession();
 

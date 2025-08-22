@@ -930,7 +930,7 @@
 		"no_rows": "No patron requests available. If you're expecting data to be here, please refresh the page.",
 		"search_placeholder_error_message": "Search by error message",
 		"search_placeholder_status": "Search by request status",
-		"source_record_error": "This patron request unexpectedly has multiple source records. Please review below. "
+		"source_record_error": "The bib record for this patron request unexpectedly has multiple source records. Please review below. "
 	},
 
 	"bibRecords": {
@@ -1082,6 +1082,7 @@
 		"bib_record_id": "Bib record UUID",
 		"call_no": "Call number",
 		"context": "Context",
+		"cluster_bib_multiple_records": "One of the bib records in this cluster has multiple source records associated with it. Please review.",
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",

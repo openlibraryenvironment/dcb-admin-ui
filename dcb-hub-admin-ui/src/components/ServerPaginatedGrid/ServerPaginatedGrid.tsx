@@ -604,6 +604,7 @@ export default function ServerPaginationGrid({
 					? presetQueryVariables
 					: filterOptions,
 		},
+		errorPolicy: "all",
 	});
 
 	const totalSize = data?.[coreType]?.totalSize;

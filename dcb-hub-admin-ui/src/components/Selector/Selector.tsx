@@ -25,6 +25,7 @@ export default function Selector({ optionsType }: SelectorType) {
 			pageno: 0,
 		},
 		fetchPolicy: "cache-and-network", // This is needed to stop the selector getting out-of-date info, as it has no polling ability.
+		errorPolicy: "all",
 		onCompleted: (data) => {
 			// Check if we have all the hostLms
 			if (data.hostLms.content.length < data.hostLms.totalSize) {

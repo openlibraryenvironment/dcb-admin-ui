@@ -32,6 +32,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 			query: "id:" + auditId,
 		},
 		pollInterval: 120000,
+		errorPolicy: "all",
 	});
 	const audit: AuditItem = data?.audits?.content?.[0];
 	// use patron request ID from audit to find the other audits known to it
@@ -52,6 +53,7 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 			pageno: 0,
 		},
 		skip: !patronRequestId,
+		errorPolicy: "all",
 		onCompleted: async (data) => {
 			if (data.audits.content.length < data.audits.totalSize) {
 				const totalPages = Math.ceil(data.audits.totalSize / 100);

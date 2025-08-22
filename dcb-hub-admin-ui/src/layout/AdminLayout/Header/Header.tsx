@@ -80,6 +80,7 @@ export default function Header({
 			pagesize: 1,
 			pageno: 0,
 		},
+		errorPolicy: "all",
 		onCompleted: (data) => {
 			const consortium: Consortium = data?.consortia.content[0];
 			// Check for changes

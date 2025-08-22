@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GridColDef } from "@mui/x-data-grid-pro";
 import { GetServerSideProps, NextPage } from "next";
 import { useTranslation } from "next-i18next";
@@ -9,6 +9,8 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { AdminLayout } from "@layout";
 import Error from "@components/Error/Error";
 import { ClientDataGrid } from "@components/ClientDataGrid";
+import Alert from "@components/Alert/Alert";
+import Typography from "@mui/material/Typography";
 
 interface Identifier {
 	namespace: string;
@@ -38,11 +40,22 @@ const Identifiers: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { id } = router.query;
+	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
+		useState(false);
 
 	const { loading, error, data } = useQuery(getClusters, {
 		variables: { query: `id: ${id}` },
 		skip: !id,
+		errorPolicy: "all",
 	});
+	useEffect(() => {
+		if (error?.message?.includes("Source emitted")) {
+			setSourceRecordErrorAlertDisplayed(true);
+		}
+	}, [error]);
+
+	const sourceRecordError = error?.message?.includes("Source emitted");
+	const standardError = error && !sourceRecordError;
 
 	const theCluster = data?.instanceClusters?.content?.[0] ?? null;
 
@@ -103,9 +116,9 @@ const Identifiers: NextPage = () => {
 		return [...baseColumns, ...namespaceColumns];
 	}, [namespaces]);
 
-	return error ? (
+	return standardError ? (
 		<AdminLayout hideBreadcrumbs>
-			{error ? (
+			{standardError ? (
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
 					message={t("ui.info.connection_issue")}
@@ -125,6 +138,17 @@ const Identifiers: NextPage = () => {
 		</AdminLayout>
 	) : (
 		<AdminLayout title="Identifiers">
+			{sourceRecordErrorAlertDisplayed ? (
+				<Alert
+					severityType="info"
+					onCloseFunc={() => setSourceRecordErrorAlertDisplayed(false)}
+					alertText={
+						<Typography variant="attributeText">
+							{t("search.cluster_bib_multiple_records")}
+						</Typography>
+					}
+				/>
+			) : null}
 			<ClientDataGrid
 				data={rows}
 				autoRowHeight={true}
