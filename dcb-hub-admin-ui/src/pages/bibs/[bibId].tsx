@@ -1,7 +1,8 @@
 import { useLazyQuery, useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
-import { AccordionSummary, Grid, Link, Stack, Typography } from "@mui/material";
+import Link from "@components/Link/Link";
+import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -49,6 +50,9 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 	});
 
 	const bib: Bib = data?.sourceBibs?.content?.[0];
+	const sourceSystemUrl = bib?.sourceSystemId
+		? "/hostlmss/" + bib?.sourceSystemId
+		: "";
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
 		true,
@@ -162,7 +166,18 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 						<Typography variant="attributeTitle">
 							{t("details.source_system_uuid")}
 						</Typography>
-						<RenderAttribute attribute={bib?.sourceSystemId} />
+						{sourceSystemUrl == "" ? (
+							<RenderAttribute attribute={bib?.sourceSystemId} />
+						) : (
+							<Link
+								href={sourceSystemUrl}
+								key="sourceSystemUrl"
+								title={t("link.host_lms_tip")}
+								underline="hover"
+							>
+								<RenderAttribute attribute={bib?.sourceSystemId} />
+							</Link>
+						)}
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>

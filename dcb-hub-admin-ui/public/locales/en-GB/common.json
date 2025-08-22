@@ -5,7 +5,9 @@
 	},
 
 	"link": {
-		"discovery_tip": "Link to $t(app.service.discovery)"
+		"bib_tip": "Link to the bib record page in DCB Admin",
+		"discovery_tip": "Link to $t(app.service.discovery)",
+		"host_lms_tip": "Link to the Host LMS page in DCB Admin"
 	},
 
 	"nav": {

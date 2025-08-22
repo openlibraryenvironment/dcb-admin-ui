@@ -154,6 +154,10 @@ export default function PatronRequestDetails({
 		? "/search?q=" + patronRequest?.bibClusterId
 		: "";
 
+	const bibUrl = patronRequest?.clusterRecord?.selectedBib
+		? "/bibs/" + patronRequest?.clusterRecord?.selectedBib
+		: "";
+
 	const updateUrl =
 		publicRuntimeConfig.DCB_API_BASE +
 		"/patrons/requests/" +
@@ -669,6 +673,7 @@ export default function PatronRequestDetails({
 										href={bibClusterRecordUrl}
 										key="bibClusterRecordLink"
 										title={t("link.discovery_tip")}
+										underline="hover"
 									>
 										<RenderAttribute attribute={patronRequest?.bibClusterId} />
 									</Link>
@@ -680,9 +685,22 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("details.selected_bib_uuid")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.clusterRecord?.selectedBib}
-								/>
+								{bibUrl == "" ? (
+									<RenderAttribute
+										attribute={patronRequest?.clusterRecord?.selectedBib}
+									/>
+								) : (
+									<Link
+										href={bibUrl}
+										key="bibLink"
+										title={t("link.bib_tip")}
+										underline="hover"
+									>
+										<RenderAttribute
+											attribute={patronRequest?.clusterRecord?.selectedBib}
+										/>
+									</Link>
+								)}
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
