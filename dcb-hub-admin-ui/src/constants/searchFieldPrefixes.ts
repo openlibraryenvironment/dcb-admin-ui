@@ -7,6 +7,10 @@ export const searchFieldPrefixes: Record<SearchField, string> = {
 	[SearchField.Author]: "contributors all",
 	[SearchField.ISSN]: "issn=",
 	[SearchField.ISBN]: "isbn=",
-	[SearchField.Subject]: "subject=",
+	[SearchField.Subject]: "subjects=",
 	[SearchField.Language]: "languages=",
+	[SearchField.Format]: "sourceTypes=",
+	[SearchField.PublicationYear]: "publicationYear=",
+	[SearchField.Publisher]: "instancePublishers=",
+	[SearchField.Library]: "items.effectiveLocationId=",
 };

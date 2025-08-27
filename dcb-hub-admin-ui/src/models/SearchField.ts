@@ -6,4 +6,8 @@ export enum SearchField {
 	ISBN = "isbn",
 	Subject = "subject",
 	Language = "language",
+	Publisher = "publisher",
+	Format = "sourceType",
+	PublicationYear = "publicationYear",
+	Library = "library",
 }

@@ -45,6 +45,7 @@ import { formatQueryPart } from "src/helpers/search/formatQueryPart";
 // Make language search catch things like "english" and "spanish" and "espanol" and translate them to "eng", "spa"
 // Try and match DCB Admin for Libraries as much as possible so migration from next is easier
 
+// CQL by default, but lucene may make these things easier
 // --- SearchQueryBuilder Component ---
 const SearchQueryBuilder = ({
 	onSearch,
@@ -114,7 +115,7 @@ const SearchQueryBuilder = ({
 						<FormControl size="small" sx={{ minWidth: 80 }}>
 							<Select
 								value={criterion.operator}
-								onChange={(e: SelectChangeEvent<"AND" | "OR">) =>
+								onChange={(e: SelectChangeEvent<"AND" | "OR" | "NOT">) =>
 									handleCriterionChange(
 										criterion.id,
 										"operator",
@@ -127,6 +128,7 @@ const SearchQueryBuilder = ({
 							>
 								<MenuItem value="AND">AND</MenuItem>
 								<MenuItem value="OR">OR</MenuItem>
+								<MenuItem value="NOT">NOT</MenuItem>
 							</Select>
 						</FormControl>
 					)}
@@ -145,18 +147,40 @@ const SearchQueryBuilder = ({
 						>
 							<MenuItem value={SearchField.Keyword}>
 								{t("search.keyword")}
+								{/**Unknown what Lucene equivalent is. May have to switch between the two. ID searches also unclear */}
 							</MenuItem>
 							<MenuItem value={SearchField.Title}>{t("search.title")}</MenuItem>
+							{/**Works with both*/}
 							<MenuItem value={SearchField.Author}>
 								{t("search.author")}
+								{/**Works with CQL, Lucene unknown. May map to agents*/}
 							</MenuItem>
 							<MenuItem value={SearchField.ISBN}>{t("search.isbn")}</MenuItem>
 							<MenuItem value={SearchField.ISSN}>{t("search.issn")}</MenuItem>
+							{/** Both work with CQL, Lucene unknown but probably maps to identifiers*/}
 							<MenuItem value={SearchField.Subject}>
 								{t("search.subject")}
+								{/** Works with CQL, Lucene unknown. Free text could cause issues. May have problems with AND */}
 							</MenuItem>
 							<MenuItem value={SearchField.Language}>
 								{t("search.language")}
+								{/** Works with CQL, Lucene unknown. Needs to be a drop-down that translates "Spanish" into spa. Flags etc */}
+							</MenuItem>
+							<MenuItem value={SearchField.Format}>
+								{t("search.format")}
+								{/** Works with CQL, Lucene unknown. May have issues with AND */}
+							</MenuItem>
+							{/* <MenuItem value={SearchField.PublicationYear}>
+								{t("search.publication_year")}
+							</MenuItem> */}
+							{/** Can be done, but needs Lucene. Lucene gives us range support also. */}
+							<MenuItem value={SearchField.Publisher}>
+								{t("search.publisher")}
+							</MenuItem>
+							{/* Works with CQL, should work with lucene  */}
+							<MenuItem value={SearchField.Library}>
+								{t("libraries.library")}
+								{/** HIGHLY EXPERIMENTAL - DEPENDS ON LOCATION DATA. Think we can only do this via CQL */}
 							</MenuItem>
 						</Select>
 					</FormControl>
