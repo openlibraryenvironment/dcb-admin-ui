@@ -29,7 +29,7 @@ import {
 } from "@mui/material";
 import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
 import getConfig from "next/config";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import { SearchField } from "@models/SearchField";
 import { SearchCriterion } from "@models/SearchCriterion";
 import { formatQueryPart } from "src/helpers/search/formatQueryPart";
@@ -123,7 +123,7 @@ const SearchQueryBuilder = ({
 									)
 								}
 								inputProps={{
-									"aria-label": t("search.operator_selection"),
+									"aria-label": "Select operator",
 								}}
 							>
 								<MenuItem value="AND">AND</MenuItem>
@@ -178,10 +178,10 @@ const SearchQueryBuilder = ({
 								{t("search.publisher")}
 							</MenuItem>
 							{/* Works with CQL, should work with lucene  */}
-							<MenuItem value={SearchField.Library}>
+							{/* <MenuItem value={SearchField.Library}>
 								{t("libraries.library")}
 								{/** HIGHLY EXPERIMENTAL - DEPENDS ON LOCATION DATA. Think we can only do this via CQL */}
-							</MenuItem>
+							{/* </MenuItem> */}
 						</Select>
 					</FormControl>
 					<TextField
@@ -306,7 +306,14 @@ const Search: NextPage = () => {
 				return;
 
 			setLoading(true);
-			const requestURL = `${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`;
+			console.log(query);
+			const isUUID = query.length == 36 ? validate(query) : false;
+			console.log(isUUID);
+			const requestURL = isUUID
+				? `${publicRuntimeConfig.DCB_SEARCH_BASE}/public/opac-inventory/instances/${query}`
+				: `${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`;
+
+			// const requestURL = `${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`;
 			const queryParams = {
 				query: query,
 				offset: page * pageSize,
@@ -316,7 +323,7 @@ const Search: NextPage = () => {
 			try {
 				const response = await axios.get(requestURL, {
 					headers: { Authorization: `Bearer ${session.accessToken}` },
-					params: queryParams,
+					params: isUUID ? {} : queryParams,
 				});
 				if (response.data.instances) {
 					setSearchResults({
@@ -324,7 +331,14 @@ const Search: NextPage = () => {
 						totalRecords: response.data.totalRecords,
 					});
 				} else {
-					setSearchResults({ instances: [], totalRecords: 0 });
+					if (response.data) {
+						setSearchResults({
+							instances: [response.data],
+							totalRecords: response.data.totalRecords || 1,
+						});
+					} else {
+						setSearchResults({ instances: [], totalRecords: 0 });
+					}
 				}
 			} catch (error) {
 				console.error(error);
@@ -414,7 +428,7 @@ const Search: NextPage = () => {
 					rowCount={searchResults.totalRecords}
 					loading={loading}
 					autoHeight
-					getRowId={(row) => row.id}
+					getRowId={(row) => row?.id}
 					sx={{ border: 0 }}
 					slots={{
 						noRowsOverlay: () => (

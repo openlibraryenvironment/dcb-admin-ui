@@ -25,7 +25,7 @@ const doesNotEqualFilter: GridFilterOperator = {
 	InputComponent: GridFilterInputValue,
 };
 
-const doesNotContainFilter: GridFilterOperator = {
+export const doesNotContainFilter: GridFilterOperator = {
 	label: "does not contain",
 	value: "does not contain",
 	getApplyFilterFn: (filterItem) => {
