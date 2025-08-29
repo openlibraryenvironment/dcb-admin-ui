@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import getConfig from "next/config";
 import { useTranslation, Trans } from "next-i18next";
-import { Typography, Box, Stack } from "@mui/material";
+import {
+	Typography,
+	Box,
+	Stack,
+	List,
+	ListItemText,
+	ListItem,
+} from "@mui/material";
 import Link from "@components/Link/Link";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
@@ -21,6 +28,9 @@ import {
 import VersionInfo from "./VersionInfo";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+import { useSession } from "next-auth/react";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+import { determineAcceptableVersion } from "src/helpers/determineVersion";
 
 // Interface for environment data
 interface EnvironmentData {
@@ -32,17 +42,30 @@ interface EnvironmentData {
 	healthLink: string;
 	environmentType: Environment;
 }
+interface TrackingConfigurationData {
+	trackingIntervals: Record<string, string>;
+	globalActiveRequestLimit: number;
+	globalTrackingInterval: string;
+}
 
 export default function CombinedEnvironmentComponent() {
 	const [environmentData, setEnvironmentData] = useState<EnvironmentData[]>([]);
-
+	const [trackingConfig, setTrackingConfig] =
+		useState<TrackingConfigurationData | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	const { publicRuntimeConfig } = getConfig();
 	const { t } = useTranslation();
+	const { data: session } = useSession();
 
 	// Function to calculate RAG status
+	const { version } = useDCBServiceInfo();
+
+	const nonLegacyBehaviour = determineAcceptableVersion(
+		version ? version : "NONE",
+		"8.46.0",
+	);
 
 	// Fetch environment data
 	useEffect(() => {
@@ -59,8 +82,22 @@ export default function CombinedEnvironmentComponent() {
 			}
 		};
 		const fetchEnvironmentData = async () => {
+			if (!session) {
+				return;
+			}
+
 			try {
 				setIsLoading(true);
+				// Only get this on supported systems
+				if (nonLegacyBehaviour) {
+					const responseTrackingConfig = await axios.get(
+						LOCAL_VERSION_LINKS.TRACKING,
+						{
+							headers: { Authorization: `Bearer ${session?.accessToken}` },
+						},
+					);
+					setTrackingConfig(responseTrackingConfig.data);
+				}
 
 				// Fetch DCB service description
 				const responseDCBDescription = await axios.get(
@@ -72,7 +109,6 @@ export default function CombinedEnvironmentComponent() {
 				let dcbHealthStatus;
 				let dcbHealthLink = LOCAL_VERSION_LINKS.SERVICE_HEALTH;
 
-				// Set up a timeout promise that rejects after 10 seconds
 				const healthTimeout = new Promise((_, reject) => {
 					setTimeout(
 						() => reject(new Error("Health endpoint timeout after 10 seconds")),
@@ -81,33 +117,24 @@ export default function CombinedEnvironmentComponent() {
 				});
 
 				try {
-					// Race the health request against the timeout
 					const dcbHealthResponse = (await Promise.race([
 						axios.get(LOCAL_VERSION_LINKS.SERVICE_HEALTH),
 						healthTimeout,
 					])) as any;
-
-					// If the health request completed successfully before the timeout
 					dcbHealthData = dcbHealthResponse.data;
 					dcbHealthStatus = calculateRAGStatus(dcbHealthData, Environment.DCB);
 				} catch (err: any) {
-					// If there was an error (timeout or API error), try the liveness endpoint
 					console.log("Falling back to liveness endpoint due to:", err.message);
-
 					try {
-						// Assuming liveness endpoint is at this path - adjust if needed
 						const livenessEndpoint = LOCAL_VERSION_LINKS.SERVICE_HEALTH.replace(
 							"/health",
 							"/health/liveness",
 						);
 						const livenessResponse = await axios.get(livenessEndpoint);
-
-						// If we get a 200 status code, mark as "Up"
 						if (livenessResponse.status === 200) {
 							dcbHealthStatus = "Up";
 							dcbHealthLink = livenessEndpoint;
 						} else {
-							// If liveness check doesn't return 200, fallback to original error data
 							dcbHealthData = err.response?.data || null;
 							dcbHealthStatus = calculateRAGStatus(
 								dcbHealthData,
@@ -116,7 +143,6 @@ export default function CombinedEnvironmentComponent() {
 						}
 					} catch (livenessErr) {
 						console.log(livenessErr);
-						// If liveness check also fails, use original error data
 						dcbHealthData = err.response?.data || null;
 						dcbHealthStatus = calculateRAGStatus(
 							dcbHealthData,
@@ -174,7 +200,7 @@ export default function CombinedEnvironmentComponent() {
 		};
 
 		fetchEnvironmentData();
-	}, [t]);
+	}, [t, session, nonLegacyBehaviour]);
 
 	// Environment DataGrid column definitions
 	const environmentColumns: GridColDef[] = [
@@ -297,7 +323,7 @@ export default function CombinedEnvironmentComponent() {
 			{/* Version DataGrid */}
 			<VersionInfo />
 
-			<Typography variant="homePageText">
+			<Typography variant="homePageText" mb={2}>
 				<Trans
 					i18nKey="environment.releases_link"
 					components={{
@@ -305,6 +331,94 @@ export default function CombinedEnvironmentComponent() {
 					}}
 				></Trans>
 			</Typography>
+			{trackingConfig && nonLegacyBehaviour && (
+				<Stack direction="column" spacing={2} mt={2}>
+					{/* Global Settings Section */}
+					<Typography
+						variant="h2"
+						className="text-xl font-semibold border-b pb-2 mb-4"
+						mb={2}
+					>
+						{/* Apply new translation key for the main title */}
+						{t("details.requesting_configuration")}
+					</Typography>
+					<Box>
+						<Typography variant="h3" className="text-lg font-medium mb-2">
+							{/* Apply new translation key for the sub-title */}
+							{t("details.requesting_global")}
+						</Typography>
+						<List dense>
+							<ListItem>
+								<ListItemText
+									primary={
+										<Box
+											component="span"
+											sx={{ display: "flex", alignItems: "center" }}
+										>
+											<Typography
+												component="span"
+												sx={{ fontWeight: "bold", mr: 1 }}
+											>
+												{t("details.requesting_global_limit")}
+											</Typography>
+											{trackingConfig.globalActiveRequestLimit}
+										</Box>
+									}
+								/>
+							</ListItem>
+							<ListItem>
+								<ListItemText
+									primary={
+										<Box
+											component="span"
+											sx={{ display: "flex", alignItems: "center" }}
+										>
+											<Typography
+												component="span"
+												sx={{ fontWeight: "bold", mr: 1 }}
+											>
+												{t("details.requesting_global_tracking")}
+											</Typography>
+											{trackingConfig.globalTrackingInterval}
+										</Box>
+									}
+								/>
+							</ListItem>
+						</List>
+					</Box>
+
+					{/* Tracking Intervals Section */}
+					<Box>
+						<Typography variant="h3" className="text-lg font-medium mb-2">
+							{t("details.requesting_tracking_intervals")}
+						</Typography>
+						<List dense>
+							{Object.entries(trackingConfig.trackingIntervals).map(
+								([key, value]) => (
+									<ListItem key={key}>
+										<ListItemText
+											primary={
+												<Box
+													component="span"
+													sx={{ display: "flex", alignItems: "center" }}
+												>
+													<Typography
+														component="span"
+														sx={{ fontWeight: "bold", mr: 1 }}
+													>
+														{key}:
+													</Typography>
+													{value}
+												</Box>
+											}
+										/>
+									</ListItem>
+								),
+							)}
+						</List>
+					</Box>
+				</Stack>
+			)}
 		</Box>
 	);
 }

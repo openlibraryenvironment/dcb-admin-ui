@@ -16,6 +16,7 @@ const LOCAL_VERSION_LINKS = {
 	KEYCLOAK: publicRuntimeConfig.KEYCLOAK_URL,
 	KEYCLOAK_HEALTH:
 		publicRuntimeConfig.KEYCLOAK_URL.split("/", 3).join("/") + "/health",
+	TRACKING: publicRuntimeConfig.DCB_API_BASE + "/admin/trackingConfiguration",
 };
 
 const REPO_LINKS = {
