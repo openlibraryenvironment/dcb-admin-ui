@@ -1,3 +1,18 @@
+# [1.45.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.44.1...v1.45.0) (2025-08-29)
+
+
+### Bug Fixes
+
+* Flag up patron requests with multiple source records [DCB-1951] ([476a1ff](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/476a1ff4140317a765514ec1d5bdf04b41e74e74))
+* Restore UUID search [DCB-2008] ([d9d4c85](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d9d4c85abca5dd80c55fdba90dcb37384978abab))
+
+
+### Features
+
+* Add publisher, format options and NOT operator [DCB-2008] ([8a3af8d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8a3af8d0350f566fff1ae1cfcbf0618235031252))
+* Add search options to DCB Admin [DCB--2008] ([a7fca4c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a7fca4cc3914b39999f4c59e862b60bbae346212))
+* Add tracking info to service status [DCB-2001] ([bafb84b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/bafb84b299b2cfd5bfa9e49f9e89d6ad5022e813))
+
 ## [1.44.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.44.0...v1.44.1) (2025-08-14)
 
 
