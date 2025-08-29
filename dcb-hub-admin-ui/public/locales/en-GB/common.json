@@ -1082,7 +1082,7 @@
 
 	"search": {
 		"add_field": "Add field",
-		"add_field_tooltip": "Add a field to your search. Available operators: AND, OR.",
+		"add_field_tooltip": "Add a field to your search. Available operators: AND, OR, NOT.",
 		"author": "Author",
 		"barcode": "Barcode",
 		"bib_record_id": "Bib record UUID",

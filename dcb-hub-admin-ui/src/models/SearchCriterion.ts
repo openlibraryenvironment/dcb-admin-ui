@@ -4,5 +4,5 @@ export interface SearchCriterion {
 	id: string;
 	field: SearchField;
 	value: string;
-	operator: "AND" | "OR";
+	operator: "AND" | "OR" | "NOT";
 }
