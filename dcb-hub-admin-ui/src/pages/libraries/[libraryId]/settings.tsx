@@ -16,6 +16,7 @@ import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import {
 	deleteLibraryQuery,
 	getLibraryBasics,
+	getLibraryBasicsLegacy,
 	updateAgencyParticipationStatus,
 } from "src/queries/queries";
 import { useSession } from "next-auth/react";
@@ -33,6 +34,9 @@ import {
 	closeConfirmation,
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import { determineAcceptableVersion } from "src/helpers/determineVersion";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -51,13 +55,22 @@ export default function Settings({ libraryId }: LibraryDetails) {
 		text: null,
 		title: null,
 	});
-	const { data, loading, error } = useQuery(getLibraryBasics, {
-		variables: {
-			query: "id:" + libraryId,
+	const { version } = useDCBServiceInfo();
+
+	const nonLegacyBehaviour = determineAcceptableVersion(
+		version ? version : "NONE",
+		"8.46.0",
+	);
+	const { data, loading, error } = useQuery(
+		nonLegacyBehaviour ? getLibraryBasics : getLibraryBasicsLegacy,
+		{
+			variables: {
+				query: "id:" + libraryId,
+			},
+			pollInterval: 120000,
+			errorPolicy: "all",
 		},
-		pollInterval: 120000,
-		errorPolicy: "all",
-	});
+	);
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
@@ -377,6 +390,14 @@ export default function Settings({ libraryId }: LibraryDetails) {
 								: t("libraries.circulation.confirmation.enable_borrowing")}
 						</Button>
 					)}
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("libraries.max_consortial_loans")}
+						</Typography>
+						<RenderAttribute attribute={library?.agency?.maxConsortialLoans} />
+					</Stack>
 				</Grid>
 			</Grid>
 

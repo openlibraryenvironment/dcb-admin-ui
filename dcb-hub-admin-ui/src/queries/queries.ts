@@ -1184,6 +1184,26 @@ export const getLibraryContacts = gql`
 	}
 `;
 
+export const getLibraryBasicsLegacy = gql`
+	query LoadLibraryBasics($query: String!) {
+		libraries(query: $query) {
+			content {
+				id
+				fullName
+				shortName
+				agencyCode
+				agency {
+					id
+					code
+					name
+					authProfile
+					isSupplyingAgency
+					isBorrowingAgency
+				}
+			}
+		}
+	}
+`;
 export const getLibraryBasics = gql`
 	query LoadLibraryBasics($query: String!) {
 		libraries(query: $query) {
@@ -1192,6 +1212,7 @@ export const getLibraryBasics = gql`
 				fullName
 				shortName
 				agencyCode
+				maxConsortialLoans
 				agency {
 					id
 					code
