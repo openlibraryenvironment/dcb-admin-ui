@@ -445,6 +445,7 @@
 		"renewal_count": "Renewal count",
 		"renewal_count_borrower": "Borrower renewal count",
 		"renewal_count_supplier": "Supplier renewal count",
+		"renewal_status": "Renewal status",
 		"request_created": "Request created",
 		"request_uuid": "Request UUID",
 		"requestor_uuid": "Patron UUID at requesting agency",

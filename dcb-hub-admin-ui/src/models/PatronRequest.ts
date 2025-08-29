@@ -1,3 +1,5 @@
+import { RenewalStatus } from "./RenewalStatus";
+
 export interface PatronRequest {
 	requestingIdentity: any;
 	id: number;
@@ -9,4 +11,5 @@ export interface PatronRequest {
 	suppliers: any;
 	elapsedTimeInCurrentStatus: number;
 	isExpeditedCheckout: boolean;
+	renewalStatus: RenewalStatus;
 }
