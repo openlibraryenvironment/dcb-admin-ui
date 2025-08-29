@@ -634,6 +634,42 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.parsedVolumeStatement} />
 						</Stack>
 					</Grid>
+					{row?.status?.code != "AVAILABLE" ? (
+						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+							<StyledDataGridAccordion elevation={0}>
+								<StyledDataGridAccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="search-suppression_decision_log_entries"
+									id="search-suppression_decision_log_entries"
+								>
+									<Typography>
+										{t("search.suppression.decision_log")}
+									</Typography>
+								</StyledDataGridAccordionSummary>
+								<AccordionDetails id="item_decision_log">
+									{JSON.stringify(row?.decisionLogEntries, null, 2)}
+								</AccordionDetails>
+							</StyledDataGridAccordion>
+						</Grid>
+					) : null}
+					{row?.status?.code != "AVAILABLE" ? (
+						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+							<StyledDataGridAccordion elevation={0}>
+								<StyledDataGridAccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="search-suppression_raw_values"
+									id="search-suppression_raw_values"
+								>
+									<Typography>
+										{t("search.suppression.raw_data_values")}
+									</Typography>
+								</StyledDataGridAccordionSummary>
+								<AccordionDetails id="item_raw_values">
+									{JSON.stringify(row?.rawDataValues, null, 2)}
+								</AccordionDetails>
+							</StyledDataGridAccordion>
+						</Grid>
+					) : null}
 				</MasterDetailLayout>
 			);
 		case "versionInfo":

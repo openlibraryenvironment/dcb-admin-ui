@@ -749,6 +749,7 @@
 		"library": "Library",
 		"library_id": "Library UUID",
 		"name": "Full name",
+		"max_consortial_loans": "Max consortial loans",
 		"new_contact": {
 			"error": "There was an error creating the new contact for the library {{library}}.",
 			"success": "New contact successfully created for {{library}}"
@@ -1122,6 +1123,10 @@
 		"requestable": "Requestable",
 		"source_type": "Source type",
 		"subject": "Subject",
+		"suppression": {
+			"decision_log": "Suppression decision log",
+			"raw_data_values": "Suppression raw data values"
+		},
 		"suppressed": "Suppressed",
 		"title": "Title",
 		"volume_parsed": "Parsed volume statement",
