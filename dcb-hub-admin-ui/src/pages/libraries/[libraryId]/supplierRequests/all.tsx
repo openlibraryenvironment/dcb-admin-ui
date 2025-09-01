@@ -10,7 +10,6 @@ import {
 	deleteLibraryQuery,
 	getLibraryBasicsPR,
 	getPatronRequests,
-	getSupplierRequests,
 } from "src/queries/queries";
 import {
 	defaultSupplierRequestLibraryColumnVisibility,
@@ -72,35 +71,11 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 	const [totalSizes, setTotalSizes] = useState<{ [key: string]: number }>({});
 	const agencyCode = library?.agencyCode;
 
-	const supplierVariables = `localAgency: "${agencyCode}"`;
+	const patronRequestQuery = "supplyingAgencyCode:" + agencyCode;
+
 	// Query to get the supplier requests patron ids
 	// which we then use to fill a patron request grid
 	// because we can't filter normally on supplying agency
-
-	const { data: supplierData } = useQuery(getSupplierRequests, {
-		variables: {
-			query: supplierVariables,
-			pageno: 0,
-			pagesize: 10000,
-			order: "dateCreated",
-			orderBy: "DESC",
-		},
-		skip: !agencyCode,
-		errorPolicy: "all",
-	});
-	// Try and map the supplier request patron IDs
-
-	const patronRequestIds = supplierData?.supplierRequests?.content
-		?.map((request: any) => request.patronRequest?.id)
-		.filter(Boolean);
-
-	// Attempt to formulate a query
-	const patronRequestQuery = patronRequestIds?.length
-		? patronRequestIds.map((id: string) => `id:${id}`).join(" OR ")
-		: "";
-
-	console.log(patronRequestQuery);
-
 	const handleTotalSizeChange = useCallback((type: string, size: number) => {
 		setTotalSizes((prevTotalSizes) => ({
 			...prevTotalSizes,
