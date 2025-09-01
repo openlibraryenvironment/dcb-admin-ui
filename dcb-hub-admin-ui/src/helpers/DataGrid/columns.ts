@@ -519,6 +519,7 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 		headerName: "Supplying agency",
 		sortable: true,
 		filterable: true,
+		filterOperators: equalsOnly,
 		valueGetter: (
 			value: any,
 			row: { suppliers: Array<{ localAgency: string }> },
