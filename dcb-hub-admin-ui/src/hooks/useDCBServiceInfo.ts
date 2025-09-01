@@ -20,16 +20,15 @@ const useDCBServiceInfo = () => {
 			Date.now() - lastFetchedAt >= REQUEST_DELAY ||
 			lastFetchedAt == null
 		) {
+			console.log(lastFetchedAt);
 			fetchVersionInfo();
 		} else {
-			if (version == null && !error) {
-				// Somehow we lost the version and need to get it back.
-				fetchVersionInfo();
-			} else {
-				console.log(
-					"Version is" + version + " and was fetched in the last two hours.",
-				);
-			}
+			console.log(
+				"Version is" +
+					version +
+					" and was fetched in the last two hours at" +
+					lastFetchedAt,
+			);
 		}
 	}, [lastFetchedAt, fetchVersionInfo, REQUEST_DELAY, version, error]);
 
