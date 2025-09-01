@@ -181,6 +181,7 @@ export default function NewFunctionalSetting({
 										"RE_RESOLUTION",
 										"SELECT_UNAVAILABLE_ITEMS",
 										"TRIGGER_SUPPLIER_RENEWAL",
+										"DENY_LIBRARY_MAPPING_EDIT",
 									]}
 									renderInput={(params) => (
 										<TextField
