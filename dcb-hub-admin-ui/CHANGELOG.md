@@ -1,3 +1,10 @@
+## [1.45.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.45.0...v1.45.1) (2025-09-01)
+
+
+### Bug Fixes
+
+* Fix filter crash: improve supplying agency filter [DCB-1973] ([f20de61](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f20de614f934de35c28d981d912f757d98db4d62))
+
 # [1.45.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.44.1...v1.45.0) (2025-08-29)
 
 
