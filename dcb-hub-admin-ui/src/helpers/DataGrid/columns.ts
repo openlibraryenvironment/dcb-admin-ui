@@ -3,7 +3,6 @@ import {
 	containsOnly,
 	durationFilters,
 	equalsOnly,
-	equalsSingular,
 	standardFilters,
 } from "./filters";
 import { formatDuration } from "../formatDuration";
@@ -306,7 +305,7 @@ export const standardPatronRequestColumns: GridColDef[] = [
 	{
 		field: "supplyingAgencyCode",
 		headerName: "Supplying agency",
-		filterOperators: equalsSingular,
+		filterOperators: equalsOnly,
 		sortable: true,
 		filterable: true,
 		valueGetter: (value: any, row: PatronRequest) => {
@@ -520,7 +519,7 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 		headerName: "Supplying agency",
 		sortable: true,
 		filterable: true,
-		filterOperators: equalsSingular,
+		filterOperators: equalsOnly,
 		valueGetter: (
 			value: any,
 			row: { suppliers: Array<{ localAgency: string }> },
