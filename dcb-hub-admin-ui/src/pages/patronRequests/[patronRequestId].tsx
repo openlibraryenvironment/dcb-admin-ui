@@ -63,13 +63,12 @@ export default function PatronRequestDetails({
 			router.push("/auth/logout");
 		},
 	});
-	const { version } = useDCBServiceInfo();
+	const { version, isDev } = useDCBServiceInfo();
 
 	// Is version 8.46.0 or greater
-	const nonLegacyBehaviour = determineAcceptableVersion(
-		version ? version : "NONE",
-		"8.46.0",
-	);
+	const nonLegacyBehaviour = isDev
+		? true
+		: determineAcceptableVersion(version ? version : "NONE", "8.46.0");
 
 	const [loadingUpdate, setLoadingUpdate] = useState(false);
 	const [loadingCleanup, setLoadingCleanup] = useState(false);
@@ -619,6 +618,14 @@ export default function PatronRequestDetails({
 								<RenderAttribute
 									attribute={patronRequest?.isExpeditedCheckout}
 								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_requests.excluded_from_tracking")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.isTooLong} />
 							</Stack>
 						</Grid>
 					</Grid>
