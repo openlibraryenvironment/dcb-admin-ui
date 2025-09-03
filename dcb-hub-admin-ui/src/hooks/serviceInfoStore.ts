@@ -45,6 +45,8 @@ const useDCBVersionStore = create<DCBVersionState>()(
 					const isDev =
 						systemType.includes("DEV") || branch.toLowerCase() === "main";
 
+					console.log("IS DEV" + isDev);
+
 					const determineAcceptableVersion = (
 						version: string | null,
 						isDev: boolean,

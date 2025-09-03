@@ -60,12 +60,11 @@ export default function CombinedEnvironmentComponent() {
 	const { data: session } = useSession();
 
 	// Function to calculate RAG status
-	const { version } = useDCBServiceInfo();
+	const { version, isDev } = useDCBServiceInfo();
 
-	const nonLegacyBehaviour = determineAcceptableVersion(
-		version ? version : "NONE",
-		"8.46.0",
-	);
+	const nonLegacyBehaviour = isDev
+		? true
+		: determineAcceptableVersion(version ? version : "NONE", "8.46.0");
 
 	// Fetch environment data
 	useEffect(() => {
@@ -98,7 +97,6 @@ export default function CombinedEnvironmentComponent() {
 					);
 					setTrackingConfig(responseTrackingConfig.data);
 				}
-
 				// Fetch DCB service description
 				const responseDCBDescription = await axios.get(
 					LOCAL_VERSION_LINKS.SERVICE_INFO,

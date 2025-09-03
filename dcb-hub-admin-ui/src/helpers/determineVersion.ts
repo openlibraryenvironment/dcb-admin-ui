@@ -3,6 +3,7 @@ export const determineAcceptableVersion = (
 	version: string | null,
 	targetVersion: string,
 ) => {
+	console.log(version);
 	if (version) {
 		const numericVersion = version.substring(1); // takes the v out of version so we can get major, minor
 		const [major, minor] = numericVersion.split(".").map(Number);

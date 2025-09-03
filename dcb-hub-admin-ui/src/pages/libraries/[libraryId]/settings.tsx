@@ -55,12 +55,11 @@ export default function Settings({ libraryId }: LibraryDetails) {
 		text: null,
 		title: null,
 	});
-	const { version } = useDCBServiceInfo();
+	const { version, isDev } = useDCBServiceInfo();
 
-	const nonLegacyBehaviour = determineAcceptableVersion(
-		version ? version : "NONE",
-		"8.46.0",
-	);
+	const nonLegacyBehaviour = isDev
+		? true
+		: determineAcceptableVersion(version ? version : "NONE", "8.46.0");
 	const { data, loading, error } = useQuery(
 		nonLegacyBehaviour ? getLibraryBasics : getLibraryBasicsLegacy,
 		{
