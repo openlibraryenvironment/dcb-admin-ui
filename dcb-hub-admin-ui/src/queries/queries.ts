@@ -1059,6 +1059,7 @@ export const getLibraryById = gql`
 					name
 					authProfile
 					isSupplyingAgency
+					maxConsortialLoans
 					isBorrowingAgency
 					hostLms {
 						id
@@ -1212,7 +1213,6 @@ export const getLibraryBasics = gql`
 				fullName
 				shortName
 				agencyCode
-				maxConsortialLoans
 				agency {
 					id
 					code
@@ -1220,6 +1220,7 @@ export const getLibraryBasics = gql`
 					authProfile
 					isSupplyingAgency
 					isBorrowingAgency
+					maxConsortialLoans
 				}
 			}
 		}
@@ -1237,6 +1238,7 @@ export const getLibraryBasicsLocation = gql`
 				agency {
 					id
 					code
+					maxConsortialLoans
 					hostLms {
 						id
 						code
