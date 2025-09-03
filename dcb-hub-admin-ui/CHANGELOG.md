@@ -1,3 +1,11 @@
+## [1.45.2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.45.1...v1.45.2) (2025-09-03)
+
+
+### Bug Fixes
+
+* Fix maxConsortialLoans placement in query ([dd659ab](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/dd659ab346cd8ca9f60d78d39cae3bbd805e64e2))
+* Prevent potential infinite /info check ([6271d63](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6271d6300f388df2c901b321bf861eb393c1a94e))
+
 ## [1.45.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.45.0...v1.45.1) (2025-09-01)
 
 
