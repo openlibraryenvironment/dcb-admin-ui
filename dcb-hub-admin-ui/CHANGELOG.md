@@ -1,3 +1,10 @@
+# [1.46.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.45.2...v1.46.0) (2025-09-05)
+
+
+### Features
+
+* New cluster record ID search [DCB-2008] ([a8fae3e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a8fae3efa8b06ea67ef310c6c7d4894f6eae3314))
+
 ## [1.45.2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.45.1...v1.45.2) (2025-09-03)
 
 
