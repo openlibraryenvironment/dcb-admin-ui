@@ -13,4 +13,5 @@ export const searchFieldPrefixes: Record<SearchField, string> = {
 	[SearchField.PublicationYear]: "publicationYear=",
 	[SearchField.Publisher]: "instancePublishers=",
 	[SearchField.Library]: "items.effectiveLocationId=",
+	[SearchField.ClusterRecordID]: "",
 };

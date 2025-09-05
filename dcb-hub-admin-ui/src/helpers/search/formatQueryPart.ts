@@ -4,6 +4,11 @@ import { languageAliasMap } from "src/constants/searchLanguageAliasMap";
 
 // Gets the query in the format for dcb-locate
 export const formatQueryPart = (field: SearchField, value: string): string => {
+	// Special handling for ClusterRecordID - return the UUID directly
+	if (field === SearchField.ClusterRecordID) {
+		return value;
+	}
+
 	const prefix = searchFieldPrefixes[field];
 	let processedValue = value;
 

@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate } from "uuid";
 import {
 	GridFilterModel,
 	GridFilterItem,
@@ -8,10 +8,18 @@ import { SearchCriterion } from "@models/SearchCriterion";
 import { SearchField } from "@models/SearchField";
 import { searchFieldPrefixes } from "src/constants/searchFieldPrefixes";
 import { formatQueryPart } from "./formatQueryPart";
+
 /**
  * Builds a CQL query string for dcb-locate from an array of criteria.
  */
 export const buildQueryFromCriteria = (criteria: SearchCriterion[]): string => {
+	if (
+		criteria.length === 1 &&
+		criteria[0].field === SearchField.ClusterRecordID &&
+		criteria[0].value
+	) {
+		return criteria[0].value;
+	}
 	return criteria
 		.filter((c) => c.value.trim() !== "")
 		.map((c, index) => {
@@ -41,6 +49,18 @@ const fieldsWithNoSpace = new Set([
  */
 export const parseQueryToCriteria = (query: string): SearchCriterion[] => {
 	if (!query || query.trim() === "") return [];
+
+	// Check if the query is a UUID (indicating a ClusterRecordID search)
+	if (validate(query)) {
+		return [
+			{
+				id: uuidv4(),
+				field: SearchField.ClusterRecordID,
+				value: query,
+				operator: "AND",
+			},
+		];
+	}
 
 	const criteria: SearchCriterion[] = [];
 	const regex = /(AND|OR|NOT)?\s*\((.*?)\)/g;
@@ -88,6 +108,7 @@ export const parseQueryToCriteria = (query: string): SearchCriterion[] => {
  * Maps search criteria to the MUI DataGrid's filter model.
  * Note: This can only represent criteria that map to a grid column (e.g., Title).
  * Searches on fields like 'Author' will not appear as grid filters.
+ * ClusterRecordID searches are excluded as they don't correspond to grid columns.
  */
 export const mapCriteriaToFilterModel = (
 	criteria: SearchCriterion[],
@@ -95,6 +116,8 @@ export const mapCriteriaToFilterModel = (
 	const items: GridFilterItem[] = [];
 	criteria
 		.filter((c) => c.value.trim() !== "")
+		// Exclude ClusterRecordID from grid filters as it doesn't map to a column
+		.filter((c) => c.field !== SearchField.ClusterRecordID)
 		.forEach((criterion) => {
 			let columnField: string | null = null;
 			if (criterion.field === SearchField.Title) columnField = "title";

@@ -10,4 +10,5 @@ export enum SearchField {
 	Format = "sourceType",
 	PublicationYear = "publicationYear",
 	Library = "library",
+	ClusterRecordID = "clusterRecordId",
 }
