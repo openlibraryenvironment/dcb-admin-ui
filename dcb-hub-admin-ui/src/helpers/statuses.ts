@@ -1,6 +1,8 @@
+// Statuses which users should NOT be able to check for updates
 export const untrackedStatuses = [
 	"ERROR",
 	"SUBMITTED_TO_DCB",
+	"CONFIRMED",
 	"PATRON_VERIFIED",
 	"RESOLVED",
 	"NOT_SUPPLIED_CURRENT_SUPPLIER",
