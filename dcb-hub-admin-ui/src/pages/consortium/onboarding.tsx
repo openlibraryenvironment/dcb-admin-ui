@@ -5,7 +5,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
+// import ConsortiumDetails from "@components/HomeContent/ConsortiumDetails";
 import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
 
@@ -43,10 +43,11 @@ const Onboarding: NextPage = () => {
 						{t("common.placeholder_text")}
 					</Typography>
 				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+				{/* Commenting out for now as this is literally just an incorrect placeholder that's causing issues. 
+				We should do this properly and reinstate */}
+				{/* <Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<ConsortiumDetails />
-				</Grid>
+				</Grid> */}
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<CombinedEnvironmentComponent />
 				</Grid>
