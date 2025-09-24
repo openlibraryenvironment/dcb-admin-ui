@@ -12,7 +12,9 @@ export const untrackedStatuses = [
 	"FINALISED",
 ];
 
-// All non-terminal statuses and ERROR after DCB-1346
+// All non-terminal statuses
+// ERROR after DCB-1346
+// NO_ITEMS_SELECTABLE_AT_ANY_AGENCY after 8.51.0
 export const cleanupStatuses = [
 	"ERROR",
 	"SUBMITTED_TO_DCB",
@@ -26,4 +28,5 @@ export const cleanupStatuses = [
 	"READY_FOR_PICKUP",
 	"LOANED",
 	"RETURN_TRANSIT",
+	"NO_ITEMS_SELECTABLE_AT_ANY_AGENCY",
 ];
