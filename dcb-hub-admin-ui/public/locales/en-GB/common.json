@@ -25,6 +25,7 @@
 		"home": "Home",
 		"hostlmss": "Host LMSs",
 		"libraries": {
+			"bibs": "Bib records",
 			"configuration": "Configuration",
 			"contacts": "Contacts",
 			"patronRequests": {

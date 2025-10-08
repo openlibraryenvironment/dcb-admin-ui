@@ -137,6 +137,7 @@ export default function MultipleTabNavigation({
 					<Tab label={t("nav.libraries.supplierRequests.name")} />
 					<Tab label={t("nav.libraries.contacts")} />
 					<Tab label={t("nav.locations")} />
+					<Tab label={t("nav.bibs")} />
 				</Tabs>
 				<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 					{type == "mappings"

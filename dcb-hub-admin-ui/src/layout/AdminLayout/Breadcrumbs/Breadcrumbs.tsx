@@ -143,6 +143,8 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 							return titleAttribute ?? pathArray[1];
 						}
 						switch (pathArray[2]) {
+							case "bibs":
+								return "nav.libraries.bibs";
 							case "contacts":
 								return "nav.libraries.contacts";
 							case "locations":

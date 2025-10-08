@@ -33,6 +33,10 @@ export const handleTabChange = (
 			break;
 		case 7:
 			router.push(`/libraries/${id}/locations`);
+			break;
+		case 8:
+			router.push(`/libraries/${id}/bibs`);
+			break;
 	}
 };
 

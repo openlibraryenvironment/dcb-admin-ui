@@ -29,6 +29,7 @@ export const presetTypes = [
 	"referenceValueMappingsForLibraryAllSecondHostLms",
 	"libraryLocations",
 	"supplierRequestsLibrary",
+	"libraryBibs",
 ];
 
 // Types of data grid where users cannot click through to a details page
@@ -70,6 +71,7 @@ export const specialRedirectionTypes = [
 	"welcomeLibraries",
 	"libraryLocations",
 	"supplierRequestsLibrary",
+	"libraryBibs",
 ];
 
 // Types of data grid where we show the actions menu to the user.

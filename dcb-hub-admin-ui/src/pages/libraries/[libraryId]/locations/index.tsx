@@ -197,6 +197,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 						<Tab label={t("nav.libraries.supplierRequests.name")} />
 						<Tab label={t("nav.libraries.contacts")} />
 						<Tab label={t("nav.locations")} />
+						<Tab label={t("nav.bibs")} />
 					</Tabs>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>

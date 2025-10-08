@@ -649,6 +649,8 @@ export default function ServerPaginationGrid({
 						window.open(`/locations/${params?.row?.id}`, "_blank");
 					} else if (type == "supplierRequestsLibrary") {
 						window.open(`/patronRequests/${params?.row?.id}`, "_blank");
+					} else if (type == "libraryBibs") {
+						window.open(`/bibs/${params?.row?.id}`, "_blank");
 					} else {
 						window.open(`/patronRequests/${params?.row?.id}`, "_blank");
 					}
@@ -661,6 +663,8 @@ export default function ServerPaginationGrid({
 						router.push(`/locations/${params?.row?.id}`);
 					} else if (type == "supplierRequestsLibrary") {
 						router.push(`/patronRequests/${params?.row?.id}`);
+					} else if (type == "libraryBibs") {
+						router.push(`/bibs/${params?.row?.id}`);
 					} else {
 						router.push(`/patronRequests/${params?.row?.id}`);
 					}
