@@ -25,7 +25,10 @@ import { useEffect, useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
+	getAgencyById,
+	getHostLmsById,
 	getLegacyPatronRequestById,
+	getLibraryBasics,
 	getLocationById,
 	getPatronIdentities,
 	getPatronRequestById,
@@ -45,7 +48,11 @@ import TabPanel from "@mui/lab/TabPanel";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import Alert from "@components/Alert/Alert";
 import { determineAcceptableVersion } from "src/helpers/determineVersion";
+import { Library } from "@models/Library";
+import { HostLMS } from "@models/HostLMS";
+import { Agency } from "@models/Agency";
 
+// Supplying, patron and pickup should all link to the library now
 type PatronRequestDetails = {
 	patronRequestId: string;
 };
@@ -142,6 +149,84 @@ export default function PatronRequestDetails({
 
 	const pickupLocation = pickupLocationData?.locations?.content?.[0];
 	// end of pickup data
+
+	// Library data
+	const { data: supplierLibraryData } = useQuery(getLibraryBasics, {
+		variables: {
+			query: "agencyCode:" + patronRequest?.suppliers[0]?.localAgency,
+			pageno: 0,
+			pagesize: 10,
+			order: "agencyCode",
+			orderBy: "ASC",
+		},
+		pollInterval: 180000,
+		skip: !patronRequest?.suppliers[0]?.localAgency,
+		errorPolicy: "all",
+	});
+
+	const supplierLibrary: Library = supplierLibraryData?.libraries?.content?.[0];
+
+	const { data: pickupLibraryData } = useQuery(getLibraryBasics, {
+		variables: {
+			query: "agencyCode:" + pickupLocation?.agency?.code,
+			pageno: 0,
+			pagesize: 10,
+			order: "agencyCode",
+			orderBy: "ASC",
+		},
+		// pollInterval: 180000,
+		skip: !pickupLocation?.agency?.code,
+		errorPolicy: "all",
+	});
+	const pickupLibrary: Library = pickupLibraryData?.libraries?.content?.[0];
+
+	// Patron library is a little harder ...
+	// Get Host LMS code, ID, then agency, then library
+
+	const { data: patronHostLmsData } = useQuery(getHostLmsById, {
+		variables: {
+			query: "code:" + patronRequest?.patronHostlmsCode,
+			pageno: 0,
+			pagesize: 10,
+			order: "code",
+			orderBy: "ASC",
+		},
+		// pollInterval: 180000,
+		skip: !patronRequest?.patronHostlmsCode,
+		errorPolicy: "all",
+	});
+	const patronHostLms: HostLMS = patronHostLmsData?.hostLms?.content?.[0];
+	// once we have host lms id we can get agency
+	const { data: patronAgencyData } = useQuery(getAgencyById, {
+		variables: {
+			query: "hostLms: " + patronHostLms?.id,
+			pageno: 0,
+			pagesize: 10,
+			order: "code",
+			orderBy: "ASC",
+		},
+		skip: !patronHostLms?.id,
+		errorPolicy: "all",
+	});
+
+	// Which we can then use to get library. When we combine library and agency we can eliminate this but for now we're stuck with it
+	const patronAgency: Agency = patronAgencyData?.agencies?.content?.[0];
+
+	const { data: patronLibraryData } = useQuery(getLibraryBasics, {
+		variables: {
+			query: "agencyCode:" + patronAgency?.code,
+			pageno: 0,
+			pagesize: 10,
+			order: "agencyCode",
+			orderBy: "ASC",
+		},
+		// pollInterval: 180000,
+		skip: !patronAgency?.code,
+		errorPolicy: "all",
+	});
+	console.log(patronLibraryData);
+	const patronLibrary: Library = patronLibraryData?.libraries?.content?.[0];
+	console.log(patronLibrary);
 
 	const [activeTab, setActiveTab] = useState(0);
 
@@ -276,19 +361,66 @@ export default function PatronRequestDetails({
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.patron_hostlms")}
+									{t("details.patron_library")}
 								</Typography>
-								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
+								{patronLibrary?.fullName ? (
+									<Link
+										href={"/libraries/" + patronLibrary?.id}
+										key="patronLibraryLink"
+										title={patronLibrary?.fullName}
+										underline="hover"
+									>
+										<RenderAttribute attribute={patronLibrary.fullName} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={patronLibrary?.fullName} />
+								)}
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.borrowing_patron_barcode")}
+									{t("details.supplier_library")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.requestingIdentity?.localBarcode}
-								/>
+								{supplierLibrary?.fullName ? (
+									<Link
+										href={"/libraries/" + supplierLibrary?.id}
+										key="supplierLibraryLink"
+										title={supplierLibrary?.fullName}
+										underline="hover"
+									>
+										<RenderAttribute attribute={supplierLibrary?.fullName} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={supplierLibrary?.fullName} />
+								)}
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_library")}
+								</Typography>
+								{pickupLibrary?.fullName ? (
+									<Link
+										href={"/libraries/" + pickupLibrary?.id}
+										key="pickupLibraryLink"
+										title={pickupLibrary?.fullName}
+										underline="hover"
+									>
+										<RenderAttribute attribute={pickupLibrary?.fullName} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={pickupLocation?.agency?.code} />
+								)}
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.patron_hostlms")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -304,9 +436,11 @@ export default function PatronRequestDetails({
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("details.pickup_agency_code")}
+									{t("details.borrowing_patron_barcode")}
 								</Typography>
-								<RenderAttribute attribute={pickupLocation?.agency?.code} />
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.localBarcode}
+								/>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -322,7 +456,16 @@ export default function PatronRequestDetails({
 								<Typography variant="attributeTitle">
 									{t("patron_requests.pickup_location_name")}
 								</Typography>
-								<RenderAttribute attribute={pickupLocation?.name} />
+								{patronRequest?.pickupLocationCode ? (
+									<LocationCell
+										locationId={patronRequest?.pickupLocationCode}
+										linkable
+									/>
+								) : (
+									<RenderAttribute
+										attribute={patronRequest?.pickupLocationCode}
+									/>
+								)}
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -799,6 +942,25 @@ export default function PatronRequestDetails({
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("details.supplier_library")}
+								</Typography>
+								{supplierLibrary?.fullName ? (
+									<Link
+										href={"/libraries/" + supplierLibrary?.id}
+										key="supplierLibraryLink"
+										title={supplierLibrary?.fullName}
+										underline="hover"
+									>
+										<RenderAttribute attribute={supplierLibrary?.fullName} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={supplierLibrary?.fullName} />
+								)}
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("details.supplying_agency_code")}
 								</Typography>
 								<RenderAttribute
@@ -1122,6 +1284,25 @@ export default function PatronRequestDetails({
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("details.patron_library")}
+								</Typography>
+								{patronLibrary?.fullName ? (
+									<Link
+										href={"/libraries/" + patronLibrary?.id}
+										key="patronLibraryLink"
+										title={patronLibrary?.fullName}
+										underline="hover"
+									>
+										<RenderAttribute attribute={patronLibrary.fullName} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={patronLibrary?.fullName} />
+								)}
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("hostlms.code")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
@@ -1287,6 +1468,25 @@ export default function PatronRequestDetails({
 							<Typography variant="accordionSummary">
 								{t("details.pickup")}
 							</Typography>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("details.pickup_library")}
+								</Typography>
+								{pickupLibrary?.fullName ? (
+									<Link
+										href={"/libraries/" + pickupLibrary?.id}
+										key="pickupLibraryLink"
+										title={pickupLibrary?.fullName}
+										underline="hover"
+									>
+										<RenderAttribute attribute={pickupLibrary?.fullName} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={pickupLocation?.agency?.code} />
+								)}
+							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
