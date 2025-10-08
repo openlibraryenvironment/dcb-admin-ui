@@ -332,6 +332,7 @@
 		"contributor_title": "Contributor title",
 		"date_created": "Date created",
 		"date_updated": "Date updated",
+		"dcb_patron_type": "DCB patron type",
 		"description": "Description",
 		"details": "Details",
 		"edition": "Edition",
@@ -773,8 +774,10 @@
 			"success": "The new library was successfully created",
 			"title": "Create a new library"
 		},
+		"no_contact": "No primary contact set",
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",
+		"request_tooltip": "This is a {{ils}} library. The primary contact(s) are {{contact}}",
 		"search_placeholder": "Search by name",
 		"settings_title": "Settings for {{name}}",
 		"short_name": "Short name",

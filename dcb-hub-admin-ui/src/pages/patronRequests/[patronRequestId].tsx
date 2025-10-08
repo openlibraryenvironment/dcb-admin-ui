@@ -28,7 +28,7 @@ import {
 	getAgencyById,
 	getHostLmsById,
 	getLegacyPatronRequestById,
-	getLibraryBasics,
+	getLibraryBasicsLocation,
 	getLocationById,
 	getPatronIdentities,
 	getPatronRequestById,
@@ -51,6 +51,8 @@ import { determineAcceptableVersion } from "src/helpers/determineVersion";
 import { Library } from "@models/Library";
 import { HostLMS } from "@models/HostLMS";
 import { Agency } from "@models/Agency";
+import { getILS } from "src/helpers/getILS";
+import { findPrimaryContacts } from "src/helpers/findPrimaryContacts";
 
 // Supplying, patron and pickup should all link to the library now
 type PatronRequestDetails = {
@@ -151,7 +153,7 @@ export default function PatronRequestDetails({
 	// end of pickup data
 
 	// Library data
-	const { data: supplierLibraryData } = useQuery(getLibraryBasics, {
+	const { data: supplierLibraryData } = useQuery(getLibraryBasicsLocation, {
 		variables: {
 			query: "agencyCode:" + patronRequest?.suppliers[0]?.localAgency,
 			pageno: 0,
@@ -166,7 +168,7 @@ export default function PatronRequestDetails({
 
 	const supplierLibrary: Library = supplierLibraryData?.libraries?.content?.[0];
 
-	const { data: pickupLibraryData } = useQuery(getLibraryBasics, {
+	const { data: pickupLibraryData } = useQuery(getLibraryBasicsLocation, {
 		variables: {
 			query: "agencyCode:" + pickupLocation?.agency?.code,
 			pageno: 0,
@@ -212,7 +214,7 @@ export default function PatronRequestDetails({
 	// Which we can then use to get library. When we combine library and agency we can eliminate this but for now we're stuck with it
 	const patronAgency: Agency = patronAgencyData?.agencies?.content?.[0];
 
-	const { data: patronLibraryData } = useQuery(getLibraryBasics, {
+	const { data: patronLibraryData } = useQuery(getLibraryBasicsLocation, {
 		variables: {
 			query: "agencyCode:" + patronAgency?.code,
 			pageno: 0,
@@ -224,9 +226,7 @@ export default function PatronRequestDetails({
 		skip: !patronAgency?.code,
 		errorPolicy: "all",
 	});
-	console.log(patronLibraryData);
 	const patronLibrary: Library = patronLibraryData?.libraries?.content?.[0];
-	console.log(patronLibrary);
 
 	const [activeTab, setActiveTab] = useState(0);
 
@@ -312,6 +312,7 @@ export default function PatronRequestDetails({
 			</AdminLayout>
 		);
 	}
+	console.log(patronLibrary?.contacts);
 
 	return standardError ||
 		patronRequest == null ||
@@ -364,14 +365,27 @@ export default function PatronRequestDetails({
 									{t("details.patron_library")}
 								</Typography>
 								{patronLibrary?.fullName ? (
-									<Link
-										href={"/libraries/" + patronLibrary?.id}
-										key="patronLibraryLink"
-										title={patronLibrary?.fullName}
-										underline="hover"
+									<Tooltip
+										title={t("libraries.request_tooltip", {
+											ils: getILS(
+												patronLibrary?.agency?.hostLms?.lmsClientClass,
+											),
+											contact: patronLibrary?.contacts
+												? findPrimaryContacts(patronLibrary?.contacts)
+												: t("libraries.no_contact"),
+										})}
 									>
-										<RenderAttribute attribute={patronLibrary.fullName} />
-									</Link>
+										<span>
+											<Link
+												href={"/libraries/" + patronLibrary?.id}
+												key="patronLibraryLink"
+												title={patronLibrary?.fullName}
+												underline="hover"
+											>
+												<RenderAttribute attribute={patronLibrary.fullName} />
+											</Link>
+										</span>
+									</Tooltip>
 								) : (
 									<RenderAttribute attribute={patronLibrary?.fullName} />
 								)}
@@ -383,14 +397,29 @@ export default function PatronRequestDetails({
 									{t("details.supplier_library")}
 								</Typography>
 								{supplierLibrary?.fullName ? (
-									<Link
-										href={"/libraries/" + supplierLibrary?.id}
-										key="supplierLibraryLink"
-										title={supplierLibrary?.fullName}
-										underline="hover"
+									<Tooltip
+										title={t("libraries.request_tooltip", {
+											ils: getILS(
+												supplierLibrary?.agency?.hostLms?.lmsClientClass,
+											),
+											contact: supplierLibrary?.contacts
+												? findPrimaryContacts(supplierLibrary?.contacts)
+												: t("libraries.no_contact"),
+										})}
 									>
-										<RenderAttribute attribute={supplierLibrary?.fullName} />
-									</Link>
+										<span>
+											<Link
+												href={"/libraries/" + supplierLibrary?.id}
+												key="supplierLibraryLink"
+												title={supplierLibrary?.fullName}
+												underline="hover"
+											>
+												<RenderAttribute
+													attribute={supplierLibrary?.fullName}
+												/>
+											</Link>
+										</span>
+									</Tooltip>
 								) : (
 									<RenderAttribute attribute={supplierLibrary?.fullName} />
 								)}
@@ -402,14 +431,27 @@ export default function PatronRequestDetails({
 									{t("details.pickup_library")}
 								</Typography>
 								{pickupLibrary?.fullName ? (
-									<Link
-										href={"/libraries/" + pickupLibrary?.id}
-										key="pickupLibraryLink"
-										title={pickupLibrary?.fullName}
-										underline="hover"
+									<Tooltip
+										title={t("libraries.request_tooltip", {
+											ils: getILS(
+												pickupLibrary?.agency?.hostLms?.lmsClientClass,
+											),
+											contact: pickupLibrary?.contacts
+												? findPrimaryContacts(pickupLibrary?.contacts)
+												: t("libraries.no_contact"),
+										})}
 									>
-										<RenderAttribute attribute={pickupLibrary?.fullName} />
-									</Link>
+										<span>
+											<Link
+												href={"/libraries/" + pickupLibrary?.id}
+												key="pickupLibraryLink"
+												title={pickupLibrary?.fullName}
+												underline="hover"
+											>
+												<RenderAttribute attribute={pickupLibrary?.fullName} />
+											</Link>
+										</span>
+									</Tooltip>
 								) : (
 									<RenderAttribute attribute={pickupLocation?.agency?.code} />
 								)}
@@ -945,14 +987,29 @@ export default function PatronRequestDetails({
 									{t("details.supplier_library")}
 								</Typography>
 								{supplierLibrary?.fullName ? (
-									<Link
-										href={"/libraries/" + supplierLibrary?.id}
-										key="supplierLibraryLink"
-										title={supplierLibrary?.fullName}
-										underline="hover"
+									<Tooltip
+										title={t("libraries.request_tooltip", {
+											ils: getILS(
+												supplierLibrary?.agency?.hostLms?.lmsClientClass,
+											),
+											contact: supplierLibrary?.contacts
+												? findPrimaryContacts(supplierLibrary?.contacts)
+												: t("libraries.no_contact"),
+										})}
 									>
-										<RenderAttribute attribute={supplierLibrary?.fullName} />
-									</Link>
+										<span>
+											<Link
+												href={"/libraries/" + supplierLibrary?.id}
+												key="supplierLibraryLink"
+												title={supplierLibrary?.fullName}
+												underline="hover"
+											>
+												<RenderAttribute
+													attribute={supplierLibrary?.fullName}
+												/>
+											</Link>
+										</span>
+									</Tooltip>
 								) : (
 									<RenderAttribute attribute={supplierLibrary?.fullName} />
 								)}
@@ -1287,14 +1344,27 @@ export default function PatronRequestDetails({
 									{t("details.patron_library")}
 								</Typography>
 								{patronLibrary?.fullName ? (
-									<Link
-										href={"/libraries/" + patronLibrary?.id}
-										key="patronLibraryLink"
-										title={patronLibrary?.fullName}
-										underline="hover"
+									<Tooltip
+										title={t("libraries.request_tooltip", {
+											ils: getILS(
+												patronLibrary?.agency?.hostLms?.lmsClientClass,
+											),
+											contact: patronLibrary?.contacts
+												? findPrimaryContacts(patronLibrary?.contacts)
+												: t("libraries.no_contact"),
+										})}
 									>
-										<RenderAttribute attribute={patronLibrary.fullName} />
-									</Link>
+										<span>
+											<Link
+												href={"/libraries/" + patronLibrary?.id}
+												key="patronLibraryLink"
+												title={patronLibrary?.fullName}
+												underline="hover"
+											>
+												<RenderAttribute attribute={patronLibrary.fullName} />
+											</Link>
+										</span>
+									</Tooltip>
 								) : (
 									<RenderAttribute attribute={patronLibrary?.fullName} />
 								)}
@@ -1475,14 +1545,27 @@ export default function PatronRequestDetails({
 									{t("details.pickup_library")}
 								</Typography>
 								{pickupLibrary?.fullName ? (
-									<Link
-										href={"/libraries/" + pickupLibrary?.id}
-										key="pickupLibraryLink"
-										title={pickupLibrary?.fullName}
-										underline="hover"
+									<Tooltip
+										title={t("libraries.request_tooltip", {
+											ils: getILS(
+												pickupLibrary?.agency?.hostLms?.lmsClientClass,
+											),
+											contact: pickupLibrary?.contacts
+												? findPrimaryContacts(pickupLibrary?.contacts)
+												: t("libraries.no_contact"),
+										})}
 									>
-										<RenderAttribute attribute={pickupLibrary?.fullName} />
-									</Link>
+										<span>
+											<Link
+												href={"/libraries/" + pickupLibrary?.id}
+												key="pickupLibraryLink"
+												title={pickupLibrary?.fullName}
+												underline="hover"
+											>
+												<RenderAttribute attribute={pickupLibrary?.fullName} />
+											</Link>
+										</span>
+									</Tooltip>
 								) : (
 									<RenderAttribute attribute={pickupLocation?.agency?.code} />
 								)}
@@ -1571,7 +1654,7 @@ export default function PatronRequestDetails({
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{"DCB patron type"}
+									{t("details.dcb_patron_type")}
 								</Typography>
 								<RenderAttribute
 									attribute={pickupPatronIdentity?.canonicalPtype}

@@ -1235,6 +1235,20 @@ export const getLibraryBasicsLocation = gql`
 				fullName
 				shortName
 				agencyCode
+				contacts {
+					id
+					firstName
+					lastName
+					role {
+						id
+						name
+						description
+						displayName
+						keycloakRole
+					}
+					isPrimaryContact
+					email
+				}
 				agency {
 					id
 					code
