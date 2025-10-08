@@ -47,6 +47,7 @@ import { handleTabChange } from "src/helpers/navigation/handleTabChange";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { isEmpty } from "lodash";
+import { getILS } from "src/helpers/getILS";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -525,6 +526,20 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 							{t("details.agency_code")}
 						</Typography>
 						<RenderAttribute attribute={library?.agencyCode} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("libraries.library_management_system")}
+						</Typography>
+						<RenderAttribute
+							attribute={
+								library?.agency?.hostLms?.lmsClientClass
+									? getILS(library?.agency?.hostLms?.lmsClientClass)
+									: library?.agency?.hostLms?.lmsClientClass
+							}
+						/>
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>

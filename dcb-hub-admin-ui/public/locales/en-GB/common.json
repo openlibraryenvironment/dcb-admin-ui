@@ -760,6 +760,7 @@
 		"groups": "Groups",
 		"library": "Library",
 		"library_id": "Library UUID",
+		"library_management_system": "Library management system(s)",
 		"name": "Full name",
 		"max_consortial_loans": "Max consortial loans",
 		"new_contact": {
