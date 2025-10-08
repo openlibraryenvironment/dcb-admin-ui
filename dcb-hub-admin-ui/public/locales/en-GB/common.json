@@ -462,6 +462,7 @@
 		"selected_bib_uuid": "Selected bib UUID",
 		"source_bib_uuid": "Source bib UUID",
 		"source_bib_title": "Title",
+		"source_library": "Source library",
 		"source_record": "Source record",
 		"source_record_not_found": "No source records found",
 		"source_record_id": "Source record ID",

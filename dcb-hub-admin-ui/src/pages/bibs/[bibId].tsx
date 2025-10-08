@@ -7,7 +7,12 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
-import { getBibMainDetails, getBibSourceRecord } from "src/queries/queries";
+import {
+	getAgencyById,
+	getBibMainDetails,
+	getBibSourceRecord,
+	getLibraryBasics,
+} from "src/queries/queries";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -19,6 +24,8 @@ import {
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import getConfig from "next/config";
+import { Agency } from "@models/Agency";
+import { Library } from "@models/Library";
 
 type BibDetails = {
 	bibId: Bib;
@@ -53,6 +60,34 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 	const sourceSystemUrl = bib?.sourceSystemId
 		? "/hostlmss/" + bib?.sourceSystemId
 		: "";
+	// source system ID -> Host LMS -> agency -> Library
+	// May be able to skip host lms query
+	const { data: bibAgencyData } = useQuery(getAgencyById, {
+		variables: {
+			query: "hostLms: " + bib?.sourceSystemId,
+			pageno: 0,
+			pagesize: 10,
+			order: "code",
+			orderBy: "ASC",
+		},
+		skip: !bib?.sourceSystemId,
+		errorPolicy: "all",
+	});
+	const bibAgency: Agency = bibAgencyData?.agencies?.content?.[0];
+	const { data: bibLibraryData } = useQuery(getLibraryBasics, {
+		variables: {
+			query: "agencyCode:" + bibAgency?.code,
+			pageno: 0,
+			pagesize: 10,
+			order: "agencyCode",
+			orderBy: "ASC",
+		},
+		// pollInterval: 180000,
+		skip: !bibAgency?.code,
+		errorPolicy: "all",
+	});
+	const bibLibrary: Library = bibLibraryData?.libraries?.content?.[0];
+
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
 		true,
@@ -159,6 +194,25 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 							{t("details.author")}
 						</Typography>
 						<RenderAttribute attribute={bib?.author} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("details.source_library")}
+						</Typography>
+						{bibLibrary?.fullName ? (
+							<Link
+								href={"/libraries/" + bibLibrary?.id}
+								key="pickupLibraryLink"
+								title={bibLibrary?.fullName}
+								underline="hover"
+							>
+								<RenderAttribute attribute={bibLibrary?.fullName} />
+							</Link>
+						) : (
+							<RenderAttribute attribute={bibLibrary?.fullName} />
+						)}
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
