@@ -1,3 +1,13 @@
+# [1.47.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.46.0...v1.47.0) (2025-10-09)
+
+
+### Features
+
+* Add ILS, primary contact tooltips to library links [DCB-2051] ([02feead](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/02feead08b0057b2afa57a90b44c66987779aab0))
+* Add library bibs section [DCB-2052] ([ac733c4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ac733c4a52c914da0d6b5cf24f995e66b3c1fa99))
+* Add library links to patron request page [DCB-2051] ([5669e89](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5669e8987025d3a62373e869b4cb74de75f34016))
+* Add library name to bib record page [DCB-2049] ([63baa6e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/63baa6e4967ee99ef73ab55b113ee333f436d67a))
+
 # [1.46.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.45.2...v1.46.0) (2025-09-05)
 
 
