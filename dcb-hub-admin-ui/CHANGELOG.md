@@ -1,3 +1,10 @@
+# [1.48.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.47.0...v1.48.0) (2025-10-16)
+
+
+### Features
+
+* Display rulesets on the library service page [DCB-2011] ([2dedaa8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2dedaa8b6b43a72b764ab6941bffb6061eec0095))
+
 # [1.47.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.46.0...v1.47.0) (2025-10-09)
 
 
