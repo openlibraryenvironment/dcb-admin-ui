@@ -1,6 +1,7 @@
 import PrivateData from "@components/PrivateData/PrivateData";
 import { Library } from "@models/Library";
 import {
+	AccordionSummary,
 	Divider,
 	Grid,
 	Stack,
@@ -32,6 +33,12 @@ import {
 	closeConfirmation,
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
+import getConfig from "next/config";
+import {
+	StyledAccordion,
+	StyledAccordionDetails,
+} from "@components/StyledAccordion/StyledAccordion";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -47,6 +54,12 @@ export default function Service({ libraryId }: LibraryDetails) {
 		severity: "success",
 		text: null,
 		title: null,
+	});
+	const [expandedAccordions, setExpandedAccordions] = useState({
+		bib1: false,
+		item1: false,
+		bib2: false,
+		item2: false,
 	});
 	const { data, loading, error } = useQuery(getLibraryServiceInfo, {
 		variables: {
@@ -75,6 +88,68 @@ export default function Service({ libraryId }: LibraryDetails) {
 	const secondHostLms: HostLMS = library?.secondHostLms;
 	const ils: string = getILS(library?.agency?.hostLms?.lmsClientClass);
 
+	const [bibSuppressionRuleset1, setBibSuppressionRuleset1] =
+		useState<any>(null);
+	const [itemSuppressionRuleset1, setItemSuppressionRuleset1] =
+		useState<any>(null);
+	const [bibSuppressionRuleset2, setBibSuppressionRuleset2] =
+		useState<any>(null);
+	const [itemSuppressionRuleset2, setItemSuppressionRuleset2] =
+		useState<any>(null);
+	const { publicRuntimeConfig } = getConfig();
+
+	const fetchRuleset = async (
+		rulesetName: string,
+		setter: React.Dispatch<React.SetStateAction<any>>,
+	) => {
+		if (!rulesetName || !session?.accessToken) return;
+
+		if (!publicRuntimeConfig?.DCB_API_BASE) {
+			console.error("DCB_API_BASE environment variable is not set.");
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`${publicRuntimeConfig?.DCB_API_BASE}/object-rules/${rulesetName}`,
+				{
+					headers: {
+						Authorization: `Bearer ${session.accessToken}`,
+					},
+				},
+			);
+
+			if (!response.ok) {
+				console.error(`Error fetching ruleset ${response.status}:`, response);
+			}
+
+			const rulesetData = await response.json();
+			setter(rulesetData);
+		} catch (fetchError) {
+			console.error(`Error fetching ruleset ${rulesetName}:`, fetchError);
+			setter({ error: `Failed to load details for ${rulesetName}.` });
+		}
+	};
+
+	// This handler is called when an accordion is clicked
+	const handleAccordionChange =
+		(
+			accordionKey: keyof typeof expandedAccordions,
+			rulesetName: string | undefined,
+			rulesetData: any,
+			setter: React.Dispatch<React.SetStateAction<any>>,
+		) =>
+		(event: React.SyntheticEvent, isExpanded: boolean) => {
+			setExpandedAccordions((prev) => ({
+				...prev,
+				[accordionKey]: isExpanded,
+			}));
+
+			// Fetch data only if expanding and data hasn't been fetched yet
+			if (isExpanded && !rulesetData && rulesetName) {
+				fetchRuleset(rulesetName, setter);
+			}
+		};
 	// Add actions menu if relevant. No edit - only delete.
 
 	if (loading || status === "loading") {
@@ -264,7 +339,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={firstHostLms?.id} />
 					</Stack>
 				</Grid>
-
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
@@ -275,7 +349,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-
 				{/* Suppression rulesets */}
 				{firstHostLms?.suppressionRulesetName != null && (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -305,7 +378,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				)}
-
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
@@ -318,7 +390,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
 						<Typography variant="attributeTitle">
@@ -329,7 +400,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Stack>
 				</Grid>
-
 				{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
 				{firstHostLms?.clientConfig?.apikey ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -340,7 +410,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{/* For Polaris libraries it's the 'access key' attribute*/}
 				{firstHostLms?.clientConfig?.["access-key"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -351,7 +420,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{/* And for Sierra libraries it is the 'key' attribute*/}
 				{firstHostLms?.clientConfig?.key ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -362,7 +430,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{firstHostLms?.clientConfig?.secret ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<PrivateData
@@ -372,7 +439,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{firstHostLms?.clientConfig?.defaultAgency ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -385,9 +451,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{/* Sierra specific values*/}
-
 				{firstHostLms?.clientConfig?.holdPolicy ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -400,7 +464,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{firstHostLms?.clientConfig?.["page-size"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -413,9 +476,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{/* Polaris-specific values*/}
-
 				{firstHostLms?.clientConfig?.["domain-id"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -465,9 +526,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{/* FOLIO Specific values: folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
-
 				{firstHostLms?.clientConfig?.["folio-tenant"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -480,7 +539,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{firstHostLms?.clientConfig?.["metadata-prefix"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -493,7 +551,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{firstHostLms?.clientConfig?.["record-syntax"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -506,7 +563,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{firstHostLms?.clientConfig?.["user-base-url"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -521,7 +577,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{/* Second Host LMS section - if exists - conditionally render */}
 				{secondHostLms ? (
 					<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -617,7 +672,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{/* 'API Key' has many different guises on clientConfig: for FOLIO libraries it's simple*/}
 				{secondHostLms?.clientConfig?.apikey ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -628,7 +682,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{/* For Polaris libraries it's the 'access key' attribute*/}
 				{secondHostLms?.clientConfig?.["access-key"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -639,7 +692,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{/* And for Sierra libraries it is the 'key' attribute*/}
 				{secondHostLms?.clientConfig?.key ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -659,9 +711,7 @@ export default function Service({ libraryId }: LibraryDetails) {
 						/>
 					</Grid>
 				) : null}
-
 				{/* Polaris specific values - Second Host LMS */}
-
 				{secondHostLms?.clientConfig?.["domain-id"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -712,7 +762,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{/* FOLIO Specific values (Second Host LMS): folio-tenant, metadata-prefix, record_syntax, user-base-url*/}
-
 				{secondHostLms?.clientConfig?.["folio-tenant"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -725,7 +774,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{secondHostLms?.clientConfig?.["metadata-prefix"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -738,7 +786,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{secondHostLms?.clientConfig?.["record-syntax"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -751,7 +798,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{secondHostLms?.clientConfig?.["user-base-url"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -767,7 +813,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 					</Grid>
 				) : null}
 				{/* Sierra specific values*/}
-
 				{secondHostLms?.clientConfig?.holdPolicy ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -780,7 +825,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 						</Stack>
 					</Grid>
 				) : null}
-
 				{secondHostLms?.clientConfig?.["page-size"] ? (
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction={"column"}>
@@ -791,6 +835,145 @@ export default function Service({ libraryId }: LibraryDetails) {
 								attribute={secondHostLms?.clientConfig?.["page-size"]}
 							/>
 						</Stack>
+					</Grid>
+				) : null}
+				{firstHostLms?.itemSuppressionRulesetName ? (
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<StyledAccordion
+							variant="outlined"
+							expanded={expandedAccordions.item1}
+							onChange={handleAccordionChange(
+								"item1",
+								firstHostLms.itemSuppressionRulesetName,
+								itemSuppressionRuleset1,
+								setItemSuppressionRuleset1,
+							)}
+							disableGutters
+						>
+							<AccordionSummary
+								aria-controls="item-suppression-ruleset-1"
+								id="item-suppression-ruleset-1-header"
+								expandIcon={<ExpandMore fontSize="large" />}
+							>
+								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									{t("libraries.suppression_ruleset_item", {
+										lms: firstHostLms?.name,
+									})}
+								</Typography>
+							</AccordionSummary>
+							<StyledAccordionDetails>
+								{itemSuppressionRuleset1 ? (
+									<pre>{JSON.stringify(itemSuppressionRuleset1, null, 2)}</pre>
+								) : (
+									<Typography>{t("libraries.ruleset_loading")}</Typography>
+								)}
+							</StyledAccordionDetails>
+						</StyledAccordion>
+					</Grid>
+				) : null}
+
+				{firstHostLms?.suppressionRulesetName ? (
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<StyledAccordion
+							variant="outlined"
+							expanded={expandedAccordions.bib1}
+							onChange={handleAccordionChange(
+								"bib1",
+								firstHostLms.suppressionRulesetName,
+								bibSuppressionRuleset1,
+								setBibSuppressionRuleset1,
+							)}
+							disableGutters
+						>
+							<AccordionSummary
+								aria-controls="bib-suppression-ruleset-1"
+								id="bib-suppression-ruleset-1-header"
+								expandIcon={<ExpandMore fontSize="large" />}
+							>
+								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									{t("libraries.suppression_ruleset_bib", {
+										lms: firstHostLms?.name,
+									})}
+								</Typography>
+							</AccordionSummary>
+							<StyledAccordionDetails>
+								{bibSuppressionRuleset1 ? (
+									<pre>{JSON.stringify(bibSuppressionRuleset1, null, 2)}</pre>
+								) : (
+									<Typography>{t("libraries.ruleset_loading")}</Typography>
+								)}
+							</StyledAccordionDetails>
+						</StyledAccordion>
+					</Grid>
+				) : null}
+
+				{secondHostLms?.itemSuppressionRulesetName ? (
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<StyledAccordion
+							variant="outlined"
+							expanded={expandedAccordions.item2}
+							onChange={handleAccordionChange(
+								"item2",
+								secondHostLms.itemSuppressionRulesetName,
+								itemSuppressionRuleset2,
+								setItemSuppressionRuleset2,
+							)}
+							disableGutters
+						>
+							<AccordionSummary
+								aria-controls="item-suppression-ruleset-2"
+								id="item-suppression-ruleset-2-header"
+								expandIcon={<ExpandMore fontSize="large" />}
+							>
+								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									{t("libraries.suppression_ruleset_item", {
+										lms: secondHostLms?.name,
+									})}
+								</Typography>
+							</AccordionSummary>
+							<StyledAccordionDetails>
+								{itemSuppressionRuleset2 ? (
+									<pre>{JSON.stringify(itemSuppressionRuleset2, null, 2)}</pre>
+								) : (
+									<Typography>{t("libraries.ruleset_loading")}</Typography>
+								)}
+							</StyledAccordionDetails>
+						</StyledAccordion>
+					</Grid>
+				) : null}
+
+				{secondHostLms?.suppressionRulesetName ? (
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<StyledAccordion
+							variant="outlined"
+							expanded={expandedAccordions.bib2}
+							onChange={handleAccordionChange(
+								"bib2",
+								secondHostLms.suppressionRulesetName,
+								bibSuppressionRuleset2,
+								setBibSuppressionRuleset2,
+							)}
+							disableGutters
+						>
+							<AccordionSummary
+								aria-controls="bib-suppression-ruleset-2"
+								id="bib-suppression-ruleset-2-header"
+								expandIcon={<ExpandMore fontSize="large" />}
+							>
+								<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									{t("libraries.suppression_ruleset_bib", {
+										lms: secondHostLms?.name,
+									})}
+								</Typography>
+							</AccordionSummary>
+							<StyledAccordionDetails>
+								{bibSuppressionRuleset2 ? (
+									<pre>{JSON.stringify(bibSuppressionRuleset2, null, 2)}</pre>
+								) : (
+									<Typography>{t("libraries.ruleset_loading")}</Typography>
+								)}
+							</StyledAccordionDetails>
+						</StyledAccordion>
 					</Grid>
 				) : null}
 			</Grid>
