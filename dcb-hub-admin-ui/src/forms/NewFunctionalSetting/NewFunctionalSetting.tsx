@@ -182,6 +182,7 @@ export default function NewFunctionalSetting({
 										"SELECT_UNAVAILABLE_ITEMS",
 										"TRIGGER_SUPPLIER_RENEWAL",
 										"DENY_LIBRARY_MAPPING_EDIT",
+										"VIRTUAL_PATRON_NAMES_VISIBLE",
 									]}
 									renderInput={(params) => (
 										<TextField

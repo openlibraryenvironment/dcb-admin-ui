@@ -679,6 +679,14 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 		sortable: true,
 	},
 	{
+		field: "renewalCount",
+		headerName: "Renewal count",
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		filterable: true,
+		sortable: true,
+	},
+	{
 		field: "itemBarcode",
 		headerName: "Item barcode",
 		filterable: false,
