@@ -18,5 +18,12 @@ export interface Item {
 	isSuppressed: boolean;
 	agency: Agency;
 	owningContext: string;
-	availableDate: string;
+	availabilityDate: string;
+	parsedVolumeStatement: string;
+	rawVolumeStatement: string;
+	hostLmsCode: string;
+	sourceHostLmsCode: string;
+	rawDataValues: Map<string, string>;
+	decisionLogEntries: Array<string>;
+	statusCorrectAsOf: string;
 }

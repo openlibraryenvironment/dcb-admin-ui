@@ -329,12 +329,23 @@ export default function StaffRequest({
 				agency: Agency;
 				location: Location;
 				barcode: string;
+				callNumber: string;
+				parsedVolumeStatement: string;
 			}) => ({
-				label: t("staff_request.patron.item_select", {
-					id: item.id,
-					name: item.location.name,
-					barcode: item.barcode,
-				}),
+				label: item?.parsedVolumeStatement
+					? t("staff_request.patron.item_select_volume", {
+							// id: item.id,
+							name: item?.location.name,
+							barcode: item.barcode,
+							callNo: item?.callNumber,
+							volumeStatement: item?.parsedVolumeStatement,
+						})
+					: t("staff_request.patron.item_select", {
+							// id: item.id,
+							name: item?.location.name,
+							barcode: item.barcode,
+							callNo: item?.callNumber,
+						}),
 				value: item.id,
 			}),
 		) || [];

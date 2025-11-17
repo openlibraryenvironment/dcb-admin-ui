@@ -634,6 +634,20 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.parsedVolumeStatement} />
 						</Stack>
 					</Grid>
+					{row?.statusCorrectAsOf ? (
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("ui.info.correct_as_of")}
+								</Typography>
+								<RenderAttribute
+									attribute={dayjs(row?.statusCorrectAsOf).format(
+										"YYYY-MM-DD HH:mm",
+									)}
+								/>
+							</Stack>
+						</Grid>
+					) : null}
 					{row?.status?.code != "AVAILABLE" ? (
 						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
 							<StyledDataGridAccordion elevation={0}>

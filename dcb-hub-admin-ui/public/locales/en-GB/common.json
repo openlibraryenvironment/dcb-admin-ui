@@ -224,6 +224,7 @@
 			"connection_issue": "There may be a connection issue",
 			"description": "Description: {{description}}",
 			"field": "Field",
+			"correct_as_of": "Status correct as of",
 			"loading": {
 				"document": "Loading {{document_type}}"
 			},
@@ -1173,7 +1174,8 @@
 			"item_host_lms": "Item Host LMS",
 			"item_library": "Item library",
 			"item_local_id": "Item local ID",
-			"item_select": "Item {{id}} - Location: {{name}}, Barcode: {{barcode}}",
+			"item_select": "Item Barcode: {{barcode}}, Location: {{name}}, Call number: {{callNo}}",
+			"item_select_volume": "Item Barcode: {{barcode}}, Location: {{name}}, Call number: {{callNo}}, Volume: {{volumeStatement}}",
 			"pickup_location": "Pickup location",
 			"pickup_location_no_agency": "Other locations",
 			"requester_note": "Requester note",
