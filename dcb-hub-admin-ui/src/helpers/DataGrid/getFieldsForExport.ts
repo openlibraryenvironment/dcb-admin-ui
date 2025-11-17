@@ -61,6 +61,8 @@ export const getFieldsForExport = (coreType: string) => {
 				"activeWorkflow",
 				"isExpeditedCheckout",
 				"itemBarcode",
+				"rawLocalItemStatus",
+				"rawLocalRequestStatus",
 			];
 		default:
 			return [];

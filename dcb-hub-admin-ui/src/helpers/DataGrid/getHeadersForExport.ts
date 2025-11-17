@@ -58,6 +58,8 @@ const headerMappings: Record<string, Record<string, string>> = {
 		activeWorkflow: "Active workflow",
 		isExpeditedCheckout: "Walk-up request?",
 		itemBarcode: "Item barcode",
+		rawLocalItemStatus: "Raw local item status",
+		rawLocalRequestStatus: "Raw local request status",
 	},
 };
 
