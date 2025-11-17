@@ -228,9 +228,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 						disabled={!isValid || !isDirty || loading}
 						onClick={handleSubmit(onSubmit)}
 					>
-						{loading
-							? t("ui.action.submitting")
-							: t("consortium.new_contact.title")}
+						{loading ? t("ui.action.submitting") : t("groups.type_new")}
 					</Button>
 				</DialogActions>
 			</Dialog>
