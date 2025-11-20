@@ -1,3 +1,10 @@
+# [1.50.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.49.0...v1.50.0) (2025-11-20)
+
+
+### Features
+
+* Improved export with local values ([0816ff1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0816ff10460133f64ae34335478f8185489181a9))
+
 # [1.49.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.48.0...v1.49.0) (2025-11-20)
 
 
