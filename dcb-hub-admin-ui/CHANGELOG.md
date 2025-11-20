@@ -1,3 +1,16 @@
+# [1.49.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.48.0...v1.49.0) (2025-11-20)
+
+
+### Bug Fixes
+
+* Fix incorrect wording on New Group form ([f5e6d13](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f5e6d13d0a81100f4a112a4be8157abe3f60789c))
+
+
+### Features
+
+* Add patron and supplying library filters [DCB-2064] ([0b2dfbd](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0b2dfbdbb79b92cb3638cd42d2ad2d448a48bfb5))
+* Improve presentation of items [DCB-2087] ([a897ede](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a897ede3deac4bbc6235484f5dedefe5575a8b42))
+
 # [1.48.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.47.0...v1.48.0) (2025-10-16)
 
 
