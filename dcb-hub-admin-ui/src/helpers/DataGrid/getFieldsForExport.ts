@@ -63,6 +63,11 @@ export const getFieldsForExport = (coreType: string) => {
 				"itemBarcode",
 				"rawLocalItemStatus",
 				"rawLocalRequestStatus",
+				"localRequestId",
+				"localRequestStatus",
+				"localItemId",
+				"localItemStatus",
+				"localItemType",
 			];
 		default:
 			return [];

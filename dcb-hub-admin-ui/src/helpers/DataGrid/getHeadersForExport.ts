@@ -60,6 +60,11 @@ const headerMappings: Record<string, Record<string, string>> = {
 		itemBarcode: "Item barcode",
 		rawLocalItemStatus: "Raw local item status",
 		rawLocalRequestStatus: "Raw local request status",
+		localRequestId: "Request ID in local system",
+		localRequestStatus: "Request status in local system",
+		localItemId: "Item ID in local system",
+		localItemStatus: "Local item status",
+		localItemType: "Local item type",
 	},
 };
 

@@ -1435,6 +1435,12 @@ export const getPatronRequests = gql`
 				requesterNote
 				activeWorkflow
 				isExpeditedCheckout
+				rawLocalRequestStatus
+				localRequestId
+				localRequestStatus
+				localItemId
+				localItemStatus
+				localItemType
 				patron {
 					id
 				}
@@ -1464,7 +1470,7 @@ export const getPatronRequests = gql`
 `;
 
 export const getPatronRequestsForExport = gql`
-	query LoadPatronRequests(
+	query LoadPatronRequestsForExport(
 		$pageno: Int!
 		$pagesize: Int!
 		$order: String!
@@ -1499,6 +1505,13 @@ export const getPatronRequestsForExport = gql`
 				pickupRequestStatus
 				pickupItemId
 				isExpeditedCheckout
+				rawLocalRequestStatus
+				rawLocalItemStatus
+				localRequestId
+				localRequestStatus
+				localItemId
+				localItemStatus
+				localItemType
 				patron {
 					id
 				}
@@ -1681,7 +1694,6 @@ export const getPatronRequestById = gql`
 					rawLocalItemStatus
 					localHoldCount
 					localRenewable
-					rawLocalStatus
 					virtualPatron {
 						id
 						localId
@@ -1820,7 +1832,6 @@ export const getLegacyPatronRequestById = gql`
 					localStatus
 					localAgency
 					rawLocalItemStatus
-					rawLocalStatus
 					virtualPatron {
 						id
 						localId
