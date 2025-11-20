@@ -8,7 +8,9 @@ import { useRouter } from "next/router";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
 	deleteLibraryQuery,
+	getLibraries,
 	getLibraryBasicsPR,
+	getLocationForPatronRequestGrid,
 	getPatronRequests,
 } from "src/queries/queries";
 import {
@@ -20,7 +22,7 @@ import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { Delete } from "@mui/icons-material";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
 	closeConfirmation,
 	handleDeleteEntity,
@@ -30,6 +32,9 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { equalsOnly } from "src/helpers/DataGrid/filters";
+import { GridColDef } from "@mui/x-data-grid-premium";
+import { Location } from "@models/Location";
 
 // group by patron request ID?
 type LibraryDetails = {
@@ -73,9 +78,6 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 
 	const patronRequestQuery = "supplyingAgencyCode:" + agencyCode;
 
-	// Query to get the supplier requests patron ids
-	// which we then use to fill a patron request grid
-	// because we can't filter normally on supplying agency
 	const handleTotalSizeChange = useCallback((type: string, size: number) => {
 		setTotalSizes((prevTotalSizes) => ({
 			...prevTotalSizes,
@@ -94,8 +96,165 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
 	];
+	const { data: locationsData, fetchMore } = useQuery(
+		getLocationForPatronRequestGrid,
+		{
+			variables: {
+				query: "",
+				order: "name",
+				orderBy: "ASC",
+				pagesize: 100,
+				pageno: 0,
+			},
+			onCompleted: (data) => {
+				if (data.locations.content.length < data.locations.totalSize) {
+					const totalPages = Math.ceil(data.locations.totalSize / 100);
+					const fetchPromises = Array.from(
+						{ length: totalPages - 1 },
+						(_, index) =>
+							fetchMore({
+								variables: {
+									pageno: index + 1,
+								},
+								updateQuery: (prev, { fetchMoreResult }) => {
+									if (!fetchMoreResult) return prev;
+									return {
+										locations: {
+											...fetchMoreResult.locations,
+											content: [
+												...prev.locations.content,
+												...fetchMoreResult.locations.content,
+											],
+										},
+									};
+								},
+							}),
+					);
+					Promise.all(fetchPromises).catch((error) =>
+						console.error("Error fetching additional locations:", error),
+					);
+				}
+			},
+			errorPolicy: "all",
+		},
+	);
 
-	if (loading || status === "loading") {
+	const patronRequestLocations: Location[] = locationsData?.locations.content;
+
+	const { data: supplyingLibraries, loading: supplyingLibrariesLoading } =
+		useQuery(getLibraries, {
+			variables: {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			},
+			errorPolicy: "all",
+		});
+
+	const libraryFilterOptions = useMemo(() => {
+		const libraries = supplyingLibraries?.libraries?.content ?? [];
+
+		if (!libraries) return [];
+		console.log("Libraries is", libraries);
+
+		return libraries.map((lib: Library) => ({
+			value: lib.agencyCode,
+			label: lib.fullName, // The human-readable name (e.g., 'Main Library')
+		}));
+	}, [supplyingLibraries?.libraries?.content]);
+
+	const patronLibraryFilterOptions = useMemo(() => {
+		const libraries = supplyingLibraries?.libraries?.content ?? [];
+
+		if (!libraries) return [];
+		console.log("Libraries is", libraries);
+
+		return libraries.map((lib: Library) => ({
+			value: lib.agency?.hostLms?.code,
+			label: lib.fullName,
+		}));
+	}, [supplyingLibraries?.libraries?.content]);
+
+	const dynamicPatronRequestColumns = useMemo(() => {
+		const pickupLocationColumn: GridColDef = {
+			field: "pickupLocationCode",
+			headerName: t("patron_requests.pickup_location_name"),
+			minWidth: 100,
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			valueGetter: (value: string) => {
+				const locationId = value;
+				if (!locationId) return "";
+				if (Array.isArray(patronRequestLocations)) {
+					return (
+						patronRequestLocations.find(
+							(loc: Location) => loc.id === locationId,
+						)?.name || locationId
+					);
+				}
+				return locationId;
+			},
+		};
+
+		const transformedStandardColumns = standardPatronRequestColumns.map(
+			(col) => {
+				// Now apply the dynamic overrides
+				if (col.field === "supplyingAgencyCode") {
+					const { ...baseColProps } = col;
+					return {
+						...baseColProps,
+						type: "singleSelect",
+						valueOptions: libraryFilterOptions,
+						filterOperators: undefined,
+					} as GridColDef;
+				}
+
+				// Apply Patron Host LMS Filter
+				if (col.field === "patronHostlmsCode") {
+					const { ...baseColProps } = col;
+					return {
+						...baseColProps,
+						type: "singleSelect",
+						valueOptions: patronLibraryFilterOptions,
+						filterOperators: undefined,
+					} as GridColDef;
+				}
+
+				return col;
+			},
+		);
+
+		const supplierIndex = transformedStandardColumns.findIndex(
+			(col) => col.field === "supplyingAgencyCode",
+		);
+
+		let standardColumnsWithPickup;
+		if (supplierIndex !== -1) {
+			standardColumnsWithPickup = [
+				...transformedStandardColumns.slice(0, supplierIndex + 1),
+				pickupLocationColumn,
+				...transformedStandardColumns.slice(supplierIndex + 1),
+			];
+		} else {
+			standardColumnsWithPickup = [
+				pickupLocationColumn,
+				...transformedStandardColumns,
+			];
+		}
+
+		return standardColumnsWithPickup;
+	}, [
+		t,
+		patronRequestLocations,
+		libraryFilterOptions,
+		patronLibraryFilterOptions,
+	]);
+
+	const allColumns = [...customColumns, ...dynamicPatronRequestColumns];
+
+	if (loading || status === "loading" || supplyingLibrariesLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -162,7 +321,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 						presetQueryVariables={"(" + patronRequestQuery + ")"}
 						type="supplierRequestsLibrary"
 						coreType="patronRequests"
-						columns={[...customColumns, ...standardPatronRequestColumns]}
+						columns={allColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}

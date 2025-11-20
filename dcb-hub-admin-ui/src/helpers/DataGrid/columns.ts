@@ -3,6 +3,7 @@ import {
 	containsOnly,
 	durationFilters,
 	equalsOnly,
+	isOnly,
 	standardFilters,
 } from "./filters";
 import { formatDuration } from "../formatDuration";
@@ -281,8 +282,9 @@ export const standardPatronRequestColumns: GridColDef[] = [
 	},
 	{
 		field: "patronHostlmsCode",
-		headerName: "Patron host LMS code",
-		filterOperators: standardFilters,
+		headerName: "Patron library",
+		filterOperators: isOnly,
+		sortable: false,
 	},
 	{
 		field: "localBarcode",
@@ -304,11 +306,13 @@ export const standardPatronRequestColumns: GridColDef[] = [
 	},
 	{
 		field: "supplyingAgencyCode",
-		headerName: "Supplying agency",
-		filterOperators: equalsOnly,
-		sortable: true,
+		headerName: "Supplying library",
 		filterable: true,
-		valueGetter: (value: any, row: PatronRequest) => {
+		sortable: true,
+		flex: 1,
+		type: "singleSelect",
+		filterOperators: isOnly,
+		valueGetter: (value: string, row: PatronRequest) => {
 			// Check if suppliers array is not empty
 			if (row.suppliers.length > 0) {
 				return row.suppliers[0].localAgency;
@@ -701,6 +705,22 @@ export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
 			}
 		},
 	},
+	{
+		field: "rawLocalItemStatus",
+		headerName: "Raw local item status",
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		filterable: true,
+		sortable: true,
+	},
+	{
+		field: "rawLocalRequestStatus",
+		headerName: "Raw local request status",
+		flex: 0.5,
+		filterOperators: equalsOnly,
+		filterable: true,
+		sortable: true,
+	},
 ];
 
 export const supplierRequestColumnsLibrary: GridColDef[] = [
@@ -838,6 +858,8 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
 		itemBarcode: false,
+		rawLocalItemStatus: false,
+		rawLocalRequestStatus: false,
 	};
 
 export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -858,6 +880,8 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
 		itemBarcode: false,
+		rawLocalItemStatus: false,
+		rawLocalRequestStatus: false,
 	};
 
 export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
@@ -878,6 +902,8 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
+	rawLocalItemStatus: false,
+	rawLocalRequestStatus: false,
 };
 
 export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
@@ -892,6 +918,8 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
 		itemBarcode: false,
+		rawLocalItemStatus: false,
+		rawLocalRequestStatus: false,
 	};
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -911,6 +939,8 @@ export const exceptionPatronRequestColumnVisibility = {
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
+	rawLocalItemStatus: false,
+	rawLocalRequestStatus: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -936,4 +966,6 @@ export const locationPatronRequestColumnVisibility = {
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
+	rawLocalItemStatus: false,
+	rawLocalRequestStatus: false,
 };

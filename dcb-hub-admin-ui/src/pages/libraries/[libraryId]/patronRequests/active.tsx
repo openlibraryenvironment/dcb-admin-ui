@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
 	deleteLibraryQuery,
+	getLibraries,
 	getLibraryBasicsPR,
 	getLocationForPatronRequestGrid,
 	getPatronRequests,
@@ -21,7 +22,7 @@ import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { Delete } from "@mui/icons-material";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
 	closeConfirmation,
 	handleDeleteEntity,
@@ -33,6 +34,7 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
 import { equalsOnly } from "src/helpers/DataGrid/filters";
 import { Location } from "@models/Location";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 type LibraryDetails = {
 	libraryId: any;
@@ -140,36 +142,120 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
 	];
-	const pickupLocationColumn = {
-		field: "pickupLocationCode",
-		headerName: t("patron_requests.pickup_location_name"),
-		minWidth: 100,
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		valueGetter: (value: string) => {
-			const locationId = value;
-			if (!locationId) return "";
-			if (Array.isArray(patronRequestLocations)) {
-				// If array of locations is returned
-				return (
-					patronRequestLocations.find((loc: Location) => loc.id === locationId)
-						?.name || locationId
-				);
-			}
+	const { data: supplyingLibraries, loading: supplyingLibrariesLoading } =
+		useQuery(getLibraries, {
+			variables: {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			},
+			errorPolicy: "all",
+		});
 
-			return locationId;
-		},
-	};
-	const supplierIndex = standardPatronRequestColumns.findIndex(
-		(col) => col.field === "supplyingAgency",
-	);
-	const standardColumns = [
-		...standardPatronRequestColumns.slice(0, supplierIndex + 1),
-		pickupLocationColumn,
-		...standardPatronRequestColumns.slice(supplierIndex + 1),
-	];
+	const libraryFilterOptions = useMemo(() => {
+		const libraries = supplyingLibraries?.libraries?.content ?? [];
 
-	if (loading || status === "loading") {
+		if (!libraries) return [];
+		console.log("Libraries is", libraries);
+
+		return libraries.map((lib: Library) => ({
+			value: lib.agencyCode,
+			label: lib.fullName, // The human-readable name (e.g., 'Main Library')
+		}));
+	}, [supplyingLibraries?.libraries?.content]);
+
+	const patronLibraryFilterOptions = useMemo(() => {
+		const libraries = supplyingLibraries?.libraries?.content ?? [];
+
+		if (!libraries) return [];
+		console.log("Libraries is", libraries);
+
+		return libraries.map((lib: Library) => ({
+			value: lib.agency?.hostLms?.code,
+			label: lib.fullName,
+		}));
+	}, [supplyingLibraries?.libraries?.content]);
+
+	const dynamicPatronRequestColumns = useMemo(() => {
+		const pickupLocationColumn: GridColDef = {
+			field: "pickupLocationCode",
+			headerName: t("patron_requests.pickup_location_name"),
+			minWidth: 100,
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			valueGetter: (value: string) => {
+				const locationId = value;
+				if (!locationId) return "";
+				if (Array.isArray(patronRequestLocations)) {
+					return (
+						patronRequestLocations.find(
+							(loc: Location) => loc.id === locationId,
+						)?.name || locationId
+					);
+				}
+				return locationId;
+			},
+		};
+
+		const transformedStandardColumns = standardPatronRequestColumns.map(
+			(col) => {
+				// Now apply the dynamic overrides
+				if (col.field === "supplyingAgencyCode") {
+					const { ...baseColProps } = col;
+					return {
+						...baseColProps,
+						type: "singleSelect",
+						valueOptions: libraryFilterOptions,
+						filterOperators: undefined,
+					} as GridColDef;
+				}
+
+				// Apply Patron Host LMS Filter
+				if (col.field === "patronHostlmsCode") {
+					const { ...baseColProps } = col;
+					return {
+						...baseColProps,
+						type: "singleSelect",
+						valueOptions: patronLibraryFilterOptions,
+						filterOperators: undefined,
+					} as GridColDef;
+				}
+
+				return col;
+			},
+		);
+
+		const supplierIndex = transformedStandardColumns.findIndex(
+			(col) => col.field === "supplyingAgencyCode",
+		);
+
+		let standardColumnsWithPickup;
+		if (supplierIndex !== -1) {
+			standardColumnsWithPickup = [
+				...transformedStandardColumns.slice(0, supplierIndex + 1),
+				pickupLocationColumn,
+				...transformedStandardColumns.slice(supplierIndex + 1),
+			];
+		} else {
+			standardColumnsWithPickup = [
+				pickupLocationColumn,
+				...transformedStandardColumns,
+			];
+		}
+
+		return standardColumnsWithPickup;
+	}, [
+		t,
+		patronRequestLocations,
+		libraryFilterOptions,
+		patronLibraryFilterOptions,
+	]);
+
+	const activeColumns = [...customColumns, ...dynamicPatronRequestColumns];
+
+	if (loading || status === "loading" || supplyingLibrariesLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -235,7 +321,7 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 						presetQueryVariables={inProgressQueryVariables}
 						type="patronRequestsLibraryActive"
 						coreType="patronRequests"
-						columns={[...customColumns, ...standardColumns]}
+						columns={activeColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}

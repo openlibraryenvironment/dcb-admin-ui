@@ -5,6 +5,7 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import {
+	getLibraries,
 	getLocationForPatronRequestGrid,
 	getPatronRequests,
 	getPatronRequestTotals,
@@ -16,7 +17,7 @@ import {
 } from "src/helpers/DataGrid/columns";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { equalsOnly } from "src/helpers/DataGrid/filters";
@@ -25,6 +26,8 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import { handleTopLevelPatronRequestTabChange } from "src/helpers/navigation/handleTabChange";
 import { queries } from "src/constants/patronRequestGridQueries";
 import { FilterAltOutlined } from "@mui/icons-material";
+import { GridColDef } from "@mui/x-data-grid-premium";
+import { Library } from "@models/Library";
 
 export default function Exception() {
 	const { t } = useTranslation();
@@ -189,37 +192,126 @@ export default function Exception() {
 		errorPolicy: "all",
 	});
 
-	const pickupLocationColumn = {
-		field: "pickupLocationCode",
-		headerName: t("patron_requests.pickup_location_name"),
-		minWidth: 100,
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		valueGetter: (value: string) => {
-			const locationId = value;
-			if (!locationId) return "";
-			if (Array.isArray(patronRequestLocations)) {
-				return (
-					patronRequestLocations.find((loc: Location) => loc.id === locationId)
-						?.name || locationId
-				);
-			}
-			return locationId;
-		},
-	};
+	const { data: supplyingLibraries, loading: supplyingLibrariesLoading } =
+		useQuery(getLibraries, {
+			variables: {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			},
+			errorPolicy: "all",
+		});
+
+	const libraryFilterOptions = useMemo(() => {
+		const libraries = supplyingLibraries?.libraries?.content ?? [];
+
+		if (!libraries) return [];
+		console.log("Libraries is", libraries);
+
+		return libraries.map((lib: Library) => ({
+			value: lib.agencyCode,
+			label: lib.fullName, // The human-readable name (e.g., 'Main Library')
+		}));
+	}, [supplyingLibraries?.libraries?.content]);
+
+	const patronLibraryFilterOptions = useMemo(() => {
+		const libraries = supplyingLibraries?.libraries?.content ?? [];
+
+		if (!libraries) return [];
+		console.log("Libraries is", libraries);
+
+		return libraries.map((lib: Library) => ({
+			value: lib.agency?.hostLms?.code,
+			label: lib.fullName,
+		}));
+	}, [supplyingLibraries?.libraries?.content]);
 
 	const customColumns = useCustomColumns();
-	const supplierIndex = patronRequestColumnsNoStatusFilter.findIndex(
-		(col) => col.field === "supplyingAgency",
-	);
 
-	const noStatusColumns = [
-		...patronRequestColumnsNoStatusFilter.slice(0, supplierIndex + 1),
-		pickupLocationColumn,
-		...patronRequestColumnsNoStatusFilter.slice(supplierIndex + 1),
-	];
+	// Columns that need dynamic addition
+	// Patron library
+	// Pickup location
+	// Supplier library
+	const dynamicPatronRequestColumns = useMemo(() => {
+		const pickupLocationColumn: GridColDef = {
+			field: "pickupLocationCode",
+			headerName: t("patron_requests.pickup_location_name"),
+			minWidth: 100,
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			valueGetter: (value: string) => {
+				const locationId = value;
+				if (!locationId) return "";
+				if (Array.isArray(patronRequestLocations)) {
+					return (
+						patronRequestLocations.find(
+							(loc: Location) => loc.id === locationId,
+						)?.name || locationId
+					);
+				}
+				return locationId;
+			},
+		};
 
-	if (status === "loading") {
+		const transformedNoStatusColumns = patronRequestColumnsNoStatusFilter.map(
+			(col) => {
+				// Now apply the dynamic overrides
+				if (col.field === "supplyingAgencyCode") {
+					const { ...baseColProps } = col;
+					return {
+						...baseColProps,
+						type: "singleSelect",
+						valueOptions: libraryFilterOptions,
+						filterOperators: undefined,
+					} as GridColDef;
+				}
+
+				// Apply Patron Host LMS Filter
+				if (col.field === "patronHostlmsCode") {
+					const { ...baseColProps } = col;
+					return {
+						...baseColProps,
+						type: "singleSelect",
+						valueOptions: patronLibraryFilterOptions,
+						filterOperators: undefined,
+					} as GridColDef;
+				}
+
+				return col;
+			},
+		);
+
+		const supplierIndex = transformedNoStatusColumns.findIndex(
+			(col) => col.field === "supplyingAgencyCode",
+		);
+
+		let standardColumnsWithPickup;
+		if (supplierIndex !== -1) {
+			standardColumnsWithPickup = [
+				...transformedNoStatusColumns.slice(0, supplierIndex + 1),
+				pickupLocationColumn,
+				...transformedNoStatusColumns.slice(supplierIndex + 1),
+			];
+		} else {
+			standardColumnsWithPickup = [
+				pickupLocationColumn,
+				...transformedNoStatusColumns,
+			];
+		}
+
+		return standardColumnsWithPickup;
+	}, [
+		t,
+		patronRequestLocations,
+		libraryFilterOptions,
+		patronLibraryFilterOptions,
+	]);
+
+	const noStatusColumns = [...customColumns, ...dynamicPatronRequestColumns];
+
+	if (status === "loading" || supplyingLibrariesLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -335,7 +427,7 @@ export default function Exception() {
 						presetQueryVariables={queries.exception}
 						type="patronRequestsException"
 						coreType="patronRequests"
-						columns={[...customColumns, ...noStatusColumns]}
+						columns={noStatusColumns}
 						selectable={true}
 						pageSize={20}
 						noDataMessage={t("patron_requests.no_rows")}

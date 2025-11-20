@@ -1,6 +1,7 @@
 import { betweenFilterOperator } from "src/helpers/DataGrid/rangeFilterOperator";
 import {
 	getGridNumericOperators,
+	getGridSingleSelectOperators,
 	getGridStringOperators,
 	GridCellParams,
 	GridFilterInputValue,
@@ -81,4 +82,10 @@ export const durationFilters: GridFilterOperator[] = [
 		["<", ">"].includes(operator.value),
 	),
 	betweenFilterOperator,
+];
+
+export const isOnly: GridFilterOperator[] = [
+	...getGridSingleSelectOperators().filter(({ value }) =>
+		["is"].includes(value),
+	),
 ];
