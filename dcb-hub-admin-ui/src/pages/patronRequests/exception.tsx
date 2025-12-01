@@ -13,21 +13,18 @@ import {
 import {
 	defaultPatronRequestColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
-	patronRequestColumnsNoStatusFilter,
 } from "src/helpers/DataGrid/columns";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { useCallback, useMemo, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { equalsOnly } from "src/helpers/DataGrid/filters";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { handleTopLevelPatronRequestTabChange } from "src/helpers/navigation/handleTabChange";
 import { queries } from "src/constants/patronRequestGridQueries";
 import { FilterAltOutlined } from "@mui/icons-material";
-import { GridColDef } from "@mui/x-data-grid-premium";
-import { Library } from "@models/Library";
+import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 
 export default function Exception() {
 	const { t } = useTranslation();
@@ -204,112 +201,16 @@ export default function Exception() {
 			errorPolicy: "all",
 		});
 
-	const libraryFilterOptions = useMemo(() => {
-		const libraries = supplyingLibraries?.libraries?.content ?? [];
-
-		if (!libraries) return [];
-		console.log("Libraries is", libraries);
-
-		return libraries.map((lib: Library) => ({
-			value: lib.agencyCode,
-			label: lib.fullName, // The human-readable name (e.g., 'Main Library')
-		}));
-	}, [supplyingLibraries?.libraries?.content]);
-
-	const patronLibraryFilterOptions = useMemo(() => {
-		const libraries = supplyingLibraries?.libraries?.content ?? [];
-
-		if (!libraries) return [];
-		console.log("Libraries is", libraries);
-
-		return libraries.map((lib: Library) => ({
-			value: lib.agency?.hostLms?.code,
-			label: lib.fullName,
-		}));
-	}, [supplyingLibraries?.libraries?.content]);
-
 	const customColumns = useCustomColumns();
-
-	// Columns that need dynamic addition
-	// Patron library
-	// Pickup location
-	// Supplier library
-	const dynamicPatronRequestColumns = useMemo(() => {
-		const pickupLocationColumn: GridColDef = {
-			field: "pickupLocationCode",
-			headerName: t("patron_requests.pickup_location_name"),
-			minWidth: 100,
-			flex: 0.5,
-			filterOperators: equalsOnly,
-			valueGetter: (value: string) => {
-				const locationId = value;
-				if (!locationId) return "";
-				if (Array.isArray(patronRequestLocations)) {
-					return (
-						patronRequestLocations.find(
-							(loc: Location) => loc.id === locationId,
-						)?.name || locationId
-					);
-				}
-				return locationId;
-			},
-		};
-
-		const transformedNoStatusColumns = patronRequestColumnsNoStatusFilter.map(
-			(col) => {
-				// Now apply the dynamic overrides
-				if (col.field === "supplyingAgencyCode") {
-					const { ...baseColProps } = col;
-					return {
-						...baseColProps,
-						type: "singleSelect",
-						valueOptions: libraryFilterOptions,
-						filterOperators: undefined,
-					} as GridColDef;
-				}
-
-				// Apply Patron Host LMS Filter
-				if (col.field === "patronHostlmsCode") {
-					const { ...baseColProps } = col;
-					return {
-						...baseColProps,
-						type: "singleSelect",
-						valueOptions: patronLibraryFilterOptions,
-						filterOperators: undefined,
-					} as GridColDef;
-				}
-
-				return col;
-			},
-		);
-
-		const supplierIndex = transformedNoStatusColumns.findIndex(
-			(col) => col.field === "supplyingAgencyCode",
-		);
-
-		let standardColumnsWithPickup;
-		if (supplierIndex !== -1) {
-			standardColumnsWithPickup = [
-				...transformedNoStatusColumns.slice(0, supplierIndex + 1),
-				pickupLocationColumn,
-				...transformedNoStatusColumns.slice(supplierIndex + 1),
-			];
-		} else {
-			standardColumnsWithPickup = [
-				pickupLocationColumn,
-				...transformedNoStatusColumns,
-			];
-		}
-
-		return standardColumnsWithPickup;
-	}, [
-		t,
-		patronRequestLocations,
-		libraryFilterOptions,
-		patronLibraryFilterOptions,
-	]);
-
-	const noStatusColumns = [...customColumns, ...dynamicPatronRequestColumns];
+	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
+	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
+		locations: patronRequestLocations,
+		libraries: supplyingLibrariesContent,
+		variant: "noStatus",
+	});
+	const noStatusColumns = useMemo(() => {
+		return [...customColumns, ...dynamicPatronRequestColumns];
+	}, [customColumns, dynamicPatronRequestColumns]);
 
 	if (status === "loading" || supplyingLibrariesLoading) {
 		return (
