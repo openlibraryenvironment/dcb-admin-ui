@@ -269,577 +269,312 @@ export const numRangeMappingColumnsNoCategoryFilter: GridColDef[] = [
 	},
 ];
 
-export const standardPatronRequestColumns: GridColDef[] = [
-	{
-		field: "dateCreated",
-		headerName: "Request created",
-		minWidth: 150,
-		filterable: false,
-		valueGetter: (value: any, row: { dateCreated: string }) => {
-			const requestCreated = row.dateCreated;
-			return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
-		},
-	},
-	{
-		field: "patronHostlmsCode",
-		headerName: "Patron library",
-		filterOperators: isOnly,
-		sortable: false,
-	},
-	{
-		field: "localBarcode",
-		headerName: "Patron barcode",
-		filterable: false,
-		sortable: false,
-		valueGetter: (value: any, row: PatronRequest) =>
-			row?.requestingIdentity?.localBarcode,
-	},
-	{
-		field: "clusterRecordTitle",
-		headerName: "Title",
-		minWidth: 100,
-		flex: 1.25,
-		filterable: false, // Cannot currently filter on nested properties.
-		sortable: false,
-		valueGetter: (value: any, row: { clusterRecord: { title: string } }) =>
-			row?.clusterRecord?.title,
-	},
-	{
-		field: "supplyingAgencyCode",
-		headerName: "Supplying library",
-		filterable: true,
-		sortable: true,
-		flex: 1,
-		type: "singleSelect",
-		filterOperators: isOnly,
-		valueGetter: (value: string, row: PatronRequest) => {
-			// Check if suppliers array is not empty
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].localAgency;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
-		},
-	},
-	{
-		field: "pickupRequestId",
-		headerName: "Pickup request UUID",
-		minWidth: 100,
-		sortable: true,
-		filterable: true,
-	},
-	{
-		field: "pickupRequestStatus",
-		headerName: "Pickup request status",
-		minWidth: 100,
-		sortable: true,
-		filterable: true,
-	},
-	{
-		field: "canonicalPtype",
-		headerName: "DCB canonical patron type",
-		minWidth: 100,
-		flex: 0.5,
-		filterable: false,
-		sortable: false,
-		valueGetter: (value: any, row: PatronRequest) => {
-			const requestingIdentity = row?.requestingIdentity;
-			return requestingIdentity?.canonicalPtype ?? "";
-		},
-	},
-	{
-		field: "canonicalItemType",
-		headerName: "DCB canonical item type",
-		minWidth: 100,
-		flex: 0.5,
-		filterable: false,
-		sortable: false,
-		valueGetter: (
-			value: any,
-			row: { suppliers: Array<{ canonicalItemType: string }> },
-		) => {
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].canonicalItemType;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
-		},
-	},
-	{
-		field: "previousStatus",
-		headerName: "Previous status",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: standardFilters,
-	},
-	{
-		field: "status",
-		headerName: "Status",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: standardFilters,
-	},
-	{
-		field: "nextExpectedStatus",
-		headerName: "Next status",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: standardFilters,
-	},
-	{
-		field: "errorMessage",
-		headerName: "Error message",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: containsOnly,
-	},
-	{
-		field: "outOfSequenceFlag",
-		headerName: "Out of sequence",
-		flex: 0.75,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "pollCountForCurrentStatus",
-		headerName: "Polling count",
-		flex: 0.25,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "elapsedTimeInCurrentStatus",
-		headerName: "Time in state (days)",
-		description:
-			"The time the request has been in its current status, in the format dd:hh:mm:ss",
-		minWidth: 50,
-		type: "number",
-		filterOperators: durationFilters,
-		valueGetter: (value: any, row: { elapsedTimeInCurrentStatus: number }) => {
-			return formatDuration(row.elapsedTimeInCurrentStatus);
-		},
-	},
-	{
-		field: "isManuallySelectedItem",
-		headerName: "Manually selected?",
-		flex: 0.75,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "dateUpdated",
-		headerName: "Request updated",
-		minWidth: 150,
-		filterable: false,
-		valueGetter: (value: any, row: { dateUpdated: string }) => {
-			const requestUpdated = row.dateUpdated;
-			return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
-		},
-	},
-	{
-		field: "description",
-		headerName: "Description",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "requesterNote",
-		headerName: "Requester note",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "id",
-		headerName: "Request UUID",
-		minWidth: 100,
-		flex: 0.5,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "activeWorkflow",
-		headerName: "Active workflow",
-		minWidth: 100,
-		sortable: true,
-		filterable: true,
-	},
-	{
-		field: "isExpeditedCheckout",
-		headerName: "On-site borrowing request?",
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		filterable: true,
-		sortable: true,
-	},
-	{
-		field: "itemBarcode",
-		headerName: "Item barcode",
-		filterable: false,
-		sortable: false,
-		flex: 0.3,
-		valueGetter: (value: any, row: PatronRequest) => {
-			// Check if suppliers array is not empty
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].localItemBarcode;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
-		},
-	},
-];
+const getPatronRequestColumns = (
+	variant: "standard" | "noStatus",
+): GridColDef[] => {
+	const isStandard = variant === "standard";
 
-export const patronRequestColumnsNoStatusFilter: GridColDef[] = [
-	{
-		field: "dateCreated",
-		headerName: "Request created",
-		minWidth: 150,
-		filterable: false,
-		valueGetter: (value: any, row: { dateCreated: string }) => {
-			const requestCreated = row.dateCreated;
-			return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+	const columns: GridColDef[] = [
+		{
+			field: "dateCreated",
+			headerName: "Request created",
+			minWidth: 150,
+			filterable: false,
+			valueGetter: (value: any, row: { dateCreated: string }) => {
+				const requestCreated = row.dateCreated;
+				return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+			},
 		},
-	},
-	{
-		field: "patronHostlmsCode",
-		headerName: "Patron host LMS code",
-		filterOperators: standardFilters,
-	},
-	{
-		field: "localBarcode",
-		headerName: "Patron barcode",
-		filterable: false,
-		sortable: false,
-		valueGetter: (value: any, row: PatronRequest) =>
-			row?.requestingIdentity?.localBarcode,
-	},
-	{
-		field: "clusterRecordTitle",
-		headerName: "Title",
-		minWidth: 100,
-		flex: 1.25,
-		filterable: false, // Cannot currently filter on nested properties.
-		sortable: false,
-		valueGetter: (value: any, row: { clusterRecord: { title: string } }) =>
-			row?.clusterRecord?.title,
-	},
-	{
-		field: "supplyingAgencyCode",
-		headerName: "Supplying agency",
-		sortable: true,
-		filterable: true,
-		filterOperators: equalsOnly,
-		valueGetter: (
-			value: any,
-			row: { suppliers: Array<{ localAgency: string }> },
-		) => {
-			// Check if suppliers array is not empty
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].localAgency;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
+		// Patron
+		{
+			field: "patronHostlmsCode",
+			headerName: "Patron library",
+			filterOperators: isOnly,
+			sortable: false,
 		},
-	},
-	{
-		field: "pickupRequestId",
-		headerName: "Pickup request UUID",
-		minWidth: 100,
-		sortable: true,
-		filterable: true,
-	},
-	{
-		field: "pickupRequestStatus",
-		headerName: "Pickup request status",
-		minWidth: 100,
-		sortable: true,
-		filterable: true,
-	},
-	{
-		field: "canonicalPtype",
-		headerName: "DCB canonical patron type",
-		minWidth: 100,
-		flex: 0.5,
-		filterable: false,
-		sortable: false,
-		valueGetter: (value: any, row: PatronRequest) => {
-			const requestingIdentity = row?.requestingIdentity;
-			return requestingIdentity?.canonicalPtype ?? "";
+		{
+			field: "localBarcode",
+			headerName: "Patron barcode",
+			filterable: false,
+			sortable: false,
+			valueGetter: (value: any, row: PatronRequest) =>
+				row?.requestingIdentity?.localBarcode,
 		},
-	},
-	{
-		field: "canonicalItemType",
-		headerName: "DCB canonical item type",
-		minWidth: 100,
-		flex: 0.5,
-		filterable: false,
-		sortable: false,
-		valueGetter: (
-			value: any,
-			row: { suppliers: Array<{ canonicalItemType: string }> },
-		) => {
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].canonicalItemType;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
+		{
+			field: "clusterRecordTitle",
+			headerName: "Title",
+			minWidth: 100,
+			flex: 1.25,
+			filterable: false,
+			sortable: false,
+			valueGetter: (value: any, row: { clusterRecord: { title: string } }) =>
+				row?.clusterRecord?.title,
 		},
-	},
-	{
-		field: "previousStatus",
-		headerName: "Previous status",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: standardFilters,
-	},
-	{
-		field: "status",
-		headerName: "Status",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: standardFilters,
-		filterable: false,
-	},
-	{
-		field: "nextExpectedStatus",
-		headerName: "Next status",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: standardFilters,
-	},
-	{
-		field: "errorMessage",
-		headerName: "Error message",
-		minWidth: 100,
-		flex: 1.5,
-		filterOperators: containsOnly,
-	},
-	{
-		field: "outOfSequenceFlag",
-		headerName: "Out of sequence",
-		flex: 0.75,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "pollCountForCurrentStatus",
-		headerName: "Polling count",
-		flex: 0.25,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "elapsedTimeInCurrentStatus",
-		headerName: "Time in state (days)",
-		description:
-			"The time the request has been in its current status, measured in days",
-		minWidth: 50,
-		type: "number",
-		filterOperators: durationFilters,
-		valueGetter: (value: any, row: { elapsedTimeInCurrentStatus: number }) =>
-			formatDuration(row.elapsedTimeInCurrentStatus),
-	},
-	{
-		field: "isManuallySelectedItem",
-		headerName: "Manually selected?",
-		flex: 0.75,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "dateUpdated",
-		headerName: "Request updated",
-		minWidth: 150,
-		filterable: false,
-		valueGetter: (value: any, row: { dateUpdated: string }) => {
-			const requestUpdated = row.dateUpdated;
-			return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+		{
+			field: "supplyingAgencyCode",
+			headerName: "Supplying library",
+			filterable: true,
+			sortable: true,
+			flex: 1,
+			type: "singleSelect",
+			filterOperators: isOnly,
+			valueGetter: (value: string, row: PatronRequest) => {
+				if (row.suppliers.length > 0) {
+					return row.suppliers[0].localAgency;
+				} else {
+					return "";
+				}
+			},
 		},
-	},
-	{
-		field: "description",
-		headerName: "Description",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "requesterNote",
-		headerName: "Requester note",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "id",
-		headerName: "Request UUID",
-		minWidth: 100,
-		flex: 0.5,
-		filterOperators: equalsOnly,
-	},
-	{
-		field: "activeWorkflow",
-		headerName: "Active workflow",
-		minWidth: 100,
-		sortable: true,
-		filterable: true,
-	},
-	{
-		field: "isExpeditedCheckout",
-		headerName: "On-site borrowing request?",
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		filterable: true,
-		sortable: true,
-	},
-	{
-		field: "renewalCount",
-		headerName: "Renewal count",
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		filterable: true,
-		sortable: true,
-	},
-	{
-		field: "itemBarcode",
-		headerName: "Item barcode",
-		filterable: false,
-		sortable: false,
-		flex: 0.3,
-		valueGetter: (value: any, row: PatronRequest) => {
-			// Check if suppliers array is not empty
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].localItemBarcode;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
+		{
+			field: "pickupLocationCode",
+			headerName: "Pickup location",
+			type: "singleSelect",
+			filterOperators: isOnly,
+			sortable: false,
+			filterable: true,
 		},
-	},
-	{
-		field: "rawLocalItemStatus",
-		headerName: "Raw local item status",
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		filterable: true,
-		sortable: true,
-	},
-	{
-		field: "rawLocalRequestStatus",
-		headerName: "Raw local request status",
-		flex: 0.5,
-		filterOperators: equalsOnly,
-		filterable: true,
-		sortable: true,
-	},
-];
+		{
+			field: "pickupRequestId",
+			headerName: "Pickup request UUID",
+			minWidth: 100,
+			sortable: true,
+			filterable: true,
+		},
+		{
+			field: "pickupRequestStatus",
+			headerName: "Pickup request status",
+			minWidth: 100,
+			sortable: true,
+			filterable: true,
+		},
+		{
+			field: "canonicalPtype",
+			headerName: "DCB canonical patron type",
+			minWidth: 100,
+			flex: 0.5,
+			filterable: false,
+			sortable: false,
+			valueGetter: (value: any, row: PatronRequest) => {
+				const requestingIdentity = row?.requestingIdentity;
+				return requestingIdentity?.canonicalPtype ?? "";
+			},
+		},
+		{
+			field: "canonicalItemType",
+			headerName: "DCB canonical item type",
+			minWidth: 100,
+			flex: 0.5,
+			filterable: false,
+			sortable: false,
+			valueGetter: (
+				value: any,
+				row: { suppliers: Array<{ canonicalItemType: string }> },
+			) => {
+				if (row.suppliers.length > 0) {
+					return row.suppliers[0].canonicalItemType;
+				} else {
+					return "";
+				}
+			},
+		},
+		{
+			field: "previousStatus",
+			headerName: "Previous status",
+			minWidth: 100,
+			flex: 1.5,
+			filterOperators: standardFilters,
+		},
+		{
+			field: "status",
+			headerName: "Status",
+			minWidth: 100,
+			flex: 1.5,
+			filterOperators: standardFilters,
+			filterable: isStandard ? true : false,
+		},
+		{
+			field: "nextExpectedStatus",
+			headerName: "Next status",
+			minWidth: 100,
+			flex: 1.5,
+			filterOperators: standardFilters,
+		},
+		{
+			field: "errorMessage",
+			headerName: "Error message",
+			minWidth: 100,
+			flex: 1.5,
+			filterOperators: containsOnly,
+		},
+		{
+			field: "outOfSequenceFlag",
+			headerName: "Out of sequence",
+			flex: 0.75,
+			filterOperators: equalsOnly,
+		},
+		{
+			field: "pollCountForCurrentStatus",
+			headerName: "Polling count",
+			flex: 0.25,
+			filterOperators: equalsOnly,
+		},
+		{
+			field: "elapsedTimeInCurrentStatus",
+			headerName: "Time in state (days)",
+			description:
+				"The time the request has been in its current status, in the format dd:hh:mm:ss",
+			minWidth: 50,
+			type: "number",
+			filterOperators: durationFilters,
+			valueGetter: (
+				value: any,
+				row: { elapsedTimeInCurrentStatus: number },
+			) => {
+				return formatDuration(row.elapsedTimeInCurrentStatus);
+			},
+		},
+		{
+			field: "isManuallySelectedItem",
+			headerName: "Manually selected?",
+			flex: 0.75,
+			filterOperators: equalsOnly,
+		},
+		{
+			field: "dateUpdated",
+			headerName: "Request updated",
+			minWidth: 150,
+			filterable: false,
+			valueGetter: (value: any, row: { dateUpdated: string }) => {
+				const requestUpdated = row.dateUpdated;
+				return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+			},
+		},
+		{
+			field: "description",
+			headerName: "Description",
+			filterOperators: standardFilters,
+			flex: 0.5,
+		},
+		{
+			field: "requesterNote",
+			headerName: "Requester note",
+			filterOperators: standardFilters,
+			flex: 0.5,
+		},
+		{
+			field: "id",
+			headerName: "Request UUID",
+			minWidth: 100,
+			flex: 0.5,
+			filterOperators: equalsOnly,
+		},
+		{
+			field: "activeWorkflow",
+			headerName: "Active workflow",
+			minWidth: 100,
+			sortable: true,
+			filterable: true,
+		},
+		{
+			field: "isExpeditedCheckout",
+			headerName: "On-site borrowing request?",
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		{
+			field: "renewalCount",
+			headerName: "Renewal count",
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		// Item values
+		{
+			field: "itemBarcode",
+			headerName: "Item barcode",
+			filterable: false,
+			sortable: false,
+			flex: 0.3,
+			valueGetter: (value: any, row: PatronRequest) => {
+				if (row.suppliers.length > 0) {
+					return row.suppliers[0].localItemBarcode;
+				} else {
+					return "";
+				}
+			},
+		},
+		{
+			field: "localItemStatus",
+			headerName: "Local item status",
+			flex: 0.3,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		{
+			field: "rawLocalItemStatus",
+			headerName: "Raw local item status",
+			flex: 0.3,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		{
+			field: "localItemType",
+			headerName: "Local item type",
+			flex: 0.3,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		{
+			field: "localItemId",
+			headerName: "Local item ID",
+			flex: 0.3,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		// Local requests
+		{
+			field: "localRequestStatus",
+			headerName: "Local request status",
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		{
+			field: "rawLocalRequestStatus",
+			headerName: "Raw local request status",
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+		{
+			field: "localRequestId",
+			headerName: "Local request ID",
+			flex: 0.3,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
+	];
+	return columns;
+};
 
-export const supplierRequestColumnsLibrary: GridColDef[] = [
-	{
-		field: "dateCreated",
-		headerName: "Request created",
-		minWidth: 150,
-		filterable: false,
-		valueGetter: (value: any, row: { dateCreated: string }) => {
-			const requestCreated = row.dateCreated;
-			return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
-		},
-	},
-	{
-		field: "dateUpdated",
-		headerName: "Request updated",
-		minWidth: 150,
-		filterable: false,
-		valueGetter: (value: any, row: { dateUpdated: string }) => {
-			const requestUpdated = row.dateUpdated;
-			return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
-		},
-	},
-	{
-		field: "canonicalItemType",
-		headerName: "DCB canonical item type",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "hostLmsCode",
-		headerName: "Host LMS code",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "isActive",
-		headerName: "Is active?",
-		filterOperators: equalsOnly,
-		flex: 0.5,
-	},
-	{
-		field: "localItemId",
-		headerName: "Local item ID",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "localBibId",
-		headerName: "Local bib ID",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "localStatus",
-		headerName: "Local status",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "localAgency",
-		headerName: "Local agency",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "rawLocalStatus",
-		headerName: "Raw local status",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "description",
-		headerName: "Description",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "requesterNote",
-		headerName: "Requester note",
-		filterOperators: standardFilters,
-		flex: 0.5,
-	},
-	{
-		field: "patronRequestId",
-		headerName: "Patron request UUID",
-		filterable: false,
-		groupable: true,
-		flex: 0.5,
-		valueGetter: (value: any, row: { patronRequest: PatronRequest }) => {
-			const id = row?.patronRequest.id;
-			return id;
-		},
-	},
-	{
-		field: "isExpeditedCheckout",
-		headerName: "On-site borrowing request?",
-		flex: 0.5,
-		valueGetter: (value: any, row: { patronRequest: PatronRequest }) => {
-			const isExpeditedCheckout = row?.patronRequest?.isExpeditedCheckout;
-			return isExpeditedCheckout;
-		},
-	},
-	{
-		field: "itemBarcode",
-		headerName: "Item barcode",
-		filterable: false,
-		sortable: false,
-		flex: 0.3,
-		valueGetter: (value: any, row: PatronRequest) => {
-			// Check if suppliers array is not empty
-			if (row.suppliers.length > 0) {
-				return row.suppliers[0].localItemBarcode;
-			} else {
-				return ""; // This allows us to handle the array being empty, and any related type errors.
-			}
-		},
-	},
-];
+// Used in most scenarios
+export const standardPatronRequestColumns: GridColDef[] =
+	getPatronRequestColumns("standard");
+
+// Used for "exception" pages where the status is irrelevant as it's always ERROR
+export const patronRequestColumnsNoStatusFilter: GridColDef[] =
+	getPatronRequestColumns("noStatus");
 
 export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityModel =
 	{
@@ -858,8 +593,14 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
 		itemBarcode: false,
+		localItemStatus: false,
 		rawLocalItemStatus: false,
+		localItemId: false,
+		localItemType: false,
+		localRequestStatus: false,
 		rawLocalRequestStatus: false,
+		localRequestId: false,
+		renewalCount: false,
 	};
 
 export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -880,8 +621,14 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
 		itemBarcode: false,
+		localItemStatus: false,
 		rawLocalItemStatus: false,
+		localItemId: false,
+		localItemType: false,
+		localRequestStatus: false,
 		rawLocalRequestStatus: false,
+		localRequestId: false,
+		renewalCount: false,
 	};
 
 export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
@@ -902,8 +649,14 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
+	localItemStatus: false,
 	rawLocalItemStatus: false,
+	localItemId: false,
+	localItemType: false,
+	localRequestStatus: false,
 	rawLocalRequestStatus: false,
+	localRequestId: false,
+	renewalCount: false,
 };
 
 export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
@@ -918,8 +671,14 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
 		itemBarcode: false,
+		localItemStatus: false,
 		rawLocalItemStatus: false,
+		localItemId: false,
+		localItemType: false,
+		localRequestStatus: false,
 		rawLocalRequestStatus: false,
+		localRequestId: false,
+		renewalCount: false,
 	};
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -939,8 +698,14 @@ export const exceptionPatronRequestColumnVisibility = {
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
+	localItemStatus: false,
 	rawLocalItemStatus: false,
+	localItemId: false,
+	localItemType: false,
+	localRequestStatus: false,
 	rawLocalRequestStatus: false,
+	localRequestId: false,
+	renewalCount: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -966,6 +731,12 @@ export const locationPatronRequestColumnVisibility = {
 	pickupRequestStatus: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
+	localItemStatus: false,
 	rawLocalItemStatus: false,
+	localItemId: false,
+	localItemType: false,
+	localRequestStatus: false,
 	rawLocalRequestStatus: false,
+	localRequestId: false,
+	renewalCount: false,
 };
