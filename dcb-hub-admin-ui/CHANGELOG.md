@@ -1,3 +1,16 @@
+# [1.51.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.50.0...v1.51.0) (2025-12-01)
+
+
+### Bug Fixes
+
+* Fix issue with "OR" operators and presets [DCB-2064] ([622cbf9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/622cbf9e74574db1a6cc606a39ceb989d2213e67))
+
+
+### Features
+
+* Add local types for export [DCB-2064] ([f5b0d3f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f5b0d3f69e27f91284a760acd64785e8819520c6))
+* Provide pickup location options, dynamic patron request columns [DCB-2064] ([ae5909e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ae5909e1f5d73be2a48eafa818e3a68fcbd5291a))
+
 # [1.50.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.49.0...v1.50.0) (2025-11-20)
 
 
