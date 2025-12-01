@@ -572,7 +572,7 @@ export default function ServerPaginationGrid({
 			)
 				filterQuery =
 					filterQuery != ""
-						? `${presetQueryVariables} && ${filterQuery}`
+						? `${presetQueryVariables} && (${filterQuery})`
 						: `${presetQueryVariables}`; // If filter query is blank, revert to the presets.
 			if (
 				!isEmpty(filterModel.items) &&
