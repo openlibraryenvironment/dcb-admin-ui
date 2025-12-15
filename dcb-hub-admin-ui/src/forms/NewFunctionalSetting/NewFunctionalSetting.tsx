@@ -183,6 +183,7 @@ export default function NewFunctionalSetting({
 										"TRIGGER_SUPPLIER_RENEWAL",
 										"DENY_LIBRARY_MAPPING_EDIT",
 										"VIRTUAL_PATRON_NAMES_VISIBLE",
+										"VIRTUAL_PATRON_NAMES_POLARIS",
 									]}
 									renderInput={(params) => (
 										<TextField
