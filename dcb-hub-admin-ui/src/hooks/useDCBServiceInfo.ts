@@ -30,7 +30,7 @@ const useDCBServiceInfo = () => {
 					lastFetchedAt,
 			);
 		}
-	}, [lastFetchedAt, fetchVersionInfo, REQUEST_DELAY, version, error]);
+	}, [lastFetchedAt, fetchVersionInfo, REQUEST_DELAY, version]);
 
 	return { version, isDev, isAcceptableVersion, loading, error, type, branch };
 };
