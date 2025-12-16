@@ -205,6 +205,12 @@
 				"description": "$t(ui.info.try_later)",
 				"action": "$t(ui.action.go_back)"
 			},
+			"503": {
+				"name": "Maintenance",
+				"summary": "OpenRS DCB is undergoing maintenance, and DCB Admin will be back soon!",
+				"description": "Please contact your system administrator for more information",
+				"action": "$t(ui.action.go_home)"
+			},
 			"cannot_retrieve_record": "Unable to retrieve the record",
 			"cannot_find_record": "Unable to find the record",
 			"search_failed": "The search was not successful",

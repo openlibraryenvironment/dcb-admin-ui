@@ -34,10 +34,26 @@ const useDCBVersionStore = create<DCBVersionState>()(
 			fetchVersionInfo: async () => {
 				const currentTime = Date.now();
 				set({ loading: true });
+				const fetchUrl = `${publicRuntimeConfig?.DCB_API_BASE}/info`;
 				try {
-					const response = await axios.get(
-						`${publicRuntimeConfig?.DCB_API_BASE}/info`,
-					);
+					// const response = await axios.get(
+					// 	`${publicRuntimeConfig?.DCB_API_BASE}/info`,
+					// );
+					let response;
+
+					try {
+						response = await axios.get(fetchUrl);
+					} catch (firstErr: any) {
+						// If 503, wait briefly and retry
+						// Just in case it is a temp disruption
+						if (firstErr.response?.status === 503) {
+							console.log("503 received. Retrying...");
+							response = await axios.get(fetchUrl);
+						} else {
+							throw firstErr;
+						}
+					}
+
 					const version = response.data.git?.tags || null;
 					const systemType = response.data.env.code || "NOT SET";
 					const branch = response.data.git?.branch || "";
@@ -75,12 +91,21 @@ const useDCBVersionStore = create<DCBVersionState>()(
 						type: systemType,
 						branch,
 					});
-				} catch (error) {
+				} catch (error: any) {
 					console.error("Error fetching DCB Service version:", error);
+					if (error?.response?.status === 503) {
+						if (
+							typeof window !== "undefined" &&
+							window.location.pathname !== "/maintenance"
+						) {
+							window.location.href = "/maintenance";
+						}
+					}
 					set({
 						error:
 							error instanceof Error ? error : new Error("An error occurred"),
 						loading: false,
+						lastFetchedAt: currentTime, // Stops getting stuck in an error state.
 					});
 				}
 			},
