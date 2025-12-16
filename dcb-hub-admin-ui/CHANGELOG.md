@@ -1,3 +1,10 @@
+# [1.52.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.51.1...v1.52.0) (2025-12-16)
+
+
+### Features
+
+* New maintenance page ([03f84ad](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/03f84ad6eb7923c9d7718da64fc79da036c41594))
+
 ## [1.51.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.51.0...v1.51.1) (2025-12-15)
 
 
