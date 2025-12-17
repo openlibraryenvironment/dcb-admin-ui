@@ -51,7 +51,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 
 	const getKey = (pathArray: string[]): string => {
 		if (
-			pathArray[0] == "libraries" &&
+			(pathArray[0] == "libraries" || pathArray[0] == "groups") &&
 			pathArray.length == 2 &&
 			titleAttribute
 		) {
@@ -61,6 +61,19 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				return pathArray[1];
 			}
 		}
+		if (pathArray[0] === "groups" && pathArray.length > 2) {
+			if (pathArray[1].length === 36) {
+				switch (pathArray[2]) {
+					case "patronRequests":
+						return "nav.groups.patronRequests";
+					case "supplierRequests":
+						return "nav.groups.supplierRequests";
+					case "settings":
+						return "nav.groups.settings";
+				}
+			}
+		}
+
 		if (pathArray[0] === "libraries" && pathArray.length > 2) {
 			// First, check for library ID (UUID)
 			if (pathArray[1].length === 36) {
@@ -115,6 +128,7 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 				case "libraries":
 				case "patronRequests":
 				case "consortium":
+				case "groups":
 					return "nav." + topLevelKey + ".name";
 				default:
 					return "nav." + topLevelKey;
@@ -130,30 +144,37 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 			} else {
 				// Handle special cases for search pages
 				if (pathArray.length > 2) {
-					if (pathArray[0] === "search") {
-						if (pathArray[2] === "cluster") {
-							return "nav.search.cluster";
-						} else if (pathArray[2] === "items") {
-							return "nav.search.items";
-						} else if (pathArray[2] === "identifiers") {
-							return "nav.search.identifiers";
-						}
-					} else if (pathArray[0] == "libraries") {
-						if (pathArray[1].length == 36 && pathArray.length == 2) {
-							return titleAttribute ?? pathArray[1];
-						}
-						switch (pathArray[2]) {
-							case "bibs":
-								return "nav.libraries.bibs";
-							case "contacts":
-								return "nav.libraries.contacts";
-							case "locations":
-								return "nav.locations";
-							case "service":
-								return "nav.libraries.service";
-							case "settings":
-								return "nav.libraries.settings";
-						}
+					switch (pathArray[0]) {
+						case "search":
+							if (pathArray[2] === "cluster") {
+								return "nav.search.cluster";
+							} else if (pathArray[2] === "items") {
+								return "nav.search.items";
+							} else if (pathArray[2] === "identifiers") {
+								return "nav.search.identifiers";
+							}
+							break;
+						case "libraries":
+							if (pathArray[1].length == 36 && pathArray.length == 2) {
+								return titleAttribute ?? pathArray[1];
+							}
+							switch (pathArray[2]) {
+								case "bibs":
+									return "nav.libraries.bibs";
+								case "contacts":
+									return "nav.libraries.contacts";
+								case "locations":
+									return "nav.locations";
+								case "service":
+									return "nav.libraries.service";
+								case "settings":
+									return "nav.libraries.settings";
+							}
+							break;
+						case "groups":
+							if (pathArray[1].length == 36 && pathArray.length == 2) {
+								return titleAttribute ?? pathArray[1];
+							}
 					}
 				}
 				if (nestedKey.includes("#auditlog")) {

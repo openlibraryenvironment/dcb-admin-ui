@@ -30,6 +30,8 @@ export const presetTypes = [
 	"libraryLocations",
 	"supplierRequestsLibrary",
 	"libraryBibs",
+	"patronRequestsGroupAll",
+	"supplierRequestsGroupAll",
 ];
 
 // Types of data grid where users cannot click through to a details page
@@ -72,6 +74,8 @@ export const specialRedirectionTypes = [
 	"libraryLocations",
 	"supplierRequestsLibrary",
 	"libraryBibs",
+	"patronRequestsGroupAll",
+	"supplierRequestsGroupAll",
 ];
 
 // Types of data grid where we show the actions menu to the user.

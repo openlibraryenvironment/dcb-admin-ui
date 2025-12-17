@@ -52,7 +52,7 @@ const Groups: NextPage = () => {
 	}
 
 	return (
-		<AdminLayout data-tid="groups-title" title={t("nav.groups")}>
+		<AdminLayout data-tid="groups-title" title={t("nav.groups.name")}>
 			<Button
 				data-tid="new-group-button"
 				variant="contained"

@@ -1361,9 +1361,12 @@ export const getLibraryGroupById = gql`
 						agencyCode
 						agency {
 							authProfile
+							code
+							id
 							hostLms {
 								lmsClientClass
 								code
+								id
 							}
 						}
 						shortName

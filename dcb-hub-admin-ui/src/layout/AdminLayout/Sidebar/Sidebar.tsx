@@ -194,7 +194,7 @@ const routes = [
 	{ path: "/libraries", translationKey: "nav.libraries.name" }, // Libraries
 	{ path: "/agencies", translationKey: "nav.agencies" }, // Agencies
 	{ path: "/hostlmss", translationKey: "nav.hostlmss" }, // Host LMSs
-	{ path: "/groups", translationKey: "nav.groups" }, // Groups
+	{ path: "/groups", translationKey: "nav.groups.name" }, // Groups
 	{ path: "/locations", translationKey: "nav.locations" }, // Locations
 	{ path: "/mappings", translationKey: "nav.mappings.name" }, // Mappings
 	{ path: "/bibs", translationKey: "nav.bibs" }, // Bib records

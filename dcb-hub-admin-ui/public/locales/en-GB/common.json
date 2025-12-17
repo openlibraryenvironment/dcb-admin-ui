@@ -21,7 +21,16 @@
 			"functionalSettings": "Functional settings",
 			"profile": "Profile"
 		},
-		"groups": "Groups",
+		"groups": {
+			"bibs": "Bib records",
+			"info": "Group info",
+			"membership": "Membership",
+			"name": "Groups",
+			"profile": "Profile",
+			"patronRequests": "Patron requests",
+			"settings": "Settings",
+			"supplierRequests": "Supplier requests"
+		},
 		"home": "Home",
 		"hostlmss": "Host LMSs",
 		"libraries": {

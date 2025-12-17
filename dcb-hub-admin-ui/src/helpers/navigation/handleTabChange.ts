@@ -163,3 +163,29 @@ export const handleConsortiumTabChange = (
 			break;
 	}
 };
+
+export const handleGroupTabChange = (
+	event: React.SyntheticEvent,
+	newValue: number,
+	router: NextRouter,
+	setTabIndex: Dispatch<SetStateAction<number>>,
+	id: string,
+) => {
+	setTabIndex(newValue);
+	switch (newValue) {
+		case 0:
+			router.push(`/groups/${id}`);
+			break;
+		case 1:
+			router.push(`/groups/${id}/patronRequests`);
+			break;
+		case 2:
+			router.push(`/groups/${id}/supplierRequests`);
+			break;
+		// case 3:
+		// 	router.push(`/groups/${id}/settings`); // Not yet!
+		// 	break;
+		// case 4:
+		//  router.push(`/groups/${id}/bibRecords`);
+	}
+};
