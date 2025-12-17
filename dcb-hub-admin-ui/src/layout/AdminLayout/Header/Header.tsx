@@ -20,6 +20,7 @@ import { useQuery } from "@apollo/client";
 import { Consortium } from "@models/Consortium";
 import { isEmpty } from "lodash";
 import fallbackHeader from "public/assets/brand/fallback-header.png";
+import useDCBVersionStore from "@hooks/serviceInfoStore";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -60,6 +61,9 @@ export default function Header({
 		setHeaderImageURL,
 	} = useConsortiumInfoStore();
 	const clearGridState = useGridStore((state) => state.clearGridState);
+	const clearVersionStore = useDCBVersionStore(
+		(state) => state.clearVersionStore,
+	);
 
 	const url = "/auth/logout";
 	const { t } = useTranslation();
@@ -67,6 +71,7 @@ export default function Header({
 		if (status === "authenticated") {
 			signOut({ redirect: false });
 			clearGridState();
+			clearVersionStore();
 			// clearConsortiumStore();
 			router.push(url);
 		} else {

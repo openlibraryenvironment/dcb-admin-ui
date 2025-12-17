@@ -16,9 +16,27 @@ interface DCBVersionState extends DCBVersionInfo {
 	loading: boolean;
 	error: Error | null;
 	fetchVersionInfo: () => Promise<void>;
+	clearVersionStore: () => void;
 }
 
 const { publicRuntimeConfig } = getConfig();
+
+const isMaintenanceOrNetworkError = (error: any) => {
+	console.log("MNE");
+	console.log(error);
+	// Check for 503
+	if (error.response?.status === 503) return true;
+
+	// Check for CORS/Network Error (Axios specific codes)
+	if (
+		error.code === "ERR_NETWORK" ||
+		error.message === "Network Error" ||
+		error.code == "ERR_NAME_NOT_RESOLVED"
+	)
+		return true;
+
+	return false;
+};
 
 const useDCBVersionStore = create<DCBVersionState>()(
 	persist(
@@ -31,6 +49,17 @@ const useDCBVersionStore = create<DCBVersionState>()(
 			error: null,
 			type: null,
 			branch: null,
+			clearVersionStore: () =>
+				set(() => ({
+					version: null,
+					isDev: false,
+					isAcceptableVersion: false,
+					lastFetchedAt: null,
+					loading: false,
+					error: null,
+					type: null,
+					branch: null,
+				})),
 			fetchVersionInfo: async () => {
 				const currentTime = Date.now();
 				set({ loading: true });
@@ -46,10 +75,12 @@ const useDCBVersionStore = create<DCBVersionState>()(
 					} catch (firstErr: any) {
 						// If 503, wait briefly and retry
 						// Just in case it is a temp disruption
-						if (firstErr.response?.status === 503) {
+						if (isMaintenanceOrNetworkError(firstErr)) {
 							console.log("503 received. Retrying...");
+							await new Promise((resolve) => setTimeout(resolve, 1000));
 							response = await axios.get(fetchUrl);
 						} else {
+							console.log(firstErr);
 							throw firstErr;
 						}
 					}
@@ -93,7 +124,7 @@ const useDCBVersionStore = create<DCBVersionState>()(
 					});
 				} catch (error: any) {
 					console.error("Error fetching DCB Service version:", error);
-					if (error?.response?.status === 503) {
+					if (isMaintenanceOrNetworkError(error)) {
 						if (
 							typeof window !== "undefined" &&
 							window.location.pathname !== "/maintenance"
