@@ -1,3 +1,10 @@
+# [1.53.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.52.0...v1.53.0) (2025-12-17)
+
+
+### Features
+
+* Add "requests for this group" page [DCB-2107] ([563d58c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/563d58c52882a3b392b8fe978814d57c172dceb8))
+
 # [1.52.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.51.1...v1.52.0) (2025-12-16)
 
 
