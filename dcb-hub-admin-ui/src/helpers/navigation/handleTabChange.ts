@@ -182,9 +182,9 @@ export const handleGroupTabChange = (
 		case 2:
 			router.push(`/groups/${id}/supplierRequests`);
 			break;
-		// case 3:
-		// 	router.push(`/groups/${id}/settings`); // Not yet!
-		// 	break;
+		case 3:
+			router.push(`/groups/${id}/settings`);
+			break;
 		// case 4:
 		//  router.push(`/groups/${id}/bibRecords`);
 	}

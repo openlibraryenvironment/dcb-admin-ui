@@ -193,7 +193,8 @@
 				"number": "The field “{{field}}” only accepts numeric values.",
 				"required": "The field  “{{field}}” is required."
 			},
-			"view_items": "View items"
+			"view_items": "View items",
+			"warning": "Warning"
 		},
 		"error": {
 			"401": {
@@ -637,6 +638,9 @@
 	},
 
 	"groups": {
+		"borrow_count": "{{count}} libraries enabled for borrowing.",
+		"bulk_update_success": "{{count}} library statuses updated succesfully",
+		"bulk_update_warning": "{{count}} library statuses updated out of {{total}}",
 		"groups_one": "group",
 		"group_member": "Group member",
 		"loading_msg": "Loading groups....",
@@ -652,7 +656,14 @@
 		"no_members": "No group members were found. Try changing your search terms or filters.",
 		"none_for_library": "No groups were found for this library.",
 		"no_rows": "No groups are available. Try adding some by clicking 'New Group'.",
-		"search_placeholder": "Search by name"
+		"search_placeholder": "Search by name",
+		"settings": {
+			"disable_all_borrowing": "Disable all for borrowing",
+			"disable_all_supplying": "Disable all for supplying",
+			"enable_all_borrowing": "Enable all for borrowing",
+			"enable_all_supplying": "Enable all for supplying"
+		},
+		"supply_count": "{{count}} libraries enabled for supplying."
 	},
 
 	"hostlms": {

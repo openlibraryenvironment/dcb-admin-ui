@@ -90,7 +90,7 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 						<Tab label={t("nav.groups.profile")} />
 						<Tab label={t("nav.groups.patronRequests")} />
 						<Tab label={t("nav.groups.supplierRequests")} />
-						{/* <Tab label={t("nav.groups.settings")} /> */}
+						<Tab label={t("nav.groups.settings")} />
 					</Tabs>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>

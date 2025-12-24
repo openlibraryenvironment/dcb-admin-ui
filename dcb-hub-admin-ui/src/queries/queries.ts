@@ -1363,6 +1363,8 @@ export const getLibraryGroupById = gql`
 							authProfile
 							code
 							id
+							isBorrowingAgency
+							isSupplyingAgency
 							hostLms {
 								lmsClientClass
 								code
