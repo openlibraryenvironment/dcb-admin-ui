@@ -2,11 +2,12 @@ import {
 	GridFilterInputValueProps,
 	getGridDateOperators,
 } from "@mui/x-data-grid-premium";
-import { Stack } from "@mui/material";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateTimeRangePicker } from "@mui/x-date-pickers-pro/DateTimeRangePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers-pro/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import { MultiInputDateTimeRangeField } from "@mui/x-date-pickers-pro/MultiInputDateTimeRangeField";
+import { DateTimePicker } from "@mui/x-date-pickers-pro";
 
 // For date time ranges
 function DateRangeFilterInput(props: GridFilterInputValueProps) {
@@ -15,50 +16,35 @@ function DateRangeFilterInput(props: GridFilterInputValueProps) {
 	const [rawStart, rawEnd] = Array.isArray(item.value)
 		? item.value
 		: [null, null];
-
 	const startDate = rawStart ? dayjs(rawStart) : null;
 	const endDate = rawEnd ? dayjs(rawEnd) : null;
-	const handleStartChange = (newValue: Dayjs | null) => {
-		applyValue({ ...item, value: [newValue, endDate] });
-	};
 
-	const handleEndChange = (newValue: Dayjs | null) => {
-		applyValue({ ...item, value: [startDate, newValue] });
+	const handleChange = (newValue: [Dayjs | null, Dayjs | null]) => {
+		applyValue({ ...item, value: newValue });
 	};
 
 	// See if we can lift the provider up to app.tsx
+
 	return (
 		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			{/* <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 1 }}> */}
-			<Stack direction="row" spacing={1}>
-				<DateTimePicker
-					label="From"
-					value={startDate}
-					onChange={handleStartChange}
-					inputRef={focusElementRef}
-					slotProps={{
-						textField: {
-							size: "small",
-							variant: "standard",
-							helperText: "Local Time",
-						},
-						actionBar: { actions: ["clear", "today"] },
-					}}
-				/>
-				<DateTimePicker
-					label="To"
-					value={endDate}
-					onChange={handleEndChange}
-					slotProps={{
-						textField: {
-							size: "small",
-							variant: "standard",
-							helperText: "Local Time",
-						},
-						actionBar: { actions: ["clear", "today"] }, // Look at what else we can do with this
-					}}
-				/>
-			</Stack>
+			<DateTimeRangePicker
+				value={[startDate, endDate]}
+				onChange={handleChange}
+				inputRef={focusElementRef}
+				slots={{ field: MultiInputDateTimeRangeField }}
+				// localeText={{
+				//     start: t("ui.data_grid.filters.from"),
+				//     end: t("ui.data_grid.filters.to"),
+				// }}
+				slotProps={{
+					textField: {
+						size: "small",
+						variant: "standard",
+						// helperText: t("ui.data_grid.filters.local_time"),
+					},
+					actionBar: { actions: ["clear", "nextOrAccept"] }, // can we add custom actions. today applies to both - maybe it's better to keep it separate?
+				}}
+			/>
 		</LocalizationProvider>
 	);
 }
@@ -107,7 +93,7 @@ export const luceneDateRangeOperators = [
 		InputComponent: SingleDateFilterInput,
 	},
 	{
-		label: "On or before", // Translation keys please
+		label: "On or before",
 		value: "onOrBefore",
 		getApplyFilterFn: () => null,
 		InputComponent: SingleDateFilterInput,
@@ -127,3 +113,42 @@ export const luceneDateRangeOperators = [
 			].includes(op.value),
 	),
 ];
+
+// LEGACY IMPLEMENTATION OF DATE TIME RANGE
+// Preserved for if the new MUI X DateTimeRangePicker ever becomes unreliable or unavailable
+// return (
+// 	<LocalizationProvider dateAdapter={AdapterDayjs}>
+// 		{/* <Box sx={{ display: "flex", gap: 1, alignItems: "center", mt: 1 }}> */}
+// 		<Stack direction="row" spacing={1}>
+// 			<DateTimePicker
+// 				label="From"
+// 				value={startDate}
+// 				onChange={handleStartChange}
+// 				inputRef={focusElementRef}
+// 				slots={{ field: MultiInputDateTimeRangeField }}
+// 				slotProps={{
+// 					textField: {
+// 						size: "small",
+// 						variant: "standard",
+// 						helperText: "Local Time",
+// 					},
+// 					actionBar: { actions: ["clear", "today"] },
+// 				}}
+// 			/>
+// 			<DateTimePicker
+// 				label="To"
+// 				value={endDate}
+// 				onChange={handleEndChange}
+// 				slots={{ field: MultiInputDateTimeRangeField }}
+// 				slotProps={{
+// 					textField: {
+// 						size: "small",
+// 						variant: "standard",
+// 						helperText: "Local Time",
+// 					},
+// 					actionBar: { actions: ["clear", "today"] }, // Look at what else we can do with this
+// 				}}
+// 			/>
+// 		</Stack>
+// 	</LocalizationProvider>
+// );

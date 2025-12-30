@@ -23,6 +23,7 @@
 		"@mui/material-nextjs": "^7.1.0",
 		"@mui/x-data-grid-premium": "^7.29.3",
 		"@mui/x-date-pickers": "^8.23.0",
+		"@mui/x-date-pickers-pro": "^8.23.0",
 		"@mui/x-license": "^8.3.0",
 		"@panva/hkdf": "^1.2.1",
 		"@types/lodash": "^4.17.6",

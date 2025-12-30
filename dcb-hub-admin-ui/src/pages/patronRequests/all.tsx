@@ -28,7 +28,6 @@ import { FilterAltOutlined } from "@mui/icons-material";
 // import { Library } from "@models/Library";
 // import { GridColDef } from "@mui/x-data-grid-premium";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { getGridDateOperators } from "@mui/x-data-grid-premium";
 
 export default function All() {
 	const { t } = useTranslation();
@@ -221,8 +220,6 @@ export default function All() {
 	const allColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
-
-	console.log(getGridDateOperators());
 
 	if (status === "loading" || supplyingLibrariesLoading) {
 		return (
