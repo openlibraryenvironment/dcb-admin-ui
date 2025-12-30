@@ -12,6 +12,7 @@ import {
 	GridColDef,
 	GridColumnVisibilityModel,
 } from "@mui/x-data-grid-premium";
+import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
 
 // Handles standard columns so we don't have to re-declare them everywhere
 
@@ -58,15 +59,13 @@ export const standardRefValueMappingColumns: GridColDef[] = [
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
-		filterOperators: standardFilters,
-		valueGetter: (value: any, row: { lastImported: any }) => {
-			const lastImported = row.lastImported;
-			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-			if (formattedDate == "Invalid Date") {
-				return "";
-			} else {
-				return formattedDate;
-			}
+		filterOperators: luceneDateRangeOperators,
+		type: "dateTime",
+		valueGetter: (value: any, row: { lastImported: string }) => {
+			return row.lastImported ? new Date(row.lastImported) : null;
+		},
+		valueFormatter: (value: Date) => {
+			return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 		},
 	},
 	{
@@ -123,15 +122,13 @@ export const refValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
-		filterOperators: standardFilters,
-		valueGetter: (value: any, row: { lastImported: any }) => {
-			const lastImported = row.lastImported;
-			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-			if (formattedDate == "Invalid Date") {
-				return "";
-			} else {
-				return formattedDate;
-			}
+		filterOperators: luceneDateRangeOperators,
+		type: "dateTime",
+		valueGetter: (value: any, row: { lastImported: string }) => {
+			return row.lastImported ? new Date(row.lastImported) : null;
+		},
+		valueFormatter: (value: Date) => {
+			return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 		},
 	},
 	{
@@ -194,15 +191,13 @@ export const standardNumRangeMappingColumns: GridColDef[] = [
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
-		filterOperators: standardFilters,
-		valueGetter: (value: any, row: { lastImported: any }) => {
-			const lastImported = row.lastImported;
-			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-			if (formattedDate == "Invalid Date") {
-				return "";
-			} else {
-				return formattedDate;
-			}
+		filterOperators: luceneDateRangeOperators,
+		type: "dateTime",
+		valueGetter: (value: any, row: { lastImported: string }) => {
+			return row.lastImported ? new Date(row.lastImported) : null;
+		},
+		valueFormatter: (value: Date) => {
+			return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 		},
 	},
 ];
@@ -256,15 +251,13 @@ export const numRangeMappingColumnsNoCategoryFilter: GridColDef[] = [
 		headerName: "Last imported",
 		minWidth: 100,
 		flex: 0.5,
-		filterOperators: standardFilters,
-		valueGetter: (value: any, row: { lastImported: any }) => {
-			const lastImported = row.lastImported;
-			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-			if (formattedDate == "Invalid Date") {
-				return "";
-			} else {
-				return formattedDate;
-			}
+		filterOperators: luceneDateRangeOperators,
+		type: "dateTime",
+		valueGetter: (value: any, row: { lastImported: string }) => {
+			return row.lastImported ? new Date(row.lastImported) : null;
+		},
+		valueFormatter: (value: Date) => {
+			return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 		},
 	},
 ];
@@ -279,10 +272,13 @@ const getPatronRequestColumns = (
 			field: "dateCreated",
 			headerName: "Request created",
 			minWidth: 150,
-			filterable: false,
+			filterOperators: luceneDateRangeOperators,
+			type: "dateTime",
 			valueGetter: (value: any, row: { dateCreated: string }) => {
-				const requestCreated = row.dateCreated;
-				return dayjs(requestCreated).format("YYYY-MM-DD HH:mm");
+				return row.dateCreated ? new Date(row.dateCreated) : null;
+			},
+			valueFormatter: (value: Date) => {
+				return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 			},
 		},
 		// Patron
@@ -444,10 +440,13 @@ const getPatronRequestColumns = (
 			field: "dateUpdated",
 			headerName: "Request updated",
 			minWidth: 150,
-			filterable: false,
+			filterOperators: luceneDateRangeOperators,
+			type: "dateTime",
 			valueGetter: (value: any, row: { dateUpdated: string }) => {
-				const requestUpdated = row.dateUpdated;
-				return dayjs(requestUpdated).format("YYYY-MM-DD HH:mm");
+				return row.dateUpdated ? new Date(row.dateUpdated) : null;
+			},
+			valueFormatter: (value: Date) => {
+				return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 			},
 		},
 		{
@@ -774,4 +773,11 @@ export const defaultPatronRequestGroupVisibility: GridColumnVisibilityModel = {
 	pollCountForCurrentStatus: false,
 	elapsedTimeInCurrentStatus: false,
 	requesterNote: false,
+};
+
+export const defaultBibColumnVisibility: GridColumnVisibilityModel = {
+	clusterRecordId: false,
+	sourceSystemId: false,
+	dateUpdated: false,
+	processVersion: false,
 };

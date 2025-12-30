@@ -27,6 +27,9 @@ import {
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { Delete } from "@mui/icons-material";
+import dayjs from "dayjs";
+import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
+import { defaultBibColumnVisibility } from "src/helpers/DataGrid/columns";
 type LibraryDetails = {
 	libraryId: string;
 };
@@ -161,11 +164,31 @@ export default function LibraryBibs({ libraryId }: LibraryDetails) {
 						sortable: false,
 						filterOperators: equalsOnly,
 					},
+					{
+						field: "processVersion",
+						headerName: t("details.process_version"),
+						minWidth: 100,
+						flex: 0.5,
+						sortable: false,
+						filterOperators: equalsOnly,
+					},
+					{
+						field: "dateUpdated",
+						headerName: t("details.date_updated"),
+						minWidth: 100,
+						flex: 0.5,
+						sortable: false,
+						filterOperators: luceneDateRangeOperators,
+						type: "dateTime",
+						valueGetter: (value: any, row: { dateUpdated: string }) => {
+							return row.dateUpdated ? new Date(row.dateUpdated) : null;
+						},
+						valueFormatter: (value: Date) => {
+							return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
+						},
+					},
 				]}
-				columnVisibilityModel={{
-					clusterRecordId: false,
-					sourceSystemId: false,
-				}}
+				columnVisibilityModel={defaultBibColumnVisibility}
 				searchPlaceholder={t("bibRecords.search_placeholder")}
 				sortDirection="ASC"
 				sortAttribute="sourceRecordId"

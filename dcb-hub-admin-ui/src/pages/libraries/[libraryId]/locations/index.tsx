@@ -42,6 +42,7 @@ import { getILS } from "src/helpers/getILS";
 import Import from "@components/Import/Import";
 import useCode from "@hooks/useCode";
 import dayjs from "dayjs";
+import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
 type LibraryDetails = {
 	libraryId: string;
 };
@@ -333,16 +334,13 @@ export default function Locations({ libraryId }: LibraryDetails) {
 								headerName: "Last imported",
 								minWidth: 100,
 								flex: 0.5,
-								filterOperators: standardFilters,
-								valueGetter: (value: any, row: { lastImported: any }) => {
-									const lastImported = row.lastImported;
-									const formattedDate =
-										dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-									if (formattedDate == "Invalid Date") {
-										return "";
-									} else {
-										return formattedDate;
-									}
+								filterOperators: luceneDateRangeOperators,
+								type: "dateTime",
+								valueGetter: (value: any, row: { lastImported: string }) => {
+									return row.lastImported ? new Date(row.lastImported) : null;
+								},
+								valueFormatter: (value: Date) => {
+									return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 								},
 							},
 						]}

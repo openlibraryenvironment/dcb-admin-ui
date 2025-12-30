@@ -17,9 +17,8 @@ import {
 import Loading from "@components/Loading/Loading";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { standardFilters } from "src/helpers/DataGrid/filters";
-import dayjs from "dayjs";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { standardRefValueMappingColumns } from "src/helpers/DataGrid/columns";
 
 // Page for 'ALL' referenceValueMappings of any category.
 
@@ -91,72 +90,7 @@ const AllMappings: NextPage = () => {
 				type="referenceValueMappings"
 				coreType="referenceValueMappings"
 				operationDataType="ReferenceValueMapping"
-				columns={[
-					{
-						field: "fromCategory",
-						headerName: "Category",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "fromContext",
-						headerName: "From context",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "fromValue",
-						headerName: "From value",
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "toContext",
-						headerName: "To context",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "toValue",
-						headerName: "To value",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-						valueGetter: (value, row: { toValue: string }) => row.toValue,
-						editable: true,
-					},
-					{
-						field: "lastImported",
-						headerName: t("common.mappings.last_imported"),
-						minWidth: 100,
-						flex: 0.5,
-						filterOperators: standardFilters,
-						valueGetter: (value: any, row: { lastImported: any }) => {
-							const lastImported = row.lastImported;
-							const formattedDate =
-								dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-							if (formattedDate == "Invalid Date") {
-								return "";
-							} else {
-								return formattedDate;
-							}
-						},
-					},
-					{
-						field: "toCategory",
-						headerName: "To category",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-						editable: true,
-						valueGetter: (value: any, row: { toCategory: any }) =>
-							row?.toCategory,
-					},
-				]}
+				columns={standardRefValueMappingColumns}
 				noDataMessage={t("mappings.import_mappings", {
 					category: t("mappings.ref_value").toLowerCase(),
 				})}

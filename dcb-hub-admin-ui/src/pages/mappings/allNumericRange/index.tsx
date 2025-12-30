@@ -14,9 +14,8 @@ import { useApolloClient } from "@apollo/client/react";
 import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
 import { useSession } from "next-auth/react";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
-import dayjs from "dayjs";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { standardNumRangeMappingColumns } from "src/helpers/DataGrid/columns";
 
 // Page for 'ALL' numeric range mappings of any category.
 
@@ -70,68 +69,7 @@ const AllNumericRange: NextPage = () => {
 				type="numericRangeMappings"
 				coreType="numericRangeMappings"
 				operationDataType="NumericRangeMapping"
-				columns={[
-					{
-						field: "domain",
-						headerName: "Category",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "context",
-						headerName: "From context",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "lowerBound",
-						headerName: "Lower bound",
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "upperBound",
-						headerName: "Upper bound",
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "targetContext",
-						headerName: "To context",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "mappedValue",
-						headerName: "Mapped value",
-						minWidth: 50,
-						flex: 0.5,
-						filterOperators: standardFilters,
-						editable: true,
-					},
-					{
-						field: "lastImported",
-						headerName: t("common.mappings.last_imported"),
-						minWidth: 100,
-						flex: 0.5,
-						filterOperators: standardFilters,
-						valueGetter: (value: any, row: { lastImported: any }) => {
-							const lastImported = row.lastImported;
-							const formattedDate =
-								dayjs(lastImported).format("YYYY-MM-DD HH:mm");
-							if (formattedDate == "Invalid Date") {
-								return "";
-							} else {
-								return formattedDate;
-							}
-						},
-					},
-				]}
+				columns={standardNumRangeMappingColumns}
 				noDataMessage={t("mappings.no_results")}
 				noResultsMessage={t("mappings.no_results")}
 				selectable={false}

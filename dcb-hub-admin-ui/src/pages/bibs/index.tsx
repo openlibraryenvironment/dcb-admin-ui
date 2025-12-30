@@ -11,6 +11,8 @@ import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";
+import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
+import { defaultBibColumnVisibility } from "src/helpers/DataGrid/columns";
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();
 
@@ -111,19 +113,17 @@ const Bibs: NextPage = () => {
 						minWidth: 100,
 						flex: 0.5,
 						sortable: false,
-						filterable: false,
+						filterOperators: luceneDateRangeOperators,
+						type: "dateTime",
 						valueGetter: (value: any, row: { dateUpdated: string }) => {
-							const dateUpdated = row.dateUpdated;
-							return dayjs(dateUpdated).format("YYYY-MM-DD HH:mm");
+							return row.dateUpdated ? new Date(row.dateUpdated) : null;
+						},
+						valueFormatter: (value: Date) => {
+							return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
 						},
 					},
 				]}
-				columnVisibilityModel={{
-					clusterRecordId: false,
-					sourceSystemId: false,
-					dateUpdated: false,
-					processVersion: false,
-				}}
+				columnVisibilityModel={defaultBibColumnVisibility}
 				searchPlaceholder={t("bibRecords.search_placeholder")}
 				sortDirection="ASC"
 				sortAttribute="sourceRecordId"

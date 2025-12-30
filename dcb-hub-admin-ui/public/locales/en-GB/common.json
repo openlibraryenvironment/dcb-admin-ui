@@ -167,6 +167,7 @@
 			"error": "Error",
 			"expand": "Expand",
 			"filters": {
+				"between": "Between",
 				"days_from": "Days from",
 				"days_to": "Days to",
 				"equals": "Equals",
@@ -176,6 +177,8 @@
 				"less_than_exclusive": "Less than",
 				"less_than_inclusive": "Less than or equal to",
 				"not_equal": "Does not equal",
+				"on_or_after": "On or after",
+				"on_or_before": "On or before",
 				"to": "To"
 			},
 			"find_column": "Find column",
