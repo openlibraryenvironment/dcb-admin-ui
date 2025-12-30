@@ -490,6 +490,7 @@ export const getBibs = gql`
 				author
 				sourceSystemId
 				sourceRecordId
+				processVersion
 				contributesTo {
 					id
 				}

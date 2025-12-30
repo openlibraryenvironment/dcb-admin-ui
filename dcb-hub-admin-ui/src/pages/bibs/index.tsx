@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+import dayjs from "dayjs";
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();
 
@@ -96,10 +97,32 @@ const Bibs: NextPage = () => {
 						sortable: false,
 						filterOperators: equalsOnly,
 					},
+					{
+						field: "processVersion",
+						headerName: t("details.process_version"),
+						minWidth: 100,
+						flex: 0.5,
+						sortable: false,
+						filterOperators: equalsOnly,
+					},
+					{
+						field: "dateUpdated",
+						headerName: t("details.date_updated"),
+						minWidth: 100,
+						flex: 0.5,
+						sortable: false,
+						filterable: false,
+						valueGetter: (value: any, row: { dateUpdated: string }) => {
+							const dateUpdated = row.dateUpdated;
+							return dayjs(dateUpdated).format("YYYY-MM-DD HH:mm");
+						},
+					},
 				]}
 				columnVisibilityModel={{
 					clusterRecordId: false,
 					sourceSystemId: false,
+					dateUpdated: false,
+					processVersion: false,
 				}}
 				searchPlaceholder={t("bibRecords.search_placeholder")}
 				sortDirection="ASC"
