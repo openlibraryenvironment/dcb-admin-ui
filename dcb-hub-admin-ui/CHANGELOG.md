@@ -1,3 +1,12 @@
+# [1.54.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.53.0...v1.54.0) (2026-01-05)
+
+
+### Features
+
+* Bulk participation updates for groups [DCB-2109] ([a5f9ce0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a5f9ce03fe0346aa53febfbea754b159339a86ec))
+* Last 30/90 days filter [DCB-2110] ([46541e2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/46541e259739f4453daa5e79d090fe1442b4a524))
+* Provide date/time filtering [DCB-2110] ([aa84a35](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/aa84a358136a15621ca5666fd6f586a09f1915f6))
+
 # [1.53.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.52.0...v1.53.0) (2025-12-17)
 
 
