@@ -44,6 +44,19 @@ export const buildFilterQuery = (
 			return "";
 		}
 	}
+	if (operator === "last30Days") {
+		const end = dayjs().toISOString();
+		const start = dayjs().subtract(30, "day").toISOString();
+
+		return `${field}:[${start} TO ${end}]`;
+	}
+
+	if (operator === "last90Days") {
+		const end = dayjs().toISOString();
+		const start = dayjs().subtract(90, "day").toISOString();
+
+		return `${field}:[${start} TO ${end}]`;
+	}
 
 	// Date range handling
 	// We want to handle is ON OR after, is on or before,range,

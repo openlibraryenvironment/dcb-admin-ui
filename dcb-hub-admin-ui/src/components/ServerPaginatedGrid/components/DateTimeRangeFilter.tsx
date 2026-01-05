@@ -98,6 +98,16 @@ export const luceneDateRangeOperators = [
 		getApplyFilterFn: () => null,
 		InputComponent: SingleDateFilterInput,
 	},
+	{
+		label: "Last 30 Days",
+		value: "last30Days",
+		getApplyFilterFn: () => null,
+	},
+	{
+		label: "Last 90 Days",
+		value: "last90Days",
+		getApplyFilterFn: () => null,
+	},
 	// Need to see which operators we actually want. Might be scope to include "is" as well.
 	...getGridDateOperators().filter(
 		(op) =>
