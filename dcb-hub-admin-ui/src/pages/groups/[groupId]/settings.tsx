@@ -187,7 +187,7 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
 	if (loading || status === "loading") {
 		return (
 			<AdminLayout hideBreadcrumbs>
-				<Loading title={t("nav.groups.group")} subtitle={t("ui.info.wait")} />
+				<Loading title={t("groups.groups_one")} subtitle={t("ui.info.wait")} />
 			</AdminLayout>
 		);
 	}
@@ -331,7 +331,7 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
 				participation={
 					groupStats?.hasBorrowing ? "disableBorrowing" : "enableBorrowing"
 				}
-				entity={t("nav.groups.group")}
+				entity={t("groups.groups_one")}
 				entityName={group.name}
 				gridEdit={false}
 			/>
@@ -352,7 +352,7 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
 				participation={
 					groupStats?.hasSupplying ? "disableSupplying" : "enableSupplying" // probably needs a customisation of confirmation modal
 				}
-				entity={t("nav.groups.group")}
+				entity={t("groups.groups_one")}
 				entityName={group.name}
 				gridEdit={false}
 			/>

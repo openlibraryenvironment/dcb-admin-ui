@@ -627,6 +627,22 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 						<RenderAttribute attribute={library?.id} />
 					</Stack>
 				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("libraries.secret_label")}
+						</Typography>
+						<RenderAttribute attribute={library?.secretLabel} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("libraries.principal_label")}
+						</Typography>
+						<RenderAttribute attribute={library?.principalLabel} />
+					</Stack>
+				</Grid>
 				{/* /* 'Primary location' title goes here/* */}
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h3" fontWeight={"bold"}>

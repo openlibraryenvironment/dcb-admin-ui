@@ -22,4 +22,6 @@ export interface Library {
 	backupDowntimeSchedule: string;
 	training: boolean;
 	contacts: Person[];
+	secretLabel: string;
+	principalLabel: string;
 }

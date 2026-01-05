@@ -1054,6 +1054,8 @@ export const getLibraryById = gql`
 				type
 				backupDowntimeSchedule
 				hostLmsConfiguration
+				secretLabel
+				principalLabel
 				agency {
 					id
 					code

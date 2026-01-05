@@ -809,6 +809,7 @@
 		"no_contact": "No primary contact set",
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
 		"none_available": "No libraries available.",
+		"principal_label": "Principal label",
 		"request_tooltip": "This is a {{ils}} library. The primary contact(s) are {{contact}}",
 		"ruleset_loading": "Loading ruleset information",
 		"search_placeholder": "Search by name",
@@ -821,6 +822,7 @@
 			"profile": "Profile",
 			"service": "Location and Service Information"
 		},
+		"secret_label": "Secret label",
 		"support_hours": "Support office hours",
 		"suppression_ruleset_bib": "Bib suppression ruleset for the {{lms}} library management system",
 		"suppression_ruleset_item": "Item suppression ruleset for {{lms}} library management system",
