@@ -51,6 +51,8 @@ const Agencies: NextPage = () => {
 					operationDataType="Agency"
 					columnVisibilityModel={{
 						id: false,
+						latitude: false,
+						longitude: false,
 					}}
 					columns={[
 						...customColumns,
@@ -72,6 +74,21 @@ const Agencies: NextPage = () => {
 							field: "id",
 							headerName: "Agency UUID",
 							minWidth: 100,
+							flex: 0.5,
+							filterOperators: equalsOnly,
+							filterable: false,
+						},
+						{
+							field: "longitude",
+							headerName: "Longitude",
+							minWidth: 50,
+							flex: 0.5,
+							filterOperators: equalsOnly,
+						},
+						{
+							field: "latitude",
+							headerName: "Latitude",
+							minWidth: 50,
 							flex: 0.5,
 							filterOperators: equalsOnly,
 							filterable: false,

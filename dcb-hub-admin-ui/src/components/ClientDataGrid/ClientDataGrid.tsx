@@ -433,7 +433,12 @@ export default function ClientDataGrid<T extends object>({
 			} else {
 				router.push(`/groups/${params?.row?.id}`);
 			}
-		} else if (type == "patronRequestsForLocation") {
+		} else if (
+			type == "patronRequestsForLocation" ||
+			type == "successCleanupRequests" ||
+			type == "skippedCleanupRequests" ||
+			type == "errorCleanupRequests"
+		) {
 			if (event.ctrlKey || event.metaKey) {
 				window.open(`/patronRequests/${params?.row?.id}`, "_blank");
 			} else {
