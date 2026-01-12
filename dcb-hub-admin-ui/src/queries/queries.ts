@@ -1449,6 +1449,7 @@ export const getPatronRequests = gql`
 				localItemId
 				localItemStatus
 				localItemType
+				resolutionCount
 				patron {
 					id
 				}

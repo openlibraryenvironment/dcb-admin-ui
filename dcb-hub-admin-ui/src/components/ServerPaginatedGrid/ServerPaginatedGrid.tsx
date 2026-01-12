@@ -11,6 +11,7 @@ import {
 	GridRowModes,
 	GridRowModesModel,
 	GridRowParams,
+	GridRowSelectionModel,
 	GridSortModel,
 	gridVisibleColumnFieldsSelector,
 	// useGridApiContext, // v8 only
@@ -72,6 +73,10 @@ import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { PatronRequest } from "@models/PatronRequest";
 import { Location } from "@models/Location";
 import { ExportProgressDialog } from "./components/ExportProgressDialog";
+import getConfig from "next/config";
+import axios from "axios";
+import { CleanupProgressDialog } from "./components/CleanupProgressDialog";
+import { cleanupStatuses } from "src/helpers/statuses";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
 const staticSlots = {
@@ -191,6 +196,29 @@ export default function ServerPaginationGrid({
 	};
 
 	const { data: session }: { data: any } = useSession();
+
+	const { publicRuntimeConfig } = getConfig();
+
+	const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>(
+		[],
+	);
+	const [cleanupState, setCleanupState] = useState<{
+		open: boolean;
+		isCleaning: boolean;
+		total: number;
+		processed: number;
+		successRows: any[];
+		errorRows: any[];
+		skippedRows: any[];
+	}>({
+		open: false,
+		isCleaning: false,
+		total: 0,
+		processed: 0,
+		successRows: [],
+		errorRows: [],
+		skippedRows: [],
+	});
 
 	// Mutations
 	const [updateRow] = useMutation(editQuery ?? updateLibraryQuery, {
@@ -358,6 +386,101 @@ export default function ServerPaginationGrid({
 		}
 
 		return { [coreType]: { ...data?.[coreType], content: allContent } };
+	};
+
+	const handleCleanup = async () => {
+		// 1. Get Selected Row Objects from Map
+		const selectedRowsMap = apiRef.current.getSelectedRows();
+		const allSelectedRows = Array.from(selectedRowsMap.values()); // Get full objects
+
+		if (allSelectedRows.length === 0) return;
+
+		// 2. Filter rows based on status
+		const eligibleRows: any[] = [];
+		const skippedRows: any[] = [];
+
+		allSelectedRows.forEach((row) => {
+			if (cleanupStatuses.includes(row.status)) {
+				eligibleRows.push(row);
+			} else {
+				skippedRows.push(row);
+			}
+		});
+
+		// 3. Initialize State
+		setCleanupState({
+			open: true,
+			isCleaning: eligibleRows.length > 0,
+			total: eligibleRows.length,
+			processed: 0,
+			successRows: [],
+			errorRows: [],
+			skippedRows: skippedRows, // Pass the skipped row objects
+		});
+
+		if (eligibleRows.length === 0) return;
+
+		let processed = 0;
+		const batchSize = 5;
+
+		for (let i = 0; i < eligibleRows.length; i += batchSize) {
+			const batch = eligibleRows.slice(i, i + batchSize);
+			const batchSuccess: any[] = [];
+			const batchError: any[] = [];
+
+			await Promise.all(
+				batch.map(async (row) => {
+					try {
+						const cleanupUrl =
+							publicRuntimeConfig.DCB_API_BASE +
+							"/patrons/requests/" +
+							row.id +
+							"/transition/cleanup";
+
+						await axios.post<any>(
+							cleanupUrl,
+							{},
+							{
+								headers: {
+									Authorization: `Bearer ${session?.accessToken}`,
+								},
+							},
+						);
+						batchSuccess.push(row);
+					} catch (error) {
+						console.error(`Failed to clean up request ${row.id}`, error);
+						batchError.push(row);
+					} finally {
+						processed++;
+					}
+				}),
+			);
+
+			// Update state with new rows appended
+			setCleanupState((prev) => ({
+				...prev,
+				processed,
+				successRows: [...prev.successRows, ...batchSuccess],
+				errorRows: [...prev.errorRows, ...batchError],
+			}));
+		}
+
+		setCleanupState((prev) => ({
+			...prev,
+			isCleaning: false,
+		}));
+
+		refetch();
+
+		// Clear grid selection
+		if (apiRef.current) {
+			apiRef.current.setRowSelectionModel([]);
+			setSelectionModel([]);
+		}
+	};
+
+	const handleCloseCleanup = () => {
+		setCleanupState((prev) => ({ ...prev, open: false }));
 	};
 
 	const handleExport = async (fileType: string, exportMode: string) => {
@@ -592,7 +715,7 @@ export default function ServerPaginationGrid({
 	const direction =
 		sortOptions.direction !== "" ? sortOptions.direction : sortDirection;
 
-	const { loading, data } = useQuery(query, {
+	const { loading, data, refetch } = useQuery(query, {
 		variables: {
 			// Fixes 'ghost page' issue.
 			pageno: paginationModel.page,
@@ -1079,6 +1202,8 @@ export default function ServerPaginationGrid({
 						excelOptions: { disableToolbarButton: true },
 						allDataLoading,
 						type: coreType,
+						onCleanup: handleCleanup,
+						selectionCount: selectionModel.length,
 					},
 				}}
 				disableAggregation={true}
@@ -1139,6 +1264,21 @@ export default function ServerPaginationGrid({
 				open={exportProgress.isExporting}
 				progress={exportProgress.progress}
 				totalRecords={exportProgress.totalRecords}
+			/>
+			<CleanupProgressDialog
+				open={cleanupState.open}
+				isCleaning={cleanupState.isCleaning}
+				progress={
+					cleanupState.total > 0
+						? (cleanupState.processed / cleanupState.total) * 100
+						: 0
+				}
+				total={cleanupState.total}
+				processed={cleanupState.processed}
+				successRows={cleanupState.successRows}
+				errorRows={cleanupState.errorRows}
+				skippedRows={cleanupState.skippedRows}
+				onClose={handleCloseCleanup}
 			/>
 		</div>
 	);

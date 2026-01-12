@@ -491,6 +491,14 @@ const getPatronRequestColumns = (
 			filterable: true,
 			sortable: true,
 		},
+		{
+			field: "resolutionCount",
+			headerName: "Resolution count",
+			flex: 0.5,
+			filterOperators: equalsOnly,
+			filterable: true,
+			sortable: true,
+		},
 		// Item values
 		{
 			field: "itemBarcode",
@@ -600,6 +608,7 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		rawLocalRequestStatus: false,
 		localRequestId: false,
 		renewalCount: false,
+		resolutionCount: false,
 	};
 
 export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibilityModel =
@@ -628,6 +637,7 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		rawLocalRequestStatus: false,
 		localRequestId: false,
 		renewalCount: false,
+		resolutionCount: false,
 	};
 
 export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
@@ -656,6 +666,7 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	rawLocalRequestStatus: false,
 	localRequestId: false,
 	renewalCount: false,
+	resolutionCount: false,
 };
 
 export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
@@ -678,6 +689,7 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		rawLocalRequestStatus: false,
 		localRequestId: false,
 		renewalCount: false,
+		resolutionCount: false,
 	};
 
 export const exceptionPatronRequestColumnVisibility = {
@@ -705,6 +717,7 @@ export const exceptionPatronRequestColumnVisibility = {
 	rawLocalRequestStatus: false,
 	localRequestId: false,
 	renewalCount: false,
+	resolutionCount: false,
 };
 
 export const locationPatronRequestColumnVisibility = {
@@ -738,6 +751,43 @@ export const locationPatronRequestColumnVisibility = {
 	rawLocalRequestStatus: false,
 	localRequestId: false,
 	renewalCount: false,
+	resolutionCount: false,
+};
+
+export const cleanupPatronRequestVisibility = {
+	canonicalItemType: false,
+	canonicalPtype: false,
+	pickupLocationCode: false,
+	status: false,
+	previousStatus: false,
+	nextExpectedStatus: false,
+	errorMessage: false,
+	elapsedTimeInCurrentStatus: false,
+	pollCountForCurrentStatus: false,
+	dateUpdated: false,
+	patronHostlmsCode: false,
+	suppliers: false,
+	id: false,
+	outOfSequenceFlag: false,
+	isManuallySelectedItem: false,
+	description: false,
+	requesterNote: false,
+	pickupRequestId: false,
+	pickupRequestStatus: false,
+	isExpeditedCheckout: false,
+	itemBarcode: false,
+	localItemStatus: false,
+	rawLocalItemStatus: false,
+	localItemId: false,
+	localItemType: false,
+	localRequestStatus: false,
+	rawLocalRequestStatus: false,
+	localRequestId: false,
+	renewalCount: false,
+	resolutionCount: false,
+	activeWorkflow: false,
+	supplyingAgencyCode: false,
+	dateCreated: false, // Maybe give them this. But that's it
 };
 
 export const defaultPatronRequestGroupVisibility: GridColumnVisibilityModel = {
@@ -773,6 +823,7 @@ export const defaultPatronRequestGroupVisibility: GridColumnVisibilityModel = {
 	pollCountForCurrentStatus: false,
 	elapsedTimeInCurrentStatus: false,
 	requesterNote: false,
+	resolutionCount: false,
 };
 
 export const defaultBibColumnVisibility: GridColumnVisibilityModel = {
