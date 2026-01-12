@@ -127,6 +127,7 @@
 			"actions": "Actions",
 			"cancel": "Cancel",
 			"checkbox_selection": "Checkbox selection",
+			"close": "Close",
 			"collapse": "Collapse",
 			"confirm_changes": "Confirm changes",
 			"complete": "{{percentage}} complete",
@@ -165,6 +166,7 @@
 			"export_modal_title": "Exporting data",
 			"exporting_records": "Exporting {{count}} records from the data grid.",
 			"error": "Error",
+			"error_count": "Error: ",
 			"expand": "Expand",
 			"filters": {
 				"between": "Between",
@@ -187,7 +189,9 @@
 			"print_current_page": "Print current page",
 			"open": "Open",
 			"save": "Save",
+			"skipped_count": "Not eligible: ",
 			"success": "Success",
+			"success_count": "Successful: ",
 			"title": "Title",
 			"updated": "Updated",
 			"validation": {
@@ -973,8 +977,10 @@
 
 	"patron_requests": {
 		"cleanup": "Force clean up",
+		"cleanup_complete": "Cleanup complete",
 		"cleanup_disabled": "Clean up is only available for requests in a non-terminal or ERROR state.",
 		"cleanup_info": "Bypass circulation; clean up and finalise request",
+		"cleanup_in_progress": "Cleanup in progress",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
 		"excluded_from_tracking": "Excluded from tracking?",
