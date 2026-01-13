@@ -315,6 +315,22 @@ export default function Locations({ libraryId }: LibraryDetails) {
 								},
 							},
 							{
+								field: "isEnabledForPickupAnywhere",
+								headerName: t("locations.new.pickup_anywhere_status"),
+								minWidth: 50,
+								flex: 0.4,
+								filterOperators: equalsOnly,
+								valueFormatter: (value: boolean) => {
+									if (value == true) {
+										return t("consortium.settings.enabled");
+									} else if (value == false) {
+										return t("consortium.settings.disabled");
+									} else {
+										return t("details.location_pickup_not_set");
+									}
+								},
+							},
+							{
 								field: "localId",
 								headerName: t("details.local_id"),
 								minWidth: 50,
@@ -354,6 +370,7 @@ export default function Locations({ libraryId }: LibraryDetails) {
 							lastImported: false,
 							agencyCode: false,
 							localId: false,
+							isEnabledForPickupAnywhere: false,
 						}}
 						sortModel={[{ field: "lastImported", sort: "desc" }]}
 						sortDirection="DESC"

@@ -103,6 +103,22 @@ const Locations: NextPage = () => {
 						},
 					},
 					{
+						field: "isEnabledForPickupAnywhere",
+						headerName: t("locations.new.pickup_anywhere_status"),
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators: equalsOnly,
+						valueFormatter: (value: boolean) => {
+							if (value == true) {
+								return t("consortium.settings.enabled");
+							} else if (value == false) {
+								return t("consortium.settings.disabled");
+							} else {
+								return t("details.location_pickup_not_set");
+							}
+						},
+					},
+					{
 						field: "localId",
 						headerName: t("details.local_id"),
 						minWidth: 50,
@@ -141,6 +157,7 @@ const Locations: NextPage = () => {
 					id: false,
 					lastImported: false,
 					localId: false,
+					isEnabledForPickupAnywhere: false,
 				}}
 				// This is how to set the default sort order
 				sortModel={[{ field: "lastImported", sort: "desc" }]}
