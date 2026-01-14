@@ -86,6 +86,14 @@ const getFieldMapping = (field: string): FieldPath => {
 				return firstSupplier?.localItemBarcode;
 			},
 		},
+		localItemType: {
+			field: "localItemType",
+			path: ["suppliers"],
+			arrayHandler: (suppliers) => {
+				const firstSupplier = arrayHandlers.firstItem(suppliers);
+				return firstSupplier?.localItemType;
+			},
+		},
 	};
 
 	return fieldMappings[field] || field;

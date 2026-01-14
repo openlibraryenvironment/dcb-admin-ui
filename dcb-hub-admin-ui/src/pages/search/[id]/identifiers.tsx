@@ -11,6 +11,9 @@ import Error from "@components/Error/Error";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Alert from "@components/Alert/Alert";
 import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { Tab, Tabs } from "@mui/material";
 
 interface Identifier {
 	namespace: string;
@@ -42,6 +45,7 @@ const Identifiers: NextPage = () => {
 	const { id } = router.query;
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
 		useState(false);
+	const [tabIndex, setTabIndex] = useState(2);
 
 	const { loading, error, data } = useQuery(getClusters, {
 		variables: { query: `id: ${id}` },
@@ -138,29 +142,57 @@ const Identifiers: NextPage = () => {
 		</AdminLayout>
 	) : (
 		<AdminLayout title="Identifiers">
-			{sourceRecordErrorAlertDisplayed ? (
-				<Alert
-					severityType="info"
-					onCloseFunc={() => setSourceRecordErrorAlertDisplayed(false)}
-					alertText={
-						<Typography variant="attributeText">
-							{t("search.cluster_bib_multiple_records")}
-						</Typography>
-					}
-				/>
-			) : null}
-			<ClientDataGrid
-				data={rows}
-				autoRowHeight={true}
-				columns={columns}
-				loading={loading}
-				type="Identifiers"
-				coreType="ClusterRecord"
-				operationDataType="identifiers"
-				selectable={false}
-				disableAggregation={true}
-				disableRowGrouping={true}
-			/>
+			<Grid
+				container
+				spacing={{ xs: 2, md: 3 }}
+				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+			>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Tabs
+						value={tabIndex}
+						onChange={(event, value) => {
+							handleRecordTabChange(
+								event,
+								value,
+								router,
+								setTabIndex,
+								id as string,
+							);
+						}}
+						aria-label="Group navigation"
+					>
+						<Tab label={t("nav.search.cluster")} />
+						<Tab label={t("nav.search.items")} />
+						<Tab label={t("nav.search.identifiers")} />
+						<Tab label={t("nav.search.requesting_history")} />
+					</Tabs>
+				</Grid>
+				{sourceRecordErrorAlertDisplayed ? (
+					<Alert
+						severityType="info"
+						onCloseFunc={() => setSourceRecordErrorAlertDisplayed(false)}
+						alertText={
+							<Typography variant="attributeText">
+								{t("search.cluster_bib_multiple_records")}
+							</Typography>
+						}
+					/>
+				) : null}
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<ClientDataGrid
+						data={rows}
+						autoRowHeight={true}
+						columns={columns}
+						loading={loading}
+						type="Identifiers"
+						coreType="ClusterRecord"
+						operationDataType="identifiers"
+						selectable={false}
+						disableAggregation={true}
+						disableRowGrouping={true}
+					/>
+				</Grid>
+			</Grid>
 		</AdminLayout>
 	);
 };

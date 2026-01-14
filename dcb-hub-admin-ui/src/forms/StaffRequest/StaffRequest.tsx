@@ -165,6 +165,7 @@ export default function StaffRequest({
 			errorPolicy: "all",
 		},
 	);
+	console.log(libraries);
 	const libraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
@@ -183,9 +184,12 @@ export default function StaffRequest({
 			}),
 		) || [];
 
+	console.log(libraryOptions);
+
 	const selectedLibrary = libraryOptions.find(
 		(option) => option.value === agencyCode,
 	);
+	console.log(selectedLibrary);
 	const isPickupAnywhere = !!selectedLibrary?.functionalSettings?.some(
 		(setting) => setting.name === "PICKUP_ANYWHERE" && setting.enabled === true,
 		// If the setting PICKUP_ANYWHERE is present and enabled, show all locations.
@@ -193,7 +197,7 @@ export default function StaffRequest({
 	);
 
 	const locationQuery = isPickupAnywhere
-		? ""
+		? "isEnabledForPickupAnywhere:true"
 		: "agency:" + selectedLibrary?.agencyId;
 
 	const [

@@ -21,15 +21,21 @@ import {
 	Accordion,
 	AccordionDetails,
 	AccordionSummary,
+	Grid,
 	List,
 	ListItem,
 	ListItemIcon,
 	ListItemText,
 	Stack,
+	Tab,
+	Tabs,
 	Typography,
 } from "@mui/material";
 import { ExpandMore, InfoOutline } from "@mui/icons-material";
 import { Item } from "@models/Item";
+import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { getClustersTitleOnly } from "src/queries/queries";
+import { useQuery } from "@apollo/client";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
 	const { data: session } = useSession();
@@ -38,12 +44,21 @@ const Items: NextPage = () => {
 	const { id } = router.query;
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
 	const [comparisonResults, setComparisonResults] = useState<any>({});
+	const [tabIndex, setTabIndex] = useState(1);
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
 	const [isItemsAccordionExpanded, setIsItemsAccordionExpanded] =
 		useState(false);
-
+	const {
+		loading: clusterLoading,
+		error: clusterError,
+		data: clusterData,
+	} = useQuery(getClustersTitleOnly, {
+		variables: { query: `id: ${id}` },
+		skip: !id,
+		errorPolicy: "all",
+	});
 	useEffect(() => {
 		const fetchRecords = async () => {
 			if (!id || !session?.accessToken) return;
@@ -185,7 +200,14 @@ const Items: NextPage = () => {
 	const rows = availabilityResults?.itemList || [];
 
 	return (
-		<AdminLayout title={t("search.items_title", { cluster: id })}>
+		<AdminLayout
+			title={t("search.items_title", {
+				cluster:
+					clusterError || clusterLoading
+						? id
+						: clusterData?.instanceClusters?.content?.[0]?.title,
+			})}
+		>
 			{error ? (
 				<Error
 					title={t("search.items_error_title")}
@@ -195,83 +217,110 @@ const Items: NextPage = () => {
 					reload
 				/>
 			) : (
-				<>
-					<Stack direction="row"></Stack>
-					<ClientDataGrid
-						data={rows ?? []}
-						columns={columns}
-						getDetailPanelContent={({ row }: any) => (
-							<MasterDetail type="items" row={row} />
-						)}
-						loading={loading}
-						disableAggregation={true}
-						disableRowGrouping={true}
-						type="Items"
-						coreType="Items"
-						operationDataType="Items"
-						selectable={false}
-					/>
-					{itemsNotShown?.length > 0 && !loading && (
-						<Accordion
-							expanded={isItemsAccordionExpanded}
-							onChange={() =>
-								setIsItemsAccordionExpanded(!isItemsAccordionExpanded)
-							}
-							sx={{ mt: 2 }}
+				<Grid
+					container
+					spacing={{ xs: 2, md: 3 }}
+					columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+				>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<Tabs
+							value={tabIndex}
+							onChange={(event, value) => {
+								handleRecordTabChange(
+									event,
+									value,
+									router,
+									setTabIndex,
+									id as string,
+								);
+							}}
+							aria-label="Group navigation"
 						>
-							<AccordionSummary
-								expandIcon={<ExpandMore />}
-								aria-controls="items-not-shown-content"
-								id="not-shown-header"
+							<Tab label={t("nav.search.cluster")} />
+							<Tab label={t("nav.search.items")} />
+							<Tab label={t("nav.search.identifiers")} />
+							<Tab label={t("nav.search.requesting_history")} />
+						</Tabs>
+					</Grid>
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<ClientDataGrid
+							data={rows ?? []}
+							columns={columns}
+							getDetailPanelContent={({ row }: any) => (
+								<MasterDetail type="items" row={row} />
+							)}
+							loading={loading}
+							disableAggregation={true}
+							disableRowGrouping={true}
+							type="Items"
+							coreType="Items"
+							operationDataType="Items"
+							selectable={false}
+						/>
+					</Grid>
+					{itemsNotShown?.length > 0 && !loading && (
+						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+							<Accordion
+								expanded={isItemsAccordionExpanded}
+								onChange={() =>
+									setIsItemsAccordionExpanded(!isItemsAccordionExpanded)
+								}
+								sx={{ mt: 2 }}
 							>
-								<Typography variant="h6">
-									{t("search.items_not_shown", {
-										number: itemsNotShown.length,
-									})}
-								</Typography>
-							</AccordionSummary>
-							<AccordionDetails>
-								<Stack spacing={1} direction="column">
-									<Typography>
-										{t("search.items_not_shown_resolution")}
+								<AccordionSummary
+									expandIcon={<ExpandMore />}
+									aria-controls="items-not-shown-content"
+									id="not-shown-header"
+								>
+									<Typography variant="h6">
+										{t("search.items_not_shown", {
+											number: itemsNotShown.length,
+										})}
 									</Typography>
-									<List dense>
-										<ListItem>
-											<ListItemIcon>
-												<InfoOutline />
-											</ListItemIcon>
-											<ListItemText
-												primary={t("search.items_not_shown_helper_item")}
-											/>
-										</ListItem>
-										<ListItem>
-											<ListItemIcon>
-												<InfoOutline />
-											</ListItemIcon>
-											<ListItemText
-												primary={t("search.items_not_shown_helper_location")}
-											/>
-										</ListItem>
-									</List>
-									<ClientDataGrid
-										data={itemsNotShown ?? []}
-										columns={columns}
-										getDetailPanelContent={({ row }: any) => (
-											<MasterDetail type="items" row={row} />
-										)}
-										loading={loading}
-										disableAggregation={true}
-										disableRowGrouping={true}
-										type="ItemsNotShown"
-										coreType="Items"
-										operationDataType="Items"
-										selectable={false}
-									/>
-								</Stack>
-							</AccordionDetails>
-						</Accordion>
+								</AccordionSummary>
+								<AccordionDetails>
+									<Stack spacing={1} direction="column">
+										<Typography>
+											{t("search.items_not_shown_resolution")}
+										</Typography>
+										<List dense>
+											<ListItem>
+												<ListItemIcon>
+													<InfoOutline />
+												</ListItemIcon>
+												<ListItemText
+													primary={t("search.items_not_shown_helper_item")}
+												/>
+											</ListItem>
+											<ListItem>
+												<ListItemIcon>
+													<InfoOutline />
+												</ListItemIcon>
+												<ListItemText
+													primary={t("search.items_not_shown_helper_location")}
+												/>
+											</ListItem>
+										</List>
+										<ClientDataGrid
+											data={itemsNotShown ?? []}
+											columns={columns}
+											getDetailPanelContent={({ row }: any) => (
+												<MasterDetail type="items" row={row} />
+											)}
+											loading={loading}
+											disableAggregation={true}
+											disableRowGrouping={true}
+											type="ItemsNotShown"
+											coreType="Items"
+											operationDataType="Items"
+											selectable={false}
+										/>
+									</Stack>
+								</AccordionDetails>
+							</Accordion>
+						</Grid>
 					)}
-				</>
+				</Grid>
 			)}
 		</AdminLayout>
 	);

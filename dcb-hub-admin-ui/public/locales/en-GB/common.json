@@ -87,7 +87,8 @@
 			"name": "Shared index",
 			"cluster": "Cluster",
 			"identifiers": "Identifiers",
-			"items": "Items"
+			"items": "Items",
+			"requesting_history": "Requesting history"
 		},
 		"serviceInfo": {
 			"alarms": {
@@ -1179,6 +1180,7 @@
 		"publication_year": "Year of publication",
 		"publisher": "Publisher",
 		"requestable": "Requestable",
+		"requesting_history_for": "Requesting history for {{title}}",
 		"source_type": "Source type",
 		"subject": "Subject",
 		"suppression": {

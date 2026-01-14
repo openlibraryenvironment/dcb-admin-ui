@@ -1463,6 +1463,7 @@ export const getPatronRequests = gql`
 					localAgency
 					canonicalItemType
 					localItemBarcode
+					localItemType
 				}
 				clusterRecord {
 					id
@@ -1532,6 +1533,7 @@ export const getPatronRequestsForExport = gql`
 					localAgency
 					canonicalItemType
 					localItemBarcode
+					localItemType
 				}
 				clusterRecord {
 					title
@@ -2234,6 +2236,21 @@ export const getClusters = gql`
 						value
 					}
 				}
+			}
+		}
+	}
+`;
+
+export const getClustersTitleOnly = gql`
+	query ClusterRecords($query: String!) {
+		instanceClusters(query: $query) {
+			content {
+				id
+				title
+				selectedBib
+				isDeleted
+				dateCreated
+				dateUpdated
 			}
 		}
 	}

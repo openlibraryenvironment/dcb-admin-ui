@@ -152,6 +152,8 @@ export default function Breadcrumbs({ titleAttribute }: BreadcrumbsType) {
 								return "nav.search.items";
 							} else if (pathArray[2] === "identifiers") {
 								return "nav.search.identifiers";
+							} else if (pathArray[2] === "requestingHistory") {
+								return "nav.search.requesting_history";
 							}
 							break;
 						case "libraries":

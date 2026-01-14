@@ -189,3 +189,27 @@ export const handleGroupTabChange = (
 		//  router.push(`/groups/${id}/bibRecords`);
 	}
 };
+
+export const handleRecordTabChange = (
+	event: React.SyntheticEvent,
+	newValue: number,
+	router: NextRouter,
+	setTabIndex: Dispatch<SetStateAction<number>>,
+	id: string,
+) => {
+	setTabIndex(newValue);
+	switch (newValue) {
+		case 0:
+			router.push(`/search/${id}/cluster`);
+			break;
+		case 1:
+			router.push(`/search/${id}/items`);
+			break;
+		case 2:
+			router.push(`/search/${id}/identifiers`);
+			break;
+		case 3:
+			router.push(`/search/${id}/requestingHistory`);
+			break;
+	}
+};

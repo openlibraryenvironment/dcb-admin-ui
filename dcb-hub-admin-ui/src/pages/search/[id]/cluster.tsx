@@ -9,6 +9,8 @@ import {
 	Grid,
 	Link,
 	Stack,
+	Tab,
+	Tabs,
 	Tooltip,
 	Typography,
 	useTheme,
@@ -30,7 +32,10 @@ import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Alert from "@components/Alert/Alert";
+import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
 
+// Separate into tabs: Cluster Record, Items, Identifiers and Requesting History
+// Following the example set in DCB Admin for Libraries
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -71,6 +76,7 @@ const Clusters: NextPage = () => {
 	const isAnAdmin = session?.profile?.roles?.some(
 		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
 	);
+	const [tabIndex, setTabIndex] = useState(0);
 
 	const matchpoints = theCluster ? extractMatchpoints(theCluster) : [];
 	const pageActions = [
@@ -196,7 +202,31 @@ const Clusters: NextPage = () => {
 					/>
 				) : null}
 			</div>
-			<Grid container spacing={2} role="row">
+			<Grid
+				container
+				spacing={{ xs: 2, md: 3 }}
+				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+			>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Tabs
+						value={tabIndex}
+						onChange={(event, value) => {
+							handleRecordTabChange(
+								event,
+								value,
+								router,
+								setTabIndex,
+								id as string,
+							);
+						}}
+						aria-label="Group navigation"
+					>
+						<Tab label={t("nav.search.cluster")} />
+						<Tab label={t("nav.search.items")} />
+						<Tab label={t("nav.search.identifiers")} />
+						<Tab label={t("nav.search.requesting_history")} />
+					</Tabs>
+				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
 					<Stack direction="column">
 						<Typography variant="attributeTitle">

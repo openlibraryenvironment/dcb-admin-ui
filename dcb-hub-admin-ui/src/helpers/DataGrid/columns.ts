@@ -537,6 +537,13 @@ const getPatronRequestColumns = (
 			filterOperators: equalsOnly,
 			filterable: true,
 			sortable: true,
+			valueGetter: (value: any, row: PatronRequest) => {
+				if (row.suppliers.length > 0 && !row?.localItemType) {
+					return row.suppliers[0].localItemType;
+				} else {
+					return "";
+				}
+			},
 		},
 		{
 			field: "localItemId",
