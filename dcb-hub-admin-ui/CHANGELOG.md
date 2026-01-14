@@ -1,3 +1,11 @@
+# [1.55.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.54.0...v1.55.0) (2026-01-14)
+
+
+### Features
+
+* Bulk cleanup [DCB-2068] ([00670d0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/00670d06ab920ef4ea6dc977f1ffb277c9a1e021))
+* Requesting history page for cluster records [DCB-2063] ([54f848c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/54f848c6c4f1e42019f2df70f8c05ebd86a6965e))
+
 # [1.54.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.53.0...v1.54.0) (2026-01-05)
 
 
