@@ -115,7 +115,6 @@ export default function GroupPatronRequests({ groupId }: GroupDetails) {
 			.filter((code: string) => code != null && code !== "");
 
 		const uniqueCodes = Array.from(new Set(codes));
-		console.log(uniqueCodes);
 		if (uniqueCodes.length === 0) return "";
 		return uniqueCodes.map((c) => `patronHostlmsCode:${c}`).join(" OR ");
 	}, [group]);

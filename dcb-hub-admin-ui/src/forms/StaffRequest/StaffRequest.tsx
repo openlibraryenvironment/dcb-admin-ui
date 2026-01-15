@@ -165,7 +165,6 @@ export default function StaffRequest({
 			errorPolicy: "all",
 		},
 	);
-	console.log(libraries);
 	const libraryOptions: PatronRequestAutocompleteOption[] =
 		libraries?.libraries?.content?.map(
 			(item: {
