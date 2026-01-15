@@ -1,3 +1,10 @@
+## [1.55.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.55.0...v1.55.1) (2026-01-15)
+
+
+### Bug Fixes
+
+* Logging fixes ([1ed3771](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1ed3771a93e2c965b9af22199a5c381c98d44ee9))
+
 # [1.55.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.54.0...v1.55.0) (2026-01-14)
 
 
