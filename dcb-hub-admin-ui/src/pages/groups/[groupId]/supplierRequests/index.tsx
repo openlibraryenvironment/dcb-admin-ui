@@ -196,7 +196,7 @@ export default function GroupSupplierRequests({ groupId }: GroupDetails) {
 							type="supplierRequestsGroupAll"
 							coreType="patronRequests"
 							columns={allColumns}
-							selectable={false}
+							selectable={true}
 							pageSize={20}
 							noDataMessage={t("patron_requests.no_rows")}
 							noResultsMessage={t("patron_requests.no_results")}
