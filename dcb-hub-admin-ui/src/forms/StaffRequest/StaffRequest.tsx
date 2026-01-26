@@ -191,12 +191,14 @@ export default function StaffRequest({
 	console.log(selectedLibrary);
 	const isPickupAnywhere = !!selectedLibrary?.functionalSettings?.some(
 		(setting) => setting.name === "PICKUP_ANYWHERE" && setting.enabled === true,
-		// If the setting PICKUP_ANYWHERE is present and enabled, show all locations.
-		// Otherwise limit to patron agency locations
+		// If the setting PICKUP_ANYWHERE is present and enabled, show all locations that are eligible and the patron agency location
+		// 	// Otherwise limit to patron agency locations
 	);
 
 	const locationQuery = isPickupAnywhere
-		? "isEnabledForPickupAnywhere:true"
+		? "agency:" +
+			selectedLibrary?.agencyId +
+			" OR isEnabledForPickupAnywhere:true"
 		: "agency:" + selectedLibrary?.agencyId;
 
 	const [
