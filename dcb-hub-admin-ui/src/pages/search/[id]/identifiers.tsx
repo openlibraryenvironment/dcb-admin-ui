@@ -45,7 +45,7 @@ const Identifiers: NextPage = () => {
 	const { id } = router.query;
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
 		useState(false);
-	const [tabIndex, setTabIndex] = useState(2);
+	const [tabIndex, setTabIndex] = useState(3);
 
 	const { loading, error, data } = useQuery(getClusters, {
 		variables: { query: `id: ${id}` },
@@ -162,6 +162,7 @@ const Identifiers: NextPage = () => {
 						aria-label="Group navigation"
 					>
 						<Tab label={t("nav.search.cluster")} />
+						<Tab label={t("nav.search.cluster_explainer")} />
 						<Tab label={t("nav.search.items")} />
 						<Tab label={t("nav.search.identifiers")} />
 						<Tab label={t("nav.search.requesting_history")} />

@@ -839,3 +839,9 @@ export const defaultBibColumnVisibility: GridColumnVisibilityModel = {
 	dateUpdated: false,
 	processVersion: false,
 };
+
+export const defaultClusterExplanationVisibility: GridColumnVisibilityModel = {
+	formattedTimestamp: false,
+	matchedBibId: false,
+	message: false,
+};

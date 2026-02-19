@@ -40,7 +40,7 @@ export default function RequestingHistory() {
 		skip: !id,
 		errorPolicy: "all",
 	});
-	const [tabIndex, setTabIndex] = useState(3);
+	const [tabIndex, setTabIndex] = useState(4);
 
 	const { data: locationsData, fetchMore } = useQuery(
 		getLocationForPatronRequestGrid,
@@ -153,6 +153,7 @@ export default function RequestingHistory() {
 						aria-label="Group navigation"
 					>
 						<Tab label={t("nav.search.cluster")} />
+						<Tab label={t("nav.search.cluster_explainer")} />
 						<Tab label={t("nav.search.items")} />
 						<Tab label={t("nav.search.identifiers")} />
 						<Tab label={t("nav.search.requesting_history")} />

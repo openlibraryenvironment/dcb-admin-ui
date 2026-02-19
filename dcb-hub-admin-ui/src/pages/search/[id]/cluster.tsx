@@ -5,34 +5,23 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { getClusters } from "src/queries/queries";
-import {
-	Grid,
-	Link,
-	Stack,
-	Tab,
-	Tabs,
-	Tooltip,
-	Typography,
-	useTheme,
-} from "@mui/material";
-import { Cancel, CheckCircle } from "@mui/icons-material";
-import {
-	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
-	GridColDef,
-	GridRenderCellParams,
-} from "@mui/x-data-grid-premium";
-import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { Grid, Link, Stack, Tab, Tabs, Typography } from "@mui/material";
 import Error from "@components/Error/Error";
-import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
-import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import StaffRequest from "../../../forms/StaffRequest/StaffRequest";
 import ExpeditedCheckout from "src/forms/ExpeditedCheckout/ExpeditedCheckout";
-import { ClientDataGrid } from "@components/ClientDataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Alert from "@components/Alert/Alert";
 import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { ClientDataGrid } from "@components/ClientDataGrid";
+import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+import {
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+	GridColDef,
+} from "@mui/x-data-grid-premium";
+import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 // Separate into tabs: Cluster Record, Items, Identifiers and Requesting History
 // Following the example set in DCB Admin for Libraries
@@ -40,7 +29,6 @@ const Clusters: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { id } = router.query;
-	const theme = useTheme();
 	const [showStaffRequest, setShowStaffRequest] = useState(false);
 	const [showExpeditedCheckout, setShowExpeditedCheckout] = useState(false);
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
@@ -62,15 +50,6 @@ const Clusters: NextPage = () => {
 	const standardError = error && !sourceRecordError;
 
 	const theCluster = data?.instanceClusters?.content?.[0] ?? null;
-	const extractMatchpoints = (clusterRecord: { members: any[] }): string[] => {
-		const matchPointSet = new Set<string>();
-		clusterRecord.members.forEach((member) => {
-			member.matchPoints.forEach((matchPoint: any) => {
-				matchPointSet.add(matchPoint.value);
-			});
-		});
-		return Array.from(matchPointSet);
-	};
 	const { data: session }: { data: any } = useSession();
 
 	const isAnAdmin = session?.profile?.roles?.some(
@@ -78,7 +57,6 @@ const Clusters: NextPage = () => {
 	);
 	const [tabIndex, setTabIndex] = useState(0);
 
-	const matchpoints = theCluster ? extractMatchpoints(theCluster) : [];
 	const pageActions = [
 		{
 			key: "staffRequest",
@@ -94,39 +72,8 @@ const Clusters: NextPage = () => {
 		},
 	];
 
-	const hasMatchpoint = (mp: string, instance: any) => {
-		const present = instance.matchPoints.some((obj: any) => obj.value === mp);
-		return present ? (
-			<Tooltip
-				sx={{ justifyContent: "center" }}
-				title={
-					"Matchpoint " + mp + " is present for the title " + instance?.title
-				}
-				aria-labelledby={
-					"Matchpoint " + mp + " is present for the title " + instance?.title
-				}
-			>
-				<CheckCircle sx={{ mt: 1.75 }} htmlColor={theme.palette.success.main} />
-			</Tooltip>
-		) : (
-			<Tooltip
-				title={
-					"Matchpoint " +
-					mp +
-					" is not present for the title " +
-					instance?.title
-				}
-				aria-labelledby={
-					"Matchpoint " +
-					mp +
-					" is not present for the title " +
-					instance?.title
-				}
-			>
-				<Cancel sx={{ mt: 1.75 }} htmlColor={theme.palette.error.main} />
-			</Tooltip>
-		);
-	};
+	// We should keep the grid of members.
+	// But not the match-points.
 
 	const columns: GridColDef[] = [
 		{
@@ -143,18 +90,6 @@ const Clusters: NextPage = () => {
 			minWidth: 300,
 			flex: 0.5,
 		},
-		...matchpoints.map((mp) => ({
-			field: mp,
-			headerName: mp,
-			minWidth: 100,
-			flex: 0.5,
-			sortable: false,
-			filterable: false,
-			renderCell: (params: GridRenderCellParams) =>
-				hasMatchpoint(mp, params.row),
-			valueGetter: (value: any, row: { matchPoints: any[] }) =>
-				row.matchPoints.some((obj: any) => obj.value === mp) ? "Yes" : "No",
-		})),
 	];
 
 	const rows = theCluster?.members ?? [];
@@ -222,6 +157,7 @@ const Clusters: NextPage = () => {
 						aria-label="Group navigation"
 					>
 						<Tab label={t("nav.search.cluster")} />
+						<Tab label={t("nav.search.cluster_explainer")} />
 						<Tab label={t("nav.search.items")} />
 						<Tab label={t("nav.search.identifiers")} />
 						<Tab label={t("nav.search.requesting_history")} />

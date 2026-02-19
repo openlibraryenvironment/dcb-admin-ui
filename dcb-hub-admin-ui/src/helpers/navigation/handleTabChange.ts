@@ -203,12 +203,15 @@ export const handleRecordTabChange = (
 			router.push(`/search/${id}/cluster`);
 			break;
 		case 1:
-			router.push(`/search/${id}/items`);
+			router.push(`/search/${id}/clusterExplanation`);
 			break;
 		case 2:
-			router.push(`/search/${id}/identifiers`);
+			router.push(`/search/${id}/items`);
 			break;
 		case 3:
+			router.push(`/search/${id}/identifiers`);
+			break;
+		case 4:
 			router.push(`/search/${id}/requestingHistory`);
 			break;
 	}

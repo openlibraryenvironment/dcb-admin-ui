@@ -44,7 +44,7 @@ const Items: NextPage = () => {
 	const { id } = router.query;
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
 	const [comparisonResults, setComparisonResults] = useState<any>({});
-	const [tabIndex, setTabIndex] = useState(1);
+	const [tabIndex, setTabIndex] = useState(2);
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
@@ -237,6 +237,7 @@ const Items: NextPage = () => {
 							aria-label="Group navigation"
 						>
 							<Tab label={t("nav.search.cluster")} />
+							<Tab label={t("nav.search.cluster_explainer")} />
 							<Tab label={t("nav.search.items")} />
 							<Tab label={t("nav.search.identifiers")} />
 							<Tab label={t("nav.search.requesting_history")} />
