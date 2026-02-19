@@ -1,3 +1,10 @@
+# [1.57.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.56.0...v1.57.0) (2026-02-19)
+
+
+### Features
+
+* Provide patron barcode filter [DCB-2131] ([f348c20](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f348c20825c1cb32d0b6d655202410329aec389f))
+
 # [1.56.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.55.1...v1.56.0) (2026-02-19)
 
 
