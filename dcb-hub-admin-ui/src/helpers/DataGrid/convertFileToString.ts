@@ -54,8 +54,8 @@ const getFieldMapping = (field: string): FieldPath => {
 			field: "clusterRecordTitle",
 			path: ["clusterRecord", "title"],
 		},
-		localBarcode: {
-			field: "localBarcode",
+		patronBarcode: {
+			field: "patronBarcode",
 			path: ["requestingIdentity", "localBarcode"],
 		},
 		canonicalPtype: {

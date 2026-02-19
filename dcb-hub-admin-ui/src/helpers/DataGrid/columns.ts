@@ -289,9 +289,10 @@ const getPatronRequestColumns = (
 			sortable: false,
 		},
 		{
-			field: "localBarcode",
+			field: "patronBarcode",
 			headerName: "Patron barcode",
-			filterable: false,
+			filterable: true,
+			filterOperators: equalsOnly,
 			sortable: false,
 			valueGetter: (value: any, row: PatronRequest) =>
 				row?.requestingIdentity?.localBarcode,

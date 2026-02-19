@@ -37,7 +37,7 @@ export const getFieldsForExport = (coreType: string) => {
 			return [
 				"dateCreated",
 				"patronHostlmsCode",
-				"localBarcode",
+				"patronBarcode",
 				"clusterRecordTitle",
 				"supplyingAgencyCode",
 				"pickupLocationCode",
