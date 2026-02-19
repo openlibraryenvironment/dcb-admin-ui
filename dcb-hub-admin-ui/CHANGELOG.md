@@ -1,3 +1,15 @@
+# [1.56.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.55.1...v1.56.0) (2026-02-19)
+
+
+### Bug Fixes
+
+* Make sure patron's library locations are always selectable ([893a01a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/893a01ae6672063f131f838d33a4b4910f032cb8))
+
+
+### Features
+
+* Provide a view to explain clustering [DCB-2130] ([1da53b5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1da53b595e2ad3938d524c5fc7eeed96500e069c))
+
 ## [1.55.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.55.0...v1.55.1) (2026-01-15)
 
 
