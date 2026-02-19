@@ -780,6 +780,103 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 				</MasterDetailLayout>
 			);
+		case "ClusterExplainer":
+			return (
+				<MasterDetailLayout width={width}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.formatted_timestamp")}
+							</Typography>
+							<RenderAttribute attribute={row?.formattedTimestamp} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.cluster_audit_message")}
+							</Typography>
+							<RenderAttribute attribute={row?.message} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.identifier")}
+							</Typography>
+							<RenderAttribute attribute={row?.matchCriteria} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("ui.data_grid.value")}
+							</Typography>
+							<RenderAttribute attribute={row?.matchValue} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.event_type")}
+							</Typography>
+							<RenderAttribute attribute={row?.eventType} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("search.bib_record_id")}
+							</Typography>
+							<Typography variant="attributeText" component="div">
+								<Link
+									href={`/bibs/${row?.id}`}
+									underline="hover"
+									onClick={(e) => {
+										e.stopPropagation();
+									}}
+								>
+									<RenderAttribute attribute={row?.subjectId} />
+								</Link>
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("search.bib_matched_against")}
+							</Typography>
+							<Typography variant="attributeText" component="div">
+								<Link
+									href={`/bibs/${row?.id}`}
+									underline="hover"
+									onClick={(e) => {
+										e.stopPropagation();
+									}}
+								>
+									<RenderAttribute attribute={row?.id} />
+								</Link>
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.process_type")}
+							</Typography>
+							<RenderAttribute attribute={row?.processType} />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction={"column"}>
+							<Typography variant="attributeTitle">
+								{t("search.process_id")}
+							</Typography>
+							<RenderAttribute attribute={row?.processId} />
+						</Stack>
+					</Grid>
+				</MasterDetailLayout>
+			);
 
 		default:
 			return null;

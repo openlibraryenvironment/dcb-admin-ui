@@ -16,6 +16,7 @@ import {
 	// useGridApiContext, v8 only
 	useGridApiRef,
 	GridToolbar,
+	useKeepGroupedColumnsHidden,
 } from "@mui/x-data-grid-premium";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
@@ -567,6 +568,94 @@ export default function ClientDataGrid<T extends object>({
 		),
 	}));
 
+	// const initialState = useKeepGroupedColumnsHidden(apiRef, initialState: {
+	// 				aggregation: {
+	// 					model: {
+	// 						sourceRecordCount: "sum",
+	// 						awaiting: "sum",
+	// 						failed: "sum",
+	// 						ingested: "sum",
+	// 						bibRecordCount: "sum",
+	// 						difference: "sum",
+	// 					},
+	// 				},
+	// 				filter: {
+	// 					// initiate the filter models here
+	// 					filterModel: {
+	// 						items: [],
+	// 						// So we don't search hidden columns and confuse the user
+	// 						quickFilterExcludeHiddenColumns: true,
+	// 					},
+	// 				},
+	// 				pagination: {
+	// 					paginationModel: { pageSize: 25, page: 0 },
+	// 				},
+	// 				rowGrouping: {
+	// 					model: ["subjectId"],
+	// 				},
+
+	// 				// Handles whether columns are visible or not - pass the relevant model in (see requests)
+	// 				columns: {
+	// 					columnVisibilityModel:
+	// 						storedColumnVisibility[type] || columnVisibilityModel,
+	// 				},
+	// 				// Handles default sort order- pass the relevant model in (see requests)
+	// 				sorting: {
+	// 					sortModel: sortOptions.field
+	// 						? [
+	// 								{
+	// 									field: sortOptions.field,
+	// 									sort: sortOptions.direction.toLowerCase(),
+	// 								},
+	// 							]
+	// 						: sortModel,
+	// 				}
+	// 			});
+
+	const initialState = useKeepGroupedColumnsHidden({
+		apiRef,
+		initialState: {
+			rowGrouping: {
+				model: ["subjectId"],
+			},
+			columns: {
+				columnVisibilityModel:
+					storedColumnVisibility[type] || columnVisibilityModel,
+			},
+			sorting: {
+				sortModel: sortOptions.field
+					? [
+							{
+								field: sortOptions.field,
+								sort: sortOptions.direction.toLowerCase(),
+							},
+						]
+					: sortModel,
+			},
+			filter: {
+				// initiate the filter models here
+				filterModel: {
+					items: [],
+					// So we don't search hidden columns and confuse the user
+					quickFilterExcludeHiddenColumns: true,
+				},
+			},
+			pagination: {
+				paginationModel: { pageSize: 25, page: 0 },
+			},
+			aggregation: {
+				model: {
+					sourceRecordCount: "sum",
+					awaiting: "sum",
+					failed: "sum",
+					ingested: "sum",
+					bibRecordCount: "sum",
+					difference: "sum",
+				},
+			},
+		},
+	});
+
 	// fix no data overlay - broken somehow.
 	return (
 		<div>
@@ -614,45 +703,7 @@ export default function ClientDataGrid<T extends object>({
 				getDetailPanelHeight={getDetailPanelHeight}
 				disableAggregation={disableAggregation}
 				disableRowGrouping={disableRowGrouping}
-				initialState={{
-					aggregation: {
-						model: {
-							sourceRecordCount: "sum",
-							awaiting: "sum",
-							failed: "sum",
-							ingested: "sum",
-							bibRecordCount: "sum",
-							difference: "sum",
-						},
-					},
-					filter: {
-						// initiate the filter models here
-						filterModel: {
-							items: [],
-							// So we don't search hidden columns and confuse the user
-							quickFilterExcludeHiddenColumns: true,
-						},
-					},
-					pagination: {
-						paginationModel: { pageSize: 25, page: 0 },
-					},
-					// Handles whether columns are visible or not - pass the relevant model in (see requests)
-					columns: {
-						columnVisibilityModel:
-							storedColumnVisibility[type] || columnVisibilityModel,
-					},
-					// Handles default sort order- pass the relevant model in (see requests)
-					sorting: {
-						sortModel: sortOptions.field
-							? [
-									{
-										field: sortOptions.field,
-										sort: sortOptions.direction.toLowerCase(),
-									},
-								]
-							: sortModel,
-					},
-				}}
+				initialState={initialState}
 				// if we don't want to filter by a column, set filterable to false (turned on by default)
 				// And if we want to hide columns, pass the visibility model in
 				columns={allColumns}
@@ -681,6 +732,9 @@ export default function ClientDataGrid<T extends object>({
 				}}
 				// getRowHeight={autoRowHeight ? () => "auto" : null}
 				editMode="row"
+				groupingColDef={{
+					minWidth: 350,
+				}}
 				onCellDoubleClick={(params, event) => {
 					// Prevent default double-click edit behavior
 					event.defaultMuiPrevented = true;
