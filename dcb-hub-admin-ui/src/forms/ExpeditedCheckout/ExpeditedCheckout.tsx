@@ -496,7 +496,7 @@ export default function ExpeditedCheckout({
 					localSystemCode: data.itemLocalSystemCode || "", // The Host LMS code for the item's Host LMS
 					agencyCode: data.itemAgencyCode || "", // The agency code of the item
 				},
-				isExpeditedCheckout: true,
+				isExpeditedRequest: true,
 			};
 
 			const response = await axios.post(
