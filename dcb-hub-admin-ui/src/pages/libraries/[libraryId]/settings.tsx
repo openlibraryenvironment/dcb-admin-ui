@@ -55,7 +55,7 @@ type LibraryDetails = {
 interface AgencyFormFields {
 	isSupplyingAgency?: boolean | null;
 	isBorrowingAgency?: boolean | null;
-	maxConsortialLoans?: number | null;
+	maxConsortialLoans?: number;
 	longitude?: number;
 	latitude?: number;
 }
@@ -117,11 +117,11 @@ export default function Settings({ libraryId }: LibraryDetails) {
 
 	const validationSchema = Yup.object().shape({
 		maxConsortialLoans: Yup.number()
-			.nullable()
-			.transform((value, originalValue) =>
-				originalValue === "" ? null : value,
+			.typeError(
+				t("ui.validation.number", {
+					field: t("libraries.max_consortial_loans"),
+				}),
 			)
-			.typeError(t("ui.validation.numeric"))
 			.min(0, t("ui.validation.min_value", { min: 0 })),
 		isSupplyingAgency: Yup.boolean().nullable(),
 		isBorrowingAgency: Yup.boolean().nullable(),
@@ -142,9 +142,9 @@ export default function Settings({ libraryId }: LibraryDetails) {
 		formState: { errors, isDirty },
 	} = useForm<AgencyFormFields>({
 		defaultValues: {
-			maxConsortialLoans: library?.agency?.maxConsortialLoans ?? null,
-			isSupplyingAgency: library?.agency?.isSupplyingAgency ?? null,
-			isBorrowingAgency: library?.agency?.isBorrowingAgency ?? null,
+			maxConsortialLoans: library?.agency?.maxConsortialLoans,
+			isSupplyingAgency: library?.agency?.isSupplyingAgency,
+			isBorrowingAgency: library?.agency?.isBorrowingAgency,
 		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
@@ -499,10 +499,11 @@ export default function Settings({ libraryId }: LibraryDetails) {
 										variant="outlined"
 										error={!!errors.maxConsortialLoans}
 										helperText={errors.maxConsortialLoans?.message}
-										value={library?.agency?.maxConsortialLoans}
 									/>
 								) : (
-									<RenderAttribute attribute={field.value} />
+									<RenderAttribute
+										attribute={library?.agency?.maxConsortialLoans}
+									/>
 								)
 							}
 						/>
