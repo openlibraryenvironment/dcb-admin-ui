@@ -1,3 +1,16 @@
+# [1.58.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.57.0...v1.58.0) (2026-02-25)
+
+
+### Bug Fixes
+
+* Ensure DCB Admin supplies patron agency code when requesting ([b5a429e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b5a429e4b8e5a7fc6bcd2c024bf0d6b611f764d9))
+* Ensure expedited checkout payload is standardised ([6c49d52](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6c49d52a9ee16158c0aa5b86b215472494dcc676))
+
+
+### Features
+
+* Edit max loans permitted for a library's patrons [DCB-1936] ([50c7e52](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/50c7e524658fcf214a6684ddb44a65f383ccdc21))
+
 # [1.57.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.56.0...v1.57.0) (2026-02-19)
 
 
