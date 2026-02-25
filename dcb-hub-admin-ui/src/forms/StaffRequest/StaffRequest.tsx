@@ -434,6 +434,7 @@ export default function StaffRequest({
 					localSystemCode: patronData.systemCode,
 					localId: patronData.localPatronId[0], // Possibly make a note if there were multiple of these - not sure why it has array type
 					homeLibraryCode: patronData.homeLocationCode,
+					agencyCode: patronData.agencyCode,
 				},
 				pickupLocation: {
 					code: selectedLocation?.value || "",
@@ -449,6 +450,7 @@ export default function StaffRequest({
 					localSystemCode: patronData.systemCode,
 					localId: patronData.localPatronId[0],
 					homeLibraryCode: patronData.homeLocationCode,
+					agencyCode: patronData.agencyCode,
 				},
 				pickupLocation: {
 					code: selectedLocation?.value || "",
