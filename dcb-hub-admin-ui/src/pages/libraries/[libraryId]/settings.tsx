@@ -1,75 +1,102 @@
 import { Library } from "@models/Library";
 import {
-	Box,
 	Button,
+	FormControl,
 	Grid,
+	MenuItem,
+	Select,
 	Stack,
 	Tab,
 	Tabs,
-	Tooltip,
+	TextField,
 	Typography,
 	useTheme,
 } from "@mui/material";
-import { Trans, useTranslation } from "next-i18next";
+import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client";
 import {
 	deleteLibraryQuery,
 	getLibraryBasics,
-	getLibraryBasicsLegacy,
-	updateAgencyParticipationStatus,
+	updateAgencyQuery,
 } from "src/queries/queries";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { AdminLayout } from "@layout";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import { useState } from "react";
-import { Delete } from "@mui/icons-material";
+import { useRef, useState } from "react";
+import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { handleTabChange } from "src/helpers/navigation/handleTabChange";
 import {
 	closeConfirmation,
+	handleCancel,
 	handleDeleteEntity,
+	handleEdit,
+	handleSaveConfirmation,
 } from "src/helpers/actions/editAndDeleteActions";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { determineAcceptableVersion } from "src/helpers/determineVersion";
-import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+import { Agency } from "@models/Agency";
+import * as Yup from "yup";
+import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { formatChangedFields } from "src/helpers/formatChangedFields";
+import { isEmpty } from "lodash";
+import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 
 type LibraryDetails = {
 	libraryId: any;
 };
+
+interface AgencyFormFields {
+	isSupplyingAgency?: boolean | null;
+	isBorrowingAgency?: boolean | null;
+	maxConsortialLoans?: number;
+	longitude?: number;
+	latitude?: number;
+}
 
 export default function Settings({ libraryId }: LibraryDetails) {
 	const { t } = useTranslation();
 
 	const [tabIndex, setTabIndex] = useState(2);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [showConfirmationBorrowing, setConfirmationBorrowing] = useState(false);
-	const [showConfirmationSupplying, setConfirmationSupplying] = useState(false);
+	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
+	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
+	// We will now need an "Edit" mode, and we need to use updateAgency
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
 		text: null,
 		title: null,
 	});
-	const { version, isDev } = useDCBServiceInfo();
+	const [changedFields, setChangedFields] = useState<Partial<Agency>>({});
+	const saveButtonRef = useRef<HTMLButtonElement>(null);
 
-	const nonLegacyBehaviour = isDev
-		? true
-		: determineAcceptableVersion(version ? version : "NONE", "8.46.0");
-	const { data, loading, error } = useQuery(
-		nonLegacyBehaviour ? getLibraryBasics : getLibraryBasicsLegacy,
-		{
-			variables: {
-				query: "id:" + libraryId,
-			},
-			pollInterval: 120000,
-			errorPolicy: "all",
+	const [editMode, setEditMode] = useState(false);
+
+	const { data, loading, error } = useQuery(getLibraryBasics, {
+		variables: {
+			query: "id:" + libraryId,
 		},
-	);
+		pollInterval: 120000,
+		errorPolicy: "all",
+		onCompleted: (data) => {
+			const library = data?.libraries?.content?.[0];
+			// This is needed because default values don't always load in time.
+			reset({
+				isSupplyingAgency: library?.agency?.isSupplyingAgency,
+				isBorrowingAgency: library?.agency?.isBorrowingAgency,
+				maxConsortialLoans: library?.agency?.maxConsortialLoans,
+				latitude: library?.latitude,
+				longitude: library?.longitude,
+			});
+		},
+	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
@@ -84,127 +111,191 @@ export default function Settings({ libraryId }: LibraryDetails) {
 	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
-	const [updateParticipation] = useMutation(updateAgencyParticipationStatus);
+	const [updateAgency] = useMutation(updateAgencyQuery);
 
 	const library: Library = data?.libraries?.content?.[0];
 
-	const handleParticipationConfirmation = (
-		active: string,
-		targetParticipation: string,
+	const validationSchema = Yup.object().shape({
+		maxConsortialLoans: Yup.number()
+			.typeError(
+				t("ui.validation.number", {
+					field: t("libraries.max_consortial_loans"),
+				}),
+			)
+			.min(0, t("ui.validation.min_value", { min: 0 })),
+		isSupplyingAgency: Yup.boolean().nullable(),
+		isBorrowingAgency: Yup.boolean().nullable(),
+		latitude: Yup.number()
+			.typeError(t("ui.validation.locations.lat"))
+			.min(-90, t("ui.validation.locations.lat"))
+			.max(90, t("ui.validation.locations.lat")),
+		longitude: Yup.number()
+			.typeError(t("ui.validation.locations.long"))
+			.min(-180, t("ui.validation.locations.long"))
+			.max(180, t("ui.validation.locations.long")),
+	});
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isDirty },
+	} = useForm<AgencyFormFields>({
+		defaultValues: {
+			maxConsortialLoans: library?.agency?.maxConsortialLoans,
+			isSupplyingAgency: library?.agency?.isSupplyingAgency,
+			isBorrowingAgency: library?.agency?.isBorrowingAgency,
+		},
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+	});
+	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		// Should be null if borrowing not active, true if we're looking to enable it, and false if we're looking to disable it
-		const borrowInput =
-			active == "borrowing"
-				? targetParticipation == "disableBorrowing"
-					? false
-					: true
-				: null;
-		const supplyInput =
-			active == "supplying"
-				? targetParticipation == "disableSupplying"
-					? false
-					: true
-				: null;
-		// Pass the correct input to the mutation
-		const input =
-			active == "borrowing"
-				? {
-						code: library?.agencyCode,
-						isBorrowingAgency: borrowInput ?? null,
-						reason: reason,
-						changeCategory: changeCategory,
-						changeReferenceUrl: changeReferenceUrl,
-					}
-				: {
-						code: library?.agencyCode,
-						isSupplyingAgency: supplyInput ?? null,
-						reason: reason,
-						changeCategory: changeCategory,
-						changeReferenceUrl: changeReferenceUrl,
-					};
-		updateParticipation({
-			variables: {
-				input,
+		handleSaveConfirmation(
+			library.agencyCode,
+			changedFields,
+			updateAgency,
+			client,
+			{
+				setEditMode,
+				setChangedFields,
+				setAlert,
+				setConfirmation: setConfirmationEdit,
 			},
-		})
-			.then((response) => {
-				// Handle successful response
-				console.log("Participation status updated:", response?.data);
-				// close the confirmation modal here - active determines the text shown
-				const successText = {
-					disableSupplying: t(
-						"libraries.circulation.confirmation.alert.supplying_disabled",
-					),
-					enableSupplying: t(
-						"libraries.circulation.confirmation.alert.supplying_enabled",
-					),
-					disableBorrowing: t(
-						"libraries.circulation.confirmation.alert.borrowing_disabled",
-					),
-					enableBorrowing: t(
-						"libraries.circulation.confirmation.alert.borrowing_enabled",
-					),
-				}[targetParticipation];
-
-				setAlert({
-					open: true,
-					severity: "success",
-					text: (
-						<Trans
-							i18nKey={successText}
-							values={{ library: library?.fullName }}
-							components={{ bold: <strong /> }}
-						/>
-					),
-				});
-				if (active.includes("Supplying") || active.includes("supplying")) {
-					closeConfirmation(
-						() => setConfirmationSupplying(false),
-						client,
-						"LoadLibrary",
-					);
-				} else {
-					closeConfirmation(
-						() => setConfirmationBorrowing(false),
-						client,
-						"LoadLibrary",
-					);
-				}
-			})
-			.catch((error) => {
-				// Handle error
-				console.error("Error updating participation status:", error);
-				// Show the correct error alert.
-				const errorText = {
-					disableSupplying: t(
-						"libraries.circulation.confirmation.alert.supplying_disabled_fail",
-					),
-					enableSupplying: t(
-						"libraries.circulation.confirmation.alert.supplying_enabled_fail",
-					),
-					disableBorrowing: t(
-						"libraries.circulation.confirmation.alert.borrowing_disabled_fail",
-					),
-					enableBorrowing: t(
-						"libraries.circulation.confirmation.alert.borrowing_enabled_fail",
-					),
-				}[targetParticipation];
-				setAlert({
-					open: true,
-					severity: "error",
-					text: (
-						<Trans
-							i18nKey={errorText}
-							values={{ library: library?.fullName }}
-							components={{ bold: <strong /> }}
-						/>
-					),
-				});
-			});
+			{
+				entityName: library?.fullName,
+				entityType: t("libraries.library"),
+				mutationName: "updateAgency",
+				t,
+			},
+			{
+				reason,
+				changeCategory,
+				changeReferenceUrl,
+			},
+			["LoadLibrary"],
+			reset,
+			[
+				"isSupplyingAgency",
+				"isBorrowingAgency",
+				"maxConsortialLoans",
+				"latitude",
+				"longitude",
+			],
+		);
 	};
+
+	const {
+		showUnsavedChangesModal,
+		handleKeepEditing,
+		handleLeaveWithoutSaving,
+	} = useUnsavedChangesWarning({
+		isDirty,
+		onKeepEditing: () => {
+			setTimeout(() => {
+				if (saveButtonRef.current) {
+					saveButtonRef.current.focus();
+				}
+			}, 0);
+		},
+		onLeaveWithoutSaving: () => {
+			setChangedFields({});
+			reset();
+			setEditMode(false);
+		},
+	});
+	const onSubmit: SubmitHandler<AgencyFormFields> = (data) => {
+		const newChangedFields = Object.keys(data).reduce((acc, key) => {
+			const field = key as keyof AgencyFormFields;
+			const currentValue = data[field];
+			const originalValue = library?.agency[field];
+
+			if (currentValue !== originalValue && currentValue !== undefined) {
+				(acc[field] as typeof currentValue) = currentValue;
+			}
+			return acc;
+		}, {} as Partial<Agency>);
+		setChangedFields(newChangedFields);
+		if (Object.keys(newChangedFields).length === 0) {
+			setEditMode(false);
+			return;
+		}
+		setConfirmationEdit(true);
+	};
+
+	const viewModeActions = [
+		{
+			key: "edit",
+			onClick: handleEdit(setEditMode, firstEditableFieldRef),
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.edit"),
+			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+		{
+			key: "delete",
+			onClick: () => setConfirmationDeletion(true),
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.delete_entity", {
+				entity: t("libraries.library").toLowerCase(),
+			}),
+			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+	];
+
+	const editModeActions = [
+		<Button
+			key="save"
+			startIcon={<Save />}
+			onClick={handleSubmit(onSubmit)}
+			disabled={!isEmpty(errors) || !isDirty}
+			ref={saveButtonRef}
+		>
+			{t("ui.data_grid.save")}
+		</Button>,
+		<Button
+			key="cancel"
+			startIcon={<Cancel />}
+			onClick={() =>
+				handleCancel(
+					{
+						setEditMode,
+						setChangedFields,
+					},
+					reset,
+				)
+			}
+		>
+			{t("ui.data_grid.cancel")}
+		</Button>,
+		<MoreActionsMenu
+			key="more"
+			actions={[
+				{
+					key: "delete",
+					onClick: () => setConfirmationDeletion(true),
+					disabled: !isAnAdmin,
+					label: t("ui.data_grid.delete_entity", {
+						entity: t("libraries.library").toLowerCase(),
+					}),
+					startIcon: (
+						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
+					),
+				},
+				{
+					key: "edit",
+					onClick: () => handleEdit(setEditMode, firstEditableFieldRef),
+					disabled: true,
+					label: t("ui.data_grid.edit"),
+					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+				},
+			]}
+		/>,
+	];
+
+	const pageActions = editMode ? editModeActions : viewModeActions;
 
 	if (loading || status === "loading") {
 		return (
@@ -218,18 +309,6 @@ export default function Settings({ libraryId }: LibraryDetails) {
 			</AdminLayout>
 		);
 	}
-
-	const pageActions = [
-		{
-			key: "delete",
-			onClick: () => setConfirmationDeletion(true),
-			disabled: !isAnAdmin,
-			label: t("ui.data_grid.delete_entity", {
-				entity: t("libraries.library").toLowerCase(),
-			}),
-			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
-		},
-	];
 
 	return error || library == null || library == undefined ? (
 		<AdminLayout hideBreadcrumbs>
@@ -255,7 +334,7 @@ export default function Settings({ libraryId }: LibraryDetails) {
 		<AdminLayout
 			title={library?.fullName}
 			pageActions={pageActions}
-			mode={"view"}
+			mode={editMode ? "edit" : "view"}
 		>
 			<Grid
 				container
@@ -293,114 +372,144 @@ export default function Settings({ libraryId }: LibraryDetails) {
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("libraries.circulation.supplying_status")}
-						</Typography>
-						{library?.agency?.isSupplyingAgency
-							? t("libraries.circulation.enabled_supply")
-							: library?.agency?.isSupplyingAgency == false
-								? t("libraries.circulation.disabled_supply")
-								: t("libraries.circulation.not_set")}
-					</Stack>
-					{!isAnAdmin ? (
-						<Tooltip
-							title={t(
-								"libraries.circulation.confirmation.admin_required_supplying",
-							)}
-							key={t(
-								"libraries.circulation.confirmation.admin_required_supplying",
-							)}
-						>
-							<span>
-								<Button
-									onClick={() => setConfirmationSupplying(true)}
-									color="primary"
-									variant="outlined"
-									sx={{ marginTop: 1 }}
-									type="submit"
-									disabled={!isAnAdmin}
-								>
-									{library?.agency?.isSupplyingAgency
-										? t("libraries.circulation.confirmation.disable_supplying")
-										: t("libraries.circulation.confirmation.enable_supplying")}
-								</Button>
-							</span>
-						</Tooltip>
-					) : (
-						<Button
-							onClick={() => setConfirmationSupplying(true)}
-							color="primary"
-							variant="outlined"
-							sx={{ marginTop: 1 }}
-							type="submit"
-							disabled={!isAnAdmin}
-						>
-							{library?.agency?.isSupplyingAgency
-								? t("libraries.circulation.confirmation.disable_supplying")
-								: t("libraries.circulation.confirmation.enable_supplying")}
-						</Button>
-					)}
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
+						<Typography variant="attributeTitle" id="label-borrowing-status">
 							{t("libraries.circulation.borrowing_status")}
 						</Typography>
-						{library?.agency?.isBorrowingAgency
-							? t("libraries.circulation.enabled_borrow")
-							: library?.agency?.isBorrowingAgency == false
-								? t("libraries.circulation.disabled_borrow")
-								: t("libraries.circulation.not_set")}
+						<Controller
+							name="isBorrowingAgency"
+							control={control}
+							render={({ field: { onChange, value } }) =>
+								editMode ? (
+									<FormControl fullWidth>
+										<Select
+											value={
+												value === null || value === undefined
+													? ""
+													: value.toString()
+											}
+											onChange={(e) => {
+												const val = e.target.value;
+												if (val === "true") onChange(true);
+												else if (val === "false") onChange(false);
+											}}
+											inputProps={{
+												"aria-labelledby": "label-borrowing-status",
+											}}
+											SelectDisplayProps={{
+												"aria-labelledby": "label-borrowing-status",
+											}}
+											displayEmpty
+											renderValue={(selected) => {
+												return selected === "true"
+													? t("libraries.circulation.enabled_borrow")
+													: t("libraries.circulation.disabled_borrow");
+											}}
+										>
+											<MenuItem value="true">
+												{t("libraries.circulation.enabled_borrow")}
+											</MenuItem>
+											<MenuItem value="false">
+												{t("libraries.circulation.disabled_borrow")}
+											</MenuItem>
+										</Select>
+									</FormControl>
+								) : (
+									<Typography>
+										{library?.agency?.isBorrowingAgency
+											? t("libraries.circulation.enabled_borrow")
+											: library?.agency?.isBorrowingAgency == false
+												? t("libraries.circulation.disabled_borrow")
+												: t("libraries.circulation.not_set")}
+									</Typography>
+								)
+							}
+						/>
 					</Stack>
-					{!isAnAdmin ? (
-						<Tooltip
-							title={t(
-								"libraries.circulation.confirmation.admin_required_borrowing",
-							)}
-							key={t(
-								"libraries.circulation.confirmation.admin_required_borrowing",
-							)}
-						>
-							<span>
-								<Button
-									onClick={() => setConfirmationBorrowing(true)}
-									color="primary"
-									variant="outlined"
-									sx={{ marginTop: 1 }}
-									type="submit"
-									disabled={!isAnAdmin}
-								>
-									{library?.agency?.isBorrowingAgency
-										? t("libraries.circulation.confirmation.disable_borrowing")
-										: t("libraries.circulation.confirmation.enable_borrowing")}
-								</Button>
-							</span>
-						</Tooltip>
-					) : (
-						<Button
-							onClick={() => setConfirmationBorrowing(true)}
-							color="primary"
-							variant="outlined"
-							sx={{ marginTop: 1 }}
-							type="submit"
-							disabled={!isAnAdmin}
-						>
-							{library?.agency?.isBorrowingAgency
-								? t("libraries.circulation.confirmation.disable_borrowing")
-								: t("libraries.circulation.confirmation.enable_borrowing")}
-						</Button>
-					)}
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
+						<Typography variant="attributeTitle" id="label-supplying-status">
+							{t("libraries.circulation.supplying_status")}
+						</Typography>
+						<Controller
+							name="isSupplyingAgency"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<FormControl fullWidth>
+										<Select
+											{...field}
+											inputProps={{
+												"aria-labelledby": "label-borrowing-status",
+											}}
+											SelectDisplayProps={{
+												"aria-labelledby": "label-borrowing-status",
+											}}
+											label={t("consortium.settings.enabled_header")}
+											value={field.value?.toString()}
+											onChange={(e) => {
+												field.onChange(e.target.value === "true");
+											}}
+											variant="outlined"
+										>
+											<MenuItem value="true">
+												{t("libraries.circulation.enabled_supply")}
+											</MenuItem>
+											<MenuItem value="false">
+												{t("libraries.circulation.disabled_supply")}
+											</MenuItem>
+										</Select>
+									</FormControl>
+								) : (
+									<Typography>
+										{library?.agency?.isSupplyingAgency
+											? t("libraries.circulation.enabled_supply")
+											: library?.agency?.isSupplyingAgency == false
+												? t("libraries.circulation.disabled_supply")
+												: t("libraries.circulation.not_set")}
+									</Typography>
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							id="max-consortial-loans-label"
+						>
 							{t("libraries.max_consortial_loans")}
 						</Typography>
-						<RenderAttribute attribute={library?.agency?.maxConsortialLoans} />
+						<Controller
+							name="maxConsortialLoans"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										aria-label="max-consortial-loans-input"
+										slotProps={{
+											htmlInput: {
+												"aria-label": "max-consortial-loans-input",
+											},
+										}}
+										type="number"
+										fullWidth
+										variant="outlined"
+										error={!!errors.maxConsortialLoans}
+										helperText={errors.maxConsortialLoans?.message}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={library?.agency?.maxConsortialLoans}
+									/>
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 			</Grid>
-
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
@@ -435,66 +544,29 @@ export default function Settings({ libraryId }: LibraryDetails) {
 				entity={t("libraries.library")}
 				gridEdit={false}
 			/>
-			<Box>
-				{showConfirmationBorrowing ? (
-					<Confirmation
-						open={showConfirmationBorrowing}
-						onClose={() =>
-							closeConfirmation(setConfirmationBorrowing, client, "LoadLibrary")
-						}
-						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
-							handleParticipationConfirmation(
-								"borrowing",
-								library?.agency?.isBorrowingAgency
-									? "disableBorrowing"
-									: "enableBorrowing",
-								reason,
-								changeCategory,
-								changeReferenceUrl,
-							)
-						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
-						type="participationStatus"
-						participation={
-							library?.agency?.isBorrowingAgency
-								? "disableBorrowing"
-								: "enableBorrowing"
-						}
-						entity={t("libraries.library")}
-						entityName={library?.shortName}
-						code={library?.agency?.code}
-						gridEdit={false}
-					/>
-				) : null}
-				{showConfirmationSupplying ? (
-					<Confirmation
-						open={showConfirmationSupplying}
-						onClose={() =>
-							closeConfirmation(setConfirmationSupplying, client, "LoadLibrary")
-						}
-						onConfirm={(reason, changeCategory, changeReferenceUrl) =>
-							handleParticipationConfirmation(
-								"supplying",
-								library?.agency?.isSupplyingAgency
-									? "disableSupplying"
-									: "enableSupplying",
-								reason,
-								changeCategory,
-								changeReferenceUrl,
-							)
-						} // Needs to be handleConfirm "borrowing" and ideally saying which one it is
-						type={"participationStatus"}
-						entity={t("libraries.library")}
-						participation={
-							library?.agency?.isSupplyingAgency
-								? "disableSupplying"
-								: "enableSupplying"
-						}
-						entityName={library?.fullName}
-						code={library?.agency?.code}
-						gridEdit={false}
-					/>
-				) : null}
-			</Box>
+			<Confirmation
+				open={showConfirmationEdit}
+				onClose={() =>
+					closeConfirmation(setConfirmationEdit, client, "LoadLibrary")
+				}
+				onConfirm={handleConfirmSave}
+				type="pageEdit"
+				editInformation={formatChangedFields(changedFields, library?.agency)}
+				entityName={library?.fullName}
+				entity={t("libraries.library")}
+				gridEdit={false}
+			/>
+
+			<Confirmation
+				open={showUnsavedChangesModal}
+				onClose={handleKeepEditing}
+				onConfirm={handleLeaveWithoutSaving}
+				type="unsavedChanges"
+				entityName={library?.fullName}
+				entity={t("libraries.library")}
+				entityId={library?.id}
+				gridEdit={false}
+			/>
 		</AdminLayout>
 	);
 }
