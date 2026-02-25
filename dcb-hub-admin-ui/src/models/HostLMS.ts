@@ -6,4 +6,5 @@ export interface HostLMS {
 	clientConfig: any;
 	itemSuppressionRulesetName: string;
 	suppressionRulesetName: string;
+	ingestSourceClass: string;
 }
