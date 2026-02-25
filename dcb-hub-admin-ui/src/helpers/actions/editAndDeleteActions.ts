@@ -48,6 +48,24 @@ export const handleSaveConfirmation = async (
 	const { setEditMode, setChangedFields, setAlert, setConfirmation } = setters;
 	const { entityName, entityType, mutationName, t } = displayInfo;
 	const { reason, changeCategory, changeReferenceUrl } = changeMetadata;
+	const standardPayload = {
+		input: {
+			id: entityId,
+			...changedFields,
+			reason,
+			changeCategory,
+			changeReferenceUrl,
+		},
+	};
+	const codeBasedPayload = {
+		input: {
+			code: entityId,
+			...changedFields,
+			// reason,
+			// changeCategory,
+			// changeReferenceUrl, // To be uncommented when API is fixed in 8.67.0
+		},
+	};
 
 	try {
 		// Update store values if provided (for UI consistency before refetch)
@@ -55,15 +73,8 @@ export const handleSaveConfirmation = async (
 			storeUpdates(changedFields);
 		}
 		const { data } = await updateMutation({
-			variables: {
-				input: {
-					id: entityId,
-					...changedFields,
-					reason,
-					changeCategory,
-					changeReferenceUrl,
-				},
-			},
+			variables:
+				mutationName == "updateAgency" ? codeBasedPayload : standardPayload,
 		});
 
 		// Check if mutation was successful

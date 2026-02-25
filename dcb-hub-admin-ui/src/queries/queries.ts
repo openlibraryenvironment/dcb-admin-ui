@@ -20,6 +20,19 @@ export const updateAgencyParticipationStatus = gql`
 	}
 `;
 
+export const updateAgencyQuery = gql`
+	mutation UpdateAgency($input: UpdateAgencyInput!) {
+		updateAgency(input: $input) {
+			id
+			code
+			name
+			isSupplyingAgency
+			isBorrowingAgency
+			maxConsortialLoans
+		}
+	}
+`;
+
 // Libraries, Library Contacts and LibraryGroups
 
 export const createLibraryContact = gql`
@@ -1188,26 +1201,6 @@ export const getLibraryContacts = gql`
 	}
 `;
 
-export const getLibraryBasicsLegacy = gql`
-	query LoadLibraryBasics($query: String!) {
-		libraries(query: $query) {
-			content {
-				id
-				fullName
-				shortName
-				agencyCode
-				agency {
-					id
-					code
-					name
-					authProfile
-					isSupplyingAgency
-					isBorrowingAgency
-				}
-			}
-		}
-	}
-`;
 export const getLibraryBasics = gql`
 	query LoadLibraryBasics($query: String!) {
 		libraries(query: $query) {

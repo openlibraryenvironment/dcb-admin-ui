@@ -282,6 +282,7 @@
 			},
 			"invalid_email": "Please supply a valid email.",
 			"max_length": "This field has a maximum length of {{length}} characters",
+			"min_value": "This value must be greater than {{min}}",
 			"number": "Please supply a valid number.",
 			"required": "Enter the {{field}}.",
 			"case_sensitive": "{{field}} is case sensitive"
