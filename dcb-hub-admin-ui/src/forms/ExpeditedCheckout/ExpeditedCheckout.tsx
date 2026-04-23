@@ -295,7 +295,8 @@ export default function ExpeditedCheckout({
 		(item) =>
 			item.agency.code === itemAgencyCode &&
 			item.isRequestable &&
-			!item.isSuppressed,
+			!item.isSuppressed &&
+			item?.status?.code == "AVAILABLE",
 	);
 
 	const pickupLocationOptions: PatronRequestAutocompleteOption[] =

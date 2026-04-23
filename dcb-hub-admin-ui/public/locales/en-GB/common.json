@@ -382,6 +382,7 @@
 		"lms_client": "LmsClientClass",
 		"large_print": "Is large print?",
 		"lat": "Latitude",
+		"last_indexed": "Last indexed",
 		"last_validated": "Last validated",
 		"local_agency": "Local agency",
 		"local_barcode": "Local barcode",

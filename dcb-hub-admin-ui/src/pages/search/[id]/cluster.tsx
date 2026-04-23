@@ -22,6 +22,7 @@ import {
 } from "@mui/x-data-grid-premium";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import dayjs from "dayjs";
 
 // Separate into tabs: Cluster Record, Items, Identifiers and Requesting History
 // Following the example set in DCB Admin for Libraries
@@ -169,7 +170,11 @@ const Clusters: NextPage = () => {
 							{t("details.date_created")}
 						</Typography>
 						<Typography variant="attributeText">
-							<RenderAttribute attribute={theCluster?.dateCreated} />
+							<RenderAttribute
+								attribute={dayjs(theCluster?.dateCreated).format(
+									"YYYY-MM-DD HH:mm",
+								)}
+							/>
 						</Typography>
 					</Stack>
 				</Grid>
@@ -179,7 +184,11 @@ const Clusters: NextPage = () => {
 							{t("details.date_updated")}
 						</Typography>
 						<Typography variant="attributeText">
-							<RenderAttribute attribute={theCluster?.dateUpdated} />
+							<RenderAttribute
+								attribute={dayjs(theCluster?.dateUpdated).format(
+									"YYYY-MM-DD HH:mm",
+								)}
+							/>
 						</Typography>
 					</Stack>
 				</Grid>
@@ -211,6 +220,21 @@ const Clusters: NextPage = () => {
 						</Typography>
 					</Stack>
 				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.last_indexed")}
+						</Typography>
+						<Typography variant="attributeText">
+							<RenderAttribute
+								attribute={dayjs(theCluster?.lastIndexed).format(
+									"YYYY-MM-DD HH:mm:ss",
+								)}
+							/>
+						</Typography>
+					</Stack>
+				</Grid>
+
 				{sourceRecordErrorAlertDisplayed ? (
 					<Grid size={{ xs: 8, sm: 12, md: 12 }} role="gridcell">
 						<Alert

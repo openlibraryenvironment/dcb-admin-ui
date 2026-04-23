@@ -2205,6 +2205,7 @@ export const getClusters = gql`
 				isDeleted
 				dateCreated
 				dateUpdated
+				lastIndexed
 				members {
 					id
 					title

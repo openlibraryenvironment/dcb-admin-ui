@@ -3,7 +3,7 @@ import { Location } from "./Location";
 
 export interface Item {
 	id: string;
-	status: string;
+	status: Status;
 	dueDate: string;
 	location: Location;
 	barcode: string;
@@ -26,4 +26,8 @@ export interface Item {
 	rawDataValues: Map<string, string>;
 	decisionLogEntries: Array<string>;
 	statusCorrectAsOf: string;
+}
+
+interface Status {
+	code: string;
 }
