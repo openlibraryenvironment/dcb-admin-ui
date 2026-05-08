@@ -1,4 +1,3 @@
-import "@styles/globals.scss";
 // Next.js allows you to import CSS directly in .js files.
 // It handles optimization and all the necessary Webpack configuration to make this work.
 // This is what makes our MUI Pro licence key work.
