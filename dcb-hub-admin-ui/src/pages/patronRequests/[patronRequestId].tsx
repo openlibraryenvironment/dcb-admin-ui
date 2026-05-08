@@ -57,6 +57,7 @@ export default function PatronRequestDetails() {
 	const client = useApolloClient();
 	const router = useRouter();
 	const patronRequestId = router.query.patronRequestId;
+	const isReady = router.isReady;
 	const { data: session, status }: { data: any; status: any } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -287,7 +288,7 @@ export default function PatronRequestDetails() {
 		() => [
 			{
 				field: "auditDate",
-				headerName: "Audit date", // Consider wrapping this in t("...") later!
+				headerName: "Audit date",
 				minWidth: 60,
 				flex: 0.2,
 				valueGetter: (value: string, row: { auditDate: string }) => {
@@ -316,16 +317,8 @@ export default function PatronRequestDetails() {
 		],
 		[],
 	);
-	// to be removed when we move away from next.js. aims to cover the irritating 'fallback' second
-	if (router.isFallback) {
-		return (
-			<AdminLayout hideBreadcrumbs>
-				<CircularProgress size={125} />
-			</AdminLayout>
-		);
-	}
 
-	if (loading || status === "loading") {
+	if (loading || status === "loading" || !isReady) {
 		return (
 			<AdminLayout>
 				<Loading
@@ -1766,15 +1759,9 @@ export default function PatronRequestDetails() {
 export async function getStaticPaths() {
 	return {
 		paths: [],
-		fallback: true,
+		fallback: "blocking",
 	};
 }
-// export async function getStaticPaths() {
-// 	return {
-// 		paths: [],
-// 		fallback: "blocking",
-// 	};
-// }
 
 export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
