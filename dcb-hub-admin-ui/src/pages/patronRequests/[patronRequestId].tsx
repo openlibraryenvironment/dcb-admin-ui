@@ -21,13 +21,12 @@ import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import getConfig from "next/config";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
 	getAgencyById,
 	getHostLmsById,
-	getLegacyPatronRequestById,
 	getLibraryBasicsLocation,
 	getLocationById,
 	getPatronIdentities,
@@ -45,9 +44,7 @@ import { LocationCell } from "@components/LocationCell/LocationCell";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import Alert from "@components/Alert/Alert";
-import { determineAcceptableVersion } from "src/helpers/determineVersion";
 import { Library } from "@models/Library";
 import { HostLMS } from "@models/HostLMS";
 import { Agency } from "@models/Agency";
@@ -67,12 +64,6 @@ export default function PatronRequestDetails() {
 			router.push("/auth/logout");
 		},
 	});
-	const { version, isDev } = useDCBServiceInfo();
-
-	// Is version 8.46.0 or greater
-	const nonLegacyBehaviour = isDev
-		? true
-		: determineAcceptableVersion(version ? version : "NONE", "8.46.0");
 
 	const [loadingUpdate, setLoadingUpdate] = useState(false);
 	const [loadingCleanup, setLoadingCleanup] = useState(false);
@@ -86,16 +77,14 @@ export default function PatronRequestDetails() {
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
 		useState(false);
 
-	const { loading, data, error } = useQuery(
-		nonLegacyBehaviour ? getPatronRequestById : getLegacyPatronRequestById,
-		{
-			variables: {
-				query: "id:" + patronRequestId,
-			},
-			pollInterval: 180000,
-			errorPolicy: "all",
+	const { loading, data, error } = useQuery(getPatronRequestById, {
+		variables: {
+			query: "id:" + patronRequestId,
 		},
-	);
+		pollInterval: 180000,
+		errorPolicy: "all",
+		skip: !patronRequestId,
+	});
 
 	useEffect(() => {
 		if (error?.message?.includes("Source emitted")) {
@@ -294,6 +283,40 @@ export default function PatronRequestDetails() {
 		setLoadingCleanup(false);
 	};
 
+	const auditColumns = useMemo(
+		() => [
+			{
+				field: "auditDate",
+				headerName: "Audit date", // Consider wrapping this in t("...") later!
+				minWidth: 60,
+				flex: 0.2,
+				valueGetter: (value: string, row: { auditDate: string }) => {
+					const auditDate = row.auditDate;
+					return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
+				},
+			},
+			{
+				field: "briefDescription",
+				headerName: "Description",
+				minWidth: 100,
+				flex: 0.4,
+			},
+			{
+				field: "fromStatus",
+				headerName: "fromStatus",
+				minWidth: 50,
+				flex: 0.25,
+			},
+			{
+				field: "toStatus",
+				headerName: "toStatus",
+				minWidth: 50,
+				flex: 0.25,
+			},
+		],
+		[],
+	);
+
 	if (loading || status === "loading") {
 		return (
 			<AdminLayout>
@@ -306,7 +329,6 @@ export default function PatronRequestDetails() {
 			</AdminLayout>
 		);
 	}
-	console.log(patronLibrary?.contacts);
 
 	return standardError ||
 		patronRequest == null ||
@@ -1715,39 +1737,9 @@ export default function PatronRequestDetails() {
 					</Typography>
 					<ClientDataGrid
 						data={patronRequest?.audit}
-						columns={[
-							{
-								field: "auditDate",
-								headerName: "Audit date",
-								minWidth: 60,
-								flex: 0.2,
-								valueGetter: (value: string, row: { auditDate: string }) => {
-									const auditDate = row.auditDate;
-									return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
-								},
-							},
-							{
-								field: "briefDescription",
-								headerName: "Description",
-								minWidth: 100,
-								flex: 0.4,
-							},
-							{
-								field: "fromStatus",
-								headerName: "fromStatus",
-								minWidth: 50,
-								flex: 0.25,
-							},
-							{
-								field: "toStatus",
-								headerName: "toStatus",
-								minWidth: 50,
-								flex: 0.25,
-							},
-						]}
+						columns={auditColumns}
 						type="Audit"
 						coreType="Audit"
-						// This grid could show click-through details of its own for each audit log entry
 						selectable={true}
 						noDataTitle={t("details.audit_log_no_data")}
 						noDataMessage={t("details.audit_log_no_rows")}
