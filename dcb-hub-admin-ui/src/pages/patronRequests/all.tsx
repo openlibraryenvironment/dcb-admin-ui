@@ -367,7 +367,7 @@ export default function All() {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
