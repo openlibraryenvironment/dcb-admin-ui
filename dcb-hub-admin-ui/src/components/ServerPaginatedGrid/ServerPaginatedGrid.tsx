@@ -1205,6 +1205,19 @@ export default function ServerPaginationGrid({
 						onCleanup: handleCleanup,
 						selectionCount: selectionModel.length,
 					},
+					row: {
+						onMouseEnter: (e: React.MouseEvent<HTMLDivElement>) => {
+							const rowId = e.currentTarget.getAttribute("data-id");
+							if (rowId && !nonClickableTypes.includes(type)) {
+								const destinationPath = determineDataGridPathOnClick(
+									type,
+									rowId,
+								);
+								// Silently prefetch the JSON in the background (sneaky next.js hack)
+								router.prefetch(destinationPath);
+							}
+						},
+					},
 				}}
 				disableAggregation={true}
 				disableRowGrouping={true}
