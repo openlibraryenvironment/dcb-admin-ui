@@ -8,6 +8,7 @@ import { ProgressBar } from "@components/ProgressBar";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { AppCacheProvider } from "@mui/material-nextjs/v13-pagesRouter";
+import nextI18NextConfig from "../../next-i18next.config.js";
 
 // We don't have to use Roboto - import whichever fonts you want here.
 import Head from "next/head";
@@ -200,4 +201,4 @@ function MyApp(props: AppProps) {
 	);
 }
 
-export default appWithTranslation(MyApp);
+export default appWithTranslation(MyApp, nextI18NextConfig);

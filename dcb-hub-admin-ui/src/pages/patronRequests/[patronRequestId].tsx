@@ -316,6 +316,14 @@ export default function PatronRequestDetails() {
 		],
 		[],
 	);
+	// to be removed when we move away from next.js. aims to cover the irritating 'fallback' second
+	if (router.isFallback) {
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<CircularProgress size={125} />
+			</AdminLayout>
+		);
+	}
 
 	if (loading || status === "loading") {
 		return (
@@ -1758,9 +1766,15 @@ export default function PatronRequestDetails() {
 export async function getStaticPaths() {
 	return {
 		paths: [],
-		fallback: "blocking",
+		fallback: true,
 	};
 }
+// export async function getStaticPaths() {
+// 	return {
+// 		paths: [],
+// 		fallback: "blocking",
+// 	};
+// }
 
 export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
