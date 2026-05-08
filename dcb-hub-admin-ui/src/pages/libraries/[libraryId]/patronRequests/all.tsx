@@ -32,14 +32,12 @@ import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation"
 import { Location } from "@models/Location";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 
-type LibraryDetails = {
-	libraryId: any;
-};
-export default function PatronRequests({ libraryId }: LibraryDetails) {
+export default function PatronRequests() {
 	const { t } = useTranslation();
 	const customColumns = useCustomColumns();
 	const theme = useTheme();
 	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -288,7 +286,14 @@ export default function PatronRequests({ libraryId }: LibraryDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -298,10 +303,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

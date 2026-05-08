@@ -43,9 +43,6 @@ import { Controller, useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { isEmpty } from "lodash";
 
-type LocationDetails = {
-	locationId: string;
-};
 // Coming in, we know the ID. So we need to query our GraphQL server to get the associated data.
 interface LocationFormFields {
 	name: string;
@@ -55,9 +52,11 @@ interface LocationFormFields {
 	localId?: string;
 }
 // Needs a parser and the decimal logic extending to the data change log also.
-export default function LocationDetails({ locationId }: LocationDetails) {
+export default function LocationDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
+	const locationId = router.query.locationId;
+
 	const theme = useTheme();
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 
@@ -887,7 +886,14 @@ export default function LocationDetails({ locationId }: LocationDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -897,10 +903,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const locationId = ctx.params.locationId;
+
 	return {
 		props: {
-			locationId,
 			...translations,
 		},
 	};

@@ -28,14 +28,12 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
 
-type LibraryDetails = {
-	libraryId: any;
-};
-export default function ItemType({ libraryId }: LibraryDetails) {
+export default function ItemType() {
 	const { t } = useTranslation();
 
 	const theme = useTheme();
 	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -236,7 +234,14 @@ export default function ItemType({ libraryId }: LibraryDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -246,10 +251,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

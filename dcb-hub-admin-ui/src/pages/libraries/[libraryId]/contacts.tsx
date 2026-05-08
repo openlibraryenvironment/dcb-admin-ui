@@ -30,11 +30,7 @@ import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import { Person } from "@models/Person";
 import NewContact from "src/forms/NewContact/NewContact";
 
-type LibraryDetails = {
-	libraryId: any;
-};
-
-export default function Contacts({ libraryId }: LibraryDetails) {
+export default function Contacts() {
 	const { t } = useTranslation();
 
 	const [tabIndex, setTabIndex] = useState(6);
@@ -45,6 +41,8 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 	const closeNewContact = () => {
 		setShowNewContact(false);
 	};
+	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -66,7 +64,6 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
-	const router = useRouter();
 	const client = useApolloClient();
 	const { data: session, status } = useSession({
 		required: true,
@@ -295,7 +292,14 @@ export default function Contacts({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	);
 }
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -305,10 +309,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

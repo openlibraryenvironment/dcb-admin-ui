@@ -24,13 +24,11 @@ import { handleGroupTabChange } from "src/helpers/navigation/handleTabChange";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { useQuery } from "@apollo/client/react";
 
-type GroupDetails = {
-	groupId: any;
-};
-export default function GroupPatronRequests({ groupId }: GroupDetails) {
+export default function GroupPatronRequests() {
 	const { t } = useTranslation();
 	const customColumns = useCustomColumns();
 	const router = useRouter();
+	const groupId = router.query.groupId as string;
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -221,7 +219,14 @@ export default function GroupPatronRequests({ groupId }: GroupDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -231,10 +236,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const groupId = ctx.params.groupId;
+
 	return {
 		props: {
-			groupId,
 			...translations,
 		},
 	};

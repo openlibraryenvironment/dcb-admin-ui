@@ -11,12 +11,10 @@ import Error from "@components/Error/Error";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
-type AgencyDetails = {
-	agencyId: string;
-};
-
-export default function AgencyDetails({ agencyId }: AgencyDetails) {
+export default function AgencyDetails() {
 	const { t } = useTranslation();
+	const router = useRouter();
+	const { agencyId } = router.query;
 	const { loading, data, error } = useQuery(getAgencyById, {
 		variables: {
 			query: "id:" + agencyId,
@@ -26,7 +24,6 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 	});
 	const agency: Agency = data?.agencies?.content?.[0];
 
-	const router = useRouter();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -151,8 +148,14 @@ export default function AgencyDetails({ agencyId }: AgencyDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
-	// Handles loading the translations on the server-side
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -162,12 +165,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	// We use ctx.params to extract the ID from the URL. Then we can use it to make the request.
-	const agencyId = ctx.params.agencyId;
-	// Then return all the relevant props ready for page load.
+
 	return {
 		props: {
-			agencyId,
 			...translations,
 		},
 	};

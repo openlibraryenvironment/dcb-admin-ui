@@ -21,12 +21,10 @@ import { isEmpty } from "lodash";
 import { ArrowLeft, ArrowRight } from "@mui/icons-material";
 import dayjs from "dayjs";
 
-type AuditDetails = {
-	auditId: string;
-};
-
-export default function AuditDetails({ auditId }: AuditDetails) {
+export default function AuditDetails() {
 	const { t } = useTranslation();
+	const router = useRouter();
+	const auditId = router.query.auditId;
 	const { loading, data, error } = useQuery(getAuditById, {
 		variables: {
 			query: "id:" + auditId,
@@ -128,7 +126,6 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 			? otherAudits[currentAuditIndex + 1]?.id
 			: null;
 
-	const router = useRouter();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -313,7 +310,14 @@ export default function AuditDetails({ auditId }: AuditDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -323,10 +327,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const auditId = ctx.params.auditId;
+
 	return {
 		props: {
-			auditId,
 			...translations,
 		},
 	};

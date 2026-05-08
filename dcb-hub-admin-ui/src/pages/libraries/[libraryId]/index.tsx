@@ -49,10 +49,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { isEmpty } from "lodash";
 import { getILS } from "src/helpers/getILS";
 
-type LibraryDetails = {
-	libraryId: any;
-};
-
 interface LibraryFormFields {
 	fullName: string;
 	shortName: string;
@@ -63,11 +59,12 @@ interface LibraryFormFields {
 	longitude?: number;
 }
 
-export default function LibraryDetails({ libraryId }: LibraryDetails) {
+export default function LibraryDetails() {
 	const { t } = useTranslation();
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 	const theme = useTheme();
 	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -847,7 +844,14 @@ export default function LibraryDetails({ libraryId }: LibraryDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -857,10 +861,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

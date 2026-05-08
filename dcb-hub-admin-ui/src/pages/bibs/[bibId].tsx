@@ -27,12 +27,11 @@ import getConfig from "next/config";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
 
-type BibDetails = {
-	bibId: Bib;
-};
-
-export default function SourceBibDetails({ bibId }: BibDetails) {
+export default function SourceBibDetails() {
 	const { t } = useTranslation();
+	const router = useRouter();
+	const { bibId } = router.query;
+
 	const { loading, data, error } = useQuery(getBibMainDetails, {
 		variables: {
 			query: "id:" + bibId,
@@ -47,7 +46,6 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 		{ loading: sourceRecordLoading, data: sourceRecordData },
 	] = useLazyQuery(getBibSourceRecord);
 
-	const router = useRouter();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -418,7 +416,14 @@ export default function SourceBibDetails({ bibId }: BibDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -428,10 +433,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const bibId = ctx.params.bibId;
+
 	return {
 		props: {
-			bibId,
 			...translations,
 		},
 	};

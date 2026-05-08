@@ -30,13 +30,12 @@ import { Delete } from "@mui/icons-material";
 import dayjs from "dayjs";
 import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
 import { defaultBibColumnVisibility } from "src/helpers/DataGrid/columns";
-type LibraryDetails = {
-	libraryId: string;
-};
-export default function LibraryBibs({ libraryId }: LibraryDetails) {
+
+export default function LibraryBibs() {
 	const { t } = useTranslation();
 
 	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const customColumns = useCustomColumns();
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const client = useApolloClient();
@@ -297,7 +296,14 @@ export default function LibraryBibs({ libraryId }: LibraryDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -307,10 +313,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

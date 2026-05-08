@@ -217,8 +217,8 @@ export async function getStaticProps(ctx: any) {
 
 export async function getStaticPaths() {
 	return {
-		paths: [], // Do not pre-render any specific IDs at build time
-		fallback: "blocking", // Generate pages on-demand and cache them
+		paths: [],
+		fallback: "blocking",
 	};
 }
 

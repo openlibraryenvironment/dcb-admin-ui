@@ -54,17 +54,12 @@ import { Agency } from "@models/Agency";
 import { getILS } from "src/helpers/getILS";
 import { findPrimaryContacts } from "src/helpers/findPrimaryContacts";
 
-// Supplying, patron and pickup should all link to the library now
-type PatronRequestDetails = {
-	patronRequestId: string;
-};
-
-export default function PatronRequestDetails({
-	patronRequestId,
-}: PatronRequestDetails) {
+export default function PatronRequestDetails() {
 	const { t } = useTranslation();
 	const { publicRuntimeConfig } = getConfig();
 	const client = useApolloClient();
+	const router = useRouter();
+	const patronRequestId = router.query.patronRequestId;
 	const { data: session, status }: { data: any; status: any } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -90,7 +85,6 @@ export default function PatronRequestDetails({
 		useState(false);
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
 		useState(false);
-	const router = useRouter();
 
 	const { loading, data, error } = useQuery(
 		nonLegacyBehaviour ? getPatronRequestById : getLegacyPatronRequestById,
@@ -1769,7 +1763,14 @@ export default function PatronRequestDetails({
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -1779,10 +1780,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const patronRequestId = ctx.params.patronRequestId;
+
 	return {
 		props: {
-			patronRequestId,
 			...translations,
 		},
 	};

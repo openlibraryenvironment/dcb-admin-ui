@@ -48,10 +48,6 @@ import { formatChangedFields } from "src/helpers/formatChangedFields";
 import { isEmpty } from "lodash";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 
-type LibraryDetails = {
-	libraryId: any;
-};
-
 interface AgencyFormFields {
 	isSupplyingAgency?: boolean | null;
 	isBorrowingAgency?: boolean | null;
@@ -60,9 +56,10 @@ interface AgencyFormFields {
 	latitude?: number;
 }
 
-export default function Settings({ libraryId }: LibraryDetails) {
+export default function Settings() {
 	const { t } = useTranslation();
-
+	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const [tabIndex, setTabIndex] = useState(2);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
@@ -100,7 +97,6 @@ export default function Settings({ libraryId }: LibraryDetails) {
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
-	const router = useRouter();
 	const client = useApolloClient();
 	const { data: session, status } = useSession({
 		required: true,
@@ -570,7 +566,14 @@ export default function Settings({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	);
 }
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -580,10 +583,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

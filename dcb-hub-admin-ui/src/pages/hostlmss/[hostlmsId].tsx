@@ -1,7 +1,6 @@
 import { Grid, Stack, Tab, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 import { AdminLayout } from "@layout";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { HostLMS } from "@models/HostLMS";
 import { useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
@@ -22,14 +21,13 @@ import { getILS } from "src/helpers/getILS";
 import TabPanel from "@mui/lab/TabPanel";
 import TabList from "@mui/lab/TabList";
 import TabContext from "@mui/lab/TabContext";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
-type HostLMSDetails = {
-	hostlmsId: any;
-};
-
-export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
+export default function HostLMSDetails() {
 	const { t } = useTranslation();
 	// pollInterval is in ms - set to 2 mins
+	const router = useRouter();
+	const hostlmsId = router.query.hostlmsId;
 	const { loading, data, error } = useQuery(getHostLmsById, {
 		variables: {
 			query: "id:" + hostlmsId,
@@ -43,7 +41,6 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
 		setActiveTab(newValue);
 	};
-	const router = useRouter();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -853,8 +850,14 @@ export default function HostLMSDetails({ hostlmsId }: HostLMSDetails) {
 		</AdminLayout>
 	);
 }
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -864,10 +867,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const hostlmsId = ctx.params.hostlmsId;
+
 	return {
 		props: {
-			hostlmsId,
 			...translations,
 		},
 	};

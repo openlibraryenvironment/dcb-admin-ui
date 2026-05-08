@@ -43,9 +43,6 @@ import Import from "@components/Import/Import";
 import useCode from "@hooks/useCode";
 import dayjs from "dayjs";
 import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
-type LibraryDetails = {
-	libraryId: string;
-};
 
 interface NewLocationData {
 	show: boolean;
@@ -54,9 +51,10 @@ interface NewLocationData {
 	libraryName: string;
 	ils: string;
 }
-export default function Locations({ libraryId }: LibraryDetails) {
+export default function Locations() {
 	const { t } = useTranslation();
-
+	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const [tabIndex, setTabIndex] = useState(7);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showImport, setImport] = useState(false);
@@ -83,7 +81,6 @@ export default function Locations({ libraryId }: LibraryDetails) {
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
-	const router = useRouter();
 	const customColumns = useCustomColumns();
 
 	const client = useApolloClient();
@@ -449,7 +446,14 @@ export default function Locations({ libraryId }: LibraryDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -459,10 +463,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

@@ -287,6 +287,8 @@ export async function getStaticProps(ctx: any) {
 }
 
 export async function getStaticPaths() {
+	// Replacement for the previous method of getting all server side props
+	// which was not good for latency. Next.js specifc
 	return {
 		paths: [], // Do not pre-render any specific IDs at build time
 		fallback: "blocking", // Generate pages on-demand and cache them

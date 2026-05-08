@@ -18,14 +18,9 @@ import {
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 
-type DataChangeLogDetails = {
-	dataChangeLogId: string;
-};
 // Coming in, we know the ID. So we need to query our GraphQL server to get the associated data.
 
-export default function DataChangeLogDetails({
-	dataChangeLogId,
-}: DataChangeLogDetails) {
+export default function DataChangeLogDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { status } = useSession({
@@ -36,6 +31,7 @@ export default function DataChangeLogDetails({
 		},
 	});
 
+	const dataChangeLogId = router.query.dataChangeLogId;
 	// Poll interval in ms
 	const { loading, data, error } = useQuery(getDataChangeLogById, {
 		variables: {
@@ -206,7 +202,14 @@ export default function DataChangeLogDetails({
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -216,10 +219,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const dataChangeLogId = ctx.params.dataChangeLogId;
+
 	return {
 		props: {
-			dataChangeLogId,
 			...translations,
 		},
 	};

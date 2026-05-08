@@ -29,13 +29,10 @@ import { closeConfirmation } from "src/helpers/actions/editAndDeleteActions";
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 
-type GroupSettingsProps = {
-	groupId: any;
-};
-
-export default function GroupSettings({ groupId }: GroupSettingsProps) {
+export default function GroupSettings() {
 	const { t } = useTranslation();
 	const router = useRouter();
+	const groupId = router.query.groupId as string;
 	const client = useApolloClient();
 
 	const [tabIndex, setTabIndex] = useState(3); // Assuming 'settings' is index 3
@@ -369,7 +366,14 @@ export default function GroupSettings({ groupId }: GroupSettingsProps) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -379,10 +383,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const groupId = ctx.params.groupId;
+
 	return {
 		props: {
-			groupId,
 			...translations,
 		},
 	};

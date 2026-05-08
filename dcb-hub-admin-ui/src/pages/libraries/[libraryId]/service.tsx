@@ -40,13 +40,10 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
-type LibraryDetails = {
-	libraryId: any;
-};
-
-export default function Service({ libraryId }: LibraryDetails) {
+export default function Service() {
 	const { t } = useTranslation();
-
+	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
 	const [tabIndex, setTabIndex] = useState(1);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
@@ -72,7 +69,6 @@ export default function Service({ libraryId }: LibraryDetails) {
 
 	const theme = useTheme();
 	const client = useApolloClient();
-	const router = useRouter();
 	const { data: session, status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -1014,7 +1010,15 @@ export default function Service({ libraryId }: LibraryDetails) {
 		</AdminLayout>
 	);
 }
-export async function getServerSideProps(ctx: any) {
+
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -1024,10 +1028,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const libraryId = ctx.params.libraryId;
+
 	return {
 		props: {
-			libraryId,
 			...translations,
 		},
 	};

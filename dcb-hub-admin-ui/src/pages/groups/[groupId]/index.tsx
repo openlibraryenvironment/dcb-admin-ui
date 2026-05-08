@@ -14,12 +14,10 @@ import { useRouter } from "next/router";
 import { handleGroupTabChange } from "src/helpers/navigation/handleTabChange";
 import { useState } from "react";
 
-type GroupDetails = {
-	groupId: string;
-};
-
-export default function GroupDetails({ groupId }: GroupDetails) {
+export default function GroupDetails() {
 	const { t } = useTranslation();
+	const router = useRouter();
+	const groupId = router.query.groupId as string;
 	const { loading, data, error } = useQuery(getLibraryGroupById, {
 		variables: {
 			query: "id:" + groupId,
@@ -30,7 +28,6 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 	const group: Group = data?.libraryGroups?.content?.[0];
 	const [tabIndex, setTabIndex] = useState(0);
 
-	const router = useRouter();
 	const { status } = useSession({
 		required: true,
 		onUnauthenticated() {
@@ -193,7 +190,14 @@ export default function GroupDetails({ groupId }: GroupDetails) {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
@@ -203,10 +207,9 @@ export async function getServerSideProps(ctx: any) {
 			"validation",
 		]);
 	}
-	const groupId = ctx.params.groupId;
+
 	return {
 		props: {
-			groupId,
 			...translations,
 		},
 	};
