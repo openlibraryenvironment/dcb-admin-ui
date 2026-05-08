@@ -1,4 +1,4 @@
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
+import { NextPage } from "next";
 import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "next-i18next";
@@ -109,10 +109,8 @@ const HostLmss: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -121,12 +119,11 @@ export const getServerSideProps: GetServerSideProps = async (
 			"validation",
 		]);
 	}
-
 	return {
 		props: {
 			...translations,
 		},
 	};
-};
+}
 
 export default HostLmss;

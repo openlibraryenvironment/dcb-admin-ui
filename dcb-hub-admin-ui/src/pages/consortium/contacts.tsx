@@ -1,6 +1,5 @@
 import { AdminLayout } from "@layout";
 import { Button, Tab, Tabs } from "@mui/material";
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -18,6 +17,7 @@ import NewContact from "../../forms/NewContact/NewContact";
 import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
+import { NextPage } from "next";
 
 const Contacts: NextPage = () => {
 	const { t } = useTranslation();
@@ -166,10 +166,8 @@ const Contacts: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -183,6 +181,6 @@ export const getServerSideProps: GetServerSideProps = async (
 			...translations,
 		},
 	};
-};
+}
 
 export default Contacts;

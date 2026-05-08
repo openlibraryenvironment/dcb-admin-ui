@@ -190,7 +190,14 @@ export default function RequestingHistory() {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticPaths() {
+	return {
+		paths: [], // Do not pre-render any specific IDs at build time
+		fallback: "blocking", // Generate pages on-demand and cache them
+	};
+}
+
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {

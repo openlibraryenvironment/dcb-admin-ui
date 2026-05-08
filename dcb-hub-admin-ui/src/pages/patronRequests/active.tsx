@@ -351,7 +351,7 @@ export default function Active() {
 	);
 }
 
-export async function getServerSideProps(ctx: any) {
+export async function getStaticProps(ctx: any) {
 	const { locale } = ctx;
 	let translations = {};
 	if (locale) {

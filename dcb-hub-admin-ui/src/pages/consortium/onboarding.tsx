@@ -1,6 +1,6 @@
 import { AdminLayout } from "@layout";
 import { Grid, Tab, Tabs, Typography } from "@mui/material";
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
+import { NextPage } from "next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useRouter } from "next/router";
@@ -56,10 +56,8 @@ const Onboarding: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -73,6 +71,6 @@ export const getServerSideProps: GetServerSideProps = async (
 			...translations,
 		},
 	};
-};
+}
 
 export default Onboarding;

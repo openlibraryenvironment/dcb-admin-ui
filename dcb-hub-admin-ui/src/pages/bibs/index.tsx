@@ -1,4 +1,3 @@
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "next-i18next";
 import { getBibs } from "src/queries/queries";
@@ -13,6 +12,7 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";
 import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
 import { defaultBibColumnVisibility } from "src/helpers/DataGrid/columns";
+import { NextPage } from "next";
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();
 
@@ -144,10 +144,8 @@ const Bibs: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -161,6 +159,6 @@ export const getServerSideProps: GetServerSideProps = async (
 			...translations,
 		},
 	};
-};
+}
 
 export default Bibs;

@@ -1,7 +1,7 @@
 import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
-import { GetServerSideProps, NextPage } from "next";
+import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -30,8 +30,8 @@ const ServiceStatus: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -45,6 +45,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			...translations,
 		},
 	};
-};
+}
 
 export default ServiceStatus;

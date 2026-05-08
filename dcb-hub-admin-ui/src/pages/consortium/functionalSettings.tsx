@@ -3,7 +3,6 @@ import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { FunctionalSetting } from "@models/FunctionalSetting";
 import { Button, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -15,6 +14,7 @@ import {
 } from "src/queries/queries";
 import NewFunctionalSetting from "../../forms/NewFunctionalSetting/NewFunctionalSetting";
 import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
+import { NextPage } from "next";
 
 const FunctionalSettings: NextPage = () => {
 	const { t } = useTranslation();
@@ -145,10 +145,8 @@ const FunctionalSettings: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -162,6 +160,6 @@ export const getServerSideProps: GetServerSideProps = async (
 			...translations,
 		},
 	};
-};
+}
 
 export default FunctionalSettings;

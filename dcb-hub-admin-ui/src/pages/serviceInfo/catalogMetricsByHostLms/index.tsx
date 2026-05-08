@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GetServerSideProps, NextPage } from "next";
+import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { Trans, useTranslation } from "next-i18next";
 import getConfig from "next/config";
@@ -219,8 +219,8 @@ const CatalogMetricsByHostLms: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -234,6 +234,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			...translations,
 		},
 	};
-};
+}
 
 export default CatalogMetricsByHostLms;

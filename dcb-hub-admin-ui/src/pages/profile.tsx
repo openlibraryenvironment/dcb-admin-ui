@@ -96,14 +96,19 @@ const Profile: NextPage = () => {
 	);
 };
 
-export async function getServerSideProps({ locale }: { locale: string }) {
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
+	let translations = {};
+	if (locale) {
+		translations = await serverSideTranslations(locale as string, [
+			"common",
+			"application",
+			"validation",
+		]);
+	}
 	return {
 		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
+			...translations,
 		},
 	};
 }

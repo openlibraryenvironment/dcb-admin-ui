@@ -1,4 +1,4 @@
-import { GetServerSideProps, NextPage } from "next";
+import { NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { Button, Tooltip } from "@mui/material";
 import { useState } from "react";
@@ -120,8 +120,8 @@ const AllMappings: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -135,6 +135,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			...translations,
 		},
 	};
-};
+}
 
 export default AllMappings;

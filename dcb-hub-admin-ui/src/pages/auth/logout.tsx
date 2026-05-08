@@ -8,7 +8,6 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { signIn } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Trans, useTranslation } from "next-i18next"; //localisation
@@ -131,10 +130,8 @@ const Logout = () => {
 Logout.noAuthRequired = true;
 export default Logout;
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -148,4 +145,4 @@ export const getServerSideProps: GetServerSideProps = async (
 			...translations,
 		},
 	};
-};
+}

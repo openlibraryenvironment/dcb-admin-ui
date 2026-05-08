@@ -3,7 +3,6 @@ import { AdminLayout } from "@layout";
 import { Button } from "@mui/material";
 import NewGroup from "../../forms/NewGroup/NewGroup";
 import { getLibraryGroups } from "src/queries/queries";
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from "next";
 //localisation
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -14,6 +13,7 @@ import Loading from "@components/Loading/Loading";
 import { standardFilters } from "src/helpers/DataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+import { NextPage } from "next/types";
 // Groups Feature Page Structure
 // This page shows the list of groups
 // New Group is the (modal) form to add a group
@@ -120,10 +120,8 @@ const Groups: NextPage = () => {
 	);
 };
 
-export const getServerSideProps: GetServerSideProps = async (
-	context: GetServerSidePropsContext,
-) => {
-	const { locale } = context;
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
 	let translations = {};
 	if (locale) {
 		translations = await serverSideTranslations(locale as string, [
@@ -137,6 +135,6 @@ export const getServerSideProps: GetServerSideProps = async (
 			...translations,
 		},
 	};
-};
+}
 
 export default Groups;
