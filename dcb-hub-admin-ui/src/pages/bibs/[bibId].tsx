@@ -37,6 +37,7 @@ export default function SourceBibDetails() {
 			query: "id:" + bibId,
 		},
 		errorPolicy: "all",
+		skip: !bibId,
 		// pollInterval: 600000, // Polling disabled on bib record page to reduce server load.
 	});
 	const { publicRuntimeConfig } = getConfig();

@@ -33,6 +33,7 @@ export default function HostLMSDetails() {
 			query: "id:" + hostlmsId,
 		},
 		pollInterval: 120000,
+		skip: !hostlmsId,
 		errorPolicy: "all",
 	});
 	const hostlms: HostLMS = data?.hostLms?.content?.[0];

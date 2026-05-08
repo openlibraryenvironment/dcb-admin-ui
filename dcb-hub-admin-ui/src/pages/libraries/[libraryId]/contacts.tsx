@@ -60,6 +60,7 @@ export default function Contacts() {
 		},
 		pollInterval: 120000,
 		errorPolicy: "all",
+		skip: !libraryId,
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 

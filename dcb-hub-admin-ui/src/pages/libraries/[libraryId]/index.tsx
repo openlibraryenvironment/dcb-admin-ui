@@ -82,6 +82,7 @@ export default function LibraryDetails() {
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 		errorPolicy: "all",
+		skip: !libraryId,
 		onCompleted: (data) => {
 			const library = data?.libraries?.content?.[0];
 			// This is needed because default values don't always load in time.

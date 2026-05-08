@@ -42,6 +42,7 @@ export default function GroupSupplierRequests() {
 		},
 		pollInterval: 120000,
 		errorPolicy: "all",
+		skip: !groupId,
 	});
 	// Get all the supplying agency codes
 	const group: Group = data?.libraryGroups?.content?.[0];

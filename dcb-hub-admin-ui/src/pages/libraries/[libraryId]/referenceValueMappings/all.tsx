@@ -69,6 +69,7 @@ export default function All() {
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 		errorPolicy: "all",
+		skip: !libraryId,
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 

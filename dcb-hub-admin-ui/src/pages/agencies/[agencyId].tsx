@@ -19,6 +19,7 @@ export default function AgencyDetails() {
 		variables: {
 			query: "id:" + agencyId,
 		},
+		skip: !agencyId,
 		pollInterval: 120000,
 		errorPolicy: "all",
 	});

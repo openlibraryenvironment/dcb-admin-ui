@@ -75,6 +75,7 @@ export default function Locations() {
 		},
 		errorPolicy: "all",
 		pollInterval: 120000,
+		skip: !libraryId,
 	});
 	const library: Library = data?.libraries?.content?.[0];
 

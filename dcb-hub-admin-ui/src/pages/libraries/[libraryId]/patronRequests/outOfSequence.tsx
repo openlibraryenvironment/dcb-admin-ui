@@ -67,6 +67,7 @@ export default function PatronRequests() {
 			query: "id:" + libraryId,
 		},
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		skip: !libraryId,
 	});
 	const { data: locationsData, fetchMore } = useQuery(
 		getLocationForPatronRequestGrid,

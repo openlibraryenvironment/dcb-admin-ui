@@ -64,6 +64,7 @@ export default function Service() {
 		},
 		pollInterval: 120000,
 		errorPolicy: "all",
+		skip: !libraryId,
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 

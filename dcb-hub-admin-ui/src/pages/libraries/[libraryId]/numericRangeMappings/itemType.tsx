@@ -59,7 +59,8 @@ export default function ItemType() {
 			query: "id:" + libraryId,
 		},
 		errorPolicy: "all",
-		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		pollInterval: 120000, // pollInterval is in ms - set to 2 mins,
+		skip: !libraryId,
 	});
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 

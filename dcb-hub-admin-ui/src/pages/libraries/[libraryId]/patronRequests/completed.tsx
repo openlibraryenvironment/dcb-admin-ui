@@ -65,6 +65,7 @@ export default function PatronRequests() {
 			query: "id:" + libraryId,
 		},
 		errorPolicy: "all",
+		skip: !libraryId,
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 	});
 	const { data: locationsData, fetchMore } = useQuery(

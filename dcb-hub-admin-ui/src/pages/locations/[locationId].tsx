@@ -75,6 +75,7 @@ export default function LocationDetails() {
 		},
 		pollInterval: 120000,
 		errorPolicy: "all",
+		skip: !locationId,
 		onCompleted: (data) => {
 			const location = data?.locations?.content?.[0];
 			// This is needed because default values don't always load in time.

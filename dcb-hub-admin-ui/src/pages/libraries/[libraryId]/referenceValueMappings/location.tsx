@@ -67,6 +67,7 @@ export default function Location() {
 		variables: {
 			query: "id:" + libraryId,
 		},
+		skip: !libraryId,
 		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 		errorPolicy: "all",
 	});

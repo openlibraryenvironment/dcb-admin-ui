@@ -68,7 +68,7 @@ export default function ItemType() {
 			query: "id:" + libraryId,
 		},
 		errorPolicy: "all",
-
+		skip: !libraryId,
 		// Disable polling on these
 		// pollInterval: 120000, // pollInterval is in ms - set to 2 mins
 		// Not just the polling. Something is causing it to switch to 'loading' instead of polling.

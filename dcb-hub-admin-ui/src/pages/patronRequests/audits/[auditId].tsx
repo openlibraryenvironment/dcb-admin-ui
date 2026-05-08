@@ -31,6 +31,7 @@ export default function AuditDetails() {
 		},
 		pollInterval: 120000,
 		errorPolicy: "all",
+		skip: !auditId,
 	});
 	const audit: AuditItem = data?.audits?.content?.[0];
 	// use patron request ID from audit to find the other audits known to it

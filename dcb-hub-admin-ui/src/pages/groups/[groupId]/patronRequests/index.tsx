@@ -42,6 +42,7 @@ export default function GroupPatronRequests() {
 		},
 		pollInterval: 120000,
 		errorPolicy: "all",
+		skip: !groupId,
 	});
 	// Get all the patron Host LMS codes
 	// And supply them as preset query.
