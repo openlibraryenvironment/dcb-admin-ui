@@ -1,3 +1,13 @@
+## [1.58.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.58.0...v1.58.1) (2026-05-12)
+
+
+### Bug Fixes
+
+* Ensure that we skip queries consistently if ID is not available ([5a10be9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5a10be924728ff969dfc91ee26de704da8c4cc9a))
+* Ensure unavailable items don't show for walk-up [DCB-2138] ([f412e41](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f412e4184082246cc61d609864289d827267c52e))
+* New props approach for nested routes [DCB-1757] ([2fbdb25](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2fbdb257d2cd4ff09379b26a9d083c40229619ef))
+* Switch to using static props to address sidebar slowness [DCB-1767] ([fe4f123](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fe4f12392988d94844fc30cf114aacb22cdf6937))
+
 # [1.58.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.57.0...v1.58.0) (2026-02-25)
 
 
