@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import {
 	styled,
 	Theme,
@@ -17,7 +17,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Link from "@components/Link/Link";
-import { useRouter } from "next/router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import {
 	LocationOn,
 	Menu as MenuIcon,

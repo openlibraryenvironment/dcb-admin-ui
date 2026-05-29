@@ -24,8 +24,8 @@ import {
 	useQuery,
 } from "@apollo/client";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { useTranslation } from "next-i18next";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
 	CustomNoDataOverlay,
 	CustomNoResultsOverlay,
@@ -41,7 +41,7 @@ import {
 	ExpandMore,
 } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
-import { useSession } from "next-auth/react";
+import { useAuth } from "react-oidc-context";
 import {
 	deleteLibraryQuery,
 	getLocations,
@@ -73,7 +73,7 @@ import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { PatronRequest } from "@models/PatronRequest";
 import { Location } from "@models/Location";
 import { ExportProgressDialog } from "./components/ExportProgressDialog";
-import getConfig from "next/config";
+
 import axios from "axios";
 import { CleanupProgressDialog } from "./components/CleanupProgressDialog";
 import { cleanupStatuses } from "src/helpers/statuses";

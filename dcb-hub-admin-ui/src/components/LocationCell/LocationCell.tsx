@@ -1,7 +1,7 @@
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@tanstack/react-query";
 import Link from "@components/Link/Link";
 import { Location } from "@models/Location";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { getLocationForPatronRequestGrid } from "src/queries/queries";
 
 export const LocationCell = ({

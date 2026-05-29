@@ -2,8 +2,8 @@ import Link from "@components/Link/Link";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 //localisation
-import { useTranslation } from "next-i18next";
-import getConfig from "next/config";
+import { useTranslation } from "react-i18next";
+
 import dayjs from "dayjs";
 import OpenRsLogo from "public/assets/brand/OpenRS_48px.png";
 import Image from "next/image";

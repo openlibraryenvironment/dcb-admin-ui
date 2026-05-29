@@ -1,4 +1,4 @@
-import { useTranslation } from "next-i18next"; //localisation
+import { useTranslation } from "react-i18next"; //localisation
 import Link from "@components/Link/Link";
 import { ONBOARDING_LINKS } from "homeData/homeConfig";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";

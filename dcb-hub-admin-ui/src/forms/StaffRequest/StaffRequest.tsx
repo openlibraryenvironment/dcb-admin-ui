@@ -26,8 +26,8 @@ import { Close } from "@mui/icons-material";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { getLibraries, getLocations } from "src/queries/queries";
 import axios from "axios";
-import getConfig from "next/config";
-import { useSession } from "next-auth/react";
+
+import { useAuth } from "react-oidc-context";
 import Link from "@components/Link/Link";
 import { getRequestError } from "src/helpers/getRequestError";
 import { Agency } from "@models/Agency";

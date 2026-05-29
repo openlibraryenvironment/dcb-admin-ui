@@ -7,7 +7,7 @@ import {
 	LinearProgress,
 	Typography,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 
 type ExportProgressProps = {
 	open: boolean;

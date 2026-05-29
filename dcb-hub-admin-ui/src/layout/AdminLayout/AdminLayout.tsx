@@ -7,7 +7,7 @@ import { Stack, Typography, useTheme, Box, Button } from "@mui/material";
 import Sidebar from "@layout/AdminLayout/Sidebar/Sidebar";
 import LinkedFooter from "./LinkedFooter/LinkedFooter";
 import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
-import { useSession } from "next-auth/react";
+import { useAuth } from "react-oidc-context";
 import Link from "@components/Link/Link";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { BookOutlined } from "@mui/icons-material";

@@ -8,7 +8,7 @@ import {
 	useGridApiContext,
 	GridApiPro,
 } from "@mui/x-data-grid-premium";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { MutableRefObject } from "react";
 import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
 

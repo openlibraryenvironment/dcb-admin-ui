@@ -1,7 +1,7 @@
 // This is an adaptor for the use of Next.js links with the MUI Link component
 // https://mui.com/material-ui/guides/routing/#next-js-pages-router
 import clsx from "clsx";
-import { useRouter } from "next/router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import MuiLink, { LinkProps as MuiLinkProps } from "@mui/material/Link";
 import { styled, useTheme } from "@mui/material/styles";
@@ -11,7 +11,8 @@ import { forwardRef } from "react";
 const Anchor = styled("a")({});
 
 interface NextLinkComposedProps
-	extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href">,
+	extends
+		Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href">,
 		Omit<
 			NextLinkProps,
 			"href" | "as" | "passHref" | "onMouseEnter" | "onClick" | "onTouchStart"

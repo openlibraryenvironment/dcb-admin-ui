@@ -18,8 +18,8 @@ import {
 	GridToolbar,
 	useKeepGroupedColumnsHidden,
 } from "@mui/x-data-grid-premium";
-import { useRouter } from "next/router";
-import { useTranslation } from "next-i18next";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { useCallback, useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { deleteLibraryContact, updatePerson } from "src/queries/queries";
@@ -36,7 +36,7 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import { DocumentNode } from "graphql";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
-import { useSession } from "next-auth/react";
+import { useAuth } from "react-oidc-context";
 import { CellEdit } from "@components/CellEdit/CellEdit";
 import { ColumnsAndSearchToolbar } from "@components/ServerPaginatedGrid/components/ColumnsAndSearchToolbar";
 import { validateRow } from "src/helpers/DataGrid/validateRow";

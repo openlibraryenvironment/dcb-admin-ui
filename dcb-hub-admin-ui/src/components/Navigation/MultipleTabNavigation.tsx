@@ -1,7 +1,7 @@
-import { useQuery } from "@apollo/client";
+import { useQuery } from "@tanstack/react-query";
 import { Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
-import { useTranslation } from "next-i18next";
-import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { Dispatch, SetStateAction } from "react";
 import {
 	handleMappingsTabChange,

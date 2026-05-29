@@ -1,6 +1,6 @@
 import Link from "@components/Link/Link";
 import { Stack, Typography, useTheme } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 
 export default function LinkedFooter() {
 	const theme = useTheme();

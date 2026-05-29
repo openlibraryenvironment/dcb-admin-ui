@@ -2,10 +2,10 @@ import { Button, Divider, Stack, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "next-i18next";
-import getConfig from "next/config";
+
 import useCode from "@hooks/useCode";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { useSession } from "next-auth/react";
+import { useAuth } from "react-oidc-context";
 import Confirmation from "./Confirmation/Confirmation";
 import { useLazyQuery } from "@apollo/client/react";
 import {

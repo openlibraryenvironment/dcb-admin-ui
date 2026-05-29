@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import getConfig from "next/config";
+
 import { useTranslation, Trans } from "next-i18next";
 import {
 	Typography,
@@ -28,7 +28,7 @@ import {
 import VersionInfo from "./VersionInfo";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
-import { useSession } from "next-auth/react";
+import { useAuth } from "react-oidc-context";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import { determineAcceptableVersion } from "src/helpers/determineVersion";
 

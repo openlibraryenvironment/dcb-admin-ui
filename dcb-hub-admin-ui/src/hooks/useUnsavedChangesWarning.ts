@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { useRouter } from "next/router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 
 interface UseUnsavedChangesWarningProps {
 	isDirty: boolean;

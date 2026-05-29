@@ -1,5 +1,5 @@
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
-import { useRouter } from "next/router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { ErrorOutline } from "@mui/icons-material";
 
 interface ErrorProps {

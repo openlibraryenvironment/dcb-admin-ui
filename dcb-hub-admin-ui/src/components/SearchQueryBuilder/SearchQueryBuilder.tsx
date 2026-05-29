@@ -1,5 +1,5 @@
 import { useSearchStore } from "src/hooks/useSearchStore";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { Add, Delete, Search as SearchIcon, Info } from "@mui/icons-material";
 import {
 	Button,

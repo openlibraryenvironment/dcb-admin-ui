@@ -5,10 +5,10 @@ import {
 } from "@mui/material";
 import { ArrowForwardIos } from "@mui/icons-material";
 import Link from "@components/Link/Link";
-import { useRouter } from "next/router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 //localisation
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { truncate } from "lodash";
 import { formatBreadcrumbTitles } from "src/helpers/formatBreadcrumbTitles";
 import { getSpecialRedirects } from "src/helpers/breadcrumbs/getSpecialRedirects";

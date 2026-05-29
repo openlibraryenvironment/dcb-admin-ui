@@ -1,0 +1,193 @@
+import { AdminLayout } from "@layout";
+//localisation
+import { useTranslation } from "react-i18next";
+import {
+	deleteLocationQuery,
+	getLocations,
+	updateLocationQuery,
+} from "src/queries/queries";
+
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import Loading from "@components/Loading/Loading";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useAuth } from "react-oidc-context";
+import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+// import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import dayjs from "dayjs";
+import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
+
+const Locations: NextPage = () => {
+	const { t } = useTranslation();
+
+	const router = useRouter();
+	const customColumns = useCustomColumns();
+	const { status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			// Push to logout page if not authenticated.
+			router.push("/auth/logout");
+		},
+	});
+
+	if (status === "loading") {
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("nav.locations").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return (
+		<AdminLayout title={t("nav.locations")}>
+			<ServerPaginationGrid
+				query={getLocations}
+				type="locations"
+				coreType="locations"
+				operationDataType="Location"
+				columns={[
+					...customColumns,
+					{
+						field: "hostSystemName",
+						headerName: "Host LMS name",
+						minWidth: 150,
+						flex: 0.6,
+						filterable: false,
+						sortable: false,
+						valueGetter: (value, row: { hostSystem: { name: string } }) =>
+							row?.hostSystem?.name,
+					},
+					{
+						field: "name",
+						headerName: "Location name",
+						minWidth: 150,
+						flex: 0.6,
+						editable: true,
+						filterOperators: standardFilters,
+					},
+					{
+						field: "printLabel",
+						headerName: "Print label",
+						minWidth: 150,
+						flex: 0.6,
+						editable: true,
+						filterOperators: standardFilters,
+					},
+					{
+						field: "code",
+						headerName: "Location code",
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators: standardFilters,
+					},
+					{
+						field: "isPickup",
+						headerName: t("locations.new.pickup_status"),
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators: equalsOnly,
+						valueFormatter: (value: boolean) => {
+							if (value == true) {
+								return t("consortium.settings.enabled");
+							} else if (value == false) {
+								return t("consortium.settings.disabled");
+							} else {
+								return t("details.location_pickup_not_set");
+							}
+						},
+					},
+					{
+						field: "isEnabledForPickupAnywhere",
+						headerName: t("locations.new.pickup_anywhere_status"),
+						minWidth: 50,
+						flex: 0.4,
+						filterOperators: equalsOnly,
+						valueFormatter: (value: boolean) => {
+							if (value == true) {
+								return t("consortium.settings.enabled");
+							} else if (value == false) {
+								return t("consortium.settings.disabled");
+							} else {
+								return t("details.location_pickup_not_set");
+							}
+						},
+					},
+					{
+						field: "localId",
+						headerName: t("details.local_id"),
+						minWidth: 50,
+						flex: 0.8,
+						filterOperators: equalsOnly,
+						editable: true,
+					},
+					{
+						field: "id",
+						headerName: "Location UUID",
+						minWidth: 50,
+						flex: 0.8,
+						filterOperators: equalsOnly,
+					},
+					{
+						field: "lastImported",
+						headerName: "Last imported",
+						minWidth: 100,
+						flex: 0.5,
+						filterOperators: luceneDateRangeOperators,
+						type: "dateTime",
+						valueGetter: (value: any, row: { lastImported: string }) => {
+							return row.lastImported ? new Date(row.lastImported) : null;
+						},
+						valueFormatter: (value: Date) => {
+							return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
+						},
+					},
+				]}
+				selectable={true}
+				pageSize={200}
+				noDataMessage={t("locations.no_rows")}
+				noResultsMessage={t("locations.no_results")}
+				searchPlaceholder={t("locations.search_placeholder")}
+				columnVisibilityModel={{
+					id: false,
+					lastImported: false,
+					localId: false,
+					isEnabledForPickupAnywhere: false,
+				}}
+				// This is how to set the default sort order
+				sortModel={[{ field: "lastImported", sort: "desc" }]}
+				sortDirection="DESC"
+				sortAttribute="lastImported"
+				refetchQuery={["LoadLocations"]}
+				deleteQuery={deleteLocationQuery}
+				editQuery={updateLocationQuery}
+				// getDetailPanelContent={({ row }: any) => (
+				// 	<MasterDetail row={row} type="locations" />
+				// )}
+			/>
+		</AdminLayout>
+	);
+};
+
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
+	let translations = {};
+	if (locale) {
+		translations = await serverSideTranslations(locale as string, [
+			"common",
+			"application",
+			"validation",
+		]);
+	}
+	return {
+		props: {
+			...translations,
+		},
+	};
+}
+
+export default Locations;

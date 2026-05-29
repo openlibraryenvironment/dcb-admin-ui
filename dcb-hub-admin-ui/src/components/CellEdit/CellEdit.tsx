@@ -10,7 +10,7 @@ import {
 import { GridRenderEditCellParams } from "@mui/x-data-grid-premium";
 import { useLazyQuery } from "@apollo/client";
 import { getRoles } from "src/queries/queries";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 
 export const CellEdit = (params: GridRenderEditCellParams) => {
 	const { id, field, value, api, colDef, hasFocus } = params;

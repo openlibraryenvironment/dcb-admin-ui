@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import getConfig from "next/config";
+
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
@@ -16,7 +16,7 @@ import {
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 
 const VersionInfo: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);

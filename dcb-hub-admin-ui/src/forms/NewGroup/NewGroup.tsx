@@ -14,8 +14,8 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 //localisation
-import { useTranslation } from "next-i18next";
-// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation } from "react-i18next";
+//
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Controller, useForm } from "react-hook-form";
 import TimedAlert from "@components/TimedAlert/TimedAlert";

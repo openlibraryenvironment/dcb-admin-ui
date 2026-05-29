@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import getConfig from "next/config";
+
 import { persist } from "zustand/middleware";
 
 interface DCBVersionInfo {

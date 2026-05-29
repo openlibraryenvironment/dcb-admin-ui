@@ -21,7 +21,7 @@ import {
 	GridToolbarFilterButton,
 	GridToolbarQuickFilter,
 } from "@mui/x-data-grid-premium";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 
 interface ExportToolbarProps {
@@ -211,7 +211,7 @@ export default function ExportToolbar({
 // 	QuickFilterControl,
 // 	QuickFilterTrigger,
 // } from "@mui/x-data-grid-premium";
-// import { useTranslation } from "next-i18next";
+// import { useTranslation } from "react-i18next";
 
 // interface ExportToolbarProps {
 // 	handleExport: (fileType: string, exportMode: string) => Promise<void>;

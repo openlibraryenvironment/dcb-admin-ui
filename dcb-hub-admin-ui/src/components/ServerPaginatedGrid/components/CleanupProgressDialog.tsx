@@ -17,7 +17,7 @@ import {
 	ExpandMore,
 	WarningAmber,
 } from "@mui/icons-material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import {
 	cleanupPatronRequestVisibility,

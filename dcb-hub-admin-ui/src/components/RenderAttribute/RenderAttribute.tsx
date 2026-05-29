@@ -1,6 +1,6 @@
 import Link from "@components/Link/Link";
 import Typography from "@mui/material/Typography";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 
 const isValidLink = (url: string): boolean => {
 	try {

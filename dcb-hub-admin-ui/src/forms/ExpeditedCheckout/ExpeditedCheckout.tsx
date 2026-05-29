@@ -14,22 +14,22 @@ import {
 	Stepper,
 	Typography,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import {
 	getLibraries,
 	getLocations,
 	getPatronRequestEssentials,
 } from "src/queries/queries";
 import axios from "axios";
-import getConfig from "next/config";
-import { useSession } from "next-auth/react";
+
+import { useAuth } from "react-oidc-context";
 import { getRequestError } from "src/helpers/getRequestError";
 import { Agency } from "@models/Agency";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { findConsortium } from "src/helpers/findConsortium";
 import { Location } from "@models/Location";
 import { Item } from "@models/Item";
-import { useRouter } from "next/router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { PatronRequestFormType } from "@models/PatronRequestFormType";
 import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
 import { PlaceRequestResponse } from "@models/PlaceRequestResponse";

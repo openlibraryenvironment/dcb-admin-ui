@@ -3,7 +3,7 @@ import TextField, { TextFieldProps } from "@mui/material/TextField";
 import { GridFilterInputValueProps, useGridRootProps } from "@mui/x-data-grid";
 import { useEffect, useRef, useState } from "react";
 import { CircularProgress } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import {
 	getRangeLabels,
 	getRangePlaceholders,

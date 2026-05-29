@@ -8,7 +8,7 @@ import {
 	SvgIconProps,
 	Tooltip,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { forwardRef, ReactElement, ChangeEvent } from "react";
 
 const VisuallyHiddenInput = styled("input")`

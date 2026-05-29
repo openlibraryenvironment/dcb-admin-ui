@@ -1,0 +1,263 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Library } from "@models/Library";
+import { Grid, Typography, useTheme } from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
+import {
+	deleteLibraryQuery,
+	deleteNumericRangeMapping,
+	getLibraryById,
+	getNumericRangeMappings,
+	updateNumericRangeMapping,
+} from "src/queries/queries";
+import { numRangeMappingColumnsNoCategoryFilter } from "src/helpers/DataGrid/columns";
+import Error from "@components/Error/Error";
+import Loading from "@components/Loading/Loading";
+import { AdminLayout } from "@layout";
+import { Delete } from "@mui/icons-material";
+import { useState } from "react";
+import {
+	closeConfirmation,
+	handleDeleteEntity,
+} from "src/helpers/actions/editAndDeleteActions";
+import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
+
+export default function PatronType() {
+	const { t } = useTranslation();
+
+	const theme = useTheme();
+	const router = useRouter();
+	const libraryId = router.query.libraryId as string;
+	const { data: session, status } = useSession({
+		required: true,
+		onUnauthenticated() {
+			router.push("/auth/logout");
+		},
+	});
+	const [tabIndex, setTabIndex] = useState(3);
+	const [subTabIndex, setSubTabIndex] = useState(4);
+	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
+	const [alert, setAlert] = useState<any>({
+		open: false,
+		severity: "success",
+		text: null,
+		title: null,
+	});
+	const client = useQueryClient();
+	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+		adminOrConsortiumAdmin.includes(role),
+	);
+
+	const { data, loading, error } = useQuery(getLibraryById, {
+		variables: {
+			query: "id:" + libraryId,
+		},
+		errorPolicy: "all",
+		pollInterval: 120000, // pollInterval is in ms - set to 2 mins
+		skip: !libraryId,
+	});
+	const [deleteLibrary] = useMutation(deleteLibraryQuery);
+
+	const library: Library = data?.libraries?.content?.[0];
+	const pageActions = [
+		{
+			key: "delete",
+			onClick: () => setConfirmationDeletion(true),
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.delete_entity", {
+				entity: t("libraries.library").toLowerCase(),
+			}),
+			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+	];
+
+	const numericRangePatronTypeVariables = `context:${library?.agency?.hostLms?.code} AND domain: "patronType" AND NOT deleted:true`;
+	const numericRangePatronTypeSecondHostLmsVariables = `context:"${library?.secondHostLms?.code}" AND domain: "patronType" AND NOT deleted:true`;
+
+	if (loading || status === "loading") {
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("libraries.library").toLowerCase(),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return error || library == null || library == undefined ? (
+		<AdminLayout hideBreadcrumbs>
+			{error ? (
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.action.go_back")}
+					goBack="/libraries"
+				/>
+			) : (
+				<Error
+					title={t("ui.error.cannot_find_record")}
+					message={t("ui.error.invalid_UUID")}
+					description={t("ui.info.check_address")}
+					action={t("ui.action.go_back")}
+					goBack="/libraries"
+				/>
+			)}
+		</AdminLayout>
+	) : (
+		<AdminLayout
+			title={library?.fullName}
+			pageActions={pageActions}
+			mode={"view"}
+		>
+			<Grid
+				container
+				spacing={{ xs: 2, md: 3 }}
+				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+			>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<MultipleTabNavigation
+						tabIndex={tabIndex}
+						subTabIndex={subTabIndex}
+						setTabIndex={setTabIndex}
+						setSubTabIndex={setSubTabIndex}
+						hostLmsCode={library?.agency?.hostLms?.code}
+						libraryId={libraryId}
+						agencyCode={library?.agencyCode}
+						type="mappings"
+					/>
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography variant="h3" fontWeight={"bold"}>
+						{t("libraries.config.data.mappings.patron_type_num_range", {
+							hostLms: library?.agency?.hostLms?.code,
+						})}
+					</Typography>
+					<ServerPaginationGrid
+						query={getNumericRangeMappings}
+						editQuery={updateNumericRangeMapping}
+						deleteQuery={deleteNumericRangeMapping}
+						refetchQuery={["LoadNumericRangeMappings"]}
+						presetQueryVariables={numericRangePatronTypeVariables}
+						type="numericRangeMappingsForLibraryPatron"
+						coreType="numericRangeMappings"
+						operationDataType="NumericRangeMapping"
+						columns={numRangeMappingColumnsNoCategoryFilter}
+						noDataMessage={t("mappings.no_results")}
+						noResultsMessage={t("mappings.no_results")}
+						selectable={false}
+						sortModel={[{ field: "context", sort: "asc" }]}
+						pageSize={200}
+						sortDirection="ASC"
+						sortAttribute="context"
+						columnVisibilityModel={{
+							domain: false,
+							lastImported: false,
+						}}
+					/>
+				</Grid>
+				{library?.secondHostLms ? (
+					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+						<Typography variant="h3" fontWeight={"bold"}>
+							{t("libraries.config.data.mappings.patron_type_num_range", {
+								hostLms: library?.secondHostLms?.code,
+							})}
+						</Typography>
+						<ServerPaginationGrid
+							query={getNumericRangeMappings}
+							editQuery={updateNumericRangeMapping}
+							deleteQuery={deleteNumericRangeMapping}
+							refetchQuery={["LoadNumericMappings"]}
+							presetQueryVariables={
+								numericRangePatronTypeSecondHostLmsVariables
+							}
+							type="numericRangeMappingsForLibraryPatronSecondHostLms"
+							coreType="numericRangeMappings"
+							operationDataType="NumericRangeMapping"
+							columns={numRangeMappingColumnsNoCategoryFilter}
+							noDataMessage={t("mappings.no_results")}
+							noResultsMessage={t("mappings.no_results")}
+							selectable={false}
+							sortModel={[{ field: "context", sort: "asc" }]}
+							pageSize={200}
+							sortDirection="ASC"
+							sortAttribute="context"
+							columnVisibilityModel={{
+								domain: false,
+								lastImported: false,
+							}}
+						/>
+					</Grid>
+				) : null}
+			</Grid>
+			<TimedAlert
+				open={alert.open}
+				severityType={alert.severity}
+				autoHideDuration={6000}
+				alertText={alert.text}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
+				alertTitle={alert.title}
+			/>
+			<Confirmation
+				open={showConfirmationDeletion}
+				onClose={() =>
+					closeConfirmation(setConfirmationDeletion, client, "LoadLibrary")
+				}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
+					handleDeleteEntity(
+						library.id,
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+						setAlert,
+						deleteLibrary,
+						t,
+						router,
+						library?.fullName ?? "",
+						"deleteLibrary",
+						"/libraries",
+					);
+					setConfirmationDeletion(false);
+				}}
+				type={"deletelibraries"}
+				entityName={library?.fullName}
+				entity={t("libraries.library")}
+				gridEdit={false}
+			/>
+		</AdminLayout>
+	);
+}
+
+export async function getStaticPaths() {
+	return {
+		paths: [],
+		fallback: "blocking",
+	};
+}
+
+export async function getStaticProps(ctx: any) {
+	const { locale } = ctx;
+	let translations = {};
+	if (locale) {
+		translations = await serverSideTranslations(locale as string, [
+			"common",
+			"application",
+			"validation",
+		]);
+	}
+
+	return {
+		props: {
+			...translations,
+		},
+	};
+}

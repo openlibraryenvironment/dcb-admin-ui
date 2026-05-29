@@ -9,7 +9,7 @@ import {
 	useTheme,
 } from "@mui/material";
 import { signIn } from "next-auth/react";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+
 import { Trans, useTranslation } from "next-i18next"; //localisation
 import Link from "@components/Link/Link";
 import LandingCard from "@components/LandingCard/LandingCard";

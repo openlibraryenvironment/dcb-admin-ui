@@ -9,7 +9,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { useGridApiContext } from "@mui/x-data-grid-premium";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useState } from "react";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
