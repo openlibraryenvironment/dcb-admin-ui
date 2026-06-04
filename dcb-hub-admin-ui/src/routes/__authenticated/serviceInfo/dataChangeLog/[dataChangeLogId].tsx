@@ -1,6 +1,12 @@
-import { Grid, Stack, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Grid";
+import { Stack } from "@queries/Stack";
+import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { getDataChangeLogById } from "src/queries/queries";
+import { getDataChangeLogById } from "@queries/Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { getDataChangeLogById";
 import { AdminLayout } from "@layout";
 
 import { useQuery } from "@tanstack/react-query";
@@ -20,18 +26,18 @@ import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 
 // Coming in, we know the ID. So we need to query our GraphQL server to get the associated data.
 
-export default function DataChangeLogDetails() {
+export const Route = createFileRoute("/__authenticated/serviceInfo/dataChangeLog/dataChangeLogId")({
+	component: DataChangeLogDetails,
+});
+
+function DataChangeLogDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const dataChangeLogId = router.query.dataChangeLogId;
+	const { id } = Route.useParams(); // TODO: verify parameter name matches TanStack route
 	// Poll interval in ms
 	const { loading, data, error } = useQuery(getDataChangeLogById, {
 		variables: {
@@ -202,27 +208,6 @@ export default function DataChangeLogDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

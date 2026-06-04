@@ -1,14 +1,25 @@
-import { Grid, Tab, Tabs, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Grid";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@mui/material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/Typography } from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import {
-	getLibraries,
-	getLibraryGroupById,
-	getLocationForPatronRequestGrid,
-	getPatronRequests,
-} from "src/queries/queries";
+	getLibraries } from "@queries/useRouter } from "@tanstack/react-router";
+import {
+	getLibraries";
+import { getLibraryGroupById } from "@queries/getLibraryGroupById";
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { getPatronRequests } from "@queries/getPatronRequests";
 import { defaultPatronRequestGroupVisibility } from "@helpers/dataGrid/columns";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import Error from "@components/Error/Error";
@@ -24,17 +35,18 @@ import { handleGroupTabChange } from "src/helpers/navigation/handleTabChange";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { useQuery } from "@apollo/client/react";
 
-export default function GroupPatronRequests() {
+export const Route = createFileRoute("/__authenticated/groups/groupId/patronRequests/")({
+	component: GroupPatronRequests,
+});
+
+function GroupPatronRequests() {
 	const { t } = useTranslation();
 	const customColumns = useCustomColumns();
 	const router = useRouter();
-	const groupId = router.query.groupId as string;
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
+	const { id } = Route.useParams(); // TODO: rename "id" to "groupId" if needed below
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const [tabIndex, setTabIndex] = useState(1);
 	const { loading, data, error } = useQuery(getLibraryGroupById, {
 		variables: {
@@ -220,27 +232,6 @@ export default function GroupPatronRequests() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

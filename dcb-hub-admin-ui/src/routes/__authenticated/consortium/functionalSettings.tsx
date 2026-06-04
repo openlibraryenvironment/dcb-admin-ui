@@ -1,17 +1,34 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { FunctionalSetting } from "@models/FunctionalSetting";
-import { Button, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ClientDataGrid } from "@components/ClientDataGrid";
+import { AdminLayout } from "@layout";
+import { FunctionalSetting } from "@models/FunctionalSetting";
+import { Button";
+import { Grid } from "@queries/Grid";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@mui/material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/Typography } from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-	getConsortiaFunctionalSettings,
-	updateFunctionalSettingQuery,
-} from "src/queries/queries";
+	getConsortiaFunctionalSettings } from "@queries/useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import {
+	getConsortiaFunctionalSettings";
+import { updateFunctionalSettingQuery } from "@queries/updateFunctionalSettingQuery";
 import NewFunctionalSetting from "../../forms/NewFunctionalSetting/NewFunctionalSetting";
 import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
 
@@ -144,21 +161,6 @@ const FunctionalSettings: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default FunctionalSettings;
+
+

@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import Loading from "@components/Loading/Loading";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
@@ -8,11 +9,26 @@ import dayjs from "dayjs";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
-import { getAlarms } from "src/queries/queries";
+import { equalsOnly } from "@queries/createFileRoute } from "@tanstack/react-router";
+import Loading from "@components/Loading/Loading";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import { AdminLayout } from "@layout";
+import dayjs from "dayjs";
+
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { equalsOnly";
+import { standardFilters } from "@helpers/dataGrid/filters";
+import { getAlarms } from "@queries/standardFilters } from "@helpers/dataGrid/filters";
+import { getAlarms";
 
 const Alarms: NextPage = () => {
-	const { status } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
 
 	const customColumns = useCustomColumns();
@@ -111,21 +127,6 @@ const Alarms: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default Alarms;
+
+

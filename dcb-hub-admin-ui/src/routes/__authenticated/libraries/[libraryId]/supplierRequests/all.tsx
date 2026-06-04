@@ -1,18 +1,33 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import { Library } from "@models/Library";
-import { Grid, Typography, useTheme } from "@mui/material";
+import { Grid } from "@queries/useQueryClient } from "@tanstack/react-query";
+import { Library } from "@models/Library";
+import { Grid";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@mui/material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/useTheme } from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
-	deleteLibraryQuery,
-	getLibraries,
-	getLibraryBasicsPR,
-	getLocationForPatronRequestGrid,
-	getPatronRequests,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/useRouter } from "@tanstack/react-router";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
+import {
+	deleteLibraryQuery";
+import { getLibraries } from "@queries/getLibraries";
+import { getLibraryBasicsPR } from "@queries/getLibraryBasicsPR";
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { getPatronRequests } from "@queries/getPatronRequests";
 import { defaultSupplierRequestLibraryColumnVisibility } from "@helpers/dataGrid/columns";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import Error from "@components/Error/Error";
@@ -32,18 +47,19 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { Location } from "@models/Location";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 
-export default function PatronRequests() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/supplierRequests/all")({
+	component: PatronRequests,
+});
+
+function PatronRequests() {
 	const { t } = useTranslation();
 	const customColumns = useCustomColumns();
 	const theme = useTheme();
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const [tabIndex, setTabIndex] = useState(5);
 	const [subTabIndex, setSubTabIndex] = useState(0);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
@@ -54,9 +70,7 @@ export default function PatronRequests() {
 		title: null,
 	});
 	const client = useQueryClient();
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = isAnAdmin;
 	const { data, loading, error } = useQuery(getLibraryBasicsPR, {
 		variables: {
 			query: "id:" + libraryId,
@@ -283,27 +297,6 @@ export default function PatronRequests() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

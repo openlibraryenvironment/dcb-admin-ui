@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "react-i18next";
 
@@ -11,17 +12,3 @@ const Settings: NextPage = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
-}
-
-export default Settings;

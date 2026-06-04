@@ -1,10 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useEffect";
+import { useMemo } from "@queries/useMemo";
+import { useState } from "react";
 import { GridColDef } from "@mui/x-data-grid-pro";
 
 import { useTranslation } from "react-i18next";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/useState } from "react";
+import { GridColDef } from "@mui/x-data-grid-pro";
+
+import { useTranslation } from "react-i18next";
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getClusters } from "src/queries/queries";
+import { getClusters } from "@queries/useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getClusters";
 
 import { AdminLayout } from "@layout";
 import Error from "@components/Error/Error";
@@ -42,7 +53,7 @@ interface RowData extends Record<string, string> {
 const Identifiers: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = router.query;
+	const { id  } = Route.useParams();
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
 		useState(false);
 	const [tabIndex, setTabIndex] = useState(3);
@@ -198,28 +209,8 @@ const Identifiers: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export default Identifiers;
+
+
+

@@ -1,117 +1,148 @@
-import { useQuery } from "@tanstack/react-query";
-import { Grid, Tab, Tabs } from "@mui/material";
-import { useAuth } from "react-oidc-context";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "react-oidc-context";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Grid, Tab, Tabs } from "@mui/material";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import {
-	getClustersTitleOnly,
-	getLibraries,
-	getLocationForPatronRequestGrid,
-	getPatronRequests,
-} from "src/queries/queries";
-import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
+// UI Components
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
-import { useMemo, useState } from "react";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { Location } from "@models/Location";
+
+// Hooks & Helpers
+import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
+import { Location } from "@models/Location";
 
-export default function RequestingHistory() {
+// Typed GraphQL Documents
+import { getClustersTitleOnly } from "@queries/getClustersTitleOnly";
+import { getLibraries } from "@queries/getLibraries";
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { getPatronRequests } from "@queries/getPatronRequests";
+
+export const Route = createFileRoute(
+	"/__authenticated/search/$id/requestingHistory",
+)({
+	component: RequestingHistory,
+});
+
+function RequestingHistory() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
-	const { id } = router.query;
-	const {
-		loading: clusterLoading,
-		error: clusterError,
-		data: clusterData,
-	} = useQuery(getClustersTitleOnly, {
-		variables: { query: `id: ${id}` },
-		skip: !id,
-		errorPolicy: "all",
-	});
+	const { id } = Route.useParams();
+
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
+	const gqlClient = useGraphQLClient();
 	const [tabIndex, setTabIndex] = useState(4);
 
-	const { data: locationsData, fetchMore } = useQuery(
-		getLocationForPatronRequestGrid,
-		{
-			variables: {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 100,
-				pageno: 0,
-			},
-			onCompleted: (data) => {
-				if (data.locations.content.length < data.locations.totalSize) {
-					const totalPages = Math.ceil(data.locations.totalSize / 100);
-					const fetchPromises = Array.from(
-						{ length: totalPages - 1 },
-						(_, index) =>
-							fetchMore({
-								variables: {
-									pageno: index + 1,
-								},
-								updateQuery: (prev, { fetchMoreResult }) => {
-									if (!fetchMoreResult) return prev;
-									return {
-										locations: {
-											...fetchMoreResult.locations,
-											content: [
-												...prev.locations.content,
-												...fetchMoreResult.locations.content,
-											],
-										},
-									};
-								},
-							}),
-					);
-					Promise.all(fetchPromises).catch((error) =>
-						console.error("Error fetching additional locations:", error),
-					);
-				}
-			},
-			errorPolicy: "all",
-		},
-	);
+	// ==========================================
+	// 1. CLUSTER DATA FETCH
+	// ==========================================
+	const {
+		isLoading: clusterLoading,
+		isError: clusterError,
+		data: clusterData,
+	} = useQuery({
+		queryKey: ["cluster", "titleOnly", id],
+		queryFn: () =>
+			gqlClient.request(getClustersTitleOnlyDoc, { query: `id: ${id}` }),
+		enabled: !!id,
+	});
 
-	const patronRequestLocations: Location[] = locationsData?.locations.content;
+	// ==========================================
+	// 2. LOCATIONS FETCH (Replaces Apollo fetchMore)
+	// ==========================================
+	// Instead of onCompleted, we just do the pagination loop inside the fetcher!
+	const fetchAllLocations = async () => {
+		const variables = {
+			query: "",
+			order: "name",
+			orderBy: "ASC",
+			pagesize: 100,
+		};
 
-	const { data: supplyingLibraries, loading: supplyingLibrariesLoading } =
-		useQuery(getLibraries, {
-			variables: {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			},
-			errorPolicy: "all",
+		// Fetch page 0
+		const firstPage = await gqlClient.request(
+			getLocationForPatronRequestGridDoc,
+			{ ...variables, pageno: 0 },
+		);
+		let allLocations = [...(firstPage?.locations?.content || [])];
+		const totalSize = firstPage?.locations?.totalSize || 0;
+
+		// If there are more pages, fetch them all concurrently
+		if (allLocations.length < totalSize) {
+			const totalPages = Math.ceil(totalSize / 100);
+			const promises = [];
+			for (let i = 1; i < totalPages; i++) {
+				promises.push(
+					gqlClient.request(getLocationForPatronRequestGridDoc, {
+						...variables,
+						pageno: i,
+					}),
+				);
+			}
+
+			const results = await Promise.all(promises);
+			results.forEach((res) => {
+				allLocations = [...allLocations, ...(res?.locations?.content || [])];
+			});
+		}
+
+		return allLocations;
+	};
+
+	const { data: patronRequestLocations } = useQuery({
+		queryKey: ["locations", "allPatronRequestGrid"],
+		queryFn: fetchAllLocations,
+	});
+
+	// ==========================================
+	// 3. LIBRARIES FETCH
+	// ==========================================
+	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
+		useQuery({
+			queryKey: ["libraries", "allSupplying"],
+			queryFn: () =>
+				gqlClient.request(getLibrariesDoc, {
+					order: "fullName",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1000,
+					query: "",
+				}),
 		});
 
+	// ==========================================
+	// 4. COLUMN CONFIGURATION
+	// ==========================================
 	const customColumns = useCustomColumns();
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
+
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
-		locations: patronRequestLocations,
+		locations: (patronRequestLocations as Location[]) || [],
 		libraries: supplyingLibrariesContent,
 		variant: "noStatus",
 	});
+
 	const noStatusColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
 
+	// ==========================================
+	// 5. RENDER UI
+	// ==========================================
 	const query = "bibClusterId:" + id;
-	if (status === "loading" || supplyingLibrariesLoading) {
+
+	if (clusterLoading || supplyingLibrariesLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -161,7 +192,8 @@ export default function RequestingHistory() {
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<ServerPaginationGrid
-						query={getPatronRequests}
+						// Make sure ServerPaginationGrid accepts your new Document string
+						query={getPatronRequestsDoc}
 						presetQueryVariables={query}
 						type="patronRequestsRecordHistory"
 						coreType="patronRequests"
@@ -188,28 +220,4 @@ export default function RequestingHistory() {
 			</Grid>
 		</AdminLayout>
 	);
-}
-
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
-
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
 }

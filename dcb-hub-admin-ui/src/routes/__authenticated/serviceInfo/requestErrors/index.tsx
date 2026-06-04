@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import Link from "@components/Link/Link";
 import { AdminLayout } from "@layout";
@@ -12,7 +13,10 @@ import Error from "@components/Error/Error";
 
 const RequestErrors: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
-	const { data: sess } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
 	const [errorOverviewResults, setErrorOverviewResults] = useState<any>([]);
 	const [loading, setLoading] = useState(false);
@@ -140,21 +144,3 @@ const RequestErrors: NextPage = () => {
 		</AdminLayout>
 	);
 };
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-
-export default RequestErrors;

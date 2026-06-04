@@ -5,8 +5,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const routesDir = path.join(__dirname, "src", "routes");
-
+const routesDir = path.join(__dirname, "..", "routes");
 // Helper to recursively get all .tsx files
 function getAllFiles(dirPath, arrayOfFiles) {
 	const files = fs.readdirSync(dirPath);
@@ -31,20 +30,21 @@ files.forEach((filePath) => {
 	if (content.includes("createFileRoute")) return;
 
 	// Calculate the TanStack Route Path
-	// e.g., src/routes/__authenticated/patronRequests/index.tsx -> /__authenticated/patronRequests/
 	let routePath = filePath
 		.replace(routesDir, "")
 		.replace(/\\/g, "/") // Fix Windows slashes
 		.replace(/\/index\.tsx$/, "/") // Handle index files
 		.replace(/\.tsx$/, "/"); // Handle flat files
 
+	// 🔥 BONUS FIX: Convert Next.js dynamic routes [id] to TanStack $id
+	routePath = routePath.replace(/\[(.*?)\]/g, "$$$1");
+
 	if (!routePath.startsWith("/")) routePath = "/" + routePath;
 
-	// 1. Inject the TanStack import at the top
-	const importStatement = `import { createFileRoute } from "@tanstack/react-router";\n\n`;
+	// 1. Prepare the import (goes at the very top)
+	const importStatement = `import { createFileRoute } from "@tanstack/react-router";\n`;
 
 	// 2. Look for the default export component name
-	// Matches: export default function MyComponent() OR export default function MyComponent (props)
 	const defaultExportRegex =
 		/export\s+default\s+function\s+([A-Za-z0-9_]+)\s*\(/;
 	const match = content.match(defaultExportRegex);
@@ -55,11 +55,15 @@ files.forEach((filePath) => {
 		// 3. Create the TanStack Route definition
 		const routeDef = `export const Route = createFileRoute("${routePath}")({\n\tcomponent: ${componentName},\n});\n\n`;
 
-		// 4. Strip "export default" from the function definition
-		content = content.replace(defaultExportRegex, `function ${componentName}(`);
+		// 4. Inject the Route definition right BEFORE the component function
+		content = content.replace(
+			defaultExportRegex,
+			`${routeDef}function ${componentName}(`,
+		);
 
-		// 5. Write the file back
-		const newContent = importStatement + routeDef + content;
+		// 5. Prepend ONLY the import statement to the top of the file
+		const newContent = importStatement + content;
+
 		fs.writeFileSync(filePath, newContent, "utf8");
 		console.log(`✅ Migrated: ${routePath}`);
 	} else {

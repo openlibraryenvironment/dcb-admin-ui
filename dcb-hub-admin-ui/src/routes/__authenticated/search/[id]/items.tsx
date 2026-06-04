@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 
 import { useTranslation } from "react-i18next";
@@ -5,43 +6,72 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { useAuth } from "react-oidc-context";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+
+import { useTranslation } from "react-i18next";
+
+import axios from "axios";
+import { useAuth } from "react-oidc-context";
+
+import { useEffect";
+import { useState } from "@queries/useState";
+import { useMemo } from "react";
 import Error from "@components/Error/Error";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/useMemo } from "react";
+import Error from "@components/Error/Error";
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import {
-	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
-	GridColDef,
-} from "@mui/x-data-grid-premium";
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF } from "@queries/useRouter } from "@tanstack/react-router";
+import {
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF";
+import { GridColDef } from "@queries/GridColDef";
+import { } from "@mui/x-data-grid-premium";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 import dayjs from "dayjs";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import {
-	Accordion,
-	AccordionDetails,
-	AccordionSummary,
-	Grid,
-	List,
-	ListItem,
-	ListItemIcon,
-	ListItemText,
-	Stack,
-	Tab,
-	Tabs,
-	Typography,
-} from "@mui/material";
-import { ExpandMore, InfoOutline } from "@mui/icons-material";
+	Accordion } from "@queries/} from "@mui/x-data-grid-premium";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
+import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+import dayjs from "dayjs";
+import { ClientDataGrid } from "@components/ClientDataGrid";
+import {
+	Accordion";
+import { AccordionDetails } from "@queries/AccordionDetails";
+import { AccordionSummary } from "@queries/AccordionSummary";
+import { Grid } from "@queries/Grid";
+import { List } from "@queries/List";
+import { ListItem } from "@queries/ListItem";
+import { ListItemIcon } from "@queries/ListItemIcon";
+import { ListItemText } from "@queries/ListItemText";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@queries/Typography";
+import { } from "@mui/material";
+import { ExpandMore } from "@queries/} from "@mui/material";
+import { ExpandMore";
+import { InfoOutline } from "@mui/icons-material";
 import { Item } from "@models/Item";
 import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
-import { getClustersTitleOnly } from "src/queries/queries";
+import { getClustersTitleOnly } from "@queries/InfoOutline } from "@mui/icons-material";
+import { Item } from "@models/Item";
+import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { getClustersTitleOnly";
 import { useQuery } from "@tanstack/react-query";
 const Items: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
-	const { data: session } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = router.query;
+	const { id  } = Route.useParams();
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
 	const [comparisonResults, setComparisonResults] = useState<any>({});
 	const [tabIndex, setTabIndex] = useState(2);
@@ -327,28 +357,8 @@ const Items: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export default Items;
+
+
+

@@ -1,17 +1,22 @@
+import { createFileRoute } from "@tanstack/react-router";
 import {
-	Button,
-	Grid,
-	Stack,
-	TextField,
-	Typography,
-	useTheme,
-} from "@mui/material";
+	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import {
+	Button";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { TextField } from "@queries/TextField";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@queries/useTheme";
+import { } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import {
-	deleteLocationQuery,
-	getLocation,
-	updateLocationQuery,
-} from "src/queries/queries";
+	deleteLocationQuery } from "@queries/} from "@mui/material";
+import { useTranslation } from "react-i18next";
+import {
+	deleteLocationQuery";
+import { getLocation } from "@queries/getLocation";
+import { updateLocationQuery } from "@queries/updateLocationQuery";
 import { AdminLayout } from "@layout";
 
 import { Location } from "@models/Location";
@@ -52,21 +57,21 @@ interface LocationFormFields {
 	localId?: string;
 }
 // Needs a parser and the decimal logic extending to the data change log also.
-export default function LocationDetails() {
+export const Route = createFileRoute("/__authenticated/locations/locationId")({
+	component: LocationDetails,
+});
+
+function LocationDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const locationId = router.query.locationId;
+	const { id } = Route.useParams(); // TODO: verify parameter name matches TanStack route
 
 	const theme = useTheme();
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	// Poll interval in ms
 	const { loading, data, error } = useQuery(getLocation, {
@@ -109,9 +114,7 @@ export default function LocationDetails() {
 	const [changedFields, setChangedFields] = useState<Partial<any>>({});
 	const ils = getILS(location?.hostSystem?.lmsClientClass);
 
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = isAnAdmin;
 
 	const validationSchema = Yup.object().shape({
 		name: Yup.string()
@@ -887,27 +890,6 @@ export default function LocationDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

@@ -1,4 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
@@ -9,34 +13,59 @@ import { AdminLayout } from "@layout";
 import { Library } from "@models/Library";
 import { Delete } from "@mui/icons-material";
 import {
-	Button,
-	Grid,
-	Stack,
-	Tab,
-	Tabs,
-	Tooltip,
-	Typography,
-	useTheme,
-} from "@mui/material";
+	Button } from "@queries/useQueryClient } from "@tanstack/react-query";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import { AdminLayout } from "@layout";
+import { Library } from "@models/Library";
+import { Delete } from "@mui/icons-material";
+import {
+	Button";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Tooltip } from "@queries/Tooltip";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@queries/useTheme";
+import { } from "@mui/material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/} from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
-import { adminOrConsortiumAdmin, allAdmins } from "src/constants/roles";
+import { adminOrConsortiumAdmin } from "@queries/useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import { adminOrConsortiumAdmin";
+import { allAdmins } from "src/constants/roles";
 import {
-	closeConfirmation,
-	handleDeleteEntity,
-} from "src/helpers/actions/editAndDeleteActions";
-import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
+	closeConfirmation } from "@queries/allAdmins } from "src/constants/roles";
+import {
+	closeConfirmation";
+import { handleDeleteEntity } from "@queries/handleDeleteEntity";
+import { } from "src/helpers/actions/editAndDeleteActions";
+import { equalsOnly } from "@queries/} from "src/helpers/actions/editAndDeleteActions";
+import { equalsOnly";
+import { standardFilters } from "@helpers/dataGrid/filters";
 import { handleTabChange } from "src/helpers/navigation/handleTabChange";
 import {
-	deleteLibraryQuery,
-	deleteLocationQuery,
-	getLibraryBasicsLocation,
-	getLocations,
-	updateLocationQuery,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/standardFilters } from "@helpers/dataGrid/filters";
+import { handleTabChange } from "src/helpers/navigation/handleTabChange";
+import {
+	deleteLibraryQuery";
+import { deleteLocationQuery } from "@queries/deleteLocationQuery";
+import { getLibraryBasicsLocation } from "@queries/getLibraryBasicsLocation";
+import { getLocations } from "@queries/getLocations";
+import { updateLocationQuery } from "@queries/updateLocationQuery";
 import NewLocation from "../../../../forms/NewLocation/NewLocation";
 import { getILS } from "src/helpers/getILS";
 import Import from "@components/Import/Import";
@@ -51,10 +80,14 @@ interface NewLocationData {
 	libraryName: string;
 	ils: string;
 }
-export default function Locations() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/locations/")({
+	component: Locations,
+});
+
+function Locations() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
 	const [tabIndex, setTabIndex] = useState(7);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showImport, setImport] = useState(false);
@@ -87,15 +120,10 @@ export default function Locations() {
 	const client = useQueryClient();
 	const { updateCategory, updateCode, resetAll } = useCode();
 
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin = isAnAdmin;
 	const isMinLibraryAdmin = session?.profile?.roles?.some((role: string) =>
 		allAdmins.includes(role),
 	);
@@ -447,27 +475,6 @@ export default function Locations() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

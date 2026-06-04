@@ -1,8 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import Error from "@components/Error/Error";
 import { useTranslation } from "react-i18next";
 
-export default function Custom500Page() {
+export const Route = createFileRoute("/500")({
+	component: Custom500Page,
+});
+
+function Custom500Page() {
 	const { t } = useTranslation();
 	return (
 		<AdminLayout hideBreadcrumbs>
@@ -15,16 +20,4 @@ export default function Custom500Page() {
 			/>
 		</AdminLayout>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: any }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }

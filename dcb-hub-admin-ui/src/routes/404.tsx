@@ -1,10 +1,15 @@
+import { createFileRoute } from "@tanstack/react-router";
 import Error from "@components/Error/Error";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "react-i18next";
 
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 
-export default function NotFound() {
+export const Route = createFileRoute("/404")({
+	component: NotFound,
+});
+
+function NotFound() {
 	const { t } = useTranslation();
 	return (
 		<AdminLayout
@@ -21,16 +26,4 @@ export default function NotFound() {
 			/>
 		</AdminLayout>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: any }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }

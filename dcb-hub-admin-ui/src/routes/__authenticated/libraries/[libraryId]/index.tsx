@@ -1,28 +1,44 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
-	Button,
-	Divider,
-	Grid,
-	Stack,
-	Tab,
-	Tabs,
-	TextField,
-	Typography,
-	useTheme,
-} from "@mui/material";
+	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+import {
+	Button";
+import { Divider } from "@queries/Divider";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { TextField } from "@queries/TextField";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@queries/useTheme";
+import { } from "@mui/material";
 import { AdminLayout } from "@layout";
-import { useState, useRef } from "react";
+import { useState } from "@queries/} from "@mui/material";
+import { AdminLayout } from "@layout";
+import { useState";
+import { useRef } from "react";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import AddressLink from "@components/Address/AddressLink";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@queries/useRef } from "react";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import { ClientDataGrid } from "@components/ClientDataGrid";
+import AddressLink from "@components/Address/AddressLink";
+import Error from "@components/Error/Error";
+import Loading from "@components/Loading/Loading";
+import { useQueryClient";
+import { useMutation } from "@queries/useMutation";
+import { useQuery } from "@tanstack/react-query";
 import {
-	deleteLibraryQuery,
-	getLibraryById,
-	updateLibraryQuery,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/useQuery } from "@tanstack/react-query";
+import {
+	deleteLibraryQuery";
+import { getLibraryById } from "@queries/getLibraryById";
+import { updateLibraryQuery } from "@queries/updateLibraryQuery";
 import { Library } from "@models/Library";
 import { findConsortium } from "src/helpers/findConsortium";
 import { useNavigate, useRouter } from "@tanstack/react-router";
@@ -58,22 +74,21 @@ interface LibraryFormFields {
 	longitude?: number;
 }
 
-export default function LibraryDetails() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/")({
+	component: LibraryDetails,
+});
+
+function LibraryDetails() {
 	const { t } = useTranslation();
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 	const theme = useTheme();
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const client = useQueryClient();
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = isAnAdmin;
 
 	const { data, loading, error } = useQuery(getLibraryById, {
 		variables: {
@@ -844,27 +859,6 @@ export default function LibraryDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

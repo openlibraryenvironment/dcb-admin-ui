@@ -1,13 +1,20 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "react-i18next";
 
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import {
-	deleteNumericRangeMapping,
-	getNumericRangeMappings,
-	updateNumericRangeMapping,
-} from "src/queries/queries";
+	deleteNumericRangeMapping } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+//localisation
+import { useTranslation } from "react-i18next";
+
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import {
+	deleteNumericRangeMapping";
+import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
+import { updateNumericRangeMapping } from "@queries/updateNumericRangeMapping";
 import { useState } from "react";
 import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
@@ -21,9 +28,9 @@ import { useQueryClient } from "@tanstack/react-query";
 const AllNumericRange: NextPage = () => {
 	const client = useQueryClient();
 	const [showImport, setImport] = useState(false);
-	const { data: session } = useSession({
-		required: true,
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const openImport = () => {
 		setImport(true);
@@ -37,9 +44,7 @@ const AllNumericRange: NextPage = () => {
 		// https://www.apollographql.com/docs/react/data/refetching/#refetch-recipes
 	};
 	const { t } = useTranslation();
-	const isAValidAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAValidAdmin = isAnAdmin;
 
 	return (
 		<AdminLayout title={t("nav.mappings.allNumericRange")}>
@@ -94,21 +99,6 @@ const AllNumericRange: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default AllNumericRange;
+
+

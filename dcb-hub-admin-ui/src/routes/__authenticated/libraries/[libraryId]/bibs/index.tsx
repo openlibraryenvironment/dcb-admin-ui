@@ -1,10 +1,14 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "react-i18next";
 import {
-	deleteLibraryQuery,
-	getBibs,
-	getLibraryBasicsLocation,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+import { useTranslation } from "react-i18next";
+import {
+	deleteLibraryQuery";
+import { getBibs } from "@queries/getBibs";
+import { getLibraryBasicsLocation } from "@queries/getLibraryBasicsLocation";
 
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import Loading from "@components/Loading/Loading";
@@ -31,11 +35,15 @@ import dayjs from "dayjs";
 import { luceneDateRangeOperators } from "@components/DataGrid/components/DateTimeRangeFilter";
 import { defaultBibColumnVisibility } from "@helpers/dataGrid/columns";
 
-export default function LibraryBibs() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/bibs/")({
+	component: LibraryBibs,
+});
+
+function LibraryBibs() {
 	const { t } = useTranslation();
 
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
 	const customColumns = useCustomColumns();
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const client = useQueryClient();
@@ -51,15 +59,10 @@ export default function LibraryBibs() {
 	const [deleteLibrary] = useMutation(deleteLibraryQuery);
 
 	const theme = useTheme();
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin = isAnAdmin;
 	const pageActions = [
 		{
 			key: "delete",
@@ -296,27 +299,6 @@ export default function LibraryBibs() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

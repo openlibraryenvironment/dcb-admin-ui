@@ -1,9 +1,14 @@
+import { createFileRoute } from "@tanstack/react-router";
 import Error from "@components/Error/Error";
 import { useTranslation } from "react-i18next";
 
 import LoginLayout from "@layout/LoginLayout/LoginLayout";
 
-export default function MaintenancePage() {
+export const Route = createFileRoute("/maintenance")({
+	component: MaintenancePage,
+});
+
+function MaintenancePage() {
 	const { t } = useTranslation();
 
 	return (
@@ -20,16 +25,4 @@ export default function MaintenancePage() {
 			/>
 		</LoginLayout>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: any }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }

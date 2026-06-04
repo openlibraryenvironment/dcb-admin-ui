@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import type { NextPage } from "next";
 import { AdminLayout } from "@layout";
 import { Stack, Typography } from "@mui/material";
@@ -13,13 +14,10 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 // Shows consortium information and libraries
 const Home: NextPage = () => {
 	const router = useRouter();
-	const { data: session, status }: { data: any; status: any } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
 	const nameOfUser = session?.profile?.given_name ?? t("app.guest_user");
 	const { displayName } = useConsortiumInfoStore();
@@ -55,17 +53,3 @@ const Home: NextPage = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
-}
-
-export default Home;

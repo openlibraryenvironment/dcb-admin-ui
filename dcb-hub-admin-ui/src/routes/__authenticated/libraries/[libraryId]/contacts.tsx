@@ -1,15 +1,30 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { Library } from "@models/Library";
-import { Button, Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
+import { Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Library } from "@models/Library";
+import { Button";
+import { Grid } from "@queries/Grid";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@queries/useTheme } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-	deleteLibraryContact,
-	deleteLibraryQuery,
-	getLibraryContacts,
-	updatePerson,
-} from "src/queries/queries";
+	deleteLibraryContact } from "@queries/useQueryClient } from "@tanstack/react-query";
+import {
+	deleteLibraryContact";
+import { deleteLibraryQuery } from "@queries/deleteLibraryQuery";
+import { getLibraryContacts } from "@queries/getLibraryContacts";
+import { updatePerson } from "@queries/updatePerson";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
@@ -30,7 +45,11 @@ import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import { Person } from "@models/Person";
 import NewContact from "src/forms/NewContact/NewContact";
 
-export default function Contacts() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/contacts")({
+	component: Contacts,
+});
+
+function Contacts() {
 	const { t } = useTranslation();
 
 	const [tabIndex, setTabIndex] = useState(6);
@@ -42,7 +61,7 @@ export default function Contacts() {
 		setShowNewContact(false);
 	};
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
 		open: false,
@@ -66,15 +85,10 @@ export default function Contacts() {
 
 	const theme = useTheme();
 	const client = useQueryClient();
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin = isAnAdmin;
 	// Will change when the query changes
 	const library: Library = data?.libraries?.content?.[0];
 	const contacts: Person[] = library?.contacts ?? [];
@@ -293,27 +307,6 @@ export default function Contacts() {
 		</AdminLayout>
 	);
 }
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

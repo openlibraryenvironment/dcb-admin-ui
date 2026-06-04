@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { AdminLayout } from "@layout";
@@ -44,7 +45,10 @@ interface SearchResultsState {
 const Search: NextPage = () => {
 	const router = useRouter();
 	const { t } = useTranslation();
-	const { data: session } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { publicRuntimeConfig } = getConfig();
 
 	// Get the global state
@@ -263,22 +267,3 @@ const Search: NextPage = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-
-export default Search;

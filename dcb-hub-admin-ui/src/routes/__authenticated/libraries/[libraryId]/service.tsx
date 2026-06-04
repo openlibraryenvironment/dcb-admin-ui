@@ -1,22 +1,37 @@
+import { createFileRoute } from "@tanstack/react-router";
 import PrivateData from "@components/PrivateData/PrivateData";
 import { Library } from "@models/Library";
 import {
-	AccordionSummary,
-	Divider,
-	Grid,
-	Stack,
-	Tab,
-	Tabs,
-	Typography,
-	useTheme,
-} from "@mui/material";
+	AccordionSummary } from "@queries/createFileRoute } from "@tanstack/react-router";
+import PrivateData from "@components/PrivateData/PrivateData";
+import { Library } from "@models/Library";
+import {
+	AccordionSummary";
+import { Divider } from "@queries/Divider";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@queries/useTheme";
+import { } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 import { HostLMS } from "@models/HostLMS";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteLibraryQuery, getLibraryServiceInfo } from "src/queries/queries";
+import { useMutation } from "@queries/} from "@mui/material";
+import { useTranslation } from "react-i18next";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
+import { HostLMS } from "@models/HostLMS";
+
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
+import { deleteLibraryQuery } from "@queries/useQueryClient } from "@tanstack/react-query";
+import { deleteLibraryQuery";
+import { getLibraryServiceInfo } from "@queries/getLibraryServiceInfo";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
@@ -40,10 +55,14 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
-export default function Service() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/service")({
+	component: Service,
+});
+
+function Service() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
 	const [tabIndex, setTabIndex] = useState(1);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState<any>({
@@ -70,15 +89,10 @@ export default function Service() {
 
 	const theme = useTheme();
 	const client = useQueryClient();
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin = isAnAdmin;
 	// Will change when the query changes
 	const library: Library = data?.libraries?.content?.[0];
 	const firstHostLms: HostLMS = library?.agency?.hostLms;
@@ -1012,27 +1026,6 @@ export default function Service() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

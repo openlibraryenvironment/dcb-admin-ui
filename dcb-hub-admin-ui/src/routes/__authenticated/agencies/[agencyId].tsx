@@ -1,6 +1,12 @@
-import { Grid, Stack, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Grid";
+import { Stack } from "@queries/Stack";
+import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { getAgency } from "src/queries/queries";
+import { getAgency } from "@queries/Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { getAgency";
 import { AdminLayout } from "@layout";
 
 import { useQuery } from "@tanstack/react-query";
@@ -11,10 +17,14 @@ import Error from "@components/Error/Error";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 
-export default function AgencyDetails() {
+export const Route = createFileRoute("/__authenticated/agencies/agencyId")({
+	component: AgencyDetails,
+});
+
+function AgencyDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { agencyId } = router.query;
+	const { agencyId  } = Route.useParams();
 	const { loading, data, error } = useQuery(getAgency, {
 		variables: {
 			query: "id:" + agencyId,
@@ -25,13 +35,9 @@ export default function AgencyDetails() {
 	});
 	const agency: Agency = data?.agencies?.content?.[0];
 
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	if (loading || status === "loading") {
 		return (
@@ -149,27 +155,6 @@ export default function AgencyDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

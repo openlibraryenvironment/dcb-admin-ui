@@ -1,15 +1,28 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Box";
+import { Grid } from "@queries/Grid";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@mui/material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/Typography } from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import {
-	getLibraries,
-	getLocationForPatronRequestGrid,
-	getPatronRequests,
-	getPatronRequestTotals,
-} from "src/queries/queries";
+	getLibraries } from "@queries/useRouter } from "@tanstack/react-router";
+import {
+	getLibraries";
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
@@ -23,15 +36,16 @@ import { queries } from "src/constants/patronRequestGridQueries";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 
-export default function OutOfSequence() {
+export const Route = createFileRoute("/__authenticated/patronRequests/outOfSequence")({
+	component: OutOfSequence,
+});
+
+function OutOfSequence() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const [tabIndex, setTabIndex] = useState(1);
 	const [totalSizes, setTotalSizes] = useState({
 		exception: 0,
@@ -344,19 +358,4 @@ export default function OutOfSequence() {
 	);
 }
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

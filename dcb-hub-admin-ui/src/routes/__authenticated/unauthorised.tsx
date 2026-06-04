@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import Error from "@components/Error/Error";
 import { AdminLayout } from "@layout";
 //localisation
@@ -5,7 +6,11 @@ import { useTranslation } from "react-i18next";
 
 import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
 
-export default function Unauthorised() {
+export const Route = createFileRoute("/__authenticated/unauthorised")({
+	component: Unauthorised,
+});
+
+function Unauthorised() {
 	const { t } = useTranslation();
 	return (
 		<AdminLayout hideTitleBox={true} hideBreadcrumbs={true}>
@@ -17,16 +22,4 @@ export default function Unauthorised() {
 			/>
 		</AdminLayout>
 	);
-}
-
-export async function getStaticProps({ locale }: { locale: any }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
 }

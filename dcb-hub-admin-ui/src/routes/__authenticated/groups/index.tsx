@@ -1,8 +1,14 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AdminLayout } from "@layout";
 import { Button } from "@mui/material";
 import NewGroup from "../../../forms/NewGroup/NewGroup";
-import { getLibraryGroups } from "src/queries/queries";
+import { getLibraryGroups } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { AdminLayout } from "@layout";
+import { Button } from "@mui/material";
+import NewGroup from "../../../forms/NewGroup/NewGroup";
+import { getLibraryGroups";
 //localisation
 import { useTranslation } from "react-i18next";
 
@@ -31,13 +37,9 @@ const Groups: NextPage = () => {
 	};
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	if (status === "loading") {
 		return (
 			<AdminLayout hideBreadcrumbs>
@@ -120,21 +122,6 @@ const Groups: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default Groups;
+
+

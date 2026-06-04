@@ -1,20 +1,29 @@
+import { createFileRoute } from "@tanstack/react-router";
 import {
-	Button,
-	Grid,
-	Stack,
-	Tab,
-	Tabs,
-	Typography,
-	Tooltip,
-	CircularProgress,
-} from "@mui/material";
+	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import {
+	Button";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@queries/Typography";
+import { Tooltip } from "@queries/Tooltip";
+import { CircularProgress } from "@queries/CircularProgress";
+import { } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@queries/} from "@mui/material";
+import { useTranslation } from "react-i18next";
+
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-	getLibraryGroupById,
-	updateAgencyParticipationStatus,
-} from "src/queries/queries";
+	getLibraryGroupById } from "@queries/useQueryClient } from "@tanstack/react-query";
+import {
+	getLibraryGroupById";
+import { updateAgencyParticipationStatus } from "@queries/updateAgencyParticipationStatus";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
@@ -29,10 +38,14 @@ import { closeConfirmation } from "src/helpers/actions/editAndDeleteActions";
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 
-export default function GroupSettings() {
+export const Route = createFileRoute("/__authenticated/groups/groupId/settings")({
+	component: GroupSettings,
+});
+
+function GroupSettings() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const groupId = router.query.groupId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "groupId" if needed below
 	const client = useQueryClient();
 
 	const [tabIndex, setTabIndex] = useState(3); // Assuming 'settings' is index 3
@@ -47,16 +60,11 @@ export default function GroupSettings() {
 		title: null,
 	});
 
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = isAnAdmin;
 
 	const { data, loading, error, refetch } = useQuery(getLibraryGroupById, {
 		variables: { query: "id:" + groupId },
@@ -366,27 +374,6 @@ export default function GroupSettings() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

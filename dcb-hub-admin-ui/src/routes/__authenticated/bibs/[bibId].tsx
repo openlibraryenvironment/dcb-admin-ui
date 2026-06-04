@@ -1,18 +1,33 @@
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { createFileRoute } from "@tanstack/react-router";
+import { useLazyQuery } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useLazyQuery";
+import { useQuery } from "@apollo/client";
 import { AdminLayout } from "@layout";
 import { Bib } from "@models/Bib";
 import Link from "@components/Link/Link";
-import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
+import { AccordionSummary } from "@queries/useQuery } from "@apollo/client";
+import { AdminLayout } from "@layout";
+import { Bib } from "@models/Bib";
+import Link from "@components/Link/Link";
+import { AccordionSummary";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import { useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
 import {
-	getAgency,
-	getBibMainDetails,
-	getBibSourceRecord,
-	getLibraryBasics,
-} from "src/queries/queries";
+	getAgency } from "@queries/Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
+
+import { useState } from "react";
+import { ExpandMore } from "@mui/icons-material";
+import {
+	getAgency";
+import { getBibMainDetails } from "@queries/getBibMainDetails";
+import { getBibSourceRecord } from "@queries/getBibSourceRecord";
+import { getLibraryBasics } from "@queries/getLibraryBasics";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -27,10 +42,14 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
 
-export default function SourceBibDetails() {
+export const Route = createFileRoute("/__authenticated/bibs/bibId")({
+	component: SourceBibDetails,
+});
+
+function SourceBibDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { bibId } = router.query;
+	const { bibId  } = Route.useParams();
 
 	const { loading, data, error } = useQuery(getBibMainDetails, {
 		variables: {
@@ -47,13 +66,9 @@ export default function SourceBibDetails() {
 		{ loading: sourceRecordLoading, data: sourceRecordData },
 	] = useLazyQuery(getBibSourceRecord);
 
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const bib: Bib = data?.sourceBibs?.content?.[0];
 	const sourceSystemUrl = bib?.sourceSystemId
@@ -417,27 +432,6 @@ export default function SourceBibDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

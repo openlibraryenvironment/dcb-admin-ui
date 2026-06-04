@@ -1,6 +1,10 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "react-i18next";
-import { getBibs } from "src/queries/queries";
+import { getBibs } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+import { useTranslation } from "react-i18next";
+import { getBibs";
 
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import Loading from "@components/Loading/Loading";
@@ -18,13 +22,9 @@ const Bibs: NextPage = () => {
 
 	const router = useRouter();
 	const customColumns = useCustomColumns();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	// Expose only the filters we have tested. The others need to be mapped to Lucene functionality.
 	// See potential examples here https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
@@ -144,21 +144,6 @@ const Bibs: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default Bibs;
+
+

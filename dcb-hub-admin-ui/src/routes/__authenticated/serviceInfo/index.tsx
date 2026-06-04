@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
@@ -8,10 +9,11 @@ import { adminOrConsortiumAdmin } from "src/constants/roles";
 
 const ServiceInfo: NextPage = () => {
 	const { t } = useTranslation();
-	const { data: session } = useSession();
-	const isAValidAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAValidAdmin = isAnAdmin;
 
 	return (
 		<AdminLayout title={t("nav.serviceInfo.name")}>
@@ -47,21 +49,3 @@ const ServiceInfo: NextPage = () => {
 		</AdminLayout>
 	);
 };
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-
-export default ServiceInfo;

@@ -1,19 +1,32 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AdminLayout } from "@layout";
 import { AuditItem } from "@models/AuditItem";
 import {
-	Button,
-	CircularProgress,
-	Grid,
-	Stack,
-	Tooltip,
-	Typography,
-} from "@mui/material";
+	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { AdminLayout } from "@layout";
+import { AuditItem } from "@models/AuditItem";
+import {
+	Button";
+import { CircularProgress } from "@queries/CircularProgress";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Tooltip } from "@queries/Tooltip";
+import { Typography } from "@queries/Typography";
+import { } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/} from "@mui/material";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { getAuditById, getAuditsByPatronRequest } from "src/queries/queries";
+import { getAuditById } from "@queries/useRouter } from "@tanstack/react-router";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import { getAuditById";
+import { getAuditsByPatronRequest } from "@queries/getAuditsByPatronRequest";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import { useAuth } from "react-oidc-context";
@@ -21,10 +34,14 @@ import { isEmpty } from "lodash";
 import { ArrowLeft, ArrowRight } from "@mui/icons-material";
 import dayjs from "dayjs";
 
-export default function AuditDetails() {
+export const Route = createFileRoute("/__authenticated/patronRequests/audits/$auditId/")({
+	component: AuditDetails,
+});
+
+function AuditDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const auditId = router.query.auditId;
+	const { id } = Route.useParams(); // TODO: verify parameter name matches TanStack route
 	const { loading, data, error } = useQuery(getAuditById, {
 		variables: {
 			query: "id:" + auditId,
@@ -127,13 +144,9 @@ export default function AuditDetails() {
 			? otherAudits[currentAuditIndex + 1]?.id
 			: null;
 
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	// Link to the original patron request so users can get back
 	const handleReturn = () => {
 		router.push(`/patronRequests/${audit?.patronRequest?.id}` + `#auditlog`);
@@ -311,27 +324,6 @@ export default function AuditDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

@@ -1,24 +1,45 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import { AdminLayout } from "@layout";
 import {
-	Button,
-	Grid,
-	Stack,
-	Tab,
-	Tabs,
-	TextField,
-	Typography,
-	useTheme,
-} from "@mui/material";
+	Button } from "@queries/useQueryClient } from "@tanstack/react-query";
+import { AdminLayout } from "@layout";
+import {
+	Button";
+import { Grid } from "@queries/Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { TextField } from "@queries/TextField";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@queries/useTheme";
+import { } from "@mui/material";
 import { PutBlobResult } from "@vercel/blob";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
 import Image from "next/image";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import { useState, useRef, ChangeEvent, useEffect } from "react";
+import { useNavigate } from "@queries/} from "@mui/material";
+import { PutBlobResult } from "@vercel/blob";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import Image from "next/image";
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
+import { useState } from "@queries/useRouter } from "@tanstack/react-router";
+import { useState";
+import { useRef } from "@queries/useRef";
+import { ChangeEvent } from "@queries/ChangeEvent";
+import { useEffect } from "react";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import { getConsortia, updateConsortiumQuery } from "src/queries/queries";
+import { getConsortia } from "@queries/useEffect } from "react";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { getConsortia";
+import { updateConsortiumQuery } from "@queries/updateConsortiumQuery";
 import {
 	handleSaveConfirmation,
 	handleCancel,
@@ -57,7 +78,9 @@ interface ConsortiumFormFields {
 const ConsortiumPage: NextPage = () => {
 	const { t } = useTranslation();
 	const [tabIndex, setTabIndex] = useState(0);
-	const { data: session } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const router = useRouter();
 	const appHeaderFileRef = useRef<HTMLInputElement>(null);
 	const aboutFileRef = useRef<HTMLInputElement>(null);
@@ -441,9 +464,7 @@ const ConsortiumPage: NextPage = () => {
 	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
 
 	// ONLY ALLOW ADMIN OR CONSORTIUM_ADMIN to edit.
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = isAnAdmin;
 	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
@@ -901,21 +922,6 @@ const ConsortiumPage: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default ConsortiumPage;
+
+

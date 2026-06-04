@@ -1,18 +1,33 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import { Library } from "@models/Library";
-import { Grid, Typography, useTheme } from "@mui/material";
+import { Grid } from "@queries/useQueryClient } from "@tanstack/react-query";
+import { Library } from "@models/Library";
+import { Grid";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@mui/material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/useTheme } from "@mui/material";
+import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import {
-	deleteLibraryQuery,
-	deleteNumericRangeMapping,
-	getLibraryById,
-	getNumericRangeMappings,
-	updateNumericRangeMapping,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/useRouter } from "@tanstack/react-router";
+import { adminOrConsortiumAdmin } from "src/constants/roles";
+import {
+	deleteLibraryQuery";
+import { deleteNumericRangeMapping } from "@queries/deleteNumericRangeMapping";
+import { getLibraryById } from "@queries/getLibraryById";
+import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
+import { updateNumericRangeMapping } from "@queries/updateNumericRangeMapping";
 import { numRangeMappingColumnsNoCategoryFilter } from "@helpers/dataGrid/columns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
@@ -28,18 +43,19 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import MultipleTabNavigation from "@components/Navigation/MultipleTabNavigation";
 
-export default function All() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/numericRangeMappings/all")({
+	component: All,
+});
+
+function All() {
 	const { t } = useTranslation();
 
 	const theme = useTheme();
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const [tabIndex, setTabIndex] = useState(3);
 	const [subTabIndex, setSubTabIndex] = useState(6);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
@@ -50,9 +66,7 @@ export default function All() {
 		title: null,
 	});
 	const client = useQueryClient();
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = isAnAdmin;
 
 	const { data, loading, error } = useQuery(getLibraryById, {
 		variables: {
@@ -235,27 +249,6 @@ export default function All() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

@@ -1,5 +1,9 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
-import { Button, Tooltip } from "@mui/material";
+import { Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+import { Button";
+import { Tooltip } from "@mui/material";
 import { useState } from "react";
 //localisation
 import { useTranslation } from "react-i18next";
@@ -8,10 +12,18 @@ import Import from "@components/Import/Import";
 
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import {
-	deleteReferenceValueMapping,
-	getMappings,
-	updateReferenceValueMapping,
-} from "src/queries/queries";
+	deleteReferenceValueMapping } from "@queries/Tooltip } from "@mui/material";
+import { useState } from "react";
+//localisation
+import { useTranslation } from "react-i18next";
+import Import from "@components/Import/Import";
+// import dayjs from "dayjs";
+
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import {
+	deleteReferenceValueMapping";
+import { getMappings } from "@queries/getMappings";
+import { updateReferenceValueMapping } from "@queries/updateReferenceValueMapping";
 import Loading from "@components/Loading/Loading";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
@@ -25,13 +37,9 @@ const AllMappings: NextPage = () => {
 	const client = useQueryClient();
 	const [showImport, setImport] = useState(false);
 	const router = useRouter();
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const openImport = () => {
 		setImport(true);
 	};
@@ -58,9 +66,7 @@ const AllMappings: NextPage = () => {
 			</AdminLayout>
 		);
 	}
-	const isAValidAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAValidAdmin = isAnAdmin;
 
 	return (
 		<AdminLayout title={t("nav.mappings.allReferenceValue")}>
@@ -119,21 +125,6 @@ const AllMappings: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default AllMappings;
+
+

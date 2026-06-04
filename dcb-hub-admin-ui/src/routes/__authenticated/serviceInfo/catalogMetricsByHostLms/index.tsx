@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import axios from "axios";
 
 import { useAuth } from "react-oidc-context";
@@ -16,7 +17,10 @@ import { ProcessState } from "@models/ProcessState";
 
 const CatalogMetricsByHostLms: NextPage = () => {
 	const { publicRuntimeConfig } = getConfig();
-	const { data } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
 	const [records, setRecords] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -51,13 +55,10 @@ const CatalogMetricsByHostLms: NextPage = () => {
 	}, [data?.accessToken, publicRuntimeConfig.VITE_DCB_API_BASE]);
 
 	const router = useRouter();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const columns: GridColDef[] = [
 		{
@@ -218,22 +219,3 @@ const CatalogMetricsByHostLms: NextPage = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-
-export default CatalogMetricsByHostLms;

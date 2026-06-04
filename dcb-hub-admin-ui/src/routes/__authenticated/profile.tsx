@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import {
 	List,
 	ListItemIcon,
@@ -94,21 +95,3 @@ const Profile: NextPage = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-export default Profile;

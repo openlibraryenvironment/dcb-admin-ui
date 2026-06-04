@@ -1,10 +1,19 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getClusters } from "src/queries/queries";
+import { getClusters } from "@queries/useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { getClusters";
 import { Grid, Link, Stack, Tab, Tabs, Typography } from "@mui/material";
 import Error from "@components/Error/Error";
 import { useEffect, useState } from "react";
@@ -29,7 +38,7 @@ import dayjs from "dayjs";
 const Clusters: NextPage = () => {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = router.query;
+	const { id  } = Route.useParams();
 	const [showStaffRequest, setShowStaffRequest] = useState(false);
 	const [showExpeditedCheckout, setShowExpeditedCheckout] = useState(false);
 	const [sourceRecordErrorAlertDisplayed, setSourceRecordErrorAlertDisplayed] =
@@ -269,29 +278,7 @@ const Clusters: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export async function getStaticPaths() {
-	// Replacement for the previous method of getting all server side props
-	// which was not good for latency. Next.js specifc
-	return {
-		paths: [], // Do not pre-render any specific IDs at build time
-		fallback: "blocking", // Generate pages on-demand and cache them
-	};
-}
-export default Clusters;
+
+
+

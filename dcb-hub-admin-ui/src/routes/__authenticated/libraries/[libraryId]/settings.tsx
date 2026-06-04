@@ -1,25 +1,35 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { Library } from "@models/Library";
 import {
-	Button,
-	FormControl,
-	Grid,
-	MenuItem,
-	Select,
-	Stack,
-	Tab,
-	Tabs,
-	TextField,
-	Typography,
-	useTheme,
-} from "@mui/material";
+	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Library } from "@models/Library";
+import {
+	Button";
+import { FormControl } from "@queries/FormControl";
+import { Grid } from "@queries/Grid";
+import { MenuItem } from "@queries/MenuItem";
+import { Select } from "@queries/Select";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { TextField } from "@queries/TextField";
+import { Typography } from "@queries/Typography";
+import { useTheme } from "@queries/useTheme";
+import { } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@queries/} from "@mui/material";
+import { useTranslation } from "react-i18next";
+
+import { useMutation";
+import { useQuery } from "@queries/useQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import {
-	deleteLibraryQuery,
-	getLibraryBasics,
-	updateAgencyQuery,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/useQueryClient } from "@tanstack/react-query";
+import {
+	deleteLibraryQuery";
+import { getLibraryBasics } from "@queries/getLibraryBasics";
+import { updateAgencyQuery } from "@queries/updateAgencyQuery";
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
@@ -56,10 +66,14 @@ interface AgencyFormFields {
 	latitude?: number;
 }
 
-export default function Settings() {
+export const Route = createFileRoute("/__authenticated/libraries/libraryId/settings")({
+	component: Settings,
+});
+
+function Settings() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const libraryId = router.query.libraryId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "libraryId" if needed below
 	const [tabIndex, setTabIndex] = useState(2);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
@@ -99,15 +113,10 @@ export default function Settings() {
 
 	const theme = useTheme();
 	const client = useQueryClient();
-	const { data: session, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			router.push("/auth/logout");
-		},
-	});
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin = isAnAdmin;
 	const [updateAgency] = useMutation(updateAgencyQuery);
 
 	const library: Library = data?.libraries?.content?.[0];
@@ -567,27 +576,6 @@ export default function Settings() {
 		</AdminLayout>
 	);
 }
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

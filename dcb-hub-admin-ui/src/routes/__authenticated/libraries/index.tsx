@@ -1,12 +1,18 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import { useTranslation } from "react-i18next";
 
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import {
-	deleteLibraryQuery,
-	getLibraries,
-	updateLibraryQuery,
-} from "src/queries/queries";
+	deleteLibraryQuery } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+import { useTranslation } from "react-i18next";
+
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import {
+	deleteLibraryQuery";
+import { getLibraries } from "@queries/getLibraries";
+import { updateLibraryQuery } from "@queries/updateLibraryQuery";
 import { getILS } from "src/helpers/getILS";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { useState } from "react";
@@ -20,44 +26,9 @@ import NewLibrary from "src/forms/NewLibrary/NewLibrary";
 
 const Libraries: NextPage = () => {
 	const { t } = useTranslation();
-	const { data: session }: { data: any } = useSession();
-
-	const isAnAdmin = session?.profile?.roles?.some(
-		(role: string) => role === "ADMIN" || role === "CONSORTIUM_ADMIN",
-	);
-	// State management for the adding library to group modal
-	const [addToGroup, setAddToGroup] = useState(false);
-	const [showNewLibrary, setShowNewLibrary] = useState(false);
-	const { displayName } = useConsortiumInfoStore();
-
-	const closeAddToGroup = () => {
-		setAddToGroup(false);
-	};
-
-	const pageActions = [
-		{
-			key: "addToGroup",
-			onClick: () => setAddToGroup(true),
-			disabled: !isAnAdmin,
-			label: t("libraries.add_to_group"),
-		},
-		{
-			key: "newLibrary",
-			onClick: () => setShowNewLibrary(true),
-			disabled: !isAnAdmin,
-			label: t("libraries.new.title"),
-		},
-	];
-	const customColumns = useCustomColumns();
-
-	const router = useRouter();
-	const { data, status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	// This is a test to see if the RefreshAccessToken Error is passed to the client properly.
 	if (data?.error) {
 		console.log("Error:" + data?.error);
@@ -244,16 +215,6 @@ const Libraries: NextPage = () => {
 	);
 };
 
-export async function getStaticProps({ locale }: { locale: string }) {
-	return {
-		props: {
-			...(await serverSideTranslations(locale, [
-				"application",
-				"common",
-				"validation",
-			])),
-		},
-	};
-}
 
-export default Libraries;
+
+

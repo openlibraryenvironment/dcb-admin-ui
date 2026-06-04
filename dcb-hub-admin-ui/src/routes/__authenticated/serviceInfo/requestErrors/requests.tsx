@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import axios from "axios";
@@ -11,11 +12,20 @@ import { AdminLayout } from "@layout";
 import Error from "@components/Error/Error";
 import Link from "@components/Link/Link";
 
+export const Route = createFileRoute(
+	"/__authenticated/serviceInfo/requestErrors/requests/",
+)({
+	component: Requests,
+});
+
 const Requests = () => {
 	const router = useRouter();
-	const { namedSql, description } = router.query;
+	const { namedSql, description } = Route.useParams();
 	const { publicRuntimeConfig } = getConfig();
-	const { data: sess } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
 	const desc = String(description);
 	const match = desc.match(/(DCB-\d+)/); // Extract "DCB-XXX"
@@ -146,22 +156,3 @@ const Requests = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-
-export default Requests;

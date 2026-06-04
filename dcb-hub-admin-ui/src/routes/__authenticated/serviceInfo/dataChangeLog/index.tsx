@@ -1,7 +1,12 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "react-i18next";
-import { getDataChangeLog } from "src/queries/queries";
+import { getDataChangeLog } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+//localisation
+import { useTranslation } from "react-i18next";
+import { getDataChangeLog";
 
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import Loading from "@components/Loading/Loading";
@@ -30,13 +35,9 @@ const DataChangeLog: NextPage = () => {
 
 	const router = useRouter();
 	const customColumns = useCustomColumns();
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	if (status === "loading") {
 		return (
@@ -186,21 +187,6 @@ const DataChangeLog: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default DataChangeLog;
+
+

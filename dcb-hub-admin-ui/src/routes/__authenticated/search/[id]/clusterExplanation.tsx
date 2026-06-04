@@ -1,22 +1,49 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { useState";
+import { useEffect } from "@queries/useEffect";
+import { useMemo } from "@queries/useMemo";
+import { useCallback } from "react";
 import { useAuth } from "react-oidc-context";
 
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { Chip, Grid, Tab, Tabs } from "@mui/material";
+import { Chip } from "@queries/useCallback } from "react";
+import { useAuth } from "react-oidc-context";
+
+import axios from "axios";
+import { useTranslation } from "react-i18next";
+import { Chip";
+import { Grid } from "@queries/Grid";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@mui/material";
 import Error from "@components/Error/Error";
-import { CheckCircle, Warning, Info } from "@mui/icons-material";
+import { CheckCircle } from "@queries/Tabs } from "@mui/material";
+import Error from "@components/Error/Error";
+import { CheckCircle";
+import { Warning } from "@queries/Warning";
+import { Info } from "@mui/icons-material";
 import {
-	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
-	GridColDef,
-} from "@mui/x-data-grid-premium";
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF } from "@queries/Info } from "@mui/icons-material";
+import {
+	GRID_DETAIL_PANEL_TOGGLE_COL_DEF";
+import { GridColDef } from "@queries/GridColDef";
+import { } from "@mui/x-data-grid-premium";
 import { parseClusteringAuditLog } from "src/helpers/parseClusteringAuditLog";
 import { ClientDataGrid } from "@components/ClientDataGrid";
 import { AdminLayout } from "@layout";
 import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/} from "@mui/x-data-grid-premium";
+import { parseClusteringAuditLog } from "src/helpers/parseClusteringAuditLog";
+import { ClientDataGrid } from "@components/ClientDataGrid";
+import { AdminLayout } from "@layout";
+import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 
-import { getClustersTitleOnly } from "src/queries/queries";
+import { getClustersTitleOnly } from "@queries/useRouter } from "@tanstack/react-router";
+
+import { getClustersTitleOnly";
 import { useQuery } from "@tanstack/react-query";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
@@ -26,11 +53,13 @@ import { defaultClusterExplanationVisibility } from "@helpers/dataGrid/columns";
 const ExplainClustering: NextPage = () => {
 	const [tabIndex, setTabIndex] = useState(1);
 
-	const { data: session } = useSession();
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { publicRuntimeConfig } = getConfig();
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = router.query;
+	const { id  } = Route.useParams();
 
 	const [loading, setLoading] = useState(false);
 	const [data, setData] = useState<any>(null);
@@ -225,28 +254,8 @@ const ExplainClustering: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export default ExplainClustering;
+
+
+

@@ -1,15 +1,27 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
-import { Button, Tab, Tabs } from "@mui/material";
+import { Button } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { AdminLayout } from "@layout";
+import { Button";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@queries/Tabs } from "@mui/material";
+import { useTranslation } from "react-i18next";
+
+import { useNavigate";
+import { useRouter } from "@tanstack/react-router";
 import Grid from "@mui/material/Grid";
 import { useState } from "react";
 import {
-	deleteConsortiumContact,
-	getConsortiaContacts,
-	updatePerson,
-} from "src/queries/queries";
+	deleteConsortiumContact } from "@queries/useRouter } from "@tanstack/react-router";
+import Grid from "@mui/material/Grid";
+import { useState } from "react";
+import {
+	deleteConsortiumContact";
+import { getConsortiaContacts } from "@queries/getConsortiaContacts";
+import { updatePerson } from "@queries/updatePerson";
 import { useQuery } from "@tanstack/react-query";
 import { Person } from "@models/Person";
 import { ClientDataGrid } from "@components/ClientDataGrid";
@@ -165,21 +177,6 @@ const Contacts: NextPage = () => {
 	);
 };
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
 
-export default Contacts;
+
+

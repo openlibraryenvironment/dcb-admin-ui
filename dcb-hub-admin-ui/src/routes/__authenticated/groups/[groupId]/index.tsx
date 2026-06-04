@@ -1,6 +1,14 @@
-import { Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Tabs } from "@queries/Tabs";
+import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { getLibraryGroupById } from "src/queries/queries";
+import { getLibraryGroupById } from "@queries/Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { getLibraryGroupById";
 import { AdminLayout } from "@layout";
 
 import { Group } from "@models/Group";
@@ -14,10 +22,14 @@ import { useNavigate, useRouter } from "@tanstack/react-router";
 import { handleGroupTabChange } from "src/helpers/navigation/handleTabChange";
 import { useState } from "react";
 
-export default function GroupDetails() {
+export const Route = createFileRoute("/__authenticated/groups/groupId/")({
+	component: GroupDetails,
+});
+
+function GroupDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const groupId = router.query.groupId as string;
+	const { id } = Route.useParams(); // TODO: rename "id" to "groupId" if needed below
 	const { loading, data, error } = useQuery(getLibraryGroupById, {
 		variables: {
 			query: "id:" + groupId,
@@ -28,13 +40,9 @@ export default function GroupDetails() {
 	const group: Group = data?.libraryGroups?.content?.[0];
 	const [tabIndex, setTabIndex] = useState(0);
 
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	if (loading || status === "loading") {
 		return (
@@ -190,27 +198,6 @@ export default function GroupDetails() {
 	);
 }
 
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+

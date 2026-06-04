@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { AdminLayout } from "@layout";
 import { Grid, Tab, Tabs, Typography } from "@mui/material";
 
@@ -55,22 +56,3 @@ const Onboarding: NextPage = () => {
 		</AdminLayout>
 	);
 };
-
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
-
-export default Onboarding;

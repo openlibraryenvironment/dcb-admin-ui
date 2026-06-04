@@ -1,4 +1,9 @@
-import { Grid, Stack, Tab, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid } from "@queries/createFileRoute } from "@tanstack/react-router";
+import { Grid";
+import { Stack } from "@queries/Stack";
+import { Tab } from "@queries/Tab";
+import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { AdminLayout } from "@layout";
 import { HostLMS } from "@models/HostLMS";
@@ -7,7 +12,16 @@ import { ExpandMore } from "@mui/icons-material";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import PrivateData from "@components/PrivateData/PrivateData";
-import { getHostLms } from "src/queries/queries";
+import { getHostLms } from "@queries/Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { AdminLayout } from "@layout";
+import { HostLMS } from "@models/HostLMS";
+import { useState } from "react";
+import { ExpandMore } from "@mui/icons-material";
+import Error from "@components/Error/Error";
+import Loading from "@components/Loading/Loading";
+import PrivateData from "@components/PrivateData/PrivateData";
+import { getHostLms";
 import { useQuery } from "@tanstack/react-query";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
@@ -22,11 +36,15 @@ import TabPanel from "@mui/lab/TabPanel";
 import TabList from "@mui/lab/TabList";
 import TabContext from "@mui/lab/TabContext";
 
-export default function HostLMSDetails() {
+export const Route = createFileRoute("/__authenticated/hostlmss/hostlmsId")({
+	component: HostLMSDetails,
+});
+
+function HostLMSDetails() {
 	const { t } = useTranslation();
 	// pollInterval is in ms - set to 2 mins
 	const router = useRouter();
-	const hostlmsId = router.query.hostlmsId;
+	const { id } = Route.useParams(); // TODO: verify parameter name matches TanStack route
 	const { loading, data, error } = useQuery(getHostLms, {
 		variables: {
 			query: "id:" + hostlmsId,
@@ -41,13 +59,9 @@ export default function HostLMSDetails() {
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
 		setActiveTab(newValue);
 	};
-	const { status } = useSession({
-		required: true,
-		onUnauthenticated() {
-			// Push to logout page if not authenticated.
-			router.push("/auth/logout");
-		},
-	});
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const [expandedAccordions, setExpandedAccordions] = useState([
 		true,
@@ -850,27 +864,6 @@ export default function HostLMSDetails() {
 		</AdminLayout>
 	);
 }
-export async function getStaticPaths() {
-	return {
-		paths: [],
-		fallback: "blocking",
-	};
-}
 
-export async function getStaticProps(ctx: any) {
-	const { locale } = ctx;
-	let translations = {};
-	if (locale) {
-		translations = await serverSideTranslations(locale as string, [
-			"common",
-			"application",
-			"validation",
-		]);
-	}
 
-	return {
-		props: {
-			...translations,
-		},
-	};
-}
+
