@@ -242,7 +242,7 @@ export default function StaffRequest({
 		setItemsLoading(true);
 		try {
 			const response = await axios.get<any[]>(
-				`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/items/availability`,
 				{
 					headers: { Authorization: `Bearer ${session?.accessToken}` },
 					params: {
@@ -367,7 +367,7 @@ export default function StaffRequest({
 
 		try {
 			const response = await axios.post(
-				`${publicRuntimeConfig.DCB_API_BASE}/patron/auth/lookup`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/patron/auth/lookup`,
 				validatePatronPayload,
 				{
 					headers: {
@@ -465,7 +465,7 @@ export default function StaffRequest({
 			};
 
 			const response = await axios.post(
-				`${publicRuntimeConfig.DCB_API_BASE}/patrons/requests/place`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/patrons/requests/place`,
 				selectionType == "manual" ? manualSelectionPayload : requestPayload,
 				{
 					headers: {

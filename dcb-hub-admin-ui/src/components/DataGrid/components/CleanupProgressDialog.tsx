@@ -22,7 +22,7 @@ import { ClientDataGrid } from "@components/ClientDataGrid";
 import {
 	cleanupPatronRequestVisibility,
 	standardPatronRequestColumns,
-} from "src/helpers/DataGrid/columns";
+} from "@helpers/dataGrid/columns";
 import { useState } from "react";
 
 interface CleanupProgressDialogProps {

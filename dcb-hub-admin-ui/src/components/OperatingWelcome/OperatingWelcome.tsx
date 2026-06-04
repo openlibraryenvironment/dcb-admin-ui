@@ -1,6 +1,6 @@
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 import { useTranslation } from "react-i18next";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
 import { getILS } from "src/helpers/getILS";
 import {
 	deleteLibraryQuery,

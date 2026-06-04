@@ -13,7 +13,7 @@ import { Box, Button, Tooltip } from "@mui/material";
 import Import from "@components/Import/Import";
 import { useAuth } from "react-oidc-context";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import { standardNumRangeMappingColumns } from "src/helpers/DataGrid/columns";
+import { standardNumRangeMappingColumns } from "@helpers/dataGrid/columns";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Page for 'ALL' numeric range mappings of any category.

@@ -8,13 +8,14 @@ const API_LINKS = {
 };
 
 const LOCAL_VERSION_LINKS = {
-	SERVICE: publicRuntimeConfig.DCB_API_BASE,
-	SERVICE_INFO: publicRuntimeConfig.DCB_API_BASE + "/info",
-	SERVICE_HEALTH: publicRuntimeConfig.DCB_API_BASE + "/health",
-	KEYCLOAK: publicRuntimeConfig.KEYCLOAK_URL,
+	SERVICE: publicRuntimeConfig.VITE_DCB_API_BASE,
+	SERVICE_INFO: publicRuntimeConfig.VITE_DCB_API_BASE + "/info",
+	SERVICE_HEALTH: publicRuntimeConfig.VITE_DCB_API_BASE + "/health",
+	KEYCLOAK: publicRuntimeConfig.VITE_KEYCLOAK_URL,
 	KEYCLOAK_HEALTH:
-		publicRuntimeConfig.KEYCLOAK_URL.split("/", 3).join("/") + "/health",
-	TRACKING: publicRuntimeConfig.DCB_API_BASE + "/admin/trackingConfiguration",
+		publicRuntimeConfig.VITE_KEYCLOAK_URL.split("/", 3).join("/") + "/health",
+	TRACKING:
+		publicRuntimeConfig.VITE_DCB_API_BASE + "/admin/trackingConfiguration",
 };
 
 const REPO_LINKS = {
@@ -54,8 +55,8 @@ const ONBOARDING_LINKS = {
 };
 
 const DCB_SERVICE_STATUS_LINKS = {
-	LOGGERS: publicRuntimeConfig.DCB_API_BASE + "/loggers",
-	METRICS: publicRuntimeConfig.DCB_API_BASE + "/metrics",
+	LOGGERS: publicRuntimeConfig.VITE_DCB_API_BASE + "/loggers",
+	METRICS: publicRuntimeConfig.VITE_DCB_API_BASE + "/metrics",
 };
 
 export {

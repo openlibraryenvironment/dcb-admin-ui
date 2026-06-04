@@ -66,7 +66,7 @@ const Items: NextPage = () => {
 			setError(false);
 			try {
 				const standardRequest = axios.get<any[]>(
-					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
+					`${publicRuntimeConfig.VITE_DCB_API_BASE}/items/availability`,
 					{
 						headers: { Authorization: `Bearer ${session?.accessToken}` },
 						params: { clusteredBibId: id },
@@ -74,7 +74,7 @@ const Items: NextPage = () => {
 				);
 
 				const noFilterRequest = axios.get<any[]>(
-					`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
+					`${publicRuntimeConfig.VITE_DCB_API_BASE}/items/availability`,
 					{
 						headers: { Authorization: `Bearer ${session?.accessToken}` },
 						params: { clusteredBibId: id, filters: "none" },
@@ -97,7 +97,7 @@ const Items: NextPage = () => {
 		};
 
 		fetchRecords();
-	}, [publicRuntimeConfig.DCB_API_BASE, id, session?.accessToken]);
+	}, [publicRuntimeConfig.VITE_DCB_API_BASE, id, session?.accessToken]);
 
 	const itemsNotShown = useMemo(() => {
 		if (!availabilityResults.itemList || !comparisonResults.itemList) {

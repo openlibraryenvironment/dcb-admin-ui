@@ -28,7 +28,7 @@ import {
 	closeConfirmation,
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
 import { handleTabChange } from "src/helpers/navigation/handleTabChange";
 import {
 	deleteLibraryQuery,
@@ -42,7 +42,7 @@ import { getILS } from "src/helpers/getILS";
 import Import from "@components/Import/Import";
 import useCode from "@hooks/useCode";
 import dayjs from "dayjs";
-import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
+import { luceneDateRangeOperators } from "@components/DataGrid/components/DateTimeRangeFilter";
 
 interface NewLocationData {
 	show: boolean;

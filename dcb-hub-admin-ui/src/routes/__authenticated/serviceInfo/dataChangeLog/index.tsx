@@ -11,7 +11,7 @@ import {
 	containsOnly,
 	equalsOnly,
 	standardFilters,
-} from "src/helpers/DataGrid/filters";
+} from "@helpers/dataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";

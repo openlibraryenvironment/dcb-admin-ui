@@ -31,7 +31,7 @@ const CatalogMetricsByHostLms: NextPage = () => {
 		const fetchRecords = async () => {
 			try {
 				const response = await axios.get<any[]>(
-					`${publicRuntimeConfig.DCB_API_BASE}/hostlmss/importIngestDetails`,
+					`${publicRuntimeConfig.VITE_DCB_API_BASE}/hostlmss/importIngestDetails`,
 					{
 						headers: { Authorization: `Bearer ${data?.accessToken}` },
 					},
@@ -48,7 +48,7 @@ const CatalogMetricsByHostLms: NextPage = () => {
 		if (data?.accessToken) {
 			fetchRecords();
 		}
-	}, [data?.accessToken, publicRuntimeConfig.DCB_API_BASE]);
+	}, [data?.accessToken, publicRuntimeConfig.VITE_DCB_API_BASE]);
 
 	const router = useRouter();
 	const { status } = useSession({

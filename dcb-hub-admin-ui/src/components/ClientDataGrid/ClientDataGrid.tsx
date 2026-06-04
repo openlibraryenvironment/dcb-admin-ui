@@ -38,18 +38,18 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { formatChangedFields } from "src/helpers/formatChangedFields";
 import { useAuth } from "react-oidc-context";
 import { CellEdit } from "@components/CellEdit/CellEdit";
-import { ColumnsAndSearchToolbar } from "@components/ServerPaginatedGrid/components/ColumnsAndSearchToolbar";
-import { validateRow } from "src/helpers/DataGrid/validateRow";
-import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
-import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
+import { ColumnsAndSearchToolbar } from "@components/DataGrid/components/ColumnsAndSearchToolbar";
+import { validateRow } from "@helpers/dataGrid/validateRow";
+import { findFirstEditableColumn } from "@helpers/dataGrid/findFirstEditableColumn";
+import { getIdOfRow } from "@helpers/dataGrid/getIdOfRow";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
-import { getEntityText } from "src/helpers/DataGrid/getEntityText";
+import { getEntityText } from "@helpers/dataGrid/getEntityText";
 import {
 	CustomNoDataOverlay,
 	CustomNoResultsOverlay,
-} from "@components/ServerPaginatedGrid/components/DynamicOverlays";
-import SearchOnlyToolbar from "@components/ServerPaginatedGrid/components/SearchOnlyToolbar";
-import QuickSearchToolbar from "@components/ServerPaginatedGrid/components/QuickSearchToolbar";
+} from "@components/DataGrid/components/DynamicOverlays";
+import SearchOnlyToolbar from "@components/DataGrid/components/SearchOnlyToolbar";
+import QuickSearchToolbar from "@components/DataGrid/components/QuickSearchToolbar";
 // This is our generic DataGrid component. Customisation can be carried out either on the props, or within this component based on type.
 // For editing, see here https://mui.com/x/react-data-grid/editing/#confirm-before-saving
 // This is our Data Grid for the Details pages, which still require client-side pagination.

@@ -19,8 +19,8 @@ const RequestErrors: NextPage = () => {
 	const [error, setError] = useState(false);
 	// Memoise to avoid recreation on each render
 	const requestUrl = useMemo(
-		() => `${publicRuntimeConfig.DCB_API_BASE}/sql?name=errorOverview`,
-		[publicRuntimeConfig.DCB_API_BASE],
+		() => `${publicRuntimeConfig.VITE_DCB_API_BASE}/sql?name=errorOverview`,
+		[publicRuntimeConfig.VITE_DCB_API_BASE],
 	);
 	const fetchRecords = useCallback(async () => {
 		if (!sess?.accessToken) return;

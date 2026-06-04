@@ -29,8 +29,8 @@ import { useTranslation } from "react-i18next";
 import {
 	CustomNoDataOverlay,
 	CustomNoResultsOverlay,
-} from "./components/DynamicOverlays";
-import QuickSearchToolbar from "./components/QuickSearchToolbar";
+} from "../DataGrid/components/DynamicOverlays";
+import QuickSearchToolbar from "../DataGrid/components/QuickSearchToolbar";
 import {
 	Cancel,
 	Delete,
@@ -52,8 +52,8 @@ import Confirmation from "@components/Upload/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { computeMutation } from "src/helpers/computeMutation";
 import { CellEdit } from "@components/CellEdit/CellEdit";
-import { validateRow } from "src/helpers/DataGrid/validateRow";
-import { determineDataGridPathOnClick } from "src/helpers/DataGrid/determineDataGridPathOnClick";
+import { validateRow } from "@helpers/dataGrid/validateRow";
+import { determineDataGridPathOnClick } from "@helpers/dataGrid/determineDataGridPathOnClick";
 import {
 	actionsTypes,
 	nonClickableTypes,
@@ -61,21 +61,21 @@ import {
 	quickFieldMap,
 	specialRedirectionTypes,
 } from "src/constants/dataGridConstants";
-import { buildFilterQuery } from "src/helpers/DataGrid/buildFilterQuery";
-import { getIdOfRow } from "src/helpers/DataGrid/getIdOfRow";
-import { findFirstEditableColumn } from "src/helpers/DataGrid/findFirstEditableColumn";
+import { buildFilterQuery } from "@helpers/dataGrid/buildFilterQuery";
+import { getIdOfRow } from "@helpers/dataGrid/getIdOfRow";
+import { findFirstEditableColumn } from "@helpers/dataGrid/findFirstEditableColumn";
 import { isEmpty } from "lodash";
-import { getFileNameForExport } from "src/helpers/DataGrid/getFileNameForExport";
-import { convertFileToString } from "src/helpers/DataGrid/convertFileToString";
-import ExportToolbar from "./components/ExportToolbar";
+import { getFileNameForExport } from "@helpers/dataGrid/getFileNameForExport";
+import { convertFileToString } from "@helpers/dataGrid/convertFileToString";
+import ExportToolbar from "../DataGrid/components/ExportToolbar";
 import { useGridStore } from "@hooks/useDataGridOptionsStore";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
 import { PatronRequest } from "@models/PatronRequest";
 import { Location } from "@models/Location";
-import { ExportProgressDialog } from "./components/ExportProgressDialog";
+import { ExportProgressDialog } from "../DataGrid/components/ExportProgressDialog";
 
 import axios from "axios";
-import { CleanupProgressDialog } from "./components/CleanupProgressDialog";
+import { CleanupProgressDialog } from "../DataGrid/components/CleanupProgressDialog";
 import { cleanupStatuses } from "src/helpers/statuses";
 // Slots that won't change are defined here to stop them from being re-created on every render.
 // See https://mui.com/x/react-data-grid/performance/#extract-static-objects-and-memoize-root-props
@@ -432,7 +432,7 @@ export default function ServerPaginationGrid({
 				batch.map(async (row) => {
 					try {
 						const cleanupUrl =
-							publicRuntimeConfig.DCB_API_BASE +
+							publicRuntimeConfig.VITE_DCB_API_BASE +
 							"/patrons/requests/" +
 							row.id +
 							"/transition/cleanup";

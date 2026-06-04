@@ -8,7 +8,7 @@ import { LicenseInfo } from "@mui/x-license";
 
 import "./i18n";
 import { routeTree } from "./routeTree.gen";
-import theme from "@themes/openrs.ts"; // Sort this out, it's a mess
+import theme from "@themes/openRS"; // Sort this out, it's a mess
 import App from "@components/App/App";
 
 // Do we still want these?
@@ -17,7 +17,6 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
-// 1. Tell TypeScript about the Cloudflare-injected window variable
 declare global {
 	interface Window {
 		__APP_ENV__?: {

@@ -63,10 +63,10 @@ const useDCBVersionStore = create<DCBVersionState>()(
 			fetchVersionInfo: async () => {
 				const currentTime = Date.now();
 				set({ loading: true });
-				const fetchUrl = `${publicRuntimeConfig?.DCB_API_BASE}/info`;
+				const fetchUrl = `${publicRuntimeConfig?.VITE_DCB_API_BASE}/info`;
 				try {
 					// const response = await axios.get(
-					// 	`${publicRuntimeConfig?.DCB_API_BASE}/info`,
+					// 	`${publicRuntimeConfig?.VITE_DCB_API_BASE}/info`,
 					// );
 					let response;
 

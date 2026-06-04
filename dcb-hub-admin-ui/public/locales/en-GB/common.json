@@ -1169,7 +1169,7 @@
 		"format": "Format",
 		"formatted_timestamp": "Timestamp",
 		"shared_index_unavailable_title": "Shared index is not configured on this system",
-		"shared_index_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment.",
+		"shared_index_unavailable_message": "Please set a valid VITE_DCB_SEARCH_BASE environment variable for this deployment.",
 		"hold_count": "Hold count",
 		"identifier": "Identifier",
 		"identifiers": "Identifiers",

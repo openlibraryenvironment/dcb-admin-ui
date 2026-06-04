@@ -7,7 +7,7 @@ import { ExpandMore } from "@mui/icons-material";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import PrivateData from "@components/PrivateData/PrivateData";
-import { getHostLmsById } from "src/queries/queries";
+import { getHostLms } from "src/queries/queries";
 import { useQuery } from "@tanstack/react-query";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import {
@@ -27,7 +27,7 @@ export default function HostLMSDetails() {
 	// pollInterval is in ms - set to 2 mins
 	const router = useRouter();
 	const hostlmsId = router.query.hostlmsId;
-	const { loading, data, error } = useQuery(getHostLmsById, {
+	const { loading, data, error } = useQuery(getHostLms, {
 		variables: {
 			query: "id:" + hostlmsId,
 		},

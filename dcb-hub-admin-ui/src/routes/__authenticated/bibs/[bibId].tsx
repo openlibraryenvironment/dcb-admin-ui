@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { ExpandMore } from "@mui/icons-material";
 import {
-	getAgencyById,
+	getAgency,
 	getBibMainDetails,
 	getBibSourceRecord,
 	getLibraryBasics,
@@ -61,7 +61,7 @@ export default function SourceBibDetails() {
 		: "";
 	// source system ID -> Host LMS -> agency -> Library
 	// May be able to skip host lms query
-	const { data: bibAgencyData } = useQuery(getAgencyById, {
+	const { data: bibAgencyData } = useQuery(getAgency, {
 		variables: {
 			query: "hostLms: " + bib?.sourceSystemId,
 			pageno: 0,
@@ -246,7 +246,7 @@ export default function SourceBibDetails() {
 						<Typography variant="attributeTitle">
 							{t("details.contributor_uuid")}
 						</Typography>
-						{publicRuntimeConfig.DCB_SEARCH_BASE ? (
+						{publicRuntimeConfig.VITE_DCB_SEARCH_BASE ? (
 							<Typography variant="attributeText" component="div">
 								<Link
 									href={`/search/${bib?.contributesTo?.id}/cluster`}

@@ -26,8 +26,8 @@ const Requests = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(false);
 	const requestUrl = useMemo(
-		() => `${publicRuntimeConfig.DCB_API_BASE}/sql?name=${namedSql}`,
-		[namedSql, publicRuntimeConfig.DCB_API_BASE],
+		() => `${publicRuntimeConfig.VITE_DCB_API_BASE}/sql?name=${namedSql}`,
+		[namedSql, publicRuntimeConfig.VITE_DCB_API_BASE],
 	);
 
 	useEffect(() => {

@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import {
 	getRangeLabels,
 	getRangePlaceholders,
-} from "src/helpers/DataGrid/getRangeLabels";
+} from "@helpers/dataGrid/getRangeLabels";
 
 export default function RangeFilter(props: GridFilterInputValueProps) {
 	const rootProps = useGridRootProps(); // warning about this line not sure why

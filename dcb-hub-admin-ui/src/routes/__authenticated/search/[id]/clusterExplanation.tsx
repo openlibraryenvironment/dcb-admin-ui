@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
-import { defaultClusterExplanationVisibility } from "src/helpers/DataGrid/columns";
+import { defaultClusterExplanationVisibility } from "@helpers/dataGrid/columns";
 
 const ExplainClustering: NextPage = () => {
 	const [tabIndex, setTabIndex] = useState(1);
@@ -53,7 +53,7 @@ const ExplainClustering: NextPage = () => {
 		setError(false);
 		try {
 			const response = await axios.get(
-				`${publicRuntimeConfig.DCB_API_BASE}/clusters/${id}/audit-log`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/clusters/${id}/audit-log`,
 				{
 					headers: { Authorization: `Bearer ${session.accessToken}` },
 				},
@@ -65,7 +65,7 @@ const ExplainClustering: NextPage = () => {
 		} finally {
 			setLoading(false);
 		}
-	}, [id, session?.accessToken, publicRuntimeConfig.DCB_API_BASE]);
+	}, [id, session?.accessToken, publicRuntimeConfig.VITE_DCB_API_BASE]);
 
 	useEffect(() => {
 		if (id) {

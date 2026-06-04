@@ -14,7 +14,7 @@ import {
 	GridFilterModel,
 	GridPaginationModel,
 } from "@mui/x-data-grid-premium";
-import { CustomNoDataOverlay } from "@components/ServerPaginatedGrid/components/DynamicOverlays";
+import { CustomNoDataOverlay } from "@components/DataGrid/components/DynamicOverlays";
 
 import { validate } from "uuid";
 import { SearchCriterion } from "@models/SearchCriterion";
@@ -110,7 +110,7 @@ const Search: NextPage = () => {
 			if (
 				!session?.accessToken ||
 				!query ||
-				!publicRuntimeConfig.DCB_SEARCH_BASE
+				!publicRuntimeConfig.VITE_DCB_SEARCH_BASE
 			)
 				return;
 
@@ -118,8 +118,8 @@ const Search: NextPage = () => {
 			setError(false);
 			const isUUID = query.length === 36 ? validate(query) : false;
 			const requestURL = isUUID
-				? `${publicRuntimeConfig.DCB_SEARCH_BASE}/public/opac-inventory/instances/${query}`
-				: `${publicRuntimeConfig.DCB_SEARCH_BASE}/search/instances`;
+				? `${publicRuntimeConfig.VITE_DCB_SEARCH_BASE}/public/opac-inventory/instances/${query}`
+				: `${publicRuntimeConfig.VITE_DCB_SEARCH_BASE}/search/instances`;
 
 			const queryParams = {
 				query: query,
@@ -151,7 +151,7 @@ const Search: NextPage = () => {
 				setLoading(false);
 			}
 		},
-		[session?.accessToken, publicRuntimeConfig.DCB_SEARCH_BASE],
+		[session?.accessToken, publicRuntimeConfig.VITE_DCB_SEARCH_BASE],
 	);
 
 	const executeSearch = (newCriteria: SearchCriterion[]) => {
@@ -215,7 +215,7 @@ const Search: NextPage = () => {
 
 	const rows = searchResults.instances || [];
 
-	return publicRuntimeConfig.DCB_SEARCH_BASE ? (
+	return publicRuntimeConfig.VITE_DCB_SEARCH_BASE ? (
 		<AdminLayout title={t("nav.search.name")}>
 			<SearchQueryBuilder onSearch={handleBuilderSearch} />
 			{error ? (

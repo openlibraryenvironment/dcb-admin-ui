@@ -12,7 +12,7 @@ import {
 	GridColDef,
 	GridColumnVisibilityModel,
 } from "@mui/x-data-grid-premium";
-import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
+import { luceneDateRangeOperators } from "@components/DataGrid/components/DateTimeRangeFilter";
 
 // Handles standard columns so we don't have to re-declare them everywhere
 

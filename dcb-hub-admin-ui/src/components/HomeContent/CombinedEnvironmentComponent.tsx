@@ -238,7 +238,7 @@ export default function CombinedEnvironmentComponent() {
 					href={
 						params.row.environmentType === Environment.DCB
 							? LOCAL_VERSION_LINKS.SERVICE_INFO
-							: publicRuntimeConfig.KEYCLOAK_URL
+							: publicRuntimeConfig.VITE_KEYCLOAK_URL
 					}
 				>
 					{params.value}

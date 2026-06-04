@@ -23,9 +23,9 @@ import { getSuccessKey } from "src/helpers/MappingsImport/getSuccessMessageKey";
 // WIP: Re-implementing what was previously done for us by Uppy.
 // Long-term aim: feature parity with Uppy for what we need and a better UI.
 const { publicRuntimeConfig } = getConfig();
-const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
+const url = publicRuntimeConfig.VITE_DCB_API_BASE + "/uploadedMappings/upload";
 
-const locationUrl = publicRuntimeConfig.DCB_API_BASE + "/locations/upload";
+const locationUrl = publicRuntimeConfig.VITE_DCB_API_BASE + "/locations/upload";
 const ALLOWED_FILE_TYPES = {
 	"text/csv": [".csv"],
 	"text/tab-separated-values": [".tsv"],

@@ -16,7 +16,7 @@ import Loading from "@components/Loading/Loading";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import { standardRefValueMappingColumns } from "src/helpers/DataGrid/columns";
+import { standardRefValueMappingColumns } from "@helpers/dataGrid/columns";
 import { useQueryClient } from "@tanstack/react-query";
 
 // Page for 'ALL' referenceValueMappings of any category.

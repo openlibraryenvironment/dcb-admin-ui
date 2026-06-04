@@ -1,6 +1,6 @@
 import { Grid, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { getAgencyById } from "src/queries/queries";
+import { getAgency } from "src/queries/queries";
 import { AdminLayout } from "@layout";
 
 import { useQuery } from "@tanstack/react-query";
@@ -15,7 +15,7 @@ export default function AgencyDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const { agencyId } = router.query;
-	const { loading, data, error } = useQuery(getAgencyById, {
+	const { loading, data, error } = useQuery(getAgency, {
 		variables: {
 			query: "id:" + agencyId,
 		},

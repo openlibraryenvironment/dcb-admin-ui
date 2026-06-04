@@ -101,14 +101,14 @@ export default function Service() {
 	) => {
 		if (!rulesetName || !session?.accessToken) return;
 
-		if (!publicRuntimeConfig?.DCB_API_BASE) {
-			console.error("DCB_API_BASE environment variable is not set.");
+		if (!publicRuntimeConfig?.VITE_DCB_API_BASE) {
+			console.error("VITE_DCB_API_BASE environment variable is not set.");
 			return;
 		}
 
 		try {
 			const response = await fetch(
-				`${publicRuntimeConfig?.DCB_API_BASE}/object-rules/${rulesetName}`,
+				`${publicRuntimeConfig?.VITE_DCB_API_BASE}/object-rules/${rulesetName}`,
 				{
 					headers: {
 						Authorization: `Bearer ${session.accessToken}`,

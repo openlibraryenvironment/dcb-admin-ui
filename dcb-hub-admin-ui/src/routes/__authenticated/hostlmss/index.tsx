@@ -7,7 +7,7 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import Loading from "@components/Loading/Loading";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 const HostLmss: NextPage = () => {

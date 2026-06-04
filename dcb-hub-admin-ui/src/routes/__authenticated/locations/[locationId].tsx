@@ -9,7 +9,7 @@ import {
 import { useTranslation } from "react-i18next";
 import {
 	deleteLocationQuery,
-	getLocationById,
+	getLocation,
 	updateLocationQuery,
 } from "src/queries/queries";
 import { AdminLayout } from "@layout";
@@ -69,7 +69,7 @@ export default function LocationDetails() {
 	});
 
 	// Poll interval in ms
-	const { loading, data, error } = useQuery(getLocationById, {
+	const { loading, data, error } = useQuery(getLocation, {
 		variables: {
 			query: "id:" + locationId,
 		},
@@ -218,7 +218,7 @@ export default function LocationDetails() {
 	});
 
 	const [updateLocation] = useMutation(updateLocationQuery, {
-		refetchQueries: ["LoadLocation", "LoadLocations"],
+		refetchQueries: ["LoadLocation", "LoadLocations", "LoadLocationForPRGrid"],
 	});
 	const [deleteLocation] = useMutation(deleteLocationQuery, {
 		refetchQueries: ["LoadLocations"],

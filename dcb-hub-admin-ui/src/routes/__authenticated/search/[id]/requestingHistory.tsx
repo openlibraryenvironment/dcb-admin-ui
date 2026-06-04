@@ -10,7 +10,7 @@ import {
 	getLocationForPatronRequestGrid,
 	getPatronRequests,
 } from "src/queries/queries";
-import { defaultPatronRequestColumnVisibility } from "src/helpers/DataGrid/columns";
+import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { useMemo, useState } from "react";

@@ -13,7 +13,7 @@ import {
 	getLocationForPatronRequestGrid,
 	getPatronRequests,
 } from "src/queries/queries";
-import { defaultSupplierRequestLibraryColumnVisibility } from "src/helpers/DataGrid/columns";
+import { defaultSupplierRequestLibraryColumnVisibility } from "@helpers/dataGrid/columns";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";

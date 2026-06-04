@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
 import { getAlarms } from "src/queries/queries";
 
 const Alarms: NextPage = () => {

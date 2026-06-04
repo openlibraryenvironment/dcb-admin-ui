@@ -6,12 +6,12 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import Loading from "@components/Loading/Loading";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";
-import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
-import { defaultBibColumnVisibility } from "src/helpers/DataGrid/columns";
+import { luceneDateRangeOperators } from "@components/DataGrid/components/DateTimeRangeFilter";
+import { defaultBibColumnVisibility } from "@helpers/dataGrid/columns";
 
 const Bibs: NextPage = () => {
 	const { t } = useTranslation();

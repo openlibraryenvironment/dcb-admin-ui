@@ -1,32 +1,33 @@
 {
 	"compilerOptions": {
-		"baseUrl": ".",
 		"paths": {
-			"@components/*": ["src/components/*"],
-			"@constants/*": ["src/constants/*"],
-			"@forms/*": ["src/forms/*"],
-			"@helpers/*": ["src/helpers/*"],
-			"@models/*": ["src/models/*"],
-			"@mutations/*": ["src/mutations/*"],
-			"@queries/*": ["src/queries/*"],
-			"@types/*": ["src/types/*"],
-			"@/*": ["src/*"]
+			"@components/*": ["./src/components/*"],
+			"@constants/*": ["./src/constants/*"],
+			"@forms/*": ["./src/forms/*"],
+			"@helpers/*": ["./src/helpers/*"],
+			"@layout/*": ["./src/layout/*"],
+			"@models/*": ["./src/models/*"],
+			"@mutations/*": ["./src/graphql/mutations/*"],
+			"@queries/*": ["./src/graphql/queries/*"],
+			"@themes/*": ["./src/themes/*"],
+			"@types/*": ["./src/types/*"],
+			"@/*": ["./src/*"]
 		},
 		"target": "ESNext",
 		"useDefineForClassFields": true,
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"allowJs": false,
 		"skipLibCheck": true,
-		"esModuleInterop": false,
+		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"strict": true,
 		"forceConsistentCasingInFileNames": true,
 		"module": "ESNext",
-		"moduleResolution": "Node",
+		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
 		"jsx": "react-jsx"
 	},
-	"include": ["src", "src/vite-env.d.ts"]
+	"include": ["src", "src/vite-env.d.ts", "types/**/*.d.ts"]
 }

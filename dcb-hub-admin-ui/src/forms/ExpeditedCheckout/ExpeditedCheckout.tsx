@@ -265,7 +265,7 @@ export default function ExpeditedCheckout({
 		setItemsLoading(true);
 		try {
 			const response = await axios.get<any[]>(
-				`${publicRuntimeConfig.DCB_API_BASE}/items/availability`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/items/availability`,
 				{
 					headers: { Authorization: `Bearer ${session?.accessToken}` },
 					params: {
@@ -281,7 +281,11 @@ export default function ExpeditedCheckout({
 			setItemsError(true);
 			setStepError(1);
 		}
-	}, [bibClusterId, publicRuntimeConfig.DCB_API_BASE, session?.accessToken]);
+	}, [
+		bibClusterId,
+		publicRuntimeConfig.VITE_DCB_API_BASE,
+		session?.accessToken,
+	]);
 
 	useEffect(() => {
 		if (activeStep == 1 || checkoutCompleted) {
@@ -422,7 +426,7 @@ export default function ExpeditedCheckout({
 
 		try {
 			const response = await axios.post(
-				`${publicRuntimeConfig.DCB_API_BASE}/patron/auth/lookup`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/patron/auth/lookup`,
 				validatePatronPayload,
 				{
 					headers: {
@@ -502,7 +506,7 @@ export default function ExpeditedCheckout({
 			};
 
 			const response = await axios.post(
-				`${publicRuntimeConfig.DCB_API_BASE}/patrons/requests/place/expeditedCheckout`,
+				`${publicRuntimeConfig.VITE_DCB_API_BASE}/patrons/requests/place/expeditedCheckout`,
 				manualSelectionPayload,
 				{
 					headers: {

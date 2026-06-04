@@ -1,86 +1,324 @@
-import { createTheme } from "@mui/material/styles";
-import baseTheme from "./baseTheme";
-import { mergeThemeStyles } from "src/helpers/mergeThemeStyles";
-// only supply colours in this file. For changes to font, or components, use baseTheme.ts.
+import { createTheme, darken, lighten } from "@mui/material/styles";
+import type {} from "@mui/x-data-grid-premium/themeAugmentation";
 
-const openRSLight = createTheme({
-	...baseTheme,
-	palette: {
-		contrastThreshold: 4.5,
-		mode: "light",
-		primary: {
-			main: "#287BAF",
-			attributeTitle: "#000000",
-			breadcrumbs: "#246F9E",
-			buttonForSelectedChildPage: "#707070",
-			buttonForSelectedPage: "#287BAF",
-			detailsAccordionSummary: "#F6F6F6",
-			editableFieldBackground: "#E2EEF6",
-			errorBackground: "#FFDAE1",
-			exclamationIcon: "#999999",
-			footerArea: "#FFFFFF",
-			footerText: "#000000",
-			linkedFooterBackground: "#0C4068",
-			linkedFooterText: "#FFFFFF",
-			header: "#0C4068",
-			headerText: "#FFFFFF",
-			hover: "#EEEEEE",
-			hoverOnSelectedPage: "#A9A9A9",
-			iconSymbol: "#FFFFFF", // The color of symbols within icons - i.e. the cross in an error icon
-			inactiveBackground: "#8C8C8C",
-			link: "#0C4068",
-			linkText: "#246F9E",
-			landingBackground: "#F9F9F9",
-			landingCard: "#FFFFFF",
-			loginCard: "#E2EEF6",
-			loginText: "#0C4068",
-			selectedText: "#FFFFFF",
-			sidebar: "#F6F6F6",
-			titleArea: "#FFFFFF",
-			pageBackground: "#F9F9F9",
-			pageContentBackground: "#FFFFFF",
-			loginButtonOutlineColor: "#FFFFFF",
-			outlineColor: "#000000",
+// ==========================================
+// 1. TYPE AUGMENTATION
+// ==========================================
+declare module "@mui/material/styles" {
+	interface Palette {
+		attributeTitle: string;
+		breadcrumbs: string;
+		buttonForSelectedChildPage: string;
+		buttonForSelectedPage: string;
+		detailsAccordionSummary: string;
+		editableFieldBackground: string;
+		errorBackground: string;
+		exclamationIcon: string;
+		footerArea: string;
+		footerText: string;
+		linkedFooterBackground: string;
+		linkedFooterText: string;
+		header: string;
+		headerText: string;
+		headingColor: string; // Added to map the typography colors dynamically
+		hover: string;
+		hoverOnSelectedPage: string;
+		iconSymbol: string;
+		inactiveBackground: string;
+		link: string;
+		linkText: string;
+		landingBackground: string;
+		landingCard: string;
+		loginCard: string;
+		loginText: string;
+		selectedText: string;
+		sidebar: string;
+		titleArea: string;
+		pageBackground: string;
+		pageContentBackground: string;
+		loginButtonOutlineColor: string;
+		outlineColor: string;
+	}
+	interface PaletteOptions {
+		attributeTitle?: string;
+		breadcrumbs?: string;
+		buttonForSelectedChildPage?: string;
+		buttonForSelectedPage?: string;
+		detailsAccordionSummary?: string;
+		editableFieldBackground?: string;
+		errorBackground?: string;
+		exclamationIcon?: string;
+		footerArea?: string;
+		footerText?: string;
+		linkedFooterBackground?: string;
+		linkedFooterText?: string;
+		header?: string;
+		headerText?: string;
+		headingColor?: string;
+		hover?: string;
+		hoverOnSelectedPage?: string;
+		iconSymbol?: string;
+		inactiveBackground?: string;
+		link?: string;
+		linkText?: string;
+		landingBackground?: string;
+		landingCard?: string;
+		loginCard?: string;
+		loginText?: string;
+		selectedText?: string;
+		sidebar?: string;
+		titleArea?: string;
+		pageBackground?: string;
+		pageContentBackground?: string;
+		loginButtonOutlineColor?: string;
+		outlineColor?: string;
+	}
+
+	interface TypographyVariants {
+		appTitle?: React.CSSProperties;
+		loginCardText?: React.CSSProperties;
+		cardActionText?: React.CSSProperties;
+		subheading?: React.CSSProperties;
+		componentSubheading?: React.CSSProperties;
+		attributeTitle?: React.CSSProperties;
+		attributeText: React.CSSProperties;
+		loginHeader?: React.CSSProperties;
+		modalTitle?: React.CSSProperties;
+		homePageText?: React.CSSProperties;
+		notFoundTitle?: React.CSSProperties;
+		notFoundText?: React.CSSProperties;
+		linkedFooterTextSize?: React.CSSProperties;
+		linkedFooterHeader?: React.CSSProperties;
+		loadingText?: React.CSSProperties;
+		accordionSummary?: React.CSSProperties;
+		subTabTitle?: React.CSSProperties;
+	}
+	interface TypographyVariantsOptions {
+		appTitle?: React.CSSProperties;
+		loginCardText?: React.CSSProperties;
+		cardActionText?: React.CSSProperties;
+		subheading?: React.CSSProperties;
+		componentSubheading?: React.CSSProperties;
+		attributeTitle?: React.CSSProperties;
+		attributeText?: React.CSSProperties;
+		loginHeader?: React.CSSProperties;
+		modalTitle?: React.CSSProperties;
+		homePageText?: React.CSSProperties;
+		notFoundTitle?: React.CSSProperties;
+		notFoundText?: React.CSSProperties;
+		linkedFooterTextSize?: React.CSSProperties;
+		linkedFooterHeader?: React.CSSProperties;
+		loadingText?: React.CSSProperties;
+		accordionSummary?: React.CSSProperties;
+		subTabTitle?: React.CSSProperties;
+	}
+}
+
+declare module "@mui/material/Typography" {
+	interface TypographyPropsVariantOverrides {
+		appTitle: true;
+		loginCardText: true;
+		cardActionText: true;
+		subheading: true;
+		componentSubheading: true;
+		attributeTitle: true;
+		attributeText: true;
+		loginHeader: true;
+		modalTitle: true;
+		homePageText: true;
+		notFoundTitle: true;
+		notFoundText: true;
+		linkedFooterTextSize: true;
+		linkedFooterHeader: true;
+		loadingText: true;
+		accordionSummary: true;
+		subTabTitle: true;
+	}
+}
+
+// ==========================================
+// 2. UNIFIED THEME CREATION
+// ==========================================
+
+// Pre-calculate hexes for the complex hover states since standard CSS variables
+// can't be put through MUI's darken/lighten functions at runtime.
+const lightPrimary = "#287BAF";
+const darkPrimary = "#35B7FF";
+const lightBg = "#FFFFFF";
+const darkBg = "#1E1E1E";
+const lightDetailsAccordion = "#F6F6F6";
+const darkDetailsAccordion = "#424242";
+
+const openRSTheme = createTheme({
+	cssVariables: true,
+
+	colorSchemes: {
+		light: {
+			palette: {
+				contrastThreshold: 4.5,
+				mode: "light",
+				primary: { main: lightPrimary },
+				background: { default: lightBg },
+
+				// Custom Light Palette from oldOpenRS.ts
+				attributeTitle: "#000000",
+				breadcrumbs: "#246F9E",
+				buttonForSelectedChildPage: "#707070",
+				buttonForSelectedPage: "#287BAF",
+				detailsAccordionSummary: lightDetailsAccordion,
+				editableFieldBackground: "#E2EEF6",
+				errorBackground: "#FFDAE1",
+				exclamationIcon: "#999999",
+				footerArea: "#FFFFFF",
+				footerText: "#000000",
+				linkedFooterBackground: "#0C4068",
+				linkedFooterText: "#FFFFFF",
+				header: "#0C4068",
+				headerText: "#FFFFFF",
+				headingColor: "#0C4068", // Automatically colors the Typography
+				hover: "#EEEEEE",
+				hoverOnSelectedPage: "#A9A9A9",
+				iconSymbol: "#FFFFFF",
+				inactiveBackground: "#8C8C8C",
+				link: "#0C4068",
+				linkText: "#246F9E",
+				landingBackground: "#F9F9F9",
+				landingCard: "#FFFFFF",
+				loginCard: "#E2EEF6",
+				loginText: "#0C4068",
+				selectedText: "#FFFFFF",
+				sidebar: "#F6F6F6",
+				titleArea: "#FFFFFF",
+				pageBackground: "#F9F9F9",
+				pageContentBackground: "#FFFFFF",
+				loginButtonOutlineColor: "#FFFFFF",
+				outlineColor: "#000000",
+			},
 		},
-		// Currently not defining secondary palette. When we do we need to define all colours.
-		// Otherwise you can run into type issues.
-		// secondary: {
-		// 	main: "#0C4068",
-		// 	detailsAccordionSummary: "#F6F6F6",
-		// },
-		background: {
-			default: "#FFFFFF",
+		dark: {
+			palette: {
+				contrastThreshold: 4.5,
+				mode: "dark",
+				primary: { main: darkPrimary },
+				background: { default: darkBg },
+
+				// Custom Dark Palette from oldOpenRS.ts
+				attributeTitle: "#FFFFFF",
+				breadcrumbs: "#35B7FF",
+				buttonForSelectedChildPage: "#999999",
+				buttonForSelectedPage: "#287BAF",
+				detailsAccordionSummary: darkDetailsAccordion,
+				editableFieldBackground: "#E2EEF6",
+				errorBackground: "transparent", // Fallback if missing
+				exclamationIcon: "#999999",
+				footerArea: "#202020",
+				footerText: "#FFFFFF",
+				linkedFooterBackground: "#000000",
+				linkedFooterText: "#FFFFFF",
+				header: "#000000",
+				headerText: "#FFFFFF",
+				headingColor: "#FFFFFF", // Automatically colors the Typography
+				hover: "#424242",
+				hoverOnSelectedPage: "#424242",
+				iconSymbol: "#FFFFFF",
+				inactiveBackground: "#8C8C8C",
+				link: "#B3E5FC",
+				linkText: "#35B7FF",
+				landingBackground: "#000000",
+				landingCard: "#202020",
+				loginCard: "#292929",
+				loginText: "#FFFFFF",
+				selectedText: "#FFFFFF",
+				sidebar: "#292929",
+				titleArea: "#1E1E1E",
+				pageBackground: "transparent", // Fallback if missing
+				pageContentBackground: "transparent", // Fallback if missing
+				loginButtonOutlineColor: "#FFFFFF",
+				outlineColor: "#FFFFFF",
+			},
 		},
 	},
-	// Supply only the font colours for the light mode here.
-	typography: mergeThemeStyles(baseTheme.typography, {
-		appTitle: {
-			color: "#0C4068",
-		},
+
+	// ==========================================
+	// 3. TYPOGRAPHY
+	// ==========================================
+	// Values perfectly mapped from baseTheme.ts
+	typography: {
+		fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
 		h1: {
-			color: "#0C4068",
+			fontSize: 32,
+			fontWeight: 400,
+			color: "var(--mui-palette-headingColor)",
 		},
 		h2: {
-			color: "#0C4068",
+			fontSize: 24,
+			fontWeight: 400,
+			color: "var(--mui-palette-headingColor)",
 		},
-		h3: {
-			color: "#0C4068",
-		},
-		h4: {
-			color: "#0C4068",
-		},
+		h3: { fontSize: 18, color: "var(--mui-palette-headingColor)" },
+		h4: { fontSize: 18, color: "var(--mui-palette-headingColor)" },
+
+		appTitle: { fontSize: 20, color: "var(--mui-palette-headingColor)" },
+		loginCardText: { fontSize: 18 },
+		cardActionText: { fontSize: "1rem" },
+		subheading: { fontSize: "1.3rem" },
 		componentSubheading: {
-			color: "#0C4068",
+			fontSize: "1.3rem",
+			color: "var(--mui-palette-headingColor)",
 		},
+		attributeTitle: { fontWeight: "bold" },
+		attributeText: { wordBreak: "break-word", textWrap: "wrap" },
+		loginHeader: { fontSize: 32, fontWeight: "bold" },
+		modalTitle: { textAlign: "center", fontWeight: "bold" },
+		homePageText: { fontSize: "1.1rem" },
+		notFoundTitle: { fontSize: "3rem" },
+		notFoundText: { fontSize: "1.5rem" },
+		linkedFooterTextSize: { fontSize: "14px" },
+		linkedFooterHeader: { fontSize: "18px", fontWeight: "bold" },
+		loadingText: { fontSize: 32, fontWeight: 400, textAlign: "center" },
 		accordionSummary: {
-			color: "#0C4068",
+			fontSize: 20,
+			fontWeight: 700,
+			color: "var(--mui-palette-headingColor)",
 		},
-	}),
-	components: mergeThemeStyles(baseTheme.components, {
-		MuiButton: {
+		subTabTitle: { fontSize: 12 },
+	},
+
+	// ==========================================
+	// 4. COMPONENTS
+	// ==========================================
+	components: {
+		MuiAccordion: {
+			defaultProps: {
+				slotProps: { transition: { timeout: 400 } },
+			},
+		},
+		MuiAccordionSummary: {
 			styleOverrides: {
-				root: {
+				root: ({ theme }) => ({
+					backgroundColor: "var(--mui-palette-detailsAccordionSummary)",
 					"&.Mui-focusVisible": {
+						border: "2px solid",
+						borderColor: "var(--mui-palette-outlineColor)",
+						boxSizing: "border-box",
+					},
+					":hover": { backgroundColor: darken(lightDetailsAccordion, 0.08) },
+					":active": { backgroundColor: darken(lightDetailsAccordion, 0.16) },
+					...theme.applyStyles("dark", {
+						":hover": { backgroundColor: lighten(darkDetailsAccordion, 0.08) },
+						":active": { backgroundColor: lighten(darkDetailsAccordion, 0.16) },
+					}),
+				}),
+			},
+		},
+		MuiButton: {
+			defaultProps: {
+				disableRipple: true,
+			},
+			styleOverrides: {
+				root: ({ theme }) => ({
+					"&.Mui-focusVisible": {
+						outline: "2px solid",
 						outlineColor: "#000000",
 					},
 					"&.MuiButton-contained": {
@@ -97,237 +335,223 @@ const openRSLight = createTheme({
 							border: "none",
 						},
 					},
-				},
+					...theme.applyStyles("dark", {
+						"&.Mui-focusVisible": {
+							outlineColor: "#FFFFFF",
+						},
+						"&.MuiButton-contained": {
+							"&:disabled": {
+								background: "#444444",
+								color: "#8c8c8c",
+								border: "none",
+							},
+						},
+						"&.MuiButton-outlined": {
+							"&:disabled": {
+								background: "#444444",
+								color: "#8c8c8c",
+								border: "none",
+							},
+						},
+					}),
+				}),
 			},
-
-			// Probably best to do overrides if it needs to be different on a per theme basis: doing the below will cause all other styles to be disapplied
-			// REDUNDANT
-			// // important: the order in which the variants are specified, affect which styles are applied
-			// // e.g. the fontSize of xlarge will override the fontSize in contained, because it is specified after
-			// variants: [
-			// 	{
-			// 		props: { variant: "contained" },
-			// 		style: {
-			// 			":active": {
-			// 				outline: "#75BEDB",
-			// 			},
-			// 		},
-			// 	},
-			// 	{
-			// 		props: { variant: "outlined" },
-			// 		style: {
-			// 			":active": {
-			// 				outline: "#75BEDB",
-			// 			},
-			// 		},
-			// 	},
-			// ],
+			variants: [
+				{
+					props: { variant: "contained" },
+					style: ({ theme }) => ({
+						textTransform: "none",
+						fontSize: "0.95rem",
+						":hover": { backgroundColor: darken(lightPrimary, 0.08) },
+						":active": {
+							outline: "1px solid #75BEDB",
+							backgroundColor: darken(lightPrimary, 0.16),
+						},
+						...theme.applyStyles("dark", {
+							":hover": { backgroundColor: lighten(darkPrimary, 0.08) },
+							":active": {
+								outline: "1px solid #75BEDB",
+								backgroundColor: lighten(darkPrimary, 0.16),
+							},
+						}),
+					}),
+				},
+				{
+					props: { variant: "outlined" },
+					style: ({ theme }) => ({
+						textTransform: "none",
+						fontSize: "0.95rem",
+						":hover": { backgroundColor: darken(lightBg, 0.08) },
+						":active": {
+							border: "1px solid #75BEDB",
+							outline: "1px solid #75BEDB",
+							backgroundColor: darken(lightBg, 0.16),
+						},
+						...theme.applyStyles("dark", {
+							":hover": { backgroundColor: lighten(darkBg, 0.08) },
+							":active": {
+								border: "1px solid #75BEDB",
+								outline: "1px solid #75BEDB",
+								backgroundColor: lighten(darkBg, 0.16),
+							},
+						}),
+					}),
+				},
+				{
+					props: { variant: "text" },
+					style: ({ theme }) => ({
+						":hover": { backgroundColor: darken(lightBg, 0.08) },
+						":active": { backgroundColor: darken(lightBg, 0.16) },
+						...theme.applyStyles("dark", {
+							":hover": { backgroundColor: lighten(darkBg, 0.08) },
+							":active": { backgroundColor: lighten(darkBg, 0.16) },
+						}),
+					}),
+				},
+				{
+					props: { size: "xlarge" },
+					style: {
+						padding: "14px 28px",
+						fontSize: "1.3rem",
+					},
+				},
+			],
+		},
+		MuiIconButton: {
+			defaultProps: {
+				disableRipple: true,
+			},
+			styleOverrides: {
+				root: ({ theme }) => ({
+					"&.Mui-focusVisible": { outline: "2px solid" },
+					":hover": { backgroundColor: darken(lightBg, 0.08) },
+					":active": { backgroundColor: darken(lightBg, 0.16) },
+					...theme.applyStyles("dark", {
+						":hover": { backgroundColor: lighten(darkBg, 0.08) },
+						":active": { backgroundColor: lighten(darkBg, 0.16) },
+					}),
+				}),
+			},
 		},
 		MuiListItemButton: {
+			defaultProps: { disableRipple: true },
 			styleOverrides: {
-				root: {
+				root: ({ theme }) => ({
 					"&.Mui-focusVisible": {
+						border: "2px solid",
 						borderColor: "#000000",
+						boxSizing: "border-box",
 					},
+					...theme.applyStyles("dark", {
+						"&.Mui-focusVisible": { borderColor: "#FFFFFF" },
+					}),
+				}),
+			},
+		},
+		MuiDataGrid: {
+			styleOverrides: {
+				cell: {
+					"&:focus": { outline: "none" },
+					":focus-visible": { outline: "2px solid" },
+				},
+				cellCheckbox: {
+					"&:focus-within": { outline: "2px solid", outlineOffset: "-3px" },
+				},
+				columnHeaderCheckbox: {
+					"&:focus-within": { outline: "2px solid", outlineOffset: "-3px" },
+				},
+				columnHeader: {
+					"&:focus": { outline: "none" },
+					":focus-visible": { outline: "2px solid" },
 				},
 			},
 		},
 		MuiTooltip: {
+			defaultProps: { arrow: true },
 			styleOverrides: {
-				tooltip: {
-					backgroundColor: "#808080",
-				},
-				arrow: {
-					color: "#808080", // Arrow color to match the tooltip background
-				},
+				tooltip: { backgroundColor: "#808080" },
+				arrow: { color: "#808080" },
 			},
 		},
-		MuiAlert: {
+		MuiAlertTitle: {
 			styleOverrides: {
-				standardSuccess: {
-					backgroundColor: "#D5EBDF",
-					color: "#274E13",
-					"& .MuiAlert-icon": {
-						color: "#274E13",
-						paddingTop: 8,
-					},
-					outline: "2px solid #274E13",
-				},
-				standardError: {
-					backgroundColor: "#FFDAE1",
-					color: "#660000",
-					"& .MuiAlert-icon": {
-						color: "#660000",
-						paddingTop: 8,
-					},
-					outline: "2px solid #660000",
-				},
-				standardWarning: {
-					backgroundColor: "#FFE4B2",
-					color: "#664200",
-					"& .MuiAlert-icon": {
-						color: "#664200",
-						paddingTop: 8,
-					},
-					outline: "2px solid #664200",
-				},
-				standardInfo: {
-					backgroundColor: "#E2EEF6",
-					color: "#0C4068",
-					"& .MuiAlert-icon": {
-						color: "#0C4068",
-						paddingTop: 8,
-					},
-					outline: "2px solid #0C4068",
-				},
+				root: { fontSize: "1.2rem" },
 			},
 		},
-	}),
-});
-
-const openRSDark = createTheme({
-	...baseTheme,
-	palette: {
-		contrastThreshold: 4.5,
-		mode: "dark",
-		primary: {
-			main: "#35B7FF",
-			attributeTitle: "#FFFFFF",
-			breadcrumbs: "#35B7FF",
-			buttonForSelectedChildPage: "#999999",
-			buttonForSelectedPage: "#287BAF",
-			detailsAccordionSummary: "#424242",
-			editableFieldBackground: "#E2EEF6",
-			exclamationIcon: "#999999",
-			footerArea: "#202020",
-			footerText: "#FFFFFF",
-			linkedFooterBackground: "#000000",
-			linkedFooterText: "#FFFFFF",
-			header: "#000000",
-			headerText: "#FFFFFF",
-			hover: "#424242",
-			hoverOnSelectedPage: "#424242",
-			iconSymbol: "#FFFFFF",
-			inactiveBackground: "#8C8C8C",
-			link: "#B3E5FC",
-			linkText: "#35B7FF",
-			landingBackground: "#000000",
-			landingCard: "#202020",
-			loginCard: "#292929",
-			loginText: "#FFFFFF",
-			selectedText: "#FFFFFF",
-			sidebar: "#292929",
-			titleArea: "#1E1E1E",
-			loginButtonOutlineColor: "#FFFFFF",
-			outlineColor: "#FFFFFF",
-		},
-		// secondary: {
-		// 	main: "#75BEDB",
-		// 	detailsAccordionSummary: "#424242",
-		// },
-		background: {
-			default: "#1E1E1E",
-		},
-	},
-	// Supply only the font colours for the dark mode here.
-	typography: mergeThemeStyles(baseTheme.typography, {
-		appTitle: {
-			color: "#FFFFFF",
-		},
-		h1: {
-			color: "#FFFFFF",
-		},
-		h2: {
-			color: "#FFFFFF",
-		},
-		componentSubheading: {
-			color: "#FFFFFF",
-		},
-	}),
-	components: mergeThemeStyles(baseTheme.components, {
-		MuiButton: {
+		MuiTab: {
 			styleOverrides: {
-				root: {
+				root: ({ theme }) => ({
 					"&.Mui-focusVisible": {
-						outlineColor: "#FFFFFF",
+						outline: "2px solid",
+						boxSizing: "border-box",
+						borderColor: "var(--mui-palette-outlineColor)",
+						outlineOffset: "-2px",
 					},
-					"&.MuiButton-contained": {
-						"&:disabled": {
-							background: "#444444",
-							color: "#8c8c8c",
-							border: "none",
-						},
-					},
-					"&.MuiButton-outlined": {
-						"&:disabled": {
-							background: "#444444",
-							color: "#8c8c8c",
-							border: "none",
-						},
-					},
-				},
-			},
-		},
-		MuiListItemButton: {
-			styleOverrides: {
-				root: {
-					"&.Mui-focusVisible": {
-						borderColor: "#FFFFFF",
-					},
-				},
+				}),
 			},
 		},
 		MuiTextField: {
 			styleOverrides: {
-				root: {
-					":active": {
-						background: "#424242",
-					},
-				},
-			},
-		},
-		MuiTooltip: {
-			styleOverrides: {
-				tooltip: {
-					backgroundColor: "#808080",
-				},
-				arrow: {
-					color: "#808080", // Arrow color to match the tooltip background
-				},
+				root: ({ theme }) => ({
+					...theme.applyStyles("dark", {
+						":active": { background: "#424242" },
+					}),
+				}),
 			},
 		},
 		MuiAlert: {
 			styleOverrides: {
-				// changes the icon to the colour of text, and applies a light border for better contrast
-				standardSuccess: {
-					"& .MuiAlert-icon": {
-						color: "#D5EBDF",
-					},
-					outline: "1px solid #D5EBDF",
-				},
-				standardError: {
-					"& .MuiAlert-icon": {
-						color: "#FFDAE1",
-					},
-					outline: "1px solid #FFDAE1",
-				},
-				standardWarning: {
-					"& .MuiAlert-icon": {
-						color: "#FFE4B2",
-					},
-					outline: "1px solid #FFE4B2",
-				},
-				standardInfo: {
-					//#B8E7FB - default text color
-					color: "#E2EEF6",
-					"& .MuiAlert-icon": {
+				standardSuccess: ({ theme }) => ({
+					backgroundColor: "#D5EBDF",
+					color: "#274E13",
+					"& .MuiAlert-icon": { color: "#274E13", paddingTop: 8 },
+					outline: "2px solid #274E13",
+					...theme.applyStyles("dark", {
+						backgroundColor: "transparent",
+						color: "inherit",
+						"& .MuiAlert-icon": { color: "#D5EBDF" },
+						outline: "1px solid #D5EBDF",
+					}),
+				}),
+				standardError: ({ theme }) => ({
+					backgroundColor: "#FFDAE1",
+					color: "#660000",
+					"& .MuiAlert-icon": { color: "#660000", paddingTop: 8 },
+					outline: "2px solid #660000",
+					...theme.applyStyles("dark", {
+						backgroundColor: "transparent",
+						color: "inherit",
+						"& .MuiAlert-icon": { color: "#FFDAE1" },
+						outline: "1px solid #FFDAE1",
+					}),
+				}),
+				standardWarning: ({ theme }) => ({
+					backgroundColor: "#FFE4B2",
+					color: "#664200",
+					"& .MuiAlert-icon": { color: "#664200", paddingTop: 8 },
+					outline: "2px solid #664200",
+					...theme.applyStyles("dark", {
+						backgroundColor: "transparent",
+						color: "inherit",
+						"& .MuiAlert-icon": { color: "#FFE4B2" },
+						outline: "1px solid #FFE4B2",
+					}),
+				}),
+				standardInfo: ({ theme }) => ({
+					backgroundColor: "#E2EEF6",
+					color: "#0C4068",
+					"& .MuiAlert-icon": { color: "#0C4068", paddingTop: 8 },
+					outline: "2px solid #0C4068",
+					...theme.applyStyles("dark", {
+						backgroundColor: "transparent",
 						color: "#E2EEF6",
-					},
-					outline: "1px solid #E2EEF6",
-				},
+						"& .MuiAlert-icon": { color: "#E2EEF6" },
+						outline: "1px solid #E2EEF6",
+					}),
+				}),
 			},
 		},
-	}),
+	},
 });
 
-export { openRSLight, openRSDark };
+export default openRSTheme;

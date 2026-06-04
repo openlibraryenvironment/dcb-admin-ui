@@ -1,7 +1,7 @@
 import { gql } from "graphql-request";
 
 export const getLocationForPatronRequestGrid = gql`
-	query LoadLocation(
+	query LoadLocationForPRGrid(
 		$pageno: Int!
 		$pagesize: Int!
 		$order: String!

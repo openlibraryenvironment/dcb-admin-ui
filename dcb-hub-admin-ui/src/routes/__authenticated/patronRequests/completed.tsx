@@ -13,7 +13,7 @@ import {
 import {
 	defaultPatronRequestColumnVisibility,
 	finishedPatronRequestColumnVisibility,
-} from "src/helpers/DataGrid/columns";
+} from "@helpers/dataGrid/columns";
 import Loading from "@components/Loading/Loading";
 import { AdminLayout } from "@layout";
 import { useCallback, useMemo, useState } from "react";

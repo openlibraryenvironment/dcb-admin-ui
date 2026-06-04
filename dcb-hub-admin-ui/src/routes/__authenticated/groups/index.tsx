@@ -10,7 +10,7 @@ import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginate
 import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import Loading from "@components/Loading/Loading";
-import { standardFilters } from "src/helpers/DataGrid/filters";
+import { standardFilters } from "@helpers/dataGrid/filters";
 // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { NextPage } from "next/types";

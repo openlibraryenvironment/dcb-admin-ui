@@ -1,7 +1,7 @@
 import {
 	defaultPatronRequestLibraryColumnVisibility,
 	exceptionPatronRequestColumnVisibility,
-} from "src/helpers/DataGrid/columns";
+} from "@helpers/dataGrid/columns";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Library } from "@models/Library";

@@ -14,7 +14,7 @@ import AddLibraryToGroup from "../../forms/AddLibraryToGroup/AddLibraryToGroup";
 import Loading from "@components/Loading/Loading";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
+import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
 import { useCustomColumns } from "@hooks/useCustomColumns"; // import MasterDetail from "@components/MasterDetail/MasterDetail";
 import NewLibrary from "src/forms/NewLibrary/NewLibrary";
 
