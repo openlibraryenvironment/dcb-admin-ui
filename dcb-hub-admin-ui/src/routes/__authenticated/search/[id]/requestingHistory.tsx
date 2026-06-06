@@ -7,26 +7,26 @@ import { Grid, Tab, Tabs } from "@mui/material";
 
 // UI Components
 import Loading from "@components/Loading/Loading";
-import { AdminLayout } from "@layout";
+import  AdminLayout from "@layout/AdminLayout/AdminLayout";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 
 // Hooks & Helpers
-import { useGraphQLClient } from "@/hooks/useGraphQLClient";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { handleRecordTabChange } from "src/helpers/navigation/handleTabChange";
+import { handleRecordTabChange } from "@helpers/navigation/handleTabChange";
 import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
 import { Location } from "@models/Location";
 
 // Typed GraphQL Documents
-import { getClustersTitleOnly } from "@queries/getClustersTitleOnly";
+import { getClustersTitleOnly } from "@queries/getClustersTitlesOnly";
 import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
 
 export const Route = createFileRoute(
-	"/__authenticated/search/$id/requestingHistory",
+	"/__authenticated/search/id/requestingHistory",
 )({
 	component: RequestingHistory,
 });
@@ -44,9 +44,6 @@ function RequestingHistory() {
 	const gqlClient = useGraphQLClient();
 	const [tabIndex, setTabIndex] = useState(4);
 
-	// ==========================================
-	// 1. CLUSTER DATA FETCH
-	// ==========================================
 	const {
 		isLoading: clusterLoading,
 		isError: clusterError,
@@ -54,14 +51,9 @@ function RequestingHistory() {
 	} = useQuery({
 		queryKey: ["cluster", "titleOnly", id],
 		queryFn: () =>
-			gqlClient.request(getClustersTitleOnlyDoc, { query: `id: ${id}` }),
+			gqlClient.request(getClustersTitleOnly, { query: `id: ${id}` }),
 		enabled: !!id,
 	});
-
-	// ==========================================
-	// 2. LOCATIONS FETCH (Replaces Apollo fetchMore)
-	// ==========================================
-	// Instead of onCompleted, we just do the pagination loop inside the fetcher!
 	const fetchAllLocations = async () => {
 		const variables = {
 			query: "",
@@ -70,9 +62,8 @@ function RequestingHistory() {
 			pagesize: 100,
 		};
 
-		// Fetch page 0
 		const firstPage = await gqlClient.request(
-			getLocationForPatronRequestGridDoc,
+			getLocationForPatronRequestGrid,
 			{ ...variables, pageno: 0 },
 		);
 		let allLocations = [...(firstPage?.locations?.content || [])];
@@ -84,7 +75,7 @@ function RequestingHistory() {
 			const promises = [];
 			for (let i = 1; i < totalPages; i++) {
 				promises.push(
-					gqlClient.request(getLocationForPatronRequestGridDoc, {
+					gqlClient.request(getLocationForPatronRequestGrid, {
 						...variables,
 						pageno: i,
 					}),
@@ -105,14 +96,12 @@ function RequestingHistory() {
 		queryFn: fetchAllLocations,
 	});
 
-	// ==========================================
-	// 3. LIBRARIES FETCH
-	// ==========================================
+
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery({
 			queryKey: ["libraries", "allSupplying"],
 			queryFn: () =>
-				gqlClient.request(getLibrariesDoc, {
+				gqlClient.request(getLibraries, {
 					order: "fullName",
 					orderBy: "ASC",
 					pageno: 0,
@@ -121,9 +110,6 @@ function RequestingHistory() {
 				}),
 		});
 
-	// ==========================================
-	// 4. COLUMN CONFIGURATION
-	// ==========================================
 	const customColumns = useCustomColumns();
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
 
@@ -137,9 +123,6 @@ function RequestingHistory() {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
 
-	// ==========================================
-	// 5. RENDER UI
-	// ==========================================
 	const query = "bibClusterId:" + id;
 
 	if (clusterLoading || supplyingLibrariesLoading) {
@@ -192,8 +175,7 @@ function RequestingHistory() {
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<ServerPaginationGrid
-						// Make sure ServerPaginationGrid accepts your new Document string
-						query={getPatronRequestsDoc}
+						query={getPatronRequests}
 						presetQueryVariables={query}
 						type="patronRequestsRecordHistory"
 						coreType="patronRequests"

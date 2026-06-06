@@ -13,7 +13,7 @@ import Error from "@components/Error/Error";
 import Link from "@components/Link/Link";
 
 export const Route = createFileRoute(
-	"/__authenticated/serviceInfo/requestErrors/requests/",
+	"/__authenticated/serviceInfo/requestErrors/requests",
 )({
 	component: Requests,
 });

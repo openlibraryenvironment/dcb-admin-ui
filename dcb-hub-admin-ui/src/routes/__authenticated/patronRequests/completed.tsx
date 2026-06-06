@@ -1,45 +1,35 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Box } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Box";
-import { Grid } from "@queries/Grid";
-import { Tab } from "@queries/Tab";
-import { Tabs } from "@queries/Tabs";
-import { Typography } from "@mui/material";
+import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { FilterAltOutlined } from "@mui/icons-material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
+import { useCallback, useMemo, useState, useEffect } from "react";
 
-import { useNavigate } from "@queries/Typography } from "@mui/material";
-import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
+import Loading from "@components/Loading/Loading";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
+import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 
-import { useNavigate";
-import { useRouter } from "@tanstack/react-router";
-import {
-	getLibraries } from "@queries/useRouter } from "@tanstack/react-router";
-import {
-	getLibraries";
-import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
-import { getPatronRequests } from "@queries/getPatronRequests";
-import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
+import { useGraphQLClient } from "@/hooks/useGraphQLClient";
+import { Location } from "@models/Location";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
+import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
 import {
 	defaultPatronRequestColumnVisibility,
 	finishedPatronRequestColumnVisibility,
 } from "@helpers/dataGrid/columns";
-import Loading from "@components/Loading/Loading";
-import { AdminLayout } from "@layout";
-import { useCallback, useMemo, useState } from "react";
-import MasterDetail from "@components/MasterDetail/MasterDetail";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { Location } from "@models/Location";
-import { useCustomColumns } from "@hooks/useCustomColumns";
-import { handleTopLevelPatronRequestTabChange } from "src/helpers/navigation/handleTabChange";
-import { queries } from "src/constants/patronRequestGridQueries";
-import { FilterAltOutlined } from "@mui/icons-material";
-import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
+import { queries } from "@constants/patronRequestGridQueries";
 
-export const Route = createFileRoute("/__authenticated/patronRequests/completed")({
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
+import { getLibraries } from "@queries/getLibraries";
+
+export const Route = createFileRoute(
+	"/__authenticated/patronRequests/completed",
+)({
 	component: Completed,
 });
 
@@ -47,8 +37,12 @@ function Completed() {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const auth = useAuth();
+	const gqlClient = useGraphQLClient();
+
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
 	const [tabIndex, setTabIndex] = useState(3);
 	const [totalSizes, setTotalSizes] = useState({
 		exception: 0,
@@ -62,11 +56,9 @@ function Completed() {
 	>(null);
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
-	// Helper function to update a specific count while preserving other counts
 	const updateCount = useCallback((key: string, count: number) => {
 		setTotalSizes((prev) => {
 			const newSizes = { ...prev, [key]: count };
-			// Recalculate the "all" total whenever any individual count changes
 			if (key !== "all") {
 				newSizes.all =
 					(key === "exception" ? count : newSizes.exception) +
@@ -78,146 +70,145 @@ function Completed() {
 		});
 	}, []);
 
-	const { data: locationsData, fetchMore } = useQuery(
-		getLocationForPatronRequestGrid,
-		{
-			variables: {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 100,
-				pageno: 0,
-			},
-			onCompleted: (data) => {
-				if (data.locations.content.length < data.locations.totalSize) {
-					const totalPages = Math.ceil(data.locations.totalSize / 100);
-					const fetchPromises = Array.from(
-						{ length: totalPages - 1 },
-						(_, index) =>
-							fetchMore({
-								variables: {
-									pageno: index + 1,
-								},
-								updateQuery: (prev, { fetchMoreResult }) => {
-									if (!fetchMoreResult) return prev;
-									return {
-										locations: {
-											...fetchMoreResult.locations,
-											content: [
-												...prev.locations.content,
-												...fetchMoreResult.locations.content,
-											],
-										},
-									};
-								},
-							}),
-					);
-					Promise.all(fetchPromises).catch((error) =>
-						console.error("Error fetching additional locations:", error),
-					);
-				}
-			},
-			errorPolicy: "all",
-		},
-	);
-
-	// Callback for when the grid reports its total size
 	const handleTotalSizeChange = useCallback(
 		(gridType: string, currentGridSize: number) => {
 			if (gridType === "patronRequestsCompleted") {
-				// Update the count for the "inProgress" tab to reflect the grid's current size
 				updateCount("finished", currentGridSize);
-
 				if (unfilteredCompletedCount !== null) {
 					setIsFilterApplied(currentGridSize < unfilteredCompletedCount);
 				} else {
 					setIsFilterApplied(false);
 				}
 			} else {
-				// Handle other grids if they also use this callback with different types
 				updateCount(gridType, currentGridSize);
 			}
 		},
 		[updateCount, unfilteredCompletedCount],
 	);
 
-	const patronRequestLocations: Location[] = locationsData?.locations.content;
-
-	// Query for Exception tab count
-	const { loading: exceptionLoading } = useQuery(getPatronRequestTotals, {
-		variables: {
-			query: queries.exception,
+	const fetchAllLocations = async () => {
+		const variables = {
+			query: "",
+			order: "name",
+			orderBy: "ASC",
+			pagesize: 100,
+		};
+		const firstPage = await gqlClient.request(getLocationForPatronRequestGrid, {
+			...variables,
 			pageno: 0,
-			pagesize: 1,
-			order: "dateCreated",
-			orderBy: "DESC",
-		},
-		onCompleted: (data) => {
-			updateCount("exception", data?.patronRequests?.totalSize || 0);
-		},
-		errorPolicy: "all",
-	});
+		});
+		let allLocations = [...(firstPage?.locations?.content || [])];
+		const totalSize = firstPage?.locations?.totalSize || 0;
 
-	// Query for Out of Sequence tab count
-	const { loading: outOfSequenceLoading } = useQuery(getPatronRequestTotals, {
-		variables: {
-			query: queries.outOfSequence,
-			pageno: 0,
-			pagesize: 1,
-			order: "dateCreated",
-			orderBy: "DESC",
-		},
-		onCompleted: (data) => {
-			updateCount("outOfSequence", data?.patronRequests?.totalSize || 0);
-		},
-		errorPolicy: "all",
-	});
+		if (allLocations.length < totalSize) {
+			const totalPages = Math.ceil(totalSize / 100);
+			const promises = [];
+			for (let i = 1; i < totalPages; i++) {
+				promises.push(
+					gqlClient.request(getLocationForPatronRequestGrid, {
+						...variables,
+						pageno: i,
+					}),
+				);
+			}
+			const results = await Promise.all(promises);
+			results.forEach((res) => {
+				allLocations = [...allLocations, ...(res?.locations?.content || [])];
+			});
+		}
+		return allLocations;
+	};
 
-	// Query for In Progress tab count
-	const { loading: inProgressLoading } = useQuery(getPatronRequestTotals, {
-		variables: {
-			query: queries.inProgress,
-			pageno: 0,
-			pagesize: 1,
-			order: "dateCreated",
-			orderBy: "DESC",
-		},
-		onCompleted: (data) => {
-			updateCount("inProgress", data?.patronRequests?.totalSize || 0);
-		},
-		errorPolicy: "all",
+	const { data: locationsData } = useQuery({
+		queryKey: ["locations", "allPatronRequestGrid"],
+		queryFn: fetchAllLocations,
 	});
+	const patronRequestLocations: Location[] =
+		(locationsData as Location[]) || [];
 
-	// Query for Finished tab count
-	const { loading: finishedLoading } = useQuery(getPatronRequestTotals, {
-		variables: {
-			query: queries.finished,
-			pageno: 0,
-			pagesize: 1,
-			order: "dateCreated",
-			orderBy: "DESC",
-		},
-		onCompleted: (data) => {
-			updateCount("finished", data?.patronRequests?.totalSize || 0);
-			setUnfilteredCompletedCount(data?.patronRequests?.totalSize);
-		},
-		errorPolicy: "all",
-	});
-
-	const { data: supplyingLibraries, loading: supplyingLibrariesLoading } =
-		useQuery(getLibraries, {
-			variables: {
-				order: "fullName",
-				orderBy: "ASC",
+	const { data: excData, isLoading: exceptionLoading } = useQuery({
+		queryKey: ["patronRequestTotals", "exception"],
+		queryFn: () =>
+			gqlClient.request(getPatronRequestTotals, {
+				query: queries.exception,
 				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			},
-			errorPolicy: "all",
+				pagesize: 1,
+				order: "dateCreated",
+				orderBy: "DESC",
+			}),
+	});
+	useEffect(() => {
+		if (excData?.patronRequests?.totalSize !== undefined) {
+			updateCount("exception", excData.patronRequests.totalSize);
+		}
+	}, [excData, updateCount]);
+
+	const { data: oosData, isLoading: outOfSequenceLoading } = useQuery({
+		queryKey: ["patronRequestTotals", "outOfSequence"],
+		queryFn: () =>
+			gqlClient.request(getPatronRequestTotals, {
+				query: queries.outOfSequence,
+				pageno: 0,
+				pagesize: 1,
+				order: "dateCreated",
+				orderBy: "DESC",
+			}),
+	});
+	useEffect(() => {
+		if (oosData?.patronRequests?.totalSize !== undefined) {
+			updateCount("outOfSequence", oosData.patronRequests.totalSize);
+		}
+	}, [oosData, updateCount]);
+
+	const { data: inProgData, isLoading: inProgressLoading } = useQuery({
+		queryKey: ["patronRequestTotals", "inProgress"],
+		queryFn: () =>
+			gqlClient.request(getPatronRequestTotals, {
+				query: queries.inProgress,
+				pageno: 0,
+				pagesize: 1,
+				order: "dateCreated",
+				orderBy: "DESC",
+			}),
+	});
+	useEffect(() => {
+		if (inProgData?.patronRequests?.totalSize !== undefined) {
+			updateCount("inProgress", inProgData.patronRequests.totalSize);
+		}
+	}, [inProgData, updateCount]);
+
+	const { data: finData, isLoading: finishedLoading } = useQuery({
+		queryKey: ["patronRequestTotals", "finished"],
+		queryFn: () =>
+			gqlClient.request(getPatronRequestTotals, {
+				query: queries.finished,
+				pageno: 0,
+				pagesize: 1,
+				order: "dateCreated",
+				orderBy: "DESC",
+			}),
+	});
+	useEffect(() => {
+		if (finData?.patronRequests?.totalSize !== undefined) {
+			updateCount("finished", finData.patronRequests.totalSize);
+			setUnfilteredCompletedCount(finData.patronRequests.totalSize);
+		}
+	}, [finData, updateCount]);
+
+	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
+		useQuery({
+			queryKey: ["libraries", "allSupplying"],
+			queryFn: () =>
+				gqlClient.request(getLibraries, {
+					order: "fullName",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1000,
+					query: "",
+				}),
 		});
 
 	const customColumns = useCustomColumns();
-
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
 		locations: patronRequestLocations,
@@ -228,7 +219,7 @@ function Completed() {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
 
-	if (status === "loading" || supplyingLibrariesLoading) {
+	if (supplyingLibrariesLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -295,13 +286,7 @@ function Completed() {
 					/>
 					<Tab
 						label={
-							<Box
-								sx={{
-									display: "flex",
-									alignItems: "center",
-									gap: 0.5,
-								}}
-							>
+							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
 								<Typography variant="subTabTitle">
 									{t("libraries.patronRequests.completed_short", {
 										number:
@@ -355,7 +340,6 @@ function Completed() {
 							...finishedPatronRequestColumnVisibility,
 						}}
 						scrollbarVisible={true}
-						// This is how to set the default sort order - so the grid loads as sorted by 'lastCreated' by default.
 						sortModel={[{ field: "dateCreated", sort: "desc" }]}
 						sortDirection="DESC"
 						sortAttribute="dateCreated"
@@ -369,5 +353,3 @@ function Completed() {
 		</AdminLayout>
 	);
 }
-
-

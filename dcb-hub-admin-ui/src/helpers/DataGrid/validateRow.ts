@@ -10,8 +10,7 @@ export const validateRow = (
 	editableColumns: any,
 ): ValidationResult | null => {
 	// For debugging purposes. Commented out by default
-	// console.log("New Row:", JSON.stringify(newRow, null, 2));
-	// console.log("Old Row:", JSON.stringify(oldRow, null, 2));
+	// console.log("New Row:", JSON.stringify(newRow, null, 2));	// console.log("Old Row:", JSON.stringify(oldRow, null, 2));
 	// Special handling for "name" column which is actually two fields
 	const oldFirstName = oldRow.firstName;
 	const newFirstName = newRow.firstName;
