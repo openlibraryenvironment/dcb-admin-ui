@@ -24,6 +24,9 @@ import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRe
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import DataGrid from "@components/DataGrid/DataGrid";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	component: All,
@@ -38,19 +41,45 @@ function All() {
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const gridId = "patronRequestsActive";
+	const {
+		paginationModel,
+		setPaginationModel,
+		sortModel,
+		setSortModel,
+		filterModel,
+		setFilterModel,
+	} = useGridStore();
 
-	const [tabIndex, setTabIndex] = useState(4);
-	const [totalSizes, setTotalSizes] = useState({
-		exception: 0,
-		outOfSequence: 0,
-		inProgress: 0,
-		finished: 0,
-		all: 0,
-	});
+	const currentPagination = paginationModel[gridId] ?? {
+		page: 0,
+		pageSize: 20,
+	};
+	const currentSort = sortModel[gridId] ?? [
+		{ field: "dateCreated", sort: "desc" },
+	];
+	const currentFilter = filterModel[gridId] ?? { items: [] };
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [unfilteredAllCount, setUnfilteredAllCount] = useState<number | null>(
 		null,
 	);
-	const [isFilterApplied, setIsFilterApplied] = useState(false);
+	const { data: gridData, isLoading: gridLoading } = useQuery({
+		queryKey: [
+			"patronRequests",
+			gridId,
+			currentPagination,
+			currentSort,
+			currentFilter,
+		],
+		queryFn: () =>
+			gqlClient.request(getPatronRequests, {
+				query: queries.inProgress,
+				pageno: currentPagination.page,
+				pagesize: currentPagination.pageSize,
+				order: currentSort[0]?.field ?? "dateCreated",
+				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
+			}),
+	});
 
 	const updateCount = useCallback((key: string, count: number) => {
 		setTotalSizes((prev) => {
@@ -65,10 +94,9 @@ function All() {
 			return newSizes;
 		});
 	}, []);
-
 	const handleTotalSizeChange = useCallback(
 		(gridType: string, currentGridSize: number) => {
-			if (gridType === "patronRequests") {
+			if (gridType === gridId) {
 				updateCount("all", currentGridSize);
 				if (unfilteredAllCount === null) {
 					setUnfilteredAllCount(currentGridSize);
@@ -82,6 +110,22 @@ function All() {
 		},
 		[updateCount, unfilteredAllCount],
 	);
+
+	useEffect(() => {
+		if (gridData?.patronRequests?.totalSize !== undefined) {
+			handleTotalSizeChange(gridId, gridData.patronRequests.totalSize);
+		}
+	}, [gridData?.patronRequests?.totalSize, handleTotalSizeChange]);
+
+	const [tabIndex, setTabIndex] = useState(4);
+	const [totalSizes, setTotalSizes] = useState({
+		exception: 0,
+		outOfSequence: 0,
+		inProgress: 0,
+		finished: 0,
+		all: 0,
+	});
+	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
 	const fetchAllLocations = async () => {
 		const variables = {
@@ -182,6 +226,7 @@ function All() {
 				orderBy: "DESC",
 			}),
 	});
+
 	useEffect(() => {
 		if (finData?.patronRequests?.totalSize !== undefined)
 			updateCount("finished", finData.patronRequests.totalSize);
@@ -315,31 +360,43 @@ function All() {
 					<Typography variant="h3" fontWeight={"bold"}>
 						{t("libraries.patronRequests.all", { number: totalSizes.all })}
 					</Typography>
-					<ServerPaginationGrid
-						query={getPatronRequests}
-						type="patronRequests"
-						coreType="patronRequests"
+					<DataGrid
+						autoRowHeight={false}
+						checkboxSelection={true}
 						columns={allColumns}
-						selectable={true}
-						pageSize={20}
-						noDataMessage={t("patron_requests.no_rows")}
-						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t(
-							"patron_requests.search_placeholder_error_message",
-						)}
-						columnVisibilityModel={{
-							...defaultPatronRequestColumnVisibility,
-							errorMessage: true,
-							outOfSequenceFlag: true,
-						}}
-						scrollbarVisible={true}
-						sortModel={[{ field: "dateCreated", sort: "desc" }]}
-						sortDirection="DESC"
-						sortAttribute="dateCreated"
-						onTotalSizeChange={handleTotalSizeChange}
+						columnVisibilityModel={defaultPatronRequestColumnVisibility}
+						disableAggregation={true}
+						disableHoverInteractions={false}
+						disablePivoting={true}
+						disableRowGrouping={true}
+						filterMode="server"
+						filterModel={currentFilter}
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="patronRequests" />
 						)}
+						identifier={gridId}
+						loading={gridLoading}
+						listViewEnabled={false}
+						noResultsText={t("patron_requests.no_results")}
+						onFilterModelChange={(model) => setFilterModel(gridId, model)}
+						onPaginationModelChange={(model: any) =>
+							setPaginationModel(gridId, model)
+						}
+						onRowModesModelChange={setRowModesModel}
+						onSortModelChange={(model) => setSortModel(gridId, model)}
+						pagination={true}
+						paginationMode="server"
+						paginationModel={currentPagination}
+						pivotingEnabled={false}
+						rowCount={gridData?.patronRequests?.totalSize ?? 0}
+						rowModesModel={rowModesModel}
+						rows={gridData?.patronRequests?.content ?? []}
+						scrollbarVisible={true}
+						sortModel={currentSort}
+						sortingMode="server"
+						toolbarVisible={true}
+						searchText=""
+						type={gridId}
 					/>
 				</Grid>
 			</Grid>

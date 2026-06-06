@@ -5,13 +5,15 @@ import { FilterAltOutlined } from "@mui/icons-material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 import { useCallback, useMemo, useState, useEffect } from "react";
+import { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import Loading from "@components/Loading/Loading";
 import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import DataGrid from "@components/DataGrid/DataGrid";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
+import { useGridStore } from "@/hooks/useDataGridStore";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
@@ -51,6 +53,26 @@ function Active() {
 	>(null);
 	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
+	const gridId = "patronRequestsActive";
+	const {
+		paginationModel,
+		setPaginationModel,
+		sortModel,
+		setSortModel,
+		filterModel,
+		setFilterModel,
+	} = useGridStore();
+
+	const currentPagination = paginationModel[gridId] ?? {
+		page: 0,
+		pageSize: 20,
+	};
+	const currentSort = sortModel[gridId] ?? [
+		{ field: "dateCreated", sort: "desc" },
+	];
+	const currentFilter = filterModel[gridId] ?? { items: [] };
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
 	const updateCount = useCallback((key: string, count: number) => {
 		setTotalSizes((prev) => {
 			const newSizes = { ...prev, [key]: count };
@@ -67,7 +89,7 @@ function Active() {
 
 	const handleTotalSizeChange = useCallback(
 		(gridType: string, currentGridSize: number) => {
-			if (gridType === "patronRequestsActive") {
+			if (gridType === gridId) {
 				updateCount("inProgress", currentGridSize);
 				if (unfilteredInProgressCount !== null) {
 					setIsFilterApplied(currentGridSize < unfilteredInProgressCount);
@@ -203,6 +225,30 @@ function Active() {
 				}),
 		});
 
+	const { data: gridData, isLoading: gridLoading } = useQuery({
+		queryKey: [
+			"patronRequests",
+			gridId,
+			currentPagination,
+			currentSort,
+			currentFilter,
+		],
+		queryFn: () =>
+			gqlClient.request(getPatronRequests, {
+				query: queries.inProgress,
+				pageno: currentPagination.page,
+				pagesize: currentPagination.pageSize,
+				order: currentSort[0]?.field ?? "dateCreated",
+				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
+			}),
+	});
+
+	useEffect(() => {
+		if (gridData?.patronRequests?.totalSize !== undefined) {
+			handleTotalSizeChange(gridId, gridData.patronRequests.totalSize);
+		}
+	}, [gridData?.patronRequests?.totalSize, handleTotalSizeChange]);
+
 	const customColumns = useCustomColumns();
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
@@ -319,26 +365,43 @@ function Active() {
 							number: totalSizes.inProgress,
 						})}
 					</Typography>
-					<ServerPaginationGrid
-						query={getPatronRequests}
-						presetQueryVariables={queries.inProgress}
-						type="patronRequestsActive"
-						coreType="patronRequests"
+					<DataGrid
+						autoRowHeight={false}
+						checkboxSelection={true}
 						columns={allColumns}
-						selectable={true}
-						pageSize={20}
-						noDataMessage={t("patron_requests.no_rows")}
-						noResultsMessage={t("patron_requests.no_results")}
-						searchPlaceholder={t("patron_requests.search_placeholder_status")}
 						columnVisibilityModel={defaultPatronRequestColumnVisibility}
-						scrollbarVisible={true}
-						sortModel={[{ field: "dateCreated", sort: "desc" }]}
-						sortDirection="DESC"
-						sortAttribute="dateCreated"
-						onTotalSizeChange={handleTotalSizeChange}
+						disableAggregation={true}
+						disableHoverInteractions={false}
+						disablePivoting={true}
+						disableRowGrouping={true}
+						filterMode="server"
+						filterModel={currentFilter}
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="patronRequests" />
 						)}
+						identifier={gridId}
+						loading={gridLoading}
+						listViewEnabled={false}
+						noResultsText={t("patron_requests.no_results")}
+						onFilterModelChange={(model) => setFilterModel(gridId, model)}
+						onPaginationModelChange={(model: any) =>
+							setPaginationModel(gridId, model)
+						}
+						onRowModesModelChange={setRowModesModel}
+						onSortModelChange={(model) => setSortModel(gridId, model)}
+						pagination={true}
+						paginationMode="server"
+						paginationModel={currentPagination}
+						pivotingEnabled={false}
+						rowCount={gridData?.patronRequests?.totalSize ?? 0}
+						rowModesModel={rowModesModel}
+						rows={gridData?.patronRequests?.content ?? []}
+						scrollbarVisible={true}
+						sortModel={currentSort}
+						sortingMode="server"
+						toolbarVisible={true}
+						searchText=""
+						type={gridId}
 					/>
 				</Grid>
 			</Grid>
