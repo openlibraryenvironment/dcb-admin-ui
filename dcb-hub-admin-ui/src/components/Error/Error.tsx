@@ -23,7 +23,7 @@ export default function Error({
 	const theme = useTheme();
 
 	const handleReturn = () => {
-		router.push(actionLink);
+		router.navigate({ to: actionLink });
 	};
 	const handleReload = () => {
 		location.reload();

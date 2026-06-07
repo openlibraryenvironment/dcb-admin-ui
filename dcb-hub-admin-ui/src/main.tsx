@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { createRouter } from "@tanstack/react-router";
+import { createRouter, AnyRouter } from "@tanstack/react-router";
 import { AuthProvider } from "react-oidc-context";
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { User } from "oidc-client-ts";
@@ -8,7 +8,7 @@ import { LicenseInfo } from "@mui/x-license";
 
 import "./i18n";
 import { routeTree } from "./routeTree.gen";
-import theme from "@themes/openRS"; // Sort this out, it's a mess
+import openRSTheme from "@themes/openRS"; // Sort this out, it's a mess
 import App from "@components/App/App";
 
 // Do we still want these?
@@ -32,15 +32,12 @@ declare global {
 	}
 }
 
-// 2. Optimized Config Fetching (Zero Waterfall)
 async function getCfg() {
 	try {
-		// A. Cloudflare HTMLRewriter injection (Instant)
 		if (typeof window !== "undefined" && window.__APP_ENV__) {
 			return window.__APP_ENV__;
 		}
 
-		// B. Fallback for local Vite dev (npm run dev)
 		const response = await fetch("/inject_env.json", { cache: "no-store" });
 
 		if (
@@ -67,10 +64,8 @@ async function getCfg() {
 	}
 }
 
-// 3. Declare router variable so the QueryClient can use it for redirects
-let router: ReturnType<typeof createRouter>;
+let router: AnyRouter;
 
-// 4. SPA-Native Error Handling
 const handleServiceErrors = (error: any) => {
 	const isNetworkError =
 		error.message?.includes("Failed to fetch") ||
@@ -90,7 +85,6 @@ const handleServiceErrors = (error: any) => {
 	}
 };
 
-// 5. Setup TanStack Query
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -106,16 +100,13 @@ const queryClient = new QueryClient({
 	}),
 });
 
-// 6. Application Bootstrapper
 async function bootstrap() {
 	const cfg = await getCfg();
 
-	// Set MUI License
 	if (cfg.VITE_MUI_X_LICENSE_KEY) {
 		LicenseInfo.setLicenseKey(cfg.VITE_MUI_X_LICENSE_KEY);
 	}
 
-	// Instantiate Router
 	router = createRouter({
 		routeTree,
 		basepath: cfg.VITE_PUBLIC_URL || "/",
@@ -130,7 +121,6 @@ async function bootstrap() {
 		},
 	});
 
-	// Setup OIDC Configuration
 	const oidcConfig = {
 		authority: cfg.VITE_KEYCLOAK_URL,
 		client_id: cfg.VITE_KEYCLOAK_ID,
@@ -162,25 +152,22 @@ async function bootstrap() {
 		},
 	};
 
-	// Mount the Application
 	const rootElement = document.getElementById("root")!;
 	if (!rootElement.innerHTML) {
 		const root = ReactDOM.createRoot(rootElement);
 		root.render(
 			<React.StrictMode>
 				<AuthProvider {...oidcConfig}>
-					<App theme={theme} queryClient={queryClient} router={router} />
+					<App theme={openRSTheme} queryClient={queryClient} router={router} />
 				</AuthProvider>
 			</React.StrictMode>,
 		);
 	}
 }
 
-// 7. Register router for TanStack Router Type Safety
+bootstrap();
 declare module "@tanstack/react-router" {
 	interface Register {
 		router: typeof router;
 	}
 }
-
-bootstrap();

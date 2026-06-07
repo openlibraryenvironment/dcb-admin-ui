@@ -1,85 +1,80 @@
-import { createFileRoute } from "@tanstack/react-router";
-import {
-	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
-import {
-	Button";
-import { Grid } from "@queries/Grid";
-import { Stack } from "@queries/Stack";
-import { Tab } from "@queries/Tab";
-import { Tabs } from "@queries/Tabs";
-import { Typography } from "@queries/Typography";
-import { Tooltip } from "@queries/Tooltip";
-import { CircularProgress } from "@queries/CircularProgress";
-import { } from "@mui/material";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-
-import { useMutation } from "@queries/} from "@mui/material";
-import { useTranslation } from "react-i18next";
-
-import { useMutation";
-import { useQuery } from "@queries/useQuery";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-	getLibraryGroupById } from "@queries/useQueryClient } from "@tanstack/react-query";
-import {
-	getLibraryGroupById";
-import { updateAgencyParticipationStatus } from "@queries/updateAgencyParticipationStatus";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
+import {
+	Button,
+	Grid,
+	Stack,
+	Tab,
+	Tabs,
+	Typography,
+	Tooltip,
+	CircularProgress,
+	Box,
+} from "@mui/material";
+
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import { useState, useMemo } from "react";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { handleGroupTabChange } from "src/helpers/navigation/handleTabChange";
-import { closeConfirmation } from "src/helpers/actions/editAndDeleteActions";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getLibraryGroupById } from "@queries/getGroupById";
+import { updateAgencyParticipationStatus } from "@mutations/updateAgencyParticipation";
+import { CONFIRMATION_TEXT_MAP } from "@helpers/getConfirmationText";
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 
-export const Route = createFileRoute("/__authenticated/groups/groupId/settings")({
+export const Route = createFileRoute(
+	"/__authenticated/groups/$groupId/settings",
+)({
 	component: GroupSettings,
 });
 
 function GroupSettings() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = Route.useParams(); // TODO: rename "id" to "groupId" if needed below
-	const client = useQueryClient();
+	const { groupId } = Route.useParams();
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+	const auth = useAuth();
 
-	const [tabIndex, setTabIndex] = useState(3); // Assuming 'settings' is index 3
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
 	const [showConfirmationBorrowing, setConfirmationBorrowing] = useState(false);
 	const [showConfirmationSupplying, setConfirmationSupplying] = useState(false);
 	const [isUpdating, setIsUpdating] = useState(false);
-
-	const [alert, setAlert] = useState<any>({
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: "success" | "error" | "warning";
+		text: string | null;
+		title: string | null;
+	}>({
 		open: false,
 		severity: "success",
 		text: null,
 		title: null,
 	});
 
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-
-	const isAnAdmin = isAnAdmin;
-
-	const { data, loading, error, refetch } = useQuery(getLibraryGroupById, {
-		variables: { query: "id:" + groupId },
-		pollInterval: 120000,
-		errorPolicy: "all",
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["group", groupId],
+		queryFn: () =>
+			gqlClient.request<any>(getLibraryGroupById, { query: `id:${groupId}` }),
+		refetchInterval: 120000,
 	});
 
 	const group: Group = data?.libraryGroups?.content?.[0];
-	const [updateParticipation] = useMutation(updateAgencyParticipationStatus);
 
-	// Calculate Group State
-	// We determine the "Group State" based on the majority.
-	// If any member is enabled, we offer to Disable All. If all are disabled, we offer to Enable All.
-	// This should say how many are enabled for borrowing, supplying in its own "circulation" section
-	// Then give option to "Bulk set"
+	const { mutateAsync: updateParticipation } = useMutation({
+		mutationFn: (variables: { input: any }) =>
+			gqlClient.request(updateAgencyParticipationStatus, variables),
+	});
+
 	const groupStats = useMemo(() => {
 		if (!group?.members)
 			return {
@@ -97,8 +92,6 @@ function GroupSettings() {
 		const supplyingCount = group.members.filter(
 			(m: LibraryGroupMember) => m.library?.agency?.isSupplyingAgency,
 		).length;
-		console.log(total);
-		console.log(borrowingCount);
 
 		return {
 			borrowingCount,
@@ -119,31 +112,22 @@ function GroupSettings() {
 		if (!group?.members) return;
 
 		setIsUpdating(true);
-
 		const isEnabled = action === "enable";
 
 		const updates = group.members.map((member: LibraryGroupMember) => {
 			const agencyCode = member.library?.agencyCode;
 			if (!agencyCode) return Promise.resolve(null);
 
-			const input =
-				type === "borrowing"
-					? {
-							code: agencyCode,
-							isBorrowingAgency: isEnabled,
-							reason,
-							changeCategory,
-							changeReferenceUrl,
-						}
-					: {
-							code: agencyCode,
-							isSupplyingAgency: isEnabled,
-							reason,
-							changeCategory,
-							changeReferenceUrl,
-						};
+			const input = {
+				code: agencyCode,
+				[type === "borrowing" ? "isBorrowingAgency" : "isSupplyingAgency"]:
+					isEnabled,
+				reason,
+				changeCategory,
+				changeReferenceUrl,
+			};
 
-			return updateParticipation({ variables: { input } });
+			return updateParticipation({ input });
 		});
 
 		const results = await Promise.allSettled(updates);
@@ -151,30 +135,17 @@ function GroupSettings() {
 		const failCount = results.filter((r) => r.status === "rejected").length;
 
 		setIsUpdating(false);
-
-		if (type === "borrowing")
-			closeConfirmation(
-				() => setConfirmationBorrowing(false),
-				client,
-				"LoadLibraryGroup",
-			);
-		else
-			closeConfirmation(
-				() => setConfirmationSupplying(false),
-				client,
-				"LoadLibraryGroup",
-			);
-
-		refetch();
+		type === "borrowing"
+			? setConfirmationBorrowing(false)
+			: setConfirmationSupplying(false);
+		queryClient.invalidateQueries({ queryKey: ["group", groupId] });
 
 		if (failCount === 0) {
 			setAlert({
 				open: true,
 				severity: "success",
 				title: t("ui.data_grid.success"),
-				text: t("groups.bulk_update_success", {
-					count: successCount,
-				}),
+				text: t("groups.bulk_update_success", { count: successCount }),
 			});
 		} else {
 			setAlert({
@@ -189,7 +160,7 @@ function GroupSettings() {
 		}
 	};
 
-	if (loading || status === "loading") {
+	if (isLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading title={t("groups.groups_one")} subtitle={t("ui.info.wait")} />
@@ -211,6 +182,13 @@ function GroupSettings() {
 		);
 	}
 
+	const borrowingAction = groupStats.hasBorrowing
+		? "disableBorrowing"
+		: "enableBorrowing";
+	const supplyingAction = groupStats.hasSupplying
+		? "disableSupplying"
+		: "enableSupplying";
+
 	return (
 		<AdminLayout title={group.name}>
 			<Grid
@@ -220,11 +198,17 @@ function GroupSettings() {
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
-						value={tabIndex}
-						onChange={(event, value) => {
-							handleGroupTabChange(event, value, router, setTabIndex, groupId);
-						}}
-						aria-label="Group navigation"
+						value={3}
+						onChange={(_, val) =>
+							router.navigate({
+								to: [
+									`/groups/${groupId}`,
+									`/groups/${groupId}/patronRequests`,
+									`/groups/${groupId}/supplierRequests`,
+									`/groups/${groupId}/settings`,
+								][val],
+							})
+						}
 					>
 						<Tab label={t("nav.groups.profile")} />
 						<Tab label={t("nav.groups.patronRequests")} />
@@ -232,16 +216,19 @@ function GroupSettings() {
 						<Tab label={t("nav.groups.settings")} />
 					</Tabs>
 				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="h2" sx={{ fontWeight: "bold" }}>
 						{t("nav.groups.settings")}
 					</Typography>
 				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="accordionSummary">
 						{t("libraries.circulation.title")}
 					</Typography>
 				</Grid>
+
 				{isUpdating && (
 					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<CircularProgress />
@@ -252,58 +239,46 @@ function GroupSettings() {
 				)}
 
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("libraries.circulation.borrowing_status")}
 						</Typography>
 						<Typography>
-							{t("groups.borrow_count", { count: groupStats?.borrowingCount })}
+							{t("groups.borrow_count", { count: groupStats.borrowingCount })}
 						</Typography>
 					</Stack>
-					{!isAnAdmin ? (
-						<Tooltip
-							title={t(
-								"libraries.circulation.confirmation.admin_required_supplying",
-							)}
-							key={t(
-								"libraries.circulation.confirmation.admin_required_supplying",
-							)}
-						>
-							<span>
-								<Button
-									color="primary"
-									variant="outlined"
-									sx={{ marginTop: 1 }}
-									disabled={!isAnAdmin || isUpdating}
-									onClick={() => setConfirmationBorrowing(true)}
-								>
-									{groupStats.hasBorrowing
-										? t("groups.settings.disable_all_borrowing")
-										: t("groups.settings.enable_all_borrowing")}
-								</Button>
-							</span>
-						</Tooltip>
-					) : (
-						<Button
-							color="primary"
-							variant="outlined"
-							sx={{ marginTop: 1 }}
-							disabled={!isAnAdmin || isUpdating}
-							onClick={() => setConfirmationBorrowing(true)}
-						>
-							{groupStats.hasBorrowing
-								? t("groups.settings.disable_all_borrowing")
-								: t("groups.settings.enable_all_borrowing")}
-						</Button>
-					)}
+					<Tooltip
+						title={
+							!isAnAdmin
+								? t(
+										"libraries.circulation.confirmation.admin_required_supplying",
+									)
+								: ""
+						}
+					>
+						<span>
+							<Button
+								color="primary"
+								variant="outlined"
+								sx={{ mt: 1 }}
+								disabled={!isAnAdmin || isUpdating}
+								onClick={() => setConfirmationBorrowing(true)}
+							>
+								{groupStats.hasBorrowing
+									? t("groups.settings.disable_all_borrowing")
+									: t("groups.settings.enable_all_borrowing")}
+							</Button>
+						</span>
+					</Tooltip>
 				</Grid>
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("libraries.circulation.supplying_status")}
 						</Typography>
 						<Typography>
-							{t("groups.supply_count", { count: groupStats?.supplyingCount })}
+							{t("groups.supply_count", { count: groupStats.supplyingCount })}
 						</Typography>
 					</Stack>
 					<Button
@@ -311,7 +286,7 @@ function GroupSettings() {
 						onClick={() => setConfirmationSupplying(true)}
 						color="primary"
 						variant="outlined"
-						sx={{ marginTop: 1 }}
+						sx={{ mt: 1 }}
 					>
 						{groupStats.hasSupplying
 							? t("groups.settings.disable_all_supplying")
@@ -323,57 +298,68 @@ function GroupSettings() {
 			<Confirmation
 				open={showConfirmationBorrowing}
 				onClose={() => setConfirmationBorrowing(false)}
-				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
+				onConfirm={(reason, category, url) =>
 					handleGroupParticipation(
 						"borrowing",
-						groupStats?.hasBorrowing ? "disable" : "enable",
+						groupStats.hasBorrowing ? "disable" : "enable",
 						reason,
-						changeCategory,
-						changeReferenceUrl,
+						category,
+						url,
 					)
 				}
-				type="participationStatus"
-				participation={
-					groupStats?.hasBorrowing ? "disableBorrowing" : "enableBorrowing"
-				}
-				entity={t("groups.groups_one")}
+				action="gridEdit"
 				entityName={group.name}
-				gridEdit={false}
+				customWarningText={
+					<Box>
+						<Typography variant="h6" gutterBottom>
+							{t(CONFIRMATION_TEXT_MAP[borrowingAction].header)}
+						</Typography>
+						<Typography paragraph>
+							{t(CONFIRMATION_TEXT_MAP[borrowingAction].para1)}
+						</Typography>
+						<Typography variant="body2">
+							{t(CONFIRMATION_TEXT_MAP[borrowingAction].select)}
+						</Typography>
+					</Box>
+				}
 			/>
 
 			<Confirmation
 				open={showConfirmationSupplying}
 				onClose={() => setConfirmationSupplying(false)}
-				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
+				onConfirm={(reason, category, url) =>
 					handleGroupParticipation(
 						"supplying",
-						groupStats?.hasSupplying ? "disable" : "enable",
+						groupStats.hasSupplying ? "disable" : "enable",
 						reason,
-						changeCategory,
-						changeReferenceUrl,
+						category,
+						url,
 					)
 				}
-				type="participationStatus"
-				participation={
-					groupStats?.hasSupplying ? "disableSupplying" : "enableSupplying" // probably needs a customisation of confirmation modal
-				}
-				entity={t("groups.groups_one")}
+				action="gridEdit"
 				entityName={group.name}
-				gridEdit={false}
+				customWarningText={
+					<Box>
+						<Typography variant="h6" gutterBottom>
+							{t(CONFIRMATION_TEXT_MAP[supplyingAction].header)}
+						</Typography>
+						<Typography paragraph>
+							{t(CONFIRMATION_TEXT_MAP[supplyingAction].para1)}
+						</Typography>
+						<Typography variant="body2">
+							{t(CONFIRMATION_TEXT_MAP[supplyingAction].select)}
+						</Typography>
+					</Box>
+				}
 			/>
 
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
-				autoHideDuration={6000}
 				alertText={alert.text}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
 				alertTitle={alert.title}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</AdminLayout>
 	);
 }
-
-
-
-

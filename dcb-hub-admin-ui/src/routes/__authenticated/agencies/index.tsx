@@ -1,119 +1,208 @@
+import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
-//localisation
-import { useTranslation } from "react-i18next";
+import {
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColumnVisibilityModel,
+	GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 
-import { getAgencies } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
-//localisation
-import { useTranslation } from "react-i18next";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
 
-import { getAgencies";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { useAuth } from "react-oidc-context";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import Loading from "@components/Loading/Loading";
-import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+import {
+	getSortOrderForServer,
+	processGridFilterModel,
+} from "@helpers/dataGrid/utilities";
+import { getAgencies } from "@queries/getAgencies";
+import { standardFilters } from "@filters/standardFilters";
+import { equalsOnly } from "@filters/equalsOnly";
 
-// import MasterDetail from "@components/MasterDetail/MasterDetail";
+export const Route = createFileRoute("/__authenticated/agencies/")({
+	component: AgenciesRouteComponent,
+});
 
-const Agencies: NextPage = () => {
-	// i18n useTranslation hook - this provides the 't' function for translations
+function AgenciesRouteComponent() {
 	const { t } = useTranslation();
-	// These are the filter operators we expose to the user. We can control this on a per-page and per-column basis.
-	// For further filter customisation, see here https://mui.com/x/react-data-grid/filtering/customization/
-
-	const router = useRouter();
+	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	if (status === "loading") {
-		return (
-			<AdminLayout hideBreadcrumbs>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.agencies").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
+	const gridId = "agencies";
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 10 },
 		);
-	}
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "name", sort: "asc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
+		useState<GridColumnVisibilityModel>(
+			storedState.columnVisibility ?? {
+				id: false,
+				latitude: false,
+				longitude: false,
+			},
+		);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: [gridId, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const queryVariables = {
+				query: processGridFilterModel(filterModel, "", []) ?? "",
+				pageno: paginationModel.page ?? 0,
+				pagesize: paginationModel.pageSize ?? 10,
+				order: sortModel[0]?.field ?? "name",
+				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
+			};
+			return gqlClient.request<any>(getAgencies, queryVariables);
+		},
+		placeholderData: (previousData) => previousData,
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const handleColumnVisibilityChange = useCallback(
+		(model: GridColumnVisibilityModel) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
+		},
+		[gridId, setColumnVisibilityModel],
+	);
+
+	const columns = useMemo(
+		() => [
+			...customColumns,
+			{
+				field: "name",
+				headerName: t("details.agency_name", "Agency name"),
+				minWidth: 150,
+				flex: 0.5,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "code",
+				headerName: t("details.agency_code", "Agency code"),
+				minWidth: 50,
+				flex: 0.5,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "id",
+				headerName: t("details.agency_uuid", "Agency UUID"),
+				minWidth: 100,
+				flex: 0.5,
+				filterOperators: equalsOnly,
+				filterable: false,
+			},
+			{
+				field: "longitude",
+				headerName: t("details.long", "Longitude"),
+				minWidth: 50,
+				flex: 0.5,
+				filterOperators: equalsOnly,
+			},
+			{
+				field: "latitude",
+				headerName: t("details.lat", "Latitude"),
+				minWidth: 50,
+				flex: 0.5,
+				filterOperators: equalsOnly,
+				filterable: false,
+			},
+		],
+		[customColumns, t],
+	);
 
 	return (
 		<AdminLayout title={t("nav.agencies")}>
-			<div>
-				<ServerPaginationGrid
-					query={getAgencies}
-					type="agencies"
-					coreType="agencies"
-					operationDataType="Agency"
-					columnVisibilityModel={{
-						id: false,
-						latitude: false,
-						longitude: false,
-					}}
-					columns={[
-						...customColumns,
-						{
-							field: "name",
-							headerName: "Agency name",
-							minWidth: 150,
-							flex: 0.5,
-							filterOperators: standardFilters,
-						},
-						{
-							field: "code",
-							headerName: "Agency code",
-							minWidth: 50,
-							flex: 0.5,
-							filterOperators: standardFilters,
-						},
-						{
-							field: "id",
-							headerName: "Agency UUID",
-							minWidth: 100,
-							flex: 0.5,
-							filterOperators: equalsOnly,
-							filterable: false,
-						},
-						{
-							field: "longitude",
-							headerName: "Longitude",
-							minWidth: 50,
-							flex: 0.5,
-							filterOperators: equalsOnly,
-						},
-						{
-							field: "latitude",
-							headerName: "Latitude",
-							minWidth: 50,
-							flex: 0.5,
-							filterOperators: equalsOnly,
-							filterable: false,
-						},
-					]}
-					selectable={true}
-					pageSize={10}
-					noDataMessage={t("agencies.no_rows")}
-					noResultsMessage={t("agencies.no_results")}
-					searchPlaceholder={t("agencies.search_placeholder")}
-					// This is how to set the default sort order
-					sortModel={[{ field: "name", sort: "asc" }]}
-					sortDirection="ASC"
-					sortAttribute="name"
-					// getDetailPanelContent={({ row }: any) => (
-					// 	<MasterDetail row={row} type="agencies" />
-					// )}
-				/>
-			</div>
+			<DataGrid
+				identifier={gridId}
+				type="agencies"
+				columns={columns}
+				rows={gridData?.agencies?.content ?? []}
+				rowCount={gridData?.agencies?.totalSize ?? 0}
+				loading={isLoading || isFetching}
+				paginationMode="server"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortingMode="server"
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterMode="server"
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				checkboxSelection={true}
+				disableAggregation
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("agencies.no_results")}
+				searchText={t("agencies.search_placeholder")}
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
+			/>
 		</AdminLayout>
 	);
-};
-
-
-
-
+}

@@ -1,161 +1,218 @@
+import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import axios from "axios";
-
 import { useAuth } from "react-oidc-context";
-import { Trans, useTranslation } from "next-i18next";
+import {
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColumnVisibilityModel,
+	GridColDef,
+	GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 
-import { useEffect, useState } from "react";
-import { GridColDef } from "@mui/x-data-grid-premium";
-import { ClientDataGrid } from "@components/ClientDataGrid";
-import { AdminLayout } from "@layout";
-
-import Alert from "@components/Alert/Alert";
-import Link from "@components/Link/Link";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import Error from "@components/Error/Error";
+
+import { useGridStore } from "@/hooks/useDataGridStore";
 import { ProcessState } from "@models/ProcessState";
 
-const CatalogMetricsByHostLms: NextPage = () => {
-	const { publicRuntimeConfig } = getConfig();
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+export const Route = createFileRoute(
+	"/__authenticated/serviceInfo/catalogMetricsByHostLms/",
+)({
+	component: CatalogMetricsByHostLms,
+});
+
+function CatalogMetricsByHostLms() {
 	const { t } = useTranslation();
-	const [records, setRecords] = useState<any[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(false);
-
-	const handleReload = () => {
-		location.reload();
-	};
-	// useEffect is being used here as this is a REST endpoint
-	// Should it change to a GraphQL endpoint we will switch it to useQuery.
-	useEffect(() => {
-		const fetchRecords = async () => {
-			try {
-				const response = await axios.get<any[]>(
-					`${publicRuntimeConfig.VITE_DCB_API_BASE}/hostlmss/importIngestDetails`,
-					{
-						headers: { Authorization: `Bearer ${data?.accessToken}` },
-					},
-				);
-				setRecords(response.data);
-				setLoading(false);
-			} catch (error) {
-				console.log(error);
-				setError(true);
-				setLoading(false);
-			}
-		};
-
-		if (data?.accessToken) {
-			fetchRecords();
-		}
-	}, [data?.accessToken, publicRuntimeConfig.VITE_DCB_API_BASE]);
-
-	const router = useRouter();
 	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const columns: GridColDef[] = [
-		{
-			field: "name",
-			headerName: t("catalogMetricsByHostLms.source_system"),
-			flex: 0.75,
-		},
-		{
-			field: "ingestEnabled",
-			headerName: t("catalogMetricsByHostLms.harvest_enabled"),
-			flex: 0.5,
-		},
-		{
-			field: "sourceRecordCount",
-			headerName: t("catalogMetricsByHostLms.harvested"),
-			flex: 0.5,
-			type: "number",
-			groupable: false,
-		},
-		{
-			field: "awaiting",
-			headerName: t("catalogMetricsByHostLms.await"),
-			flex: 0.5,
-			groupable: false,
-			type: "number",
-			valueGetter: (value, row) => {
-				const states: ProcessState[] = row?.processStates || [];
-				const failure = states.find(
-					(state: ProcessState) => state.value === "PROCESSING_REQUIRED",
-				);
-				return failure ? failure.count : 0;
-			},
-		},
-		{
-			field: "failed",
-			headerName: t("catalogMetricsByHostLms.failed"),
-			flex: 0.5,
-			groupable: false,
-			type: "number",
-			valueGetter: (value, row) => {
-				const states: ProcessState[] = row?.processStates || [];
-				const failure = states.find(
-					(state: ProcessState) => state.value === "FAILURE",
-				);
-				return failure ? failure.count : 0;
-			},
-		},
-		{
-			field: "ingested",
-			headerName: t("catalogMetricsByHostLms.ingested"),
-			flex: 0.5,
-			groupable: false,
-			type: "number",
-			valueGetter: (value, row) => {
-				const states: ProcessState[] = row?.processStates || [];
-				const failure = states.find(
-					(state: ProcessState) => state.value === "SUCCESS",
-				);
-				return failure ? failure.count : 0;
-			},
-		},
-		{
-			field: "bibRecordCount",
-			headerName: t("nav.bibs"),
-			flex: 0.5,
-			type: "number",
-			groupable: false,
-		},
-		{
-			field: "difference",
-			headerName: t("catalogMetricsByHostLms.difference"),
-			flex: 0.75,
-			type: "number",
-			groupable: false,
-			valueGetter: (value, row) => {
-				const difference: number = row.sourceRecordCount - row.bibRecordCount;
-				return difference;
-			},
-		},
-		{
-			field: "id",
-			headerName: t("catalogMetricsByHostLms.source_system_id"),
-			flex: 1,
-		},
-		{
-			field: "checkPointId",
-			headerName: t("catalogMetricsByHostLms.checkpoint_id"),
-			flex: 1,
-		},
-	];
+	const gridId = "catalogMetricsByHostLms";
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	if (loading || status === "loading") {
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 20 },
+		);
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "name", sort: "asc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
+		useState<GridColumnVisibilityModel>(
+			storedState.columnVisibility ?? {
+				id: false,
+				checkPointId: false,
+				sourceSystemId: false,
+			},
+		);
+
+	const {
+		data: records,
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
+		queryKey: ["catalogMetricsByHostLms"],
+		queryFn: async () => {
+			const res = await fetch(
+				`${import.meta.env.VITE_DCB_API_BASE}/hostlmss/importIngestDetails`,
+				{
+					headers: { Authorization: `Bearer ${auth.user?.access_token}` },
+				},
+			);
+			if (!res.ok) console.error("Failed to fetch catalog metrics");
+			return res.json();
+		},
+		staleTime: 1000 * 60 * 5, // Cache for 5 minutes since this is a heavy request
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const handleColumnVisibilityChange = useCallback(
+		(model: GridColumnVisibilityModel) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
+		},
+		[gridId, setColumnVisibilityModel],
+	);
+
+	const columns: GridColDef[] = useMemo(
+		() => [
+			{
+				field: "name",
+				headerName: t("catalogMetricsByHostLms.source_system"),
+				flex: 0.75,
+			},
+			{
+				field: "ingestEnabled",
+				headerName: t("catalogMetricsByHostLms.harvest_enabled"),
+				flex: 0.5,
+				type: "boolean",
+			},
+			{
+				field: "sourceRecordCount",
+				headerName: t("catalogMetricsByHostLms.harvested"),
+				flex: 0.5,
+				type: "number",
+				groupable: false,
+			},
+			{
+				field: "awaiting",
+				headerName: t("catalogMetricsByHostLms.await"),
+				flex: 0.5,
+				groupable: false,
+				type: "number",
+				valueGetter: (value, row) => {
+					const states: ProcessState[] = row?.processStates || [];
+					const state = states.find((s) => s.value === "PROCESSING_REQUIRED");
+					return state ? state.count : 0;
+				},
+			},
+			{
+				field: "failed",
+				headerName: t("catalogMetricsByHostLms.failed"),
+				flex: 0.5,
+				groupable: false,
+				type: "number",
+				valueGetter: (value, row) => {
+					const states: ProcessState[] = row?.processStates || [];
+					const state = states.find((s) => s.value === "FAILURE");
+					return state ? state.count : 0;
+				},
+			},
+			{
+				field: "ingested",
+				headerName: t("catalogMetricsByHostLms.ingested"),
+				flex: 0.5,
+				groupable: false,
+				type: "number",
+				valueGetter: (value, row) => {
+					const states: ProcessState[] = row?.processStates || [];
+					const state = states.find((s) => s.value === "SUCCESS");
+					return state ? state.count : 0;
+				},
+			},
+			{
+				field: "bibRecordCount",
+				headerName: t("nav.bibs"),
+				flex: 0.5,
+				type: "number",
+				groupable: false,
+			},
+			{
+				field: "difference",
+				headerName: t("catalogMetricsByHostLms.difference"),
+				flex: 0.75,
+				type: "number",
+				groupable: false,
+				valueGetter: (value, row) =>
+					(row.sourceRecordCount || 0) - (row.bibRecordCount || 0),
+			},
+			{
+				field: "id",
+				headerName: t("catalogMetricsByHostLms.source_system_id"),
+				flex: 1,
+			},
+			{
+				field: "checkPointId",
+				headerName: t("catalogMetricsByHostLms.checkpoint_id"),
+				flex: 1,
+			},
+		],
+		[t],
+	);
+
+	if (isLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
-						//make the first character lowercase
 						document_type:
 							t("catalogMetricsByHostLms.name").charAt(0).toLowerCase() +
 							t("catalogMetricsByHostLms.name").slice(1),
@@ -165,57 +222,61 @@ const CatalogMetricsByHostLms: NextPage = () => {
 			</AdminLayout>
 		);
 	}
-	return error ? (
-		<AdminLayout title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
-			<Alert
-				severityType="error"
-				alertText={
-					<Trans
-						i18nKey={"common.error_loading"}
-						t={t}
-						values={{
-							page_title: t("nav.serviceInfo.catalogMetricsByHostLms"),
-						}}
-						components={{
-							linkComponent: (
-								<Link
-									onClick={handleReload}
-									title={t("ui.action.reload")}
-									key={t("ui.action.reload")}
-									href="catalogMetricsByHostLms"
-								/>
-							),
-						}}
-					/>
-				}
-				onCloseFunc={() => setError(false)}
-			/>
-		</AdminLayout>
-	) : (
+
+	if (isError) {
+		return (
+			<AdminLayout title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
+				<Error
+					title={t("common.error_loading", {
+						page_title: t("nav.serviceInfo.catalogMetricsByHostLms"),
+					})}
+					message={t("ui.info.connection_issue")}
+					description={t("ui.info.try_later")}
+					action={t("ui.action.reload")}
+					// onClick={refetch}
+				/>
+			</AdminLayout>
+		);
+	}
+
+	return (
 		<AdminLayout
 			title={t("nav.serviceInfo.catalogMetricsByHostLms")}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("reference.catalog_build")}
 		>
-			<ClientDataGrid
+			<DataGrid
+				identifier={gridId}
+				type={gridId}
 				columns={columns}
-				data={records}
-				type="catalogMetricsByHostLms"
-				coreType="BibRecord"
-				// We don't want click-through on this grid.
-				selectable={false}
-				noDataTitle={t("catalogMetricsByHostLms.no_results")}
-				// This is how to set the default sort order
-				sortModel={[{ field: "name", sort: "asc" }]}
-				columnVisibilityModel={{
-					id: false,
-					checkPointId: false,
-					sourceSystemId: false,
-				}}
-				operationDataType="BibRecord"
+				rows={records ?? []}
+				loading={isLoading}
+				paginationMode="client"
+				sortingMode="client"
+				filterMode="client"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				checkboxSelection={false}
 				disableAggregation={false}
-				disableRowGrouping={true}
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("catalogMetricsByHostLms.no_results")}
+				searchText={t("general.search")}
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
 			/>
 		</AdminLayout>
 	);
-};
+}

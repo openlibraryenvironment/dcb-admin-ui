@@ -1,120 +1,104 @@
-import { createFileRoute } from "@tanstack/react-router";
-import {
-	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
-import {
-	Button";
-import { Grid } from "@queries/Grid";
-import { Stack } from "@queries/Stack";
-import { TextField } from "@queries/TextField";
-import { Typography } from "@queries/Typography";
-import { useTheme } from "@queries/useTheme";
-import { } from "@mui/material";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	deleteLocationQuery } from "@queries/} from "@mui/material";
-import { useTranslation } from "react-i18next";
-import {
-	deleteLocationQuery";
-import { getLocation } from "@queries/getLocation";
-import { updateLocationQuery } from "@queries/updateLocationQuery";
-import { AdminLayout } from "@layout";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useAuth } from "react-oidc-context";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { isEmpty } from "lodash";
 
-import { Location } from "@models/Location";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	Button,
+	Grid,
+	Stack,
+	TextField,
+	Typography,
+	useTheme,
+} from "@mui/material";
+import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
+
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
-import { useAuth } from "react-oidc-context";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import { useRef, useState } from "react";
-
-import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
-import { formatChangedFields } from "src/helpers/formatChangedFields";
+import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
+import { getLocation } from "@queries/getLocation";
+import { deleteLocationQuery } from "@mutations/deleteLocation";
+import { getILS } from "@helpers/getILS";
+import { getLocalId } from "@helpers/getLocalId";
+import { formatChangedFields } from "@helpers/formatChangedFields";
 import {
 	handleCancel,
 	handleDeleteEntity,
 	handleEdit,
 	handleSaveConfirmation,
-} from "src/helpers/actions/editAndDeleteActions";
-import { getILS } from "src/helpers/getILS";
-import { getLocalId } from "src/helpers/getLocalId";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Controller, useForm } from "react-hook-form";
-import * as Yup from "yup";
-import { isEmpty } from "lodash";
+} from "@helpers/actions/editAndDeleteActions";
+import { Location } from "@models/Location";
+import { updateLocationQuery } from "@mutations/updateLocation";
 
-// Coming in, we know the ID. So we need to query our GraphQL server to get the associated data.
 interface LocationFormFields {
 	name: string;
-	printLabel?: string;
-	latitude?: number;
-	longitude?: number;
-	localId?: string;
+	printLabel?: string | null;
+	latitude?: number | null;
+	longitude?: number | null;
+	localId?: string | null;
 }
-// Needs a parser and the decimal logic extending to the data change log also.
-export const Route = createFileRoute("/__authenticated/locations/locationId")({
+
+export const Route = createFileRoute("/__authenticated/locations/$locationId")({
 	component: LocationDetails,
 });
 
 function LocationDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = Route.useParams(); // TODO: verify parameter name matches TanStack route
-
+	const { locationId } = Route.useParams();
 	const theme = useTheme();
-	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
-
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
 	const auth = useAuth();
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	// Poll interval in ms
-	const { loading, data, error } = useQuery(getLocation, {
-		variables: {
-			query: "id:" + locationId,
-		},
-		pollInterval: 120000,
-		errorPolicy: "all",
-		skip: !locationId,
-		onCompleted: (data) => {
-			const location = data?.locations?.content?.[0];
-			// This is needed because default values don't always load in time.
-			reset({
-				name: location?.name ?? "",
-				printLabel: location?.printLabel ?? "",
-				latitude: Number(Number(location?.latitude).toFixed(5)),
-				longitude: Number(Number(location?.longitude).toFixed(5)),
-				localId: location?.localId ?? "",
-			});
-		},
-	});
-
-	const location: Location = data?.locations?.content?.[0];
-	const client = useQueryClient();
+	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 	const saveButtonRef = useRef<HTMLButtonElement>(null);
 
-	const [alert, setAlert] = useState<any>({
-		open: false,
-		severity: "success",
-		text: null,
-		title: null,
-	});
 	const [editMode, setEditMode] = useState(false);
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
 	const [showConfirmationPickup, setConfirmationPickup] = useState(false);
 	const [showConfirmationPickupAnywhere, setConfirmationPickupAnywhere] =
 		useState(false);
+	const [changedFields, setChangedFields] = useState<
+		Partial<LocationFormFields>
+	>({});
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: "success" | "error" | "warning";
+		text: string | null;
+		title: string | null;
+	}>({
+		open: false,
+		severity: "success",
+		text: null,
+		title: null,
+	});
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["location", locationId],
+		queryFn: () =>
+			gqlClient.request<any>(getLocation, { query: `id:${locationId}` }),
+		enabled: !!locationId,
+		refetchInterval: 120000,
+	});
 
-	const [changedFields, setChangedFields] = useState<Partial<any>>({});
+	const location: Location = data?.locations?.content?.[0];
 	const ils = getILS(location?.hostSystem?.lmsClientClass);
-
-	const isAnAdmin = isAnAdmin;
 
 	const validationSchema = Yup.object().shape({
 		name: Yup.string()
@@ -123,39 +107,35 @@ function LocationDetails() {
 			.required(t("ui.validation.locations.name"))
 			.max(255, t("ui.validation.max_length", { length: 255 })),
 		printLabel: Yup.string()
+			.nullable()
 			.trim()
 			.max(128, t("ui.validation.max_length", { length: 128 })),
 		latitude: Yup.number()
+			.nullable()
+			.transform((value, originalValue) =>
+				originalValue === "" ? null : value,
+			)
 			.test(
 				"sixDecimalPlaceLimit",
 				t("ui.validation.locations.lat"),
-				(latitude) => /^-?\d+(\.\d{1,5})?$/.test(String(latitude)),
-				// ideally this would be clever enough to take the sign into account
+				(val) => val == null || /^-?\d+(\.\d{1,5})?$/.test(String(val)),
 			)
+			.min(-90, t("ui.validation.locations.lat"))
+			.max(90, t("ui.validation.locations.lat")),
+		longitude: Yup.number()
+			.nullable()
 			.transform((value, originalValue) =>
 				originalValue === "" ? null : value,
 			)
-			.nonNullable(t("ui.validation.locations.lat"))
-			.typeError(t("ui.validation.locations.lat"))
-			.min(-90, t("ui.validation.locations.lat"))
-			.max(90, t("ui.validation.locations.lat")),
-		// Needs validation now to prevent more than 6dp
-		// As DB can't handle it
-		longitude: Yup.number()
 			.test(
 				"sixDecimalPlaceLimit",
 				t("ui.validation.locations.long"),
-				(longitude) => /^-?\d+(\.\d{1,5})?$/.test(String(longitude)),
+				(val) => val == null || /^-?\d+(\.\d{1,5})?$/.test(String(val)),
 			)
-			.transform((value, originalValue) =>
-				originalValue === "" ? null : value,
-			)
-			.nonNullable(t("ui.validation.locations.long"))
-			.typeError(t("ui.validation.locations.long"))
 			.min(-180, t("ui.validation.locations.long"))
 			.max(180, t("ui.validation.locations.long")),
 		localId: Yup.string()
-			// Required when Polaris or FOLIO.
+			.nullable()
 			.max(64, t("ui.validation.max_length", { length: 64 }))
 			.when("$ils", {
 				is: "FOLIO",
@@ -176,29 +156,7 @@ function LocationDetails() {
 						.required(
 							t("ui.validation.required", { field: t("details.local_id") }),
 						)
-						.matches(/^\d+$/, t("ui.validation.locations.local_id_polaris"))
-						.test(
-							"non-negative",
-							t("ui.validation.locations.local_id_polaris"),
-							(value) =>
-								value === undefined || value === "" || parseInt(value) >= 0,
-						),
-			})
-			.when("$ils", {
-				is: "Sierra",
-				then: (schema) =>
-					schema
-						.optional()
-						.nullable()
-						.test(
-							"non-negative-if-provided",
-							t("ui.validation.locations.local_id_sierra"),
-							(value) =>
-								value === undefined ||
-								value === "" ||
-								value === null ||
-								(/^\d+$/.test(value) && parseInt(value) >= 0),
-						),
+						.matches(/^\d+$/, t("ui.validation.locations.local_id_polaris")),
 			}),
 	});
 
@@ -208,77 +166,52 @@ function LocationDetails() {
 		reset,
 		formState: { errors, isDirty },
 	} = useForm<LocationFormFields>({
-		defaultValues: {
-			name: location?.name,
-			printLabel: location?.printLabel,
-			latitude: Number(Number(location?.latitude).toFixed(5)),
-			longitude: Number(Number(location?.longitude).toFixed(5)),
-			localId: location?.localId,
-		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
-		context: { ils: ils },
+		context: { ils },
+		values: {
+			name: location?.name ?? "",
+			printLabel: location?.printLabel ?? "",
+			latitude: location?.latitude
+				? Number(Number(location.latitude).toFixed(5))
+				: null,
+			longitude: location?.longitude
+				? Number(Number(location.longitude).toFixed(5))
+				: null,
+			localId: location?.localId ?? "",
+		},
 	});
 
-	const [updateLocation] = useMutation(updateLocationQuery, {
-		refetchQueries: ["LoadLocation", "LoadLocations", "LoadLocationForPRGrid"],
-	});
-	const [deleteLocation] = useMutation(deleteLocationQuery, {
-		refetchQueries: ["LoadLocations"],
+	const { mutateAsync: updateLocation } = useMutation({
+		mutationFn: (variables: { input: any }) =>
+			gqlClient.request(updateLocationQuery, variables),
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: ["location", locationId] }),
 	});
 
-	const closeConfirmation = () => {
-		setConfirmationPickup(false);
-		// This refetches the LoadLibrary query to ensure we're up-to-date after confirmation.
-		client.refetchQueries({
-			include: ["LoadLocation"],
-		});
-	};
-
-	const closeConfirmationPickupAnywhere = () => {
-		setConfirmationPickupAnywhere(false);
-		// This refetches the LoadLibrary query to ensure we're up-to-date after confirmation.
-		client.refetchQueries({
-			include: ["LoadLocation"],
-		});
-	};
+	const { mutateAsync: deleteLocation } = useMutation({
+		mutationFn: (variables: { input: any }) =>
+			gqlClient.request(deleteLocationQuery, variables),
+	});
 
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
 		handleLeaveWithoutSaving,
-	} = useUnsavedChangesWarning({
-		isDirty,
-		onKeepEditing: () => {
-			setTimeout(() => {
-				if (saveButtonRef.current) {
-					saveButtonRef.current.focus();
-				}
-			}, 0);
-		},
-		onLeaveWithoutSaving: () => {
-			setChangedFields({});
-			reset();
-		},
-	});
+	} = useUnsavedChangesWarning(isDirty);
 
-	const onSubmit = (data: Partial<Location>) => {
-		const newChangedFields = Object.keys(data).reduce((acc, key) => {
+	const onSubmit = (formData: LocationFormFields) => {
+		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
 			const field = key as keyof LocationFormFields;
-			const currentValue = data[field];
-			const originalValue = location[field];
-
-			if (currentValue !== originalValue && currentValue !== undefined) {
-				if (
-					Number(Number(originalValue).toFixed(5)) == currentValue &&
-					(field == "latitude" || field == "longitude")
-				) {
-					return acc;
-				}
-				(acc[field] as typeof currentValue) = currentValue;
+			if (
+				formData[field] !== location[field] &&
+				formData[field] !== undefined
+			) {
+				(acc[field] as any) = formData[field];
 			}
 			return acc;
-		}, {} as Partial<Location>);
+		}, {} as Partial<LocationFormFields>);
+
 		setChangedFields(newChangedFields);
 		if (Object.keys(newChangedFields).length === 0) {
 			setEditMode(false);
@@ -287,143 +220,72 @@ function LocationDetails() {
 		setConfirmationEdit(true);
 	};
 
-	const handlePickupConfirmation = (
-		pickup: string,
+	const handleStatusToggle = async (
+		field: "isPickup" | "isEnabledForPickupAnywhere",
+		action: "enable" | "disable",
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		const input = {
-			id: location?.id,
-			isPickup: pickup === "enablePickup" ? true : false,
-			reason: reason,
-			changeCategory: changeCategory,
-			changeReferenceUrl: changeReferenceUrl,
-		};
-		updateLocation({
-			variables: {
-				input,
-			},
-		}).then((response) => {
-			if (response.data) {
-				setAlert({
-					open: true,
-					severity: "success",
-					text:
-						pickup == "disablePickup"
-							? t("details.location_pickup_disable_success", {
-									location: location?.name,
-								})
-							: t("details.location_pickup_enable_success", {
-									location: location?.name,
-								}),
-					title: t("ui.data_grid.updated"),
-				});
-				closeConfirmation();
-			} else {
-				setAlert({
-					open: true,
-					severity: "error",
-					text:
-						pickup == "disablePickup"
-							? t("details.location_pickup_error_disable", {
-									location: location?.name,
-								})
-							: t("details.location_pickup_error_enable", {
-									location: location?.name,
-								}),
-					title: t("ui.data_grid.error"),
-				});
-				closeConfirmation();
-			}
-		});
+		const isEnabled = action === "enable";
+		try {
+			await updateLocation({
+				input: {
+					id: location.id,
+					[field]: isEnabled,
+					reason,
+					changeCategory,
+					changeReferenceUrl,
+				},
+			});
+			setAlert({
+				open: true,
+				severity: "success",
+				text: t(
+					`details.location_${field === "isPickup" ? "pickup" : "pickup_anywhere"}_${isEnabled ? "enable" : "disable"}_success`,
+					{ location: location.name },
+				),
+				title: t("ui.data_grid.updated"),
+			});
+		} catch {
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t(
+					`details.location_${field === "isPickup" ? "pickup" : "pickup_anywhere"}_error_${isEnabled ? "enable" : "disable"}`,
+					{ location: location.name },
+				),
+				title: t("ui.data_grid.error"),
+			});
+		} finally {
+			field === "isPickup"
+				? setConfirmationPickup(false)
+				: setConfirmationPickupAnywhere(false);
+		}
 	};
 
-	const handlePickupAnywhereConfirmation = (
-		pickupAnywhere: string,
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		const input = {
-			id: location?.id,
-			isEnabledForPickupAnywhere:
-				pickupAnywhere === "enablePickupAnywhere" ? true : false,
-			reason: reason,
-			changeCategory: changeCategory,
-			changeReferenceUrl: changeReferenceUrl,
-		};
-		updateLocation({
-			variables: {
-				input,
-			},
-		}).then((response) => {
-			if (response.data) {
-				setAlert({
-					open: true,
-					severity: "success",
-					text:
-						pickupAnywhere == "disablePickupAnywhere"
-							? t("details.location_pickup_anywhere_disable_success", {
-									location: location?.name,
-								})
-							: t("details.location_pickup_anywhere_enable_success", {
-									location: location?.name,
-								}),
-					title: t("ui.data_grid.updated"),
-				});
-				closeConfirmationPickupAnywhere();
-			} else {
-				setAlert({
-					open: true,
-					severity: "error",
-					text:
-						pickupAnywhere == "disablePickupAnywhere"
-							? t("details.location_pickup_anywhere_error_disable", {
-									location: location?.name,
-								})
-							: t("details.location_pickup_anywhere_error_enable", {
-									location: location?.name,
-								}),
-					title: t("ui.data_grid.error"),
-				});
-				closeConfirmationPickupAnywhere();
-			}
-		});
-	};
-
-	const handleConfirmSave = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		handleSaveConfirmation(
-			location.id,
-			changedFields,
-			updateLocation,
-			client,
-			{
-				setEditMode,
-				setChangedFields,
-				setAlert,
-				setConfirmation: setConfirmationEdit,
-			},
-			{
-				entityName: location?.name,
-				entityType: t("locations.location_one"),
-				mutationName: "updateLocation",
-				t,
-			},
-			{
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			},
-			["LoadLocation"],
-			reset,
-			["name", "printLabel", "latitude", "longitude", "localId"],
+	if (isLoading)
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("locations.location_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			</AdminLayout>
 		);
-	};
+	if (error || !location)
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<Error
+					title={t("ui.error.cannot_retrieve_record")}
+					action={t("ui.action.go_back")}
+					goBack="/locations"
+					message="locations.error" //** TODO */
+				/>
+			</AdminLayout>
+		);
 
 	const viewModeActions = [
 		{
@@ -457,15 +319,7 @@ function LocationDetails() {
 		<Button
 			key="cancel"
 			startIcon={<Cancel />}
-			onClick={() =>
-				handleCancel(
-					{
-						setEditMode,
-						setChangedFields,
-					},
-					reset,
-				)
-			}
+			onClick={() => handleCancel({ setEditMode, setChangedFields }, reset)}
 		>
 			{t("ui.data_grid.cancel")}
 		</Button>,
@@ -483,75 +337,28 @@ function LocationDetails() {
 						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
 					),
 				},
-				{
-					key: "edit",
-					onClick: () => handleEdit(setEditMode, firstEditableFieldRef),
-					disabled: true,
-					label: t("ui.data_grid.edit"),
-					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
-				},
 			]}
 		/>,
 	];
 
-	const pageActions = editMode ? editModeActions : viewModeActions;
-
-	// If GraphQL is loading or session fetching is loading
-	if (loading || status === "loading") {
-		return (
-			<AdminLayout hideBreadcrumbs>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("locations.location_one"),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
-		);
-	}
-	return error || location == null || location == undefined ? (
-		<AdminLayout hideBreadcrumbs>
-			{error ? (
-				<Error
-					title={t("ui.error.cannot_retrieve_record")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.try_later")}
-					action={t("ui.action.go_back")}
-					goBack="/locations"
-				/>
-			) : (
-				<Error
-					title={t("ui.error.cannot_find_record")}
-					message={t("ui.error.invalid_UUID")}
-					description={t("ui.info.check_address")}
-					action={t("ui.action.go_back")}
-					goBack="/locations"
-				/>
-			)}
-		</AdminLayout>
-	) : (
+	return (
 		<AdminLayout
-			title={location?.name}
-			pageActions={pageActions}
+			title={location.name}
+			pageActions={editMode ? editModeActions : viewModeActions}
 			mode={editMode ? "edit" : "view"}
 		>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-				sx={{ marginBottom: "5px" }}
-				component={"form"}
+				component="form"
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={
-								errors.name
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
+							color={errors.name ? "error" : "primary.attributeTitle"}
 						>
 							{t("details.location_name")}
 						</Typography>
@@ -564,26 +371,22 @@ function LocationDetails() {
 										{...field}
 										inputRef={firstEditableFieldRef}
 										fullWidth
-										variant="outlined"
 										error={!!errors.name}
 										helperText={errors.name?.message}
 									/>
 								) : (
-									<RenderAttribute attribute={location?.name} />
+									<RenderAttribute attribute={location.name} />
 								)
 							}
 						/>
 					</Stack>
 				</Grid>
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={
-								errors.printLabel
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
+							color={errors.printLabel ? "error" : "primary.attributeTitle"}
 						>
 							{t("details.location_printlabel")}
 						</Typography>
@@ -595,42 +398,49 @@ function LocationDetails() {
 									<TextField
 										{...field}
 										fullWidth
-										variant="outlined"
 										error={!!errors.printLabel}
 										helperText={errors.printLabel?.message}
 									/>
 								) : (
-									<RenderAttribute attribute={location?.printLabel} />
+									<RenderAttribute attribute={location.printLabel} />
 								)
 							}
 						/>
 					</Stack>
 				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.location_code")}
-						</Typography>
-						<RenderAttribute attribute={location?.code} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.location_type")}
-						</Typography>
-						<RenderAttribute attribute={location?.type} />
-					</Stack>
-				</Grid>
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={
-								errors.latitude
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
+							color={errors.localId ? "error" : "primary.attributeTitle"}
+						>
+							{t(getLocalId(ils))}
+						</Typography>
+						<Controller
+							name="localId"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.localId}
+										helperText={errors.localId?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={location.localId} />
+								)
 							}
+						/>
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction="column">
+						<Typography
+							variant="attributeTitle"
+							color={errors.latitude ? "error" : "primary.attributeTitle"}
 						>
 							{t("details.lat")}
 						</Typography>
@@ -642,13 +452,12 @@ function LocationDetails() {
 									<TextField
 										{...field}
 										fullWidth
-										variant="outlined"
 										error={!!errors.latitude}
 										helperText={errors.latitude?.message}
 									/>
 								) : (
 									<RenderAttribute
-										attribute={location?.latitude}
+										attribute={location.latitude}
 										type="number"
 									/>
 								)
@@ -656,15 +465,12 @@ function LocationDetails() {
 						/>
 					</Stack>
 				</Grid>
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={
-								errors.longitude
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
+							color={errors.longitude ? "error" : "primary.attributeTitle"}
 						>
 							{t("details.long")}
 						</Typography>
@@ -676,13 +482,12 @@ function LocationDetails() {
 									<TextField
 										{...field}
 										fullWidth
-										variant="outlined"
 										error={!!errors.longitude}
 										helperText={errors.longitude?.message}
 									/>
 								) : (
 									<RenderAttribute
-										attribute={location?.longitude}
+										attribute={location.longitude}
 										type="number"
 									/>
 								)
@@ -690,114 +495,65 @@ function LocationDetails() {
 						/>
 					</Stack>
 				</Grid>
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("locations.new.pickup_status")}
 						</Typography>
-						{location?.isPickup
-							? t("locations.new.pickup_enabled")
-							: location?.isPickup == false
-								? t("locations.new.pickup_disabled")
-								: t("details.location_pickup_not_set")}
+						<Typography>
+							{location.isPickup
+								? t("locations.new.pickup_enabled")
+								: t("locations.new.pickup_disabled")}
+						</Typography>
 					</Stack>
-					{isAnAdmin ? (
+					{isAnAdmin && (
 						<Button
 							onClick={() => setConfirmationPickup(true)}
-							color="primary"
 							variant="outlined"
-							sx={{ marginTop: 1 }}
-							type="submit"
+							sx={{ mt: 1 }}
 						>
-							{location?.isPickup
+							{location.isPickup
 								? t("details.location_pickup_disable")
 								: t("details.location_pickup_enable")}
 						</Button>
-					) : null}
+					)}
 				</Grid>
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("locations.new.pickup_anywhere_status")}
 						</Typography>
-						{location?.isEnabledForPickupAnywhere
-							? t("locations.new.pickup_anywhere_enabled")
-							: location?.isEnabledForPickupAnywhere == false
-								? t("locations.new.pickup_anywhere_disabled")
-								: t("details.location_pickup_anywhere_not_set")}
+						<Typography>
+							{location.isEnabledForPickupAnywhere
+								? t("locations.new.pickup_anywhere_enabled")
+								: t("locations.new.pickup_anywhere_disabled")}
+						</Typography>
 					</Stack>
-					{isAnAdmin ? (
+					{isAnAdmin && (
 						<Button
 							onClick={() => setConfirmationPickupAnywhere(true)}
-							color="primary"
 							variant="outlined"
-							sx={{ marginTop: 1 }}
-							type="submit"
+							sx={{ mt: 1 }}
 						>
-							{location?.isEnabledForPickupAnywhere
+							{location.isEnabledForPickupAnywhere
 								? t("details.location_pickup_anywhere_disable")
 								: t("details.location_pickup_anywhere_enable")}
 						</Button>
-					) : null}
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction="column">
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.localId
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
-						>
-							{t(getLocalId(ils))}
-						</Typography>
-						<Controller
-							name="localId"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										variant="outlined"
-										fullWidth
-										required={ils == "Sierra" ? false : true}
-										error={!!errors.localId}
-										helperText={errors.localId?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={location?.localId} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.location_agency")}
-						</Typography>
-						<RenderAttribute attribute={location?.agency?.id} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.location_uuid")}
-						</Typography>
-						<RenderAttribute attribute={location?.id} />
-					</Stack>
+					)}
 				</Grid>
 			</Grid>
+
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
+				onConfirm={(r, c, u) => {
 					handleDeleteEntity(
 						location.id,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
+						r,
+						c,
+						u,
 						setAlert,
 						deleteLocation,
 						t,
@@ -808,88 +564,85 @@ function LocationDetails() {
 					);
 					setConfirmationDeletion(false);
 				}}
-				type={"deletelocations"}
-				entityName={location?.name}
-				entityId={location?.id}
-				entity={t("locations.location_one")}
-				gridEdit={false}
+				action="deletion"
+				entityName={location.name}
 			/>
 			<Confirmation
 				open={showConfirmationEdit}
 				onClose={() => setConfirmationEdit(false)}
-				onConfirm={handleConfirmSave}
-				type="pageEdit"
+				onConfirm={(r, c, u) =>
+					handleSaveConfirmation(
+						location.id,
+						changedFields,
+						updateLocation,
+						queryClient as any,
+						{
+							setEditMode,
+							setChangedFields,
+							setAlert,
+							setConfirmation: setConfirmationEdit,
+						},
+						{
+							entityName: location.name,
+							entityType: t("locations.location_one"),
+							mutationName: "updateLocation",
+							t,
+						},
+						{ reason: r, changeCategory: c, changeReferenceUrl: u },
+						["location", locationId],
+						reset,
+						["name", "printLabel", "latitude", "longitude", "localId"],
+					)
+				}
+				action="gridEdit"
 				editInformation={formatChangedFields(changedFields, location)}
-				entityName={location?.name}
-				entity={t("locations.location_one")}
-				entityId={location?.id}
-				gridEdit={false}
+				entityName={location.name}
 			/>
 			<Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
-				type="unsavedChanges"
-				entityName={location?.name}
-				entity={t("locations.location_one")}
-				entityId={location?.id}
-				gridEdit={false}
+				action="unsaved"
+				entityName={location.name}
 			/>
 			<Confirmation
 				open={showConfirmationPickup}
-				onClose={() => closeConfirmation()}
-				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
-					handlePickupConfirmation(
-						location?.isPickup ? "disablePickup" : "enablePickup",
-						reason,
-						changeCategory,
-						changeReferenceUrl,
+				onClose={() => setConfirmationPickup(false)}
+				onConfirm={(r, c, u) =>
+					handleStatusToggle(
+						"isPickup",
+						location.isPickup ? "disable" : "enable",
+						r,
+						c,
+						u,
 					)
 				}
-				type="pickup"
-				participation={location?.isPickup ? "disablePickup" : "enablePickup"}
-				entityName={location?.name}
-				entity={t("locations.location_one")}
-				code={location?.code}
-				gridEdit={false}
+				action="gridEdit"
+				entityName={location.name}
 			/>
 			<Confirmation
 				open={showConfirmationPickupAnywhere}
-				onClose={() => closeConfirmationPickupAnywhere()}
-				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
-					handlePickupAnywhereConfirmation(
-						location?.isEnabledForPickupAnywhere
-							? "disablePickupAnywhere"
-							: "enablePickupAnywhere",
-						reason,
-						changeCategory,
-						changeReferenceUrl,
+				onClose={() => setConfirmationPickupAnywhere(false)}
+				onConfirm={(r, c, u) =>
+					handleStatusToggle(
+						"isEnabledForPickupAnywhere",
+						location.isEnabledForPickupAnywhere ? "disable" : "enable",
+						r,
+						c,
+						u,
 					)
 				}
-				type="pickupAnywhere"
-				participation={
-					location?.isEnabledForPickupAnywhere
-						? "disablePickupAnywhere"
-						: "enablePickupAnywhere"
-				}
-				entityName={location?.name}
-				entity={t("locations.location_one")}
-				code={location?.code}
-				gridEdit={false}
+				action="gridEdit"
+				entityName={location.name}
 			/>
+
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
-				autoHideDuration={6000}
 				alertText={alert.text}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-				entity={t("locations.location_one")}
 				alertTitle={alert.title}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</AdminLayout>
 	);
 }
-
-
-
-

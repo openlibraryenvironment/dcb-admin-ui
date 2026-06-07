@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 //localisation
 import { useTranslation } from "react-i18next";
 
-const Mappings: NextPage = () => {
+export const Route = createFileRoute("/__authenticated/mappings/")({
+	component: MappingsRouteComponent,
+});
+
+function MappingsRouteComponent() {
 	const { t } = useTranslation();
 
 	return (
@@ -23,4 +27,4 @@ const Mappings: NextPage = () => {
 			</List>
 		</AdminLayout>
 	);
-};
+}

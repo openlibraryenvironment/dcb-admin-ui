@@ -43,7 +43,7 @@ import { Library } from "@models/Library";
 import { findConsortium } from "src/helpers/findConsortium";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import * as Yup from "yup";

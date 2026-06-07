@@ -1,127 +1,222 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { AdminLayout } from "@layout";
-import { Button } from "@mui/material";
-import NewGroup from "../../../forms/NewGroup/NewGroup";
-import { getLibraryGroups } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { AdminLayout } from "@layout";
-import { Button } from "@mui/material";
-import NewGroup from "../../../forms/NewGroup/NewGroup";
-import { getLibraryGroups";
-//localisation
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import Loading from "@components/Loading/Loading";
-import { standardFilters } from "@helpers/dataGrid/filters";
-// import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "@hooks/useCustomColumns";
-import { NextPage } from "next/types";
-// Groups Feature Page Structure
-// This page shows the list of groups
-// New Group is the (modal) form to add a group
-// [groupId].tsx is the 'Details' page.
-// Groups have been altered to take Libraries - no longer agencies
+import { Button, Stack } from "@mui/material";
+import {
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColumnVisibilityModel,
+	GridColDef,
+	GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 
-const Groups: NextPage = () => {
-	const [showNewGroup, setShowNewGroup] = useState(false);
-	const customColumns = useCustomColumns();
-	const openNewGroup = () => {
-		setShowNewGroup(true);
-	};
-	const closeNewGroup = () => {
-		setShowNewGroup(false);
-	};
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
+import NewGroup from "@forms/NewGroup/NewGroup";
+
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import {
+	getSortOrderForServer,
+	processGridFilterModel,
+} from "@helpers/dataGrid/utilities";
+import { standardFilters } from "@filters/standardFilters";
+
+import { getLibraryGroups } from "@queries/getLibraryGroups";
+
+export const Route = createFileRoute("/__authenticated/groups/")({
+	component: GroupsRouteComponent,
+});
+
+function GroupsRouteComponent() {
 	const { t } = useTranslation();
-	const router = useRouter();
+	const gqlClient = useGraphQLClient();
+	const customColumns = useCustomColumns();
 	const auth = useAuth();
+
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	if (status === "loading") {
-		return (
-			<AdminLayout hideBreadcrumbs>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.groups").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
+	const gridId = "groups";
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 10 },
 		);
-	}
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "name", sort: "asc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
+		useState<GridColumnVisibilityModel>(
+			storedState.columnVisibility ?? { id: false },
+		);
+
+	const [showNewGroup, setShowNewGroup] = useState(false);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: [gridId, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const queryVariables = {
+				query: processGridFilterModel(filterModel, "", []) ?? "",
+				pageno: paginationModel.page ?? 0,
+				pagesize: paginationModel.pageSize ?? 10,
+				order: sortModel[0]?.field ?? "name",
+				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
+			};
+			return gqlClient.request<any>(getLibraryGroups, queryVariables);
+		},
+		placeholderData: (previousData) => previousData,
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const handleColumnVisibilityChange = useCallback(
+		(model: GridColumnVisibilityModel) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
+		},
+		[gridId, setColumnVisibilityModel],
+	);
+
+	const columns: GridColDef[] = useMemo(
+		() => [
+			...customColumns,
+			{
+				field: "name",
+				headerName: t("groups.group_name", "Group name"),
+				minWidth: 150,
+				flex: 0.6,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "code",
+				headerName: t("groups.group_code", "Group code"),
+				minWidth: 50,
+				flex: 0.6,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "type",
+				headerName: t("groups.group_type", "Group type"),
+				minWidth: 50,
+				flex: 0.4,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "id",
+				headerName: t("groups.group_uuid", "Group UUID"),
+				minWidth: 100,
+				flex: 0.8,
+				filterOperators: standardFilters,
+			},
+		],
+		[customColumns, t],
+	);
 
 	return (
 		<AdminLayout data-tid="groups-title" title={t("nav.groups.name")}>
-			<Button
-				data-tid="new-group-button"
-				variant="contained"
-				onClick={openNewGroup}
-			>
-				{t("groups.type_new")}
-			</Button>
-			<ServerPaginationGrid
-				query={getLibraryGroups}
-				coreType="libraryGroups"
-				type="groups"
-				columnVisibilityModel={{
-					id: false,
-				}}
-				columns={[
-					...customColumns,
-					{
-						field: "name",
-						headerName: "Group name",
-						minWidth: 150,
-						flex: 0.6,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "code",
-						headerName: "Group code",
-						minWidth: 50,
-						flex: 0.6,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "type",
-						headerName: "Group type",
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "id",
-						headerName: "Group UUID",
-						minWidth: 100,
-						flex: 0.8,
-						filterOperators: standardFilters,
-					},
-				]}
-				selectable={true}
-				pageSize={10}
-				noDataMessage={t("groups.no_rows")}
-				noResultsMessage={t("groups.no_results")}
-				searchPlaceholder={t("groups.search_placeholder")}
-				// This is how to set the default sort order
-				sortModel={[{ field: "name", sort: "asc" }]}
-				sortDirection="ASC"
-				sortAttribute="name"
-				// getDetailPanelContent={({ row }: any) => (
-				// 	<MasterDetail row={row} type="groups" />
-				// )}
+			{isAnAdmin && (
+				<Stack direction="row" sx={{ mb: 3 }}>
+					<Button
+						data-tid="new-group-button"
+						variant="contained"
+						onClick={() => setShowNewGroup(true)}
+					>
+						{t("groups.type_new")}
+					</Button>
+				</Stack>
+			)}
+
+			<DataGrid
+				identifier={gridId}
+				type={gridId}
+				columns={columns}
+				rows={gridData?.libraryGroups?.content ?? []}
+				rowCount={gridData?.libraryGroups?.totalSize ?? 0}
+				loading={isLoading || isFetching}
+				paginationMode="server"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortingMode="server"
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterMode="server"
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				checkboxSelection={true}
+				disableAggregation
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("groups.no_results")}
+				searchText={t("groups.search_placeholder")}
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
 			/>
-			<div>
-				{showNewGroup ? (
-					<NewGroup show={showNewGroup} onClose={closeNewGroup} />
-				) : null}
-			</div>
+
+			{showNewGroup && (
+				<NewGroup show={showNewGroup} onClose={() => setShowNewGroup(false)} />
+			)}
 		</AdminLayout>
 	);
-};
-
-
-
-
+}

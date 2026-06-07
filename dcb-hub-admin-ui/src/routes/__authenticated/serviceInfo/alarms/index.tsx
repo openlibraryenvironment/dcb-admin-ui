@@ -1,132 +1,223 @@
+import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import Loading from "@components/Loading/Loading";
-import MasterDetail from "@components/MasterDetail/MasterDetail";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { useCustomColumns } from "@hooks/useCustomColumns";
-import { AdminLayout } from "@layout";
 import dayjs from "dayjs";
+import {
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColumnVisibilityModel,
+	GridColDef,
+	GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 
-import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
-
-import { equalsOnly } from "@queries/createFileRoute } from "@tanstack/react-router";
-import Loading from "@components/Loading/Loading";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
+
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { AdminLayout } from "@layout";
-import dayjs from "dayjs";
+import {
+	getSortOrderForServer,
+	processGridFilterModel,
+} from "@helpers/dataGrid/utilities";
 
-import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
+import { getAlarms } from "@queries/getAlarms";
+import { standardFilters } from "@filters/standardFilters";
+import { equalsOnly } from "@filters/equalsOnly";
 
-import { equalsOnly";
-import { standardFilters } from "@helpers/dataGrid/filters";
-import { getAlarms } from "@queries/standardFilters } from "@helpers/dataGrid/filters";
-import { getAlarms";
+export const Route = createFileRoute("/__authenticated/serviceInfo/alarms/")({
+	component: AlarmsRouteComponent,
+});
 
-const Alarms: NextPage = () => {
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+function AlarmsRouteComponent() {
 	const { t } = useTranslation();
-
+	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
-	const columns = [
-		{
-			field: "id",
-			headerName: t("alarms.id"),
-			minWidth: 100,
-			flex: 0.5,
-			filterOperators: equalsOnly,
-		},
-		{
-			field: "code",
-			headerName: t("alarms.code"),
-			minWidth: 100,
-			flex: 0.8,
-			filterOperators: standardFilters,
-		},
-		{
-			field: "created",
-			headerName: t("alarms.created"),
-			minWidth: 50,
-			flex: 0.3,
-			filterable: false,
-			valueGetter: (value: any, row: { created: string }) => {
-				const created = row?.created;
-				return dayjs(created).format("YYYY-MM-DD HH:mm");
-			},
-		},
-		{
-			field: "lastSeen",
-			headerName: t("alarms.last_seen"),
-			minWidth: 50,
-			flex: 0.3,
-			filterable: false,
-			valueGetter: (value: any, row: { lastSeen: string }) => {
-				const lastSeen = row?.lastSeen;
-				return dayjs(lastSeen).format("YYYY-MM-DD HH:mm");
-			},
-		},
-		{
-			field: "repeatCount",
-			headerName: t("alarms.repeat_count"),
-			flex: 0.2,
-			filterable: false,
-		},
-		{
-			field: "expires",
-			headerName: t("alarms.expires"),
-			minWidth: 50,
-			flex: 0.3,
-			filterable: false,
-			valueGetter: (value: any, row: { expires: string }) => {
-				const expires = row?.expires;
-				return dayjs(expires).format("YYYY-MM-DD HH:mm");
-			},
-		},
-	];
 
-	const alarmColumns = [...customColumns, ...columns];
+	const gridId = "alarms";
 
-	if (status === "loading") {
-		return (
-			<AdminLayout>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.serviceInfo.serviceStatus").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 20 },
 		);
-	}
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "created", sort: "desc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
+		useState<GridColumnVisibilityModel>(
+			storedState.columnVisibility ?? { expires: false },
+		);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: [gridId, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const queryVariables = {
+				query: processGridFilterModel(filterModel, "", []) ?? "",
+				pageno: paginationModel.page ?? 0,
+				pagesize: paginationModel.pageSize ?? 20,
+				order: sortModel[0]?.field ?? "created",
+				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
+			};
+			return gqlClient.request<any>(getAlarms, queryVariables);
+		},
+		placeholderData: (previousData) => previousData,
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const handleColumnVisibilityChange = useCallback(
+		(model: GridColumnVisibilityModel) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
+		},
+		[gridId, setColumnVisibilityModel],
+	);
+
+	const columns: GridColDef[] = useMemo(
+		() => [
+			...customColumns,
+			{
+				field: "id",
+				headerName: t("alarms.id"),
+				minWidth: 100,
+				flex: 0.5,
+				filterOperators: equalsOnly,
+			},
+			{
+				field: "code",
+				headerName: t("alarms.code"),
+				minWidth: 100,
+				flex: 0.8,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "created",
+				headerName: t("alarms.created"),
+				minWidth: 100,
+				flex: 0.3,
+				filterable: false,
+				valueGetter: (value: any, row: any) =>
+					dayjs(row?.created).format("YYYY-MM-DD HH:mm"),
+			},
+			{
+				field: "lastSeen",
+				headerName: t("alarms.last_seen"),
+				minWidth: 100,
+				flex: 0.3,
+				filterable: false,
+				valueGetter: (value: any, row: any) =>
+					dayjs(row?.lastSeen).format("YYYY-MM-DD HH:mm"),
+			},
+			{
+				field: "repeatCount",
+				headerName: t("alarms.repeat_count"),
+				minWidth: 50,
+				flex: 0.2,
+				filterable: false,
+				type: "number",
+			},
+			{
+				field: "expires",
+				headerName: t("alarms.expires"),
+				minWidth: 100,
+				flex: 0.3,
+				filterable: false,
+				valueGetter: (value: any, row: any) =>
+					dayjs(row?.expires).format("YYYY-MM-DD HH:mm"),
+			},
+		],
+		[customColumns, t],
+	);
 
 	return (
 		<AdminLayout title={t("nav.serviceInfo.alarms.name")}>
-			<ServerPaginationGrid
-				query={getAlarms}
-				type="alarms"
-				coreType="alarms"
-				operationDataType="alarms"
-				selectable={false}
-				pageSize={20}
-				sortAttribute="created"
-				sortDirection="ASC"
-				sortModel={[{ field: "created", sort: "asc" }]}
-				columns={alarmColumns}
-				columnVisibilityModel={{
-					expires: false,
-				}}
+			<DataGrid
+				identifier={gridId}
+				type={gridId}
+				columns={columns}
+				rows={gridData?.alarms?.content ?? []}
+				rowCount={gridData?.alarms?.totalSize ?? 0}
+				loading={isLoading || isFetching}
+				paginationMode="server"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortingMode="server"
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterMode="server"
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="alarms" />
 				)}
-			></ServerPaginationGrid>
+				checkboxSelection={true}
+				disableAggregation
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("common.no_results")}
+				searchText={t("general.search")}
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
+			/>
 		</AdminLayout>
 	);
-};
-
-
-
-
+}

@@ -1,9 +1,11 @@
 {
 	"compilerOptions": {
 		"paths": {
+			"@columns/*": ["./src/columns/*"],
 			"@components/*": ["./src/components/*"],
 			"@constants/*": ["./src/constants/*"],
 			"@forms/*": ["./src/forms/*"],
+			"@filters/*": ["./src/filters/*"],
 			"@helpers/*": ["./src/helpers/*"],
 			"@hooks/*": ["./src/hooks/*"],
 			"@layout/*": ["./src/layout/*"],

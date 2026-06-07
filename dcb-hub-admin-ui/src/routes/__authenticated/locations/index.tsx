@@ -1,179 +1,270 @@
+import { useState, useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
-//localisation
-import { useTranslation } from "react-i18next";
-import {
-	deleteLocationQuery } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
-//localisation
-import { useTranslation } from "react-i18next";
-import {
-	deleteLocationQuery";
-import { getLocations } from "@queries/getLocations";
-import { updateLocationQuery } from "@queries/updateLocationQuery";
-
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import Loading from "@components/Loading/Loading";
-import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
-// import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "@hooks/useCustomColumns";
 import dayjs from "dayjs";
-import { luceneDateRangeOperators } from "@components/DataGrid/components/DateTimeRangeFilter";
 
-const Locations: NextPage = () => {
+import { Button, Stack, Tooltip } from "@mui/material";
+import {
+	GridRowModesModel,
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColDef,
+} from "@mui/x-data-grid-premium";
+
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
+import NewLocation from "@forms/NewLocation/NewLocation";
+import Import from "@components/Import/Import";
+
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import useCode from "@hooks/useCode";
+
+import { getLocations } from "@queries/getLocations";
+import {
+	getSortOrderForServer,
+	processGridFilterModel,
+} from "@helpers/dataGrid/utilities";
+import { standardFilters } from "@filters/standardFilters";
+import { equalsOnly } from "@filters/equalsOnly";
+import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
+import { defaultLocationColumns } from "@columns/locationColumns";
+
+export const Route = createFileRoute("/__authenticated/locations/")({
+	component: LocationsRouteComponent,
+});
+
+function LocationsRouteComponent() {
 	const { t } = useTranslation();
-
-	const router = useRouter();
+	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const { updateCategory, updateCode, resetAll } = useCode();
 
-	if (status === "loading") {
-		return (
-			<AdminLayout hideBreadcrumbs>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.locations").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isMinLibraryAdmin = isAnAdmin || userRoles.includes("LIBRARY_ADMIN");
+
+	const gridId = "locations";
+
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 200 },
 		);
-	}
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "lastImported", sort: "desc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] = useState(
+		storedState.columnVisibility ?? {
+			id: false,
+			lastImported: false,
+			localId: false,
+			isEnabledForPickupAnywhere: false,
+			agencyCode: false,
+		},
+	);
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const [newLocation, setNewLocation] = useState({
+		show: false,
+		hostLmsCode: "",
+		agencyCode: "",
+		libraryName: "",
+		ils: "",
+	});
+	const [showImport, setImport] = useState(false);
+
+	const {
+		data: gridData,
+		isLoading: gridLoading,
+		isFetching,
+		refetch,
+	} = useQuery({
+		queryKey: ["locations", gridId, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const queryVariables = {
+				query: processGridFilterModel(filterModel, "", []) ?? "",
+				pageno: paginationModel.page ?? 0,
+				pagesize: paginationModel.pageSize ?? 200,
+				order: sortModel[0]?.field ?? "lastImported",
+				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
+			};
+			return gqlClient.request(getLocations, queryVariables);
+		},
+		placeholderData: (previousData) => previousData,
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const handleColumnVisibilityChange = useCallback(
+		(model: any) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
+		},
+		[gridId, setColumnVisibilityModel],
+	);
+
+	const closeImport = () => {
+		setImport(false);
+		resetAll();
+		refetch();
+	};
+
+	const openImport = () => {
+		updateCategory("Locations");
+		updateCode("");
+		setImport(true);
+	};
+
+	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
+
+	const columns: GridColDef[] = useMemo(
+		() => [...customColumns, ...defaultLocationColumns],
+		[customColumns],
+	);
 
 	return (
 		<AdminLayout title={t("nav.locations")}>
-			<ServerPaginationGrid
-				query={getLocations}
+			{isAnAdmin && (
+				<Stack spacing={4} direction="row" sx={{ mb: 3 }}>
+					<Button
+						data-tid="new-location-button"
+						variant="outlined"
+						onClick={() => {
+							setNewLocation({
+								show: true,
+								hostLmsCode: "",
+								agencyCode: "",
+								libraryName: "",
+								ils: "",
+							});
+						}}
+					>
+						{t("locations.new.button")}
+					</Button>
+					<Tooltip
+						title={isMinLibraryAdmin ? "" : t("mappings.import_disabled")}
+					>
+						<span>
+							<Button
+								variant="outlined"
+								onClick={openImport}
+								disabled={!isMinLibraryAdmin}
+							>
+								{t("locations.import.button")}
+							</Button>
+						</span>
+					</Tooltip>
+				</Stack>
+			)}
+
+			<DataGrid
+				identifier={gridId}
 				type="locations"
-				coreType="locations"
-				operationDataType="Location"
-				columns={[
-					...customColumns,
-					{
-						field: "hostSystemName",
-						headerName: "Host LMS name",
-						minWidth: 150,
-						flex: 0.6,
-						filterable: false,
-						sortable: false,
-						valueGetter: (value, row: { hostSystem: { name: string } }) =>
-							row?.hostSystem?.name,
-					},
-					{
-						field: "name",
-						headerName: "Location name",
-						minWidth: 150,
-						flex: 0.6,
-						editable: true,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "printLabel",
-						headerName: "Print label",
-						minWidth: 150,
-						flex: 0.6,
-						editable: true,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "code",
-						headerName: "Location code",
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "isPickup",
-						headerName: t("locations.new.pickup_status"),
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: equalsOnly,
-						valueFormatter: (value: boolean) => {
-							if (value == true) {
-								return t("consortium.settings.enabled");
-							} else if (value == false) {
-								return t("consortium.settings.disabled");
-							} else {
-								return t("details.location_pickup_not_set");
-							}
-						},
-					},
-					{
-						field: "isEnabledForPickupAnywhere",
-						headerName: t("locations.new.pickup_anywhere_status"),
-						minWidth: 50,
-						flex: 0.4,
-						filterOperators: equalsOnly,
-						valueFormatter: (value: boolean) => {
-							if (value == true) {
-								return t("consortium.settings.enabled");
-							} else if (value == false) {
-								return t("consortium.settings.disabled");
-							} else {
-								return t("details.location_pickup_not_set");
-							}
-						},
-					},
-					{
-						field: "localId",
-						headerName: t("details.local_id"),
-						minWidth: 50,
-						flex: 0.8,
-						filterOperators: equalsOnly,
-						editable: true,
-					},
-					{
-						field: "id",
-						headerName: "Location UUID",
-						minWidth: 50,
-						flex: 0.8,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "lastImported",
-						headerName: "Last imported",
-						minWidth: 100,
-						flex: 0.5,
-						filterOperators: luceneDateRangeOperators,
-						type: "dateTime",
-						valueGetter: (value: any, row: { lastImported: string }) => {
-							return row.lastImported ? new Date(row.lastImported) : null;
-						},
-						valueFormatter: (value: Date) => {
-							return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
-						},
-					},
-				]}
-				selectable={true}
-				pageSize={200}
-				noDataMessage={t("locations.no_rows")}
-				noResultsMessage={t("locations.no_results")}
-				searchPlaceholder={t("locations.search_placeholder")}
-				columnVisibilityModel={{
-					id: false,
-					lastImported: false,
-					localId: false,
-					isEnabledForPickupAnywhere: false,
-				}}
-				// This is how to set the default sort order
-				sortModel={[{ field: "lastImported", sort: "desc" }]}
-				sortDirection="DESC"
-				sortAttribute="lastImported"
-				refetchQuery={["LoadLocations"]}
-				deleteQuery={deleteLocationQuery}
-				editQuery={updateLocationQuery}
-				// getDetailPanelContent={({ row }: any) => (
-				// 	<MasterDetail row={row} type="locations" />
-				// )}
+				columns={columns}
+				rows={gridData?.locations?.content ?? []}
+				rowCount={gridData?.locations?.totalSize ?? 0}
+				loading={shouldShowLoading}
+				paginationMode="server"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortingMode="server"
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterMode="server"
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				editMode="row"
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
+				checkboxSelection={true}
+				disableAggregation
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("locations.no_results")}
+				searchText={t("locations.search_placeholder")}
 			/>
+
+			{newLocation.show && (
+				<NewLocation
+					show={newLocation.show}
+					onClose={() => {
+						setNewLocation({
+							show: false,
+							hostLmsCode: "",
+							agencyCode: "",
+							libraryName: "",
+							ils: "",
+						});
+						refetch();
+					}}
+					hostLmsCode={newLocation.hostLmsCode}
+					agencyCode={newLocation.agencyCode}
+					libraryName={newLocation.libraryName}
+					type="Pickup"
+					ils={newLocation.ils}
+				/>
+			)}
+
+			{showImport && (
+				<Import show={showImport} onClose={closeImport} type="Locations" />
+			)}
 		</AdminLayout>
 	);
-};
-
-
-
-
+}

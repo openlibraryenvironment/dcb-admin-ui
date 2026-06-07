@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	TableContainer,
 	Table,
@@ -8,72 +10,84 @@ import {
 	Typography,
 } from "@mui/material";
 import { isEmpty } from "lodash";
-import { useTranslation } from "react-i18next";
 import {
 	fieldNameToLabel,
 	gridFieldNameToLabel,
-} from "src/helpers/dataChangeLogHelperFunctions";
+} from "@helpers/dataChangeLogHelperFunctions";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 type ChangesSummaryType = {
-	action: string;
-	changes: any;
-	context: string; // Whether it's called for the change log or for an edit
+	action: "INSERT" | "UPDATE" | "DELETE";
+	changes: string | Record<string, any>;
+	context: "dataChangeLog" | "gridEdit";
 };
+
+const META_FIELDS = [
+	"reason",
+	"change_category",
+	"change_reference_url",
+	"last_edited_by",
+];
 
 export default function ChangesSummary({
 	action,
 	changes,
 	context,
 }: ChangesSummaryType) {
-	const parsedChanges = JSON.parse(changes);
 	const { t } = useTranslation();
 
-	let fields: string[] = [];
 	const isUpdate = action === "UPDATE";
 	const isInsert = action === "INSERT";
-
 	const isDelete = action === "DELETE";
 
-	// We can have an INSERT, an UPDATE, or a DELETE
-	// Edits should always be UPDATES
-	// DCL can be either
+	const { parsedChanges, fields } = useMemo(() => {
+		const parsed = typeof changes === "string" ? JSON.parse(changes) : changes;
+		let calculatedFields: string[] = [];
 
-	if (isUpdate) {
-		const oldFields = Object.keys(parsedChanges.old_values);
-		const newFields = Object.keys(parsedChanges.new_values);
-		fields = oldFields.concat(
-			newFields.filter((field) => !oldFields.includes(field)),
+		if (isUpdate && parsed?.old_values && parsed?.new_values) {
+			const oldFields = Object.keys(parsed.old_values);
+			const newFields = Object.keys(parsed.new_values);
+			calculatedFields = Array.from(new Set([...oldFields, ...newFields]));
+		} else {
+			calculatedFields = Object.keys(parsed || {});
+		}
+
+		return {
+			parsedChanges: parsed,
+			fields: calculatedFields.filter((field) => !META_FIELDS.includes(field)),
+		};
+	}, [changes, isUpdate]);
+
+	if (isEmpty(fields)) {
+		return (
+			<Typography variant="body1">
+				{t("data_change_log.no_eligible_changes")}
+			</Typography>
 		);
-	} else {
-		// Delete and Insert don't have new/old values so we get fields from parsed changes.
-		fields = Object.keys(parsedChanges);
 	}
 
-	const metaFields = [
-		"reason",
-		"change_category",
-		"change_reference_url",
-		"last_edited_by", // These fields are change specific and should not be shown in relation to previous changes
-	];
-
-	fields = fields.filter((field) => !metaFields.includes(field)); // Remove meta fields from the summary
-
-	return !isEmpty(fields) ? (
+	return (
 		<TableContainer>
-			<Table>
+			<Table aria-label={t("data_change_log.summary_table_aria")}>
 				<TableHead>
 					<TableRow>
-						<TableCell>{t("data_change_log.field_label")}</TableCell>
+						<TableCell component="th" scope="col">
+							{t("data_change_log.field_label")}
+						</TableCell>
 						{isUpdate && (
-							<TableCell>{t("data_change_log.old_value")}</TableCell>
+							<TableCell component="th" scope="col">
+								{t("data_change_log.old_value")}
+							</TableCell>
 						)}
 						{isDelete && (
-							<TableCell>{t("data_change_log.deleted_value")}</TableCell>
+							<TableCell component="th" scope="col">
+								{t("data_change_log.deleted_value")}
+							</TableCell>
 						)}
-
 						{!isDelete && (
-							<TableCell>{t("data_change_log.new_value")}</TableCell>
+							<TableCell component="th" scope="col">
+								{t("data_change_log.new_value")}
+							</TableCell>
 						)}
 					</TableRow>
 				</TableHead>
@@ -81,22 +95,22 @@ export default function ChangesSummary({
 					{fields.map((field) => (
 						<TableRow
 							key={field}
-							sx={{
-								"&:last-child td, &:last-child th": { borderBottom: 0 },
-							}}
+							sx={{ "&:last-child td, &:last-child th": { borderBottom: 0 } }}
 						>
-							<TableCell>
-								{context == "dataChangeLog"
+							<TableCell component="th" scope="row">
+								{context === "dataChangeLog"
 									? fieldNameToLabel(field)
 									: gridFieldNameToLabel(field)}
 							</TableCell>
+
 							{isUpdate && (
 								<TableCell>
 									<RenderAttribute
-										attribute={parsedChanges.old_values[field]}
+										attribute={parsedChanges.old_values?.[field]}
 									/>
 								</TableCell>
 							)}
+
 							{isInsert && (
 								<TableCell>
 									<RenderAttribute attribute={parsedChanges[field]} />
@@ -106,10 +120,11 @@ export default function ChangesSummary({
 							{isUpdate && (
 								<TableCell>
 									<RenderAttribute
-										attribute={parsedChanges.new_values[field]}
+										attribute={parsedChanges.new_values?.[field]}
 									/>
 								</TableCell>
 							)}
+
 							{isDelete && (
 								<TableCell>
 									<RenderAttribute attribute={parsedChanges[field]} />
@@ -120,9 +135,5 @@ export default function ChangesSummary({
 				</TableBody>
 			</Table>
 		</TableContainer>
-	) : (
-		<Typography variant="body1">
-			{t("data_change_log.no_eligible_changes")}
-		</Typography>
 	);
 }

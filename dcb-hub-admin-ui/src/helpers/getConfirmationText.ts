@@ -1,44 +1,31 @@
-export function getConfirmationFirstPara(participation: string): string {
-	switch (participation) {
-		case "enableSupplying":
-			return "libraries.circulation.confirmation.para1_enable_supplying";
-		case "disableSupplying":
-			return "libraries.circulation.confirmation.para1_disable_supplying";
-		case "enableBorrowing":
-			return "libraries.circulation.confirmation.para1_enable_borrowing";
-		case "disableBorrowing":
-			return "libraries.circulation.confirmation.para1_disable_borrowing";
-		default:
-			return ""; // Return a default key instead
-	}
-}
+export type ParticipationAction =
+	| "enableSupplying"
+	| "disableSupplying"
+	| "enableBorrowing"
+	| "disableBorrowing";
 
-export function getConfirmationSecondPara(participation: string): string {
-	switch (participation) {
-		case "enableSupplying":
-			return "libraries.circulation.confirmation.select_enable_supplying";
-		case "disableSupplying":
-			return "libraries.circulation.confirmation.select_disable_supplying";
-		case "enableBorrowing":
-			return "libraries.circulation.confirmation.select_enable_borrowing";
-		case "disableBorrowing":
-			return "libraries.circulation.confirmation.select_disable_borrowing";
-		default:
-			return "";
-	}
-}
-
-export function getConfirmationHeader(participation: string): string {
-	switch (participation) {
-		case "enableSupplying":
-			return "libraries.circulation.confirmation.header_enable_supplying";
-		case "disableSupplying":
-			return "libraries.circulation.confirmation.header_disable_supplying";
-		case "enableBorrowing":
-			return "libraries.circulation.confirmation.header_enable_borrowing";
-		case "disableBorrowing":
-			return "libraries.circulation.confirmation.header_disable_borrowing";
-		default:
-			return "";
-	}
-}
+export const CONFIRMATION_TEXT_MAP: Record<
+	ParticipationAction,
+	{ header: string; para1: string; select: string }
+> = {
+	enableSupplying: {
+		header: "libraries.circulation.confirmation.header_enable_supplying",
+		para1: "libraries.circulation.confirmation.para1_enable_supplying",
+		select: "libraries.circulation.confirmation.select_enable_supplying",
+	},
+	disableSupplying: {
+		header: "libraries.circulation.confirmation.header_disable_supplying",
+		para1: "libraries.circulation.confirmation.para1_disable_supplying",
+		select: "libraries.circulation.confirmation.select_disable_supplying",
+	},
+	enableBorrowing: {
+		header: "libraries.circulation.confirmation.header_enable_borrowing",
+		para1: "libraries.circulation.confirmation.para1_enable_borrowing",
+		select: "libraries.circulation.confirmation.select_enable_borrowing",
+	},
+	disableBorrowing: {
+		header: "libraries.circulation.confirmation.header_disable_borrowing",
+		para1: "libraries.circulation.confirmation.para1_disable_borrowing",
+		select: "libraries.circulation.confirmation.select_disable_borrowing",
+	},
+};

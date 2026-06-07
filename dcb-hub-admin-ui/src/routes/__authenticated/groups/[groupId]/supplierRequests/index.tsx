@@ -1,138 +1,167 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Grid } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { Grid";
-import { Tab } from "@queries/Tab";
-import { Tabs } from "@queries/Tabs";
-import { Typography } from "@mui/material";
-import { useAuth } from "react-oidc-context";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-
-import { useNavigate } from "@queries/Typography } from "@mui/material";
-import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
-
-import { useNavigate";
-import { useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Grid, Tab, Tabs, Typography } from "@mui/material";
 import {
-	getLibraries } from "@queries/useRouter } from "@tanstack/react-router";
-import {
-	getLibraries";
-import { getLibraryGroupById } from "@queries/getLibraryGroupById";
-import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
-import { getPatronRequests } from "@queries/getPatronRequests";
-import { defaultPatronRequestGroupVisibility } from "@helpers/dataGrid/columns";
-import { useCustomColumns } from "@hooks/useCustomColumns";
-import Error from "@components/Error/Error";
-import Loading from "@components/Loading/Loading";
-import { AdminLayout } from "@layout";
-import { useMemo, useState } from "react";
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColumnVisibilityModel,
+	GridRowModesModel,
+} from "@mui/x-data-grid-premium";
+
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { Location } from "@models/Location";
-import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { Group } from "@models/Group";
-import { handleGroupTabChange } from "src/helpers/navigation/handleTabChange";
-import { LibraryGroupMember } from "@models/LibraryGroupMember";
-import { useQuery } from "@apollo/client/react";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
 
-export const Route = createFileRoute("/__authenticated/groups/groupId/supplierRequests/")({
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
+import {
+	getSortOrderForServer,
+	processGridFilterModel,
+} from "@helpers/dataGrid/utilities";
+import { defaultPatronRequestGroupVisibility } from "@columns/columnVisibility/defaultPatronRequestGroupVisibility";
+
+import { getLibraryGroupById } from "@queries/getGroupById";
+import { getPatronRequests } from "@queries/getPatronRequests";
+import { getLibraries } from "@queries/getLibraries";
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+
+import { Group } from "@models/Group";
+import { LibraryGroupMember } from "@models/LibraryGroupMember";
+
+export const Route = createFileRoute(
+	"/__authenticated/groups/$groupId/supplierRequests/",
+)({
 	component: GroupSupplierRequests,
 });
 
 function GroupSupplierRequests() {
 	const { t } = useTranslation();
-	const customColumns = useCustomColumns();
 	const router = useRouter();
-	const { id } = Route.useParams(); // TODO: rename "id" to "groupId" if needed below
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	const [tabIndex, setTabIndex] = useState(2);
-	const { loading, data, error } = useQuery(getLibraryGroupById, {
-		variables: {
-			query: "id:" + groupId,
-		},
-		pollInterval: 120000,
-		errorPolicy: "all",
-		skip: !groupId,
-	});
-	// Get all the supplying agency codes
-	const group: Group = data?.libraryGroups?.content?.[0];
+	const { groupId } = Route.useParams();
+	const gqlClient = useGraphQLClient();
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	const customColumns = useCustomColumns();
 
-	const { data: locationsData, fetchMore } = useQuery(
-		getLocationForPatronRequestGrid,
-		{
-			variables: {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 100,
-				pageno: 0,
-			},
-			onCompleted: (data) => {
-				if (data.locations.content.length < data.locations.totalSize) {
-					const totalPages = Math.ceil(data.locations.totalSize / 100);
-					const fetchPromises = Array.from(
-						{ length: totalPages - 1 },
-						(_, index) =>
-							fetchMore({
-								variables: {
-									pageno: index + 1,
-								},
-								updateQuery: (prev, { fetchMoreResult }) => {
-									if (!fetchMoreResult) return prev;
-									return {
-										locations: {
-											...fetchMoreResult.locations,
-											content: [
-												...prev.locations.content,
-												...fetchMoreResult.locations.content,
-											],
-										},
-									};
-								},
-							}),
-					);
-					Promise.all(fetchPromises).catch((error) =>
-						console.error("Error fetching additional locations:", error),
-					);
-				}
-			},
-		},
+	const gridId = "groupSupplierRequests";
+
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 20 },
+		);
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
 	);
-	const patronRequestLocations: Location[] = locationsData?.locations.content;
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "dateCreated", sort: "desc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
+		useState<GridColumnVisibilityModel>(
+			storedState.columnVisibility ?? defaultPatronRequestGroupVisibility,
+		);
 
-	const { data: patronLibraries, loading: patronLibrariesLoading } = useQuery(
-		getLibraries,
-		{
-			variables: {
+	const {
+		data: groupData,
+		isLoading: isGroupLoading,
+		error: groupError,
+	} = useQuery({
+		queryKey: ["group", groupId],
+		queryFn: () =>
+			gqlClient.request<any>(getLibraryGroupById, { query: `id:${groupId}` }),
+		refetchInterval: 120000,
+	});
+
+	const group: Group = groupData?.libraryGroups?.content?.[0];
+
+	const groupVariables = useMemo(() => {
+		if (!group?.members) return "";
+		const codes = group.members
+			.map((member: LibraryGroupMember) => member?.library?.agency?.code)
+			.filter((code?: string) => Boolean(code));
+
+		const uniqueCodes = Array.from(new Set(codes));
+		if (uniqueCodes.length === 0) return "";
+		return uniqueCodes.map((c) => `supplyingAgencyCode:${c}`).join(" OR ");
+	}, [group]);
+
+	const {
+		data: requestsData,
+		isLoading: isRequestsLoading,
+		isFetching: isRequestsFetching,
+	} = useQuery({
+		queryKey: [gridId, groupId, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const baseQuery = `(${groupVariables})`;
+			const queryVariables = {
+				query:
+					processGridFilterModel(filterModel, baseQuery, [
+						"status",
+						"description",
+					]) ?? "",
+				pageno: paginationModel.page ?? 0,
+				pagesize: paginationModel.pageSize ?? 20,
+				order: sortModel[0]?.field ?? "dateCreated",
+				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
+			};
+			return gqlClient.request<any>(getPatronRequests, queryVariables);
+		},
+		enabled: !!groupVariables,
+		placeholderData: (previousData) => previousData,
+	});
+
+	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
+		queryKey: ["allLibrariesDictionary"],
+		queryFn: () =>
+			gqlClient.request<any>(getLibraries, {
 				order: "fullName",
 				orderBy: "ASC",
 				pageno: 0,
 				pagesize: 1000,
 				query: "",
-			},
-			errorPolicy: "all",
-		},
-	);
-	const patronLibrariesContent = patronLibraries?.libraries?.content;
+			}),
+		staleTime: 1000 * 60 * 30, // Cache for 30 mins
+	});
 
-	// Supplying agency codes
-	const groupVariables = useMemo(() => {
-		if (!group?.members) return "";
-		const codes = group.members
-			.map((member: LibraryGroupMember) => member?.library?.agency?.code)
-			.filter((code: string) => code != null && code !== "");
-
-		const uniqueCodes = Array.from(new Set(codes));
-		console.log(uniqueCodes);
-		if (uniqueCodes.length === 0) return "";
-		return uniqueCodes.map((c) => `supplyingAgencyCode:${c}`).join(" OR ");
-	}, [group]);
+	const { data: locationsData, isLoading: isLocationsLoading } = useQuery({
+		queryKey: ["allLocationsDictionary"],
+		queryFn: () =>
+			gqlClient.request<any>(getLocationForPatronRequestGrid, {
+				query: "",
+				order: "name",
+				orderBy: "ASC",
+				pagesize: 1000,
+				pageno: 0,
+			}),
+		staleTime: 1000 * 60 * 30, // Cache for 30 mins
+	});
 
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
-		locations: patronRequestLocations,
-		libraries: patronLibrariesContent,
+		locations: locationsData?.locations?.content ?? [],
+		libraries: librariesData?.libraries?.content ?? [],
 		variant: "standard",
 	});
 
@@ -140,7 +169,45 @@ function GroupSupplierRequests() {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
 
-	if (loading || status === "loading" || patronLibrariesLoading) {
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const handleColumnVisibilityChange = useCallback(
+		(model: GridColumnVisibilityModel) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
+		},
+		[gridId, setColumnVisibilityModel],
+	);
+
+	const isLoading =
+		isGroupLoading ||
+		isLibrariesLoading ||
+		isLocationsLoading ||
+		(isRequestsLoading && !requestsData);
+
+	if (isLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -153,27 +220,31 @@ function GroupSupplierRequests() {
 		);
 	}
 
-	return error || group == null || group == undefined ? (
-		<AdminLayout hideBreadcrumbs>
-			{error ? (
+	if (groupError || !group) {
+		return (
+			<AdminLayout hideBreadcrumbs>
 				<Error
-					title={t("ui.error.cannot_retrieve_record")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.try_later")}
+					title={
+						groupError
+							? t("ui.error.cannot_retrieve_record")
+							: t("ui.error.cannot_find_record")
+					}
+					message={
+						groupError
+							? t("ui.info.connection_issue")
+							: t("ui.error.invalid_UUID")
+					}
+					description={
+						groupError ? t("ui.info.try_later") : t("ui.info.check_address")
+					}
 					action={t("ui.action.go_back")}
-					goBack="/libraries"
+					goBack="/groups"
 				/>
-			) : (
-				<Error
-					title={t("ui.error.cannot_find_record")}
-					message={t("ui.error.invalid_UUID")}
-					description={t("ui.info.check_address")}
-					action={t("ui.action.go_back")}
-					goBack="/libraries"
-				/>
-			)}
-		</AdminLayout>
-	) : (
+			</AdminLayout>
+		);
+	}
+
+	return (
 		<AdminLayout title={group?.name}>
 			<Grid
 				container
@@ -182,11 +253,17 @@ function GroupSupplierRequests() {
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs
-						value={tabIndex}
-						onChange={(event, value) => {
-							handleGroupTabChange(event, value, router, setTabIndex, groupId);
-						}}
-						aria-label="Group navigation"
+						value={2}
+						onChange={(_, val) =>
+							router.navigate({
+								to: [
+									`/groups/${groupId}`,
+									`/groups/${groupId}/patronRequests`,
+									`/groups/${groupId}/supplierRequests`,
+									`/groups/${groupId}/settings`,
+								][val],
+							})
+						}
 					>
 						<Tab label={t("nav.groups.profile")} />
 						<Tab label={t("nav.groups.patronRequests")} />
@@ -195,39 +272,53 @@ function GroupSupplierRequests() {
 					</Tabs>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight={"bold"}>
+					<Typography variant="h2" fontWeight="bold">
 						{t("nav.groups.supplierRequests")}
 					</Typography>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					{groupVariables ? (
-						<ServerPaginationGrid
-							query={getPatronRequests}
-							presetQueryVariables={"(" + groupVariables + ")"} // Makes sure the OR chain is evaluated properly
-							type="supplierRequestsGroupAll"
-							coreType="patronRequests"
+						<DataGrid
+							identifier={gridId}
+							type={gridId}
 							columns={allColumns}
-							selectable={true}
-							pageSize={20}
-							noDataMessage={t("patron_requests.no_rows")}
-							noResultsMessage={t("patron_requests.no_results")}
-							searchPlaceholder={t("patron_requests.search_placeholder_status")}
-							columnVisibilityModel={defaultPatronRequestGroupVisibility}
-							scrollbarVisible={true}
-							sortModel={[{ field: "dateCreated", sort: "desc" }]}
-							sortDirection="DESC"
-							sortAttribute="dateCreated"
+							rows={requestsData?.patronRequests?.content ?? []}
+							rowCount={requestsData?.patronRequests?.totalSize ?? 0}
+							loading={isRequestsFetching && !!requestsData}
+							paginationMode="server"
+							pagination
+							paginationModel={paginationModel}
+							onPaginationModelChange={handlePaginationChange}
+							sortingMode="server"
+							sortModel={sortModel}
+							onSortModelChange={handleSortChange}
+							filterMode="server"
+							filterModel={filterModel}
+							onFilterModelChange={handleFilterChange}
+							columnVisibilityModel={columnVisibilityModel}
+							onColumnVisibilityModelChange={handleColumnVisibilityChange}
 							getDetailPanelContent={({ row }: any) => (
 								<MasterDetail row={row} type="patronRequests" />
 							)}
+							checkboxSelection={false}
+							disableAggregation
+							disableHoverInteractions={false}
+							disableRowGrouping
+							disablePivoting
+							listViewEnabled={false}
+							pivotingEnabled={false}
+							toolbarVisible
+							scrollbarVisible={false}
+							noResultsText={t("patron_requests.no_results")}
+							searchText={t("patron_requests.search_placeholder_status")}
+							rowModesModel={rowModesModel}
+							onRowModesModelChange={setRowModesModel}
 						/>
-					) : null}
+					) : (
+						<Typography>{t("patron_requests.no_results")}</Typography>
+					)}
 				</Grid>
 			</Grid>
 		</AdminLayout>
 	);
 }
-
-
-
-

@@ -1,72 +1,44 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMutation } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { useMutation";
-import { useQuery } from "@queries/useQuery";
-import { useQueryClient } from "@tanstack/react-query";
-import { AdminLayout } from "@layout";
-import {
-	Button } from "@queries/useQueryClient } from "@tanstack/react-query";
-import { AdminLayout } from "@layout";
-import {
-	Button";
-import { Grid } from "@queries/Grid";
-import { Stack } from "@queries/Stack";
-import { Tab } from "@queries/Tab";
-import { Tabs } from "@queries/Tabs";
-import { TextField } from "@queries/TextField";
-import { Typography } from "@queries/Typography";
-import { useTheme } from "@queries/useTheme";
-import { } from "@mui/material";
-import { PutBlobResult } from "@vercel/blob";
-import { useAuth } from "react-oidc-context";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-
-import Image from "next/image";
-import { useNavigate } from "@queries/} from "@mui/material";
-import { PutBlobResult } from "@vercel/blob";
 import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
-
-import Image from "next/image";
-import { useNavigate";
-import { useRouter } from "@tanstack/react-router";
-import { useState } from "@queries/useRouter } from "@tanstack/react-router";
-import { useState";
-import { useRef } from "@queries/useRef";
-import { ChangeEvent } from "@queries/ChangeEvent";
-import { useEffect } from "react";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
-import { getConsortia } from "@queries/useEffect } from "react";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
-import { getConsortia";
-import { updateConsortiumQuery } from "@queries/updateConsortiumQuery";
-import {
-	handleSaveConfirmation,
-	handleCancel,
-	handleEdit,
-} from "src/helpers/actions/editAndDeleteActions";
-import { Consortium } from "@models/Consortium";
-import useUnsavedChangesWarning from "@hooks/useUnsavedChangesWarning";
-import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
-import { formatChangedFields } from "src/helpers/formatChangedFields";
-import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
-import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
-import Loading from "@components/Loading/Loading";
-import ErrorComponent from "@components/Error/Error";
-import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
-import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
-import { isEmpty } from "lodash";
-import { Controller, useForm } from "react-hook-form";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { handleConsortiumTabChange } from "src/helpers/navigation/handleTabChange";
+import { isEmpty } from "lodash";
 
-// If this ever needs to be extended to support multiple consortia
-// Change current flat structure to [id] structure similar to libraries
-// And have a consortium grid page
-// or only show active consortia
+import {
+	Button,
+	Grid,
+	Tab,
+	Tabs,
+	TextField,
+	Typography,
+	useTheme,
+	Box,
+} from "@mui/material";
+import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
+
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import Confirmation from "@components/Confirmation/Confirmation";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import Loading from "@components/Loading/Loading";
+import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { getConsortia } from "@queries/getConsortia";
+import { updateConsortiumQuery } from "@mutations/updateConsortium";
+import { formatChangedFields } from "@helpers/formatChangedFields";
+import { Consortium } from "@models/Consortium";
+import Error from "@components/Error/Error";
+
+export const Route = createFileRoute("/__authenticated/consortium/")({
+	component: ConsortiumPage,
+});
 
 interface ConsortiumFormFields {
 	displayName: string;
@@ -74,21 +46,42 @@ interface ConsortiumFormFields {
 	catalogueSearchUrl?: string;
 	description?: string;
 }
-// check upload button for image upload
-const ConsortiumPage: NextPage = () => {
+
+function ConsortiumPage() {
 	const { t } = useTranslation();
-	const [tabIndex, setTabIndex] = useState(0);
 	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const router = useRouter();
+	const theme = useTheme();
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
 	const appHeaderFileRef = useRef<HTMLInputElement>(null);
 	const aboutFileRef = useRef<HTMLInputElement>(null);
+	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 
 	const [headerIsUploading, setHeaderIsUploading] = useState(false);
 	const [aboutIsUploading, setAboutIsUploading] = useState(false);
+	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState("");
+	const [aboutPreviewUrl, setAboutPreviewUrl] = useState("");
 
-	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
+	const [editMode, setEditMode] = useState(false);
+	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
+	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: "success" | "error";
+		text: string | null;
+		title: string | null;
+	}>({
+		open: false,
+		severity: "success",
+		text: null,
+		title: null,
+	});
 
 	const {
 		setHeaderImageURL,
@@ -98,80 +91,102 @@ const ConsortiumPage: NextPage = () => {
 		setWebsiteURL,
 		setDescription,
 	} = useConsortiumInfoStore();
-	const { data, loading, error } = useQuery(getConsortia, {
-		variables: {
-			order: "id",
-			orderBy: "DESC",
-			pageno: 0,
-			pagesize: 10,
-		},
-		errorPolicy: "all",
-		onCompleted: (data) => {
-			const consortium: Consortium = data.consortia?.content[0];
-			// Ensure our cache for unauthenticated display is up to date
-			setDescription(consortium?.description);
-			setWebsiteURL(consortium?.websiteUrl);
-			setCatalogueSearchURL(consortium?.catalogueSearchUrl);
-			setDisplayName(consortium?.displayName);
-			setHeaderImageURL(consortium?.headerImageUrl);
-			setAboutImageURL(consortium?.aboutImageUrl);
-			reset({
-				displayName: consortium?.displayName ?? "",
-				description: consortium?.description ?? "",
-				websiteUrl: consortium?.websiteUrl ?? "",
-				catalogueSearchUrl: consortium?.catalogueSearchUrl,
-			});
-		},
-	});
-	// Make sure this only gets the first consortia
-	const consortium: Consortium = data?.consortia.content[0];
-	const client = useQueryClient();
-	const saveButtonRef = useRef<HTMLButtonElement>(null);
 
-	const [alert, setAlert] = useState<any>({
-		open: false,
-		severity: "success",
-		text: null,
-		title: null,
+	const {
+		data: gridData,
+		isLoading: loading,
+		error,
+	} = useQuery({
+		queryKey: ["LoadConsortium"],
+		queryFn: () =>
+			gqlClient.request<any>(getConsortia, {
+				order: "id",
+				orderBy: "DESC",
+				pageno: 0,
+				pagesize: 1,
+			}),
 	});
-	const [editMode, setEditMode] = useState(false);
-	const theme = useTheme();
-	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
-	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
+
+	const consortium: Consortium = gridData?.consortia?.content?.[0];
+
 	const validationSchema = Yup.object().shape({
 		displayName: Yup.string()
 			.trim()
-			.nonNullable(
-				t("ui.data_grid.validation.no_empty", {
-					field: t("consortium.display_name"),
-				}),
-			)
-			.required(
-				t("ui.validation.required", { field: t("consortium.display_name") }),
-			)
-			.max(200, t("ui.validation.max_length", { length: 200 })),
-		description: Yup.string()
-			.trim()
-			.max(400, t("ui.validation.max_length", { length: 128 })),
-		websiteUrl: Yup.string()
-			.trim()
-			.max(200, t("ui.validation.max_length", { length: 128 })),
-		catalogueSearchUrl: Yup.string()
-			.trim()
-			.max(200, t("ui.validation.max_length", { length: 128 })),
+			.required(t("validation.required"))
+			.max(200),
+		description: Yup.string().trim().max(400),
+		websiteUrl: Yup.string().trim().max(200),
+		catalogueSearchUrl: Yup.string().trim().max(200),
 	});
 
-	const onSubmit = (data: Partial<Consortium>) => {
-		const newChangedFields = Object.keys(data).reduce((acc, key) => {
-			const field = key as keyof ConsortiumFormFields;
-			const currentValue = data[field];
-			const originalValue = consortium[field];
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isDirty },
+	} = useForm<ConsortiumFormFields>({
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+	});
 
-			if (currentValue !== originalValue && currentValue !== undefined) {
-				(acc[field] as typeof currentValue) = currentValue;
+	useEffect(() => {
+		if (consortium) {
+			setDescription(consortium.description);
+			setWebsiteURL(consortium.websiteUrl);
+			setCatalogueSearchURL(consortium.catalogueSearchUrl);
+			setDisplayName(consortium.displayName);
+			setHeaderImageURL(consortium.headerImageUrl);
+			setAboutImageURL(consortium.aboutImageUrl);
+			reset({
+				displayName: consortium.displayName ?? "",
+				description: consortium.description ?? "",
+				websiteUrl: consortium.websiteUrl ?? "",
+				catalogueSearchUrl: consortium.catalogueSearchUrl ?? "",
+			});
+		}
+	}, [
+		consortium,
+		reset,
+		setDescription,
+		setWebsiteURL,
+		setCatalogueSearchURL,
+		setDisplayName,
+		setHeaderImageURL,
+		setAboutImageURL,
+	]);
+
+	const {
+		showUnsavedChangesModal,
+		handleKeepEditing,
+		handleLeaveWithoutSaving,
+	} = useUnsavedChangesWarning(isDirty);
+
+	const { mutateAsync: updateConsortium } = useMutation({
+		mutationFn: (variables: any) =>
+			gqlClient.request(updateConsortiumQuery, variables),
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
+	});
+
+	useEffect(() => {
+		return () => {
+			if (appHeaderPreviewUrl) URL.revokeObjectURL(appHeaderPreviewUrl);
+			if (aboutPreviewUrl) URL.revokeObjectURL(aboutPreviewUrl);
+		};
+	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
+
+	const onSubmit = (formData: ConsortiumFormFields) => {
+		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
+			const field = key as keyof ConsortiumFormFields;
+			if (
+				formData[field] !== consortium[field] &&
+				formData[field] !== undefined
+			) {
+				(acc[field] as any) = formData[field];
 			}
 			return acc;
 		}, {} as Partial<Consortium>);
+
 		setChangedFields(newChangedFields);
 		if (Object.keys(newChangedFields).length === 0) {
 			setEditMode(false);
@@ -180,748 +195,417 @@ const ConsortiumPage: NextPage = () => {
 		setConfirmationEdit(true);
 	};
 
-	const {
-		control,
-		handleSubmit,
-		reset,
-		formState: { errors, isDirty },
-	} = useForm<ConsortiumFormFields>({
-		defaultValues: {
-			displayName: consortium?.displayName,
-			description: consortium?.description,
-			websiteUrl: consortium?.websiteUrl,
-			catalogueSearchUrl: consortium?.catalogueSearchUrl,
-		},
-		resolver: yupResolver(validationSchema),
-		mode: "onChange",
-	});
-
-	const {
-		showUnsavedChangesModal,
-		handleKeepEditing,
-		handleLeaveWithoutSaving,
-	} = useUnsavedChangesWarning({
-		isDirty,
-		onKeepEditing: () => {
-			setTimeout(() => {
-				if (saveButtonRef.current) {
-					saveButtonRef.current.focus();
-				}
-			}, 0);
-		},
-		onLeaveWithoutSaving: () => {
-			setChangedFields({});
-			reset();
-		},
-	});
-
-	const [updateConsortium] = useMutation(updateConsortiumQuery, {
-		refetchQueries: ["LoadConsortium"],
-	});
-	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState<string>("");
-	const [aboutPreviewUrl, setAboutPreviewUrl] = useState<string>("");
-
-	const validateImageSize = (
-		file: File,
-		width: number,
-		height: number,
-	): Promise<any> => {
-		const allowedTypes = ["image/png", "image/jpeg"];
-		if (!allowedTypes.includes(file.type)) {
-			return Promise.resolve(false);
-		}
-		return new Promise((resolve, reject) => {
-			// Create an image element with proper type
-			const img = document.createElement("img");
-			img.onload = () => {
-				// Revoke object URL to prevent memory leaks
-				URL.revokeObjectURL(img.src);
-
-				const isValidSize = img.width <= width && img.height === height;
-				resolve(isValidSize);
-			};
-			img.onerror = (error) => {
-				// Revoke object URL in case of error
-				URL.revokeObjectURL(img.src);
-				console.log(error);
-				reject(new Error("Failed to load image"));
-			};
-			// Create object URL for the file
-			img.src = URL.createObjectURL(file);
-		});
-	};
-
-	// Handlers for file selection
-	const handleAppHeaderFileSelect = (event: ChangeEvent) => {
-		const target = event.target as HTMLInputElement;
-		const file = target?.files?.[0];
-		if (file) {
-			const objectUrl = URL.createObjectURL(file);
-			setAppHeaderPreviewUrl(objectUrl);
-		}
-	};
-
-	const handleAboutFileSelect = (event: ChangeEvent) => {
-		const target = event.target as HTMLInputElement;
-		const file = target?.files?.[0];
-		if (file) {
-			const objectUrl = URL.createObjectURL(file);
-			setAboutPreviewUrl(objectUrl);
-		}
-	};
-
-	const handleRemoveAbout = () => {
-		setAboutPreviewUrl("");
-
-		// Reset the file input
-		if (aboutFileRef && "current" in aboutFileRef && aboutFileRef.current) {
-			aboutFileRef.current.value = "";
-		}
-	};
-	// Pass in image sizes for the preview
-
-	const handleRemoveAppHeader = () => {
-		setAppHeaderPreviewUrl("");
-
-		// Reset the file input
-		if (
-			appHeaderFileRef &&
-			"current" in appHeaderFileRef &&
-			appHeaderFileRef.current
-		) {
-			appHeaderFileRef.current.value = "";
-		}
-	};
-
-	const handleAppHeaderFileUpload = async (event: React.FormEvent) => {
-		event.preventDefault();
-		setHeaderIsUploading(true);
-		try {
-			if (!appHeaderFileRef.current?.files) {
-				throw new Error("No file selected");
-			}
-			const file = appHeaderFileRef.current.files[0];
-			// Validate image size now.
-			const isValidSize = await validateImageSize(file, 36, 36);
-			if (!isValidSize) {
-				const allowedTypes = ["image/png", "image/jpeg"];
-				const isWrongType = !allowedTypes.includes(file.type);
-				setAlert({
-					open: true,
-					severity: "error",
-					text: isWrongType
-						? t("consortium.invalid_file_type", {
-								allowedTypes: "PNG, JPG",
-							})
-						: t("consortium.image_size_error_header", {
-								width: 36,
-								height: 36,
-							}),
-					title: t("ui.data_grid.error"),
-				});
-				setHeaderIsUploading(false);
-				return;
-			}
-			const newName = `consortium${consortium.displayName}user${username}.png`;
-			const response = await fetch(
-				`/api/persistentAssets/serverUpload?filename=${newName}`,
-				{
-					method: "POST",
-					body: file,
-				},
-			);
-			if (!response.ok) {
-				throw new Error("Upload failed");
-			}
-			const newBlob = (await response.json()) as PutBlobResult;
-			// Update state and perform mutation
-			setHeaderImageURL(newBlob.url);
-			await updateConsortium({
-				variables: {
-					input: {
-						id: consortium.id,
-						headerImageUrl: newBlob.url,
-						headerImageUploader: username,
-						headerImageUploaderEmail: email,
-						reason: "Update of consortium header image",
-						changeCategory: "Initial setup",
-					},
-				},
-			});
-			// Clear preview and file selection
-			setAppHeaderPreviewUrl("");
-			if (appHeaderFileRef.current) {
-				appHeaderFileRef.current.value = "";
-			}
-			setAlert({
-				open: true,
-				severity: "success",
-				text: t("consortium.logo_app_header_success"),
-				title: t("ui.data_grid.updated"),
-			});
-		} catch (error) {
-			console.error("Upload error:", error);
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("consortium.logo_app_header_error"),
-				title: t("ui.data_grid.error"),
-			});
-		} finally {
-			setHeaderIsUploading(false);
-		}
-	};
-
-	const handleAboutFileUpload = async (event: React.FormEvent) => {
-		event.preventDefault();
-		setAboutIsUploading(true);
-
-		try {
-			if (!aboutFileRef.current?.files) {
-				throw new Error("No file selected");
-			}
-			const file = aboutFileRef.current.files[0];
-
-			const isValidSize = await validateImageSize(file, 180, 48);
-			if (!isValidSize) {
-				const allowedTypes = ["image/png", "image/jpeg"];
-				const isWrongType = !allowedTypes.includes(file.type);
-				setAlert({
-					open: true,
-					severity: "error",
-					text: isWrongType
-						? t("consortium.invalid_file_type", {
-								allowedTypes: "PNG, JPG",
-							})
-						: t("consortium.image_size_error_about", {
-								width: 160,
-								height: 48,
-							}),
-					title: t("ui.data_grid.error"),
-				});
-				setAboutIsUploading(false);
-				return;
-			}
-			const newName = `consortium${consortium.displayName}user${username}.png`;
-			const response = await fetch(
-				`/api/persistentAssets/serverUpload?filename=${newName}`,
-				{
-					method: "POST",
-					body: file,
-				},
-			);
-			if (!response.ok) {
-				throw new Error("Upload failed");
-			}
-			const newBlob = (await response.json()) as PutBlobResult;
-			// Update state and perform mutation
-			setAboutImageURL(newBlob.url);
-			await updateConsortium({
-				variables: {
-					input: {
-						id: consortium.id,
-						aboutImageUrl: newBlob.url,
-						aboutImageUploader: username,
-						aboutImageUploaderEmail: email,
-						reason: "Update of consortium about image",
-						changeCategory: "Initial setup",
-					},
-				},
-			});
-			// Clear preview and file selection
-			setAboutPreviewUrl("");
-			if (aboutFileRef.current) {
-				aboutFileRef.current.value = "";
-			}
-			setAlert({
-				open: true,
-				severity: "success",
-				text: t("consortium.logo_about_success"),
-				title: t("ui.data_grid.updated"),
-			});
-		} catch (error) {
-			console.error("Upload error:", error);
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("consortium.logo_about_error"),
-				title: t("consortium.logo_about_error"),
-			});
-		} finally {
-			setAboutIsUploading(false);
-		}
-	};
-
-	useEffect(() => {
-		return () => {
-			if (appHeaderPreviewUrl) {
-				URL.revokeObjectURL(appHeaderPreviewUrl);
-			}
-			if (aboutPreviewUrl) {
-				URL.revokeObjectURL(aboutPreviewUrl);
-			}
-		};
-	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
-
-	// ONLY ALLOW ADMIN OR CONSORTIUM_ADMIN to edit.
-	const isAnAdmin = isAnAdmin;
 	const handleConfirmSave = async (
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
-		handleSaveConfirmation(
-			consortium.id,
-			changedFields,
-			updateConsortium,
-			client,
-			{
-				setEditMode,
-				setChangedFields,
-				setAlert,
-				setConfirmation: setConfirmationEdit,
-			},
-			{
-				entityName: consortium?.displayName,
-				entityType: t("nav.consortium.name"),
-				mutationName: "updateConsortium",
-				t,
-			},
-			{
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			},
-			["LoadConsortium"],
-			reset,
-			["displayName", "catalogueSearchUrl", "websiteUrl", "description"],
-			(updatedFields) => {
-				// Update your store values here
-				if (updatedFields.displayName)
-					setDisplayName(updatedFields.displayName);
-				if (updatedFields.catalogueSearchUrl)
-					setCatalogueSearchURL(updatedFields.catalogueSearchUrl);
-				if (updatedFields.websiteUrl) setWebsiteURL(updatedFields.websiteUrl);
-				if (updatedFields.description)
-					setDescription(updatedFields.description);
-			},
-		);
+		try {
+			await updateConsortium({
+				input: {
+					id: consortium.id,
+					reason,
+					changeCategory,
+					changeReferenceUrl,
+					...changedFields,
+				},
+			});
+			setAlert({
+				open: true,
+				severity: "success",
+				text: t("ui.data_grid.updated"),
+				title: t("ui.success"),
+			});
+			setEditMode(false);
+			setChangedFields({});
+		} catch (e) {
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("ui.error.update_failed"),
+				title: t("ui.error.title"),
+			});
+		} finally {
+			setConfirmationEdit(false);
+		}
 	};
 
-	const username = session?.user?.name;
-	const email = session?.user?.email ?? "No email provided";
+	const validateImageSize = (
+		file: File,
+		width: number,
+		height: number,
+	): Promise<boolean> => {
+		return new Promise((resolve, reject) => {
+			const img = document.createElement("img");
+			img.onload = () => {
+				URL.revokeObjectURL(img.src);
+				resolve(img.width <= width && img.height === height);
+			};
+			img.onerror = () => {
+				URL.revokeObjectURL(img.src);
+				reject(false);
+			};
+			img.src = URL.createObjectURL(file);
+		});
+	};
 
-	const viewModeActions = [
-		{
-			key: "edit",
-			onClick: handleEdit(setEditMode, firstEditableFieldRef),
-			disabled: !isAnAdmin,
-			label: t("ui.data_grid.edit"),
-			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
-		},
-	];
+	const handleFileUpload = async (
+		fileRef: React.RefObject<HTMLInputElement | null>,
+		isHeader: boolean,
+	) => {
+		const file = fileRef.current?.files?.[0];
+		if (!file) return;
 
-	const editModeActions = [
-		<Button
-			key="save"
-			startIcon={<Save />}
-			onClick={handleSubmit(onSubmit)}
-			disabled={!isEmpty(errors) || !isDirty}
-			ref={saveButtonRef}
-		>
-			{t("ui.data_grid.save")}
-		</Button>,
-		<Button
-			key="cancel"
-			startIcon={<Cancel />}
-			onClick={() =>
-				handleCancel(
-					{
-						setEditMode,
-						setChangedFields,
-					},
-					reset,
-				)
-			}
-		>
-			{t("ui.data_grid.cancel")}
-		</Button>,
-		<MoreActionsMenu
-			key="more"
-			actions={[
-				{
-					key: "edit",
-					onClick: handleEdit(setEditMode, firstEditableFieldRef),
-					disabled: true,
-					label: t("ui.data_grid.edit"),
-					startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+		const isValidSize = await validateImageSize(
+			file,
+			isHeader ? 36 : 180,
+			isHeader ? 36 : 48,
+		);
+		if (!isValidSize) {
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("consortium.invalid_image_size"),
+				title: t("ui.error.title"),
+			});
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append("file", file);
+		const uploadUrl =
+			import.meta.env.VITE_DCB_API_BASE + "/persistentAssets/serverUpload";
+
+		try {
+			isHeader ? setHeaderIsUploading(true) : setAboutIsUploading(true);
+			const res = await fetch(uploadUrl, {
+				method: "POST",
+				body: formData,
+				headers: { Authorization: `Bearer ${auth.user?.access_token}` },
+			});
+			const { url } = await res.json();
+
+			await updateConsortium({
+				input: {
+					id: consortium.id,
+					[isHeader ? "headerImageUrl" : "aboutImageUrl"]: url,
+					reason: `Update of consortium ${isHeader ? "header" : "about"} image`,
+					changeCategory: "Initial setup",
 				},
-			]}
-		/>,
-	];
-	const pageActions = editMode ? editModeActions : viewModeActions;
-	if (loading) {
+			});
+
+			isHeader ? setAppHeaderPreviewUrl("") : setAboutPreviewUrl("");
+			if (fileRef.current) fileRef.current.value = "";
+			setAlert({
+				open: true,
+				severity: "success",
+				text: t("ui.success"),
+				title: t("ui.success"),
+			});
+		} catch (e) {
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("ui.error.update_failed"),
+				title: t("ui.error.title"),
+			});
+		} finally {
+			isHeader ? setHeaderIsUploading(false) : setAboutIsUploading(false);
+		}
+	};
+
+	if (loading)
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.consortium.name").toLowerCase(),
-					})}
+					title={t("ui.info.loading.document")}
 					subtitle={t("ui.info.wait")}
 				/>
 			</AdminLayout>
 		);
-	}
-
-	return error || consortium == null || consortium == undefined ? (
-		<AdminLayout hideBreadcrumbs>
-			{error ? (
-				<ErrorComponent
+	if (error || !consortium)
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<Error
 					title={t("ui.error.cannot_retrieve_record")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.try_later")}
 					action={t("ui.action.go_back")}
 					goBack="/locations"
+					message={t("error.consortium")} /** TODO: Translation keys */
 				/>
-			) : (
-				<ErrorComponent
-					title={t("ui.error.consortium_not_found")}
-					message={t("ui.error.consortium_not_present")}
-					description={t("ui.error.consortium_advice")}
-					action={t("ui.action.go_back")}
-					goBack="/locations"
-				/>
-			)}
-		</AdminLayout>
-	) : (
+			</AdminLayout>
+		);
+
+	return (
 		<AdminLayout
 			title={t("nav.consortium.name")}
-			pageActions={pageActions}
 			mode={editMode ? "edit" : "view"}
+			pageActions={
+				editMode
+					? [
+							<Button
+								key="save"
+								startIcon={<Save />}
+								onClick={handleSubmit(onSubmit)}
+								disabled={!isEmpty(errors) || !isDirty}
+							>
+								{t("ui.data_grid.save")}
+							</Button>,
+							<Button
+								key="cancel"
+								startIcon={<Cancel />}
+								onClick={() => {
+									reset();
+									setEditMode(false);
+									setChangedFields({});
+								}}
+							>
+								{t("ui.data_grid.cancel")}
+							</Button>,
+						]
+					: [
+							{
+								key: "edit",
+								onClick: () => setEditMode(true),
+								disabled: !isAnAdmin,
+								label: t("ui.data_grid.edit"),
+								startIcon: (
+									<Edit htmlColor={theme.palette.primary.exclamationIcon} />
+								),
+							},
+						]
+			}
 		>
+			<Tabs
+				value={0}
+				onChange={(_, val) =>
+					router.navigate({
+						to: [
+							"/consortium",
+							"/consortium/functionalSettings",
+							"/consortium/onboarding",
+							"/consortium/contacts",
+						][val],
+					})
+				}
+				sx={{ mb: 3 }}
+			>
+				<Tab label={t("nav.consortium.profile")} />
+				<Tab label={t("nav.consortium.functionalSettings")} />
+				<Tab label={t("nav.consortium.onboarding")} />
+				<Tab label={t("nav.consortium.contacts")} />
+			</Tabs>
+
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-				sx={{ marginBottom: "5px" }}
+				component="form"
+				onSubmit={handleSubmit(onSubmit)}
 			>
-				<Grid
-					container
-					spacing={{ xs: 2, md: 3 }}
-					columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-					sx={{ marginBottom: "5px" }}
-					component={"form"}
-					onSubmit={handleSubmit(onSubmit)}
-				>
-					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-						<Tabs
-							value={tabIndex}
-							onChange={(event, value) => {
-								handleConsortiumTabChange(event, value, router, setTabIndex);
-							}}
-							aria-label="Consortium Navigation"
-						>
-							<Tab label={t("nav.consortium.profile")} />
-							<Tab label={t("nav.consortium.functionalSettings")} />
-							<Tab label={t("nav.consortium.onboarding")} />
-							<Tab label={t("nav.consortium.contacts")} />
-						</Tabs>
-					</Grid>
-					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-						<Stack direction={"column"}>
-							<Typography variant="attributeTitle">
-								{t("consortium.name")}
-							</Typography>
-							<RenderAttribute attribute={consortium?.name} />
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-						<Stack direction={"column"}>
-							<Typography
-								variant="attributeTitle"
-								color={
-									errors?.displayName && editMode
-										? theme.palette.error.main
-										: theme.palette.primary.attributeTitle
-								}
-							>
-								{t("consortium.display_name")}
-							</Typography>
-							<Controller
-								name="displayName"
-								control={control}
-								render={({ field }) =>
-									editMode ? (
-										<TextField
-											{...field}
-											inputRef={firstEditableFieldRef}
-											fullWidth
-											variant="outlined"
-											error={!!errors.displayName}
-											helperText={errors.displayName?.message}
-										/>
-									) : (
-										<RenderAttribute attribute={consortium?.displayName} />
-									)
-								}
-							/>
-						</Stack>
-					</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography variant="attributeTitle">
+						{t("consortium.name")}
+					</Typography>
+					<RenderAttribute attribute={consortium.name} />
 				</Grid>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography
+						variant="attributeTitle"
+						color={errors.displayName && editMode ? "error" : "primary"}
+					>
+						{t("consortium.display_name")}
+					</Typography>
+					<Controller
+						name="displayName"
+						control={control}
+						render={({ field }) =>
+							editMode ? (
+								<TextField
+									{...field}
+									inputRef={firstEditableFieldRef}
+									fullWidth
+									error={!!errors.displayName}
+									helperText={errors.displayName?.message}
+								/>
+							) : (
+								<RenderAttribute attribute={consortium.displayName} />
+							)
+						}
+					/>
+				</Grid>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography
+						variant="attributeTitle"
+						color={errors.websiteUrl && editMode ? "error" : "primary"}
+					>
+						{t("consortium.url")}
+					</Typography>
+					<Controller
+						name="websiteUrl"
+						control={control}
+						render={({ field }) =>
+							editMode ? (
+								<TextField
+									{...field}
+									fullWidth
+									error={!!errors.websiteUrl}
+									helperText={errors.websiteUrl?.message}
+								/>
+							) : (
+								<RenderAttribute attribute={consortium.websiteUrl} />
+							)
+						}
+					/>
+				</Grid>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography
+						variant="attributeTitle"
+						color={errors.catalogueSearchUrl && editMode ? "error" : "primary"}
+					>
+						{t("consortium.search_url")}
+					</Typography>
+					<Controller
+						name="catalogueSearchUrl"
+						control={control}
+						render={({ field }) =>
+							editMode ? (
+								<TextField
+									{...field}
+									fullWidth
+									error={!!errors.catalogueSearchUrl}
+									helperText={errors.catalogueSearchUrl?.message}
+								/>
+							) : (
+								<RenderAttribute attribute={consortium.catalogueSearchUrl} />
+							)
+						}
+					/>
+				</Grid>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography
+						variant="attributeTitle"
+						color={errors.description && editMode ? "error" : "primary"}
+					>
+						{t("consortium.description_title")}
+					</Typography>
+					<Controller
+						name="description"
+						control={control}
+						render={({ field }) =>
+							editMode ? (
+								<TextField
+									{...field}
+									fullWidth
+									error={!!errors.description}
+									helperText={errors.description?.message}
+								/>
+							) : (
+								<RenderAttribute attribute={consortium.description} />
+							)
+						}
+					/>
+				</Grid>
+
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeTitle">
 						{t("consortium.logo_app_header")}
 					</Typography>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					{!isEmpty(consortium?.headerImageUrl) ? (
-						<Image
-							src={consortium?.headerImageUrl}
-							alt="Uploaded content"
-							width={36}
-							height={36}
-							style={{
-								maxWidth: "200px",
-								maxHeight: "200px",
-								objectFit: "contain",
-								marginTop: "8px",
-							}}
+					{consortium.headerImageUrl ? (
+						<Box
+							component="img"
+							src={consortium.headerImageUrl}
+							sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
 						/>
 					) : (
-						<Typography variant="attributeText">
-							{t("consortium.no_file_uploaded")}
-						</Typography>
+						<Typography>{t("consortium.no_file_uploaded")}</Typography>
+					)}
+					<FileUploadButton
+						ref={appHeaderFileRef}
+						icon={<CloudUpload />}
+						buttonText={t("consortium.select_image")}
+						href="#appHeaderUpload"
+						isUploading={headerIsUploading}
+						onFileSelect={(e) =>
+							setAppHeaderPreviewUrl(URL.createObjectURL(e.target.files![0]))
+						}
+						previewUrl={appHeaderPreviewUrl}
+						handleRemove={() => setAppHeaderPreviewUrl("")}
+					/>
+					{appHeaderPreviewUrl && (
+						<Button
+							variant="outlined"
+							onClick={() => handleFileUpload(appHeaderFileRef, true)}
+							disabled={headerIsUploading}
+							sx={{ mt: 2 }}
+						>
+							{headerIsUploading ? t("common.uploading") : t("common.upload")}
+						</Button>
 					)}
 				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography>
-						{t("consortium.logo_app_header_requirements")}
-					</Typography>
-				</Grid>
-				<form
-					onSubmit={async (event) => {
-						handleAppHeaderFileUpload(event);
-					}}
-				>
-					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-						<FileUploadButton
-							ref={appHeaderFileRef}
-							icon={<CloudUpload />}
-							buttonText={t("consortium.select_image")}
-							href="#appHeaderUpload"
-							isUploading={headerIsUploading}
-							onFileSelect={handleAppHeaderFileSelect}
-							previewUrl={appHeaderPreviewUrl}
-							handleRemove={handleRemoveAppHeader}
-						/>
-						{appHeaderPreviewUrl ? (
-							<Button
-								variant="outlined"
-								type="submit"
-								disabled={headerIsUploading}
-								sx={{ mt: 2 }}
-							>
-								{headerIsUploading ? t("common.uploading") : t("common.upload")}
-							</Button>
-						) : null}
-					</Grid>
-				</form>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2">
-						{t("consortium.landing_page_title")}
-					</Typography>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="body1">
-						{t("consortium.landing_page_subheader")}
-					</Typography>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors?.websiteUrl && editMode
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
-						>
-							{t("consortium.url")}
-						</Typography>
-						<Controller
-							name="websiteUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										variant="outlined"
-										error={!!errors.websiteUrl}
-										helperText={errors.websiteUrl?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium?.websiteUrl} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors?.catalogueSearchUrl && editMode
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
-						>
-							{t("consortium.search_url")}
-						</Typography>
-						<Controller
-							name="catalogueSearchUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										variant="outlined"
-										error={!!errors.catalogueSearchUrl}
-										helperText={errors.catalogueSearchUrl?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium?.catalogueSearchUrl} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors?.description && editMode
-									? theme.palette.error.main
-									: theme.palette.primary.attributeTitle
-							}
-						>
-							{t("consortium.description_title")}
-						</Typography>
-						<Controller
-							name="description"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										variant="outlined"
-										error={!!errors.description}
-										helperText={errors.description?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium?.description} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography variant="attributeTitle">
 						{t("consortium.logo_about")}
 					</Typography>
-				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					{!isEmpty(consortium?.aboutImageUrl) ? (
-						<Image
-							src={consortium?.aboutImageUrl}
-							alt="Uploaded image for the about section"
-							width={160}
-							height={48}
-							style={{
-								maxWidth: "200px",
-								maxHeight: "200px",
-								objectFit: "contain",
-								marginTop: "8px",
-							}}
+					{consortium.aboutImageUrl ? (
+						<Box
+							component="img"
+							src={consortium.aboutImageUrl}
+							sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
 						/>
 					) : (
-						<Typography variant="attributeText">
-							{t("consortium.no_file_uploaded")}
-						</Typography>
+						<Typography>{t("consortium.no_file_uploaded")}</Typography>
+					)}
+					<FileUploadButton
+						ref={aboutFileRef}
+						icon={<CloudUpload />}
+						buttonText={t("consortium.select_image")}
+						href="#aboutFileUpload"
+						isUploading={aboutIsUploading}
+						onFileSelect={(e) =>
+							setAboutPreviewUrl(URL.createObjectURL(e.target.files![0]))
+						}
+						previewUrl={aboutPreviewUrl}
+						handleRemove={() => setAboutPreviewUrl("")}
+					/>
+					{aboutPreviewUrl && (
+						<Button
+							variant="outlined"
+							onClick={() => handleFileUpload(aboutFileRef, false)}
+							disabled={aboutIsUploading}
+							sx={{ mt: 2 }}
+						>
+							{aboutIsUploading ? t("common.uploading") : t("common.upload")}
+						</Button>
 					)}
 				</Grid>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="attributeText">
-						{t("consortium.logo_about_requirements")}
-					</Typography>
-				</Grid>
-				<form
-					onSubmit={async (event) => {
-						handleAboutFileUpload(event);
-					}}
-				>
-					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-						<FileUploadButton
-							ref={aboutFileRef}
-							icon={<CloudUpload />}
-							buttonText={t("consortium.select_image")}
-							href="#aboutFileUpload"
-							isUploading={aboutIsUploading}
-							onFileSelect={handleAboutFileSelect}
-							previewUrl={aboutPreviewUrl}
-							handleRemove={handleRemoveAbout}
-						/>
-						{aboutPreviewUrl ? (
-							<Button
-								variant="contained"
-								type="submit"
-								disabled={aboutIsUploading}
-								sx={{ mt: 2 }}
-							>
-								{aboutIsUploading ? t("common.uploading") : t("common.upload")}
-							</Button>
-						) : null}
-					</Grid>
-				</form>
 			</Grid>
+
 			<Confirmation
 				open={showConfirmationEdit}
 				onClose={() => setConfirmationEdit(false)}
 				onConfirm={handleConfirmSave}
-				type="pageEdit"
+				action="gridEdit"
 				editInformation={formatChangedFields(changedFields, consortium)}
 				entityName={consortium?.displayName}
-				entity={t("nav.consortium.name")}
-				entityId={consortium?.id}
-				gridEdit={false}
 			/>
 			<Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
-				type="unsavedChanges"
-				entityName={consortium?.displayName}
-				entity={t("nav.consortium.name")}
-				entityId={consortium?.id}
-				gridEdit={false}
+				action="unsaved"
 			/>
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
-				autoHideDuration={6000}
 				alertText={alert.text}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-				entity={t("nav.consortium.name")}
 				alertTitle={alert.title}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</AdminLayout>
 	);
-};
-
-
-
-
+}

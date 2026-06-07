@@ -10,14 +10,12 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import Loading from "@components/Loading/Loading";
 import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
-import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
 import { queries } from "@constants/patronRequestGridQueries";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
@@ -27,6 +25,7 @@ import { getLibraries } from "@queries/getLibraries";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import DataGrid from "@components/DataGrid/DataGrid";
+import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	component: All,

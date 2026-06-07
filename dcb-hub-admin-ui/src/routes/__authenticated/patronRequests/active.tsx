@@ -18,7 +18,7 @@ import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
-import { defaultPatronRequestColumnVisibility } from "@helpers/dataGrid/columns";
+import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { queries } from "@constants/patronRequestGridQueries";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";

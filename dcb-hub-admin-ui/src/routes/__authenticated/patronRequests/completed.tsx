@@ -18,16 +18,14 @@ import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
-import {
-	defaultPatronRequestColumnVisibility,
-	finishedPatronRequestColumnVisibility,
-} from "@helpers/dataGrid/columns";
 import { queries } from "@constants/patronRequestGridQueries";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
+import { finishedPatronRequestColumnVisibility } from "@columns/columnVisibility/finishedPatronRequestColumnVisibility";
+import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/completed",

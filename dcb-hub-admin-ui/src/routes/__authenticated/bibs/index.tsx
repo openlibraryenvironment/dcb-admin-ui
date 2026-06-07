@@ -1,149 +1,153 @@
+import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
-import { useTranslation } from "react-i18next";
-import { getBibs } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
-import { useTranslation } from "react-i18next";
-import { getBibs";
 
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import Loading from "@components/Loading/Loading";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
-import { equalsOnly, standardFilters } from "@helpers/dataGrid/filters";
-// import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { useCustomColumns } from "@hooks/useCustomColumns";
-import dayjs from "dayjs";
-import { luceneDateRangeOperators } from "@components/DataGrid/components/DateTimeRangeFilter";
-import { defaultBibColumnVisibility } from "@helpers/dataGrid/columns";
+// MUI X Premium Imports
+import {
+	GridRowModesModel,
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+} from "@mui/x-data-grid-premium";
 
-const Bibs: NextPage = () => {
+// Internal Components & Layouts
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
+
+// Hooks & Queries
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getBibs } from "@queries/getBibs";
+import {
+	getSortOrderForServer,
+	processGridFilterModel,
+} from "@helpers/dataGrid/utilities";
+import { standardBibColumns } from "@/columns/bibColumns";
+import { bibColumnVisibility } from "@/columns/columnVisibility/bibColumnVisbility";
+
+export const Route = createFileRoute("/__authenticated/bibs/")({
+	component: BibsRouteComponent,
+});
+
+function BibsRouteComponent() {
 	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
 
-	const router = useRouter();
-	const customColumns = useCustomColumns();
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const gridId = "sourceBibs";
 
-	// Expose only the filters we have tested. The others need to be mapped to Lucene functionality.
-	// See potential examples here https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+	} = useGridStore();
 
-	if (status === "loading") {
-		return (
-			<AdminLayout>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.bibs").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
-		);
-	}
-
-	const BibsDisplay = () => {
-		return (
-			<ServerPaginationGrid
-				query={getBibs}
-				type="bibs"
-				coreType="sourceBibs"
-				selectable={true}
-				pageSize={5}
-				noDataMessage={t("bibRecords.no_rows")}
-				noResultsMessage={t("bibRecords.no_results")}
-				// Sorting is disabled on this page because of the expensive nature of sorting millions of records.
-				// If we want to restore it, just remove the 'sortable' attributes.
-				columns={[
-					...customColumns,
-					{
-						field: "title",
-						headerName: t("details.source_bib_title"),
-						minWidth: 150,
-						flex: 0.6,
-						sortable: false,
-						filterOperators: standardFilters,
-					},
-					{
-						field: "clusterRecordId",
-						headerName: t("details.cluster_record_uuid"),
-						minWidth: 50,
-						flex: 0.5,
-						sortable: false,
-						filterOperators: equalsOnly,
-						filterable: false,
-						valueGetter: (value: any, row: { contributesTo: { id: string } }) =>
-							row?.contributesTo?.id,
-					},
-					{
-						field: "sourceRecordId",
-						headerName: t("details.source_record_id"),
-						minWidth: 50,
-						sortable: false,
-						filterOperators: standardFilters,
-						flex: 0.5,
-					},
-					{
-						field: "sourceSystemId",
-						headerName: t("details.source_system_id"),
-						minWidth: 50,
-						sortable: false,
-						filterOperators: equalsOnly,
-						flex: 0.5,
-					},
-					{
-						field: "id",
-						headerName: t("details.source_bib_uuid"),
-						minWidth: 100,
-						flex: 0.5,
-						sortable: false,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "processVersion",
-						headerName: t("details.process_version"),
-						minWidth: 100,
-						flex: 0.5,
-						sortable: false,
-						filterOperators: equalsOnly,
-					},
-					{
-						field: "dateUpdated",
-						headerName: t("details.date_updated"),
-						minWidth: 100,
-						flex: 0.5,
-						sortable: false,
-						filterOperators: luceneDateRangeOperators,
-						type: "dateTime",
-						valueGetter: (value: any, row: { dateUpdated: string }) => {
-							return row.dateUpdated ? new Date(row.dateUpdated) : null;
-						},
-						valueFormatter: (value: Date) => {
-							return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
-						},
-					},
-				]}
-				columnVisibilityModel={defaultBibColumnVisibility}
-				searchPlaceholder={t("bibRecords.search_placeholder")}
-				sortDirection="ASC"
-				sortAttribute="sourceRecordId"
-				// getDetailPanelContent={({ row }: any) => (
-				// 	<MasterDetail row={row} type="bibs" />
-				// )}
-			/>
-		);
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
 	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 25 },
+		);
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "dateCreated", sort: "desc" }],
+	);
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const {
+		data: gridData,
+		isLoading: gridLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: ["sourceBibs", gridId, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const queryVariables = {
+				query: processGridFilterModel(filterModel, "", []) ?? "",
+				pageno: paginationModel.page ?? 0,
+				pagesize: paginationModel.pageSize ?? 25,
+				order: sortModel[0]?.field ?? "dateCreated",
+				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
+			};
+
+			return gqlClient.request(getBibs, queryVariables);
+		},
+		placeholderData: (previousData) => previousData,
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
+	);
+
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
+
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
+
+	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
+
 	return (
 		<AdminLayout
 			title={t("nav.bibs")}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("reference.catalog_build")}
 		>
-			<BibsDisplay />
+			<DataGrid
+				identifier={gridId}
+				type={gridId}
+				columns={standardBibColumns}
+				columnVisibilityModel={bibColumnVisibility}
+				rows={gridData?.bibs?.content ?? []}
+				rowCount={gridData?.bibs?.totalSize ?? 0}
+				loading={shouldShowLoading}
+				paginationMode="server"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortingMode="server"
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterMode="server"
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				editMode="row"
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
+				checkboxSelection={false}
+				disableAggregation
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("audit.no_results")}
+				searchText={t("general.search")}
+			/>
 		</AdminLayout>
 	);
-};
-
-
-
-
+}

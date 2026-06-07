@@ -28,7 +28,7 @@ import {
 	closeConfirmation,
 	handleDeleteEntity,
 } from "src/helpers/actions/editAndDeleteActions";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { Delete } from "@mui/icons-material";
 import dayjs from "dayjs";

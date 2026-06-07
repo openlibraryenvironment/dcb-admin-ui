@@ -1,0 +1,205 @@
+import { useEffect, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import {
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
+	Button,
+	TextField,
+	Stack,
+	Box,
+} from "@mui/material";
+import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
+
+type ConfirmationAction =
+	| "gridEdit"
+	| "deletion"
+	| "unsaved"
+	| "uploadReplacement";
+
+interface AuditFormData {
+	reason: string;
+	changeCategory: string;
+	changeReferenceUrl: string;
+}
+
+interface ConfirmationProps {
+	open: boolean;
+	action: ConfirmationAction;
+	entityName?: string;
+	editInformation?: string | Record<string, any>;
+	customWarningText?: ReactNode;
+	onClose: () => void;
+	onConfirm: (reason: string, category: string, url: string) => void;
+}
+
+export default function Confirmation({
+	open,
+	action,
+	entityName = "Item",
+	editInformation,
+	customWarningText,
+	onClose,
+	onConfirm,
+}: ConfirmationProps) {
+	const { t } = useTranslation();
+
+	const isEdit = action === "gridEdit";
+	const isDelete = action === "deletion";
+	const isUnsaved = action === "unsaved";
+	const isUpload = action === "uploadReplacement";
+	const requiresAuditFields = isEdit || isDelete || isUpload;
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { isValid },
+	} = useForm<AuditFormData>({
+		defaultValues: {
+			reason: "",
+			changeCategory: "",
+			changeReferenceUrl: "",
+		},
+		mode: "onChange",
+	});
+
+	useEffect(() => {
+		if (open) {
+			reset({ reason: "", changeCategory: "", changeReferenceUrl: "" });
+		}
+	}, [open, reset]);
+
+	const getTitle = () => {
+		if (isEdit) return t("ui.confirmation.edit_title", { entity: entityName });
+		if (isDelete)
+			return t("ui.confirmation.delete_title", { entity: entityName });
+		if (isUnsaved) return t("ui.confirmation.unsaved_title");
+		if (isUpload)
+			return t("ui.confirmation.upload_title", { entity: entityName });
+		return t("ui.confirmation.general_title");
+	};
+
+	const onSubmit = (data: AuditFormData) => {
+		onConfirm(
+			data.reason.trim(),
+			data.changeCategory.trim(),
+			data.changeReferenceUrl.trim(),
+		);
+	};
+
+	const handleSimpleConfirm = () => {
+		onConfirm("", "", "");
+	};
+
+	return (
+		<Dialog
+			open={open}
+			onClose={onClose}
+			aria-labelledby="confirmation-dialog-title"
+			aria-describedby="confirmation-dialog-description"
+			maxWidth="md"
+			fullWidth={isEdit || isDelete || isUpload}
+		>
+			<form
+				onSubmit={
+					requiresAuditFields
+						? handleSubmit(onSubmit)
+						: (e) => {
+								e.preventDefault();
+								handleSimpleConfirm();
+							}
+				}
+			>
+				<DialogTitle id="confirmation-dialog-title">{getTitle()}</DialogTitle>
+
+				<DialogContent>
+					<DialogContentText
+						id="confirmation-dialog-description"
+						sx={{ mb: 2 }}
+					>
+						{isDelete &&
+							t("ui.confirmation.delete_warning", { entity: entityName })}
+						{isUnsaved && t("ui.confirmation.unsaved_warning")}
+						{isEdit && t("ui.confirmation.edit_review")}
+					</DialogContentText>
+
+					{isUpload && customWarningText && (
+						<Box sx={{ mb: 2 }}>{customWarningText}</Box>
+					)}
+
+					{isEdit && editInformation && (
+						<ChangesSummary
+							action="UPDATE"
+							changes={editInformation}
+							context="gridEdit"
+						/>
+					)}
+
+					{requiresAuditFields && (
+						<Stack spacing={2} sx={{ mt: 3 }}>
+							<Controller
+								name="reason"
+								control={control}
+								rules={{ required: t("validation.required") }}
+								render={({ field, fieldState }) => (
+									<TextField
+										{...field}
+										required
+										label={t("audit.reason")}
+										multiline
+										rows={2}
+										fullWidth
+										error={!!fieldState.error}
+										helperText={fieldState.error?.message}
+									/>
+								)}
+							/>
+							<Controller
+								name="changeCategory"
+								control={control}
+								render={({ field }) => (
+									<TextField {...field} label={t("audit.category")} fullWidth />
+								)}
+							/>
+							<Controller
+								name="changeReferenceUrl"
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										label={t("audit.reference_url")}
+										type="url"
+										fullWidth
+									/>
+								)}
+							/>
+						</Stack>
+					)}
+				</DialogContent>
+
+				<DialogActions sx={{ px: 3, pb: 2 }}>
+					<Button onClick={onClose} color="inherit" variant="text">
+						{isUnsaved ? t("ui.actions.keep_editing") : t("ui.actions.cancel")}
+					</Button>
+
+					<Button
+						type="submit"
+						color={isDelete || isUnsaved ? "error" : "primary"}
+						variant="contained"
+						disabled={requiresAuditFields && !isValid}
+						autoFocus={!isDelete}
+					>
+						{isDelete && t("ui.actions.confirm_delete")}
+						{isEdit && t("ui.actions.save_changes")}
+						{isUnsaved && t("ui.actions.leave_without_saving")}
+						{isUpload && t("ui.actions.confirm_upload")}
+					</Button>
+				</DialogActions>
+			</form>
+		</Dialog>
+	);
+}

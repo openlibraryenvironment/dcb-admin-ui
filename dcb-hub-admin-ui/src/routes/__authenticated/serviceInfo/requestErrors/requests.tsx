@@ -1,158 +1,242 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { GridColDef } from "@mui/x-data-grid-premium";
-import { ClientDataGrid } from "@components/ClientDataGrid";
-import axios from "axios";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-
-import { useAuth } from "react-oidc-context";
-
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { AdminLayout } from "@layout";
-import Error from "@components/Error/Error";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useAuth } from "react-oidc-context";
+import {
+	GridPaginationModel,
+	GridSortModel,
+	GridFilterModel,
+	GridColumnVisibilityModel,
+	GridColDef,
+	GridRowModesModel,
+} from "@mui/x-data-grid-premium";
+
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import DataGrid from "@components/DataGrid/DataGrid";
 import Link from "@components/Link/Link";
+import ErrorComponent from "@components/Error/Error";
+
+import { useGridStore } from "@/hooks/useDataGridStore";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/requests",
 )({
 	component: Requests,
+	validateSearch: (search: Record<string, unknown>) => {
+		return {
+			namedSql: search.namedSql as string,
+			description: search.description as string,
+		};
+	},
 });
 
-const Requests = () => {
-	const router = useRouter();
-	const { namedSql, description } = Route.useParams();
-	const { publicRuntimeConfig } = getConfig();
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+function Requests() {
 	const { t } = useTranslation();
-	const desc = String(description);
-	const match = desc.match(/(DCB-\d+)/); // Extract "DCB-XXX"
-	const ticketId = match ? match[0] : null;
-	const link = `https://openlibraryfoundation.atlassian.net/browse/${ticketId}`;
+	const auth = useAuth();
+	const { namedSql, description } = Route.useSearch();
 
-	const [requestData, setRequestData] = useState<any>([]);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(false);
-	const requestUrl = useMemo(
-		() => `${publicRuntimeConfig.VITE_DCB_API_BASE}/sql?name=${namedSql}`,
-		[namedSql, publicRuntimeConfig.VITE_DCB_API_BASE],
+	const gridId = "errorOverviewPatronRequests";
+
+	const {
+		sortModel: storedSortModel,
+		filterModel: storedFilterModel,
+		paginationModel: storedPaginationModel,
+		columnVisibilityModel: storedColumnVisibilityModel,
+		setSortModel,
+		setFilterModel,
+		setPaginationModel,
+		setColumnVisibilityModel,
+	} = useGridStore();
+
+	const storedState = {
+		sort: storedSortModel[gridId],
+		filter: storedFilterModel[gridId],
+		pagination: storedPaginationModel[gridId],
+		columnVisibility: storedColumnVisibilityModel[gridId],
+	};
+
+	const [paginationModel, setLocalPaginationModel] =
+		useState<GridPaginationModel>(
+			storedState.pagination ?? { page: 0, pageSize: 20 },
+		);
+	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
+		storedState.filter ?? { items: [] },
+	);
+	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
+		storedState.sort ?? [{ field: "Date", sort: "desc" }],
+	);
+	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
+		useState<GridColumnVisibilityModel>(storedState.columnVisibility ?? {});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const {
+		data: records,
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery({
+		queryKey: ["errorRequests", namedSql],
+		queryFn: async () => {
+			const res = await fetch(
+				`${import.meta.env.VITE_DCB_API_BASE}/sql?name=${namedSql}`,
+				{
+					headers: { Authorization: `Bearer ${auth.user?.access_token}` },
+				},
+			);
+			if (!res.ok) throw new Error("Failed to fetch request errors");
+			return res.json();
+		},
+		enabled: !!namedSql,
+	});
+
+	const handlePaginationChange = useCallback(
+		(model: GridPaginationModel) => {
+			setLocalPaginationModel(model);
+			setPaginationModel(gridId, model);
+		},
+		[gridId, setPaginationModel],
 	);
 
-	useEffect(() => {
-		const fetchRequestData = async () => {
-			setLoading(true);
-			try {
-				const response = await axios.get(requestUrl, {
-					headers: { Authorization: `Bearer ${sess?.accessToken}` },
-				});
-				setRequestData(response.data.hits);
-				setLoading(false);
-			} catch (err) {
-				console.error("Error fetching request data:", err);
-				setLoading(false);
-				setError(true);
-			}
-		};
+	const handleSortChange = useCallback(
+		(model: GridSortModel) => {
+			setLocalSortModel(model);
+			setSortModel(gridId, model);
+		},
+		[gridId, setSortModel],
+	);
 
-		if (namedSql) {
-			fetchRequestData();
-		}
-	}, [namedSql, requestUrl, sess?.accessToken]);
+	const handleFilterChange = useCallback(
+		(model: GridFilterModel) => {
+			setLocalFilterModel(model);
+			setFilterModel(gridId, model);
+		},
+		[gridId, setFilterModel],
+	);
 
-	const columns: GridColDef[] = [
-		{
-			field: "Date",
-			headerName: t("error_overview.date"),
-			minWidth: 50,
-			flex: 0.3,
+	const handleColumnVisibilityChange = useCallback(
+		(model: GridColumnVisibilityModel) => {
+			setLocalColumnVisibilityModel(model);
+			setColumnVisibilityModel(gridId, model);
 		},
-		{
-			field: "RequestId",
-			headerName: t("error_overview.request_id"),
-			minWidth: 100,
-			flex: 0.7,
-			renderCell: (params) => (
-				<Link
-					href={`/patronRequests/${params.value}`}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					{params.value}
-				</Link>
-			),
-		},
-		// {
-		// 	field: "RequestURL",
-		// 	headerName: t("error_overview.request_url"),
-		// 	minWidth: 150,
-		// 	flex: 1,
-		// },
-		{
-			field: "Requester",
-			headerName: t("error_overview.requester"),
-			minWidth: 100,
-			flex: 0.7,
-		},
-		{
-			field: "Supplier",
-			headerName: t("error_overview.supplier"),
-			minWidth: 100,
-			flex: 0.7,
-		},
-		{
-			field: "URL",
-			headerName: t("error_overview.audit_url"),
-			minWidth: 100,
-			flex: 0.7,
-			renderCell: (params) => (
-				// The URLs come to us hardcoded for production
-				// But we only need the Audit ID
-				<Link
-					href={params.value.replace(
-						"https://libraries-dcb-hub-admin-scaffold-uat-git-production-knowint.vercel.app",
-						"",
-					)}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					{t("error_overview.view_audit", {
-						audit: params.value.replace(
-							"https://libraries-dcb-hub-admin-scaffold-uat-git-production-knowint.vercel.app/patronRequests/audits/",
-							"",
-						),
-					})}
-				</Link>
-			),
-		},
-	];
+		[gridId, setColumnVisibilityModel],
+	);
 
-	return (
-		<AdminLayout title={desc} link={link}>
-			{error ? (
-				<Error
+	const columns: GridColDef[] = useMemo(
+		() => [
+			{
+				field: "Date",
+				headerName: t("error_overview.date"),
+				minWidth: 50,
+				flex: 0.3,
+			},
+			{
+				field: "RequestId",
+				headerName: t("error_overview.request_id"),
+				minWidth: 100,
+				flex: 0.7,
+				renderCell: (params) => (
+					<Link
+						to={`/patronRequests/${params.value}`}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{params.value}
+					</Link>
+				),
+			},
+			{
+				field: "Requester",
+				headerName: t("error_overview.requester"),
+				minWidth: 100,
+				flex: 0.7,
+			},
+			{
+				field: "Supplier",
+				headerName: t("error_overview.supplier"),
+				minWidth: 100,
+				flex: 0.7,
+			},
+			{
+				field: "URL",
+				headerName: t("error_overview.audit_url"),
+				minWidth: 100,
+				flex: 0.7,
+				renderCell: (params) => {
+					const url = params.value as string;
+					if (!url) return "";
+					// Extract UUID robustly instead of hardcoded string replacement
+					const auditId = url.split("/").pop();
+					return (
+						<Link
+							to={`/patronRequests/audits/${auditId}`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{t("error_overview.view_audit", { audit: auditId })}
+						</Link>
+					);
+				},
+			},
+		],
+		[t],
+	);
+
+	const match = description?.match(/(DCB-\d+)/);
+	const ticketId = match ? match[0] : null;
+	const linkUrl = ticketId
+		? `https://openlibraryfoundation.atlassian.net/browse/${ticketId}`
+		: undefined;
+
+	if (isError) {
+		return (
+			<AdminLayout title={description} link={linkUrl}>
+				<ErrorComponent
 					title={t("error_overview.error_loading")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.reload")}
 					action={t("ui.action.reload")}
-					reload
+					// onClick={refetch}
 				/>
-			) : (
-				<ClientDataGrid
-					columns={columns}
-					data={requestData ?? []}
-					type="errorOverviewPatronRequests"
-					coreType="ErrorOverviewResults"
-					loading={loading}
-					selectable={false}
-					noDataTitle={t("error_overview.no_results")}
-					sortModel={[{ field: "Date", sort: "desc" }]}
-					operationDataType="PatronRequest"
-					disableAggregation={true}
-					disableRowGrouping={true}
-				/>
-			)}
+			</AdminLayout>
+		);
+	}
+
+	return (
+		<AdminLayout title={description} link={linkUrl}>
+			<DataGrid
+				identifier={gridId}
+				type={gridId}
+				columns={columns}
+				rows={records?.hits ?? []}
+				loading={isLoading}
+				paginationMode="client"
+				sortingMode="client"
+				filterMode="client"
+				pagination
+				paginationModel={paginationModel}
+				onPaginationModelChange={handlePaginationChange}
+				sortModel={sortModel}
+				onSortModelChange={handleSortChange}
+				filterModel={filterModel}
+				onFilterModelChange={handleFilterChange}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				editMode="row"
+				rowModesModel={rowModesModel}
+				onRowModesModelChange={setRowModesModel}
+				checkboxSelection={false}
+				disableAggregation
+				disableHoverInteractions={false}
+				disableRowGrouping
+				disablePivoting
+				listViewEnabled={false}
+				pivotingEnabled={false}
+				toolbarVisible
+				scrollbarVisible={false}
+				noResultsText={t("error_overview.no_results")}
+				searchText={t("general.search")}
+			/>
 		</AdminLayout>
 	);
-};
+}

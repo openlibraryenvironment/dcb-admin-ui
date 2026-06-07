@@ -41,7 +41,7 @@ import { useState } from "react";
 import { getILS } from "src/helpers/getILS";
 import { Delete } from "@mui/icons-material";
 import { adminOrConsortiumAdmin } from "src/constants/roles";
-import Confirmation from "@components/Upload/Confirmation/Confirmation";
+import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { handleTabChange } from "src/helpers/navigation/handleTabChange";
 import {

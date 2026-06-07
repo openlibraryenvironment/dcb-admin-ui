@@ -1,165 +1,90 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { AdminLayout } from "@layout";
-import { AuditItem } from "@models/AuditItem";
-import {
-	Button } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { AdminLayout } from "@layout";
-import { AuditItem } from "@models/AuditItem";
-import {
-	Button";
-import { CircularProgress } from "@queries/CircularProgress";
-import { Grid } from "@queries/Grid";
-import { Stack } from "@queries/Stack";
-import { Tooltip } from "@queries/Tooltip";
-import { Typography } from "@queries/Typography";
-import { } from "@mui/material";
 import { useTranslation } from "react-i18next";
-
-import { useNavigate } from "@queries/} from "@mui/material";
-import { useTranslation } from "react-i18next";
-
-import { useNavigate";
-import { useRouter } from "@tanstack/react-router";
-import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { getAuditById } from "@queries/useRouter } from "@tanstack/react-router";
-import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { getAuditById";
-import { getAuditsByPatronRequest } from "@queries/getAuditsByPatronRequest";
-import Loading from "@components/Loading/Loading";
-import Error from "@components/Error/Error";
-import { useAuth } from "react-oidc-context";
-import { isEmpty } from "lodash";
-import { ArrowLeft, ArrowRight } from "@mui/icons-material";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import { ArrowLeft, ArrowRight } from "@mui/icons-material";
+import {
+	Button,
+	CircularProgress,
+	Grid,
+	Stack,
+	Tooltip,
+	Typography,
+} from "@mui/material";
 
-export const Route = createFileRoute("/__authenticated/patronRequests/audits/$auditId/")({
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import Loading from "@components/Loading/Loading";
+import ErrorComponent from "@components/Error/Error";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getAuditById } from "@queries/getAuditById";
+import { getAuditsByPatronRequest } from "@queries/getAuditByPatronRequest";
+import { AuditItem } from "@models/AuditItem";
+
+export const Route = createFileRoute(
+	"/__authenticated/patronRequests/audits/$auditId/",
+)({
 	component: AuditDetails,
 });
 
 function AuditDetails() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const { id } = Route.useParams(); // TODO: verify parameter name matches TanStack route
-	const { loading, data, error } = useQuery(getAuditById, {
-		variables: {
-			query: "id:" + auditId,
-		},
-		pollInterval: 120000,
-		errorPolicy: "all",
-		skip: !auditId,
+	const { auditId } = Route.useParams();
+	const gqlClient = useGraphQLClient();
+
+	const { data, isLoading, error } = useQuery({
+		queryKey: ["audit", auditId],
+		queryFn: () =>
+			gqlClient.request<any>(getAuditById, { query: `id:${auditId}` }),
+		enabled: !!auditId,
+		refetchInterval: 120000,
 	});
+
 	const audit: AuditItem = data?.audits?.content?.[0];
-	// use patron request ID from audit to find the other audits known to it
 	const patronRequestId =
-		audit?.patronRequest.id ?? audit?.auditData.patronRequestId;
+		audit?.patronRequest?.id ?? audit?.auditData?.patronRequestId;
+	const auditDate = audit?.auditDate;
 
-	const {
-		loading: otherAuditsLoading,
-		data: otherAuditsData,
-		error: otherAuditsError,
-		fetchMore,
-	} = useQuery(getAuditsByPatronRequest, {
-		variables: {
-			query: "patronRequest:" + patronRequestId,
-			order: "auditDate",
-			orderBy: "ASC",
-			pagesize: 100,
-			pageno: 0,
-		},
-		skip: !patronRequestId,
-		errorPolicy: "all",
-		onCompleted: async (data) => {
-			if (data.audits.content.length < data.audits.totalSize) {
-				const totalPages = Math.ceil(data.audits.totalSize / 100);
-				// Fetch pages in sequence to maintain the order - as order is key here
-				for (let page = 1; page < totalPages; page++) {
-					try {
-						await fetchMore({
-							variables: {
-								pageno: page,
-							},
-							updateQuery: (prev, { fetchMoreResult }) => {
-								if (!fetchMoreResult) return prev;
-								// Let's combine and sort all additional items by auditdate
-								const allContent = [
-									...prev.audits.content,
-									...fetchMoreResult.audits.content,
-								];
-
-								const sortedContent = allContent.sort((a, b) => {
-									return (
-										new Date(a.auditDate).getTime() -
-										new Date(b.auditDate).getTime()
-									);
-								});
-
-								return {
-									audits: {
-										...fetchMoreResult.audits,
-										content: sortedContent,
-									},
-								};
-							},
-						});
-					} catch (error) {
-						console.error(`Error fetching page ${page}:`, error);
-						break; // There's an error: stop fetching
-					}
-				}
-			}
-		},
+	// Fetch specifically the single NEXT (newer) audit entry
+	const { data: nextAuditData, isLoading: nextLoading } = useQuery({
+		queryKey: ["audit", "next", patronRequestId, auditDate],
+		queryFn: () =>
+			gqlClient.request<any>(getAuditsByPatronRequest, {
+				query: `patronRequest:${patronRequestId} AND auditDate>${auditDate}`,
+				order: "auditDate",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1,
+			}),
+		enabled: !!patronRequestId && !!auditDate,
 	});
-	// Figure out our position in the list of audits
-	// We only need to understand 'next' and 'previous' and get their IDs so we can link.
-	const otherAudits = otherAuditsData?.audits?.content ?? [];
-	console.log(
-		"Audit dates in order:",
-		otherAudits.map((audit: { auditDate: any; id: any }) => ({
-			date: audit.auditDate,
-			id: audit.id,
-		})),
-	);
 
-	const currentAuditIndex = otherAudits.findIndex(
-		(item: AuditItem) => item.id === auditId,
-	);
-	console.log(currentAuditIndex);
-	// Then grab previous and next audit entries.
-	const previousAudit =
-		currentAuditIndex > 0 ? otherAudits[currentAuditIndex - 1] : null;
-	const nextAudit =
-		currentAuditIndex < otherAudits.length - 1
-			? otherAudits[currentAuditIndex + 1]
-			: null;
+	// Fetch specifically the single PREVIOUS (older) audit entry
+	const { data: prevAuditData, isLoading: prevLoading } = useQuery({
+		queryKey: ["audit", "prev", patronRequestId, auditDate],
+		queryFn: () =>
+			gqlClient.request<any>(getAuditsByPatronRequest, {
+				query: `patronRequest:${patronRequestId} AND auditDate<${auditDate}`,
+				order: "auditDate",
+				orderBy: "DESC", // Sort descending to get the most recent older entry
+				pageno: 0,
+				pagesize: 1,
+			}),
+		enabled: !!patronRequestId && !!auditDate,
+	});
 
-	// previous is older
-	const previousAuditId =
-		currentAuditIndex > 0 ? otherAudits[currentAuditIndex - 1]?.id : null;
+	const nextAudit = nextAuditData?.audits?.content?.[0];
+	const previousAudit = prevAuditData?.audits?.content?.[0];
 
-	// next is newer
-	const nextAuditId =
-		currentAuditIndex < otherAudits.length - 1
-			? otherAudits[currentAuditIndex + 1]?.id
-			: null;
-
-	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	// Link to the original patron request so users can get back
-	const handleReturn = () => {
-		router.push(`/patronRequests/${audit?.patronRequest?.id}` + `#auditlog`);
+	const handleNavigate = (targetId: string | undefined) => {
+		if (targetId) router.navigate({ to: `/patronRequests/audits/${targetId}` });
 	};
 
-	const handleNavigate = (auditId: string | null) => {
-		if (auditId) {
-			router.push(`/patronRequests/audits/${auditId}`);
-		}
-	};
-	const goBackLink: string =
-		`/patronRequests/${audit?.patronRequest?.id}` + `#auditlog`;
-	if (loading || status === "loading") {
+	const goBackLink = `/patronRequests/${patronRequestId}#auditlog`;
+
+	if (isLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -172,103 +97,50 @@ function AuditDetails() {
 		);
 	}
 
-	return error || audit == null || audit == undefined ? (
-		<AdminLayout hideBreadcrumbs>
-			{error ? (
-				<Error
-					title={t("ui.error.cannot_retrieve_record")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.try_later")}
+	if (error || !audit) {
+		return (
+			<AdminLayout hideBreadcrumbs>
+				<ErrorComponent
+					title={
+						error
+							? t("ui.error.cannot_retrieve_record")
+							: t("ui.error.cannot_find_record")
+					}
+					message={
+						error ? t("ui.info.connection_issue") : t("ui.error.invalid_UUID")
+					}
+					description={
+						error ? t("ui.info.try_later") : t("ui.info.check_address")
+					}
 					action={t("ui.action.go_back")}
 					goBack={goBackLink}
 				/>
-			) : (
-				<Error
-					title={t("ui.error.cannot_find_record")}
-					message={t("ui.error.invalid_UUID")}
-					description={t("ui.info.check_address")}
-					action={t("ui.action.go_back")}
-					goBack={goBackLink}
-				/>
-			)}
-		</AdminLayout>
-	) : (
-		<AdminLayout title={audit?.id}>
+			</AdminLayout>
+		);
+	}
+
+	return (
+		<AdminLayout title={audit.id}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 2, sm: 2, md: 2, lg: 2 }}
 			>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.audit_uuid")}
-						</Typography>
-						<RenderAttribute attribute={audit?.id} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.audit_date")}
-						</Typography>
-						<RenderAttribute
-							attribute={dayjs(audit?.auditDate).format(
-								"YYYY-MM-DD HH:mm:ss.SSS",
-							)}
-						/>
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.audit_description")}
-						</Typography>
-						<RenderAttribute attribute={audit?.briefDescription} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.audit_from_status")}
-						</Typography>
-						<RenderAttribute attribute={audit?.fromStatus} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.audit_to_status")}
-						</Typography>
-						<RenderAttribute attribute={audit?.toStatus} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("details.patron_request_uuid")}
-						</Typography>
-						<RenderAttribute attribute={audit?.patronRequest?.id} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Typography variant="attributeTitle">{t("details.audit")}</Typography>
-					<pre>{JSON.stringify(audit?.auditData, null, 2)}</pre>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+				<Grid size={{ xs: 2, sm: 2, md: 2 }}>
 					<Stack direction="row" justifyContent="space-between" width="100%">
-						{/* Left side */}
-						<Button variant="contained" onClick={handleReturn}>
+						<Button
+							variant="contained"
+							onClick={() => router.navigate({ to: goBackLink })}
+						>
 							{t("details.patron_request_return")}
 						</Button>
 
-						{/* Right side */}
 						<Stack direction="row" spacing={2}>
 							<Tooltip
 								title={
-									previousAuditId
+									previousAudit
 										? t("ui.info.description", {
-												description: previousAudit?.briefDescription,
+												description: previousAudit.briefDescription,
 											})
 										: t("ui.info.oldest_entry")
 								}
@@ -276,10 +148,10 @@ function AuditDetails() {
 								<span>
 									<Button
 										variant="outlined"
-										onClick={() => handleNavigate(previousAuditId)}
-										disabled={!previousAuditId || !isEmpty(otherAuditsError)}
+										onClick={() => handleNavigate(previousAudit?.id)}
+										disabled={!previousAudit}
 										startIcon={
-											otherAuditsLoading ? (
+											prevLoading ? (
 												<CircularProgress size={20} />
 											) : (
 												<ArrowLeft />
@@ -290,11 +162,12 @@ function AuditDetails() {
 									</Button>
 								</span>
 							</Tooltip>
+
 							<Tooltip
 								title={
-									nextAuditId
+									nextAudit
 										? t("ui.info.description", {
-												description: nextAudit?.briefDescription,
+												description: nextAudit.briefDescription,
 											})
 										: t("ui.info.newest_entry")
 								}
@@ -302,10 +175,10 @@ function AuditDetails() {
 								<span>
 									<Button
 										variant="outlined"
-										onClick={() => handleNavigate(nextAuditId)}
-										disabled={!nextAuditId || !isEmpty(otherAuditsError)}
+										onClick={() => handleNavigate(nextAudit?.id)}
+										disabled={!nextAudit}
 										endIcon={
-											otherAuditsLoading ? (
+											nextLoading ? (
 												<CircularProgress size={20} />
 											) : (
 												<ArrowRight />
@@ -319,11 +192,73 @@ function AuditDetails() {
 						</Stack>
 					</Stack>
 				</Grid>
+
+				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.audit_uuid")}
+						</Typography>
+						<RenderAttribute attribute={audit.id} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.audit_date")}
+						</Typography>
+						<RenderAttribute
+							attribute={dayjs(audit.auditDate).format(
+								"YYYY-MM-DD HH:mm:ss.SSS",
+							)}
+						/>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.audit_description")}
+						</Typography>
+						<RenderAttribute attribute={audit.briefDescription} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.audit_from_status")}
+						</Typography>
+						<RenderAttribute attribute={audit.fromStatus} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.audit_to_status")}
+						</Typography>
+						<RenderAttribute attribute={audit.toStatus} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">
+							{t("details.patron_request_uuid")}
+						</Typography>
+						<RenderAttribute attribute={audit.patronRequest?.id} />
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 2, md: 2 }}>
+					<Typography variant="attributeTitle">{t("details.audit")}</Typography>
+					<pre
+						style={{
+							overflowX: "auto",
+							padding: "1rem",
+							backgroundColor: "#f5f5f5",
+							borderRadius: "4px",
+						}}
+					>
+						{JSON.stringify(audit.auditData, null, 2)}
+					</pre>
+				</Grid>
 			</Grid>
 		</AdminLayout>
 	);
 }
-
-
-
-

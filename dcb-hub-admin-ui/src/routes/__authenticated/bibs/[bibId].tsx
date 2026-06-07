@@ -1,33 +1,13 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useLazyQuery } from "@queries/createFileRoute } from "@tanstack/react-router";
-import { useLazyQuery";
-import { useQuery } from "@apollo/client";
-import { AdminLayout } from "@layout";
-import { Bib } from "@models/Bib";
-import Link from "@components/Link/Link";
-import { AccordionSummary } from "@queries/useQuery } from "@apollo/client";
-import { AdminLayout } from "@layout";
-import { Bib } from "@models/Bib";
-import Link from "@components/Link/Link";
-import { AccordionSummary";
-import { Grid } from "@queries/Grid";
-import { Stack } from "@queries/Stack";
-import { Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
-
-import { useState } from "react";
+import { useAuth } from "react-oidc-context";
+import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
-import {
-	getAgency } from "@queries/Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
 
-import { useState } from "react";
-import { ExpandMore } from "@mui/icons-material";
-import {
-	getAgency";
-import { getBibMainDetails } from "@queries/getBibMainDetails";
-import { getBibSourceRecord } from "@queries/getBibSourceRecord";
-import { getLibraryBasics } from "@queries/getLibraryBasics";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -36,111 +16,94 @@ import {
 	StyledAccordionDetails,
 	StyledAccordionButton,
 } from "@components/StyledAccordion/StyledAccordion";
-import { useAuth } from "react-oidc-context";
-import { useNavigate, useRouter } from "@tanstack/react-router";
 
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getBibMainDetails } from "@queries/getBibMainDetails";
+import { getBibSourceRecord } from "@queries/getBibSourceRecord";
+import { getAgency } from "@queries/getAgency";
+import { getLibraryBasics } from "@queries/getLibraryBasics";
+
+import { Bib } from "@models/Bib";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
 
-export const Route = createFileRoute("/__authenticated/bibs/bibId")({
+export const Route = createFileRoute("/__authenticated/bibs/$bibId")({
 	component: SourceBibDetails,
 });
 
 function SourceBibDetails() {
 	const { t } = useTranslation();
-	const router = useRouter();
-	const { bibId  } = Route.useParams();
-
-	const { loading, data, error } = useQuery(getBibMainDetails, {
-		variables: {
-			query: "id:" + bibId,
-		},
-		errorPolicy: "all",
-		skip: !bibId,
-		// pollInterval: 600000, // Polling disabled on bib record page to reduce server load.
-	});
-	const { publicRuntimeConfig } = getConfig();
-
-	const [
-		fetchSourceRecord,
-		{ loading: sourceRecordLoading, data: sourceRecordData },
-	] = useLazyQuery(getBibSourceRecord);
-
+	const { bibId } = Route.useParams();
+	const gqlClient = useGraphQLClient();
 	const auth = useAuth();
+
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const bib: Bib = data?.sourceBibs?.content?.[0];
-	const sourceSystemUrl = bib?.sourceSystemId
-		? "/hostlmss/" + bib?.sourceSystemId
-		: "";
-	// source system ID -> Host LMS -> agency -> Library
-	// May be able to skip host lms query
-	const { data: bibAgencyData } = useQuery(getAgency, {
-		variables: {
-			query: "hostLms: " + bib?.sourceSystemId,
-			pageno: 0,
-			pagesize: 10,
-			order: "code",
-			orderBy: "ASC",
-		},
-		skip: !bib?.sourceSystemId,
-		errorPolicy: "all",
+	const [isCanonicalExpanded, setIsCanonicalExpanded] = useState(true);
+	const [isSourceRecordExpanded, setIsSourceRecordExpanded] = useState(false);
+
+	const {
+		data: bibData,
+		isLoading: bibLoading,
+		error: bibError,
+	} = useQuery({
+		queryKey: ["bib", bibId],
+		queryFn: () =>
+			gqlClient.request<any>(getBibMainDetails, { query: `id:${bibId}` }),
+		enabled: !!bibId,
 	});
-	const bibAgency: Agency = bibAgencyData?.agencies?.content?.[0];
-	const { data: bibLibraryData } = useQuery(getLibraryBasics, {
-		variables: {
-			query: "agencyCode:" + bibAgency?.code,
-			pageno: 0,
-			pagesize: 10,
-			order: "agencyCode",
-			orderBy: "ASC",
-		},
-		// pollInterval: 180000,
-		skip: !bibAgency?.code,
-		errorPolicy: "all",
+
+	const bib: Bib = bibData?.sourceBibs?.content?.[0];
+	const sourceSystemId = bib?.sourceSystemId;
+	const sourceSystemUrl = sourceSystemId ? `/hostlmss/${sourceSystemId}` : "";
+
+	const { data: agencyData } = useQuery({
+		queryKey: ["agency", "byHostLms", sourceSystemId],
+		queryFn: () =>
+			gqlClient.request<any>(getAgency, {
+				query: `hostLms: ${sourceSystemId}`,
+				pageno: 0,
+				pagesize: 10,
+				order: "code",
+				orderBy: "ASC",
+			}),
+		enabled: !!sourceSystemId,
 	});
-	const bibLibrary: Library = bibLibraryData?.libraries?.content?.[0];
 
-	const [expandedAccordions, setExpandedAccordions] = useState([
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		true,
-		false,
-		false,
-	]);
+	const bibAgency: Agency = agencyData?.agencies?.content?.[0];
+	const agencyCode = bibAgency?.code;
 
-	// Functions to handle expanding both individual accordions and all accordions
-	const handleAccordionChange = (index: number) => () => {
-		setExpandedAccordions((prevExpanded) => {
-			const newExpanded = [...prevExpanded];
-			newExpanded[index] = !newExpanded[index];
-			if (index === 8 && !prevExpanded[8]) {
-				fetchSourceRecord({
-					variables: {
-						query: "id:" + bibId + " && title:*",
-						// This is a workaround to deal with Apollo treating these two queries as having the same cache query key
-						// And thus re-fetching one when the other is fired because it thinks that the cache has been changed.
-						// By specifying an additional useless parameter as an AND, we get round this.
-						// But only as an AND with the UUID- so it will only fetch the bib matching the UUID
-					},
-				});
-			}
-			return newExpanded;
-		});
+	const { data: libraryData } = useQuery({
+		queryKey: ["library", "byAgencyCode", agencyCode],
+		queryFn: () =>
+			gqlClient.request<any>(getLibraryBasics, {
+				query: `agencyCode:${agencyCode}`,
+				pageno: 0,
+				pagesize: 10,
+				order: "agencyCode",
+				orderBy: "ASC",
+			}),
+		enabled: !!agencyCode,
+	});
+
+	const bibLibrary: Library = libraryData?.libraries?.content?.[0];
+
+	const { data: sourceRecordData, isLoading: sourceRecordLoading } = useQuery({
+		queryKey: ["bibSourceRecord", bibId],
+		queryFn: () =>
+			gqlClient.request<any>(getBibSourceRecord, { query: `id:${bibId}` }),
+		enabled: isSourceRecordExpanded && !!bibId,
+	});
+
+	const toggleExpandAll = () => {
+		const targetState = !isCanonicalExpanded;
+		setIsCanonicalExpanded(targetState);
+		setIsSourceRecordExpanded(targetState);
 	};
 
-	// Works for closing + expanding as it sets values to their opposite
-	const expandAll = () => {
-		setExpandedAccordions((prevExpanded) =>
-			prevExpanded.map(() => !prevExpanded[0]),
-		);
-	};
-	if (loading || status == "loading") {
+	if (bibLoading) {
 		return (
 			<AdminLayout hideBreadcrumbs>
 				<Loading
@@ -153,41 +116,46 @@ function SourceBibDetails() {
 		);
 	}
 
-	return error || bib == null || bib == undefined ? (
-		<AdminLayout hideBreadcrumbs>
-			{error ? (
+	if (bibError || !bib) {
+		return (
+			<AdminLayout hideBreadcrumbs>
 				<Error
-					title={t("ui.error.cannot_retrieve_record")}
-					message={t("ui.info.connection_issue")}
-					description={t("ui.info.try_later")}
+					title={
+						bibError
+							? t("ui.error.cannot_retrieve_record")
+							: t("ui.error.cannot_find_record")
+					}
+					message={
+						bibError
+							? t("ui.info.connection_issue")
+							: t("ui.error.invalid_UUID")
+					}
+					description={
+						bibError ? t("ui.info.try_later") : t("ui.info.check_address")
+					}
 					action={t("ui.action.go_back")}
 					goBack="/bibs"
 				/>
-			) : (
-				<Error
-					title={t("ui.error.cannot_find_record")}
-					message={t("ui.error.invalid_UUID")}
-					description={t("ui.info.check_address")}
-					action={t("ui.action.go_back")}
-					goBack="/bibs"
-				/>
-			)}
-		</AdminLayout>
-	) : (
+			</AdminLayout>
+		);
+	}
+
+	return (
 		<AdminLayout title={bib?.title}>
 			<Stack direction="row" justifyContent="end">
-				<StyledAccordionButton onClick={expandAll}>
-					{expandedAccordions[0] ? t("details.collapse") : t("details.expand")}
+				<StyledAccordionButton onClick={toggleExpandAll}>
+					{isCanonicalExpanded ? t("details.collapse") : t("details.expand")}
 				</StyledAccordionButton>
 			</Stack>
+
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-				sx={{ marginBottom: "5px" }}
+				sx={{ mb: "5px" }}
 			>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.source_bib_uuid")}
 						</Typography>
@@ -195,7 +163,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.title")}
 						</Typography>
@@ -203,7 +171,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.author")}
 						</Typography>
@@ -211,18 +179,17 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.source_library")}
 						</Typography>
 						{bibLibrary?.fullName ? (
 							<Link
-								href={"/libraries/" + bibLibrary?.id}
-								key="pickupLibraryLink"
-								title={bibLibrary?.fullName}
+								href={`/libraries/${bibLibrary.id}`}
+								title={bibLibrary.fullName}
 								underline="hover"
 							>
-								<RenderAttribute attribute={bibLibrary?.fullName} />
+								<RenderAttribute attribute={bibLibrary.fullName} />
 							</Link>
 						) : (
 							<RenderAttribute attribute={bibLibrary?.fullName} />
@@ -230,16 +197,15 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.source_system_uuid")}
 						</Typography>
-						{sourceSystemUrl == "" ? (
+						{sourceSystemUrl === "" ? (
 							<RenderAttribute attribute={bib?.sourceSystemId} />
 						) : (
 							<Link
 								href={sourceSystemUrl}
-								key="sourceSystemUrl"
 								title={t("link.host_lms_tip")}
 								underline="hover"
 							>
@@ -249,7 +215,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.source_record_id")}
 						</Typography>
@@ -257,18 +223,16 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.contributor_uuid")}
 						</Typography>
-						{publicRuntimeConfig.VITE_DCB_SEARCH_BASE ? (
+						{import.meta.env.VITE_DCB_SEARCH_BASE ? (
 							<Typography variant="attributeText" component="div">
 								<Link
 									href={`/search/${bib?.contributesTo?.id}/cluster`}
 									underline="hover"
-									onClick={(e) => {
-										e.stopPropagation();
-									}}
+									onClick={(e: any) => e.stopPropagation()}
 								>
 									<RenderAttribute attribute={bib?.contributesTo?.id} />
 								</Link>
@@ -279,7 +243,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.contributor_title")}
 						</Typography>
@@ -287,7 +251,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.process_version")}
 						</Typography>
@@ -295,7 +259,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.metadata_score")}
 						</Typography>
@@ -303,7 +267,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.publisher")}
 						</Typography>
@@ -311,7 +275,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.publication_place")}
 						</Typography>
@@ -319,7 +283,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.publication_date")}
 						</Typography>
@@ -327,7 +291,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.edition")}
 						</Typography>
@@ -335,7 +299,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.large_print")}
 						</Typography>
@@ -343,7 +307,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.cluster_reason")}
 						</Typography>
@@ -351,7 +315,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.record_type")}
 						</Typography>
@@ -359,7 +323,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.date_created")}
 						</Typography>
@@ -367,7 +331,7 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+					<Stack direction="column">
 						<Typography variant="attributeTitle">
 							{t("details.date_updated")}
 						</Typography>
@@ -375,10 +339,11 @@ function SourceBibDetails() {
 					</Stack>
 				</Grid>
 			</Grid>
+
 			<StyledAccordion
 				variant="outlined"
-				expanded={expandedAccordions[0]}
-				onChange={handleAccordionChange(0)}
+				expanded={isCanonicalExpanded}
+				onChange={() => setIsCanonicalExpanded(!isCanonicalExpanded)}
 				disableGutters
 			>
 				<AccordionSummary
@@ -394,10 +359,11 @@ function SourceBibDetails() {
 					<pre>{JSON.stringify(bib?.canonicalMetadata, null, 2)}</pre>
 				</StyledAccordionDetails>
 			</StyledAccordion>
+
 			<StyledAccordion
 				variant="outlined"
-				expanded={expandedAccordions[8]}
-				onChange={handleAccordionChange(8)}
+				expanded={isSourceRecordExpanded}
+				onChange={() => setIsSourceRecordExpanded(!isSourceRecordExpanded)}
 				disableGutters
 			>
 				<AccordionSummary
@@ -431,7 +397,3 @@ function SourceBibDetails() {
 		</AdminLayout>
 	);
 }
-
-
-
-
