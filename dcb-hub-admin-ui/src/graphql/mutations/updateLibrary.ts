@@ -1,6 +1,6 @@
 import { gql } from "graphql-request";
 
-export const updateLibraryQuery = gql`
+export const updateLibraryMutation = gql`
 	mutation UpdateLibrary($input: UpdateLibraryInput!) {
 		updateLibrary(input: $input) {
 			id

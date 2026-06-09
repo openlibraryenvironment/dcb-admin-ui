@@ -20,7 +20,7 @@ import {
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
 
 export const Route = createFileRoute(
-	"/__authenticated/serviceInfo/dataChangeLogs/$dataChangeLogId",
+	"/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId",
 )({
 	component: DataChangeLogDetails,
 });

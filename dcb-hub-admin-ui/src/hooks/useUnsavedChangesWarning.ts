@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useBlocker } from "@tanstack/react-router";
 
-export function useUnsavedChangesWarning(isDirty: boolean) {
+export function useUnsavedChangesWarning(
+	isDirty: boolean,
+	onKeepEditing?: () => void,
+	onLeaveWithoutSaving?: () => void,
+) {
 	const { proceed, reset, status, next } = useBlocker({
 		shouldBlockFn: () => isDirty,
 		withResolver: true,
@@ -21,7 +25,13 @@ export function useUnsavedChangesWarning(isDirty: boolean) {
 
 	return {
 		showUnsavedChangesModal: status === "blocked",
-		handleKeepEditing: () => reset?.(),
-		handleLeaveWithoutSaving: () => proceed?.(),
+		handleKeepEditing: () => {
+			onKeepEditing?.();
+			reset?.();
+		},
+		handleLeaveWithoutSaving: () => {
+			onLeaveWithoutSaving?.();
+			proceed?.();
+		},
 	};
 }

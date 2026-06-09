@@ -17,7 +17,7 @@ import { getClusters } from "@queries/getClusters";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { useState } from "react";
 
-export const Route = createFileRoute("/__authenticated/search/$clusterId/")({
+export const Route = createFileRoute("/__authenticated/search/$clusterId/cluster")({
 	component: ClusterDetails,
 });
 

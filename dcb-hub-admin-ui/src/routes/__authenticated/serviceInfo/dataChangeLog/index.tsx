@@ -29,7 +29,7 @@ import { getDataChangeLog } from "@queries/getDataChangeLog";
 import { dataChangeLogColumns } from "@columns/dataChangeLogColumns";
 
 export const Route = createFileRoute(
-	"/__authenticated/serviceInfo/dataChangeLogs/",
+	"/__authenticated/serviceInfo/dataChangeLog/",
 )({
 	component: DataChangeLogsGrid,
 });

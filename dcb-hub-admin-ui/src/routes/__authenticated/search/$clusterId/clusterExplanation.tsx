@@ -24,7 +24,7 @@ import { parseClusteringAuditLog } from "@helpers/parseClusteringAuditLog";
 import { defaultClusterExplanationVisibility } from "@columns/columnVisibility/defaultClusterExplanationVisibility";
 
 export const Route = createFileRoute(
-	"/__authenticated/search/$clusterId/explanation",
+	"/__authenticated/search/$clusterId/clusterExplanation",
 )({
 	component: ClusterExplanation,
 });

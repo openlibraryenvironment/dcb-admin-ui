@@ -1,17 +1,15 @@
 import { dateTimeRangeOperators } from "@filters/dateTimeRangeOperators";
-import {
-	containsOnly,
-	durationFilters,
-	equalsOnly,
-	isOnly,
-	standardFilters,
-} from "@constants/filters/filters";
 import { dcbStatusValueOptions } from "@constants/statuses/DCBStatuses";
 import { dcbWorkflowOptions } from "@constants/workflows/DCBWorkflows";
 import { formatDuration } from "@helpers/formatDuration";
 import { PatronRequest } from "@models/PatronRequest";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import dayjs from "dayjs";
+import { isOnly } from "@filters/isOnly";
+import { containsOnly } from "@filters/containsOnly";
+import { equalsOnly } from "@filters/equalsOnly";
+import { standardFilters } from "@filters/standardFilters";
+import { durationFilters } from "@filters/durationFilters";
 
 export const standardSupplierRequestColumns: GridColDef[] = [
 	{
