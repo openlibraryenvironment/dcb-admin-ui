@@ -1,5 +1,9 @@
-import { useMutation } from "@apollo/client";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Box,
 	Button,
@@ -15,20 +19,18 @@ import {
 	Select,
 	TextField,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
-import { createLocation, getLocations } from "src/queries/queries";
-import { getLocalId } from "src/helpers/getLocalId";
+
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getLocalId } from "@helpers/getLocalId";
+import { createLocation } from "@mutations/createLocation";
 
 interface NewLocationFormData {
 	code: string;
 	name: string;
 	isPickup: boolean;
-	latitude: number;
-	longitude: number;
+	latitude: number | null;
+	longitude: number | null;
 	isEnabledForPickupAnywhere: boolean;
 	printLabel?: string;
 	localId?: string;
@@ -47,6 +49,7 @@ type NewLocationFormType = {
 	libraryName: string;
 	type: string;
 };
+
 interface ServerError {
 	message: string;
 	field?: string;
@@ -62,24 +65,28 @@ export default function NewLocation({
 	ils,
 }: NewLocationFormType) {
 	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+
+	const [alert, setAlert] = useState({
+		open: false,
+		severity: "success",
+		text: "",
+	});
+
 	const validationSchema = Yup.object().shape({
 		code: Yup.string()
 			.required(
-				t("ui.validation.required", {
-					field: t("details.location_code"),
-				}),
+				t("ui.validation.required", { field: t("details.location_code") }),
 			)
-			.max(200, t("ui.validation.max_length", { length: 200 })),
+			.max(200),
 		name: Yup.string()
 			.required(
-				t("ui.validation.required", {
-					field: t("details.location_name"),
-				}),
+				t("ui.validation.required", { field: t("details.location_name") }),
 			)
-			.max(255, t("ui.validation.max_length", { length: 255 })),
+			.max(255),
 		localId: Yup.string()
-			// Required when Polaris or FOLIO.
-			.max(64, t("ui.validation.max_length", { length: 64 }))
+			.max(64)
 			.when("$ils", {
 				is: "FOLIO",
 				then: (schema) =>
@@ -103,130 +110,78 @@ export default function NewLocation({
 						.test(
 							"non-negative",
 							t("ui.validation.locations.local_id_polaris"),
-							(value) =>
-								value === undefined || value === "" || parseInt(value) >= 0,
+							(val) => !val || parseInt(val) >= 0,
 						),
 			})
 			.when("$ils", {
 				is: "Sierra",
 				then: (schema) =>
 					schema
-						.optional()
 						.nullable()
+						.optional()
 						.test(
 							"non-negative-if-provided",
 							t("ui.validation.locations.local_id_sierra"),
-							(value) =>
-								value === undefined ||
-								value === "" ||
-								value === null ||
-								(/^\d+$/.test(value) && parseInt(value) >= 0),
+							(val) => !val || (/^\d+$/.test(val) && parseInt(val) >= 0),
 						),
 			}),
-		deliveryStops: Yup.string().max(
-			128,
-			t("ui.validation.max_length", { length: 128 }),
-		),
-		printLabel: Yup.string().max(
-			128,
-			t("ui.validation.max_length", { length: 128 }),
-		),
+		deliveryStops: Yup.string().max(128),
+		printLabel: Yup.string().max(128),
 		latitude: Yup.number()
-			.transform((value, originalValue) =>
-				originalValue === "" ? null : value,
-			) // Stops a weird bug where Yup would attempt to convert an empty string to a number
+			.nullable()
+			.transform((v, o) => (o === "" ? null : v))
 			.required(t("ui.validation.locations.lat"))
-			.typeError(t("ui.validation.locations.lat"))
-			.min(-90, t("ui.validation.locations.lat"))
-			.max(90, t("ui.validation.locations.lat")),
+			.min(-90)
+			.max(90),
 		longitude: Yup.number()
-			.transform((value, originalValue) =>
-				originalValue === "" ? null : value,
-			) //
-			.required(
-				t("ui.validation.required", {
-					field: t("details.long"),
-				}),
-			)
-			.typeError(t("ui.validation.locations.long"))
-			.min(-180, t("ui.validation.locations.long"))
-			.max(180, t("ui.validation.locations.long")),
-		reason: Yup.string().max(
-			100,
-			t("ui.validation.max_length", { length: 100 }),
-		),
-		changeCategory: Yup.string().max(
-			200,
-			t("ui.validation.max_length", { length: 200 }),
-		),
-		changeReferenceUrl: Yup.string()
-			.url(t("ui.data_grid.edit_url"))
-			.typeError(t("ui.data_grid.edit_url"))
-			.max(200, t("ui.validation.max_length", { length: 200 })),
-		isPickup: Yup.boolean().required(
-			t("ui.validation.required", {
-				field: t("details.is_pickup"),
-			}),
-		),
-		isEnabledForPickupAnywhere: Yup.boolean().required(
-			t("ui.validation.required", {
-				field: t("details.is_pickup_anywhere"),
-			}),
-		),
+			.nullable()
+			.transform((v, o) => (o === "" ? null : v))
+			.required(t("ui.validation.required", { field: t("details.long") }))
+			.min(-180)
+			.max(180),
+		reason: Yup.string().max(100),
+		changeCategory: Yup.string().max(200),
+		changeReferenceUrl: Yup.string().url(t("ui.data_grid.edit_url")).max(200),
+		isPickup: Yup.boolean().required(),
+		isEnabledForPickupAnywhere: Yup.boolean().required(),
 	});
 
 	const parseServerError = (error: any): ServerError => {
-		// To handle server side errors and make them translation keys
 		const message = error.message || "An unknown error occurred";
-		const folioIDRequired = message.match(
-			/localID is required for FOLIO systems/,
-		);
-		const folioMustBeId = message.match(
-			/Location creation failed: localId must be a valid UUID for FOLIO systems/,
-		);
-		const polarisRequired = message.match(
-			/localId is required for Polaris systems"/,
-		);
-		const sierraId = message.match(
-			/must be a non-negative integer for Sierra systems/,
-		);
-		const polarisId = message.match(
-			/localId must be a non-negative integer for Polaris systems/,
-		);
-		const invalidLat = message.match(/latitude must be between/);
-		const invalidLong = message.match(/longitude must be between/);
-		const alreadyExists = message.match(
-			/Location with this localId already exists/,
-		);
-		const codeExists = message.match(/Location with this code already exists/);
-		// could return keys instead
-		if (folioIDRequired || folioMustBeId) {
+		if (
+			message.match(/localID is required for FOLIO systems/) ||
+			message.match(/localId must be a valid UUID for FOLIO systems/)
+		)
 			return {
 				message: t("ui.validation.locations.local_id_folio"),
 				field: "localId",
 			};
-		} else if (polarisRequired || polarisId) {
+		if (
+			message.match(/localId is required for Polaris systems/) ||
+			message.match(
+				/localId must be a non-negative integer for Polaris systems/,
+			)
+		)
 			return {
 				message: t("ui.validation.locations.local_id_polaris"),
 				field: "localId",
 			};
-		} else if (sierraId) {
+		if (message.match(/must be a non-negative integer for Sierra systems/))
 			return {
 				message: t("ui.validation.locations.local_id_sierra"),
 				field: "localId",
 			};
-		} else if (alreadyExists) {
+		if (message.match(/Location with this localId already exists/))
 			return {
 				message: t("locations.new.error.already_exists"),
 				field: "localId",
 			};
-		} else if (invalidLat) {
+		if (message.match(/latitude must be between/))
 			return { message: t("ui.validation.locations.lat"), field: "latitude" };
-		} else if (invalidLong) {
+		if (message.match(/longitude must be between/))
 			return { message: t("ui.validation.locations.long"), field: "longitude" };
-		} else if (codeExists) {
+		if (message.match(/Location with this code already exists/))
 			return { message: t("locations.new.error.code_exists"), field: "code" };
-		}
 		return { message };
 	};
 
@@ -245,59 +200,47 @@ export default function NewLocation({
 			printLabel: "",
 			deliveryStops: "",
 			reason: "",
+			localId: "",
 			changeCategory: "Location creation",
 			changeReferenceUrl: "",
 			isPickup: true,
+			isEnabledForPickupAnywhere: true,
+			latitude: null,
+			longitude: null,
 		},
-		resolver: yupResolver(validationSchema),
+		resolver: yupResolver(validationSchema) as any,
 		mode: "onChange",
-		context: { ils: ils },
+		context: { ils },
 	});
 
-	const [createNewLocation, { loading }] = useMutation(createLocation, {
-		refetchQueries: [getLocations],
-	});
-
-	const [alert, setAlert] = useState<{
-		open: boolean;
-		severity: "success" | "error";
-		text: string | null;
-	}>({
-		open: false,
-		severity: "success",
-		text: null,
+	const { mutateAsync: createNewLocation, isPending } = useMutation({
+		mutationFn: (variables: { input: any }) =>
+			gqlClient.request<any>(createLocation, variables),
+		onSuccess: () => queryClient.invalidateQueries(), // Broad refresh to update any active grid
 	});
 
 	const onSubmit = async (data: NewLocationFormData) => {
 		try {
-			const result = await createNewLocation({
+			await createNewLocation({
 				variables: { input: { ...data, agencyCode, hostLmsCode, type } },
 			});
-
-			if (result.data) {
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("locations.new.success", { name: libraryName }),
-				});
-
-				// Delay the modal closing and form reset to ensure the alert is visible
-				setTimeout(() => {
-					reset();
-					onClose();
-				}, 1000);
-			}
+			setAlert({
+				open: true,
+				severity: "success",
+				text: t("locations.new.success", { name: libraryName }),
+			});
+			setTimeout(() => {
+				reset();
+				onClose();
+			}, 1000);
 		} catch (error) {
-			// This will only get errors coming from the server. So anything caught by client-side should not reach here.
 			const parsedError = parseServerError(error);
-			console.error("Error creating new location:", error);
 			if (parsedError.field) {
 				setError(parsedError.field as keyof NewLocationFormData, {
 					type: "server",
 					message: parsedError.message,
 				});
 			} else {
-				console.error("Error creating new location:", error);
 				setAlert({
 					open: true,
 					severity: "error",
@@ -309,13 +252,7 @@ export default function NewLocation({
 
 	return (
 		<>
-			<Dialog
-				open={show}
-				onClose={onClose}
-				fullWidth
-				maxWidth="sm"
-				aria-labelledby="new-location-modal"
-			>
+			<Dialog open={show} onClose={onClose} fullWidth maxWidth="sm">
 				<DialogTitle variant="modalTitle">
 					{t("locations.new.title", { name: libraryName })}
 				</DialogTitle>
@@ -324,12 +261,7 @@ export default function NewLocation({
 					<Box
 						component="form"
 						onSubmit={handleSubmit(onSubmit)}
-						sx={{
-							display: "flex",
-							flexDirection: "column",
-							gap: 2,
-							mt: 2,
-						}}
+						sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
 					>
 						<Controller
 							name="name"
@@ -338,18 +270,13 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									label={t("details.location_name")}
-									variant="outlined"
-									fullWidth
 									required
 									error={!!errors.name}
 									helperText={errors.name?.message}
 									onBlur={(e) => {
-										field.onBlur(); // Handle original blur
-										const printLabel = watch("printLabel");
-										// Only set printLabel if it's empty
-										if (!printLabel) {
+										field.onBlur();
+										if (!watch("printLabel"))
 											setValue("printLabel", e.target.value);
-										}
 									}}
 								/>
 							)}
@@ -361,37 +288,20 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									label={t("details.location_code")}
-									variant="outlined"
-									fullWidth
 									required
 									error={!!errors.code}
 									helperText={errors.code?.message}
 								/>
 							)}
 						/>
-						{/* <Controller
-							name="printLabel"
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("details.location_printlabel")}
-									variant="outlined"
-									fullWidth
-									error={!!errors.printLabel}
-									helperText={errors.printLabel?.message}
-								/>
-							)}
-						/> */}
 						<Controller
 							name="longitude"
 							control={control}
 							render={({ field }) => (
 								<TextField
 									{...field}
+									type="number"
 									label={t("details.long")}
-									variant="outlined"
-									fullWidth
 									required
 									error={!!errors.longitude}
 									helperText={errors.longitude?.message}
@@ -404,9 +314,8 @@ export default function NewLocation({
 							render={({ field }) => (
 								<TextField
 									{...field}
+									type="number"
 									label={t("details.lat")}
-									variant="outlined"
-									fullWidth
 									required
 									error={!!errors.latitude}
 									helperText={errors.latitude?.message}
@@ -420,14 +329,13 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									label={t(getLocalId(ils))}
-									variant="outlined"
-									fullWidth
-									required={ils == "Sierra" ? false : true}
+									required={ils !== "Sierra"}
 									error={!!errors.localId}
 									helperText={errors.localId?.message}
 								/>
 							)}
 						/>
+
 						<Controller
 							name="isPickup"
 							control={control}
@@ -437,26 +345,18 @@ export default function NewLocation({
 									<Select
 										{...field}
 										label={t("locations.new.pickup_status")}
-										value={field.value?.toString() ?? "true"}
-										onChange={(e) => {
-											field.onChange(e.target.value === "true");
-										}}
+										value={field.value?.toString()}
+										onChange={(e) => field.onChange(e.target.value === "true")}
 									>
-										<MenuItem
-											key={t("locations.new.pickup_enabled")}
-											value="true"
-										>
+										<MenuItem value="true">
 											{t("locations.new.pickup_enabled")}
 										</MenuItem>
-										<MenuItem
-											key={t("locations.new.pickup_disabled")}
-											value="false"
-										>
+										<MenuItem value="false">
 											{t("locations.new.pickup_disabled")}
 										</MenuItem>
 									</Select>
 									{errors.isPickup && (
-										<FormHelperText>{errors.isPickup?.message}</FormHelperText>
+										<FormHelperText>{errors.isPickup.message}</FormHelperText>
 									)}
 								</FormControl>
 							)}
@@ -476,27 +376,19 @@ export default function NewLocation({
 									<Select
 										{...field}
 										label={t("locations.new.pickup_anywhere_status")}
-										value={field.value?.toString() ?? "true"}
-										onChange={(e) => {
-											field.onChange(e.target.value === "true");
-										}}
+										value={field.value?.toString()}
+										onChange={(e) => field.onChange(e.target.value === "true")}
 									>
-										<MenuItem
-											key={t("locations.new.pickup_anywhere_enabled")}
-											value="true"
-										>
+										<MenuItem value="true">
 											{t("locations.new.pickup_anywhere_enabled")}
 										</MenuItem>
-										<MenuItem
-											key={t("locations.new.pickup_anywhere_disabled")}
-											value="false"
-										>
+										<MenuItem value="false">
 											{t("locations.new.pickup_anywhere_disabled")}
 										</MenuItem>
 									</Select>
 									{errors.isEnabledForPickupAnywhere && (
 										<FormHelperText>
-											{errors.isEnabledForPickupAnywhere?.message}
+											{errors.isEnabledForPickupAnywhere.message}
 										</FormHelperText>
 									)}
 								</FormControl>
@@ -510,22 +402,17 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									label={t("data_change_log.reason_addition")}
-									variant="outlined"
-									fullWidth
 									error={!!errors.reason}
 									helperText={errors.reason?.message}
 								/>
 							)}
 						/>
-
 						<Controller
 							name="changeReferenceUrl"
 							control={control}
 							render={({ field }) => (
 								<TextField
 									{...field}
-									fullWidth
-									variant="outlined"
 									label={t("data_change_log.reference_url")}
 									error={!!errors.changeReferenceUrl}
 									helperText={errors.changeReferenceUrl?.message}
@@ -535,26 +422,24 @@ export default function NewLocation({
 					</Box>
 				</DialogContent>
 				<DialogActions sx={{ p: 2 }}>
-					<Button onClick={onClose} variant="outlined" color="primary">
+					<Button onClick={onClose} variant="outlined">
 						{t("mappings.cancel")}
 					</Button>
-					<div style={{ flex: "1 0 0" }} />
+					<Box sx={{ flex: 1 }} />
 					<Button
-						type="submit"
 						variant="contained"
-						color="primary"
-						disabled={!isValid || !isDirty || loading}
+						disabled={!isValid || !isDirty || isPending}
 						onClick={handleSubmit(onSubmit)}
 					>
-						{loading ? t("ui.action.submitting") : t("locations.new.button")}
+						{isPending ? t("ui.action.submitting") : t("locations.new.button")}
 					</Button>
 				</DialogActions>
 			</Dialog>
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
-				autoHideDuration={6000}
 				alertText={alert.text}
+				autoHideDuration={6000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</>

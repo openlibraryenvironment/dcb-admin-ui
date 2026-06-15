@@ -10,10 +10,10 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { Trans, useTranslation } from "next-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Close } from "@mui/icons-material";
 import Selector from "@components/Selector/Selector";
-import { MAPPING_OPTIONS } from "src/constants/mappingsImportConstants";
+import { MAPPING_OPTIONS } from "@constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
 import useCode from "@hooks/useCode";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";

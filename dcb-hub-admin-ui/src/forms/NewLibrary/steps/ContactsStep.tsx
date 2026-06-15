@@ -1,4 +1,5 @@
-import { NewLibraryFormData } from "@models/NewLibraryFormData";
+import { useTranslation } from "react-i18next";
+import { useFormContext, Controller, useFieldArray } from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
 import {
 	Autocomplete,
@@ -12,33 +13,14 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { TFunction } from "next-i18next";
-import {
-	Control,
-	Controller,
-	FieldErrors,
-	useFieldArray,
-} from "react-hook-form";
 
-type ContactsStepType = {
-	control: Control<NewLibraryFormData, any>;
-	errors: FieldErrors<NewLibraryFormData>;
-	t: TFunction;
-	handleClose: () => void;
-	handleSubmit: () => void;
-	isValid: boolean;
-	loading: boolean;
-};
+export default function ContactsStep() {
+	const { t } = useTranslation();
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext();
 
-export default function ContactsStep({
-	control,
-	errors,
-	t,
-	handleClose,
-	handleSubmit,
-	loading,
-	isValid,
-}: ContactsStepType) {
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "contacts",
@@ -56,29 +38,27 @@ export default function ContactsStep({
 		}
 	};
 
-	const handleRemoveContact = (index: number) => {
-		if (fields.length > 1) {
-			remove(index);
-		}
-	};
+	// We typecast the errors to any to easily drill into the deeply nested array objects
+	const contactErrors: any = errors.contacts;
+
 	return (
-		<>
+		<Stack spacing={3} sx={{ mt: 1 }}>
 			{fields.map((field, index) => (
-				<Paper key={field.id} sx={{ p: 2 }}>
+				<Paper key={field.id} sx={{ p: 3 }} variant="outlined">
 					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
 						<Typography variant="h6">
 							{t("libraries.contacts.one")} #{index + 1}
 						</Typography>
 						{fields.length > 1 && (
 							<IconButton
-								onClick={() => handleRemoveContact(index)}
+								onClick={() => remove(index)}
 								aria-label={t("libraries.contacts.remove")}
 							>
-								<Delete />
+								<Delete color="error" />
 							</IconButton>
 						)}
 					</Box>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+					<Stack spacing={2} direction="column">
 						<Controller
 							name={`contacts.${index}.firstName`}
 							control={control}
@@ -86,11 +66,10 @@ export default function ContactsStep({
 								<TextField
 									{...field}
 									label={t("libraries.contacts.first_name")}
-									variant="outlined"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.firstName}
-									helperText={errors.contacts?.[index]?.firstName?.message}
+									fullWidth
+									error={!!contactErrors?.[index]?.firstName}
+									helperText={contactErrors?.[index]?.firstName?.message}
 								/>
 							)}
 						/>
@@ -101,11 +80,10 @@ export default function ContactsStep({
 								<TextField
 									{...field}
 									label={t("libraries.contacts.last_name")}
-									variant="outlined"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.lastName}
-									helperText={errors.contacts?.[index]?.lastName?.message}
+									fullWidth
+									error={!!contactErrors?.[index]?.lastName}
+									helperText={contactErrors?.[index]?.lastName?.message}
 								/>
 							)}
 						/>
@@ -116,12 +94,11 @@ export default function ContactsStep({
 								<TextField
 									{...field}
 									label={t("libraries.contacts.email")}
-									variant="outlined"
 									type="email"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.email}
-									helperText={errors.contacts?.[index]?.email?.message}
+									fullWidth
+									error={!!contactErrors?.[index]?.email}
+									helperText={contactErrors?.[index]?.email?.message}
 								/>
 							)}
 						/>
@@ -131,10 +108,6 @@ export default function ContactsStep({
 							render={({ field }) => (
 								<Autocomplete
 									{...field}
-									value={field.value || null}
-									onChange={(_, newValue) => {
-										field.onChange(newValue);
-									}}
 									options={[
 										t("libraries.contacts.roles.implementation"),
 										t("libraries.contacts.roles.library_service_admin"),
@@ -143,18 +116,17 @@ export default function ContactsStep({
 										t("libraries.contacts.roles.support"),
 										t("libraries.contacts.roles.technical"),
 									]}
+									onChange={(_, newValue) => field.onChange(newValue || "")}
+									value={field.value || null}
 									renderInput={(params) => (
 										<TextField
 											{...params}
 											required
 											label={t("libraries.contacts.role")}
-											error={!!errors.contacts?.[index]?.role}
-											helperText={errors.contacts?.[index]?.role?.message}
+											error={!!contactErrors?.[index]?.role}
+											helperText={contactErrors?.[index]?.role?.message}
 										/>
 									)}
-									isOptionEqualToValue={(option, value) =>
-										option === value || (!option && !value)
-									}
 								/>
 							)}
 						/>
@@ -168,7 +140,7 @@ export default function ContactsStep({
 								/>
 							)}
 						/>
-					</Box>
+					</Stack>
 				</Paper>
 			))}
 
@@ -177,7 +149,6 @@ export default function ContactsStep({
 					startIcon={<Add />}
 					onClick={handleAddContact}
 					variant="outlined"
-					color="primary"
 					sx={{ alignSelf: "flex-start" }}
 				>
 					{t("consortium.new_contact.title")}
@@ -187,23 +158,10 @@ export default function ContactsStep({
 			{errors.contacts &&
 				typeof errors.contacts === "object" &&
 				"message" in errors.contacts && (
-					<Typography color="error">{errors.contacts.message}</Typography>
+					<Typography color="error">
+						{errors.contacts.message as string}
+					</Typography>
 				)}
-			<Stack spacing={1} direction={"row"}>
-				<Button variant="outlined" onClick={handleClose}>
-					{t("mappings.cancel")}
-				</Button>
-				<div style={{ flex: "1 0 0" }} />
-				<Button
-					type="submit"
-					variant="contained"
-					color="primary"
-					disabled={!isValid || loading}
-					onClick={handleSubmit}
-				>
-					{loading ? t("ui.action.submitting") : t("libraries.new.title")}
-				</Button>
-			</Stack>
-		</>
+		</Stack>
 	);
 }

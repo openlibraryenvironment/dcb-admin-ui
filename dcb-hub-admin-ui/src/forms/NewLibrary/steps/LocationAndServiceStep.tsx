@@ -1,7 +1,7 @@
 import { NewLibraryFormData } from "@models/NewLibraryFormData";
 import { Button, Stack } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { TFunction } from "next-i18next";
+import { TFunction } from "react-i18next";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 
 type LocationAndServiceStep = {

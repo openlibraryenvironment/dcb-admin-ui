@@ -8,7 +8,7 @@ import {
 	handlePatronRequestTabChange,
 	handleSupplierRequestTabChange,
 	handleTabChange,
-} from "src/helpers/navigation/handleTabChange";
+} from "@helpers/navigation/handleTabChange";
 import { getPatronRequestTotals } from "src/queries/queries";
 
 type MultipleTabNavType = {

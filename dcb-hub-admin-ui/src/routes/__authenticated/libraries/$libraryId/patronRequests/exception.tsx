@@ -37,7 +37,7 @@ import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRe
 import { getPatronRequests } from "@queries/getPatronRequests";
 
 export const Route = createFileRoute(
-	"/__authenticated/libraries/$libraryId/patronRequests/completed",
+	"/__authenticated/libraries/$libraryId/patronRequests/exception",
 )({
 	component: PatronRequestsCompleted,
 });

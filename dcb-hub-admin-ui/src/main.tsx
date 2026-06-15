@@ -8,7 +8,6 @@ import { LicenseInfo } from "@mui/x-license";
 
 import "./i18n";
 import { routeTree } from "./routeTree.gen";
-import openRSTheme from "@themes/openRS"; // Sort this out, it's a mess
 import App from "@components/App/App";
 
 // Do we still want these?
@@ -16,6 +15,7 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { openRSTheme } from "@themes/openRS";
 
 declare global {
 	interface Window {

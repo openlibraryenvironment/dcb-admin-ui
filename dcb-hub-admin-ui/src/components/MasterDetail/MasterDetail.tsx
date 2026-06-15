@@ -14,7 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import MasterDetailLayout from "./MasterDetailLayout";
 import dayjs from "dayjs";
-import { formatDuration } from "src/helpers/formatDuration";
+import { formatDuration } from "@helpers/formatDuration";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import {
 	StyledAccordionDetails,

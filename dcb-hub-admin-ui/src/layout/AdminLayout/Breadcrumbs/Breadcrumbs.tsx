@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 //localisation
 import { useTranslation } from "react-i18next";
 import { truncate } from "lodash";
-import { formatBreadcrumbTitles } from "src/helpers/formatBreadcrumbTitles";
-import { getSpecialRedirects } from "src/helpers/breadcrumbs/getSpecialRedirects";
+import { formatBreadcrumbTitles } from "@helpers/formatBreadcrumbTitles";
+import { getSpecialRedirects } from "@helpers/breadcrumbs/getSpecialRedirects";
 
 type BreadcrumbType = {
 	href: string;

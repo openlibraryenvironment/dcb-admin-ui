@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { calculateDCBRAGStatus } from "src/helpers/calculateDCBRAGStatus";
-import { calculateKeycloakRAGStatus } from "src/helpers/calculateKeycloakRAGStatus";
+import { calculateDCBRAGStatus } from "@helpers/calculateDCBRAGStatus";
+import { calculateKeycloakRAGStatus } from "@helpers/calculateKeycloakRAGStatus";
 import Loading from "@components/Loading/Loading";
 import { useTranslation } from "react-i18next";
 import { Typography } from "@mui/material";

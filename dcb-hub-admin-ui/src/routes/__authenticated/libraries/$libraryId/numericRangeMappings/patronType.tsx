@@ -24,7 +24,7 @@ import { deleteNumericRangeMapping } from "@mutations/deleteNumericRangeMapping"
 import { numericRangeMappingColumnsNoCategoryFilter } from "@columns/numericRangeMappingColumnsNoCategoryFilter";
 
 export const Route = createFileRoute(
-	"/__authenticated/libraries/$libraryId/numericRangeMappings/all",
+	"/__authenticated/libraries/$libraryId/numericRangeMappings/patronType",
 )({
 	component: AllNumericMappings,
 });

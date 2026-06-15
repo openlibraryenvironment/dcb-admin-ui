@@ -26,7 +26,7 @@ import { updateReferenceValueMapping } from "@mutations/updateReferenceValueMapp
 import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapping";
 
 export const Route = createFileRoute(
-	"/__authenticated/libraries/$libraryId/referenceValueMappings/location",
+	"/__authenticated/libraries/$libraryId/referenceValueMappings/itemType",
 )({
 	component: LocationMappings,
 });

@@ -29,10 +29,10 @@ import axios from "axios";
 
 import { useAuth } from "react-oidc-context";
 import Link from "@components/Link/Link";
-import { getRequestError } from "src/helpers/getRequestError";
+import { getRequestError } from "@helpers/getRequestError";
 import { Agency } from "@models/Agency";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
-import { findConsortium } from "src/helpers/findConsortium";
+import { findConsortium } from "@helpers/findConsortium";
 import { Location } from "@models/Location";
 import { isEmpty } from "lodash";
 import { Item } from "@models/Item";

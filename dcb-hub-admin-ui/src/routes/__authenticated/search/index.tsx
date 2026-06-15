@@ -27,7 +27,7 @@ import {
 	mapCriteriaToFilterModel,
 	mapFilterModelToCriteria,
 	parseQueryToCriteria,
-} from "src/helpers/search/searchQueryHelpers";
+} from "@helpers/search/searchQueryHelpers";
 
 interface SearchInstance {
 	id: string;

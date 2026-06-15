@@ -1,10 +1,12 @@
 import { gql } from "graphql-request";
-export const createLibrary = gql`
-	mutation CreateLibrary($input: LibraryInput!) {
+
+export const createLibraryMutation = gql`
+	mutation CreateLibrary($input: CreateLibraryInput!) {
 		createLibrary(input: $input) {
 			id
+			agencyCode
 			fullName
-			type
+			shortName
 		}
 	}
 `;

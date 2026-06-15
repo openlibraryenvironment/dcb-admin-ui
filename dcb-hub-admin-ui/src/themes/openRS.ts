@@ -195,7 +195,7 @@ const darkBg = "#1E1E1E";
 const lightDetailsAccordion = "#F6F6F6";
 const darkDetailsAccordion = "#424242";
 
-const openRSTheme = createTheme({
+export const openRSTheme = createTheme({
 	cssVariables: true,
 
 	colorSchemes: {
@@ -694,8 +694,6 @@ const openRSTheme = createTheme({
 		},
 	},
 });
-
-export default openRSTheme;
 
 declare module "@mui/material/Accordion" {
 	interface AccordionPropsVariantOverrides {

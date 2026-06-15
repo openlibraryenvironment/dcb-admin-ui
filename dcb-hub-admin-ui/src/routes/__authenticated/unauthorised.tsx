@@ -3,8 +3,7 @@ import Error from "@components/Error/Error";
 import { AdminLayout } from "@layout";
 //localisation
 import { useTranslation } from "react-i18next";
-
-import { capitaliseFirstCharacter } from "src/helpers/capitaliseFirstCharacter";
+import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
 
 export const Route = createFileRoute("/__authenticated/unauthorised")({
 	component: Unauthorised,
