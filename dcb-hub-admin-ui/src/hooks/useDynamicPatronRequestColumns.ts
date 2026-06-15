@@ -4,10 +4,11 @@ import { GridColDef } from "@mui/x-data-grid-premium";
 import { Location } from "@models/Location";
 import { Library } from "@models/Library";
 import {
-	standardPatronRequestColumns,
 	patronRequestColumnsNoStatusFilter,
-} from "@helpers/dataGrid/columns";
-import { isOnly } from "@helpers/dataGrid/filters";
+	standardPatronRequestColumns,
+} from "@columns/getPatronRequestColumns";
+import { isOnly } from "@filters/isOnly";
+
 // A hook for injecting the dynamic columns
 // These are columns where we fetch the values to provide options for filtering (i.e. actual library names)
 

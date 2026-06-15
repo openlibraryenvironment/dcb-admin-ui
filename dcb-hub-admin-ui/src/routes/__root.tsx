@@ -4,6 +4,7 @@ import { AuthContextProps, useAuth } from "react-oidc-context";
 import { QueryClient } from "@tanstack/react-query";
 import Loading from "@components/Loading/Loading";
 import { useTranslation } from "react-i18next";
+import { GlobalError, NotFound } from "@components/GlobalErrors/GlobalErrors";
 
 // Define the context available to the router
 interface AppRouterContext {
@@ -36,4 +37,6 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 			</>
 		);
 	},
+	notFoundComponent: NotFound,
+	errorComponent: GlobalError,
 });

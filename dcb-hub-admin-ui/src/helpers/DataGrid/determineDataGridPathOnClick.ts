@@ -1,7 +1,7 @@
 import {
 	nonClickableTypes,
 	specialRedirectionTypes,
-} from "src/constants/dataGridConstants";
+} from "@constants/dataGridConstants";
 
 export function determineDataGridPathOnClick(type: string, rowId: string) {
 	if (specialRedirectionTypes.includes(type)) {

@@ -3,7 +3,7 @@ import {
 	conversionFields,
 	conversionFieldsMap,
 	numericOperators,
-} from "src/constants/dataGridConstants";
+} from "@constants/dataGridConstants";
 
 export const buildFilterQuery = (
 	field: string,

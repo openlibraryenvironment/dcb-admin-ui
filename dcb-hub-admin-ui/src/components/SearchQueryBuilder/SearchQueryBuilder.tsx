@@ -1,4 +1,3 @@
-import { useSearchStore } from "src/hooks/useSearchStore";
 import { useTranslation } from "react-i18next";
 import { Add, Delete, Search as SearchIcon, Info } from "@mui/icons-material";
 import {
@@ -13,11 +12,18 @@ import {
 	SelectChangeEvent,
 	Tooltip,
 	Alert,
+	Stack,
 } from "@mui/material";
+
+import { useSearchStore } from "@hooks/useSearchStore";
 import { SearchField } from "@models/SearchField";
 import { SearchCriterion } from "@models/SearchCriterion";
 
-export const SearchQueryBuilder = ({ onSearch }: { onSearch: () => void }) => {
+interface SearchQueryBuilderProps {
+	onSearch: () => void;
+}
+
+export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 	const { t } = useTranslation();
 	const {
 		criteria,
@@ -40,15 +46,14 @@ export const SearchQueryBuilder = ({ onSearch }: { onSearch: () => void }) => {
 		field: keyof Omit<SearchCriterion, "id">,
 		value: string,
 	) => {
-		// If the user selects "Cluster Record UUID", make it the ONLY criterion.
 		if (field === "field" && value === SearchField.ClusterRecordID) {
 			const currentCriterion = criteria.find((c) => c.id === id);
 			if (currentCriterion) {
-				// Replace the entire criteria array with just this one
+				// Replace the entire criteria array with just this one to satisfy exclusive UUID rule
 				setCriteria([
 					{
 						...currentCriterion,
-						field: value,
+						field: value as SearchField,
 						value: currentCriterion.value.trim(),
 					},
 				]);
@@ -57,26 +62,20 @@ export const SearchQueryBuilder = ({ onSearch }: { onSearch: () => void }) => {
 			field === "value" &&
 			criteria.find((c) => c.id === id)?.field === SearchField.ClusterRecordID
 		) {
-			// For ClusterRecordID, ensure we trim the value and don't allow any extra characters
+			// For ClusterRecordID, ensure we trim the value and don't allow trailing spaces
 			const cleanValue = value.trim();
 			updateCriterion(id, field, cleanValue);
 		} else {
-			// Otherwise, update the criterion normally
 			updateCriterion(id, field, value);
 		}
 	};
 
-	const handleSearch = () => {
-		onSearch();
-	};
-
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === "Enter") {
-			handleSearch();
+			onSearch();
 		}
 	};
 
-	// Get placeholder text based on selected field
 	const getPlaceholder = (field: SearchField) => {
 		if (field === SearchField.ClusterRecordID) {
 			return "e.g., 966ac8ca-12e8-4f95-81e3-8c9a0eb20500";
@@ -84,11 +83,15 @@ export const SearchQueryBuilder = ({ onSearch }: { onSearch: () => void }) => {
 		return t("general.search");
 	};
 
+	// Universal UUID validation regex (v1-v5 compliant)
+	const uuidRegex =
+		/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 	return (
-		<Box display="flex" flexDirection="column" gap={2} mb={2}>
-			{/* Show info alert for UUID search */}
+		<Stack spacing={2} sx={{ width: "100%", mb: 2 }}>
+			{/* Informative alert for exclusive UUID searches */}
 			{isUuidSearch && (
-				<Alert severity="info" icon={<Info />} sx={{ mb: 1 }}>
+				<Alert severity="info" icon={<Info />}>
 					{t(
 						"search.uuid_search_info",
 						"Cluster Record UUID search allows only a single search criterion. Enter a valid UUID to search for a specific record.",
@@ -96,102 +99,115 @@ export const SearchQueryBuilder = ({ onSearch }: { onSearch: () => void }) => {
 				</Alert>
 			)}
 
-			{criteria.map((criterion, index) => (
-				<Box key={criterion.id} display="flex" alignItems="center" gap={1}>
-					{index > 0 && !isUuidSearch && (
-						<FormControl size="small" sx={{ minWidth: 80 }}>
+			{criteria.map((criterion, index) => {
+				const isInvalidUuid =
+					criterion.field === SearchField.ClusterRecordID &&
+					criterion.value.trim() !== "" &&
+					!uuidRegex.test(criterion.value);
+
+				return (
+					<Stack
+						key={criterion.id}
+						direction="row"
+						spacing={1.5}
+						alignItems="center"
+						sx={{ width: "100%" }}
+					>
+						{index > 0 && !isUuidSearch && (
+							<FormControl size="small" sx={{ minWidth: 90 }}>
+								<Select
+									value={criterion.operator}
+									onChange={(e: SelectChangeEvent<"AND" | "OR" | "NOT">) =>
+										handleCriterionChange(
+											criterion.id,
+											"operator",
+											e.target.value,
+										)
+									}
+									inputProps={{
+										"aria-label": t("search.aria.select_operator"),
+									}}
+								>
+									<MenuItem value="AND">AND</MenuItem>
+									<MenuItem value="OR">OR</MenuItem>
+									<MenuItem value="NOT">NOT</MenuItem>
+								</Select>
+							</FormControl>
+						)}
+
+						<FormControl size="small" sx={{ minWidth: 160 }}>
+							<InputLabel id={`field-label-${criterion.id}`}>
+								{t("ui.info.field")}
+							</InputLabel>
 							<Select
-								value={criterion.operator}
-								onChange={(e: SelectChangeEvent<"AND" | "OR" | "NOT">) =>
-									handleCriterionChange(
-										criterion.id,
-										"operator",
-										e.target.value,
-									)
+								labelId={`field-label-${criterion.id}`}
+								value={criterion.field}
+								label={t("ui.info.field")}
+								onChange={(e: SelectChangeEvent<SearchField>) =>
+									handleCriterionChange(criterion.id, "field", e.target.value)
 								}
-								inputProps={{ "aria-label": "Select operator" }}
+								inputProps={{ "aria-label": t("ui.info.field") }}
 							>
-								<MenuItem value="AND">AND</MenuItem>
-								<MenuItem value="OR">OR</MenuItem>
-								<MenuItem value="NOT">NOT</MenuItem>
+								<MenuItem value={SearchField.Keyword}>
+									{t("search.keyword")}
+								</MenuItem>
+								<MenuItem value={SearchField.Title}>
+									{t("search.title")}
+								</MenuItem>
+								<MenuItem value={SearchField.Author}>
+									{t("search.author")}
+								</MenuItem>
+								<MenuItem value={SearchField.ISBN}>{t("search.isbn")}</MenuItem>
+								<MenuItem value={SearchField.ISSN}>{t("search.issn")}</MenuItem>
+								<MenuItem value={SearchField.Subject}>
+									{t("search.subject")}
+								</MenuItem>
+								<MenuItem value={SearchField.Language}>
+									{t("search.language")}
+								</MenuItem>
+								<MenuItem value={SearchField.Format}>
+									{t("search.format")}
+								</MenuItem>
+								<MenuItem value={SearchField.Publisher}>
+									{t("search.publisher")}
+								</MenuItem>
+								<MenuItem value={SearchField.ClusterRecordID}>
+									{t("details.cluster_record_uuid")}
+								</MenuItem>
 							</Select>
 						</FormControl>
-					)}
-					<FormControl size="small" sx={{ minWidth: 120 }} title="Field">
-						<InputLabel>{t("ui.info.field")}</InputLabel>
-						<Select
-							value={criterion.field}
-							label="Field"
-							title="Field"
-							onChange={(e: SelectChangeEvent<SearchField>) =>
-								handleCriterionChange(criterion.id, "field", e.target.value)
+
+						<TextField
+							size="small"
+							fullWidth
+							placeholder={getPlaceholder(criterion.field)}
+							value={criterion.value}
+							onChange={(e) =>
+								handleCriterionChange(criterion.id, "value", e.target.value)
 							}
-							inputProps={{ "aria-label": "field" }}
-						>
-							<MenuItem value={SearchField.Keyword}>
-								{t("search.keyword")}
-							</MenuItem>
-							<MenuItem value={SearchField.Title}>{t("search.title")}</MenuItem>
-							<MenuItem value={SearchField.Author}>
-								{t("search.author")}
-							</MenuItem>
-							<MenuItem value={SearchField.ISBN}>{t("search.isbn")}</MenuItem>
-							<MenuItem value={SearchField.ISSN}>{t("search.issn")}</MenuItem>
-							<MenuItem value={SearchField.Subject}>
-								{t("search.subject")}
-							</MenuItem>
-							<MenuItem value={SearchField.Language}>
-								{t("search.language")}
-							</MenuItem>
-							<MenuItem value={SearchField.Format}>
-								{t("search.format")}
-							</MenuItem>
-							<MenuItem value={SearchField.Publisher}>
-								{t("search.publisher")}
-							</MenuItem>
-							<MenuItem value={SearchField.ClusterRecordID}>
-								{t("details.cluster_record_uuid")}
-							</MenuItem>
-						</Select>
-					</FormControl>
-					<TextField
-						size="small"
-						fullWidth
-						placeholder={getPlaceholder(criterion.field)}
-						value={criterion.value}
-						onChange={(e) =>
-							handleCriterionChange(criterion.id, "value", e.target.value)
-						}
-						onKeyDown={handleKeyDown}
-						// Add validation for UUID field
-						error={
-							criterion.field === SearchField.ClusterRecordID &&
-							criterion.value.trim() !== "" &&
-							!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-								criterion.value,
-							)
-						}
-						helperText={
-							criterion.field === SearchField.ClusterRecordID &&
-							criterion.value.trim() !== "" &&
-							!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-								criterion.value,
-							)
-								? t("search.invalid_uuid", "Please enter a valid UUID")
-								: undefined
-						}
-					/>
-					{criteria.length > 1 && !isUuidSearch && (
-						<IconButton
-							onClick={() => handleRemoveCriterion(criterion.id)}
-							aria-label="remove criterion"
-						>
-							<Delete />
-						</IconButton>
-					)}
-				</Box>
-			))}
-			<Box display="flex" gap={1}>
+							onKeyDown={handleKeyDown}
+							error={isInvalidUuid}
+							helperText={
+								isInvalidUuid
+									? t("search.invalid_uuid", "Please enter a valid UUID")
+									: undefined
+							}
+						/>
+
+						{criteria.length > 1 && !isUuidSearch && (
+							<IconButton
+								onClick={() => handleRemoveCriterion(criterion.id)}
+								aria-label={t("search.aria.remove_criterion")}
+								color="error"
+							>
+								<Delete />
+							</IconButton>
+						)}
+					</Stack>
+				);
+			})}
+
+			<Box display="flex" gap={1.5}>
 				<Tooltip
 					title={
 						isUuidSearch
@@ -216,13 +232,13 @@ export const SearchQueryBuilder = ({ onSearch }: { onSearch: () => void }) => {
 				</Tooltip>
 				<Button
 					startIcon={<SearchIcon />}
-					onClick={handleSearch}
+					onClick={onSearch}
 					variant="contained"
 					color="primary"
 				>
 					{t("general.search")}
 				</Button>
 			</Box>
-		</Box>
+		</Stack>
 	);
 };

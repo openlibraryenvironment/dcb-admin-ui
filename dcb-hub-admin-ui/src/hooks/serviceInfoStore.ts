@@ -1,148 +1,80 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 
-import { persist } from "zustand/middleware";
-
-interface DCBVersionInfo {
+interface VersionInfo {
 	version: string | null;
 	isDev: boolean;
 	isAcceptableVersion: boolean;
+	loading: boolean;
+	error: string | null;
 	type: string | null;
 	branch: string | null;
 	lastFetchedAt: number | null;
-}
-
-interface DCBVersionState extends DCBVersionInfo {
-	loading: boolean;
-	error: Error | null;
 	fetchVersionInfo: () => Promise<void>;
 	clearVersionStore: () => void;
 }
 
-const { publicRuntimeConfig } = getConfig();
-
-const isMaintenanceOrNetworkError = (error: any) => {
-	console.log("MNE");
-	console.log(error);
-	// Check for 503
-	if (error.response?.status === 503) return true;
-
-	// Check for CORS/Network Error (Axios specific codes)
-	if (
-		error.code === "ERR_NETWORK" ||
-		error.message === "Network Error" ||
-		error.code == "ERR_NAME_NOT_RESOLVED"
-	)
-		return true;
-
-	return false;
-};
-
-const useDCBVersionStore = create<DCBVersionState>()(
+const useDCBVersionStore = create<VersionInfo>()(
 	persist(
 		(set) => ({
 			version: null,
 			isDev: false,
-			isAcceptableVersion: false,
-			lastFetchedAt: null,
+			isAcceptableVersion: true,
 			loading: false,
 			error: null,
 			type: null,
 			branch: null,
-			clearVersionStore: () =>
-				set(() => ({
+			lastFetchedAt: null,
+
+			fetchVersionInfo: async () => {
+				set({ loading: true, error: null });
+
+				try {
+					// In Vite, we don't need getConfig(). We just hit our /api proxy
+					// which automatically routes to VITE_DCB_API_BASE
+					const response = await axios.get("/api/info");
+					const data = response.data;
+
+					const versionStr = data.version || "";
+					const isDev = versionStr.includes("SNAPSHOT");
+
+					// Update state with the fetched data
+					set({
+						version: data.version || "Unknown",
+						isDev,
+						// Add any custom acceptable version logic here if you had it
+						isAcceptableVersion: true,
+						type: data.environmentType || "Production",
+						branch: data.branch || "main",
+						lastFetchedAt: Date.now(),
+						loading: false,
+					});
+				} catch (error: any) {
+					console.error("Failed to fetch DCB service info:", error);
+					set({
+						error: error.message || "Failed to fetch version info",
+						loading: false,
+					});
+				}
+			},
+
+			clearVersionStore: () => {
+				set({
 					version: null,
 					isDev: false,
-					isAcceptableVersion: false,
-					lastFetchedAt: null,
+					isAcceptableVersion: true,
 					loading: false,
 					error: null,
 					type: null,
 					branch: null,
-				})),
-			fetchVersionInfo: async () => {
-				const currentTime = Date.now();
-				set({ loading: true });
-				const fetchUrl = `${publicRuntimeConfig?.VITE_DCB_API_BASE}/info`;
-				try {
-					// const response = await axios.get(
-					// 	`${publicRuntimeConfig?.VITE_DCB_API_BASE}/info`,
-					// );
-					let response;
-
-					try {
-						response = await axios.get(fetchUrl);
-					} catch (firstErr: any) {
-						// If 503, wait briefly and retry
-						// Just in case it is a temp disruption
-						if (isMaintenanceOrNetworkError(firstErr)) {
-							console.log("503 received. Retrying...");
-							await new Promise((resolve) => setTimeout(resolve, 1000));
-							response = await axios.get(fetchUrl);
-						} else {
-							console.log(firstErr);
-							throw firstErr;
-						}
-					}
-
-					const version = response.data.git?.tags || null;
-					const systemType = response.data.env.code || "NOT SET";
-					const branch = response.data.git?.branch || "";
-
-					const isDev =
-						systemType.includes("DEV") || branch.toLowerCase() === "main";
-
-					console.log("IS DEV" + isDev);
-
-					const determineAcceptableVersion = (
-						version: string | null,
-						isDev: boolean,
-					) => {
-						if (version) {
-							const numericVersion = version.substring(1);
-							const [major, minor] = numericVersion.split(".").map(Number);
-							return major > 7 || (major === 7 && minor >= 3) || isDev;
-						} else {
-							return isDev;
-						}
-					};
-
-					const isAcceptableVersion = determineAcceptableVersion(
-						version,
-						isDev,
-					);
-
-					set({
-						version,
-						isDev,
-						isAcceptableVersion,
-						lastFetchedAt: currentTime,
-						loading: false,
-						error: null,
-						type: systemType,
-						branch,
-					});
-				} catch (error: any) {
-					console.error("Error fetching DCB Service version:", error);
-					if (isMaintenanceOrNetworkError(error)) {
-						if (
-							typeof window !== "undefined" &&
-							window.location.pathname !== "/maintenance"
-						) {
-							window.location.href = "/maintenance";
-						}
-					}
-					set({
-						error:
-							error instanceof Error ? error : new Error("An error occurred"),
-						loading: false,
-						lastFetchedAt: currentTime, // Stops getting stuck in an error state.
-					});
-				}
+					lastFetchedAt: null,
+				});
 			},
 		}),
 		{
 			name: "dcb-version-storage",
+			storage: createJSONStorage(() => sessionStorage),
 		},
 	),
 );

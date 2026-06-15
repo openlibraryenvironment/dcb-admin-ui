@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"paths": {
+			"@assets/*": ["./src/assets/*"],
 			"@columns/*": ["./src/columns/*"],
 			"@components/*": ["./src/components/*"],
 			"@constants/*": ["./src/constants/*"],

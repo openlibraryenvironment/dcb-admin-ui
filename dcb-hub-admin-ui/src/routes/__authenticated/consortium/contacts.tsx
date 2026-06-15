@@ -24,6 +24,7 @@ import { getConsortiumContacts } from "@queries/getConsortiumContacts";
 import { updatePerson } from "@mutations/updatePerson";
 import { deleteConsortiumContact } from "@mutations/deleteConsortiumContact";
 import { computeMutation } from "@helpers/computeMutation";
+import { CellEdit } from "@components/CellEdit/CellEdit";
 
 export const Route = createFileRoute("/__authenticated/consortium/contacts")({
 	component: Contacts,
@@ -140,6 +141,7 @@ function Contacts() {
 				field: "role",
 				headerName: t("libraries.contacts.role"),
 				flex: 0.5,
+				renderEditCell: (params) => <CellEdit {...params} />,
 				editable: true,
 				valueFormatter: (val: any) => val?.displayName ?? val?.name,
 			},

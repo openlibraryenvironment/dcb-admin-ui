@@ -15,7 +15,12 @@ import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as R500RouteImport } from './routes/500'
 import { Route as R404RouteImport } from './routes/404'
+import { Route as _authenticatedIndexRouteImport } from './routes/__authenticated/index'
 import { Route as _authenticatedUnauthorisedRouteImport } from './routes/__authenticated/unauthorised'
+import { Route as _authenticatedProfileRouteImport } from './routes/__authenticated/profile'
+import { Route as _authenticatedSettingsIndexRouteImport } from './routes/__authenticated/settings/index'
+import { Route as _authenticatedServiceInfoIndexRouteImport } from './routes/__authenticated/serviceInfo/index'
+import { Route as _authenticatedSearchIndexRouteImport } from './routes/__authenticated/search/index'
 import { Route as _authenticatedMappingsIndexRouteImport } from './routes/__authenticated/mappings/index'
 import { Route as _authenticatedLocationsIndexRouteImport } from './routes/__authenticated/locations/index'
 import { Route as _authenticatedLibrariesIndexRouteImport } from './routes/__authenticated/libraries/index'
@@ -107,10 +112,38 @@ const R404Route = R404RouteImport.update({
   path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
+const _authenticatedIndexRoute = _authenticatedIndexRouteImport.update({
+  id: '/__authenticated/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const _authenticatedUnauthorisedRoute =
   _authenticatedUnauthorisedRouteImport.update({
     id: '/__authenticated/unauthorised',
     path: '/unauthorised',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const _authenticatedProfileRoute = _authenticatedProfileRouteImport.update({
+  id: '/__authenticated/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const _authenticatedSettingsIndexRoute =
+  _authenticatedSettingsIndexRouteImport.update({
+    id: '/__authenticated/settings/',
+    path: '/settings/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const _authenticatedServiceInfoIndexRoute =
+  _authenticatedServiceInfoIndexRouteImport.update({
+    id: '/__authenticated/serviceInfo/',
+    path: '/serviceInfo/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const _authenticatedSearchIndexRoute =
+  _authenticatedSearchIndexRouteImport.update({
+    id: '/__authenticated/search/',
+    path: '/search/',
     getParentRoute: () => rootRouteImport,
   } as any)
 const _authenticatedMappingsIndexRoute =
@@ -491,7 +524,9 @@ export interface FileRoutesByFullPath {
   '/logout': typeof LogoutRoute
   '/maintenance': typeof MaintenanceRoute
   '/networkError': typeof NetworkErrorRoute
+  '/profile': typeof _authenticatedProfileRoute
   '/unauthorised': typeof _authenticatedUnauthorisedRoute
+  '/': typeof _authenticatedIndexRoute
   '/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
   '/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
@@ -513,6 +548,9 @@ export interface FileRoutesByFullPath {
   '/libraries/': typeof _authenticatedLibrariesIndexRoute
   '/locations/': typeof _authenticatedLocationsIndexRoute
   '/mappings/': typeof _authenticatedMappingsIndexRoute
+  '/search/': typeof _authenticatedSearchIndexRoute
+  '/serviceInfo/': typeof _authenticatedServiceInfoIndexRoute
+  '/settings/': typeof _authenticatedSettingsIndexRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -560,7 +598,9 @@ export interface FileRoutesByTo {
   '/logout': typeof LogoutRoute
   '/maintenance': typeof MaintenanceRoute
   '/networkError': typeof NetworkErrorRoute
+  '/profile': typeof _authenticatedProfileRoute
   '/unauthorised': typeof _authenticatedUnauthorisedRoute
+  '/': typeof _authenticatedIndexRoute
   '/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
   '/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
@@ -582,6 +622,9 @@ export interface FileRoutesByTo {
   '/libraries': typeof _authenticatedLibrariesIndexRoute
   '/locations': typeof _authenticatedLocationsIndexRoute
   '/mappings': typeof _authenticatedMappingsIndexRoute
+  '/search': typeof _authenticatedSearchIndexRoute
+  '/serviceInfo': typeof _authenticatedServiceInfoIndexRoute
+  '/settings': typeof _authenticatedSettingsIndexRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -630,7 +673,9 @@ export interface FileRoutesById {
   '/logout': typeof LogoutRoute
   '/maintenance': typeof MaintenanceRoute
   '/networkError': typeof NetworkErrorRoute
+  '/__authenticated/profile': typeof _authenticatedProfileRoute
   '/__authenticated/unauthorised': typeof _authenticatedUnauthorisedRoute
+  '/__authenticated/': typeof _authenticatedIndexRoute
   '/__authenticated/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/__authenticated/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
   '/__authenticated/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
@@ -652,6 +697,9 @@ export interface FileRoutesById {
   '/__authenticated/libraries/': typeof _authenticatedLibrariesIndexRoute
   '/__authenticated/locations/': typeof _authenticatedLocationsIndexRoute
   '/__authenticated/mappings/': typeof _authenticatedMappingsIndexRoute
+  '/__authenticated/search/': typeof _authenticatedSearchIndexRoute
+  '/__authenticated/serviceInfo/': typeof _authenticatedServiceInfoIndexRoute
+  '/__authenticated/settings/': typeof _authenticatedSettingsIndexRoute
   '/__authenticated/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/__authenticated/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/__authenticated/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -701,7 +749,9 @@ export interface FileRouteTypes {
     | '/logout'
     | '/maintenance'
     | '/networkError'
+    | '/profile'
     | '/unauthorised'
+    | '/'
     | '/agencies/$agencyId'
     | '/bibs/$bibId'
     | '/consortium/contacts'
@@ -723,6 +773,9 @@ export interface FileRouteTypes {
     | '/libraries/'
     | '/locations/'
     | '/mappings/'
+    | '/search/'
+    | '/serviceInfo/'
+    | '/settings/'
     | '/groups/$groupId/settings'
     | '/libraries/$libraryId/contacts'
     | '/libraries/$libraryId/service'
@@ -770,7 +823,9 @@ export interface FileRouteTypes {
     | '/logout'
     | '/maintenance'
     | '/networkError'
+    | '/profile'
     | '/unauthorised'
+    | '/'
     | '/agencies/$agencyId'
     | '/bibs/$bibId'
     | '/consortium/contacts'
@@ -792,6 +847,9 @@ export interface FileRouteTypes {
     | '/libraries'
     | '/locations'
     | '/mappings'
+    | '/search'
+    | '/serviceInfo'
+    | '/settings'
     | '/groups/$groupId/settings'
     | '/libraries/$libraryId/contacts'
     | '/libraries/$libraryId/service'
@@ -839,7 +897,9 @@ export interface FileRouteTypes {
     | '/logout'
     | '/maintenance'
     | '/networkError'
+    | '/__authenticated/profile'
     | '/__authenticated/unauthorised'
+    | '/__authenticated/'
     | '/__authenticated/agencies/$agencyId'
     | '/__authenticated/bibs/$bibId'
     | '/__authenticated/consortium/contacts'
@@ -861,6 +921,9 @@ export interface FileRouteTypes {
     | '/__authenticated/libraries/'
     | '/__authenticated/locations/'
     | '/__authenticated/mappings/'
+    | '/__authenticated/search/'
+    | '/__authenticated/serviceInfo/'
+    | '/__authenticated/settings/'
     | '/__authenticated/groups/$groupId/settings'
     | '/__authenticated/libraries/$libraryId/contacts'
     | '/__authenticated/libraries/$libraryId/service'
@@ -909,7 +972,9 @@ export interface RootRouteChildren {
   LogoutRoute: typeof LogoutRoute
   MaintenanceRoute: typeof MaintenanceRoute
   NetworkErrorRoute: typeof NetworkErrorRoute
+  _authenticatedProfileRoute: typeof _authenticatedProfileRoute
   _authenticatedUnauthorisedRoute: typeof _authenticatedUnauthorisedRoute
+  _authenticatedIndexRoute: typeof _authenticatedIndexRoute
   _authenticatedAgenciesAgencyIdRoute: typeof _authenticatedAgenciesAgencyIdRoute
   _authenticatedBibsBibIdRoute: typeof _authenticatedBibsBibIdRoute
   _authenticatedConsortiumContactsRoute: typeof _authenticatedConsortiumContactsRoute
@@ -931,6 +996,9 @@ export interface RootRouteChildren {
   _authenticatedLibrariesIndexRoute: typeof _authenticatedLibrariesIndexRoute
   _authenticatedLocationsIndexRoute: typeof _authenticatedLocationsIndexRoute
   _authenticatedMappingsIndexRoute: typeof _authenticatedMappingsIndexRoute
+  _authenticatedSearchIndexRoute: typeof _authenticatedSearchIndexRoute
+  _authenticatedServiceInfoIndexRoute: typeof _authenticatedServiceInfoIndexRoute
+  _authenticatedSettingsIndexRoute: typeof _authenticatedSettingsIndexRoute
   _authenticatedGroupsGroupIdSettingsRoute: typeof _authenticatedGroupsGroupIdSettingsRoute
   _authenticatedLibrariesLibraryIdContactsRoute: typeof _authenticatedLibrariesLibraryIdContactsRoute
   _authenticatedLibrariesLibraryIdServiceRoute: typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -1011,11 +1079,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/__authenticated/': {
+      id: '/__authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof _authenticatedIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/__authenticated/unauthorised': {
       id: '/__authenticated/unauthorised'
       path: '/unauthorised'
       fullPath: '/unauthorised'
       preLoaderRoute: typeof _authenticatedUnauthorisedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/__authenticated/profile': {
+      id: '/__authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof _authenticatedProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/__authenticated/settings/': {
+      id: '/__authenticated/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof _authenticatedSettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/__authenticated/serviceInfo/': {
+      id: '/__authenticated/serviceInfo/'
+      path: '/serviceInfo'
+      fullPath: '/serviceInfo/'
+      preLoaderRoute: typeof _authenticatedServiceInfoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/__authenticated/search/': {
+      id: '/__authenticated/search/'
+      path: '/search'
+      fullPath: '/search/'
+      preLoaderRoute: typeof _authenticatedSearchIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/__authenticated/mappings/': {
@@ -1475,7 +1578,9 @@ const rootRouteChildren: RootRouteChildren = {
   LogoutRoute: LogoutRoute,
   MaintenanceRoute: MaintenanceRoute,
   NetworkErrorRoute: NetworkErrorRoute,
+  _authenticatedProfileRoute: _authenticatedProfileRoute,
   _authenticatedUnauthorisedRoute: _authenticatedUnauthorisedRoute,
+  _authenticatedIndexRoute: _authenticatedIndexRoute,
   _authenticatedAgenciesAgencyIdRoute: _authenticatedAgenciesAgencyIdRoute,
   _authenticatedBibsBibIdRoute: _authenticatedBibsBibIdRoute,
   _authenticatedConsortiumContactsRoute: _authenticatedConsortiumContactsRoute,
@@ -1505,6 +1610,9 @@ const rootRouteChildren: RootRouteChildren = {
   _authenticatedLibrariesIndexRoute: _authenticatedLibrariesIndexRoute,
   _authenticatedLocationsIndexRoute: _authenticatedLocationsIndexRoute,
   _authenticatedMappingsIndexRoute: _authenticatedMappingsIndexRoute,
+  _authenticatedSearchIndexRoute: _authenticatedSearchIndexRoute,
+  _authenticatedServiceInfoIndexRoute: _authenticatedServiceInfoIndexRoute,
+  _authenticatedSettingsIndexRoute: _authenticatedSettingsIndexRoute,
   _authenticatedGroupsGroupIdSettingsRoute:
     _authenticatedGroupsGroupIdSettingsRoute,
   _authenticatedLibrariesLibraryIdContactsRoute:

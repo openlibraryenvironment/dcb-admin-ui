@@ -1,16 +1,18 @@
-import { PropsWithChildren, ReactNode, useState } from "react";
-import Head from "next/head";
-import Footer from "@layout/AdminLayout/Footer/Footer";
-import Header from "./Header/Header";
-import Breadcrumbs from "./Breadcrumbs/Breadcrumbs";
-import { Stack, Typography, useTheme, Box, Button } from "@mui/material";
-import Sidebar from "@layout/AdminLayout/Sidebar/Sidebar";
-import LinkedFooter from "./LinkedFooter/LinkedFooter";
-import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
+import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
 import { useAuth } from "react-oidc-context";
-import Link from "@components/Link/Link";
-import { adminOrConsortiumAdmin } from "src/constants/roles";
+import { Stack, Typography, useTheme, Box, Button } from "@mui/material";
 import { BookOutlined } from "@mui/icons-material";
+
+import Header from "./Header/Header";
+import Sidebar from "./Sidebar/Sidebar";
+import Breadcrumbs from "./Breadcrumbs/Breadcrumbs";
+import Footer from "./Footer/Footer";
+import LinkedFooter from "./LinkedFooter/LinkedFooter";
+
+import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
+import Link from "@components/Link/Link";
+import { adminOrConsortiumAdmin } from "@constants/roles";
+
 interface AdminLayoutProps {
 	title?: string;
 	children?: ReactNode;
@@ -18,16 +20,10 @@ interface AdminLayoutProps {
 	hideBreadcrumbs?: boolean;
 	pageActions?: any;
 	mode?: "edit" | "view";
-	link?: string; // for when title needs to be a link
+	link?: string;
 	docLink?: string;
 	subtitle?: string;
 }
-
-// This layout takes the following props: a title and components to be rendered as children
-// It is intended for use with pages that have a title, a footer, and a single content area.
-// Different layouts may be required for other pages in DCB Admin.
-
-// Title component must have a white background.
 
 export default function AdminLayout({
 	title,
@@ -42,22 +38,36 @@ export default function AdminLayout({
 }: PropsWithChildren<AdminLayoutProps>) {
 	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const theme = useTheme();
-	const { data: session } = useSession();
-	const isAnAdmin = session?.profile?.roles?.some((role: string) =>
+
+	const auth = useAuth();
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin = userRoles.some((role) =>
 		adminOrConsortiumAdmin.includes(role),
 	);
+
+	useEffect(() => {
+		const baseAppTitle = "DCB Admin";
+		if (title) {
+			document.title = `${title} | ${baseAppTitle}`;
+		} else {
+			document.title = baseAppTitle;
+		}
+
+		return () => {
+			document.title = baseAppTitle;
+		};
+	}, [title]);
+
 	const renderTitle = () => {
-		if (!link) {
+		if (!link || !title)
 			return (
 				<Typography id="page-title" variant="h1">
 					{title}
 				</Typography>
 			);
-		}
-		if (!title) return null;
-		// Regex to match DCB ticket pattern for error overview title
+
 		const dcbMatch = title.match(/(DCB-\d+)/);
-		if (link && dcbMatch) {
+		if (dcbMatch) {
 			const [dcbPart] = dcbMatch;
 			const beforeDcb = title.slice(0, dcbMatch.index);
 			const afterDcb = title.slice((dcbMatch.index ?? 0) + dcbPart.length);
@@ -65,12 +75,15 @@ export default function AdminLayout({
 			return (
 				<Typography id="page-title" variant="h1">
 					{beforeDcb}
-					{dcbPart != "DCB-????" ? <Link href={link}>{dcbPart}</Link> : dcbPart}
+					{dcbPart !== "DCB-????" ? (
+						<Link href={link}>{dcbPart}</Link>
+					) : (
+						dcbPart
+					)}
 					{afterDcb}
 				</Typography>
 			);
 		}
-		// If no link or no DCB pattern, render title as before
 		return (
 			<Typography id="page-title" variant="h1">
 				{title}
@@ -79,150 +92,118 @@ export default function AdminLayout({
 	};
 
 	return (
-		<>
-			<Head>
-				<link rel="icon" href="/favicon.ico" />
-			</Head>
+		<Box
+			sx={{
+				display: "flex",
+				height: "100%",
+				width: "100%",
+				flexDirection: "column",
+				minHeight: "100vh",
+				backgroundColor: "primary.pageBackground",
+			}}
+		>
 			<Header openStateFuncClosed={() => setSidebarOpen(!sidebarOpen)} />
-			{/*container for everything, includes the sidebar*/}
+
 			<Box
 				sx={{
 					display: "flex",
+					maxWidth: "1400px",
 					height: "100%",
 					width: "100%",
-					flexDirection: "column",
-					minHeight: "100vh",
-					backgroundColor: theme.palette.primary.pageBackground,
+					alignSelf: "center",
+					flex: "1 0 auto",
+					backgroundColor: "primary.pageContentBackground",
 				}}
 			>
-				{/* Container for centring content in the middle of the screen */}
-				{/* flex: '1 0 auto' - child element grows to fill space and pushes the footer to the bottom*/}
+				<Sidebar
+					openStateOpen={sidebarOpen}
+					openStateFuncOpen={() => setSidebarOpen(true)}
+					openStateFuncClosed={() => setSidebarOpen(false)}
+				/>
+
 				<Box
 					sx={{
+						flexGrow: 3,
+						overflow: "auto",
 						display: "flex",
-						maxWidth: "1400px",
-						height: "100%",
-						width: "100%",
-						alignSelf: "center",
-						flex: "1 0 auto",
-						backgroundColor: theme.palette.primary.pageContentBackground,
+						flexDirection: "column",
 					}}
 				>
-					<Box>
-						<Sidebar
-							openStateOpen={sidebarOpen}
-							openStateFuncOpen={() => {
-								setSidebarOpen(sidebarOpen);
-							}}
-							openStateFuncClosed={() => setSidebarOpen(!sidebarOpen)}
-						/>
-					</Box>
-					{/* Container for content excluding the sidebar
-						- flexGrow makes the content grow to the window size
-						- overflow: auto, means that content does not go beyond its container
-						- minHeight must be 100vh for the footer to be at the bottom of the screen
-					*/}
-					<Box
-						display="flex"
-						sx={{
-							flexGrow: 3,
-							overflow: "auto",
-							display: "flex",
-							flexDirection: "column",
-						}}
+					<Stack
+						spacing={2}
+						sx={{ height: "100%", width: "100%", marginTop: 9 }}
 					>
-						{/* MarginTop: 9 is to stop the breadcrumbs entering header area */}
-						<Stack
-							spacing={2}
-							sx={{ height: "100%", width: "100%", marginTop: 9 }}
-						>
-							{hideBreadcrumbs != true && title ? (
-								<Box>
-									<Breadcrumbs titleAttribute={title} />
-								</Box>
-							) : null}
-							{/* Title
-								- height: 90px & p: 3 - this is to make the text appear centered
-							*/}
-							{/* Only render tile box if the value from page props is true */}
-							{hideTitleBox != true ? (
-								<Box
-									sx={{
-										marginTop: 1,
-										marginBottom: 1,
-										height: "100%",
-										// grow and shrink as needed to fill the available space in the flex container
-										flex: "0",
-										backgroundColor: theme.palette.primary.titleArea,
-									}}
-								>
-									<Stack
-										direction="row"
-										alignItems="center"
-										justifyContent="space-between"
-										sx={{ p: 3, pb: 0 }} // Optional padding adjustments
-									>
-										{title ? (
-											<Stack
-												direction={"column"}
-												spacing={1}
-												alignItems="baseline"
-											>
-												{title != null ? renderTitle() : null}
-												{docLink ? (
-													<Button
-														variant="outlined"
-														startIcon={<BookOutlined />}
-														href={docLink}
-														size="small"
-													>
-														{subtitle ? subtitle : docLink}
-													</Button>
-												) : null}
-											</Stack>
-										) : null}
-
-										{pageActions && isAnAdmin && (
-											<PageActionsMenu
-												actions={pageActions}
-												mode={mode || "view"}
-											/>
-										)}
-									</Stack>
-								</Box>
-							) : null}
-
-							<Box sx={{ pl: 3, pr: 3, paddingBottom: 3, height: "100%" }}>
-								{children}
+						{!hideBreadcrumbs && title && (
+							<Box>
+								<Breadcrumbs titleAttribute={title} />
 							</Box>
-						</Stack>
-					</Box>
-				</Box>
-				{/* Footer
-				- flexShrink: 0 - flex item does not shrink
-			*/}
-				<Box
-					sx={{
-						overflow: "auto",
-						backgroundColor: theme.palette.primary.linkedFooterBackground,
-						paddingBottom: 2,
-						paddingTop: 2,
-						flexShrink: 0,
-					}}
-				>
-					<LinkedFooter />
-				</Box>
-				<Box
-					sx={{
-						overflow: "auto",
-						backgroundColor: theme.palette.primary.footerArea,
-						padding: 2,
-						flexShrink: 0,
-					}}
-				>
-					<Footer />
+						)}
+
+						{!hideTitleBox && (
+							<Box
+								sx={{
+									my: 1,
+									height: "100%",
+									flex: "0",
+									backgroundColor: "primary.titleArea",
+								}}
+							>
+								<Stack
+									direction="row"
+									alignItems="center"
+									justifyContent="space-between"
+									sx={{ p: 3, pb: 0 }}
+								>
+									{title && (
+										<Stack direction="column" spacing={1} alignItems="baseline">
+											{renderTitle()}
+											{docLink && (
+												<Button
+													variant="outlined"
+													startIcon={<BookOutlined />}
+													href={docLink}
+													size="small"
+												>
+													{subtitle || docLink}
+												</Button>
+											)}
+										</Stack>
+									)}
+									{pageActions && isAnAdmin && (
+										<PageActionsMenu
+											actions={pageActions}
+											mode={mode || "view"}
+										/>
+									)}
+								</Stack>
+							</Box>
+						)}
+
+						<Box sx={{ px: 3, pb: 3, height: "100%" }}>{children}</Box>
+					</Stack>
 				</Box>
 			</Box>
-		</>
+
+			<Box
+				sx={{
+					overflow: "auto",
+					backgroundColor: "primary.linkedFooterBackground",
+					py: 2,
+					flexShrink: 0,
+				}}
+			>
+				<LinkedFooter />
+			</Box>
+			<Box
+				sx={{
+					overflow: "auto",
+					backgroundColor: "primary.footerArea",
+					p: 2,
+					flexShrink: 0,
+				}}
+			>
+				<Footer />
+			</Box>
+		</Box>
 	);
 }

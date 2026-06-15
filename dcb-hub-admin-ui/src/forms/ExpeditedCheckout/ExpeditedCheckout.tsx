@@ -1,84 +1,94 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useLazyQuery, useQuery } from "@apollo/client";
+import { useTranslation } from "react-i18next";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import * as Yup from "yup";
 import {
-	Dialog,
 	DialogContent,
-	DialogTitle,
-	IconButton,
 	Step,
 	StepIconProps,
 	StepLabel,
 	Stepper,
 	Typography,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import {
-	getLibraries,
-	getLocations,
-	getPatronRequestEssentials,
-} from "src/queries/queries";
+import { getPatronRequestEssentials } from "@queries/getPatronRequestEssentials";
+import { getLocations } from "@queries/getLocations";
+import { getLibraries } from "@queries/getLibraries";
 import axios from "axios";
-
 import { useAuth } from "react-oidc-context";
 import { getRequestError } from "@helpers/getRequestError";
-import { Agency } from "@models/Agency";
+import { Agency } from "../../models/Agency";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import { findConsortium } from "@helpers/findConsortium";
 import { Location } from "@models/Location";
 import { Item } from "@models/Item";
-import { useNavigate, useRouter } from "@tanstack/react-router";
 import { PatronRequestFormType } from "@models/PatronRequestFormType";
 import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
 import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
 import { PatronLookupResponse } from "@models/PatronLookupResponse";
 import { OnSiteBorrowingFormData } from "@models/OnSiteBorrowingFormData";
-import { Close } from "@mui/icons-material";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { PatronValidationStep } from "./steps/PatronValidationStep";
 import { RequestCreationStep } from "./steps/RequestCreationStep";
 import { CheckoutStep } from "./steps/CheckoutStep";
-import { successfulExpeditedCheckoutStatuses } from "src/constants/statuses";
-import { StatusStepConnector } from "@components/StatusStepConnector/StatusStepConnector";
+import { successfulExpeditedCheckoutStatuses } from "@constants/statuses/successfulExpeditedCheckoutStatuses";
+import { StatusStepConnector } from "../../components/StatusStepConnector/StatusStepConnector";
+import request from "graphql-request";
+import { Library } from "@models/Library";
+import { useNavigate, useRouter } from "@tanstack/react-router";
+import { AutocompleteOption } from "@models/AutocompleteOption";
+import { getLibrary } from "@queries/getLibrary";
+import {
+	LibrariesQueryData,
+	PatronRequestQueryData,
+} from "@models/ReactQueryHelperTypes";
 import {
 	getStepColors,
 	getStepLabelFontWeight,
 } from "@helpers/getStepLabelStyles";
 
+{
+	/** TODO - THIS MUST BE LIKE 'GOD MODE' for consortia. Cannot be restricted to one library **/
+}
 export default function ExpeditedCheckout({
-	show,
+	// show,
 	onClose,
 	bibClusterId,
 }: PatronRequestFormType) {
 	const { t } = useTranslation();
-	const { data: session } = useSession();
+	const auth = useAuth();
+	const staffAgencyCode = String(auth.user?.profile?.code);
+	// Also the ID of the library of the item.
+	const { cfg } = useRouter().options.context;
+
+	const navigate = useNavigate();
+	const headers = useMemo(
+		() => ({
+			Authorization: `Bearer ${auth.user?.access_token}`,
+		}),
+		[auth.user?.access_token],
+	);
 
 	const [alert, setAlert] = useState<{
 		open: boolean;
 		severity: "success" | "error";
-		text: string | null;
+		text: string;
 		patronRequestLink?: string;
 	}>({
 		open: false,
 		severity: "success",
-		text: null,
+		text: "",
 		patronRequestLink: "",
 	});
 	const [activeStep, setActiveStep] = useState(0);
 	const steps = [
-		t("expedited_checkout.steps.patron_validation"),
-		t("expedited_checkout.steps.request_creation"),
-		t("expedited_checkout.steps.checkout"),
+		t("requesting.expedited_checkout.steps.patron_validation"),
+		t("requesting.expedited_checkout.steps.request_creation"),
+		t("requesting.expedited_checkout.steps.checkout"),
 	];
 
-	const { publicRuntimeConfig } = getConfig();
-	const router = useRouter();
-
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [isValidatingPatron, setIsValidatingPatron] = useState(false);
 	const [patronValidated, setPatronValidated] = useState(false);
 	const [patronData, setPatronData] = useState<PatronLookupResponse | null>(
 		null,
@@ -86,31 +96,119 @@ export default function ExpeditedCheckout({
 	const [availabilityResults, setAvailabilityResults] = useState<any>({});
 	const [itemsLoading, setItemsLoading] = useState(false);
 	const [itemsError, setItemsError] = useState(false);
+	const [patronRequestId, setPatronRequestId] = useState<string | null>(null);
 	const [patronRequestWaiting, setPatronRequestWaiting] = useState(false);
 	const [checkoutCompleted, setCheckoutCompleted] = useState(false);
 	const [stepError, setStepError] = useState<number | null>(null);
-	const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Ref for the timeout ID
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	const [fetchPatronRequest, { data: patronRequestData }] = useLazyQuery(
-		getPatronRequestEssentials,
-		{
-			variables: {},
-			fetchPolicy: "network-only",
-			notifyOnNetworkStatusChange: true,
-			onCompleted: (data) => {
-				const status = data?.patronRequests?.content?.[0]?.status;
-				if (
-					successfulExpeditedCheckoutStatuses.includes(status) &&
-					patronRequestWaiting == true
-				) {
-					// Request has reached completion state
-					setPatronRequestWaiting(false);
-					setCheckoutCompleted(true);
-					setStepError(null);
-				}
-			},
-		},
+	// The library ID of the staff user and item is known. Now we fetch its data
+
+	const {
+		data: staffLibraryData,
+		// isError: errorFetchingStaffLibrary,
+		// isLoading: staffLibraryLoading,
+	} = useQuery<LibrariesQueryData>({
+		queryKey: ["libraryInfo", staffAgencyCode, headers, cfg.VITE_DCB_API_BASE],
+		queryFn: async () =>
+			request(
+				cfg.VITE_DCB_API_BASE + "/graphql",
+				getLibrary,
+				{
+					query: "agencyCode:" + staffAgencyCode,
+					pageno: 0,
+					orderBy: "fullName",
+					order: "DESC",
+				},
+				headers,
+			),
+		// do the on success here
+	});
+
+	const staffLibrary = staffLibraryData?.libraries?.content?.[0];
+
+	const {
+		data: patronLibrariesData,
+		isLoading: patronLibrariesLoading,
+		// isError: patronLibrariesError,
+	} = useQuery<LibrariesQueryData>({
+		queryKey: ["librariesInfo", headers, cfg.VITE_DCB_API_BASE],
+		queryFn: () =>
+			request(
+				`${cfg.VITE_DCB_API_BASE}/graphql`,
+				getLibraries,
+				{
+					order: "fullName",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1000,
+					query: "",
+				},
+				headers,
+			),
+	});
+
+	const patronLibraries: Library[] =
+		patronLibrariesData?.libraries?.content ?? [];
+
+	const patronLibraryOptions: AutocompleteOption[] = useMemo(
+		() =>
+			patronLibraries.map(
+				(item: {
+					fullName: string;
+					id: string;
+					agencyCode: string;
+					agency: Agency;
+					membership: [LibraryGroupMember];
+				}) => ({
+					label: item.fullName,
+					value: item.agencyCode,
+					id: item.id,
+					agencyId: item.agency?.id,
+					hostLmsCode: item?.agency?.hostLms?.code,
+					functionalSettings: findConsortium(item?.membership)
+						?.functionalSettings,
+				}),
+			),
+		[patronLibraries],
 	);
+
+	// Pickup anywhere is not relevant here: you can only check out at a location of the staff user's library.
+
+	// The library of the patron will need to be selected from the list.
+	// The locations list is limited only to locations associated with the library of the staff user / item.
+
+	const { data: patronRequestData } = useQuery<PatronRequestQueryData>({
+		queryKey: [
+			"patronRequestEssentials",
+			patronRequestId,
+			headers,
+			cfg.VITE_DCB_API_BASE,
+		],
+		queryFn: () =>
+			request(
+				`${cfg.VITE_DCB_API_BASE}/graphql`,
+				getPatronRequestEssentials,
+				{ query: `id:${patronRequestId}` },
+				headers,
+			),
+		enabled: patronRequestWaiting && !!patronRequestId,
+		refetchInterval: 10000,
+	});
+
+	useEffect(() => {
+		if (patronRequestData) {
+			const status = patronRequestData?.patronRequests?.content?.[0]?.status;
+			if (
+				successfulExpeditedCheckoutStatuses.includes(status ?? "") &&
+				patronRequestWaiting
+			) {
+				setPatronRequestWaiting(false);
+				setCheckoutCompleted(true);
+				setStepError(null);
+			}
+		}
+	}, [patronRequestData, patronRequestWaiting]);
 
 	const patronRequest = patronRequestData?.patronRequests?.content?.[0];
 
@@ -118,38 +216,41 @@ export default function ExpeditedCheckout({
 		patronBarcode: Yup.string()
 			.required(
 				t("ui.validation.required", {
-					field: t("staff_request.patron.barcode").toLowerCase(),
+					field: t("requesting.staff_request.patron.barcode").toLowerCase(),
 				}),
 			)
 			.test(
 				"no-square-brackets",
-				t("staff_request.patron.error.no_brackets"),
+				t("requesting.staff_request.patron.error.no_brackets"),
 				(value) =>
 					value ? !value.includes("[") && !value.includes("]") : true,
 			),
 		agencyCode: Yup.string().required(
 			t("ui.validation.required", {
-				field: t("details.agency_code").toLowerCase(),
+				field: t("agency.code").toLowerCase(),
 			}),
 		),
 		pickupLocationId: Yup.string().required(
 			t("ui.validation.required", {
-				field: t("staff_request.patron.pickup_location").toLowerCase(),
+				field: t(
+					"requesting.staff_request.patron.pickup_location",
+				).toLowerCase(),
 			}),
 		),
 		requesterNote: Yup.string(),
 		itemLocalId: Yup.string().required(
 			t("ui.validation.required", {
-				field: t("staff_request.patron.item_local_id").toLowerCase(),
+				field: t("requesting.staff_request.patron.item_local_id").toLowerCase(),
 			}),
 		),
 		itemLocalSystemCode: Yup.string().required(),
 		itemAgencyCode: Yup.string().required(
 			t("ui.validation.required", {
-				field: t("staff_request.patron.item_library").toLowerCase(),
+				field: t("requesting.staff_request.patron.item_library").toLowerCase(),
 			}),
 		),
 	});
+	const staffLibraryHostLmsCode = staffLibrary?.agency?.hostLms?.code;
 
 	const {
 		control,
@@ -161,140 +262,87 @@ export default function ExpeditedCheckout({
 	} = useForm<OnSiteBorrowingFormData>({
 		defaultValues: {
 			patronBarcode: "",
-			agencyCode: "",
+			agencyCode: staffAgencyCode,
 			pickupLocationId: "",
-			requesterNote: "On-site borrowing: ",
+			requesterNote: "On-site-borrowing: ",
 			itemLocalId: "",
-			itemLocalSystemCode: "",
-			itemAgencyCode: "",
+			itemLocalSystemCode: staffLibraryHostLmsCode,
+			itemAgencyCode: staffAgencyCode, // For on-site borrowing, the item agency code must match the user's.
+			// As you can only do an on-site borrowing request for your own library's items.
 		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
 	});
+
 	const formValues = watch();
-	const patronBarcode = formValues.patronBarcode;
-	const agencyCode = formValues.agencyCode;
-	const itemAgencyCode = formValues.itemAgencyCode;
-	const pickupLocationId = formValues.pickupLocationId;
-	const itemLocalId = formValues.itemLocalId;
+	const {
+		patronBarcode,
+		agencyCode,
+		itemAgencyCode,
+		pickupLocationId,
+		itemLocalId,
+		itemLocalSystemCode,
+	} = formValues;
 
-	const { data: libraries, loading: librariesLoading } = useQuery(
-		getLibraries,
+	const locationQuery = `agency:${staffLibrary?.agency?.id}`; // Staff library is always the supplier.
+
+	console.log(itemLocalSystemCode);
+
+	const { data: pickupLocations, isLoading: pickupLocationsLoading } = useQuery(
 		{
-			variables: {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			},
-			errorPolicy: "all",
+			queryKey: ["locations", locationQuery, headers, cfg.VITE_DCB_API_BASE],
+			queryFn: () =>
+				request(
+					`${cfg.VITE_DCB_API_BASE}/graphql`,
+					getLocations,
+					{
+						order: "name",
+						orderBy: "ASC",
+						pageno: 0,
+						pagesize: 1000,
+						query: locationQuery,
+					},
+					headers,
+				),
+			enabled: !!staffLibrary?.agency?.id,
 		},
 	);
-	const { data: itemLibraries, loading: itemLibrariesLoading } = useQuery(
-		getLibraries,
-		{
-			variables: {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			},
-			errorPolicy: "all",
-		},
-	);
+	useEffect(() => {
+		if (staffLibraryHostLmsCode) {
+			setValue("itemLocalSystemCode", staffLibraryHostLmsCode, {
+				shouldValidate: true,
+			});
+		}
+	}, [staffLibraryHostLmsCode, setValue]);
 
-	const libraryOptions: PatronRequestAutocompleteOption[] =
-		libraries?.libraries?.content?.map(
-			(item: {
-				fullName: string;
-				id: string;
-				agencyCode: string;
-				agency: Agency;
-				membership: [LibraryGroupMember];
-			}) => ({
-				label: item.fullName,
-				value: item.agencyCode,
-				id: item.id,
-				agencyId: item.agency?.id,
-				hostLmsCode: item?.agency?.hostLms?.code,
-				functionalSettings: findConsortium(item?.membership)
-					?.functionalSettings,
-			}),
-		) || [];
-
-	const itemLibraryOptions: PatronRequestAutocompleteOption[] = useMemo(
-		() =>
-			itemLibraries?.libraries?.content?.map(
-				(item: { fullName: string; agencyCode: string; agency: Agency }) => ({
-					label: item.fullName,
-					value: item.agencyCode,
-					hostLmsCode: item?.agency?.hostLms?.code,
-					agencyId: item?.agency?.id,
-				}),
-			) || [],
-		[itemLibraries],
-	);
-
-	// A.K.A the staff library - where the actual item is
-	const selectedItemLibrary = libraryOptions.find(
-		(option) => option.value === itemAgencyCode,
-	);
-
-	const locationQuery = "agency:" + selectedItemLibrary?.agencyId;
-	// With expedited checkout, you can only place a request to be picked up at the staff library
-	// Because that's where the actual item + the staff user are.
-	// The patron can come from any OpenRS library
-
-	const { data: pickupLocations, loading: pickupLocationsLoading } = useQuery(
-		getLocations,
-		{
-			variables: {
-				order: "name",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: locationQuery,
-			},
-			errorPolicy: "all",
-			skip: !selectedItemLibrary?.agencyId,
-		},
-	);
 	const fetchRecords = useCallback(async () => {
 		setItemsLoading(true);
+		setItemsError(false);
 		try {
 			const response = await axios.get<any[]>(
-				`${publicRuntimeConfig.VITE_DCB_API_BASE}/items/availability`,
+				`${cfg.VITE_DCB_API_BASE}/items/availability`,
 				{
-					headers: { Authorization: `Bearer ${session?.accessToken}` },
-					params: {
-						clusteredBibId: bibClusterId,
-					},
+					headers,
+					params: { clusteredBibId: bibClusterId },
 				},
 			);
-			setItemsLoading(false);
 			setAvailabilityResults(response.data);
 		} catch (error) {
 			console.error("Error:", error);
-			setItemsLoading(false);
 			setItemsError(true);
 			setStepError(1);
+		} finally {
+			setItemsLoading(false);
 		}
-	}, [
-		bibClusterId,
-		publicRuntimeConfig.VITE_DCB_API_BASE,
-		session?.accessToken,
-	]);
+	}, [bibClusterId, headers]);
 
 	useEffect(() => {
-		if (activeStep == 1 || checkoutCompleted) {
+		if (activeStep === 1 || checkoutCompleted) {
 			fetchRecords();
 		}
-	}, [checkoutCompleted, activeStep, bibClusterId, fetchRecords]);
+	}, [checkoutCompleted, activeStep, fetchRecords]);
 
 	const itemsData: Item[] = availabilityResults?.itemList || [];
-	// filter on agency code - from user selected library
 	const filteredItems = itemsData.filter(
 		(item) =>
 			item.agency.code === itemAgencyCode &&
@@ -304,7 +352,7 @@ export default function ExpeditedCheckout({
 	);
 
 	const pickupLocationOptions: PatronRequestAutocompleteOption[] =
-		pickupLocations?.locations?.content?.map(
+		(pickupLocations as any)?.locations?.content?.map(
 			(item: { name: string; id: string; code: string }) => ({
 				label: item.name,
 				value: item.id,
@@ -312,230 +360,151 @@ export default function ExpeditedCheckout({
 			}),
 		) || [];
 
-	const sortedPickupLocationOptions = useMemo(() => {
-		if (!pickupLocations?.locations?.content) {
-			return [];
-		}
-		const options = pickupLocations?.locations?.content.map(
-			(item: {
-				name: string;
-				id: string;
-				agency: { name: string; code: string };
-			}) => ({
-				label: item.name,
-				value: item.id,
-				agencyName:
-					item?.agency?.name ??
-					t("staff_request.patron.pickup_location_no_agency"),
-				agencyCode: item?.agency?.code,
-			}),
-		);
-
-		// Sort the array of options
-		return options.sort((a: any, b: any) => {
-			const isAUserAgency = a.agencyCode === agencyCode;
-			const isBUserAgency = b.agencyCode === agencyCode;
-
-			// #1: The user's selected agency locations always come first.
-			if (isAUserAgency && !isBUserAgency) return -1;
-			if (!isAUserAgency && isBUserAgency) return 1;
-
-			// #2: For all other locations (or within the user's agency group),
-			// sort the groups alphabetically by agency name.
-			if (a.agencyName && b.agencyName && a.agencyName !== b.agencyName) {
-				return a.agencyName.localeCompare(b.agencyName);
-			}
-
-			// #3: Within each agency group, sort locations alphabetically by name.
-			return a.label.localeCompare(b.label);
-		});
-	}, [pickupLocations?.locations?.content, t, agencyCode]);
-
 	const itemOptions: PatronRequestAutocompleteOption[] =
-		filteredItems?.map(
+		filteredItems.map(
 			(item: {
 				id: string;
 				agency: Agency;
 				location: Location;
 				barcode: string;
-				callNumber?: string;
 				dueDate?: string;
+				callNumber?: string;
 				parsedVolumeStatement?: string;
 			}) => ({
 				label: item?.parsedVolumeStatement
-					? t("staff_request.patron.item_select_volume", {
+					? t("requesting.staff_request.patron.item_select_volume", {
 							name: item?.location.name,
 							barcode: item.barcode,
 							callNo: item?.callNumber,
 							volumeStatement: item?.parsedVolumeStatement,
 						})
-					: t("staff_request.patron.item_select", {
+					: t("requesting.staff_request.patron.item_select", {
 							name: item?.location.name,
 							barcode: item.barcode,
 							callNo: item?.callNumber,
 						}),
+
 				value: item.id,
 				dueDate: item?.dueDate,
 			}),
 		) || [];
-	const checkedOutItem = itemsData.find((item) => item.id === itemLocalId);
 
-	// This is a timeout effect for the checkout stage (step 2)
-	// After 60s we can see that instant checkout has not occurred.
-	// And so we indicate to the user that they should go to the patron request page.
+	// const selectedItem = itemOptions.find(
+	// 	(option) => option.value === itemLocalId,
+	// );
+
+	const rawSelectedItem = itemsData.find((item) => item.id === itemLocalId);
+
 	useEffect(() => {
-		// Always clear any previous timeout when dependencies change or effect re-runs
 		if (timeoutRef.current) {
 			clearTimeout(timeoutRef.current);
 			timeoutRef.current = null;
-			console.log("Cleared previous checkout timeout.");
 		}
 
-		// Conditions to start the timeout:
-		// 1. We are on the final step (index 2)
-		// 2. Checkout is NOT yet completed
-		// 3. There isn't already an error flagged for this step
 		if (activeStep === 2 && !checkoutCompleted && stepError !== 2) {
-			console.log("Starting checkout timeout (60s)...");
 			timeoutRef.current = setTimeout(() => {
-				// This code runs IF the timeout completes *before* checkoutCompleted becomes true
-				console.log("The checkout timeout was reached!");
-				setStepError(2); // Flag step 2 as erroneous due to timeout
-				// No need to check checkoutCompleted again here, effect cleanup handles success case
+				setStepError(2);
 			}, 60000);
 		}
-		// Cleanup function: This runs when the component unmounts
-		// OR when any dependency (activeStep, checkoutCompleted, stepError) changes *before* the next effect run.
+
 		return () => {
 			if (timeoutRef.current) {
 				clearTimeout(timeoutRef.current);
-				timeoutRef.current = null;
-				console.log("Checkout timeout cleared due to cleanup.");
 			}
 		};
-		// Dependencies: Effect should re-evaluate if we change step, complete checkout, or an error occurs.
 	}, [activeStep, checkoutCompleted, stepError]);
+	console.log(errors);
 
-	// Handler for validating patron
-	const validatePatron = async () => {
-		setIsValidatingPatron(true);
-		const validatePatronPayload = {
-			patronPrinciple: patronBarcode,
-			agencyCode: agencyCode,
-		};
-
-		try {
-			const response = await axios.post(
-				`${publicRuntimeConfig.VITE_DCB_API_BASE}/patron/auth/lookup`,
-				validatePatronPayload,
-				{
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${session?.accessToken}`,
-					},
-				},
-			);
-
-			const data: PatronLookupResponse = response.data;
-
+	const validatePatronMutation = useMutation<
+		PatronLookupResponse,
+		unknown,
+		{ patronPrinciple: string; agencyCode: string }
+	>({
+		mutationFn: (payload) =>
+			axios
+				.post(`${cfg.VITE_DCB_API_BASE}/patron/auth/lookup`, payload, {
+					headers,
+				})
+				.then((res) => res.data),
+		onSuccess: (data) => {
 			if (data.status === "VALID") {
 				setPatronData(data);
 				setPatronValidated(true);
-				// no alert here any more as it was causing issues
 				setStepError(null);
 				setActiveStep(1);
 			} else {
 				setAlert({
 					open: true,
 					severity: "error",
-					text: t("staff_request.patron.error.validation_failure"),
+					text: t("requesting.staff_request.patron.error.validation_failure"),
 				});
 				setStepError(0);
 			}
-		} catch (error) {
+		},
+		onError: (error) => {
 			console.error("Error validating patron:", error);
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("staff_request.patron.error.validation_failure"),
+				text: t("requesting.staff_request.patron.error.validation_failure"),
 			});
 			setStepError(0);
-		} finally {
-			setIsValidatingPatron(false);
-		}
-	};
+		},
+	});
 
-	const onSubmit = async (data: OnSiteBorrowingFormData) => {
-		if (!patronData || patronData.status !== "VALID") {
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("staff_request.patron.error.validate_first"),
-			});
-			return;
-		}
-		setIsSubmitting(true);
-
-		// Only do this if VALID patron lookup
-		try {
+	const placeRequestMutation = useMutation<
+		PlaceRequestResponse,
+		any,
+		OnSiteBorrowingFormData
+	>({
+		mutationFn: async (data) => {
+			if (!patronData || patronData.status !== "VALID") {
+				throw new Error(
+					t("requesting.staff_request.patron.error.validation_failure"),
+				);
+			}
 			const selectedLocation = pickupLocationOptions.find(
 				(option) => option.value === data.pickupLocationId,
 			);
 
-			const manualSelectionPayload = {
-				citation: {
-					bibClusterId: bibClusterId,
-				},
+			const payload = {
+				citation: { bibClusterId },
 				requestor: {
 					localSystemCode: patronData.systemCode,
 					localId: patronData.localPatronId[0],
 					homeLibraryCode: patronData.homeLocationCode,
 					agencyCode: patronData.agencyCode,
 				},
-				pickupLocation: {
-					code: selectedLocation?.value || "",
-				},
+				pickupLocation: { code: selectedLocation?.value || "" },
 				description: "On site borrowing request" + data.requesterNote,
 				requesterNote: data.requesterNote || "On site borrowing request",
 				item: {
-					localId: data.itemLocalId || "", // The local ID of the specific item
-					localSystemCode: data.itemLocalSystemCode || "", // The Host LMS code for the item's Host LMS
-					agencyCode: data.itemAgencyCode || "", // The agency code of the item
+					localId: data.itemLocalId || "",
+					localSystemCode: data.itemLocalSystemCode || "",
+					agencyCode: data.itemAgencyCode || "",
 				},
 				isExpeditedRequest: true,
 			};
 
 			const response = await axios.post(
-				`${publicRuntimeConfig.VITE_DCB_API_BASE}/patrons/requests/place/expeditedCheckout`,
-				manualSelectionPayload,
-				{
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${session?.accessToken}`,
-					},
-				},
+				`${cfg.VITE_DCB_API_BASE}/patrons/requests/place/expeditedCheckout`,
+				payload,
+				{ headers },
 			);
-			const placeRequestData: PlaceRequestResponse = response.data;
-			const requestId = placeRequestData.id;
-			console.log(
-				"The expedited checkout request was placed ",
-				placeRequestData,
-			);
+			return response.data;
+		},
+		onSuccess: (data) => {
+			setPatronRequestId(data.id);
 			setAlert({
 				open: true,
 				severity: "success",
-				text: t("expedited_checkout.feedback.in_progress"),
+				text: t("requesting.expedited_checkout.feedback.in_progress"),
 			});
 			setPatronRequestWaiting(true);
-			fetchPatronRequest({
-				variables: {
-					query: "id:" + requestId,
-				},
-				pollInterval: 10000,
-			});
 			setStepError(null);
 			setActiveStep(2);
-		} catch (error: any) {
+		},
+		onError: (error: any) => {
 			console.error("Error submitting patron request:", error.response?.data);
 			setAlert({
 				open: true,
@@ -546,16 +515,31 @@ export default function ExpeditedCheckout({
 				}),
 			});
 			setStepError(1);
-		} finally {
-			setIsSubmitting(false);
+		},
+	});
+
+	const validatePatron = () => {
+		validatePatronMutation.mutate({
+			patronPrinciple: patronBarcode,
+			agencyCode: agencyCode,
+		});
+	};
+
+	const onSubmit = (data: OnSiteBorrowingFormData) => {
+		if (!patronData || patronData.status !== "VALID") {
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("requesting.staff_request.patron.error.validate_first"),
+			});
+			return;
 		}
+		placeRequestMutation.mutate(data);
 	};
 
 	const handleClose = () => {
-		// Reset state
 		if (timeoutRef.current) {
 			clearTimeout(timeoutRef.current);
-			timeoutRef.current = null;
 		}
 		reset();
 		setActiveStep(0);
@@ -564,20 +548,25 @@ export default function ExpeditedCheckout({
 		setPatronRequestWaiting(false);
 		setCheckoutCompleted(false);
 		setStepError(null);
+		setPatronRequestId(null);
 		onClose();
 	};
 
-	// View request handler
 	const handleViewRequest = () => {
-		const requestId = patronRequest?.id;
-		router.push(`/patronRequests/${requestId}`);
+		if (patronRequest?.id) {
+			navigate({ to: `/patronRequests/${patronRequest.id}` });
+		}
+	};
+
+	// For read only users who are not allowed to look at patron requests
+	const handleReadOnlyReturn = () => {
+		navigate({ to: `/requesting` });
 	};
 
 	const handleAlertClose = useCallback(() => {
 		setAlert((prevAlert) => ({ ...prevAlert, open: false }));
 	}, []);
 
-	// Steps:
 	const getStepContent = (step: number) => {
 		switch (step) {
 			case 0:
@@ -586,13 +575,13 @@ export default function ExpeditedCheckout({
 						control={control}
 						errors={errors}
 						patronValidated={patronValidated}
-						isValidatingPatron={isValidatingPatron}
+						isValidatingPatron={validatePatronMutation.isPending}
 						handleClose={handleClose}
 						validatePatron={validatePatron}
 						patronBarcode={patronBarcode}
 						agencyCode={agencyCode}
-						libraryOptions={libraryOptions}
-						librariesLoading={librariesLoading}
+						libraryOptions={patronLibraryOptions}
+						librariesLoading={patronLibrariesLoading}
 						t={t}
 					/>
 				);
@@ -601,10 +590,10 @@ export default function ExpeditedCheckout({
 					<RequestCreationStep
 						control={control}
 						errors={errors}
-						itemLibraryOptions={itemLibraryOptions}
-						itemLibrariesLoading={itemLibrariesLoading}
+						// itemLibraryOptions={itemLibraryOptions}
+						// itemLibrariesLoading={librariesLoading}
 						setValue={setValue}
-						pickupLocationOptions={sortedPickupLocationOptions}
+						pickupLocationOptions={pickupLocationOptions}
 						pickupLocationsLoading={pickupLocationsLoading}
 						itemOptions={itemOptions}
 						itemsLoading={itemsLoading}
@@ -612,7 +601,7 @@ export default function ExpeditedCheckout({
 						itemAgencyCode={itemAgencyCode}
 						handleClose={handleClose}
 						isValid={isValid}
-						isSubmitting={isSubmitting}
+						isSubmitting={placeRequestMutation.isPending}
 						pickupLocationId={pickupLocationId}
 						t={t}
 					/>
@@ -621,10 +610,11 @@ export default function ExpeditedCheckout({
 				return (
 					<CheckoutStep
 						handleViewRequest={handleViewRequest}
+						handleReadOnlyReturn={handleReadOnlyReturn}
 						checkoutCompleted={checkoutCompleted}
 						stepError={stepError}
 						t={t}
-						dueDate={checkedOutItem?.dueDate ?? ""}
+						dueDate={rawSelectedItem?.dueDate ?? ""}
 					/>
 				);
 			default:
@@ -633,13 +623,13 @@ export default function ExpeditedCheckout({
 						control={control}
 						errors={errors}
 						patronValidated={patronValidated}
-						isValidatingPatron={isValidatingPatron}
+						isValidatingPatron={validatePatronMutation.isPending}
 						handleClose={handleClose}
 						validatePatron={validatePatron}
 						patronBarcode={patronBarcode}
 						agencyCode={agencyCode}
-						libraryOptions={libraryOptions}
-						librariesLoading={librariesLoading}
+						libraryOptions={patronLibraryOptions}
+						librariesLoading={patronLibrariesLoading}
 						t={t}
 					/>
 				); // This should never happen - but putting this in place ensures that the process would reset gracefully.
@@ -648,15 +638,14 @@ export default function ExpeditedCheckout({
 
 	return (
 		<>
-			<Dialog
+			{/* <Dialog
 				open={show}
 				onClose={handleClose}
 				aria-labelledby="patron-request-modal"
 				fullWidth
-				maxWidth="sm"
-			>
+				maxWidth="sm">
 				<DialogTitle id="form-dialog-title" variant="modalTitle">
-					{t("expedited_checkout.title_on_site")}
+					{t("requesting.expedited_checkout.title_on_site")}
 				</DialogTitle>
 
 				{(!patronRequestWaiting || checkoutCompleted) && (
@@ -668,77 +657,74 @@ export default function ExpeditedCheckout({
 							right: 8,
 							top: 8,
 							color: (theme) => theme.palette.grey[500],
-						}}
-					>
+						}}>
 						<Close />
 					</IconButton>
-				)}
+				)} */}
 
-				<DialogContent sx={{ overflow: "visible" }}>
-					<Stepper
-						activeStep={activeStep}
-						alternativeLabel
-						sx={{ mb: 4 }}
-						connector={
-							<StatusStepConnector
-								stepError={stepError}
-								activeStep={activeStep}
-							/>
+			<DialogContent sx={{ overflow: "visible" }}>
+				<Stepper
+					activeStep={activeStep}
+					alternativeLabel
+					sx={{ mb: 4 }}
+					connector={
+						<StatusStepConnector
+							stepError={stepError}
+							activeStep={activeStep}
+						/>
+					}
+				>
+					{steps.map((label, index) => {
+						const stepProps: { completed?: boolean } = {};
+						const labelProps: {
+							optional?: React.ReactNode;
+							error?: boolean;
+							StepIconComponent?: React.ElementType<StepIconProps>;
+						} = {};
+						const isActive = index === activeStep;
+						const isCompleted =
+							index < activeStep ||
+							(index === steps.length - 1 && checkoutCompleted);
+						const hasError = stepError === index;
+
+						if (isCompleted) {
+							stepProps.completed = true;
 						}
-					>
-						{steps.map((label, index) => {
-							const stepProps: { completed?: boolean } = {};
-							const labelProps: {
-								optional?: React.ReactNode;
-								error?: boolean;
-								StepIconComponent?: React.ElementType<StepIconProps>;
-							} = {};
-							const isActive = index === activeStep;
-							const isCompleted =
-								index < activeStep ||
-								(index === steps.length - 1 && checkoutCompleted);
-							const hasError = stepError === index;
-
-							if (isCompleted) {
-								stepProps.completed = true;
-							}
-							if (hasError) {
-								labelProps.error = true;
-							}
-							// Ensures that we mark the last step as complete when checkout is complete.
-							if (index === 2 && checkoutCompleted) {
-								labelProps.optional = (
-									<Typography variant="caption" color="success.main">
-										{t("expedited_checkout.steps.complete")}
-									</Typography>
-								);
-							}
-
-							// labels are not working properly, styling needs improving ^^ pass in a custom connector also
-							return (
-								<Step key={label} {...stepProps}>
-									<StepLabel {...labelProps} StepIconComponent={DCBStepIcon}>
-										<Typography
-											color={getStepColors(isActive, hasError, isCompleted)}
-											fontWeight={getStepLabelFontWeight(isActive)}
-										>
-											{label}
-										</Typography>
-									</StepLabel>
-								</Step>
+						if (hasError) {
+							labelProps.error = true;
+						}
+						if (index === 2 && checkoutCompleted) {
+							labelProps.optional = (
+								<Typography variant="caption" color="success.main">
+									{t("requesting.expedited_checkout.steps.complete")}
+								</Typography>
 							);
-						})}
-					</Stepper>
-					<form onSubmit={handleSubmit(onSubmit)}>
-						{getStepContent(activeStep)}
-					</form>
-				</DialogContent>
-			</Dialog>
+						}
+
+						return (
+							<Step key={label} {...stepProps}>
+								<StepLabel {...labelProps} slots={{ stepIcon: DCBStepIcon }}>
+									<Typography
+										color={getStepColors(isActive, hasError, isCompleted)}
+										fontWeight={getStepLabelFontWeight(isActive)}
+									>
+										{label}
+									</Typography>
+								</StepLabel>
+							</Step>
+						);
+					})}
+				</Stepper>
+				<form onSubmit={handleSubmit(onSubmit)}>
+					{getStepContent(activeStep)}
+				</form>
+			</DialogContent>
+			{/* </Dialog> */}
 			<TimedAlert
 				severityType={alert.severity}
 				open={alert.open}
 				autoHideDuration={6000}
-				onCloseFunc={handleAlertClose} // Pass the stable callback
+				onCloseFunc={handleAlertClose}
 				alertText={alert.text}
 				key="expedited-checkout-alert"
 			/>

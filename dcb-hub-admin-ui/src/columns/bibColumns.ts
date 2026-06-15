@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import i18n from "@/i18n";
 import { GridColDef } from "@mui/x-data-grid-premium";
-import { equalsOnly, standardFilters } from "@constants/filters/filters";
 import { dateTimeRangeOperators } from "@filters/dateTimeRangeOperators";
+import { standardFilters } from "@filters/standardFilters";
+import { equalsOnly } from "@filters/equalsOnly";
 
 export const standardBibColumns: GridColDef[] = [
 	{

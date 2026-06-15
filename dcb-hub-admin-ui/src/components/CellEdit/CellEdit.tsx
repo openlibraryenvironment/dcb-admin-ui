@@ -1,83 +1,100 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import {
+	GridRenderEditCellParams,
+	useGridApiContext,
+} from "@mui/x-data-grid-premium";
 import {
 	Autocomplete,
 	Box,
 	MenuItem,
 	Select,
 	TextField,
-	useTheme,
+	SelectChangeEvent,
 } from "@mui/material";
-import { GridRenderEditCellParams } from "@mui/x-data-grid-premium";
-import { useLazyQuery } from "@apollo/client";
-import { getRoles } from "src/queries/queries";
-import { useTranslation } from "react-i18next";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getRoles } from "@queries/getRoles";
+
+interface RoleOption {
+	name: string;
+	displayName?: string;
+}
 
 export const CellEdit = (params: GridRenderEditCellParams) => {
-	const { id, field, value, api, colDef, hasFocus } = params;
+	const { id, field, value, colDef, hasFocus } = params;
 	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
 
-	const theme = useTheme();
+	// MUI V7 standard: retrieve mutable grid control reference via context
+	const apiRef = useGridApiContext();
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [selectedRole, setSelectedRole] = useState<any>(null);
-	const [autocompleteLoading, setAutocompleteLoading] = useState(true);
 
-	// Set initial value based on grid's existing value
+	const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
+	const [shouldFetchRoles, setShouldFetchRoles] = useState(false);
+
 	useEffect(() => {
 		if (value) {
 			setSelectedRole(
-				typeof value === "object" && value.name ? value : { name: value },
+				typeof value === "object" && "name" in value ? value : { name: value },
 			);
 		}
 	}, [value]);
-	const [availableOptions, setAvailableOptions] = useState<any>([]);
-
-	const [optionsData] = useLazyQuery(getRoles, {
-		variables: {
-			order: "name",
-			orderBy: "ASC",
-			pagesize: 100,
-		},
-		onCompleted: (data) => {
-			setAvailableOptions(data?.roles?.content);
-			setAutocompleteLoading(false);
-		},
-	});
 
 	useEffect(() => {
 		if (hasFocus) {
 			inputRef.current?.focus();
 		}
 	}, [hasFocus]);
+
+	// Modernized role lookup using TanStack Query instead of Apollo GraphQL
+	const { data: optionsData, isLoading: autocompleteLoading } = useQuery({
+		queryKey: ["availableGridRoles"],
+		queryFn: async () => {
+			const response = await gqlClient.request<{
+				roles: { content: RoleOption[] };
+			}>(getRoles, {
+				order: "name",
+				orderBy: "ASC",
+				pagesize: 100,
+			});
+			return response?.roles?.content || [];
+		},
+		enabled: shouldFetchRoles,
+	});
+
 	if (colDef?.field === "role") {
 		return (
 			<Autocomplete
-				options={availableOptions}
-				loading={autocompleteLoading}
+				options={optionsData || []}
+				loading={autocompleteLoading && shouldFetchRoles}
 				value={selectedRole}
-				onOpen={() => {
-					optionsData();
-				}}
-				getOptionLabel={(option: any) => option?.displayName || value || ""}
+				onOpen={() => setShouldFetchRoles(true)}
+				getOptionLabel={(option: RoleOption) =>
+					option?.displayName || option?.name || ""
+				}
 				isOptionEqualToValue={(option, currentValue) =>
 					option?.name === (currentValue?.name || currentValue)
 				}
-				onChange={(event, newValue) => {
+				onChange={(_event, newValue) => {
 					setSelectedRole(newValue);
-					api.setEditCellValue({
+					apiRef.current.setEditCellValue({
 						id,
 						field,
 						value: newValue || null,
-						debounceMs: 100,
 					});
 				}}
-				renderInput={(params) => (
+				renderInput={(inputParams) => (
 					<TextField
-						{...params}
+						{...inputParams}
 						variant="outlined"
 						fullWidth
-						helperText={autocompleteLoading ? t("common.loading") : ""}
+						helperText={
+							autocompleteLoading && shouldFetchRoles ? t("common.loading") : ""
+						}
 						inputProps={{
-							...params.inputProps, // So we don't lose the previous input props
+							...inputParams.inputProps,
 							"aria-label": "role-autocomplete",
 						}}
 					/>
@@ -90,31 +107,35 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 
 	if (
 		colDef?.type === "singleSelect" &&
-		(colDef.field == "isPrimaryContact" || colDef.field == "enabled")
+		(colDef.field === "isPrimaryContact" || colDef.field === "enabled")
 	) {
+		const selectValue =
+			value !== undefined && value !== null ? value.toString() : "false";
+
 		return (
-			<Box style={{ height: "100%", display: "flex", alignItems: "center" }}>
+			<Box
+				sx={{
+					height: "100%",
+					width: "100%",
+					display: "flex",
+					alignItems: "center",
+				}}
+			>
 				<Select
 					title={colDef?.field ?? "Select"}
-					value={value.toString()}
-					onChange={(event: any) => {
-						api.setEditCellValue(
-							{
-								id,
-								field,
-								value: event.target.value === "true",
-								debounceMs: 100,
-							},
-							event,
-						);
+					value={selectValue}
+					onChange={(event: SelectChangeEvent<string>) => {
+						apiRef.current.setEditCellValue({
+							id,
+							field,
+							value: event.target.value === "true",
+						});
 					}}
 					fullWidth
-					inputProps={{
-						"aria-label": colDef?.headerName,
-					}}
+					inputProps={{ "aria-label": colDef?.headerName }}
 					sx={{
 						height: "100%",
-						backgroundColor: theme.palette.primary.editableFieldBackground,
+						backgroundColor: "primary.editableFieldBackground",
 					}}
 				>
 					<MenuItem value="true">Yes</MenuItem>
@@ -126,8 +147,9 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 
 	return (
 		<Box
-			style={{
+			sx={{
 				height: "100%",
+				width: "100%",
 				display: "flex",
 				alignItems: "center",
 			}}
@@ -135,22 +157,21 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 			<TextField
 				title={colDef?.field ?? "Data grid cell edit text field"}
 				inputRef={inputRef}
-				value={value}
+				value={value || ""}
 				onChange={(event) => {
-					api.setEditCellValue(
-						{ id, field, value: event.target.value, debounceMs: 100 },
-						event,
-					);
+					apiRef.current.setEditCellValue({
+						id,
+						field,
+						value: event.target.value,
+					});
 				}}
 				size="medium"
 				variant="outlined"
-				inputProps={{
-					"aria-label": colDef?.headerName,
-				}}
+				inputProps={{ "aria-label": colDef?.headerName }}
 				fullWidth
 				sx={{
 					height: "100%",
-					backgroundColor: theme.palette.primary.editableFieldBackground,
+					backgroundColor: "primary.editableFieldBackground",
 				}}
 			/>
 		</Box>

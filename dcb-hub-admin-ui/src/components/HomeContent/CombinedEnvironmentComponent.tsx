@@ -29,7 +29,7 @@ import {
 	DCB_SERVICE_STATUS_LINKS,
 	LOCAL_VERSION_LINKS,
 	RELEASE_PAGE_LINKS,
-} from "../../../homeData/homeConfig";
+} from "../../homeData/homeConfig";
 import VersionInfo from "./VersionInfo";
 
 interface TrackingConfigurationData {

@@ -1,39 +1,37 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+import { useTranslation } from "react-i18next";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
 } from "@mui/x-data-grid-premium";
-import { LOCAL_VERSION_LINKS } from "homeData/homeConfig";
-import { ClientDataGrid } from "@components/ClientDataGrid";
+
+import DataGrid from "@components/DataGrid/DataGrid";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
+import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
+import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
+
 import {
 	Release,
 	ServiceInfo,
 	Tag,
 	VersionData,
 } from "@models/VersionInfoTypes";
-import MasterDetail from "@components/MasterDetail/MasterDetail";
-import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
-import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
-import { useTranslation } from "react-i18next";
+import { LOCAL_VERSION_LINKS } from "@/homeData/homeConfig";
 
 const VersionInfo: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [versionData, setVersionData] = useState<VersionData[]>([]);
 	const { t } = useTranslation();
 
-	const { publicRuntimeConfig } = getConfig() || {
-		publicRuntimeConfig: { version: "unknown" },
-	};
+	// FIX: Migrated from legacy getConfig() to standard Vite environment variable string mappings
+	const appVersion = import.meta.env.VITE_APP_VERSION || "unknown";
 
-	// Fetch data from all sources
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				setLoading(true);
 
-				// Initialize data array with loading state
 				setVersionData([
 					{
 						id: 1,
@@ -53,7 +51,6 @@ const VersionInfo: React.FC = () => {
 					},
 				]);
 
-				// Fetch all the required data in parallel
 				const [serviceTags, serviceInfo, adminRelease] = await Promise.all([
 					axios.get<Tag[]>(
 						"https://api.github.com/repos/openlibraryenvironment/dcb-service/tags",
@@ -64,7 +61,6 @@ const VersionInfo: React.FC = () => {
 					),
 				]);
 
-				// Update with actual data
 				const newVersionData: VersionData[] = [
 					{
 						id: 1,
@@ -85,43 +81,39 @@ const VersionInfo: React.FC = () => {
 						id: 2,
 						repository: "dcb-admin-ui",
 						latestVersion: adminRelease.data?.tag_name || "Unknown",
-						currentVersion: publicRuntimeConfig?.version || "Unknown",
+						currentVersion: appVersion,
 						status:
-							adminRelease.data?.tag_name === publicRuntimeConfig?.version
+							adminRelease.data?.tag_name === appVersion
 								? "current"
 								: "outdated",
 						latestData: adminRelease.data,
-						currentData: publicRuntimeConfig?.version,
+						currentData: appVersion,
 						detailType: "release",
 					},
 				];
+
 				if (
 					!serviceTags.data ||
 					serviceTags.data.length === 0 ||
-					serviceInfo.data?.git?.closest === "" ||
 					!serviceInfo.data?.git?.closest
 				) {
-					// Check branch information
 					if (serviceInfo.data?.git?.branch === "main") {
-						// Default to latest version with "-Dev" suffix
 						newVersionData[0].currentVersion = serviceTags.data[0]?.name
 							? `${serviceTags.data[0].name}-Dev`
 							: `${adminRelease.data?.tag_name || "Unknown"}-Dev`;
 					}
 				}
 				setVersionData(newVersionData);
-				setLoading(false);
 			} catch (err) {
 				console.error("Error fetching version information:", err);
-
+			} finally {
 				setLoading(false);
 			}
 		};
 
 		fetchData();
-	}, [publicRuntimeConfig?.version]);
+	}, [appVersion]);
 
-	// Column definitions for the data grid
 	const columns: GridColDef[] = [
 		{
 			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
@@ -131,12 +123,7 @@ const VersionInfo: React.FC = () => {
 			),
 			renderHeader: () => <DetailPanelHeader />,
 		},
-		{
-			field: "repository",
-			headerName: "Repository",
-			flex: 1,
-			sortable: false,
-		},
+		{ field: "repository", headerName: "Repository", flex: 1, sortable: false },
 		{
 			field: "latestVersion",
 			headerName: "Latest Version",
@@ -152,20 +139,32 @@ const VersionInfo: React.FC = () => {
 	];
 
 	return (
-		<ClientDataGrid
-			data={versionData ?? []}
-			columns={columns}
-			loading={loading}
-			selectable={false}
+		<DataGrid
+			identifier="versionInfoGrid"
 			type="versionInfo"
-			coreType="versionInfo"
-			operationDataType="versionInfo"
+			columns={columns}
+			rows={versionData}
+			loading={loading}
+			checkboxSelection={false}
 			disableAggregation
 			disableRowGrouping
+			disablePivoting
+			disableHoverInteractions={false}
+			pagination={false}
+			paginationMode="client"
+			sortingMode="client"
+			filterMode="client"
+			rowModesModel={{}}
+			listViewEnabled={false}
+			pivotingEnabled={false}
+			toolbarVisible={false}
+			scrollbarVisible={true}
+			noResultsText={t("ui.data_grid.no_rows")}
+			searchText=""
+			paginationModel={{ page: 0, pageSize: 20 }}
 			getDetailPanelContent={({ row }: any) => (
 				<MasterDetail row={row} type="versionInfo" />
 			)}
-			toolbarVisible="not-visible"
 		/>
 	);
 };

@@ -16,7 +16,6 @@ import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
-import { queries } from "@constants/patronRequestGridQueries";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
@@ -26,6 +25,7 @@ import { useGridStore } from "@/hooks/useDataGridStore";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
+import { queries } from "@constants/patronRequestGridQueries";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	component: All,

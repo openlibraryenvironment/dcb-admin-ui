@@ -22,13 +22,13 @@ import { RefObject, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
+import { SxProps, Theme } from "@mui/material";
+import ExportToolbar from "./components/ExportToolbar";
 import {
 	expandedFilterPanelTypes,
 	nonClickableTypes,
 	specialRedirectionTypes,
 } from "@constants/dataGrid/types";
-import { SxProps, Theme } from "@mui/material";
-import ExportToolbar from "./components/ExportToolbar";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority

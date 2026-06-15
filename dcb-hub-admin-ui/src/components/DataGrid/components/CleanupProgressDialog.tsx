@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Accordion,
 	AccordionDetails,
@@ -17,14 +19,10 @@ import {
 	ExpandMore,
 	WarningAmber,
 } from "@mui/icons-material";
-import { useTranslation } from "react-i18next";
-import { ClientDataGrid } from "@components/ClientDataGrid";
-import {
-	cleanupPatronRequestVisibility,
-	standardPatronRequestColumns,
-} from "@helpers/dataGrid/columns";
-import { useState } from "react";
 
+import DataGrid from "@components/DataGrid/DataGrid";
+import { standardPatronRequestColumns } from "@columns/getPatronRequestColumns";
+import { cleanupPatronRequestVisibility } from "@columns/columnVisibility/cleanupPatronRequestVisibility";
 interface CleanupProgressDialogProps {
 	open: boolean;
 	isCleaning: boolean;
@@ -37,7 +35,6 @@ interface CleanupProgressDialogProps {
 	onClose: () => void;
 }
 
-// Translation keys and more refinement needed
 export const CleanupProgressDialog = ({
 	open,
 	isCleaning,
@@ -65,141 +62,171 @@ export const CleanupProgressDialog = ({
 			<DialogContent>
 				<Stack direction="column" spacing={1}>
 					<Stack direction="column" spacing={1}>
-						<Stack direction="row" spacing={1}>
+						<Stack direction="row" spacing={1} alignItems="center">
 							<LinearProgress
 								variant="determinate"
 								value={progress}
 								color={isCleaning ? "primary" : "success"}
 								aria-labelledby="progressOfCleanup"
-								// sx={{ height: 10, borderRadius: 5 }}
+								sx={{ flexGrow: 1 }}
 							/>
-							{isCleaning ? (
+							{isCleaning && (
 								<Typography
 									variant="body2"
 									color="secondary"
-									align="right"
-									sx={{ mt: 1 }}
+									sx={{ minWidth: 50, textAlign: "right" }}
 								>
 									{processed} / {total}
 								</Typography>
-							) : null}
+							)}
 						</Stack>
-						{successRows?.length > 0 ? (
-							<Stack direction="column" spacing={1}>
-								<Accordion
-									expanded={isSuccessRowsExpanded}
-									onChange={() =>
-										setIsSuccessRowsExpanded(!isSuccessRowsExpanded)
-									}
-									sx={{ mt: 2 }}
-								>
-									<AccordionSummary
-										expandIcon={<ExpandMore />}
-										aria-controls="success-rows-show-content"
-										id="success-rows-show-content"
-									>
-										<Stack direction={"row"} spacing={1}>
-											<CheckCircleOutline color="success" />
-											<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-												{t("ui.data_grid.success_count")}
-												{successRows?.length}
-											</Typography>
-										</Stack>
-									</AccordionSummary>
-									<AccordionDetails>
-										<ClientDataGrid
-											data={successRows}
-											columns={standardPatronRequestColumns}
-											columnVisibilityModel={cleanupPatronRequestVisibility}
-											coreType="patronRequests"
-											type="successCleanupRequests"
-											selectable={false}
-											disableAggregation
-											disableRowGrouping
-											operationDataType="patronRequests"
-											toolbarVisible="not-visible"
-										/>
-									</AccordionDetails>
-								</Accordion>
-							</Stack>
-						) : null}
-					</Stack>
-					{errorRows?.length > 0 ? (
-						<Stack direction="column" spacing={1}>
+
+						{successRows?.length > 0 && (
 							<Accordion
-								expanded={isErrorRowsExpanded}
-								onChange={() => setIsErrorRowsExpanded(!isErrorRowsExpanded)}
-								sx={{ mt: 2 }}
-							>
-								<AccordionSummary
-									expandIcon={<ExpandMore />}
-									aria-controls="error-rows-show-content"
-									id="error-rows-show-content"
-								>
-									<Stack direction={"row"} spacing={1}>
-										<ErrorOutline color="error" />
-										<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-											{t("ui.data_grid.error_count")}
-											{errorRows?.length}
-										</Typography>
-									</Stack>
-								</AccordionSummary>
-								<AccordionDetails>
-									<ClientDataGrid
-										data={errorRows}
-										columns={standardPatronRequestColumns}
-										columnVisibilityModel={cleanupPatronRequestVisibility}
-										coreType="patronRequests"
-										type="errorCleanupRequests"
-										selectable={false}
-										disableAggregation
-										disableRowGrouping
-										operationDataType="patronRequests"
-										toolbarVisible="not-visible"
-									/>
-								</AccordionDetails>
-							</Accordion>
-						</Stack>
-					) : null}
-					{skippedRows?.length > 0 ? (
-						<Stack direction={"column"} spacing={1}>
-							<Accordion
-								expanded={isSkippedRowsExpanded}
+								expanded={isSuccessRowsExpanded}
 								onChange={() =>
-									setIsSkippedRowsExpanded(!isSkippedRowsExpanded)
+									setIsSuccessRowsExpanded(!isSuccessRowsExpanded)
 								}
 								sx={{ mt: 2 }}
 							>
 								<AccordionSummary
 									expandIcon={<ExpandMore />}
-									aria-controls="skipped-rows-show-content"
-									id="skipped-rows-show-content"
+									aria-controls="success-rows-content"
+									id="success-rows-header"
 								>
-									<Stack direction={"row"} spacing={1}>
-										<WarningAmber color="warning" />
+									<Stack direction="row" spacing={1} alignItems="center">
+										<CheckCircleOutline color="success" />
 										<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-											{t("ui.data_grid.skipped_count")}
-											{skippedRows?.length}
+											{t("ui.data_grid.success_count")} {successRows.length}
 										</Typography>
 									</Stack>
 								</AccordionSummary>
 								<AccordionDetails>
-									<ClientDataGrid
-										data={skippedRows}
+									<DataGrid
+										identifier="cleanupSuccessGrid"
+										type="successCleanupRequests"
 										columns={standardPatronRequestColumns}
 										columnVisibilityModel={cleanupPatronRequestVisibility}
-										coreType="patronRequests"
-										type="skippedCleanupRequests"
-										selectable={false}
+										rows={successRows}
+										loading={false}
+										checkboxSelection={false}
 										disableAggregation
 										disableRowGrouping
-										operationDataType="patronRequests"
-										toolbarVisible="not-visible"
+										disablePivoting
+										disableHoverInteractions={false}
+										pagination={true}
+										paginationMode="client"
+										paginationModel={{ page: 0, pageSize: 5 }}
+										sortingMode="client"
+										filterMode="client"
+										rowModesModel={{}}
+										listViewEnabled={false}
+										pivotingEnabled={false}
+										toolbarVisible={false}
+										scrollbarVisible={true}
+										noResultsText=""
+										searchText=""
 									/>
 								</AccordionDetails>
 							</Accordion>
-						</Stack>
-					) : null}
+						)}
+					</Stack>
+
+					{errorRows?.length > 0 && (
+						<Accordion
+							expanded={isErrorRowsExpanded}
+							onChange={() => setIsErrorRowsExpanded(!isErrorRowsExpanded)}
+							sx={{ mt: 2 }}
+						>
+							<AccordionSummary
+								expandIcon={<ExpandMore />}
+								aria-controls="error-rows-content"
+								id="error-rows-header"
+							>
+								<Stack direction="row" spacing={1} alignItems="center">
+									<ErrorOutline color="error" />
+									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+										{t("ui.data_grid.error_count")} {errorRows.length}
+									</Typography>
+								</Stack>
+							</AccordionSummary>
+							<AccordionDetails>
+								<DataGrid
+									identifier="cleanupErrorGrid"
+									type="errorCleanupRequests"
+									columns={standardPatronRequestColumns}
+									columnVisibilityModel={cleanupPatronRequestVisibility}
+									rows={errorRows}
+									loading={false}
+									checkboxSelection={false}
+									disableAggregation
+									disableRowGrouping
+									disablePivoting
+									disableHoverInteractions={false}
+									pagination={true}
+									paginationMode="client"
+									paginationModel={{ page: 0, pageSize: 5 }}
+									sortingMode="client"
+									filterMode="client"
+									rowModesModel={{}}
+									listViewEnabled={false}
+									pivotingEnabled={false}
+									toolbarVisible={false}
+									scrollbarVisible={true}
+									noResultsText=""
+									searchText=""
+								/>
+							</AccordionDetails>
+						</Accordion>
+					)}
+
+					{skippedRows?.length > 0 && (
+						<Accordion
+							expanded={isSkippedRowsExpanded}
+							onChange={() => setIsSkippedRowsExpanded(!isSkippedRowsExpanded)}
+							sx={{ mt: 2 }}
+						>
+							<AccordionSummary
+								expandIcon={<ExpandMore />}
+								aria-controls="skipped-rows-content"
+								id="skipped-rows-header"
+							>
+								<Stack direction="row" spacing={1} alignItems="center">
+									<WarningAmber color="warning" />
+									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+										{t("ui.data_grid.skipped_count")} {skippedRows.length}
+									</Typography>
+								</Stack>
+							</AccordionSummary>
+							<AccordionDetails>
+								<DataGrid
+									identifier="cleanupSkippedGrid"
+									type="skippedCleanupRequests"
+									columns={standardPatronRequestColumns}
+									columnVisibilityModel={cleanupPatronRequestVisibility}
+									rows={skippedRows}
+									loading={false}
+									checkboxSelection={false}
+									disableAggregation
+									disableRowGrouping
+									disablePivoting
+									disableHoverInteractions={false}
+									pagination={true}
+									paginationMode="client"
+									paginationModel={{ page: 0, pageSize: 5 }}
+									sortingMode="client"
+									filterMode="client"
+									rowModesModel={{}}
+									listViewEnabled={false}
+									pivotingEnabled={false}
+									toolbarVisible={false}
+									scrollbarVisible={true}
+									noResultsText=""
+									searchText=""
+								/>
+							</AccordionDetails>
+						</Accordion>
+					)}
 				</Stack>
 			</DialogContent>
 			<DialogActions>

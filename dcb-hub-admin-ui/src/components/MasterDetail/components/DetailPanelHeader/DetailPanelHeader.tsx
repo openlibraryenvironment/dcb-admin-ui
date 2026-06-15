@@ -1,4 +1,7 @@
+import { MutableRefObject } from "react";
+import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip } from "@mui/material";
+import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
 import {
 	useGridSelector,
 	gridDetailPanelExpandedRowIdsSelector,
@@ -6,54 +9,45 @@ import {
 	gridRowsLookupSelector,
 	GridRowId,
 	useGridApiContext,
-	GridApiPro,
+	GridApiPremium,
 } from "@mui/x-data-grid-premium";
-import { useTranslation } from "react-i18next";
-import { MutableRefObject } from "react";
-import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
 
 export default function DetailPanelHeader() {
-	const apiRef = useGridApiContext() as MutableRefObject<GridApiPro>;
+	// UPGRADE: Cast context directly to the high-performance dynamic GridApiPremium instance
+	const apiRef = useGridApiContext() as MutableRefObject<GridApiPremium>;
 	const { t } = useTranslation();
 
+	// UPGRADE: MUI X V8 returns expandedRowIds natively as an optimized Set<GridRowId> collection
 	const expandedRowIds = useGridSelector(
 		apiRef,
 		gridDetailPanelExpandedRowIdsSelector,
-	);
+	) as Set<GridRowId>;
 	const rowsWithDetailPanels = useGridSelector(
 		apiRef,
 		gridDetailPanelExpandedRowsContentCacheSelector,
 	);
 
-	// const noDetailPanelsOpen = expandedRowIds.size === 0; // to be restored when we upgrade to v8
-	const noDetailPanelsOpen = expandedRowIds.length === 0;
-	// RESTORE WHEN WE UPGRADE TO V8 - CURRENTLY UNABLE TO BECAUSE OF NEXT.JS
-	// const expandOrCollapseAll = () => {
-	// 	if (noDetailPanelsOpen) {
-	// 		const dataRowIdToModelLookup = gridRowsLookupSelector(apiRef);
-	// 		const allRowIdsWithDetailPanels = new Set<GridRowId>();
-	// 		for (const key in rowsWithDetailPanels) {
-	// 			if (Object.prototype.hasOwnProperty.call(rowsWithDetailPanels, key)) {
-	// 				const rowData = dataRowIdToModelLookup[key];
-	// 				const givenRow = gridRowIdSelector(apiRef, rowData);
-	// 				allRowIdsWithDetailPanels.add(givenRow);
-	// 			}
-	// 		}
-	// 		apiRef.current.setExpandedDetailPanels(allRowIdsWithDetailPanels);
-	// 	} else {
-	// 		apiRef.current.setExpandedDetailPanels(new Set());
-	// 	}
-	// };
+	const noDetailPanelsOpen = expandedRowIds.size === 0;
 
 	const expandOrCollapseAll = () => {
-		const dataRowIdToModelLookup = gridRowsLookupSelector(apiRef);
-		const allRowIdsWithDetailPanels: GridRowId[] = Object.keys(
-			rowsWithDetailPanels,
-		).map((key) => apiRef.current.getRowId(dataRowIdToModelLookup[key]));
+		if (noDetailPanelsOpen) {
+			const dataRowIdToModelLookup = gridRowsLookupSelector(apiRef);
+			const allRowIdsWithDetailPanels = new Set<GridRowId>();
 
-		apiRef.current.setExpandedDetailPanels(
-			noDetailPanelsOpen ? allRowIdsWithDetailPanels : [],
-		);
+			// Populate high-performance unique key collection
+			for (const key in rowsWithDetailPanels) {
+				if (Object.prototype.hasOwnProperty.call(rowsWithDetailPanels, key)) {
+					const rowData = dataRowIdToModelLookup[key];
+					if (rowData) {
+						allRowIdsWithDetailPanels.add(apiRef.current.getRowId(rowData));
+					}
+				}
+			}
+			// UPGRADE: Set values cleanly as a Set per the restored V8 specification standards
+			apiRef.current.setExpandedDetailPanels(allRowIdsWithDetailPanels);
+		} else {
+			apiRef.current.setExpandedDetailPanels(new Set());
+		}
 	};
 
 	const Icon = noDetailPanelsOpen ? UnfoldMore : UnfoldLess;

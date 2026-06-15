@@ -1,0 +1,64 @@
+{
+	"app": {
+		"name": "Administrador DCB",
+		"title": "{{consortium_name}} | {{environment}}",
+		"version": "Versión",
+		"released": "Lanzado el",
+		"guest_user": "Invitado"
+	},
+	"nav": {
+		"home": "Inicio",
+		"profile": "Perfil",
+		"login": "Iniciar sesión",
+		"logout": "Cerrar sesión",
+		"search": {
+			"name": "Búsqueda Compartida"
+		},
+		"libraries": {
+			"name": "Bibliotecas"
+		},
+		"consortium": {
+			"name": "Consorcio"
+		},
+		"serviceInfo": {
+			"name": "Información del Servicio"
+		}
+	},
+	"ui": {
+		"info": {
+			"wait": "Por favor espera...",
+			"loading": {
+				"document": "Cargando {{document_type}}..."
+			}
+		},
+		"action": {
+			"go_back": "Volver",
+			"reload": "Recargar"
+		},
+		"error": {
+			"404": {
+				"name": "Página no encontrada",
+				"summary": "No pudimos encontrar la página que buscas.",
+				"description": "Es posible que el enlace esté roto o que la página haya sido eliminada.",
+				"action": "Volver al inicio"
+			},
+			"500": {
+				"name": "Error del servidor",
+				"summary": "Algo salió mal de nuestro lado.",
+				"description": "Por favor, inténtalo de nuevo más tarde.",
+				"action": "Volver al inicio"
+			}
+		}
+	},
+	"login": {
+		"title": "Bienvenido",
+		"access": "Accede a tu cuenta de administrador",
+		"keycloak": "Iniciar sesión con Keycloak",
+		"initialising": "Inicializando...",
+		"loading_title": "Comprobando credenciales"
+	},
+	"general": {
+		"search": "Buscar",
+		"submit": "Enviar"
+	}
+}

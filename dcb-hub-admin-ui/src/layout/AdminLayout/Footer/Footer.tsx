@@ -5,8 +5,8 @@ import { useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
 import dayjs from "dayjs";
-import OpenRsLogo from "public/assets/brand/OpenRS_48px.png";
-import Image from "next/image";
+import OpenRsLogo from "@assets/brand/OpenRS_48px.png";
+import { useRouter } from "@tanstack/react-router";
 
 // this is a guess at what the width should be
 // may need changing in the future
@@ -15,7 +15,7 @@ const OpenRsLogoHeight = 32;
 
 export default function Footer() {
 	const { t } = useTranslation();
-	const { publicRuntimeConfig } = getConfig();
+	const { cfg } = useRouter().options.context as { cfg: any };
 	const theme = useTheme();
 
 	return (
@@ -51,22 +51,21 @@ export default function Footer() {
 					{". " +
 						t("app.version") +
 						" " +
-						publicRuntimeConfig?.version +
+						cfg?.version +
 						". " +
 						t("app.released") +
 						" " +
-						dayjs(publicRuntimeConfig?.releaseDate).format("YYYY-MM-DD") +
+						dayjs(cfg?.releaseDate).format("YYYY-MM-DD") +
 						"."}
 				</Typography>
 				{/* apply a wrapper to style the logo inline with text */}
 				<Box sx={{ pt: 1.25 }}>
 					<Link href={"https://www.openrs.org/"}>
-						{/* next.js's image used for size optimisation and better speed */}
-						<Image
-							src={OpenRsLogo.src}
+						<Box
+							component="img"
+							src={OpenRsLogo}
 							alt="OpenRS Logo"
-							width={OpenRsLogoWidth}
-							height={OpenRsLogoHeight}
+							sx={{ width: OpenRsLogoWidth, height: OpenRsLogoHeight }}
 						/>
 					</Link>
 				</Box>

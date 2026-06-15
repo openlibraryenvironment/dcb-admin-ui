@@ -36,8 +36,6 @@ import { useGridStore } from "@/hooks/useDataGridStore";
 import { formatDuration } from "@helpers/formatDuration";
 import { getILS } from "@helpers/getILS";
 import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
-import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
-import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { getPatronRequest } from "@queries/getPatronRequest";
 import { getLibraryBasics } from "@queries/getLibraryBasics";
@@ -46,6 +44,8 @@ import { getHostLms } from "@queries/getHostLms";
 import { getLocation } from "@queries/getLocation";
 import { getPatronIdentities } from "@queries/getPatronIdentities";
 import { SourceRecord } from "@models/SourceRecord";
+import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
+import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,

@@ -1,9 +1,10 @@
 import { createTheme, darken, lighten } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-premium/themeAugmentation";
-
-// ==========================================
-// 1. TYPE AUGMENTATION
-// ==========================================
+declare module "@mui/material/Button" {
+	interface ButtonPropsSizeOverrides {
+		xlarge: true;
+	}
+}
 declare module "@mui/material/styles" {
 	interface Palette {
 		attributeTitle: string;
@@ -44,7 +45,87 @@ declare module "@mui/material/styles" {
 		loginButtonOutlineColor: string;
 		outlineColor: string;
 	}
+
+	interface PaletteColor {
+		attributeTitle?: string;
+		breadcrumbs?: string;
+		buttonForSelectedChildPage?: string;
+		buttonForSelectedPage?: string;
+		detailsAccordionSummary?: string;
+		editableFieldBackground?: string;
+		errorBackground?: string;
+		exclamationIcon?: string;
+		footerArea?: string;
+		footerText?: string;
+		linkedFooterBackground?: string;
+		linkedFooterText?: string;
+		header?: string;
+		headerText?: string;
+		headingColor?: string;
+		hitCountText?: string;
+		hover?: string;
+		hoverOnSelectedPage?: string;
+		iconSymbol?: string;
+		inactiveBackground?: string;
+		link?: string;
+		linkText?: string;
+		landingBackground?: string;
+		landingCard?: string;
+		loginCard?: string;
+		loginText?: string;
+		navigationText?: string;
+		navigationTextActive?: string;
+		searchResultBackground?: string;
+		searchResultTitle?: string;
+		selectedText?: string;
+		sidebar?: string;
+		titleArea?: string;
+		pageBackground?: string;
+		pageContentBackground?: string;
+		loginButtonOutlineColor?: string;
+		outlineColor?: string;
+	}
 	interface PaletteOptions {
+		attributeTitle?: string;
+		breadcrumbs?: string;
+		buttonForSelectedChildPage?: string;
+		buttonForSelectedPage?: string;
+		detailsAccordionSummary?: string;
+		editableFieldBackground?: string;
+		errorBackground?: string;
+		exclamationIcon?: string;
+		footerArea?: string;
+		footerText?: string;
+		linkedFooterBackground?: string;
+		linkedFooterText?: string;
+		header?: string;
+		headerText?: string;
+		headingColor?: string;
+		hitCountText?: string;
+		hover?: string;
+		hoverOnSelectedPage?: string;
+		iconSymbol?: string;
+		inactiveBackground?: string;
+		link?: string;
+		linkText?: string;
+		landingBackground?: string;
+		landingCard?: string;
+		loginCard?: string;
+		loginText?: string;
+		navigationText?: string;
+		navigationTextActive?: string;
+		searchResultBackground?: string;
+		searchResultTitle?: string;
+		selectedText?: string;
+		sidebar?: string;
+		titleArea?: string;
+		pageBackground?: string;
+		pageContentBackground?: string;
+		loginButtonOutlineColor?: string;
+		outlineColor?: string;
+	}
+
+	interface SimplePaletteColorOptions {
 		attributeTitle?: string;
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
@@ -203,48 +284,48 @@ export const openRSTheme = createTheme({
 			palette: {
 				contrastThreshold: 4.5,
 				mode: "light",
-				primary: { main: lightPrimary },
+				primary: {
+					main: lightPrimary,
+					attributeTitle: "#000000",
+					breadcrumbs: "#246F9E",
+					buttonForSelectedChildPage: "#707070",
+					buttonForSelectedPage: "#287BAF",
+					detailsAccordionSummary: lightDetailsAccordion,
+					editableFieldBackground: "#E2EEF6",
+					errorBackground: "#FFDAE1",
+					exclamationIcon: "#999999",
+					footerArea: "#FFFFFF",
+					footerText: "#000000",
+					linkedFooterBackground: "#0C4068",
+					linkedFooterText: "#FFFFFF",
+					header: "#0C4068",
+					headerText: "#FFFFFF",
+					headingColor: "#0C4068",
+					hitCountText: "#333333",
+					hover: "#EEEEEE",
+					hoverOnSelectedPage: "#A9A9A9",
+					iconSymbol: "#FFFFFF",
+					inactiveBackground: "#8C8C8C",
+					link: "#0C4068",
+					linkText: "#246F9E",
+					landingBackground: "#F9F9F9",
+					landingCard: "#FFFFFF",
+					loginCard: "#E2EEF6",
+					loginText: "#0C4068",
+					navigationText: "#E2EEF6",
+					navigationTextActive: "#FFFFFF",
+					searchResultBackground: "#F6F9FC",
+					searchResultTitle: "#186498",
+					selectedText: "#FFFFFF",
+					sidebar: "#F6F6F6",
+					titleArea: "#FFFFFF",
+					pageBackground: "#F9F9F9",
+					pageContentBackground: "#FFFFFF",
+					loginButtonOutlineColor: "#FFFFFF",
+					outlineColor: "#000000",
+				},
 				secondary: { main: "#1e7ebf" },
 				background: { default: lightBg },
-
-				// Custom Light Palette
-				attributeTitle: "#000000",
-				breadcrumbs: "#246F9E",
-				buttonForSelectedChildPage: "#707070",
-				buttonForSelectedPage: "#287BAF",
-				detailsAccordionSummary: lightDetailsAccordion,
-				editableFieldBackground: "#E2EEF6",
-				errorBackground: "#FFDAE1",
-				exclamationIcon: "#999999",
-				footerArea: "#FFFFFF",
-				footerText: "#000000",
-				linkedFooterBackground: "#0C4068",
-				linkedFooterText: "#FFFFFF",
-				header: "#0C4068",
-				headerText: "#FFFFFF",
-				headingColor: "#0C4068",
-				hitCountText: "#333333",
-				hover: "#EEEEEE",
-				hoverOnSelectedPage: "#A9A9A9",
-				iconSymbol: "#FFFFFF",
-				inactiveBackground: "#8C8C8C",
-				link: "#0C4068",
-				linkText: "#246F9E",
-				landingBackground: "#F9F9F9",
-				landingCard: "#FFFFFF",
-				loginCard: "#E2EEF6",
-				loginText: "#0C4068",
-				navigationText: "#E2EEF6",
-				navigationTextActive: "#FFFFFF",
-				searchResultBackground: "#F6F9FC",
-				searchResultTitle: "#186498",
-				selectedText: "#FFFFFF",
-				sidebar: "#F6F6F6",
-				titleArea: "#FFFFFF",
-				pageBackground: "#F9F9F9",
-				pageContentBackground: "#FFFFFF",
-				loginButtonOutlineColor: "#FFFFFF",
-				outlineColor: "#000000",
 			},
 		},
 		dark: {
@@ -252,47 +333,47 @@ export const openRSTheme = createTheme({
 				contrastThreshold: 4.5,
 				mode: "dark",
 				primary: { main: darkPrimary },
-				secondary: { main: "#75BEDB" },
+				secondary: {
+					main: "#75BEDB",
+					attributeTitle: "#FFFFFF",
+					breadcrumbs: "#35B7FF",
+					buttonForSelectedChildPage: "#999999",
+					buttonForSelectedPage: "#287BAF",
+					detailsAccordionSummary: darkDetailsAccordion,
+					editableFieldBackground: "#E2EEF6",
+					errorBackground: "transparent",
+					exclamationIcon: "#999999",
+					footerArea: "#202020",
+					footerText: "#FFFFFF",
+					linkedFooterBackground: "#000000",
+					linkedFooterText: "#FFFFFF",
+					header: "#000000",
+					headerText: "#FFFFFF",
+					headingColor: "#FFFFFF",
+					hitCountText: "#FFFFFF",
+					hover: "#424242",
+					hoverOnSelectedPage: "#424242",
+					iconSymbol: "#FFFFFF",
+					inactiveBackground: "#8C8C8C",
+					link: "#B3E5FC",
+					linkText: "#35B7FF",
+					landingBackground: "#000000",
+					landingCard: "#202020",
+					loginCard: "#292929",
+					loginText: "#FFFFFF",
+					navigationText: "#A0AEC0",
+					navigationTextActive: "#FFFFFF",
+					searchResultBackground: "#424242",
+					searchResultTitle: "#63B3ED",
+					selectedText: "#FFFFFF",
+					sidebar: "#292929",
+					titleArea: "#1E1E1E",
+					pageBackground: "transparent",
+					pageContentBackground: "transparent",
+					loginButtonOutlineColor: "#FFFFFF",
+					outlineColor: "#FFFFFF",
+				},
 				background: { default: darkBg },
-
-				// Custom Dark Palette
-				attributeTitle: "#FFFFFF",
-				breadcrumbs: "#35B7FF",
-				buttonForSelectedChildPage: "#999999",
-				buttonForSelectedPage: "#287BAF",
-				detailsAccordionSummary: darkDetailsAccordion,
-				editableFieldBackground: "#E2EEF6",
-				errorBackground: "transparent",
-				exclamationIcon: "#999999",
-				footerArea: "#202020",
-				footerText: "#FFFFFF",
-				linkedFooterBackground: "#000000",
-				linkedFooterText: "#FFFFFF",
-				header: "#000000",
-				headerText: "#FFFFFF",
-				headingColor: "#FFFFFF",
-				hitCountText: "#FFFFFF",
-				hover: "#424242",
-				hoverOnSelectedPage: "#424242",
-				iconSymbol: "#FFFFFF",
-				inactiveBackground: "#8C8C8C",
-				link: "#B3E5FC",
-				linkText: "#35B7FF",
-				landingBackground: "#000000",
-				landingCard: "#202020",
-				loginCard: "#292929",
-				loginText: "#FFFFFF",
-				navigationText: "#A0AEC0",
-				navigationTextActive: "#FFFFFF",
-				searchResultBackground: "#424242",
-				searchResultTitle: "#63B3ED",
-				selectedText: "#FFFFFF",
-				sidebar: "#292929",
-				titleArea: "#1E1E1E",
-				pageBackground: "transparent",
-				pageContentBackground: "transparent",
-				loginButtonOutlineColor: "#FFFFFF",
-				outlineColor: "#FFFFFF",
 			},
 		},
 	},

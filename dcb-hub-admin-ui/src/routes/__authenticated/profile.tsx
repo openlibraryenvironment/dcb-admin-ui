@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "react-oidc-context";
 import {
 	List,
 	ListItemIcon,
@@ -7,6 +9,7 @@ import {
 	ListSubheader,
 	ListItem,
 	useTheme,
+	Box,
 } from "@mui/material";
 import {
 	PersonOutline,
@@ -15,29 +18,31 @@ import {
 	ThumbUpOffAlt,
 	SupervisorAccountOutlined,
 } from "@mui/icons-material";
-//localisation
-import { useTranslation } from "react-i18next";
 
-import { AdminLayout } from "@layout";
-import { useAuth } from "react-oidc-context";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 
-const Profile: NextPage = () => {
-	const { data: session }: { data: any } = useSession();
-	const emailVerified =
-		session?.profile?.email_verified ?? "Cannot fetch verified email status.";
+export const Route = createFileRoute("/__authenticated/profile")({
+	component: Profile,
+});
 
+function Profile() {
 	const { t } = useTranslation();
 	const theme = useTheme();
+
+	const auth = useAuth();
+	const profile = auth.user?.profile;
+
+	const emailVerified =
+		profile?.email_verified ?? "Cannot fetch verified email status.";
+
 	return (
 		<AdminLayout title={t("nav.profile")} hideTitleBox={true}>
 			<Typography variant="h2" sx={{ pl: 2, fontSize: 32 }}>
 				{t("nav.profile")}
 			</Typography>
 			<List className="list-profile">
-				<ListSubheader
-					sx={{ backgroundColor: theme.palette.background.default }}
-				>
+				<ListSubheader sx={{ backgroundColor: "transparent" }}>
 					<Typography variant="h6">{t("profile.details")}</Typography>
 				</ListSubheader>
 				<ListItem>
@@ -48,7 +53,7 @@ const Profile: NextPage = () => {
 						<Typography variant="attributeTitle">
 							{t("profile.name")}
 						</Typography>
-						{session?.user?.name}
+						{profile?.name || profile?.given_name || "N/A"}
 					</ListItemText>
 				</ListItem>
 				<ListItem>
@@ -59,7 +64,7 @@ const Profile: NextPage = () => {
 						<Typography variant="attributeTitle">
 							{t("profile.email")}
 						</Typography>
-						{session?.user?.email}
+						{profile?.email || "N/A"}
 					</ListItemText>
 				</ListItem>
 				<ListItem>
@@ -81,17 +86,21 @@ const Profile: NextPage = () => {
 						<Typography variant="attributeTitle">
 							{t("profile.prefered_username")}
 						</Typography>
-						{session?.profile?.preferred_username}
+						{profile?.preferred_username || "N/A"}
 					</ListItemText>
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
 						<SupervisorAccountOutlined />
 					</ListItemIcon>
-					<Typography variant="attributeTitle">{t("profile.roles")}</Typography>
-					<FormatArrayAsList roles={session?.profile?.roles} />
+					<Box>
+						<Typography variant="attributeTitle">
+							{t("profile.roles")}
+						</Typography>
+						<FormatArrayAsList roles={profile?.roles as string[] | undefined} />
+					</Box>
 				</ListItem>
 			</List>
 		</AdminLayout>
 	);
-};
+}

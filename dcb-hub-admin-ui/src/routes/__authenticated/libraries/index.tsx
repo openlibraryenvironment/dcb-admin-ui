@@ -40,10 +40,10 @@ import {
 import { getLibraries } from "@queries/getLibraries";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
-import { libraryColumns } from "@columns/libraryColumns";
 import { computeMutation } from "@helpers/computeMutation";
 import { findConsortium } from "@helpers/findConsortium";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { libraryColumns } from "@columns/libraryColumns";
 
 export const Route = createFileRoute("/__authenticated/libraries/")({
 	component: Libraries,

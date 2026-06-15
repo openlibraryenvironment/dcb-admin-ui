@@ -1,3 +1,6 @@
+import { useTranslation, Trans } from "react-i18next"; // Swapped next-i18next for react-i18next
+import ReactMarkdown from "react-markdown";
+import { isEmpty } from "lodash";
 import {
 	CardContent,
 	CardMedia,
@@ -6,25 +9,15 @@ import {
 	CardActions,
 	Button,
 	Card,
-	useTheme,
+	Box,
 } from "@mui/material";
-import { Trans, useTranslation } from "next-i18next"; //localisation
-import Image from "next/image";
-import Link from "@components/Link/Link";
-import kIntLogo from "public/assets/brand/Knowledge-Integration_48px.png";
-import openRSLogo from "public/assets/brand/OpenRS_48px.png";
-import fallbackAbout from "public/assets/brand/fallback-about.png";
-import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
-import ReactMarkdown from "react-markdown";
-import { isEmpty } from "lodash";
 
-// This component holds the UI elements shared between the 'landing' pages (login and logout)
-// It holds the 'three cards' and associated info.
+import Link from "@components/Link/Link";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 export default function LandingCard() {
 	const { t } = useTranslation();
-	const theme = useTheme();
-	// Elevation of 3 applied to the cards for drop shadows: content spaced by '4' - 32 px
+
 	const {
 		displayName,
 		aboutImageURL,
@@ -32,6 +25,11 @@ export default function LandingCard() {
 		websiteURL,
 		description,
 	} = useConsortiumInfoStore();
+
+	// Serve standard static assets from Vite's public folder
+	const kIntLogo = "/assets/brand/Knowledge-Integration_48px.png";
+	const openRSLogo = "/assets/brand/OpenRS_48px.png";
+	const fallbackAbout = "/assets/brand/fallback-about.png";
 
 	return (
 		<Stack
@@ -45,17 +43,18 @@ export default function LandingCard() {
 				elevation={3}
 				sx={{
 					p: 3,
-					backgroundColor: theme.palette.primary.landingCard,
+					backgroundColor: "primary.landingCard",
 					width: "100%",
 					display: "flex",
 					flexDirection: "column",
 				}}
 			>
 				<CardContent>
-					<Stack direction={"column"} spacing={3}>
+					<Stack direction="column" spacing={3}>
 						<CardMedia sx={{ justifyContent: "center", display: "flex" }}>
 							<a href="https://www.openrs.org/">
-								<Image
+								<Box
+									component="img"
 									src={openRSLogo}
 									height={48}
 									alt={t("ui.logo", { owner: "OpenRS" })}
@@ -66,9 +65,9 @@ export default function LandingCard() {
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
 							{t("openrs.about")}
 						</Typography>
-						<Typography variant="loginCardText">
+						<Typography variant="loginCardText" component="div">
 							<Trans
-								i18nKey={"openrs.description"}
+								i18nKey="openrs.description"
 								t={t}
 								components={{
 									linkComponent: (
@@ -86,8 +85,8 @@ export default function LandingCard() {
 				<CardActions disableSpacing sx={{ mt: "auto" }}>
 					<Button
 						size="medium"
-						type="text"
 						href="https://www.openrs.org/"
+						target="_blank"
 						rel="noopener"
 					>
 						<Typography variant="cardActionText">
@@ -96,21 +95,23 @@ export default function LandingCard() {
 					</Button>
 				</CardActions>
 			</Card>
+
 			<Card
 				elevation={3}
 				sx={{
 					p: 3,
-					backgroundColor: theme.palette.primary.landingCard,
+					backgroundColor: "primary.landingCard",
 					width: "100%",
 					display: "flex",
 					flexDirection: "column",
 				}}
 			>
 				<CardContent>
-					<Stack direction={"column"} spacing={3}>
+					<Stack direction="column" spacing={3}>
 						<CardMedia sx={{ justifyContent: "center", display: "flex" }}>
 							<a href="https://www.k-int.com/">
-								<Image
+								<Box
+									component="img"
 									src={kIntLogo}
 									height={48}
 									alt={t("ui.logo", { owner: "Knowledge Integration" })}
@@ -121,9 +122,9 @@ export default function LandingCard() {
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
 							{t("openrs.dcb.about")}
 						</Typography>
-						<Typography variant="loginCardText">
+						<Typography variant="loginCardText" component="div">
 							<Trans
-								i18nKey={"openrs.dcb.description"}
+								i18nKey="openrs.dcb.description"
 								t={t}
 								components={{
 									linkComponent: (
@@ -138,8 +139,8 @@ export default function LandingCard() {
 				<CardActions disableSpacing sx={{ mt: "auto" }}>
 					<Button
 						size="medium"
-						type="text"
 						href="https://knowint.zendesk.com/"
+						target="_blank"
 						rel="noopener"
 					>
 						<Typography variant="cardActionText">
@@ -148,52 +149,56 @@ export default function LandingCard() {
 					</Button>
 				</CardActions>
 			</Card>
+
 			<Card
 				elevation={3}
 				sx={{
 					p: 3,
-					backgroundColor: theme.palette.primary.landingCard,
+					backgroundColor: "primary.landingCard",
 					width: "100%",
 					display: "flex",
 					flexDirection: "column",
 				}}
 			>
 				<CardContent>
-					<Stack direction={"column"} spacing={3}>
+					<Stack direction="column" spacing={3}>
 						<CardMedia sx={{ justifyContent: "center", display: "flex" }}>
 							{websiteURL ? (
 								<a href={websiteURL}>
-									<Image
+									<Box
+										component="img"
 										src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
 										height={48}
 										width={180}
+										sx={{ objectFit: "contain" }}
 										alt={t("ui.logo", { owner: { displayName } })}
 										title={t("ui.logo", { owner: { displayName } })}
 									/>
 								</a>
 							) : (
-								<Image
+								<Box
+									component="img"
 									src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
 									height={48}
 									width={180}
+									sx={{ objectFit: "contain" }}
 									alt={t("ui.logo", { owner: { displayName } })}
 									title={t("ui.logo", { owner: { displayName } })}
 								/>
 							)}
 						</CardMedia>
 						<Typography variant="h2" sx={{ fontSize: 32 }}>
-							{!(displayName == "OpenRS Consortium")
+							{displayName !== "OpenRS Consortium"
 								? t("consortium.about", { consortium: displayName })
 								: t("consortium.about_generic")}
 						</Typography>
-						{description == "" ? (
-							<Typography variant="loginCardText">
+
+						{isEmpty(description) ? (
+							<Typography variant="loginCardText" component="div">
 								<Trans
-									i18nKey={"consortium.description_generic"}
+									i18nKey="consortium.description_generic"
 									t={t}
-									components={{
-										paragraph: <p />,
-									}}
+									components={{ paragraph: <p /> }}
 								/>
 							</Typography>
 						) : (
@@ -209,12 +214,13 @@ export default function LandingCard() {
 						)}
 					</Stack>
 				</CardContent>
-				{catalogueSearchURL ? (
+
+				{catalogueSearchURL && (
 					<CardActions disableSpacing sx={{ mt: "auto" }}>
 						<Button
 							size="medium"
-							type="text"
 							href={catalogueSearchURL}
+							target="_blank"
 							rel="noopener"
 						>
 							<Typography variant="cardActionText">
@@ -222,7 +228,7 @@ export default function LandingCard() {
 							</Typography>
 						</Button>
 					</CardActions>
-				) : null}
+				)}
 			</Card>
 		</Stack>
 	);

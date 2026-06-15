@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import Error from "@components/Error/Error";
 import { useTranslation } from "react-i18next";
 

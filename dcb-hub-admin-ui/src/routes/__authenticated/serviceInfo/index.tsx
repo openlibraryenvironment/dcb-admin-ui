@@ -1,51 +1,59 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { AdminLayout } from "@layout";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "react-oidc-context";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
-import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next";
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import { adminOrConsortiumAdmin } from "@constants/roles";
 
-import { adminOrConsortiumAdmin } from "src/constants/roles";
+export const Route = createFileRoute("/__authenticated/serviceInfo/")({
+	component: ServiceInfo,
+});
 
-const ServiceInfo: NextPage = () => {
+function ServiceInfo() {
 	const { t } = useTranslation();
 	const auth = useAuth();
+
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	const isAValidAdmin = isAnAdmin;
+	const isAnAdmin = userRoles.some((role) =>
+		adminOrConsortiumAdmin.includes(role),
+	);
 
 	return (
 		<AdminLayout title={t("nav.serviceInfo.name")}>
 			<List component="nav" aria-labelledby="service-information">
-				<ListItem component="nav" disablePadding>
+				<ListItem disablePadding>
+					{/* Replaced 'a' tag with TanStack 'Link' for instantaneous SPA navigation */}
 					<ListItemButton
-						component="a"
-						href="/serviceInfo/catalogMetricsByHostLms"
+						component={Link}
+						to="/serviceInfo/catalogMetricsByHostLms"
 					>
 						<ListItemText
 							primary={t("nav.serviceInfo.catalogMetricsByHostLms")}
 						/>
 					</ListItemButton>
 				</ListItem>
-				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/serviceInfo/serviceStatus">
+
+				<ListItem disablePadding>
+					<ListItemButton component={Link} to="/serviceInfo/serviceStatus">
 						<ListItemText primary={t("nav.serviceInfo.serviceStatus")} />
 					</ListItemButton>
 				</ListItem>
-				{isAValidAdmin ? (
-					<ListItem component="nav" disablePadding>
-						<ListItemButton component="a" href="/serviceInfo/dataChangeLog">
+
+				{isAnAdmin && (
+					<ListItem disablePadding>
+						<ListItemButton component={Link} to="/serviceInfo/dataChangeLog">
 							<ListItemText primary={t("nav.serviceInfo.dataChangeLog")} />
 						</ListItemButton>
 					</ListItem>
-				) : null}
-				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/serviceInfo/requestErrors">
+				)}
+
+				<ListItem disablePadding>
+					<ListItemButton component={Link} to="/serviceInfo/requestErrors">
 						<ListItemText primary={t("nav.serviceInfo.requestErrors.name")} />
 					</ListItemButton>
 				</ListItem>
 			</List>
 		</AdminLayout>
 	);
-};
+}

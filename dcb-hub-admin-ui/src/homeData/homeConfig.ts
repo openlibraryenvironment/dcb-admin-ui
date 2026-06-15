@@ -1,5 +1,3 @@
-const { publicRuntimeConfig } = getConfig();
-
 const API_LINKS = {
 	SERVICE:
 		"https://api.github.com/repos/openlibraryenvironment/dcb-service/tags",
@@ -7,15 +5,40 @@ const API_LINKS = {
 		"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
 };
 
+// Helper utility to safely retrieve the environment configuration globally
+// following the bootstrap injection strategy in your main.tsx
+const getEnvConfig = () => {
+	if (typeof window !== "undefined" && window.__APP_ENV__) {
+		return window.__APP_ENV__;
+	}
+	// Fallback to static Vite environment variables if running in testing or edge environments
+	return {
+		VITE_DCB_API_BASE: String(import.meta.env.VITE_DCB_API_BASE || ""),
+		VITE_KEYCLOAK_URL: String(import.meta.env.VITE_KEYCLOAK_URL || ""),
+	};
+};
+
+// Converted to getters to prevent early initialization crashes and evaluate variables dynamically
 const LOCAL_VERSION_LINKS = {
-	SERVICE: publicRuntimeConfig.VITE_DCB_API_BASE,
-	SERVICE_INFO: publicRuntimeConfig.VITE_DCB_API_BASE + "/info",
-	SERVICE_HEALTH: publicRuntimeConfig.VITE_DCB_API_BASE + "/health",
-	KEYCLOAK: publicRuntimeConfig.VITE_KEYCLOAK_URL,
-	KEYCLOAK_HEALTH:
-		publicRuntimeConfig.VITE_KEYCLOAK_URL.split("/", 3).join("/") + "/health",
-	TRACKING:
-		publicRuntimeConfig.VITE_DCB_API_BASE + "/admin/trackingConfiguration",
+	get SERVICE() {
+		return getEnvConfig().VITE_DCB_API_BASE;
+	},
+	get SERVICE_INFO() {
+		return `${getEnvConfig().VITE_DCB_API_BASE}/info`;
+	},
+	get SERVICE_HEALTH() {
+		return `${getEnvConfig().VITE_DCB_API_BASE}/health`;
+	},
+	get KEYCLOAK() {
+		return getEnvConfig().VITE_KEYCLOAK_URL;
+	},
+	get KEYCLOAK_HEALTH() {
+		const keycloakUrl = getEnvConfig().VITE_KEYCLOAK_URL || "";
+		return `${keycloakUrl.split("/", 3).join("/")}/health`;
+	},
+	get TRACKING() {
+		return `${getEnvConfig().VITE_DCB_API_BASE}/admin/trackingConfiguration`;
+	},
 };
 
 const REPO_LINKS = {
@@ -55,8 +78,12 @@ const ONBOARDING_LINKS = {
 };
 
 const DCB_SERVICE_STATUS_LINKS = {
-	LOGGERS: publicRuntimeConfig.VITE_DCB_API_BASE + "/loggers",
-	METRICS: publicRuntimeConfig.VITE_DCB_API_BASE + "/metrics",
+	get LOGGERS() {
+		return `${getEnvConfig().VITE_DCB_API_BASE}/loggers`;
+	},
+	get METRICS() {
+		return `${getEnvConfig().VITE_DCB_API_BASE}/metrics`;
+	},
 };
 
 export {

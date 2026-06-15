@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Error from "@components/Error/Error";
 import { useTranslation } from "react-i18next";
+import { createFileRoute } from "@tanstack/react-router";
 
 import LoginLayout from "@layout/LoginLayout/LoginLayout";
+import ErrorComponent from "@components/Error/Error";
 
 export const Route = createFileRoute("/maintenance")({
 	component: MaintenancePage,
@@ -13,7 +13,7 @@ function MaintenancePage() {
 
 	return (
 		<LoginLayout pageName={t("ui.error.503.page_title")}>
-			<Error
+			<ErrorComponent
 				title={t("ui.error.503.name") || "Maintenance"}
 				message={t("ui.error.503.summary") || "System Under Maintenance"}
 				description={
@@ -21,7 +21,7 @@ function MaintenancePage() {
 					"The service is currently unavailable. Please try again later."
 				}
 				action={t("ui.error.503.action") || "Sign out"}
-				goBack="/auth/logout"
+				goBack="/logout"
 			/>
 		</LoginLayout>
 	);

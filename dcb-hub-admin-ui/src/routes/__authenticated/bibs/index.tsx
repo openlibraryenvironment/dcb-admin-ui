@@ -23,8 +23,8 @@ import {
 	getSortOrderForServer,
 	processGridFilterModel,
 } from "@helpers/dataGrid/utilities";
-import { standardBibColumns } from "@/columns/bibColumns";
-import { bibColumnVisibility } from "@/columns/columnVisibility/bibColumnVisbility";
+import { standardBibColumns } from "@columns/bibColumns";
+import { bibColumnVisibility } from "@columns/columnVisibility/bibColumnVisbility";
 
 export const Route = createFileRoute("/__authenticated/bibs/")({
 	component: BibsRouteComponent,

@@ -1,28 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type { NextPage } from "next";
-import { AdminLayout } from "@layout";
-import { Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
-import { useTranslation } from "react-i18next"; //localisation
+import { Stack, Typography } from "@mui/material";
 
+import AdminLayout from "@layout/AdminLayout/AdminLayout";
 import Loading from "@components/Loading/Loading";
-import { useNavigate, useRouter } from "@tanstack/react-router";
 import OperatingWelcome from "@components/OperatingWelcome/OperatingWelcome";
+
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
-// The DCB Admin Home Page.
-// Now without launch-date-based conditional display, with onboarding components moved to the 'onboarding' page in the consortium section.
-// Shows consortium information and libraries
-const Home: NextPage = () => {
-	const router = useRouter();
+
+export const Route = createFileRoute("/__authenticated/")({
+	component: Home,
+});
+
+function Home() {
 	const auth = useAuth();
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const { t } = useTranslation();
-	const nameOfUser = session?.profile?.given_name ?? t("app.guest_user");
 	const { displayName } = useConsortiumInfoStore();
 
-	if (status === "loading") {
+	// Check loading state natively through OIDC context
+	if (auth.isLoading) {
 		return (
 			<AdminLayout>
 				<Loading
@@ -35,21 +32,33 @@ const Home: NextPage = () => {
 		);
 	}
 
+	// Safely extract the user's name from the OIDC profile with robust fallbacks
+	const profile = auth.user?.profile;
+	const nameOfUser =
+		profile?.given_name || profile?.name || t("app.guest_user");
+
 	return (
 		<AdminLayout
 			title={t("welcome.greeting", { user: nameOfUser })}
 			hideTitleBox={true}
 		>
-			<Stack direction="column" spacing={2}>
+			<Stack direction="column" spacing={2} sx={{ mt: 2 }}>
 				<Typography variant="h1">
 					{t("welcome.greeting", { user: nameOfUser })}
 				</Typography>
+
 				<Typography variant="homePageText">
-					{t("welcome.context", { consortium_name: displayName })}
+					{t("welcome.context", {
+						consortium_name: displayName || t("consortium.name"),
+					})}
 				</Typography>
-				<Typography variant="h2">{t("consortium.your")}</Typography>
+
+				<Typography variant="h2" sx={{ mt: 4 }}>
+					{t("consortium.your")}
+				</Typography>
+
 				<OperatingWelcome />
 			</Stack>
 		</AdminLayout>
 	);
-};
+}

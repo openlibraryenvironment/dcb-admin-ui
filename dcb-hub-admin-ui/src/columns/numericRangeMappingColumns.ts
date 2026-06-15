@@ -1,5 +1,6 @@
 import { dateTimeRangeOperators } from "@filters/dateTimeRangeOperators";
-import { equalsOnly, standardFilters } from "@constants/filters/filters";
+import { equalsOnly } from "@filters/equalsOnly";
+import { standardFilters } from "@filters/standardFilters";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import dayjs from "dayjs";
 export const standardNumRangeMappingColumns: GridColDef[] = [

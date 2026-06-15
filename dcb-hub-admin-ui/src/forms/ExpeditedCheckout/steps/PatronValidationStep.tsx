@@ -7,12 +7,12 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { TFunction } from "next-i18next";
+import { TFunction } from "i18next";
 import { Control, Controller, FieldErrors } from "react-hook-form";
 
 // Step 1: Patron Validation Component: this is step 1 in the expedited checkout workflow
-type PatronValidationStepType = {
-	control: Control<OnSiteBorrowingFormData, any>;
+interface PatronValidationStepType {
+	control: Control<any, any>;
 	errors: FieldErrors<OnSiteBorrowingFormData>;
 	patronValidated: boolean;
 	isValidatingPatron: boolean;
@@ -23,7 +23,7 @@ type PatronValidationStepType = {
 	libraryOptions: PatronRequestAutocompleteOption[];
 	librariesLoading: boolean;
 	t: TFunction;
-};
+}
 export const PatronValidationStep = ({
 	control,
 	errors,
@@ -39,10 +39,10 @@ export const PatronValidationStep = ({
 }: PatronValidationStepType) => {
 	return (
 		<>
-			<Typography variant="body1" paragraph>
-				{t("expedited_checkout.steps.patron_validation_instruction")}
+			<Typography variant="body1">
+				{t("requesting.expedited_checkout.steps.patron_validation_instruction")}
 			</Typography>
-
+			{/* /** The library of the patron. Could be a visiting patron, so this is not restricted*/}
 			<Controller
 				name="agencyCode"
 				control={control}
@@ -65,10 +65,9 @@ export const PatronValidationStep = ({
 								{...params}
 								margin="normal"
 								required
-								label={t("staff_request.patron.affiliated")}
+								label={t("requesting.staff_request.patron.affiliated")}
 								error={!!errors.agencyCode}
 								helperText={errors.agencyCode?.message}
-								disabled={patronValidated}
 							/>
 						)}
 						isOptionEqualToValue={(option, value) =>
@@ -88,7 +87,7 @@ export const PatronValidationStep = ({
 						required
 						fullWidth
 						id="patronBarcode"
-						label={t("staff_request.patron.barcode")}
+						label={t("requesting.staff_request.patron.barcode")}
 						error={!!errors.patronBarcode}
 						helperText={errors.patronBarcode?.message}
 						disabled={patronValidated}
@@ -97,7 +96,7 @@ export const PatronValidationStep = ({
 			/>
 			<Stack spacing={1} direction={"row"}>
 				<Button variant="outlined" onClick={handleClose}>
-					{t("mappings.cancel")}
+					{t("ui.actions.cancel")}
 				</Button>
 				<div style={{ flex: "1 0 0" }} />
 				<Button
@@ -107,8 +106,8 @@ export const PatronValidationStep = ({
 					disabled={isValidatingPatron || !patronBarcode || !agencyCode}
 				>
 					{isValidatingPatron
-						? t("staff_request.patron.validating")
-						: t("staff_request.patron.validate")}
+						? t("requesting.staff_request.patron.validating")
+						: t("requesting.staff_request.patron.validate")}
 				</Button>
 			</Stack>
 		</>

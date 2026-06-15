@@ -1,7 +1,12 @@
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "@tanstack/react-router";
+import ReactMarkdown from "react-markdown";
+import dayjs from "dayjs";
+
 import {
 	AccordionDetails,
 	Grid,
-	Link,
 	List,
 	ListItem,
 	ListItemText,
@@ -9,21 +14,20 @@ import {
 	Typography,
 } from "@mui/material";
 import { useGridApiContext } from "@mui/x-data-grid-premium";
-import { useTranslation } from "react-i18next";
-import { useCallback, useEffect, useState } from "react";
+import { ExpandMore } from "@mui/icons-material";
+
+import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import MasterDetailLayout from "./MasterDetailLayout";
-import dayjs from "dayjs";
-import { formatDuration } from "@helpers/formatDuration";
+import { LocationCell } from "@components/LocationCell/LocationCell";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import {
 	StyledAccordionDetails,
 	StyledDataGridAccordion,
 	StyledDataGridAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
-import { ExpandMore } from "@mui/icons-material";
-import { LocationCell } from "@components/LocationCell/LocationCell";
-import ReactMarkdown from "react-markdown";
+
+import { formatDuration } from "@helpers/formatDuration";
+import MasterDetailLayout from "./MasterDetailLayout";
 
 type MasterDetailType = {
 	row: any;
@@ -56,7 +60,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.agency_uuid")}
 							</Typography>
@@ -71,7 +75,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("alarms.code")}
 							</Typography>
@@ -81,7 +85,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("alarms.expires")}
 							</Typography>
@@ -90,9 +94,8 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 						</Stack>
 					</Grid>
-
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("alarms.details")}
 							</Typography>
@@ -105,7 +108,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.source_bib_uuid")}
 							</Typography>
@@ -126,12 +129,12 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									{t("search.bib_record_id")}
 								</Typography>
 								<Typography variant="attributeText" component="div">
+									{/* UPGRADE: Use component={RouterLink} to pass SPA paths instantly */}
 									<Link
-										href={`/bibs/${row?.id}`}
+										component={RouterLink}
+										to={`/bibs/${row?.id}`}
 										underline="hover"
-										onClick={(e) => {
-											e.stopPropagation();
-										}}
+										onClick={(e: React.MouseEvent) => e.stopPropagation()}
 									>
 										<RenderAttribute attribute={row?.id} />
 									</Link>
@@ -154,7 +157,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									{t("search.identifiers")}
 								</Typography>
 								<List sx={{ pl: 0, ml: 0 }} dense disablePadding>
-									{row.canonicalMetadata.identifiers.map(
+									{row?.canonicalMetadata?.identifiers?.map(
 										(id: { namespace: string; value: string }) => (
 											<ListItem
 												sx={{ pl: 0 }}
@@ -215,40 +218,40 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">{t("groups.id")}</Typography>
 							<Typography variant="attributeText">
 								<RenderAttribute attribute={row?.id} />
 							</Typography>
 						</Stack>
 					</Grid>
-					{row?.type?.toLowerCase() === "consortium" ? (
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("consortium.name")}
-								</Typography>
-								<RenderAttribute attribute={row?.consortium?.name} />
-							</Stack>
-						</Grid>
-					) : null}
-					{row?.type?.toLowerCase() === "consortium" ? (
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("consortium.id")}
-								</Typography>
-								<RenderAttribute attribute={row?.consortium?.id} />
-							</Stack>
-						</Grid>
-					) : null}
+					{row?.type?.toLowerCase() === "consortium" && (
+						<>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction="column">
+									<Typography variant="attributeTitle">
+										{t("consortium.name")}
+									</Typography>
+									<RenderAttribute attribute={row?.consortium?.name} />
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction="column">
+									<Typography variant="attributeTitle">
+										{t("consortium.id")}
+									</Typography>
+									<RenderAttribute attribute={row?.consortium?.id} />
+								</Stack>
+							</Grid>
+						</>
+					)}
 				</MasterDetailLayout>
 			);
 		case "hostlmss":
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("hostlms.id")}
 							</Typography>
@@ -259,7 +262,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					</Grid>
 					{row?.clientConfig?.["base-url-application-services"] != null && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.base_application")}
 								</Typography>
@@ -275,7 +278,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 					{row?.clientConfig?.["base-url"] != null && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.base")}
 								</Typography>
@@ -289,7 +292,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 					{row?.clientConfig?.roles != null && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.roles")}
 								</Typography>
@@ -303,7 +306,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 					{row?.clientConfig?.["contextHierarchy"] != null && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.context_hierarchy")}
 								</Typography>
@@ -317,7 +320,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 					{row?.clientConfig?.["default-agency-code"] != null && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.default_agency_code")}
 								</Typography>
@@ -331,7 +334,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 					{row?.clientConfig?.ingest != null && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("hostlms.client_config.ingest")}
 								</Typography>
@@ -349,7 +352,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("libraries.library_id")}
 							</Typography>
@@ -362,7 +365,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.location_uuid")}
 							</Typography>
@@ -370,15 +373,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
-							<Typography variant="attributeTitle">
-								{t("details.location_uuid")}
-							</Typography>
-							<RenderAttribute attribute={row?.id} />
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.location_type")}
 							</Typography>
@@ -386,7 +381,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.location_agency_name")}
 							</Typography>
@@ -399,7 +394,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.request_created")}
 							</Typography>
@@ -409,7 +404,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.patron_hostlms")}
 							</Typography>
@@ -417,7 +412,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.borrowing_patron_barcode")}
 							</Typography>
@@ -427,7 +422,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.title")}
 							</Typography>
@@ -435,15 +430,15 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.supplying_agency_code")}
 							</Typography>
-							<RenderAttribute attribute={row?.suppliers[0]?.localAgency} />
+							<RenderAttribute attribute={row?.suppliers?.[0]?.localAgency} />
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("patron_requests.pickup_location_name")}
 							</Typography>
@@ -451,7 +446,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.previous_status")}
 							</Typography>
@@ -459,7 +454,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.status")}
 							</Typography>
@@ -467,7 +462,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.next_expected_status")}
 							</Typography>
@@ -477,7 +472,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.error")}
 							</Typography>
@@ -485,16 +480,15 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.is_transition_out_of_sequence")}
 							</Typography>
 							<RenderAttribute attribute={row?.outOfSequenceFlag?.toString()} />
 						</Stack>
 					</Grid>
-
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.polling_checks_in_status")}
 							</Typography>
@@ -504,7 +498,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.time_in_status")}
 							</Typography>
@@ -514,17 +508,17 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.item_manually_selected")}
 							</Typography>
 							<RenderAttribute
-								attribute={row.isManuallySelectedItem?.toString()}
+								attribute={row?.isManuallySelectedItem?.toString()}
 							/>
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.request_updated")}
 							</Typography>
@@ -534,7 +528,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.request_uuid")}
 							</Typography>
@@ -547,7 +541,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.context")}
 							</Typography>
@@ -555,7 +549,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.agency_code")}
 							</Typography>
@@ -563,7 +557,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.agency_name")}
 							</Typography>
@@ -571,7 +565,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.location_name")}
 							</Typography>
@@ -579,7 +573,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("details.location_code")}
 							</Typography>
@@ -587,7 +581,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.barcode")}
 							</Typography>
@@ -595,7 +589,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.call_no")}
 							</Typography>
@@ -603,7 +597,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.local_item_type_code")}
 							</Typography>
@@ -611,7 +605,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.local_item_type_name")}
 							</Typography>
@@ -619,7 +613,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.volume_raw")}
 							</Typography>
@@ -627,16 +621,16 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.volume_parsed")}
 							</Typography>
 							<RenderAttribute attribute={row?.parsedVolumeStatement} />
 						</Stack>
 					</Grid>
-					{row?.statusCorrectAsOf ? (
+					{row?.statusCorrectAsOf && (
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
+							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("ui.info.correct_as_of")}
 								</Typography>
@@ -647,43 +641,41 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								/>
 							</Stack>
 						</Grid>
-					) : null}
-					{row?.status?.code != "AVAILABLE" ? (
-						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
-							<StyledDataGridAccordion elevation={0}>
-								<StyledDataGridAccordionSummary
-									expandIcon={<ExpandMore />}
-									aria-controls="search-suppression_decision_log_entries"
-									id="search-suppression_decision_log_entries"
-								>
-									<Typography>
-										{t("search.suppression.decision_log")}
-									</Typography>
-								</StyledDataGridAccordionSummary>
-								<AccordionDetails id="item_decision_log">
-									{JSON.stringify(row?.decisionLogEntries, null, 2)}
-								</AccordionDetails>
-							</StyledDataGridAccordion>
-						</Grid>
-					) : null}
-					{row?.status?.code != "AVAILABLE" ? (
-						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
-							<StyledDataGridAccordion elevation={0}>
-								<StyledDataGridAccordionSummary
-									expandIcon={<ExpandMore />}
-									aria-controls="search-suppression_raw_values"
-									id="search-suppression_raw_values"
-								>
-									<Typography>
-										{t("search.suppression.raw_data_values")}
-									</Typography>
-								</StyledDataGridAccordionSummary>
-								<AccordionDetails id="item_raw_values">
-									{JSON.stringify(row?.rawDataValues, null, 2)}
-								</AccordionDetails>
-							</StyledDataGridAccordion>
-						</Grid>
-					) : null}
+					)}
+					{row?.status?.code !== "AVAILABLE" && (
+						<>
+							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+								<StyledDataGridAccordion elevation={0}>
+									<StyledDataGridAccordionSummary
+										expandIcon={<ExpandMore />}
+										id="search-suppression_decision_log_entries"
+									>
+										<Typography>
+											{t("search.suppression.decision_log")}
+										</Typography>
+									</StyledDataGridAccordionSummary>
+									<AccordionDetails id="item_decision_log">
+										{JSON.stringify(row?.decisionLogEntries, null, 2)}
+									</AccordionDetails>
+								</StyledDataGridAccordion>
+							</Grid>
+							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+								<StyledDataGridAccordion elevation={0}>
+									<StyledDataGridAccordionSummary
+										expandIcon={<ExpandMore />}
+										id="search-suppression_raw_values"
+									>
+										<Typography>
+											{t("search.suppression.raw_data_values")}
+										</Typography>
+									</StyledDataGridAccordionSummary>
+									<AccordionDetails id="item_raw_values">
+										{JSON.stringify(row?.rawDataValues, null, 2)}
+									</AccordionDetails>
+								</StyledDataGridAccordion>
+							</Grid>
+						</>
+					)}
 				</MasterDetailLayout>
 			);
 		case "versionInfo":
@@ -692,37 +684,31 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					{row?.repository === "dcb-service" ? (
 						<>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction={"column"}>
+								<Stack direction="column">
 									<Typography variant="attributeTitle">
 										{t("environment.latest_version")}
 									</Typography>
 									<RenderAttribute attribute={row?.latestData?.name} />
 								</Stack>
 							</Grid>
-
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction={"column"}>
+								<Stack direction="column">
 									<Typography variant="attributeTitle">
 										{t("environment.latest_version_github")}
 									</Typography>
 									<RenderAttribute
-										attribute={
-											"https://github.com/openlibraryenvironment/dcb-service/releases/tag/" +
-											row?.latestData?.name
-										}
+										attribute={`https://github.com/openlibraryenvironment/dcb-service/releases/tag/${row?.latestData?.name}`}
 										type="url"
 									/>
 								</Stack>
 							</Grid>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction={"column"}>
+								<Stack direction="column">
 									<Typography variant="attributeTitle">
 										{t("environment.changelog")}
 									</Typography>
 									<RenderAttribute
-										attribute={
-											"https://github.com/openlibraryenvironment/dcb-service/blob/main/changelog.md"
-										}
+										attribute="https://github.com/openlibraryenvironment/dcb-service/blob/main/changelog.md"
 										type="url"
 									/>
 								</Stack>
@@ -731,7 +717,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					) : (
 						<>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction={"column"}>
+								<Stack direction="column">
 									<Typography variant="attributeTitle">
 										{t("environment.latest_version_released")}
 									</Typography>
@@ -743,21 +729,18 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</Stack>
 							</Grid>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction={"column"}>
+								<Stack direction="column">
 									<Typography variant="attributeTitle">
 										{t("environment.latest_version_github")}
 									</Typography>
 									<RenderAttribute
-										attribute={
-											"https://github.com/openlibraryenvironment/dcb-admin-ui/releases/" +
-											row?.latestData?.name
-										}
+										attribute={`https://github.com/openlibraryenvironment/dcb-admin-ui/releases/${row?.latestData?.name}`}
 										type="url"
 									/>
 								</Stack>
 							</Grid>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction={"column"}>
+								<Stack direction="column">
 									<Typography variant="attributeTitle">
 										{t("details.author")}
 									</Typography>
@@ -784,7 +767,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 			return (
 				<MasterDetailLayout width={width}>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.formatted_timestamp")}
 							</Typography>
@@ -792,7 +775,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.cluster_audit_message")}
 							</Typography>
@@ -800,7 +783,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.identifier")}
 							</Typography>
@@ -808,7 +791,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("ui.data_grid.value")}
 							</Typography>
@@ -816,7 +799,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.event_type")}
 							</Typography>
@@ -830,11 +813,10 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 							<Typography variant="attributeText" component="div">
 								<Link
-									href={`/bibs/${row?.id}`}
+									component={RouterLink}
+									to={`/bibs/${row?.id}`}
 									underline="hover"
-									onClick={(e) => {
-										e.stopPropagation();
-									}}
+									onClick={(e: React.MouseEvent) => e.stopPropagation()}
 								>
 									<RenderAttribute attribute={row?.subjectId} />
 								</Link>
@@ -848,11 +830,10 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 							<Typography variant="attributeText" component="div">
 								<Link
-									href={`/bibs/${row?.id}`}
+									component={RouterLink}
+									to={`/bibs/${row?.id}`}
 									underline="hover"
-									onClick={(e) => {
-										e.stopPropagation();
-									}}
+									onClick={(e: React.MouseEvent) => e.stopPropagation()}
 								>
 									<RenderAttribute attribute={row?.id} />
 								</Link>
@@ -860,7 +841,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.process_type")}
 							</Typography>
@@ -868,7 +849,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction={"column"}>
+						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.process_id")}
 							</Typography>
@@ -877,7 +858,6 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					</Grid>
 				</MasterDetailLayout>
 			);
-
 		default:
 			return null;
 	}

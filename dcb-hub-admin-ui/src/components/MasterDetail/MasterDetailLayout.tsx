@@ -1,6 +1,14 @@
-import { Box, Grid, Divider } from "@mui/material";
+import { Box, Divider, Grid } from "@mui/material";
 
-export default function MasterDetailLayout({ children, width }: any) {
+interface MasterDetailLayoutProps {
+	children: React.ReactNode;
+	width: number | string | undefined;
+}
+
+export default function MasterDetailLayout({
+	children,
+	width,
+}: MasterDetailLayoutProps) {
 	return (
 		<Box>
 			<Grid
@@ -19,8 +27,9 @@ export default function MasterDetailLayout({ children, width }: any) {
 			>
 				{children}
 			</Grid>
+			{/* UPGRADE: Use standard explicit Grid size naming parameters layout formats */}
 			<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-				<Divider aria-hidden="true"></Divider>
+				<Divider aria-hidden="true" />
 			</Grid>
 		</Box>
 	);

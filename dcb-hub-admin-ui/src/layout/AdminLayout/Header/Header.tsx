@@ -1,32 +1,38 @@
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import { Menu, AccountCircle } from "@mui/icons-material";
-import Link from "@components/Link/Link";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { styled, useTheme } from "@mui/material/styles";
-import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Button, lighten } from "@mui/material";
-import Image from "next/image";
-import { useNavigate, useRouter } from "@tanstack/react-router";
-import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
-import Head from "next/head";
-import { useGridStore } from "@hooks/useDataGridOptionsStore";
-import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
-import { getConsortiaKeyInfo } from "src/queries/queries";
+import { useAuth } from "react-oidc-context";
+import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Consortium } from "@models/Consortium";
 import { isEmpty } from "lodash";
-import fallbackHeader from "public/assets/brand/fallback-header.png";
+
+import {
+	Box,
+	Toolbar,
+	Typography,
+	IconButton,
+	Button,
+	lighten,
+	styled,
+	useTheme,
+} from "@mui/material";
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
+import { Menu, AccountCircle } from "@mui/icons-material";
+
+import Link from "@components/Link/Link";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useGridStore } from "@/hooks/useDataGridStore";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import useDCBVersionStore from "@hooks/serviceInfoStore";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+
+import { getConsortiumBasics } from "@queries/getConsortiumBasics";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
 }
+
 interface HeaderProps {
-	openStateFuncClosed?: any;
+	openStateFuncClosed?: () => void;
 	iconsVisible?: boolean;
 }
 
@@ -36,19 +42,22 @@ const AppBar = styled(MuiAppBar, {
 	zIndex: theme.zIndex.drawer + 1,
 }));
 
-// Note that in dark mode the header's icon button colour changes are greater.
-// This is because the standard percentages did not distinguish them enough.
-// It's also worth noting that 'lighten' is used irrespective of mode. This is intentional, as the header will always have a dark background.
-// Should this change, this approach will need re-visiting.
-
 export default function Header({
 	openStateFuncClosed,
-	iconsVisible,
+	iconsVisible = true,
 }: HeaderProps) {
-	const { status } = useSession();
 	const theme = useTheme();
-	const router = useRouter();
+	const navigate = useNavigate();
+	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
+
+	const auth = useAuth();
 	const { type } = useDCBServiceInfo();
+	const clearGridState = useGridStore((state) => state.clearGridState);
+	const clearVersionStore = useDCBVersionStore(
+		(state) => state.clearVersionStore,
+	);
+
 	const {
 		headerImageURL,
 		displayName,
@@ -60,221 +69,189 @@ export default function Header({
 		setName,
 		setHeaderImageURL,
 	} = useConsortiumInfoStore();
-	const clearGridState = useGridStore((state) => state.clearGridState);
-	const clearVersionStore = useDCBVersionStore(
-		(state) => state.clearVersionStore,
-	);
 
-	const url = "/auth/logout";
-	const { t } = useTranslation();
-	const handleClick = () => {
-		if (status === "authenticated") {
-			signOut({ redirect: false });
+	const handleAuthClick = () => {
+		if (auth.isAuthenticated) {
 			clearGridState();
 			clearVersionStore();
-			// clearConsortiumStore();
-			router.push(url);
+			auth.signoutRedirect({
+				post_logout_redirect_uri: `${window.location.origin}/logout?loggedOut=true`,
+			});
 		} else {
-			signIn();
+			auth.signinRedirect();
 		}
 	};
-	const { data: headerContentData } = useQuery(getConsortiaKeyInfo, {
-		variables: {
-			order: "name",
-			orderBy: "ASC",
-			pagesize: 1,
-			pageno: 0,
-		},
-		errorPolicy: "all",
-		onCompleted: (data) => {
-			const consortium: Consortium = data?.consortia.content[0];
-			// Check for changes
-			if (consortium && consortium.displayName !== displayName) {
-				setName(consortium.name);
-				setDisplayName(consortium.displayName);
-				setDescription(consortium.description);
-				setCatalogueSearchURL(consortium.catalogueSearchUrl);
-				setWebsiteURL(consortium.websiteUrl);
-				setHeaderImageURL(consortium?.headerImageUrl);
-				if (!isEmpty(consortium?.aboutImageUrl)) {
-					setAboutImageURL(consortium.aboutImageUrl);
-				}
-			}
-		},
-		fetchPolicy: "cache-and-network", // Fetch from cache first, then network
-		nextFetchPolicy: "cache-first", // Subsequent fetches prefer cache
-		// skip: !isEmpty(headerImageURL),
+
+	const { data: headerContentData } = useQuery({
+		queryKey: ["consortiaKeyInfo"],
+		queryFn: () =>
+			gqlClient.request(getConsortiumBasics, {
+				order: "name",
+				orderBy: "ASC",
+				pagesize: 1,
+				pageno: 0,
+			}),
 	});
 
-	const consortium: Consortium = headerContentData?.consortia.content[0];
+	const consortium = headerContentData?.consortia?.content?.[0];
+
+	// Sync consortium store state if data changes
+	useEffect(() => {
+		if (consortium && consortium.displayName !== displayName) {
+			setName(consortium.name);
+			setDisplayName(consortium.displayName);
+			setDescription(consortium.description);
+			setCatalogueSearchURL(consortium.catalogueSearchUrl);
+			setWebsiteURL(consortium.websiteUrl);
+			setHeaderImageURL(consortium.headerImageUrl);
+			if (!isEmpty(consortium.aboutImageUrl)) {
+				setAboutImageURL(consortium.aboutImageUrl);
+			}
+		}
+	}, [
+		consortium,
+		displayName,
+		setName,
+		setDisplayName,
+		setDescription,
+		setCatalogueSearchURL,
+		setWebsiteURL,
+		setHeaderImageURL,
+		setAboutImageURL,
+	]);
+
 	const pageTitle = t("app.title", {
-		// consortium_name: consortium?.displayName ?? displayName,
 		consortium_name: isEmpty(displayName)
 			? consortium?.displayName
 			: displayName,
 		environment: type,
 	});
 
+	const fallbackHeaderSrc = "/assets/brand/fallback-header.png";
+
 	return (
-		<>
-			<Head>
-				<title>{pageTitle}</title>
-			</Head>
-			<Box sx={{ flexGrow: 1 }}>
-				{/* A maximum height of 70px is set to stop the header overlapping with the sidebar on small screen sizes */}
-				<AppBar
-					position="fixed"
+		<Box sx={{ flexGrow: 1 }}>
+			<AppBar
+				position="fixed"
+				sx={{ backgroundColor: "primary.header", maxHeight: "70px" }}
+			>
+				<Toolbar
+					disableGutters
 					sx={{
-						backgroundColor: theme.palette.primary.header,
+						maxWidth: "1400px",
+						alignSelf: "center",
+						width: "100%",
+						padding: 0,
 						maxHeight: "70px",
+						px: iconsVisible ? "24px" : "16px",
 					}}
 				>
-					{/* this width is the maxSize of the content */}
-					<Toolbar
-						disableGutters
+					{iconsVisible && (
+						<Box>
+							<IconButton
+								data-tid="sidebar-menu"
+								size="large"
+								edge="start"
+								aria-label="menu"
+								onClick={openStateFuncClosed}
+								sx={{
+									mr: 2,
+									color: "primary.headerText",
+									":hover": {
+										backgroundColor: lighten(
+											theme.palette.primary.header as string,
+											theme.palette.mode === "light" ? 0.08 : 0.16,
+										),
+									},
+									":active": {
+										backgroundColor: lighten(
+											theme.palette.primary.header as string,
+											theme.palette.mode === "light" ? 0.16 : 0.24,
+										),
+									},
+								}}
+							>
+								<Menu sx={{ fontSize: 20 }} data-tid="menu-icon" />
+							</IconButton>
+						</Box>
+					)}
+
+					<Box
+						component="img"
+						src={isEmpty(headerImageURL) ? fallbackHeaderSrc : headerImageURL}
+						alt={t("consortium.logo_app_header")}
+						sx={{ width: 36, height: 36, mt: !iconsVisible ? 1 : 0 }}
+					/>
+
+					<Typography
+						data-tid="header-title"
+						variant="appTitle"
+						component="div"
 						sx={{
-							maxWidth: "1400px",
-							alignSelf: "center",
-							width: "100%",
-							padding: 0,
-							maxHeight: "70px",
-							paddingLeft: iconsVisible != false ? "24px" : "16px",
-							paddingRight: iconsVisible != false ? "24px" : "16px",
+							color: "primary.headerText",
+							fontWeight: "bold",
+							flexGrow: 1,
+							pl: 2,
 						}}
 					>
-						{/* This code handles the display of the consortium icon and sidebar icon.
-          By using iconsVisible, we can render the correct UI for the situation  */}
-						{iconsVisible != false ? (
-							<Box>
-								<IconButton
-									data-tid="sidebar-menu"
-									size="large"
-									edge="start"
-									aria-label="menu"
-									onClick={openStateFuncClosed}
-									sx={{
-										mr: 2,
-										color: theme.palette.primary.headerText,
-										":hover": {
-											backgroundColor:
-												theme.palette.mode == "light"
-													? lighten(theme.palette.primary.header, 0.08)
-													: lighten(theme.palette.primary.header, 0.16),
-										},
-										":active": {
-											backgroundColor:
-												theme.palette.mode == "light"
-													? lighten(theme.palette.primary.header, 0.16)
-													: lighten(theme.palette.primary.header, 0.24),
-										},
-									}}
-								>
-									<Menu sx={{ fontSize: 20 }} data-tid="menu-icon" />
-								</IconButton>
-							</Box>
-						) : null}
-						{/* Render just the image if other header icons are visible, 
-              or the image and additional padding if the icons have been hidden. */}
-						{iconsVisible != false ? (
-							<Image
-								src={isEmpty(headerImageURL) ? fallbackHeader : headerImageURL}
-								alt={t("consortium.logo_app_header")}
-								width={36}
-								height={36}
-							/>
-						) : (
-							<Box sx={{ mt: 1 }}>
-								<Image
-									src={
-										isEmpty(headerImageURL) ? fallbackHeader : headerImageURL
-									}
-									alt={t("consortium.logo_app_header")}
-									width={36}
-									height={36}
-								/>
-							</Box>
-						)}
-						<Typography
-							data-tid="header-title"
-							variant="appTitle"
-							component="div"
-							sx={{
-								color: theme.palette.primary.headerText,
-								fontWeight: "bold",
-								flexGrow: 1,
-								pl: 2,
-							}}
-						>
-							{t("app.title", {
-								consortium_name: consortium?.displayName ?? displayName,
-								environment: type,
-							})}
-						</Typography>
+						{pageTitle}
+					</Typography>
+
+					{iconsVisible && (
 						<div>
-							{iconsVisible != false ? (
-								<IconButton
-									size="large"
-									data-tid="profile-button"
-									aria-label="account of current user"
-									sx={{
-										color: theme.palette.primary.headerText,
-										":hover": {
-											backgroundColor:
-												theme.palette.mode == "light"
-													? lighten(theme.palette.primary.header, 0.08)
-													: lighten(theme.palette.primary.header, 0.16),
-										},
-										":active": {
-											backgroundColor:
-												theme.palette.mode == "light"
-													? lighten(theme.palette.primary.header, 0.16)
-													: lighten(theme.palette.primary.header, 0.24),
-										},
-									}}
-									LinkComponent={Link}
-									href="/profile"
-								>
-									<AccountCircle sx={{ fontSize: 20 }} />
-								</IconButton>
-							) : null}
-							{iconsVisible != false ? (
-								<Button
-									data-tid="login-button"
-									aria-label={status === "authenticated" ? "Logout" : "Login"}
-									onClick={handleClick}
-									/* this removes default styling that was stopping the header and footer from being the same width
-                 it also sets the colour of the header text */
-									sx={{
-										color: theme.palette.primary.headerText,
-										p: 1,
-										// paddingInline: "0px",
-										minWidth: "0px",
-										"&.Mui-focusVisible": {
-											outlineColor: "#FFFFFF",
-										},
-										":hover": {
-											backgroundColor:
-												theme.palette.mode == "light"
-													? lighten(theme.palette.primary.header, 0.08)
-													: lighten(theme.palette.primary.header, 0.16),
-										},
-										":active": {
-											backgroundColor:
-												theme.palette.mode == "light"
-													? lighten(theme.palette.primary.header, 0.16)
-													: lighten(theme.palette.primary.header, 0.24),
-										},
-									}}
-								>
-									{status === "authenticated"
-										? t("nav.logout")
-										: t("nav.login")}
-								</Button>
-							) : null}
+							<IconButton
+								size="large"
+								data-tid="profile-button"
+								aria-label="account of current user"
+								onClick={() => navigate({ to: "/profile" })}
+								sx={{
+									color: "primary.headerText",
+									":hover": {
+										backgroundColor: lighten(
+											theme.palette.primary.header as string,
+											theme.palette.mode === "light" ? 0.08 : 0.16,
+										),
+									},
+									":active": {
+										backgroundColor: lighten(
+											theme.palette.primary.header as string,
+											theme.palette.mode === "light" ? 0.16 : 0.24,
+										),
+									},
+								}}
+							>
+								<AccountCircle sx={{ fontSize: 20 }} />
+							</IconButton>
+
+							<Button
+								data-tid="login-button"
+								aria-label={auth.isAuthenticated ? "Logout" : "Login"}
+								onClick={handleAuthClick}
+								sx={{
+									color: "primary.headerText",
+									p: 1,
+									minWidth: "0px",
+									"&.Mui-focusVisible": { outlineColor: "#FFFFFF" },
+									":hover": {
+										backgroundColor: lighten(
+											theme.palette.primary.header as string,
+											theme.palette.mode === "light" ? 0.08 : 0.16,
+										),
+									},
+									":active": {
+										backgroundColor: lighten(
+											theme.palette.primary.header as string,
+											theme.palette.mode === "light" ? 0.16 : 0.24,
+										),
+									},
+								}}
+							>
+								{auth.isAuthenticated ? t("nav.logout") : t("nav.login")}
+							</Button>
 						</div>
-					</Toolbar>
-				</AppBar>
-			</Box>
-		</>
+					)}
+				</Toolbar>
+			</AppBar>
+		</Box>
 	);
 }

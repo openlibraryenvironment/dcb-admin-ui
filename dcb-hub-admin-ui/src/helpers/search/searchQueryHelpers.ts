@@ -6,7 +6,7 @@ import {
 } from "@mui/x-data-grid-premium";
 import { SearchCriterion } from "@models/SearchCriterion";
 import { SearchField } from "@models/SearchField";
-import { searchFieldPrefixes } from "src/constants/searchFieldPrefixes";
+import { searchFieldPrefixes } from "@constants/searchFieldPrefixes";
 import { formatQueryPart } from "./formatQueryPart";
 
 /**
