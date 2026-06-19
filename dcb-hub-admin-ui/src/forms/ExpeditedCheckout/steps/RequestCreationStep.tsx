@@ -15,16 +15,18 @@ import {
 	Control,
 	Controller,
 	FieldErrors,
+	FieldValues,
+	Path,
 	UseFormSetValue,
 } from "react-hook-form";
 
 // Step two: request creation / placing
-interface RequestCreationStepType {
+interface RequestCreationStepType<TFieldValues extends FieldValues> {
 	// control:
 	// 	| Control<OnSiteBorrowingFormData, any>
 	// 	| Control<StaffRequestFormData, any>; // itemLibraryOptions: PatronRequestAutocompleteOption[];
 	// itemLibrariesLoading: boolean;
-	control: Control<any, any>;
+	control: Control<TFieldValues>;
 	setValue: UseFormSetValue<OnSiteBorrowingFormData>;
 	errors: FieldErrors<OnSiteBorrowingFormData>;
 	pickupLocationOptions: PatronRequestAutocompleteOption[];
@@ -40,9 +42,8 @@ interface RequestCreationStepType {
 	t: TFunction;
 }
 // need to pass in the item library and agency code and local system code
-export const RequestCreationStep = ({
+export const RequestCreationStep = <TFieldValues extends FieldValues>({
 	control,
-	// setValue,
 	errors,
 	pickupLocationOptions,
 	pickupLocationsLoading,
@@ -55,14 +56,14 @@ export const RequestCreationStep = ({
 	isSubmitting,
 	pickupLocationId,
 	t,
-}: RequestCreationStepType) => {
+}: RequestCreationStepType<TFieldValues>) => {
 	console.log(errors);
 	return (
 		<>
 			<Typography>
 				{t("requesting.expedited_checkout.steps.request_creation_instruction")}
 			</Typography>
-			{/* Do a pre-selected entry for the item library */}
+			{/* Do a pre-selected entry for the item library  - DCB Admin is different*/}
 			{/* <Controller
 				name="itemAgencyCode"
 				control={control}
@@ -114,7 +115,7 @@ export const RequestCreationStep = ({
 				)}
 			/> */}
 			<Controller
-				name="pickupLocationId"
+				name={"pickupLocationId" as Path<TFieldValues>}
 				control={control}
 				render={({ field: { onChange, value } }) => (
 					<Autocomplete
@@ -148,7 +149,7 @@ export const RequestCreationStep = ({
 				)}
 			/>
 			<Controller
-				name="itemLocalId"
+				name={"itemLocalId" as Path<TFieldValues>}
 				control={control}
 				render={({ field: { onChange, value } }) => (
 					<Autocomplete
@@ -197,7 +198,7 @@ export const RequestCreationStep = ({
 			/>
 
 			<Controller
-				name="requesterNote"
+				name={"requesterNote" as Path<TFieldValues>}
 				control={control}
 				render={({ field }) => (
 					<TextField

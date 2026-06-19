@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from "vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import { pathToFileURL } from "url";
 /// <reference types="vitest/config" />
 
 export default defineConfig(({ mode }) => {
@@ -50,7 +49,7 @@ export default defineConfig(({ mode }) => {
 		resolve: {
 			alias: {
 				"@assets": path.resolve(__dirname, "src/assets"),
-				"@columns": path.resolve(__dirname, "src/columns/*"),
+				"@columns": path.resolve(__dirname, "src/columns"),
 				"@components": path.resolve(__dirname, "src/components"),
 				"@constants": path.resolve(__dirname, "src/constants"),
 				"@filters": path.resolve(__dirname, "src/filters"),

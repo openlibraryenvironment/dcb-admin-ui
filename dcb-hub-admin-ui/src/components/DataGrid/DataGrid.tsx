@@ -29,6 +29,7 @@ import {
 	nonClickableTypes,
 	specialRedirectionTypes,
 } from "@constants/dataGrid/types";
+import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority
@@ -149,56 +150,16 @@ export default function DataGrid({
 		type: "include",
 		ids: new Set(),
 	});
+
 	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
-		//UseNavigateResult<string>
-		console.log(type, params);
-
-		if (rowModesModel[params?.row?.id]?.mode !== GridRowModes.Edit) {
-			// Some grids, like the PRs on the library page, need special redirection
-			if (specialRedirectionTypes.includes(type)) {
-				if (event.ctrlKey || event.metaKey)
-					if (type == "audits") {
-						console.log("Type match");
-						if (event.ctrlKey || event.metaKey) {
-							window.open(
-								`/patronRequests/audits/${params?.row?.id}`,
-								"_blank",
-							);
-						} else {
-							navigate({ to: `/patronRequests/audits/${params?.row?.id}` });
-						}
-					} else {
-						window.open(`/patronRequests/${params?.row?.id}`, "_blank");
-					}
-				if (!(event.ctrlKey || event.metaKey))
-					if (type == "audits") {
-						console.log("Type match");
-						if (event.ctrlKey || event.metaKey) {
-							window.open(
-								`/patronRequests/audits/${params?.row?.id}`,
-								"_blank",
-							);
-						} else {
-							navigate({ to: `/patronRequests/audits/${params?.row?.id}` });
-						}
-					} else {
-						navigate({ to: `/patronRequests/${params?.row?.id}` });
-					}
-			} else if (
-				// Others we don't want users to be able to click through on
-				!nonClickableTypes.includes(type)
-			) {
-				if (event.ctrlKey || event.metaKey)
-					window.open(`/${type}/${params?.row?.id}`, "_blank");
-				if (!(event.ctrlKey || event.metaKey))
-					navigate({ to: `/${type}/${params?.row?.id}` });
-			}
-		} else {
-			// Don't let them navigate away if editing is present
-			event.defaultMuiPrevented = true;
-		}
+		handleDataGridRowClick({
+			params,
+			event,
+			rowModesModel,
+			type,
+			navigate,
+		});
 	};
-
 	//identifier may not be needed
 	return (
 		<div style={{ display: "flex", flexDirection: "column" }}>

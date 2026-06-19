@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { useMutation } from "@apollo/client";
+import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { createLibraryGroup } from "src/queries/queries";
 import {
 	Dialog,
 	DialogContent,
@@ -13,12 +15,10 @@ import {
 	DialogActions,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-//localisation
-import { useTranslation } from "react-i18next";
-//
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Controller, useForm } from "react-hook-form";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { createLibraryGroup } from "@mutations/createLibraryGroup";
 
 interface FormData {
 	name: string;
@@ -26,25 +26,11 @@ interface FormData {
 	type: string;
 }
 
-interface CreateGroupResponse {
-	data: {
-		createLibraryGroup: {
-			id: string;
-			code: string;
-			name: string;
-			type: string;
-		};
-	};
-}
-
 type NewGroupType = {
 	show: boolean;
-	onClose: any;
-	// type: string; - for if/when we make this a generic 'New' form later
+	onClose: () => void;
 };
 
-//This validates input client-side for the form
-// add translation keys
 const validationSchema = Yup.object().shape({
 	name: Yup.string()
 		.required("Group name is required")
@@ -57,15 +43,11 @@ const validationSchema = Yup.object().shape({
 		.max(32, "Group type must be at most 32 characters"),
 });
 
-// sort Group typings
 export default function NewGroup({ show, onClose }: NewGroupType) {
 	const { t } = useTranslation();
-	const [createGroupMutation, { loading }] = useMutation<CreateGroupResponse>(
-		createLibraryGroup,
-		{
-			refetchQueries: ["LoadGroups"],
-		},
-	);
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+
 	const [alert, setAlert] = useState<{
 		open: boolean;
 		severity: "success" | "error";
@@ -75,48 +57,6 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 		severity: "success",
 		text: null,
 	});
-
-	const onSubmit = async (values: FormData) => {
-		try {
-			const result = await createGroupMutation({
-				variables: {
-					input: {
-						name: values.name,
-						code: values.code,
-						type: values.type,
-					},
-				},
-			});
-			if (result.data) {
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("groups.new_group_success"),
-				});
-
-				// Delay the modal closing and form reset to ensure the alert is visible
-				setTimeout(() => {
-					reset();
-					onClose();
-				}, 1000);
-			} else {
-				console.error("Error creating new group");
-				setAlert({
-					open: true,
-					severity: "error",
-					text: t("groups.new_group_error"),
-				});
-			}
-		} catch (error) {
-			// We should bear in mind that GraphQL errors often come as '200' responses.
-			console.error("Error creating new group:", error);
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("groups.new_group_error"),
-			});
-		}
-	};
 
 	const {
 		control,
@@ -133,16 +73,65 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 		mode: "onChange",
 	});
 
+	// UPGRADE: Replaced legacy Apollo useMutation with TanStack useMutation
+	const mutation = useMutation({
+		mutationFn: async (values: FormData) => {
+			return gqlClient.request<any>(createLibraryGroup, {
+				input: {
+					name: values.name,
+					code: values.code,
+					type: values.type,
+				},
+			});
+		},
+		onSuccess: (data) => {
+			if (data) {
+				// UPGRADE: Cleanly invalidate target grid cache inside the global store
+				queryClient.invalidateQueries({ queryKey: ["LoadGroups"] });
+
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("groups.new_group_success"),
+				});
+
+				// Delay modal closing slightly so the user sees the confirmation banner
+				setTimeout(() => {
+					reset();
+					onClose();
+				}, 1000);
+			} else {
+				throw new Error("No data returned from service layer");
+			}
+		},
+		onError: (error) => {
+			console.error("Error creating new group:", error);
+			setAlert({
+				open: true,
+				severity: "error",
+				text: t("groups.new_group_error"),
+			});
+		},
+	});
+
+	const onSubmit = (values: FormData) => {
+		mutation.mutate(values);
+	};
+
 	return (
 		<>
 			<Dialog
 				open={show}
 				onClose={onClose}
-				aria-labelledby="new-group-modal"
+				aria-labelledby="new-group-modal-title"
 				fullWidth
 				maxWidth="sm"
 			>
-				<DialogTitle data-tid="new-group-title" variant="modalTitle">
+				<DialogTitle
+					id="new-group-modal-title"
+					data-tid="new-group-title"
+					variant="modalTitle"
+				>
 					{t("groups.type_new")}
 				</DialogTitle>
 				<IconButton
@@ -161,6 +150,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 				<DialogContent>
 					<Box
 						component="form"
+						id="new-group-form"
 						onSubmit={handleSubmit(onSubmit)}
 						sx={{
 							display: "flex",
@@ -223,12 +213,14 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 					<div style={{ flex: "1 0 0" }} />
 					<Button
 						type="submit"
+						form="new-group-form"
 						variant="contained"
 						color="primary"
-						disabled={!isValid || !isDirty || loading}
-						onClick={handleSubmit(onSubmit)}
+						disabled={!isValid || !isDirty || mutation.isPending}
 					>
-						{loading ? t("ui.action.submitting") : t("groups.type_new")}
+						{mutation.isPending
+							? t("ui.action.submitting")
+							: t("groups.type_new")}
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -242,15 +234,3 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 		</>
 	);
 }
-
-// export async function getStaticProps({ locale }: { locale: string }) {
-// 	return {
-// 		props: {
-// 			...(await serverSideTranslations(locale, [
-// 				"application",
-// 				"common",
-// 				"validation",
-// 			])),
-// 		},
-// 	};
-// }

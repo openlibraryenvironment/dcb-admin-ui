@@ -1,33 +1,40 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import Link from "next/link";
-import { Typography } from "@mui/material";
+import { Link } from "@tanstack/react-router"; // UPGRADE: Swapped from next/link
+import { Typography, Link as MuiLink, Box } from "@mui/material";
 
-// Custom link renderer to ensure external links open in new tab
-export const CustomLink = ({
-	href,
-	children,
-}: {
+interface CustomLinkProps {
 	href?: string;
 	children?: React.ReactNode;
-}) => {
+}
+
+// Custom link renderer to ensure external links open in new tab safely
+export const CustomLink = ({ href, children }: CustomLinkProps) => {
 	const isExternalLink =
 		href && (href.startsWith("http://") || href.startsWith("https://"));
 
 	if (isExternalLink) {
 		return (
-			<a
+			<MuiLink
 				href={href}
 				target="_blank"
 				rel="noopener noreferrer"
-				style={{ color: "#1976d2", textDecoration: "underline" }}
+				sx={{ color: "primary.main", textDecoration: "underline" }}
 			>
 				{children}
-			</a>
+			</MuiLink>
 		);
 	}
 
-	return <Link href={href || ""}>{children}</Link>;
+	// UPGRADE: Uses TanStack Router's 'to' path designation mapping property natively
+	return (
+		<Link
+			to={href || ""}
+			style={{ color: "#1976d2", textDecoration: "underline" }}
+		>
+			{children}
+		</Link>
+	);
 };
 
 interface MarkdownDescriptionProps {
@@ -39,7 +46,7 @@ const MarkdownDescription: React.FC<MarkdownDescriptionProps> = ({
 	content,
 	editMode,
 }) => {
-	// If in edit mode, show raw text
+	// If in edit mode, show raw text shell
 	if (editMode) {
 		return <Typography variant="body1">{content}</Typography>;
 	}
@@ -49,16 +56,34 @@ const MarkdownDescription: React.FC<MarkdownDescriptionProps> = ({
 			components={{
 				a: CustomLink,
 				p: ({ children }) => (
-					<Typography variant="body1">{children}</Typography>
+					<Typography variant="body1" sx={{ mb: 1 }}>
+						{children}
+					</Typography>
 				),
-				h1: ({ children }) => <Typography variant="h1">{children}</Typography>,
-				h2: ({ children }) => <Typography variant="h2">{children}</Typography>,
-				h3: ({ children }) => <Typography variant="h3">{children}</Typography>,
+				h1: ({ children }) => (
+					<Typography variant="h1" sx={{ mb: 2 }}>
+						{children}
+					</Typography>
+				),
+				h2: ({ children }) => (
+					<Typography variant="h2" sx={{ mb: 1.5 }}>
+						{children}
+					</Typography>
+				),
+				h3: ({ children }) => (
+					<Typography variant="h3" sx={{ mb: 1 }}>
+						{children}
+					</Typography>
+				),
 				strong: ({ children }) => (
-					<strong style={{ fontWeight: "bold" }}>{children}</strong>
+					<Box component="strong" sx={{ fontWeight: "bold" }}>
+						{children}
+					</Box>
 				),
 				em: ({ children }) => (
-					<em style={{ fontStyle: "italic" }}>{children}</em>
+					<Box component="em" sx={{ fontStyle: "italic" }}>
+						{children}
+					</Box>
 				),
 			}}
 		>

@@ -29,11 +29,10 @@ const useDCBVersionStore = create<VersionInfo>()(
 
 			fetchVersionInfo: async () => {
 				set({ loading: true, error: null });
+				const DCB_API_BASE = import.meta.env.VITE_DCB_API_BASE;
 
 				try {
-					// In Vite, we don't need getConfig(). We just hit our /api proxy
-					// which automatically routes to VITE_DCB_API_BASE
-					const response = await axios.get("/api/info");
+					const response = await axios.get(DCB_API_BASE + "/info");
 					const data = response.data;
 
 					const versionStr = data.version || "";
@@ -43,7 +42,6 @@ const useDCBVersionStore = create<VersionInfo>()(
 					set({
 						version: data.version || "Unknown",
 						isDev,
-						// Add any custom acceptable version logic here if you had it
 						isAcceptableVersion: true,
 						type: data.environmentType || "Production",
 						branch: data.branch || "main",

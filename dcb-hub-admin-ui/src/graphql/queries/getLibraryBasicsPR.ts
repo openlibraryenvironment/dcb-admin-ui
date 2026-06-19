@@ -1,7 +1,7 @@
 import { gql } from "graphql-request";
 
 export const getLibraryBasicsPR = gql`
-	query LoadLibraryServiceInfo($query: String!) {
+	query LoadLibraryBasicsPR($query: String!) {
 		libraries(query: $query) {
 			content {
 				id

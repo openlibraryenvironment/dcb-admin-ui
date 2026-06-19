@@ -17,7 +17,6 @@ import { useGridStore } from "@/hooks/useDataGridStore";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
@@ -25,6 +24,7 @@ import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
 import { queries } from "@constants/patronRequestGridQueries";
+import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/active")({
 	component: Active,
@@ -135,6 +135,7 @@ function Active() {
 		}
 		return allLocations;
 	};
+	const currentPath = Route.fullPath;
 
 	const { data: locationsData } = useQuery({
 		queryKey: ["locations", "allPatronRequestGrid"],
@@ -281,14 +282,12 @@ function Active() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Tabs
-					value={tabIndex}
-					onChange={(event, value) => {
-						handleTopLevelPatronRequestTabChange(
-							event,
-							value,
+					value={currentPath}
+					onChange={(_event, value) => {
+						handleTabChange({
+							newValue: value,
 							router,
-							setTabIndex,
-						);
+						});
 					}}
 					aria-label={"Patron request navigation"}
 				>

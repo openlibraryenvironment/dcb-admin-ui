@@ -1,5 +1,9 @@
-import { useMutation } from "@apollo/client";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 import {
 	Autocomplete,
 	Box,
@@ -16,15 +20,10 @@ import {
 	Select,
 	TextField,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import {
-	addFunctionalSettingQuery,
-	getConsortiaFunctionalSettings,
-} from "src/queries/queries";
-import * as Yup from "yup";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { addFunctionalSettingMutation } from "@mutations/addFunctionalSetting";
 
 interface NewFunctionalSettingFormData {
 	description: string;
@@ -49,6 +48,18 @@ export default function NewFunctionalSetting({
 	consortiumName,
 }: NewFunctionalSettingType) {
 	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: "success" | "error";
+		text: string | null;
+	}>({
+		open: false,
+		severity: "success",
+		text: null,
+	});
 
 	const validationSchema = Yup.object().shape({
 		description: Yup.string()
@@ -62,9 +73,7 @@ export default function NewFunctionalSetting({
 		name: Yup.string()
 			.trim()
 			.required(
-				t("ui.validation.required", {
-					field: t("consortium.settings.name"),
-				}),
+				t("ui.validation.required", { field: t("consortium.settings.name") }),
 			)
 			.max(128, t("ui.validation.max_length", { length: 128 })),
 		enabled: Yup.boolean().required(
@@ -91,30 +100,18 @@ export default function NewFunctionalSetting({
 		mode: "onChange",
 	});
 
-	const [createFunctionalSetting, { loading }] = useMutation(
-		addFunctionalSettingQuery,
-		{
-			refetchQueries: [getConsortiaFunctionalSettings],
-		},
-	);
-
-	const [alert, setAlert] = useState<{
-		open: boolean;
-		severity: "success" | "error";
-		text: string | null;
-	}>({
-		open: false,
-		severity: "success",
-		text: null,
-	});
-
-	const onSubmit = async (data: NewFunctionalSettingFormData) => {
-		try {
-			const result = await createFunctionalSetting({
-				variables: { input: { ...data, consortiumName } },
+	const settingMutation = useMutation({
+		mutationFn: async (data: NewFunctionalSettingFormData) => {
+			return gqlClient.request<any>(addFunctionalSettingMutation, {
+				input: { ...data, consortiumName },
 			});
+		},
+		onSuccess: (responseData) => {
+			if (responseData) {
+				queryClient.invalidateQueries({
+					queryKey: ["getConsortiaFunctionalSettings"],
+				});
 
-			if (result.data) {
 				setAlert({
 					open: true,
 					severity: "success",
@@ -123,13 +120,13 @@ export default function NewFunctionalSetting({
 					}),
 				});
 
-				// Delay the modal closing and form reset to ensure the alert is visible
 				setTimeout(() => {
 					reset();
 					onClose();
 				}, 1000);
 			}
-		} catch (error) {
+		},
+		onError: (error) => {
 			console.error("Error creating new functional setting:", error);
 			setAlert({
 				open: true,
@@ -138,7 +135,11 @@ export default function NewFunctionalSetting({
 					consortium: consortiumDisplayName,
 				}),
 			});
-		}
+		},
+	});
+
+	const onSubmit = (data: NewFunctionalSettingFormData) => {
+		settingMutation.mutate(data);
 	};
 
 	return (
@@ -148,15 +149,19 @@ export default function NewFunctionalSetting({
 				onClose={onClose}
 				fullWidth
 				maxWidth="sm"
-				aria-labelledby="new-functional-setting-modal"
+				aria-labelledby="new-functional-setting-modal-title"
 			>
-				<DialogTitle variant="modalTitle">
+				<DialogTitle
+					id="new-functional-setting-modal-title"
+					variant="modalTitle"
+				>
 					{t("consortium.new_functional_setting.title")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>
 					<Box
 						component="form"
+						id="new-functional-setting-form"
 						onSubmit={handleSubmit(onSubmit)}
 						sx={{
 							display: "flex",
@@ -170,11 +175,6 @@ export default function NewFunctionalSetting({
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									{...field}
-									value={field.value || null}
-									onChange={(_, newValue) => {
-										field.onChange(newValue);
-									}}
 									options={[
 										"OWN_LIBRARY_BORROWING",
 										"PICKUP_ANYWHERE",
@@ -185,6 +185,10 @@ export default function NewFunctionalSetting({
 										"VIRTUAL_PATRON_NAMES_VISIBLE",
 										"VIRTUAL_PATRON_NAMES_POLARIS",
 									]}
+									value={field.value || null}
+									onChange={(_, newValue) => {
+										field.onChange(newValue);
+									}}
 									renderInput={(params) => (
 										<TextField
 											{...params}
@@ -202,7 +206,7 @@ export default function NewFunctionalSetting({
 						/>
 						<Box>
 							<FormControl fullWidth error={!!errors.enabled} required>
-								<InputLabel>
+								<InputLabel id="enabled-select-label">
 									{t("consortium.settings.enabled_header")}
 								</InputLabel>
 								<Controller
@@ -210,6 +214,7 @@ export default function NewFunctionalSetting({
 									control={control}
 									render={({ field }) => (
 										<Select
+											labelId="enabled-select-label"
 											{...field}
 											label={t("consortium.settings.enabled_header")}
 											value={field.value?.toString() ?? "false"}
@@ -264,7 +269,6 @@ export default function NewFunctionalSetting({
 							fullWidth
 							variant="outlined"
 							label={t("data_change_log.reference_url")}
-							name={t("data_change_log.reference_url")}
 							error={!!errors.changeReferenceUrl}
 							helperText={errors.changeReferenceUrl?.message}
 						/>
@@ -277,12 +281,12 @@ export default function NewFunctionalSetting({
 					<div style={{ flex: "1 0 0" }} />
 					<Button
 						type="submit"
+						form="new-functional-setting-form"
 						variant="contained"
 						color="primary"
-						disabled={!isValid || !isDirty || loading}
-						onClick={handleSubmit(onSubmit)}
+						disabled={!isValid || !isDirty || settingMutation.isPending}
 					>
-						{loading
+						{settingMutation.isPending
 							? t("ui.action.submitting")
 							: t("consortium.new_functional_setting.title")}
 					</Button>

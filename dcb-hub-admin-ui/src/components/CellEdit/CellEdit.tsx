@@ -31,7 +31,9 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 	const apiRef = useGridApiContext();
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
+	const [selectedRole, setSelectedRole] = useState<RoleOption | undefined>(
+		undefined,
+	);
 	const [shouldFetchRoles, setShouldFetchRoles] = useState(false);
 
 	useEffect(() => {
@@ -70,6 +72,7 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 				options={optionsData || []}
 				loading={autocompleteLoading && shouldFetchRoles}
 				value={selectedRole}
+				// value={selectedRole ?? undefined}
 				onOpen={() => setShouldFetchRoles(true)}
 				getOptionLabel={(option: RoleOption) =>
 					option?.displayName || option?.name || ""

@@ -1,12 +1,6 @@
-import { generateFilterDescription } from "@helpers/dataGrid/utilities";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-	ChecklistRounded,
-	CleaningServicesRounded,
-	FileDownloadOutlined,
-	PrintOutlined,
-} from "@mui/icons-material";
-import {
-	Badge,
 	Button,
 	CircularProgress,
 	ListItemIcon,
@@ -16,19 +10,22 @@ import {
 	Tooltip,
 } from "@mui/material";
 import {
-	ColumnsPanelTrigger,
-	FilterPanelTrigger,
-	GridFilterListIcon,
-	gridFilterModelSelector,
+	ChecklistRounded,
+	CleaningServicesRounded,
+	FileDownloadOutlined,
+	PrintOutlined,
+} from "@mui/icons-material";
+import {
+	GridToolbarContainer,
+	GridToolbarColumnsButton,
+	GridToolbarFilterButton,
 	GridToolbarExportContainer,
-	GridViewColumnIcon,
-	Toolbar,
-	ToolbarButton,
 	useGridApiContext,
 	useGridSelector,
+	gridFilterModelSelector,
 } from "@mui/x-data-grid-premium";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
+
+import { generateFilterDescription } from "@helpers/dataGrid/utilities";
 
 interface ExportToolbarProps {
 	handleExport?: (fileType: string, exportMode: string) => Promise<void>;
@@ -45,12 +42,22 @@ export default function ExportToolbar({
 	onCleanup,
 	selectionCount = 0,
 }: ExportToolbarProps) {
+	const { t } = useTranslation();
+	const apiRef = useGridApiContext();
+	const filterModel = useGridSelector(apiRef, gridFilterModelSelector);
+	const filterTooltipText = generateFilterDescription(filterModel);
+
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
 
 	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
 	};
+
+	const handleMenuClose = () => {
+		setAnchorEl(null);
+	};
+
 	const onExportClick = (fileType: string, exportMode: string) => {
 		if (handleExport) {
 			handleExport(fileType, exportMode);
@@ -59,98 +66,86 @@ export default function ExportToolbar({
 		}
 	};
 
-	const handleMenuClose = () => {
-		setAnchorEl(null);
-	};
-
 	const handleCleanupClick = () => {
 		if (onCleanup) {
-			console.log("Cleaning ");
 			onCleanup();
 		}
 		handleMenuClose();
 	};
-	const { t } = useTranslation();
-	const apiRef = useGridApiContext();
-	const filterModel = useGridSelector(apiRef, gridFilterModelSelector);
-	const filterTooltipText = generateFilterDescription(filterModel);
-	// Further customisation needed - ideally it would be "filters" text on the button but in the old style
+
 	return (
-		<Toolbar>
-			<Tooltip title="Columns">
-				<ColumnsPanelTrigger render={<ToolbarButton />}>
-					<GridViewColumnIcon fontSize="small" />
-				</ColumnsPanelTrigger>
-			</Tooltip>
+		<GridToolbarContainer>
+			{/* UPGRADE: Replaced manual Triggers with native V8 Toolbar Buttons */}
+			<GridToolbarColumnsButton />
+
 			<Tooltip title={filterTooltipText}>
-				<FilterPanelTrigger
-					render={(props, state) => (
-						<ToolbarButton {...props} color="default">
-							<Badge badgeContent={state.filterCount} color="primary">
-								{/* // variant="dot"> */}
-								<GridFilterListIcon fontSize="small" />
-							</Badge>
-						</ToolbarButton>
-					)}
-				/>
+				<span>
+					<GridToolbarFilterButton />
+				</span>
 			</Tooltip>
-			{/* <GridToolbarDensitySelector /> */}
+
 			<GridToolbarExportContainer>
-				{type != "patronRequests" ? (
-					<MenuItem
-						onClick={() => onExportClick("csv", "default")}
-						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							{allDataLoading ? <CircularProgress /> : <FileDownloadOutlined />}
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export_all_csv")}</ListItemText>
-					</MenuItem>
-				) : null}
-				{type != "patronRequests" ? (
-					<MenuItem
-						onClick={() => onExportClick("tsv", "default")}
-						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<FileDownloadOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export_all_tsv")}</ListItemText>
-					</MenuItem>
-				) : null}
-				{type == "patronRequests" ? (
-					<MenuItem
-						onClick={() => onExportClick("csv", "all")}
-						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<FileDownloadOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export.all")}</ListItemText>
-					</MenuItem>
-				) : null}
-				{type == "patronRequests" ? (
-					<MenuItem
-						onClick={() => onExportClick("csv", "filtered")}
-						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<FileDownloadOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export.filtered")}</ListItemText>
-					</MenuItem>
-				) : null}
-				{type == "patronRequests" ? (
-					<MenuItem
-						onClick={() => onExportClick("csv", "current")}
-						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<FileDownloadOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export.current")}</ListItemText>
-					</MenuItem>
-				) : null}
+				{/* UPGRADE: Grouped conditional rendering cleanly via fragments */}
+				{type !== "patronRequests" && (
+					<>
+						<MenuItem
+							onClick={() => onExportClick("csv", "default")}
+							disabled={allDataLoading}
+						>
+							<ListItemIcon>
+								{allDataLoading ? (
+									<CircularProgress size={20} />
+								) : (
+									<FileDownloadOutlined />
+								)}
+							</ListItemIcon>
+							<ListItemText>{t("ui.data_grid.export_all_csv")}</ListItemText>
+						</MenuItem>
+						<MenuItem
+							onClick={() => onExportClick("tsv", "default")}
+							disabled={allDataLoading}
+						>
+							<ListItemIcon>
+								<FileDownloadOutlined />
+							</ListItemIcon>
+							<ListItemText>{t("ui.data_grid.export_all_tsv")}</ListItemText>
+						</MenuItem>
+					</>
+				)}
+
+				{type === "patronRequests" && (
+					<>
+						<MenuItem
+							onClick={() => onExportClick("csv", "all")}
+							disabled={allDataLoading}
+						>
+							<ListItemIcon>
+								<FileDownloadOutlined />
+							</ListItemIcon>
+							<ListItemText>{t("ui.data_grid.export.all")}</ListItemText>
+						</MenuItem>
+						<MenuItem
+							onClick={() => onExportClick("csv", "filtered")}
+							disabled={allDataLoading}
+						>
+							<ListItemIcon>
+								<FileDownloadOutlined />
+							</ListItemIcon>
+							<ListItemText>{t("ui.data_grid.export.filtered")}</ListItemText>
+						</MenuItem>
+						<MenuItem
+							onClick={() => onExportClick("csv", "current")}
+							disabled={allDataLoading}
+						>
+							<ListItemIcon>
+								<FileDownloadOutlined />
+							</ListItemIcon>
+							<ListItemText>{t("ui.data_grid.export.current")}</ListItemText>
+						</MenuItem>
+					</>
+				)}
+
+				{/* Global Export Options */}
 				<MenuItem
 					onClick={() => onExportClick("csv", "print")}
 					disabled={allDataLoading}
@@ -161,9 +156,9 @@ export default function ExportToolbar({
 					<ListItemText>{t("ui.data_grid.export.print")}</ListItemText>
 				</MenuItem>
 			</GridToolbarExportContainer>
-			{type == "patronRequests" && (
+
+			{type === "patronRequests" && (
 				<>
-					{/* <Divider orientation="vertical" flexItem sx={{ mx: 1 }} /> */}
 					<Button
 						id="actions-button"
 						aria-controls={open ? "actions-menu" : undefined}
@@ -197,6 +192,6 @@ export default function ExportToolbar({
 					</Menu>
 				</>
 			)}
-		</Toolbar>
+		</GridToolbarContainer>
 	);
 }

@@ -286,6 +286,7 @@ function ReferenceValueMappingsRoute() {
 				onConfirm={handleModalConfirm}
 				entityName="ReferenceValueMapping"
 				editInformation={editRecord ?? ""}
+				action="gridEdit"
 			/>
 			<Confirmation
 				open={!!deleteConfirmationId}
@@ -296,7 +297,7 @@ function ReferenceValueMappingsRoute() {
 					setDeleteConfirmationId(null);
 				}}
 				entityName="ReferenceValueMapping"
-				type={"deleteReferenceValueMapping"}
+				action="deletion"
 			/>
 			{showImport && (
 				<Import

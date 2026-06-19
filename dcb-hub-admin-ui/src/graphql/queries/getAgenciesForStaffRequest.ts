@@ -1,7 +1,7 @@
 import { gql } from "graphql-request";
 
 export const getAgenciesForStaffRequest = gql`
-	query LoadAgencies(
+	query LoadAgenciesForStaffRequest(
 		$pageno: Int!
 		$pagesize: Int!
 		$order: String!

@@ -15,7 +15,7 @@ import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
+import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
@@ -79,7 +79,7 @@ function All() {
 				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
 			}),
 	});
-
+	const currentPath = Route.fullPath;
 	const updateCount = useCallback((key: string, count: number) => {
 		setTotalSizes((prev) => {
 			const newSizes = { ...prev, [key]: count };
@@ -275,14 +275,12 @@ function All() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Tabs
-					value={tabIndex}
-					onChange={(event, value) => {
-						handleTopLevelPatronRequestTabChange(
-							event,
-							value,
+					value={currentPath}
+					onChange={(_event, value) => {
+						handleTabChange({
+							newValue: value,
 							router,
-							setTabIndex,
-						);
+						});
 					}}
 					aria-label={"Patron request navigation"}
 				>

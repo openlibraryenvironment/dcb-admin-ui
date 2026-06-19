@@ -17,7 +17,6 @@ import { useGridStore } from "@/hooks/useDataGridStore";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { handleTopLevelPatronRequestTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
@@ -26,6 +25,7 @@ import { getLibraries } from "@queries/getLibraries";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { queries } from "@constants/patronRequestGridQueries";
+import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/exception",
@@ -44,6 +44,8 @@ function Exception() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const [tabIndex, setTabIndex] = useState(0);
+	const currentPath = Route.fullPath;
+
 	const [totalSizes, setTotalSizes] = useState({
 		exception: 0,
 		outOfSequence: 0,
@@ -284,14 +286,12 @@ function Exception() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Tabs
-					value={tabIndex}
-					onChange={(event, value) => {
-						handleTopLevelPatronRequestTabChange(
-							event,
-							value,
+					value={currentPath}
+					onChange={(_event, value) => {
+						handleTabChange({
+							newValue: value,
 							router,
-							setTabIndex,
-						);
+						});
 					}}
 					aria-label={"Patron request navigation"}
 				>

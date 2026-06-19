@@ -1,171 +1,213 @@
-import { NewLibraryFormData } from "@models/NewLibraryFormData";
-import { Button, Stack } from "@mui/material";
-import TextField from "@mui/material/TextField";
-import { TFunction } from "react-i18next";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import { useTranslation } from "react-i18next"; // 1. Import the hook locally
+import {
+	Control,
+	Controller,
+	FieldErrors,
+	FieldValues,
+	Path,
+} from "react-hook-form";
+import { Button, Stack, TextField, Box } from "@mui/material";
 
-type LocationAndServiceStep = {
-	control: Control<NewLibraryFormData, any>;
-	errors: FieldErrors<NewLibraryFormData>;
-	t: TFunction;
+type LocationAndServiceStepProps<TFieldValues extends FieldValues> = {
+	control: Control<TFieldValues>;
+	errors: FieldErrors<TFieldValues>;
 	handleClose: () => void;
 	handleNext: () => void;
 	isValid: boolean;
 };
-export const LocationAndServiceStep = ({
+
+export const LocationAndServiceStep = <TFieldValues extends FieldValues>({
 	control,
 	errors,
-	t,
 	handleClose,
 	handleNext,
 	isValid,
-}: LocationAndServiceStep) => (
-	<Stack spacing={1} direction="column">
-		{/* 		/* Location info */}
+}: LocationAndServiceStepProps<TFieldValues>) => {
+	// 2. Initialize it directly inside the component lifecycle
+	const { t } = useTranslation();
 
-		<Controller
-			name="address"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("libraries.primaryLocation.address")}
-					variant="outlined"
-					fullWidth
-					required
-					error={!!errors.address}
-					helperText={errors.address?.message}
-				/>
-			)}
-		/>
-		<Controller
-			name="latitude"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("libraries.primaryLocation.latitude")}
-					variant="outlined"
-					fullWidth
-					required
-					error={!!errors.latitude}
-					helperText={errors.latitude?.message}
-					onChange={(e) => {
-						const value = e.target.value;
-						field.onChange(value === "" ? undefined : Number(value));
-					}}
-				/>
-			)}
-		/>
-		<Controller
-			name="longitude"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("libraries.primaryLocation.longitude")}
-					variant="outlined"
-					fullWidth
-					required
-					error={!!errors.longitude}
-					helperText={errors.longitude?.message}
-					onChange={(e) => {
-						const value = e.target.value;
-						field.onChange(value === "" ? undefined : Number(value));
-					}}
-				/>
-			)}
-		/>
+	return (
+		<Stack spacing={2} direction="column" sx={{ mt: 1 }}>
+			<Controller
+				name={"address" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("libraries.primaryLocation.address")}
+						variant="outlined"
+						fullWidth
+						required
+						error={!!errors["address" as keyof FieldErrors<TFieldValues>]}
+						helperText={
+							errors["address" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+					/>
+				)}
+			/>
 
-		{/* 		/* Service info */}
+			<Controller
+				name={"latitude" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("libraries.primaryLocation.latitude")}
+						variant="outlined"
+						fullWidth
+						required
+						error={!!errors["latitude" as keyof FieldErrors<TFieldValues>]}
+						helperText={
+							errors["latitude" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+						onChange={(e) => {
+							const value = e.target.value;
+							field.onChange(value === "" ? undefined : Number(value));
+						}}
+					/>
+				)}
+			/>
 
-		<Controller
-			name="patronWebsite"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("libraries.service.systems.patron_site")}
-					variant="outlined"
-					fullWidth
-					error={!!errors.patronWebsite}
-					helperText={errors.patronWebsite?.message}
-				/>
-			)}
-		/>
-		<Controller
-			name="hostLmsConfiguration"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("hostlms.configuration")}
-					variant="outlined"
-					fullWidth
-					multiline
-					error={!!errors.hostLmsConfiguration}
-					helperText={errors.hostLmsConfiguration?.message}
-				/>
-			)}
-		/>
-		<Controller
-			name="discoverySystem"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("libraries.service.systems.discovery")}
-					variant="outlined"
-					fullWidth
-					error={!!errors.discoverySystem}
-					helperText={errors.discoverySystem?.message}
-				/>
-			)}
-		/>
+			<Controller
+				name={"longitude" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("libraries.primaryLocation.longitude")}
+						variant="outlined"
+						fullWidth
+						required
+						error={!!errors["longitude" as keyof FieldErrors<TFieldValues>]}
+						helperText={
+							errors["longitude" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+						onChange={(e) => {
+							const value = e.target.value;
+							field.onChange(value === "" ? undefined : Number(value));
+						}}
+					/>
+				)}
+			/>
 
-		<Controller
-			name="reason"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					label={t("data_change_log.reason_addition")}
-					variant="outlined"
-					fullWidth
-					required
-					error={!!errors.reason}
-					helperText={errors.reason?.message}
-				/>
-			)}
-		/>
+			<Controller
+				name={"patronWebsite" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("libraries.service.systems.patron_site")}
+						variant="outlined"
+						fullWidth
+						error={!!errors["patronWebsite" as keyof FieldErrors<TFieldValues>]}
+						helperText={
+							errors["patronWebsite" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+					/>
+				)}
+			/>
 
-		<Controller
-			name="changeReferenceUrl"
-			control={control}
-			render={({ field }) => (
-				<TextField
-					{...field}
-					fullWidth
-					variant="outlined"
-					label={t("data_change_log.reference_url")}
-					error={!!errors.changeReferenceUrl}
-					helperText={errors.changeReferenceUrl?.message}
-				/>
-			)}
-		/>
-		<Stack spacing={1} direction={"row"}>
-			<Button variant="outlined" onClick={handleClose}>
-				{t("mappings.cancel")}
-			</Button>
-			<div style={{ flex: "1 0 0" }} />
-			<Button
-				color="primary"
-				variant="contained"
-				onClick={handleNext}
-				disabled={!isValid}
-			>
-				{t("ui.action.next")}
-			</Button>
+			<Controller
+				name={"hostLmsConfiguration" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("hostlms.configuration")}
+						variant="outlined"
+						fullWidth
+						multiline
+						rows={3}
+						error={
+							!!errors[
+								"hostLmsConfiguration" as keyof FieldErrors<TFieldValues>
+							]
+						}
+						helperText={
+							errors["hostLmsConfiguration" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+					/>
+				)}
+			/>
+
+			<Controller
+				name={"discoverySystem" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("libraries.service.systems.discovery")}
+						variant="outlined"
+						fullWidth
+						error={
+							!!errors["discoverySystem" as keyof FieldErrors<TFieldValues>]
+						}
+						helperText={
+							errors["discoverySystem" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+					/>
+				)}
+			/>
+
+			<Controller
+				name={"reason" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						label={t("data_change_log.reason_addition")}
+						variant="outlined"
+						fullWidth
+						required
+						error={!!errors["reason" as keyof FieldErrors<TFieldValues>]}
+						helperText={
+							errors["reason" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+					/>
+				)}
+			/>
+
+			<Controller
+				name={"changeReferenceUrl" as Path<TFieldValues>}
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						fullWidth
+						variant="outlined"
+						label={t("data_change_log.reference_url")}
+						error={
+							!!errors["changeReferenceUrl" as keyof FieldErrors<TFieldValues>]
+						}
+						helperText={
+							errors["changeReferenceUrl" as keyof FieldErrors<TFieldValues>]
+								?.message as string
+						}
+					/>
+				)}
+			/>
+
+			<Stack spacing={2} direction="row" sx={{ pt: 2 }}>
+				<Button variant="outlined" onClick={handleClose}>
+					{t("mappings.cancel")}
+				</Button>
+				<Box sx={{ flex: "1 0 0" }} />
+				<Button
+					color="primary"
+					variant="contained"
+					onClick={handleNext}
+					disabled={!isValid}
+				>
+					{t("ui.action.next")}
+				</Button>
+			</Stack>
 		</Stack>
-	</Stack>
-);
+	);
+};

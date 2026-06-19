@@ -1,7 +1,7 @@
 import { gql } from "graphql-request";
 
 export const getAgency = gql`
-	query LoadAgencies($query: String!) {
+	query LoadAgency($query: String!) {
 		agencies(query: $query) {
 			content {
 				id

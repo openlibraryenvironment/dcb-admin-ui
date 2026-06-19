@@ -266,7 +266,9 @@ export default function NewMapping({
 	const onSubmit = async (data: NewMappingFormData) => {
 		try {
 			setServerErrors({});
-			await createMapping({ variables: { input: { ...data } } });
+			await createMapping({
+				input: { ...data },
+			});
 			setAlert({
 				open: true,
 				severity: "success",

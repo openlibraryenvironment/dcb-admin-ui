@@ -1440,6 +1440,13 @@ export type UpdateRoleInput = {
   reason?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AddFunctionalSettingMutationVariables = Exact<{
+  input: FunctionalSettingInput;
+}>;
+
+
+export type AddFunctionalSettingMutation = { __typename?: 'Mutation', createFunctionalSetting: { __typename?: 'FunctionalSetting', id: string, name: FunctionalSettingType, enabled: boolean, description?: string | null } };
+
 export type AddLibraryToGroupMutationVariables = Exact<{
   input: AddLibraryToGroupCommand;
 }>;
@@ -1447,12 +1454,26 @@ export type AddLibraryToGroupMutationVariables = Exact<{
 
 export type AddLibraryToGroupMutation = { __typename?: 'Mutation', addLibraryToGroup: { __typename?: 'LibraryGroupMember', id: string, library?: { __typename?: 'Library', id: string, agencyCode?: string | null, fullName?: string | null } | null, libraryGroup?: { __typename?: 'LibraryGroup', id: string, code: string, name: string, type: string } | null } };
 
+export type CreateConsortiumContactMutationVariables = Exact<{
+  input: ConsortiumContactInput;
+}>;
+
+
+export type CreateConsortiumContactMutation = { __typename?: 'Mutation', createContact: { __typename?: 'ConsortiumContact', id?: string | null, person?: { __typename?: 'Person', firstName?: string | null, lastName?: string | null } | null, consortium?: { __typename?: 'Consortium', id: string } | null } };
+
+export type CreateHostLmsMutationVariables = Exact<{
+  input: CreateHostLmsInput;
+}>;
+
+
+export type CreateHostLmsMutation = { __typename?: 'Mutation', createHostLms?: { __typename?: 'CreateHostLmsResult', pingStatus?: string | null, ingestStatus?: string | null, warnings?: Array<string | null> | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null, lmsClientClass?: string | null } | null } | null };
+
 export type CreateLibraryMutationVariables = Exact<{
   input: LibraryInput;
 }>;
 
 
-export type CreateLibraryMutation = { __typename?: 'Mutation', createLibrary: { __typename?: 'Library', id: string, fullName?: string | null, type?: string | null } };
+export type CreateLibraryMutation = { __typename?: 'Mutation', createLibrary: { __typename?: 'Library', id: string, agencyCode?: string | null, fullName?: string | null, shortName?: string | null } };
 
 export type CreateLibraryContactMutationVariables = Exact<{
   input: CreateLibraryContactInput;
@@ -1481,6 +1502,13 @@ export type CreateReferenceValueMappingMutationVariables = Exact<{
 
 
 export type CreateReferenceValueMappingMutation = { __typename?: 'Mutation', createReferenceValueMapping: { __typename?: 'ReferenceValueMapping', id: string, toValue?: string | null } };
+
+export type DeleteConsortiumContactMutationVariables = Exact<{
+  input: DeleteConsortiumContactInput;
+}>;
+
+
+export type DeleteConsortiumContactMutation = { __typename?: 'Mutation', deleteContact: { __typename?: 'DeleteEntityPayload', success: boolean, message?: string | null } };
 
 export type DeleteLibraryMutationVariables = Exact<{
   input: DeleteEntityInput;
@@ -1531,6 +1559,20 @@ export type UpdateAgencyParticipationStatusMutationVariables = Exact<{
 
 export type UpdateAgencyParticipationStatusMutation = { __typename?: 'Mutation', updateAgencyParticipationStatus: { __typename?: 'Agency', id?: string | null, code?: string | null, name?: string | null, isSupplyingAgency?: boolean | null, isBorrowingAgency?: boolean | null } };
 
+export type UpdateConsortiumMutationVariables = Exact<{
+  input: UpdateConsortiumInput;
+}>;
+
+
+export type UpdateConsortiumMutation = { __typename?: 'Mutation', updateConsortium: { __typename?: 'Consortium', id: string, headerImageUrl?: string | null, headerImageUploader?: string | null, headerImageUploaderEmail?: string | null, aboutImageUrl?: string | null, aboutImageUploader?: string | null, aboutImageUploaderEmail?: string | null, description?: string | null, catalogueSearchUrl?: string | null, websiteUrl?: string | null } };
+
+export type UpdateFunctionalSettingMutationVariables = Exact<{
+  input: UpdateFunctionalSettingInput;
+}>;
+
+
+export type UpdateFunctionalSettingMutation = { __typename?: 'Mutation', updateFunctionalSetting: { __typename?: 'FunctionalSetting', id: string, name: FunctionalSettingType, enabled: boolean, description?: string | null } };
+
 export type UpdateLibraryMutationVariables = Exact<{
   input: UpdateLibraryInput;
 }>;
@@ -1566,6 +1608,14 @@ export type UpdateReferenceValueMappingMutationVariables = Exact<{
 
 export type UpdateReferenceValueMappingMutation = { __typename?: 'Mutation', updateReferenceValueMapping: { __typename?: 'ReferenceValueMapping', id: string, toValue?: string | null } };
 
+export type CheckExistingLocationsQueryVariables = Exact<{
+  pagesize: Scalars['Int']['input'];
+  query: Scalars['String']['input'];
+}>;
+
+
+export type CheckExistingLocationsQuery = { __typename?: 'Query', locations: { __typename?: 'LocationPage', totalSize?: number | null } };
+
 export type CheckExistingMappingsQueryVariables = Exact<{
   pagesize: Scalars['Int']['input'];
   query: Scalars['String']['input'];
@@ -1583,11 +1633,44 @@ export type CheckExistingNumericRangeMappingsQueryVariables = Exact<{
 export type CheckExistingNumericRangeMappingsQuery = { __typename?: 'Query', numericRangeMappings: { __typename?: 'NumericRangeMappingPage', totalSize?: number | null, content?: Array<{ __typename?: 'NumericRangeMapping', id: string, context?: string | null, domain?: string | null, lowerBound?: number | null, upperBound?: number | null, targetContext?: string | null, mappedValue?: string | null, deleted?: boolean | null, lastImported?: string | null } | null> | null } };
 
 export type LoadAgenciesQueryVariables = Exact<{
+  pageno: Scalars['Int']['input'];
+  pagesize: Scalars['Int']['input'];
+  order: Scalars['String']['input'];
+  query: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadAgenciesQuery = { __typename?: 'Query', agencies: { __typename?: 'AgencyPage', totalSize?: number | null, content?: Array<{ __typename?: 'Agency', id?: string | null, code?: string | null, name?: string | null, latitude?: number | null, longitude?: number | null } | null> | null, pageable?: { __typename?: 'Pageable', number?: number | null, offset?: number | null } | null } };
+
+export type LoadAgenciesForStaffRequestQueryVariables = Exact<{
+  pageno: Scalars['Int']['input'];
+  pagesize: Scalars['Int']['input'];
+  order: Scalars['String']['input'];
+  query: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadAgenciesForStaffRequestQuery = { __typename?: 'Query', agencies: { __typename?: 'AgencyPage', totalSize?: number | null, content?: Array<{ __typename?: 'Agency', id?: string | null, code?: string | null, name?: string | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null } | null } | null> | null, pageable?: { __typename?: 'Pageable', number?: number | null, offset?: number | null } | null } };
+
+export type LoadAgencyQueryVariables = Exact<{
   query: Scalars['String']['input'];
 }>;
 
 
-export type LoadAgenciesQuery = { __typename?: 'Query', agencies: { __typename?: 'AgencyPage', content?: Array<{ __typename?: 'Agency', id?: string | null, code?: string | null, name?: string | null, authProfile?: string | null, longitude?: number | null, latitude?: number | null, isSupplyingAgency?: boolean | null, isBorrowingAgency?: boolean | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null, lmsClientClass?: string | null, clientConfig?: any | null } | null, locations?: Array<{ __typename?: 'Location', id: string, dateCreated?: string | null, dateUpdated?: string | null, code?: string | null, name?: string | null, type?: string | null, isPickup?: boolean | null, isEnabledForPickupAnywhere?: boolean | null, longitude?: number | null, latitude?: number | null, locationReference?: string | null, deliveryStops?: string | null, printLabel?: string | null, localId?: string | null } | null> | null } | null> | null } };
+export type LoadAgencyQuery = { __typename?: 'Query', agencies: { __typename?: 'AgencyPage', content?: Array<{ __typename?: 'Agency', id?: string | null, code?: string | null, name?: string | null, authProfile?: string | null, longitude?: number | null, latitude?: number | null, isSupplyingAgency?: boolean | null, isBorrowingAgency?: boolean | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null, lmsClientClass?: string | null, clientConfig?: any | null } | null, locations?: Array<{ __typename?: 'Location', id: string, dateCreated?: string | null, dateUpdated?: string | null, code?: string | null, name?: string | null, type?: string | null, isPickup?: boolean | null, isEnabledForPickupAnywhere?: boolean | null, longitude?: number | null, latitude?: number | null, locationReference?: string | null, deliveryStops?: string | null, printLabel?: string | null, localId?: string | null } | null> | null } | null> | null } };
+
+export type LoadAlarmsQueryVariables = Exact<{
+  pageno: Scalars['Int']['input'];
+  pagesize: Scalars['Int']['input'];
+  order: Scalars['String']['input'];
+  query: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadAlarmsQuery = { __typename?: 'Query', alarms: { __typename?: 'AlarmPage', totalSize?: number | null, content?: Array<{ __typename?: 'Alarm', id: string, code?: string | null, created?: string | null, lastSeen?: string | null, repeatCount?: number | null, expires?: string | null, alarmDetails?: any | null } | null> | null, pageable?: { __typename?: 'Pageable', number?: number | null, offset?: number | null } | null } };
 
 export type GetAuditByIdQueryVariables = Exact<{
   query: Scalars['String']['input'];
@@ -1663,6 +1746,49 @@ export type ClusterRecordsTitleOnlyQueryVariables = Exact<{
 
 export type ClusterRecordsTitleOnlyQuery = { __typename?: 'Query', instanceClusters: { __typename?: 'ClusterRecordPage', content?: Array<{ __typename?: 'ClusterRecord', id: string, title?: string | null, selectedBib?: string | null, isDeleted?: boolean | null, dateCreated?: string | null, dateUpdated?: string | null } | null> | null } };
 
+export type LoadConsortiumQueryVariables = Exact<{
+  order: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadConsortiumQuery = { __typename?: 'Query', consortia: { __typename?: 'ConsortiumPage', totalSize?: number | null, content?: Array<{ __typename?: 'Consortium', id: string, name: string, dateOfLaunch?: string | null, headerImageUrl?: string | null, headerImageUploader?: string | null, headerImageUploaderEmail?: string | null, aboutImageUrl?: string | null, aboutImageUploader?: string | null, aboutImageUploaderEmail?: string | null, description?: string | null, catalogueSearchUrl?: string | null, websiteUrl?: string | null, displayName?: string | null, libraryGroup: { __typename?: 'LibraryGroup', id: string }, contacts?: Array<{ __typename?: 'Person', email?: string | null, id?: string | null } | null> | null, functionalSettings?: Array<{ __typename?: 'FunctionalSetting', id: string, name: FunctionalSettingType, enabled: boolean } | null> | null } | null> | null } };
+
+export type LoadConsortiumHeaderQueryVariables = Exact<{
+  order: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadConsortiumHeaderQuery = { __typename?: 'Query', consortia: { __typename?: 'ConsortiumPage', totalSize?: number | null, content?: Array<{ __typename?: 'Consortium', id: string, name: string, displayName?: string | null, headerImageUrl?: string | null, aboutImageUrl?: string | null, description?: string | null, catalogueSearchUrl?: string | null, websiteUrl?: string | null } | null> | null } };
+
+export type LoadConsortiumContactsQueryVariables = Exact<{
+  order: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadConsortiumContactsQuery = { __typename?: 'Query', consortia: { __typename?: 'ConsortiumPage', totalSize?: number | null, content?: Array<{ __typename?: 'Consortium', id: string, name: string, displayName?: string | null, contacts?: Array<{ __typename?: 'Person', id?: string | null, firstName?: string | null, lastName?: string | null, isPrimaryContact?: boolean | null, email?: string | null, role: { __typename?: 'Role', id: string, name: string, description?: string | null, displayName: string, keycloakRole?: string | null } } | null> | null } | null> | null } };
+
+export type LoadConsortiumFsQueryVariables = Exact<{
+  order: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadConsortiumFsQuery = { __typename?: 'Query', consortia: { __typename?: 'ConsortiumPage', totalSize?: number | null, content?: Array<{ __typename?: 'Consortium', id: string, name: string, displayName?: string | null, functionalSettings?: Array<{ __typename?: 'FunctionalSetting', id: string, name: FunctionalSettingType, enabled: boolean, description?: string | null } | null> | null } | null> | null } };
+
+export type LoadDataChangeLogQueryVariables = Exact<{
+  pageno: Scalars['Int']['input'];
+  pagesize: Scalars['Int']['input'];
+  order: Scalars['String']['input'];
+  query: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadDataChangeLogQuery = { __typename?: 'Query', dataChangeLog: { __typename?: 'DataChangeLogPage', totalSize?: number | null, content?: Array<{ __typename?: 'DataChangeLog', id: string, entityId: string, entityType: string, actionInfo: string, lastEditedBy?: string | null, timestampLogged: string, reason?: string | null, changeReferenceUrl?: string | null, changeCategory?: string | null, changes: any } | null> | null, pageable?: { __typename?: 'Pageable', number?: number | null, offset?: number | null } | null } };
+
 export type LoadGroupQueryVariables = Exact<{
   query: Scalars['String']['input'];
 }>;
@@ -1710,12 +1836,12 @@ export type LoadLibraryBasicsQueryVariables = Exact<{
 
 export type LoadLibraryBasicsQuery = { __typename?: 'Query', libraries: { __typename?: 'LibraryPage', content?: Array<{ __typename?: 'Library', id: string, fullName?: string | null, shortName?: string | null, agencyCode?: string | null, contacts?: Array<{ __typename?: 'Person', id?: string | null, firstName?: string | null, lastName?: string | null, isPrimaryContact?: boolean | null, email?: string | null, role: { __typename?: 'Role', id: string, name: string, description?: string | null, displayName: string, keycloakRole?: string | null } } | null> | null, agency?: { __typename?: 'Agency', id?: string | null, code?: string | null, maxConsortialLoans?: number | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, lmsClientClass?: string | null } | null } | null, secondHostLms?: { __typename?: 'HostLms', code?: string | null, name?: string | null, id?: string | null, lmsClientClass?: string | null } | null } | null> | null } };
 
-export type LoadLibraryServiceInfoQueryVariables = Exact<{
+export type LoadLibraryBasicsPrQueryVariables = Exact<{
   query: Scalars['String']['input'];
 }>;
 
 
-export type LoadLibraryServiceInfoQuery = { __typename?: 'Query', libraries: { __typename?: 'LibraryPage', content?: Array<{ __typename?: 'Library', id: string, fullName?: string | null, agencyCode?: string | null, agency?: { __typename?: 'Agency', id?: string | null, authProfile?: string | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null } | null } | null } | null> | null } };
+export type LoadLibraryBasicsPrQuery = { __typename?: 'Query', libraries: { __typename?: 'LibraryPage', content?: Array<{ __typename?: 'Library', id: string, fullName?: string | null, agencyCode?: string | null, agency?: { __typename?: 'Agency', id?: string | null, authProfile?: string | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null } | null } | null } | null> | null } };
 
 export type LoadLibraryBibClusterIdsQueryVariables = Exact<{
   query: Scalars['String']['input'];
@@ -1725,6 +1851,17 @@ export type LoadLibraryBibClusterIdsQueryVariables = Exact<{
 
 
 export type LoadLibraryBibClusterIdsQuery = { __typename?: 'Query', patronRequests?: { __typename?: 'PatronRequestPage', content?: Array<{ __typename?: 'PatronRequest', bibClusterId?: string | null, clusterRecord?: { __typename?: 'ClusterRecord', title?: string | null, members?: Array<{ __typename?: 'BibRecord', publisher?: string | null } | null> | null } | null } | null> | null } | null };
+
+export type LoadLibraryContactsQueryVariables = Exact<{
+  pageno: Scalars['Int']['input'];
+  pagesize: Scalars['Int']['input'];
+  order: Scalars['String']['input'];
+  query: Scalars['String']['input'];
+  orderBy: Scalars['String']['input'];
+}>;
+
+
+export type LoadLibraryContactsQuery = { __typename?: 'Query', libraries: { __typename?: 'LibraryPage', content?: Array<{ __typename?: 'Library', id: string, fullName?: string | null, shortName?: string | null, contacts?: Array<{ __typename?: 'Person', id?: string | null, firstName?: string | null, lastName?: string | null, isPrimaryContact?: boolean | null, email?: string | null, role: { __typename?: 'Role', id: string, name: string, description?: string | null, displayName: string, keycloakRole?: string | null } } | null> | null } | null> | null } };
 
 export type LoadGroupsQueryVariables = Exact<{
   pageno: Scalars['Int']['input'];
@@ -1736,6 +1873,13 @@ export type LoadGroupsQueryVariables = Exact<{
 
 
 export type LoadGroupsQuery = { __typename?: 'Query', libraryGroups: { __typename?: 'LibraryGroupPage', totalSize?: number | null, content?: Array<{ __typename?: 'LibraryGroup', id: string, code: string, name: string, type: string, consortium?: { __typename?: 'Consortium', name: string, id: string } | null } | null> | null, pageable?: { __typename?: 'Pageable', number?: number | null, offset?: number | null } | null } };
+
+export type LoadLibraryServiceInfoQueryVariables = Exact<{
+  query: Scalars['String']['input'];
+}>;
+
+
+export type LoadLibraryServiceInfoQuery = { __typename?: 'Query', libraries: { __typename?: 'LibraryPage', content?: Array<{ __typename?: 'Library', id: string, fullName?: string | null, patronWebsite?: string | null, discoverySystem?: string | null, backupDowntimeSchedule?: string | null, hostLmsConfiguration?: string | null, agency?: { __typename?: 'Agency', id?: string | null, authProfile?: string | null, hostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null, clientConfig?: any | null, lmsClientClass?: string | null, itemSuppressionRulesetName?: string | null, suppressionRulesetName?: string | null } | null } | null, secondHostLms?: { __typename?: 'HostLms', id?: string | null, code?: string | null, name?: string | null, clientConfig?: any | null, lmsClientClass?: string | null, itemSuppressionRulesetName?: string | null, suppressionRulesetName?: string | null } | null } | null> | null } };
 
 export type LoadLocationQueryVariables = Exact<{
   query: Scalars['String']['input'];
@@ -1893,6 +2037,16 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
+export const AddFunctionalSettingDocument = new TypedDocumentString(`
+    mutation AddFunctionalSetting($input: FunctionalSettingInput!) {
+  createFunctionalSetting(input: $input) {
+    id
+    name
+    enabled
+    description
+  }
+}
+    `) as unknown as TypedDocumentString<AddFunctionalSettingMutation, AddFunctionalSettingMutationVariables>;
 export const AddLibraryToGroupDocument = new TypedDocumentString(`
     mutation addLibraryToGroup($input: AddLibraryToGroupCommand!) {
   addLibraryToGroup(input: $input) {
@@ -1911,12 +2065,42 @@ export const AddLibraryToGroupDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<AddLibraryToGroupMutation, AddLibraryToGroupMutationVariables>;
+export const CreateConsortiumContactDocument = new TypedDocumentString(`
+    mutation CreateConsortiumContact($input: ConsortiumContactInput!) {
+  createContact(input: $input) {
+    id
+    person {
+      firstName
+      lastName
+    }
+    consortium {
+      id
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<CreateConsortiumContactMutation, CreateConsortiumContactMutationVariables>;
+export const CreateHostLmsDocument = new TypedDocumentString(`
+    mutation CreateHostLms($input: CreateHostLmsInput!) {
+  createHostLms(input: $input) {
+    hostLms {
+      id
+      code
+      name
+      lmsClientClass
+    }
+    pingStatus
+    ingestStatus
+    warnings
+  }
+}
+    `) as unknown as TypedDocumentString<CreateHostLmsMutation, CreateHostLmsMutationVariables>;
 export const CreateLibraryDocument = new TypedDocumentString(`
     mutation CreateLibrary($input: LibraryInput!) {
   createLibrary(input: $input) {
     id
+    agencyCode
     fullName
-    type
+    shortName
   }
 }
     `) as unknown as TypedDocumentString<CreateLibraryMutation, CreateLibraryMutationVariables>;
@@ -1960,6 +2144,14 @@ export const CreateReferenceValueMappingDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<CreateReferenceValueMappingMutation, CreateReferenceValueMappingMutationVariables>;
+export const DeleteConsortiumContactDocument = new TypedDocumentString(`
+    mutation DeleteConsortiumContact($input: DeleteConsortiumContactInput!) {
+  deleteContact(input: $input) {
+    success
+    message
+  }
+}
+    `) as unknown as TypedDocumentString<DeleteConsortiumContactMutation, DeleteConsortiumContactMutationVariables>;
 export const DeleteLibraryDocument = new TypedDocumentString(`
     mutation DeleteLibrary($input: DeleteEntityInput!) {
   deleteLibrary(input: $input) {
@@ -2023,6 +2215,32 @@ export const UpdateAgencyParticipationStatusDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateAgencyParticipationStatusMutation, UpdateAgencyParticipationStatusMutationVariables>;
+export const UpdateConsortiumDocument = new TypedDocumentString(`
+    mutation UpdateConsortium($input: UpdateConsortiumInput!) {
+  updateConsortium(input: $input) {
+    id
+    headerImageUrl
+    headerImageUploader
+    headerImageUploaderEmail
+    aboutImageUrl
+    aboutImageUploader
+    aboutImageUploaderEmail
+    description
+    catalogueSearchUrl
+    websiteUrl
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateConsortiumMutation, UpdateConsortiumMutationVariables>;
+export const UpdateFunctionalSettingDocument = new TypedDocumentString(`
+    mutation UpdateFunctionalSetting($input: UpdateFunctionalSettingInput!) {
+  updateFunctionalSetting(input: $input) {
+    id
+    name
+    enabled
+    description
+  }
+}
+    `) as unknown as TypedDocumentString<UpdateFunctionalSettingMutation, UpdateFunctionalSettingMutationVariables>;
 export const UpdateLibraryDocument = new TypedDocumentString(`
     mutation UpdateLibrary($input: UpdateLibraryInput!) {
   updateLibrary(input: $input) {
@@ -2083,6 +2301,13 @@ export const UpdateReferenceValueMappingDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<UpdateReferenceValueMappingMutation, UpdateReferenceValueMappingMutationVariables>;
+export const CheckExistingLocationsDocument = new TypedDocumentString(`
+    query CheckExistingLocations($pagesize: Int!, $query: String!) {
+  locations(pagesize: $pagesize, query: $query) {
+    totalSize
+  }
+}
+    `) as unknown as TypedDocumentString<CheckExistingLocationsQuery, CheckExistingLocationsQueryVariables>;
 export const CheckExistingMappingsDocument = new TypedDocumentString(`
     query CheckExistingMappings($pagesize: Int!, $query: String!) {
   referenceValueMappings(pagesize: $pagesize, query: $query) {
@@ -2122,7 +2347,57 @@ export const CheckExistingNumericRangeMappingsDocument = new TypedDocumentString
 }
     `) as unknown as TypedDocumentString<CheckExistingNumericRangeMappingsQuery, CheckExistingNumericRangeMappingsQueryVariables>;
 export const LoadAgenciesDocument = new TypedDocumentString(`
-    query LoadAgencies($query: String!) {
+    query LoadAgencies($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+  agencies(
+    pageno: $pageno
+    pagesize: $pagesize
+    order: $order
+    query: $query
+    orderBy: $orderBy
+  ) {
+    totalSize
+    content {
+      id
+      code
+      name
+      latitude
+      longitude
+    }
+    pageable {
+      number
+      offset
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadAgenciesQuery, LoadAgenciesQueryVariables>;
+export const LoadAgenciesForStaffRequestDocument = new TypedDocumentString(`
+    query LoadAgenciesForStaffRequest($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+  agencies(
+    pageno: $pageno
+    pagesize: $pagesize
+    order: $order
+    query: $query
+    orderBy: $orderBy
+  ) {
+    totalSize
+    content {
+      id
+      code
+      name
+      hostLms {
+        id
+        code
+      }
+    }
+    pageable {
+      number
+      offset
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadAgenciesForStaffRequestQuery, LoadAgenciesForStaffRequestQueryVariables>;
+export const LoadAgencyDocument = new TypedDocumentString(`
+    query LoadAgency($query: String!) {
   agencies(query: $query) {
     content {
       id
@@ -2159,7 +2434,33 @@ export const LoadAgenciesDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<LoadAgenciesQuery, LoadAgenciesQueryVariables>;
+    `) as unknown as TypedDocumentString<LoadAgencyQuery, LoadAgencyQueryVariables>;
+export const LoadAlarmsDocument = new TypedDocumentString(`
+    query LoadAlarms($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+  alarms(
+    pageno: $pageno
+    pagesize: $pagesize
+    order: $order
+    query: $query
+    orderBy: $orderBy
+  ) {
+    totalSize
+    content {
+      id
+      code
+      created
+      lastSeen
+      repeatCount
+      expires
+      alarmDetails
+    }
+    pageable {
+      number
+      offset
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadAlarmsQuery, LoadAlarmsQueryVariables>;
 export const GetAuditByIdDocument = new TypedDocumentString(`
     query GetAuditById($query: String!) {
   audits(query: $query) {
@@ -2353,6 +2654,130 @@ export const ClusterRecordsTitleOnlyDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<ClusterRecordsTitleOnlyQuery, ClusterRecordsTitleOnlyQueryVariables>;
+export const LoadConsortiumDocument = new TypedDocumentString(`
+    query LoadConsortium($order: String!, $orderBy: String!) {
+  consortia(order: $order, orderBy: $orderBy) {
+    totalSize
+    content {
+      id
+      name
+      libraryGroup {
+        id
+      }
+      dateOfLaunch
+      headerImageUrl
+      headerImageUploader
+      headerImageUploaderEmail
+      aboutImageUrl
+      aboutImageUploader
+      aboutImageUploaderEmail
+      description
+      catalogueSearchUrl
+      websiteUrl
+      displayName
+      contacts {
+        email
+        id
+      }
+      functionalSettings {
+        id
+        name
+        enabled
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadConsortiumQuery, LoadConsortiumQueryVariables>;
+export const LoadConsortiumHeaderDocument = new TypedDocumentString(`
+    query LoadConsortiumHeader($order: String!, $orderBy: String!) {
+  consortia(order: $order, orderBy: $orderBy) {
+    totalSize
+    content {
+      id
+      name
+      displayName
+      headerImageUrl
+      aboutImageUrl
+      description
+      catalogueSearchUrl
+      websiteUrl
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadConsortiumHeaderQuery, LoadConsortiumHeaderQueryVariables>;
+export const LoadConsortiumContactsDocument = new TypedDocumentString(`
+    query LoadConsortiumContacts($order: String!, $orderBy: String!) {
+  consortia(order: $order, orderBy: $orderBy) {
+    totalSize
+    content {
+      id
+      name
+      displayName
+      contacts {
+        id
+        firstName
+        lastName
+        role {
+          id
+          name
+          description
+          displayName
+          keycloakRole
+        }
+        isPrimaryContact
+        email
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadConsortiumContactsQuery, LoadConsortiumContactsQueryVariables>;
+export const LoadConsortiumFsDocument = new TypedDocumentString(`
+    query LoadConsortiumFS($order: String!, $orderBy: String!) {
+  consortia(order: $order, orderBy: $orderBy) {
+    totalSize
+    content {
+      id
+      name
+      displayName
+      functionalSettings {
+        id
+        name
+        enabled
+        description
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadConsortiumFsQuery, LoadConsortiumFsQueryVariables>;
+export const LoadDataChangeLogDocument = new TypedDocumentString(`
+    query LoadDataChangeLog($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+  dataChangeLog(
+    pageno: $pageno
+    pagesize: $pagesize
+    order: $order
+    query: $query
+    orderBy: $orderBy
+  ) {
+    totalSize
+    content {
+      id
+      entityId
+      entityType
+      actionInfo
+      lastEditedBy
+      timestampLogged
+      reason
+      changeReferenceUrl
+      changeCategory
+      changes
+    }
+    pageable {
+      number
+      offset
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadDataChangeLogQuery, LoadDataChangeLogQueryVariables>;
 export const LoadGroupDocument = new TypedDocumentString(`
     query LoadGroup($query: String!) {
   libraryGroups(query: $query) {
@@ -2608,8 +3033,8 @@ export const LoadLibraryBasicsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LoadLibraryBasicsQuery, LoadLibraryBasicsQueryVariables>;
-export const LoadLibraryServiceInfoDocument = new TypedDocumentString(`
-    query LoadLibraryServiceInfo($query: String!) {
+export const LoadLibraryBasicsPrDocument = new TypedDocumentString(`
+    query LoadLibraryBasicsPR($query: String!) {
   libraries(query: $query) {
     content {
       id
@@ -2627,7 +3052,7 @@ export const LoadLibraryServiceInfoDocument = new TypedDocumentString(`
     }
   }
 }
-    `) as unknown as TypedDocumentString<LoadLibraryServiceInfoQuery, LoadLibraryServiceInfoQueryVariables>;
+    `) as unknown as TypedDocumentString<LoadLibraryBasicsPrQuery, LoadLibraryBasicsPrQueryVariables>;
 export const LoadLibraryBibClusterIdsDocument = new TypedDocumentString(`
     query LoadLibraryBibClusterIds($query: String!, $pagesize: Int, $pageno: Int) {
   patronRequests(query: $query, pagesize: $pagesize, pageno: $pageno) {
@@ -2643,6 +3068,37 @@ export const LoadLibraryBibClusterIdsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LoadLibraryBibClusterIdsQuery, LoadLibraryBibClusterIdsQueryVariables>;
+export const LoadLibraryContactsDocument = new TypedDocumentString(`
+    query LoadLibraryContacts($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
+  libraries(
+    pageno: $pageno
+    pagesize: $pagesize
+    order: $order
+    query: $query
+    orderBy: $orderBy
+  ) {
+    content {
+      id
+      fullName
+      shortName
+      contacts {
+        id
+        firstName
+        lastName
+        role {
+          id
+          name
+          description
+          displayName
+          keycloakRole
+        }
+        isPrimaryContact
+        email
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadLibraryContactsQuery, LoadLibraryContactsQueryVariables>;
 export const LoadGroupsDocument = new TypedDocumentString(`
     query LoadGroups($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
   libraryGroups(
@@ -2670,6 +3126,42 @@ export const LoadGroupsDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<LoadGroupsQuery, LoadGroupsQueryVariables>;
+export const LoadLibraryServiceInfoDocument = new TypedDocumentString(`
+    query LoadLibraryServiceInfo($query: String!) {
+  libraries(query: $query) {
+    content {
+      id
+      fullName
+      patronWebsite
+      discoverySystem
+      backupDowntimeSchedule
+      hostLmsConfiguration
+      agency {
+        id
+        authProfile
+        hostLms {
+          id
+          code
+          name
+          clientConfig
+          lmsClientClass
+          itemSuppressionRulesetName
+          suppressionRulesetName
+        }
+      }
+      secondHostLms {
+        id
+        code
+        name
+        clientConfig
+        lmsClientClass
+        itemSuppressionRulesetName
+        suppressionRulesetName
+      }
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<LoadLibraryServiceInfoQuery, LoadLibraryServiceInfoQueryVariables>;
 export const LoadLocationDocument = new TypedDocumentString(`
     query LoadLocation($query: String!) {
   locations(query: $query) {

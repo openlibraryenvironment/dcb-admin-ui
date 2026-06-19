@@ -222,7 +222,7 @@ export default function NewLocation({
 	const onSubmit = async (data: NewLocationFormData) => {
 		try {
 			await createNewLocation({
-				variables: { input: { ...data, agencyCode, hostLmsCode, type } },
+				input: { ...data, agencyCode, hostLmsCode, type },
 			});
 			setAlert({
 				open: true,

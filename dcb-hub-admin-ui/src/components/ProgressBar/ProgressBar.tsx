@@ -1,29 +1,15 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useRouterState } from "@tanstack/react-router"; // UPGRADE: Pure hooks-driven state monitoring
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
-// Can be removed after switch away from next.js
 
 export function ProgressBar() {
-	const router = useRouter();
-	const [isRouting, setIsRouting] = useState(false);
+	// UPGRADE: Instantly listens reactive-style to the router compilation pipeline.
+	// Fires automatically when lazy-loading route files, code-split chunks, or asynchronous query loaders.
+	const isRouting = useRouterState({
+		select: (state) => state.status === "pending",
+	});
 
-	useEffect(() => {
-		const handleStart = () => setIsRouting(true);
-		const handleStop = () => setIsRouting(false);
-
-		router.events.on("routeChangeStart", handleStart);
-		router.events.on("routeChangeComplete", handleStop);
-		router.events.on("routeChangeError", handleStop);
-
-		return () => {
-			router.events.off("routeChangeStart", handleStart);
-			router.events.off("routeChangeComplete", handleStop);
-			router.events.off("routeChangeError", handleStop);
-		};
-	}, [router.events]);
-
-	// Don't render anything if we aren't actively navigating
+	// Don't render anything if the router is idle or finished navigating
 	if (!isRouting) return null;
 
 	return (
