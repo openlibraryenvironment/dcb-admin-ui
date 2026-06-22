@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
@@ -245,7 +245,7 @@ function Settings() {
 	];
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library.fullName}
 			pageActions={editMode ? editModeActions : viewModeActions}
 			mode={editMode ? "edit" : "view"}
@@ -458,6 +458,6 @@ function Settings() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

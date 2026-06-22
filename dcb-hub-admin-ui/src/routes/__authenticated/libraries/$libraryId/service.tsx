@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { Delete, ExpandMore } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
@@ -168,7 +168,7 @@ function Service() {
 		);
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library.fullName}
 			pageActions={[
 				{
@@ -600,6 +600,6 @@ function Service() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

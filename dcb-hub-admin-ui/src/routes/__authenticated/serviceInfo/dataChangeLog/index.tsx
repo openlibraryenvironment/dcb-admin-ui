@@ -12,7 +12,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Link from "@components/Link/Link";
@@ -136,10 +136,10 @@ function DataChangeLogsGrid() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.serviceInfo.dataChangeLog")}>
+		<PageContainer title={t("nav.serviceInfo.dataChangeLog")}>
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"dataChangeLog"}
 				columns={columns}
 				rows={gridData?.dataChangeLog?.content ?? []}
 				rowCount={gridData?.dataChangeLog?.totalSize ?? 0}
@@ -173,6 +173,6 @@ function DataChangeLogsGrid() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

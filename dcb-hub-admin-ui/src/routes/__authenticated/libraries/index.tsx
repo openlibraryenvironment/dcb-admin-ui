@@ -19,7 +19,7 @@ import {
 	GridColDef,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -346,7 +346,7 @@ function Libraries() {
 		);
 
 	return (
-		<AdminLayout title={t("nav.libraries.name")} pageActions={pageActions}>
+		<PageContainer title={t("nav.libraries.name")} pageActions={pageActions}>
 			{/* Bulk Actions Toolbar */}
 			{isAnAdmin && (
 				<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
@@ -433,6 +433,6 @@ function Libraries() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Error from "@components/Error/Error";
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import { useTranslation } from "react-i18next";
 
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/404")({
 function NotFound() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout
+		<PageContainer
 			title={t("404.page_title")}
 			hideTitleBox={true}
 			hideBreadcrumbs={true}
@@ -24,6 +24,6 @@ function NotFound() {
 				action={capitaliseFirstCharacter(t("ui.error.404.action"))}
 				goBack="/"
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

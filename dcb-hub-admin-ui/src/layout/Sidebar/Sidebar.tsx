@@ -11,6 +11,7 @@ import {
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
+	useMediaQuery,
 } from "@mui/material";
 import {
 	LocationOn,
@@ -26,6 +27,7 @@ import {
 	Info,
 	LocalLibrary,
 	Search,
+	ChevronLeft,
 } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
@@ -132,11 +134,12 @@ const routes = [
 	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" },
 ];
 
+// still needs serious improvement. now we are seeing dupes
 export default function Sidebar(props: any) {
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const location = useLocation();
-
+	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 	const [selected, setSelected] = useState(-1);
 	const [isDisabled, setDisabled] = useState(-1);
 	const [isChildPage, setChildPage] = useState(false);
@@ -172,17 +175,15 @@ export default function Sidebar(props: any) {
 	return (
 		<>
 			{props.openStateOpen && (
-				<Drawer variant="permanent" open={props.openStateOpen}>
-					<DrawerHeader>
-						<IconButton
-							color="inherit"
-							onClick={props.openStateFuncClosed}
-							edge="start"
-							sx={{ mr: "auto", minWidth: 0, ml: 0.65 }}
-						>
-							<MenuIcon />
-						</IconButton>
-					</DrawerHeader>
+				<Drawer
+					variant={isMobile ? "temporary" : "permanent"}
+					open={props.openStateOpen}
+					onClose={props.openStateFuncClosed} // Required for temporary drawers to close when clicking outside
+					ModalProps={{
+						keepMounted: true, // Better open performance on mobile.
+					}}
+				>
+					{/* <DrawerHeader /> */}
 					<Divider />
 					<List component="nav" data-tid="sidebar">
 						{routes.map((route, index) => (
@@ -205,7 +206,6 @@ export default function Sidebar(props: any) {
 										justifyContent: props.openStateOpen ? "initial" : "center",
 										px: "24px",
 
-										// CLEANUP: Uses your custom OpenRS theme hover variables natively!
 										":hover": { backgroundColor: "primary.hover" },
 										":active": { backgroundColor: "primary.hover" },
 

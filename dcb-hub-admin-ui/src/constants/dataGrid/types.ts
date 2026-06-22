@@ -8,7 +8,11 @@ export const nonClickableTypes = [
 
 // Types of data grid where users can click through to a details page,
 // but where special redirection is needed to get the correct URL
-export const specialRedirectionTypes = ["dataChangeLog", "audits"];
+export const specialRedirectionTypes = [
+	"dataChangeLog",
+	"audits",
+	"welcomeLibraries",
+];
 
 // Types of data grid where we show the actions menu to the user.
 export const actionsTypes = [

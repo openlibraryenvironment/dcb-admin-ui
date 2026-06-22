@@ -12,7 +12,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Link from "@components/Link/Link";
 import ErrorComponent from "@components/Error/Error";
@@ -190,7 +190,7 @@ function Requests() {
 
 	if (isError) {
 		return (
-			<AdminLayout title={description} link={linkUrl}>
+			<PageContainer title={description} link={linkUrl}>
 				<ErrorComponent
 					title={t("error_overview.error_loading")}
 					message={t("ui.info.connection_issue")}
@@ -198,15 +198,15 @@ function Requests() {
 					action={t("ui.action.reload")}
 					// onClick={refetch}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={description} link={linkUrl}>
+		<PageContainer title={description} link={linkUrl}>
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"errorOverviewPatronRequests"}
 				columns={columns}
 				rows={records?.hits ?? []}
 				loading={isLoading}
@@ -237,6 +237,6 @@ function Requests() {
 				noResultsText={t("error_overview.no_results")}
 				searchText={t("general.search")}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

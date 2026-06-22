@@ -84,6 +84,8 @@ export default function Header({
 
 	const { data: headerContentData } = useQuery({
 		queryKey: ["consortiaKeyInfo"],
+		enabled: auth.isAuthenticated,
+		throwOnError: false,
 		queryFn: () =>
 			gqlClient.request(getConsortiumBasics, {
 				order: "name",

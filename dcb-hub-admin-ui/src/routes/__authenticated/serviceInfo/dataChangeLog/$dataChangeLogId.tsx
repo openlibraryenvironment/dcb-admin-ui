@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Grid, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
@@ -44,20 +44,20 @@ function DataChangeLogDetails() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("data_change_log.loading_details"),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (error || !dataChangeLog) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<ErrorComponent
 					title={
 						error
@@ -73,7 +73,7 @@ function DataChangeLogDetails() {
 					action={t("ui.action.go_back")}
 					goBack="/serviceInfo/dataChangeLogs"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
@@ -83,7 +83,7 @@ function DataChangeLogDetails() {
 		dataChangeLog.actionInfo === "DELETE";
 
 	return (
-		<AdminLayout title={dataChangeLog.id}>
+		<PageContainer title={dataChangeLog.id}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -213,6 +213,6 @@ function DataChangeLogDetails() {
 					/>
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

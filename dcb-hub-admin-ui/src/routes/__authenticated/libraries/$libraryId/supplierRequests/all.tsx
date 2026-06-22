@@ -13,7 +13,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -236,7 +236,7 @@ function SupplierRequestsAll() {
 		);
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library?.fullName}
 			pageActions={[
 				{
@@ -282,7 +282,7 @@ function SupplierRequestsAll() {
 
 					<DataGrid
 						identifier={gridId}
-						type="supplierRequests"
+						type="patronRequests"
 						columns={allColumns}
 						rows={requestsData?.patronRequests?.content ?? []}
 						rowCount={requestsData?.patronRequests?.totalSize ?? 0}
@@ -348,6 +348,6 @@ function SupplierRequestsAll() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

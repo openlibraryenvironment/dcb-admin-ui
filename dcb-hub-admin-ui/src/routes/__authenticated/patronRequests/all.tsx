@@ -8,7 +8,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useCallback, useMemo, useState, useEffect } from "react";
 
 import Loading from "@components/Loading/Loading";
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
@@ -256,19 +256,19 @@ function All() {
 
 	if (supplyingLibrariesLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.patronRequests.name").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={t("nav.patronRequests.name")}>
+		<PageContainer title={t("nav.patronRequests.name")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -393,10 +393,10 @@ function All() {
 						sortingMode="server"
 						toolbarVisible={true}
 						searchText=""
-						type={gridId}
+						type={"patronRequests"}
 					/>
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

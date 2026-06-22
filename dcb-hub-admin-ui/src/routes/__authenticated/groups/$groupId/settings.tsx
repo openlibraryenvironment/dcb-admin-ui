@@ -15,7 +15,7 @@ import {
 	Box,
 } from "@mui/material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -162,15 +162,15 @@ function GroupSettings() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading title={t("groups.groups_one")} subtitle={t("ui.info.wait")} />
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (error || !group) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
 					message={t("ui.info.connection_issue")}
@@ -178,7 +178,7 @@ function GroupSettings() {
 					action={t("ui.action.go_back")}
 					goBack="/groups"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
@@ -190,7 +190,7 @@ function GroupSettings() {
 		: "enableSupplying";
 
 	return (
-		<AdminLayout title={group.name}>
+		<PageContainer title={group.name}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -360,6 +360,6 @@ function GroupSettings() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

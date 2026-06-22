@@ -14,7 +14,7 @@ import {
 	GridColDef,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import NewLocation from "@forms/NewLocation/NewLocation";
 import Import from "@components/Import/Import";
@@ -172,7 +172,7 @@ function LocationsRouteComponent() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.locations")}>
+		<PageContainer title={t("nav.locations")}>
 			{isAnAdmin && (
 				<Stack spacing={4} direction="row" sx={{ mb: 3 }}>
 					<Button
@@ -265,6 +265,6 @@ function LocationsRouteComponent() {
 			{showImport && (
 				<Import show={showImport} onClose={closeImport} type="Locations" />
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

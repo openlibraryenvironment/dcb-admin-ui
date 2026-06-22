@@ -72,13 +72,24 @@ const handleServiceErrors = (error: any) => {
 		error.message?.includes("Network request failed") ||
 		error.message?.includes("NetworkError");
 	const isServiceUnavailable = error?.response?.status === 503;
+	const isUnauthorized = error?.response?.status === 401; // Add this!
 
-	if (window.location.pathname === "/maintenance") {
+	if (
+		window.location.pathname === "/maintenance" ||
+		window.location.pathname === "/login"
+	) {
 		return;
 	}
 
-	// Use TanStack Router for instant transitions instead of hard reloading
-	if (isServiceUnavailable && router) {
+	if (isUnauthorized && router) {
+		// Kick them to login (or logout) and clear the bad cache!
+		queryClient.clear();
+		router.navigate({
+			to: "/login",
+			search: { redirect: window.location.pathname },
+			replace: true,
+		});
+	} else if (isServiceUnavailable && router) {
 		router.navigate({ to: "/maintenance", replace: true });
 	} else if (isNetworkError && router) {
 		router.navigate({ to: "/networkError", replace: true });
@@ -90,6 +101,11 @@ const queryClient = new QueryClient({
 		queries: {
 			staleTime: 1000 * 60 * 5, // 5 minutes
 			retry: 1,
+			throwOnError: (error: any) => {
+				// Don't throw 401s/503s to the UI boundary, let the cache handler deal with those
+				const status = error?.response?.status;
+				return status !== 401 && status !== 503;
+			},
 		},
 	},
 	queryCache: new QueryCache({
@@ -129,11 +145,15 @@ async function bootstrap() {
 		scope: "openid profile email",
 		loadUserInfo: true,
 		automaticSilentRenew: true,
+		onSilentRenewError: (error: Error) => {
+			console.warn("Silent renew failed, user session expired", error);
+			router.navigate({ to: "/login", replace: true });
+		},
 		onSigninCallback: (_user: User | void): void => {
 			console.log("Sign in for ", _user);
 			const isReadOnly = _user?.profile?.roles?.includes("LIBRARY_READ_ONLY");
-			const afterLoginRedirectPath = sessionStorage.getItem(
-				"afterLoginRedirectPath",
+			const postLoginRedirectPath = sessionStorage.getItem(
+				"postLoginRedirectPath",
 			);
 
 			// Clear the OIDC code from the URL cleanly
@@ -145,9 +165,9 @@ async function bootstrap() {
 				return;
 			}
 
-			if (afterLoginRedirectPath) {
-				sessionStorage.removeItem("afterLoginRedirectPath");
-				router.navigate({ to: afterLoginRedirectPath, replace: true });
+			if (postLoginRedirectPath) {
+				sessionStorage.removeItem("postLoginRedirectPath");
+				router.navigate({ to: postLoginRedirectPath, replace: true });
 			}
 		},
 	};

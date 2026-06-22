@@ -10,7 +10,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 import { useGridStore } from "@/hooks/useDataGridStore";
@@ -169,7 +169,7 @@ function AgenciesRouteComponent() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.agencies")}>
+		<PageContainer title={t("nav.agencies")}>
 			<DataGrid
 				identifier={gridId}
 				type="agencies"
@@ -203,6 +203,6 @@ function AgenciesRouteComponent() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

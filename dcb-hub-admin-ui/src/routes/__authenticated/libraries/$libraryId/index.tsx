@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import AddressLink from "@components/Address/AddressLink";
@@ -255,7 +255,7 @@ function LibraryProfile() {
 	];
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library.fullName}
 			pageActions={editMode ? editModeActions : viewModeActions}
 			mode={editMode ? "edit" : "view"}
@@ -602,7 +602,7 @@ function LibraryProfile() {
 						paginationModel={{ page: 0, pageSize: 20 }}
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						type="groupsOfLibrary"
+						type="groups"
 						columns={[
 							{
 								field: "name",
@@ -708,6 +708,6 @@ function LibraryProfile() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

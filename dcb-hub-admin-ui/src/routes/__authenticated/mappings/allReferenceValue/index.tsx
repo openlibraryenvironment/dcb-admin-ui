@@ -12,7 +12,7 @@ import {
 	GridActionsCellItem,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Import from "@components/Import/Import";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -218,7 +218,7 @@ function ReferenceValueMappingsRoute() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.mappings.allReferenceValue")}>
+		<PageContainer title={t("nav.mappings.allReferenceValue")}>
 			<Stack spacing={4} direction="row" sx={{ mb: 3 }}>
 				<Button
 					variant="outlined"
@@ -242,7 +242,7 @@ function ReferenceValueMappingsRoute() {
 
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"referenceValueMappings"}
 				columns={columns}
 				rows={gridData?.referenceValueMappings?.content ?? []}
 				rowCount={gridData?.referenceValueMappings?.totalSize ?? 0}
@@ -309,6 +309,6 @@ function ReferenceValueMappingsRoute() {
 					type="Reference value mappings"
 				/>
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

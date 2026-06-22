@@ -12,7 +12,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 
@@ -181,10 +181,10 @@ function AlarmsRouteComponent() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.serviceInfo.alarms.name")}>
+		<PageContainer title={t("nav.serviceInfo.alarms.name")}>
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"alarms"}
 				columns={columns}
 				rows={gridData?.alarms?.content ?? []}
 				rowCount={gridData?.alarms?.totalSize ?? 0}
@@ -218,6 +218,6 @@ function AlarmsRouteComponent() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

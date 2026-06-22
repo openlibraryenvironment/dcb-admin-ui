@@ -7,7 +7,6 @@ i18n
 	.use(HttpBackend) // fetch over the network for MISSING languages
 	.use(initReactI18next)
 	.init({
-		// Take English immediately
 		resources: {
 			"en-GB": { application: en },
 		},
@@ -16,8 +15,6 @@ i18n
 		partialBundledLanguages: true, // the rest are only partially bundled
 
 		backend: {
-			// 4. Where to find the OTHER languages (like Spanish, French, etc.)
-			// These remain in the public folder: public/locales/es/application.json
 			loadPath: "/locales/{{lng}}/{{ns}}.json",
 		},
 		ns: ["application"],

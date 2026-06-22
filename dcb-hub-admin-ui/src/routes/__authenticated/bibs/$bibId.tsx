@@ -6,7 +6,7 @@ import { useAuth } from "react-oidc-context";
 import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
@@ -105,20 +105,20 @@ function SourceBibDetails() {
 
 	if (bibLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("bibRecords.bibs_one").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (bibError || !bib) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={
 						bibError
@@ -136,12 +136,12 @@ function SourceBibDetails() {
 					action={t("ui.action.go_back")}
 					goBack="/bibs"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={bib?.title}>
+		<PageContainer title={bib?.title}>
 			<Stack direction="row" justifyContent="end">
 				<StyledAccordionButton onClick={toggleExpandAll}>
 					{isCanonicalExpanded ? t("details.collapse") : t("details.expand")}
@@ -394,6 +394,6 @@ function SourceBibDetails() {
 					)}
 				</StyledAccordionDetails>
 			</StyledAccordion>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -1222,7 +1222,7 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{"DCB patron type"}
+									{t("patron.request.canonical_ptype")}
 								</Typography>
 								<RenderAttribute
 									attribute={

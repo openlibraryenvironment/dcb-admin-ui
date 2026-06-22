@@ -6,7 +6,7 @@ import { useAuth } from "react-oidc-context";
 import { Grid, Tab, Tabs, Typography, Button, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
@@ -117,7 +117,7 @@ function LocationMappings() {
 		);
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library.fullName}
 			pageActions={[
 				{
@@ -291,6 +291,6 @@ function LocationMappings() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

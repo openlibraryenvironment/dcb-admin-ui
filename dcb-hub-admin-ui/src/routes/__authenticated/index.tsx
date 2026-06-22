@@ -3,13 +3,32 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { Stack, Typography } from "@mui/material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
-import Loading from "@components/Loading/Loading";
+// Note: Using PageContainer instead of PageContainer!
+import PageContainer from "@layout/PageContainer/PageContainer";
 import OperatingWelcome from "@components/OperatingWelcome/OperatingWelcome";
-
+import Error from "@components/Error/Error";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 export const Route = createFileRoute("/__authenticated/")({
+	// 1. THE LOADER: Pre-fetch data before the page renders.
+	loader: async ({ context: { queryClient } }) => {
+		// we might be able to pre-fetch operating welcome, but let's see
+
+		return {};
+	},
+
+	// 2. THE ERROR BOUNDARY: error components go here instead
+	errorComponent: ({ error }) => (
+		<PageContainer hideTitleBox hideBreadcrumbs>
+			<Error
+				title="Unable to load the Dashboard"
+				message={error.message}
+				action="Reload Dashboard"
+				reload={true}
+			/>
+		</PageContainer>
+	),
+
 	component: Home,
 });
 
@@ -18,27 +37,12 @@ function Home() {
 	const { t } = useTranslation();
 	const { displayName } = useConsortiumInfoStore();
 
-	// Check loading state natively through OIDC context
-	if (auth.isLoading) {
-		return (
-			<AdminLayout>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type: t("nav.home").toLowerCase(),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</AdminLayout>
-		);
-	}
-
-	// Safely extract the user's name from the OIDC profile with robust fallbacks
 	const profile = auth.user?.profile;
 	const nameOfUser =
 		profile?.given_name || profile?.name || t("app.guest_user");
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={t("welcome.greeting", { user: nameOfUser })}
 			hideTitleBox={true}
 		>
@@ -59,6 +63,6 @@ function Home() {
 
 				<OperatingWelcome />
 			</Stack>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

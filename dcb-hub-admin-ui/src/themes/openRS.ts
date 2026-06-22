@@ -421,13 +421,10 @@ export const openRSTheme = createTheme({
 		searchResultTitle: { fontSize: "1.3rem" },
 	},
 
-	// ==========================================
-	// 4. COMPONENTS
-	// ==========================================
 	components: {
 		MuiAccordion: {
 			defaultProps: {
-				slotProps: { transition: { timeout: 400 } },
+				slotProps: { transition: { timeout: 400, unmountOnExit: true } },
 			},
 			styleOverrides: {
 				root: ({ theme }) => ({

@@ -13,7 +13,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -209,7 +209,7 @@ function PatronRequestsAll() {
 	};
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library?.fullName}
 			pageActions={[
 				{
@@ -350,6 +350,6 @@ function PatronRequestsAll() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

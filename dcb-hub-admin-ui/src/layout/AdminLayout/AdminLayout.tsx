@@ -3,11 +3,11 @@ import { useAuth } from "react-oidc-context";
 import { Stack, Typography, useTheme, Box, Button } from "@mui/material";
 import { BookOutlined } from "@mui/icons-material";
 
-import Header from "./Header/Header";
-import Sidebar from "./Sidebar/Sidebar";
-import Breadcrumbs from "./Breadcrumbs/Breadcrumbs";
-import Footer from "./Footer/Footer";
-import LinkedFooter from "./LinkedFooter/LinkedFooter";
+import Header from "../Header/Header";
+import Sidebar from "../Sidebar/Sidebar";
+import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
+import Footer from "../Footer/Footer";
+import LinkedFooter from "../LinkedFooter/LinkedFooter";
 
 import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
 import Link from "@components/Link/Link";

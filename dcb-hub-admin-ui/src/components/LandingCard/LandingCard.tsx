@@ -26,10 +26,9 @@ export default function LandingCard() {
 		description,
 	} = useConsortiumInfoStore();
 
-	// Serve standard static assets from Vite's public folder
-	const kIntLogo = "/assets/brand/Knowledge-Integration_48px.png";
-	const openRSLogo = "/assets/brand/OpenRS_48px.png";
-	const fallbackAbout = "/assets/brand/fallback-about.png";
+	const kIntLogo = "./assets/brand/Knowledge-Integration_48px.png";
+	const openRSLogo = "./assets/brand/OpenRS_48px.png";
+	const fallbackAbout = "./assets/brand/fallback-about.png";
 
 	return (
 		<Stack

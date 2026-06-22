@@ -1,147 +1,119 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef } from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import CircularProgress from "@mui/material/CircularProgress";
-import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import LoginIcon from "@mui/icons-material/Login";
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation, Trans } from "react-i18next";
 import { useAuth } from "react-oidc-context";
-import { useGridStore } from "@/hooks/useDataGridStore";
-import { z } from "zod";
-import { useTranslation } from "react-i18next";
+import {
+	Box,
+	Button,
+	Card,
+	CardContent,
+	Stack,
+	Typography,
+	useTheme,
+} from "@mui/material";
 
-// Define the search params to handle the ?loggedOut=true flag
-const logoutSearchSchema = z.object({
-	loggedOut: z.boolean().optional().catch(false),
-});
+import LoginLayout from "@layout/LoginLayout/LoginLayout";
+import Link from "@components/Link/Link";
+import Alert from "@components/Alert/Alert";
+import LandingCard from "@components/LandingCard/LandingCard";
+import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 export const Route = createFileRoute("/logout")({
-	validateSearch: logoutSearchSchema,
+	// Validate if the user landed here via an intentional logout
+	validateSearch: (search: Record<string, unknown>) => ({
+		loggedOut: search.loggedOut === "true",
+	}),
 	component: Logout,
 });
 
 function Logout() {
-	const auth = useAuth();
-	const { clearGridState } = useGridStore();
-	const { loggedOut } = Route.useSearch();
+	const theme = useTheme();
 	const { t } = useTranslation();
+	const auth = useAuth();
+	const { displayName } = useConsortiumInfoStore();
 
-	// Use a ref to ensure logout only triggers once per mount
-	const hasTriggeredLogout = useRef(false);
+	const { loggedOut } = Route.useSearch();
+	const [alertDisplayed, setAlertDisplayed] = useState(loggedOut);
 
-	useEffect(() => {
-		// If we are already in the "success" state, or auth is loading, do nothing.
-		if (loggedOut || auth.isLoading || hasTriggeredLogout.current) {
-			return;
-		}
-
-		const performLogout = async () => {
-			hasTriggeredLogout.current = true;
-			try {
-				clearGridState();
-				sessionStorage.removeItem("afterLoginRedirectPath");
-				const postLogoutRedirectUri = `${window.location.origin}/logout?loggedOut=true`;
-				await auth.signoutRedirect({
-					post_logout_redirect_uri: postLogoutRedirectUri,
-				});
-			} catch (error) {
-				console.error("Logout error:", error);
-				hasTriggeredLogout.current = false;
-			}
-		};
-
-		if (auth.isAuthenticated) {
-			performLogout();
-		} else if (!auth.isAuthenticated && !loggedOut) {
-			// If user navigates to /logout manually but is already logged out,
-			// just treat it as a success state to avoid infinite loops.
-		}
-	}, [auth, clearGridState, loggedOut]);
-
-	if (loggedOut) {
-		return (
-			<Box
-				sx={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-					minHeight: "100vh",
-					backgroundColor: (theme) => theme.palette.grey[100],
-				}}
-			>
-				<Paper
-					elevation={3}
-					sx={{
-						p: 4,
-						display: "flex",
-						flexDirection: "column",
-						alignItems: "center",
-						maxWidth: 400,
-						width: "100%",
-						textAlign: "center",
-					}}
-				>
-					<CheckCircleOutlineIcon
-						color="success"
-						sx={{ fontSize: 60, mb: 2 }}
-					/>
-
-					<Typography component="h1" variant="h5" sx={{ mb: 2 }}>
-						{t("ui.logout.out")}
-					</Typography>
-
-					<Typography variant="body1" sx={{ mb: 4 }}>
-						{t("ui.logout.success")}
-					</Typography>
-
-					<Button
-						component={Link}
-						to="/login"
-						variant="contained"
-						color="primary"
-						fullWidth
-						startIcon={<LoginIcon />}
-					>
-						{t("ui.logout.again")}
-					</Button>
-				</Paper>
-			</Box>
-		);
-	}
+	const handleSignIn = () => {
+		auth.signinRedirect();
+	};
 
 	return (
-		<Box
-			sx={{
-				display: "flex",
-				justifyContent: "center",
-				alignItems: "center",
-				minHeight: "100vh",
-				backgroundColor: (theme) => theme.palette.grey[100],
-			}}
-		>
-			<Paper
-				elevation={3}
+		<LoginLayout pageName="logOut">
+			<Card
+				variant="outlined"
 				sx={{
-					p: 4,
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					maxWidth: 400,
+					backgroundColor: "primary.loginCard",
+					pt: 4,
+					pb: 4,
+					border: "none",
 					width: "100%",
 				}}
 			>
-				<Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-					{t("ui.logout.out_current")}
-				</Typography>
+				{alertDisplayed && (
+					<Box
+						mb={2}
+						sx={{
+							maxWidth: "1400px",
+							margin: "auto",
+							paddingLeft: "16px",
+							paddingRight: "16px",
+						}}
+					>
+						<Alert
+							severityType="info"
+							onCloseFunc={() => setAlertDisplayed(false)}
+							titleShown={false}
+							alertText={
+								<Typography variant="loginCardText">
+									<Trans
+										i18nKey="loginout.logged_out"
+										t={t}
+										components={{ bold: <strong />, break: <br /> }}
+										values={{ appName: "DCB Admin", consortium: displayName }}
+									/>
+								</Typography>
+							}
+						/>
+					</Box>
+				)}
+				<CardContent sx={{ maxWidth: "1400px", margin: "auto" }}>
+					<Stack direction="column" spacing={2} width="fit-content">
+						<Typography color="primary.loginText" variant="loginHeader">
+							{t("loginout.login")}
+						</Typography>
+						<Typography color="primary.loginText" variant="subheading">
+							<Trans
+								i18nKey="loginout.keycloak"
+								t={t}
+								components={{
+									linkComponent: (
+										<Link
+											key="keycloak-link"
+											href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2817064969/"
+										/>
+									),
+								}}
+							/>
+						</Typography>
+					</Stack>
+					<Box sx={{ mt: 3.5 }}>
+						<Button
+							variant="contained"
+							color="primary"
+							size="xlarge"
+							onClick={handleSignIn}
+						>
+							{t("nav.login")}
+						</Button>
+					</Box>
+				</CardContent>
+			</Card>
 
-				<CircularProgress sx={{ my: 2 }} />
-
-				<Typography variant="body1" sx={{ textAlign: "center" }}>
-					{t("ui.logout.out_progress")}
-				</Typography>
-			</Paper>
-		</Box>
+			<Box sx={{ width: "100%", maxWidth: "1400px", margin: "auto" }}>
+				<LandingCard />
+			</Box>
+		</LoginLayout>
 	);
 }

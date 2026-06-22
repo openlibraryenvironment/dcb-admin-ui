@@ -8,7 +8,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { ExpandMore } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
 import PrivateData from "@components/PrivateData/PrivateData";
@@ -51,20 +51,20 @@ function HostLMSDetails() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("hostlms.hostlms_one"),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (error || !hostlms) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={
 						error
@@ -80,14 +80,14 @@ function HostLMSDetails() {
 					action={t("ui.action.go_back")}
 					goBack="/hostlmss"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	const ilsType = getILS(hostlms.lmsClientClass);
 
 	return (
-		<AdminLayout title={hostlms.name}>
+		<PageContainer title={hostlms.name}>
 			<TabContext value={activeTab}>
 				<TabList
 					onChange={(_, val) => setActiveTab(val)}
@@ -164,7 +164,7 @@ function HostLMSDetails() {
 					</Grid>
 				</TabPanel>
 			</TabContext>
-		</AdminLayout>
+		</PageContainer>
 	);
 }
 

@@ -13,7 +13,7 @@ import {
 	GridActionsCellItem,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -244,7 +244,7 @@ function Contacts() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.consortium.contacts")}>
+		<PageContainer title={t("nav.consortium.contacts")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -338,6 +338,6 @@ function Contacts() {
 					entity="Consortium"
 				/>
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

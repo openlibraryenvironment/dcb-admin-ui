@@ -12,7 +12,7 @@ import {
 	Typography,
 } from "@mui/material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
@@ -86,20 +86,20 @@ function AuditDetails() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("details.audit").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (error || !audit) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<ErrorComponent
 					title={
 						error
@@ -115,12 +115,12 @@ function AuditDetails() {
 					action={t("ui.action.go_back")}
 					goBack={goBackLink}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={audit.id}>
+		<PageContainer title={audit.id}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -259,6 +259,6 @@ function AuditDetails() {
 					</pre>
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

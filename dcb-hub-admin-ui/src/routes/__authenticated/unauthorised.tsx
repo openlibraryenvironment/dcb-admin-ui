@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import ErrorComponent from "@components/Error/Error";
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
 
@@ -13,7 +13,7 @@ function Unauthorised() {
 	const { t } = useTranslation();
 
 	return (
-		<AdminLayout hideTitleBox={true} hideBreadcrumbs={true}>
+		<PageContainer hideTitleBox={true} hideBreadcrumbs={true}>
 			<ErrorComponent
 				title={t("ui.error.401.name")}
 				message={t("ui.error.401.summary")}
@@ -21,6 +21,6 @@ function Unauthorised() {
 				action={capitaliseFirstCharacter(t("ui.error.401.action"))}
 				goBack="/"
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

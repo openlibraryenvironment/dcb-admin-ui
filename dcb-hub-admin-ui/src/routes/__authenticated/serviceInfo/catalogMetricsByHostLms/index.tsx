@@ -12,7 +12,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -210,7 +210,7 @@ function CatalogMetricsByHostLms() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type:
@@ -219,13 +219,13 @@ function CatalogMetricsByHostLms() {
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (isError) {
 		return (
-			<AdminLayout title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
+			<PageContainer title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
 				<Error
 					title={t("common.error_loading", {
 						page_title: t("nav.serviceInfo.catalogMetricsByHostLms"),
@@ -235,19 +235,19 @@ function CatalogMetricsByHostLms() {
 					action={t("ui.action.reload")}
 					// onClick={refetch}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={t("nav.serviceInfo.catalogMetricsByHostLms")}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("reference.catalog_build")}
 		>
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"catalogMetricsByHostLms"}
 				columns={columns}
 				rows={records ?? []}
 				loading={isLoading}
@@ -277,6 +277,6 @@ function CatalogMetricsByHostLms() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

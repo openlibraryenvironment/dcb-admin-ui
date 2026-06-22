@@ -13,7 +13,7 @@ import {
 } from "@mui/x-data-grid-premium";
 import { Box } from "@mui/material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import ErrorComponent from "@components/Error/Error";
 import { SearchQueryBuilder } from "@components/SearchQueryBuilder/SearchQueryBuilder";
@@ -27,7 +27,6 @@ import {
 	parseQueryToCriteria,
 } from "@helpers/search/searchQueryHelpers";
 
-// 1. Strictly type the URL parameters
 const searchSchema = z.object({
 	q: z.string().optional().catch(""),
 });
@@ -208,19 +207,19 @@ function SearchPage() {
 	// --- Render ---
 	if (!import.meta.env.VITE_DCB_SEARCH_BASE) {
 		return (
-			<AdminLayout title={t("nav.search.name")}>
+			<PageContainer title={t("nav.search.name")}>
 				<ErrorComponent
 					title={t("search.shared_index_unavailable_title")}
 					message={t("search.shared_index_unavailable_message")}
 					action={t("ui.action.go_back")}
 					goBack="/"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={t("nav.search.name")}>
+		<PageContainer title={t("nav.search.name")}>
 			<Box sx={{ mb: 3 }}>
 				<SearchQueryBuilder onSearch={handleBuilderSearch} />
 			</Box>
@@ -263,6 +262,6 @@ function SearchPage() {
 					searchText={t("general.search")}
 				/>
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -316,27 +316,27 @@ function ConsortiumPage() {
 
 	if (loading)
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document")}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	if (error || !consortium)
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
 					action={t("ui.action.go_back")}
 					goBack="/locations"
 					message={t("error.consortium")} /** TODO: Translation keys */
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={t("nav.consortium.name")}
 			mode={editMode ? "edit" : "view"}
 			pageActions={
@@ -606,6 +606,6 @@ function ConsortiumPage() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -11,7 +11,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
@@ -209,20 +209,20 @@ function GroupSupplierRequests() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("groups.groups_one").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (groupError || !group) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={
 						groupError
@@ -240,12 +240,12 @@ function GroupSupplierRequests() {
 					action={t("ui.action.go_back")}
 					goBack="/groups"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={group?.name}>
+		<PageContainer title={group?.name}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -280,7 +280,7 @@ function GroupSupplierRequests() {
 					{groupVariables ? (
 						<DataGrid
 							identifier={gridId}
-							type={gridId}
+							type={"patronRequests"}
 							columns={allColumns}
 							rows={requestsData?.patronRequests?.content ?? []}
 							rowCount={requestsData?.patronRequests?.totalSize ?? 0}
@@ -319,6 +319,6 @@ function GroupSupplierRequests() {
 					)}
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

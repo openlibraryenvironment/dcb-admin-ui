@@ -13,7 +13,7 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import StaffRequest from "@forms/StaffRequest/StaffRequest";
 import ExpeditedCheckout from "@forms/ExpeditedCheckout/ExpeditedCheckout";
 
@@ -85,7 +85,7 @@ function ClusterLayout() {
 	];
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={t("search.cluster_title", { record: title })}
 			pageActions={pageActions}
 		>
@@ -127,6 +127,6 @@ function ClusterLayout() {
 					<Outlet />
 				</TabPanel>
 			</TabContext>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

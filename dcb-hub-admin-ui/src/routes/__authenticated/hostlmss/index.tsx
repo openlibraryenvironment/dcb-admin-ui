@@ -11,7 +11,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 import { useGridStore } from "@/hooks/useDataGridStore";
@@ -173,10 +173,10 @@ function HostLmss() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.hostlmss")}>
+		<PageContainer title={t("nav.hostlmss")}>
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"hostlmss"}
 				columns={columns}
 				rows={gridData?.hostLms?.content ?? []}
 				rowCount={gridData?.hostLms?.totalSize ?? 0}
@@ -207,6 +207,6 @@ function HostLmss() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

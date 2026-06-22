@@ -13,7 +13,7 @@ import {
 	GridRowModesModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import NewGroup from "@forms/NewGroup/NewGroup";
 
@@ -167,7 +167,7 @@ function GroupsRouteComponent() {
 	);
 
 	return (
-		<AdminLayout data-tid="groups-title" title={t("nav.groups.name")}>
+		<PageContainer data-tid="groups-title" title={t("nav.groups.name")}>
 			{isAnAdmin && (
 				<Stack direction="row" sx={{ mb: 3 }}>
 					<Button
@@ -182,7 +182,7 @@ function GroupsRouteComponent() {
 
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"groups"}
 				columns={columns}
 				rows={gridData?.libraryGroups?.content ?? []}
 				rowCount={gridData?.libraryGroups?.totalSize ?? 0}
@@ -217,6 +217,6 @@ function GroupsRouteComponent() {
 			{showNewGroup && (
 				<NewGroup show={showNewGroup} onClose={() => setShowNewGroup(false)} />
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

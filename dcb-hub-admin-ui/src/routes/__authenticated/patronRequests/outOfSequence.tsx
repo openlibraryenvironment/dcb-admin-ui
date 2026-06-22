@@ -8,7 +8,7 @@ import { useCallback, useMemo, useState, useEffect } from "react";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import Loading from "@components/Loading/Loading";
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import DataGrid from "@components/DataGrid/DataGrid";
 
@@ -265,19 +265,19 @@ function OutOfSequence() {
 
 	if (supplyingLibrariesLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.patronRequests.name").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	return (
-		<AdminLayout title={t("nav.patronRequests.name")}>
+		<PageContainer title={t("nav.patronRequests.name")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -403,10 +403,10 @@ function OutOfSequence() {
 						sortingMode="server"
 						toolbarVisible={true}
 						searchText=""
-						type={gridId}
+						type={"patronRequests"}
 					/>
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

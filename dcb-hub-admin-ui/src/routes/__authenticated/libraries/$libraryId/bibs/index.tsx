@@ -13,7 +13,7 @@ import {
 	GridColDef,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -260,7 +260,7 @@ function LibraryBibs() {
 		);
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={library.fullName}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("reference.catalog_build")}
@@ -365,6 +365,6 @@ function LibraryBibs() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

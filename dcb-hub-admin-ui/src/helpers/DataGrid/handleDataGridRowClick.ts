@@ -28,13 +28,11 @@ export const handleDataGridRowClick = ({
 	type,
 	navigate,
 }: RowClickConfig) => {
-	// 1. Guard Clause: Block navigation if the row is currently in Edit Mode
 	if (rowModesModel[params.row.id]?.mode === GridRowModes.Edit) {
 		event.defaultMuiPrevented = true;
 		return;
 	}
 
-	// 2. Guard Clause: Abort if this grid type is strictly non-clickable
 	if (
 		nonClickableTypes.includes(type) &&
 		!specialRedirectionTypes.includes(type)
@@ -42,24 +40,33 @@ export const handleDataGridRowClick = ({
 		return;
 	}
 
-	// 3. Resolve the target URL path dynamically
-	let targetPath = `/${type}/${params.row.id}`; // Default fallback
+	let targetPath = `/${type}/${params.row.id}`;
+	const rowId = params?.row?.id;
 
 	if (specialRedirectionTypes.includes(type)) {
-		targetPath =
-			type === "audits"
-				? `/patronRequests/audits/${params.row.id}`
-				: `/patronRequests/${params.row.id}`;
+		if (type === "dataChangeLog") {
+			targetPath = `/serviceInfo/dataChangeLog/${rowId}`;
+		} else if (type == "welcomeLibraries") {
+			targetPath = `/libraries/${rowId}`;
+		} else if (type === "audits") {
+			targetPath = `/patronRequests/audits/${params.row.id}`;
+		} else {
+			targetPath = `/patronRequests/${rowId}`;
+		}
 	}
 
-	// 4. Execute the Navigation
+	// if (specialRedirectionTypes.includes(type)) {
+	// 	targetPath =
+	// 		type === "audits"
+	// 			? `/patronRequests/audits/${params.row.id}`
+	// 			: `/patronRequests/${params.row.id}`;
+	// }
+
 	const openInNewTab = event.ctrlKey || event.metaKey;
 
 	if (openInNewTab) {
-		// Native browser behavior for opening a new tab
 		window.open(targetPath, "_blank");
 	} else {
-		// High-performance client-side SPA routing via TanStack
 		navigate({ to: targetPath });
 	}
 };

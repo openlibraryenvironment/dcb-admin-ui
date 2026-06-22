@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
@@ -266,25 +266,25 @@ function LocationDetails() {
 
 	if (isLoading)
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("locations.location_one"),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	if (error || !location)
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
 					action={t("ui.action.go_back")}
 					goBack="/locations"
 					message="locations.error" //** TODO */
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 
 	const viewModeActions = [
@@ -342,7 +342,7 @@ function LocationDetails() {
 	];
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={location.name}
 			pageActions={editMode ? editModeActions : viewModeActions}
 			mode={editMode ? "edit" : "view"}
@@ -643,6 +643,6 @@ function LocationDetails() {
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
 import { useTranslation } from "react-i18next";
 
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/500")({
 function Custom500Page() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout hideBreadcrumbs>
+		<PageContainer hideBreadcrumbs>
 			<Error
 				title={t("ui.error.500.name")}
 				message={t("ui.error.500.summary")}
@@ -18,6 +18,6 @@ function Custom500Page() {
 				action={t("ui.error.500.action")}
 				goBack="/"
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

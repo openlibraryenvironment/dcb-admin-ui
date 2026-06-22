@@ -12,7 +12,7 @@ import {
 	GridActionsCellItem,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Import from "@components/Import/Import";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -217,7 +217,7 @@ function NumericRangeMappingsRoute() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.mappings.allNumericRange")}>
+		<PageContainer title={t("nav.mappings.allNumericRange")}>
 			<Stack spacing={4} direction="row" sx={{ mb: 3 }}>
 				<Button
 					variant="outlined"
@@ -241,7 +241,7 @@ function NumericRangeMappingsRoute() {
 
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"numericRangeMappings"}
 				columns={columns}
 				rows={gridData?.numericRangeMappings?.content ?? []}
 				rowCount={gridData?.numericRangeMappings?.totalSize ?? 0}
@@ -300,6 +300,6 @@ function NumericRangeMappingsRoute() {
 					type="Numeric range mappings"
 				/>
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -10,7 +10,7 @@ import {
 	GridSortModel,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
@@ -50,20 +50,20 @@ function GroupDetails() {
 
 	if (isLoading) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("groups.groups_one"),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
 	if (error || !group) {
 		return (
-			<AdminLayout hideBreadcrumbs>
+			<PageContainer hideBreadcrumbs>
 				<Error
 					title={
 						error
@@ -79,7 +79,7 @@ function GroupDetails() {
 					action={t("ui.action.go_back")}
 					goBack="/groups"
 				/>
-			</AdminLayout>
+			</PageContainer>
 		);
 	}
 
@@ -107,7 +107,7 @@ function GroupDetails() {
 	const members = group?.members?.map((item: any) => item.library) ?? [];
 
 	return (
-		<AdminLayout title={group?.name}>
+		<PageContainer title={group?.name}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -201,7 +201,7 @@ function GroupDetails() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<DataGrid
 						identifier="libraryGroupMembers"
-						type="libraryGroupMembers"
+						type="libraries"
 						columns={columns}
 						rows={members}
 						rowCount={members.length}
@@ -230,6 +230,6 @@ function GroupDetails() {
 					/>
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -10,7 +10,7 @@ import {
 } from "@mui/x-data-grid-premium";
 // bibs - info call n ot working
 // Internal Components & Layouts
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 // Hooks & Queries
@@ -108,14 +108,14 @@ function BibsRouteComponent() {
 	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
 
 	return (
-		<AdminLayout
+		<PageContainer
 			title={t("nav.bibs")}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("reference.catalog_build")}
 		>
 			<DataGrid
 				identifier={gridId}
-				type={gridId}
+				type={"bibs"}
 				columns={standardBibColumns}
 				columnVisibilityModel={bibColumnVisibility}
 				rows={gridData?.bibs?.content ?? []}
@@ -146,6 +146,6 @@ function BibsRouteComponent() {
 				noResultsText={t("audit.no_results")}
 				searchText={t("general.search")}
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

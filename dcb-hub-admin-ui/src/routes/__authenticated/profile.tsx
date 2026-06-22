@@ -19,7 +19,7 @@ import {
 	SupervisorAccountOutlined,
 } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 
 export const Route = createFileRoute("/__authenticated/profile")({
@@ -37,7 +37,7 @@ function Profile() {
 		profile?.email_verified ?? "Cannot fetch verified email status.";
 
 	return (
-		<AdminLayout title={t("nav.profile")} hideTitleBox={true}>
+		<PageContainer title={t("nav.profile")} hideTitleBox={true}>
 			<Typography variant="h2" sx={{ pl: 2, fontSize: 32 }}>
 				{t("nav.profile")}
 			</Typography>
@@ -101,6 +101,6 @@ function Profile() {
 					</Box>
 				</ListItem>
 			</List>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

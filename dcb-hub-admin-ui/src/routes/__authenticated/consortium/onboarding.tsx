@@ -5,7 +5,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Grid, Tab, Tabs, Typography, Box, Tooltip } from "@mui/material";
 import { WarningAmber } from "@mui/icons-material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 
@@ -132,7 +132,7 @@ function Onboarding() {
 	}, [t, showNumericRanges]);
 
 	return (
-		<AdminLayout title={t("nav.consortium.onboarding")}>
+		<PageContainer title={t("nav.consortium.onboarding")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -196,6 +196,6 @@ function Onboarding() {
 					<CombinedEnvironmentComponent />
 				</Grid>
 			</Grid>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

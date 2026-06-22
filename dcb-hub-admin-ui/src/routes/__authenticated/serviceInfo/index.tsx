@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import { adminOrConsortiumAdmin } from "@constants/roles";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/")({
@@ -20,7 +20,7 @@ function ServiceInfo() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.serviceInfo.name")}>
+		<PageContainer title={t("nav.serviceInfo.name")}>
 			<List component="nav" aria-labelledby="service-information">
 				<ListItem disablePadding>
 					{/* Replaced 'a' tag with TanStack 'Link' for instantaneous SPA navigation */}
@@ -54,6 +54,6 @@ function ServiceInfo() {
 					</ListItemButton>
 				</ListItem>
 			</List>
-		</AdminLayout>
+		</PageContainer>
 	);
 }

@@ -1,9 +1,9 @@
 import { PropsWithChildren, ReactNode } from "react";
 import { Box, Paper, Stack } from "@mui/material";
 
-import Footer from "@layout/AdminLayout/Footer/Footer";
-import Header from "@layout/AdminLayout/Header/Header";
-import LinkedFooter from "@layout/AdminLayout/LinkedFooter/LinkedFooter";
+import Footer from "@layout/Footer/Footer";
+import Header from "@layout/Header/Header";
+import LinkedFooter from "@layout/LinkedFooter/LinkedFooter";
 
 interface LoginLayoutProps {
 	children?: ReactNode;

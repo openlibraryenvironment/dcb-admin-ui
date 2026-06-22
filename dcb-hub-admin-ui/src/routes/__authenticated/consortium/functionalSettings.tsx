@@ -13,7 +13,7 @@ import {
 	GridActionsCellItem,
 } from "@mui/x-data-grid-premium";
 
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Confirmation from "@components/Confirmation/Confirmation";
 import NewFunctionalSetting from "@forms/NewFunctionalSetting/NewFunctionalSetting";
@@ -197,7 +197,7 @@ function FunctionalSettings() {
 	);
 
 	return (
-		<AdminLayout title={t("nav.consortium.functionalSettings")}>
+		<PageContainer title={t("nav.consortium.functionalSettings")}>
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -291,6 +291,6 @@ function FunctionalSettings() {
 					consortiumDisplayName={consortium?.displayName}
 				/>
 			)}
-		</AdminLayout>
+		</PageContainer>
 	);
 }

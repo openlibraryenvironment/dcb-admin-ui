@@ -15,16 +15,6 @@ interface AppRouterContext {
 
 export const Route = createRootRouteWithContext<AppRouterContext>()({
 	component: () => {
-		const auth = useAuth();
-		const { t } = useTranslation();
-
-		// Show a global loading spinner only during the initial auth check
-		if (auth.isLoading) {
-			return (
-				<Loading title={t("login.initialising")} subtitle={t("ui.info.wait")} />
-			);
-		}
-
 		// The Outlet will render the correct route.
 		// For protected routes, it will be the _authenticated layout.
 		// For public routes, it will be the login page directly.

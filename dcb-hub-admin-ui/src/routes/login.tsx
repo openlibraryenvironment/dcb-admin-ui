@@ -1,101 +1,94 @@
-import { useAuth } from "react-oidc-context";
 import { createFileRoute } from "@tanstack/react-router";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import LoginIcon from "@mui/icons-material/Login";
-import { z } from "zod";
-import Loading from "@components/Loading/Loading";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
+import { useAuth } from "react-oidc-context";
+import {
+	Box,
+	Button,
+	Card,
+	CardContent,
+	Stack,
+	Typography,
+	useTheme,
+} from "@mui/material";
 
-const Login = () => {
-	const auth = useAuth();
-	const { t } = useTranslation();
+import LoginLayout from "@layout/LoginLayout/LoginLayout";
+import Link from "@components/Link/Link";
+import LandingCard from "@components/LandingCard/LandingCard";
 
-	// If user is already authenticated, redirect to home page
-	// Retrieve the redirect path from the URL search parameters.
-	const { redirect } = Route.useSearch();
-
-	// If the user is already authenticated, redirect them to their intended page
-	// or the dashboard. This handles cases where a logged-in user navigates to /login.
-	// useEffect(() => {
-	// 	// console.log(redirect);
-	// 	console.log("Auth: ", auth);
-	// 	if (auth.isAuthenticated) {
-	// 		console.log(redirect);
-	// 		navigate({ to: redirect || "/" });
-	// 	}
-	// }, [auth.isAuthenticated, navigate, redirect]);
-	// Still need to handle this case but this should stop it causing problems.
-
-	console.log("Current location is", window.location.pathname);
-	console.log("Redirect is", redirect);
-	const handleLogin = () => {
-		// Store current location
-		sessionStorage.setItem("postLoginRedirectPath", redirect || "/");
-		const redirectPath = sessionStorage.getItem("postLoginRedirectPath");
-		console.log("Final redirect is", redirectPath);
-		// Trigger login redirect - this is being lost
-		auth.signinRedirect();
-	};
-
-	if (auth.isLoading) {
-		return (
-			<Loading title={t("login.loading_title")} subtitle={t("ui.info.wait")} />
-		);
-	}
-
-	return (
-		<Box
-			sx={{
-				display: "flex",
-				justifyContent: "center",
-				alignItems: "center",
-				minHeight: "100vh",
-				backgroundColor: (theme) => theme.palette.grey[100],
-			}}>
-			<Paper
-				elevation={3}
-				sx={{
-					p: 4,
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					maxWidth: 500,
-					width: "100%",
-				}}>
-				<Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-					{t("login.title")}
-				</Typography>
-
-				<Typography variant="body1" sx={{ mb: 3, textAlign: "center" }}>
-					{t("login.access")}
-				</Typography>
-
-				<Button
-					fullWidth
-					variant="contained"
-					color="primary"
-					onClick={handleLogin}
-					disabled={auth.isLoading}
-					startIcon={<LoginIcon />}
-					sx={{ mt: 2 }}>
-					{t("login.keycloak")}
-				</Button>
-
-				{auth.error && (
-					<Typography color="error" sx={{ mt: 2 }}>
-						Authentication error: {auth.error.message}
-					</Typography>
-				)}
-			</Paper>
-		</Box>
-	);
-};
 export const Route = createFileRoute("/login")({
-	validateSearch: z.object({
-		redirect: z.string().optional().catch(""),
+	// TanStack Router: Type-safe search params validation
+	validateSearch: (search: Record<string, unknown>) => ({
+		redirect: search.redirect as string | undefined,
 	}),
 	component: Login,
 });
+
+function Login() {
+	const theme = useTheme();
+	const { t } = useTranslation();
+	const auth = useAuth();
+
+	// Grab the redirect URL passed from __authenticated.tsx
+	const { redirect } = Route.useSearch();
+
+	const handleSignIn = () => {
+		// Store the redirect path so main.tsx can route them back after OIDC completes
+		if (redirect) {
+			sessionStorage.setItem("postLoginRedirectPath", redirect);
+		}
+		// Trigger react-oidc-context sign-in flow
+		auth.signinRedirect();
+	};
+
+	return (
+		<LoginLayout pageName="landingPage">
+			<Card
+				variant="outlined"
+				sx={{
+					backgroundColor: "primary.loginCard",
+					pt: 4,
+					pb: 4,
+					border: "none",
+					width: "100%",
+				}}
+			>
+				<CardContent sx={{ maxWidth: "1400px", margin: "auto" }}>
+					<Stack direction="column" spacing={2} width="fit-content">
+						<Typography color="primary.loginText" variant="loginHeader">
+							{t("loginout.login")}
+						</Typography>
+						<Typography color="primary.loginText" variant="subheading">
+							<Trans
+								i18nKey="loginout.keycloak"
+								t={t}
+								components={{
+									linkComponent: (
+										<Link
+											key="keycloak-information-link"
+											href="https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2817064969/"
+										/>
+									),
+								}}
+							/>
+						</Typography>
+					</Stack>
+					<Box sx={{ mt: 3.5 }}>
+						<Button
+							data-tid="login-button"
+							variant="contained"
+							color="primary"
+							size="xlarge"
+							onClick={handleSignIn}
+						>
+							{t("nav.login")}
+						</Button>
+					</Box>
+				</CardContent>
+			</Card>
+
+			<Box sx={{ width: "100%", maxWidth: "1400px", margin: "auto" }}>
+				<LandingCard />
+			</Box>
+		</LoginLayout>
+	);
+}

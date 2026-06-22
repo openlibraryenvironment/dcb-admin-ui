@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { ErrorComponentProps } from "@tanstack/react-router";
-import AdminLayout from "@layout/AdminLayout/AdminLayout";
+import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
 
 export function NotFound() {
 	const { t } = useTranslation();
 	return (
-		<AdminLayout title={t("404.page_title")} hideTitleBox hideBreadcrumbs>
+		<PageContainer title={t("404.page_title")} hideTitleBox hideBreadcrumbs>
 			<Error
 				title={t("ui.error.404.name")}
 				message={t("ui.error.404.summary")}
@@ -15,7 +15,7 @@ export function NotFound() {
 				action={capitaliseFirstCharacter(t("ui.error.404.action"))}
 				goBack="/"
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }
 
@@ -24,7 +24,7 @@ export function GlobalError({ error }: ErrorComponentProps) {
 	console.error("Global crash caught by TanStack:", error);
 
 	return (
-		<AdminLayout hideBreadcrumbs>
+		<PageContainer hideBreadcrumbs>
 			<Error
 				title={t("ui.error.500.name")}
 				message={t("ui.error.500.summary")}
@@ -32,6 +32,6 @@ export function GlobalError({ error }: ErrorComponentProps) {
 				action={t("ui.error.500.action")}
 				goBack="/"
 			/>
-		</AdminLayout>
+		</PageContainer>
 	);
 }
