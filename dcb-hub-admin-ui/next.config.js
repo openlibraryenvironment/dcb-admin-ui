@@ -33,6 +33,7 @@ const nextConfig = {
 	},
 	i18n,
 	publicRuntimeConfig: {
+		AUTH_PROVIDER: process.env.AUTH_PROVIDER ?? "keycloak",
 		DCB_SEARCH_BASE: process.env.DCB_SEARCH_BASE,
 		DCB_API_BASE: process.env.DCB_API_BASE,
 		DCB_ES_URL: process.env.DCB_ES_URL,

@@ -9,6 +9,7 @@ import {
 	useTheme,
 } from "@mui/material";
 import { signIn } from "next-auth/react";
+import getConfig from "next/config";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { Trans, useTranslation } from "next-i18next"; //localisation
 import Link from "@components/Link/Link";
@@ -23,6 +24,9 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 const Logout = () => {
 	const theme = useTheme();
 	const { t } = useTranslation();
+	const { publicRuntimeConfig } = getConfig();
+	const signInProvider =
+		publicRuntimeConfig.AUTH_PROVIDER === "oidc" ? "oidc" : "keycloak";
 	const [alertDisplayed, setAlertDisplayed] = useState(true);
 	const { displayName } = useConsortiumInfoStore();
 
@@ -102,7 +106,7 @@ const Logout = () => {
 								variant="contained"
 								color="primary"
 								size="xlarge"
-								onClick={() => handleSignIn("keycloak")}
+								onClick={() => handleSignIn(signInProvider)}
 							>
 								{t("nav.login")}
 							</Button>

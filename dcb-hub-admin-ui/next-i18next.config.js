@@ -7,6 +7,9 @@ module.exports = {
 		// the default locale to be used when visiting
 		// a non-localized route (e.g. `/about`)
 		defaultLocale: "en-GB",
+		...(process.env.NEXT_LOCALE_DETECTION === "false"
+			? { localeDetection: /** @type {false} */ (false) }
+			: {}),
 	},
 
 	fallbackLng: "en-GB",

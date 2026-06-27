@@ -5,11 +5,94 @@ import { JWT } from "next-auth/jwt";
 import dayjs from "dayjs";
 // For anyone curious about what this file does, start here https://next-auth.js.org/configuration/initialization
 
+const selectedAuthProvider = process.env.AUTH_PROVIDER ?? "keycloak";
+
 const keycloak = KeycloakProvider({
 	clientId: process.env.KEYCLOAK_ID!,
 	clientSecret: process.env.KEYCLOAK_SECRET!,
 	issuer: process.env.KEYCLOAK_URL!,
 });
+
+const oidcIssuer = process.env.OIDC_ISSUER ?? process.env.KEYCLOAK_URL!;
+const oidcClientId = process.env.OIDC_CLIENT_ID ?? process.env.KEYCLOAK_ID!;
+const oidcClientSecret =
+	process.env.OIDC_CLIENT_SECRET ?? process.env.KEYCLOAK_SECRET ?? "";
+const oidcScope = process.env.OIDC_SCOPE ?? "openid email profile";
+
+const extractRoles = (profile: any): string[] => {
+	const roles = new Set<string>();
+
+	if (Array.isArray(profile?.roles)) {
+		profile.roles.forEach((role: string) => roles.add(role));
+	}
+
+	if (Array.isArray(profile?.realm_access?.roles)) {
+		profile.realm_access.roles.forEach((role: string) => roles.add(role));
+	}
+
+	Object.values(profile?.resource_access ?? {}).forEach((resource: any) => {
+		if (Array.isArray(resource?.roles)) {
+			resource.roles.forEach((role: string) => roles.add(role));
+		}
+	});
+
+	const zitadelProjectRoles =
+		profile?.["urn:zitadel:iam:org:project:roles"] ?? {};
+	Object.keys(zitadelProjectRoles).forEach((role) => roles.add(role));
+
+	return Array.from(roles);
+};
+
+const summariseProfile = (profile: any) => ({
+	sub: profile?.sub ?? profile?.id,
+	name: profile?.name ?? profile?.preferred_username ?? profile?.email,
+	email: profile?.email,
+	email_verified: profile?.email_verified,
+	preferred_username: profile?.preferred_username,
+	roles: extractRoles(profile),
+});
+
+const summariseUser = (user: any, profile: any) => ({
+	id: user?.id ?? profile.sub,
+	name: user?.name ?? profile.name,
+	email: user?.email ?? profile.email,
+	image: user?.image,
+});
+
+const oidc = {
+	id: "oidc",
+	name: process.env.OIDC_PROVIDER_NAME ?? "OpenID Connect",
+	type: "oauth",
+	wellKnown: `${oidcIssuer}/.well-known/openid-configuration`,
+	authorization: { params: { scope: oidcScope } },
+	clientId: oidcClientId,
+	clientSecret: oidcClientSecret,
+	idToken: true,
+	checks: ["pkce", "state"],
+	profile(profile: any) {
+		const summarisedProfile = summariseProfile(profile);
+		return {
+			id: summarisedProfile.sub,
+			image: profile.picture,
+			...summarisedProfile,
+		};
+	},
+} as any;
+
+const activeProvider = selectedAuthProvider === "oidc" ? oidc : keycloak;
+
+let oidcDiscoveryCache: any;
+
+const discoverOidc = async () => {
+	if (!oidcDiscoveryCache) {
+		const response = await axios.get(
+			`${oidcIssuer}/.well-known/openid-configuration`,
+		);
+		oidcDiscoveryCache = response.data;
+	}
+
+	return oidcDiscoveryCache;
+};
 
 /**
  * This method takes a token, and returns a new token from Keycloak with updated
@@ -26,13 +109,24 @@ const keycloak = KeycloakProvider({
 // Invalid grant is because the refresh token is not active. Why it's not active in the EBSCO scenario is unclear.
 const refreshAccessToken = async (token: JWT) => {
 	const params = new URLSearchParams();
-	params.append("client_id", process.env.KEYCLOAK_ID!);
+	const provider = token.provider ?? selectedAuthProvider;
+	const clientId = provider === "oidc" ? oidcClientId : process.env.KEYCLOAK_ID!;
+	const clientSecret =
+		provider === "oidc" ? oidcClientSecret : process.env.KEYCLOAK_SECRET!;
+	const tokenEndpoint =
+		provider === "oidc"
+			? (await discoverOidc()).token_endpoint
+			: `${process.env.KEYCLOAK_URL}/protocol/openid-connect/token`;
+
+	params.append("client_id", clientId);
 	params.append("grant_type", "refresh_token");
 	params.append("refresh_token", token.refreshToken);
-	params.append("client_secret", process.env.KEYCLOAK_SECRET!);
-	console.log("The refresh access token method has been triggered.");
+	if (clientSecret) {
+		params.append("client_secret", clientSecret);
+	}
+	console.log(`The ${provider} refresh access token method has been triggered.`);
 	return axios
-		.post(process.env.KEYCLOAK_URL + "/protocol/openid-connect/token", params, {
+		.post(tokenEndpoint, params, {
 			headers: { "Content-Type": "application/x-www-form-urlencoded" },
 		})
 		.then((refresh_response) => {
@@ -84,12 +178,23 @@ const refreshAccessToken = async (token: JWT) => {
 async function completeSignout(jwt: JWT) {
 	const { id_token } = jwt;
 	try {
+		const provider = jwt.provider ?? selectedAuthProvider;
 		// Add the id_token_hint to the query string
 		const params = new URLSearchParams();
 		params.append("id_token_hint", id_token);
+		const logoutEndpoint =
+			provider === "oidc"
+				? (await discoverOidc()).end_session_endpoint
+				: `${process.env.KEYCLOAK_URL}/protocol/openid-connect/logout`;
+
+		if (!logoutEndpoint) {
+			console.log("No OIDC logout endpoint advertised by provider.");
+			return;
+		}
+
 		// @ts-ignore as temp fix: error behaviour is already covered by the AxiosError on line 86 and so failure state is covered
 		// prettier-ignore
-		const { status, statusText } = await axios.get(`${keycloak.options.issuer}/protocol/openid-connect/logout?${params.toString()}`,
+		const { status, statusText } = await axios.get(`${logoutEndpoint}?${params.toString()}`,
 		);
 		// Confirm we've logged out properly - the Keycloak login should appear and force us to put in login info.
 		console.log("Completed post-logout handshake", status, statusText);
@@ -108,7 +213,7 @@ export default NextAuth({
 		signIn: "/auth/login",
 		signOut: "/auth/logout",
 	},
-	providers: [keycloak],
+	providers: [activeProvider],
 	callbacks: {
 		async session({ session, token }: { session: any; token?: any }) {
 			// Set session properties if token exists
@@ -157,13 +262,15 @@ export default NextAuth({
 				console.log(
 					"Initial sign-in for " + user.id + " at " + dayjs().format(),
 				);
+				const profileSummary = summariseProfile(profile ?? user);
 				return {
 					accessToken: account.access_token,
 					id_token: account.id_token,
 					accessTokenExpires: account.expires_at * 1000,
 					refreshToken: account.refresh_token, // Expected to be 30 mins/1800 seconds - correlates to session max
-					profile: profile,
-					user,
+					profile: profileSummary,
+					provider: account.provider,
+					user: summariseUser(user, profileSummary),
 				};
 			}
 			if (Date.now() > token.accessTokenExpires - bufferTime) {
