@@ -275,7 +275,7 @@ function LibraryProfile() {
 								to: [
 									`/libraries/${libraryId}`,
 									`/libraries/${libraryId}/contacts`,
-									`/libraries/${libraryId}/patronRequests`,
+									`/libraries/${libraryId}/patronRequests/all`,
 								][val],
 							})
 						}

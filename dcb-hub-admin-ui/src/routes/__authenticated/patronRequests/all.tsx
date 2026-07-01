@@ -1,11 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useLocation,
+	useRouter,
+} from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Typography, Tab, Tabs, Grid } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "@tanstack/react-router";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -18,18 +21,26 @@ import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestCo
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
-import { getPatronRequests } from "@queries/getPatronRequests";
-import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
+import { getPatronRequestDashboard } from "@queries/getPatronRequestDashboard";
 import { queries } from "@constants/patronRequestGridQueries";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	component: All,
 });
+
+// WCAG 2.2 Tab Linkage Helper
+function a11yTabProps(value: string) {
+	return {
+		id: `patron-tab-${value.replace(/\//g, "-")}`,
+		"aria-controls": `patron-tabpanel-${value.replace(/\//g, "-")}`,
+		value,
+	};
+}
 
 function All() {
 	const { t } = useTranslation();
@@ -40,7 +51,9 @@ function All() {
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	const gridId = "patronRequestsActive";
+	const gridId = "patronRequestsAll";
+	const location = useLocation();
+	const currentPath = location.pathname;
 	const {
 		paginationModel,
 		setPaginationModel,
@@ -58,74 +71,55 @@ function All() {
 		{ field: "dateCreated", sort: "desc" },
 	];
 	const currentFilter = filterModel[gridId] ?? { items: [] };
+
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const [unfilteredAllCount, setUnfilteredAllCount] = useState<number | null>(
-		null,
-	);
-	const { data: gridData, isLoading: gridLoading } = useQuery({
+
+	// Ideally, this would know to fetch the full query for whichever tab is on screen (all active etc)
+	// but also know NOT to fetch it for the others
+	const { data: dashboardData, isLoading: gridLoading } = useQuery({
 		queryKey: [
-			"patronRequests",
+			"patronRequestsDashboard",
 			gridId,
 			currentPagination,
 			currentSort,
-			currentFilter,
 		],
 		queryFn: () =>
-			gqlClient.request(getPatronRequests, {
-				query: queries.inProgress,
+			gqlClient.request(getPatronRequestDashboard, {
+				allQuery: queries.all,
+				activeQuery: queries.inProgress,
+				exceptionQuery: queries.exception,
+				outOfSequenceQuery: queries.outOfSequence,
+				finishedQuery: queries.finished,
+
 				pageno: currentPagination.page,
 				pagesize: currentPagination.pageSize,
 				order: currentSort[0]?.field ?? "dateCreated",
 				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
 			}),
 	});
-	const currentPath = Route.fullPath;
-	const updateCount = useCallback((key: string, count: number) => {
-		setTotalSizes((prev) => {
-			const newSizes = { ...prev, [key]: count };
-			if (key !== "all") {
-				newSizes.all =
-					(key === "exception" ? count : newSizes.exception) +
-					(key === "outOfSequence" ? count : newSizes.outOfSequence) +
-					(key === "inProgress" ? count : newSizes.inProgress) +
-					(key === "finished" ? count : newSizes.finished);
-			}
-			return newSizes;
-		});
-	}, []);
-	const handleTotalSizeChange = useCallback(
-		(gridType: string, currentGridSize: number) => {
-			if (gridType === gridId) {
-				updateCount("all", currentGridSize);
-				if (unfilteredAllCount === null) {
-					setUnfilteredAllCount(currentGridSize);
-					setIsFilterApplied(false);
-				} else {
-					setIsFilterApplied(currentGridSize < unfilteredAllCount);
-				}
-			} else {
-				updateCount(gridType, currentGridSize);
-			}
-		},
-		[updateCount, unfilteredAllCount],
-	);
 
-	useEffect(() => {
-		if (gridData?.patronRequests?.totalSize !== undefined) {
-			handleTotalSizeChange(gridId, gridData.patronRequests.totalSize);
-		}
-	}, [gridData?.patronRequests?.totalSize, handleTotalSizeChange]);
+	// Deriving layout metrics reactively from server output safely
+	const totalSizes = useMemo(() => {
+		const all = dashboardData?.allRequests?.totalSize ?? 0;
+		const exception = dashboardData?.exceptionRequests?.totalSize ?? 0;
+		const outOfSequence = dashboardData?.outOfSequenceRequests?.totalSize ?? 0;
+		const inProgress = dashboardData?.activeRequests?.totalSize ?? 0;
+		const finished = dashboardData?.finishedRequests?.totalSize ?? 0;
+		return {
+			exception,
+			outOfSequence,
+			inProgress,
+			finished,
+			all,
+		};
+	}, [dashboardData]);
 
-	const [tabIndex, setTabIndex] = useState(4);
-	const [totalSizes, setTotalSizes] = useState({
-		exception: 0,
-		outOfSequence: 0,
-		inProgress: 0,
-		finished: 0,
-		all: 0,
-	});
-	const [isFilterApplied, setIsFilterApplied] = useState(false);
+	// Pagination, sorting and filtering currently broken
 
+	// Filter Applied State Evaluation (Derived without state effects)
+	const isFilterApplied = currentFilter.items.length > 0;
+
+	// Cached asynchronous lookups configuration
 	const fetchAllLocations = async () => {
 		const variables = {
 			query: "",
@@ -162,74 +156,8 @@ function All() {
 	const { data: locationsData } = useQuery({
 		queryKey: ["locations", "allPatronRequestGrid"],
 		queryFn: fetchAllLocations,
+		staleTime: 1000 * 60 * 15, // Cache for 15 minutes to prevent continuous unneeded calls
 	});
-	const patronRequestLocations: Location[] =
-		(locationsData as Location[]) || [];
-
-	const { data: excData, isLoading: exceptionLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "exception"],
-		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
-				query: queries.exception,
-				pageno: 0,
-				pagesize: 100000,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
-	});
-	useEffect(() => {
-		if (excData?.patronRequests?.totalSize !== undefined)
-			updateCount("exception", excData.patronRequests.totalSize);
-	}, [excData, updateCount]);
-
-	const { data: oosData, isLoading: outOfSequenceLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "outOfSequence"],
-		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
-				query: queries.outOfSequence,
-				pageno: 0,
-				pagesize: 10000,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
-	});
-	useEffect(() => {
-		if (oosData?.patronRequests?.totalSize !== undefined)
-			updateCount("outOfSequence", oosData.patronRequests.totalSize);
-	}, [oosData, updateCount]);
-
-	const { data: inProgData, isLoading: inProgressLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "inProgress"],
-		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
-				query: queries.inProgress,
-				pageno: 0,
-				pagesize: 10000,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
-	});
-	useEffect(() => {
-		if (inProgData?.patronRequests?.totalSize !== undefined)
-			updateCount("inProgress", inProgData.patronRequests.totalSize);
-	}, [inProgData, updateCount]);
-
-	const { data: finData, isLoading: finishedLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "finished"],
-		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
-				query: queries.finished,
-				pageno: 0,
-				pagesize: 10000,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
-	});
-
-	useEffect(() => {
-		if (finData?.patronRequests?.totalSize !== undefined)
-			updateCount("finished", finData.patronRequests.totalSize);
-	}, [finData, updateCount]);
 
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery({
@@ -243,13 +171,18 @@ function All() {
 					query: "",
 				}),
 		});
+
 	const customColumns = useCustomColumns();
+	const patronRequestLocations: Location[] =
+		(locationsData as Location[]) || [];
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
+
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
 		locations: patronRequestLocations,
 		libraries: supplyingLibrariesContent,
 		variant: "standard",
 	});
+
 	const allColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
@@ -266,6 +199,7 @@ function All() {
 			</PageContainer>
 		);
 	}
+	console.log(dashboardData);
 
 	return (
 		<PageContainer title={t("nav.patronRequests.name")}>
@@ -277,67 +211,70 @@ function All() {
 				<Tabs
 					value={currentPath}
 					onChange={(_event, value) => {
-						handleTabChange({
-							newValue: value,
-							router,
-						});
+						handleTabChange({ newValue: value, router });
 					}}
-					aria-label={"Patron request navigation"}
+					aria-label={t(
+						"nav.patronRequests.accessibility_title",
+						"Patron request views workflow filtering",
+					)}
 				>
 					<Tab
+						{...a11yTabProps("/__authenticated/patronRequests/exception")}
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.exception_short", {
-									number: exceptionLoading
-										? t("common.loading")
-										: totalSizes.exception,
-								})}
+							<Typography
+								variant="subTabTitle"
+								aria-label={`${totalSizes.exception} exception items`}
+							>
+								{t("libraries.patronRequests.exception_short")} (
+								{totalSizes.exception})
 							</Typography>
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/__authenticated/patronRequests/outOfSequence")}
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.out_of_sequence_short", {
-									number: outOfSequenceLoading
-										? t("common.loading")
-										: totalSizes.outOfSequence,
-								})}
+							<Typography
+								variant="subTabTitle"
+								aria-label={`${totalSizes.outOfSequence} out of sequence items`}
+							>
+								{t("libraries.patronRequests.out_of_sequence_short")} (
+								{totalSizes.outOfSequence})
 							</Typography>
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/__authenticated/patronRequests/active")}
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.active_short", {
-									number: inProgressLoading
-										? t("common.loading")
-										: totalSizes.inProgress,
-								})}
+							<Typography
+								variant="subTabTitle"
+								aria-label={`${totalSizes.inProgress} active items`}
+							>
+								{t("libraries.patronRequests.active_short")} (
+								{totalSizes.inProgress})
 							</Typography>
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/__authenticated/patronRequests/completed")}
 						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.completed_short", {
-									number: finishedLoading
-										? t("common.loading")
-										: totalSizes.finished,
-								})}
+							<Typography
+								variant="subTabTitle"
+								aria-label={`${totalSizes.finished} completed items`}
+							>
+								{t("libraries.patronRequests.completed_short")} (
+								{totalSizes.finished})
 							</Typography>
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/__authenticated/patronRequests/all")}
 						label={
 							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-								<Typography variant="subTabTitle">
-									{t("libraries.patronRequests.all_short", {
-										number:
-											inProgressLoading && unfilteredAllCount === null
-												? t("common.loading")
-												: totalSizes.all,
-									})}
+								<Typography
+									variant="subTabTitle"
+									aria-label={`${totalSizes.all} total items`}
+								>
+									{t("libraries.patronRequests.all_short")} ({totalSizes.all})
 								</Typography>
 								{isFilterApplied && (
 									<FilterAltOutlined
@@ -353,10 +290,16 @@ function All() {
 					/>
 				</Tabs>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h3" fontWeight={"bold"}>
+				<Grid
+					size={{ xs: 4, sm: 8, md: 12 }}
+					role="tabpanel"
+					id={`patron-tabpanel-${currentPath.replace(/\//g, "-")}`}
+					aria-labelledby={`patron-tab-${currentPath.replace(/\//g, "-")}`}
+				>
+					<Typography variant="h3" fontWeight={"bold"} sx={{ mb: 2 }}>
 						{t("libraries.patronRequests.all", { number: totalSizes.all })}
 					</Typography>
+
 					<DataGrid
 						autoRowHeight={false}
 						checkboxSelection={true}
@@ -385,9 +328,9 @@ function All() {
 						paginationMode="server"
 						paginationModel={currentPagination}
 						pivotingEnabled={false}
-						rowCount={gridData?.patronRequests?.totalSize ?? 0}
+						rowCount={dashboardData?.allRequests?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
-						rows={gridData?.patronRequests?.content ?? []}
+						rows={dashboardData?.allRequests?.content ?? []}
 						scrollbarVisible={true}
 						sortModel={currentSort}
 						sortingMode="server"

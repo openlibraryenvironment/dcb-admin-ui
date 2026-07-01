@@ -6,7 +6,7 @@ import { Autocomplete, Stack, TextField, Typography } from "@mui/material";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getGroupsSelection } from "@queries/getGroupsSelection";
 
-export default function GroupStep({ libraryId }: { libraryId?: string }) {
+export default function GroupStep() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const {
@@ -24,6 +24,7 @@ export default function GroupStep({ libraryId }: { libraryId?: string }) {
 				pagesize: 1000,
 				query: "",
 			}),
+		staleTime: 1000 * 60 * 5, // Just in case somebody is constantly going back and forth
 	});
 
 	const groupOptions =

@@ -1,5 +1,6 @@
 import {
 	DataGridPremium,
+	DataGridPremiumProps,
 	GridApiPremium,
 	GridColDef,
 	GridColumnVisibilityModel,
@@ -30,6 +31,7 @@ import {
 	specialRedirectionTypes,
 } from "@constants/dataGrid/types";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority
@@ -43,6 +45,25 @@ declare module "@mui/x-data-grid-premium" {
 		onCleanup?: () => void;
 		selectionCount?: number;
 	}
+}
+const IMMUTABLE_FALLBACK_MODES = {};
+interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
+	autoRowHeight?: boolean;
+	identifier: string;
+	listViewEnabled: boolean;
+	noResultsText: string;
+	pivotingEnabled: boolean;
+	scrollbarVisible: boolean;
+	toolbarVisible: boolean;
+	searchText: string;
+	styleOverrides?: SxProps<Theme>;
+	type: string;
+	parentApiRef?: RefObject<GridApiPremium | null>;
+	enableCleanup?: boolean;
+	onCleanup?: () => void;
+	onExport?: (fileType: string, exportMode: string) => Promise<void>;
+	isExporting?: boolean;
+	disableHoverInteractions?: boolean;
 }
 
 interface DataGridProps {
@@ -91,49 +112,72 @@ interface DataGridProps {
 	onExport?: (fileType: string, exportMode: string) => Promise<void>;
 	isExporting?: boolean;
 }
+// export default function DataGrid({
+// 	autoRowHeight,
+// 	checkboxSelection,
+// 	columns,
+// 	columnVisibilityModel,
+// 	disableAggregation,
+// 	disableHoverInteractions,
+// 	disablePivoting,
+// 	disableRowGrouping,
+// 	editMode,
+// 	enableCleanup,
+// 	filterMode,
+// 	filterModel,
+// 	getDetailPanelContent,
+// 	isExporting = false,
+// 	loading,
+// 	listViewEnabled,
+// 	noResultsText,
+// 	onCleanup,
+// 	onColumnVisibilityModelChange,
+// 	onExport,
+// 	onFilterModelChange,
+// 	onPaginationModelChange,
+// 	onRowModesModelChange,
+// 	onRowEditStop,
+// 	onSortModelChange,
+// 	pagination,
+// 	paginationMode,
+// 	paginationModel,
+// 	parentApiRef,
+// 	pivotingEnabled,
+// 	processRowUpdate,
+// 	rowCount,
+// 	rowModesModel,
+// 	rows,
+// 	scrollbarVisible,
+// 	sortModel,
+// 	sortingMode,
+// 	styleOverrides,
+// 	searchText,
+// 	toolbarVisible,
+// 	type,
+// }: DataGridProps) {
 export default function DataGrid({
 	autoRowHeight,
-	checkboxSelection,
-	columns,
-	columnVisibilityModel,
-	disableAggregation,
-	disableHoverInteractions,
-	disablePivoting,
-	disableRowGrouping,
-	editMode,
 	enableCleanup,
-	filterMode,
-	filterModel,
-	getDetailPanelContent,
+	identifier,
 	isExporting = false,
-	loading,
 	listViewEnabled,
 	noResultsText,
 	onCleanup,
-	onColumnVisibilityModelChange,
 	onExport,
-	onFilterModelChange,
-	onPaginationModelChange,
-	onRowModesModelChange,
-	onRowEditStop,
-	onSortModelChange,
-	pagination,
-	paginationMode,
-	paginationModel,
 	parentApiRef,
 	pivotingEnabled,
-	processRowUpdate,
-	rowCount,
-	rowModesModel,
-	rows,
 	scrollbarVisible,
-	sortModel,
-	sortingMode,
-	styleOverrides,
 	searchText,
+	styleOverrides,
 	toolbarVisible,
 	type,
-}: DataGridProps) {
+	disableHoverInteractions,
+	paginationMode,
+	rowCount,
+	rowModesModel = IMMUTABLE_FALLBACK_MODES,
+	rows,
+	...rest
+}: CustomDataGridProps) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const expandedFilterPanel = expandedFilterPanelTypes.includes(type);
@@ -141,7 +185,7 @@ export default function DataGrid({
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
-		text: null,
+		text: "",
 	}); // We do need to give feedback on editing s
 	const internalApiRef = useGridApiRef();
 	const apiRef = parentApiRef || internalApiRef;
@@ -160,27 +204,33 @@ export default function DataGrid({
 			navigate,
 		});
 	};
+	const handleSelectionChange = useCallback(
+		(newSelection: GridRowSelectionModel) => {
+			setSelectionModel(newSelection);
+		},
+		[],
+	);
 	//identifier may not be needed
 	return (
 		<div style={{ display: "flex", flexDirection: "column" }}>
 			<DataGridPremium
+				{...rest}
+				rows={rows}
+				rowModesModel={rowModesModel}
+				paginationMode={paginationMode}
+				rowCount={paginationMode === "server" ? rowCount : undefined}
 				apiRef={apiRef}
-				checkboxSelection={checkboxSelection}
-				columns={columns}
-				columnVisibilityModel={columnVisibilityModel}
-				disableAggregation={disableAggregation}
-				disableRowGrouping={disableRowGrouping}
-				disableRowSelectionOnClick
-				disablePivoting={disablePivoting}
-				editMode={editMode}
-				filterMode={filterMode}
-				filterModel={filterModel}
-				getDetailPanelContent={getDetailPanelContent}
-				getDetailPanelHeight={getDetailPanelHeight}
-				// May need initial state passed in like serverpaginated grid
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}
 				listView={listViewEnabled}
-				loading={loading}
+				pivotActive={pivotingEnabled}
+				showToolbar={toolbarVisible}
+				rowSelectionModel={selectionModel}
+				onRowSelectionModelChange={handleSelectionChange}
+				onRowClick={handleRowClick}
+				onCellDoubleClick={(params, event) => {
+					event.defaultMuiPrevented = true;
+				}}
+				disableRowSelectionExcludeModel
 				localeText={{
 					toolbarQuickFilterPlaceholder: searchText ?? t("general.search"),
 					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
@@ -193,19 +243,14 @@ export default function DataGrid({
 					"filterOperator>=": t("ui.data_grid.filters.greater_than_inclusive"),
 					"filterOperator<": t("ui.data_grid.filters.less_than_exclusive"),
 					"filterOperator<=": t("ui.data_grid.filters.less_than_inclusive"),
-				}} // Overrides for data grid text
-				onCellDoubleClick={(params, event) => {
-					// Prevent default double-click edit behavior
-					event.defaultMuiPrevented = true;
 				}}
-				onColumnVisibilityModelChange={onColumnVisibilityModelChange}
-				onFilterModelChange={onFilterModelChange}
-				onPaginationModelChange={onPaginationModelChange}
-				//@ts-expect-error Until we fix the typing issues, expect an error here.
-				onProcessRowUpdateError={(params: GridRowParams, error: string) => {
-					// fix typing
+				onProcessRowUpdateError={(error: any) => {
 					console.error("Error updating row:", error);
-					const name = params?.row?.name ?? params?.row?.fullName;
+
+					// Whatever is throwing the error must include the row name for us to grab it here
+
+					const name = error?.rowName || t("general.this_item", "this item");
+
 					setAlert({
 						open: true,
 						severity: "error",
@@ -220,26 +265,6 @@ export default function DataGrid({
 						}),
 					});
 				}}
-				onSortModelChange={onSortModelChange}
-				onRowClick={handleRowClick}
-				onRowSelectionModelChange={(newSelection) => {
-					setSelectionModel(newSelection);
-				}}
-				pageSizeOptions={[5, 10, 20, 25, 30, 40, 50, 100, 200]}
-				pagination={pagination}
-				paginationMode={paginationMode}
-				paginationModel={paginationModel}
-				pivotActive={pivotingEnabled}
-				processRowUpdate={processRowUpdate}
-				rowModesModel={rowModesModel}
-				onRowEditStop={onRowEditStop}
-				onRowModesModelChange={onRowModesModelChange}
-				rowCount={paginationMode === "server" ? rowCount : undefined}
-				rows={rows}
-				rowSelectionModel={selectionModel}
-				showToolbar={toolbarVisible}
-				sortingMode={sortingMode}
-				sortModel={sortModel}
 				slots={{
 					detailPanelExpandIcon: GridExpandMoreIcon,
 					detailPanelCollapseIcon: GridExpandLessIcon,
@@ -269,9 +294,11 @@ export default function DataGrid({
 							}
 						: undefined,
 				}}
+				// Remember this grid is still used for editing. So check functionality has been preserved in the migration.
+
 				sx={{
 					border: "0",
-					minHeight: rows.length === 0 ? "400px" : undefined, // ensures that if there's nothing there, we still see loading etc
+					minHeight: rows?.length === 0 ? "400px" : undefined, // ensures that if there's nothing there, we still see loading etc
 					"@media print": {
 						".MuiDataGrid-main": { color: "rgba(0, 0, 0, 0.87)" },
 					},
@@ -296,10 +323,16 @@ export default function DataGrid({
 						overflow: "hidden", // Prevent scrollbars in the detail panel
 						height: "auto", // Adjust height automatically
 					},
-
 					// CUSTOM OVERRIDES (will merge with and override base styles so be careful)
 					...styleOverrides,
 				}}
+			/>
+			<TimedAlert
+				open={alert.open}
+				severityType={alert.severity}
+				autoHideDuration={6000}
+				alertText={alert.text}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</div>
 	);

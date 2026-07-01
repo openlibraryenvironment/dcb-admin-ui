@@ -1,5 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { useFormContext, Controller, useFieldArray } from "react-hook-form";
+import {
+	useFormContext,
+	Controller,
+	useFieldArray,
+	FieldErrors,
+} from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
 import {
 	Autocomplete,
@@ -13,6 +18,10 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
+import { newLibrarySchema } from "@schemas/newLibrarySchema";
+import { z } from "zod";
+
+type LibraryFormValues = z.infer<typeof newLibrarySchema>;
 
 export default function ContactsStep() {
 	const { t } = useTranslation();
@@ -38,8 +47,9 @@ export default function ContactsStep() {
 		}
 	};
 
-	// We typecast the errors to any to easily drill into the deeply nested array objects
-	const contactErrors: any = errors.contacts;
+	const contactErrors = errors.contacts as unknown as FieldErrors<
+		LibraryFormValues["contacts"]
+	>;
 
 	return (
 		<Stack spacing={3} sx={{ mt: 1 }}>
@@ -158,7 +168,7 @@ export default function ContactsStep() {
 			{errors.contacts &&
 				typeof errors.contacts === "object" &&
 				"message" in errors.contacts && (
-					<Typography color="error">
+					<Typography color="error" role="alert" aria-live="assertive">
 						{errors.contacts.message as string}
 					</Typography>
 				)}

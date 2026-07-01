@@ -24,6 +24,7 @@ export function ProfileStep({ wizardMode }: { wizardMode?: string }) {
 				pagesize: 1000,
 				query: "",
 			}),
+		staleTime: 1000 * 60 * 5, // Just in case somebody is constantly going back and forth
 	});
 
 	const agencyOptions =

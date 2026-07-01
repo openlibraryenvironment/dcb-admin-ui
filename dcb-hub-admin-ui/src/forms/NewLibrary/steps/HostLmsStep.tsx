@@ -17,9 +17,6 @@ export default function HostLmsStep() {
 				<Controller
 					name="hostLmsCode"
 					control={control}
-					rules={{
-						required: t("validation.required", { field: t("hostlms.code") }),
-					}}
 					render={({ field }) => (
 						<TextField
 							{...field}
@@ -34,9 +31,6 @@ export default function HostLmsStep() {
 				<Controller
 					name="hostLmsName"
 					control={control}
-					rules={{
-						required: t("validation.required", { field: t("hostlms.name") }),
-					}}
 					render={({ field }) => (
 						<TextField
 							{...field}
@@ -49,15 +43,10 @@ export default function HostLmsStep() {
 					)}
 				/>
 			</Stack>
-
+			{/** TODO: I18N */}
 			<Controller
 				name="lmsClientClass"
 				control={control}
-				rules={{
-					required: t("validation.required", {
-						field: t("hostlms.client_class"),
-					}),
-				}}
 				render={({ field }) => (
 					<TextField
 						{...field}

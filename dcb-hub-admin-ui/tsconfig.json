@@ -14,6 +14,7 @@
 			"@models/*": ["./src/models/*"],
 			"@mutations/*": ["./src/graphql/mutations/*"],
 			"@queries/*": ["./src/graphql/queries/*"],
+			"@schemas/*": ["./src/schemas/*"],
 			"@themes/*": ["./src/themes/*"],
 			"@types/*": ["./src/types/*"],
 			"@/*": ["./src/*"]

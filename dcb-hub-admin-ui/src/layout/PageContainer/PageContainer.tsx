@@ -38,7 +38,7 @@ export default function PageContainer({
 
 	useEffect(() => {
 		const baseAppTitle = "DCB Admin";
-		document.title = title ? `${title} | ${baseAppTitle}` : baseAppTitle;
+		document.title = title ? `${baseAppTitle} | ${title} ` : baseAppTitle;
 		return () => {
 			document.title = baseAppTitle;
 		};

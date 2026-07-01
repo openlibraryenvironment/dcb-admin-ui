@@ -63,7 +63,7 @@ const getPatronRequestColumns = (
 			type: "singleSelect",
 			filterOperators: isOnly,
 			valueGetter: (value: string, row: PatronRequest) => {
-				if (row.suppliers.length > 0) {
+				if (row?.suppliers?.length > 0) {
 					return row.suppliers[0].localAgency;
 				} else {
 					return "";
@@ -115,7 +115,7 @@ const getPatronRequestColumns = (
 				value: any,
 				row: { suppliers: Array<{ canonicalItemType: string }> },
 			) => {
-				if (row.suppliers.length > 0) {
+				if (row?.suppliers?.length > 0) {
 					return row.suppliers[0].canonicalItemType;
 				} else {
 					return "";
@@ -255,7 +255,7 @@ const getPatronRequestColumns = (
 			sortable: false,
 			flex: 0.3,
 			valueGetter: (value: any, row: PatronRequest) => {
-				if (row.suppliers.length > 0) {
+				if (row?.suppliers?.length > 0) {
 					return row.suppliers[0].localItemBarcode;
 				} else {
 					return "";
@@ -286,7 +286,7 @@ const getPatronRequestColumns = (
 			filterable: true,
 			sortable: true,
 			valueGetter: (value: any, row: PatronRequest) => {
-				if (row.suppliers.length > 0 && !row?.localItemType) {
+				if (row?.suppliers?.length > 0 && !row?.localItemType) {
 					return row.suppliers[0].localItemType;
 				} else {
 					return "";

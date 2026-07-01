@@ -6,8 +6,6 @@ export const useGraphQLClient = () => {
 	// Pull directly from TanStack's active synchronized context tree
 	const { cfg, auth } = useRouter().options.context as { cfg: any; auth: any };
 
-	console.log(cfg, auth);
-
 	return useMemo(() => {
 		const endpoint = `${cfg?.VITE_DCB_API_BASE || ""}/graphql`;
 

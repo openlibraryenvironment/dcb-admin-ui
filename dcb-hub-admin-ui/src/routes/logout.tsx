@@ -22,7 +22,10 @@ export const Route = createFileRoute("/logout")({
 	// Validate if the user landed here via an intentional logout
 	validateSearch: (search: Record<string, unknown>) => ({
 		loggedOut: search.loggedOut === "true",
+		reason: search.reason as "session_expired" | "intentional" | undefined,
+		redirect: search.redirect as string | undefined,
 	}),
+
 	component: Logout,
 });
 
@@ -32,7 +35,7 @@ function Logout() {
 	const auth = useAuth();
 	const { displayName } = useConsortiumInfoStore();
 
-	const { loggedOut } = Route.useSearch();
+	const { reason, redirect, loggedOut } = Route.useSearch();
 	const [alertDisplayed, setAlertDisplayed] = useState(loggedOut);
 
 	const handleSignIn = () => {

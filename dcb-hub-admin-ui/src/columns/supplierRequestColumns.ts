@@ -92,7 +92,7 @@ export const standardSupplierRequestColumns: GridColDef[] = [
 			value: string,
 			row: { suppliers: { canonicalItemType: string }[] },
 		) => {
-			if (row.suppliers.length > 0) {
+			if (row?.suppliers?.length > 0) {
 				return row.suppliers[0].canonicalItemType;
 			} else {
 				return ""; // This allows us to handle the array being empty, and any related type errors.
@@ -236,7 +236,7 @@ export const standardSupplierRequestColumns: GridColDef[] = [
 		sortable: false,
 		flex: 0.3,
 		valueGetter: (value: any, row: PatronRequest) => {
-			if (row.suppliers.length > 0) {
+			if (row?.suppliers?.length > 0) {
 				return row.suppliers[0].localItemBarcode;
 			} else {
 				return "";

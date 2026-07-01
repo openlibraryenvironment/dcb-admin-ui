@@ -12,6 +12,23 @@ export const specialRedirectionTypes = [
 	"dataChangeLog",
 	"audits",
 	"welcomeLibraries",
+	"patronRequestsLibraryActive",
+	"patronRequestsLibraryOutOfSequence",
+	"patronRequestsLibraryCompleted",
+	"patronRequestsLibraryException",
+	"patronRequestsLibraryAll",
+	"patronRequestsActive",
+	"patronRequestsOutOfSequence",
+	"patronRequestsCompleted",
+	"patronRequestsException",
+	"dataChangeLog",
+	"welcomeLibraries",
+	"libraryLocations",
+	"supplierRequestsLibrary",
+	"libraryBibs",
+	"patronRequestsGroupAll",
+	"supplierRequestsGroupAll",
+	"patronRequestsRecordHistory",
 ];
 
 // Types of data grid where we show the actions menu to the user.

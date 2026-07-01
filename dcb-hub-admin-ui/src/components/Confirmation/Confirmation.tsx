@@ -18,7 +18,8 @@ type ConfirmationAction =
 	| "gridEdit"
 	| "deletion"
 	| "unsaved"
-	| "uploadReplacement";
+	| "uploadReplacement"
+	| "sessionWarning";
 
 interface AuditFormData {
 	reason: string;
@@ -51,6 +52,7 @@ export default function Confirmation({
 	const isDelete = action === "deletion";
 	const isUnsaved = action === "unsaved";
 	const isUpload = action === "uploadReplacement";
+	const isSessionWarning = action === "sessionWarning";
 	const requiresAuditFields = isEdit || isDelete || isUpload;
 
 	const {
@@ -74,6 +76,7 @@ export default function Confirmation({
 	}, [open, reset]);
 
 	const getTitle = () => {
+		if (isSessionWarning) return t("ui.confirmation.session_warning");
 		if (isEdit) return t("ui.confirmation.edit_title", { entity: entityName });
 		if (isDelete)
 			return t("ui.confirmation.delete_title", { entity: entityName });
@@ -183,11 +186,16 @@ export default function Confirmation({
 
 				<DialogActions sx={{ px: 3, pb: 2 }}>
 					<Button onClick={onClose} color="inherit" variant="text">
-						{isUnsaved ? t("ui.actions.keep_editing") : t("ui.actions.cancel")}
+						{isUnsaved
+							? t("ui.actions.keep_editing")
+							: isSessionWarning
+								? t("loginout.logout")
+								: t("ui.actions.cancel")}
 					</Button>
 
 					<Button
-						type="submit"
+						type={isSessionWarning ? "button" : "submit"} // Don't submit the form for session warning
+						onClick={isSessionWarning ? () => onConfirm("", "", "") : undefined}
 						color={isDelete || isUnsaved ? "error" : "primary"}
 						variant="contained"
 						disabled={requiresAuditFields && !isValid}
@@ -196,6 +204,7 @@ export default function Confirmation({
 						{isDelete && t("ui.actions.confirm_delete")}
 						{isEdit && t("ui.actions.save_changes")}
 						{isUnsaved && t("ui.actions.leave_without_saving")}
+						{isSessionWarning && t("loginout.stay_logged_in", "Stay Logged In")}
 						{isUpload && t("ui.actions.confirm_upload")}
 					</Button>
 				</DialogActions>

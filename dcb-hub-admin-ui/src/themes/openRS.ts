@@ -5,6 +5,11 @@ declare module "@mui/material/Button" {
 		xlarge: true;
 	}
 }
+declare module "@mui/material/IconButton" {
+	interface IconButtonPropsSizeOverrides {
+		xlarge: true;
+	}
+}
 declare module "@mui/material/styles" {
 	interface Palette {
 		attributeTitle: string;

@@ -61,6 +61,7 @@ export default defineConfig(({ mode }) => {
 				"@queries": path.resolve(__dirname, "src/graphql/queries"),
 				"@models": path.resolve(__dirname, "src/models"),
 				"@mutations": path.resolve(__dirname, "src/graphql/mutations"),
+				"@schemas": path.resolve(__dirname, "src/schemas"),
 				"@themes": path.resolve(__dirname, "src/themes"),
 				"@types": path.resolve(__dirname, "src/types"),
 				"@": path.resolve(__dirname, "src"),

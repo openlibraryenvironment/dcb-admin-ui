@@ -46,6 +46,7 @@ import { getPatronIdentities } from "@queries/getPatronIdentities";
 import { SourceRecord } from "@models/SourceRecord";
 import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
 import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
+import PageContainer from "@layout/PageContainer/PageContainer";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
@@ -137,6 +138,8 @@ function RouteComponent() {
 		queryFn: async () =>
 			gqlClient.request(getPatronIdentities, {
 				query: `localId:${patronRequest?.pickupPatronId}`,
+				order: "id",
+				orderBy: "ASC",
 			}),
 		enabled: !!patronRequest?.pickupPatronId,
 	});
@@ -278,10 +281,7 @@ function RouteComponent() {
 	}
 
 	return (
-		<>
-			<Typography variant="h1" mb={3} mt={3}>
-				{patronRequest?.clusterRecord?.title}
-			</Typography>
+		<PageContainer title={patronRequest?.clusterRecord?.title}>
 			<TabContext value={activeTab}>
 				<TabList
 					onChange={handleTabChange}
@@ -1681,6 +1681,6 @@ function RouteComponent() {
 					/>
 				</TabPanel>
 			</TabContext>
-		</>
+		</PageContainer>
 	);
 }

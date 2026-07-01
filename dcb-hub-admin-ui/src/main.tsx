@@ -1,9 +1,9 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { createRouter, AnyRouter } from "@tanstack/react-router";
+import { createRouter, AnyRouter, useRouter } from "@tanstack/react-router";
 import { AuthProvider } from "react-oidc-context";
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
-import { User } from "oidc-client-ts";
+import { User, WebStorageStateStore } from "oidc-client-ts";
 import { LicenseInfo } from "@mui/x-license";
 
 import "./i18n";
@@ -72,21 +72,28 @@ const handleServiceErrors = (error: any) => {
 		error.message?.includes("Network request failed") ||
 		error.message?.includes("NetworkError");
 	const isServiceUnavailable = error?.response?.status === 503;
-	const isUnauthorized = error?.response?.status === 401; // Add this!
+	const isUnauthorized = error?.response?.status === 401;
+	const { cfg } = useRouter().options.context;
 
 	if (
 		window.location.pathname === "/maintenance" ||
-		window.location.pathname === "/login"
+		window.location.pathname === "/login" ||
+		window.location.pathname === "/logout" // Add this to prevent loops
 	) {
 		return;
 	}
 
 	if (isUnauthorized && router) {
-		// Kick them to login (or logout) and clear the bad cache!
 		queryClient.clear();
+		// Remove local user data so react-oidc-context knows they are gone
+		sessionStorage.removeItem(
+			`oidc.user:${cfg.VITE_KEYCLOAK_URL}:${cfg.VITE_KEYCLOAK_ID}`,
+		);
+
+		// Push them to logout instead of login
 		router.navigate({
-			to: "/login",
-			search: { redirect: window.location.pathname },
+			to: "/logout",
+			search: { reason: "session_expired", redirect: window.location.pathname },
 			replace: true,
 		});
 	} else if (isServiceUnavailable && router) {
@@ -145,9 +152,18 @@ async function bootstrap() {
 		scope: "openid profile email",
 		loadUserInfo: true,
 		automaticSilentRenew: true,
+		monitorSession: true,
+		revokeAccessTokenOnSignout: true,
+		userStore: new WebStorageStateStore({ store: window.localStorage }),
 		onSilentRenewError: (error: Error) => {
 			console.warn("Silent renew failed, user session expired", error);
-			router.navigate({ to: "/login", replace: true });
+
+			queryClient.clear();
+			router.navigate({
+				to: "/logout",
+				search: { reason: "session_expired" },
+				replace: true,
+			});
 		},
 		onSigninCallback: (_user: User | void): void => {
 			console.log("Sign in for ", _user);

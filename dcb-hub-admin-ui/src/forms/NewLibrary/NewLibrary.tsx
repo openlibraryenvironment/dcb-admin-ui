@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useWatch } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Dialog,
@@ -22,7 +22,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
 import { createHostLmsMutation } from "@mutations/createHostLms";
 import { createLibraryMutation } from "@mutations/createLibrary";
-
+import { zodResolver } from "@hookform/resolvers/zod";
 import ModeSelectionStep from "./steps/ModeSelectionStep";
 import HostLmsStep from "./steps/HostLmsStep";
 import { ProfileStep } from "./steps/ProfileStep";
@@ -32,6 +32,7 @@ import RefValueMappingStep from "./steps/RefValueMappingStep";
 import NumericMappingStep from "./steps/NumericRangeMappingStep";
 import LocationsStep from "./steps/LocationsStep";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
+import { newLibrarySchema } from "@/schemas/newLibrarySchema";
 
 type NewLibraryType = {
 	show: boolean;
@@ -52,10 +53,6 @@ export default function NewLibrary({
 	const [wizardMode, setWizardMode] = useState<
 		"unselected" | "existing" | "new"
 	>("unselected");
-	const [createdHostLmsCode, setCreatedHostLmsCode] = useState<string | null>(
-		null,
-	);
-	const [createdLibraryId, setCreatedLibraryId] = useState<string | null>(null);
 	const [alert, setAlert] = useState({
 		open: false,
 		severity: "success",
@@ -64,6 +61,7 @@ export default function NewLibrary({
 
 	const methods = useForm({
 		mode: "onChange",
+		resolver: zodResolver(newLibrarySchema),
 		defaultValues: {
 			// Host LMS Fields
 			hostLmsCode: "",
@@ -100,7 +98,10 @@ export default function NewLibrary({
 		},
 	});
 
-	const lmsClientClass = methods.watch("lmsClientClass");
+	const [watchedHostLmsCode, watchedAgencyCode, lmsClientClass] = useWatch({
+		control: methods.control,
+		name: ["hostLmsCode", "agencyCode", "lmsClientClass"],
+	});
 	const requiresNumericMappings =
 		lmsClientClass?.toLowerCase().includes("sierra") ||
 		lmsClientClass?.toLowerCase().includes("polaris");
@@ -156,17 +157,11 @@ export default function NewLibrary({
 		const formData = methods.getValues();
 
 		try {
-			// Phase 1: If creating a Host LMS
+			// Phase 1: If creating a Host LMS. zod catches bad json so no need for dupes
 			if (currentStep?.id === "hostLms") {
-				let parsedConfig = {};
-				try {
-					parsedConfig = JSON.parse(formData.clientConfig || "{}");
-				} catch (e) {
-					throw new Error(
-						t("hostlms.client_config_json_helper") ||
-							"Invalid JSON in client config",
-					);
-				}
+				const parsedConfig = formData.clientConfig
+					? JSON.parse(formData.clientConfig)
+					: {};
 
 				const result = await createHostLms({
 					input: {
@@ -178,7 +173,8 @@ export default function NewLibrary({
 						itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
 					},
 				});
-				setCreatedHostLmsCode(result.createHostLms.hostLms.code);
+				// Check this matches up with GQL, but the principle is right - we should be using what comes back
+				methods.setValue("hostLmsCode", result.createHostLms.hostLms.code);
 				setAlert({
 					open: true,
 					severity: "success",
@@ -193,11 +189,9 @@ export default function NewLibrary({
 				const result = await createLibrary({
 					input: {
 						...formData,
-						hostLmsCode:
-							wizardMode === "new" ? createdHostLmsCode : formData.hostLmsCode,
 					},
 				});
-				setCreatedLibraryId(result.createLibrary.id);
+				methods.setValue("libraryId", result.createLibrary.library.id);
 				setAlert({
 					open: true,
 					severity: "success",
@@ -209,7 +203,10 @@ export default function NewLibrary({
 
 			if (currentStep?.id === "group" && formData.groupId) {
 				await gqlClient.request(addLibraryToGroup, {
-					input: { libraryGroup: formData.groupId, library: createdLibraryId },
+					input: {
+						libraryGroup: formData.groupId,
+						library: formData.libraryId,
+					},
 				});
 				setAlert({
 					open: true,
@@ -247,36 +244,16 @@ export default function NewLibrary({
 			case "contacts":
 				return <ContactsStep />;
 			case "group":
-				return <GroupStep libraryId={createdLibraryId!} />;
+				return <GroupStep />;
 			case "refMappings":
-				return (
-					<RefValueMappingStep
-						hostLmsCode={
-							wizardMode === "new"
-								? createdHostLmsCode!
-								: methods.getValues("hostLmsCode")
-						}
-					/>
-				);
+				return <RefValueMappingStep hostLmsCode={watchedHostLmsCode} />;
 			case "numMappings":
-				return (
-					<NumericMappingStep
-						hostLmsCode={
-							wizardMode === "new"
-								? createdHostLmsCode!
-								: methods.getValues("hostLmsCode")
-						}
-					/>
-				);
+				return <NumericMappingStep hostLmsCode={watchedHostLmsCode} />;
 			case "locations":
 				return (
 					<LocationsStep
-						hostLmsCode={
-							wizardMode === "new"
-								? createdHostLmsCode!
-								: methods.getValues("hostLmsCode")
-						}
-						agencyCode={methods.getValues("agencyCode")}
+						hostLmsCode={watchedHostLmsCode}
+						agencyCode={watchedAgencyCode}
 					/>
 				);
 			default:

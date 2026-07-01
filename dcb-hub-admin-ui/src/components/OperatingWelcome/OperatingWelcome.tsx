@@ -59,7 +59,6 @@ export default function OperatingWelcome() {
 			},
 		);
 
-	// 3. TanStack Query for Data Fetching
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadLibraries", paginationModel, sortModel, filterModel],
 		queryFn: async () => {
@@ -76,7 +75,6 @@ export default function OperatingWelcome() {
 		},
 	});
 
-	// 4. TanStack Mutation for Editing Rows (Replaces `editQuery` prop)
 	const updateMutation = useMutation({
 		mutationFn: async (updatedRow: GridRowModel) => {
 			return gqlClient.request(updateLibraryMutation, {
@@ -84,7 +82,6 @@ export default function OperatingWelcome() {
 			});
 		},
 		onSuccess: () => {
-			// Invalidate the cache to force a background refresh of the grid
 			queryClient.invalidateQueries({ queryKey: ["LoadLibraries"] });
 		},
 	});
@@ -97,12 +94,15 @@ export default function OperatingWelcome() {
 			await updateMutation.mutateAsync(newRow);
 			return newRow;
 		} catch (error) {
-			console.error("Failed to update row", error);
-			return oldRow; // Reverts the row if the mutation fails
+			// Make sure that this throws a custom object so DataGrid can extract the row's name for alerts
+
+			throw {
+				message: "Update failed",
+				rowName: newRow.fullName || newRow.name,
+			};
 		}
 	};
 
-	// 5. State Synchronization Handlers
 	const handlePaginationChange = useCallback(
 		(m: GridPaginationModel) => {
 			setLocalPaginationModel(m);
