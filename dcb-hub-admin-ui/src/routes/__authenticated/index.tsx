@@ -11,7 +11,7 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
 export const Route = createFileRoute("/__authenticated/")({
 	// 1. THE LOADER: Pre-fetch data before the page renders.
-	loader: async ({ context: { queryClient } }) => {
+	loader: async () => {
 		// we might be able to pre-fetch operating welcome, but let's see
 
 		return {};
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/__authenticated/")({
 function Home() {
 	const auth = useAuth();
 	const { t } = useTranslation();
-	const { displayName } = useConsortiumInfoStore();
+	const displayName = useConsortiumInfoStore((state) => state.displayName);
 
 	const profile = auth.user?.profile;
 	const nameOfUser =

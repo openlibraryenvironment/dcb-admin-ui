@@ -74,7 +74,6 @@ function CatalogMetricsByHostLms() {
 		data: records,
 		isLoading,
 		isError,
-		refetch,
 	} = useQuery({
 		queryKey: ["catalogMetricsByHostLms"],
 		queryFn: async () => {
@@ -232,7 +231,7 @@ function CatalogMetricsByHostLms() {
 					})}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
-					action={t("ui.action.reload")}
+					action={t("ui.actions.reload")}
 					// onClick={refetch}
 				/>
 			</PageContainer>
@@ -243,7 +242,7 @@ function CatalogMetricsByHostLms() {
 		<PageContainer
 			title={t("nav.serviceInfo.catalogMetricsByHostLms")}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
-			subtitle={t("reference.catalog_build")}
+			subtitle={t("ui.reference.catalog_build")}
 		>
 			<DataGrid
 				identifier={gridId}

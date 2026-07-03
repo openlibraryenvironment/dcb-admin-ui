@@ -28,7 +28,6 @@ import { computeMutation } from "@helpers/computeMutation";
 
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { updateNumericRangeMapping } from "@mutations/updateNumericRangeMapping";
-import { deleteNumericRangeMapping } from "@mutations/deleteNumericRangeMapping";
 
 export const Route = createFileRoute(
 	"/__authenticated/mappings/allNumericRange/",
@@ -67,7 +66,6 @@ function NumericRangeMappingsRoute() {
 		setDeleteConfirmationId,
 		showImport,
 		setImport,
-		showNewMapping,
 		setNewMapping,
 	} = useMappingGridState(gridId, { lastImported: false });
 
@@ -90,20 +88,14 @@ function NumericRangeMappingsRoute() {
 				order: sortModel[0]?.field ?? "lastImported",
 				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
 			};
-			return gqlClient.request(getNumericRangeMappings, queryVariables);
+			return gqlClient.request<any>(getNumericRangeMappings, queryVariables);
 		},
 		placeholderData: (previousData) => previousData,
 	});
 
 	const { mutateAsync: updateMapping } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateNumericRangeMapping, variables),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-
-	const { mutate: deleteMapping } = useMutation({
-		mutationFn: (id: string) =>
-			gqlClient.request(deleteNumericRangeMapping, { id }),
+			gqlClient.request<any>(updateNumericRangeMapping, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -152,7 +144,7 @@ function NumericRangeMappingsRoute() {
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {

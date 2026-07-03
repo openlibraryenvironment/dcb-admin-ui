@@ -36,7 +36,7 @@ function Onboarding() {
 			}),
 	});
 
-	const libraries = data?.libraries?.content ?? [];
+	const libraries = useMemo(() => data?.libraries?.content ?? [], [data]);
 
 	const showNumericRanges = useMemo(() => {
 		return libraries.some((lib: any) => {

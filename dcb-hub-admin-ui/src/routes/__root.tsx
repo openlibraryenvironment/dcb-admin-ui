@@ -1,9 +1,7 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { AuthContextProps, useAuth } from "react-oidc-context";
+import { AuthContextProps } from "react-oidc-context";
 import { QueryClient } from "@tanstack/react-query";
-import Loading from "@components/Loading/Loading";
-import { useTranslation } from "react-i18next";
 import { GlobalError, NotFound } from "@components/GlobalErrors/GlobalErrors";
 
 // Define the context available to the router

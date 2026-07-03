@@ -1,9 +1,8 @@
 import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Button, Stack, useTheme } from "@mui/material";
 import { Delete, Edit, Save, Cancel, GroupAdd } from "@mui/icons-material";
 import {
 	GridPaginationModel,
@@ -17,6 +16,7 @@ import {
 	GridRowParams,
 	useGridApiRef,
 	GridColDef,
+	GridRowId,
 } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -31,7 +31,6 @@ import NewLibrary from "@forms/NewLibrary/NewLibrary";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { getILS } from "@helpers/getILS";
 import {
 	getSortOrderForServer,
 	processGridFilterModel,
@@ -41,18 +40,60 @@ import { getLibraries } from "@queries/getLibraries";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { computeMutation } from "@helpers/computeMutation";
-import { findConsortium } from "@helpers/findConsortium";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { libraryColumns } from "@columns/libraryColumns";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { defaultLibraryColumnVisibility } from "@columns/columnVisibility/defaultLibraryColumnVisibility";
+
+// Default-state prefetch: the component reads pagination/sort/filter state
+// from useGridStore (a Zustand store) at mount time, which the loader
+// cannot access (it isn't a hook and runs outside React). We can only
+// prefetch the grid's own hardcoded default first page/sort here - these
+// values must mirror the component's initial useState fallbacks below so
+// the cache entry lines up on a fresh (unauthenticated-store) render.
+const DEFAULT_PAGINATION_MODEL: GridPaginationModel = {
+	page: 0,
+	pageSize: 200,
+};
+const DEFAULT_SORT_MODEL: GridSortModel = [
+	{ field: "abbreviatedName", sort: "asc" },
+];
+const DEFAULT_FILTER_MODEL: GridFilterModel = { items: [] };
+const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel =
+	defaultLibraryColumnVisibility;
+const EMPTY_ROWS: any[] = []; // Prevents the grid from remounting selection states
 
 export const Route = createFileRoute("/__authenticated/libraries/")({
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: [
+				"librariesList",
+				DEFAULT_PAGINATION_MODEL,
+				DEFAULT_SORT_MODEL,
+				DEFAULT_FILTER_MODEL,
+			],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getLibraries, {
+					query: "",
+					pageno: DEFAULT_PAGINATION_MODEL.page,
+					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
+					order: DEFAULT_SORT_MODEL[0].field,
+					orderBy: "ASC",
+				}),
+		});
+	},
 	component: Libraries,
 });
 
+// Make this the exemplar: it has row editing, actions, and the usual filters as well as needing the store
+
 function Libraries() {
 	const { t } = useTranslation();
-	const router = useRouter();
-	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 	const customColumns = useCustomColumns();
@@ -60,6 +101,7 @@ function Libraries() {
 	const { displayName } = useConsortiumInfoStore();
 
 	const apiRef = useGridApiRef();
+	const [selectedLibraryIds, setSelectedLibraryIds] = useState<GridRowId[]>([]);
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin =
@@ -67,38 +109,42 @@ function Libraries() {
 
 	const gridId = "librariesList";
 
-	const {
-		paginationModel: storedPaginationModel,
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setPaginationModel,
-		setSortModel,
-		setFilterModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
+	const paginationModel = useGridStore(
+		(state) => state.paginationModel[gridId] ?? DEFAULT_PAGINATION_MODEL,
+	);
+	const sortModel = useGridStore(
+		(state) => state.sortModel[gridId] ?? DEFAULT_SORT_MODEL,
+	);
+	const filterModel = useGridStore(
+		(state) => state.filterModel[gridId] ?? DEFAULT_FILTER_MODEL,
+	);
+	const columnVisibilityModel = useGridStore(
+		(state) => state.columnVisibilityModel[gridId] ?? DEFAULT_COLUMN_VISIBILITY,
+	);
 
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPaginationModel[gridId] ?? { page: 0, pageSize: 200 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilterModel[gridId] ?? { items: [] },
+	const setGridPagination = useGridStore((state) => state.setPaginationModel);
+	const setGridSort = useGridStore((state) => state.setSortModel);
+	const setGridFilter = useGridStore((state) => state.setFilterModel);
+	const setGridColumnVisibility = useGridStore(
+		(state) => state.setColumnVisibilityModel,
 	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedSortModel[gridId] ?? [{ field: "abbreviatedName", sort: "asc" }],
+
+	const handlePaginationChange = useCallback(
+		(m: GridPaginationModel) => setGridPagination(gridId, m),
+		[gridId, setGridPagination],
 	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedColumnVisibilityModel[gridId] ?? {
-				id: false,
-				clientConfigIngest: false,
-				isSupplyingAgency: false,
-				isBorrowingAgency: false,
-				hostLmsCatalogue: false,
-				hostLmsCirculation: false,
-			},
-		);
+	const handleSortChange = useCallback(
+		(m: GridSortModel) => setGridSort(gridId, m),
+		[gridId, setGridSort],
+	);
+	const handleFilterChange = useCallback(
+		(m: GridFilterModel) => setGridFilter(gridId, m),
+		[gridId, setGridFilter],
+	);
+	const handleColumnVisibilityChange = useCallback(
+		(m: GridColumnVisibilityModel) => setGridColumnVisibility(gridId, m),
+		[gridId, setGridColumnVisibility],
+	);
 
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
@@ -136,12 +182,12 @@ function Libraries() {
 
 	const { mutateAsync: updateLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateLibraryMutation, variables),
+			gqlClient.request<any>(updateLibraryMutation, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutate: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
+			gqlClient.request<any>(deleteLibraryMutation, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -196,46 +242,22 @@ function Libraries() {
 	};
 
 	const handleBulkAddToGroup = () => {
-		// Read directly from the DataGrid API to get fully selected row objects
-		const selectedRowModels = apiRef.current?.getSelectedRows() || new Map();
-		const selectedLibraries = Array.from(selectedRowModels.values()).map(
-			(row: any) => ({
-				id: row.id,
-				name: row.fullName,
-			}),
-		);
+		if (!apiRef.current || selectedLibraryIds.length === 0) return;
 
-		if (selectedLibraries.length > 0) setGroupModalLibraries(selectedLibraries);
+		const selectedLibraries = selectedLibraryIds
+			.map((id) => {
+				const row = apiRef.current!.getRow(id);
+				if (!row) return null;
+
+				return {
+					id: row.id,
+					name: row.fullName,
+				};
+			})
+			.filter(Boolean);
+
+		setGroupModalLibraries(selectedLibraries as any);
 	};
-
-	const handlePaginationChange = useCallback(
-		(m: GridPaginationModel) => {
-			setLocalPaginationModel(m);
-			setPaginationModel(gridId, m);
-		},
-		[gridId, setPaginationModel],
-	);
-	const handleSortChange = useCallback(
-		(m: GridSortModel) => {
-			setLocalSortModel(m);
-			setSortModel(gridId, m);
-		},
-		[gridId, setSortModel],
-	);
-	const handleFilterChange = useCallback(
-		(m: GridFilterModel) => {
-			setLocalFilterModel(m);
-			setFilterModel(gridId, m);
-		},
-		[gridId, setFilterModel],
-	);
-	const handleColumnVisibilityChange = useCallback(
-		(m: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(m);
-			setColumnVisibilityModel(gridId, m);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -244,7 +266,7 @@ function Libraries() {
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 140,
 				getActions: ({ id, row }: GridRowParams) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
@@ -333,6 +355,12 @@ function Libraries() {
 			disabled: !isAnAdmin,
 			label: t("libraries.add_to_group"),
 		},
+		{
+			key: "addToGroup",
+			onClick: handleBulkAddToGroup,
+			disabled: !isAnAdmin || selectedLibraryIds.length === 0,
+			label: t("libraries.add_to_group_selected"),
+		},
 	];
 
 	if (isLoading)
@@ -347,25 +375,12 @@ function Libraries() {
 
 	return (
 		<PageContainer title={t("nav.libraries.name")} pageActions={pageActions}>
-			{/* Bulk Actions Toolbar */}
-			{isAnAdmin && (
-				<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-					<Button
-						variant="outlined"
-						startIcon={<GroupAdd />}
-						onClick={handleBulkAddToGroup}
-					>
-						{t("libraries.add_selected_to_group")}
-					</Button>
-				</Stack>
-			)}
-
 			<DataGrid
 				identifier={gridId}
 				type="libraries"
 				parentApiRef={apiRef}
 				columns={columns}
-				rows={gridData?.libraries?.content ?? []}
+				rows={gridData?.libraries?.content ?? EMPTY_ROWS}
 				rowCount={gridData?.libraries?.totalSize ?? 0}
 				loading={isLoading || isFetching}
 				paginationMode="server"
@@ -395,6 +410,15 @@ function Libraries() {
 				scrollbarVisible={false}
 				noResultsText={t("libraries.none_found")}
 				searchText={t("libraries.search_placeholder")}
+				onRowSelectionModelChange={(newSelection: any) => {
+					const extractedIds = newSelection?.ids
+						? Array.from(newSelection.ids)
+						: Array.isArray(newSelection)
+							? newSelection
+							: [];
+
+					setSelectedLibraryIds(extractedIds as GridRowId[]);
+				}}
 			/>
 
 			{showNewLibrary && (

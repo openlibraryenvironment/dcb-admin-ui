@@ -63,13 +63,14 @@ function LocationMappings() {
 		error,
 	} = useQuery({
 		queryKey: ["library", libraryId],
-		queryFn: () => gqlClient.request(getLibrary, { query: `id:${libraryId}` }),
+		queryFn: () =>
+			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
 		enabled: !!libraryId,
 	});
 
 	const { mutateAsync: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
+			gqlClient.request<any>(deleteLibraryMutation, variables),
 	});
 
 	const library = libraryData?.libraries?.content?.[0];
@@ -110,7 +111,7 @@ function LocationMappings() {
 		return (
 			<Error
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message="TODO"
 			/>
@@ -161,7 +162,12 @@ function LocationMappings() {
 					</Tabs>
 
 					{/* Primary Host LMS Grid */}
-					<Typography variant="h3" fontWeight="bold">
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("libraries.config.data.mappings.location", {
 							hostLms: library.agency?.hostLms?.code,
 						})}
@@ -202,7 +208,13 @@ function LocationMappings() {
 					{/* Secondary Host LMS Grid (If exists) */}
 					{library.secondHostLms && (
 						<>
-							<Typography variant="h3" fontWeight="bold" sx={{ mt: 4 }}>
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+									mt: 4,
+								}}
+							>
 								{t("libraries.config.data.mappings.location", {
 									hostLms: library.secondHostLms.code,
 								})}
@@ -244,7 +256,6 @@ function LocationMappings() {
 					)}
 				</Grid>
 			</Grid>
-
 			{newMapping.show && (
 				<NewMapping
 					show={newMapping.show}

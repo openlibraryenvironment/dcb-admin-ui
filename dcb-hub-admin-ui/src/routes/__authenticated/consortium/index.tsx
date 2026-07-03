@@ -35,8 +35,36 @@ import { updateConsortiumQuery } from "@mutations/updateConsortium";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+
+const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 10 };
+const DEFAULT_SORT_MODEL = [{ field: "name", sort: "asc" }];
+const DEFAULT_FILTER_MODEL = { items: [] };
 
 export const Route = createFileRoute("/__authenticated/consortium/")({
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: [
+				"groups",
+				DEFAULT_PAGINATION_MODEL,
+				DEFAULT_SORT_MODEL,
+				DEFAULT_FILTER_MODEL,
+			],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getConsortia, {
+					query: "",
+					pageno: DEFAULT_PAGINATION_MODEL.page,
+					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
+					order: DEFAULT_SORT_MODEL[0].field,
+					orderBy: "ASC",
+				}),
+		});
+	},
 	component: ConsortiumPage,
 });
 
@@ -218,7 +246,7 @@ function ConsortiumPage() {
 			});
 			setEditMode(false);
 			setChangedFields({});
-		} catch (e) {
+		} catch {
 			setAlert({
 				open: true,
 				severity: "error",
@@ -277,7 +305,8 @@ function ConsortiumPage() {
 			import.meta.env.VITE_DCB_API_BASE + "/persistentAssets/serverUpload";
 
 		try {
-			isHeader ? setHeaderIsUploading(true) : setAboutIsUploading(true);
+			if (isHeader) setHeaderIsUploading(true);
+			else setAboutIsUploading(true);
 			const res = await fetch(uploadUrl, {
 				method: "POST",
 				body: formData,
@@ -294,7 +323,8 @@ function ConsortiumPage() {
 				},
 			});
 
-			isHeader ? setAppHeaderPreviewUrl("") : setAboutPreviewUrl("");
+			if (isHeader) setAppHeaderPreviewUrl("");
+			else setAboutPreviewUrl("");
 			if (fileRef.current) fileRef.current.value = "";
 			setAlert({
 				open: true,
@@ -302,7 +332,7 @@ function ConsortiumPage() {
 				text: t("ui.success"),
 				title: t("ui.success"),
 			});
-		} catch (e) {
+		} catch {
 			setAlert({
 				open: true,
 				severity: "error",
@@ -310,7 +340,8 @@ function ConsortiumPage() {
 				title: t("ui.error.title"),
 			});
 		} finally {
-			isHeader ? setHeaderIsUploading(false) : setAboutIsUploading(false);
+			if (isHeader) setHeaderIsUploading(false);
+			else setAboutIsUploading(false);
 		}
 	};
 
@@ -328,7 +359,7 @@ function ConsortiumPage() {
 			<PageContainer hideBreadcrumbs>
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/locations"
 					message={t("error.consortium")} /** TODO: Translation keys */
 				/>
@@ -412,7 +443,11 @@ function ConsortiumPage() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography
 						variant="attributeTitle"
-						color={errors.displayName && editMode ? "error" : "primary"}
+						color={
+							errors.displayName && editMode
+								? "error"
+								: "primary.attributeTitle"
+						}
 					>
 						{t("consortium.display_name")}
 					</Typography>
@@ -438,7 +473,9 @@ function ConsortiumPage() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography
 						variant="attributeTitle"
-						color={errors.websiteUrl && editMode ? "error" : "primary"}
+						color={
+							errors.websiteUrl && editMode ? "error" : "primary.attributeTitle"
+						}
 					>
 						{t("consortium.url")}
 					</Typography>
@@ -463,7 +500,11 @@ function ConsortiumPage() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography
 						variant="attributeTitle"
-						color={errors.catalogueSearchUrl && editMode ? "error" : "primary"}
+						color={
+							errors.catalogueSearchUrl && editMode
+								? "error"
+								: "primary.attributeTitle"
+						}
 					>
 						{t("consortium.search_url")}
 					</Typography>
@@ -488,7 +529,11 @@ function ConsortiumPage() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography
 						variant="attributeTitle"
-						color={errors.description && editMode ? "error" : "primary"}
+						color={
+							errors.description && editMode
+								? "error"
+								: "primary.attributeTitle"
+						}
 					>
 						{t("consortium.description_title")}
 					</Typography>

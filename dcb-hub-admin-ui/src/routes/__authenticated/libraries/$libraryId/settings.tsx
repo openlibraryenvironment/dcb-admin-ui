@@ -14,8 +14,6 @@ import {
 	MenuItem,
 	Select,
 	Stack,
-	Tab,
-	Tabs,
 	TextField,
 	Typography,
 	useTheme,
@@ -23,6 +21,7 @@ import {
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
@@ -156,21 +155,6 @@ function Settings() {
 		setConfirmationEdit(true);
 	};
 
-	const handleMainTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = [
-			"",
-			"/service",
-			"/settings",
-			"/mappings",
-			"/patronRequests/all",
-			"/supplierRequests/all",
-			"/contacts",
-			"/locations",
-			"/bibs",
-		];
-		router.navigate({ to: `/libraries/${libraryId}${routes[val]}` });
-	};
-
 	if (isLoading)
 		return (
 			<Loading
@@ -184,7 +168,7 @@ function Settings() {
 		return (
 			<ErrorComponent
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message="TODO"
 			/>
@@ -193,6 +177,7 @@ function Settings() {
 	const viewModeActions = [
 		{
 			key: "edit",
+			// eslint-disable-next-line react-hooks/refs -- handleEdit only reads the ref inside the returned click handler (via requestAnimationFrame), never during render
 			onClick: handleEdit(setEditMode, firstEditableFieldRef),
 			disabled: !isAnAdmin,
 			label: t("ui.data_grid.edit"),
@@ -258,20 +243,15 @@ function Settings() {
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={2} onChange={handleMainTabChange} variant="scrollable">
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.service")} />
-						<Tab label={t("nav.libraries.settings")} />
-						<Tab label={t("nav.mappings.name")} />
-						<Tab label={t("nav.libraries.patronRequests.name")} />
-						<Tab label={t("nav.libraries.supplierRequests.name")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.locations")} />
-						<Tab label={t("nav.bibs")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={2} />
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold">
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("nav.libraries.settings")}
 					</Typography>
 				</Grid>
@@ -391,7 +371,6 @@ function Settings() {
 					</Stack>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

@@ -6,8 +6,6 @@ import { useAuth } from "react-oidc-context";
 import {
 	Grid,
 	Stack,
-	Tab,
-	Tabs,
 	Typography,
 	Divider,
 	AccordionSummary,
@@ -16,6 +14,7 @@ import {
 import { Delete, ExpandMore } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
@@ -70,8 +69,6 @@ function Service() {
 	const [bibSuppressionRuleset1, setBibSuppressionRuleset1] =
 		useState<any>(null);
 	const [itemSuppressionRuleset1, setItemSuppressionRuleset1] =
-		useState<any>(null);
-	const [bibSuppressionRuleset2, setBibSuppressionRuleset2] =
 		useState<any>(null);
 	const [itemSuppressionRuleset2, setItemSuppressionRuleset2] =
 		useState<any>(null);
@@ -133,21 +130,6 @@ function Service() {
 				fetchRuleset(rulesetName, setter);
 		};
 
-	const handleMainTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = [
-			"",
-			"/service",
-			"/settings",
-			"/mappings",
-			"/patronRequests/all",
-			"/supplierRequests/all",
-			"/contacts",
-			"/locations",
-			"/bibs",
-		];
-		router.navigate({ to: `/libraries/${libraryId}${routes[val]}` });
-	};
-
 	if (isLoading)
 		return (
 			<Loading
@@ -161,7 +143,7 @@ function Service() {
 		return (
 			<ErrorComponent
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message={"TODO"}
 			/>
@@ -190,27 +172,27 @@ function Service() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={1} onChange={handleMainTabChange} variant="scrollable">
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.service")} />
-						<Tab label={t("nav.libraries.settings")} />
-						<Tab label={t("nav.mappings.name")} />
-						<Tab label={t("nav.libraries.patronRequests.name")} />
-						<Tab label={t("nav.libraries.supplierRequests.name")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.locations")} />
-						<Tab label={t("nav.bibs")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={1} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold">
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("nav.libraries.service")}
 					</Typography>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="accordionSummary" fontWeight="bold">
-						{t("details.general")}
+					<Typography
+						variant="accordionSummary"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
+						{t("ui.info.general")}
 					</Typography>
 				</Grid>
 
@@ -243,7 +225,12 @@ function Service() {
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Typography variant="h3" fontWeight="bold">
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("libraries.config.patronAuth.title")}
 					</Typography>
 					<Stack direction="column">
@@ -268,7 +255,12 @@ function Service() {
 							<Divider aria-hidden="true" />
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-							<Typography variant="h3" fontWeight="bold">
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+								}}
+							>
 								{t("libraries.service.hostlms_title", {
 									name: firstHostLms.name,
 								})}
@@ -455,7 +447,12 @@ function Service() {
 									)}
 								>
 									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography variant="h3" fontWeight="bold">
+										<Typography
+											variant="h3"
+											sx={{
+												fontWeight: "bold",
+											}}
+										>
 											{t("libraries.suppression_ruleset_item", {
 												lms: firstHostLms.name,
 											})}
@@ -486,7 +483,12 @@ function Service() {
 									)}
 								>
 									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography variant="h3" fontWeight="bold">
+										<Typography
+											variant="h3"
+											sx={{
+												fontWeight: "bold",
+											}}
+										>
 											{t("libraries.suppression_ruleset_bib", {
 												lms: firstHostLms.name,
 											})}
@@ -513,7 +515,12 @@ function Service() {
 							<Divider aria-hidden="true" />
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-							<Typography variant="h3" fontWeight="bold">
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+								}}
+							>
 								{t("libraries.service.hostlms_title", {
 									name: secondHostLms.name,
 								})}
@@ -549,7 +556,12 @@ function Service() {
 									)}
 								>
 									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography variant="h3" fontWeight="bold">
+										<Typography
+											variant="h3"
+											sx={{
+												fontWeight: "bold",
+											}}
+										>
 											{t("libraries.suppression_ruleset_item", {
 												lms: secondHostLms.name,
 											})}
@@ -570,7 +582,6 @@ function Service() {
 					</>
 				)}
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

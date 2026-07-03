@@ -64,7 +64,7 @@ function ClusterExplanation() {
 				defaultClusterExplanationVisibility,
 		);
 
-	const { data, isLoading, isError, refetch } = useQuery({
+	const { data, isLoading, isError } = useQuery({
 		queryKey: ["clusterAuditLog", clusterId],
 		queryFn: async () => {
 			const res = await fetch(
@@ -196,7 +196,7 @@ function ClusterExplanation() {
 			<Error
 				title={t("search.items_error_title")}
 				message={t("ui.info.connection_issue")}
-				action={t("ui.action.reload")}
+				action={t("ui.actions.reload")}
 				// onClick={refetch}
 			/>
 		);

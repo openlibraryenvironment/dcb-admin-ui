@@ -74,7 +74,6 @@ function Requests() {
 		data: records,
 		isLoading,
 		isError,
-		refetch,
 	} = useQuery({
 		queryKey: ["errorRequests", namedSql],
 		queryFn: async () => {
@@ -195,7 +194,7 @@ function Requests() {
 					title={t("error_overview.error_loading")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.reload")}
-					action={t("ui.action.reload")}
+					action={t("ui.actions.reload")}
 					// onClick={refetch}
 				/>
 			</PageContainer>

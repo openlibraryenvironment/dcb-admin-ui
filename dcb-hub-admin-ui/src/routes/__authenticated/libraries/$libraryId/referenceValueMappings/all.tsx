@@ -1,36 +1,19 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Tab, Tabs, Typography, Button, useTheme } from "@mui/material";
-import { Delete, Edit, Save, Cancel } from "@mui/icons-material";
-import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridRowModesModel,
-	GridRowModel,
-	GridRowModes,
-	GridActionsCellItem,
-	GridRowParams,
-} from "@mui/x-data-grid-premium";
+import { Delete } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
-import DataGrid from "@components/DataGrid/DataGrid";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import NewMapping from "@forms/NewMapping/NewMapping";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
 import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
 import { referenceValueMappingColumnsNoCategoryFilter } from "@columns/referenceValueMappingsNoCategoryFilter";
 
@@ -39,7 +22,6 @@ import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { getMappings } from "@queries/getMappings";
 import { updateReferenceValueMapping } from "@mutations/updateReferenceValueMapping";
 import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapping";
-import { computeMutation } from "@helpers/computeMutation";
 import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
 
 export const Route = createFileRoute(
@@ -128,7 +110,7 @@ function AllMappings() {
 		return (
 			<Error
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message="TODO"
 			/>
@@ -179,7 +161,12 @@ function AllMappings() {
 					</Tabs>
 
 					{/* Primary Host LMS Grid */}
-					<Typography variant="h3" fontWeight="bold">
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("libraries.config.data.mappings.all_ref_value", {
 							hostLms: library.agency?.hostLms?.code,
 						})}
@@ -221,7 +208,13 @@ function AllMappings() {
 					{/* Secondary Host LMS Grid (If exists) */}
 					{library.secondHostLms && (
 						<>
-							<Typography variant="h3" fontWeight="bold" sx={{ mt: 4 }}>
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+									mt: 4,
+								}}
+							>
 								{t("libraries.config.data.mappings.all_ref_value", {
 									hostLms: library.secondHostLms.code,
 								})}
@@ -263,7 +256,6 @@ function AllMappings() {
 					)}
 				</Grid>
 			</Grid>
-
 			{newMapping.show && (
 				<NewMapping
 					show={newMapping.show}

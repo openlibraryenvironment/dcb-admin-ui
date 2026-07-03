@@ -6,18 +6,11 @@ import { Grid, Stack, Tab, Typography } from "@mui/material";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import { ExpandMore } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
 import Loading from "@components/Loading/Loading";
-import PrivateData from "@components/PrivateData/PrivateData";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import {
-	SubAccordion,
-	SubAccordionDetails,
-	SubAccordionSummary,
-} from "@components/StyledAccordion/StyledAccordion";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getHostLms } from "@queries/getHostLms";
@@ -27,8 +20,29 @@ import FolioConfig from "@components/HostLmsConfig/FolioConfig";
 import SierraConfig from "@components/HostLmsConfig/SierraConfig";
 import AlmaConfig from "@components/HostLmsConfig/AlmaConfig";
 import PolarisConfig from "@components/HostLmsConfig/PolarisConfig";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { hostlmsParamsSchema } from "@schemas/routeParams/hostlmsParams";
 
 export const Route = createFileRoute("/__authenticated/hostlmss/$hostlmsId")({
+	params: {
+		parse: (raw) => hostlmsParamsSchema.parse(raw),
+	},
+	// Prefetches into the same query cache entry the component's useQuery
+	// below reads (identical queryKey).
+	loader: ({ context: { queryClient, cfg, auth }, params: { hostlmsId } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: ["hostLms", hostlmsId],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getHostLms, {
+					query: `id:${hostlmsId}`,
+				}),
+		});
+	},
 	component: HostLMSDetails,
 });
 
@@ -77,7 +91,7 @@ function HostLMSDetails() {
 					description={
 						error ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/hostlmss"
 				/>
 			</PageContainer>
@@ -94,7 +108,7 @@ function HostLMSDetails() {
 					variant="scrollable"
 					sx={{ mb: 3 }}
 				>
-					<Tab label={t("details.general")} value="0" />
+					<Tab label={t("ui.info.general")} value="0" />
 					<Tab label={t("hostlms.client_config.title")} value="1" />
 				</TabList>
 
@@ -106,7 +120,7 @@ function HostLMSDetails() {
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 							<Typography variant="accordionSummary">
-								{t("details.general")}
+								{t("ui.info.general")}
 							</Typography>
 						</Grid>
 						<ConfigItem title={t("hostlms.code")} value={hostlms.code} />

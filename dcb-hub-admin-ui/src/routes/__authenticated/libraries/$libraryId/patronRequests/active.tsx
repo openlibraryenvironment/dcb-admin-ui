@@ -244,7 +244,7 @@ function PatronRequestsActive() {
 					>
 						<Tab label={t("nav.libraries.profile")} />
 						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.libraries.patronRequests")} />
+						<Tab label={t("nav.libraries.patronRequests.name")} />
 					</Tabs>
 				</Grid>
 
@@ -275,7 +275,13 @@ function PatronRequestsActive() {
 						/>
 					</Tabs>
 
-					<Typography variant="h3" fontWeight="bold" sx={{ mb: 2 }}>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("libraries.patronRequests.all", {
 							number: requestsData?.patronRequests?.totalSize ?? 0,
 						})}
@@ -319,7 +325,6 @@ function PatronRequestsActive() {
 					/>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

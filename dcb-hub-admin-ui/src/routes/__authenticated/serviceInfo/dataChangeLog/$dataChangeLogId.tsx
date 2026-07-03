@@ -70,7 +70,7 @@ function DataChangeLogDetails() {
 					description={
 						error ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/serviceInfo/dataChangeLogs"
 				/>
 			</PageContainer>

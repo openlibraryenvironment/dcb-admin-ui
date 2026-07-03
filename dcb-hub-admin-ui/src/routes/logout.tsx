@@ -9,7 +9,6 @@ import {
 	CardContent,
 	Stack,
 	Typography,
-	useTheme,
 } from "@mui/material";
 
 import LoginLayout from "@layout/LoginLayout/LoginLayout";
@@ -30,12 +29,11 @@ export const Route = createFileRoute("/logout")({
 });
 
 function Logout() {
-	const theme = useTheme();
 	const { t } = useTranslation();
 	const auth = useAuth();
 	const { displayName } = useConsortiumInfoStore();
 
-	const { reason, redirect, loggedOut } = Route.useSearch();
+	const { loggedOut } = Route.useSearch();
 	const [alertDisplayed, setAlertDisplayed] = useState(loggedOut);
 
 	const handleSignIn = () => {
@@ -56,8 +54,8 @@ function Logout() {
 			>
 				{alertDisplayed && (
 					<Box
-						mb={2}
 						sx={{
+							mb: 2,
 							maxWidth: "1400px",
 							margin: "auto",
 							paddingLeft: "16px",
@@ -82,11 +80,27 @@ function Logout() {
 					</Box>
 				)}
 				<CardContent sx={{ maxWidth: "1400px", margin: "auto" }}>
-					<Stack direction="column" spacing={2} width="fit-content">
-						<Typography color="primary.loginText" variant="loginHeader">
+					<Stack
+						direction="column"
+						spacing={2}
+						sx={{
+							width: "fit-content",
+						}}
+					>
+						<Typography
+							variant="loginHeader"
+							sx={{
+								color: "primary.loginText",
+							}}
+						>
 							{t("loginout.login")}
 						</Typography>
-						<Typography color="primary.loginText" variant="subheading">
+						<Typography
+							variant="subheading"
+							sx={{
+								color: "primary.loginText",
+							}}
+						>
 							<Trans
 								i18nKey="loginout.keycloak"
 								t={t}
@@ -113,7 +127,6 @@ function Logout() {
 					</Box>
 				</CardContent>
 			</Card>
-
 			<Box sx={{ width: "100%", maxWidth: "1400px", margin: "auto" }}>
 				<LandingCard />
 			</Box>

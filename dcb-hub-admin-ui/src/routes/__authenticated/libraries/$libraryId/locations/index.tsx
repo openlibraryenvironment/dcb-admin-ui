@@ -8,8 +8,6 @@ import {
 	Button,
 	Grid,
 	Stack,
-	Tab,
-	Tabs,
 	Tooltip,
 	Typography,
 	useTheme,
@@ -29,6 +27,7 @@ import {
 } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -182,17 +181,17 @@ function LibraryLocations() {
 
 	const { mutateAsync: updateLocation } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateLocationQuery, variables),
+			gqlClient.request<any>(updateLocationQuery, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutate: deleteLocation } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLocationQuery, variables),
+			gqlClient.request<any>(deleteLocationQuery, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutateAsync: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
+			gqlClient.request<any>(deleteLibraryMutation, variables),
 	});
 
 	const processRowUpdate = useCallback(
@@ -276,17 +275,6 @@ function LibraryLocations() {
 		[gridId, setColumnVisibilityModel],
 	);
 
-	const handleMainTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = [
-			"",
-			"/contacts",
-			"/patronRequests/all",
-			"/supplierRequests/all",
-			"/locations",
-		];
-		router.navigate({ to: `/libraries/${libraryId}${routes[val]}` });
-	};
-
 	const closeImport = () => {
 		setImport(false);
 		resetAll();
@@ -348,7 +336,7 @@ function LibraryLocations() {
 						? t("consortium.settings.enabled")
 						: val === false
 							? t("consortium.settings.disabled")
-							: t("details.location_pickup_not_set"),
+							: t("locations.new.pickup_not_set"),
 			},
 			{
 				field: "isEnabledForPickupAnywhere",
@@ -361,11 +349,11 @@ function LibraryLocations() {
 						? t("consortium.settings.enabled")
 						: val === false
 							? t("consortium.settings.disabled")
-							: t("details.location_pickup_not_set"),
+							: t("locations.new.pickup_not_set"),
 			},
 			{
 				field: "localId",
-				headerName: t("details.local_id"),
+				headerName: t("locations.local_id"),
 				minWidth: 50,
 				flex: 0.8,
 				filterOperators: equalsOnly,
@@ -393,7 +381,7 @@ function LibraryLocations() {
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }: GridRowParams) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
@@ -465,7 +453,7 @@ function LibraryLocations() {
 		return (
 			<Error
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message="TODO"
 			/>
@@ -494,17 +482,17 @@ function LibraryLocations() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={4} onChange={handleMainTabChange} variant="scrollable">
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.libraries.patronRequests")} />
-						<Tab label={t("nav.libraries.supplierRequests.name")} />
-						<Tab label={t("nav.locations")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={7} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold" sx={{ mb: 2 }}>
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("nav.locations")}
 					</Typography>
 
@@ -581,7 +569,6 @@ function LibraryLocations() {
 					/>
 				</Grid>
 			</Grid>
-
 			{newLocation.show && (
 				<NewLocation
 					show={newLocation.show}
@@ -611,7 +598,6 @@ function LibraryLocations() {
 					libraryName={library?.fullName}
 				/>
 			)}
-
 			<Confirmation
 				open={!!promiseArguments || !!deleteLocationId}
 				onClose={() => {

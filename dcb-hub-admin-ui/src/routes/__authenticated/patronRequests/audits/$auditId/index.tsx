@@ -89,7 +89,7 @@ function AuditDetails() {
 			<PageContainer hideBreadcrumbs>
 				<Loading
 					title={t("ui.info.loading.document", {
-						document_type: t("details.audit").toLowerCase(),
+						document_type: t("audit_log.audit").toLowerCase(),
 					})}
 					subtitle={t("ui.info.wait")}
 				/>
@@ -112,7 +112,7 @@ function AuditDetails() {
 					description={
 						error ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack={goBackLink}
 				/>
 			</PageContainer>
@@ -127,12 +127,18 @@ function AuditDetails() {
 				columns={{ xs: 2, sm: 2, md: 2, lg: 2 }}
 			>
 				<Grid size={{ xs: 2, sm: 2, md: 2 }}>
-					<Stack direction="row" justifyContent="space-between" width="100%">
+					<Stack
+						direction="row"
+						sx={{
+							justifyContent: "space-between",
+							width: "100%",
+						}}
+					>
 						<Button
 							variant="contained"
 							onClick={() => router.navigate({ to: goBackLink })}
 						>
-							{t("details.patron_request_return")}
+							{t("patron_request.return")}
 						</Button>
 
 						<Stack direction="row" spacing={2}>
@@ -158,7 +164,7 @@ function AuditDetails() {
 											)
 										}
 									>
-										{t("ui.action.older")}
+										{t("ui.actions.older")}
 									</Button>
 								</span>
 							</Tooltip>
@@ -185,7 +191,7 @@ function AuditDetails() {
 											)
 										}
 									>
-										{t("ui.action.newer")}
+										{t("ui.actions.newer")}
 									</Button>
 								</span>
 							</Tooltip>
@@ -196,7 +202,7 @@ function AuditDetails() {
 				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.audit_uuid")}
+							{t("audit_log.audit_uuid")}
 						</Typography>
 						<RenderAttribute attribute={audit.id} />
 					</Stack>
@@ -204,7 +210,7 @@ function AuditDetails() {
 				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.audit_date")}
+							{t("audit_log.audit_date")}
 						</Typography>
 						<RenderAttribute
 							attribute={dayjs(audit.auditDate).format(
@@ -216,7 +222,7 @@ function AuditDetails() {
 				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.audit_description")}
+							{t("audit_log.audit_description")}
 						</Typography>
 						<RenderAttribute attribute={audit.briefDescription} />
 					</Stack>
@@ -224,7 +230,7 @@ function AuditDetails() {
 				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.audit_from_status")}
+							{t("audit_log.audit_from_status")}
 						</Typography>
 						<RenderAttribute attribute={audit.fromStatus} />
 					</Stack>
@@ -232,7 +238,7 @@ function AuditDetails() {
 				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.audit_to_status")}
+							{t("audit_log.audit_to_status")}
 						</Typography>
 						<RenderAttribute attribute={audit.toStatus} />
 					</Stack>
@@ -240,13 +246,15 @@ function AuditDetails() {
 				<Grid size={{ xs: 2, sm: 1, md: 1 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.patron_request_uuid")}
+							{t("patron_request.uuid")}
 						</Typography>
 						<RenderAttribute attribute={audit.patronRequest?.id} />
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 2, md: 2 }}>
-					<Typography variant="attributeTitle">{t("details.audit")}</Typography>
+					<Typography variant="attributeTitle">
+						{t("audit_log.audit_data")}
+					</Typography>
 					<pre
 						style={{
 							overflowX: "auto",

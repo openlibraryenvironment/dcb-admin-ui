@@ -8,7 +8,7 @@ import {
 	useLocation,
 } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Tab, Typography, Button, Stack, Alert } from "@mui/material";
+import { Tab, Typography, Alert } from "@mui/material";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
@@ -56,17 +56,17 @@ function ClusterLayout() {
 	// Determine active tab based on the current URL path
 	const currentPath = location.pathname;
 	let activeTab = "cluster";
-	if (currentPath.endsWith("/explanation")) activeTab = "explanation";
+	if (currentPath.endsWith("/clusterExplanation"))
+		activeTab = "clusterExplanation";
 	if (currentPath.endsWith("/items")) activeTab = "items";
 	if (currentPath.endsWith("/identifiers")) activeTab = "identifiers";
-	if (currentPath.endsWith("/history")) activeTab = "history";
+	if (currentPath.endsWith("/requestingHistory"))
+		activeTab = "requestingHistory";
 
 	const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
-		const destination =
-			newValue === "cluster"
-				? `/search/${clusterId}`
-				: `/search/${clusterId}/${newValue}`;
-		navigate({ to: destination });
+		// Every tab (including "cluster") is a child route - navigating to the bare
+		// /search/$clusterId layout renders an empty Outlet.
+		navigate({ to: `/search/${clusterId}/${newValue}` });
 	};
 
 	const pageActions = [
@@ -117,10 +117,16 @@ function ClusterLayout() {
 			<TabContext value={activeTab}>
 				<TabList onChange={handleTabChange} variant="scrollable" sx={{ mb: 3 }}>
 					<Tab label={t("nav.search.cluster")} value="cluster" />
-					<Tab label={t("nav.search.cluster_explainer")} value="explanation" />
+					<Tab
+						label={t("nav.search.cluster_explainer")}
+						value="clusterExplanation"
+					/>
 					<Tab label={t("nav.search.items")} value="items" />
 					<Tab label={t("nav.search.identifiers")} value="identifiers" />
-					<Tab label={t("nav.search.requesting_history")} value="history" />
+					<Tab
+						label={t("nav.search.requesting_history")}
+						value="requestingHistory"
+					/>
 				</TabList>
 
 				<TabPanel value={activeTab} sx={{ p: 0 }}>

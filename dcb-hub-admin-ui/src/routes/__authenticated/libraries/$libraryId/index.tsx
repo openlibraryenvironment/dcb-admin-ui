@@ -12,8 +12,6 @@ import {
 	Divider,
 	Grid,
 	Stack,
-	Tab,
-	Tabs,
 	TextField,
 	Typography,
 	useTheme,
@@ -21,6 +19,7 @@ import {
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import AddressLink from "@components/Address/AddressLink";
@@ -46,8 +45,29 @@ import { getLibrary } from "@queries/getLibrary";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
 
 export const Route = createFileRoute("/__authenticated/libraries/$libraryId/")({
+	params: {
+		parse: (raw) => libraryParamsSchema.parse(raw),
+	},
+	// Prefetches into the same query cache entry the component's useQuery
+	// below reads (identical queryKey) - see docs/architecture.md.
+	loader: ({ context: { queryClient, cfg, auth }, params: { libraryId } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: ["library", libraryId],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getLibrary, {
+					query: `id:${libraryId}`,
+				}),
+		});
+	},
 	component: LibraryProfile,
 });
 
@@ -194,7 +214,7 @@ function LibraryProfile() {
 		return (
 			<Error
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message={t("error.library")} /** TODO */
 			/>
@@ -203,6 +223,7 @@ function LibraryProfile() {
 	const viewModeActions = [
 		{
 			key: "edit",
+			// eslint-disable-next-line react-hooks/refs -- handleEdit only reads the ref inside the returned click handler (via requestAnimationFrame), never during render
 			onClick: handleEdit(setEditMode, firstEditableFieldRef),
 			disabled: !isAnAdmin,
 			label: t("ui.data_grid.edit"),
@@ -268,26 +289,16 @@ function LibraryProfile() {
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={0}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									`/libraries/${libraryId}`,
-									`/libraries/${libraryId}/contacts`,
-									`/libraries/${libraryId}/patronRequests/all`,
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.libraries.patronRequests")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={0} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold">
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("nav.libraries.profile")}
 					</Typography>
 				</Grid>
@@ -301,7 +312,7 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.fullName ? "error" : "primary"}
+							color={errors.fullName ? "error" : "primary.attributeTitle"}
 						>
 							{t("libraries.name")}
 						</Typography>
@@ -328,7 +339,7 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.shortName ? "error" : "primary"}
+							color={errors.shortName ? "error" : "primary.attributeTitle"}
 						>
 							{t("libraries.short_name")}
 						</Typography>
@@ -354,7 +365,9 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.abbreviatedName ? "error" : "primary"}
+							color={
+								errors.abbreviatedName ? "error" : "primary.attributeTitle"
+							}
 						>
 							{t("libraries.abbreviated_name")}
 						</Typography>
@@ -387,7 +400,7 @@ function LibraryProfile() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.agency_code")}
+							{t("agencies.code")}
 						</Typography>
 						<RenderAttribute attribute={library.agencyCode} />
 					</Stack>
@@ -409,7 +422,7 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.supportHours ? "error" : "primary"}
+							color={errors.supportHours ? "error" : "primary.attributeTitle"}
 						>
 							{t("libraries.support_hours")}
 						</Typography>
@@ -435,7 +448,11 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.backupDowntimeSchedule ? "error" : "primary"}
+							color={
+								errors.backupDowntimeSchedule
+									? "error"
+									: "primary.attributeTitle"
+							}
 						>
 							{t("libraries.service.environments.backup_schedule")}
 						</Typography>
@@ -495,7 +512,12 @@ function LibraryProfile() {
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h3" fontWeight="bold">
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("libraries.primaryLocation.title")}
 					</Typography>
 				</Grid>
@@ -511,7 +533,7 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.latitude ? "error" : "primary"}
+							color={errors.latitude ? "error" : "primary.attributeTitle"}
 						>
 							{t("libraries.primaryLocation.latitude")}
 						</Typography>
@@ -537,7 +559,7 @@ function LibraryProfile() {
 					<Stack direction="column">
 						<Typography
 							variant="attributeTitle"
-							color={errors.longitude ? "error" : "primary"}
+							color={errors.longitude ? "error" : "primary.attributeTitle"}
 						>
 							{t("libraries.primaryLocation.longitude")}
 						</Typography>
@@ -570,7 +592,12 @@ function LibraryProfile() {
 				{isConsortiumGroupMember && (
 					<>
 						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-							<Typography variant="h3" fontWeight="bold">
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+								}}
+							>
 								{t("consortium.title")}
 							</Typography>
 						</Grid>
@@ -591,7 +618,12 @@ function LibraryProfile() {
 				)}
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h3" fontWeight="bold">
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("libraries.groups")}
 					</Typography>
 				</Grid>
@@ -642,7 +674,6 @@ function LibraryProfile() {
 					/>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

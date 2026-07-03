@@ -142,7 +142,7 @@ function LocationDetails() {
 				then: (schema) =>
 					schema
 						.required(
-							t("ui.validation.required", { field: t("details.local_id") }),
+							t("ui.validation.required", { field: t("locations.local_id") }),
 						)
 						.matches(
 							/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
@@ -154,7 +154,7 @@ function LocationDetails() {
 				then: (schema) =>
 					schema
 						.required(
-							t("ui.validation.required", { field: t("details.local_id") }),
+							t("ui.validation.required", { field: t("locations.local_id") }),
 						)
 						.matches(/^\d+$/, t("ui.validation.locations.local_id_polaris")),
 			}),
@@ -242,7 +242,7 @@ function LocationDetails() {
 				open: true,
 				severity: "success",
 				text: t(
-					`details.location_${field === "isPickup" ? "pickup" : "pickup_anywhere"}_${isEnabled ? "enable" : "disable"}_success`,
+					`locations.${field === "isPickup" ? "pickup" : "pickup_anywhere"}_${isEnabled ? "enable" : "disable"}_success`,
 					{ location: location.name },
 				),
 				title: t("ui.data_grid.updated"),
@@ -252,15 +252,14 @@ function LocationDetails() {
 				open: true,
 				severity: "error",
 				text: t(
-					`details.location_${field === "isPickup" ? "pickup" : "pickup_anywhere"}_error_${isEnabled ? "enable" : "disable"}`,
+					`locations.location_${field === "isPickup" ? "pickup" : "pickup_anywhere"}_error_${isEnabled ? "enable" : "disable"}`,
 					{ location: location.name },
 				),
 				title: t("ui.data_grid.error"),
 			});
 		} finally {
-			field === "isPickup"
-				? setConfirmationPickup(false)
-				: setConfirmationPickupAnywhere(false);
+			if (field === "isPickup") setConfirmationPickup(false);
+			else setConfirmationPickupAnywhere(false);
 		}
 	};
 
@@ -280,7 +279,7 @@ function LocationDetails() {
 			<PageContainer hideBreadcrumbs>
 				<Error
 					title={t("ui.error.cannot_retrieve_record")}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/locations"
 					message="locations.error" //** TODO */
 				/>
@@ -360,7 +359,7 @@ function LocationDetails() {
 							variant="attributeTitle"
 							color={errors.name ? "error" : "primary.attributeTitle"}
 						>
-							{t("details.location_name")}
+							{t("locations.name")}
 						</Typography>
 						<Controller
 							name="name"
@@ -388,7 +387,7 @@ function LocationDetails() {
 							variant="attributeTitle"
 							color={errors.printLabel ? "error" : "primary.attributeTitle"}
 						>
-							{t("details.location_printlabel")}
+							{t("locations.print_label")}
 						</Typography>
 						<Controller
 							name="printLabel"
@@ -442,7 +441,7 @@ function LocationDetails() {
 							variant="attributeTitle"
 							color={errors.latitude ? "error" : "primary.attributeTitle"}
 						>
-							{t("details.lat")}
+							{t("locations.latitude")}
 						</Typography>
 						<Controller
 							name="latitude"
@@ -472,7 +471,7 @@ function LocationDetails() {
 							variant="attributeTitle"
 							color={errors.longitude ? "error" : "primary.attributeTitle"}
 						>
-							{t("details.long")}
+							{t("locations.longitude")}
 						</Typography>
 						<Controller
 							name="longitude"
@@ -514,8 +513,8 @@ function LocationDetails() {
 							sx={{ mt: 1 }}
 						>
 							{location.isPickup
-								? t("details.location_pickup_disable")
-								: t("details.location_pickup_enable")}
+								? t("locations.new.pickup_disable")
+								: t("locations.new.pickup_enable")}
 						</Button>
 					)}
 				</Grid>
@@ -538,8 +537,8 @@ function LocationDetails() {
 							sx={{ mt: 1 }}
 						>
 							{location.isEnabledForPickupAnywhere
-								? t("details.location_pickup_anywhere_disable")
-								: t("details.location_pickup_anywhere_enable")}
+								? t("locations.new.pickup_anywhere_disable")
+								: t("locations.newpickup_anywhere_enable")}
 						</Button>
 					)}
 				</Grid>

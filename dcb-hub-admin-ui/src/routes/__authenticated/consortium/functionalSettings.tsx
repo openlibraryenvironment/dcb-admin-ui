@@ -62,7 +62,7 @@ function FunctionalSettings() {
 
 	const { mutateAsync: updateSetting } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateFunctionalSettingQuery, variables),
+			gqlClient.request<any>(updateFunctionalSettingQuery, variables),
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				queryKey: ["LoadConsortiumFunctionalSettings"],
@@ -133,8 +133,8 @@ function FunctionalSettings() {
 				editable: true,
 				type: "singleSelect",
 				valueOptions: [
-					{ value: true, label: t("ui.action.yes") },
-					{ value: false, label: t("ui.action.no") },
+					{ value: true, label: t("ui.actions.yes") },
+					{ value: false, label: t("ui.actions.no") },
 				],
 				valueFormatter: (val: boolean) =>
 					val
@@ -144,7 +144,7 @@ function FunctionalSettings() {
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {

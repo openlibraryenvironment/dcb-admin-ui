@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import dayjs from "dayjs";
 import {
 	GridPaginationModel,
 	GridSortModel,
@@ -15,8 +14,6 @@ import {
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import Link from "@components/Link/Link";
-import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -132,7 +129,7 @@ function DataChangeLogsGrid() {
 
 	const columns: GridColDef[] = useMemo(
 		() => [...customColumns, ...dataChangeLogColumns],
-		[customColumns, t],
+		[customColumns],
 	);
 
 	return (

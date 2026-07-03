@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 
@@ -35,11 +34,9 @@ function SourceBibDetails() {
 	const { t } = useTranslation();
 	const { bibId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
-	const auth = useAuth();
-
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+	// Runtime config (not build-time import.meta.env, which is undefined in the
+	// runtime-configured production image - see search/index.tsx).
+	const { cfg } = useRouter().options.context as { cfg: any };
 
 	const [isCanonicalExpanded, setIsCanonicalExpanded] = useState(true);
 	const [isSourceRecordExpanded, setIsSourceRecordExpanded] = useState(false);
@@ -133,7 +130,7 @@ function SourceBibDetails() {
 					description={
 						bibError ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/bibs"
 				/>
 			</PageContainer>
@@ -142,12 +139,18 @@ function SourceBibDetails() {
 
 	return (
 		<PageContainer title={bib?.title}>
-			<Stack direction="row" justifyContent="end">
+			<Stack
+				direction="row"
+				sx={{
+					justifyContent: "end",
+				}}
+			>
 				<StyledAccordionButton onClick={toggleExpandAll}>
-					{isCanonicalExpanded ? t("details.collapse") : t("details.expand")}
+					{isCanonicalExpanded
+						? t("ui.data_grid.collapse")
+						: t("ui.data_grid.expand")}
 				</StyledAccordionButton>
 			</Stack>
-
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -157,7 +160,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.source_bib_uuid")}
+							{t("bibRecords.source_bib_uuid")}
 						</Typography>
 						<RenderAttribute attribute={bib?.id} />
 					</Stack>
@@ -165,7 +168,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.title")}
+							{t("search.title")}
 						</Typography>
 						<RenderAttribute attribute={bib?.title} />
 					</Stack>
@@ -173,7 +176,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.author")}
+							{t("search.author")}
 						</Typography>
 						<RenderAttribute attribute={bib?.author} />
 					</Stack>
@@ -181,7 +184,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.source_library")}
+							{t("bibRecords.source_library")}
 						</Typography>
 						{bibLibrary?.fullName ? (
 							<Link
@@ -199,7 +202,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.source_system_uuid")}
+							{t("bibRecords.source_system_uuid")}
 						</Typography>
 						{sourceSystemUrl === "" ? (
 							<RenderAttribute attribute={bib?.sourceSystemId} />
@@ -217,7 +220,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.source_record_id")}
+							{t("bibRecords.source_record_id")}
 						</Typography>
 						<RenderAttribute attribute={bib?.sourceRecordId} />
 					</Stack>
@@ -225,9 +228,9 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.contributor_uuid")}
+							{t("bibRecords.contributor_uuid")}
 						</Typography>
-						{import.meta.env.VITE_DCB_SEARCH_BASE ? (
+						{cfg?.VITE_DCB_SEARCH_BASE ? (
 							<Typography variant="attributeText" component="div">
 								<Link
 									href={`/search/${bib?.contributesTo?.id}/cluster`}
@@ -245,7 +248,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.contributor_title")}
+							{t("requesting.contributor")}
 						</Typography>
 						<RenderAttribute attribute={bib?.contributesTo?.title} />
 					</Stack>
@@ -253,7 +256,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.process_version")}
+							{t("bibRecords.process_version")}
 						</Typography>
 						<RenderAttribute attribute={bib?.processVersion} />
 					</Stack>
@@ -261,7 +264,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.metadata_score")}
+							{t("bibRecords.metadata_score")}
 						</Typography>
 						<RenderAttribute attribute={bib?.metadataScore} />
 					</Stack>
@@ -269,7 +272,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.publisher")}
+							{t("requesting.publisher")}
 						</Typography>
 						<RenderAttribute attribute={bib?.publisher} />
 					</Stack>
@@ -277,7 +280,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.publication_place")}
+							{t("requesting.publication_place")}
 						</Typography>
 						<RenderAttribute attribute={bib?.placeOfPublication} />
 					</Stack>
@@ -285,7 +288,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.publication_date")}
+							{t("requesting.publication_date")}
 						</Typography>
 						<RenderAttribute attribute={bib?.dateOfPublication} />
 					</Stack>
@@ -293,7 +296,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.edition")}
+							{t("bibRecords.edition")}
 						</Typography>
 						<RenderAttribute attribute={bib?.edition} />
 					</Stack>
@@ -301,7 +304,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.large_print")}
+							{t("bibRecords.large_print")}
 						</Typography>
 						<RenderAttribute attribute={bib?.isLargePrint} />
 					</Stack>
@@ -309,15 +312,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.cluster_reason")}
-						</Typography>
-						<RenderAttribute attribute={bib?.clusterReason} />
-					</Stack>
-				</Grid>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction="column">
-						<Typography variant="attributeTitle">
-							{t("details.record_type")}
+							{t("bibRecords.record_type")}
 						</Typography>
 						<RenderAttribute attribute={bib?.typeOfRecord} />
 					</Stack>
@@ -325,7 +320,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.date_created")}
+							{t("ui.info.date_created")}
 						</Typography>
 						<RenderAttribute attribute={bib?.dateCreated} />
 					</Stack>
@@ -333,13 +328,12 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.date_updated")}
+							{t("ui.info.date_updated")}
 						</Typography>
 						<RenderAttribute attribute={bib?.dateUpdated} />
 					</Stack>
 				</Grid>
 			</Grid>
-
 			<StyledAccordion
 				variant="outlined"
 				expanded={isCanonicalExpanded}
@@ -352,14 +346,13 @@ function SourceBibDetails() {
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-						{t("details.canonical_metadata")}
+						{t("patron_request.canonical_metadata")}
 					</Typography>
 				</AccordionSummary>
 				<StyledAccordionDetails>
 					<pre>{JSON.stringify(bib?.canonicalMetadata, null, 2)}</pre>
 				</StyledAccordionDetails>
 			</StyledAccordion>
-
 			<StyledAccordion
 				variant="outlined"
 				expanded={isSourceRecordExpanded}
@@ -372,14 +365,14 @@ function SourceBibDetails() {
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
-						{t("details.source_record")}
+						{t("bibRecords.source_record")}
 					</Typography>
 				</AccordionSummary>
 				<StyledAccordionDetails>
 					{sourceRecordLoading ? (
 						<Loading
 							title={t("ui.info.loading.document", {
-								document_type: t("details.source_record").toLowerCase(),
+								document_type: t("bibRecords.source_record").toLowerCase(),
 							})}
 							subtitle={t("ui.info.wait")}
 						/>

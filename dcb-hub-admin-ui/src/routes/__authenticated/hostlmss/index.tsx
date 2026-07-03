@@ -25,8 +25,35 @@ import {
 import { getHostLms } from "@queries/getHostLms";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
 
 export const Route = createFileRoute("/__authenticated/hostlmss/")({
+	// Default-state prefetch: the loader has no access to the Zustand grid
+	// store (it's not a hook), so it can only prefetch the same defaults the
+	// component falls back to on first render (no stored state yet) -
+	// gridId "hostlmss", page 0/size 10, sort by name asc, no filter.
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		const gridId = "hostlmss";
+		const paginationModel = { page: 0, pageSize: 10 };
+		const filterModel = { items: [] };
+		const sortModel: GridSortModel = [{ field: "name", sort: "asc" }];
+		return queryClient.ensureQueryData({
+			queryKey: [gridId, paginationModel, sortModel, filterModel],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getHostLms, {
+					query: processGridFilterModel(filterModel, "", []) ?? "",
+					pageno: paginationModel.page,
+					pagesize: paginationModel.pageSize,
+					order: sortModel[0]?.field ?? "name",
+					orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
+				}),
+		});
+	},
 	component: HostLmss,
 });
 

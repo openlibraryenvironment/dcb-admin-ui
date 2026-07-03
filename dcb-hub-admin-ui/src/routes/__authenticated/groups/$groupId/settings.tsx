@@ -135,9 +135,8 @@ function GroupSettings() {
 		const failCount = results.filter((r) => r.status === "rejected").length;
 
 		setIsUpdating(false);
-		type === "borrowing"
-			? setConfirmationBorrowing(false)
-			: setConfirmationSupplying(false);
+		if (type === "borrowing") setConfirmationBorrowing(false);
+		else setConfirmationSupplying(false);
 		queryClient.invalidateQueries({ queryKey: ["group", groupId] });
 
 		if (failCount === 0) {
@@ -175,7 +174,7 @@ function GroupSettings() {
 					title={t("ui.error.cannot_retrieve_record")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.try_later")}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/groups"
 				/>
 			</PageContainer>
@@ -232,7 +231,13 @@ function GroupSettings() {
 				{isUpdating && (
 					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<CircularProgress />
-						<Typography variant="caption" align="center" display="block">
+						<Typography
+							variant="caption"
+							align="center"
+							sx={{
+								display: "block",
+							}}
+						>
 							{t("groups.settings.processing_bulk_update")}
 						</Typography>
 					</Grid>
@@ -294,7 +299,6 @@ function GroupSettings() {
 					</Button>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationBorrowing}
 				onClose={() => setConfirmationBorrowing(false)}
@@ -314,7 +318,11 @@ function GroupSettings() {
 						<Typography variant="h6" gutterBottom>
 							{t(CONFIRMATION_TEXT_MAP[borrowingAction].header)}
 						</Typography>
-						<Typography paragraph>
+						<Typography
+							sx={{
+								marginBottom: "16px",
+							}}
+						>
 							{t(CONFIRMATION_TEXT_MAP[borrowingAction].para1)}
 						</Typography>
 						<Typography variant="body2">
@@ -323,7 +331,6 @@ function GroupSettings() {
 					</Box>
 				}
 			/>
-
 			<Confirmation
 				open={showConfirmationSupplying}
 				onClose={() => setConfirmationSupplying(false)}
@@ -343,7 +350,11 @@ function GroupSettings() {
 						<Typography variant="h6" gutterBottom>
 							{t(CONFIRMATION_TEXT_MAP[supplyingAction].header)}
 						</Typography>
-						<Typography paragraph>
+						<Typography
+							sx={{
+								marginBottom: "16px",
+							}}
+						>
 							{t(CONFIRMATION_TEXT_MAP[supplyingAction].para1)}
 						</Typography>
 						<Typography variant="body2">
@@ -352,7 +363,6 @@ function GroupSettings() {
 					</Box>
 				}
 			/>
-
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

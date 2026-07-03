@@ -11,8 +11,29 @@ import Error from "@components/Error/Error";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgency } from "@queries/getAgency";
 import { Agency } from "@models/Agency";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { agencyParamsSchema } from "@schemas/routeParams/agencyParams";
 
 export const Route = createFileRoute("/__authenticated/agencies/$agencyId")({
+	params: {
+		parse: (raw) => agencyParamsSchema.parse(raw),
+	},
+	// Prefetches into the same query cache entry the component's useQuery
+	// below reads (identical queryKey) - see docs/architecture.md.
+	loader: ({ context: { queryClient, cfg, auth }, params: { agencyId } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: ["agency", agencyId],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getAgency, {
+					query: `id:${agencyId}`,
+				}),
+		});
+	},
 	component: AgencyDetails,
 });
 
@@ -59,7 +80,7 @@ function AgencyDetails() {
 					description={
 						error ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/agencies"
 				/>
 			</PageContainer>
@@ -77,7 +98,7 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.agency_name")}
+							{t("agencies.name")}
 						</Typography>
 						<RenderAttribute attribute={agency.name} />
 					</Stack>
@@ -85,7 +106,7 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.agency_uuid")}
+							{t("agencies.uuid")}
 						</Typography>
 						<RenderAttribute attribute={agency.id} />
 					</Stack>
@@ -93,7 +114,7 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.agency_code")}
+							{t("agencies.code")}
 						</Typography>
 						<RenderAttribute attribute={agency.code} />
 					</Stack>
@@ -101,7 +122,7 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.agency_hostlms")}
+							{t("agencies.hostlms")}
 						</Typography>
 						<RenderAttribute attribute={agency.hostLms?.code} />
 					</Stack>
@@ -125,7 +146,7 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.agency_auth")}
+							{t("agencies.auth")}
 						</Typography>
 						<RenderAttribute attribute={agency.authProfile} />
 					</Stack>
@@ -133,14 +154,16 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("details.long")}
+							{t("locations.longitude")}
 						</Typography>
 						<RenderAttribute attribute={agency.longitude} />
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">{t("details.lat")}</Typography>
+						<Typography variant="attributeTitle">
+							{t("locations.latitude")}
+						</Typography>
 						<RenderAttribute attribute={agency.latitude} />
 					</Stack>
 				</Grid>

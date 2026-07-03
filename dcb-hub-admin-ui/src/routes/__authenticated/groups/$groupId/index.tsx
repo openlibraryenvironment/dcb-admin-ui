@@ -1,8 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
 import { Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
 import {
 	GridPaginationModel,
@@ -19,8 +18,29 @@ import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { Group } from "@models/Group";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { groupParamsSchema } from "@schemas/routeParams/groupParams";
 
 export const Route = createFileRoute("/__authenticated/groups/$groupId/")({
+	params: {
+		parse: (raw) => groupParamsSchema.parse(raw),
+	},
+	// Prefetches into the same query cache entry the component's useQuery
+	// below reads (identical queryKey) - see docs/architecture.md.
+	loader: ({ context: { queryClient, cfg, auth }, params: { groupId } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: ["group", groupId],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getLibraryGroupById, {
+					query: `id:${groupId}`,
+				}),
+		});
+	},
 	component: GroupDetails,
 });
 
@@ -76,7 +96,7 @@ function GroupDetails() {
 					description={
 						error ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/groups"
 				/>
 			</PageContainer>
@@ -98,7 +118,7 @@ function GroupDetails() {
 		},
 		{
 			field: "agencyCode",
-			headerName: t("details.agency_code"),
+			headerName: t("agencies.code"),
 			minWidth: 50,
 			flex: 0.5,
 		},
@@ -135,7 +155,12 @@ function GroupDetails() {
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold">
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("nav.groups.profile")}
 					</Typography>
 				</Grid>

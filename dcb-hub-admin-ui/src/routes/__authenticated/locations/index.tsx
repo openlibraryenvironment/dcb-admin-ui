@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import dayjs from "dayjs";
 
 import { Button, Stack, Tooltip } from "@mui/material";
 import {
@@ -29,9 +28,6 @@ import {
 	getSortOrderForServer,
 	processGridFilterModel,
 } from "@helpers/dataGrid/utilities";
-import { standardFilters } from "@filters/standardFilters";
-import { equalsOnly } from "@filters/equalsOnly";
-import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
 import { defaultLocationColumns } from "@columns/locationColumns";
 
 export const Route = createFileRoute("/__authenticated/locations/")({
@@ -115,7 +111,7 @@ function LocationsRouteComponent() {
 				order: sortModel[0]?.field ?? "lastImported",
 				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
 			};
-			return gqlClient.request(getLocations, queryVariables);
+			return gqlClient.request<any>(getLocations, queryVariables);
 		},
 		placeholderData: (previousData) => previousData,
 	});

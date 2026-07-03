@@ -23,8 +23,42 @@ import {
 import { getAgencies } from "@queries/getAgencies";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+
+// Default-state prefetch: the component reads pagination/sort/filter state
+// from useGridStore (a Zustand store) at mount time, which the loader
+// cannot access (it isn't a hook and runs outside React). We can only
+// prefetch the grid's own hardcoded default first page/sort here - these
+// values must mirror the component's initial useState fallbacks below so
+// the cache entry lines up on a fresh (unauthenticated-store) render.
+const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 10 };
+const DEFAULT_SORT_MODEL = [{ field: "name", sort: "asc" }];
+const DEFAULT_FILTER_MODEL = { items: [] };
 
 export const Route = createFileRoute("/__authenticated/agencies/")({
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global
+		// network/401 error handler in main.tsx before __authenticated.tsx's
+		// own component-level auth-gate redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: [
+				"agencies",
+				DEFAULT_PAGINATION_MODEL,
+				DEFAULT_SORT_MODEL,
+				DEFAULT_FILTER_MODEL,
+			],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getAgencies, {
+					query: "",
+					pageno: DEFAULT_PAGINATION_MODEL.page,
+					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
+					order: DEFAULT_SORT_MODEL[0].field,
+					orderBy: "ASC",
+				}),
+		});
+	},
 	component: AgenciesRouteComponent,
 });
 
@@ -129,21 +163,21 @@ function AgenciesRouteComponent() {
 			...customColumns,
 			{
 				field: "name",
-				headerName: t("details.agency_name", "Agency name"),
+				headerName: t("agencies.name", "Agency name"),
 				minWidth: 150,
 				flex: 0.5,
 				filterOperators: standardFilters,
 			},
 			{
 				field: "code",
-				headerName: t("details.agency_code", "Agency code"),
+				headerName: t("agencies.code", "Agency code"),
 				minWidth: 50,
 				flex: 0.5,
 				filterOperators: standardFilters,
 			},
 			{
 				field: "id",
-				headerName: t("details.agency_uuid", "Agency UUID"),
+				headerName: t("agencies.uuid", "Agency UUID"),
 				minWidth: 100,
 				flex: 0.5,
 				filterOperators: equalsOnly,
@@ -151,14 +185,14 @@ function AgenciesRouteComponent() {
 			},
 			{
 				field: "longitude",
-				headerName: t("details.long", "Longitude"),
+				headerName: t("locations.longitude", "Longitude"),
 				minWidth: 50,
 				flex: 0.5,
 				filterOperators: equalsOnly,
 			},
 			{
 				field: "latitude",
-				headerName: t("details.lat", "Latitude"),
+				headerName: t("locations.latitude", "Latitude"),
 				minWidth: 50,
 				flex: 0.5,
 				filterOperators: equalsOnly,

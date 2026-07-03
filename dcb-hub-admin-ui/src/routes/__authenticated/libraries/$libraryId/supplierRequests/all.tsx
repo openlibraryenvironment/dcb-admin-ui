@@ -37,6 +37,7 @@ import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/supplierRequests/all",
@@ -205,17 +206,6 @@ function SupplierRequestsAll() {
 		[gridId, setColumnVisibilityModel],
 	);
 
-	const handleMainTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = [
-			"",
-			"/contacts",
-			"/patronRequests/all",
-			"/supplierRequests/all",
-			"/locations",
-		];
-		router.navigate({ to: `/libraries/${libraryId}${routes[val]}` });
-	};
-
 	if (isLibraryLoading)
 		return (
 			<Loading
@@ -229,7 +219,7 @@ function SupplierRequestsAll() {
 		return (
 			<Error
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message={"TODO"}
 			/>
@@ -258,15 +248,8 @@ function SupplierRequestsAll() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={3} onChange={handleMainTabChange} variant="scrollable">
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.libraries.patronRequests")} />
-						<Tab label={t("nav.libraries.supplierRequests.name")} />
-						<Tab label={t("nav.locations")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={5} />
 				</Grid>
-
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs value={0} sx={{ mb: 2 }}>
 						<Tab
@@ -274,7 +257,13 @@ function SupplierRequestsAll() {
 						/>
 					</Tabs>
 
-					<Typography variant="h3" fontWeight="bold" sx={{ mb: 2 }}>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("libraries.patronRequests.all", {
 							number: requestsData?.patronRequests?.totalSize ?? 0,
 						})}
@@ -318,7 +307,6 @@ function SupplierRequestsAll() {
 					/>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

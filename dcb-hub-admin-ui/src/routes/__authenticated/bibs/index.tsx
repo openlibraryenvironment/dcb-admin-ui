@@ -76,7 +76,7 @@ function BibsRouteComponent() {
 				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
 			};
 
-			return gqlClient.request(getBibs, queryVariables);
+			return gqlClient.request<any>(getBibs, queryVariables);
 		},
 		placeholderData: (previousData) => previousData,
 	});
@@ -111,7 +111,7 @@ function BibsRouteComponent() {
 		<PageContainer
 			title={t("nav.bibs")}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
-			subtitle={t("reference.catalog_build")}
+			subtitle={t("ui.reference.catalog_build")}
 		>
 			<DataGrid
 				identifier={gridId}

@@ -3,15 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import {
-	Grid,
-	Tab,
-	Tabs,
-	Button,
-	Typography,
-	Stack,
-	useTheme,
-} from "@mui/material";
+import { Grid, Button, Typography, Stack, useTheme } from "@mui/material";
 import { Edit, Delete, Save, Cancel } from "@mui/icons-material";
 import {
 	GridRowModesModel,
@@ -23,6 +15,7 @@ import {
 } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -88,7 +81,7 @@ function LibraryContacts() {
 
 	const { mutateAsync: updateContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updatePerson, variables),
+			gqlClient.request<any>(updatePerson, variables),
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				queryKey: ["library", "contacts", libraryId],
@@ -96,7 +89,7 @@ function LibraryContacts() {
 	});
 	const { mutate: deleteContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryContact, variables),
+			gqlClient.request<any>(deleteLibraryContact, variables),
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				queryKey: ["library", "contacts", libraryId],
@@ -104,7 +97,7 @@ function LibraryContacts() {
 	});
 	const { mutateAsync: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
+			gqlClient.request<any>(deleteLibraryMutation, variables),
 	});
 
 	const processRowUpdate = useCallback(
@@ -203,14 +196,14 @@ function LibraryContacts() {
 				editable: true,
 				type: "singleSelect",
 				valueOptions: [
-					{ value: true, label: t("ui.action.yes") },
-					{ value: false, label: t("ui.action.no") },
+					{ value: true, label: t("ui.actions.yes") },
+					{ value: false, label: t("ui.actions.no") },
 				],
 			},
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
@@ -293,26 +286,16 @@ function LibraryContacts() {
 				sx={{ mb: 3 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={1}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									`/libraries/${libraryId}`,
-									`/libraries/${libraryId}/contacts`,
-									`/libraries/${libraryId}/patronRequests/all`,
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.libraries.patronRequests")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={6} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold">
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("nav.libraries.contacts")}
 					</Typography>
 				</Grid>
@@ -356,7 +339,6 @@ function LibraryContacts() {
 					/>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={!!promiseArguments || !!deleteContactId}
 				onClose={() => {

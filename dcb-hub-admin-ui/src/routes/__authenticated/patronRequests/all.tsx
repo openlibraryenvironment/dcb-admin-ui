@@ -6,7 +6,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Box, Typography, Tab, Tabs, Grid } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
-import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 
@@ -28,8 +27,43 @@ import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { getPatronRequestDashboard } from "@queries/getPatronRequestDashboard";
 import { queries } from "@constants/patronRequestGridQueries";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
+	// Default-state prefetch: the loader has no access to the Zustand grid
+	// store (it's not a hook), so it can only prefetch the same defaults the
+	// component falls back to on first render - gridId "patronRequestsAll",
+	// page 0/size 20, sort by dateCreated desc. Note this queryKey has no
+	// filter model entry (unlike the other patronRequests list routes) -
+	// matches the component's useQuery exactly.
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
+		if (!auth?.isAuthenticated) return;
+		const gridId = "patronRequestsAll";
+		const currentPagination = { page: 0, pageSize: 20 };
+		const currentSort = [{ field: "dateCreated", sort: "desc" }];
+		return queryClient.ensureQueryData({
+			queryKey: [
+				"patronRequestsDashboard",
+				gridId,
+				currentPagination,
+				currentSort,
+			],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getPatronRequestDashboard, {
+					allQuery: queries.all,
+					activeQuery: queries.inProgress,
+					exceptionQuery: queries.exception,
+					outOfSequenceQuery: queries.outOfSequence,
+					finishedQuery: queries.finished,
+
+					pageno: currentPagination.page,
+					pagesize: currentPagination.pageSize,
+					order: currentSort[0]?.field ?? "dateCreated",
+					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
+				}),
+		});
+	},
 	component: All,
 });
 
@@ -45,12 +79,8 @@ function a11yTabProps(value: string) {
 function All() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const auth = useAuth();
 	const gqlClient = useGraphQLClient();
 
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 	const gridId = "patronRequestsAll";
 	const location = useLocation();
 	const currentPath = location.pathname;
@@ -84,7 +114,7 @@ function All() {
 			currentSort,
 		],
 		queryFn: () =>
-			gqlClient.request(getPatronRequestDashboard, {
+			gqlClient.request<any>(getPatronRequestDashboard, {
 				allQuery: queries.all,
 				activeQuery: queries.inProgress,
 				exceptionQuery: queries.exception,
@@ -127,10 +157,13 @@ function All() {
 			orderBy: "ASC",
 			pagesize: 100,
 		};
-		const firstPage = await gqlClient.request(getLocationForPatronRequestGrid, {
-			...variables,
-			pageno: 0,
-		});
+		const firstPage = await gqlClient.request<any>(
+			getLocationForPatronRequestGrid,
+			{
+				...variables,
+				pageno: 0,
+			},
+		);
 		let allLocations = [...(firstPage?.locations?.content || [])];
 		const totalSize = firstPage?.locations?.totalSize || 0;
 
@@ -139,7 +172,7 @@ function All() {
 			const promises = [];
 			for (let i = 1; i < totalPages; i++) {
 				promises.push(
-					gqlClient.request(getLocationForPatronRequestGrid, {
+					gqlClient.request<any>(getLocationForPatronRequestGrid, {
 						...variables,
 						pageno: i,
 					}),
@@ -163,7 +196,7 @@ function All() {
 		useQuery({
 			queryKey: ["libraries", "allSupplying"],
 			queryFn: () =>
-				gqlClient.request(getLibraries, {
+				gqlClient.request<any>(getLibraries, {
 					order: "fullName",
 					orderBy: "ASC",
 					pageno: 0,
@@ -278,9 +311,8 @@ function All() {
 								</Typography>
 								{isFilterApplied && (
 									<FilterAltOutlined
-										aria-label={t(
-											"common.filterIsApplied",
-											"Filter is applied",
+										aria-label={String(
+											t("common.filterIsApplied", "Filter is applied"),
 										)}
 										fontSize="small"
 									/>
@@ -296,7 +328,13 @@ function All() {
 					id={`patron-tabpanel-${currentPath.replace(/\//g, "-")}`}
 					aria-labelledby={`patron-tab-${currentPath.replace(/\//g, "-")}`}
 				>
-					<Typography variant="h3" fontWeight={"bold"} sx={{ mb: 2 }}>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("libraries.patronRequests.all", { number: totalSizes.all })}
 					</Typography>
 

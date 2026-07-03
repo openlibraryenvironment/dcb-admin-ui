@@ -112,19 +112,19 @@ function Identifiers() {
 			},
 			{
 				field: "author",
-				headerName: t("details.author"),
+				headerName: t("search.author"),
 				flex: 0.5,
 				minWidth: 150,
 			},
 			{
 				field: "sourceSystemId",
-				headerName: t("details.source_system_uuid"),
+				headerName: t("bibRecords.source_system_uuid"),
 				flex: 0.4,
 				minWidth: 150,
 			},
 			{
 				field: "sourceRecordId",
-				headerName: t("details.source_record_id"),
+				headerName: t("bibRecords.source_record_id"),
 				flex: 0.4,
 				minWidth: 150,
 			},
@@ -185,7 +185,7 @@ function Identifiers() {
 		return (
 			<ErrorComponent
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.reload")}
+				action={t("ui.actions.reload")}
 				reload
 				message={t("eerror")} /** TODO */
 			/>

@@ -104,7 +104,7 @@ function AllNumericMappings() {
 		return (
 			<ErrorComponent
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message="TODO"
 			/>
@@ -153,7 +153,13 @@ function AllNumericMappings() {
 						<Tab label={t("mappings.categories.all")} />
 					</Tabs>
 
-					<Typography variant="h3" fontWeight="bold" sx={{ mb: 2 }}>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("libraries.config.data.mappings.all_num_range", {
 							hostLms: library.agency?.hostLms?.code,
 						})}
@@ -175,7 +181,14 @@ function AllNumericMappings() {
 
 					{library.secondHostLms && (
 						<>
-							<Typography variant="h3" fontWeight="bold" sx={{ mt: 4, mb: 2 }}>
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+									mt: 4,
+									mb: 2,
+								}}
+							>
 								{t("libraries.config.data.mappings.all_num_range", {
 									hostLms: library.secondHostLms.code,
 								})}
@@ -197,7 +210,6 @@ function AllNumericMappings() {
 					)}
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

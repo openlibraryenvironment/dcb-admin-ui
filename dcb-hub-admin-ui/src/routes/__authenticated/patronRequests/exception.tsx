@@ -2,9 +2,8 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
-import { useAuth } from "react-oidc-context";
 import { useTranslation } from "react-i18next";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import Loading from "@components/Loading/Loading";
@@ -26,37 +25,50 @@ import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibilit
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { queries } from "@constants/patronRequestGridQueries";
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/exception",
 )({
+	// Default-state prefetch: the loader has no access to the Zustand grid
+	// store (it's not a hook), so it can only prefetch the same defaults the
+	// component falls back to on first render - gridId
+	// "patronRequestsException", page 0/size 20, sort by dateCreated desc, no
+	// filter.
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
+		if (!auth?.isAuthenticated) return;
+		const gridId = "patronRequestsException";
+		const currentPagination = { page: 0, pageSize: 20 };
+		const currentSort = [{ field: "dateCreated", sort: "desc" }];
+		const currentFilter = { items: [] };
+		return queryClient.ensureQueryData({
+			queryKey: [
+				"patronRequests",
+				gridId,
+				currentPagination,
+				currentSort,
+				currentFilter,
+			],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getPatronRequests, {
+					query: queries.exception,
+					pageno: currentPagination.page,
+					pagesize: currentPagination.pageSize,
+					order: currentSort[0]?.field ?? "dateCreated",
+					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
+				}),
+		});
+	},
 	component: Exception,
 });
 
 function Exception() {
 	const { t } = useTranslation();
 	const router = useRouter();
-	const auth = useAuth();
 	const gqlClient = useGraphQLClient();
 
-	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin =
-		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-
-	const [tabIndex, setTabIndex] = useState(0);
 	const currentPath = Route.fullPath;
-
-	const [totalSizes, setTotalSizes] = useState({
-		exception: 0,
-		outOfSequence: 0,
-		inProgress: 0,
-		finished: 0,
-		all: 0,
-	});
-	const [unfilteredExceptionCount, setUnfilteredExceptionCount] = useState<
-		number | null
-	>(null);
-	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
 	const gridId = "patronRequestsException";
 	const {
@@ -78,36 +90,6 @@ function Exception() {
 	const currentFilter = filterModel[gridId] ?? { items: [] };
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const updateCount = useCallback((key: string, count: number) => {
-		setTotalSizes((prev) => {
-			const newSizes = { ...prev, [key]: count };
-			if (key !== "all") {
-				newSizes.all =
-					(key === "exception" ? count : newSizes.exception) +
-					(key === "outOfSequence" ? count : newSizes.outOfSequence) +
-					(key === "inProgress" ? count : newSizes.inProgress) +
-					(key === "finished" ? count : newSizes.finished);
-			}
-			return newSizes;
-		});
-	}, []);
-
-	const handleTotalSizeChange = useCallback(
-		(gridType: string, currentGridSize: number) => {
-			if (gridType === gridId) {
-				updateCount("exception", currentGridSize);
-				if (unfilteredExceptionCount !== null) {
-					setIsFilterApplied(currentGridSize < unfilteredExceptionCount);
-				} else {
-					setIsFilterApplied(false);
-				}
-			} else {
-				updateCount(gridType, currentGridSize);
-			}
-		},
-		[updateCount, unfilteredExceptionCount],
-	);
-
 	const fetchAllLocations = async () => {
 		const variables = {
 			query: "",
@@ -115,10 +97,13 @@ function Exception() {
 			orderBy: "ASC",
 			pagesize: 100,
 		};
-		const firstPage = await gqlClient.request(getLocationForPatronRequestGrid, {
-			...variables,
-			pageno: 0,
-		});
+		const firstPage = await gqlClient.request<any>(
+			getLocationForPatronRequestGrid,
+			{
+				...variables,
+				pageno: 0,
+			},
+		);
 		let allLocations = [...(firstPage?.locations?.content || [])];
 		const totalSize = firstPage?.locations?.totalSize || 0;
 
@@ -127,7 +112,7 @@ function Exception() {
 			const promises = [];
 			for (let i = 1; i < totalPages; i++) {
 				promises.push(
-					gqlClient.request(getLocationForPatronRequestGrid, {
+					gqlClient.request<any>(getLocationForPatronRequestGrid, {
 						...variables,
 						pageno: i,
 					}),
@@ -151,7 +136,7 @@ function Exception() {
 	const { data: excData, isLoading: exceptionLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "exception"],
 		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
+			gqlClient.request<any>(getPatronRequestTotals, {
 				query: queries.exception,
 				pageno: 0,
 				pagesize: 1,
@@ -159,17 +144,10 @@ function Exception() {
 				orderBy: "DESC",
 			}),
 	});
-	useEffect(() => {
-		if (excData?.patronRequests?.totalSize !== undefined) {
-			updateCount("exception", excData.patronRequests.totalSize);
-			setUnfilteredExceptionCount(excData.patronRequests.totalSize);
-		}
-	}, [excData, updateCount]);
-
 	const { data: oosData, isLoading: outOfSequenceLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "outOfSequence"],
 		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
+			gqlClient.request<any>(getPatronRequestTotals, {
 				query: queries.outOfSequence,
 				pageno: 0,
 				pagesize: 1,
@@ -177,16 +155,10 @@ function Exception() {
 				orderBy: "DESC",
 			}),
 	});
-	useEffect(() => {
-		if (oosData?.patronRequests?.totalSize !== undefined) {
-			updateCount("outOfSequence", oosData.patronRequests.totalSize);
-		}
-	}, [oosData, updateCount]);
-
 	const { data: inProgData, isLoading: inProgressLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "inProgress"],
 		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
+			gqlClient.request<any>(getPatronRequestTotals, {
 				query: queries.inProgress,
 				pageno: 0,
 				pagesize: 1,
@@ -194,16 +166,10 @@ function Exception() {
 				orderBy: "DESC",
 			}),
 	});
-	useEffect(() => {
-		if (inProgData?.patronRequests?.totalSize !== undefined) {
-			updateCount("inProgress", inProgData.patronRequests.totalSize);
-		}
-	}, [inProgData, updateCount]);
-
 	const { data: finData, isLoading: finishedLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "finished"],
 		queryFn: () =>
-			gqlClient.request(getPatronRequestTotals, {
+			gqlClient.request<any>(getPatronRequestTotals, {
 				query: queries.finished,
 				pageno: 0,
 				pagesize: 1,
@@ -211,17 +177,11 @@ function Exception() {
 				orderBy: "DESC",
 			}),
 	});
-	useEffect(() => {
-		if (finData?.patronRequests?.totalSize !== undefined) {
-			updateCount("finished", finData.patronRequests.totalSize);
-		}
-	}, [finData, updateCount]);
-
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery({
 			queryKey: ["libraries", "allSupplying"],
 			queryFn: () =>
-				gqlClient.request(getLibraries, {
+				gqlClient.request<any>(getLibraries, {
 					order: "fullName",
 					orderBy: "ASC",
 					pageno: 0,
@@ -239,7 +199,7 @@ function Exception() {
 			currentFilter,
 		],
 		queryFn: () =>
-			gqlClient.request(getPatronRequests, {
+			gqlClient.request<any>(getPatronRequests, {
 				query: queries.exception,
 				pageno: currentPagination.page,
 				pagesize: currentPagination.pageSize,
@@ -248,11 +208,28 @@ function Exception() {
 			}),
 	});
 
-	useEffect(() => {
-		if (gridData?.patronRequests?.totalSize !== undefined) {
-			handleTotalSizeChange(gridId, gridData.patronRequests.totalSize);
-		}
-	}, [gridData?.patronRequests?.totalSize, handleTotalSizeChange]);
+	// Counts are derived directly from the query data rather than pushed into
+	// state via effects. The exception tab reflects the (possibly filtered) grid
+	// total, and the filter indicator compares it to the unfiltered total.
+	const unfilteredExceptionCount = excData?.patronRequests?.totalSize ?? null;
+	const gridTotalSize = gridData?.patronRequests?.totalSize as
+		number | undefined;
+	const exceptionCount = gridTotalSize ?? unfilteredExceptionCount ?? 0;
+	const isFilterApplied =
+		gridTotalSize != null && unfilteredExceptionCount != null
+			? gridTotalSize < unfilteredExceptionCount
+			: false;
+	const totalSizes = {
+		exception: exceptionCount,
+		outOfSequence: oosData?.patronRequests?.totalSize ?? 0,
+		inProgress: inProgData?.patronRequests?.totalSize ?? 0,
+		finished: finData?.patronRequests?.totalSize ?? 0,
+		all:
+			exceptionCount +
+			(oosData?.patronRequests?.totalSize ?? 0) +
+			(inProgData?.patronRequests?.totalSize ?? 0) +
+			(finData?.patronRequests?.totalSize ?? 0),
+	};
 
 	const customColumns = useCustomColumns();
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
@@ -308,9 +285,8 @@ function Exception() {
 								</Typography>
 								{isFilterApplied && (
 									<FilterAltOutlined
-										aria-label={t(
-											"common.filterIsApplied",
-											"Filter is applied",
+										aria-label={String(
+											t("common.filterIsApplied", "Filter is applied"),
 										)}
 										fontSize="small"
 									/>
@@ -363,7 +339,12 @@ function Exception() {
 				</Tabs>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h3" fontWeight={"bold"}>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("libraries.patronRequests.exception", {
 							number: totalSizes.exception,
 						})}

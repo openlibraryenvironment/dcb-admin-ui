@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -88,14 +88,6 @@ function RouteComponent() {
 		{ field: "auditDate", sort: "desc" },
 	];
 
-	const prQueryVariables = {
-		query: "id:" + id,
-		pagesize: 10,
-		pageno: 0,
-		orderBy: "dateUpdated",
-		order: "DESC",
-	};
-
 	const {
 		data,
 		isError,
@@ -103,26 +95,23 @@ function RouteComponent() {
 	} = useQuery({
 		queryKey: ["patronRequest", id],
 		queryFn: async () =>
-			gqlClient.request(getPatronRequest, { query: `id:${id}` }),
+			gqlClient.request<any>(getPatronRequest, { query: `id:${id}` }),
 		enabled: !!id,
 	});
 
-	const {
-		data: supplierLibraryData,
-		isError: supplierLibraryError,
-		isLoading: supplierLibraryLoading,
-	} = useQuery({
-		queryKey: ["supplierLibraryData", id],
-		queryFn: async () =>
-			gqlClient.request(getLibraryBasics, {
-				query: "agencyCode:" + patronRequest?.suppliers[0]?.localAgency,
-				pageno: 0,
-				pagesize: 10,
-				order: "agencyCode",
-				orderBy: "ASC",
-			}),
-		enabled: !!id,
-	});
+	const { data: supplierLibraryData, isLoading: supplierLibraryLoading } =
+		useQuery({
+			queryKey: ["supplierLibraryData", id],
+			queryFn: async () =>
+				gqlClient.request<any>(getLibraryBasics, {
+					query: "agencyCode:" + patronRequest?.suppliers[0]?.localAgency,
+					pageno: 0,
+					pagesize: 10,
+					order: "agencyCode",
+					orderBy: "ASC",
+				}),
+			enabled: !!id,
+		});
 
 	const patronRequest = data?.patronRequests?.content?.[0];
 	const members = patronRequest?.clusterRecord?.members;
@@ -136,7 +125,7 @@ function RouteComponent() {
 	} = useQuery({
 		queryKey: ["patronIdentities", patronRequest?.pickupPatronId],
 		queryFn: async () =>
-			gqlClient.request(getPatronIdentities, {
+			gqlClient.request<any>(getPatronIdentities, {
 				query: `localId:${patronRequest?.pickupPatronId}`,
 				order: "id",
 				orderBy: "ASC",
@@ -153,7 +142,7 @@ function RouteComponent() {
 	} = useQuery({
 		queryKey: ["location", patronRequest?.pickupLocationCode],
 		queryFn: async () =>
-			gqlClient.request(getLocation, {
+			gqlClient.request<any>(getLocation, {
 				query: `id:${patronRequest?.pickupLocationCode}`,
 			}),
 		enabled: !!patronRequest?.pickupLocationCode,
@@ -164,7 +153,7 @@ function RouteComponent() {
 		{
 			queryKey: ["library", "pickup", pickupLocation?.agency?.code],
 			queryFn: async () =>
-				gqlClient.request(getLibraryBasics, {
+				gqlClient.request<any>(getLibraryBasics, {
 					query: `agencyCode:${pickupLocation?.agency?.code}`,
 				}),
 			enabled: !!pickupLocation?.agency?.code,
@@ -175,7 +164,7 @@ function RouteComponent() {
 	const { data: patronLmsData, isLoading: patronLmsLoading } = useQuery({
 		queryKey: ["hostLms", patronRequest?.patronHostlmsCode],
 		queryFn: async () =>
-			gqlClient.request(getHostLms, {
+			gqlClient.request<any>(getHostLms, {
 				query: `code:${patronRequest?.patronHostlmsCode}`,
 			}),
 		enabled: !!patronRequest?.patronHostlmsCode,
@@ -185,7 +174,7 @@ function RouteComponent() {
 	const { data: patronAgencyData, isLoading: patronAgencyLoading } = useQuery({
 		queryKey: ["agency", patronHostLms?.id],
 		queryFn: async () =>
-			gqlClient.request(getAgency, {
+			gqlClient.request<any>(getAgency, {
 				query: `hostLms:${patronHostLms?.id}`,
 			}),
 		enabled: !!patronHostLms?.id,
@@ -196,7 +185,7 @@ function RouteComponent() {
 		{
 			queryKey: ["library", "patron", patronAgency?.code],
 			queryFn: async () =>
-				gqlClient.request(getLibraryBasics, {
+				gqlClient.request<any>(getLibraryBasics, {
 					query: `agencyCode:${patronAgency?.code}`,
 				}),
 			enabled: !!patronAgency?.code,
@@ -297,7 +286,7 @@ function RouteComponent() {
 					<Tab label={t("patron_request.supplying")} />
 					<Tab label={t("patron_request.borrowing")} />
 					<Tab label={t("patron_request.pickup")} />
-					<Tab label={t("audit.log")} />
+					<Tab label={t("audit_log.title")} />
 				</TabList>
 
 				<TabPanel value={0}>
@@ -857,7 +846,7 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("bibs.selected_bib_uuid")}
+									{t("requesting.selected_bib_uuid")}
 								</Typography>
 								<RenderAttribute
 									attribute={patronRequest?.clusterRecord?.selectedBib}
@@ -974,7 +963,7 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron_request.date_created")}
+									{t("ui.info.date_created")}
 								</Typography>
 								<RenderAttribute
 									attribute={dayjs(
@@ -986,7 +975,7 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron_request.date_updated")}
+									{t("ui.info.date_updated")}
 								</Typography>
 								<RenderAttribute
 									attribute={dayjs(
@@ -1050,7 +1039,13 @@ function RouteComponent() {
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+						<Grid
+							size={{ xs: 4, sm: 8, md: 12, lg: 16 }}
+							sx={{
+								mb: 1,
+								mt: 1,
+							}}
+						>
 							<Divider aria-hidden="true"></Divider>
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -1175,7 +1170,13 @@ function RouteComponent() {
 						spacing={{ xs: 2, md: 3 }}
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
-						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+						<Grid
+							size={{ xs: 4, sm: 8, md: 12, lg: 16 }}
+							sx={{
+								mb: 1,
+								mt: 1,
+							}}
+						>
 							<Divider aria-hidden="true"></Divider>
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -1340,7 +1341,13 @@ function RouteComponent() {
 							</Stack>
 						</Grid>
 
-						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+						<Grid
+							size={{ xs: 4, sm: 8, md: 12, lg: 16 }}
+							sx={{
+								mb: 1,
+								mt: 1,
+							}}
+						>
 							<Divider aria-hidden="true"></Divider>
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -1465,7 +1472,13 @@ function RouteComponent() {
 								/>
 							</Stack>
 						</Grid>
-						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+						<Grid
+							size={{ xs: 4, sm: 8, md: 12, lg: 16 }}
+							sx={{
+								mb: 1,
+								mt: 1,
+							}}
+						>
 							<Divider aria-hidden="true"></Divider>
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -1548,7 +1561,13 @@ function RouteComponent() {
 								)}
 							</Stack>
 						</Grid>
-						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }} mb={1} mt={1}>
+						<Grid
+							size={{ xs: 4, sm: 8, md: 12, lg: 16 }}
+							sx={{
+								mb: 1,
+								mt: 1,
+							}}
+						>
 							<Divider aria-hidden="true"></Divider>
 						</Grid>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
@@ -1604,7 +1623,7 @@ function RouteComponent() {
 
 				<TabPanel value={5}>
 					<Typography id="auditlog" variant="accordionSummary">
-						{t("audit.log")}
+						{t("audit_log.title")}
 					</Typography>
 					<DataGrid
 						disablePivoting

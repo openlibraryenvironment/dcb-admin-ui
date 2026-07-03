@@ -65,14 +65,14 @@ function Contacts() {
 
 	const { mutateAsync: updateContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updatePerson, variables),
+			gqlClient.request<any>(updatePerson, variables),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortiumContacts"] }),
 	});
 
 	const { mutate: deleteContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteConsortiumContact, variables),
+			gqlClient.request<any>(deleteConsortiumContact, variables),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortiumContacts"] }),
 	});
@@ -177,14 +177,14 @@ function Contacts() {
 				editable: true,
 				type: "singleSelect",
 				valueOptions: [
-					{ value: true, label: t("ui.action.yes") },
-					{ value: false, label: t("ui.action.no") },
+					{ value: true, label: t("ui.actions.yes") },
+					{ value: false, label: t("ui.actions.no") },
 				],
 			},
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {

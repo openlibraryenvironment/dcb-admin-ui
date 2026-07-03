@@ -68,7 +68,6 @@ function ReferenceValueMappingsRoute() {
 		setDeleteConfirmationId,
 		showImport,
 		setImport,
-		showNewMapping,
 		setNewMapping,
 	} = useMappingGridState(gridId, { lastImported: false, toCategory: false });
 
@@ -91,20 +90,20 @@ function ReferenceValueMappingsRoute() {
 				order: sortModel[0]?.field ?? "lastImported",
 				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
 			};
-			return gqlClient.request(getMappings, queryVariables);
+			return gqlClient.request<any>(getMappings, queryVariables);
 		},
 		placeholderData: (previousData) => previousData,
 	});
 
 	const { mutateAsync: updateMapping } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateReferenceValueMapping, variables),
+			gqlClient.request<any>(updateReferenceValueMapping, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
 	const { mutate: deleteMapping } = useMutation({
 		mutationFn: (id: string) =>
-			gqlClient.request(deleteReferenceValueMapping, { id }),
+			gqlClient.request<any>(deleteReferenceValueMapping, { id }),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -153,7 +152,7 @@ function ReferenceValueMappingsRoute() {
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {

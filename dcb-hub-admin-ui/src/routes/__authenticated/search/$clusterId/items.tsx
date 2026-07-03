@@ -13,7 +13,7 @@ import {
 	Stack,
 	Alert,
 } from "@mui/material";
-import { ExpandMore, InfoOutline } from "@mui/icons-material";
+import { ExpandMore } from "@mui/icons-material";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
@@ -48,7 +48,7 @@ function ItemsPageComponent() {
 	const { paginationModel, setPaginationModel, sortModel, setSortModel } =
 		useGridStore();
 
-	const { data, isLoading, error } = useQuery({
+	const { data, isLoading } = useQuery({
 		queryKey: ["clusterItems", clusterId],
 		queryFn: async () => {
 			const headers = { Authorization: `Bearer ${auth.user?.access_token}` };

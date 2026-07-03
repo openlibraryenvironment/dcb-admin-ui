@@ -1,7 +1,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	useRouter,
+	Link,
+} from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { z } from "zod";
 import { validate } from "uuid";
@@ -38,8 +43,13 @@ export const Route = createFileRoute("/__authenticated/search/")({
 
 function SearchPage() {
 	const { t } = useTranslation();
-	const navigate = useNavigate({ from: Route.id });
+	const navigate = useNavigate();
 	const auth = useAuth();
+	// Runtime config (injected via inject_env.json in production) - not the
+	// build-time import.meta.env, which is undefined in the runtime-configured
+	// production image and would wrongly show the "shared index unavailable" page.
+	const { cfg } = useRouter().options.context as { cfg: any };
+	const searchBase = cfg?.VITE_DCB_SEARCH_BASE;
 
 	// Read the query directly from the URL
 	const { q } = Route.useSearch();
@@ -70,15 +80,19 @@ function SearchPage() {
 		if (!isEqual(parsedCriteria, criteria)) {
 			setCriteria(parsedCriteria);
 		}
+		// intentionally re-syncs only when the URL (q) changes; depending on `criteria` would fight the reverse Criteria->URL sync
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [q, setCriteria]);
 
 	// 3. Sync Query Builder Criteria -> DataGrid Filter Model UI
+	/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- intentionally re-syncs the grid filter model only when `criteria` changes; depending on `filterModelLocal` would fight the reverse grid->criteria sync */
 	useEffect(() => {
 		const newFilterModel = mapCriteriaToFilterModel(criteria);
 		if (!isEqual(newFilterModel, filterModelLocal)) {
 			setLocalFilterModel(newFilterModel);
 		}
 	}, [criteria]);
+	/* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
 
 	// 4. TanStack Query for Data Fetching (Replaces useEffect + Axios)
 	const { data, isLoading, isError, isFetching } = useQuery({
@@ -87,7 +101,7 @@ function SearchPage() {
 			if (!auth.user?.access_token || !q)
 				return { instances: [], totalRecords: 0 };
 
-			const baseUrl = import.meta.env.VITE_DCB_SEARCH_BASE;
+			const baseUrl = searchBase;
 			if (!baseUrl) throw new Error("Search base URL not configured");
 
 			const isUUID = q.length === 36 ? validate(q) : false;
@@ -120,12 +134,18 @@ function SearchPage() {
 	});
 
 	// --- Handlers ---
-	const executeSearch = (newCriteria: any) => {
-		const newQuery = buildQueryFromCriteria(newCriteria);
-		if (newQuery !== q) {
-			navigate({ search: { q: newQuery }, replace: true });
-		}
-	};
+	const executeSearch = useCallback(
+		(newCriteria: any) => {
+			const newQuery = buildQueryFromCriteria(newCriteria);
+			if (newQuery !== q) {
+				// Explicit public path: navigating off Route.id (the internal
+				// "/__authenticated/search/") landed on the NotFound page. Writing the
+				// URL here is what makes the search shareable/bookmarkable.
+				navigate({ to: "/search", search: { q: newQuery }, replace: true });
+			}
+		},
+		[q, navigate],
+	);
 
 	const handleBuilderSearch = () => {
 		// Reset to page 0 on a fresh search
@@ -149,7 +169,7 @@ function SearchPage() {
 			setLocalFilterModel(newFilterModel);
 			setFilterModel(gridId, newFilterModel);
 		},
-		[filterModelLocal, setCriteria, setFilterModel, gridId],
+		[filterModelLocal, setCriteria, setFilterModel, gridId, executeSearch],
 	);
 
 	const handlePaginationChange = useCallback(
@@ -205,13 +225,13 @@ function SearchPage() {
 	);
 
 	// --- Render ---
-	if (!import.meta.env.VITE_DCB_SEARCH_BASE) {
+	if (!searchBase) {
 		return (
 			<PageContainer title={t("nav.search.name")}>
 				<ErrorComponent
 					title={t("search.shared_index_unavailable_title")}
 					message={t("search.shared_index_unavailable_message")}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/"
 				/>
 			</PageContainer>
@@ -229,7 +249,7 @@ function SearchPage() {
 					title={t("ui.error.search_failed")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.reload")}
-					action={t("ui.action.reload")}
+					action={t("ui.actions.reload")}
 					reload
 				/>
 			) : (

@@ -17,7 +17,9 @@ import { getClusters } from "@queries/getClusters";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { useState } from "react";
 
-export const Route = createFileRoute("/__authenticated/search/$clusterId/cluster")({
+export const Route = createFileRoute(
+	"/__authenticated/search/$clusterId/cluster",
+)({
 	component: ClusterDetails,
 });
 
@@ -34,8 +36,7 @@ function ClusterDetails() {
 		enabled: !!clusterId,
 	});
 
-	const { paginationModel, setPaginationModel, sortModel, setSortModel } =
-		useGridStore();
+	const { paginationModel } = useGridStore();
 
 	const cluster = data?.instanceClusters?.content?.[0];
 	const gridId = "clustermembers";
@@ -62,7 +63,7 @@ function ClusterDetails() {
 		return (
 			<Error
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/search"
 				message={t("error.error")} /** TODO */
 			/>
@@ -78,7 +79,7 @@ function ClusterDetails() {
 			<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 				<Stack direction="column">
 					<Typography variant="attributeTitle">
-						{t("details.date_created")}
+						{t("ui.info.date_created")}
 					</Typography>
 					<RenderAttribute
 						attribute={dayjs(cluster?.dateCreated).format("YYYY-MM-DD HH:mm")}
@@ -88,7 +89,7 @@ function ClusterDetails() {
 			<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 				<Stack direction="column">
 					<Typography variant="attributeTitle">
-						{t("details.date_updated")}
+						{t("ui.info.date_updated")}
 					</Typography>
 					<RenderAttribute
 						attribute={dayjs(cluster?.dateUpdated).format("YYYY-MM-DD HH:mm")}
@@ -98,7 +99,7 @@ function ClusterDetails() {
 			<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 				<Stack direction="column">
 					<Typography variant="attributeTitle">
-						{t("details.selected_bib_uuid")}
+						{t("requesting.selected_bib_uuid")}
 					</Typography>
 					<Link to={`/bibs/${cluster?.selectedBib}`} underline="hover">
 						<RenderAttribute attribute={cluster?.selectedBib} />
@@ -116,7 +117,7 @@ function ClusterDetails() {
 			<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 				<Stack direction="column">
 					<Typography variant="attributeTitle">
-						{t("details.last_indexed")}
+						{t("ui.info.last_indexed")}
 					</Typography>
 					<RenderAttribute
 						attribute={dayjs(cluster?.lastIndexed).format(

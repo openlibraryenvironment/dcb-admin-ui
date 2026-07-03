@@ -14,6 +14,7 @@ import {
 } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -231,22 +232,7 @@ function PatronRequestsAll() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={2}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									`/libraries/${libraryId}`,
-									`/libraries/${libraryId}/contacts`,
-									`/libraries/${libraryId}/patronRequests/all`,
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.libraries.patronRequests")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={4} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
@@ -276,7 +262,13 @@ function PatronRequestsAll() {
 						/>
 					</Tabs>
 
-					<Typography variant="h3" fontWeight="bold" sx={{ mb: 2 }}>
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("libraries.patronRequests.all", {
 							number: requestsData?.patronRequests?.totalSize ?? 0,
 						})}
@@ -320,7 +312,6 @@ function PatronRequestsAll() {
 					/>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

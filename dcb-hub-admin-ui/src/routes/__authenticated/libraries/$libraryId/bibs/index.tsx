@@ -4,7 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
-import { Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
+import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import {
 	GridPaginationModel,
@@ -14,6 +14,7 @@ import {
 } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -155,27 +156,12 @@ function LibraryBibs() {
 		[gridId, setColumnVisibilityModel],
 	);
 
-	const handleMainTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = [
-			"",
-			"/service",
-			"/settings",
-			"/mappings/reference-value/all",
-			"/patronRequests/all",
-			"/supplierRequests/all",
-			"/contacts",
-			"/locations",
-			"/bibs",
-		];
-		router.navigate({ to: `/libraries/${libraryId}${routes[val]}` });
-	};
-
 	const columns: GridColDef[] = useMemo(
 		() => [
 			...customColumns.map((col) => ({ ...col, sortable: false })), // Enforce no sorting on custom columns too
 			{
 				field: "title",
-				headerName: t("details.source_bib_title"),
+				headerName: t("search.title"),
 				minWidth: 150,
 				flex: 0.6,
 				sortable: false,
@@ -183,7 +169,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "clusterRecordId",
-				headerName: t("details.cluster_record_uuid"),
+				headerName: t("patron_request.cluster_record_uuid"),
 				minWidth: 50,
 				flex: 0.5,
 				sortable: false,
@@ -193,7 +179,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "sourceRecordId",
-				headerName: t("details.source_record_id"),
+				headerName: t("bibRecords.source_record_id"),
 				minWidth: 50,
 				sortable: false,
 				filterOperators: standardFilters,
@@ -201,7 +187,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "sourceSystemId",
-				headerName: t("details.source_system_id"),
+				headerName: t("bibRecords.source_system_id"),
 				minWidth: 50,
 				sortable: false,
 				filterOperators: equalsOnly,
@@ -209,7 +195,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "id",
-				headerName: t("details.source_bib_uuid"),
+				headerName: t("bibRecords.source_bib_uuid"),
 				minWidth: 100,
 				flex: 0.5,
 				sortable: false,
@@ -217,7 +203,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "processVersion",
-				headerName: t("details.process_version"),
+				headerName: t("bibRecords.process_version"),
 				minWidth: 100,
 				flex: 0.5,
 				sortable: false,
@@ -225,7 +211,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "dateUpdated",
-				headerName: t("details.date_updated"),
+				headerName: t("ui.info.date_updated"),
 				minWidth: 100,
 				flex: 0.5,
 				sortable: false,
@@ -253,7 +239,7 @@ function LibraryBibs() {
 		return (
 			<ErrorComponent
 				title={t("ui.error.cannot_retrieve_record")}
-				action={t("ui.action.go_back")}
+				action={t("ui.actions.go_back")}
 				goBack="/libraries"
 				message="TODO"
 			/>
@@ -263,7 +249,7 @@ function LibraryBibs() {
 		<PageContainer
 			title={library.fullName}
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
-			subtitle={t("reference.catalog_build")}
+			subtitle={t("ui.reference.catalog_build")}
 			pageActions={[
 				{
 					key: "delete",
@@ -284,20 +270,16 @@ function LibraryBibs() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={8} onChange={handleMainTabChange} variant="scrollable">
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.service")} />
-						<Tab label={t("nav.libraries.settings")} />
-						<Tab label={t("nav.mappings.name")} />
-						<Tab label={t("nav.libraries.patronRequests.name")} />
-						<Tab label={t("nav.libraries.supplierRequests.name")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.locations")} />
-						<Tab label={t("nav.bibs")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={8} />
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold" sx={{ mb: 2 }}>
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
 						{t("nav.bibs")}
 					</Typography>
 
@@ -335,7 +317,6 @@ function LibraryBibs() {
 					/>
 				</Grid>
 			</Grid>
-
 			<Confirmation
 				open={showConfirmationDeletion}
 				onClose={() => setConfirmationDeletion(false)}

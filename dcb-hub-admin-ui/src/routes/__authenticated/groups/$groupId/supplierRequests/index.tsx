@@ -237,7 +237,7 @@ function GroupSupplierRequests() {
 					description={
 						groupError ? t("ui.info.try_later") : t("ui.info.check_address")
 					}
-					action={t("ui.action.go_back")}
+					action={t("ui.actions.go_back")}
 					goBack="/groups"
 				/>
 			</PageContainer>
@@ -272,7 +272,12 @@ function GroupSupplierRequests() {
 					</Tabs>
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h2" fontWeight="bold">
+					<Typography
+						variant="h2"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
 						{t("nav.groups.supplierRequests")}
 					</Typography>
 				</Grid>
