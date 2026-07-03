@@ -61,7 +61,7 @@ export const defaultLocationColumns: GridColDef[] = [
 			} else if (value === false) {
 				return i18n.t("consortium.settings.disabled");
 			} else {
-				return i18n.t("details.location_pickup_not_set");
+				return i18n.t("locations.new.pickup_not_set");
 			}
 		},
 	},
@@ -77,13 +77,13 @@ export const defaultLocationColumns: GridColDef[] = [
 			} else if (value === false) {
 				return i18n.t("consortium.settings.disabled");
 			} else {
-				return i18n.t("details.location_pickup_not_set");
+				return i18n.t("locations.new.pickup_not_set");
 			}
 		},
 	},
 	{
 		field: "localId",
-		headerName: i18n.t("details.local_id"),
+		headerName: i18n.t("locations.local_id"),
 		minWidth: 50,
 		flex: 0.8,
 		filterOperators: equalsOnly,
