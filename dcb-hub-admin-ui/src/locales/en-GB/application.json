@@ -1,15 +1,20 @@
 {
 	"agencies": {
-		"agencies_one": "agency",
 		"add_to_group": "Add agencies to a group",
+		"agencies_one": "agency",
 		"alert_text_success": "Agency added to group!",
 		"alert_text": "Failed to fetch the agencies, please refresh the page.",
+		"auth": "Authentication profile",
 		"borrowing": "Is borrowing agency?",
+		"code": "Agency code",
+		"host_lms": "Agency Host LMS",
 		"loading_msg": "Loading agencies....",
+		"name": "Agency name",
 		"no_results": "No agencies were found. Try changing your search terms or filters.",
 		"no_rows": "No agencies available. If you're expecting data to be here, please refresh the page.",
 		"supplying": "Is supplying agency?",
-		"search_placeholder": "Search by name"
+		"search_placeholder": "Search by name",
+		"uuid": "Agency UUID"
 	},
 	"alarms": {
 		"code": "Alarm code",
@@ -48,18 +53,28 @@
 		"audit_description": "Brief description",
 		"audit_from_status": "fromStatus",
 		"audit_uuid": "Audit UUID",
-		"audit_log": "Audit log",
+		"title": "Audit log",
 		"audit_log_no_data": "No audit log found.",
 		"audit_log_no_rows": "Try changing your filters or search terms.",
 		"audit_to_status": "toStatus"
 	},
 	"bibRecords": {
 		"bibs_one": "bib record",
-		"source_record": "Source record",
 		"bib_records": "Bib records",
+		"contributor_uuid": "Contributor UUID",
+		"edition": "Edition",
+		"large_print": "Large print?",
+		"metadata_score": "Metadata score",
 		"no_results": "No bib records found. Try changing your search terms or filters.",
 		"no_rows": "No bib records available. If you're expecting data to be here, please refresh the page.",
-		"search_placeholder": "Search by sourceRecordId"
+		"process_version": "Process version",
+		"record_type": "Record type",
+		"search_placeholder": "Search by sourceRecordId",
+		"source_bib_uuid": "Source bib UUID",
+		"source_library": "Source library",
+		"source_record": "Source record",
+		"source_record_id": "Source record ID",
+		"source_system_uuid": "Source system UUID"
 	},
 	"catalogMetricsByHostLms": {
 		"await": "Awaiting ingest",
@@ -277,9 +292,26 @@
 		"language_switcher_title": "Language",
 		"consortium_icon": "The icon of the {{consortium}} consortium."
 	},
-	"host_lms": {
+	"theme": {
+		"appearance": "Appearance",
+		"theme_label": "Theme",
+		"mode_label": "Mode",
+		"themes": {
+			"openRS": "OpenRS",
+			"evergreen": "Evergreen"
+		},
+		"modes": {
+			"light": "Light",
+			"dark": "Dark",
+			"highContrast": "High contrast"
+		}
+	},
+	"hostlms": {
 		"alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.",
 		"bibSuppressionRulesetName": "Bib suppression ruleset",
+		"client_class": "Client class",
+		"client_config_json": "Client configuration (JSON)",
+		"client_config_json_helper": "Optional. Provide any additional configuration as JSON.",
 		"code": "Host LMS code",
 		"configuration": "Host LMS configuration",
 		"hostlms_one": "Host LMS",
@@ -288,10 +320,14 @@
 		"loading_msg": "Loading HostLMS....",
 		"lms_client": "LmsClientClass",
 		"name": "Host LMS name",
+		"new": "New Host LMS",
+		"new_explanation": "Enter the details of the new host LMS you want to create.",
 		"no_results": "No Host LMSs were found. Try changing your search terms or filters.",
 		"no_rows": "No Host LMSs are available. If you're expecting data to be here, please refresh the page.",
+		"ping_warning": "Creating this Host LMS will attempt to connect to it immediately.",
 		"roles": "Roles",
 		"search_placeholder": "Search by name",
+		"success_ping": "Host LMS created. Connection status: {{status}}",
 		"client_config": {
 			"title": "Client config",
 			"access_id": "Access ID",
@@ -343,6 +379,7 @@
 	"libraries": {
 		"abbreviated_name": "Abbreviated name",
 		"add_to_group": "Add library to a group",
+		"add_to_group_selected": "Add selected libraries to a group",
 		"add_to_group_explanation": "Please select a library to add to a group. You can also use this form to add a library to a consortium by selecting the relevant consortium group.",
 		"alert_text_success": "Library successfully added to group",
 		"error_adding_to_group": "Error adding library to group. Please try again.",
@@ -371,6 +408,7 @@
 		"request_tooltip": "This is a {{ils}} library. The primary contact(s) are {{contact}}",
 		"ruleset_loading": "Loading ruleset information",
 		"search_placeholder": "Search by name",
+		"selected_libraries": "Selected libraries",
 		"settings_title": "Settings for {{name}}",
 		"short_name": "Short name",
 		"site_designation": "Site designation",
@@ -529,9 +567,14 @@
 		}
 	},
 	"locations": {
+		"alert_text": "Failed to fetch the locations, please refresh the page.",
+		"agency_name": "Location agency name",
+		"code": "Location code",
+		"latitude": "Latitude",
+		"local_id": "Local ID",
 		"location_one": "location",
 		"loading_msg": "Loading locations....",
-		"alert_text": "Failed to fetch the locations, please refresh the page.",
+		"longitude": "Longitude",
 		"import": {
 			"button": "Import",
 			"confirmation_body": "<paragraph> <bold>{{existingMappingCount}}</bold> pickup locations for {{libraryName}} will be <bold>deleted</bold> and replaced with pickup locations from the file “{{fileName}}.”</paragraph>",
@@ -551,6 +594,7 @@
 			"successful_replacement": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted.",
 			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup location(s) did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information."
 		},
+		"name": "Location name",
 		"new": {
 			"button": "New location",
 			"error": {
@@ -559,8 +603,11 @@
 				"generic": "There was an error creating the new location for {{name}}"
 			},
 			"page_title": "Locations for {{name}}",
+			"pickup_disable": "Disable pickup",
 			"pickup_disabled": "Disabled for pickup",
+			"pickup_enable": "Enable pickup",
 			"pickup_enabled": "Enabled for pickup",
+			"pickup_not_set": "Pickup status not set",
 			"pickup_anywhere_disabled": "Disabled for pickup anywhere",
 			"pickup_anywhere_enabled": "Enabled for pickup anywhere",
 			"pickup_anywhere_status": "Pickup anywhere status",
@@ -574,11 +621,15 @@
 		"no_results": "No locations were found. Try changing your search terms or filters.",
 		"no_rows": "No locations available. If you're expecting data to be here, please refresh the page.",
 		"not_found": "Error: could not find a pickup location with this UUID",
-		"search_placeholder": "Search by name"
+		"print_label": "Print label",
+		"search_placeholder": "Search by name",
+		"type": "Location type",
+		"uuid": "Location UUID"
 	},
 	"loginout": {
 		"keycloak": "We use <linkComponent>Keycloak</linkComponent> for secure authentication",
 		"login": "Please login to gain full access to $t(app.name)",
+		"logout": "Logout",
 		"logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>"
 	},
 	"mappings": {
@@ -681,6 +732,8 @@
 	"nav": {
 		"agencies": "Agencies",
 		"auditLog": "Audit log",
+		"main_menu": "Main menu",
+		"toggle_menu": "Toggle navigation menu",
 		"bibs": "Bib records",
 		"consortium": {
 			"contacts": "Contacts",
@@ -776,6 +829,13 @@
 			"name": "Settings"
 		}
 	},
+	"new": {
+		"library": {
+			"existing_or_new_system": "Is this library part of a new or existing host LMS?",
+			"use_existing": "Use existing system",
+			"create_new": "Create new system"
+		}
+	},
 	"onboarding": {},
 	"openrs": {
 		"name": "OpenRS",
@@ -826,8 +886,6 @@
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
 		"cluster_record_uuid": "Cluster record UUID",
-		"date_created": "Date created",
-		"date_updated": "Date updated",
 		"description": "Description",
 		"error_identities": "Error loading patron identity information",
 		"error_message": "Error message",
@@ -928,6 +986,7 @@
 		"supplying": "Supplying",
 		"supplying_agency_code": "Supplying agency code",
 		"time_in_status": "Time in status",
+		"uuid": "Patron request UUID",
 		"view": "View",
 		"virtual_item": "Virtual item",
 		"virtual_patron": "Virtual patron",
@@ -952,7 +1011,14 @@
 		"search_placeholder_status": "Search by request status",
 		"source_record_error": "The bib record for this patron request unexpectedly has multiple source records. Please review below. "
 	},
-	"profile": {},
+	"profile": {
+		"details": "Your details",
+		"name": "Name: ",
+		"email": "Email: ",
+		"email_verified": "Email Verified: ",
+		"prefered_username": "Prefered Username: ",
+		"roles": "Roles: "
+	},
 	"requesting": {
 		"available_at": "Items present at {{total}} institution(s)",
 		"available_for_walk_up": "Available for walk-up requesting",
@@ -972,6 +1038,7 @@
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",
 		"cluster_deleted": "Is cluster deleted?",
+		"configuration": "Requesting configuration",
 		"contributor": "Contributor(s): {{contributors}}",
 		"date_available": "Date available",
 		"date_due": "Date due",
@@ -1004,6 +1071,9 @@
 		},
 		"format": "Format: {{formats}}",
 		"format_title": "Format(s)",
+		"global": "Global requesting settings",
+		"global_limit": "Global active request limit: ",
+		"global_tracking": "Global tracking interval: ",
 		"history": "Requesting history",
 		"hold_count": "Hold count",
 		"identifiers": "Identifiers",
@@ -1031,6 +1101,7 @@
 		"options": "Request options",
 		"physical_descriptions": "Physical descriptions",
 		"publication_date": "Publication date: {{publicationDate}} ",
+		"publication_place": "Publication place",
 		"publication_year": "Publication year",
 		"publisher": "Publisher",
 		"place_description": "You have chosen to place a request for {{title}}. Please select a requesting option below.",
@@ -1039,6 +1110,7 @@
 		"record_information": "Record information",
 		"record_updated": "Record updated",
 		"requestable": "Requestable",
+		"selected_bib_uuid": "Selected bib UUID",
 		"series": "Series",
 		"shared_index_unavailable_title": "Shared index is not configured on this system",
 		"shared_index_unavailable_message": "Please set a valid DCB_SEARCH_BASE environment variable for this deployment.",
@@ -1114,7 +1186,8 @@
 				"validating": "Validating patron"
 			},
 			"select_pickup": "We have succesfully validated the patron provided. Please choose a pickup location and click 'Submit' to finish placing this staff request."
-		}
+		},
+		"tracking_intervals": "Tracking intervals"
 	},
 	"search": {
 		"add_field": "Add field",
@@ -1190,19 +1263,24 @@
 			"empty": "Empty field",
 			"is_breadcrumb": "This is a breadcrumb trail"
 		},
-		"action": {
+		"actions": {
+			"cancel": "Cancel",
 			"close_alert": "Close alert",
 			"contact_sysadmin": "contact your system administrator",
 			"explain_clustering": "Explain clustering for this record",
 			"go_home": "Go to $t(nav.home) page",
 			"go_back": "Go back",
+			"go_back_message": "Return to the previous page",
+			"keep_editing": "Keep editing",
 			"newer": "Newer",
 			"next": "Next",
 			"no": "No",
 			"older": "Older",
 			"reload": "Reload page",
+			"save_changes": "Save changes",
 			"submitting": "Submitting",
 			"toggle_on": "Toggle onboarding mode",
+			"validate": "Validate",
 			"view_error_details": "View error details",
 			"yes": "Yes"
 		},
@@ -1252,6 +1330,7 @@
 			"error_count": "Error: ",
 			"expand": "Expand",
 			"filters": {
+				"active_description": "{{length}} filter(s) active: {{description}}",
 				"between": "Between",
 				"days_from": "Days from",
 				"days_to": "Days to",
@@ -1259,6 +1338,8 @@
 				"from": "From",
 				"greater_than_exclusive": "Greater than",
 				"greater_than_inclusive": "Greater than or equal to",
+				"last_thirty_days": "Last 30 days",
+				"last_ninety_days": "Last 90 days",
 				"less_than_exclusive": "Less than",
 				"less_than_inclusive": "Less than or equal to",
 				"not_equal": "Does not equal",
@@ -1331,12 +1412,16 @@
 		"info": {
 			"contact": "contact",
 			"connection_issue": "There may be a connection issue",
+			"correct_as_of": "Status correct as of",
+			"date_created": "Date created",
+			"date_updated": "Date updated",
 			"description": "Description: {{description}}",
 			"field": "Field",
-			"correct_as_of": "Status correct as of",
+			"general": "General",
 			"loading": {
 				"document": "Loading {{document_type}}"
 			},
+			"last_indexed": "Last indexed",
 			"reload": "Try reloading the page",
 			"try_later": "Please try again later",
 			"wait": "Please wait",
