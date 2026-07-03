@@ -1,0 +1,17 @@
+{
+	"consortia": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "b6b58b25-1e0a-5b3e-9b1a-2e6c9b3f1a11",
+				"name": "e2e-consortium",
+				"displayName": "E2E Test Consortium",
+				"headerImageUrl": null,
+				"aboutImageUrl": null,
+				"description": "Seeded consortium for Playwright e2e runs",
+				"catalogueSearchUrl": null,
+				"websiteUrl": null
+			}
+		]
+	}
+}
