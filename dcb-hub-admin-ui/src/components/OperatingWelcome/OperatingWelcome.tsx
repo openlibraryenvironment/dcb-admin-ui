@@ -19,6 +19,7 @@ import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { getLibraries } from "@queries/getLibraries";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
+import { defaultWelcomeLibraryColumnVisibility } from "@columns/columnVisibility/defaultWelcomeLibraryColumnVisibility";
 
 export default function OperatingWelcome() {
 	const { t } = useTranslation();
@@ -51,12 +52,7 @@ export default function OperatingWelcome() {
 	);
 	const [columnVisibilityModel, setLocalVisibilityModel] =
 		useState<GridColumnVisibilityModel>(
-			storedVisibility[gridId] || {
-				id: false,
-				hostLmsCatalogue: false,
-				hostLmsCirculation: false,
-				authProfile: false,
-			},
+			storedVisibility[gridId] || defaultWelcomeLibraryColumnVisibility,
 		);
 
 	const { data, isLoading, isFetching } = useQuery({
@@ -86,14 +82,11 @@ export default function OperatingWelcome() {
 		},
 	});
 
-	const processRowUpdate = async (
-		newRow: GridRowModel,
-		oldRow: GridRowModel,
-	) => {
+	const processRowUpdate = async (newRow: GridRowModel) => {
 		try {
 			await updateMutation.mutateAsync(newRow);
 			return newRow;
-		} catch (error) {
+		} catch {
 			// Make sure that this throws a custom object so DataGrid can extract the row's name for alerts
 
 			throw {

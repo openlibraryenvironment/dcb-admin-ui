@@ -2,21 +2,10 @@ import {
 	DataGridPremium,
 	DataGridPremiumProps,
 	GridApiPremium,
-	GridColDef,
-	GridColumnVisibilityModel,
 	GridEventListener,
 	GridExpandLessIcon,
 	GridExpandMoreIcon,
-	GridFeatureMode,
-	GridFilterModel,
-	GridPaginationModel,
-	GridRowModes,
-	GridRowModesModel,
-	GridRowParams,
 	GridRowSelectionModel,
-	GridRowsProp,
-	GridSortModel,
-	GridToolbar,
 	useGridApiRef,
 } from "@mui/x-data-grid-premium";
 import { RefObject, useCallback, useState } from "react";
@@ -25,11 +14,7 @@ import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
 import { SxProps, Theme } from "@mui/material";
 import ExportToolbar from "./components/ExportToolbar";
-import {
-	expandedFilterPanelTypes,
-	nonClickableTypes,
-	specialRedirectionTypes,
-} from "@constants/dataGrid/types";
+import { expandedFilterPanelTypes } from "@constants/dataGrid/types";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 // Needs reviewing for consortial needs
@@ -66,99 +51,9 @@ interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
 	disableHoverInteractions?: boolean;
 }
 
-interface DataGridProps {
-	autoRowHeight?: boolean;
-	checkboxSelection: boolean;
-	columns: GridColDef[];
-	columnVisibilityModel?: GridColumnVisibilityModel;
-	disableAggregation: boolean;
-	disableHoverInteractions: boolean;
-	disablePivoting: boolean;
-	disableRowGrouping: boolean;
-	editMode?: "cell" | "row"; // Determines cell or row editing
-	filterMode: GridFeatureMode; // Determines client or server-side filtering
-	filterModel?: GridFilterModel;
-	getDetailPanelContent?: any; // Function for returning detail panel content, where applicable
-	identifier: string; // The specific type or identifier. Must be unique in the application, as it is used to retrieve data grid settings.
-	loading: boolean;
-	listViewEnabled: boolean;
-	noResultsText: string;
-	onColumnVisibilityModelChange?: (model: GridColumnVisibilityModel) => void;
-	onFilterModelChange?: (model: GridFilterModel) => void;
-	// onPaginationModelChange: (model: GridPaginationModel) => void;
-	onPaginationModelChange?: any;
-	onRowModesModelChange?: (model: GridRowModesModel) => void;
-	onRowEditStop?: (params: any, event: any) => void;
-	onSortModelChange?: (model: GridSortModel) => void;
-	pagination: boolean;
-	paginationMode: GridFeatureMode; // Determines client or server side pagination
-	paginationModel: GridPaginationModel;
-	pivotingEnabled: boolean;
-	processRowUpdate?: (newRow: any, oldRow: any) => Promise<any> | any;
-	rowCount?: number;
-	rowModesModel: GridRowModesModel;
-	rows: GridRowsProp;
-	scrollbarVisible: boolean;
-	// sortModel: GridSortModel;
-	sortModel?: any;
-	sortingMode: GridFeatureMode;
-	toolbarVisible: boolean;
-	searchText: string;
-	styleOverrides?: SxProps<Theme>; // If you are providing style overrides for the Data Grid, you MUST include all styles as this will override everything specified by default in sx
-	type: string; // The general type - i.e. "Locations"
-	parentApiRef?: RefObject<GridApiPremium | null>;
-	enableCleanup?: boolean;
-	onCleanup?: () => void;
-	onExport?: (fileType: string, exportMode: string) => Promise<void>;
-	isExporting?: boolean;
-}
-// export default function DataGrid({
-// 	autoRowHeight,
-// 	checkboxSelection,
-// 	columns,
-// 	columnVisibilityModel,
-// 	disableAggregation,
-// 	disableHoverInteractions,
-// 	disablePivoting,
-// 	disableRowGrouping,
-// 	editMode,
-// 	enableCleanup,
-// 	filterMode,
-// 	filterModel,
-// 	getDetailPanelContent,
-// 	isExporting = false,
-// 	loading,
-// 	listViewEnabled,
-// 	noResultsText,
-// 	onCleanup,
-// 	onColumnVisibilityModelChange,
-// 	onExport,
-// 	onFilterModelChange,
-// 	onPaginationModelChange,
-// 	onRowModesModelChange,
-// 	onRowEditStop,
-// 	onSortModelChange,
-// 	pagination,
-// 	paginationMode,
-// 	paginationModel,
-// 	parentApiRef,
-// 	pivotingEnabled,
-// 	processRowUpdate,
-// 	rowCount,
-// 	rowModesModel,
-// 	rows,
-// 	scrollbarVisible,
-// 	sortModel,
-// 	sortingMode,
-// 	styleOverrides,
-// 	searchText,
-// 	toolbarVisible,
-// 	type,
-// }: DataGridProps) {
 export default function DataGrid({
 	autoRowHeight,
 	enableCleanup,
-	identifier,
 	isExporting = false,
 	listViewEnabled,
 	noResultsText,
@@ -176,12 +71,12 @@ export default function DataGrid({
 	rowCount,
 	rowModesModel = IMMUTABLE_FALLBACK_MODES,
 	rows,
+	onRowSelectionModelChange,
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const expandedFilterPanel = expandedFilterPanelTypes.includes(type);
-	const getDetailPanelHeight = useCallback(() => "auto", []); // Only necessary because master detail is not applicable to all grids yet
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
@@ -205,10 +100,13 @@ export default function DataGrid({
 		});
 	};
 	const handleSelectionChange = useCallback(
-		(newSelection: GridRowSelectionModel) => {
+		(newSelection: GridRowSelectionModel, details: any) => {
 			setSelectionModel(newSelection);
+			if (onRowSelectionModelChange) {
+				onRowSelectionModelChange(newSelection, details);
+			}
 		},
-		[],
+		[onRowSelectionModelChange],
 	);
 	//identifier may not be needed
 	return (
@@ -235,7 +133,7 @@ export default function DataGrid({
 					toolbarQuickFilterPlaceholder: searchText ?? t("general.search"),
 					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
 					toolbarExportCSV: t("ui.data_grid.export.current"),
-					toolbarExportPrint: t("ui.data_grid.export.print"),
+					toolbarExportPrint: t("ui.data_grid.print_current_page"),
 					filterOperatorDoesNotEqual: t("ui.data_grid.filters.not_equal"),
 					"filterOperator!=": t("ui.data_grid.filters.not_equal"),
 					"filterOperator=": t("ui.data_grid.filters.equals"),
@@ -274,7 +172,12 @@ export default function DataGrid({
 					noResultsOverlay: () => (
 						<NoResultsOverlay noResultsMessage={noResultsText} />
 					),
-					toolbar: type === "patronRequests" ? ExportToolbar : GridToolbar, // rely on this for now. develop our own 'standard custom' toolbar by v9
+					// ExportToolbar already branches internally on type === "patronRequests"
+					// for which export menu items to show, so it's a safe universal
+					// toolbar - was previously only wired for patronRequests grids,
+					// silently leaving every other grid on MUI's stock GridToolbar
+					// (losing the custom export/cleanup options).
+					toolbar: ExportToolbar,
 				}}
 				slotProps={{
 					toolbar: {

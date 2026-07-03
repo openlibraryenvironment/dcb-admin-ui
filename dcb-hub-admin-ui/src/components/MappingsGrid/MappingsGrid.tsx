@@ -37,8 +37,7 @@ interface MappingsGridProps {
 	deleteMutation: any;
 	dataKey: "referenceValueMappings" | "numericRangeMappings";
 	mutationUpdateKey:
-		| "updateReferenceValueMapping"
-		| "updateNumericRangeMapping";
+		"updateReferenceValueMapping" | "updateNumericRangeMapping";
 	hiddenColumns?: GridColumnVisibilityModel;
 }
 
@@ -76,7 +75,7 @@ export default function MappingsGrid({
 		storedFilterModel[gridId] ?? { items: [] },
 	);
 	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedSortModel[gridId] ?? [{ field: "context", sort: "asc" }],
+		storedSortModel[gridId] ?? [{ field: "lastImported", sort: "asc" }],
 	);
 
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
@@ -101,7 +100,7 @@ export default function MappingsGrid({
 				query: processGridFilterModel(filterModel, baseQuery, []) ?? "",
 				pageno: paginationModel.page ?? 0,
 				pagesize: paginationModel.pageSize ?? 200,
-				order: sortModel[0]?.field ?? "context",
+				order: sortModel[0]?.field ?? "lastImported",
 				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
 			};
 			return gqlClient.request<any>(getQuery, queryVariables);
@@ -112,12 +111,12 @@ export default function MappingsGrid({
 
 	const { mutateAsync: doUpdate } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateMutation, variables),
+			gqlClient.request<any>(updateMutation, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutate: doDelete } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteMutation, variables),
+			gqlClient.request<any>(deleteMutation, variables),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -177,7 +176,7 @@ export default function MappingsGrid({
 			{
 				field: "actions",
 				type: "actions",
-				headerName: t("ui.actions"),
+				headerName: t("ui.data_grid.actions"),
 				width: 100,
 				getActions: ({ id }: GridRowParams) => {
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {

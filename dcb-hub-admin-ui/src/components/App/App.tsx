@@ -2,7 +2,6 @@ import {
 	Box,
 	CircularProgress,
 	CssBaseline,
-	Theme,
 	ThemeProvider,
 	Typography,
 } from "@mui/material";
@@ -10,14 +9,25 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Router, RouterProvider } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { useAuth } from "react-oidc-context";
+import { useTranslation } from "react-i18next";
+
+import { getAppTheme } from "@themes/openRS";
+import { useThemeStore } from "@hooks/useThemeStore";
 
 interface AppProps {
 	queryClient: QueryClient;
-	theme: Theme;
 	router: Router<any, any>;
 }
-export default function App({ queryClient, theme, router }: AppProps) {
+export default function App({ queryClient, router }: AppProps) {
 	const auth = useAuth();
+	const { t } = useTranslation();
+
+	// The active brand theme + mode are user-selectable (see ThemeControls in
+	// profile.tsx) and persisted; swap the whole theme rather than toggling a
+	// colour scheme so all four+ theme/mode combinations apply cleanly.
+	const themeName = useThemeStore((s) => s.themeName);
+	const mode = useThemeStore((s) => s.mode);
+	const theme = getAppTheme(themeName, mode);
 
 	return (
 		<QueryClientProvider client={queryClient}>
@@ -38,8 +48,13 @@ export default function App({ queryClient, theme, router }: AppProps) {
 							}}
 						>
 							<CircularProgress size={60} color="primary" />
-							<Typography variant="loadingText" color="primary.headingColor">
-								Loading... {/** TODO */}
+							<Typography
+								variant="loadingText"
+								sx={{
+									color: "primary.headingColor",
+								}}
+							>
+								{t("common.loading")}
 							</Typography>
 						</Box>
 					}

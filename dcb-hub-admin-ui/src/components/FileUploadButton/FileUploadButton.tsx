@@ -102,8 +102,6 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 								<CancelRounded />
 							</Button>
 						</Tooltip>
-						{/* Just until we figure out the issues with <Image */}
-						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img
 							src={previewUrl}
 							alt="Preview"

@@ -1,6 +1,6 @@
 import { GridFilterInputValueProps } from "@mui/x-data-grid-premium";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers-pro";
+import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 // import { useTranslation } from "react-i18next";
 
 import dayjs, { Dayjs } from "dayjs";

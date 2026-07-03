@@ -158,7 +158,7 @@ export default function ExportToolbar({
 					<ListItemIcon>
 						<PrintOutlined />
 					</ListItemIcon>
-					<ListItemText>{t("ui.data_grid.export.print")}</ListItemText>
+					<ListItemText>{t("ui.data_grid.print_current_page")}</ListItemText>
 				</MenuItem>
 			</GridToolbarExportContainer>
 			{type == "patronRequests" && (

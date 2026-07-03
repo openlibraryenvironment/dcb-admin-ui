@@ -35,10 +35,13 @@ export default function RangeFilter(props: GridFilterInputValueProps) {
 		};
 	}, []);
 
-	useEffect(() => {
-		const itemValue = item.value ?? ["", ""];
-		setFilterValueState(itemValue);
-	}, [item.value]);
+	// Re-sync the local filter value from the incoming filter item during render
+	// (when it changes) rather than via an effect.
+	const [prevItemValue, setPrevItemValue] = useState(item.value);
+	if (item.value !== prevItemValue) {
+		setPrevItemValue(item.value);
+		setFilterValueState(item.value ?? ["", ""]);
+	}
 
 	const updateFilterValue = (lowerBound: string, upperBound: string) => {
 		clearTimeout(filterTimeout.current);
@@ -94,9 +97,11 @@ export default function RangeFilter(props: GridFilterInputValueProps) {
 				value={filterValueState[1] ?? ""}
 				onChange={handleUpperFilterChange}
 				type="number"
-				InputProps={
-					applying ? { endAdornment: <CircularProgress size={"sm"} /> } : {}
-				}
+				slotProps={{
+					input: applying
+						? { endAdornment: <CircularProgress size={"sm"} /> }
+						: {},
+				}}
 			/>
 		</Box>
 	);

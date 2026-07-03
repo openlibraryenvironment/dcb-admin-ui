@@ -54,7 +54,6 @@ export default function PolarisConfig({ config }: { config: any }) {
 				title={t("hostlms.client_config.logon_user_id")}
 				value={config?.["logon-user-id"]}
 			/>
-
 			<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 				<PrivateData
 					clientConfigType={t("hostlms.client_config.staff_password")}
@@ -69,11 +68,15 @@ export default function PolarisConfig({ config }: { config: any }) {
 					id="access-key"
 				/>
 			</Grid>
-
 			{config?.item && (
 				<SubAccordion variant="outlined" disableGutters>
 					<SubAccordionSummary expandIcon={<ExpandMore />}>
-						<Typography variant="h3" fontWeight="bold">
+						<Typography
+							variant="h3"
+							sx={{
+								fontWeight: "bold",
+							}}
+						>
 							{t("hostlms.client_config.item")}
 						</Typography>
 					</SubAccordionSummary>
@@ -115,11 +118,15 @@ export default function PolarisConfig({ config }: { config: any }) {
 					</SubAccordionDetails>
 				</SubAccordion>
 			)}
-
 			{config?.papi && (
 				<SubAccordion variant="outlined" disableGutters>
 					<SubAccordionSummary expandIcon={<ExpandMore />}>
-						<Typography variant="h3" fontWeight="bold">
+						<Typography
+							variant="h3"
+							sx={{
+								fontWeight: "bold",
+							}}
+						>
 							{t("hostlms.client_config.papi")}
 						</Typography>
 					</SubAccordionSummary>
@@ -149,11 +156,15 @@ export default function PolarisConfig({ config }: { config: any }) {
 					</SubAccordionDetails>
 				</SubAccordion>
 			)}
-
 			{config?.services && (
 				<SubAccordion variant="outlined" disableGutters>
 					<SubAccordionSummary expandIcon={<ExpandMore />}>
-						<Typography variant="h3" fontWeight="bold">
+						<Typography
+							variant="h3"
+							sx={{
+								fontWeight: "bold",
+							}}
+						>
 							{t("hostlms.client_config.services")}
 						</Typography>
 					</SubAccordionSummary>

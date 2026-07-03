@@ -22,8 +22,6 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { Environment } from "@models/Environment";
 import { calculateDCBRAGStatus } from "@helpers/calculateDCBRAGStatus";
 import { calculateKeycloakRAGStatus } from "@helpers/calculateKeycloakRAGStatus";
-import { determineAcceptableVersion } from "@helpers/determineVersion";
-import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 
 import {
 	DCB_SERVICE_STATUS_LINKS,
@@ -44,7 +42,7 @@ export default function CombinedEnvironmentComponent() {
 
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const { data, isLoading, isError, refetch } = useQuery({
+	const { data, isLoading, isError } = useQuery({
 		queryKey: ["environmentHealth"],
 		queryFn: async () => {
 			const headers = { Authorization: `Bearer ${auth.user?.access_token}` };
@@ -78,7 +76,7 @@ export default function CombinedEnvironmentComponent() {
 							status: calculateDCBRAGStatus(err.response?.data),
 							link: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
 						};
-					} catch (livenessErr) {
+					} catch {
 						return {
 							status: calculateDCBRAGStatus(err.response?.data),
 							link: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
@@ -203,7 +201,7 @@ export default function CombinedEnvironmentComponent() {
 				title={t("service.environment_health_error", {
 					error: "Failed to load environment status",
 				})}
-				action={t("ui.action.reload")}
+				action={t("ui.actions.reload")}
 				message={t("error.environment")} /** TODO ERROR */
 				// onClick={refetch}
 			/>
@@ -284,12 +282,12 @@ export default function CombinedEnvironmentComponent() {
 						variant="h2"
 						sx={{ borderBottom: 1, borderColor: "divider", pb: 1, mb: 2 }}
 					>
-						{t("details.requesting_configuration")}
+						{t("requesting.configuration")}
 					</Typography>
 
 					<Box>
 						<Typography variant="h3" sx={{ mb: 2 }}>
-							{t("details.requesting_global")}
+							{t("requesting.global")}
 						</Typography>
 						<List dense>
 							<ListItem>
@@ -303,7 +301,7 @@ export default function CombinedEnvironmentComponent() {
 												component="span"
 												sx={{ fontWeight: "bold", mr: 1 }}
 											>
-												{t("details.requesting_global_limit")}
+												{t("requesting.global_limit")}
 											</Typography>
 											{data.trackingConfig.globalActiveRequestLimit}
 										</Box>
@@ -321,7 +319,7 @@ export default function CombinedEnvironmentComponent() {
 												component="span"
 												sx={{ fontWeight: "bold", mr: 1 }}
 											>
-												{t("details.requesting_global_tracking")}
+												{t("requesting.global_tracking")}
 											</Typography>
 											{data.trackingConfig.globalTrackingInterval}
 										</Box>
@@ -333,7 +331,7 @@ export default function CombinedEnvironmentComponent() {
 
 					<Box>
 						<Typography variant="h3" sx={{ mb: 2 }}>
-							{t("details.requesting_tracking_intervals")}
+							{t("requesting.tracking_intervals")}
 						</Typography>
 						<List dense>
 							{Object.entries(data.trackingConfig.trackingIntervals).map(

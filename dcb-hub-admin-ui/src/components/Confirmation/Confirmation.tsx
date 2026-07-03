@@ -15,11 +15,7 @@ import {
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 
 type ConfirmationAction =
-	| "gridEdit"
-	| "deletion"
-	| "unsaved"
-	| "uploadReplacement"
-	| "sessionWarning";
+	"gridEdit" | "deletion" | "unsaved" | "uploadReplacement" | "sessionWarning";
 
 interface AuditFormData {
 	reason: string;
@@ -199,6 +195,7 @@ export default function Confirmation({
 						color={isDelete || isUnsaved ? "error" : "primary"}
 						variant="contained"
 						disabled={requiresAuditFields && !isValid}
+						// eslint-disable-next-line jsx-a11y/no-autofocus -- deliberate focus management for the modal's primary action; intentionally skipped for delete to avoid accidental confirmation
 						autoFocus={!isDelete}
 					>
 						{isDelete && t("ui.actions.confirm_delete")}

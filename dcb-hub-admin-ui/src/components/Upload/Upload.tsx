@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
@@ -69,9 +69,15 @@ export default function FileUpload({
 		(type === "Locations" ? "/locations/upload" : "/uploadedMappings/upload");
 	const headers = { Authorization: `Bearer ${auth.user?.access_token}` };
 
-	useEffect(() => {
+	// Close the confirmation dialog when the target entity changes, adjusting
+	// state during render rather than via an effect.
+	const [prevCode, setPrevCode] = useState(code);
+	const [prevCategory, setPrevCategory] = useState(category);
+	if (code !== prevCode || category !== prevCategory) {
+		setPrevCode(code);
+		setPrevCategory(category);
 		setConfirmOpen(false);
-	}, [code, category]);
+	}
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -237,7 +243,14 @@ export default function FileUpload({
 				style={{ display: "none" }}
 				id="file-upload"
 			/>
-			<Stack direction="column" alignContent="center" spacing={1} pb={3}>
+			<Stack
+				direction="column"
+				spacing={1}
+				sx={{
+					alignContent: "center",
+					pb: 3,
+				}}
+			>
 				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 					{t("mappings.file")}
 				</Typography>
@@ -248,6 +261,7 @@ export default function FileUpload({
 					i18nKey="mappings.import_body_warning"
 					components={{
 						linkComponent: (
+							// eslint-disable-next-line jsx-a11y/anchor-has-content -- link text is injected by <Trans> from the translation string
 							<a href={docLink} target="_blank" rel="noopener noreferrer" />
 						),
 						paragraph: <p />,
@@ -265,9 +279,7 @@ export default function FileUpload({
 					</Button>
 				</label>
 			</Stack>
-
 			<Divider aria-hidden="true" />
-
 			<Stack spacing={1} direction="row">
 				<Button variant="outlined" onClick={onCancel}>
 					{t("mappings.cancel")}
@@ -282,7 +294,6 @@ export default function FileUpload({
 					{t("mappings.import_file")}
 				</Button>
 			</Stack>
-
 			<Confirmation
 				open={isConfirmOpen}
 				onClose={() => setConfirmOpen(false)}

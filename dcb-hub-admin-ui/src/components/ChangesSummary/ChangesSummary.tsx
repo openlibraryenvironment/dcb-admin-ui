@@ -68,7 +68,7 @@ export default function ChangesSummary({
 
 	return (
 		<TableContainer>
-			<Table aria-label={t("data_change_log.summary_table_aria")}>
+			<Table aria-label={String(t("data_change_log.summary_table_aria"))}>
 				<TableHead>
 					<TableRow>
 						<TableCell component="th" scope="col">

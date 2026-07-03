@@ -31,18 +31,26 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 	const apiRef = useGridApiContext();
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const [selectedRole, setSelectedRole] = useState<RoleOption | undefined>(
-		undefined,
-	);
-	const [shouldFetchRoles, setShouldFetchRoles] = useState(false);
+	const roleFromValue = (v: unknown): RoleOption | undefined =>
+		v
+			? typeof v === "object" && "name" in v
+				? (v as RoleOption)
+				: { name: String(v) }
+			: undefined;
 
-	useEffect(() => {
+	// Derive the edit buffer from the incoming cell value, adjusting it during
+	// render when the value changes rather than syncing via an effect.
+	const [selectedRole, setSelectedRole] = useState<RoleOption | undefined>(() =>
+		roleFromValue(value),
+	);
+	const [prevValue, setPrevValue] = useState(value);
+	if (value !== prevValue) {
+		setPrevValue(value);
 		if (value) {
-			setSelectedRole(
-				typeof value === "object" && "name" in value ? value : { name: value },
-			);
+			setSelectedRole(roleFromValue(value));
 		}
-	}, [value]);
+	}
+	const [shouldFetchRoles, setShouldFetchRoles] = useState(false);
 
 	useEffect(() => {
 		if (hasFocus) {
@@ -96,9 +104,13 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 						helperText={
 							autocompleteLoading && shouldFetchRoles ? t("common.loading") : ""
 						}
-						inputProps={{
-							...inputParams.inputProps,
-							"aria-label": "role-autocomplete",
+						slotProps={{
+							...inputParams.slotProps,
+
+							htmlInput: {
+								...inputParams.slotProps.htmlInput,
+								"aria-label": "role-autocomplete",
+							},
 						}}
 					/>
 				)}
@@ -141,8 +153,8 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 						backgroundColor: "primary.editableFieldBackground",
 					}}
 				>
-					<MenuItem value="true">Yes</MenuItem>
-					<MenuItem value="false">No</MenuItem>
+					<MenuItem value="true">{t("ui.actions.yes")}</MenuItem>
+					<MenuItem value="false">{t("ui.actions.no")}</MenuItem>
 				</Select>
 			</Box>
 		);
@@ -170,11 +182,13 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 				}}
 				size="medium"
 				variant="outlined"
-				inputProps={{ "aria-label": colDef?.headerName }}
 				fullWidth
 				sx={{
 					height: "100%",
 					backgroundColor: "primary.editableFieldBackground",
+				}}
+				slotProps={{
+					htmlInput: { "aria-label": colDef?.headerName },
 				}}
 			/>
 		</Box>

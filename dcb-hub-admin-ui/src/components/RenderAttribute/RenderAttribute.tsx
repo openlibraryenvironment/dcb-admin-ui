@@ -87,7 +87,7 @@ export default function RenderAttribute({ attribute, title, type }: any) {
 		<Typography
 			variant="attributeText"
 			aria-hidden="true"
-			title={t("a11y.empty")}
+			title={String(t("ui.a11y.empty"))}
 		>
 			-
 		</Typography>

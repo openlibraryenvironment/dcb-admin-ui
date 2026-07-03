@@ -30,7 +30,13 @@ export const ExportProgressDialog = ({
 			</DialogTitle>
 			<DialogContent>
 				<Box sx={{ width: "100%", mb: 2 }}>
-					<Typography variant="body1" color="text.secondary" align="center">
+					<Typography
+						variant="body1"
+						align="center"
+						sx={{
+							color: "text.secondary",
+						}}
+					>
 						{t("ui.data_grid.complete", { percentage: progress + "%" })}
 					</Typography>
 					<LinearProgress variant="determinate" value={progress} />

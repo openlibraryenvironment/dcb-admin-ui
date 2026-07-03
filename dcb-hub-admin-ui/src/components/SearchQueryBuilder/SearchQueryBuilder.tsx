@@ -98,7 +98,6 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 					)}
 				</Alert>
 			)}
-
 			{criteria.map((criterion, index) => {
 				const isInvalidUuid =
 					criterion.field === SearchField.ClusterRecordID &&
@@ -110,8 +109,10 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 						key={criterion.id}
 						direction="row"
 						spacing={1.5}
-						alignItems="center"
-						sx={{ width: "100%" }}
+						sx={{
+							alignItems: "center",
+							width: "100%",
+						}}
 					>
 						{index > 0 && !isUuidSearch && (
 							<FormControl size="small" sx={{ minWidth: 90 }}>
@@ -134,7 +135,6 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 								</Select>
 							</FormControl>
 						)}
-
 						<FormControl size="small" sx={{ minWidth: 160 }}>
 							<InputLabel id={`field-label-${criterion.id}`}>
 								{t("ui.info.field")}
@@ -172,11 +172,10 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 									{t("search.publisher")}
 								</MenuItem>
 								<MenuItem value={SearchField.ClusterRecordID}>
-									{t("details.cluster_record_uuid")}
+									{t("patron_request.cluster_record_uuid")}
 								</MenuItem>
 							</Select>
 						</FormControl>
-
 						<TextField
 							size="small"
 							fullWidth
@@ -193,7 +192,6 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 									: undefined
 							}
 						/>
-
 						{criteria.length > 1 && !isUuidSearch && (
 							<IconButton
 								onClick={() => handleRemoveCriterion(criterion.id)}
@@ -206,8 +204,12 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 					</Stack>
 				);
 			})}
-
-			<Box display="flex" gap={1.5}>
+			<Box
+				sx={{
+					display: "flex",
+					gap: 1.5,
+				}}
+			>
 				<Tooltip
 					title={
 						isUuidSearch

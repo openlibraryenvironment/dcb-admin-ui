@@ -34,7 +34,7 @@ export default function Alert({
 						<IconButton
 							size="small"
 							onClick={onCloseFunc}
-							title={t("ui.action.close_alert")}
+							title={t("ui.actions.close_alert")}
 						>
 							<Close htmlColor={textColor} />
 						</IconButton>

@@ -14,8 +14,8 @@ import {
 	Typography,
 } from "@mui/material";
 import {
-	CheckCircleOutline,
-	ErrorOutline,
+	CheckCircleOutlined,
+	ErrorOutlined,
 	ExpandMore,
 	WarningAmber,
 } from "@mui/icons-material";
@@ -62,7 +62,13 @@ export const CleanupProgressDialog = ({
 			<DialogContent>
 				<Stack direction="column" spacing={1}>
 					<Stack direction="column" spacing={1}>
-						<Stack direction="row" spacing={1} alignItems="center">
+						<Stack
+							direction="row"
+							spacing={1}
+							sx={{
+								alignItems: "center",
+							}}
+						>
 							<LinearProgress
 								variant="determinate"
 								value={progress}
@@ -94,8 +100,14 @@ export const CleanupProgressDialog = ({
 									aria-controls="success-rows-content"
 									id="success-rows-header"
 								>
-									<Stack direction="row" spacing={1} alignItems="center">
-										<CheckCircleOutline color="success" />
+									<Stack
+										direction="row"
+										spacing={1}
+										sx={{
+											alignItems: "center",
+										}}
+									>
+										<CheckCircleOutlined color="success" />
 										<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 											{t("ui.data_grid.success_count")} {successRows.length}
 										</Typography>
@@ -143,8 +155,14 @@ export const CleanupProgressDialog = ({
 								aria-controls="error-rows-content"
 								id="error-rows-header"
 							>
-								<Stack direction="row" spacing={1} alignItems="center">
-									<ErrorOutline color="error" />
+								<Stack
+									direction="row"
+									spacing={1}
+									sx={{
+										alignItems: "center",
+									}}
+								>
+									<ErrorOutlined color="error" />
 									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 										{t("ui.data_grid.error_count")} {errorRows.length}
 									</Typography>
@@ -191,7 +209,13 @@ export const CleanupProgressDialog = ({
 								aria-controls="skipped-rows-content"
 								id="skipped-rows-header"
 							>
-								<Stack direction="row" spacing={1} alignItems="center">
+								<Stack
+									direction="row"
+									spacing={1}
+									sx={{
+										alignItems: "center",
+									}}
+								>
 									<WarningAmber color="warning" />
 									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 										{t("ui.data_grid.skipped_count")} {skippedRows.length}

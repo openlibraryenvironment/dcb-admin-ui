@@ -15,6 +15,13 @@ import {
 import Link from "@components/Link/Link";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 
+// Bundled assets (they live in src/assets, not public/) - import so Vite emits a
+// hashed URL that resolves on any route. Referencing them as "./assets/..."
+// string paths pointed at a non-existent public/ file, so the images 404'd.
+import kIntLogo from "@assets/brand/Knowledge-Integration_48px.png";
+import openRSLogo from "@assets/brand/OpenRS_48px.png";
+import fallbackAbout from "@assets/brand/fallback-about.png";
+
 export default function LandingCard() {
 	const { t } = useTranslation();
 
@@ -26,17 +33,15 @@ export default function LandingCard() {
 		description,
 	} = useConsortiumInfoStore();
 
-	const kIntLogo = "./assets/brand/Knowledge-Integration_48px.png";
-	const openRSLogo = "./assets/brand/OpenRS_48px.png";
-	const fallbackAbout = "./assets/brand/fallback-about.png";
-
 	return (
 		<Stack
 			direction={{ xs: "column", sm: "column", md: "row", lg: "row" }}
 			spacing={4}
-			p={"16px"}
-			pt={"48px"}
-			pb={"48px"}
+			sx={{
+				p: "16px",
+				pt: "48px",
+				pb: "48px",
+			}}
 		>
 			<Card
 				elevation={3}
@@ -55,9 +60,11 @@ export default function LandingCard() {
 								<Box
 									component="img"
 									src={openRSLogo}
-									height={48}
-									alt={t("ui.logo", { owner: "OpenRS" })}
-									title={t("ui.logo", { owner: "OpenRS" })}
+									alt={String(t("ui.logo", { owner: "OpenRS" }))}
+									title={String(t("ui.logo", { owner: "OpenRS" }))}
+									sx={{
+										height: 48,
+									}}
 								/>
 							</a>
 						</CardMedia>
@@ -94,7 +101,6 @@ export default function LandingCard() {
 					</Button>
 				</CardActions>
 			</Card>
-
 			<Card
 				elevation={3}
 				sx={{
@@ -112,9 +118,13 @@ export default function LandingCard() {
 								<Box
 									component="img"
 									src={kIntLogo}
-									height={48}
-									alt={t("ui.logo", { owner: "Knowledge Integration" })}
-									title={t("ui.logo", { owner: "Knowledge Integration" })}
+									alt={String(t("ui.logo", { owner: "Knowledge Integration" }))}
+									title={String(
+										t("ui.logo", { owner: "Knowledge Integration" }),
+									)}
+									sx={{
+										height: 48,
+									}}
 								/>
 							</a>
 						</CardMedia>
@@ -148,7 +158,6 @@ export default function LandingCard() {
 					</Button>
 				</CardActions>
 			</Card>
-
 			<Card
 				elevation={3}
 				sx={{
@@ -167,22 +176,26 @@ export default function LandingCard() {
 									<Box
 										component="img"
 										src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
-										height={48}
-										width={180}
-										sx={{ objectFit: "contain" }}
-										alt={t("ui.logo", { owner: { displayName } })}
-										title={t("ui.logo", { owner: { displayName } })}
+										alt={String(t("ui.logo", { owner: displayName }))}
+										title={String(t("ui.logo", { owner: displayName }))}
+										sx={{
+											height: 48,
+											width: 180,
+											objectFit: "contain",
+										}}
 									/>
 								</a>
 							) : (
 								<Box
 									component="img"
 									src={isEmpty(aboutImageURL) ? fallbackAbout : aboutImageURL}
-									height={48}
-									width={180}
-									sx={{ objectFit: "contain" }}
-									alt={t("ui.logo", { owner: { displayName } })}
-									title={t("ui.logo", { owner: { displayName } })}
+									alt={String(t("ui.logo", { owner: displayName }))}
+									title={String(t("ui.logo", { owner: displayName }))}
+									sx={{
+										height: 48,
+										width: 180,
+										objectFit: "contain",
+									}}
 								/>
 							)}
 						</CardMedia>
