@@ -57,6 +57,7 @@ export default function HostLmsStep() {
 						error={!!errors.lmsClientClass}
 						helperText={errors.lmsClientClass?.message as string}
 					>
+						{/* eslint-disable i18next/no-literal-string -- LMS product names are proper nouns and are not translated */}
 						<MenuItem value="org.olf.dcb.core.interaction.sierra.SierraLmsClient">
 							Sierra
 						</MenuItem>
@@ -69,6 +70,7 @@ export default function HostLmsStep() {
 						<MenuItem value="org.olf.dcb.core.interaction.alma.AlmaOaiPmhIngestSource">
 							Alma
 						</MenuItem>
+						{/* eslint-enable i18next/no-literal-string */}
 					</TextField>
 				)}
 			/>

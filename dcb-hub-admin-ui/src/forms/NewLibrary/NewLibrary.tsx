@@ -33,11 +33,26 @@ import NumericMappingStep from "./steps/NumericRangeMappingStep";
 import LocationsStep from "./steps/LocationsStep";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import { newLibrarySchema } from "@/schemas/newLibrarySchema";
+import type { z } from "zod";
 
 type NewLibraryType = {
 	show: boolean;
 	onClose: () => void;
 	consortiumName?: string;
+};
+
+// Maps each wizard step to the newLibrarySchema fields it's responsible
+// for, so handleNext only validates the step actually being shown. Steps
+// not listed here (profile, refMappings, numMappings, locations) aren't
+// covered by newLibrarySchema yet - trigger() is skipped for them rather
+// than invented field names.
+const STEP_SCHEMA_FIELDS: Record<
+	string,
+	(keyof z.infer<typeof newLibrarySchema>)[]
+> = {
+	hostLms: ["hostLmsCode", "hostLmsName", "lmsClientClass", "clientConfig"],
+	contacts: ["contacts"],
+	group: ["groupId"],
 };
 
 export default function NewLibrary({
@@ -151,7 +166,18 @@ export default function NewLibrary({
 		});
 
 	const handleNext = async () => {
-		const isStepValid = await methods.trigger();
+		// Scoped to the CURRENT step's own fields, not the whole shared schema:
+		// newLibrarySchema requires `contacts` (min 1) unconditionally, and a
+		// bare methods.trigger() validates every field in the schema regardless
+		// of which step is showing. Since contacts isn't filled in until a
+		// later step, that made the wizard unable to ever advance past the
+		// first step, no matter what was entered - and because the failing
+		// field (contacts) isn't rendered on earlier steps, nothing ever
+		// showed why "Next" appeared to do nothing.
+		const fieldsToValidate = STEP_SCHEMA_FIELDS[currentStep?.id ?? ""] ?? [];
+		const isStepValid =
+			fieldsToValidate.length === 0 ||
+			(await methods.trigger(fieldsToValidate));
 		if (!isStepValid) return;
 
 		const formData = methods.getValues();
@@ -253,7 +279,7 @@ export default function NewLibrary({
 				return (
 					<LocationsStep
 						hostLmsCode={watchedHostLmsCode}
-						agencyCode={watchedAgencyCode}
+						agencyCode={watchedAgencyCode ?? ""}
 					/>
 				);
 			default:
@@ -297,11 +323,13 @@ export default function NewLibrary({
 							{wizardMode !== "unselected" && (
 								<Stack
 									direction="row"
-									justifyContent="space-between"
-									sx={{ mt: 4 }}
+									sx={{
+										justifyContent: "space-between",
+										mt: 4,
+									}}
 								>
 									<Button variant="outlined" onClick={handleClose}>
-										{t("ui.action.cancel")}
+										{t("ui.actions.cancel")}
 									</Button>
 
 									{activeStepIndex < steps.length - 1 ? (
@@ -312,7 +340,7 @@ export default function NewLibrary({
 										>
 											{isHostLmsPending || isLibraryPending
 												? t("ui.info.wait")
-												: t("ui.action.next")}
+												: t("ui.actions.next")}
 										</Button>
 									) : (
 										<Button
@@ -320,7 +348,7 @@ export default function NewLibrary({
 											onClick={handleClose}
 											color="success"
 										>
-											{t("ui.action.finish")}
+											{t("ui.actions.finish")}
 										</Button>
 									)}
 								</Stack>

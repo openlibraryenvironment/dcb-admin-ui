@@ -334,7 +334,7 @@ export default function NewContact({
 						disabled={!isValid || !isDirty || contactMutation.isPending}
 					>
 						{contactMutation.isPending
-							? t("ui.action.submitting")
+							? t("ui.actions.submitting")
 							: t("consortium.new_contact.title")}
 					</Button>
 				</DialogActions>

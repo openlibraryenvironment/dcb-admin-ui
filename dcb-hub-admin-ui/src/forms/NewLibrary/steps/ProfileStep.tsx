@@ -6,7 +6,7 @@ import { Autocomplete, Stack, TextField } from "@mui/material";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 
-export function ProfileStep({ wizardMode }: { wizardMode?: string }) {
+export function ProfileStep() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const {

@@ -8,7 +8,13 @@ export default function ModeSelectionStep({
 }) {
 	const { t } = useTranslation();
 	return (
-		<Stack spacing={3} alignItems="center" sx={{ py: 4 }}>
+		<Stack
+			spacing={3}
+			sx={{
+				alignItems: "center",
+				py: 4,
+			}}
+		>
 			<Typography variant="h5">
 				{t("new.library.existing_or_new_system")}
 			</Typography>

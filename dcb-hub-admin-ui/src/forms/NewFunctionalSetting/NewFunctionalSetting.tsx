@@ -223,8 +223,8 @@ export default function NewFunctionalSetting({
 											}}
 											variant="outlined"
 										>
-											<MenuItem value="true">Yes</MenuItem>
-											<MenuItem value="false">No</MenuItem>
+											<MenuItem value="true">{t("ui.actions.yes")}</MenuItem>
+											<MenuItem value="false">{t("ui.actions.no")}</MenuItem>
 										</Select>
 									)}
 								/>
@@ -287,7 +287,7 @@ export default function NewFunctionalSetting({
 						disabled={!isValid || !isDirty || settingMutation.isPending}
 					>
 						{settingMutation.isPending
-							? t("ui.action.submitting")
+							? t("ui.actions.submitting")
 							: t("consortium.new_functional_setting.title")}
 					</Button>
 				</DialogActions>

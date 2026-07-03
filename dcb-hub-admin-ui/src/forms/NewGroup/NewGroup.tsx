@@ -219,7 +219,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 						disabled={!isValid || !isDirty || mutation.isPending}
 					>
 						{mutation.isPending
-							? t("ui.action.submitting")
+							? t("ui.actions.submitting")
 							: t("groups.type_new")}
 					</Button>
 				</DialogActions>

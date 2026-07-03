@@ -29,7 +29,6 @@ export default function NumericMappingStep({
 			<Typography>
 				{t("libraries.new.num_mapping_explanation", { hostLms: hostLmsCode })}
 			</Typography>
-
 			<Box
 				sx={{
 					p: 3,
@@ -49,13 +48,15 @@ export default function NumericMappingStep({
 				</Button>
 				<Typography
 					variant="caption"
-					display="block"
-					sx={{ mt: 1, color: "text.secondary" }}
+					sx={{
+						display: "block",
+						mt: 1,
+						color: "text.secondary",
+					}}
 				>
 					{t("mappings.import.num_helper_text")}
 				</Typography>
 			</Box>
-
 			{showImport && (
 				<Import
 					show={showImport}

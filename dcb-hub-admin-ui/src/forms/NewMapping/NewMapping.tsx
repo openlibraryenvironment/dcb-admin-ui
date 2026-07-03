@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { isEmpty } from "lodash";
@@ -73,7 +73,6 @@ export default function NewMapping({
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 
-	const [serverErrors, setServerErrors] = useState<Record<string, any>>({});
 	const [alert, setAlert] = useState({
 		open: false,
 		severity: "success",
@@ -209,7 +208,6 @@ export default function NewMapping({
 		reset,
 		setError,
 		formState: { errors, isValid, isDirty },
-		watch,
 		trigger,
 		setValue,
 	} = useForm<NewMappingFormData>({
@@ -249,10 +247,10 @@ export default function NewMapping({
 		[trigger, setValue, hostLmsCode],
 	);
 
-	const fromContext = watch("fromContext");
-	const fromCategory = watch("fromCategory");
-	const toContext = watch("toContext");
-	const toCategory = watch("toCategory");
+	const fromContext = useWatch({ control, name: "fromContext" });
+	const fromCategory = useWatch({ control, name: "fromCategory" });
+	const toContext = useWatch({ control, name: "toContext" });
+	const toCategory = useWatch({ control, name: "toCategory" });
 
 	const getAvailableValues = (context: string, cat: string) => {
 		if (context === "DCB" && cat === "ItemType") return canonicalItemTypes;
@@ -265,7 +263,6 @@ export default function NewMapping({
 
 	const onSubmit = async (data: NewMappingFormData) => {
 		try {
-			setServerErrors({});
 			await createMapping({
 				input: { ...data },
 			});
@@ -316,7 +313,9 @@ export default function NewMapping({
 								container
 								spacing={{ xs: 2, md: 3 }}
 								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-								mb={1}
+								sx={{
+									mb: 1,
+								}}
 							>
 								<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 									<Stack>
@@ -540,7 +539,7 @@ export default function NewMapping({
 						disabled={!isValid || !isDirty || isPending}
 						onClick={handleSubmit(onSubmit)}
 					>
-						{isPending ? t("ui.action.submitting") : t("mappings.new.title")}
+						{isPending ? t("ui.actions.submitting") : t("mappings.new.title")}
 					</Button>
 				</DialogActions>
 			</Dialog>

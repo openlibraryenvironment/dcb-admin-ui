@@ -176,16 +176,20 @@ export const RequestCreationStep = <TFieldValues extends FieldValues>({
 								label={t("requesting.staff_request.patron.item_local_id")}
 								error={!!errors.itemLocalId || itemsError}
 								helperText={errors.itemLocalId?.message}
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<>
-											{itemsLoading ? (
-												<CircularProgress color="inherit" size={20} />
-											) : null}
-											{params.InputProps.endAdornment}
-										</>
-									),
+								slotProps={{
+									...params.slotProps,
+
+									input: {
+										...params.slotProps.input,
+										endAdornment: (
+											<>
+												{itemsLoading ? (
+													<CircularProgress color="inherit" size={20} />
+												) : null}
+												{params.slotProps.input.endAdornment}
+											</>
+										),
+									},
 								}}
 							/>
 						)}
@@ -196,7 +200,6 @@ export const RequestCreationStep = <TFieldValues extends FieldValues>({
 					/>
 				)}
 			/>
-
 			<Controller
 				name={"requesterNote" as Path<TFieldValues>}
 				control={control}

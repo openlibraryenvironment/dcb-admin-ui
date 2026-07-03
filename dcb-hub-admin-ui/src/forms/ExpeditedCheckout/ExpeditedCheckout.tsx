@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -148,8 +148,10 @@ export default function ExpeditedCheckout({
 			),
 	});
 
-	const patronLibraries: Library[] =
-		patronLibrariesData?.libraries?.content ?? [];
+	const patronLibraries: Library[] = useMemo(
+		() => patronLibrariesData?.libraries?.content ?? [],
+		[patronLibrariesData],
+	);
 
 	const patronLibraryOptions: AutocompleteOption[] = useMemo(
 		() =>
@@ -196,6 +198,7 @@ export default function ExpeditedCheckout({
 		refetchInterval: 10000,
 	});
 
+	/* eslint-disable react-hooks/set-state-in-effect -- advances the checkout flow in response to the polled patron-request status (reacting to an external async event) */
 	useEffect(() => {
 		if (patronRequestData) {
 			const status = patronRequestData?.patronRequests?.content?.[0]?.status;
@@ -209,6 +212,7 @@ export default function ExpeditedCheckout({
 			}
 		}
 	}, [patronRequestData, patronRequestWaiting]);
+	/* eslint-enable react-hooks/set-state-in-effect */
 
 	const patronRequest = patronRequestData?.patronRequests?.content?.[0];
 
@@ -256,7 +260,6 @@ export default function ExpeditedCheckout({
 		control,
 		handleSubmit,
 		reset,
-		watch,
 		setValue,
 		formState: { errors, isValid },
 	} = useForm<OnSiteBorrowingFormData>({
@@ -274,7 +277,9 @@ export default function ExpeditedCheckout({
 		mode: "onChange",
 	});
 
-	const formValues = watch();
+	// useWatch({ control }) returns all form values; cast to the form type since
+	// defaultValues are provided so every field is defined at runtime.
+	const formValues = useWatch({ control }) as OnSiteBorrowingFormData;
 	const {
 		patronBarcode,
 		agencyCode,
@@ -334,13 +339,15 @@ export default function ExpeditedCheckout({
 		} finally {
 			setItemsLoading(false);
 		}
-	}, [bibClusterId, headers]);
+	}, [bibClusterId, headers, cfg.VITE_DCB_API_BASE]);
 
+	/* eslint-disable react-hooks/set-state-in-effect -- triggers the availability fetch when the checkout step changes */
 	useEffect(() => {
 		if (activeStep === 1 || checkoutCompleted) {
 			fetchRecords();
 		}
 	}, [checkoutCompleted, activeStep, fetchRecords]);
+	/* eslint-enable react-hooks/set-state-in-effect */
 
 	const itemsData: Item[] = availabilityResults?.itemList || [];
 	const filteredItems = itemsData.filter(
@@ -661,7 +668,6 @@ export default function ExpeditedCheckout({
 						<Close />
 					</IconButton>
 				)} */}
-
 			<DialogContent sx={{ overflow: "visible" }}>
 				<Stepper
 					activeStep={activeStep}
@@ -695,7 +701,12 @@ export default function ExpeditedCheckout({
 						}
 						if (index === 2 && checkoutCompleted) {
 							labelProps.optional = (
-								<Typography variant="caption" color="success.main">
+								<Typography
+									variant="caption"
+									sx={{
+										color: "success.main",
+									}}
+								>
 									{t("requesting.expedited_checkout.steps.complete")}
 								</Typography>
 							);
@@ -706,7 +717,9 @@ export default function ExpeditedCheckout({
 								<StepLabel {...labelProps} slots={{ stepIcon: DCBStepIcon }}>
 									<Typography
 										color={getStepColors(isActive, hasError, isCompleted)}
-										fontWeight={getStepLabelFontWeight(isActive)}
+										sx={{
+											fontWeight: getStepLabelFontWeight(isActive),
+										}}
 									>
 										{label}
 									</Typography>

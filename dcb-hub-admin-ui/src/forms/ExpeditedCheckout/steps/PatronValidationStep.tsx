@@ -64,7 +64,6 @@ export const PatronValidationStep = <TFieldValues extends FieldValues>({
 					/>
 				)}
 			/>
-
 			<Controller
 				name={"agencyCode" as Path<TFieldValues>} // Surely there's a better way than this ...
 				control={control}
@@ -91,16 +90,20 @@ export const PatronValidationStep = <TFieldValues extends FieldValues>({
 									errors["agencyCode" as keyof FieldErrors<TFieldValues>]
 										?.message as string
 								}
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<>
-											{librariesLoading ? (
-												<CircularProgress color="inherit" size={20} />
-											) : null}
-											{params.InputProps.endAdornment}
-										</>
-									),
+								slotProps={{
+									...params.slotProps,
+
+									input: {
+										...params.slotProps.input,
+										endAdornment: (
+											<>
+												{librariesLoading ? (
+													<CircularProgress color="inherit" size={20} />
+												) : null}
+												{params.slotProps.input.endAdornment}
+											</>
+										),
+									},
 								}}
 							/>
 						)}
@@ -110,7 +113,6 @@ export const PatronValidationStep = <TFieldValues extends FieldValues>({
 					/>
 				)}
 			/>
-
 			<Stack direction="row" spacing={2} sx={{ mt: 2 }}>
 				<Button variant="outlined" onClick={handleClose}>
 					{t("ui.actions.cancel")}

@@ -25,7 +25,6 @@ export default function RefValueMappingStep({
 			<Typography>
 				{t("libraries.new.ref_mapping_explanation", { hostLms: hostLmsCode })}
 			</Typography>
-
 			<Box
 				sx={{
 					p: 3,
@@ -45,13 +44,15 @@ export default function RefValueMappingStep({
 				</Button>
 				<Typography
 					variant="caption"
-					display="block"
-					sx={{ mt: 1, color: "text.secondary" }}
+					sx={{
+						display: "block",
+						mt: 1,
+						color: "text.secondary",
+					}}
 				>
 					{t("mappings.import.helper_text")}
 				</Typography>
 			</Box>
-
 			{showImport && (
 				<Import
 					show={showImport}

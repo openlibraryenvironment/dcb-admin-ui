@@ -37,7 +37,6 @@ export default function LocationsStep({
 			<Typography>
 				{t("libraries.new.locations_explanation", { library: libraryName })}
 			</Typography>
-
 			<Stack direction="row" spacing={3} sx={{ width: "100%", mt: 2 }}>
 				{/* Bulk Import Option */}
 				<Box
@@ -63,7 +62,13 @@ export default function LocationsStep({
 					>
 						{t("locations.import.button")}
 					</Button>
-					<Typography variant="caption" display="block" color="text.secondary">
+					<Typography
+						variant="caption"
+						sx={{
+							display: "block",
+							color: "text.secondary",
+						}}
+					>
 						{t(
 							"locations.import.helper_text",
 							"Upload a CSV to batch import multiple locations at once.",
@@ -95,7 +100,13 @@ export default function LocationsStep({
 					>
 						{t("locations.new.button")}
 					</Button>
-					<Typography variant="caption" display="block" color="text.secondary">
+					<Typography
+						variant="caption"
+						sx={{
+							display: "block",
+							color: "text.secondary",
+						}}
+					>
 						{t(
 							"locations.new.helper_text",
 							"Manually add a single pickup location to the system.",
@@ -103,7 +114,6 @@ export default function LocationsStep({
 					</Typography>
 				</Box>
 			</Stack>
-
 			{/* Render the Modals */}
 			{showImport && (
 				<Import
@@ -114,7 +124,6 @@ export default function LocationsStep({
 					libraryName={libraryName}
 				/>
 			)}
-
 			{showNewLocation && (
 				<NewLocation
 					show={showNewLocation}

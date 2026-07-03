@@ -271,7 +271,7 @@ export default function AddLibraryToGroup({
 								variant="contained"
 								disabled={!isValid || isPending}
 							>
-								{isPending ? t("ui.action.submitting") : t("general.submit")}
+								{isPending ? t("ui.actions.submitting") : t("general.submit")}
 							</Button>
 						</Stack>
 					</form>

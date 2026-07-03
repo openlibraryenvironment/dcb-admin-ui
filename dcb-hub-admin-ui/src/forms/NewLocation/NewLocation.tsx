@@ -76,14 +76,10 @@ export default function NewLocation({
 
 	const validationSchema = Yup.object().shape({
 		code: Yup.string()
-			.required(
-				t("ui.validation.required", { field: t("details.location_code") }),
-			)
+			.required(t("ui.validation.required", { field: t("locations.code") }))
 			.max(200),
 		name: Yup.string()
-			.required(
-				t("ui.validation.required", { field: t("details.location_name") }),
-			)
+			.required(t("ui.validation.required", { field: t("locations.name") }))
 			.max(255),
 		localId: Yup.string()
 			.max(64)
@@ -92,7 +88,7 @@ export default function NewLocation({
 				then: (schema) =>
 					schema
 						.required(
-							t("ui.validation.required", { field: t("details.local_id") }),
+							t("ui.validation.required", { field: t("locations.local_id") }),
 						)
 						.matches(
 							/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
@@ -104,7 +100,7 @@ export default function NewLocation({
 				then: (schema) =>
 					schema
 						.required(
-							t("ui.validation.required", { field: t("details.local_id") }),
+							t("ui.validation.required", { field: t("locations.local_id") }),
 						)
 						.matches(/^\d+$/, t("ui.validation.locations.local_id_polaris"))
 						.test(
@@ -136,7 +132,9 @@ export default function NewLocation({
 		longitude: Yup.number()
 			.nullable()
 			.transform((v, o) => (o === "" ? null : v))
-			.required(t("ui.validation.required", { field: t("details.long") }))
+			.required(
+				t("ui.validation.required", { field: t("locations.longitude") }),
+			)
 			.min(-180)
 			.max(180),
 		reason: Yup.string().max(100),
@@ -191,7 +189,7 @@ export default function NewLocation({
 		reset,
 		formState: { errors, isValid, isDirty },
 		setError,
-		watch,
+		getValues,
 		setValue,
 	} = useForm<NewLocationFormData>({
 		defaultValues: {
@@ -269,13 +267,13 @@ export default function NewLocation({
 							render={({ field }) => (
 								<TextField
 									{...field}
-									label={t("details.location_name")}
+									label={t("locations.name")}
 									required
 									error={!!errors.name}
 									helperText={errors.name?.message}
 									onBlur={(e) => {
 										field.onBlur();
-										if (!watch("printLabel"))
+										if (!getValues("printLabel"))
 											setValue("printLabel", e.target.value);
 									}}
 								/>
@@ -287,7 +285,7 @@ export default function NewLocation({
 							render={({ field }) => (
 								<TextField
 									{...field}
-									label={t("details.location_code")}
+									label={t("locations.code")}
 									required
 									error={!!errors.code}
 									helperText={errors.code?.message}
@@ -301,7 +299,7 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									type="number"
-									label={t("details.long")}
+									label={t("locations.longitude")}
 									required
 									error={!!errors.longitude}
 									helperText={errors.longitude?.message}
@@ -315,7 +313,7 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									type="number"
-									label={t("details.lat")}
+									label={t("locations.latitude")}
 									required
 									error={!!errors.latitude}
 									helperText={errors.latitude?.message}
@@ -431,7 +429,7 @@ export default function NewLocation({
 						disabled={!isValid || !isDirty || isPending}
 						onClick={handleSubmit(onSubmit)}
 					>
-						{isPending ? t("ui.action.submitting") : t("locations.new.button")}
+						{isPending ? t("ui.actions.submitting") : t("locations.new.button")}
 					</Button>
 				</DialogActions>
 			</Dialog>

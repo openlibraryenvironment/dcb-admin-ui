@@ -205,7 +205,7 @@ export const LocationAndServiceStep = <TFieldValues extends FieldValues>({
 					onClick={handleNext}
 					disabled={!isValid}
 				>
-					{t("ui.action.next")}
+					{t("ui.actions.next")}
 				</Button>
 			</Stack>
 		</Stack>
