@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
-import { createRouter, AnyRouter, useRouter } from "@tanstack/react-router";
+import { createRouter, AnyRouter } from "@tanstack/react-router";
 import { AuthProvider } from "react-oidc-context";
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { User, WebStorageStateStore } from "oidc-client-ts";
@@ -15,7 +15,6 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
-import { openRSTheme } from "@themes/openRS";
 
 declare global {
 	interface Window {
@@ -73,7 +72,6 @@ const handleServiceErrors = (error: any) => {
 		error.message?.includes("NetworkError");
 	const isServiceUnavailable = error?.response?.status === 503;
 	const isUnauthorized = error?.response?.status === 401;
-	const { cfg } = useRouter().options.context;
 
 	if (
 		window.location.pathname === "/maintenance" ||
@@ -85,8 +83,10 @@ const handleServiceErrors = (error: any) => {
 
 	if (isUnauthorized && router) {
 		queryClient.clear();
-		// Remove local user data so react-oidc-context knows they are gone
-		sessionStorage.removeItem(
+		// Remove local user data so react-oidc-context knows they are gone.
+		// Must match the WebStorageStateStore backing store below (localStorage), not sessionStorage.
+		const { cfg } = router.options.context as { cfg: any };
+		localStorage.removeItem(
 			`oidc.user:${cfg.VITE_KEYCLOAK_URL}:${cfg.VITE_KEYCLOAK_ID}`,
 		);
 
@@ -194,7 +194,7 @@ async function bootstrap() {
 		root.render(
 			<React.StrictMode>
 				<AuthProvider {...oidcConfig}>
-					<App theme={openRSTheme} queryClient={queryClient} router={router} />
+					<App queryClient={queryClient} router={router} />
 				</AuthProvider>
 			</React.StrictMode>,
 		);

@@ -8,12 +8,11 @@ import {
 	Typography,
 	ListSubheader,
 	ListItem,
-	useTheme,
 	Box,
 } from "@mui/material";
 import {
-	PersonOutline,
-	MailOutline,
+	PersonOutlined,
+	MailOutlined,
 	MarkEmailReadOutlined,
 	ThumbUpOffAlt,
 	SupervisorAccountOutlined,
@@ -21,6 +20,7 @@ import {
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
+import ThemeControls from "@components/ThemeControls/ThemeControls";
 
 export const Route = createFileRoute("/__authenticated/profile")({
 	component: Profile,
@@ -28,7 +28,6 @@ export const Route = createFileRoute("/__authenticated/profile")({
 
 function Profile() {
 	const { t } = useTranslation();
-	const theme = useTheme();
 
 	const auth = useAuth();
 	const profile = auth.user?.profile;
@@ -47,7 +46,7 @@ function Profile() {
 				</ListSubheader>
 				<ListItem>
 					<ListItemIcon>
-						<PersonOutline />
+						<PersonOutlined />
 					</ListItemIcon>
 					<ListItemText>
 						<Typography variant="attributeTitle">
@@ -58,7 +57,7 @@ function Profile() {
 				</ListItem>
 				<ListItem>
 					<ListItemIcon>
-						<MailOutline />
+						<MailOutlined />
 					</ListItemIcon>
 					<ListItemText>
 						<Typography variant="attributeTitle">
@@ -99,6 +98,15 @@ function Profile() {
 						</Typography>
 						<FormatArrayAsList roles={profile?.roles as string[] | undefined} />
 					</Box>
+				</ListItem>
+			</List>
+
+			<List className="list-profile">
+				<ListSubheader sx={{ backgroundColor: "transparent" }}>
+					<Typography variant="h6">{t("theme.appearance")}</Typography>
+				</ListSubheader>
+				<ListItem>
+					<ThemeControls />
 				</ListItem>
 			</List>
 		</PageContainer>
