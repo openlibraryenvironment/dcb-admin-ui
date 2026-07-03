@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import {
@@ -166,10 +166,10 @@ export default function StaffRequest({
 		mode: "onChange",
 	});
 
-	const selectionType = watch("selectionType");
-	const patronAgencyCode = watch("agencyCode");
-	const itemAgencyCode = watch("itemAgencyCode");
-	const patronBarcode = watch("patronBarcode");
+	const selectionType = useWatch({ control, name: "selectionType" });
+	const patronAgencyCode = useWatch({ control, name: "agencyCode" });
+	const itemAgencyCode = useWatch({ control, name: "itemAgencyCode" });
+	const patronBarcode = useWatch({ control, name: "patronBarcode" });
 
 	const { data: librariesData, isLoading: librariesDataLoading } =
 		useQuery<LibrariesQueryData>({
@@ -606,7 +606,9 @@ export default function StaffRequest({
 								<StepLabel {...labelProps} slots={{ stepIcon: DCBStepIcon }}>
 									<Typography
 										color={getStepColors(isActive, hasError, isCompleted)}
-										fontWeight={getStepLabelFontWeight(isActive)}
+										sx={{
+											fontWeight: getStepLabelFontWeight(isActive),
+										}}
 									>
 										{label}
 									</Typography>
