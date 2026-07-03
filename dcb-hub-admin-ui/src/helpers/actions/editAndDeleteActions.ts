@@ -72,9 +72,11 @@ export const handleSaveConfirmation = async (
 				{} as Record<string, any>,
 			);
 
-			Object.keys(fieldsToReset).length > 0
-				? reset(fieldsToReset, { keepValues: false })
-				: reset();
+			if (Object.keys(fieldsToReset).length > 0) {
+				reset(fieldsToReset, { keepValues: false });
+			} else {
+				reset();
+			}
 		} else {
 			reset();
 		}
@@ -130,7 +132,11 @@ export const handleCancel = (
 ) => {
 	setters.setEditMode(false);
 	setters.setChangedFields({});
-	resetValues ? reset(resetValues, { keepValues: false }) : reset();
+	if (resetValues) {
+		reset(resetValues, { keepValues: false });
+	} else {
+		reset();
+	}
 };
 
 export const handleEdit =
@@ -154,7 +160,7 @@ export const handleDeleteEntity = async (
 	changeReferenceUrl: string,
 	setAlert: Dispatch<SetStateAction<any>>,
 	deleteMutation: (variables: any) => Promise<any>,
-	t: TFunction<"common" | "application" | "validation">,
+	t: TFunction<any>,
 	router: AnyRouter,
 	name: string,
 	operationType: string,

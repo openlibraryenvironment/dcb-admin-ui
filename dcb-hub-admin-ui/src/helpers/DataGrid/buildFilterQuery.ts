@@ -10,102 +10,94 @@ export const buildFilterQuery = (
 	operator: string,
 	value: any,
 ) => {
-	const fromValue = value[0];
-	const toValue = value[1];
-	const isConversionField = conversionFields.includes(field);
-	const conversionFieldFactor = conversionFieldsMap[field];
-
-	// Goes first because it needs to be handled before anything  else
-	if (operator === "between" && value) {
-		// At the minute we only need to handle numeric fields.
-		// If the value isn't numeric we must remove spaces
-		if (conversionFields.includes(field)) {
-			const fromSeconds = fromValue * conversionFieldFactor;
-			const toSeconds = toValue * conversionFieldFactor;
-			// May not need all of this
-			if (fromSeconds && toSeconds) {
-				return `${field}:[${fromSeconds} TO ${toSeconds}]`;
-			} else if (fromSeconds && !toSeconds) {
-				return `${field}:[${fromSeconds} TO *]`;
-			} else if (toSeconds && !fromSeconds) {
-				return `${field}:[* TO ${toSeconds}]`;
-			}
-			return "";
-		}
-		// Not a conversion field
-		else {
-			if (fromValue && toValue) {
-				return `${field}:[${fromValue} TO ${toValue}]`;
-			} else if (fromValue && !toValue) {
-				return `${field}:[${fromValue} TO *]`;
-			} else if (toValue && !fromValue) {
-				return `${field}:[* TO ${toValue}]`;
-			}
-			return "";
-		}
-	}
+	// 1. VALUE-INDEPENDENT OPERATORS
+	// These operators do not require user input. Handle them before the guard.
 	if (operator === "last30Days") {
 		const end = dayjs().toISOString();
 		const start = dayjs().subtract(30, "day").toISOString();
-
 		return `${field}:[${start} TO ${end}]`;
 	}
 
 	if (operator === "last90Days") {
 		const end = dayjs().toISOString();
 		const start = dayjs().subtract(90, "day").toISOString();
-
 		return `${field}:[${start} TO ${end}]`;
 	}
 
-	// Date range handling
-	// We want to handle is ON OR after, is on or before,range,
-	// On or after - range with open bound (Date TO *)
-	// On or before - range with open bound (Date TO *)
-	// We should also handle "Today"
-	if (operator === "luceneDateRange" && Array.isArray(value)) {
-		const [start, end] = value;
+	// 2. THE THREAD SAVER (GUARD)
+	// If the user hasn't typed anything yet, bail out cleanly.
+	// Note: value === 0 is structurally valid for numerics, so we check explicitly.
+	if (value === undefined || value === null || value === "") {
+		return "";
+	}
 
-		// We need to handle open bounds (*) and we also need to convert to UTC. But can't convert null to UTC so we must check
-		// In the absence of a value, assume open bounds.
-		// In the absence of both values, ignore input entirely.
-		const startStr = start ? dayjs(start).toISOString() : "*";
-		const endStr = end ? dayjs(end).toISOString() : "*";
+	// 3. SAFE ARRAY EXTRACTION
+	// Only extract indices if the value is actually an array (e.g., from a date range picker).
+	const isArray = Array.isArray(value);
+	const fromValue = isArray ? value[0] : undefined;
+	const toValue = isArray ? value[1] : undefined;
+
+	const isConversionField = conversionFields.includes(field);
+	const conversionFieldFactor = conversionFieldsMap[field];
+
+	// 4. RANGE OPERATORS
+	if (operator === "between") {
+		if (isConversionField) {
+			const fromSeconds = fromValue
+				? fromValue * conversionFieldFactor
+				: undefined;
+			const toSeconds = toValue ? toValue * conversionFieldFactor : undefined;
+
+			if (fromSeconds && toSeconds)
+				return `${field}:[${fromSeconds} TO ${toSeconds}]`;
+			if (fromSeconds && !toSeconds) return `${field}:[${fromSeconds} TO *]`;
+			if (!fromSeconds && toSeconds) return `${field}:[* TO ${toSeconds}]`;
+			return "";
+		}
+
+		if (fromValue && toValue) return `${field}:[${fromValue} TO ${toValue}]`;
+		if (fromValue && !toValue) return `${field}:[${fromValue} TO *]`;
+		if (!fromValue && toValue) return `${field}:[* TO ${toValue}]`;
+		return "";
+	}
+
+	if (operator === "luceneDateRange" && isArray) {
+		const startStr = fromValue ? dayjs(fromValue).toISOString() : "*";
+		const endStr = toValue ? dayjs(toValue).toISOString() : "*";
 
 		if (startStr === "*" && endStr === "*") return "";
-
 		return `${field}:[${startStr} TO ${endStr}]`;
 	}
 
-	// Handle date-time "before" or "after" operations
+	// 5. DATE OPERATORS
 	if (operator === "onOrAfter" || operator === "onOrBefore") {
-		if (!value) return "";
 		const dateStr = dayjs(value).toISOString();
 
-		if (operator === "onOrAfter") {
-			// Essentially this is just from X (inclusive) to now
-			return `${field}:[${dateStr} TO *]`;
-		}
-		if (operator === "onOrBefore") {
-			return `${field}:[* TO ${dateStr}]`;
-		}
+		if (operator === "onOrAfter") return `${field}:[${dateStr} TO *]`;
+		if (operator === "onOrBefore") return `${field}:[* TO ${dateStr}]`;
 	}
 
+	// 6. STANDARD OPERATORS
 	const replacedValue = numericOperators.includes(operator)
 		? value
-		: value.replaceAll(" ", "?");
+		: String(value).replaceAll(" ", "?");
+
 	// Question marks are used to replace spaces in search terms- see Lucene docs https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
 	// Lucene powers our server-side querying so we need to get expressions into the right syntax.
 	// We're currently only supporting contains and equals, but other operators are possible - see docs.
 	// We will also need to introduce type handling - i.e. for UUIDs, numbers etc - based on the field.
 
-	const convertedValue = replacedValue * conversionFieldFactor;
+	const convertedValue = isConversionField
+		? Number(replacedValue) * conversionFieldFactor
+		: null;
+
 	const containsQuery = `${field}:*${replacedValue}*`;
 	const doesNotContainQuery = `*:* AND NOT (${containsQuery})`;
 	const equalsQuery = isConversionField
 		? `${field}:${convertedValue}`
 		: `${field}:${replacedValue}`;
 	const doesNotEqualQuery = `*:* AND NOT (${equalsQuery})`;
+
 	const lessThanQueryInclusive = isConversionField
 		? `${field}:[* TO ${convertedValue}]`
 		: `${field}:[* TO ${replacedValue}]`;
@@ -118,14 +110,6 @@ export const buildFilterQuery = (
 	const greaterThanQueryExclusive = isConversionField
 		? `${field}:{${convertedValue} TO *}`
 		: `${field}:{${replacedValue} TO *}`;
-
-	if (!field || !value) {
-		// Handle the case when the field or value is empty
-		if (value != 0) {
-			return null;
-		}
-		// If the value is actually zero, this is valid so don't return null
-	}
 
 	switch (operator) {
 		case "contains":
