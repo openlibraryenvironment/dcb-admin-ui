@@ -1,9 +1,11 @@
 // Types of data grid where users cannot click through to a details page
+// (the search grid instead navigates via per-cell Links to cluster/items/
+// identifiers, so a whole-row click must not hijack to /searchInstances/<id>).
 export const nonClickableTypes = [
 	"referenceValueMappings",
 	"numericRangeMappings",
 	"alarms",
-	"SharedIndexSearchGrid",
+	"searchInstances",
 ];
 
 // Types of data grid where users can click through to a details page,

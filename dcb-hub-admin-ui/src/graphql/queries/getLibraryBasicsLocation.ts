@@ -1,6 +1,6 @@
 import { gql } from "graphql-request";
 export const getLibraryBasicsLocation = gql`
-	query LoadLibraryBasics($query: String!) {
+	query LoadLibraryBasicsLocation($query: String!) {
 		libraries(query: $query) {
 			content {
 				id
@@ -32,15 +32,10 @@ export const getLibraryBasicsLocation = gql`
 					}
 				}
 				secondHostLms {
+					id
 					code
 					name
-						name
-						description
-						displayName
-						keycloakRole
-					}
-					isPrimaryContact
-					email
+					lmsClientClass
 				}
 			}
 		}

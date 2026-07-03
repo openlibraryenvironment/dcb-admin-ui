@@ -7,6 +7,6 @@ export function getLocalId(ils: string): string {
 		case "Sierra":
 			return "locations.new.sierra";
 		default:
-			return "details.local_id";
+			return "locations.local_id";
 	}
 }

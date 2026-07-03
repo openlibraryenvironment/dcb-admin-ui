@@ -10,18 +10,11 @@ export const getDataChangeLogById = gql`
 				entityType
 				actionInfo
 				lastEditedBy
+				timestampLogged
 				reason
 				changeReferenceUrl
-		) {
-			totalSize
-			content {
-				id
-				code
-				created
-				lastSeen
-				repeatCount
-				expires
-				alarmDetails
+				changeCategory
+				changes
 			}
 			pageable {
 				number
