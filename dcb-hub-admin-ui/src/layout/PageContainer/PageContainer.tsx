@@ -84,7 +84,6 @@ export default function PageContainer({
 					<Breadcrumbs titleAttribute={title} />
 				</Box>
 			)}
-
 			{!hideTitleBox && (
 				<Box
 					sx={{
@@ -96,12 +95,21 @@ export default function PageContainer({
 				>
 					<Stack
 						direction="row"
-						alignItems="center"
-						justifyContent="space-between"
-						sx={{ p: 3, pb: 0 }}
+						sx={{
+							alignItems: "center",
+							justifyContent: "space-between",
+							p: 3,
+							pb: 0,
+						}}
 					>
 						{title && (
-							<Stack direction="column" spacing={1} alignItems="baseline">
+							<Stack
+								direction="column"
+								spacing={1}
+								sx={{
+									alignItems: "baseline",
+								}}
+							>
 								{renderTitle()}
 								{docLink && (
 									<Button
@@ -121,7 +129,6 @@ export default function PageContainer({
 					</Stack>
 				</Box>
 			)}
-
 			<Box sx={{ px: 3, pb: 3, height: "100%" }}>{children}</Box>
 		</Stack>
 	);

@@ -12,7 +12,6 @@ interface LoginLayoutProps {
 
 export default function LoginLayout({
 	children,
-	pageName,
 }: PropsWithChildren<LoginLayoutProps>) {
 	return (
 		<>
@@ -29,21 +28,22 @@ export default function LoginLayout({
 						width: "100%",
 					}}
 				>
-					{/* Replaced the buggy ternary block with a unified clean layout */}
+					{/*
+					 * Full-bleed content area. Each child (login card, LandingCard) owns a
+					 * full-width coloured band and caps its own inner content to 1400px —
+					 * matching the fixed Header's Toolbar. Do NOT cap width here, or the
+					 * bands get clipped and no longer align with the header bar.
+					 * `mt` clears the 70px fixed AppBar.
+					 */}
 					<Box
 						sx={{
 							flexGrow: 1,
 							display: "flex",
 							flexDirection: "column",
-							maxWidth: "1440px",
 							width: "100%",
-							margin: "auto",
 						}}
 					>
-						<Stack
-							spacing={2}
-							sx={{ height: "100%", width: "100%", mt: 8, p: 2 }}
-						>
+						<Stack spacing={2} sx={{ width: "100%", mt: "70px" }}>
 							<Box sx={{ flex: "1 0 auto" }}>{children}</Box>
 						</Stack>
 					</Box>

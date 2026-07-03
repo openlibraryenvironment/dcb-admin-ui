@@ -1,17 +1,30 @@
 import { ReactNode, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 
 import Header from "../Header/Header";
 import Sidebar from "../Sidebar/Sidebar";
 import Footer from "../Footer/Footer";
 import LinkedFooter from "../LinkedFooter/LinkedFooter";
+import { useSidebarStore } from "@hooks/useSidebarStore";
 
 export default function StructuralLayout({
 	children,
 }: {
 	children: ReactNode;
 }) {
-	const [sidebarOpen, setSidebarOpen] = useState(true);
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+	// Desktop docked visibility is a persisted preference; the mobile overlay is
+	// transient (never open on first paint). One menu button toggles whichever
+	// axis is active at the current breakpoint.
+	const desktopOpen = useSidebarStore((state) => state.sidebarOpen);
+	const setSidebarOpen = useSidebarStore((state) => state.setSidebarOpen);
+	const [mobileOpen, setMobileOpen] = useState(false);
+
+	const menuOpen = isMobile ? mobileOpen : desktopOpen;
+	const handleMenuToggle = () =>
+		isMobile ? setMobileOpen((open) => !open) : setSidebarOpen(!desktopOpen);
 
 	return (
 		<Box
@@ -25,7 +38,7 @@ export default function StructuralLayout({
 				pt: "70px",
 			}}
 		>
-			<Header openStateFuncClosed={() => setSidebarOpen(!sidebarOpen)} />
+			<Header onMenuClick={handleMenuToggle} menuOpen={menuOpen} />
 
 			<Box
 				sx={{
@@ -39,9 +52,10 @@ export default function StructuralLayout({
 				}}
 			>
 				<Sidebar
-					openStateOpen={sidebarOpen}
-					openStateFuncOpen={() => setSidebarOpen(true)}
-					openStateFuncClosed={() => setSidebarOpen(false)}
+					isMobile={isMobile}
+					mobileOpen={mobileOpen}
+					desktopOpen={desktopOpen}
+					onClose={() => setMobileOpen(false)}
 				/>
 
 				<Box

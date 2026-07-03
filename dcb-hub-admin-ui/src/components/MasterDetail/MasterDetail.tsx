@@ -36,6 +36,7 @@ type MasterDetailType = {
 
 export default function MasterDetail({ row, type }: MasterDetailType) {
 	const apiRef = useGridApiContext();
+	// eslint-disable-next-line react-hooks/refs -- MUI DataGrid apiRef is populated and safe to read in this lazy initializer
 	const [width, setWidth] = useState(() => {
 		const dimensions = apiRef.current.getRootDimensions();
 		return dimensions?.viewportInnerSize.width;
@@ -62,7 +63,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.agency_uuid")}
+								{t("agencies.uuid")}
 							</Typography>
 							<Typography variant="attributeText">
 								<RenderAttribute attribute={row?.id} />
@@ -110,7 +111,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.source_bib_uuid")}
+								{t("bibRecords.source_bib_uuid")}
 							</Typography>
 							<Typography variant="attributeText">
 								<RenderAttribute attribute={row?.id} />
@@ -144,7 +145,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
-									{t("details.author")}
+									{t("search.author")}
 								</Typography>
 								<Typography variant="attributeText">
 									<RenderAttribute attribute={row?.author} />
@@ -180,7 +181,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									aria-controls="source-bibs-source-record-json-content"
 									id="source-bibs-source-record-json-header"
 								>
-									<Typography>{t("details.source_record")}</Typography>
+									<Typography>{t("bibRecords.source_record")}</Typography>
 								</StyledDataGridAccordionSummary>
 								<AccordionDetails id="source-bibs-source-record-json-content">
 									<pre>{JSON.stringify(row?.sourceRecord, null, 2)}</pre>
@@ -194,7 +195,9 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									aria-controls="search-canonical-metadata-content"
 									id="search-canonical-metadata-header"
 								>
-									<Typography>{t("details.canonical_metadata")}</Typography>
+									<Typography>
+										{t("patron_request.canonical_metadata")}
+									</Typography>
 								</StyledDataGridAccordionSummary>
 								<AccordionDetails id="search-canonical-metadata-content">
 									<pre>{JSON.stringify(row?.canonicalMetadata, null, 2)}</pre>
@@ -367,7 +370,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.location_uuid")}
+								{t("locations.uuid")}
 							</Typography>
 							<RenderAttribute attribute={row?.id} />
 						</Stack>
@@ -375,7 +378,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.location_type")}
+								{t("locations.type")}
 							</Typography>
 							<RenderAttribute attribute={row?.type} />
 						</Stack>
@@ -383,7 +386,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.location_agency_name")}
+								{t("locations.agency_name")}
 							</Typography>
 							<RenderAttribute attribute={row?.agency?.name} />
 						</Stack>
@@ -396,7 +399,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.request_created")}
+								{t("patron_request.request_created")}
 							</Typography>
 							<RenderAttribute
 								attribute={dayjs(row?.dateCreated).format("YYYY-MM-DD HH:mm")}
@@ -406,7 +409,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.patron_hostlms")}
+								{t("patron_request.patron_hostlms")}
 							</Typography>
 							<RenderAttribute attribute={row?.patronHostlmsCode} />
 						</Stack>
@@ -414,7 +417,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.borrowing_patron_barcode")}
+								{t("patron_request.borrowing_patron_barcode")}
 							</Typography>
 							<RenderAttribute
 								attribute={row?.requestingIdentity?.localBarcode}
@@ -424,7 +427,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.title")}
+								{t("search.title")}
 							</Typography>
 							<RenderAttribute attribute={row?.clusterRecord?.title} />
 						</Stack>
@@ -432,7 +435,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.supplying_agency_code")}
+								{t("patron_request.supplying_agency_code")}
 							</Typography>
 							<RenderAttribute attribute={row?.suppliers?.[0]?.localAgency} />
 						</Stack>
@@ -448,7 +451,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.previous_status")}
+								{t("patron_request.previous_status")}
 							</Typography>
 							<RenderAttribute attribute={row?.previousStatus} />
 						</Stack>
@@ -456,7 +459,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.status")}
+								{t("patron_request.status")}
 							</Typography>
 							<RenderAttribute attribute={row?.status} />
 						</Stack>
@@ -464,7 +467,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.next_expected_status")}
+								{t("patron_request.next_expected_status")}
 							</Typography>
 							<RenderAttribute
 								attribute={row?.nextExpectedStatus?.toString()}
@@ -474,7 +477,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.error")}
+								{t("patron_request.error")}
 							</Typography>
 							<RenderAttribute attribute={row?.errorMessage} />
 						</Stack>
@@ -482,7 +485,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.is_transition_out_of_sequence")}
+								{t("patron_request.is_transition_out_of_sequence")}
 							</Typography>
 							<RenderAttribute attribute={row?.outOfSequenceFlag?.toString()} />
 						</Stack>
@@ -490,7 +493,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.polling_checks_in_status")}
+								{t("patron_request.polling_checks_in_status")}
 							</Typography>
 							<RenderAttribute
 								attribute={row?.pollCountForCurrentStatus?.toString()}
@@ -500,7 +503,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.time_in_status")}
+								{t("patron_request.time_in_status")}
 							</Typography>
 							<RenderAttribute
 								attribute={formatDuration(row?.elapsedTimeInCurrentStatus)}
@@ -510,7 +513,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.item_manually_selected")}
+								{t("patron_request.item_manually_selected")}
 							</Typography>
 							<RenderAttribute
 								attribute={row?.isManuallySelectedItem?.toString()}
@@ -520,7 +523,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.request_updated")}
+								{t("patron_request.request_updated")}
 							</Typography>
 							<RenderAttribute
 								attribute={dayjs(row?.dateUpdated).format("YYYY-MM-DD HH:mm")}
@@ -530,7 +533,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.request_uuid")}
+								{t("patron_request.uuid")}
 							</Typography>
 							<RenderAttribute attribute={row?.id} />
 						</Stack>
@@ -551,7 +554,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.agency_code")}
+								{t("agencies.code")}
 							</Typography>
 							<RenderAttribute attribute={row?.agency?.code} />
 						</Stack>
@@ -559,7 +562,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.agency_name")}
+								{t("agencies.name")}
 							</Typography>
 							<RenderAttribute attribute={row?.agency?.description} />
 						</Stack>
@@ -567,7 +570,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.location_name")}
+								{t("locations.name")}
 							</Typography>
 							<RenderAttribute attribute={row?.location?.name} />
 						</Stack>
@@ -575,7 +578,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("details.location_code")}
+								{t("locations.code")}
 							</Typography>
 							<RenderAttribute attribute={row?.location?.code} />
 						</Stack>
@@ -742,7 +745,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction="column">
 									<Typography variant="attributeTitle">
-										{t("details.author")}
+										{t("search.author")}
 									</Typography>
 									<RenderAttribute attribute={row?.latestData?.author?.login} />
 								</Stack>

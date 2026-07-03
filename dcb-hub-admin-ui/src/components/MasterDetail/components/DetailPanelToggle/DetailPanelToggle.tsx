@@ -29,6 +29,7 @@ export function DetailPanelToggle(
 		gridDetailPanelExpandedRowsContentCacheSelector,
 	);
 
+	// eslint-disable-next-line react-hooks/refs -- MUI DataGrid apiRef is populated and safe to read during render
 	const rowNode = apiRef.current.getRowNode(id);
 	if (rowNode?.type === "group") {
 		return null;

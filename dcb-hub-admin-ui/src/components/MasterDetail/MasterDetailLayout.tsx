@@ -15,8 +15,8 @@ export default function MasterDetailLayout({
 				container
 				spacing={{ xs: 1, md: 2 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-				pl={13}
 				sx={{
+					pl: 13,
 					py: 2,
 					height: "100%",
 					boxSizing: "border-box",

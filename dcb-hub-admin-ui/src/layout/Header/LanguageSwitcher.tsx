@@ -3,39 +3,65 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-// This component is currently unused due to us not presently supporting other languages.
-// It has been maintained within the codebase because there is a high chance we will need to support other languages in the future.
+
+// Supported UI languages. `label` is intentionally the endonym and is NOT translated.
+const LANGUAGES = [
+	{ code: "en", label: "English" },
+	{ code: "es", label: "Español" },
+];
 
 export default function LanguageSwitcher() {
-	const [language, setLanguage] = useState("");
+	const { t, i18n } = useTranslation();
+
+	// Normalise "en-GB" -> "en" so the value matches a MenuItem (avoids MUI's
+	// out-of-range value warning). Falls back to the first supported language.
+	const base = (i18n.resolvedLanguage ?? i18n.language ?? "en").split("-")[0];
+	const current = LANGUAGES.some((l) => l.code === base)
+		? base
+		: LANGUAGES[0].code;
+
 	const handleChange = (event: SelectChangeEvent) => {
-		setLanguage(event.target.value);
+		i18n.changeLanguage(event.target.value);
 	};
 
-	const { t, i18n } = useTranslation();
-	const changeLanguage = (lng: any) => {
-		i18n.changeLanguage(lng);
-	};
+	const label = String(t("header.language_switcher_title"));
 
 	return (
-		<FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-			<InputLabel id="language-select-menu-label">
-				{t("header.language_switcher_title")}
-			</InputLabel>
+		<FormControl
+			size="small"
+			sx={{
+				minWidth: 120,
+				// Contrast against the dark header bar (WCAG 2.2 AA).
+				"& .MuiInputLabel-root": { color: "primary.headerText" },
+				"& .MuiInputLabel-root.Mui-focused": { color: "primary.headerText" },
+				"& .MuiOutlinedInput-root": {
+					color: "primary.headerText",
+					"& .MuiOutlinedInput-notchedOutline": {
+						borderColor: "primary.headerText",
+					},
+					"&:hover .MuiOutlinedInput-notchedOutline": {
+						borderColor: "primary.headerText",
+					},
+					"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+						borderColor: "primary.headerText",
+					},
+				},
+				"& .MuiSelect-icon": { color: "primary.headerText" },
+			}}
+		>
+			<InputLabel id="language-select-menu-label">{label}</InputLabel>
 			<Select
 				labelId="language-select-menu-label"
 				id="language-select-menu"
-				value={language}
-				label={t("header.language_switcher_title")}
+				value={current}
+				label={label}
 				onChange={handleChange}
 			>
-				<MenuItem value={10} onClick={() => changeLanguage("en")}>
-					English
-				</MenuItem>
-				<MenuItem value={20} onClick={() => changeLanguage("es")}>
-					Spanish
-				</MenuItem>
+				{LANGUAGES.map((lng) => (
+					<MenuItem key={lng.code} value={lng.code}>
+						{lng.label}
+					</MenuItem>
+				))}
 			</Select>
 		</FormControl>
 	);

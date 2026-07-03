@@ -1,21 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "@tanstack/react-router";
-import { styled, Theme, CSSObject, useTheme } from "@mui/material/styles";
 import {
-	Drawer as MuiDrawer,
+	Drawer,
 	List,
 	Divider,
-	IconButton,
 	ListItem,
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
-	useMediaQuery,
 } from "@mui/material";
 import {
 	LocationOn,
-	Menu as MenuIcon,
 	Settings,
 	Book,
 	Home,
@@ -27,65 +23,14 @@ import {
 	Info,
 	LocalLibrary,
 	Search,
-	ChevronLeft,
 } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
 
 const drawerWidth = 240;
 
-const openedMixin = (theme: Theme): CSSObject => ({
-	backgroundColor: theme.palette.primary.sidebar,
-	width: drawerWidth,
-	position: "static",
-	height: "100%",
-	border: "0px",
-	transition: theme.transitions.create("width", {
-		easing: theme.transitions.easing.sharp,
-		duration: theme.transitions.duration.enteringScreen,
-	}),
-	overflowX: "hidden",
-});
-
-const closedMixin = (theme: Theme): CSSObject => ({
-	transition: theme.transitions.create("width", {
-		easing: theme.transitions.easing.sharp,
-		duration: theme.transitions.duration.leavingScreen,
-	}),
-	overflowX: "hidden",
-	width: `calc(${theme.spacing(7)} + 1px)`,
-	[theme.breakpoints.up("sm")]: {
-		width: `calc(${theme.spacing(8)} + 1px)`,
-	},
-});
-
-const DrawerHeader = styled("div")(({ theme }) => ({
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "flex-end",
-	padding: theme.spacing(0, 1),
-	...theme.mixins.toolbar,
-}));
-
-const Drawer = styled(MuiDrawer, {
-	shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-	width: drawerWidth,
-	flexShrink: 0,
-	whiteSpace: "nowrap",
-	boxSizing: "border-box",
-	...(open && {
-		...openedMixin(theme),
-		"& .MuiDrawer-paper": openedMixin(theme),
-	}),
-	...(!open && {
-		...closedMixin(theme),
-		"& .MuiDrawer-paper": closedMixin(theme),
-	}),
-}));
-
 const SidebarIcon = (indexVal: number, isSelected: boolean) => {
-	const sx = { color: isSelected ? "white" : "inherit" };
+	const sx = { color: isSelected ? "primary.selectedText" : "inherit" };
 	switch (indexVal) {
 		case 0:
 			return <Home fontSize="small" sx={sx} />;
@@ -134,122 +79,168 @@ const routes = [
 	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" },
 ];
 
-// still needs serious improvement. now we are seeing dupes
-export default function Sidebar(props: any) {
-	const { t } = useTranslation();
-	const theme = useTheme();
-	const location = useLocation();
-	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-	const [selected, setSelected] = useState(-1);
-	const [isDisabled, setDisabled] = useState(-1);
-	const [isChildPage, setChildPage] = useState(false);
+interface SidebarProps {
+	// Below `md`: temporary overlay controlled by `mobileOpen`.
+	// At `md`+: permanently docked, shown/hidden by `desktopOpen` (no mini rail).
+	isMobile: boolean;
+	mobileOpen: boolean;
+	desktopOpen: boolean;
+	onClose: () => void;
+}
 
-	useEffect(() => {
+export default function Sidebar({
+	isMobile,
+	mobileOpen,
+	desktopOpen,
+	onClose,
+}: SidebarProps) {
+	const { t } = useTranslation();
+	const location = useLocation();
+
+	// Selection state is derived entirely from the current URL - deliberately
+	// not mirrored into component state (which previously caused it to
+	// briefly desync from the URL via an optimistic click handler + a
+	// separate effect, producing duplicate/incorrect highlighting).
+	const { selected, isChildPage, disabledIndex } = useMemo(() => {
 		const currentRoute = location.pathname;
-		const currentIndex = routes.findIndex(
-			(route) => route.path === currentRoute,
-		);
-		const isExactRoute = currentIndex !== -1;
+		const exactIndex = routes.findIndex((route) => route.path === currentRoute);
+
+		if (exactIndex !== -1) {
+			return {
+				selected: exactIndex,
+				isChildPage: false,
+				disabledIndex: exactIndex,
+			};
+		}
 
 		const homeRemovedFromArray = routes.slice(1);
 		const parentIndex = homeRemovedFromArray.findIndex((route) =>
 			currentRoute.startsWith(route.path),
 		);
-		const isChildRoute = parentIndex !== -1;
 
-		if (isChildRoute && !isExactRoute) {
-			setChildPage(true);
-			setSelected(parentIndex + 1);
-		} else {
-			setChildPage(false);
-			setSelected(currentIndex);
+		if (parentIndex !== -1) {
+			return {
+				selected: parentIndex + 1,
+				isChildPage: true,
+				disabledIndex: -1,
+			};
 		}
-		setDisabled(currentIndex);
+
+		return { selected: -1, isChildPage: false, disabledIndex: -1 };
 	}, [location.pathname]);
 
-	const handleListButtonClick = useCallback((index: number) => {
-		setSelected(index);
-		setDisabled(index);
-	}, []);
+	const navigation = (
+		<List
+			component="nav"
+			id="main-sidebar-nav"
+			aria-label={String(t("nav.main_menu"))}
+			data-tid="sidebar"
+		>
+			{routes.map((route, index) => (
+				<ListItem key={route.path} disablePadding sx={{ display: "block" }}>
+					<ListItemButton
+						component={Link}
+						to={route.path}
+						selected={selected === index}
+						disabled={disabledIndex === index}
+						// On mobile, choosing a destination dismisses the overlay.
+						onClick={isMobile ? onClose : undefined}
+						aria-current={
+							!isChildPage && selected === index ? "page" : undefined
+						}
+						sx={{
+							minHeight: 48,
+							px: "24px",
+
+							":hover": { backgroundColor: "primary.hover" },
+							":active": { backgroundColor: "primary.hover" },
+
+							"&.Mui-selected": {
+								backgroundColor: isChildPage
+									? "primary.buttonForSelectedChildPage"
+									: "primary.buttonForSelectedPage",
+								color: "primary.selectedText",
+								"&.Mui-focusVisible": {
+									backgroundColor: isChildPage
+										? "primary.buttonForSelectedChildPage"
+										: "primary.buttonForSelectedPage",
+								},
+								":hover": {
+									backgroundColor: isChildPage
+										? "primary.hoverOnSelectedPage"
+										: "primary.buttonForSelectedPage",
+								},
+							},
+							"&.Mui-disabled": { opacity: 1 },
+						}}
+					>
+						<ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: "center" }}>
+							{SidebarIcon(index, selected === index)}
+						</ListItemIcon>
+						<ListItemText
+							primary={t(route.translationKey)}
+							slotProps={{
+								primary: {
+									sx: {
+										fontWeight: selected === index ? "bold" : "normal",
+									},
+								},
+							}}
+						/>
+					</ListItemButton>
+				</ListItem>
+			))}
+		</List>
+	);
+
+	if (isMobile) {
+		return (
+			<Drawer
+				variant="temporary"
+				open={mobileOpen}
+				onClose={onClose}
+				ModalProps={{ keepMounted: true }} // Better open performance on mobile.
+				sx={{
+					"& .MuiDrawer-paper": {
+						width: drawerWidth,
+						boxSizing: "border-box",
+						backgroundColor: "primary.sidebar",
+						border: 0,
+						// Clear the fixed 70px Header and scroll if items overflow.
+						pt: "70px",
+						overflowY: "auto",
+					},
+				}}
+			>
+				<Divider />
+				{navigation}
+			</Drawer>
+		);
+	}
+
+	// Desktop/tablet: docked drawer, toggled fully in/out (never a mini rail).
+	// Unmounting when hidden keeps hidden nav links out of the tab order (WCAG).
+	if (!desktopOpen) return null;
 
 	return (
-		<>
-			{props.openStateOpen && (
-				<Drawer
-					variant={isMobile ? "temporary" : "permanent"}
-					open={props.openStateOpen}
-					onClose={props.openStateFuncClosed} // Required for temporary drawers to close when clicking outside
-					ModalProps={{
-						keepMounted: true, // Better open performance on mobile.
-					}}
-				>
-					{/* <DrawerHeader /> */}
-					<Divider />
-					<List component="nav" data-tid="sidebar">
-						{routes.map((route, index) => (
-							<ListItem
-								key={route.path}
-								disablePadding
-								sx={{ display: "block" }}
-							>
-								<ListItemButton
-									component={Link}
-									to={route.path}
-									selected={selected === index}
-									onClick={() => handleListButtonClick(index)}
-									disabled={isDisabled === index}
-									aria-current={
-										!isChildPage && selected === index ? "page" : undefined
-									}
-									sx={{
-										minHeight: 48,
-										justifyContent: props.openStateOpen ? "initial" : "center",
-										px: "24px",
-
-										":hover": { backgroundColor: "primary.hover" },
-										":active": { backgroundColor: "primary.hover" },
-
-										"&.Mui-selected": {
-											backgroundColor: isChildPage
-												? "primary.buttonForSelectedChildPage"
-												: "primary.buttonForSelectedPage",
-											color: "primary.selectedText",
-											"&.Mui-focusVisible": {
-												backgroundColor: isChildPage
-													? "primary.buttonForSelectedChildPage"
-													: "primary.buttonForSelectedPage",
-											},
-											":hover": {
-												backgroundColor: isChildPage
-													? "primary.hoverOnSelectedPage"
-													: "primary.buttonForSelectedPage",
-											},
-										},
-										"&.Mui-disabled": { opacity: 1 },
-									}}
-								>
-									<ListItemIcon
-										sx={{
-											minWidth: 0,
-											mr: props.openStateOpen ? 3 : "auto",
-											justifyContent: "center",
-										}}
-									>
-										{SidebarIcon(index, selected === index)}
-									</ListItemIcon>
-									<ListItemText
-										primary={t(route.translationKey)}
-										sx={{ opacity: props.openStateOpen ? 1 : 0 }}
-										primaryTypographyProps={{
-											fontWeight: selected === index ? "bold" : "normal",
-										}}
-									/>
-								</ListItemButton>
-							</ListItem>
-						))}
-					</List>
-				</Drawer>
-			)}
-		</>
+		<Drawer
+			variant="permanent"
+			sx={{
+				width: drawerWidth,
+				flexShrink: 0,
+				"& .MuiDrawer-paper": {
+					position: "static",
+					width: drawerWidth,
+					height: "100%",
+					boxSizing: "border-box",
+					backgroundColor: "primary.sidebar",
+					border: 0,
+					overflowX: "hidden",
+				},
+			}}
+		>
+			<Divider />
+			{navigation}
+		</Drawer>
 	);
 }

@@ -18,7 +18,6 @@ import {
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { Menu, AccountCircle } from "@mui/icons-material";
 
-import Link from "@components/Link/Link";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
@@ -26,13 +25,18 @@ import useDCBVersionStore from "@hooks/serviceInfoStore";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
+import LanguageSwitcher from "./LanguageSwitcher";
+// Bundled asset (src/assets, not public/) - import for a hashed URL that resolves
+// on any route; the old "/assets/brand/..." string pointed at a missing public file.
+import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
 }
 
 interface HeaderProps {
-	openStateFuncClosed?: () => void;
+	onMenuClick?: () => void;
+	menuOpen?: boolean;
 	iconsVisible?: boolean;
 }
 
@@ -43,7 +47,8 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 export default function Header({
-	openStateFuncClosed,
+	onMenuClick,
+	menuOpen = false,
 	iconsVisible = true,
 }: HeaderProps) {
 	const theme = useTheme();
@@ -87,7 +92,7 @@ export default function Header({
 		enabled: auth.isAuthenticated,
 		throwOnError: false,
 		queryFn: () =>
-			gqlClient.request(getConsortiumBasics, {
+			gqlClient.request<any>(getConsortiumBasics, {
 				order: "name",
 				orderBy: "ASC",
 				pagesize: 1,
@@ -129,10 +134,8 @@ export default function Header({
 		environment: type,
 	});
 
-	const fallbackHeaderSrc = "/assets/brand/fallback-header.png";
-
 	return (
-		<Box sx={{ flexGrow: 1 }}>
+		<Box>
 			<AppBar
 				position="fixed"
 				sx={{ backgroundColor: "primary.header", maxHeight: "70px" }}
@@ -154,8 +157,10 @@ export default function Header({
 								data-tid="sidebar-menu"
 								size="large"
 								edge="start"
-								aria-label="menu"
-								onClick={openStateFuncClosed}
+								aria-label={String(t("nav.toggle_menu"))}
+								aria-expanded={menuOpen}
+								aria-controls="main-sidebar-nav"
+								onClick={onMenuClick}
 								sx={{
 									mr: 2,
 									color: "primary.headerText",
@@ -181,7 +186,7 @@ export default function Header({
 					<Box
 						component="img"
 						src={isEmpty(headerImageURL) ? fallbackHeaderSrc : headerImageURL}
-						alt={t("consortium.logo_app_header")}
+						alt={String(t("consortium.logo_app_header"))}
 						sx={{ width: 36, height: 36, mt: !iconsVisible ? 1 : 0 }}
 					/>
 
@@ -200,7 +205,15 @@ export default function Header({
 					</Typography>
 
 					{iconsVisible && (
-						<div>
+						<Box
+							sx={{
+								display: "flex",
+								alignItems: "center",
+								gap: 1,
+								flexShrink: 0,
+							}}
+						>
+							<LanguageSwitcher />
 							<IconButton
 								size="large"
 								data-tid="profile-button"
@@ -250,7 +263,7 @@ export default function Header({
 							>
 								{auth.isAuthenticated ? t("nav.logout") : t("nav.login")}
 							</Button>
-						</div>
+						</Box>
 					)}
 				</Toolbar>
 			</AppBar>

@@ -1,4 +1,3 @@
-import { MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip } from "@mui/material";
 import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
@@ -9,15 +8,12 @@ import {
 	gridRowsLookupSelector,
 	GridRowId,
 	useGridApiContext,
-	GridApiPremium,
 } from "@mui/x-data-grid-premium";
 
 export default function DetailPanelHeader() {
-	// UPGRADE: Cast context directly to the high-performance dynamic GridApiPremium instance
-	const apiRef = useGridApiContext() as MutableRefObject<GridApiPremium>;
+	const apiRef = useGridApiContext();
 	const { t } = useTranslation();
 
-	// UPGRADE: MUI X V8 returns expandedRowIds natively as an optimized Set<GridRowId> collection
 	const expandedRowIds = useGridSelector(
 		apiRef,
 		gridDetailPanelExpandedRowIdsSelector,
@@ -34,7 +30,6 @@ export default function DetailPanelHeader() {
 			const dataRowIdToModelLookup = gridRowsLookupSelector(apiRef);
 			const allRowIdsWithDetailPanels = new Set<GridRowId>();
 
-			// Populate high-performance unique key collection
 			for (const key in rowsWithDetailPanels) {
 				if (Object.prototype.hasOwnProperty.call(rowsWithDetailPanels, key)) {
 					const rowData = dataRowIdToModelLookup[key];
@@ -43,7 +38,6 @@ export default function DetailPanelHeader() {
 					}
 				}
 			}
-			// UPGRADE: Set values cleanly as a Set per the restored V8 specification standards
 			apiRef.current.setExpandedDetailPanels(allRowIdsWithDetailPanels);
 		} else {
 			apiRef.current.setExpandedDetailPanels(new Set());
@@ -54,7 +48,11 @@ export default function DetailPanelHeader() {
 
 	return (
 		<Tooltip
-			title={noDetailPanelsOpen ? t("details.expand") : t("details.collapse")}
+			title={
+				noDetailPanelsOpen
+					? t("ui.data_grid.expand")
+					: t("ui.data_grid.collapse")
+			}
 		>
 			<span>
 				<IconButton

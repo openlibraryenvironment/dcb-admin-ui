@@ -106,8 +106,10 @@ export default function LinkedFooter() {
 	return (
 		<Stack
 			direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
-			justifyContent="center"
-			alignItems={"stretch"}
+			sx={{
+				justifyContent: "center",
+				alignItems: "stretch",
+			}}
 		>
 			{sections.map((section) => (
 				<div

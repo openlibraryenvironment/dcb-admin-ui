@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 
 import dayjs from "dayjs";
 import OpenRsLogo from "@assets/brand/OpenRS_48px.png";
-import { useRouter } from "@tanstack/react-router";
 
 // this is a guess at what the width should be
 // may need changing in the future
@@ -15,8 +14,13 @@ const OpenRsLogoHeight = 32;
 
 export default function Footer() {
 	const { t } = useTranslation();
-	const { cfg } = useRouter().options.context as { cfg: any };
 	const theme = useTheme();
+
+	// Build-time constants (see vite.config.mts `define`). `version` comes from
+	// package.json, `releaseDate` from release-info.json.
+	const releaseDate = __APP_RELEASE_DATE__
+		? dayjs(__APP_RELEASE_DATE__).format("YYYY-MM-DD")
+		: null;
 
 	return (
 		<div>
@@ -51,12 +55,11 @@ export default function Footer() {
 					{". " +
 						t("app.version") +
 						" " +
-						cfg?.version +
-						". " +
-						t("app.released") +
-						" " +
-						dayjs(cfg?.releaseDate).format("YYYY-MM-DD") +
-						"."}
+						__APP_VERSION__ +
+						"." +
+						(releaseDate
+							? " " + t("app.released") + " " + releaseDate + "."
+							: "")}
 				</Typography>
 				{/* apply a wrapper to style the logo inline with text */}
 				<Box sx={{ pt: 1.25 }}>
