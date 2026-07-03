@@ -14,6 +14,7 @@ import merge from "deepmerge";
 import isEqual from "lodash/isEqual";
 import { getSession } from "next-auth/react";
 import getConfig from "next/config";
+import { redirectForStaleSession } from "./staleSession";
 
 export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
@@ -23,13 +24,15 @@ const { publicRuntimeConfig } = getConfig();
 
 // Error handling link
 const errorLink = onError(
-	({ graphQLErrors, networkError, operation, forward }) => {
+	({ graphQLErrors, networkError }) => {
 		if (graphQLErrors) {
 			for (const err of graphQLErrors) {
-				// Handle 401 errors by attempting to refresh the token
-				if (err.extensions?.code === "UNAUTHENTICATED") {
-					// Retry the query once after attempting to refresh the token
-					return forward(operation);
+				if (
+					err.extensions?.code === "UNAUTHENTICATED" ||
+					err.extensions?.code === "FORBIDDEN"
+				) {
+					void redirectForStaleSession();
+					return;
 				}
 
 				console.log(
@@ -37,7 +40,14 @@ const errorLink = onError(
 				);
 			}
 		}
-		if (networkError) console.log(`[Network error]: ${networkError}`);
+		if (networkError) {
+			const statusCode = (networkError as { statusCode?: number }).statusCode;
+			if (statusCode === 401 || statusCode === 403) {
+				void redirectForStaleSession();
+				return;
+			}
+			console.log(`[Network error]: ${networkError}`);
+		}
 	},
 );
 

@@ -2,8 +2,9 @@
 // It handles optimization and all the necessary Webpack configuration to make this work.
 // This is what makes our MUI Pro licence key work.
 import { LicenseInfo } from "@mui/x-license";
-import { SessionProvider } from "next-auth/react";
+import { SessionProvider, useSession } from "next-auth/react";
 import { ProgressBar } from "@components/ProgressBar";
+import { useEffect } from "react";
 
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -19,6 +20,10 @@ import { appWithTranslation } from "next-i18next";
 import { openRSLight, openRSDark } from "src/themes/openRS";
 import { ApolloProvider } from "@apollo/client";
 import { useApollo } from "@lib/apollo";
+import {
+	installStaleSessionInterceptors,
+	redirectForStaleSession,
+} from "@lib/staleSession";
 declare module "@mui/material/styles" {
 	interface PaletteColor {
 		attributeTitle?: string;
@@ -159,6 +164,22 @@ declare module "@mui/material/Button" {
 
 LicenseInfo.setLicenseKey(String(process.env.NEXT_PUBLIC_MUI_X_LICENSE_KEY));
 
+function StaleSessionWatcher() {
+	const { data: session } = useSession();
+
+	useEffect(() => {
+		installStaleSessionInterceptors();
+	}, []);
+
+	useEffect(() => {
+		if (session?.error === "RefreshAccessTokenError") {
+			void redirectForStaleSession();
+		}
+	}, [session?.error]);
+
+	return null;
+}
+
 function MyApp(props: AppProps) {
 	const { Component, pageProps } = props;
 	const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -192,6 +213,7 @@ function MyApp(props: AppProps) {
 				<ApolloProvider client={apolloClient}>
 					<ThemeProvider theme={theme}>
 						<CssBaseline />
+						<StaleSessionWatcher />
 						<ProgressBar />
 						<Component {...pageProps} />
 					</ThemeProvider>
