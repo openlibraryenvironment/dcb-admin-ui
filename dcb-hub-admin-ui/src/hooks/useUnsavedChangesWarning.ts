@@ -6,7 +6,7 @@ export function useUnsavedChangesWarning(
 	onKeepEditing?: () => void,
 	onLeaveWithoutSaving?: () => void,
 ) {
-	const { proceed, reset, status, next } = useBlocker({
+	const { proceed, reset, status } = useBlocker({
 		shouldBlockFn: () => isDirty,
 		withResolver: true,
 	});
