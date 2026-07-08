@@ -289,7 +289,7 @@ function Libraries() {
 						<GridActionsCellItem
 							key="edit"
 							icon={<Edit />}
-							label={t("ui.edit")}
+							label={t("ui.data_grid.edit")}
 							onClick={(e) => {
 								e.stopPropagation();
 								setRowModesModel({
@@ -303,7 +303,7 @@ function Libraries() {
 						<GridActionsCellItem
 							key="delete"
 							icon={<Delete />}
-							label={t("ui.delete")}
+							label={t("ui.data_grid.delete")}
 							onClick={(e) => {
 								e.stopPropagation();
 								setDeleteLibraryId(id as string);

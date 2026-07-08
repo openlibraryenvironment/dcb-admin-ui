@@ -180,7 +180,7 @@ function FunctionalSettings() {
 						<GridActionsCellItem
 							key="edit"
 							icon={<Edit />}
-							label={t("ui.edit")}
+							label={t("ui.data_grid.edit")}
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,

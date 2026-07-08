@@ -40,6 +40,7 @@ interface ExportToolbarProps {
 	selectionCount?: number;
 	wizardEnabled?: boolean;
 	onOpenWizard?: () => void;
+	disableToolbarFilter?: boolean;
 }
 
 export default function ExportToolbar({
@@ -50,6 +51,7 @@ export default function ExportToolbar({
 	selectionCount = 0,
 	wizardEnabled,
 	onOpenWizard,
+	disableToolbarFilter,
 }: ExportToolbarProps) {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
@@ -84,17 +86,19 @@ export default function ExportToolbar({
 					<GridViewColumnIcon fontSize="small" />
 				</ColumnsPanelTrigger>
 			</Tooltip>
-			<Tooltip title={filterTooltipText}>
-				<FilterPanelTrigger
-					render={(props, state) => (
-						<ToolbarButton {...props} color="default">
-							<Badge badgeContent={state.filterCount} color="primary">
-								<GridFilterListIcon fontSize="small" />
-							</Badge>
-						</ToolbarButton>
-					)}
-				/>
-			</Tooltip>
+			{!disableToolbarFilter ? (
+				<Tooltip title={filterTooltipText}>
+					<FilterPanelTrigger
+						render={(props, state) => (
+							<ToolbarButton {...props} color="default">
+								<Badge badgeContent={state.filterCount} color="primary">
+									<GridFilterListIcon fontSize="small" />
+								</Badge>
+							</ToolbarButton>
+						)}
+					/>
+				</Tooltip>
+			) : null}
 			{handleExport ? (
 				<GridToolbarExportContainer>
 					<MenuItem

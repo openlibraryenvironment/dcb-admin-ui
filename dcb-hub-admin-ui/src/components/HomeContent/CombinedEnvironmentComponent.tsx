@@ -17,7 +17,6 @@ import Link from "@components/Link/Link";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
-import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 import { Environment } from "@models/Environment";
 import { calculateDCBRAGStatus } from "@helpers/calculateDCBRAGStatus";
@@ -239,11 +238,8 @@ export default function CombinedEnvironmentComponent() {
 				pivotingEnabled={false}
 				toolbarVisible={false}
 				scrollbarVisible={false}
-				getDetailPanelContent={({ row }: any) => (
-					<MasterDetail row={row} type="environmentInfo" />
-				)}
 				pagination
-				noResultsText={t("common.no_results")}
+				noResultsText={t("ui.data_grid.no_results")}
 				searchText=""
 			/>
 

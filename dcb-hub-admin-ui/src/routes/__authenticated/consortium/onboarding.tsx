@@ -187,7 +187,7 @@ function Onboarding() {
 						pagination
 						paginationModel={{ page: 0, pageSize: 20 }}
 						scrollbarVisible={false}
-						noResultsText={t("common.no_results")}
+						noResultsText={t("ui.data_grid.no_results")}
 						searchText=""
 					/>
 				</Grid>

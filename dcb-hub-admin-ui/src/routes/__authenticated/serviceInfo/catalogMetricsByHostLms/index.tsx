@@ -216,7 +216,7 @@ function CatalogMetricsByHostLms() {
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("catalogMetricsByHostLms.no_results")}
-				searchText={t("general.search")}
+				searchText={t("ui.data_grid.search")}
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>

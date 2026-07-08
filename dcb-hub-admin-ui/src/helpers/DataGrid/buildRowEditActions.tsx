@@ -80,7 +80,7 @@ export function buildRowEditActionsColumn({
 				<GridActionsCellItem
 					key="edit"
 					icon={<Edit />}
-					label={t("ui.edit")}
+					label={t("ui.data_grid.edit")}
 					onClick={() =>
 						setRowModesModel({
 							...rowModesModel,
@@ -92,7 +92,7 @@ export function buildRowEditActionsColumn({
 				<GridActionsCellItem
 					key="delete"
 					icon={<Delete />}
-					label={t("ui.delete")}
+					label={t("ui.data_grid.delete")}
 					onClick={() => onDelete(id)}
 					disabled={!canEdit}
 				/>,

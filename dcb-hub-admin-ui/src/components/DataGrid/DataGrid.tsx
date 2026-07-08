@@ -44,6 +44,7 @@ declare module "@mui/x-data-grid-premium" {
 		selectionCount?: number;
 		wizardEnabled?: boolean;
 		onOpenWizard?: () => void;
+		disableToolbarFilter?: boolean;
 	}
 }
 const IMMUTABLE_FALLBACK_MODES = {};
@@ -70,6 +71,7 @@ interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
 	 * its response key, and any base query / quick-filter fields.
 	 */
 	exportConfig?: GridExportConfig;
+	disableToolbarFilter?: boolean;
 }
 
 export default function DataGrid({
@@ -96,6 +98,7 @@ export default function DataGrid({
 	rowModesModel = IMMUTABLE_FALLBACK_MODES,
 	rows,
 	onRowSelectionModelChange,
+	disableToolbarFilter,
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
@@ -204,7 +207,7 @@ export default function DataGrid({
 				}}
 				disableRowSelectionExcludeModel
 				localeText={{
-					toolbarQuickFilterPlaceholder: searchText ?? t("general.search"),
+					toolbarQuickFilterPlaceholder: searchText ?? t("ui.data_grid.search"),
 					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
 					toolbarExportCSV: t("ui.data_grid.export.current"),
 					toolbarExportPrint: t("ui.data_grid.print_current_page"),
@@ -266,6 +269,7 @@ export default function DataGrid({
 						selectionCount: selectionModel?.ids?.size || 0,
 						wizardEnabled: exportConfig?.wizard,
 						onOpenWizard: () => setWizardOpen(true),
+						disableToolbarFilter: disableToolbarFilter,
 					},
 					filterPanel: expandedFilterPanel
 						? {

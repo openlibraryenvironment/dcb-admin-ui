@@ -371,7 +371,7 @@ function LibraryLocations() {
 						<GridActionsCellItem
 							key="edit"
 							icon={<Edit />}
-							label={t("ui.edit")}
+							label={t("ui.data_grid.edit")}
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
@@ -383,7 +383,7 @@ function LibraryLocations() {
 						<GridActionsCellItem
 							key="delete"
 							icon={<Delete />}
-							label={t("ui.delete")}
+							label={t("ui.data_grid.delete")}
 							onClick={() => setDeleteLocationId(id as string)}
 							disabled={!isAnAdmin}
 						/>,

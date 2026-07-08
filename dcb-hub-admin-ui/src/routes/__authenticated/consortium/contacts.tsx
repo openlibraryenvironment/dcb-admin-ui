@@ -220,7 +220,7 @@ function Contacts() {
 						<GridActionsCellItem
 							key="edit"
 							icon={<Edit />}
-							label={t("ui.edit")}
+							label={t("ui.data_grid.edit")}
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
@@ -232,7 +232,7 @@ function Contacts() {
 						<GridActionsCellItem
 							key="delete"
 							icon={<Delete />}
-							label={t("ui.delete")}
+							label={t("ui.data_grid.delete")}
 							onClick={() => setDeleteConfirmationId(id as string)}
 							disabled={!isAnAdmin}
 						/>,

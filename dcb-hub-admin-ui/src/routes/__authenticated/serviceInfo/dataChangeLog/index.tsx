@@ -112,7 +112,7 @@ function DataChangeLogsGrid() {
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("data_change_log.no_results")}
-				searchText={t("general.search")}
+				searchText={t("ui.data_grid.search")}
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 			/>

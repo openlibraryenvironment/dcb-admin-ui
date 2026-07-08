@@ -17,6 +17,7 @@ import {
 	Typography,
 	useTheme,
 	Box,
+	Stack,
 } from "@mui/material";
 import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
 
@@ -36,6 +37,7 @@ import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
 
 const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 10 };
 const DEFAULT_SORT_MODEL = [{ field: "name", sort: "asc" }];
@@ -433,166 +435,176 @@ function ConsortiumPage() {
 				component="form"
 				onSubmit={handleSubmit(onSubmit)}
 			>
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="attributeTitle">
-						{t("consortium.name")}
-					</Typography>
-					<RenderAttribute attribute={consortium.name} />
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("consortium.name")}
+						</Typography>
+						<RenderAttribute attribute={consortium.name} />
+					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography
-						variant="attributeTitle"
-						color={
-							errors.displayName && editMode
-								? "error"
-								: "primary.attributeTitle"
-						}
-					>
-						{t("consortium.display_name")}
-					</Typography>
-					<Controller
-						name="displayName"
-						control={control}
-						render={({ field }) =>
-							editMode ? (
-								<TextField
-									{...field}
-									inputRef={firstEditableFieldRef}
-									fullWidth
-									error={!!errors.displayName}
-									helperText={errors.displayName?.message}
-								/>
-							) : (
-								<RenderAttribute attribute={consortium.displayName} />
-							)
-						}
-					/>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.displayName && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.display_name")}
+						</Typography>
+						<Controller
+							name="displayName"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										inputRef={firstEditableFieldRef}
+										fullWidth
+										error={!!errors.displayName}
+										helperText={errors.displayName?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.displayName} />
+								)
+							}
+						/>
+					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography
-						variant="attributeTitle"
-						color={
-							errors.websiteUrl && editMode ? "error" : "primary.attributeTitle"
-						}
-					>
-						{t("consortium.url")}
-					</Typography>
-					<Controller
-						name="websiteUrl"
-						control={control}
-						render={({ field }) =>
-							editMode ? (
-								<TextField
-									{...field}
-									fullWidth
-									error={!!errors.websiteUrl}
-									helperText={errors.websiteUrl?.message}
-								/>
-							) : (
-								<RenderAttribute attribute={consortium.websiteUrl} />
-							)
-						}
-					/>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.websiteUrl && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.url")}
+						</Typography>
+						<Controller
+							name="websiteUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.websiteUrl}
+										helperText={errors.websiteUrl?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.websiteUrl} />
+								)
+							}
+						/>
+					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography
-						variant="attributeTitle"
-						color={
-							errors.catalogueSearchUrl && editMode
-								? "error"
-								: "primary.attributeTitle"
-						}
-					>
-						{t("consortium.search_url")}
-					</Typography>
-					<Controller
-						name="catalogueSearchUrl"
-						control={control}
-						render={({ field }) =>
-							editMode ? (
-								<TextField
-									{...field}
-									fullWidth
-									error={!!errors.catalogueSearchUrl}
-									helperText={errors.catalogueSearchUrl?.message}
-								/>
-							) : (
-								<RenderAttribute attribute={consortium.catalogueSearchUrl} />
-							)
-						}
-					/>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.catalogueSearchUrl && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.search_url")}
+						</Typography>
+						<Controller
+							name="catalogueSearchUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.catalogueSearchUrl}
+										helperText={errors.catalogueSearchUrl?.message}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.catalogueSearchUrl} />
+								)
+							}
+						/>
+					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography
-						variant="attributeTitle"
-						color={
-							errors.description && editMode
-								? "error"
-								: "primary.attributeTitle"
-						}
-					>
-						{t("consortium.description_title")}
-					</Typography>
-					<Controller
-						name="description"
-						control={control}
-						render={({ field }) =>
-							editMode ? (
-								<TextField
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.description && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.description_title")}
+						</Typography>
+						<Controller
+							name="description"
+							control={control}
+							render={({ field }) => (
+								<MarkdownInput
 									{...field}
-									fullWidth
+									editMode={editMode}
 									error={!!errors.description}
 									helperText={errors.description?.message}
 								/>
-							) : (
-								<RenderAttribute attribute={consortium.description} />
-							)
-						}
-					/>
-				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="attributeTitle">
-						{t("consortium.logo_app_header")}
-					</Typography>
-					{consortium.headerImageUrl ? (
-						<Box
-							component="img"
-							src={consortium.headerImageUrl}
-							sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
+							)}
 						/>
-					) : (
-						<Typography>{t("consortium.no_file_uploaded")}</Typography>
-					)}
-					<FileUploadButton
-						ref={appHeaderFileRef}
-						icon={<CloudUpload />}
-						buttonText={t("consortium.select_image")}
-						href="#appHeaderUpload"
-						isUploading={headerIsUploading}
-						onFileSelect={(e) =>
-							setAppHeaderPreviewUrl(URL.createObjectURL(e.target.files![0]))
-						}
-						previewUrl={appHeaderPreviewUrl}
-						handleRemove={() => setAppHeaderPreviewUrl("")}
-					/>
-					{appHeaderPreviewUrl && (
-						<Button
-							variant="outlined"
-							onClick={() => handleFileUpload(appHeaderFileRef, true)}
-							disabled={headerIsUploading}
-							sx={{ mt: 2 }}
-						>
-							{headerIsUploading ? t("common.uploading") : t("common.upload")}
-						</Button>
-					)}
+					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography variant="attributeTitle">
+							{t("consortium.logo_app_header")}
+						</Typography>
+						{consortium.headerImageUrl ? (
+							<Box
+								component="img"
+								src={consortium.headerImageUrl}
+								sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
+							/>
+						) : (
+							<Typography>{t("consortium.no_file_uploaded")}</Typography>
+						)}
+						<FileUploadButton
+							ref={appHeaderFileRef}
+							icon={<CloudUpload />}
+							buttonText={t("consortium.select_image")}
+							href="#appHeaderUpload"
+							isUploading={headerIsUploading}
+							onFileSelect={(e) =>
+								setAppHeaderPreviewUrl(URL.createObjectURL(e.target.files![0]))
+							}
+							previewUrl={appHeaderPreviewUrl}
+							handleRemove={() => setAppHeaderPreviewUrl("")}
+						/>
+						{appHeaderPreviewUrl && (
+							<Button
+								variant="outlined"
+								onClick={() => handleFileUpload(appHeaderFileRef, true)}
+								disabled={headerIsUploading}
+								sx={{ mt: 2 }}
+							>
+								{headerIsUploading ? t("common.uploading") : t("common.upload")}
+							</Button>
+						)}
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Typography variant="attributeTitle">
 						{t("consortium.logo_about")}
 					</Typography>

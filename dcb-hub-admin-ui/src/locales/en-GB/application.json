@@ -108,6 +108,7 @@
 		"placeholder_tip": "Caution: example placeholder data",
 		"unknown": "Unknown",
 		"upload": "Upload",
+		"upload_title": "Upload {{entityName}}",
 		"uploading": "Uploading"
 	},
 	"consortium": {
@@ -227,23 +228,21 @@
 		"user": "User"
 	},
 	"environment": {
-		"environment": {
-			"your": "Your $t(app.dcb) environment",
-			"changelog": "Changelog",
-			"configured_for": "This installation of $t(app.name) is configured for",
-			"compare_components": "The latest versions of $t(app.dcb) system components are",
-			"component": "Component",
-			"last_commit_url": "Latest commit URL",
-			"latest_version": "Latest version",
-			"latest_version_released": "Latest version released",
-			"latest_version_github": "Latest version URL",
-			"loading_release_info": "Loading release information ...",
-			"loading_version_info": "Loading version information ...",
-			"your_version": "Your version",
-			"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
-			"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information.",
-			"versions": "Versions"
-		}
+		"your": "Your $t(app.dcb) environment",
+		"changelog": "Changelog",
+		"configured_for": "This installation of $t(app.name) is configured for",
+		"compare_components": "The latest versions of $t(app.dcb) system components are",
+		"component": "Component",
+		"last_commit_url": "Latest commit URL",
+		"latest_version": "Latest version",
+		"latest_version_released": "Latest version released",
+		"latest_version_github": "Latest version URL",
+		"loading_release_info": "Loading release information ...",
+		"loading_version_info": "Loading version information ...",
+		"your_version": "Your version",
+		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
+		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information.",
+		"versions": "Versions"
 	},
 	"error_overview": {
 		"audit_url": "Audit URL",
@@ -300,6 +299,10 @@
 		"theme_label": "Theme",
 		"mode_label": "Mode",
 		"themes": {
+			"folio": "FOLIO",
+			"itsComingHome": "England World Cup 26 (It's coming home)!",
+			"koha": "Koha",
+			"mobius": "MOBIUS",
 			"openRS": "OpenRS",
 			"evergreen": "Evergreen"
 		},
@@ -434,38 +437,7 @@
 			"enabled_supply": "Enabled: can supply",
 			"not_set": "Not set",
 			"supplying_status": "Library supplying status",
-			"title": "Circulation",
-			"confirmation": {
-				"admin_required_borrowing": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's borrowing status.",
-				"admin_required_supplying": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's supplying status.",
-				"disable_borrowing": "Disable patron borrowing",
-				"disable_supplying": "Disable supplying",
-				"enable_borrowing": "Enable patron borrowing",
-				"enable_supplying": "Enable supplying",
-				"header_enable_borrowing": "Enable patron borrowing for {{library}}",
-				"header_enable_supplying": "Enable supplying for {{library}}",
-				"header_disable_borrowing": "Disable patron borrowing for {{library}}",
-				"header_disable_supplying": "Disable supplying for {{library}}",
-				"para1_enable_borrowing": "<bold>{{library}} patrons </bold> will be able to place borrowing requests at other consortium libraries.",
-				"para1_enable_supplying": "Catalogue records for <bold>{{library}}</bold> will become <bold>discoverable</bold> and <bold>requestable</bold> by patrons of other consortium libraries.",
-				"para1_disable_borrowing": "<bold>{{library}} patrons</bold> will no longer be able to place borrowing requests at other consortium libraries.",
-				"para1_disable_supplying": "Catalogue records for <bold>{{library}}</bold> will <bold>not be discoverable</bold> or <bold>requestable</bold> by patrons of other consortium libraries.",
-				"reason": "Reason for change",
-				"select_enable_borrowing": "Select \"Enable borrowing\" to go ahead.",
-				"select_enable_supplying": "Select \"Enable supplying\" to go ahead.",
-				"select_disable_borrowing": "Select \"Disable borrowing\" to go ahead.",
-				"select_disable_supplying": "Select \"Disable supplying\" to go ahead.",
-				"alert": {
-					"borrowing_disabled": "{{library}} patrons are now <bold>not able</bold> to place borrowing requests at other consortium libraries",
-					"borrowing_disabled_fail": "Borrowing status for {{library}} patrons <bold>could not be disabled</bold>",
-					"borrowing_enabled": "{{library}} patrons are now <bold>able</bold> to place borrowing requests at other consortium libraries",
-					"borrowing_enabled_fail": "Borrowing status for {{library}} patrons <bold>could not be enabled</bold>",
-					"supplying_disabled": "{{library}} is now <bold>not able</bold> to act as a supplying library",
-					"supplying_disabled_fail": "Supplying status for {{library}} <bold>could not be disabled</bold>",
-					"supplying_enabled": "{{library}} is now <bold>enabled</bold> to act as a supplying library",
-					"supplying_enabled_fail": "Supplying status for {{library}} <bold>could not be enabled</bold>"
-				}
-			}
+			"title": "Circulation"
 		},
 		"config": {
 			"title": "Configuration",
@@ -1020,6 +992,7 @@
 		"name": "Name: ",
 		"email": "Email: ",
 		"email_verified": "Email Verified: ",
+		"language": "Language (experimental)",
 		"prefered_username": "Prefered Username: ",
 		"roles": "Roles: "
 	},
@@ -1048,6 +1021,11 @@
 		"date_due": "Date due",
 		"description": "Description",
 		"expedited_checkout": {
+			"actions": {
+				"place": "Expedited checkout"
+			},
+			"option_description": "Instantly check out an available item from your library to a patron.",
+			"return": "Return",
 			"create_request": "Create request",
 			"creating_request": "Creating request ...",
 			"description": "Welcome to DCB on-site borrowing. Please provide the barcode and the library of the patron you would like to make a request for. <paragraph>Provided that the patron's details are valid and the item exists and is available at your library, DCB will instantly check out this item to the specified patron.</paragraph>",
@@ -1068,7 +1046,12 @@
 				"patron_validation": "Patron validation",
 				"patron_validation_instruction": "Please provide the barcode and the affiliated institution of the patron.",
 				"request_creation": "Request creation",
-				"request_creation_instruction": "The patron barcode is valid. Please now provide the remaining details."
+				"request_creation_instruction": "The patron barcode is valid. Please now provide the remaining details.",
+				"checkout_failure_request_only": "Item checkout is taking too long. Please return to the requests list and check the request's status from there.",
+				"due_date_loading": "Loading due date...",
+				"quick_walk_up": {
+					"instructions": "Scan or enter the item barcode and confirm the pickup location to check the item out to this patron."
+				}
 			},
 			"title_on_site": "Item checkout",
 			"view_request": "View request"
@@ -1110,6 +1093,16 @@
 		"publisher": "Publisher",
 		"place_description": "You have chosen to place a request for {{title}}. Please select a requesting option below.",
 		"place_title": "Place a request",
+		"quick_walk_up": {
+			"title": "Quick walk-up request",
+			"actions": {
+				"place": "Quick walk-up"
+			},
+			"option_description": "Check an item out to a patron who is at the desk with the item in hand.",
+			"steps": {
+				"request_creation": "Scan item"
+			}
+		},
 		"record_created": "Record created",
 		"record_information": "Record information",
 		"record_updated": "Record updated",
@@ -1152,6 +1145,7 @@
 			"actions": {
 				"place": "Place a staff request"
 			},
+			"option_description": "Place a request for this record on a patron's behalf; DCB selects and supplies an available item.",
 			"new": "New request",
 			"patron": {
 				"affiliated": "Affiliated institution",
@@ -1184,7 +1178,8 @@
 				},
 				"success": {
 					"lookup": "The patron {{barcode}} has been successfully validated for {{library}}.",
-					"request": "Your staff request has been successfully placed and can be tracked in DCB Admin <linkComponent> here </linkComponent>."
+					"request": "Your staff request has been successfully placed and can be tracked in DCB Admin <linkComponent> here </linkComponent>.",
+					"request_requesting_only": "Your staff request has been successfully placed."
 				},
 				"validate": "Validate patron",
 				"validating": "Validating patron"
@@ -1254,7 +1249,19 @@
 		"volume_parsed": "Parsed volume statement",
 		"volume_raw": "Raw volume statement"
 	},
-	"service_info": {},
+	"service": {
+		"name": "Service",
+		"environment": "Environment",
+		"environment_health": "Environment health",
+		"environment_health_error": "Error: {{error}}",
+		"address": "Address",
+		"status": "Status",
+		"state": {
+			"up": "Up",
+			"partial": "Partial",
+			"down": "Down"
+		}
+	},
 	"settings": {},
 	"support": {
 		"admin_user_guides": "DCB Admin user guides",
@@ -1270,6 +1277,7 @@
 		"actions": {
 			"cancel": "Cancel",
 			"close_alert": "Close alert",
+			"continue": "Continue",
 			"contact_sysadmin": "contact your system administrator",
 			"explain_clustering": "Explain clustering for this record",
 			"go_home": "Go to $t(nav.home) page",
@@ -1282,11 +1290,45 @@
 			"older": "Older",
 			"reload": "Reload page",
 			"save_changes": "Save changes",
+			"submit": "Submit",
 			"submitting": "Submitting",
 			"toggle_on": "Toggle onboarding mode",
 			"validate": "Validate",
 			"view_error_details": "View error details",
 			"yes": "Yes"
+		},
+		"confirmation": {
+			"admin_required_borrowing": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's borrowing status.",
+			"admin_required_supplying": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's supplying status.",
+			"disable_borrowing": "Disable patron borrowing",
+			"disable_supplying": "Disable supplying",
+			"edit_title": "Edit {{entityName}}",
+			"enable_borrowing": "Enable patron borrowing",
+			"enable_supplying": "Enable supplying",
+			"header_enable_borrowing": "Enable patron borrowing for {{library}}",
+			"header_enable_supplying": "Enable supplying for {{library}}",
+			"header_disable_borrowing": "Disable patron borrowing for {{library}}",
+			"header_disable_supplying": "Disable supplying for {{library}}",
+			"para1_enable_borrowing": "<bold>{{library}} patrons </bold> will be able to place borrowing requests at other consortium libraries.",
+			"para1_enable_supplying": "Catalogue records for <bold>{{library}}</bold> will become <bold>discoverable</bold> and <bold>requestable</bold> by patrons of other consortium libraries.",
+			"para1_disable_borrowing": "<bold>{{library}} patrons</bold> will no longer be able to place borrowing requests at other consortium libraries.",
+			"para1_disable_supplying": "Catalogue records for <bold>{{library}}</bold> will <bold>not be discoverable</bold> or <bold>requestable</bold> by patrons of other consortium libraries.",
+			"reason": "Reason for change",
+			"select_enable_borrowing": "Select \"Enable borrowing\" to go ahead.",
+			"select_enable_supplying": "Select \"Enable supplying\" to go ahead.",
+			"select_disable_borrowing": "Select \"Disable borrowing\" to go ahead.",
+			"select_disable_supplying": "Select \"Disable supplying\" to go ahead.",
+			"session_warning": "Your session is about to expire",
+			"alert": {
+				"borrowing_disabled": "{{library}} patrons are now <bold>not able</bold> to place borrowing requests at other consortium libraries",
+				"borrowing_disabled_fail": "Borrowing status for {{library}} patrons <bold>could not be disabled</bold>",
+				"borrowing_enabled": "{{library}} patrons are now <bold>able</bold> to place borrowing requests at other consortium libraries",
+				"borrowing_enabled_fail": "Borrowing status for {{library}} patrons <bold>could not be enabled</bold>",
+				"supplying_disabled": "{{library}} is now <bold>not able</bold> to act as a supplying library",
+				"supplying_disabled_fail": "Supplying status for {{library}} <bold>could not be disabled</bold>",
+				"supplying_enabled": "{{library}} is now <bold>enabled</bold> to act as a supplying library",
+				"supplying_enabled_fail": "Supplying status for {{library}} <bold>could not be enabled</bold>"
+			}
 		},
 		"data_grid": {
 			"actions": "Actions",
@@ -1376,9 +1418,11 @@
 			"master_detail": "Master detail",
 			"message": "Message",
 			"more": "More",
+			"no_results": "No results",
 			"print_current_page": "Print current page",
 			"open": "Open",
 			"save": "Save",
+			"search": "Search",
 			"skipped_count": "Not eligible: ",
 			"success": "Success",
 			"success_count": "Successful: ",
@@ -1456,6 +1500,15 @@
 			"newest_entry": "This is the most recent audit entry in the log."
 		},
 		"logo": "{{owner}} logo",
+		"markdown": {
+			"format_guide": "Markdown formatting guide",
+			"input": "Markdown text input",
+			"no_preview": "Nothing to preview",
+			"preview": "Preview",
+			"tabs": "Markdown editor tabs",
+			"type": "Type here - Markdown supported",
+			"write": "Write"
+		},
 		"reference": {
 			"catalog_build": "Reference: Catalog build"
 		},

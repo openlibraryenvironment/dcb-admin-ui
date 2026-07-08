@@ -1679,7 +1679,7 @@ function RouteComponent() {
 						disableRowGrouping={true}
 						loading={patronRequestLoading}
 						listViewEnabled={false}
-						noResultsText={t("audit.no_results")}
+						noResultsText={t("ui.data_grid.no_results")}
 						pagination
 						paginationMode="client"
 						paginationModel={currentPagination}

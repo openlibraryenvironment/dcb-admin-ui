@@ -59,7 +59,6 @@ export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 					exceptionQuery: queries.exception,
 					outOfSequenceQuery: queries.outOfSequence,
 					finishedQuery: queries.finished,
-
 					pageno: currentPagination.page,
 					pagesize: currentPagination.pageSize,
 					order: currentSort[0]?.field ?? "dateCreated",

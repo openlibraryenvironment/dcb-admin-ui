@@ -100,8 +100,8 @@ function BibsRouteComponent() {
 				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
-				noResultsText={t("audit.no_results")}
-				searchText={t("general.search")}
+				noResultsText={t("ui.data_grid.no_results")}
+				searchText={t("ui.data_grid.search")}
 			/>
 		</PageContainer>
 	);

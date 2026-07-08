@@ -76,9 +76,8 @@ export default function Confirmation({
 		if (isEdit) return t("ui.confirmation.edit_title", { entity: entityName });
 		if (isDelete)
 			return t("ui.confirmation.delete_title", { entity: entityName });
-		if (isUnsaved) return t("ui.confirmation.unsaved_title");
-		if (isUpload)
-			return t("ui.confirmation.upload_title", { entity: entityName });
+		if (isUnsaved) return t("ui.unsaved_changes.header");
+		if (isUpload) return t("common.upload_title", { entityName: entityName });
 		return t("ui.confirmation.general_title");
 	};
 
@@ -148,7 +147,7 @@ export default function Confirmation({
 									<TextField
 										{...field}
 										required
-										label={t("audit.reason")}
+										label={t("data_change_log.reason")}
 										multiline
 										rows={2}
 										fullWidth
@@ -161,7 +160,11 @@ export default function Confirmation({
 								name="changeCategory"
 								control={control}
 								render={({ field }) => (
-									<TextField {...field} label={t("audit.category")} fullWidth />
+									<TextField
+										{...field}
+										label={t("data_change_log.category")}
+										fullWidth
+									/>
 								)}
 							/>
 							<Controller
@@ -170,7 +173,7 @@ export default function Confirmation({
 								render={({ field }) => (
 									<TextField
 										{...field}
-										label={t("audit.reference_url")}
+										label={t("data_change_log.reference_url")}
 										type="url"
 										fullWidth
 									/>

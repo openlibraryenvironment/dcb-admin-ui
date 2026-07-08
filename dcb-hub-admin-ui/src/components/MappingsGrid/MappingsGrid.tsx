@@ -210,7 +210,7 @@ export default function MappingsGrid({
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("mappings.no_results")}
-				searchText={t("general.search")}
+				searchText={t("ui.data_grid.search")}
 			/>
 			<Confirmation
 				open={!!promiseArguments || !!deleteMappingId}

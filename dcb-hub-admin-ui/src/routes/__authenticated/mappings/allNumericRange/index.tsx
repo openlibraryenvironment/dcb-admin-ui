@@ -175,7 +175,7 @@ function NumericRangeMappingsRoute() {
 						<GridActionsCellItem
 							key="edit"
 							icon={<Edit />}
-							label={t("ui.edit")}
+							label={t("ui.data_grid.edit")}
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
@@ -187,7 +187,7 @@ function NumericRangeMappingsRoute() {
 						<GridActionsCellItem
 							key="delete"
 							icon={<Delete />}
-							label={t("ui.delete")}
+							label={t("ui.data_grid.delete")}
 							onClick={() => setDeleteConfirmationId(id)}
 							disabled={!isAnAdmin}
 						/>,
@@ -211,7 +211,7 @@ function NumericRangeMappingsRoute() {
 					onClick={() => setNewMapping(true)}
 					disabled={!isAnAdmin}
 				>
-					{t("mappings.new")}
+					{t("mappings.new.title")}
 				</Button>
 				<Tooltip title={isAnAdmin ? "" : t("mappings.import_disabled")}>
 					<span>
@@ -265,7 +265,7 @@ function NumericRangeMappingsRoute() {
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("mappings.no_results")}
-				searchText={t("general.search")}
+				searchText={t("ui.data_grid.search")}
 			/>
 
 			<Confirmation

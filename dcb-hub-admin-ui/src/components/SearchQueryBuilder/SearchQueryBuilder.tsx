@@ -80,7 +80,7 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 		if (field === SearchField.ClusterRecordID) {
 			return "e.g., 966ac8ca-12e8-4f95-81e3-8c9a0eb20500";
 		}
-		return t("general.search");
+		return t("ui.data_grid.search");
 	};
 
 	// Universal UUID validation regex (v1-v5 compliant)
@@ -238,7 +238,7 @@ export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 					variant="contained"
 					color="primary"
 				>
-					{t("general.search")}
+					{t("ui.data_grid.search")}
 				</Button>
 			</Box>
 		</Stack>

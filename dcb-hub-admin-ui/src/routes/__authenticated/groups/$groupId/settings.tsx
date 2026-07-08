@@ -254,11 +254,7 @@ function GroupSettings() {
 					</Stack>
 					<Tooltip
 						title={
-							!isAnAdmin
-								? t(
-										"libraries.circulation.confirmation.admin_required_supplying",
-									)
-								: ""
+							!isAnAdmin ? t("ui.confirmation.admin_required_supplying") : ""
 						}
 					>
 						<span>

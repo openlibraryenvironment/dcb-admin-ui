@@ -179,7 +179,7 @@ function Requests() {
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("error_overview.no_results")}
-				searchText={t("general.search")}
+				searchText={t("ui.data_grid.search")}
 			/>
 		</PageContainer>
 	);

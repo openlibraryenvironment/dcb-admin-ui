@@ -43,6 +43,7 @@ export const Route = createFileRoute("/__authenticated/hostlmss/")({
 					pagesize: currentPagination.pageSize,
 					order: currentSort[0]?.field ?? "name",
 					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
+					query: "",
 				}),
 		});
 	},

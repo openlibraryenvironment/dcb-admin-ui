@@ -86,7 +86,6 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 		},
 		onSuccess: (data) => {
 			if (data) {
-				// UPGRADE: Cleanly invalidate target grid cache inside the global store
 				queryClient.invalidateQueries({ queryKey: ["groups"] });
 
 				setAlert({
