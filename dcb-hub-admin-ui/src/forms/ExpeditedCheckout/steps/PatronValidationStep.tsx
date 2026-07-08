@@ -1,39 +1,33 @@
+import { OnSiteBorrowingFormData } from "@models/OnSiteBorrowingFormData";
+import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
 import {
 	Autocomplete,
 	Button,
-	CircularProgress,
 	Stack,
 	TextField,
+	Typography,
 } from "@mui/material";
 import { TFunction } from "i18next";
-import {
-	Control,
-	Controller,
-	FieldErrors,
-	FieldValues,
-	Path,
-} from "react-hook-form";
-import { AutocompleteOption } from "@models/AutocompleteOption";
+import { Control, Controller, FieldErrors } from "react-hook-form";
 
-// 1. Declare TFieldValues generic on the props interface
-interface PatronValidationStepProps<TFieldValues extends FieldValues> {
-	control: Control<TFieldValues>;
-	errors: FieldErrors<TFieldValues>;
+// Step 1: Patron Validation Component: this is step 1 in the expedited checkout workflow
+interface PatronValidationStepType {
+	control: Control<any, any>;
+	errors: FieldErrors<OnSiteBorrowingFormData>;
 	patronValidated: boolean;
 	isValidatingPatron: boolean;
 	handleClose: () => void;
 	validatePatron: () => void;
 	patronBarcode: string;
 	agencyCode: string;
-	libraryOptions: AutocompleteOption[];
+	libraryOptions: PatronRequestAutocompleteOption[];
 	librariesLoading: boolean;
 	t: TFunction;
 }
-
-// 2. Pass the TFieldValues generic constraints straight to the component definition
-export const PatronValidationStep = <TFieldValues extends FieldValues>({
+export const PatronValidationStep = ({
 	control,
 	errors,
+	patronValidated,
 	isValidatingPatron,
 	handleClose,
 	validatePatron,
@@ -42,69 +36,38 @@ export const PatronValidationStep = <TFieldValues extends FieldValues>({
 	libraryOptions,
 	librariesLoading,
 	t,
-}: PatronValidationStepProps<TFieldValues>) => {
+}: PatronValidationStepType) => {
 	return (
-		<Stack spacing={2} sx={{ mt: 2 }}>
+		<>
+			<Typography variant="body1">
+				{t("requesting.expedited_checkout.steps.patron_validation_instruction")}
+			</Typography>
+			{/* /** The library of the patron. Could be a visiting patron, so this is not restricted*/}
 			<Controller
-				// 3. Cast the literal key string to Path<TFieldValues>
-				name={"patronBarcode" as Path<TFieldValues>}
-				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						label={t("requesting.staff_request.patron.barcode")}
-						variant="outlined"
-						fullWidth
-						required
-						error={!!errors["patronBarcode" as keyof FieldErrors<TFieldValues>]}
-						helperText={
-							errors["patronBarcode" as keyof FieldErrors<TFieldValues>]
-								?.message as string
-						}
-					/>
-				)}
-			/>
-			<Controller
-				name={"agencyCode" as Path<TFieldValues>} // Surely there's a better way than this ...
+				name="agencyCode"
 				control={control}
 				render={({ field: { onChange, value } }) => (
 					<Autocomplete
 						value={
-							libraryOptions.find((option) => option.value === value) || null
+							value
+								? libraryOptions.find((option) => option.value === value) ||
+									null
+								: null
 						}
-						onChange={(_, newValue: AutocompleteOption | null) => {
+						onChange={(_, newValue) => {
 							onChange(newValue?.value || "");
 						}}
 						options={libraryOptions}
 						loading={librariesLoading}
-						getOptionLabel={(option: AutocompleteOption) => option.label}
+						getOptionLabel={(option) => option.label}
 						renderInput={(params) => (
 							<TextField
 								{...params}
+								margin="normal"
 								required
-								label={t("agency.code")}
-								error={
-									!!errors["agencyCode" as keyof FieldErrors<TFieldValues>]
-								}
-								helperText={
-									errors["agencyCode" as keyof FieldErrors<TFieldValues>]
-										?.message as string
-								}
-								slotProps={{
-									...params.slotProps,
-
-									input: {
-										...params.slotProps.input,
-										endAdornment: (
-											<>
-												{librariesLoading ? (
-													<CircularProgress color="inherit" size={20} />
-												) : null}
-												{params.slotProps.input.endAdornment}
-											</>
-										),
-									},
-								}}
+								label={t("requesting.staff_request.patron.affiliated")}
+								error={!!errors.agencyCode}
+								helperText={errors.agencyCode?.message}
 							/>
 						)}
 						isOptionEqualToValue={(option, value) =>
@@ -113,24 +76,40 @@ export const PatronValidationStep = <TFieldValues extends FieldValues>({
 					/>
 				)}
 			/>
-			<Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+
+			<Controller
+				name="patronBarcode"
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						margin="normal"
+						required
+						fullWidth
+						id="patronBarcode"
+						label={t("requesting.staff_request.patron.barcode")}
+						error={!!errors.patronBarcode}
+						helperText={errors.patronBarcode?.message}
+						disabled={patronValidated}
+					/>
+				)}
+			/>
+			<Stack spacing={1} direction={"row"}>
 				<Button variant="outlined" onClick={handleClose}>
 					{t("ui.actions.cancel")}
 				</Button>
 				<div style={{ flex: "1 0 0" }} />
 				<Button
-					variant="contained"
 					color="primary"
-					disabled={!patronBarcode || !agencyCode || isValidatingPatron}
+					variant="contained"
 					onClick={validatePatron}
+					disabled={isValidatingPatron || !patronBarcode || !agencyCode}
 				>
-					{isValidatingPatron ? (
-						<CircularProgress size={24} color="inherit" />
-					) : (
-						t("ui.actions.validate")
-					)}
+					{isValidatingPatron
+						? t("requesting.staff_request.patron.validating")
+						: t("requesting.staff_request.patron.validate")}
 				</Button>
 			</Stack>
-		</Stack>
+		</>
 	);
 };

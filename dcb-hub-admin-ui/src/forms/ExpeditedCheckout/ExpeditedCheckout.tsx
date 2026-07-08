@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Control, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -36,7 +36,6 @@ import { CheckoutStep } from "./steps/CheckoutStep";
 import { successfulExpeditedCheckoutStatuses } from "@constants/statuses/successfulExpeditedCheckoutStatuses";
 import { StatusStepConnector } from "../../components/StatusStepConnector/StatusStepConnector";
 import request from "graphql-request";
-import { Library } from "@models/Library";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { AutocompleteOption } from "@models/AutocompleteOption";
 import { getLibrary } from "@queries/getLibrary";
@@ -49,11 +48,7 @@ import {
 	getStepLabelFontWeight,
 } from "@helpers/getStepLabelStyles";
 
-{
-	/** TODO - THIS MUST BE LIKE 'GOD MODE' for consortia. Cannot be restricted to one library **/
-}
 export default function ExpeditedCheckout({
-	// show,
 	onClose,
 	bibClusterId,
 }: PatronRequestFormType) {
@@ -93,12 +88,8 @@ export default function ExpeditedCheckout({
 	const [patronData, setPatronData] = useState<PatronLookupResponse | null>(
 		null,
 	);
-	const [availabilityResults, setAvailabilityResults] = useState<any>({});
-	const [itemsLoading, setItemsLoading] = useState(false);
-	const [itemsError, setItemsError] = useState(false);
 	const [patronRequestId, setPatronRequestId] = useState<string | null>(null);
 	const [patronRequestWaiting, setPatronRequestWaiting] = useState(false);
-	const [checkoutCompleted, setCheckoutCompleted] = useState(false);
 	const [stepError, setStepError] = useState<number | null>(null);
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -148,14 +139,9 @@ export default function ExpeditedCheckout({
 			),
 	});
 
-	const patronLibraries: Library[] = useMemo(
-		() => patronLibrariesData?.libraries?.content ?? [],
-		[patronLibrariesData],
-	);
-
 	const patronLibraryOptions: AutocompleteOption[] = useMemo(
 		() =>
-			patronLibraries.map(
+			(patronLibrariesData?.libraries?.content ?? []).map(
 				(item: {
 					fullName: string;
 					id: string;
@@ -172,7 +158,7 @@ export default function ExpeditedCheckout({
 						?.functionalSettings,
 				}),
 			),
-		[patronLibraries],
+		[patronLibrariesData],
 	);
 
 	// Pickup anywhere is not relevant here: you can only check out at a location of the staff user's library.
@@ -195,26 +181,21 @@ export default function ExpeditedCheckout({
 				headers,
 			),
 		enabled: patronRequestWaiting && !!patronRequestId,
-		refetchInterval: 10000,
+		// Poll until the request reaches a successful checkout status, then stop.
+		refetchInterval: (query) =>
+			successfulExpeditedCheckoutStatuses.includes(
+				query.state.data?.patronRequests?.content?.[0]?.status ?? "",
+			)
+				? false
+				: 10000,
 	});
 
-	/* eslint-disable react-hooks/set-state-in-effect -- advances the checkout flow in response to the polled patron-request status (reacting to an external async event) */
-	useEffect(() => {
-		if (patronRequestData) {
-			const status = patronRequestData?.patronRequests?.content?.[0]?.status;
-			if (
-				successfulExpeditedCheckoutStatuses.includes(status ?? "") &&
-				patronRequestWaiting
-			) {
-				setPatronRequestWaiting(false);
-				setCheckoutCompleted(true);
-				setStepError(null);
-			}
-		}
-	}, [patronRequestData, patronRequestWaiting]);
-	/* eslint-enable react-hooks/set-state-in-effect */
-
 	const patronRequest = patronRequestData?.patronRequests?.content?.[0];
+	// Derived during render — no sync effect needed. True once the polled request
+	// reaches a terminal successful checkout status.
+	const checkoutCompleted = successfulExpeditedCheckoutStatuses.includes(
+		patronRequest?.status ?? "",
+	);
 
 	const validationSchema = Yup.object().shape({
 		patronBarcode: Yup.string()
@@ -277,21 +258,15 @@ export default function ExpeditedCheckout({
 		mode: "onChange",
 	});
 
-	// useWatch({ control }) returns all form values; cast to the form type since
-	// defaultValues are provided so every field is defined at runtime.
-	const formValues = useWatch({ control }) as OnSiteBorrowingFormData;
-	const {
-		patronBarcode,
-		agencyCode,
-		itemAgencyCode,
-		pickupLocationId,
-		itemLocalId,
-		itemLocalSystemCode,
-	} = formValues;
+	// Isolated field subscriptions — a bare `watch()` at the form root would
+	// re-render the whole form on every keystroke (keystroke cascade).
+	const patronBarcode = useWatch({ control, name: "patronBarcode" });
+	const agencyCode = useWatch({ control, name: "agencyCode" });
+	const itemAgencyCode = useWatch({ control, name: "itemAgencyCode" });
+	const pickupLocationId = useWatch({ control, name: "pickupLocationId" });
+	const itemLocalId = useWatch({ control, name: "itemLocalId" });
 
 	const locationQuery = `agency:${staffLibrary?.agency?.id}`; // Staff library is always the supplier.
-
-	console.log(itemLocalSystemCode);
 
 	const { data: pickupLocations, isLoading: pickupLocationsLoading } = useQuery(
 		{
@@ -320,34 +295,28 @@ export default function ExpeditedCheckout({
 		}
 	}, [staffLibraryHostLmsCode, setValue]);
 
-	const fetchRecords = useCallback(async () => {
-		setItemsLoading(true);
-		setItemsError(false);
-		try {
-			const response = await axios.get<any[]>(
-				`${cfg.VITE_DCB_API_BASE}/items/availability`,
-				{
-					headers,
-					params: { clusteredBibId: bibClusterId },
-				},
-			);
-			setAvailabilityResults(response.data);
-		} catch (error) {
-			console.error("Error:", error);
-			setItemsError(true);
-			setStepError(1);
-		} finally {
-			setItemsLoading(false);
-		}
-	}, [bibClusterId, headers, cfg.VITE_DCB_API_BASE]);
-
-	/* eslint-disable react-hooks/set-state-in-effect -- triggers the availability fetch when the checkout step changes */
-	useEffect(() => {
-		if (activeStep === 1 || checkoutCompleted) {
-			fetchRecords();
-		}
-	}, [checkoutCompleted, activeStep, fetchRecords]);
-	/* eslint-enable react-hooks/set-state-in-effect */
+	// Live item availability for the cluster. Only fetched once the patron is
+	// validated (step 1) or after checkout, and re-uses TanStack Query caching
+	// instead of a hand-rolled effect + local loading/error state.
+	const {
+		data: availabilityResults,
+		isLoading: itemsLoading,
+		isError: itemsError,
+	} = useQuery<any>({
+		queryKey: [
+			"itemAvailability",
+			bibClusterId,
+			headers,
+			cfg.VITE_DCB_API_BASE,
+		],
+		queryFn: () =>
+			axios.get(`${cfg.VITE_DCB_API_BASE}/items/availability`, {
+				headers,
+				params: { clusteredBibId: bibClusterId },
+			}),
+		enabled: (activeStep === 1 || checkoutCompleted) && !!bibClusterId,
+		select: (response) => response.data,
+	});
 
 	const itemsData: Item[] = availabilityResults?.itemList || [];
 	const filteredItems = itemsData.filter(
@@ -420,7 +389,6 @@ export default function ExpeditedCheckout({
 			}
 		};
 	}, [activeStep, checkoutCompleted, stepError]);
-	console.log(errors);
 
 	const validatePatronMutation = useMutation<
 		PatronLookupResponse,
@@ -553,7 +521,6 @@ export default function ExpeditedCheckout({
 		setPatronValidated(false);
 		setPatronData(null);
 		setPatronRequestWaiting(false);
-		setCheckoutCompleted(false);
 		setStepError(null);
 		setPatronRequestId(null);
 		onClose();
@@ -575,11 +542,15 @@ export default function ExpeditedCheckout({
 	}, []);
 
 	const getStepContent = (step: number) => {
+		// The shared step components hardcode field names, so they expose an
+		// untyped `Control<any, any>`. RHF 7.80 no longer treats a concrete
+		// Control as assignable to that, so widen once here.
+		const anyControl = control as unknown as Control<any, any>;
 		switch (step) {
 			case 0:
 				return (
 					<PatronValidationStep
-						control={control}
+						control={anyControl}
 						errors={errors}
 						patronValidated={patronValidated}
 						isValidatingPatron={validatePatronMutation.isPending}
@@ -595,10 +566,8 @@ export default function ExpeditedCheckout({
 			case 1:
 				return (
 					<RequestCreationStep
-						control={control}
+						control={anyControl}
 						errors={errors}
-						// itemLibraryOptions={itemLibraryOptions}
-						// itemLibrariesLoading={librariesLoading}
 						setValue={setValue}
 						pickupLocationOptions={pickupLocationOptions}
 						pickupLocationsLoading={pickupLocationsLoading}
@@ -627,7 +596,7 @@ export default function ExpeditedCheckout({
 			default:
 				return (
 					<PatronValidationStep
-						control={control}
+						control={anyControl}
 						errors={errors}
 						patronValidated={patronValidated}
 						isValidatingPatron={validatePatronMutation.isPending}
@@ -645,29 +614,6 @@ export default function ExpeditedCheckout({
 
 	return (
 		<>
-			{/* <Dialog
-				open={show}
-				onClose={handleClose}
-				aria-labelledby="patron-request-modal"
-				fullWidth
-				maxWidth="sm">
-				<DialogTitle id="form-dialog-title" variant="modalTitle">
-					{t("requesting.expedited_checkout.title_on_site")}
-				</DialogTitle>
-
-				{(!patronRequestWaiting || checkoutCompleted) && (
-					<IconButton
-						aria-label="close"
-						onClick={handleClose}
-						sx={{
-							position: "absolute",
-							right: 8,
-							top: 8,
-							color: (theme) => theme.palette.grey[500],
-						}}>
-						<Close />
-					</IconButton>
-				)} */}
 			<DialogContent sx={{ overflow: "visible" }}>
 				<Stepper
 					activeStep={activeStep}
@@ -701,12 +647,7 @@ export default function ExpeditedCheckout({
 						}
 						if (index === 2 && checkoutCompleted) {
 							labelProps.optional = (
-								<Typography
-									variant="caption"
-									sx={{
-										color: "success.main",
-									}}
-								>
+								<Typography variant="caption" color="success.main">
 									{t("requesting.expedited_checkout.steps.complete")}
 								</Typography>
 							);
@@ -716,8 +657,8 @@ export default function ExpeditedCheckout({
 							<Step key={label} {...stepProps}>
 								<StepLabel {...labelProps} slots={{ stepIcon: DCBStepIcon }}>
 									<Typography
-										color={getStepColors(isActive, hasError, isCompleted)}
 										sx={{
+											color: getStepColors(isActive, hasError, isCompleted),
 											fontWeight: getStepLabelFontWeight(isActive),
 										}}
 									>
@@ -732,7 +673,6 @@ export default function ExpeditedCheckout({
 					{getStepContent(activeStep)}
 				</form>
 			</DialogContent>
-			{/* </Dialog> */}
 			<TimedAlert
 				severityType={alert.severity}
 				open={alert.open}

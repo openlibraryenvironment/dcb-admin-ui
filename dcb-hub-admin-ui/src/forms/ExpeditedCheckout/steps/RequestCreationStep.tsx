@@ -4,7 +4,6 @@ import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocomple
 import {
 	Autocomplete,
 	Button,
-	CircularProgress,
 	Stack,
 	TextField,
 	Typography,
@@ -15,18 +14,16 @@ import {
 	Control,
 	Controller,
 	FieldErrors,
-	FieldValues,
-	Path,
 	UseFormSetValue,
 } from "react-hook-form";
 
 // Step two: request creation / placing
-interface RequestCreationStepType<TFieldValues extends FieldValues> {
+interface RequestCreationStepType {
 	// control:
 	// 	| Control<OnSiteBorrowingFormData, any>
 	// 	| Control<StaffRequestFormData, any>; // itemLibraryOptions: PatronRequestAutocompleteOption[];
 	// itemLibrariesLoading: boolean;
-	control: Control<TFieldValues>;
+	control: Control<any, any>;
 	setValue: UseFormSetValue<OnSiteBorrowingFormData>;
 	errors: FieldErrors<OnSiteBorrowingFormData>;
 	pickupLocationOptions: PatronRequestAutocompleteOption[];
@@ -42,8 +39,9 @@ interface RequestCreationStepType<TFieldValues extends FieldValues> {
 	t: TFunction;
 }
 // need to pass in the item library and agency code and local system code
-export const RequestCreationStep = <TFieldValues extends FieldValues>({
+export const RequestCreationStep = ({
 	control,
+	// setValue,
 	errors,
 	pickupLocationOptions,
 	pickupLocationsLoading,
@@ -56,66 +54,14 @@ export const RequestCreationStep = <TFieldValues extends FieldValues>({
 	isSubmitting,
 	pickupLocationId,
 	t,
-}: RequestCreationStepType<TFieldValues>) => {
-	console.log(errors);
+}: RequestCreationStepType) => {
 	return (
 		<>
 			<Typography>
 				{t("requesting.expedited_checkout.steps.request_creation_instruction")}
 			</Typography>
-			{/* Do a pre-selected entry for the item library  - DCB Admin is different*/}
-			{/* <Controller
-				name="itemAgencyCode"
-				control={control}
-				render={({ field: { onChange, value } }) => (
-					<Autocomplete
-						value={
-							value
-								? itemLibraryOptions.find((option) => option.value === value) ||
-									null
-								: null
-						}
-						onChange={(_, newValue: PatronRequestAutocompleteOption | null) => {
-							onChange(newValue?.value || "");
-							// Set the Host LMS code ("localSystemCode") also - this now defaults only to the agency's Host LMS code.
-							setValue("itemLocalSystemCode", newValue?.hostLmsCode ?? "");
-						}}
-						options={itemLibraryOptions}
-						getOptionLabel={(option: PatronRequestAutocompleteOption) =>
-							option.label
-						}
-						renderInput={(params) => (
-							<TextField
-								{...params}
-								margin="normal"
-								required
-								fullWidth
-								id="itemAgencyCode"
-								label={t("requesting.staff_request.patron.item_library")}
-								error={!!errors.itemAgencyCode}
-								helperText={errors.itemAgencyCode?.message}
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<>
-											{itemLibrariesLoading ? (
-												<CircularProgress color="inherit" size={20} />
-											) : null}
-											{params.InputProps.endAdornment}
-										</>
-									),
-								}}
-							/>
-						)}
-						isOptionEqualToValue={(option, value) =>
-							option.value === value.value
-						}
-						loading={itemLibrariesLoading}
-					/>
-				)}
-			/> */}
 			<Controller
-				name={"pickupLocationId" as Path<TFieldValues>}
+				name="pickupLocationId"
 				control={control}
 				render={({ field: { onChange, value } }) => (
 					<Autocomplete
@@ -149,7 +95,7 @@ export const RequestCreationStep = <TFieldValues extends FieldValues>({
 				)}
 			/>
 			<Controller
-				name={"itemLocalId" as Path<TFieldValues>}
+				name="itemLocalId"
 				control={control}
 				render={({ field: { onChange, value } }) => (
 					<Autocomplete
@@ -176,21 +122,6 @@ export const RequestCreationStep = <TFieldValues extends FieldValues>({
 								label={t("requesting.staff_request.patron.item_local_id")}
 								error={!!errors.itemLocalId || itemsError}
 								helperText={errors.itemLocalId?.message}
-								slotProps={{
-									...params.slotProps,
-
-									input: {
-										...params.slotProps.input,
-										endAdornment: (
-											<>
-												{itemsLoading ? (
-													<CircularProgress color="inherit" size={20} />
-												) : null}
-												{params.slotProps.input.endAdornment}
-											</>
-										),
-									},
-								}}
 							/>
 						)}
 						isOptionEqualToValue={(option, value) =>
@@ -200,8 +131,9 @@ export const RequestCreationStep = <TFieldValues extends FieldValues>({
 					/>
 				)}
 			/>
+
 			<Controller
-				name={"requesterNote" as Path<TFieldValues>}
+				name="requesterNote"
 				control={control}
 				render={({ field }) => (
 					<TextField

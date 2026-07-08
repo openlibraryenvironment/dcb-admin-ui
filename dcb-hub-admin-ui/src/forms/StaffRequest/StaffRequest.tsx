@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Control, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import {
@@ -166,6 +166,7 @@ export default function StaffRequest({
 		mode: "onChange",
 	});
 
+	// Isolated field subscriptions (useWatch) instead of bare watch() reads.
 	const selectionType = useWatch({ control, name: "selectionType" });
 	const patronAgencyCode = useWatch({ control, name: "agencyCode" });
 	const itemAgencyCode = useWatch({ control, name: "itemAgencyCode" });
@@ -296,7 +297,7 @@ export default function StaffRequest({
 				value: item.id,
 				agencyName:
 					item?.agency?.name ??
-					t("staff_request.patron.pickup_location_no_agency"),
+					t("requesting.staff_request.patron.pickup_location_no_agency"),
 				agencyCode: item?.agency?.code,
 			}),
 		);
@@ -506,11 +507,14 @@ export default function StaffRequest({
 	};
 
 	const getStepContent = (step: number) => {
+		// Shared steps expose an untyped Control<any, any>; RHF 7.80 rejects the
+		// concrete Control assignment, so widen once here.
+		const anyControl = control as unknown as Control<any, any>;
 		switch (step) {
 			case 0:
 				return (
 					<PatronValidationStep
-						control={control}
+						control={anyControl}
 						errors={errors}
 						patronValidated={activeStep !== 0}
 						isValidatingPatron={validatePatronMutation.isPending}
@@ -526,7 +530,7 @@ export default function StaffRequest({
 			case 1:
 				return (
 					<StaffRequestDetailsStep
-						control={control}
+						control={anyControl}
 						errors={errors}
 						watch={watch}
 						setValue={setValue}
@@ -552,26 +556,6 @@ export default function StaffRequest({
 
 	return (
 		<>
-			{/* <Dialog
-				open={show}
-				onClose={handleClose}
-				aria-labelledby="patron-request-modal"
-				fullWidth
-				maxWidth="sm">
-				<DialogTitle id="form-dialog-title" variant="modalTitle">
-					{t("requesting.staff_request.new")}
-				</DialogTitle>
-				<IconButton
-					aria-label="close"
-					onClick={handleClose}
-					sx={{
-						position: "absolute",
-						right: 8,
-						top: 8,
-						color: (theme) => theme.palette.grey[500],
-					}}>
-					<Close />
-				</IconButton> */}
 			<DialogContent>
 				{/* Same style as Expedited Checkout */}
 				<Stepper
@@ -605,8 +589,8 @@ export default function StaffRequest({
 							<Step key={label} {...stepProps}>
 								<StepLabel {...labelProps} slots={{ stepIcon: DCBStepIcon }}>
 									<Typography
-										color={getStepColors(isActive, hasError, isCompleted)}
 										sx={{
+											color: getStepColors(isActive, hasError, isCompleted),
 											fontWeight: getStepLabelFontWeight(isActive),
 										}}
 									>
