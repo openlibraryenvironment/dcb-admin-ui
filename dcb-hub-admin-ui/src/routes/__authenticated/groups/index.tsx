@@ -8,6 +8,7 @@ import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
+import Loading from "@components/Loading/Loading";
 import NewGroup from "@forms/NewGroup/NewGroup";
 
 import { useGridState } from "@hooks/useGridState";
@@ -141,6 +142,22 @@ function GroupsRouteComponent() {
 		],
 		[customColumns, t],
 	);
+
+	// Cold-load guard: on a hard page load the prefetch loader is skipped
+	// while OIDC is still restoring the session (auth not yet authenticated),
+	// so the cache is empty when this mounts. Without this, the grid paints a
+	// misleading "0" for one frame before the first fetch resolves. isLoading
+	// is only true on a genuine cold start - placeholderData keeps it false
+	// during pagination/filter refetches, so interactions don't blank the grid.
+	if (isLoading)
+		return (
+			<Loading
+				title={t("ui.info.loading.document", {
+					document_type: t("nav.groups.name").toLowerCase(),
+				})}
+				subtitle={t("ui.info.wait")}
+			/>
+		);
 
 	return (
 		<PageContainer data-tid="groups-title" title={t("nav.groups.name")}>

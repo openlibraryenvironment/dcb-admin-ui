@@ -808,7 +808,9 @@
 		"library": {
 			"existing_or_new_system": "Is this library part of a new or existing host LMS?",
 			"use_existing": "Use existing system",
-			"create_new": "Create new system"
+			"use_existing_description": "Connect this library to a host LMS that is already configured in DCB. Choose this when the library shares its system with libraries that have already been onboarded.",
+			"create_new": "Create new system",
+			"create_new_description": "Set up a new host LMS for this library as part of onboarding. Choose this when the library's system has not yet been added to DCB."
 		}
 	},
 	"onboarding": {},

@@ -818,7 +818,7 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("bibRecords.cluster_uuid")}
+									{t("search.cluster_id")}
 								</Typography>
 								{bibClusterRecordUrl == "" ? (
 									<RenderAttribute attribute={patronRequest?.bibClusterId} />
@@ -1223,7 +1223,7 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron.request.canonical_ptype")}
+									{t("patron_request.patron_canonical_ptype")}
 								</Typography>
 								<RenderAttribute
 									attribute={

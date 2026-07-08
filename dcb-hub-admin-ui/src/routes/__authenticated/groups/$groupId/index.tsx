@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Grid, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid, Stack, Typography } from "@mui/material";
+import GroupTabs from "@components/GroupTabs/GroupTabs";
 import {
 	GridPaginationModel,
 	GridRowModesModel,
@@ -46,7 +47,6 @@ export const Route = createFileRoute("/__authenticated/groups/$groupId/")({
 
 function GroupDetails() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { groupId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
@@ -134,24 +134,7 @@ function GroupDetails() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={0}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									`/groups/${groupId}`,
-									`/groups/${groupId}/patronRequests`,
-									`/groups/${groupId}/supplierRequests`,
-									`/groups/${groupId}/settings`,
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.groups.profile")} />
-						<Tab label={t("nav.groups.patronRequests")} />
-						<Tab label={t("nav.groups.supplierRequests")} />
-						<Tab label={t("nav.groups.settings")} />
-					</Tabs>
+					<GroupTabs groupId={groupId} value={0} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>

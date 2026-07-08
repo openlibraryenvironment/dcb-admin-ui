@@ -8,13 +8,41 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import OperatingWelcome from "@components/OperatingWelcome/OperatingWelcome";
 import Error from "@components/Error/Error";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { getLibraries } from "@queries/getLibraries";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+
+// Default-state prefetch: mirrors OperatingWelcome's own useGridState defaults
+// (pageSize 200, sort fullName ASC, no filter) AND its literal "LoadLibraries"
+// query key, so the cache entry lines up on a fresh render and the welcome
+// grid paints with its rows/count already populated instead of flashing.
+const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 200 };
+const DEFAULT_SORT_MODEL = [{ field: "fullName", sort: "asc" }];
+const DEFAULT_FILTER_MODEL = { items: [] };
 
 export const Route = createFileRoute("/__authenticated/")({
-	// 1. THE LOADER: Pre-fetch data before the page renders.
-	loader: async () => {
-		// we might be able to pre-fetch operating welcome, but let's see
-
-		return {};
+	// 1. THE LOADER: Pre-fetch the welcome grid's first page before render.
+	loader: ({ context: { queryClient, cfg, auth } }) => {
+		// Skip prefetching for unauthenticated visitors - the request would
+		// fail (no token) and its failure would trigger the global network/401
+		// handler in main.tsx before __authenticated.tsx's own auth-gate
+		// redirect to /login ever runs.
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: [
+				"LoadLibraries",
+				DEFAULT_PAGINATION_MODEL,
+				DEFAULT_SORT_MODEL,
+				DEFAULT_FILTER_MODEL,
+			],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any>(getLibraries, {
+					query: "",
+					pageno: DEFAULT_PAGINATION_MODEL.page,
+					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
+					order: DEFAULT_SORT_MODEL[0].field,
+					orderBy: "ASC",
+				}),
+		});
 	},
 
 	// 2. THE ERROR BOUNDARY: error components go here instead

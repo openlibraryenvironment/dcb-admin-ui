@@ -1,7 +1,6 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { FilterAltOutlined } from "@mui/icons-material";
+import { Grid, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 
@@ -9,6 +8,7 @@ import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import DataGrid from "@components/DataGrid/DataGrid";
+import PatronRequestTabs from "@components/PatronRequestTabs/PatronRequestTabs";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { useGridState } from "@hooks/useGridState";
@@ -24,10 +24,8 @@ import { getLibraries } from "@queries/getLibraries";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { queries } from "@constants/patronRequestGridQueries";
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/exception",
@@ -67,7 +65,6 @@ export const Route = createFileRoute(
 
 function Exception() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 
 	const currentPath = Route.fullPath;
@@ -263,83 +260,17 @@ function Exception() {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Tabs
-					value={currentPath}
-					onChange={(_event, value) => {
-						handleTabChange({
-							newValue: value,
-							router,
-						});
+				<PatronRequestTabs
+					currentPath={currentPath}
+					totalSizes={totalSizes}
+					loading={{
+						exception: exceptionLoading,
+						outOfSequence: outOfSequenceLoading,
+						inProgress: inProgressLoading,
+						finished: finishedLoading,
 					}}
-					aria-label={"Patron request navigation"}
-				>
-					<Tab
-						label={
-							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-								<Typography variant="subTabTitle">
-									{t("libraries.patronRequests.exception_short", {
-										number:
-											exceptionLoading && unfilteredExceptionCount === null
-												? t("common.loading")
-												: totalSizes.exception,
-									})}
-								</Typography>
-								{isFilterApplied && (
-									<FilterAltOutlined
-										aria-label={String(t("ui.info.filter_applied"))}
-										fontSize="small"
-									/>
-								)}
-							</Box>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/outOfSequence")}
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.out_of_sequence_short", {
-									number: outOfSequenceLoading
-										? t("common.loading")
-										: totalSizes.outOfSequence,
-								})}
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/active")}
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.active_short", {
-									number: inProgressLoading
-										? t("common.loading")
-										: totalSizes.inProgress,
-								})}
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/completed")}
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.completed_short", {
-									number: finishedLoading
-										? t("common.loading")
-										: totalSizes.finished,
-								})}
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/all")}
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.all_short", {
-									number: totalSizes.all,
-								})}
-							</Typography>
-						}
-					/>
-				</Tabs>
+					isFilterApplied={isFilterApplied}
+				/>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography

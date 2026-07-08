@@ -260,7 +260,9 @@ export default function NewLibrary({
 
 	const renderStepContent = () => {
 		if (wizardMode === "unselected")
-			return <ModeSelectionStep setMode={setWizardMode} />;
+			return (
+				<ModeSelectionStep setMode={setWizardMode} onCancel={handleClose} />
+			);
 
 		switch (currentStep?.id) {
 			case "hostLms":

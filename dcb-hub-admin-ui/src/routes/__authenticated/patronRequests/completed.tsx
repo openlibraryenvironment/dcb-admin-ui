@@ -1,7 +1,6 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
-import { FilterAltOutlined } from "@mui/icons-material";
+import { Grid, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 
@@ -9,13 +8,13 @@ import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import DataGrid from "@components/DataGrid/DataGrid";
+import PatronRequestTabs from "@components/PatronRequestTabs/PatronRequestTabs";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { useGridState } from "@hooks/useGridState";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
@@ -66,7 +65,6 @@ export const Route = createFileRoute(
 
 function Completed() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 
 	const gridId = "patronRequestsCompleted";
@@ -261,81 +259,17 @@ function Completed() {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Tabs
-					value={currentPath}
-					onChange={(_event, value) => {
-						handleTabChange({
-							newValue: value,
-							router,
-						});
+				<PatronRequestTabs
+					currentPath={currentPath}
+					totalSizes={totalSizes}
+					loading={{
+						exception: exceptionLoading,
+						outOfSequence: outOfSequenceLoading,
+						inProgress: inProgressLoading,
+						finished: finishedLoading,
 					}}
-					aria-label={"Patron request navigation"}
-				>
-					<Tab
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.exception_short", {
-									number: exceptionLoading
-										? t("common.loading")
-										: totalSizes.exception,
-								})}
-							</Typography>
-						}
-					/>
-					<Tab
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.out_of_sequence_short", {
-									number: outOfSequenceLoading
-										? t("common.loading")
-										: totalSizes.outOfSequence,
-								})}
-							</Typography>
-						}
-					/>
-					<Tab
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.active_short", {
-									number: inProgressLoading
-										? t("common.loading")
-										: totalSizes.inProgress,
-								})}
-							</Typography>
-						}
-					/>
-					<Tab
-						label={
-							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-								<Typography variant="subTabTitle">
-									{t("libraries.patronRequests.completed_short", {
-										number:
-											finishedLoading && unfilteredCompletedCount === null
-												? t("common.loading")
-												: totalSizes.finished,
-									})}
-								</Typography>
-								{isFilterApplied && (
-									<FilterAltOutlined
-										aria-label={String(
-											t("common.filterIsApplied", "Filter is applied"),
-										)}
-										fontSize="small"
-									/>
-								)}
-							</Box>
-						}
-					/>
-					<Tab
-						label={
-							<Typography variant="subTabTitle">
-								{t("libraries.patronRequests.all_short", {
-									number: totalSizes.all,
-								})}
-							</Typography>
-						}
-					/>
-				</Tabs>
+					isFilterApplied={isFilterApplied}
+				/>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography

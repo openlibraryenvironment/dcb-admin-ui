@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Grid, Tab, Tabs, Typography } from "@mui/material";
+import { createFileRoute } from "@tanstack/react-router";
+import { Grid, Typography } from "@mui/material";
+import GroupTabs from "@components/GroupTabs/GroupTabs";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -34,7 +35,6 @@ export const Route = createFileRoute(
 
 function GroupPatronRequests() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { groupId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
@@ -195,24 +195,7 @@ function GroupPatronRequests() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={1}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									`/groups/${groupId}`,
-									`/groups/${groupId}/patronRequests`,
-									`/groups/${groupId}/supplierRequests`,
-									`/groups/${groupId}/settings`,
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.groups.profile")} />
-						<Tab label={t("nav.groups.patronRequests")} />
-						<Tab label={t("nav.groups.supplierRequests")} />
-						<Tab label={t("nav.groups.settings")} />
-					</Tabs>
+					<GroupTabs groupId={groupId} value={1} />
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography

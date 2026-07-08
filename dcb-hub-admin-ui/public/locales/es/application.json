@@ -807,7 +807,9 @@
 		"library": {
 			"existing_or_new_system": "¿Forma parte esta biblioteca de un LMS de host nuevo o ya existente?",
 			"use_existing": "Utilizar el sistema existente",
-			"create_new": "Crear un nuevo sistema"
+			"use_existing_description": "Conecte esta biblioteca a un LMS de host que ya está configurado en DCB. Elija esta opción cuando la biblioteca comparta su sistema con bibliotecas que ya se han incorporado.",
+			"create_new": "Crear un nuevo sistema",
+			"create_new_description": "Configure un nuevo LMS de host para esta biblioteca como parte de la incorporación. Elija esta opción cuando el sistema de la biblioteca aún no se haya añadido a DCB."
 		}
 	},
 	"onboarding": {},

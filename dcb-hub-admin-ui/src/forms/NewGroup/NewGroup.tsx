@@ -73,7 +73,6 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 		mode: "onChange",
 	});
 
-	// UPGRADE: Replaced legacy Apollo useMutation with TanStack useMutation
 	const mutation = useMutation({
 		mutationFn: async (values: FormData) => {
 			return gqlClient.request<any>(createLibraryGroup, {

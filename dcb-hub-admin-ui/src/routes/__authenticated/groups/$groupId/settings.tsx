@@ -1,14 +1,12 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import {
 	Button,
 	Grid,
 	Stack,
-	Tab,
-	Tabs,
 	Typography,
 	Tooltip,
 	CircularProgress,
@@ -16,6 +14,7 @@ import {
 } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import GroupTabs from "@components/GroupTabs/GroupTabs";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -36,7 +35,6 @@ export const Route = createFileRoute(
 
 function GroupSettings() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { groupId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
@@ -196,24 +194,7 @@ function GroupSettings() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={3}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									`/groups/${groupId}`,
-									`/groups/${groupId}/patronRequests`,
-									`/groups/${groupId}/supplierRequests`,
-									`/groups/${groupId}/settings`,
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.groups.profile")} />
-						<Tab label={t("nav.groups.patronRequests")} />
-						<Tab label={t("nav.groups.supplierRequests")} />
-						<Tab label={t("nav.groups.settings")} />
-					</Tabs>
+					<GroupTabs groupId={groupId} value={3} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>

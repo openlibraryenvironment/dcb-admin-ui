@@ -477,7 +477,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("patron_request.error")}
+								{t("patron_request.error_message")}
 							</Typography>
 							<RenderAttribute attribute={row?.errorMessage} />
 						</Stack>
@@ -485,7 +485,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("patron_request.is_transition_out_of_sequence")}
+								{t("patron_request.out_of_sequence")}
 							</Typography>
 							<RenderAttribute attribute={row?.outOfSequenceFlag?.toString()} />
 						</Stack>

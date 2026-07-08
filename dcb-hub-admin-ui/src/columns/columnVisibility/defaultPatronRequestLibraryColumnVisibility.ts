@@ -26,4 +26,9 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		localRequestId: false,
 		renewalCount: false,
 		resolutionCount: false,
+		pickupItemId: false,
+		pollCountForCurrentStatus: false,
+		elapsedTimeInCurrentStatus: false,
+		description: false,
+		requesterNote: false,
 	};

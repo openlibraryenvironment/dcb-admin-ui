@@ -1,23 +1,18 @@
-import {
-	createFileRoute,
-	useLocation,
-	useRouter,
-} from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Box, Typography, Tab, Tabs, Grid } from "@mui/material";
-import { FilterAltOutlined } from "@mui/icons-material";
+import { Typography, Grid } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import PatronRequestTabs from "@components/PatronRequestTabs/PatronRequestTabs";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getLibraries } from "@queries/getLibraries";
@@ -28,7 +23,6 @@ import { getPatronRequestDashboard } from "@queries/getPatronRequestDashboard";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
@@ -71,7 +65,6 @@ export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 
 function All() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 
 	const gridId = "patronRequestsAll";
@@ -228,7 +221,6 @@ function All() {
 			</PageContainer>
 		);
 	}
-	console.log(dashboardData);
 
 	return (
 		<PageContainer title={t("nav.patronRequests.name")}>
@@ -237,86 +229,18 @@ function All() {
 				spacing={{ xs: 2, md: 3 }}
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
-				<Tabs
-					value={currentPath}
-					onChange={(_event, value) => {
-						handleTabChange({ newValue: value, router });
+				<PatronRequestTabs
+					currentPath={currentPath}
+					totalSizes={totalSizes}
+					loading={{
+						exception: gridLoading,
+						outOfSequence: gridLoading,
+						inProgress: gridLoading,
+						finished: gridLoading,
+						all: gridLoading,
 					}}
-					aria-label={t(
-						"nav.patronRequests.accessibility_title",
-						"Patron request views workflow filtering",
-					)}
-				>
-					<Tab
-						{...a11yTabProps("/patronRequests/exception")}
-						label={
-							<Typography
-								variant="subTabTitle"
-								aria-label={`${totalSizes.exception} exception items`}
-							>
-								{t("libraries.patronRequests.exception_short")} (
-								{totalSizes.exception})
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/outOfSequence")}
-						label={
-							<Typography
-								variant="subTabTitle"
-								aria-label={`${totalSizes.outOfSequence} out of sequence items`}
-							>
-								{t("libraries.patronRequests.out_of_sequence_short")} (
-								{totalSizes.outOfSequence})
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/active")}
-						label={
-							<Typography
-								variant="subTabTitle"
-								aria-label={`${totalSizes.inProgress} active items`}
-							>
-								{t("libraries.patronRequests.active_short")} (
-								{totalSizes.inProgress})
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/completed")}
-						label={
-							<Typography
-								variant="subTabTitle"
-								aria-label={`${totalSizes.finished} completed items`}
-							>
-								{t("libraries.patronRequests.completed_short")} (
-								{totalSizes.finished})
-							</Typography>
-						}
-					/>
-					<Tab
-						{...a11yTabProps("/patronRequests/all")}
-						label={
-							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-								<Typography
-									variant="subTabTitle"
-									aria-label={`${totalSizes.all} total items`}
-								>
-									{t("libraries.patronRequests.all_short")} ({totalSizes.all})
-								</Typography>
-								{isFilterApplied && (
-									<FilterAltOutlined
-										aria-label={String(
-											t("common.filterIsApplied", "Filter is applied"),
-										)}
-										fontSize="small"
-									/>
-								)}
-							</Box>
-						}
-					/>
-				</Tabs>
+					isFilterApplied={isFilterApplied}
+				/>
 
 				<Grid
 					size={{ xs: 4, sm: 8, md: 12 }}

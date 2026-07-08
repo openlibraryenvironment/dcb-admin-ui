@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
+import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
+import MappingsSubTabs from "@components/MappingsSubTabs/MappingsSubTabs";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
@@ -69,28 +71,6 @@ function AllNumericMappings() {
 	const numericRangePatronTypePrimaryQuery = `context:"${library.agency?.hostLms?.code}" AND domain:"patronType" AND NOT deleted:true`;
 	const numericRangePatronTypeSecondaryQuery = `context:"${library.secondHostLms?.code}" AND domain:"patronType" AND NOT deleted:true`;
 
-	const handleMainTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = [
-			"",
-			"/service",
-			"/settings",
-			"/referenceValueMappings/all",
-			"/patronRequests/all",
-			"/supplierRequests/all",
-			"/contacts",
-			"/locations",
-			"/bibs",
-		];
-		router.navigate({ to: `/libraries/${libraryId}${routes[val]}` });
-	};
-
-	const handleSubTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = ["itemType", "location", "patronType", "all"];
-		router.navigate({
-			to: `/libraries/${libraryId}/numericRangeMappings/${routes[val]}`,
-		});
-	};
-
 	if (isLoading)
 		return (
 			<Loading
@@ -132,26 +112,15 @@ function AllNumericMappings() {
 				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={3} onChange={handleMainTabChange} variant="scrollable">
-						<Tab label={t("nav.libraries.profile")} />
-						<Tab label={t("nav.libraries.service")} />
-						<Tab label={t("nav.libraries.settings")} />
-						<Tab label={t("nav.mappings.name")} />
-						<Tab label={t("nav.libraries.patronRequests.name")} />
-						<Tab label={t("nav.libraries.supplierRequests.name")} />
-						<Tab label={t("nav.libraries.contacts")} />
-						<Tab label={t("nav.locations")} />
-						<Tab label={t("nav.bibs")} />
-					</Tabs>
+					<LibraryTabs libraryId={libraryId} value={3} />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={2} onChange={handleSubTabChange} sx={{ mb: 2 }}>
-						<Tab label={t("mappings.categories.itemType")} />
-						<Tab label={t("mappings.categories.location")} />
-						<Tab label={t("mappings.categories.patronType")} />
-						<Tab label={t("mappings.categories.all")} />
-					</Tabs>
+					<MappingsSubTabs
+						libraryId={libraryId}
+						type="numericRange"
+						activeCategory="patronType"
+					/>
 
 					<Typography
 						variant="h3"

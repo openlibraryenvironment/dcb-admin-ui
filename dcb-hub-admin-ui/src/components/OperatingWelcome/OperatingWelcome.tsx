@@ -49,6 +49,7 @@ export default function OperatingWelcome() {
 					defaultPageSize: 200,
 				}),
 			),
+		placeholderData: (previousData) => previousData,
 	});
 
 	const updateMutation = useMutation({
@@ -192,7 +193,7 @@ export default function OperatingWelcome() {
 			columns={columns}
 			// Map TanStack query response to grid props. Adjust 'libraries.content' to match your actual GraphQL shape
 			rows={data?.libraries?.content ?? []}
-			rowCount={data?.libraries?.totalElements ?? 0}
+			rowCount={data?.libraries?.totalSize ?? 0}
 			loading={isLoading || isFetching}
 			// Pagination
 			pagination={true}

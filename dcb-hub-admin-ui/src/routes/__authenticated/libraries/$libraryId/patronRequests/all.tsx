@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
+import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
+import LibraryPatronRequestSubTabs from "@components/LibraryPatronRequestSubTabs/LibraryPatronRequestSubTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -151,13 +152,6 @@ function PatronRequestsAll() {
 			gqlClient.request(deleteLibraryMutation, variables),
 	});
 
-	const handleSubTabChange = (_: React.SyntheticEvent, val: number) => {
-		const routes = ["all", "outOfSequence", "active", "completed", "exception"];
-		router.navigate({
-			to: `/libraries/${libraryId}/patronRequests/${routes[val]}`,
-		});
-	};
-
 	return (
 		<PageContainer
 			title={library?.fullName}
@@ -185,31 +179,11 @@ function PatronRequestsAll() {
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={0} onChange={handleSubTabChange} sx={{ mb: 2 }}>
-						<Tab
-							label={t("libraries.patronRequests.all", { number: "" }).trim()}
-						/>
-						<Tab
-							label={t("libraries.patronRequests.out_of_sequence", {
-								number: "",
-							}).trim()}
-						/>
-						<Tab
-							label={t("libraries.patronRequests.active", {
-								number: "",
-							}).trim()}
-						/>
-						<Tab
-							label={t("libraries.patronRequests.completed", {
-								number: "",
-							}).trim()}
-						/>
-						<Tab
-							label={t("libraries.patronRequests.exception", {
-								number: "",
-							}).trim()}
-						/>
-					</Tabs>
+					<LibraryPatronRequestSubTabs
+						libraryId={libraryId}
+						code={code}
+						activeBucket="all"
+					/>
 
 					<Typography
 						variant="h3"

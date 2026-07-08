@@ -192,7 +192,7 @@ export default function DataGrid({
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
 				loading={loading}
-				pageSizeOptions={[5, 10, 15, 25, 50, 100, 200]}
+				pageSizeOptions={[5, 10, 15, 20, 25, 50, 100, 200]}
 				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}
