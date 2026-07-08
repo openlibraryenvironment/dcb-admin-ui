@@ -21,6 +21,7 @@ import {
 import PageContainer from "@layout/PageContainer/PageContainer";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 import ThemeControls from "@components/ThemeControls/ThemeControls";
+import LanguageSwitcher from "@layout/Header/LanguageSwitcher";
 
 export const Route = createFileRoute("/__authenticated/profile")({
 	component: Profile,
@@ -107,6 +108,14 @@ function Profile() {
 				</ListSubheader>
 				<ListItem>
 					<ThemeControls />
+				</ListItem>
+			</List>
+			<List className="list-profile">
+				<ListSubheader sx={{ backgroundColor: "transparent" }}>
+					<Typography variant="h6">{t("profile.language")}</Typography>
+				</ListSubheader>
+				<ListItem>
+					<LanguageSwitcher />
 				</ListItem>
 			</List>
 		</PageContainer>

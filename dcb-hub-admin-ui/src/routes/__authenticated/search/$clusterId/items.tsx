@@ -13,18 +13,22 @@ import {
 	Stack,
 	Alert,
 } from "@mui/material";
-import { ExpandMore } from "@mui/icons-material";
+import { Bolt, ExpandMore } from "@mui/icons-material";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
+import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { itemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
 import {
+	GridActionsCellItem,
+	GridColDef,
 	GridPaginationModel,
 	GridRowModesModel,
+	GridRowParams,
 } from "@mui/x-data-grid-premium";
 
 export const Route = createFileRoute(
@@ -38,6 +42,11 @@ function ItemsPageComponent() {
 	const { t } = useTranslation();
 	const auth = useAuth();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	// Quick walk-up launched directly against an available item row. The scanned
+	// barcode is pre-filled; the walk-up flow resolves the cluster server-side.
+	const [showWalkUp, setShowWalkUp] = useState(false);
+	const [walkUpBarcode, setWalkUpBarcode] = useState("");
 
 	const [isItemsAccordionExpanded, setIsItemsAccordionExpanded] =
 		useState(false);
@@ -77,6 +86,42 @@ function ItemsPageComponent() {
 
 	const items = data?.standard || [];
 
+	// Base item columns + a row action that skips straight to a pre-filled Quick
+	// walk-up, but only for items that can actually be walked up (available,
+	// requestable, not suppressed).
+	const itemColumnsWithWalkUp: GridColDef[] = useMemo(
+		() => [
+			...itemColumns,
+			{
+				field: "walkUpAction",
+				type: "actions",
+				headerName: t("ui.data_grid.actions"),
+				width: 120,
+				getActions: (params: GridRowParams<Item>) => {
+					const item = params.row;
+					const canWalkUp =
+						!!item?.barcode &&
+						item.isRequestable &&
+						!item.isSuppressed &&
+						item.status?.code === "AVAILABLE";
+					if (!canWalkUp) return [];
+					return [
+						<GridActionsCellItem
+							key="quickWalkUp"
+							icon={<Bolt />}
+							label={t("requesting.quick_walk_up.actions.place")}
+							onClick={() => {
+								setWalkUpBarcode(item.barcode);
+								setShowWalkUp(true);
+							}}
+						/>,
+					];
+				},
+			},
+		],
+		[t],
+	);
+
 	const itemsNotShown = useMemo(() => {
 		if (!data) return [];
 		const standardIds = new Set(data.standard.map((i: Item) => i.id));
@@ -101,6 +146,14 @@ function ItemsPageComponent() {
 			spacing={{ xs: 2, md: 3 }}
 			columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 		>
+			{showWalkUp && (
+				<CombinedRequestingModal
+					show={showWalkUp}
+					onClose={() => setShowWalkUp(false)}
+					initialRequestType="quickWalkUp"
+					initialItemBarcode={walkUpBarcode}
+				/>
+			)}
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 				{data?.errors?.length > 0 && (
 					<Alert severity="error" sx={{ mb: 2 }}>
@@ -134,7 +187,7 @@ function ItemsPageComponent() {
 				<DataGrid
 					identifier={itemsGridId}
 					type="Items"
-					columns={itemColumns}
+					columns={itemColumnsWithWalkUp}
 					rows={items}
 					loading={isLoading}
 					paginationMode="client"

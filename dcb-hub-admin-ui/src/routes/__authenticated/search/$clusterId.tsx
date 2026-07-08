@@ -14,8 +14,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
-import StaffRequest from "@forms/StaffRequest/StaffRequest";
-import ExpeditedCheckout from "@forms/ExpeditedCheckout/ExpeditedCheckout";
+import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClustersTitleOnly } from "@queries/getClustersTitlesOnly";
@@ -36,8 +35,7 @@ function ClusterLayout() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const [showStaffRequest, setShowStaffRequest] = useState(false);
-	const [showExpeditedCheckout, setShowExpeditedCheckout] = useState(false);
+	const [showRequestModal, setShowRequestModal] = useState(false);
 
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["cluster", "titleOnly", clusterId],
@@ -71,16 +69,10 @@ function ClusterLayout() {
 
 	const pageActions = [
 		{
-			key: "staffRequest",
-			onClick: () => setShowStaffRequest(true),
+			key: "placeRequest",
+			onClick: () => setShowRequestModal(true),
 			disabled: !isAnAdmin,
-			label: t("staff_request.actions.place"),
-		},
-		{
-			key: "expeditedCheckout",
-			onClick: () => setShowExpeditedCheckout(true),
-			disabled: !isAnAdmin,
-			label: t("expedited_checkout.steps.checkout"),
+			label: t("requesting.place_title"),
 		},
 	];
 
@@ -89,19 +81,13 @@ function ClusterLayout() {
 			title={t("search.cluster_title", { record: title })}
 			pageActions={pageActions}
 		>
-			{/* Modals */}
-			{showStaffRequest && (
-				<StaffRequest
-					show={showStaffRequest}
-					onClose={() => setShowStaffRequest(false)}
+			{/* Single entry point: the user picks the request type inside the modal */}
+			{showRequestModal && (
+				<CombinedRequestingModal
+					show={showRequestModal}
+					onClose={() => setShowRequestModal(false)}
 					bibClusterId={clusterId}
-				/>
-			)}
-			{showExpeditedCheckout && (
-				<ExpeditedCheckout
-					show={showExpeditedCheckout}
-					onClose={() => setShowExpeditedCheckout(false)}
-					bibClusterId={clusterId}
+					title={title}
 				/>
 			)}
 

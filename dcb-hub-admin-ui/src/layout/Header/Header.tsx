@@ -25,9 +25,6 @@ import useDCBVersionStore from "@hooks/serviceInfoStore";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
-import LanguageSwitcher from "./LanguageSwitcher";
-// Bundled asset (src/assets, not public/) - import for a hashed URL that resolves
-// on any route; the old "/assets/brand/..." string pointed at a missing public file.
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
 
 interface AppBarProps extends MuiAppBarProps {
@@ -213,7 +210,6 @@ export default function Header({
 								flexShrink: 0,
 							}}
 						>
-							<LanguageSwitcher />
 							<IconButton
 								size="large"
 								data-tid="profile-button"

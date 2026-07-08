@@ -151,7 +151,7 @@ function ClusterDetails() {
 					pagination
 					disablePivoting
 					scrollbarVisible={false}
-					noResultsText={t("common.no_results")}
+					noResultsText={t("ui.data_grid.no_results")}
 					searchText=""
 					rowModesModel={rowModesModel}
 					onRowModesModelChange={setRowModesModel}

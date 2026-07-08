@@ -10,11 +10,16 @@ const LANGUAGES = [
 	{ code: "es", label: "Español" },
 ];
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+	/** Determines styling. Use "header" for dark navbars, or "default" for standard page backgrounds. */
+	variant?: "header" | "default";
+}
+
+export default function LanguageSwitcher({
+	variant = "default",
+}: LanguageSwitcherProps) {
 	const { t, i18n } = useTranslation();
 
-	// Normalise "en-GB" -> "en" so the value matches a MenuItem (avoids MUI's
-	// out-of-range value warning). Falls back to the first supported language.
 	const base = (i18n.resolvedLanguage ?? i18n.language ?? "en").split("-")[0];
 	const current = LANGUAGES.some((l) => l.code === base)
 		? base
@@ -26,27 +31,33 @@ export default function LanguageSwitcher() {
 
 	const label = String(t("header.language_switcher_title"));
 
+	const headerStyles =
+		variant === "header"
+			? {
+					"& .MuiInputLabel-root": { color: "primary.headerText" },
+					"& .MuiInputLabel-root.Mui-focused": { color: "primary.headerText" },
+					"& .MuiOutlinedInput-root": {
+						color: "primary.headerText",
+						"& .MuiOutlinedInput-notchedOutline": {
+							borderColor: "primary.headerText",
+						},
+						"&:hover .MuiOutlinedInput-notchedOutline": {
+							borderColor: "primary.headerText",
+						},
+						"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+							borderColor: "primary.headerText",
+						},
+					},
+					"& .MuiSelect-icon": { color: "primary.headerText" },
+				}
+			: {};
+
 	return (
 		<FormControl
 			size="small"
 			sx={{
 				minWidth: 120,
-				// Contrast against the dark header bar (WCAG 2.2 AA).
-				"& .MuiInputLabel-root": { color: "primary.headerText" },
-				"& .MuiInputLabel-root.Mui-focused": { color: "primary.headerText" },
-				"& .MuiOutlinedInput-root": {
-					color: "primary.headerText",
-					"& .MuiOutlinedInput-notchedOutline": {
-						borderColor: "primary.headerText",
-					},
-					"&:hover .MuiOutlinedInput-notchedOutline": {
-						borderColor: "primary.headerText",
-					},
-					"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-						borderColor: "primary.headerText",
-					},
-				},
-				"& .MuiSelect-icon": { color: "primary.headerText" },
+				...headerStyles,
 			}}
 		>
 			<InputLabel id="language-select-menu-label">{label}</InputLabel>

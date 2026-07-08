@@ -11,24 +11,19 @@ import { useAuth } from "react-oidc-context";
 import { z } from "zod";
 import { validate } from "uuid";
 import { isEqual } from "lodash";
-import {
-	GridColDef,
-	GridPaginationModel,
-	GridFilterModel,
-} from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 import { Box } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import ErrorComponent from "@components/Error/Error";
 import { SearchQueryBuilder } from "@components/SearchQueryBuilder/SearchQueryBuilder";
+import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useSearchStore } from "@hooks/useSearchStore";
 import {
 	buildQueryFromCriteria,
-	mapCriteriaToFilterModel,
-	mapFilterModelToCriteria,
 	parseQueryToCriteria,
 } from "@helpers/search/searchQueryHelpers";
 
@@ -51,51 +46,41 @@ function SearchPage() {
 	const { cfg } = useRouter().options.context as { cfg: any };
 	const searchBase = cfg?.VITE_DCB_SEARCH_BASE;
 
-	// Read the query directly from the URL
+	// The URL (`q`) is the single source of truth for the *executed* search:
+	// shareable, bookmarkable, and the sole trigger for data fetching.
 	const { q } = Route.useSearch();
-
-	// Global Stores
-	const { criteria, setCriteria } = useSearchStore();
-	const {
-		paginationModel: storedPaginationModel,
-		filterModel: storedFilterModel,
-		setPaginationModel,
-		setFilterModel,
-	} = useGridStore();
 
 	const gridId = "sharedIndexSearch";
 
-	// Local UI State mapped to persistent storage
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPaginationModel[gridId] ?? { page: 0, pageSize: 25 },
-		);
-	const [filterModelLocal, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilterModel[gridId] ?? { items: [] },
-	);
+	// The SearchQueryBuilder owns the editable *draft* criteria (the advanced
+	// filter surface). We only need to push parsed criteria back into it on URL
+	// changes, so we grab the stable setter with an atomic selector - subscribing
+	// to `criteria` here would re-render (and repaint the grid) on every keystroke.
+	const setCriteria = useSearchStore((s) => s.setCriteria);
 
-	// 2. Sync URL -> Query Builder Criteria (When user clicks a link or hits back/forward)
+	// Pagination is the only grid state this page owns; the query builder replaces
+	// column filtering and the search API has no sort. useGridState gives us the
+	// shared atomic-selector persistence used by every other grid.
+	const { paginationModel, onPaginationModelChange } = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 25 },
+	});
+
+	// Quick walk-up can be launched straight from search results: staff already
+	// have the item barcode in hand, so no cluster context is required here.
+	const [showWalkUp, setShowWalkUp] = useState(false);
+
+	// URL -> builder draft. Rehydrates the query builder on deep-link / back /
+	// forward. Reads current criteria via getState() so this effect depends only
+	// on `q` (setCriteria is a stable Zustand action) and never fights a reverse
+	// sync - there is no reverse sync any more.
 	useEffect(() => {
-		const parsedCriteria = parseQueryToCriteria(q || "");
-		if (!isEqual(parsedCriteria, criteria)) {
+		const parsedCriteria = parseQueryToCriteria(q ?? "");
+		if (!isEqual(parsedCriteria, useSearchStore.getState().criteria)) {
 			setCriteria(parsedCriteria);
 		}
-		// intentionally re-syncs only when the URL (q) changes; depending on `criteria` would fight the reverse Criteria->URL sync
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [q, setCriteria]);
 
-	// 3. Sync Query Builder Criteria -> DataGrid Filter Model UI
-	/* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps -- intentionally re-syncs the grid filter model only when `criteria` changes; depending on `filterModelLocal` would fight the reverse grid->criteria sync */
-	useEffect(() => {
-		const newFilterModel = mapCriteriaToFilterModel(criteria);
-		if (!isEqual(newFilterModel, filterModelLocal)) {
-			setLocalFilterModel(newFilterModel);
-		}
-	}, [criteria]);
-	/* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
-
-	// 4. TanStack Query for Data Fetching (Replaces useEffect + Axios)
-	const { data, isLoading, isError, isFetching } = useQuery({
+	const { data, isLoading, isFetching, isError } = useQuery({
 		queryKey: ["search", q, paginationModel.page, paginationModel.pageSize],
 		queryFn: async () => {
 			if (!auth.user?.access_token || !q)
@@ -133,54 +118,20 @@ function SearchPage() {
 		placeholderData: (prev) => prev, // Keeps previous data on screen while fetching next page
 	});
 
-	// --- Handlers ---
-	const executeSearch = useCallback(
-		(newCriteria: any) => {
-			const newQuery = buildQueryFromCriteria(newCriteria);
-			if (newQuery !== q) {
-				// Explicit public path: navigating off Route.id (the internal
-				// "/__authenticated/search/") landed on the NotFound page. Writing the
-				// URL here is what makes the search shareable/bookmarkable.
-				navigate({ to: "/search", search: { q: newQuery }, replace: true });
-			}
-		},
-		[q, navigate],
-	);
+	// The builder is the whole filter surface: on search we read its draft
+	// lazily (getState, so this page never subscribes to per-keystroke changes),
+	// reset to page 0, and write the executed query to the URL - which is what
+	// makes the search shareable/bookmarkable and drives the fetch.
+	const handleBuilderSearch = useCallback(() => {
+		const newQuery = buildQueryFromCriteria(useSearchStore.getState().criteria);
+		onPaginationModelChange({ page: 0, pageSize: paginationModel.pageSize });
+		if (newQuery !== q) {
+			// Explicit public path: navigating off Route.id (the internal
+			// "/__authenticated/search/") lands on the NotFound page.
+			navigate({ to: "/search", search: { q: newQuery }, replace: true });
+		}
+	}, [q, navigate, onPaginationModelChange, paginationModel.pageSize]);
 
-	const handleBuilderSearch = () => {
-		// Reset to page 0 on a fresh search
-		const newPagination = { page: 0, pageSize: paginationModel.pageSize };
-		setLocalPaginationModel(newPagination);
-		setPaginationModel(gridId, newPagination);
-		executeSearch(criteria);
-	};
-
-	const handleFilterModelChange = useCallback(
-		(newFilterModel: GridFilterModel) => {
-			const newCriteriaFromGrid = mapFilterModelToCriteria(newFilterModel);
-			const currentCriteriaFromGrid =
-				mapFilterModelToCriteria(filterModelLocal);
-
-			if (!isEqual(currentCriteriaFromGrid, newCriteriaFromGrid)) {
-				setCriteria(newCriteriaFromGrid);
-				executeSearch(newCriteriaFromGrid);
-			}
-
-			setLocalFilterModel(newFilterModel);
-			setFilterModel(gridId, newFilterModel);
-		},
-		[filterModelLocal, setCriteria, setFilterModel, gridId, executeSearch],
-	);
-
-	const handlePaginationChange = useCallback(
-		(m: GridPaginationModel) => {
-			setLocalPaginationModel(m);
-			setPaginationModel(gridId, m);
-		},
-		[gridId, setPaginationModel],
-	);
-
-	// --- Columns ---
 	const columns: GridColDef[] = useMemo(
 		() => [
 			{
@@ -188,11 +139,13 @@ function SearchPage() {
 				headerName: t("ui.data_grid.title"),
 				minWidth: 300,
 				flex: 0.7,
+				filterable: false,
 			},
 			{
 				field: "id",
 				headerName: t("search.cluster_id"),
 				minWidth: 100,
+				filterable: false,
 				flex: 0.5,
 				renderCell: (params) => (
 					<Link to={`/search/${params.row.id}/cluster`}>{params.row.id}</Link>
@@ -202,6 +155,7 @@ function SearchPage() {
 				field: "items",
 				headerName: t("search.items"),
 				minWidth: 100,
+				filterable: false,
 				flex: 0.3,
 				renderCell: (params) => (
 					<Link to={`/search/${params.row.id}/items`}>
@@ -213,6 +167,7 @@ function SearchPage() {
 				field: "identifiers",
 				headerName: t("search.identifiers"),
 				minWidth: 100,
+				filterable: false,
 				flex: 0.3,
 				renderCell: (params) => (
 					<Link to={`/search/${params.row.id}/identifiers`}>
@@ -238,8 +193,23 @@ function SearchPage() {
 		);
 	}
 
+	const pageActions = [
+		{
+			key: "quickWalkUp",
+			onClick: () => setShowWalkUp(true),
+			label: t("requesting.quick_walk_up.actions.place"),
+		},
+	];
+
 	return (
-		<PageContainer title={t("nav.search.name")}>
+		<PageContainer title={t("nav.search.name")} pageActions={pageActions}>
+			{showWalkUp && (
+				<CombinedRequestingModal
+					show={showWalkUp}
+					onClose={() => setShowWalkUp(false)}
+					initialRequestType="quickWalkUp"
+				/>
+			)}
 			<Box sx={{ mb: 3 }}>
 				<SearchQueryBuilder onSearch={handleBuilderSearch} />
 			</Box>
@@ -263,23 +233,22 @@ function SearchPage() {
 					paginationMode="server"
 					pagination
 					paginationModel={paginationModel}
-					onPaginationModelChange={handlePaginationChange}
-					sortingMode="server"
-					filterMode="server"
-					filterModel={filterModelLocal}
-					onFilterModelChange={handleFilterModelChange}
+					onPaginationModelChange={onPaginationModelChange}
+					// The SearchQueryBuilder is the sole (advanced) filter surface, no need for MUI filter model
+					disableColumnFilter
+					disableColumnSorting
 					checkboxSelection={false}
 					disableAggregation
 					disableRowGrouping
 					disableHoverInteractions={false}
 					disablePivoting
-					rowModesModel={{}}
 					listViewEnabled={false}
 					pivotingEnabled={false}
 					toolbarVisible={true}
 					scrollbarVisible={false}
 					noResultsText={t("search.no_data")}
-					searchText={t("general.search")}
+					searchText={t("ui.data_grid.search")}
+					disableToolbarFilter={true}
 				/>
 			)}
 		</PageContainer>
