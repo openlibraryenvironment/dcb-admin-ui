@@ -88,6 +88,10 @@ function BibsRouteComponent() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 				checkboxSelection={false}
+				exportConfig={{
+					query: getBibs,
+					coreType: "sourceBibs",
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

@@ -25,6 +25,7 @@ import { useGridState } from "@hooks/useGridState";
 import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { getPatronRequestDashboard } from "@queries/getPatronRequestDashboard";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
@@ -343,6 +344,13 @@ function All() {
 						disableHoverInteractions={false}
 						disablePivoting={true}
 						disableRowGrouping={true}
+						exportConfig={{
+							query: getPatronRequestsForExport,
+							coreType: "patronRequests",
+							baseQuery: queries.all,
+							quickFilterFields: ["status", "description"],
+							wizard: true,
+						}}
 						filterMode="server"
 						filterModel={currentFilter}
 						getDetailPanelContent={({ row }: any) => (

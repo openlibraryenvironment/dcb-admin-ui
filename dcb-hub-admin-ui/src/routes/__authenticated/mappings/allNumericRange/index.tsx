@@ -250,6 +250,12 @@ function NumericRangeMappingsRoute() {
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={processRowUpdate}
 				checkboxSelection={false}
+				exportConfig={{
+					query: getNumericRangeMappings,
+					coreType: "numericRangeMappings",
+					baseQuery: "(domain: * AND NOT deleted:true)",
+					wizard: true,
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

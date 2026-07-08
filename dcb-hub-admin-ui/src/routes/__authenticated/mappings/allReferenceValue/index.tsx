@@ -258,6 +258,12 @@ function ReferenceValueMappingsRoute() {
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={processRowUpdate}
 				checkboxSelection={false}
+				exportConfig={{
+					query: getMappings,
+					coreType: "referenceValueMappings",
+					baseQuery: "(fromContext: * AND NOT deleted:true)",
+					wizard: true,
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

@@ -19,6 +19,7 @@ import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/
 import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/requestingHistory",
@@ -169,6 +170,13 @@ function RequestingHistory() {
 						<MasterDetail row={row} type="patronRequests" />
 					)}
 					checkboxSelection={true}
+					exportConfig={{
+						query: getPatronRequestsForExport,
+						coreType: "patronRequests",
+						baseQuery: `(bibClusterId:${clusterId})`,
+						quickFilterFields: ["status", "description"],
+						wizard: true,
+					}}
 					disableAggregation
 					disableHoverInteractions={false}
 					disableRowGrouping

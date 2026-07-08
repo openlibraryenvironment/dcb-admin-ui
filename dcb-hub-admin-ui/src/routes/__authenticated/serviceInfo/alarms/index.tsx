@@ -147,6 +147,10 @@ function AlarmsRouteComponent() {
 					<MasterDetail row={row} type="alarms" />
 				)}
 				checkboxSelection={true}
+				exportConfig={{
+					query: getAlarms,
+					coreType: "alarms",
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

@@ -166,6 +166,10 @@ function AgenciesRouteComponent() {
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				checkboxSelection={true}
+				exportConfig={{
+					query: getAgencies,
+					coreType: "agencies",
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

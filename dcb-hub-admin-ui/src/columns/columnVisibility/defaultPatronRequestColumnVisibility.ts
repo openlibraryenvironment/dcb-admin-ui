@@ -17,6 +17,7 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	activeWorkflow: false,
 	pickupRequestId: false,
 	pickupRequestStatus: false,
+	pickupItemId: false,
 	isExpeditedCheckout: false,
 	itemBarcode: false,
 	localItemStatus: false,

@@ -19,6 +19,7 @@ import { defaultPatronRequestGroupVisibility } from "@columns/columnVisibility/d
 
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 
@@ -247,6 +248,13 @@ function GroupSupplierRequests() {
 								<MasterDetail row={row} type="patronRequests" />
 							)}
 							checkboxSelection={false}
+							exportConfig={{
+								query: getPatronRequestsForExport,
+								coreType: "patronRequests",
+								baseQuery: `(${groupVariables})`,
+								quickFilterFields: ["status", "description"],
+								wizard: true,
+							}}
 							disableAggregation
 							disableHoverInteractions={false}
 							disableRowGrouping

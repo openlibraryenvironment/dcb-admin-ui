@@ -165,6 +165,10 @@ function HostLmss() {
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				checkboxSelection={true}
+				exportConfig={{
+					query: getHostLms,
+					coreType: "hostLms",
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

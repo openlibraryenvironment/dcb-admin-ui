@@ -506,6 +506,12 @@ function LibraryLocations() {
 						columnVisibilityModel={columnVisibilityModel}
 						onColumnVisibilityModelChange={handleColumnVisibilityChange}
 						checkboxSelection={true}
+						exportConfig={{
+							query: getLocations,
+							coreType: "locations",
+							baseQuery: presetQueryVariables,
+							wizard: true,
+						}}
 						disableAggregation
 						disableRowGrouping
 						disableHoverInteractions={false}

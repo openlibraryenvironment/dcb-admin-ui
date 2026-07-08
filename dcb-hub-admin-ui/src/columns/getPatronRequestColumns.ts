@@ -93,6 +93,15 @@ const getPatronRequestColumns = (
 			filterable: true,
 		},
 		{
+			// Export-only column (hidden by default) so the export wizard can
+			// offer every field the export query returns.
+			field: "pickupItemId",
+			headerName: "Pickup item ID",
+			minWidth: 100,
+			sortable: false,
+			filterable: false,
+		},
+		{
 			field: "canonicalPtype",
 			headerName: "DCB canonical patron type",
 			minWidth: 100,

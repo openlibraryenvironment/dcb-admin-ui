@@ -19,6 +19,7 @@ import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
 import { finishedPatronRequestColumnVisibility } from "@columns/columnVisibility/finishedPatronRequestColumnVisibility";
@@ -359,6 +360,13 @@ function Completed() {
 						disableHoverInteractions={false}
 						disablePivoting={true}
 						disableRowGrouping={true}
+						exportConfig={{
+							query: getPatronRequestsForExport,
+							coreType: "patronRequests",
+							baseQuery: queries.finished,
+							quickFilterFields: ["status", "description"],
+							wizard: true,
+						}}
 						filterMode="server"
 						filterModel={currentFilter}
 						getDetailPanelContent={({ row }: any) => (

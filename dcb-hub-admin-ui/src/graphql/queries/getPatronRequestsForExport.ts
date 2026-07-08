@@ -31,6 +31,8 @@ export const getPatronRequestsForExport = gql`
 				outOfSequenceFlag
 				elapsedTimeInCurrentStatus
 				pollCountForCurrentStatus
+				renewalCount
+				resolutionCount
 				isManuallySelectedItem
 				requesterNote
 				activeWorkflow

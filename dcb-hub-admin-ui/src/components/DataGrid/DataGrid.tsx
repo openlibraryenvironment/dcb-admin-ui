@@ -2,6 +2,8 @@ import {
 	DataGridPremium,
 	DataGridPremiumProps,
 	GridApiPremium,
+	GridColDef,
+	GridColumnVisibilityModel,
 	GridEventListener,
 	GridExpandLessIcon,
 	GridExpandMoreIcon,
@@ -14,6 +16,14 @@ import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
 import { SxProps, Theme } from "@mui/material";
 import ExportToolbar from "./components/ExportToolbar";
+import ExportWizard from "./components/ExportWizard";
+import { ExportProgressDialog } from "./components/ExportProgressDialog";
+import {
+	ExportFormat,
+	ExportMode,
+	GridExportConfig,
+	useGridExport,
+} from "@hooks/useGridExport";
 import { expandedFilterPanelTypes } from "@constants/dataGrid/types";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -24,11 +34,16 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 
 declare module "@mui/x-data-grid-premium" {
 	interface ToolbarPropsOverrides {
-		handleExport?: (fileType: string, exportMode: string) => Promise<void>;
+		handleExport?: (
+			fileType: string,
+			exportMode: string,
+		) => Promise<void> | void;
 		allDataLoading?: boolean;
 		type?: string;
 		onCleanup?: () => void;
 		selectionCount?: number;
+		wizardEnabled?: boolean;
+		onOpenWizard?: () => void;
 	}
 }
 const IMMUTABLE_FALLBACK_MODES = {};
@@ -49,11 +64,18 @@ interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
 	onExport?: (fileType: string, exportMode: string) => Promise<void>;
 	isExporting?: boolean;
 	disableHoverInteractions?: boolean;
+	/**
+	 * Opts this grid into the shared server-side export (three TSV scopes plus an
+	 * optional column/scope/format wizard). Provide the full-dataset export query,
+	 * its response key, and any base query / quick-filter fields.
+	 */
+	exportConfig?: GridExportConfig;
 }
 
 export default function DataGrid({
 	autoRowHeight,
 	enableCleanup,
+	identifier,
 	isExporting = false,
 	listViewEnabled,
 	noResultsText,
@@ -67,6 +89,7 @@ export default function DataGrid({
 	toolbarVisible,
 	type,
 	disableHoverInteractions,
+	exportConfig,
 	loading,
 	paginationMode,
 	rowCount,
@@ -90,6 +113,33 @@ export default function DataGrid({
 		type: "include",
 		ids: new Set(),
 	});
+
+	// Shared server-side export (opt-in via `exportConfig`). The hook lives here
+	// because DataGrid already owns the grid API ref, columns, and the current
+	// filter/sort - so a grid opts in with a single prop rather than re-wiring
+	// the export/progress/wizard plumbing each time.
+	const exportColumns = (rest.columns as GridColDef[]) ?? [];
+	const [wizardOpen, setWizardOpen] = useState(false);
+	const { exportProgress, runExport } = useGridExport({
+		apiRef,
+		config: exportConfig ?? { query: null, coreType: "" },
+		filterModel: rest.filterModel ?? { items: [] },
+		sortModel: rest.sortModel ?? [],
+		columns: exportColumns,
+		identifier,
+		onSuccess: (message) =>
+			setAlert({ open: true, severity: "success", text: message }),
+		onError: (message) =>
+			setAlert({ open: true, severity: "error", text: message }),
+	});
+
+	const handleExport = exportConfig
+		? (fileType: string, exportMode: string) =>
+				runExport({
+					mode: exportMode as ExportMode,
+					format: fileType as ExportFormat,
+				})
+		: onExport;
 
 	// During its render-phase state initialisation MUI clamps the controlled
 	// `paginationModel` page against `rowCount`. Callers pass a transient
@@ -206,12 +256,16 @@ export default function DataGrid({
 				slotProps={{
 					toolbar: {
 						showQuickFilter: false,
-						handleExport: onExport, // Pass the export handler
+						handleExport, // three-scope server export (or legacy onExport)
 						excelOptions: { disableToolbarButton: true },
-						allDataLoading: isExporting, // Pass the loading state
+						allDataLoading: exportConfig
+							? exportProgress.isExporting
+							: isExporting,
 						type: type, // Pass type to determine menu options
 						onCleanup: enableCleanup ? onCleanup : undefined, // Pass cleanup handler
 						selectionCount: selectionModel?.ids?.size || 0,
+						wizardEnabled: exportConfig?.wizard,
+						onOpenWizard: () => setWizardOpen(true),
 					},
 					filterPanel: expandedFilterPanel
 						? {
@@ -253,6 +307,23 @@ export default function DataGrid({
 					// CUSTOM OVERRIDES (will merge with and override base styles so be careful)
 					...styleOverrides,
 				}}
+			/>
+			{exportConfig?.wizard ? (
+				<ExportWizard
+					open={wizardOpen}
+					onClose={() => setWizardOpen(false)}
+					columns={exportColumns}
+					columnVisibilityModel={
+						(rest.columnVisibilityModel as GridColumnVisibilityModel) ?? {}
+					}
+					selectedCount={selectionModel?.ids?.size || 0}
+					onExport={runExport}
+				/>
+			) : null}
+			<ExportProgressDialog
+				open={exportProgress.isExporting}
+				progress={exportProgress.progress}
+				totalRecords={exportProgress.totalRecords}
 			/>
 			<TimedAlert
 				open={alert.open}

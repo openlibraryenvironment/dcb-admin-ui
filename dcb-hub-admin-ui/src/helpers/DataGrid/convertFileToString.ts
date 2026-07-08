@@ -1,6 +1,4 @@
 import { formatDuration } from "../formatDuration";
-import { getFieldsForExport } from "./getFieldsForExport";
-import { getHeadersForExport } from "./getHeadersForExport";
 
 // type for nested field paths
 type SimpleField = string;
@@ -113,32 +111,33 @@ const getFieldValue = (item: any, fieldMapping: FieldPath): any => {
 	return nestedValue;
 };
 
+/**
+ * Serialises server-fetched export rows to a delimited string. `fields` and
+ * `headers` are aligned arrays derived from the grid's own columns (see
+ * getExportColumns), so the column picker, the grid, and the file all agree.
+ * Nested/derived source fields are resolved through the mapping registry above.
+ */
 export const convertFileToString = (
 	data: any[],
 	delimiter: string,
-	coreType: string,
-	usefulColumns: string[] | null,
+	fields: string[],
+	headers: string[],
+	// field -> (value -> label) for singleSelect columns; maps codes/UUIDs to the
+	// same human labels the grid shows (see getValueLabelMaps).
+	valueLabelMaps: Record<string, Record<string, string>> = {},
 ) => {
-	const fieldsForExport = usefulColumns
-		? usefulColumns
-		: getFieldsForExport(coreType);
-	const formattedHeaders = usefulColumns
-		? getHeadersForExport(coreType, fieldsForExport)
-		: getHeadersForExport(coreType);
-	const fieldToHeaderMap: Record<string, string> = {};
-	fieldsForExport.forEach((field, index) => {
-		if (formattedHeaders[index]) {
-			fieldToHeaderMap[field] = formattedHeaders[index];
-		}
-	});
-
-	const headerRow = formattedHeaders.join(delimiter);
+	const headerRow = headers.join(delimiter);
 
 	const rows = data.map((item: any) =>
-		fieldsForExport
+		fields
 			.map((field: string) => {
 				const fieldMapping = getFieldMapping(field);
-				const value = getFieldValue(item, fieldMapping);
+				const rawValue = getFieldValue(item, fieldMapping);
+				const labelMap = valueLabelMaps[field];
+				const value =
+					labelMap && rawValue != null
+						? (labelMap[String(rawValue)] ?? rawValue)
+						: rawValue;
 				return formatCellValue(value, delimiter, field);
 			})
 			.join(delimiter),

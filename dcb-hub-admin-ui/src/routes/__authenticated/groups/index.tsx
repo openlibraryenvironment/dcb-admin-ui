@@ -176,6 +176,10 @@ function GroupsRouteComponent() {
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				checkboxSelection={true}
+				exportConfig={{
+					query: getLibraryGroups,
+					coreType: "libraryGroups",
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

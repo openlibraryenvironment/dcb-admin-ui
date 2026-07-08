@@ -195,6 +195,12 @@ export default function MappingsGrid({
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={processRowUpdate}
 				checkboxSelection={false}
+				exportConfig={{
+					query: getQuery,
+					coreType: dataKey,
+					baseQuery,
+					wizard: true,
+				}}
 				disableAggregation
 				disableRowGrouping
 				disableHoverInteractions={false}

@@ -26,6 +26,7 @@ import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/patronRequests/all",
@@ -245,6 +246,13 @@ function PatronRequestsAll() {
 							<MasterDetail row={row} type="patronRequests" />
 						)}
 						checkboxSelection={true}
+						exportConfig={{
+							query: getPatronRequestsForExport,
+							coreType: "patronRequests",
+							baseQuery: `patronHostlmsCode: "${code}"`,
+							quickFilterFields: ["status", "description"],
+							wizard: true,
+						}}
 						disableAggregation
 						disableRowGrouping
 						disableHoverInteractions={false}

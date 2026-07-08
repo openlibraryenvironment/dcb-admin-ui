@@ -169,6 +169,11 @@ function LocationsRouteComponent() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 				checkboxSelection={true}
+				exportConfig={{
+					query: getLocations,
+					coreType: "locations",
+					wizard: true,
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

@@ -19,6 +19,7 @@ import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
 import { queries } from "@constants/patronRequestGridQueries";
@@ -357,6 +358,13 @@ function OutOfSequence() {
 						disableHoverInteractions={false}
 						disablePivoting={true}
 						disableRowGrouping={true}
+						exportConfig={{
+							query: getPatronRequestsForExport,
+							coreType: "patronRequests",
+							baseQuery: queries.outOfSequence,
+							quickFilterFields: ["status", "description"],
+							wizard: true,
+						}}
 						filterMode="server"
 						filterModel={currentFilter}
 						getDetailPanelContent={({ row }: any) => (

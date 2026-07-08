@@ -18,6 +18,7 @@ import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestCo
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { getLibraries } from "@queries/getLibraries";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
@@ -363,6 +364,13 @@ function Exception() {
 						disableHoverInteractions={false}
 						disablePivoting={true}
 						disableRowGrouping={true}
+						exportConfig={{
+							query: getPatronRequestsForExport,
+							coreType: "patronRequests",
+							baseQuery: queries.exception,
+							quickFilterFields: ["status", "description"],
+							wizard: true,
+						}}
 						filterMode="server"
 						filterModel={currentFilter}
 						getDetailPanelContent={({ row }: any) => (

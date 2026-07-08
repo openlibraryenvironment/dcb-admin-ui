@@ -269,6 +269,11 @@ function LibraryBibs() {
 						columnVisibilityModel={columnVisibilityModel}
 						onColumnVisibilityModelChange={handleColumnVisibilityChange}
 						checkboxSelection={false}
+						exportConfig={{
+							query: getBibs,
+							coreType: "sourceBibs",
+							baseQuery: presetQueryVariables,
+						}}
 						disableAggregation
 						disableRowGrouping
 						disableHoverInteractions={false}

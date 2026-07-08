@@ -99,6 +99,10 @@ function DataChangeLogsGrid() {
 					<MasterDetail row={row} type="dataChangeLog" />
 				)}
 				checkboxSelection={true}
+				exportConfig={{
+					query: getDataChangeLog,
+					coreType: "dataChangeLog",
+				}}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping
