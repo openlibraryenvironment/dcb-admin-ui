@@ -52,7 +52,7 @@ function AuditDetails() {
 		queryKey: ["audit", "next", patronRequestId, auditDate],
 		queryFn: () =>
 			gqlClient.request<any>(getAuditsByPatronRequest, {
-				query: `patronRequest:${patronRequestId} AND auditDate>${auditDate}`,
+				query: `patronRequest:"${patronRequestId}" AND auditDate>"${auditDate}"`,
 				order: "auditDate",
 				orderBy: "ASC",
 				pageno: 0,
@@ -66,9 +66,9 @@ function AuditDetails() {
 		queryKey: ["audit", "prev", patronRequestId, auditDate],
 		queryFn: () =>
 			gqlClient.request<any>(getAuditsByPatronRequest, {
-				query: `patronRequest:${patronRequestId} AND auditDate<${auditDate}`,
+				query: `patronRequest:"${patronRequestId}" AND auditDate<"${auditDate}"`,
 				order: "auditDate",
-				orderBy: "DESC", // Sort descending to get the most recent older entry
+				orderBy: "DESC",
 				pageno: 0,
 				pagesize: 1,
 			}),
