@@ -140,6 +140,8 @@ export default function AddLibraryToGroup({
 			// Invalidate relevant queries to refresh grids
 			queryClient.invalidateQueries({ queryKey: ["libraryGroups"] });
 			queryClient.invalidateQueries({ queryKey: ["libraries"] });
+			queryClient.invalidateQueries({ queryKey: ["libraries"] });
+			queryClient.invalidateQueries({ queryKey: ["group", data.groupId] });
 
 			setTimeout(() => {
 				reset();
@@ -271,7 +273,9 @@ export default function AddLibraryToGroup({
 								variant="contained"
 								disabled={!isValid || isPending}
 							>
-								{isPending ? t("ui.actions.submitting") : t("general.submit")}
+								{isPending
+									? t("ui.actions.submitting")
+									: t("ui.actions.submit")}
 							</Button>
 						</Stack>
 					</form>
