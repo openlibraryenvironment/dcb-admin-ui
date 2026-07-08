@@ -1,5 +1,6 @@
 import {
 	GridFilterModel,
+	GridPaginationModel,
 	GridSortDirection,
 	GridSortModel,
 } from "@mui/x-data-grid-premium";
@@ -56,6 +57,50 @@ export const normalizeSortModel = (sortModel: GridSortModel): GridSortModel => {
 export const getSortOrderForServer = (sortOrder: GridSortDirection): string => {
 	return sortOrder?.toUpperCase() === "ASC" ? "ASC" : "DESC";
 };
+
+export interface ServerGridQueryVars {
+	query: string;
+	pageno: number;
+	pagesize: number;
+	order: string;
+	orderBy: string;
+}
+
+interface ServerGridQueryOptions {
+	filterModel: GridFilterModel;
+	sortModel: GridSortModel;
+	paginationModel: GridPaginationModel;
+	/** Fallback sort field used when the user has not chosen a sort column. */
+	defaultOrder: string;
+	/** Base Lucene query ANDed with the user's column filters (e.g. a tab/status clause). */
+	baseQuery?: string;
+	/** Fields the toolbar quick-filter searches across. */
+	quickFilterFields?: string[];
+	/** Fallback page size, mirroring the grid's own default. */
+	defaultPageSize?: number;
+}
+
+/**
+ * Single builder for the `{ query, pageno, pagesize, order, orderBy }` variables
+ * every server-driven grid sends to the backend. Centralised so a grid CANNOT
+ * silently forget to fold its filter model into the query - the exact omission
+ * that broke patron request filtering after the grid migration.
+ */
+export const buildServerGridQueryVars = ({
+	filterModel,
+	sortModel,
+	paginationModel,
+	defaultOrder,
+	baseQuery = "",
+	quickFilterFields = [],
+	defaultPageSize = 25,
+}: ServerGridQueryOptions): ServerGridQueryVars => ({
+	query: processGridFilterModel(filterModel, baseQuery, quickFilterFields),
+	pageno: paginationModel.page ?? 0,
+	pagesize: paginationModel.pageSize ?? defaultPageSize,
+	order: sortModel[0]?.field ?? defaultOrder,
+	orderBy: getSortOrderForServer(sortModel[0]?.sort),
+});
 
 export const checkIfFiltering = (
 	filterModel: GridFilterModel,

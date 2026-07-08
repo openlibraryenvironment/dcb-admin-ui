@@ -2,28 +2,18 @@ import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridRowModesModel,
 	GridRowModel,
-	GridRowModes,
-	GridActionsCellItem,
-	GridRowParams,
 	GridColDef,
 	GridColumnVisibilityModel,
 } from "@mui/x-data-grid-premium";
-import { Delete, Edit, Save, Cancel } from "@mui/icons-material";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import Confirmation from "@components/Confirmation/Confirmation";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { computeMutation } from "@helpers/computeMutation";
 
 interface MappingsGridProps {
@@ -59,26 +49,19 @@ export default function MappingsGrid({
 	const queryClient = useQueryClient();
 
 	const {
-		paginationModel: storedPaginationModel,
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		setPaginationModel,
-		setSortModel,
-		setFilterModel,
-	} = useGridStore();
+		paginationModel,
+		sortModel,
+		filterModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange,
+		onSortModelChange,
+		onFilterModelChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 200 },
+		sort: [{ field: "lastImported", sort: "asc" }],
+	});
 
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPaginationModel[gridId] ?? { page: 0, pageSize: 200 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilterModel[gridId] ?? { items: [] },
-	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedSortModel[gridId] ?? [{ field: "lastImported", sort: "asc" }],
-	);
-
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
 	const [deleteMappingId, setDeleteMappingId] = useState<string | null>(null);
 
@@ -96,14 +79,17 @@ export default function MappingsGrid({
 			filterModel,
 		],
 		queryFn: async () => {
-			const queryVariables = {
-				query: processGridFilterModel(filterModel, baseQuery, []) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 200,
-				order: sortModel[0]?.field ?? "lastImported",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
-			};
-			return gqlClient.request<any>(getQuery, queryVariables);
+			return gqlClient.request<any>(
+				getQuery,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					baseQuery,
+					defaultOrder: "lastImported",
+					defaultPageSize: 200,
+				}),
+			);
 		},
 		enabled: !!hostLmsCode,
 		placeholderData: (previousData) => previousData,
@@ -173,66 +159,15 @@ export default function MappingsGrid({
 	const gridColumns: GridColDef[] = useMemo(
 		() => [
 			...columns,
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 100,
-				getActions: ({ id }: GridRowParams) => {
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.edit")}
-							onClick={() =>
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
-								})
-							}
-							disabled={!isAnAdmin}
-						/>,
-						<GridActionsCellItem
-							key="delete"
-							icon={<Delete />}
-							label={t("ui.delete")}
-							onClick={() => setDeleteMappingId(id as string)}
-							disabled={!isAnAdmin}
-						/>,
-					];
-				},
-			},
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id) => setDeleteMappingId(id as string),
+				canEdit: isAnAdmin,
+			}),
 		],
-		[columns, rowModesModel, isAnAdmin, t],
+		[columns, rowModesModel, setRowModesModel, isAnAdmin, t],
 	);
 
 	return (
@@ -247,22 +182,13 @@ export default function MappingsGrid({
 				paginationMode="server"
 				pagination
 				paginationModel={paginationModel}
-				onPaginationModelChange={(m: GridPaginationModel) => {
-					setLocalPaginationModel(m);
-					setPaginationModel(gridId, m);
-				}}
+				onPaginationModelChange={onPaginationModelChange}
 				sortingMode="server"
 				sortModel={sortModel}
-				onSortModelChange={(m) => {
-					setLocalSortModel(m);
-					setSortModel(gridId, m);
-				}}
+				onSortModelChange={onSortModelChange}
 				filterMode="server"
 				filterModel={filterModel}
-				onFilterModelChange={(m) => {
-					setLocalFilterModel(m);
-					setFilterModel(gridId, m);
-				}}
+				onFilterModelChange={onFilterModelChange}
 				columnVisibilityModel={hiddenColumns}
 				editMode="row"
 				rowModesModel={rowModesModel}

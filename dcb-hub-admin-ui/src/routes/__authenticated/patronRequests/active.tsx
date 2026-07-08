@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import { useMemo } from "react";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -12,7 +11,7 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
@@ -25,6 +24,8 @@ import { getLibraries } from "@queries/getLibraries";
 import { queries } from "@constants/patronRequestGridQueries";
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/active")({
 	// Default-state prefetch: the loader has no access to the Zustand grid
@@ -66,23 +67,18 @@ function Active() {
 
 	const gridId = "patronRequestsActive";
 	const {
-		paginationModel,
-		setPaginationModel,
-		sortModel,
-		setSortModel,
-		filterModel,
-		setFilterModel,
-	} = useGridStore();
-
-	const currentPagination = paginationModel[gridId] ?? {
-		page: 0,
-		pageSize: 20,
-	};
-	const currentSort = sortModel[gridId] ?? [
-		{ field: "dateCreated", sort: "desc" },
-	];
-	const currentFilter = filterModel[gridId] ?? { items: [] };
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel: currentPagination,
+		sortModel: currentSort,
+		filterModel: currentFilter,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange,
+		onSortModelChange,
+		onFilterModelChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "dateCreated", sort: "desc" }],
+	});
 
 	const fetchAllLocations = async () => {
 		const variables = {
@@ -198,13 +194,17 @@ function Active() {
 			currentFilter,
 		],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequests, {
-				query: queries.inProgress,
-				pageno: currentPagination.page,
-				pagesize: currentPagination.pageSize,
-				order: currentSort[0]?.field ?? "dateCreated",
-				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-			}),
+			gqlClient.request<any>(
+				getPatronRequests,
+				buildServerGridQueryVars({
+					filterModel: currentFilter,
+					sortModel: currentSort,
+					paginationModel: currentPagination,
+					baseQuery: queries.inProgress,
+					defaultOrder: "dateCreated",
+					defaultPageSize: 20,
+				}),
+			),
 	});
 
 	// Counts are derived directly from the query data rather than pushed into
@@ -295,23 +295,23 @@ function Active() {
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/patronRequests/active")}
+						aria-label={
+							inProgressLoading
+								? String(t("common.loading"))
+								: `${totalSizes.inProgress} active items${isFilterApplied ? ", filter applied" : ""}`
+						}
 						label={
 							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-								<Typography variant="subTabTitle">
+								<Typography variant="subTabTitle" aria-hidden="true">
 									{t("libraries.patronRequests.active_short", {
-										number:
-											inProgressLoading && unfilteredInProgressCount === null
-												? t("common.loading")
-												: totalSizes.inProgress,
+										number: inProgressLoading
+											? t("common.loading")
+											: totalSizes.inProgress,
 									})}
 								</Typography>
 								{isFilterApplied && (
-									<FilterAltOutlined
-										aria-label={String(
-											t("common.filterIsApplied", "Filter is applied"),
-										)}
-										fontSize="small"
-									/>
+									<FilterAltOutlined fontSize="small" aria-hidden="true" />
 								)}
 							</Box>
 						}
@@ -328,8 +328,16 @@ function Active() {
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/patronRequests/all")}
 						label={
-							<Typography variant="subTabTitle">
+							<Typography
+								variant="subTabTitle"
+								aria-label={
+									exceptionLoading
+										? String(t("common.loading"))
+										: `${totalSizes.exception} exception items`
+								}
+							>
 								{t("libraries.patronRequests.all_short", {
 									number: totalSizes.all,
 								})}
@@ -367,12 +375,10 @@ function Active() {
 						loading={gridLoading}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
-						onFilterModelChange={(model) => setFilterModel(gridId, model)}
-						onPaginationModelChange={(model: any) =>
-							setPaginationModel(gridId, model)
-						}
+						onFilterModelChange={onFilterModelChange}
+						onPaginationModelChange={onPaginationModelChange}
 						onRowModesModelChange={setRowModesModel}
-						onSortModelChange={(model) => setSortModel(gridId, model)}
+						onSortModelChange={onSortModelChange}
 						pagination={true}
 						paginationMode="server"
 						paginationModel={currentPagination}

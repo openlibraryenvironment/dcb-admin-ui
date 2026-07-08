@@ -116,6 +116,7 @@ export const buildFilterQuery = (
 			return containsQuery;
 		case "equals":
 		case "=":
+		case "is": // singleSelect columns (patron/supplying library, pickup location)
 			return equalsQuery;
 		case "does not equal":
 		case "!=":

@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import { useMemo } from "react";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -12,7 +11,7 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
@@ -26,6 +25,8 @@ import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/
 import { queries } from "@constants/patronRequestGridQueries";
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/exception",
@@ -72,23 +73,18 @@ function Exception() {
 
 	const gridId = "patronRequestsException";
 	const {
-		paginationModel,
-		setPaginationModel,
-		sortModel,
-		setSortModel,
-		filterModel,
-		setFilterModel,
-	} = useGridStore();
-
-	const currentPagination = paginationModel[gridId] ?? {
-		page: 0,
-		pageSize: 20,
-	};
-	const currentSort = sortModel[gridId] ?? [
-		{ field: "dateCreated", sort: "desc" },
-	];
-	const currentFilter = filterModel[gridId] ?? { items: [] };
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel: currentPagination,
+		sortModel: currentSort,
+		filterModel: currentFilter,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange,
+		onSortModelChange,
+		onFilterModelChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "dateCreated", sort: "desc" }],
+	});
 
 	const fetchAllLocations = async () => {
 		const variables = {
@@ -199,13 +195,17 @@ function Exception() {
 			currentFilter,
 		],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequests, {
-				query: queries.exception,
-				pageno: currentPagination.page,
-				pagesize: currentPagination.pageSize,
-				order: currentSort[0]?.field ?? "dateCreated",
-				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-			}),
+			gqlClient.request<any>(
+				getPatronRequests,
+				buildServerGridQueryVars({
+					filterModel: currentFilter,
+					sortModel: currentSort,
+					paginationModel: currentPagination,
+					baseQuery: queries.exception,
+					defaultOrder: "dateCreated",
+					defaultPageSize: 20,
+				}),
+			),
 	});
 
 	// Counts are derived directly from the query data rather than pushed into
@@ -285,9 +285,7 @@ function Exception() {
 								</Typography>
 								{isFilterApplied && (
 									<FilterAltOutlined
-										aria-label={String(
-											t("common.filterIsApplied", "Filter is applied"),
-										)}
+										aria-label={String(t("ui.info.filter_applied"))}
 										fontSize="small"
 									/>
 								)}
@@ -295,6 +293,7 @@ function Exception() {
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/patronRequests/outOfSequence")}
 						label={
 							<Typography variant="subTabTitle">
 								{t("libraries.patronRequests.out_of_sequence_short", {
@@ -306,6 +305,7 @@ function Exception() {
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/patronRequests/active")}
 						label={
 							<Typography variant="subTabTitle">
 								{t("libraries.patronRequests.active_short", {
@@ -317,6 +317,7 @@ function Exception() {
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/patronRequests/completed")}
 						label={
 							<Typography variant="subTabTitle">
 								{t("libraries.patronRequests.completed_short", {
@@ -328,6 +329,7 @@ function Exception() {
 						}
 					/>
 					<Tab
+						{...a11yTabProps("/patronRequests/all")}
 						label={
 							<Typography variant="subTabTitle">
 								{t("libraries.patronRequests.all_short", {
@@ -370,12 +372,10 @@ function Exception() {
 						loading={gridLoading}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
-						onFilterModelChange={(model) => setFilterModel(gridId, model)}
-						onPaginationModelChange={(model: any) =>
-							setPaginationModel(gridId, model)
-						}
+						onFilterModelChange={onFilterModelChange}
+						onPaginationModelChange={onPaginationModelChange}
 						onRowModesModelChange={setRowModesModel}
-						onSortModelChange={(model) => setSortModel(gridId, model)}
+						onSortModelChange={onSortModelChange}
 						pagination={true}
 						paginationMode="server"
 						paginationModel={currentPagination}

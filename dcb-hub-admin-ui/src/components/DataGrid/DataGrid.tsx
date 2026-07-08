@@ -67,6 +67,7 @@ export default function DataGrid({
 	toolbarVisible,
 	type,
 	disableHoverInteractions,
+	loading,
 	paginationMode,
 	rowCount,
 	rowModesModel = IMMUTABLE_FALLBACK_MODES,
@@ -89,6 +90,27 @@ export default function DataGrid({
 		type: "include",
 		ids: new Set(),
 	});
+
+	// During its render-phase state initialisation MUI clamps the controlled
+	// `paginationModel` page against `rowCount`. Callers pass a transient
+	// `rowCount={data?.total ?? 0}` that is `0` while loading, so on first
+	// render (with a persisted page > 0) MUI reads a *known* count of zero,
+	// clamps the page, and fires `onPaginationModelChange` synchronously during
+	// render - which runs the parent's setState and triggers React's "Cannot
+	// update a component while rendering a different component" warning.
+	// Report the count as unknown (-1) until a real, non-loading count arrives:
+	// with an unknown count MUI can't compute a max page, so it never clamps.
+	// Once known, we keep the last value across loading refetches so it never
+	// drops back to a transient 0. State is adjusted during render (React's
+	// supported pattern) rather than in an effect.
+	// https://mui.com/x/react-data-grid/pagination/#server-side-pagination
+	const [knownRowCount, setKnownRowCount] = useState<number | undefined>(
+		loading ? undefined : rowCount,
+	);
+	if (!loading && rowCount !== undefined && rowCount !== knownRowCount) {
+		setKnownRowCount(rowCount);
+	}
+	const resolvedRowCount = knownRowCount ?? -1;
 
 	const handleRowClick: GridEventListener<"rowClick"> = (params, event) => {
 		handleDataGridRowClick({
@@ -116,7 +138,9 @@ export default function DataGrid({
 				rows={rows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
-				rowCount={paginationMode === "server" ? rowCount : undefined}
+				loading={loading}
+				pageSizeOptions={[5, 10, 15, 25, 50, 100, 200]}
+				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}
 				listView={listViewEnabled}

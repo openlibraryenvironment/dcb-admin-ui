@@ -8,7 +8,7 @@ import { equalsOnly } from "@filters/equalsOnly";
 export const standardBibColumns: GridColDef[] = [
 	{
 		field: "title",
-		headerName: i18n.t("bibs.title_actual"),
+		headerName: i18n.t("search.title"),
 		minWidth: 150,
 		flex: 1,
 		sortable: false,
@@ -16,7 +16,7 @@ export const standardBibColumns: GridColDef[] = [
 	},
 	{
 		field: "clusterRecordId",
-		headerName: i18n.t("bibs.cluster_uuid"),
+		headerName: i18n.t("search.cluster_id"),
 		minWidth: 50,
 		flex: 0.5,
 		sortable: false,
@@ -27,7 +27,7 @@ export const standardBibColumns: GridColDef[] = [
 	},
 	{
 		field: "sourceRecordId",
-		headerName: i18n.t("bibs.source_record_id"),
+		headerName: i18n.t("bibRecords.source_record_id"),
 		minWidth: 50,
 		sortable: false,
 		filterOperators: standardFilters,
@@ -35,7 +35,7 @@ export const standardBibColumns: GridColDef[] = [
 	},
 	{
 		field: "sourceSystemId",
-		headerName: i18n.t("bibs.source_system_id"),
+		headerName: i18n.t("bibRecords.source_system_uuid"),
 		minWidth: 50,
 		sortable: false,
 		filterOperators: equalsOnly,
@@ -43,7 +43,7 @@ export const standardBibColumns: GridColDef[] = [
 	},
 	{
 		field: "id",
-		headerName: i18n.t("bibs.id"),
+		headerName: i18n.t("bibRecords.uuid"),
 		minWidth: 100,
 		flex: 0.5,
 		sortable: false,
@@ -51,7 +51,7 @@ export const standardBibColumns: GridColDef[] = [
 	},
 	{
 		field: "dateUpdated",
-		headerName: i18n.t("bibs.date_updated"),
+		headerName: i18n.t("ui.info.date_updated"),
 		minWidth: 50,
 		flex: 0.6,
 		sortable: false,
@@ -66,7 +66,7 @@ export const standardBibColumns: GridColDef[] = [
 	},
 	{
 		field: "processVersion",
-		headerName: i18n.t("bibs.process_version"),
+		headerName: i18n.t("bibRecords.process_version"),
 		minWidth: 50,
 		sortable: false,
 		filterOperators: equalsOnly,

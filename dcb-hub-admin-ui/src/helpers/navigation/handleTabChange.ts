@@ -6,12 +6,12 @@ interface HandleTabChangeProps {
 	/** The initialized TanStack Router instance */
 	router: AnyRouter;
 }
+
 export const handleTabChange = ({ newValue, router }: HandleTabChangeProps) => {
 	if (!newValue) return;
 
-	// Execute an instant client-side SPA route push
 	router.navigate({
 		to: newValue,
-		replace: false, // Set to true if you don't want tab switches clogging up browser back history
+		replace: false,
 	});
 };

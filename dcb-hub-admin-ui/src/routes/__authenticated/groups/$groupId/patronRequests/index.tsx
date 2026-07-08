@@ -1,15 +1,8 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Grid, Tab, Tabs, Typography } from "@mui/material";
-import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridRowModesModel,
-} from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -17,14 +10,11 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { defaultPatronRequestGroupVisibility } from "@columns/columnVisibility/defaultPatronRequestGroupVisibility";
 
 import { getLibraryGroupById } from "@queries/getGroupById";
@@ -49,40 +39,22 @@ function GroupPatronRequests() {
 	const customColumns = useCustomColumns();
 
 	const gridId = "groupPatronRequests";
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
 	const {
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		paginationModel: storedPaginationModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setSortModel,
-		setFilterModel,
-		setPaginationModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	const storedState = {
-		sort: storedSortModel[gridId],
-		filter: storedFilterModel[gridId],
-		pagination: storedPaginationModel[gridId],
-		columnVisibility: storedColumnVisibilityModel[gridId],
-	};
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedState.pagination ?? { page: 0, pageSize: 20 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedState.filter ?? { items: [] },
-	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedState.sort ?? [{ field: "dateCreated", sort: "desc" }],
-	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedState.columnVisibility ?? defaultPatronRequestGroupVisibility,
-		);
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "dateCreated", sort: "desc" }],
+		columnVisibility: defaultPatronRequestGroupVisibility,
+	});
 
 	const {
 		data: groupData,
@@ -118,18 +90,18 @@ function GroupPatronRequests() {
 		queryKey: [gridId, groupId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
 			const baseQuery = `(${groupVariables})`;
-			const queryVariables = {
-				query:
-					processGridFilterModel(filterModel, baseQuery, [
-						"status",
-						"description",
-					]) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 20,
-				order: sortModel[0]?.field ?? "dateCreated",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
-			};
-			return gqlClient.request<any>(getPatronRequests, queryVariables);
+			return gqlClient.request<any>(
+				getPatronRequests,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					baseQuery,
+					quickFilterFields: ["status", "description"],
+					defaultOrder: "dateCreated",
+					defaultPageSize: 20,
+				}),
+			);
 		},
 		enabled: !!groupVariables,
 		placeholderData: (previousData) => previousData,
@@ -170,38 +142,6 @@ function GroupPatronRequests() {
 	const allColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-
-	const handleSortChange = useCallback(
-		(model: GridSortModel) => {
-			setLocalSortModel(model);
-			setSortModel(gridId, model);
-		},
-		[gridId, setSortModel],
-	);
-
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
-
-	const handleColumnVisibilityChange = useCallback(
-		(model: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(model);
-			setColumnVisibilityModel(gridId, model);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	const isLoading =
 		isGroupLoading ||

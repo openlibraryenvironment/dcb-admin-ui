@@ -14,11 +14,6 @@ import {
 } from "@mui/material";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridRowModesModel,
 	GridColDef,
 	GridRowModes,
 	GridRowModel,
@@ -36,14 +31,11 @@ import Error from "@components/Error/Error";
 import Import from "@components/Import/Import";
 import NewLocation from "@forms/NewLocation/NewLocation";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import useCode from "@hooks/useCode";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
 import { getILS } from "@helpers/getILS";
@@ -84,38 +76,27 @@ function LibraryLocations() {
 	const gridId = "libraryLocations";
 
 	const {
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		paginationModel: storedPaginationModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setSortModel,
-		setFilterModel,
-		setPaginationModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPaginationModel[gridId] ?? { page: 0, pageSize: 200 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilterModel[gridId] ?? { items: [] },
-	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedSortModel[gridId] ?? [{ field: "lastImported", sort: "desc" }],
-	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedColumnVisibilityModel[gridId] ?? {
-				id: false,
-				lastImported: false,
-				agencyCode: false,
-				localId: false,
-				isEnabledForPickupAnywhere: false,
-			},
-		);
-
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 200 },
+		sort: [{ field: "lastImported", sort: "desc" }],
+		columnVisibility: {
+			id: false,
+			lastImported: false,
+			agencyCode: false,
+			localId: false,
+			isEnabledForPickupAnywhere: false,
+		},
+	});
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
 	const [editRecord, setEditRecord] = useState<string | null>(null);
 
@@ -165,15 +146,17 @@ function LibraryLocations() {
 			filterModel,
 		],
 		queryFn: async () => {
-			const queryVariables = {
-				query:
-					processGridFilterModel(filterModel, presetQueryVariables, []) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 200,
-				order: sortModel[0]?.field ?? "lastImported",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
-			};
-			return gqlClient.request<any>(getLocations, queryVariables);
+			return gqlClient.request<any>(
+				getLocations,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					baseQuery: presetQueryVariables,
+					defaultOrder: "lastImported",
+					defaultPageSize: 200,
+				}),
+			);
 		},
 		enabled: !!library?.agency?.hostLms?.id,
 		placeholderData: (previousData) => previousData,
@@ -245,35 +228,6 @@ function LibraryLocations() {
 			);
 		}
 	};
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-	const handleSortChange = useCallback(
-		(model: GridSortModel) => {
-			setLocalSortModel(model);
-			setSortModel(gridId, model);
-		},
-		[gridId, setSortModel],
-	);
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
-	const handleColumnVisibilityChange = useCallback(
-		(model: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(model);
-			setColumnVisibilityModel(gridId, model);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	const closeImport = () => {
 		setImport(false);
@@ -437,7 +391,7 @@ function LibraryLocations() {
 				},
 			},
 		],
-		[customColumns, rowModesModel, isAnAdmin, t],
+		[customColumns, rowModesModel, setRowModesModel, isAnAdmin, t],
 	);
 
 	if (isLibraryLoading)

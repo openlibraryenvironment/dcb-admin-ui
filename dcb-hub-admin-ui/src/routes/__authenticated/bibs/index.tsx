@@ -1,26 +1,15 @@
-import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	GridRowModesModel,
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-} from "@mui/x-data-grid-premium";
-// bibs - info call n ot working
 // Internal Components & Layouts
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 // Hooks & Queries
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getBibs } from "@queries/getBibs";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { standardBibColumns } from "@columns/bibColumns";
 import { bibColumnVisibility } from "@columns/columnVisibility/bibColumnVisbility";
 
@@ -34,32 +23,20 @@ function BibsRouteComponent() {
 
 	const gridId = "sourceBibs";
 
+	// No bib column is user-sortable, so the grid's sort model stays empty; the
+	// default server order (dateCreated desc) is applied by the query fallbacks
+	// below. Seeding a sort on a non-existent column would make MUI emit an
+	// onSortModelChange during its render-phase init.
 	const {
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		paginationModel: storedPaginationModel,
-		setSortModel,
-		setFilterModel,
-		setPaginationModel,
-	} = useGridStore();
-
-	const storedState = {
-		sort: storedSortModel[gridId],
-		filter: storedFilterModel[gridId],
-		pagination: storedPaginationModel[gridId],
-	};
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedState.pagination ?? { page: 0, pageSize: 25 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedState.filter ?? { items: [] },
-	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedState.sort ?? [{ field: "dateCreated", sort: "desc" }],
-	);
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel,
+		sortModel,
+		filterModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange,
+		onSortModelChange,
+		onFilterModelChange,
+	} = useGridState(gridId, { pagination: { page: 0, pageSize: 25 } });
 
 	const {
 		data: gridData,
@@ -67,43 +44,19 @@ function BibsRouteComponent() {
 		isFetching,
 	} = useQuery({
 		queryKey: ["sourceBibs", gridId, paginationModel, sortModel, filterModel],
-		queryFn: async () => {
-			const queryVariables = {
-				query: processGridFilterModel(filterModel, "", []) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 25,
-				order: sortModel[0]?.field ?? "dateCreated",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
-			};
-
-			return gqlClient.request<any>(getBibs, queryVariables);
-		},
+		queryFn: () =>
+			gqlClient.request<any>(
+				getBibs,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					defaultOrder: "dateCreated",
+					defaultPageSize: 25,
+				}),
+			),
 		placeholderData: (previousData) => previousData,
 	});
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-
-	const handleSortChange = useCallback(
-		(model: GridSortModel) => {
-			setLocalSortModel(model);
-			setSortModel(gridId, model);
-		},
-		[gridId, setSortModel],
-	);
-
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
 
 	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
 
@@ -118,19 +71,19 @@ function BibsRouteComponent() {
 				type={"bibs"}
 				columns={standardBibColumns}
 				columnVisibilityModel={bibColumnVisibility}
-				rows={gridData?.bibs?.content ?? []}
-				rowCount={gridData?.bibs?.totalSize ?? 0}
+				rows={gridData?.sourceBibs?.content ?? []}
+				rowCount={gridData?.sourceBibs?.totalSize ?? 0}
 				loading={shouldShowLoading}
 				paginationMode="server"
 				pagination
 				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				onPaginationModelChange={onPaginationModelChange}
 				sortingMode="server"
 				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				onSortModelChange={onSortModelChange}
 				filterMode="server"
 				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
+				onFilterModelChange={onFilterModelChange}
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}

@@ -1,22 +1,15 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Grid, Typography, Alert } from "@mui/material";
-import {
-	GridColDef,
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridRowModesModel,
-} from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClusters } from "@queries/getClusters";
 
@@ -32,33 +25,21 @@ function Identifiers() {
 	const gqlClient = useGraphQLClient();
 
 	const gridId = "ClusterIdentifiers";
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
 	const {
-		paginationModel: storedPaginationModel,
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setPaginationModel,
-		setSortModel,
-		setFilterModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPaginationModel[gridId] ?? { page: 0, pageSize: 25 },
-		);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedSortModel[gridId] ?? [{ field: "title", sort: "asc" }],
-	);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilterModel[gridId] ?? { items: [] },
-	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedColumnVisibilityModel[gridId] ?? {},
-		);
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 25 },
+		sort: [{ field: "title", sort: "asc" }],
+	});
 
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["cluster", "full", clusterId],
@@ -142,35 +123,6 @@ function Identifiers() {
 
 		return [...baseColumns, ...namespaceColumns];
 	}, [namespaces, t]);
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-	const handleSortChange = useCallback(
-		(model: GridSortModel) => {
-			setLocalSortModel(model);
-			setSortModel(gridId, model);
-		},
-		[gridId, setSortModel],
-	);
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
-	const handleColumnVisibilityChange = useCallback(
-		(model: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(model);
-			setColumnVisibilityModel(gridId, model);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	if (isLoading)
 		return (

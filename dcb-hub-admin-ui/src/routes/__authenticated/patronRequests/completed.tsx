@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import { useMemo } from "react";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -12,7 +11,7 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import DataGrid from "@components/DataGrid/DataGrid";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
@@ -26,6 +25,7 @@ import { finishedPatronRequestColumnVisibility } from "@columns/columnVisibility
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/completed",
@@ -70,23 +70,18 @@ function Completed() {
 
 	const gridId = "patronRequestsCompleted";
 	const {
-		paginationModel,
-		setPaginationModel,
-		sortModel,
-		setSortModel,
-		filterModel,
-		setFilterModel,
-	} = useGridStore();
-
-	const currentPagination = paginationModel[gridId] ?? {
-		page: 0,
-		pageSize: 20,
-	};
-	const currentSort = sortModel[gridId] ?? [
-		{ field: "dateCreated", sort: "desc" },
-	];
-	const currentFilter = filterModel[gridId] ?? { items: [] };
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel: currentPagination,
+		sortModel: currentSort,
+		filterModel: currentFilter,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange,
+		onSortModelChange,
+		onFilterModelChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "dateCreated", sort: "desc" }],
+	});
 	const currentPath = Route.fullPath;
 
 	const fetchAllLocations = async () => {
@@ -198,13 +193,17 @@ function Completed() {
 			currentFilter,
 		],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequests, {
-				query: queries.finished,
-				pageno: currentPagination.page,
-				pagesize: currentPagination.pageSize,
-				order: currentSort[0]?.field ?? "dateCreated",
-				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-			}),
+			gqlClient.request<any>(
+				getPatronRequests,
+				buildServerGridQueryVars({
+					filterModel: currentFilter,
+					sortModel: currentSort,
+					paginationModel: currentPagination,
+					baseQuery: queries.finished,
+					defaultOrder: "dateCreated",
+					defaultPageSize: 20,
+				}),
+			),
 	});
 
 	// Counts are derived directly from the query data rather than pushed into
@@ -369,12 +368,10 @@ function Completed() {
 						loading={gridLoading}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
-						onFilterModelChange={(model) => setFilterModel(gridId, model)}
-						onPaginationModelChange={(model: any) =>
-							setPaginationModel(gridId, model)
-						}
+						onFilterModelChange={onFilterModelChange}
+						onPaginationModelChange={onPaginationModelChange}
 						onRowModesModelChange={setRowModesModel}
-						onSortModelChange={(model) => setSortModel(gridId, model)}
+						onSortModelChange={onSortModelChange}
 						pagination={true}
 						paginationMode="server"
 						paginationModel={currentPagination}

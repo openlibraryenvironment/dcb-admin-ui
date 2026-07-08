@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Box, Typography, Tab, Tabs, Grid } from "@mui/material";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -21,33 +21,35 @@ import { handleTabChange } from "@helpers/navigation/handleTabChange";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getLibraries } from "@queries/getLibraries";
-import { useGridStore } from "@/hooks/useDataGridStore";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import { useGridState } from "@hooks/useGridState";
 import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { getPatronRequestDashboard } from "@queries/getPatronRequestDashboard";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	// Default-state prefetch: the loader has no access to the Zustand grid
 	// store (it's not a hook), so it can only prefetch the same defaults the
 	// component falls back to on first render - gridId "patronRequestsAll",
-	// page 0/size 20, sort by dateCreated desc. Note this queryKey has no
-	// filter model entry (unlike the other patronRequests list routes) -
-	// matches the component's useQuery exactly.
+	// page 0/size 20, sort by dateCreated desc, empty filter - matches the
+	// component's useQuery exactly.
 	loader: ({ context: { queryClient, cfg, auth } }) => {
 		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
 		const gridId = "patronRequestsAll";
 		const currentPagination = { page: 0, pageSize: 20 };
 		const currentSort = [{ field: "dateCreated", sort: "desc" }];
+		const currentFilter = { items: [] };
 		return queryClient.ensureQueryData({
 			queryKey: [
 				"patronRequestsDashboard",
 				gridId,
 				currentPagination,
 				currentSort,
+				currentFilter,
 			],
 			queryFn: () =>
 				createGraphQLClient(cfg, auth).request<any>(getPatronRequestDashboard, {
@@ -67,15 +69,6 @@ export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	component: All,
 });
 
-// WCAG 2.2 Tab Linkage Helper
-function a11yTabProps(value: string) {
-	return {
-		id: `patron-tab-${value.replace(/\//g, "-")}`,
-		"aria-controls": `patron-tabpanel-${value.replace(/\//g, "-")}`,
-		value,
-	};
-}
-
 function All() {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -85,24 +78,18 @@ function All() {
 	const location = useLocation();
 	const currentPath = location.pathname;
 	const {
-		paginationModel,
-		setPaginationModel,
-		sortModel,
-		setSortModel,
-		filterModel,
-		setFilterModel,
-	} = useGridStore();
-
-	const currentPagination = paginationModel[gridId] ?? {
-		page: 0,
-		pageSize: 20,
-	};
-	const currentSort = sortModel[gridId] ?? [
-		{ field: "dateCreated", sort: "desc" },
-	];
-	const currentFilter = filterModel[gridId] ?? { items: [] };
-
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel: currentPagination,
+		sortModel: currentSort,
+		filterModel: currentFilter,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange,
+		onSortModelChange,
+		onFilterModelChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "dateCreated", sort: "desc" }],
+	});
 
 	// Ideally, this would know to fetch the full query for whichever tab is on screen (all active etc)
 	// but also know NOT to fetch it for the others
@@ -112,20 +99,29 @@ function All() {
 			gridId,
 			currentPagination,
 			currentSort,
+			currentFilter,
 		],
-		queryFn: () =>
-			gqlClient.request<any>(getPatronRequestDashboard, {
-				allQuery: queries.all,
+		queryFn: () => {
+			const gridVars = buildServerGridQueryVars({
+				filterModel: currentFilter,
+				sortModel: currentSort,
+				paginationModel: currentPagination,
+				baseQuery: queries.all,
+				defaultOrder: "dateCreated",
+				defaultPageSize: 20,
+			});
+			return gqlClient.request<any>(getPatronRequestDashboard, {
+				allQuery: gridVars.query,
 				activeQuery: queries.inProgress,
 				exceptionQuery: queries.exception,
 				outOfSequenceQuery: queries.outOfSequence,
 				finishedQuery: queries.finished,
-
-				pageno: currentPagination.page,
-				pagesize: currentPagination.pageSize,
-				order: currentSort[0]?.field ?? "dateCreated",
-				orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-			}),
+				pageno: gridVars.pageno,
+				pagesize: gridVars.pagesize,
+				order: gridVars.order,
+				orderBy: gridVars.orderBy,
+			});
+		},
 	});
 
 	// Deriving layout metrics reactively from server output safely
@@ -252,7 +248,7 @@ function All() {
 					)}
 				>
 					<Tab
-						{...a11yTabProps("/__authenticated/patronRequests/exception")}
+						{...a11yTabProps("/patronRequests/exception")}
 						label={
 							<Typography
 								variant="subTabTitle"
@@ -264,7 +260,7 @@ function All() {
 						}
 					/>
 					<Tab
-						{...a11yTabProps("/__authenticated/patronRequests/outOfSequence")}
+						{...a11yTabProps("/patronRequests/outOfSequence")}
 						label={
 							<Typography
 								variant="subTabTitle"
@@ -276,7 +272,7 @@ function All() {
 						}
 					/>
 					<Tab
-						{...a11yTabProps("/__authenticated/patronRequests/active")}
+						{...a11yTabProps("/patronRequests/active")}
 						label={
 							<Typography
 								variant="subTabTitle"
@@ -288,7 +284,7 @@ function All() {
 						}
 					/>
 					<Tab
-						{...a11yTabProps("/__authenticated/patronRequests/completed")}
+						{...a11yTabProps("/patronRequests/completed")}
 						label={
 							<Typography
 								variant="subTabTitle"
@@ -300,7 +296,7 @@ function All() {
 						}
 					/>
 					<Tab
-						{...a11yTabProps("/__authenticated/patronRequests/all")}
+						{...a11yTabProps("/patronRequests/all")}
 						label={
 							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
 								<Typography
@@ -356,12 +352,10 @@ function All() {
 						loading={gridLoading}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
-						onFilterModelChange={(model) => setFilterModel(gridId, model)}
-						onPaginationModelChange={(model: any) =>
-							setPaginationModel(gridId, model)
-						}
+						onFilterModelChange={onFilterModelChange}
+						onPaginationModelChange={onPaginationModelChange}
 						onRowModesModelChange={setRowModesModel}
-						onSortModelChange={(model) => setSortModel(gridId, model)}
+						onSortModelChange={onSortModelChange}
 						pagination={true}
 						paginationMode="server"
 						paginationModel={currentPagination}

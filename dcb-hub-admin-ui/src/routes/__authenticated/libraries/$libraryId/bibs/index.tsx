@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
@@ -6,12 +6,7 @@ import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
 import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-import {
-	GridPaginationModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridColDef,
-} from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -21,11 +16,11 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
-import { processGridFilterModel } from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 import { getLibraryBasicsLocation } from "@queries/getLibraryBasicsLocation";
 import { getBibs } from "@queries/getBibs";
@@ -57,25 +52,16 @@ function LibraryBibs() {
 	const gridId = "libraryBibs";
 
 	const {
-		filterModel: storedFilterModel,
-		paginationModel: storedPaginationModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setFilterModel,
-		setPaginationModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPaginationModel[gridId] ?? { page: 0, pageSize: 20 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilterModel[gridId] ?? { items: [] },
-	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedColumnVisibilityModel[gridId] ?? libraryBibColumnVisibility,
-		);
+		paginationModel,
+		filterModel,
+		columnVisibilityModel,
+		onPaginationModelChange: handlePaginationChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		columnVisibility: libraryBibColumnVisibility,
+	});
 
 	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
 	const [alert, setAlert] = useState({
@@ -115,15 +101,17 @@ function LibraryBibs() {
 	} = useQuery({
 		queryKey: [gridId, presetQueryVariables, paginationModel, filterModel],
 		queryFn: async () => {
-			const queryVariables = {
-				query:
-					processGridFilterModel(filterModel, presetQueryVariables, []) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 20,
-				order: "sourceRecordId",
-				orderBy: "ASC",
-			};
-			return gqlClient.request<any>(getBibs, queryVariables);
+			return gqlClient.request<any>(
+				getBibs,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel: [{ field: "sourceRecordId", sort: "asc" }],
+					paginationModel,
+					baseQuery: presetQueryVariables,
+					defaultOrder: "sourceRecordId",
+					defaultPageSize: 20,
+				}),
+			);
 		},
 		enabled: !!library?.agency?.hostLms?.id,
 		placeholderData: (previousData) => previousData,
@@ -133,28 +121,6 @@ function LibraryBibs() {
 		mutationFn: (variables: { input: any }) =>
 			gqlClient.request(deleteLibraryMutation, variables),
 	});
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
-	const handleColumnVisibilityChange = useCallback(
-		(model: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(model);
-			setColumnVisibilityModel(gridId, model);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -187,7 +153,7 @@ function LibraryBibs() {
 			},
 			{
 				field: "sourceSystemId",
-				headerName: t("bibRecords.source_system_id"),
+				headerName: t("bibRecords.source_system_uuid"),
 				minWidth: 50,
 				sortable: false,
 				filterOperators: equalsOnly,

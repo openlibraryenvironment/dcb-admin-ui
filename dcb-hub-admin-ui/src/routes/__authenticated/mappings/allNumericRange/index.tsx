@@ -20,10 +20,7 @@ import Confirmation from "@components/Confirmation/Confirmation";
 import { useMappingGridState } from "@/hooks/useMappingGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { standardNumRangeMappingColumns } from "@columns/numericRangeMappingColumns";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { computeMutation } from "@helpers/computeMutation";
 
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
@@ -76,19 +73,17 @@ function NumericRangeMappingsRoute() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
-			const queryVariables = {
-				query:
-					processGridFilterModel(
-						filterModel,
-						"(domain: * AND NOT deleted:true)",
-						[],
-					) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 20,
-				order: sortModel[0]?.field ?? "lastImported",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
-			};
-			return gqlClient.request<any>(getNumericRangeMappings, queryVariables);
+			return gqlClient.request<any>(
+				getNumericRangeMappings,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					baseQuery: "(domain: * AND NOT deleted:true)",
+					defaultOrder: "lastImported",
+					defaultPageSize: 20,
+				}),
+			);
 		},
 		placeholderData: (previousData) => previousData,
 	});

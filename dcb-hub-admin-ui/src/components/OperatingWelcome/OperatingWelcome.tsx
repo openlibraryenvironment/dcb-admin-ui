@@ -1,19 +1,13 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-	GridColDef,
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridRowModel,
-} from "@mui/x-data-grid-premium";
+import { GridColDef, GridRowModel } from "@mui/x-data-grid-premium";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import { getILS } from "@helpers/getILS";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { getLibraries } from "@queries/getLibraries";
@@ -27,48 +21,34 @@ export default function OperatingWelcome() {
 	const queryClient = useQueryClient();
 	const gridId = "welcomeLibraries";
 
-	// 1. Pull Global State from Zustand
 	const {
-		paginationModel: storedPagination,
-		sortModel: storedSort,
-		filterModel: storedFilter,
-		columnVisibilityModel: storedVisibility,
-		setPaginationModel,
-		setSortModel,
-		setFilterModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	// 2. Initialize Local State (Falling back to Zustand, then Defaults)
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedPagination[gridId] || { page: 0, pageSize: 200 },
-		);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedSort[gridId] || [{ field: "fullName", sort: "asc" }],
-	);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedFilter[gridId] || { items: [] },
-	);
-	const [columnVisibilityModel, setLocalVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedVisibility[gridId] || defaultWelcomeLibraryColumnVisibility,
-		);
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 200 },
+		sort: [{ field: "fullName", sort: "asc" }],
+		columnVisibility: defaultWelcomeLibraryColumnVisibility,
+	});
 
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadLibraries", paginationModel, sortModel, filterModel],
-		queryFn: async () => {
-			const orderBy = sortModel[0]?.sort?.toUpperCase() || "ASC";
-			const order = sortModel[0]?.field || "fullName";
-
-			return gqlClient.request<any>(getLibraries, {
-				pageno: paginationModel.page,
-				pagesize: paginationModel.pageSize,
-				order,
-				orderBy,
-				query: "",
-			});
-		},
+		queryFn: () =>
+			gqlClient.request<any>(
+				getLibraries,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					defaultOrder: "fullName",
+					defaultPageSize: 200,
+				}),
+			),
 	});
 
 	const updateMutation = useMutation({
@@ -95,38 +75,6 @@ export default function OperatingWelcome() {
 			};
 		}
 	};
-
-	const handlePaginationChange = useCallback(
-		(m: GridPaginationModel) => {
-			setLocalPaginationModel(m);
-			setPaginationModel(gridId, m);
-		},
-		[gridId, setPaginationModel],
-	);
-
-	const handleSortChange = useCallback(
-		(m: GridSortModel) => {
-			setLocalSortModel(m);
-			setSortModel(gridId, m);
-		},
-		[gridId, setSortModel],
-	);
-
-	const handleFilterChange = useCallback(
-		(m: GridFilterModel) => {
-			setLocalFilterModel(m);
-			setFilterModel(gridId, m);
-		},
-		[gridId, setFilterModel],
-	);
-
-	const handleVisibilityChange = useCallback(
-		(m: GridColumnVisibilityModel) => {
-			setLocalVisibilityModel(m);
-			setColumnVisibilityModel(gridId, m);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	// 6. Column Definitions
 	const columns: GridColDef[] = useMemo(

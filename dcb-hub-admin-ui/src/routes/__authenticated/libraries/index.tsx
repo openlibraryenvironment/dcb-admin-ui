@@ -9,7 +9,6 @@ import {
 	GridSortModel,
 	GridFilterModel,
 	GridColumnVisibilityModel,
-	GridRowModesModel,
 	GridRowModel,
 	GridRowModes,
 	GridActionsCellItem,
@@ -28,13 +27,10 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import AddLibraryToGroup from "@forms/AddLibraryToGroup/AddLibraryToGroup";
 import NewLibrary from "@forms/NewLibrary/NewLibrary";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 import { getLibraries } from "@queries/getLibraries";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
@@ -109,44 +105,23 @@ function Libraries() {
 
 	const gridId = "librariesList";
 
-	const paginationModel = useGridStore(
-		(state) => state.paginationModel[gridId] ?? DEFAULT_PAGINATION_MODEL,
-	);
-	const sortModel = useGridStore(
-		(state) => state.sortModel[gridId] ?? DEFAULT_SORT_MODEL,
-	);
-	const filterModel = useGridStore(
-		(state) => state.filterModel[gridId] ?? DEFAULT_FILTER_MODEL,
-	);
-	const columnVisibilityModel = useGridStore(
-		(state) => state.columnVisibilityModel[gridId] ?? DEFAULT_COLUMN_VISIBILITY,
-	);
-
-	const setGridPagination = useGridStore((state) => state.setPaginationModel);
-	const setGridSort = useGridStore((state) => state.setSortModel);
-	const setGridFilter = useGridStore((state) => state.setFilterModel);
-	const setGridColumnVisibility = useGridStore(
-		(state) => state.setColumnVisibilityModel,
-	);
-
-	const handlePaginationChange = useCallback(
-		(m: GridPaginationModel) => setGridPagination(gridId, m),
-		[gridId, setGridPagination],
-	);
-	const handleSortChange = useCallback(
-		(m: GridSortModel) => setGridSort(gridId, m),
-		[gridId, setGridSort],
-	);
-	const handleFilterChange = useCallback(
-		(m: GridFilterModel) => setGridFilter(gridId, m),
-		[gridId, setGridFilter],
-	);
-	const handleColumnVisibilityChange = useCallback(
-		(m: GridColumnVisibilityModel) => setGridColumnVisibility(gridId, m),
-		[gridId, setGridColumnVisibility],
-	);
-
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	const {
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: DEFAULT_PAGINATION_MODEL,
+		sort: DEFAULT_SORT_MODEL,
+		filter: DEFAULT_FILTER_MODEL,
+		columnVisibility: DEFAULT_COLUMN_VISIBILITY,
+	});
 	const [promiseArguments, setPromiseArguments] = useState<any>(null);
 	const [deleteLibraryId, setDeleteLibraryId] = useState<string | null>(null);
 
@@ -167,16 +142,17 @@ function Libraries() {
 		isFetching,
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: async () => {
-			const queryVariables = {
-				query: processGridFilterModel(filterModel, "", []) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 200,
-				order: sortModel[0]?.field ?? "abbreviatedName",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
-			};
-			return gqlClient.request<any>(getLibraries, queryVariables);
-		},
+		queryFn: () =>
+			gqlClient.request<any>(
+				getLibraries,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					defaultOrder: "abbreviatedName",
+					defaultPageSize: 200,
+				}),
+			),
 		placeholderData: (previousData) => previousData,
 	});
 
@@ -339,7 +315,7 @@ function Libraries() {
 				},
 			},
 		],
-		[customColumns, rowModesModel, isAnAdmin, t],
+		[customColumns, rowModesModel, setRowModesModel, isAnAdmin, t],
 	);
 
 	const pageActions = [

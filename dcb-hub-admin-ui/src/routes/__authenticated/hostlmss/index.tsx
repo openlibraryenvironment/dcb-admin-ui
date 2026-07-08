@@ -1,26 +1,16 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridColDef,
-	GridRowModesModel,
-} from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 import { getHostLms } from "@queries/getHostLms";
 import { standardFilters } from "@filters/standardFilters";
@@ -33,24 +23,26 @@ export const Route = createFileRoute("/__authenticated/hostlmss/")({
 	// component falls back to on first render (no stored state yet) -
 	// gridId "hostlmss", page 0/size 10, sort by name asc, no filter.
 	loader: ({ context: { queryClient, cfg, auth } }) => {
-		// Skip prefetching for unauthenticated visitors - the request would
-		// fail (no token) and its failure would trigger the global
-		// network/401 error handler in main.tsx before __authenticated.tsx's
-		// own component-level auth-gate redirect to /login ever runs.
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
 		const gridId = "hostlmss";
-		const paginationModel = { page: 0, pageSize: 10 };
-		const filterModel = { items: [] };
-		const sortModel: GridSortModel = [{ field: "name", sort: "asc" }];
+		const currentPagination = { page: 0, pageSize: 20 };
+		const currentSort = [{ field: "name", sort: "desc" }];
+		const currentFilter = { items: [] };
 		return queryClient.ensureQueryData({
-			queryKey: [gridId, paginationModel, sortModel, filterModel],
+			queryKey: [
+				"patronRequests",
+				gridId,
+				currentPagination,
+				currentSort,
+				currentFilter,
+			],
 			queryFn: () =>
 				createGraphQLClient(cfg, auth).request<any>(getHostLms, {
-					query: processGridFilterModel(filterModel, "", []) ?? "",
-					pageno: paginationModel.page,
-					pagesize: paginationModel.pageSize,
-					order: sortModel[0]?.field ?? "name",
-					orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
+					pageno: currentPagination.page,
+					pagesize: currentPagination.pageSize,
+					order: currentSort[0]?.field ?? "name",
+					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
 				}),
 		});
 	},
@@ -65,38 +57,21 @@ function HostLmss() {
 	const gridId = "hostlmss";
 
 	const {
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		paginationModel: storedPaginationModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setSortModel,
-		setFilterModel,
-		setPaginationModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	const storedState = {
-		sort: storedSortModel[gridId],
-		filter: storedFilterModel[gridId],
-		pagination: storedPaginationModel[gridId],
-		columnVisibility: storedColumnVisibilityModel[gridId],
-	};
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedState.pagination ?? { page: 0, pageSize: 10 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedState.filter ?? { items: [] },
-	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedState.sort ?? [{ field: "name", sort: "asc" }],
-	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(
-			storedState.columnVisibility ?? { id: false },
-		);
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 10 },
+		sort: [{ field: "name", sort: "asc" }],
+		columnVisibility: { id: false },
+	});
 
 	const {
 		data: gridData,
@@ -104,50 +79,19 @@ function HostLmss() {
 		isFetching,
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: async () => {
-			const queryVariables = {
-				query: processGridFilterModel(filterModel, "", []) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 10,
-				order: sortModel[0]?.field ?? "name",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "ASC",
-			};
-			return gqlClient.request<any>(getHostLms, queryVariables);
-		},
+		queryFn: () =>
+			gqlClient.request<any>(
+				getHostLms,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					defaultOrder: "name",
+					defaultPageSize: 10,
+				}),
+			),
 		placeholderData: (previousData) => previousData,
 	});
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-
-	const handleSortChange = useCallback(
-		(model: GridSortModel) => {
-			setLocalSortModel(model);
-			setSortModel(gridId, model);
-		},
-		[gridId, setSortModel],
-	);
-
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
-
-	const handleColumnVisibilityChange = useCallback(
-		(model: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(model);
-			setColumnVisibilityModel(gridId, model);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	const columns: GridColDef[] = useMemo(
 		() => [

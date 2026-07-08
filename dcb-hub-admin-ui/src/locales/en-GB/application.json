@@ -68,13 +68,16 @@
 		"no_results": "No bib records found. Try changing your search terms or filters.",
 		"no_rows": "No bib records available. If you're expecting data to be here, please refresh the page.",
 		"process_version": "Process version",
+		"record_created": "Record created",
+		"record_updated": "Record updated",
 		"record_type": "Record type",
 		"search_placeholder": "Search by sourceRecordId",
 		"source_bib_uuid": "Source bib UUID",
 		"source_library": "Source library",
 		"source_record": "Source record",
 		"source_record_id": "Source record ID",
-		"source_system_uuid": "Source system UUID"
+		"source_system_uuid": "Source system UUID",
+		"uuid": "Bib UUID"
 	},
 	"catalogMetricsByHostLms": {
 		"await": "Awaiting ingest",
@@ -886,6 +889,7 @@
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
 		"cluster_record_uuid": "Cluster record UUID",
+		"completed_requests": "{{completed}} completed requests",
 		"description": "Description",
 		"error_identities": "Error loading patron identity information",
 		"error_message": "Error message",
@@ -1417,6 +1421,7 @@
 			"date_updated": "Date updated",
 			"description": "Description: {{description}}",
 			"field": "Field",
+			"filter_applied": "Filter(s) are applied",
 			"general": "General",
 			"loading": {
 				"document": "Loading {{document_type}}"

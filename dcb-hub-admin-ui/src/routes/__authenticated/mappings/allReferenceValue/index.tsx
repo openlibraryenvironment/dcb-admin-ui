@@ -20,10 +20,7 @@ import Confirmation from "@components/Confirmation/Confirmation";
 import { useMappingGridState } from "@/hooks/useMappingGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { standardRefValueMappingColumns } from "@columns/referenceValueMappingColumns";
-import {
-	getSortOrderForServer,
-	processGridFilterModel,
-} from "@helpers/dataGrid/utilities";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { computeMutation } from "@helpers/computeMutation";
 
 import { getMappings } from "@queries/getMappings";
@@ -78,19 +75,17 @@ function ReferenceValueMappingsRoute() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
-			const queryVariables = {
-				query:
-					processGridFilterModel(
-						filterModel,
-						"(fromContext: * AND NOT deleted:true)",
-						[],
-					) ?? "",
-				pageno: paginationModel.page ?? 0,
-				pagesize: paginationModel.pageSize ?? 20,
-				order: sortModel[0]?.field ?? "lastImported",
-				orderBy: getSortOrderForServer(sortModel[0]?.sort) ?? "DESC",
-			};
-			return gqlClient.request<any>(getMappings, queryVariables);
+			return gqlClient.request<any>(
+				getMappings,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					baseQuery: "(fromContext: * AND NOT deleted:true)",
+					defaultOrder: "lastImported",
+					defaultPageSize: 20,
+				}),
+			);
 		},
 		placeholderData: (previousData) => previousData,
 	});

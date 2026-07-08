@@ -1,23 +1,16 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
-	GridColDef,
-	GridRowModesModel,
-} from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Link from "@components/Link/Link";
 import Error from "@components/Error/Error";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/",
@@ -32,36 +25,20 @@ function RequestErrors() {
 	const gridId = "errorOverview";
 
 	const {
-		sortModel: storedSortModel,
-		filterModel: storedFilterModel,
-		paginationModel: storedPaginationModel,
-		columnVisibilityModel: storedColumnVisibilityModel,
-		setSortModel,
-		setFilterModel,
-		setPaginationModel,
-		setColumnVisibilityModel,
-	} = useGridStore();
-
-	const storedState = {
-		sort: storedSortModel[gridId],
-		filter: storedFilterModel[gridId],
-		pagination: storedPaginationModel[gridId],
-		columnVisibility: storedColumnVisibilityModel[gridId],
-	};
-
-	const [paginationModel, setLocalPaginationModel] =
-		useState<GridPaginationModel>(
-			storedState.pagination ?? { page: 0, pageSize: 20 },
-		);
-	const [filterModel, setLocalFilterModel] = useState<GridFilterModel>(
-		storedState.filter ?? { items: [] },
-	);
-	const [sortModel, setLocalSortModel] = useState<GridSortModel>(
-		storedState.sort ?? [{ field: "total", sort: "desc" }],
-	);
-	const [columnVisibilityModel, setLocalColumnVisibilityModel] =
-		useState<GridColumnVisibilityModel>(storedState.columnVisibility ?? {});
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "total", sort: "desc" }],
+	});
 
 	const {
 		data: records,
@@ -80,38 +57,6 @@ function RequestErrors() {
 			return res.json();
 		},
 	});
-
-	const handlePaginationChange = useCallback(
-		(model: GridPaginationModel) => {
-			setLocalPaginationModel(model);
-			setPaginationModel(gridId, model);
-		},
-		[gridId, setPaginationModel],
-	);
-
-	const handleSortChange = useCallback(
-		(model: GridSortModel) => {
-			setLocalSortModel(model);
-			setSortModel(gridId, model);
-		},
-		[gridId, setSortModel],
-	);
-
-	const handleFilterChange = useCallback(
-		(model: GridFilterModel) => {
-			setLocalFilterModel(model);
-			setFilterModel(gridId, model);
-		},
-		[gridId, setFilterModel],
-	);
-
-	const handleColumnVisibilityChange = useCallback(
-		(model: GridColumnVisibilityModel) => {
-			setLocalColumnVisibilityModel(model);
-			setColumnVisibilityModel(gridId, model);
-		},
-		[gridId, setColumnVisibilityModel],
-	);
 
 	const columns: GridColDef[] = useMemo(
 		() => [
