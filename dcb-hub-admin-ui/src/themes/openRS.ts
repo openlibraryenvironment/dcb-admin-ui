@@ -468,6 +468,178 @@ const evergreenHighContrast = {
 	searchResultTitle: "#1B5E20",
 };
 
+// ---- It's Coming Home (England World Cup theme) ----
+const itsComingHomeLight = {
+	...openRSLight,
+	main: "#CE1126", // St. George's Cross Red
+	breadcrumbs: "#00247D", // Deep England Blue
+	buttonForSelectedPage: "#CE1126",
+	linkedFooterBackground: "#00247D",
+	header: "#00247D",
+	headingColor: "#00247D",
+	link: "#00247D",
+	linkText: "#CE1126",
+	editableFieldBackground: "#F5F6F8",
+	loginCard: "#F5F6F8",
+	loginText: "#00247D",
+	tabsBackground: "#F5F6F8",
+	navigationText: "#00247D",
+	navigationTextActive: "#CE1126",
+	searchResultTitle: "#00247D",
+};
+
+const itsComingHomeDark = {
+	...openRSDark,
+	main: "#FF4D4D",
+	breadcrumbs: "#4B8BFF",
+	buttonForSelectedPage: "#CE1126",
+	link: "#4B8BFF",
+	linkText: "#FF4D4D",
+	loginCard: "#2A2E35",
+	tabsBackground: "#2A2E35",
+	navigationText: "#4B8BFF",
+	searchResultTitle: "#4B8BFF",
+};
+
+const itsComingHomeHighContrast = {
+	...openRSHighContrast,
+	main: "#9E0013",
+	breadcrumbs: "#00164D",
+	buttonForSelectedPage: "#9E0013",
+	link: "#00164D",
+	linkText: "#00164D",
+	searchResultTitle: "#00164D",
+};
+
+// ---- Koha (ILS theme) ----
+const kohaLight = {
+	...openRSLight,
+	main: "#5C8A2E", // Koha Community Green
+	breadcrumbs: "#222222",
+	buttonForSelectedPage: "#5C8A2E",
+	linkedFooterBackground: "#5C8A2E",
+	header: "#5C8A2E",
+	headingColor: "#5C8A2E",
+	link: "#5C8A2E",
+	linkText: "#5C8A2E",
+	editableFieldBackground: "#F0F4EC",
+	loginCard: "#F0F4EC",
+	loginText: "#222222",
+	tabsBackground: "#5C8A2E",
+	navigationText: "#222222",
+	navigationTextActive: "#5C8A2E",
+	searchResultTitle: "#222222",
+};
+
+const kohaDark = {
+	...openRSDark,
+	main: "#88B744",
+	breadcrumbs: "#D4D4D4",
+	buttonForSelectedPage: "#5C8A2E",
+	link: "#88B744",
+	linkText: "#88B744",
+	loginCard: "#2D332A",
+	tabsBackground: "#2D332A",
+	navigationText: "#D4D4D4",
+	searchResultTitle: "#D4D4D4",
+};
+
+const kohaHighContrast = {
+	...openRSHighContrast,
+	main: "#2E4A14",
+	breadcrumbs: "#000000",
+	buttonForSelectedPage: "#2E4A14",
+	link: "#2E4A14",
+	linkText: "#2E4A14",
+	searchResultTitle: "#000000",
+};
+
+const folioLight = {
+	...openRSLight,
+	main: "#4C7EA5", // FOLIO Bright Blue
+	breadcrumbs: "#4C7EA5", // FOLIO Dark Blue
+	buttonForSelectedPage: "#0077C8",
+	linkedFooterBackground: "#FF674C",
+	header: "#FF674C",
+	headingColor: "#094970",
+	link: "#0077C8",
+	linkText: "#0077C8",
+	editableFieldBackground: "#EAF4FA",
+	loginCard: "#EAF4FA",
+	loginText: "#094970",
+	tabsBackground: "#FF674C",
+	navigationText: "#094970",
+	navigationTextActive: "#0077C8",
+	searchResultTitle: "#0077C8",
+};
+
+const folioDark = {
+	...openRSDark,
+	main: "#5AB5D4", // FOLIO Cyan
+	breadcrumbs: "#5AB5D4",
+	buttonForSelectedPage: "#0077C8",
+	link: "#5AB5D4",
+	linkText: "#5AB5D4",
+	loginCard: "#222C33",
+	tabsBackground: "#222C33",
+	navigationText: "#5AB5D4",
+	searchResultTitle: "#5AB5D4",
+};
+
+const folioHighContrast = {
+	...openRSHighContrast,
+	main: "#042D45",
+	breadcrumbs: "#042D45",
+	buttonForSelectedPage: "#042D45",
+	link: "#042D45",
+	linkText: "#042D45",
+	searchResultTitle: "#042D45",
+};
+
+// ---- MOBIUS ----
+const mobiusLight = {
+	...openRSLight,
+	main: "#0096A7", // MOBIUS Light Blue
+	breadcrumbs: "#003D6A", // MOBIUS Dark Blue
+	buttonForSelectedPage: "#0096A7",
+	linkedFooterBackground: "#003D6A",
+	header: "#003D6A",
+	headingColor: "#003D6A",
+	link: "#003D6A",
+	linkText: "#0096A7",
+	editableFieldBackground: "#E5F4F6", // Soft 10% tint of the Light Blue
+	loginCard: "#E5F4F6",
+	loginText: "#003D6A",
+	tabsBackground: "#E5F4F6",
+	navigationText: "#003D6A",
+	navigationTextActive: "#0096A7",
+	searchResultTitle: "#003D6A",
+};
+
+const mobiusDark = {
+	...openRSDark,
+	main: "#0096A7",
+	breadcrumbs: "#4DD0E1", // Lightened cyan for dark-mode text legibility
+	buttonForSelectedPage: "#0096A7",
+	link: "#4DD0E1",
+	linkText: "#4DD0E1",
+	loginCard: "#111C24", // Deep blue-grey tint
+	tabsBackground: "#111C24",
+	navigationText: "#4DD0E1",
+	searchResultTitle: "#4DD0E1",
+};
+
+const mobiusHighContrast = {
+	...openRSHighContrast,
+	// Light Blue fails WCAG AAA contrast, so we strictly use Dark Blue here
+	main: "#003D6A",
+	breadcrumbs: "#003D6A",
+	buttonForSelectedPage: "#003D6A",
+	link: "#003D6A",
+	linkText: "#003D6A",
+	searchResultTitle: "#003D6A",
+};
+
 // ---------------------------------------------------------------------------
 // Shared (colour-agnostic) theme options
 // ---------------------------------------------------------------------------
@@ -964,7 +1136,51 @@ const THEMES = {
 			true,
 		),
 	},
-} as const;
+	itsComingHome: {
+		light: buildTheme(itsComingHomeLight, "#00247D", "#FFFFFF", "light"),
+		dark: buildTheme(itsComingHomeDark, "#4B8BFF", "#1E1E1E", "dark"),
+		highContrast: buildTheme(
+			itsComingHomeHighContrast,
+			"#00164D",
+			"#FFFFFF",
+			"light",
+			true,
+		),
+	},
+	koha: {
+		light: buildTheme(kohaLight, "#88B744", "#FFFFFF", "light"),
+		dark: buildTheme(kohaDark, "#A5D25C", "#1E1E1E", "dark"),
+		highContrast: buildTheme(
+			kohaHighContrast,
+			"#1F330D",
+			"#FFFFFF",
+			"light",
+			true,
+		),
+	},
+	folio: {
+		light: buildTheme(folioLight, "#5AB5D4", "#FFFFFF", "light"),
+		dark: buildTheme(folioDark, "#87CEEB", "#1E1E1E", "dark"),
+		highContrast: buildTheme(
+			folioHighContrast,
+			"#021B2A",
+			"#FFFFFF",
+			"light",
+			true,
+		),
+	},
+	mobius: {
+		light: buildTheme(mobiusLight, "#003D6A", "#FFFFFF", "light"),
+		dark: buildTheme(mobiusDark, "#4DD0E1", "#585353", "dark"),
+		highContrast: buildTheme(
+			mobiusHighContrast,
+			"#002A4A", // A slightly darker shade for the secondary active states
+			"#FFFFFF",
+			"light",
+			true,
+		),
+	},
+};
 
 export type ThemeName = keyof typeof THEMES;
 export type ThemeMode = keyof (typeof THEMES)["openRS"];
