@@ -135,7 +135,6 @@ export default function NewContact({
 		},
 		onSuccess: (responseData) => {
 			if (responseData) {
-				// UPGRADE: Invalidate clean dynamic state structures depending on entity context
 				const queryKeyToInvalidate =
 					entity === "Consortium"
 						? "getConsortiaContacts"

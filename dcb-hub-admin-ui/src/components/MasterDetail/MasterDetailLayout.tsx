@@ -2,6 +2,10 @@ import { Box, Divider, Grid } from "@mui/material";
 
 interface MasterDetailLayoutProps {
 	children: React.ReactNode;
+	/**
+	 * Width is passed down from the DataGrid API ref so the detail panel
+	 * perfectly matches the viewport size.
+	 */
 	width: number | string | undefined;
 }
 
@@ -10,27 +14,36 @@ export default function MasterDetailLayout({
 	width,
 }: MasterDetailLayoutProps) {
 	return (
-		<Box>
+		<Box
+			sx={{
+				// Match the viewport width passed from the grid
+				width,
+				// Ensure content fits within the box without overflowing
+				boxSizing: "border-box",
+			}}
+		>
 			<Grid
 				container
-				spacing={{ xs: 1, md: 2 }}
-				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+				spacing={2}
+				// Force a 12-column grid across all standard breakpoints
+				// This allows child components using `size={{ xs: 4, sm: 4, md: 4 }}`
+				// to automatically wrap into 3 equal columns (12 / 4 = 3)
+				columns={12}
 				sx={{
-					pl: 13,
+					// Apply standard padding. The top/bottom padding ensures
+					// breathing room, and the left padding indents the content
+					// past the expansion icon.
+					pl: 8,
+					pr: 2,
 					py: 2,
-					height: "100%",
-					boxSizing: "border-box",
-					position: "sticky",
-					left: 0,
-					width,
 				}}
 			>
 				{children}
 			</Grid>
-			{/* UPGRADE: Use standard explicit Grid size naming parameters layout formats */}
-			<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+			{/* The divider spans the full width of the container */}
+			<Box sx={{ width: "100%", px: 2, pb: 1 }}>
 				<Divider aria-hidden="true" />
-			</Grid>
+			</Box>
 		</Box>
 	);
 }

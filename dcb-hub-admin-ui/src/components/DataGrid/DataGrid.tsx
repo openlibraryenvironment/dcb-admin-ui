@@ -183,7 +183,6 @@ export default function DataGrid({
 		},
 		[onRowSelectionModelChange],
 	);
-	//identifier may not be needed
 	return (
 		<div style={{ display: "flex", flexDirection: "column" }}>
 			<DataGridPremium
@@ -196,6 +195,7 @@ export default function DataGrid({
 				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}
+				getDetailPanelHeight={() => "auto"} // Needed to ensure the height is sensible for master details
 				listView={listViewEnabled}
 				pivotActive={pivotingEnabled}
 				showToolbar={toolbarVisible}

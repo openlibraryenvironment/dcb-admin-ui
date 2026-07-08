@@ -130,7 +130,6 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									{t("search.bib_record_id")}
 								</Typography>
 								<Typography variant="attributeText" component="div">
-									{/* UPGRADE: Use component={RouterLink} to pass SPA paths instantly */}
 									<Link
 										component={RouterLink}
 										to={`/bibs/${row?.id}`}
@@ -857,6 +856,83 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								{t("search.process_id")}
 							</Typography>
 							<RenderAttribute attribute={row?.processId} />
+						</Stack>
+					</Grid>
+				</MasterDetailLayout>
+			);
+		case "onboarding":
+			return (
+				<MasterDetailLayout width={width}>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("mappings.item_type_count", "Item Types")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.itemTypeMappingCount || 0} />
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("mappings.patron_type_count", "Patron Types")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.patronTypeMappingCount || 0} />
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("mappings.location_count", "Locations")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.locationMappingCount || 0} />
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("locations.pickup_count", "Pickup Locations")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.pickupLocationCount || 0} />
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("mappings.numeric_range_count", "Numeric Ranges")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute
+									attribute={row?.numericRangeMappingCount || 0}
+								/>
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("nav.patronRequests.name", "Patron Requests")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.patronRequestCount || 0} />
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("nav.supplierRequests.name", "Supplier Requests")}
+							</Typography>
+							<Typography variant="attributeText">
+								<RenderAttribute attribute={row?.supplierRequestCount || 0} />
+							</Typography>
 						</Stack>
 					</Grid>
 				</MasterDetailLayout>

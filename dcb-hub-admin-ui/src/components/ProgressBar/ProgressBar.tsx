@@ -1,10 +1,10 @@
-import { useRouterState } from "@tanstack/react-router"; // UPGRADE: Pure hooks-driven state monitoring
+import { useRouterState } from "@tanstack/react-router";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
 
+// Should kick in on slow loads so users still get feedback. one to monitor
+
 export function ProgressBar() {
-	// UPGRADE: Instantly listens reactive-style to the router compilation pipeline.
-	// Fires automatically when lazy-loading route files, code-split chunks, or asynchronous query loaders.
 	const isRouting = useRouterState({
 		select: (state) => state.status === "pending",
 	});

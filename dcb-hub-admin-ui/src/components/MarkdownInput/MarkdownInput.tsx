@@ -1,6 +1,6 @@
 import React, { forwardRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "@tanstack/react-router"; // UPGRADE: Swapped from next/link
+import { Link } from "@tanstack/react-router";
 import {
 	Typography,
 	Link as MuiLink,

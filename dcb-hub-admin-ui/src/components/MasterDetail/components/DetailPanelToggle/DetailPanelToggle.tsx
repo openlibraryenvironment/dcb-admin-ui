@@ -1,4 +1,4 @@
-import { MutableRefObject, isValidElement } from "react";
+import { isValidElement } from "react";
 import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -8,7 +8,6 @@ import {
 	useGridSelector,
 	gridDetailPanelExpandedRowsContentCacheSelector,
 	gridDetailPanelExpandedRowIdsSelector,
-	GridApiPremium,
 	GridRowId,
 } from "@mui/x-data-grid-premium";
 
@@ -17,9 +16,8 @@ export function DetailPanelToggle(
 ) {
 	const { t } = useTranslation();
 	const { id } = props;
-	const apiRef = useGridApiContext() as MutableRefObject<GridApiPremium>;
+	const apiRef = useGridApiContext();
 
-	// UPGRADE: Read collection natively as an optimized lookahead Set
 	const expandedRowIds = useGridSelector(
 		apiRef,
 		gridDetailPanelExpandedRowIdsSelector,
