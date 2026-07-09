@@ -171,7 +171,7 @@ function SupplierRequestsAll() {
 				title={t("ui.error.cannot_retrieve_record")}
 				action={t("ui.actions.go_back")}
 				goBack="/libraries"
-				message={"TODO"}
+				message={t("error.invalid_UUID")}
 			/>
 		);
 

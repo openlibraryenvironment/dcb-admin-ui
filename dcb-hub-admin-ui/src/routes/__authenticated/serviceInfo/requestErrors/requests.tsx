@@ -140,7 +140,7 @@ function Requests() {
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.reload")}
 					action={t("ui.actions.reload")}
-					// onClick={refetch}
+					reload
 				/>
 			</PageContainer>
 		);

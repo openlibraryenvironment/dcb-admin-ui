@@ -10,6 +10,7 @@ import Error from "@components/Error/Error";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { getLibraries } from "@queries/getLibraries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import i18n from "@/i18n";
 
 // Default-state prefetch: mirrors OperatingWelcome's own useGridState defaults
 // (pageSize 200, sort fullName ASC, no filter) AND its literal "LoadLibraries"
@@ -45,13 +46,12 @@ export const Route = createFileRoute("/__authenticated/")({
 		});
 	},
 
-	// 2. THE ERROR BOUNDARY: error components go here instead
 	errorComponent: ({ error }) => (
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
-				title="Unable to load the Dashboard"
+				title={i18n.t("ui.error.unable_to_load_page")}
 				message={error.message}
-				action="Reload Dashboard"
+				action={i18n.t("ui.actions.reload")}
 				reload={true}
 			/>
 		</PageContainer>

@@ -250,7 +250,7 @@ function RouteComponent() {
 			<>
 				{isError ? (
 					<Error
-						title={t("ui.feedback.error.cannot_retrieve_record")}
+						title={t("ui.error.cannot_retrieve_record")}
 						message={t("ui.info.connection_issue")}
 						description={t("ui.info.try_later")}
 						action={t("ui.actions.go_back")}
@@ -258,8 +258,8 @@ function RouteComponent() {
 					/>
 				) : (
 					<Error
-						title={t("ui.feedback.error.cannot_find_record")}
-						message={t("ui.feedback.error.invalid_UUID")}
+						title={t("ui.error.cannot_find_record")}
+						message={t("ui.error.invalid_UUID")}
 						description={t("ui.info.check_address")}
 						action={t("ui.actions.go_back")}
 						goBack="/patronRequests/exception"
@@ -421,7 +421,7 @@ function RouteComponent() {
 									<RenderAttribute
 										attribute={
 											pickupLocationDataError
-												? t("patron_request..error_pickup")
+												? t("patron_request.error_pickup")
 												: pickupLocation?.agency?.code
 										}
 									/>
@@ -443,7 +443,7 @@ function RouteComponent() {
 									<RenderAttribute
 										attribute={
 											pickupLocationDataError
-												? t("patron_request..error_pickup")
+												? t("patron_request.error_pickup")
 												: pickupLocation?.hostSystem?.code
 										}
 									/>
@@ -464,7 +464,7 @@ function RouteComponent() {
 								) : pickupLocationDataError ? (
 									t("patron_request.error_pickup")
 								) : auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-									<Tooltip title={t("location.view_location")}>
+									<Tooltip title={t("locations.view_location")}>
 										<CustomLink to={`/locations/${pickupLocation?.id}`}>
 											{pickupLocation?.name}
 										</CustomLink>
@@ -1242,7 +1242,7 @@ function RouteComponent() {
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
 							<Typography variant="accordionSummary">
-								{t("patron_request.borrowing", "Borrowing")}
+								{t("patron_request.borrowing")}
 							</Typography>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1434,7 +1434,7 @@ function RouteComponent() {
 								) : pickupLocationDataError ? (
 									t("patron_request.error_pickup")
 								) : auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-									<Tooltip title={t("location.view_location")}>
+									<Tooltip title={t("locations.view_location")}>
 										<CustomLink to={`/locations/${pickupLocation?.id}`}>
 											{pickupLocation?.name}
 										</CustomLink>
@@ -1510,7 +1510,7 @@ function RouteComponent() {
 									<RenderAttribute
 										attribute={
 											patronIdentitiesError
-												? t("patron_request..error_identities")
+												? t("patron_request.error_identities")
 												: pickupPatronIdentity?.localBarcode
 										}
 									/>
@@ -1532,7 +1532,7 @@ function RouteComponent() {
 									<RenderAttribute
 										attribute={
 											patronIdentitiesError
-												? t("patron_request..error_identities")
+												? t("patron_request.error_identities")
 												: pickupPatronIdentity?.localPtype
 										}
 									/>
@@ -1554,7 +1554,7 @@ function RouteComponent() {
 									<RenderAttribute
 										attribute={
 											patronIdentitiesError
-												? t("patron_request..error_identities")
+												? t("patron_request.error_identities")
 												: pickupPatronIdentity?.canonicalPtype
 										}
 									/>
@@ -1665,8 +1665,6 @@ function RouteComponent() {
 						identifier="AuditPatronRequestDetails"
 						// This grid could show click-through details of its own for each audit log entry
 						checkboxSelection={false}
-						// noDataTitle={t("patron_request.audit_log_no_data")}
-						// noDataMessage={t("patron_request.audit_log_no_rows")}
 						// sortModel={[{ field: "auditDate", sort: "desc" }]}
 						// operationDataType="Audit"
 						filterMode="client"

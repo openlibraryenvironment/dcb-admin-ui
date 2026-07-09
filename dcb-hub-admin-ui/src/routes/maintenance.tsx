@@ -14,13 +14,10 @@ function MaintenancePage() {
 	return (
 		<LoginLayout pageName={t("ui.error.503.page_title")}>
 			<ErrorComponent
-				title={t("ui.error.503.name") || "Maintenance"}
-				message={t("ui.error.503.summary") || "System Under Maintenance"}
-				description={
-					t("ui.error.503.description") ||
-					"The service is currently unavailable. Please try again later."
-				}
-				action={t("ui.error.503.action") || "Sign out"}
+				title={t("ui.error.503.name")}
+				message={t("ui.error.503.summary")}
+				description={t("ui.error.503.description")}
+				action={t("ui.error.503.action")}
 				goBack="/logout"
 			/>
 		</LoginLayout>

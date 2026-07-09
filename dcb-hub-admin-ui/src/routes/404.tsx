@@ -13,7 +13,7 @@ function NotFound() {
 	const { t } = useTranslation();
 	return (
 		<PageContainer
-			title={t("404.page_title")}
+			title={t("ui.error.404.name")}
 			hideTitleBox={true}
 			hideBreadcrumbs={true}
 		>

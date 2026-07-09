@@ -201,8 +201,8 @@ export default function CombinedEnvironmentComponent() {
 					error: "Failed to load environment status",
 				})}
 				action={t("ui.actions.reload")}
-				message={t("error.environment")} /** TODO ERROR */
-				// onClick={refetch}
+				message={t("ui.error.something_wrong")}
+				reload
 			/>
 		);
 	}

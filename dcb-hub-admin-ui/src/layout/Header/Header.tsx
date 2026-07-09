@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { isEmpty } from "lodash";
 
 import {
@@ -59,6 +59,7 @@ export default function Header({
 	const clearVersionStore = useDCBVersionStore(
 		(state) => state.clearVersionStore,
 	);
+	const queryClient = useQueryClient();
 
 	const {
 		headerImageURL,
@@ -76,6 +77,7 @@ export default function Header({
 		if (auth.isAuthenticated) {
 			clearGridState();
 			clearVersionStore();
+			queryClient.clear();
 			auth.signoutRedirect({
 				post_logout_redirect_uri: `${window.location.origin}/logout?loggedOut=true`,
 			});

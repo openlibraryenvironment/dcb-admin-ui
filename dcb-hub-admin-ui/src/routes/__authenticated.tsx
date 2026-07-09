@@ -13,15 +13,16 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Confirmation from "@components/Confirmation/Confirmation";
+import i18n from "@/i18n";
 
 export const Route = createFileRoute("/__authenticated")({
 	component: AuthenticatedLayout,
 	errorComponent: ({ error }) => (
 		<StructuralLayout>
 			<Error
-				title="Something went wrong"
+				title={i18n.t("ui.error.something_wrong")}
 				message={error.message}
-				action="Reload"
+				action={i18n.t("ui.actions.reload")}
 				reload={true}
 			/>
 		</StructuralLayout>
@@ -124,10 +125,9 @@ function AuthenticatedLayout() {
 		content = (
 			<Error
 				title="Authentication Error"
-				message={`Oops... ${auth.error.message}`}
-				action="Return to Login"
-				// Route them back to your clean login/logout flow
-				// onClick={() => navigate({ to: "/login", replace: true })}
+				message={t("ui.error.auth_error", { details: auth.error.message })}
+				action={t("ui.error.return_to_login")}
+				goBack={"/login"}
 			/>
 		);
 	} else if (isAuthResolving) {
@@ -146,10 +146,7 @@ function AuthenticatedLayout() {
 				<Confirmation
 					open={showSessionWarning}
 					action="sessionWarning"
-					customWarningText={t(
-						"loginout.expiring_warning",
-						"Your session is about to expire. Press continue or move your mouse to stay securely signed in.",
-					)}
+					customWarningText={t("loginout.expiring_warning")}
 					onClose={handleForceLogout}
 					onConfirm={handleStayLoggedIn}
 				/>

@@ -65,7 +65,7 @@ function ClusterDetails() {
 				title={t("ui.error.cannot_retrieve_record")}
 				action={t("ui.actions.go_back")}
 				goBack="/search"
-				message={t("error.error")} /** TODO */
+				message={t("error.invalid_UUID")}
 			/>
 		);
 	}

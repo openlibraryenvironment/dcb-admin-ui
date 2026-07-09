@@ -44,7 +44,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 						version: data.version || "Unknown",
 						isDev,
 						isAcceptableVersion: true,
-						type: data.environmentType || "Production",
+						type: data.environmentType || "",
 						branch: data.branch || "main",
 						lastFetchedAt: Date.now(),
 						loading: false,
@@ -65,7 +65,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 					isAcceptableVersion: true,
 					loading: false,
 					error: null,
-					type: null,
+					type: "",
 					branch: null,
 					lastFetchedAt: null,
 				});

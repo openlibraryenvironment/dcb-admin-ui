@@ -1,3 +1,4 @@
+import { dcbStatusValueOptions } from "@constants/statuses/DCBStatuses";
 import { containsOnly } from "@filters/containsOnly";
 import { durationFilters } from "@filters/durationFilters";
 import { equalsOnly } from "@filters/equalsOnly";
@@ -136,14 +137,18 @@ const getPatronRequestColumns = (
 			headerName: "Previous status",
 			minWidth: 100,
 			flex: 1.5,
-			filterOperators: standardFilters,
+			type: "singleSelect", // Note - may need to support IS and IS NOT, but not is any of as we have a different way of doing that
+			filterOperators: undefined,
+			valueOptions: dcbStatusValueOptions,
 		},
 		{
 			field: "status",
 			headerName: "Status",
 			minWidth: 100,
-			flex: 1.5,
-			filterOperators: standardFilters,
+			flex: 1.0,
+			type: "singleSelect", // Note - may need to support IS and IS NOT, but not is any of as we have a different way of doing that
+			filterOperators: undefined,
+			valueOptions: dcbStatusValueOptions,
 			filterable: isStandard ? true : false,
 		},
 		{
@@ -151,7 +156,9 @@ const getPatronRequestColumns = (
 			headerName: "Next status",
 			minWidth: 100,
 			flex: 1.5,
-			filterOperators: standardFilters,
+			type: "singleSelect", // Note - may need to support IS and IS NOT, but not is any of as we have a different way of doing that
+			filterOperators: undefined,
+			valueOptions: dcbStatusValueOptions,
 		},
 		{
 			field: "errorMessage",

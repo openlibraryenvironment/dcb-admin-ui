@@ -96,6 +96,7 @@
 	},
 	"common": {
 		"about": "About",
+		"discovery": "DCB Discovery",
 		"error_loading": "An error has occurred while loading {{page_title}}. Please <linkComponent>reload</linkComponent> the page.",
 		"filter_applied": "Filter(s) are applied",
 		"loading": "Loading ...",
@@ -604,9 +605,11 @@
 		"print_label": "Print label",
 		"search_placeholder": "Search by name",
 		"type": "Location type",
-		"uuid": "Location UUID"
+		"uuid": "Location UUID",
+		"view_location": "View pickup location"
 	},
 	"loginout": {
+		"expiring_warning": "Your session is about to expire. Press continue or move your mouse to stay securely signed in.",
 		"keycloak": "We use <linkComponent>Keycloak</linkComponent> for secure authentication",
 		"login": "Please login to gain full access to $t(app.name)",
 		"logout": "Logout",
@@ -813,12 +816,72 @@
 		"library": {
 			"existing_or_new_system": "Is this library part of a new or existing host LMS?",
 			"use_existing": "Use existing system",
-			"use_existing_description": "Connect this library to a host LMS that is already configured in DCB. Choose this when the library shares its system with libraries that have already been onboarded.",
+			"use_existing_description": "Connect this library to a Host LMS that is already configured in OpenRS. Choose this when the library to be added shares its system with libraries that have already been onboarded, or if the Host LMS was added separately beforehand.",
 			"create_new": "Create new system",
-			"create_new_description": "Set up a new host LMS for this library as part of onboarding. Choose this when the library's system has not yet been added to DCB."
+			"create_new_description": "Set up a new host LMS for this library as part of onboarding. Choose this when the library's Host LMS has not yet been added to OpenRS."
 		}
 	},
-	"onboarding": {},
+	"onboarding": {
+		"summary": {
+			"stage": "Stage",
+			"action": "What you need to do",
+			"status": "How it's going"
+		},
+		"stage": {
+			"introduce_libraries": {
+				"name": "Introduce libraries",
+				"action": "Tell us about the members in your consortium that we need to onboard and migrate",
+				"status_known_zero": "We don't know about any library agencies in {{consortium_name}}.",
+				"status_known_one": "We know about {{count}} library agency in {{consortium_name}}.",
+				"status_known_other": "We know about {{count}} library agencies in {{consortium_name}}.",
+				"status_missing_zero": "We are not missing any basic details for these.",
+				"status_missing_other": "We are missing basic details for {{count}} of these."
+			},
+			"provision_systems": {
+				"name": "Provision systems",
+				"action": "Provide technical details we need to set up your DCB services",
+				"status_known_zero": "We don't know about any Host LMS instances that are needed for {{consortium_name}}.",
+				"status_known_one": "We know about {{count}} Host LMS instance that is needed for {{consortium_name}}.",
+				"status_known_other": "We know about {{count}} Host LMS instances that are needed for {{consortium_name}}.",
+				"status_missing_zero": "We are not missing any essential details for these.",
+				"status_missing_other": "We are missing essential details for {{count}} of these."
+			},
+			"configure_services": {
+				"name": "Configure services",
+				"action": "Share configuration mappings and test record details we need to check that DCB services work as you expect",
+				"status_config_zero": "We are not missing mapping configuration or authentication details for any library.",
+				"status_config_one": "We are missing mapping configuration or authentication details for {{count}} library.",
+				"status_config_other": "We are missing mapping configuration or authentication details for {{count}} libraries.",
+				"status_testing_zero": "We are not missing test records or accounts for any library.",
+				"status_testing_one": "We are missing test records or accounts for {{count}} library.",
+				"status_testing_other": "We are missing test records or accounts for {{count}} libraries."
+			},
+			"migrate_service": {
+				"name": "Migrate service",
+				"action": "Share key dates and contacts so we can plan for your service migration",
+				"status_migration_zero": "We are not missing expected migration details for any library.",
+				"status_migration_one": "We are missing expected migration details for {{count}} library.",
+				"status_migration_other": "We are missing expected migration details for {{count}} libraries.",
+				"status_signoff_zero": "We are not missing a migration sign-off authority contact for any library.",
+				"status_signoff_one": "We are missing a migration sign-off authority contact for {{count}} library.",
+				"status_signoff_other": "We are missing a migration sign-off authority contact for {{count}} libraries."
+			},
+			"operate_dcb": {
+				"name": "Operate DCB",
+				"action": "Authorise who can manage your live DCB services",
+				"status_operators_zero": "There are no library services administrators authorised to operate DCB services",
+				"status_operators_one": "There are {{count}} library services administrators authorised to operate DCB services.",
+				"status_operators_other": "There is {{count}} library services administrators authorised to operate DCB services."
+			},
+			"manage_support": {
+				"name": "Manage support",
+				"action": "Maintain current authorised support contacts so we can deal with any help you need",
+				"status_support_zero": "We have no support contacts authorised to raise or handle support enquiries.",
+				"status_support_one": "We have {{count}} support contact authorised to raise or handle support enquiries.",
+				"status_support_other": "We have {{count}} support contacts authorised to raise or handle support enquiries."
+			}
+		}
+	},
 	"openrs": {
 		"name": "OpenRS",
 		"about": "$t(common.about) $t(openrs.name)",
@@ -938,6 +1001,7 @@
 		"request_updated": "Request updated",
 		"resolution_count": "Resolution count",
 		"return": "Return to patron request",
+		"source_record_not_found": "Source record not found",
 		"status": "Current status",
 		"statuses": {
 			"SUBMITTED_TO_DCB": "Submitted to DCB",
@@ -1473,8 +1537,10 @@
 				"description": "Please contact your system administrator for more information",
 				"action": "Log out"
 			},
+			"auth_error": "An error occurred during authentication. Details: {{details}}",
 			"cannot_retrieve_record": "Unable to retrieve the record",
 			"cannot_find_record": "Unable to find the record",
+			"return_to_login": "Return to login",
 			"search_failed": "The search was not successful",
 			"something_wrong": "Something went wrong",
 			"summary": "Sorry, you do not have access to this page",
@@ -1482,7 +1548,8 @@
 			"invalid_UUID": "The record might have been deleted or the identifier could be wrong",
 			"consortium_not_found": "Unable to find the consortium",
 			"consortium_not_present": "No consortium exists on this DCB instance.",
-			"consortium_advice": "Please set up your consortium and try again."
+			"consortium_advice": "Please set up your consortium and try again.",
+			"unable_to_load_page": "Sorry, we were unable to load this page"
 		},
 		"file": {
 			"no_file_selected": "No file selected"

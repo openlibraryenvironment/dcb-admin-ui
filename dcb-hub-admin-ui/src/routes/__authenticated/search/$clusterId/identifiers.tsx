@@ -139,7 +139,7 @@ function Identifiers() {
 				title={t("ui.error.cannot_retrieve_record")}
 				action={t("ui.actions.reload")}
 				reload
-				message={t("eerror")} /** TODO */
+				message={t("error.invalid_UUID")}
 			/>
 		);
 	}

@@ -7,7 +7,7 @@ import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
 export function NotFound() {
 	const { t } = useTranslation();
 	return (
-		<PageContainer title={t("404.page_title")} hideTitleBox hideBreadcrumbs>
+		<PageContainer title={t("ui.error.404.name")} hideTitleBox hideBreadcrumbs>
 			<Error
 				title={t("ui.error.404.name")}
 				message={t("ui.error.404.summary")}
