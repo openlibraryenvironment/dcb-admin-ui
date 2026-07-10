@@ -21,8 +21,8 @@ function NetworkError() {
 			}}
 		>
 			<ErrorComponent
-				title={t("ui.feedback.network_error")}
-				message={t("ui.feedback.network_error_message")}
+				title={t("ui.error.network_error")}
+				message={t("ui.error.network_error_message")}
 				description={t("ui.actions.go_back_message")}
 				action={t("ui.actions.go_back")}
 				goBack="/"

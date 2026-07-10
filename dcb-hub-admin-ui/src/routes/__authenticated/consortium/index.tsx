@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { isEmpty } from "lodash";
@@ -155,7 +155,13 @@ function ConsortiumPage() {
 		reset,
 		formState: { errors, isDirty },
 	} = useForm<ConsortiumFormFields>({
-		resolver: yupResolver(validationSchema),
+		// @hookform/resolvers@5 tightened the Resolver generics: yup infers
+		// unset fields as `string | undefined` (required key), which no longer
+		// unifies with the optional properties on ConsortiumFormFields. The
+		// shapes are equivalent at runtime, so pin the resolver to the form type.
+		resolver: yupResolver(
+			validationSchema,
+		) as unknown as Resolver<ConsortiumFormFields>,
 		mode: "onChange",
 	});
 

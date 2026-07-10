@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Control, useForm, useWatch } from "react-hook-form";
+import { Control, Resolver, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import {
@@ -162,7 +162,13 @@ export default function StaffRequest({
 			itemLocalSystemCode: "",
 			itemAgencyCode: "",
 		},
-		resolver: yupResolver(validationSchema),
+		// @hookform/resolvers@5 tightened the Resolver generics: yup infers
+		// unset fields as `string | undefined` (required key), which no longer
+		// unifies with the optional properties on StaffRequestFormData. The
+		// shapes are equivalent at runtime, so pin the resolver to the form type.
+		resolver: yupResolver(
+			validationSchema,
+		) as unknown as Resolver<StaffRequestFormData>,
 		mode: "onChange",
 	});
 

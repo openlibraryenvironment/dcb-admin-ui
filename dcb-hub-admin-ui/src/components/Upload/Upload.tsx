@@ -30,6 +30,9 @@ interface FileUploadProps {
 	type: "Reference value mappings" | "Numeric range mappings" | "Locations";
 	presetHostLmsId?: string;
 	libraryName?: string;
+	// Fired once a upload succeeds, with the number of records imported. Lets a
+	// parent (e.g. the New Library wizard) reflect progress before proceeding.
+	onImported?: (count: number) => void;
 }
 
 export default function FileUpload({
@@ -38,6 +41,7 @@ export default function FileUpload({
 	type,
 	presetHostLmsId,
 	libraryName,
+	onImported,
 }: FileUploadProps) {
 	const { t } = useTranslation();
 	const auth = useAuth();
@@ -118,8 +122,8 @@ export default function FileUpload({
 			return;
 		}
 
-		if (!code || !category) return;
-
+		if (!code) return;
+		if (type !== "Locations" && !category) return;
 		try {
 			let totalSize = 0;
 
@@ -211,6 +215,7 @@ export default function FileUpload({
 			setSuccessCount(response.data.recordsImported ?? 0);
 			setDeletedCount(response.data.recordsDeleted ?? 0);
 			setIgnoredCount(response.data.recordsIgnored ?? 0);
+			onImported?.(response.data.recordsImported ?? 0);
 
 			setTimeout(() => {
 				onCancel();
@@ -286,12 +291,18 @@ export default function FileUpload({
 				</Button>
 				<Box sx={{ flex: 1 }} />
 				<Button
-					disabled={!filesAdded || !code || !category}
+					disabled={
+						type != "Locations"
+							? !filesAdded || !code || !category
+							: !filesAdded || !code
+					}
 					onClick={handleUploadCheck}
 					color="primary"
 					variant="contained"
 				>
-					{t("mappings.import_file")}
+					{type == "Locations"
+						? t("locations.import.button")
+						: t("mappings.import_file")}
 				</Button>
 			</Stack>
 			<Confirmation

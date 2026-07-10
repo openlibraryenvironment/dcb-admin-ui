@@ -359,7 +359,7 @@ function Settings() {
 										type="number"
 										fullWidth
 										error={!!errors.maxConsortialLoans}
-										helperText={errors.maxConsortialLoans?.message}
+										helperText={errors.maxConsortialLoans?.message as string}
 									/>
 								) : (
 									<RenderAttribute

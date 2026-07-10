@@ -48,6 +48,7 @@ type NewLocationFormType = {
 	agencyCode: string;
 	libraryName: string;
 	type: string;
+	onCreated?: () => void;
 };
 
 interface ServerError {
@@ -63,6 +64,7 @@ export default function NewLocation({
 	libraryName,
 	type,
 	ils,
+	onCreated,
 }: NewLocationFormType) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
@@ -227,6 +229,7 @@ export default function NewLocation({
 				severity: "success",
 				text: t("locations.new.success", { name: libraryName }),
 			});
+			onCreated?.();
 			setTimeout(() => {
 				reset();
 				onClose();

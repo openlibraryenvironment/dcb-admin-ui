@@ -17,6 +17,7 @@ import { MAPPING_OPTIONS } from "@constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
 import useCode from "@hooks/useCode";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import { useEffect } from "react";
 
 type ImportForm = {
 	show: boolean;
@@ -25,6 +26,7 @@ type ImportForm = {
 	presetHostLms?: string;
 	presetHostLmsId?: string;
 	libraryName?: string;
+	onImported?: (count: number) => void;
 };
 // This could be generic for locations. Upload maybe not.
 
@@ -35,9 +37,18 @@ export default function Import({
 	presetHostLms,
 	presetHostLmsId,
 	libraryName,
+	onImported,
 }: ImportForm) {
 	const { t } = useTranslation();
-	const { category, updateCategory, resetAll } = useCode();
+
+	const { category, updateCategory, resetAll, updateCode } = useCode();
+
+	// Sync the presetHostLms to the global code state so Upload.tsx can read it
+	useEffect(() => {
+		if (presetHostLms && updateCode) {
+			updateCode(presetHostLms);
+		}
+	}, [presetHostLms, updateCode]);
 
 	const handleCloseImport = () => {
 		resetAll(); // Reset both code and category when closing the import dialog
@@ -83,26 +94,37 @@ export default function Import({
 						}}
 					/>
 
-					{type == "Locations" && presetHostLms ? (
+					{/* 1. Dynamic Read-Only Grid: Shows if we have a preset Host LMS OR if it's Locations */}
+					{(presetHostLms || type === "Locations") && (
 						<Grid container columns={{ xs: 4, sm: 8, md: 12 }}>
-							<Grid size={{ xs: 2, sm: 4, md: 6 }}>
-								<Stack>
-									<Typography variant="attributeTitle">
-										{t("mappings.category")}
-									</Typography>
-									<RenderAttribute attribute={type} />
-								</Stack>
-							</Grid>
-							<Grid size={{ xs: 2, sm: 4, md: 6 }}>
-								<Stack>
-									<Typography variant="attributeTitle">
-										{t("hostlms.hostlms_one")}
-									</Typography>
-									<RenderAttribute attribute={presetHostLms} />
-								</Stack>
-							</Grid>
+							{/* Only lock the Category to read-only if it's Locations */}
+							{type === "Locations" && (
+								<Grid size={{ xs: 2, sm: 4, md: 6 }}>
+									<Stack>
+										<Typography variant="attributeTitle">
+											{t("mappings.category")}
+										</Typography>
+										<RenderAttribute attribute={type} />
+									</Stack>
+								</Grid>
+							)}
+
+							{/* Show the preset Host LMS as read-only if one was passed in */}
+							{presetHostLms && (
+								<Grid size={{ xs: 2, sm: 4, md: 6 }}>
+									<Stack>
+										<Typography variant="attributeTitle">
+											{t("hostlms.hostlms_one")}
+										</Typography>
+										<RenderAttribute attribute={presetHostLms} />
+									</Stack>
+								</Grid>
+							)}
 						</Grid>
-					) : (
+					)}
+
+					{/* Category Autocomplete: ALWAYS show for Mappings, NEVER for Locations */}
+					{type !== "Locations" && (
 						<Autocomplete
 							options={MAPPING_OPTIONS[type]}
 							getOptionLabel={(option: MappingOption) => t(option.displayKey)}
@@ -118,15 +140,19 @@ export default function Import({
 							)}
 						/>
 					)}
-					{type != "Locations" && !presetHostLms ? (
+
+					{/* Host LMS Selector: ONLY show if a preset wasn't passed down */}
+					{!presetHostLms && (
 						<Selector optionsType={t("hostlms.hostlms_one")} />
-					) : null}
+					)}
+
 					<Upload
 						onCancel={handleCloseImport}
 						category={category}
 						type={type}
 						presetHostLmsId={presetHostLmsId}
 						libraryName={libraryName}
+						onImported={onImported}
 					/>
 				</Stack>
 			</DialogContent>

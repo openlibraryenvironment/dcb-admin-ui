@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Stack, Typography, Button, Box } from "@mui/material";
-import { UploadFile } from "@mui/icons-material";
+import { Stack, Typography, Button, Box, Alert } from "@mui/material";
+import { UploadFile, CheckCircle } from "@mui/icons-material";
 
 import Import from "@components/Import/Import";
 
@@ -14,6 +14,9 @@ export default function RefValueMappingStep({
 }: RefValueMappingStepProps) {
 	const { t } = useTranslation();
 	const [showImport, setShowImport] = useState(false);
+	// null = nothing imported yet; a number accumulates across repeated imports.
+	const [importedCount, setImportedCount] = useState<number | null>(null);
+	const hasImported = importedCount !== null;
 
 	return (
 		<Stack
@@ -21,10 +24,23 @@ export default function RefValueMappingStep({
 			direction="column"
 			sx={{ mt: 1, alignItems: "flex-start" }}
 		>
-			<Typography variant="h6">{t("mappings.categories.all")}</Typography>
+			<Typography variant="h6">
+				{t("nav.mappings.allReferenceValue")}
+			</Typography>
 			<Typography>
 				{t("libraries.new.ref_mapping_explanation", { hostLms: hostLmsCode })}
 			</Typography>
+
+			{hasImported && (
+				<Alert
+					severity="success"
+					icon={<CheckCircle fontSize="inherit" />}
+					sx={{ width: "100%" }}
+				>
+					{t("libraries.new.ref_mapping_added", { count: importedCount ?? 0 })}
+				</Alert>
+			)}
+
 			<Box
 				sx={{
 					p: 3,
@@ -36,11 +52,11 @@ export default function RefValueMappingStep({
 				}}
 			>
 				<Button
-					variant="contained"
+					variant={hasImported ? "outlined" : "contained"}
 					startIcon={<UploadFile />}
 					onClick={() => setShowImport(true)}
 				>
-					{t("mappings.import.button")}
+					{hasImported ? t("mappings.import_more") : t("mappings.import")}
 				</Button>
 				<Typography
 					variant="caption"
@@ -50,7 +66,7 @@ export default function RefValueMappingStep({
 						color: "text.secondary",
 					}}
 				>
-					{t("mappings.import.helper_text")}
+					{t("mappings.new_library")}
 				</Typography>
 			</Box>
 			{showImport && (
@@ -59,6 +75,9 @@ export default function RefValueMappingStep({
 					onClose={() => setShowImport(false)}
 					type="Reference value mappings"
 					presetHostLms={hostLmsCode}
+					onImported={(count) =>
+						setImportedCount((prev) => (prev ?? 0) + count)
+					}
 				/>
 			)}
 		</Stack>

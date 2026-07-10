@@ -23,6 +23,33 @@ import { z } from "zod";
 
 type LibraryFormValues = z.infer<typeof newLibrarySchema>;
 
+// The `value` MUST be the backend RoleName enum constant - CreateLibraryDataFetcher
+// upper-cases and matches it against RoleName. Sending the translated label breaks
+// for anything the naive coercion can't reconstruct (e.g. LIBRARY_SERVICES_ADMINISTRATOR).
+const ROLE_OPTIONS = [
+	{
+		value: "IMPLEMENTATION_CONTACT",
+		labelKey: "libraries.contacts.roles.implementation",
+	},
+	{
+		value: "LIBRARY_SERVICES_ADMINISTRATOR",
+		labelKey: "libraries.contacts.roles.library_service_admin",
+	},
+	{
+		value: "OPERATIONS_CONTACT",
+		labelKey: "libraries.contacts.roles.operations",
+	},
+	{
+		value: "SIGN_OFF_AUTHORITY",
+		labelKey: "libraries.contacts.roles.sign_off",
+	},
+	{ value: "SUPPORT", labelKey: "libraries.contacts.roles.support" },
+	{
+		value: "TECHNICAL_CONTACT",
+		labelKey: "libraries.contacts.roles.technical",
+	},
+] as const;
+
 export default function ContactsStep() {
 	const { t } = useTranslation();
 	const {
@@ -117,17 +144,17 @@ export default function ContactsStep() {
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									{...field}
-									options={[
-										t("libraries.contacts.roles.implementation"),
-										t("libraries.contacts.roles.library_service_admin"),
-										t("libraries.contacts.roles.operations"),
-										t("libraries.contacts.roles.sign_off"),
-										t("libraries.contacts.roles.support"),
-										t("libraries.contacts.roles.technical"),
-									]}
-									onChange={(_, newValue) => field.onChange(newValue || "")}
+									options={ROLE_OPTIONS.map((option) => option.value)}
+									getOptionLabel={(value) =>
+										t(
+											ROLE_OPTIONS.find((option) => option.value === value)
+												?.labelKey ?? "",
+										)
+									}
+									onChange={(_, newValue) => field.onChange(newValue ?? "")}
+									onBlur={field.onBlur}
 									value={field.value || null}
+									isOptionEqualToValue={(option, value) => option === value}
 									renderInput={(params) => (
 										<TextField
 											{...params}

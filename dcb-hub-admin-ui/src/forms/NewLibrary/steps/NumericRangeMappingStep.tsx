@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Stack, Typography, Button, Box } from "@mui/material";
-import { UploadFile } from "@mui/icons-material";
+import { Stack, Typography, Button, Box, Alert } from "@mui/material";
+import { UploadFile, CheckCircle } from "@mui/icons-material";
 
 import Import from "@components/Import/Import";
 
@@ -14,6 +14,9 @@ export default function NumericMappingStep({
 }: NumericMappingStepProps) {
 	const { t } = useTranslation();
 	const [showImport, setShowImport] = useState(false);
+	// null = nothing imported yet; a number accumulates across repeated imports.
+	const [importedCount, setImportedCount] = useState<number | null>(null);
+	const hasImported = importedCount !== null;
 
 	return (
 		<Stack
@@ -29,6 +32,17 @@ export default function NumericMappingStep({
 			<Typography>
 				{t("libraries.new.num_mapping_explanation", { hostLms: hostLmsCode })}
 			</Typography>
+
+			{hasImported && (
+				<Alert
+					severity="success"
+					icon={<CheckCircle fontSize="inherit" />}
+					sx={{ width: "100%" }}
+				>
+					{t("libraries.new.num_mapping_added", { count: importedCount ?? 0 })}
+				</Alert>
+			)}
+
 			<Box
 				sx={{
 					p: 3,
@@ -40,11 +54,11 @@ export default function NumericMappingStep({
 				}}
 			>
 				<Button
-					variant="contained"
+					variant={hasImported ? "outlined" : "contained"}
 					startIcon={<UploadFile />}
 					onClick={() => setShowImport(true)}
 				>
-					{t("mappings.import.button")}
+					{hasImported ? t("mappings.import_more") : t("mappings.import")}
 				</Button>
 				<Typography
 					variant="caption"
@@ -54,7 +68,7 @@ export default function NumericMappingStep({
 						color: "text.secondary",
 					}}
 				>
-					{t("mappings.import.num_helper_text")}
+					{t("mappings.new_library_num")}
 				</Typography>
 			</Box>
 			{showImport && (
@@ -63,6 +77,9 @@ export default function NumericMappingStep({
 					onClose={() => setShowImport(false)}
 					type="Numeric range mappings"
 					presetHostLms={hostLmsCode}
+					onImported={(count) =>
+						setImportedCount((prev) => (prev ?? 0) + count)
+					}
 				/>
 			)}
 		</Stack>

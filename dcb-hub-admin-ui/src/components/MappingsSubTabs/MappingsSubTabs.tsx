@@ -24,12 +24,12 @@ const CATEGORIES: Record<
 		{ category: "itemType", labelKey: "mappings.categories.itemType" },
 		{ category: "location", labelKey: "mappings.categories.location" },
 		{ category: "patronType", labelKey: "mappings.categories.patronType" },
-		{ category: "all", labelKey: "mappings.categories.all" },
+		{ category: "all", labelKey: "nav.mappings.allReferenceValue" },
 	],
 	numericRange: [
 		{ category: "itemType", labelKey: "mappings.categories.itemType" },
 		{ category: "patronType", labelKey: "mappings.categories.patronType" },
-		{ category: "all", labelKey: "mappings.categories.all" },
+		{ category: "all", labelKey: "nav.mappings.allReferenceValue" },
 	],
 };
 

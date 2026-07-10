@@ -122,7 +122,7 @@ function AgencyDetails() {
 				<Grid size={{ xs: 3, sm: 3, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("agencies.hostlms")}
+							{t("agencies.host_lms")}
 						</Typography>
 						<RenderAttribute attribute={agency.hostLms?.code} />
 					</Stack>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Control, useForm, useWatch } from "react-hook-form";
+import { Control, Resolver, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -254,7 +254,13 @@ export default function ExpeditedCheckout({
 			itemAgencyCode: staffAgencyCode, // For on-site borrowing, the item agency code must match the user's.
 			// As you can only do an on-site borrowing request for your own library's items.
 		},
-		resolver: yupResolver(validationSchema),
+		// @hookform/resolvers@5 tightened the Resolver generics: yup infers
+		// unset fields as `string | undefined` (required key), which no longer
+		// unifies with the optional properties on OnSiteBorrowingFormData. The
+		// shapes are equivalent at runtime, so pin the resolver to the form type.
+		resolver: yupResolver(
+			validationSchema,
+		) as unknown as Resolver<OnSiteBorrowingFormData>,
 		mode: "onChange",
 	});
 

@@ -326,7 +326,7 @@ function LibraryProfile() {
 										inputRef={firstEditableFieldRef}
 										fullWidth
 										error={!!errors.fullName}
-										helperText={errors.fullName?.message}
+										helperText={errors.fullName?.message as string}
 									/>
 								) : (
 									<RenderAttribute attribute={library.fullName} />
@@ -352,7 +352,7 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.shortName}
-										helperText={errors.shortName?.message}
+										helperText={errors.shortName?.message as string}
 									/>
 								) : (
 									<RenderAttribute attribute={library.shortName} />
@@ -380,7 +380,7 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.abbreviatedName}
-										helperText={errors.abbreviatedName?.message}
+										helperText={errors.abbreviatedName?.message as string}
 									/>
 								) : (
 									<RenderAttribute attribute={library.abbreviatedName} />
@@ -435,7 +435,7 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.supportHours}
-										helperText={errors.supportHours?.message}
+										helperText={errors.supportHours?.message as string}
 									/>
 								) : (
 									<RenderAttribute attribute={library.supportHours} />
@@ -465,7 +465,9 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.backupDowntimeSchedule}
-										helperText={errors.backupDowntimeSchedule?.message}
+										helperText={
+											errors.backupDowntimeSchedule?.message as string
+										}
 									/>
 								) : (
 									<RenderAttribute attribute={library.backupDowntimeSchedule} />
@@ -546,7 +548,7 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.latitude}
-										helperText={errors.latitude?.message}
+										helperText={errors.latitude?.message as string}
 									/>
 								) : (
 									<RenderAttribute attribute={library.latitude} type="number" />
@@ -572,7 +574,7 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.longitude}
-										helperText={errors.longitude?.message}
+										helperText={errors.longitude?.message as string}
 									/>
 								) : (
 									<RenderAttribute

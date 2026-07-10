@@ -157,7 +157,7 @@ function ItemsPageComponent() {
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 				{data?.errors?.length > 0 && (
 					<Alert severity="error" sx={{ mb: 2 }}>
-						{t("ui.feedback.error.general")}
+						{t("ui.error.something_wrong")}
 					</Alert>
 				)}
 				{items.length === 0 && (

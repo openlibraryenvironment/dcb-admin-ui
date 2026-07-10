@@ -332,7 +332,7 @@ function Libraries() {
 			label: t("libraries.add_to_group"),
 		},
 		{
-			key: "addToGroup",
+			key: "addToGroupBulk",
 			onClick: handleBulkAddToGroup,
 			disabled: !isAnAdmin || selectedLibraryIds.length === 0,
 			label: t("libraries.add_to_group_selected"),

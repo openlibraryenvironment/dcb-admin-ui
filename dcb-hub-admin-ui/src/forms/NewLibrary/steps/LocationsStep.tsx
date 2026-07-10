@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
-import { Stack, Typography, Button, Box } from "@mui/material";
-import { UploadFile, AddLocationAlt } from "@mui/icons-material";
+import { Stack, Typography, Button, Box, Alert } from "@mui/material";
+import { UploadFile, AddLocationAlt, CheckCircle } from "@mui/icons-material";
 
 import Import from "@components/Import/Import";
 import NewLocation from "@forms/NewLocation/NewLocation";
@@ -22,6 +22,10 @@ export default function LocationsStep({
 
 	const [showImport, setShowImport] = useState(false);
 	const [showNewLocation, setShowNewLocation] = useState(false);
+	// Combined count of bulk-imported + manually-added locations. null until the
+	// user adds their first one.
+	const [addedCount, setAddedCount] = useState<number | null>(null);
+	const hasAdded = addedCount !== null;
 
 	// Retrieve values safely from the wizard's state machine context
 	const libraryName = getValues("fullName");
@@ -37,6 +41,17 @@ export default function LocationsStep({
 			<Typography>
 				{t("libraries.new.locations_explanation", { library: libraryName })}
 			</Typography>
+
+			{hasAdded && (
+				<Alert
+					severity="success"
+					icon={<CheckCircle fontSize="inherit" />}
+					sx={{ width: "100%" }}
+				>
+					{t("libraries.new.location_added", { count: addedCount ?? 0 })}
+				</Alert>
+			)}
+
 			<Stack direction="row" spacing={3} sx={{ width: "100%", mt: 2 }}>
 				{/* Bulk Import Option */}
 				<Box
@@ -122,6 +137,7 @@ export default function LocationsStep({
 					type="Locations"
 					presetHostLms={hostLmsCode}
 					libraryName={libraryName}
+					onImported={(count) => setAddedCount((prev) => (prev ?? 0) + count)}
 				/>
 			)}
 			{showNewLocation && (
@@ -133,6 +149,7 @@ export default function LocationsStep({
 					libraryName={libraryName}
 					type="Pickup"
 					ils={getILS(lmsClientClass) || ""}
+					onCreated={() => setAddedCount((prev) => (prev ?? 0) + 1)}
 				/>
 			)}
 		</Stack>

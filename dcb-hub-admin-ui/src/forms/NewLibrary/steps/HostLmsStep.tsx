@@ -57,17 +57,17 @@ export default function HostLmsStep() {
 						error={!!errors.lmsClientClass}
 						helperText={errors.lmsClientClass?.message as string}
 					>
-						{/* eslint-disable i18next/no-literal-string -- LMS product names are proper nouns and are not translated */}
+						{/* eslint-disable i18next/no-literal-string -- LMS product names are proper nouns and are not translated. may need ingest classes too */}
 						<MenuItem value="org.olf.dcb.core.interaction.sierra.SierraLmsClient">
 							Sierra
 						</MenuItem>
 						<MenuItem value="org.olf.dcb.core.interaction.polaris.PolarisLmsClient">
 							Polaris
 						</MenuItem>
-						<MenuItem value="org.olf.dcb.core.interaction.folio.FolioOaiPmhIngestSource">
+						<MenuItem value="org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient">
 							FOLIO
 						</MenuItem>
-						<MenuItem value="org.olf.dcb.core.interaction.alma.AlmaOaiPmhIngestSource">
+						<MenuItem value="org.olf.dcb.core.interaction.alma.AlmaHostLmsClient">
 							Alma
 						</MenuItem>
 						{/* eslint-enable i18next/no-literal-string */}

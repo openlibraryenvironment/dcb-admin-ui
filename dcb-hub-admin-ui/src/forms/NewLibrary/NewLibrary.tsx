@@ -25,6 +25,9 @@ import { createLibraryMutation } from "@mutations/createLibrary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ModeSelectionStep from "./steps/ModeSelectionStep";
 import HostLmsStep from "./steps/HostLmsStep";
+import HostLmsResultStep, {
+	type HostLmsVerificationResult,
+} from "./steps/HostLmsResultStep";
 import { ProfileStep } from "./steps/ProfileStep";
 import ContactsStep from "./steps/ContactsStep";
 import GroupStep from "./steps/GroupStep";
@@ -55,6 +58,39 @@ const STEP_SCHEMA_FIELDS: Record<
 	group: ["groupId"],
 };
 
+type LibraryFormValues = z.infer<typeof newLibrarySchema>;
+
+// The GraphQL LibraryInput type only accepts a fixed set of fields. Spreading
+// the whole form object (which also carries Host LMS/group/wizard-only state)
+// makes the server reject the mutation with "field not defined in LibraryInput".
+// Build an explicit, typed payload instead - contacts are consumed inline by
+// CreateLibraryDataFetcher, so no separate createLibraryContact call is needed.
+const buildLibraryInput = (formData: LibraryFormValues) => ({
+	agencyCode: formData.agencyCode,
+	fullName: formData.fullName,
+	shortName: formData.shortName,
+	abbreviatedName: formData.abbreviatedName,
+	address: formData.address,
+	type: formData.type,
+	latitude: formData.latitude,
+	longitude: formData.longitude,
+	supportHours: formData.supportHours,
+	patronWebsite: formData.patronWebsite,
+	discoverySystem: formData.discoverySystem,
+	hostLmsConfiguration: formData.hostLmsConfiguration,
+	backupDowntimeSchedule: formData.backupDowntimeSchedule,
+	reason: formData.reason,
+	hostLmsCode: formData.hostLmsCode,
+	authProfile: formData.authProfile,
+	contacts: formData.contacts.map((contact) => ({
+		firstName: contact.firstName.trim(),
+		lastName: contact.lastName.trim(),
+		email: contact.email.trim(),
+		role: contact.role,
+		isPrimaryContact: contact.isPrimaryContact,
+	})),
+});
+
 export default function NewLibrary({
 	show,
 	onClose,
@@ -73,9 +109,11 @@ export default function NewLibrary({
 		severity: "success",
 		text: "",
 	});
+	const [hostLmsResult, setHostLmsResult] =
+		useState<HostLmsVerificationResult | null>(null);
 
 	const methods = useForm({
-		mode: "onChange",
+		mode: "onTouched",
 		resolver: zodResolver(newLibrarySchema),
 		defaultValues: {
 			// Host LMS Fields
@@ -92,13 +130,14 @@ export default function NewLibrary({
 			abbreviatedName: "",
 			address: "",
 			type: "",
-			latitude: null,
-			longitude: null,
+			latitude: undefined,
+			longitude: undefined,
 			supportHours: "",
 			patronWebsite: "",
 			hostLmsConfiguration: "",
 			discoverySystem: "",
 			backupDowntimeSchedule: "",
+			authProfile: "",
 			reason: "Adding a new library",
 			contacts: [
 				{
@@ -129,7 +168,7 @@ export default function NewLibrary({
 			{ id: "profile", label: t("libraries.steps.profile") },
 			{ id: "contacts", label: t("libraries.steps.contacts") },
 			{ id: "group", label: t("libraries.steps.group") },
-			{ id: "refMappings", label: t("mappings.categories.all") },
+			{ id: "refMappings", label: t("nav.mappings.allReferenceValue") },
 		];
 
 		if (requiresNumericMappings) {
@@ -144,7 +183,11 @@ export default function NewLibrary({
 		base.push({ id: "locations", label: t("nav.locations") });
 
 		if (wizardMode === "new")
-			return [{ id: "hostLms", label: t("hostlms.new") }, ...base];
+			return [
+				{ id: "hostLms", label: t("hostlms.new") },
+				{ id: "hostLmsResult", label: t("hostlms.verification.step") },
+				...base,
+			];
 		return base;
 	}, [wizardMode, requiresNumericMappings, t]);
 
@@ -155,35 +198,34 @@ export default function NewLibrary({
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
 				gqlClient.request<any>(createHostLmsMutation, variables),
+			onSuccess: () =>
+				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
 		});
 
 	const { mutateAsync: createLibrary, isPending: isLibraryPending } =
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
 				gqlClient.request<any>(createLibraryMutation, variables),
-			onSuccess: () =>
-				queryClient.invalidateQueries({ queryKey: ["libraries"] }),
+			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: ["librariesList"] });
+				queryClient.invalidateQueries({ queryKey: ["agencies"] });
+				queryClient.invalidateQueries({ queryKey: ["agenciesSelection"] });
+			},
 		});
 
 	const handleNext = async () => {
-		// Scoped to the CURRENT step's own fields, not the whole shared schema:
-		// newLibrarySchema requires `contacts` (min 1) unconditionally, and a
-		// bare methods.trigger() validates every field in the schema regardless
-		// of which step is showing. Since contacts isn't filled in until a
-		// later step, that made the wizard unable to ever advance past the
-		// first step, no matter what was entered - and because the failing
-		// field (contacts) isn't rendered on earlier steps, nothing ever
-		// showed why "Next" appeared to do nothing.
-		const fieldsToValidate = STEP_SCHEMA_FIELDS[currentStep?.id ?? ""] ?? [];
-		const isStepValid =
-			fieldsToValidate.length === 0 ||
-			(await methods.trigger(fieldsToValidate));
-		if (!isStepValid) return;
-
-		const formData = methods.getValues();
-
 		try {
-			// Phase 1: If creating a Host LMS. zod catches bad json so no need for dupes
+			// Scoped to the CURRENT step's own fields
+			const fieldsToValidate = STEP_SCHEMA_FIELDS[currentStep?.id ?? ""] ?? [];
+			const isStepValid =
+				fieldsToValidate.length === 0 ||
+				(await methods.trigger(fieldsToValidate));
+
+			if (!isStepValid) return;
+
+			const formData = methods.getValues();
+
+			// Phase 1: If creating a Host LMS
 			if (currentStep?.id === "hostLms") {
 				const parsedConfig = formData.clientConfig
 					? JSON.parse(formData.clientConfig)
@@ -199,25 +241,22 @@ export default function NewLibrary({
 						itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
 					},
 				});
-				// Check this matches up with GQL, but the principle is right - we should be using what comes back
-				methods.setValue("hostLmsCode", result.createHostLms.hostLms.code);
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("hostlms.success_ping", {
-						status: result.createHostLms.pingStatus,
-					}),
-				});
+				const hostLmsData = result?.createHostLms;
+
+				// Just in case we get something weird from dcb-service.
+				if (!hostLmsData || !hostLmsData.hostLms) {
+					throw new Error(t("hostlms.error.no_data_returned"));
+				}
+				methods.setValue("hostLmsCode", hostLmsData.hostLms.code);
+				setHostLmsResult(hostLmsData); // Surface ping/ingest/warnings on a dedicated verification step
 			}
 
 			// Phase 2: If creating Library + Contacts
 			if (currentStep?.id === "contacts") {
 				const result = await createLibrary({
-					input: {
-						...formData,
-					},
+					input: buildLibraryInput(formData),
 				});
-				methods.setValue("libraryId", result.createLibrary.library.id);
+				methods.setValue("libraryId", result.createLibrary.id);
 				setAlert({
 					open: true,
 					severity: "success",
@@ -227,6 +266,7 @@ export default function NewLibrary({
 				});
 			}
 
+			// Phase 3: Group Step
 			if (currentStep?.id === "group" && formData.groupId) {
 				await gqlClient.request(addLibraryToGroup, {
 					input: {
@@ -234,6 +274,7 @@ export default function NewLibrary({
 						library: formData.libraryId,
 					},
 				});
+				queryClient.invalidateQueries({ queryKey: ["groups"] });
 				setAlert({
 					open: true,
 					severity: "success",
@@ -243,6 +284,7 @@ export default function NewLibrary({
 
 			setActiveStepIndex((prev) => prev + 1);
 		} catch (error: any) {
+			console.error("Validation or mutation failed:", error);
 			setAlert({
 				open: true,
 				severity: "error",
@@ -255,6 +297,7 @@ export default function NewLibrary({
 		methods.reset();
 		setWizardMode("unselected");
 		setActiveStepIndex(0);
+		setHostLmsResult(null);
 		onClose();
 	};
 
@@ -267,6 +310,8 @@ export default function NewLibrary({
 		switch (currentStep?.id) {
 			case "hostLms":
 				return <HostLmsStep />;
+			case "hostLmsResult":
+				return <HostLmsResultStep result={hostLmsResult} />;
 			case "profile":
 				return <ProfileStep />;
 			case "contacts":
@@ -350,7 +395,7 @@ export default function NewLibrary({
 											onClick={handleClose}
 											color="success"
 										>
-											{t("ui.actions.finish")}
+											{t("ui.actions.submit")}
 										</Button>
 									)}
 								</Stack>

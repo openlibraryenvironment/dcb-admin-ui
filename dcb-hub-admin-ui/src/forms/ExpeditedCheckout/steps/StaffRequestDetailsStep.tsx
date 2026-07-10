@@ -198,7 +198,7 @@ export const StaffRequestDetailsStep = ({
 										error={!!errors.itemLocalId || itemsError}
 										helperText={
 											errors.itemLocalId?.message ||
-											(itemsError ? t("ui.feedback.error.general") : "")
+											(itemsError ? t("ui.error.something_wrong") : "")
 										}
 									/>
 								)}
