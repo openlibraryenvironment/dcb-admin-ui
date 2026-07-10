@@ -151,6 +151,7 @@
 			"title": "Add new functional setting",
 			"success": "The new functional setting was successfully added for the {{consortium}} consortium."
 		},
+		"no_consortium_setup": "No consortium has been set up on this system yet",
 		"no_file_uploaded": "No file uploaded",
 		"onboarding": "Onboarding your consortium",
 		"remove_image": "Remove image",

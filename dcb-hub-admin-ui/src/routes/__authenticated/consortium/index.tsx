@@ -369,7 +369,7 @@ function ConsortiumPage() {
 					title={t("ui.error.cannot_retrieve_record")}
 					action={t("ui.actions.go_back")}
 					goBack="/locations"
-					message={t("error.consortium")} /** TODO: Translation keys */
+					message={t("consortium.no_consortium_setup")}
 				/>
 			</PageContainer>
 		);
