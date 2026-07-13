@@ -74,13 +74,48 @@ test.describe("Sidebar navigation", () => {
 		page,
 	}) => {
 		await page.goto("/");
+		const nav = page.locator('[data-tid="sidebar"]');
+		await expect(nav).toBeVisible();
+
 		await page.getByRole("button", { name: /menu/i }).click();
 
-		const nav = page.locator('[data-tid="sidebar"]');
-		// Collapsed state hides link text but keeps icons/links present (mini-drawer).
-		await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
+		// The docked sidebar has no mini rail - Sidebar.tsx returns null when
+		// collapsed - so collapsing removes it from the DOM entirely. This spec
+		// used to assert a mini-drawer that keeps its icons, which has never been
+		// how this component behaves.
+		await expect(nav).toHaveCount(0);
+
+		// The collapsed state is persisted (useSidebarStore, zustand/persist). On
+		// reload it must come back collapsed AND must never render open first: a
+		// sidebar that flashes in and then vanishes is the actual regression this
+		// test exists to catch, and an auto-retrying expect() cannot see it. So
+		// watch the DOM from before the first paint instead.
+		await page.addInitScript(() => {
+			(
+				window as Window & { __sidebarEverRendered?: boolean }
+			).__sidebarEverRendered = false;
+			const check = () => {
+				if (document.querySelector('[data-tid="sidebar"]')) {
+					(
+						window as Window & { __sidebarEverRendered?: boolean }
+					).__sidebarEverRendered = true;
+				}
+			};
+			new MutationObserver(check).observe(document.documentElement, {
+				childList: true,
+				subtree: true,
+			});
+		});
 
 		await page.reload();
-		await expect(nav.getByRole("link", { name: "Home" })).toBeVisible();
+		await expect(page.getByRole("button", { name: /menu/i })).toBeVisible();
+		await expect(nav).toHaveCount(0);
+		expect(
+			await page.evaluate(
+				() =>
+					(window as Window & { __sidebarEverRendered?: boolean })
+						.__sidebarEverRendered,
+			),
+		).toBe(false);
 	});
 });

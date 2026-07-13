@@ -1,0 +1,48 @@
+{
+	"locations": {
+		"totalSize": 2,
+		"pageable": { "number": 0, "offset": 0 },
+		"content": [
+			{
+				"id": "1f0c9b3a-1111-5111-9111-111111111111",
+				"code": "ALPHA-MAIN",
+				"name": "Alpha Main Desk",
+				"type": "PICKUP",
+				"isPickup": true,
+				"isEnabledForPickupAnywhere": true,
+				"printLabel": "Alpha Main",
+				"localId": "1",
+				"deliveryStops": "A1",
+				"lastImported": "2026-05-01T09:30:00Z",
+				"latitude": 53.4808,
+				"longitude": -2.2426,
+				"agency": {
+					"id": "a1b2c3d4-1111-5111-9111-111111111111",
+					"code": "alpha",
+					"name": "Alpha Agency"
+				},
+				"hostSystem": { "name": "Alpha Host LMS" }
+			},
+			{
+				"id": "2f0c9b3a-2222-5222-9222-222222222222",
+				"code": "BETA-MAIN",
+				"name": "Beta Main Desk",
+				"type": "PICKUP",
+				"isPickup": false,
+				"isEnabledForPickupAnywhere": false,
+				"printLabel": "Beta Main",
+				"localId": "2",
+				"deliveryStops": "B1",
+				"lastImported": "2026-05-02T14:15:00Z",
+				"latitude": 51.5072,
+				"longitude": -0.1276,
+				"agency": {
+					"id": "b1b2c3d4-2222-5222-9222-222222222222",
+					"code": "beta",
+					"name": "Beta Agency"
+				},
+				"hostSystem": { "name": "Beta Host LMS" }
+			}
+		]
+	}
+}

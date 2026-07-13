@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
@@ -12,6 +12,18 @@ import libraries from "./fixtures-data/libraries.json";
 // (the zod newLibrarySchema, via src/forms/NewLibrary/NewLibrary.tsx's
 // handleNext -> methods.trigger()) actually blocks progression on invalid input.
 
+// Opening the wizard: page actions are gated behind an "Actions" dropdown
+// (PageActionsMenu), not a directly-visible button. The first step is a radio
+// group ("Use existing system" / "Create new system") plus a Continue button -
+// NOT a pair of buttons, which is what these specs used to click and why they
+// timed out waiting for a "Create new" button that has never existed.
+const openWizardOnHostLmsStep = async (page: Page) => {
+	await page.getByRole("button", { name: /actions/i }).click();
+	await page.getByRole("menuitem", { name: /create a new library/i }).click();
+	await page.getByRole("radio", { name: /create new system/i }).check();
+	await page.getByRole("button", { name: /continue/i }).click();
+};
+
 test.describe("New Library wizard", () => {
 	test.beforeEach(async ({ page }) => {
 		await seedAuth(page);
@@ -24,28 +36,22 @@ test.describe("New Library wizard", () => {
 	});
 
 	test("opens to the new-vs-existing mode selection step", async ({ page }) => {
-		// Page actions are gated behind an "Actions" dropdown (PageActionsMenu),
-		// not a directly-visible button.
 		await page.getByRole("button", { name: /actions/i }).click();
 		await page.getByRole("menuitem", { name: /create a new library/i }).click();
 
 		await expect(page.getByRole("dialog")).toBeVisible();
 		await expect(
-			page.getByRole("button", { name: /create new/i }),
+			page.getByRole("radio", { name: /create new system/i }),
 		).toBeVisible();
 		await expect(
-			page.getByRole("button", { name: /use existing/i }),
+			page.getByRole("radio", { name: /use existing system/i }),
 		).toBeVisible();
 	});
 
 	test("blocks advancing past the host LMS step with empty required fields, with visible validation feedback", async ({
 		page,
 	}) => {
-		// Page actions are gated behind an "Actions" dropdown (PageActionsMenu),
-		// not a directly-visible button.
-		await page.getByRole("button", { name: /actions/i }).click();
-		await page.getByRole("menuitem", { name: /create a new library/i }).click();
-		await page.getByRole("button", { name: /create new/i }).click();
+		await openWizardOnHostLmsStep(page);
 
 		const dialog = page.getByRole("dialog");
 		const codeField = dialog.getByLabel(/host lms code/i);
@@ -61,10 +67,15 @@ test.describe("New Library wizard", () => {
 		// so validation silently blocked every step forever with no feedback.
 		await expect(codeField).toHaveValue("");
 		await expect(codeField).toHaveAttribute("aria-invalid", "true");
-		await expect(dialog.getByText("Host LMS Code is required")).toBeVisible();
+		// The message comes from newLibrarySchema -> i18n "ui.validation.required"
+		// ("Enter the {{field}}."), not the invented wording this spec used to
+		// assert.
+		await expect(dialog.getByText("Enter the Host LMS code.")).toBeVisible();
 	});
 
-	test("advances to the Profile step once host LMS fields are valid", async ({
+	// The step after Host LMS is Verification (it pings the newly created Host
+	// LMS), not Profile - Profile comes after that.
+	test("advances past the host LMS step once its fields are valid", async ({
 		page,
 	}) => {
 		await mockGraphQL(page, {
@@ -74,9 +85,7 @@ test.describe("New Library wizard", () => {
 				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
 			},
 		});
-		await page.getByRole("button", { name: /actions/i }).click();
-		await page.getByRole("menuitem", { name: /create a new library/i }).click();
-		await page.getByRole("button", { name: /create new/i }).click();
+		await openWizardOnHostLmsStep(page);
 
 		const dialog = page.getByRole("dialog");
 		await dialog.getByLabel(/host lms code/i).fill("testcode");
@@ -87,16 +96,12 @@ test.describe("New Library wizard", () => {
 		await dialog.getByRole("button", { name: /next/i }).click();
 
 		await expect(dialog.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
-			"Profile",
+			"Verification",
 		);
 	});
 
 	test("cancel closes the dialog without submitting", async ({ page }) => {
-		// Page actions are gated behind an "Actions" dropdown (PageActionsMenu),
-		// not a directly-visible button.
-		await page.getByRole("button", { name: /actions/i }).click();
-		await page.getByRole("menuitem", { name: /create a new library/i }).click();
-		await page.getByRole("button", { name: /create new/i }).click();
+		await openWizardOnHostLmsStep(page);
 
 		const dialog = page.getByRole("dialog");
 		await dialog.getByRole("button", { name: /cancel/i }).click();
