@@ -39,5 +39,3 @@ export const actionsTypes = [
 	"referenceValueMappings",
 	"numericRangeMappings",
 ];
-
-export const expandedFilterPanelTypes = ["patronRequests"];

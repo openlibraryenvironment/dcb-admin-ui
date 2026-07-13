@@ -19,6 +19,13 @@ import { getMappings } from "@queries/getMappings";
 import { getLocations } from "@queries/getLocations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLocationsQueryVariables,
+	LoadMappingsQueryVariables,
+	LoadNumericRangeMappingsQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/consortium/onboarding")({
 	component: Onboarding,
@@ -35,13 +42,16 @@ function Onboarding() {
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],
 		queryFn: async () => {
 			// 1. Get the base libraries
-			const libRes = await gqlClient.request<any>(getLibraries, {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 500,
-				query: "",
-			});
+			const libRes = await gqlClient.request<any, LoadLibrariesQueryVariables>(
+				getLibraries,
+				{
+					order: "fullName",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 500,
+					query: "",
+				},
+			);
 
 			const libs = libRes?.libraries?.content ?? [];
 
@@ -68,67 +78,86 @@ function Onboarding() {
 					}
 
 					try {
-						// Setting pagesize: 1 to purely retrieve the totalSize count efficiently
-						const queries = [
-							gqlClient.request<any>(getMappings, {
+						// Setting pagesize: 1 to purely retrieve the totalSize count efficiently.
+						// Inlined into Promise.all so TS infers a tuple: hoisting this into a
+						// `const queries = [...]` widens it to a union array, which is how
+						// `results[5].supplierRequests` (a field that query never returns) went
+						// unnoticed.
+						const [
+							itemTypeRes,
+							patronTypeRes,
+							locationRes,
+							pickupRes,
+							borrowingRes,
+							supplyingRes,
+						] = await Promise.all([
+							gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
 								query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
 								order: "id",
 								orderBy: "ASC",
 								pageno: 0,
 								pagesize: 1,
 							}),
-							gqlClient.request<any>(getMappings, {
+							gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
 								query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"patronType" OR fromCategory:"patronType") AND NOT deleted:true`,
 								order: "id",
 								orderBy: "ASC",
 								pageno: 0,
 								pagesize: 1,
 							}),
-							gqlClient.request<any>(getMappings, {
+							gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
 								query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`,
 								order: "id",
 								orderBy: "ASC",
 								pageno: 0,
 								pagesize: 1,
 							}),
-							gqlClient.request<any>(getLocations, {
-								query: `hostSystem: ${hostLmsId} AND isPickup: true`,
-								order: "code",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							}),
-							gqlClient.request<any>(getPatronRequests, {
-								query: `patronHostlmsCode: "${hostLmsCode}"`,
-								order: "dateCreated",
-								orderBy: "DESC",
-								pageno: 0,
-								pagesize: 1,
-							}),
-							gqlClient.request<any>(getPatronRequests, {
-								query: `supplyingAgencyCode: "${agencyCode}"`,
-								order: "dateCreated",
-								orderBy: "DESC",
-								pageno: 0,
-								pagesize: 1,
-							}),
-						];
-
-						let numericRangePromise = null;
-						if (requiresNumeric) {
-							numericRangePromise = gqlClient.request<any>(
-								getNumericRangeMappings,
+							gqlClient.request<any, LoadLocationsQueryVariables>(
+								getLocations,
 								{
-									query: `context:"${hostLmsCode}" AND NOT deleted:true`,
-									order: "id",
+									query: `hostSystem: ${hostLmsId} AND isPickup: true`,
+									order: "code",
 									orderBy: "ASC",
 									pageno: 0,
 									pagesize: 1,
 								},
-							);
+							),
+							gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+								getPatronRequests,
+								{
+									query: `patronHostlmsCode: "${hostLmsCode}"`,
+									order: "dateCreated",
+									orderBy: "DESC",
+									pageno: 0,
+									pagesize: 1,
+								},
+							),
+							gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+								getPatronRequests,
+								{
+									query: `supplyingAgencyCode: "${agencyCode}"`,
+									order: "dateCreated",
+									orderBy: "DESC",
+									pageno: 0,
+									pagesize: 1,
+								},
+							),
+						]);
+
+						let numericRangePromise = null;
+						if (requiresNumeric) {
+							numericRangePromise = gqlClient.request<
+								any,
+								LoadNumericRangeMappingsQueryVariables
+							>(getNumericRangeMappings, {
+								query: `context:"${hostLmsCode}" AND NOT deleted:true`,
+								order: "id",
+								orderBy: "ASC",
+								pageno: 0,
+								pagesize: 1,
+							});
 						}
 
-						const results = await Promise.all(queries);
 						const numericRes = requiresNumeric
 							? await numericRangePromise
 							: null;
@@ -136,15 +165,19 @@ function Onboarding() {
 						return {
 							...lib,
 							itemTypeMappingCount:
-								results[0]?.referenceValueMappings?.totalSize ?? 0,
+								itemTypeRes?.referenceValueMappings?.totalSize ?? 0,
 							patronTypeMappingCount:
-								results[1]?.referenceValueMappings?.totalSize ?? 0,
+								patronTypeRes?.referenceValueMappings?.totalSize ?? 0,
 							locationMappingCount:
-								results[2]?.referenceValueMappings?.totalSize ?? 0,
-							pickupLocationCount: results[3]?.locations?.totalSize ?? 0,
-							patronRequestCount: results[4]?.patronRequests?.totalSize ?? 0,
+								locationRes?.referenceValueMappings?.totalSize ?? 0,
+							pickupLocationCount: pickupRes?.locations?.totalSize ?? 0,
+							patronRequestCount: borrowingRes?.patronRequests?.totalSize ?? 0,
+							// This is a LoadPatronRequests query filtered by supplying agency,
+							// so it returns `patronRequests`. It previously read
+							// `.supplierRequests`, which that query never returns - the count
+							// was therefore always 0.
 							supplierRequestCount:
-								results[5]?.supplierRequests?.totalSize ?? 0,
+								supplyingRes?.patronRequests?.totalSize ?? 0,
 							numericRangeMappingCount: requiresNumeric
 								? (numericRes?.numericRangeMappings?.totalSize ?? 0)
 								: null,
@@ -247,7 +280,7 @@ function Onboarding() {
 								})}
 							</Typography>
 							<Typography variant="body2">
-								{t("libraries.config.data.mappings.location_count", {
+								{t("libraries.config.data.mappings.location_type_count", {
 									count: row.locationTypeMappingCount || 0,
 								})}
 							</Typography>

@@ -5,6 +5,10 @@ import {
 	numericOperators,
 } from "@constants/dataGridConstants";
 
+// Question marks replace spaces in search terms - see Lucene docs
+// https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
+const toLuceneTerm = (value: any) => String(value).replaceAll(" ", "?");
+
 export const buildFilterQuery = (
 	field: string,
 	operator: string,
@@ -27,7 +31,13 @@ export const buildFilterQuery = (
 	// 2. THE THREAD SAVER (GUARD)
 	// If the user hasn't typed anything yet, bail out cleanly.
 	// Note: value === 0 is structurally valid for numerics, so we check explicitly.
-	if (value === undefined || value === null || value === "") {
+	// An empty array is what "is any of" holds before any option is picked.
+	if (
+		value === undefined ||
+		value === null ||
+		value === "" ||
+		(Array.isArray(value) && value.length === 0)
+	) {
 		return "";
 	}
 
@@ -77,14 +87,27 @@ export const buildFilterQuery = (
 		if (operator === "onOrBefore") return `${field}:[* TO ${dateStr}]`;
 	}
 
-	// 6. STANDARD OPERATORS
+	// 6. SET MEMBERSHIP ("is any of" on singleSelect / string columns)
+	// The value is an array of selections, so it cannot go through the scalar
+	// path below - String([a, b]) would produce the nonsense term "a,b".
+	if (operator === "isAnyOf") {
+		const terms = (isArray ? value : [value])
+			.filter(
+				(entry: any) => entry !== undefined && entry !== null && entry !== "",
+			)
+			.map((entry: any) => `${field}:${toLuceneTerm(entry)}`);
+
+		if (terms.length === 0) return "";
+		// Parenthesised: processGridFilterModel ANDs this with the other filter items.
+		return `(${terms.join(" OR ")})`;
+	}
+
+	// 7. STANDARD OPERATORS
 	const replacedValue = numericOperators.includes(operator)
 		? value
-		: String(value).replaceAll(" ", "?");
+		: toLuceneTerm(value);
 
-	// Question marks are used to replace spaces in search terms- see Lucene docs https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
 	// Lucene powers our server-side querying so we need to get expressions into the right syntax.
-	// We're currently only supporting contains and equals, but other operators are possible - see docs.
 	// We will also need to introduce type handling - i.e. for UUIDs, numbers etc - based on the field.
 
 	const convertedValue = isConversionField
@@ -121,10 +144,13 @@ export const buildFilterQuery = (
 		case "does not equal":
 		case "!=":
 		case "Does not equal":
+		case "doesNotEqual": // MUI's built-in string operator
+		case "not": // singleSelect columns (status, previous status, next status...)
 			// Note - the NOT operator can not be used with just one term. So we have to improvise
 			// https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#not-heading
 			return doesNotEqualQuery;
 		case "does not contain":
+		case "doesNotContain": // MUI's built-in string operator
 			return doesNotContainQuery;
 		case "<=":
 			return lessThanQueryInclusive;

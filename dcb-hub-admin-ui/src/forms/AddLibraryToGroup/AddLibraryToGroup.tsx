@@ -25,6 +25,10 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getGroupsSelection } from "@queries/getGroupsSelection";
 import { getLibraries } from "@queries/getLibraries";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
+import type {
+	LoadGroupsSelectionQueryVariables,
+	LoadLibrariesQueryVariables,
+} from "@generated/graphql";
 
 interface AddLibraryType {
 	show: boolean;
@@ -78,7 +82,7 @@ export default function AddLibraryToGroup({
 	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
 		queryKey: ["librariesSelection"],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraries, {
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 				order: "fullName",
 				orderBy: "ASC",
 				pageno: 0,
@@ -91,13 +95,15 @@ export default function AddLibraryToGroup({
 	const { data: groupsData, isLoading: isGroupsLoading } = useQuery({
 		queryKey: ["groupsSelection"],
 		queryFn: () =>
-			gqlClient.request<any>(getGroupsSelection, {
-				order: "name",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			}),
+			gqlClient.request<any, LoadGroupsSelectionQueryVariables>(
+				getGroupsSelection,
+				{
+					order: "name",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1000,
+				},
+			),
 	});
 
 	const libraryOptions =

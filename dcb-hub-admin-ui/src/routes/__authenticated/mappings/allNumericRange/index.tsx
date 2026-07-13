@@ -25,6 +25,10 @@ import { computeMutation } from "@helpers/computeMutation";
 
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { updateNumericRangeMapping } from "@mutations/updateNumericRangeMapping";
+import type {
+	LoadNumericRangeMappingsQueryVariables,
+	UpdateNumericRangeMappingMutationVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/mappings/allNumericRange/",
@@ -63,7 +67,6 @@ function NumericRangeMappingsRoute() {
 		setDeleteConfirmationId,
 		showImport,
 		setImport,
-		setNewMapping,
 	} = useMappingGridState(gridId, { lastImported: false });
 
 	const {
@@ -73,7 +76,7 @@ function NumericRangeMappingsRoute() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadNumericRangeMappingsQueryVariables>(
 				getNumericRangeMappings,
 				buildServerGridQueryVars({
 					filterModel,
@@ -90,7 +93,10 @@ function NumericRangeMappingsRoute() {
 
 	const { mutateAsync: updateMapping } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updateNumericRangeMapping, variables),
+			gqlClient.request<any, UpdateNumericRangeMappingMutationVariables>(
+				updateNumericRangeMapping,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -141,7 +147,9 @@ function NumericRangeMappingsRoute() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 100,
-				getActions: ({ id }) => {
+				getActions: ({ id, columns: rowColumns }) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -179,7 +187,7 @@ function NumericRangeMappingsRoute() {
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								})
 							}
 							disabled={!isAnAdmin}
@@ -206,13 +214,9 @@ function NumericRangeMappingsRoute() {
 	return (
 		<PageContainer title={t("nav.mappings.allNumericRange")}>
 			<Stack spacing={4} direction="row" sx={{ mb: 3 }}>
-				<Button
-					variant="outlined"
-					onClick={() => setNewMapping(true)}
-					disabled={!isAnAdmin}
-				>
-					{t("mappings.new.title")}
-				</Button>
+				{/* No "new mapping" button here: NewMapping only creates reference
+				    value mappings, so the button did nothing but set a flag nobody
+				    read. Numeric range mappings are import-only for now. */}
 				<Tooltip title={isAnAdmin ? "" : t("mappings.import_disabled")}>
 					<span>
 						<Button

@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
 import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -11,6 +10,7 @@ import Link from "@components/Link/Link";
 import ErrorComponent from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/requests",
@@ -26,7 +26,7 @@ export const Route = createFileRoute(
 
 function Requests() {
 	const { t } = useTranslation();
-	const auth = useAuth();
+	const client = useDcbRestClient();
 	const { namedSql, description } = Route.useSearch();
 
 	const gridId = "errorOverviewPatronRequests";
@@ -54,14 +54,8 @@ function Requests() {
 	} = useQuery({
 		queryKey: ["errorRequests", namedSql],
 		queryFn: async () => {
-			const res = await fetch(
-				`${import.meta.env.VITE_DCB_API_BASE}/sql?name=${namedSql}`,
-				{
-					headers: { Authorization: `Bearer ${auth.user?.access_token}` },
-				},
-			);
-			if (!res.ok) throw new Error("Failed to fetch request errors");
-			return res.json();
+			const res = await client.get("/sql", { params: { name: namedSql } });
+			return res.data;
 		},
 		enabled: !!namedSql,
 	});

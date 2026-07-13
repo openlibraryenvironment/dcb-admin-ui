@@ -24,6 +24,7 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getLocalId } from "@helpers/getLocalId";
 import { createLocation } from "@mutations/createLocation";
+import type { CreateLocationMutationVariables } from "@generated/graphql";
 
 interface NewLocationFormData {
 	code: string;
@@ -215,7 +216,10 @@ export default function NewLocation({
 
 	const { mutateAsync: createNewLocation, isPending } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(createLocation, variables),
+			gqlClient.request<any, CreateLocationMutationVariables>(
+				createLocation,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries(), // Broad refresh to update any active grid
 	});
 
@@ -255,7 +259,11 @@ export default function NewLocation({
 		<>
 			<Dialog open={show} onClose={onClose} fullWidth maxWidth="sm">
 				<DialogTitle variant="modalTitle">
-					{t("locations.new.title", { name: libraryName })}
+					{/* Opened from the consortium-wide locations page there is no library,
+					    and the interpolated title degraded to "Add new location for". */}
+					{libraryName
+						? t("locations.new.title", { name: libraryName })
+						: t("locations.new.title_no_library")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>

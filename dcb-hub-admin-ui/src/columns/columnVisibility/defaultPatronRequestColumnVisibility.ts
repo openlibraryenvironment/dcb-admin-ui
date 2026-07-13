@@ -29,5 +29,6 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	localRequestId: false,
 	renewalCount: false,
 	pollCountForCurrentStatus: false,
+	resolutionCount: false,
 	elapsedTimeInCurrentStatus: false,
 };

@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
 import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -11,6 +10,7 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { ProcessState } from "@models/ProcessState";
 
 export const Route = createFileRoute(
@@ -21,7 +21,7 @@ export const Route = createFileRoute(
 
 function CatalogMetricsByHostLms() {
 	const { t } = useTranslation();
-	const auth = useAuth();
+	const client = useDcbRestClient();
 
 	const gridId = "catalogMetricsByHostLms";
 
@@ -53,14 +53,8 @@ function CatalogMetricsByHostLms() {
 	} = useQuery({
 		queryKey: ["catalogMetricsByHostLms"],
 		queryFn: async () => {
-			const res = await fetch(
-				`${import.meta.env.VITE_DCB_API_BASE}/hostlmss/importIngestDetails`,
-				{
-					headers: { Authorization: `Bearer ${auth.user?.access_token}` },
-				},
-			);
-			if (!res.ok) console.error("Failed to fetch catalog metrics");
-			return res.json();
+			const res = await client.get("/hostlmss/importIngestDetails");
+			return res.data;
 		},
 		staleTime: 1000 * 60 * 5, // Cache for 5 minutes since this is a heavy request
 	});

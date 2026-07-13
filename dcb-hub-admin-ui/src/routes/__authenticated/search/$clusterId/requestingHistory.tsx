@@ -20,6 +20,11 @@ import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/requestingHistory",
@@ -54,7 +59,7 @@ function RequestingHistory() {
 	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
 		queryKey: ["allLibrariesDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraries, {
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 				order: "fullName",
 				orderBy: "ASC",
 				pageno: 0,
@@ -67,13 +72,16 @@ function RequestingHistory() {
 	const { data: locationsData, isLoading: isLocationsLoading } = useQuery({
 		queryKey: ["allLocationsDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLocationForPatronRequestGrid, {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 1000,
-				pageno: 0,
-			}),
+			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+				getLocationForPatronRequestGrid,
+				{
+					query: "",
+					order: "name",
+					orderBy: "ASC",
+					pagesize: 1000,
+					pageno: 0,
+				},
+			),
 		staleTime: 1000 * 60 * 30, // Cache for 30 mins
 	});
 
@@ -96,7 +104,7 @@ function RequestingHistory() {
 		queryKey: [gridId, clusterId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
 			const baseQuery = `(bibClusterId:${clusterId})`;
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
 				getPatronRequests,
 				buildServerGridQueryVars({
 					filterModel,

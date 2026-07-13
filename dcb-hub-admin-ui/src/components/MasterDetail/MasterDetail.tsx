@@ -896,7 +896,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
-								{t("locations.pickup_count", "Pickup Locations")}
+								{t("locations.pickup_locations")}
 							</Typography>
 							<Typography variant="attributeText">
 								<RenderAttribute attribute={row?.pickupLocationCount || 0} />

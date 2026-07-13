@@ -29,9 +29,15 @@ import Loading from "@components/Loading/Loading";
 import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { getConsortia } from "@queries/getConsortia";
+import type {
+	LoadConsortiumQueryVariables,
+	UpdateConsortiumMutationVariables,
+} from "@generated/graphql";
+
 import { updateConsortiumQuery } from "@mutations/updateConsortium";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Consortium } from "@models/Consortium";
@@ -39,9 +45,14 @@ import Error from "@components/Error/Error";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
 
-const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 10 };
-const DEFAULT_SORT_MODEL = [{ field: "name", sort: "asc" }];
-const DEFAULT_FILTER_MODEL = { items: [] };
+// The page renders a single consortium: the newest one. Loader and component MUST
+// agree on both key and variables, or ensureQueryData warms a cache entry the
+// component never reads.
+const CONSORTIUM_QUERY_KEY = ["LoadConsortium"];
+const CONSORTIUM_QUERY_VARIABLES: LoadConsortiumQueryVariables = {
+	order: "id",
+	orderBy: "DESC",
+};
 
 export const Route = createFileRoute("/__authenticated/consortium/")({
 	loader: ({ context: { queryClient, cfg, auth } }) => {
@@ -51,20 +62,12 @@ export const Route = createFileRoute("/__authenticated/consortium/")({
 		// own component-level auth-gate redirect to /login ever runs.
 		if (!auth?.isAuthenticated) return;
 		return queryClient.ensureQueryData({
-			queryKey: [
-				"groups",
-				DEFAULT_PAGINATION_MODEL,
-				DEFAULT_SORT_MODEL,
-				DEFAULT_FILTER_MODEL,
-			],
+			queryKey: CONSORTIUM_QUERY_KEY,
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getConsortia, {
-					query: "",
-					pageno: DEFAULT_PAGINATION_MODEL.page,
-					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-					order: DEFAULT_SORT_MODEL[0].field,
-					orderBy: "ASC",
-				}),
+				createGraphQLClient(cfg, auth).request<
+					any,
+					LoadConsortiumQueryVariables
+				>(getConsortia, CONSORTIUM_QUERY_VARIABLES),
 		});
 	},
 	component: ConsortiumPage,
@@ -83,6 +86,7 @@ function ConsortiumPage() {
 	const router = useRouter();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
+	const client = useDcbRestClient();
 	const queryClient = useQueryClient();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -127,17 +131,18 @@ function ConsortiumPage() {
 		isLoading: loading,
 		error,
 	} = useQuery({
-		queryKey: ["LoadConsortium"],
+		queryKey: CONSORTIUM_QUERY_KEY,
 		queryFn: () =>
-			gqlClient.request<any>(getConsortia, {
-				order: "id",
-				orderBy: "DESC",
-				pageno: 0,
-				pagesize: 1,
-			}),
+			gqlClient.request<any, LoadConsortiumQueryVariables>(
+				getConsortia,
+				CONSORTIUM_QUERY_VARIABLES,
+			),
 	});
 
-	const consortium: Consortium = gridData?.consortia?.content?.[0];
+	// May legitimately be absent (no consortium configured yet) - the render guards
+	// on it below. Typing it as a bare Consortium hid that from the compiler.
+	const consortium = gridData?.consortia?.content?.[0] as
+		Consortium | undefined;
 
 	const validationSchema = Yup.object().shape({
 		displayName: Yup.string()
@@ -200,8 +205,11 @@ function ConsortiumPage() {
 	} = useUnsavedChangesWarning(isDirty);
 
 	const { mutateAsync: updateConsortium } = useMutation({
-		mutationFn: (variables: any) =>
-			gqlClient.request(updateConsortiumQuery, variables),
+		mutationFn: (variables: UpdateConsortiumMutationVariables) =>
+			gqlClient.request<any, UpdateConsortiumMutationVariables>(
+				updateConsortiumQuery,
+				variables,
+			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
 	});
@@ -214,6 +222,7 @@ function ConsortiumPage() {
 	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
 
 	const onSubmit = (formData: ConsortiumFormFields) => {
+		if (!consortium) return;
 		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
 			const field = key as keyof ConsortiumFormFields;
 			if (
@@ -238,6 +247,7 @@ function ConsortiumPage() {
 		changeCategory: string,
 		changeReferenceUrl: string,
 	) => {
+		if (!consortium) return;
 		try {
 			await updateConsortium({
 				input: {
@@ -252,7 +262,7 @@ function ConsortiumPage() {
 				open: true,
 				severity: "success",
 				text: t("ui.data_grid.updated"),
-				title: t("ui.success"),
+				title: t("ui.data_grid.success"),
 			});
 			setEditMode(false);
 			setChangedFields({});
@@ -292,7 +302,7 @@ function ConsortiumPage() {
 		isHeader: boolean,
 	) => {
 		const file = fileRef.current?.files?.[0];
-		if (!file) return;
+		if (!file || !consortium) return;
 
 		const isValidSize = await validateImageSize(
 			file,
@@ -303,7 +313,9 @@ function ConsortiumPage() {
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("consortium.invalid_image_size"),
+				text: isHeader
+					? t("consortium.image_size_error_header")
+					: t("consortium.image_size_error_about"),
 				title: t("ui.error.title"),
 			});
 			return;
@@ -311,18 +323,12 @@ function ConsortiumPage() {
 
 		const formData = new FormData();
 		formData.append("file", file);
-		const uploadUrl =
-			import.meta.env.VITE_DCB_API_BASE + "/persistentAssets/serverUpload";
 
 		try {
 			if (isHeader) setHeaderIsUploading(true);
 			else setAboutIsUploading(true);
-			const res = await fetch(uploadUrl, {
-				method: "POST",
-				body: formData,
-				headers: { Authorization: `Bearer ${auth.user?.access_token}` },
-			});
-			const { url } = await res.json();
+			const res = await client.post("/persistentAssets/serverUpload", formData);
+			const { url } = res.data;
 
 			await updateConsortium({
 				input: {
@@ -339,8 +345,8 @@ function ConsortiumPage() {
 			setAlert({
 				open: true,
 				severity: "success",
-				text: t("ui.success"),
-				title: t("ui.success"),
+				text: t("ui.data_grid.success"),
+				title: t("ui.data_grid.success"),
 			});
 		} catch {
 			setAlert({
@@ -573,8 +579,11 @@ function ConsortiumPage() {
 					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					{/* A column Stack stretches its children to the container width by
+					    default; these Grids span the full row, so the upload controls must
+					    be pinned to the start to size to their own content. */}
+					<Stack direction={"column"} sx={{ alignItems: "flex-start" }}>
 						<Typography variant="attributeTitle">
 							{t("consortium.logo_app_header")}
 						</Typography>
@@ -612,41 +621,43 @@ function ConsortiumPage() {
 					</Stack>
 				</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Typography variant="attributeTitle">
-						{t("consortium.logo_about")}
-					</Typography>
-					{consortium.aboutImageUrl ? (
-						<Box
-							component="img"
-							src={consortium.aboutImageUrl}
-							sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Stack direction={"column"} sx={{ alignItems: "flex-start" }}>
+						<Typography variant="attributeTitle">
+							{t("consortium.logo_about")}
+						</Typography>
+						{consortium.aboutImageUrl ? (
+							<Box
+								component="img"
+								src={consortium.aboutImageUrl}
+								sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
+							/>
+						) : (
+							<Typography>{t("consortium.no_file_uploaded")}</Typography>
+						)}
+						<FileUploadButton
+							ref={aboutFileRef}
+							icon={<CloudUpload />}
+							buttonText={t("consortium.select_image")}
+							href="#aboutFileUpload"
+							isUploading={aboutIsUploading}
+							onFileSelect={(e) =>
+								setAboutPreviewUrl(URL.createObjectURL(e.target.files![0]))
+							}
+							previewUrl={aboutPreviewUrl}
+							handleRemove={() => setAboutPreviewUrl("")}
 						/>
-					) : (
-						<Typography>{t("consortium.no_file_uploaded")}</Typography>
-					)}
-					<FileUploadButton
-						ref={aboutFileRef}
-						icon={<CloudUpload />}
-						buttonText={t("consortium.select_image")}
-						href="#aboutFileUpload"
-						isUploading={aboutIsUploading}
-						onFileSelect={(e) =>
-							setAboutPreviewUrl(URL.createObjectURL(e.target.files![0]))
-						}
-						previewUrl={aboutPreviewUrl}
-						handleRemove={() => setAboutPreviewUrl("")}
-					/>
-					{aboutPreviewUrl && (
-						<Button
-							variant="outlined"
-							onClick={() => handleFileUpload(aboutFileRef, false)}
-							disabled={aboutIsUploading}
-							sx={{ mt: 2 }}
-						>
-							{aboutIsUploading ? t("common.uploading") : t("common.upload")}
-						</Button>
-					)}
+						{aboutPreviewUrl && (
+							<Button
+								variant="outlined"
+								onClick={() => handleFileUpload(aboutFileRef, false)}
+								disabled={aboutIsUploading}
+								sx={{ mt: 2 }}
+							>
+								{aboutIsUploading ? t("common.uploading") : t("common.upload")}
+							</Button>
+						)}
+					</Stack>
 				</Grid>
 			</Grid>
 

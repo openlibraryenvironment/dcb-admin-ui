@@ -51,7 +51,9 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 		const { t } = useTranslation();
 
 		return (
-			<Stack spacing={2}>
+			// alignItems keeps the trigger sized to its label: a column Stack stretches
+			// its children, which made the button span the full width of any wide parent.
+			<Stack spacing={2} sx={{ alignItems: "flex-start" }}>
 				<Button
 					component="label"
 					variant="outlined"
@@ -80,7 +82,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						sx={{
 							mt: 2,
 							maxWidth: "200px",
-							maxHeight: "200",
+							maxHeight: "200px",
 							position: "relative", // Add this to position the remove button
 							overflow: "hidden",
 							borderRadius: 1,
@@ -91,7 +93,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						<Tooltip title={t("consortium.remove_image")}>
 							<Button
 								onClick={handleRemove}
-								aria-label="Remove image"
+								aria-label={t("consortium.remove_image")}
 								sx={{
 									position: "absolute",
 									top: 0,

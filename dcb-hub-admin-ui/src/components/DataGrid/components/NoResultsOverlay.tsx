@@ -17,7 +17,8 @@ export function NoResultsOverlay({ noResultsMessage }: OverlayType) {
 				alignItems: "center",
 				justifyContent: "center",
 				height: "100%",
-			}}>
+			}}
+		>
 			<Typography variant="body1"> {noResultsMessage} </Typography>
 		</Box>
 	);

@@ -25,6 +25,11 @@ import { updatePerson } from "@mutations/updatePerson";
 import { deleteConsortiumContact } from "@mutations/deleteConsortiumContact";
 import { computeMutation } from "@helpers/computeMutation";
 import { CellEdit } from "@components/CellEdit/CellEdit";
+import type {
+	DeleteConsortiumContactMutationVariables,
+	LoadConsortiumContactsQueryVariables,
+	UpdatePersonMutationVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/consortium/contacts")({
 	component: Contacts,
@@ -52,12 +57,13 @@ function Contacts() {
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadConsortiumContacts"],
 		queryFn: () =>
-			gqlClient.request<any>(getConsortiumContacts, {
-				order: "id",
-				orderBy: "DESC",
-				pageno: 0,
-				pagesize: 10,
-			}),
+			gqlClient.request<any, LoadConsortiumContactsQueryVariables>(
+				getConsortiumContacts,
+				{
+					order: "id",
+					orderBy: "DESC",
+				},
+			),
 	});
 
 	const consortiumId = data?.consortia?.content?.[0]?.id;
@@ -65,14 +71,20 @@ function Contacts() {
 
 	const { mutateAsync: updateContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updatePerson, variables),
+			gqlClient.request<any, UpdatePersonMutationVariables>(
+				updatePerson,
+				variables,
+			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortiumContacts"] }),
 	});
 
 	const { mutate: deleteContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteConsortiumContact, variables),
+			gqlClient.request<any, DeleteConsortiumContactMutationVariables>(
+				deleteConsortiumContact,
+				variables,
+			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortiumContacts"] }),
 	});
@@ -186,7 +198,9 @@ function Contacts() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 100,
-				getActions: ({ id }) => {
+				getActions: ({ id, columns: rowColumns }) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -224,7 +238,7 @@ function Contacts() {
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								})
 							}
 							disabled={!isAnAdmin}

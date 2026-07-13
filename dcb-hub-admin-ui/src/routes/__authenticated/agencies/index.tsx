@@ -14,6 +14,7 @@ import { getAgencies } from "@queries/getAgencies";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import type { LoadAgenciesQueryVariables } from "@generated/graphql";
 
 // Default-state prefetch: the component reads pagination/sort/filter state
 // from useGridStore (a Zustand store) at mount time, which the loader
@@ -40,13 +41,16 @@ export const Route = createFileRoute("/__authenticated/agencies/")({
 				DEFAULT_FILTER_MODEL,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getAgencies, {
-					query: "",
-					pageno: DEFAULT_PAGINATION_MODEL.page,
-					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-					order: DEFAULT_SORT_MODEL[0].field,
-					orderBy: "ASC",
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadAgenciesQueryVariables>(
+					getAgencies,
+					{
+						query: "",
+						pageno: DEFAULT_PAGINATION_MODEL.page,
+						pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
+						order: DEFAULT_SORT_MODEL[0].field,
+						orderBy: "ASC",
+					},
+				),
 		});
 	},
 	component: AgenciesRouteComponent,
@@ -87,7 +91,7 @@ function AgenciesRouteComponent() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadAgenciesQueryVariables>(
 				getAgencies,
 				buildServerGridQueryVars({
 					filterModel,

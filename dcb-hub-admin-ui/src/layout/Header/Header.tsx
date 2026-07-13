@@ -26,6 +26,7 @@ import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
+import type { LoadConsortiumHeaderQueryVariables } from "@generated/graphql";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -91,12 +92,13 @@ export default function Header({
 		enabled: auth.isAuthenticated,
 		throwOnError: false,
 		queryFn: () =>
-			gqlClient.request<any>(getConsortiumBasics, {
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 1,
-				pageno: 0,
-			}),
+			gqlClient.request<any, LoadConsortiumHeaderQueryVariables>(
+				getConsortiumBasics,
+				{
+					order: "name",
+					orderBy: "ASC",
+				},
+			),
 	});
 
 	const consortium = headerContentData?.consortia?.content?.[0];

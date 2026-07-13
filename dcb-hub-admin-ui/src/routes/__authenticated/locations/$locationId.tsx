@@ -41,6 +41,7 @@ import {
 } from "@helpers/actions/editAndDeleteActions";
 import { Location } from "@models/Location";
 import { updateLocationQuery } from "@mutations/updateLocation";
+import type { LoadLocationQueryVariables } from "@generated/graphql";
 
 interface LocationFormFields {
 	name: string;
@@ -92,7 +93,9 @@ function LocationDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["location", locationId],
 		queryFn: () =>
-			gqlClient.request<any>(getLocation, { query: `id:${locationId}` }),
+			gqlClient.request<any, LoadLocationQueryVariables>(getLocation, {
+				query: `id:${locationId}`,
+			}),
 		enabled: !!locationId,
 		refetchInterval: 120000,
 	});
@@ -544,7 +547,7 @@ function LocationDetails() {
 						>
 							{location.isEnabledForPickupAnywhere
 								? t("locations.new.pickup_anywhere_disable")
-								: t("locations.newpickup_anywhere_enable")}
+								: t("locations.new.pickup_anywhere_enable")}
 						</Button>
 					)}
 				</Grid>

@@ -16,6 +16,7 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Import from "@components/Import/Import";
 import Confirmation from "@components/Confirmation/Confirmation";
+import NewMapping from "@forms/NewMapping/NewMapping";
 
 import { useMappingGridState } from "@/hooks/useMappingGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -24,8 +25,16 @@ import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { computeMutation } from "@helpers/computeMutation";
 
 import { getMappings } from "@queries/getMappings";
+import { getHostLmsCodes } from "@queries/getHostLmsCodes";
 import { updateReferenceValueMapping } from "@mutations/updateReferenceValueMapping";
 import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapping";
+import type {
+	DeleteEntityInput,
+	DeleteReferenceValueMappingMutationVariables,
+	LoadHostLmsCodesQueryVariables,
+	LoadMappingsQueryVariables,
+	UpdateReferenceValueMappingMutationVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/mappings/allReferenceValue/",
@@ -65,8 +74,29 @@ function ReferenceValueMappingsRoute() {
 		setDeleteConfirmationId,
 		showImport,
 		setImport,
+		showNewMapping,
 		setNewMapping,
 	} = useMappingGridState(gridId, { lastImported: false, toCategory: false });
+
+	// This page is consortium-wide, so it has no library to take a Host LMS code
+	// from. The new-mapping form still needs the set of contexts a mapping can be
+	// scoped to, so fetch the codes and hand it the full list.
+	const { data: hostLmsData } = useQuery({
+		queryKey: ["hostLmsCodes"],
+		queryFn: () =>
+			gqlClient.request<any, LoadHostLmsCodesQueryVariables>(getHostLmsCodes, {
+				query: "",
+				pagesize: 1000,
+			}),
+		staleTime: 1000 * 60 * 5,
+	});
+	const hostLmsCodes: string[] = useMemo(
+		() =>
+			(hostLmsData?.hostLms?.content ?? [])
+				.map((hostLms: { code: string }) => hostLms.code)
+				.filter(Boolean),
+		[hostLmsData],
+	);
 
 	const {
 		data: gridData,
@@ -75,7 +105,7 @@ function ReferenceValueMappingsRoute() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadMappingsQueryVariables>(
 				getMappings,
 				buildServerGridQueryVars({
 					filterModel,
@@ -92,13 +122,23 @@ function ReferenceValueMappingsRoute() {
 
 	const { mutateAsync: updateMapping } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updateReferenceValueMapping, variables),
+			gqlClient.request<any, UpdateReferenceValueMappingMutationVariables>(
+				updateReferenceValueMapping,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
+	// The mutation declares `$input: DeleteEntityInput!`. This previously passed a
+	// bare `{ id }`, so the non-null $input was never supplied and the delete was
+	// rejected by the server. The audit fields the confirmation dialog collects were
+	// being discarded as well.
 	const { mutate: deleteMapping } = useMutation({
-		mutationFn: (id: string) =>
-			gqlClient.request<any>(deleteReferenceValueMapping, { id }),
+		mutationFn: (input: DeleteEntityInput) =>
+			gqlClient.request<any, DeleteReferenceValueMappingMutationVariables>(
+				deleteReferenceValueMapping,
+				{ input },
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -149,7 +189,9 @@ function ReferenceValueMappingsRoute() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 100,
-				getActions: ({ id }) => {
+				getActions: ({ id, columns: rowColumns }) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -187,7 +229,7 @@ function ReferenceValueMappingsRoute() {
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								})
 							}
 							disabled={!isAnAdmin}
@@ -291,14 +333,33 @@ function ReferenceValueMappingsRoute() {
 			<Confirmation
 				open={!!deleteConfirmationId}
 				onClose={() => setDeleteConfirmationId(null)}
-				onConfirm={() => {
+				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
 					if (deleteConfirmationId)
-						deleteMapping(deleteConfirmationId as string);
+						deleteMapping({
+							id: deleteConfirmationId as string,
+							reason,
+							changeCategory,
+							changeReferenceUrl,
+						});
 					setDeleteConfirmationId(null);
 				}}
 				entityName="ReferenceValueMapping"
 				action="deletion"
 			/>
+			{showNewMapping && (
+				<NewMapping
+					show={showNewMapping}
+					onClose={() => {
+						setNewMapping(false);
+						queryClient.invalidateQueries({ queryKey: [gridId] });
+					}}
+					category=""
+					hostLmsCode=""
+					agencyCode=""
+					libraryName=""
+					hostLmsCodes={hostLmsCodes}
+				/>
+			)}
 			{showImport && (
 				<Import
 					show={showImport}

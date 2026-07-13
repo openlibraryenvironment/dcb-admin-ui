@@ -137,7 +137,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
 						placeholder={t("ui.markdown.type")}
 						slotProps={{
 							htmlInput: {
-								"aria-label": t("ui.markdown.text_input"),
+								"aria-label": t("ui.markdown.input"),
 							},
 						}}
 					/>

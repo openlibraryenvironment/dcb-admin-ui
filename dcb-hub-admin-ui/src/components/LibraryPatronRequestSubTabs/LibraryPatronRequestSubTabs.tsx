@@ -10,6 +10,7 @@ import {
 	getLibraryPatronRequestQueries,
 	LibraryPatronRequestBucket,
 } from "@constants/libraryPatronRequestQueries";
+import type { LoadPatronRequestTotalsQueryVariables } from "@generated/graphql";
 
 // The five workflow buckets for a single library's patron requests. `bucket`
 // doubles as the route segment; `labelKey` resolves to "<Label> requests
@@ -55,13 +56,16 @@ export default function LibraryPatronRequestSubTabs({
 		queries: SUBTABS.map((tab) => ({
 			queryKey: ["patronRequestTotals", "library", code, tab.bucket],
 			queryFn: () =>
-				gqlClient.request<any>(getPatronRequestTotals, {
-					query: bucketQueries?.[tab.bucket] ?? "",
-					pageno: 0,
-					pagesize: 1,
-					order: "dateCreated",
-					orderBy: "DESC",
-				}),
+				gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
+					getPatronRequestTotals,
+					{
+						query: bucketQueries?.[tab.bucket] ?? "",
+						pageno: 0,
+						pagesize: 1,
+						order: "dateCreated",
+						orderBy: "DESC",
+					},
+				),
 			enabled: !!code,
 			staleTime: 1000 * 60,
 		})),

@@ -46,8 +46,15 @@ export function buildRowEditActionsColumn({
 		type: "actions",
 		headerName: t("ui.data_grid.actions"),
 		width: 100,
-		getActions: ({ id }: GridRowParams) => {
+		getActions: ({ id, columns }: GridRowParams) => {
 			const isEditing = rowModesModel[id]?.mode === GridRowModes.Edit;
+			// Entering edit mode without `fieldToFocus` leaves focus on the Edit
+			// button that just disappeared, so the row silently swaps to inputs with
+			// nothing focused and no visible indication of where you are - a WCAG
+			// 2.4.7 (focus visible) and 3.2.2 (on input) failure. Focus the row's
+			// first editable cell, derived from the grid's own columns so a grid
+			// cannot forget to name one.
+			const fieldToFocus = columns.find((col) => col.editable)?.field;
 
 			if (isEditing) {
 				return [
@@ -84,7 +91,7 @@ export function buildRowEditActionsColumn({
 					onClick={() =>
 						setRowModesModel({
 							...rowModesModel,
-							[id]: { mode: GridRowModes.Edit },
+							[id]: { mode: GridRowModes.Edit, fieldToFocus },
 						})
 					}
 					disabled={!canEdit}

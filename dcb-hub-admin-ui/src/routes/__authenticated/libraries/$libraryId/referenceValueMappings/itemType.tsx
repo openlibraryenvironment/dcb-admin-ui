@@ -26,6 +26,10 @@ import { referenceValueMappingColumnsNoCategoryFilter } from "@columns/reference
 import { getMappings } from "@queries/getMappings";
 import { updateReferenceValueMapping } from "@mutations/updateReferenceValueMapping";
 import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapping";
+import type {
+	DeleteLibraryMutationVariables,
+	LoadLibraryQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/referenceValueMappings/itemType",
@@ -66,13 +70,18 @@ function LocationMappings() {
 	} = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 
 	const { mutateAsync: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteLibraryMutation, variables),
+			gqlClient.request<any, DeleteLibraryMutationVariables>(
+				deleteLibraryMutation,
+				variables,
+			),
 	});
 
 	const library = libraryData?.libraries?.content?.[0];

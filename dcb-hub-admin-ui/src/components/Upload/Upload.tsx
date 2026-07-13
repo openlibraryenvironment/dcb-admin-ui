@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { useAuth } from "react-oidc-context";
-import axios from "axios";
 import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 
 import useCode from "@hooks/useCode";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Confirmation from "../Confirmation/Confirmation";
 
@@ -18,6 +17,11 @@ import { getErrorMessageKey } from "@helpers/MappingsImport/getErrorMessageKey";
 import { getSuccessKey } from "@helpers/MappingsImport/getSuccessMessageKey";
 import { checkExistingLocations } from "@queries/checkExistingLocations";
 import { checkExistingNumericRangeMappings } from "@queries/checkExistingNumericRangeMappings";
+import type {
+	CheckExistingLocationsQueryVariables,
+	CheckExistingMappingsQueryVariables,
+	CheckExistingNumericRangeMappingsQueryVariables,
+} from "@generated/graphql";
 
 const ALLOWED_FILE_TYPES = {
 	"text/csv": [".csv"],
@@ -44,8 +48,8 @@ export default function FileUpload({
 	onImported,
 }: FileUploadProps) {
 	const { t } = useTranslation();
-	const auth = useAuth();
 	const gqlClient = useGraphQLClient();
+	const client = useDcbRestClient();
 	const { code, resetAll } = useCode();
 
 	const [addedFile, setAddedFile] = useState<File | null>(null);
@@ -68,10 +72,8 @@ export default function FileUpload({
 	const [ignoredCount, setIgnoredCount] = useState(0);
 	const [deletedCount, setDeletedCount] = useState(0);
 
-	const uploadUrl =
-		import.meta.env.VITE_DCB_API_BASE +
-		(type === "Locations" ? "/locations/upload" : "/uploadedMappings/upload");
-	const headers = { Authorization: `Bearer ${auth.user?.access_token}` };
+	const uploadPath =
+		type === "Locations" ? "/locations/upload" : "/uploadedMappings/upload";
 
 	// Close the confirmation dialog when the target entity changes, adjusting
 	// state during render rather than via an effect.
@@ -138,13 +140,16 @@ export default function FileUpload({
 								query: `(toContext:${code} OR fromContext:${code}) AND (fromCategory:${category} OR toCategory:${category}) AND NOT deleted:true`,
 								pagesize: 1,
 							};
-				const res = await gqlClient.request<any>(
-					checkExistingMappings,
-					queryVars,
-				);
+				const res = await gqlClient.request<
+					any,
+					CheckExistingMappingsQueryVariables
+				>(checkExistingMappings, queryVars);
 				totalSize = res?.referenceValueMappings?.totalSize ?? 0;
 			} else if (type === "Locations" && presetHostLmsId) {
-				const res = await gqlClient.request<any>(checkExistingLocations, {
+				const res = await gqlClient.request<
+					any,
+					CheckExistingLocationsQueryVariables
+				>(checkExistingLocations, {
 					query: `hostSystem:${presetHostLmsId}`,
 					pagesize: 1,
 				});
@@ -157,10 +162,10 @@ export default function FileUpload({
 								query: `context:${code} AND domain:${category} AND NOT deleted:true`,
 								pagesize: 1,
 							};
-				const res = await gqlClient.request<any>(
-					checkExistingNumericRangeMappings,
-					queryVars,
-				);
+				const res = await gqlClient.request<
+					any,
+					CheckExistingNumericRangeMappingsQueryVariables
+				>(checkExistingNumericRangeMappings, queryVars);
 				totalSize = res?.numericRangeMappings?.totalSize ?? 0;
 			}
 
@@ -209,7 +214,7 @@ export default function FileUpload({
 			formData.append("changeReferenceUrl", changeReferenceUrl);
 
 		try {
-			const response = await axios.post(uploadUrl, formData, { headers });
+			const response = await client.post(uploadPath, formData);
 
 			setSuccess(true);
 			setSuccessCount(response.data.recordsImported ?? 0);

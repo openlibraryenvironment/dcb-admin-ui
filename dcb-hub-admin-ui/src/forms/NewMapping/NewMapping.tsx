@@ -34,6 +34,7 @@ import {
 	validCategories,
 } from "@constants/mappingsImportConstants";
 import { createReferenceValueMapping } from "@mutations/createReferenceValueMapping";
+import type { CreateReferenceValueMappingMutationVariables } from "@generated/graphql";
 
 interface NewMappingFormData {
 	toValue: string;
@@ -59,6 +60,12 @@ type NewMappingFormType = {
 	hostLmsCode: string;
 	agencyCode: string;
 	libraryName: string;
+	/**
+	 * Every Host LMS code a mapping may be scoped to. Supplied by the
+	 * consortium-wide mappings page, which has no single library - and therefore
+	 * no `hostLmsCode` - to derive the from/to context choices from.
+	 */
+	hostLmsCodes?: string[];
 };
 
 export default function NewMapping({
@@ -68,6 +75,7 @@ export default function NewMapping({
 	hostLmsCode,
 	agencyCode,
 	libraryName,
+	hostLmsCodes,
 }: NewMappingFormType) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
@@ -79,7 +87,29 @@ export default function NewMapping({
 		text: "",
 	});
 
-	const contextOptions = ["DCB", hostLmsCode];
+	// Filtered, because an absent hostLmsCode used to leave an unselectable blank
+	// option sitting in both context dropdowns.
+	const contextOptions = ["DCB", ...(hostLmsCodes ?? [hostLmsCode])].filter(
+		Boolean,
+	);
+
+	// Both the category and the Host LMS code are absent when the form is opened
+	// from a consortium-wide mappings page. Interpolating an empty string into
+	// the full title leaves either a double space or a dangling "for".
+	const categoryLabel = mappingsCategoryConverter(category);
+	let title = t("mappings.new.title");
+	if (categoryLabel && hostLmsCode) {
+		title = t("mappings.new.title_modal", {
+			category: categoryLabel,
+			code: hostLmsCode,
+		});
+	} else if (hostLmsCode) {
+		title = t("mappings.new.title_modal_no_category", { code: hostLmsCode });
+	} else if (categoryLabel) {
+		title = t("mappings.new.title_modal_no_host_lms", {
+			category: categoryLabel,
+		});
+	}
 
 	const validationSchema = Yup.object().shape({
 		fromCategory: Yup.string()
@@ -228,7 +258,10 @@ export default function NewMapping({
 
 	const { mutateAsync: createMapping, isPending } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(createReferenceValueMapping, variables),
+			gqlClient.request<any, CreateReferenceValueMappingMutationVariables>(
+				createReferenceValueMapping,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries(), // Broad refresh to update any active grid
 	});
 
@@ -295,12 +328,7 @@ export default function NewMapping({
 	return (
 		<>
 			<Dialog open={show} onClose={onClose} fullWidth maxWidth="sm">
-				<DialogTitle variant="modalTitle">
-					{t("mappings.new.title_modal", {
-						category: mappingsCategoryConverter(category),
-						code: hostLmsCode,
-					})}
-				</DialogTitle>
+				<DialogTitle variant="modalTitle">{title}</DialogTitle>
 				<Divider aria-hidden="true" />
 				<DialogContent>
 					<Box

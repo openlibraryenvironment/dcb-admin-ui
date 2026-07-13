@@ -19,6 +19,7 @@ import { Close } from "@mui/icons-material";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { createLibraryGroup } from "@mutations/createLibraryGroup";
+import type { CreateLibraryGroupMutationVariables } from "@generated/graphql";
 
 interface FormData {
 	name: string;
@@ -75,13 +76,16 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 
 	const mutation = useMutation({
 		mutationFn: async (values: FormData) => {
-			return gqlClient.request<any>(createLibraryGroup, {
-				input: {
-					name: values.name,
-					code: values.code,
-					type: values.type,
+			return gqlClient.request<any, CreateLibraryGroupMutationVariables>(
+				createLibraryGroup,
+				{
+					input: {
+						name: values.name,
+						code: values.code,
+						type: values.type,
+					},
 				},
-			});
+			);
 		},
 		onSuccess: (data) => {
 			if (data) {

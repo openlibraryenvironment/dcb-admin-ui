@@ -10,7 +10,7 @@ import {
 	GridRowSelectionModel,
 	useGridApiRef,
 } from "@mui/x-data-grid-premium";
-import { RefObject, useCallback, useState } from "react";
+import { RefObject, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
@@ -24,7 +24,7 @@ import {
 	GridExportConfig,
 	useGridExport,
 } from "@hooks/useGridExport";
-import { expandedFilterPanelTypes } from "@constants/dataGrid/types";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 // Needs reviewing for consortial needs
@@ -103,7 +103,16 @@ export default function DataGrid({
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-	const expandedFilterPanel = expandedFilterPanelTypes.includes(type);
+	// A server-filtered grid can only offer the operators buildFilterQuery knows
+	// how to turn into Lucene. Enforced here rather than per column definition,
+	// so a new column cannot quietly ship a filter the backend never answers.
+	const columns = useMemo(
+		() =>
+			rest.filterMode === "server"
+				? constrainToServerOperators(rest.columns as GridColDef[])
+				: rest.columns,
+		[rest.columns, rest.filterMode],
+	);
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
@@ -187,6 +196,7 @@ export default function DataGrid({
 		<div style={{ display: "flex", flexDirection: "column" }}>
 			<DataGridPremium
 				{...rest}
+				columns={columns}
 				rows={rows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
@@ -224,7 +234,7 @@ export default function DataGrid({
 
 					// Whatever is throwing the error must include the row name for us to grab it here
 
-					const name = error?.rowName || t("general.this_item", "this item");
+					const name = error?.rowName || t("ui.data_grid.this_item");
 
 					setAlert({
 						open: true,
@@ -271,13 +281,28 @@ export default function DataGrid({
 						onOpenWizard: () => setWizardOpen(true),
 						disableToolbarFilter: disableToolbarFilter,
 					},
-					filterPanel: expandedFilterPanel
-						? {
-								sx: {
-									"& .MuiDataGrid-filterFormValueInput": { minWidth: 420 }, // ideally this would be dynamic. something stopping the date-time-range picker from accepting this. If it can't be dynamic it should only apply to grids of that nature
-								},
-							}
-						: undefined,
+					// The panel is a Popper anchored bottom-end, and MUI re-runs
+					// forceUpdate() on every render of it. So anything that changes the
+					// panel's width relocates its left edge - which is why picking a
+					// column or operator (and thereby swapping in a value input of a
+					// different width) made the whole panel jump sideways.
+					// Pinning the value column to a width that fits the widest input we
+					// use (the date-time range picker) makes the panel's geometry
+					// constant, so there is nothing left to re-place.
+					filterPanel: {
+						filterFormProps: {
+							// MUI sizes the value input `small` but leaves these at the
+							// theme default (medium), so the selects rendered a size taller
+							// than the input beside them.
+							logicOperatorInputProps: { size: "small" },
+							columnInputProps: { size: "small" },
+							operatorInputProps: { size: "small" },
+						},
+						sx: {
+							"& .MuiDataGrid-filterForm": { alignItems: "center" },
+							"& .MuiDataGrid-filterFormValueInput": { width: 420 },
+						},
+					},
 				}}
 				// Remember this grid is still used for editing. So check functionality has been preserved in the migration.
 

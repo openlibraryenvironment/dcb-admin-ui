@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Box, Typography } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -12,6 +12,7 @@ import InsightsDashboard from "@components/Insights/InsightsDashboard";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { createRestClient } from "@helpers/createRestClient";
+import { isInsightsEnabled } from "@helpers/featureFlags";
 import { getLibrary } from "@queries/getLibrary";
 import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
@@ -20,6 +21,7 @@ import {
 	timeSeriesQueryOptions,
 	StatsParams,
 } from "@helpers/statsApi";
+import type { LoadLibraryQueryVariables } from "@generated/graphql";
 
 // Must mirror insightsPlotStore's default preset so the prefetched keys match.
 const DEFAULT_PRESET = "30d" as const;
@@ -36,6 +38,17 @@ export const Route = createFileRoute(
 	params: {
 		parse: (raw) => libraryParamsSchema.parse(raw),
 	},
+	// The tab is hidden while the flag is off, but the URL is still typeable -
+	// and the page would call statistics endpoints that this environment's
+	// dcb-service does not serve yet.
+	beforeLoad: ({ params: { libraryId } }) => {
+		if (!isInsightsEnabled()) {
+			throw redirect({
+				to: "/libraries/$libraryId",
+				params: { libraryId },
+			});
+		}
+	},
 	loader: async ({
 		context: { queryClient, cfg, auth },
 		params: { libraryId },
@@ -47,9 +60,12 @@ export const Route = createFileRoute(
 		const libraryData = await queryClient.ensureQueryData({
 			queryKey: ["library", libraryId],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getLibrary, {
-					query: `id:${libraryId}`,
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadLibraryQueryVariables>(
+					getLibrary,
+					{
+						query: `id:${libraryId}`,
+					},
+				),
 		});
 
 		const libraryCode = hostLmsCodeOf(libraryData);
@@ -81,7 +97,9 @@ function LibraryInsights() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 

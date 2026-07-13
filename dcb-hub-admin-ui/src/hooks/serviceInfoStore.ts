@@ -11,7 +11,8 @@ interface VersionInfo {
 	type: string | null;
 	branch: string | null;
 	lastFetchedAt: number | null;
-	fetchVersionInfo: () => Promise<void>;
+	fetchedFrom: string | null;
+	fetchVersionInfo: (apiBase: string) => Promise<void>;
 	clearVersionStore: () => void;
 }
 
@@ -26,13 +27,22 @@ const useDCBVersionStore = create<VersionInfo>()(
 			type: null,
 			branch: null,
 			lastFetchedAt: null,
+			fetchedFrom: null,
 
-			fetchVersionInfo: async () => {
+			// The API base MUST be supplied by the caller from the runtime config
+			// (inject_env.json), not read from import.meta.env: .dockerignore excludes
+			// .env, so in the production image import.meta.env.VITE_DCB_API_BASE bakes
+			// to the literal `undefined` and "undefined/info" resolves against the
+			// admin host, where nginx's SPA fallback answers 200 with index.html.
+			fetchVersionInfo: async (apiBase: string) => {
+				if (!apiBase) {
+					set({ error: "No DCB API base configured", loading: false });
+					return;
+				}
 				set({ loading: true, error: null });
-				const DCB_API_BASE = import.meta.env.VITE_DCB_API_BASE;
 
 				try {
-					const response = await axios.get(DCB_API_BASE + "/info");
+					const response = await axios.get(apiBase + "/info");
 					const data = response.data;
 
 					const versionStr = data.version || "";
@@ -43,9 +53,10 @@ const useDCBVersionStore = create<VersionInfo>()(
 						version: data.version || "Unknown",
 						isDev,
 						isAcceptableVersion: true,
-						type: data.environmentType || "",
+						type: data.env.code || "",
 						branch: data.branch || "main",
 						lastFetchedAt: Date.now(),
+						fetchedFrom: apiBase,
 						loading: false,
 					});
 				} catch (error: any) {
@@ -67,12 +78,27 @@ const useDCBVersionStore = create<VersionInfo>()(
 					type: "",
 					branch: null,
 					lastFetchedAt: null,
+					fetchedFrom: null,
 				});
 			},
 		}),
 		{
 			name: "dcb-version-storage",
 			storage: createJSONStorage(() => sessionStorage),
+			// Bumped to discard caches written before the runtime-config fix; those
+			// hold an environment type fetched from the wrong /info endpoint.
+			version: 1,
+			// Only the fetched payload is worth caching. Persisting `loading`/`error`
+			// meant a reload mid-request rehydrated a stale transient state.
+			partialize: (state) => ({
+				version: state.version,
+				isDev: state.isDev,
+				isAcceptableVersion: state.isAcceptableVersion,
+				type: state.type,
+				branch: state.branch,
+				lastFetchedAt: state.lastFetchedAt,
+				fetchedFrom: state.fetchedFrom,
+			}),
 		},
 	),
 );

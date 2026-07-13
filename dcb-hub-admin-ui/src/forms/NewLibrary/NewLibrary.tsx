@@ -37,6 +37,10 @@ import LocationsStep from "./steps/LocationsStep";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import { newLibrarySchema } from "@/schemas/newLibrarySchema";
 import type { z } from "zod";
+import type {
+	CreateHostLmsMutationVariables,
+	CreateLibraryMutationVariables,
+} from "@generated/graphql";
 
 type NewLibraryType = {
 	show: boolean;
@@ -197,7 +201,10 @@ export default function NewLibrary({
 	const { mutateAsync: createHostLms, isPending: isHostLmsPending } =
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
-				gqlClient.request<any>(createHostLmsMutation, variables),
+				gqlClient.request<any, CreateHostLmsMutationVariables>(
+					createHostLmsMutation,
+					variables,
+				),
 			onSuccess: () =>
 				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
 		});
@@ -205,7 +212,10 @@ export default function NewLibrary({
 	const { mutateAsync: createLibrary, isPending: isLibraryPending } =
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
-				gqlClient.request<any>(createLibraryMutation, variables),
+				gqlClient.request<any, CreateLibraryMutationVariables>(
+					createLibraryMutation,
+					variables,
+				),
 			onSuccess: () => {
 				queryClient.invalidateQueries({ queryKey: ["librariesList"] });
 				queryClient.invalidateQueries({ queryKey: ["agencies"] });

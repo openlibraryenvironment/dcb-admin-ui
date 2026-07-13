@@ -29,6 +29,10 @@ import { equalsOnly } from "@filters/equalsOnly";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { libraryBibColumnVisibility } from "@columns/columnVisibility/libraryBibColumnVisibility";
+import type {
+	LoadBibsQueryVariables,
+	LoadLibraryBasicsLocationQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/bibs/",
@@ -78,13 +82,12 @@ function LibraryBibs() {
 	} = useQuery({
 		queryKey: ["library", "basicsLocation", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryBasicsLocation, {
-				query: `id:${libraryId}`,
-				pageno: 0,
-				pagesize: 100,
-				order: "fullName",
-				orderBy: "DESC",
-			}),
+			gqlClient.request<any, LoadLibraryBasicsLocationQueryVariables>(
+				getLibraryBasicsLocation,
+				{
+					query: `id:${libraryId}`,
+				},
+			),
 		enabled: !!libraryId,
 	});
 
@@ -101,7 +104,7 @@ function LibraryBibs() {
 	} = useQuery({
 		queryKey: [gridId, presetQueryVariables, paginationModel, filterModel],
 		queryFn: async () => {
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadBibsQueryVariables>(
 				getBibs,
 				buildServerGridQueryVars({
 					filterModel,

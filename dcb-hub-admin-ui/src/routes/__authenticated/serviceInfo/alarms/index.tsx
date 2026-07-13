@@ -17,6 +17,7 @@ import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { getAlarms } from "@queries/getAlarms";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
+import type { LoadAlarmsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/alarms/")({
 	component: AlarmsRouteComponent,
@@ -53,7 +54,7 @@ function AlarmsRouteComponent() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadAlarmsQueryVariables>(
 				getAlarms,
 				buildServerGridQueryVars({
 					filterModel,

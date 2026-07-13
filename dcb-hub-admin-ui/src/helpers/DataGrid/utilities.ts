@@ -149,7 +149,7 @@ export const generateFilterDescription = (model?: GridFilterModel): string => {
 				operator = i18n
 					.t("ui.data_grid.filters.between", { defaultValue: "between" })
 					.toLowerCase();
-				val = `${formattedStart} ${i18n.t("general.and", { defaultValue: "and" })} ${formattedEnd}`;
+				val = `${formattedStart} ${i18n.t("ui.data_grid.filters.and")} ${formattedEnd}`;
 			} else if (hasStart) {
 				operator = i18n
 					.t("ui.data_grid.filters.after", { defaultValue: "after" })

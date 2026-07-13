@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Resolver } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -24,10 +24,29 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { addFunctionalSettingMutation } from "@mutations/addFunctionalSetting";
+import type {
+	AddFunctionalSettingMutationVariables,
+	FunctionalSettingType,
+} from "@generated/graphql";
+
+// Typed against the schema enum rather than left as a bare string[], so that a value
+// added, removed or renamed in schema.graphqls fails the build here instead of being
+// rejected at runtime by the server.
+const FUNCTIONAL_SETTING_TYPES: FunctionalSettingType[] = [
+	"OWN_LIBRARY_BORROWING",
+	"PICKUP_ANYWHERE",
+	"RE_RESOLUTION",
+	"SELECT_UNAVAILABLE_ITEMS",
+	"TRIGGER_SUPPLIER_RENEWAL",
+	"DENY_LIBRARY_MAPPING_EDIT",
+	"VIRTUAL_PATRON_NAMES_VISIBLE",
+	"VIRTUAL_PATRON_NAMES_POLARIS",
+];
 
 interface NewFunctionalSettingFormData {
 	description: string;
-	name: string;
+	// null until the user picks one; yup's .required() enforces it on submit.
+	name: FunctionalSettingType | null;
 	enabled: boolean;
 	reason?: string;
 	changeCategory?: string;
@@ -90,21 +109,29 @@ export default function NewFunctionalSetting({
 	} = useForm<NewFunctionalSettingFormData>({
 		defaultValues: {
 			description: "",
-			name: "",
+			name: null,
 			enabled: false,
 			reason: "",
 			changeCategory: "",
 			changeReferenceUrl: "",
 		},
-		resolver: yupResolver(validationSchema),
+		// yup infers `name` as a plain string, which no longer unifies with the schema
+		// enum on the form type. The shapes match at runtime; pin it to the form type.
+		resolver: yupResolver(
+			validationSchema,
+		) as unknown as Resolver<NewFunctionalSettingFormData>,
 		mode: "onChange",
 	});
 
 	const settingMutation = useMutation({
-		mutationFn: async (data: NewFunctionalSettingFormData) => {
-			return gqlClient.request<any>(addFunctionalSettingMutation, {
-				input: { ...data, consortiumName },
-			});
+		mutationFn: async ({
+			name,
+			...rest
+		}: NewFunctionalSettingFormData & { name: FunctionalSettingType }) => {
+			return gqlClient.request<any, AddFunctionalSettingMutationVariables>(
+				addFunctionalSettingMutation,
+				{ input: { ...rest, name, consortiumName } },
+			);
 		},
 		onSuccess: (responseData) => {
 			if (responseData) {
@@ -139,7 +166,9 @@ export default function NewFunctionalSetting({
 	});
 
 	const onSubmit = (data: NewFunctionalSettingFormData) => {
-		settingMutation.mutate(data);
+		// Guaranteed non-null by the yup schema, but narrow it for the mutation input.
+		if (!data.name) return;
+		settingMutation.mutate({ ...data, name: data.name });
 	};
 
 	return (
@@ -175,16 +204,7 @@ export default function NewFunctionalSetting({
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									options={[
-										"OWN_LIBRARY_BORROWING",
-										"PICKUP_ANYWHERE",
-										"RE_RESOLUTION",
-										"SELECT_UNAVAILABLE_ITEMS",
-										"TRIGGER_SUPPLIER_RENEWAL",
-										"DENY_LIBRARY_MAPPING_EDIT",
-										"VIRTUAL_PATRON_NAMES_VISIBLE",
-										"VIRTUAL_PATRON_NAMES_POLARIS",
-									]}
+									options={FUNCTIONAL_SETTING_TYPES}
 									value={field.value || null}
 									onChange={(_, newValue) => {
 										field.onChange(newValue);

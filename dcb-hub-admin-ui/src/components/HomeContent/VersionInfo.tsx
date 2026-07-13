@@ -159,7 +159,7 @@ const VersionInfo: React.FC = () => {
 			pivotingEnabled={false}
 			toolbarVisible={false}
 			scrollbarVisible={true}
-			noResultsText={t("ui.data_grid.no_rows")}
+			noResultsText={t("ui.data_grid.no_results")}
 			searchText=""
 			paginationModel={{ page: 0, pageSize: 20 }}
 			getDetailPanelContent={({ row }: any) => (

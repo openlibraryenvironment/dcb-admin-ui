@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
 import { Grid, Chip } from "@mui/material";
 import { CheckCircle, Warning, Info } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid-premium";
@@ -13,6 +12,7 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { parseClusteringAuditLog } from "@helpers/parseClusteringAuditLog";
 import { defaultClusterExplanationVisibility } from "@columns/columnVisibility/defaultClusterExplanationVisibility";
 
@@ -25,7 +25,7 @@ export const Route = createFileRoute(
 function ClusterExplanation() {
 	const { t } = useTranslation();
 	const { clusterId } = Route.useParams();
-	const auth = useAuth();
+	const client = useDcbRestClient();
 
 	const gridId = "ClusterExplainer";
 	const {
@@ -48,14 +48,8 @@ function ClusterExplanation() {
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ["clusterAuditLog", clusterId],
 		queryFn: async () => {
-			const res = await fetch(
-				`${import.meta.env.VITE_DCB_API_BASE}/clusters/${clusterId}/audit-log`,
-				{
-					headers: { Authorization: `Bearer ${auth.user?.access_token}` },
-				},
-			);
-			if (!res.ok) console.error("Could not fetch explanation");
-			return res.json();
+			const res = await client.get(`/clusters/${clusterId}/audit-log`);
+			return res.data;
 		},
 		enabled: !!clusterId,
 	});
@@ -190,7 +184,7 @@ function ClusterExplanation() {
 					pivotingEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
-					noResultsText={t("ui.info.no_results")}
+					noResultsText={t("ui.data_grid.no_results")}
 					searchText={t("ui.data_grid.search")}
 					rowModesModel={rowModesModel}
 					onRowModesModelChange={setRowModesModel}

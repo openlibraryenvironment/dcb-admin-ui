@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
 import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -11,6 +10,7 @@ import Link from "@components/Link/Link";
 import Error from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/",
@@ -20,7 +20,7 @@ export const Route = createFileRoute(
 
 function RequestErrors() {
 	const { t } = useTranslation();
-	const auth = useAuth();
+	const client = useDcbRestClient();
 
 	const gridId = "errorOverview";
 
@@ -47,14 +47,10 @@ function RequestErrors() {
 	} = useQuery({
 		queryKey: ["errorOverview"],
 		queryFn: async () => {
-			const res = await fetch(
-				`${import.meta.env.VITE_DCB_API_BASE}/sql?name=errorOverview`,
-				{
-					headers: { Authorization: `Bearer ${auth.user?.access_token}` },
-				},
-			);
-			if (!res.ok) console.error("Failed to fetch error overview");
-			return res.json();
+			const res = await client.get("/sql", {
+				params: { name: "errorOverview" },
+			});
+			return res.data;
 		},
 	});
 

@@ -14,6 +14,7 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { getDataChangeLog } from "@queries/getDataChangeLog";
 import { dataChangeLogColumns } from "@columns/dataChangeLogColumns";
+import type { LoadDataChangeLogQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/dataChangeLog/",
@@ -56,7 +57,7 @@ function DataChangeLogsGrid() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadDataChangeLogQueryVariables>(
 				getDataChangeLog,
 				buildServerGridQueryVars({
 					filterModel,

@@ -26,6 +26,12 @@ import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+	LoadPatronRequestTotalsQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/completed",
@@ -51,7 +57,10 @@ export const Route = createFileRoute(
 				currentFilter,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getPatronRequests, {
+				createGraphQLClient(cfg, auth).request<
+					any,
+					LoadPatronRequestsQueryVariables
+				>(getPatronRequests, {
 					query: queries.finished,
 					pageno: currentPagination.page,
 					pagesize: currentPagination.pageSize,
@@ -72,14 +81,20 @@ function Completed() {
 		paginationModel: currentPagination,
 		sortModel: currentSort,
 		filterModel: currentFilter,
+		columnVisibilityModel,
 		rowModesModel,
 		setRowModesModel,
 		onPaginationModelChange,
 		onSortModelChange,
 		onFilterModelChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
 	} = useGridState(gridId, {
 		pagination: { page: 0, pageSize: 20 },
 		sort: [{ field: "dateCreated", sort: "desc" }],
+		columnVisibility: {
+			...defaultPatronRequestColumnVisibility,
+			...finishedPatronRequestColumnVisibility,
+		},
 	});
 	const currentPath = Route.fullPath;
 
@@ -90,13 +105,13 @@ function Completed() {
 			orderBy: "ASC",
 			pagesize: 100,
 		};
-		const firstPage = await gqlClient.request<any>(
-			getLocationForPatronRequestGrid,
-			{
-				...variables,
-				pageno: 0,
-			},
-		);
+		const firstPage = await gqlClient.request<
+			any,
+			LoadLocationForPrGridQueryVariables
+		>(getLocationForPatronRequestGrid, {
+			...variables,
+			pageno: 0,
+		});
 		let allLocations = [...(firstPage?.locations?.content || [])];
 		const totalSize = firstPage?.locations?.totalSize || 0;
 
@@ -105,10 +120,13 @@ function Completed() {
 			const promises = [];
 			for (let i = 1; i < totalPages; i++) {
 				promises.push(
-					gqlClient.request<any>(getLocationForPatronRequestGrid, {
-						...variables,
-						pageno: i,
-					}),
+					gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+						getLocationForPatronRequestGrid,
+						{
+							...variables,
+							pageno: i,
+						},
+					),
 				);
 			}
 			const results = await Promise.all(promises);
@@ -129,52 +147,64 @@ function Completed() {
 	const { data: excData, isLoading: exceptionLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "exception"],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequestTotals, {
-				query: queries.exception,
-				pageno: 0,
-				pagesize: 1,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
+			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
+				getPatronRequestTotals,
+				{
+					query: queries.exception,
+					pageno: 0,
+					pagesize: 1,
+					order: "dateCreated",
+					orderBy: "DESC",
+				},
+			),
 	});
 	const { data: oosData, isLoading: outOfSequenceLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "outOfSequence"],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequestTotals, {
-				query: queries.outOfSequence,
-				pageno: 0,
-				pagesize: 1,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
+			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
+				getPatronRequestTotals,
+				{
+					query: queries.outOfSequence,
+					pageno: 0,
+					pagesize: 1,
+					order: "dateCreated",
+					orderBy: "DESC",
+				},
+			),
 	});
 	const { data: inProgData, isLoading: inProgressLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "inProgress"],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequestTotals, {
-				query: queries.inProgress,
-				pageno: 0,
-				pagesize: 1,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
+			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
+				getPatronRequestTotals,
+				{
+					query: queries.inProgress,
+					pageno: 0,
+					pagesize: 1,
+					order: "dateCreated",
+					orderBy: "DESC",
+				},
+			),
 	});
 	const { data: finData, isLoading: finishedLoading } = useQuery({
 		queryKey: ["patronRequestTotals", "finished"],
 		queryFn: () =>
-			gqlClient.request<any>(getPatronRequestTotals, {
-				query: queries.finished,
-				pageno: 0,
-				pagesize: 1,
-				order: "dateCreated",
-				orderBy: "DESC",
-			}),
+			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
+				getPatronRequestTotals,
+				{
+					query: queries.finished,
+					pageno: 0,
+					pagesize: 1,
+					order: "dateCreated",
+					orderBy: "DESC",
+				},
+			),
 	});
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery({
 			queryKey: ["libraries", "allSupplying"],
 			queryFn: () =>
-				gqlClient.request<any>(getLibraries, {
+				gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 					order: "fullName",
 					orderBy: "ASC",
 					pageno: 0,
@@ -192,7 +222,7 @@ function Completed() {
 			currentFilter,
 		],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadPatronRequestsQueryVariables>(
 				getPatronRequests,
 				buildServerGridQueryVars({
 					filterModel: currentFilter,
@@ -286,10 +316,8 @@ function Completed() {
 						autoRowHeight={false}
 						checkboxSelection={true}
 						columns={allColumns}
-						columnVisibilityModel={{
-							...defaultPatronRequestColumnVisibility,
-							...finishedPatronRequestColumnVisibility,
-						}}
+						columnVisibilityModel={columnVisibilityModel}
+						onColumnVisibilityModelChange={handleColumnVisibilityChange}
 						disableAggregation={true}
 						disableHoverInteractions={false}
 						disablePivoting={true}

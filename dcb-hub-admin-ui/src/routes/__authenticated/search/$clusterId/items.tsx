@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAuth } from "react-oidc-context";
-import axios from "axios";
 import {
 	Grid,
 	Typography,
@@ -21,6 +19,7 @@ import Loading from "@components/Loading/Loading";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
 import { useGridStore } from "@/hooks/useDataGridStore";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { itemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
 import {
@@ -40,7 +39,7 @@ export const Route = createFileRoute(
 function ItemsPageComponent() {
 	const { clusterId } = Route.useParams();
 	const { t } = useTranslation();
-	const auth = useAuth();
+	const client = useDcbRestClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	// Quick walk-up launched directly against an available item row. The scanned
@@ -60,17 +59,12 @@ function ItemsPageComponent() {
 	const { data, isLoading } = useQuery({
 		queryKey: ["clusterItems", clusterId],
 		queryFn: async () => {
-			const headers = { Authorization: `Bearer ${auth.user?.access_token}` };
-			const baseUrl = `${import.meta.env.VITE_DCB_API_BASE}/items/availability`;
-
 			// Fetch Standard and No-Filter concurrently
 			const [standardRes, noFilterRes] = await Promise.all([
-				axios.get<any>(baseUrl, {
-					headers,
+				client.get<any>("/items/availability", {
 					params: { clusteredBibId: clusterId },
 				}),
-				axios.get<any>(baseUrl, {
-					headers,
+				client.get<any>("/items/availability", {
 					params: { clusteredBibId: clusterId, filters: "none" },
 				}),
 			]);

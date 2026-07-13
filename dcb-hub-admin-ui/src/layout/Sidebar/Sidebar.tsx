@@ -27,6 +27,7 @@ import {
 } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
+import { isInsightsEnabled } from "@helpers/featureFlags";
 
 const drawerWidth = 240;
 
@@ -101,13 +102,27 @@ export default function Sidebar({
 	const { t } = useTranslation();
 	const location = useLocation();
 
+	// Insights is gated on a dcb-service release that is not out yet. Filtered at
+	// render rather than removed from `routes`, because the icon lookup and the
+	// selection logic below are index-based - and since Insights is the last
+	// entry, dropping it shifts nothing.
+	const visibleRoutes = useMemo(
+		() =>
+			isInsightsEnabled()
+				? routes
+				: routes.filter((route) => route.path !== "/consortium/insights"),
+		[],
+	);
+
 	// Selection state is derived entirely from the current URL - deliberately
 	// not mirrored into component state (which previously caused it to
 	// briefly desync from the URL via an optimistic click handler + a
 	// separate effect, producing duplicate/incorrect highlighting).
 	const { selected, isChildPage, disabledIndex } = useMemo(() => {
 		const currentRoute = location.pathname;
-		const exactIndex = routes.findIndex((route) => route.path === currentRoute);
+		const exactIndex = visibleRoutes.findIndex(
+			(route) => route.path === currentRoute,
+		);
 
 		if (exactIndex !== -1) {
 			return {
@@ -117,7 +132,7 @@ export default function Sidebar({
 			};
 		}
 
-		const homeRemovedFromArray = routes.slice(1);
+		const homeRemovedFromArray = visibleRoutes.slice(1);
 		const parentIndex = homeRemovedFromArray.findIndex((route) =>
 			currentRoute.startsWith(route.path),
 		);
@@ -131,7 +146,7 @@ export default function Sidebar({
 		}
 
 		return { selected: -1, isChildPage: false, disabledIndex: -1 };
-	}, [location.pathname]);
+	}, [location.pathname, visibleRoutes]);
 
 	const navigation = (
 		<List
@@ -140,7 +155,7 @@ export default function Sidebar({
 			aria-label={String(t("nav.main_menu"))}
 			data-tid="sidebar"
 		>
-			{routes.map((route, index) => (
+			{visibleRoutes.map((route, index) => (
 				<ListItem key={route.path} disablePadding sx={{ display: "block" }}>
 					<ListItemButton
 						component={Link}

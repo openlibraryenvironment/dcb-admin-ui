@@ -22,6 +22,7 @@ import AlmaConfig from "@components/HostLmsConfig/AlmaConfig";
 import PolarisConfig from "@components/HostLmsConfig/PolarisConfig";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { hostlmsParamsSchema } from "@schemas/routeParams/hostlmsParams";
+import type { LoadHostLmsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/hostlmss/$hostlmsId")({
 	params: {
@@ -38,9 +39,12 @@ export const Route = createFileRoute("/__authenticated/hostlmss/$hostlmsId")({
 		return queryClient.ensureQueryData({
 			queryKey: ["hostLms", hostlmsId],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getHostLms, {
-					query: `id:${hostlmsId}`,
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadHostLmsQueryVariables>(
+					getHostLms,
+					{
+						query: `id:${hostlmsId}`,
+					},
+				),
 		});
 	},
 	component: HostLMSDetails,
@@ -56,7 +60,9 @@ function HostLMSDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["hostLms", hostlmsId],
 		queryFn: () =>
-			gqlClient.request<any>(getHostLms, { query: `id:${hostlmsId}` }),
+			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
+				query: `id:${hostlmsId}`,
+			}),
 		enabled: !!hostlmsId,
 		refetchInterval: 120000,
 	});

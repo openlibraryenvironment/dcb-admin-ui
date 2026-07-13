@@ -18,6 +18,7 @@ import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequ
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClustersTitleOnly } from "@queries/getClustersTitlesOnly";
+import type { ClusterRecordsTitleOnlyQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/search/$clusterId")({
 	component: ClusterLayout,
@@ -40,9 +41,12 @@ function ClusterLayout() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["cluster", "titleOnly", clusterId],
 		queryFn: () =>
-			gqlClient.request<any>(getClustersTitleOnly, {
-				query: `id: ${clusterId}`,
-			}),
+			gqlClient.request<any, ClusterRecordsTitleOnlyQueryVariables>(
+				getClustersTitleOnly,
+				{
+					query: `id: ${clusterId}`,
+				},
+			),
 		enabled: !!clusterId,
 	});
 

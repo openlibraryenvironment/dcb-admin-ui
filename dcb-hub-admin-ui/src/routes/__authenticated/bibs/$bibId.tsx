@@ -25,6 +25,12 @@ import { getLibraryBasics } from "@queries/getLibraryBasics";
 import { Bib } from "@models/Bib";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
+import type {
+	LoadAgencyQueryVariables,
+	LoadBibMainDetailsQueryVariables,
+	LoadBibSourceRecordQueryVariables,
+	LoadLibraryBasicsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/bibs/$bibId")({
 	component: SourceBibDetails,
@@ -48,7 +54,10 @@ function SourceBibDetails() {
 	} = useQuery({
 		queryKey: ["bib", bibId],
 		queryFn: () =>
-			gqlClient.request<any>(getBibMainDetails, { query: `id:${bibId}` }),
+			gqlClient.request<any, LoadBibMainDetailsQueryVariables>(
+				getBibMainDetails,
+				{ query: `id:${bibId}` },
+			),
 		enabled: !!bibId,
 	});
 
@@ -59,12 +68,8 @@ function SourceBibDetails() {
 	const { data: agencyData } = useQuery({
 		queryKey: ["agency", "byHostLms", sourceSystemId],
 		queryFn: () =>
-			gqlClient.request<any>(getAgency, {
+			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {
 				query: `hostLms: ${sourceSystemId}`,
-				pageno: 0,
-				pagesize: 10,
-				order: "code",
-				orderBy: "ASC",
 			}),
 		enabled: !!sourceSystemId,
 	});
@@ -75,13 +80,12 @@ function SourceBibDetails() {
 	const { data: libraryData } = useQuery({
 		queryKey: ["library", "byAgencyCode", agencyCode],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryBasics, {
-				query: `agencyCode:${agencyCode}`,
-				pageno: 0,
-				pagesize: 10,
-				order: "agencyCode",
-				orderBy: "ASC",
-			}),
+			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
+				getLibraryBasics,
+				{
+					query: `agencyCode:${agencyCode}`,
+				},
+			),
 		enabled: !!agencyCode,
 	});
 
@@ -90,7 +94,10 @@ function SourceBibDetails() {
 	const { data: sourceRecordData, isLoading: sourceRecordLoading } = useQuery({
 		queryKey: ["bibSourceRecord", bibId],
 		queryFn: () =>
-			gqlClient.request<any>(getBibSourceRecord, { query: `id:${bibId}` }),
+			gqlClient.request<any, LoadBibSourceRecordQueryVariables>(
+				getBibSourceRecord,
+				{ query: `id:${bibId}` },
+			),
 		enabled: isSourceRecordExpanded && !!bibId,
 	});
 
@@ -209,7 +216,7 @@ function SourceBibDetails() {
 						) : (
 							<Link
 								href={sourceSystemUrl}
-								title={t("link.host_lms_tip")}
+								title={t("ui.link.host_lms_tip")}
 								underline="hover"
 							>
 								<RenderAttribute attribute={bib?.sourceSystemId} />

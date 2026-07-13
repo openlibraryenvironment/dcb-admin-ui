@@ -12,6 +12,7 @@ import { getBibs } from "@queries/getBibs";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { standardBibColumns } from "@columns/bibColumns";
 import { bibColumnVisibility } from "@columns/columnVisibility/bibColumnVisbility";
+import type { LoadBibsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/bibs/")({
 	component: BibsRouteComponent,
@@ -31,12 +32,17 @@ function BibsRouteComponent() {
 		paginationModel,
 		sortModel,
 		filterModel,
+		columnVisibilityModel,
 		rowModesModel,
 		setRowModesModel,
 		onPaginationModelChange,
 		onSortModelChange,
 		onFilterModelChange,
-	} = useGridState(gridId, { pagination: { page: 0, pageSize: 25 } });
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 25 },
+		columnVisibility: bibColumnVisibility,
+	});
 
 	const {
 		data: gridData,
@@ -45,7 +51,7 @@ function BibsRouteComponent() {
 	} = useQuery({
 		queryKey: ["sourceBibs", gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadBibsQueryVariables>(
 				getBibs,
 				buildServerGridQueryVars({
 					filterModel,
@@ -70,7 +76,8 @@ function BibsRouteComponent() {
 				identifier={gridId}
 				type={"bibs"}
 				columns={standardBibColumns}
-				columnVisibilityModel={bibColumnVisibility}
+				columnVisibilityModel={columnVisibilityModel}
+				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				rows={gridData?.sourceBibs?.content ?? []}
 				rowCount={gridData?.sourceBibs?.totalSize ?? 0}
 				loading={shouldShowLoading}

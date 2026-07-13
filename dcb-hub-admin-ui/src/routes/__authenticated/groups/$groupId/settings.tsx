@@ -26,6 +26,7 @@ import { updateAgencyParticipationStatus } from "@mutations/updateAgencyParticip
 import { CONFIRMATION_TEXT_MAP } from "@helpers/getConfirmationText";
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
+import type { LoadGroupQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/groups/$groupId/settings",
@@ -62,7 +63,9 @@ function GroupSettings() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["group", groupId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryGroupById, { query: `id:${groupId}` }),
+			gqlClient.request<any, LoadGroupQueryVariables>(getLibraryGroupById, {
+				query: `id:${groupId}`,
+			}),
 		refetchInterval: 120000,
 	});
 

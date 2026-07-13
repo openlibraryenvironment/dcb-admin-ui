@@ -29,6 +29,12 @@ import { getLibraryContacts } from "@queries/getLibraryContacts";
 import { updatePerson } from "@mutations/updatePerson";
 import { deleteLibraryContact } from "@mutations/deleteLibraryContact";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import type {
+	DeleteLibraryContactMutationVariables,
+	DeleteLibraryMutationVariables,
+	LoadLibraryContactsQueryVariables,
+	UpdatePersonMutationVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/contacts",
@@ -66,13 +72,16 @@ function LibraryContacts() {
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["library", "contacts", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryContacts, {
-				query: `id:${libraryId}`,
-				pageno: 0,
-				pagesize: 100,
-				order: "fullName",
-				orderBy: "DESC",
-			}),
+			gqlClient.request<any, LoadLibraryContactsQueryVariables>(
+				getLibraryContacts,
+				{
+					query: `id:${libraryId}`,
+					pageno: 0,
+					pagesize: 100,
+					order: "fullName",
+					orderBy: "DESC",
+				},
+			),
 		enabled: !!libraryId,
 	});
 
@@ -81,7 +90,10 @@ function LibraryContacts() {
 
 	const { mutateAsync: updateContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updatePerson, variables),
+			gqlClient.request<any, UpdatePersonMutationVariables>(
+				updatePerson,
+				variables,
+			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				queryKey: ["library", "contacts", libraryId],
@@ -89,7 +101,10 @@ function LibraryContacts() {
 	});
 	const { mutate: deleteContact } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteLibraryContact, variables),
+			gqlClient.request<any, DeleteLibraryContactMutationVariables>(
+				deleteLibraryContact,
+				variables,
+			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				queryKey: ["library", "contacts", libraryId],
@@ -97,7 +112,10 @@ function LibraryContacts() {
 	});
 	const { mutateAsync: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteLibraryMutation, variables),
+			gqlClient.request<any, DeleteLibraryMutationVariables>(
+				deleteLibraryMutation,
+				variables,
+			),
 	});
 
 	const processRowUpdate = useCallback(
@@ -205,7 +223,9 @@ function LibraryContacts() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 100,
-				getActions: ({ id }) => {
+				getActions: ({ id, columns: rowColumns }) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -243,7 +263,7 @@ function LibraryContacts() {
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								})
 							}
 							disabled={!isAnAdmin}

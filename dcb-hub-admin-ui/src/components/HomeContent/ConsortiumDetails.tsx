@@ -21,12 +21,7 @@ interface ConsortiumStageRow {
 	statusOperatorsCount?: number;
 	statusSupportCount?: number;
 	translationTemplate:
-		| "introduce"
-		| "provision"
-		| "configure"
-		| "migrate"
-		| "operate"
-		| "support";
+		"introduce" | "provision" | "configure" | "migrate" | "operate" | "support";
 }
 
 export default function ConsortiumDetails() {

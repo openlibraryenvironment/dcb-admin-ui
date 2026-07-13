@@ -18,6 +18,7 @@ import {
 	tableNameToEntityName,
 } from "@helpers/dataChangeLogHelperFunctions";
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
+import type { GetDataChangeLogByIdQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId",
@@ -33,9 +34,12 @@ function DataChangeLogDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["dataChangeLog", dataChangeLogId],
 		queryFn: () =>
-			gqlClient.request<any>(getDataChangeLogById, {
-				query: `id:${dataChangeLogId}`,
-			}),
+			gqlClient.request<any, GetDataChangeLogByIdQueryVariables>(
+				getDataChangeLogById,
+				{
+					query: `id:${dataChangeLogId}`,
+				},
+			),
 		enabled: !!dataChangeLogId,
 		refetchInterval: 120000,
 	});

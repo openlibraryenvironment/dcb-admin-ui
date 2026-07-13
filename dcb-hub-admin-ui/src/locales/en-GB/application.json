@@ -254,7 +254,8 @@
 		"source_record": "Source record",
 		"source_record_id": "Source record ID",
 		"source_system_uuid": "Source system UUID",
-		"uuid": "Bib UUID"
+		"uuid": "Bib UUID",
+		"view_cluster_record": "View cluster record {{id}} ({{title}})"
 	},
 	"catalogMetricsByHostLms": {
 		"await": "Awaiting ingest",
@@ -360,7 +361,8 @@
 		},
 		"title": "Consortium",
 		"url": "Website URL",
-		"your": "Your consortium"
+		"your": "Your consortium",
+		"onboarding_missing": "Missing configurations:"
 	},
 	"data_change_log": {
 		"action": "Action",
@@ -404,7 +406,8 @@
 		"ref_url_helper": "The URL of the ticket describing the change requested, if applicable.",
 		"table_name": "Database table name",
 		"timestamp": "Timestamp",
-		"user": "User"
+		"user": "User",
+		"summary_table_aria": "Summary of the changes to be made"
 	},
 	"environment": {
 		"your": "Your $t(app.dcb) environment",
@@ -465,7 +468,9 @@
 			"disable_all_borrowing": "Disable all for borrowing",
 			"disable_all_supplying": "Disable all for supplying",
 			"enable_all_borrowing": "Enable all for borrowing",
-			"enable_all_supplying": "Enable all for supplying"
+			"enable_all_supplying": "Enable all for supplying",
+			"bulk_update_partial": "Updated {{success}} of {{total}} libraries. The remaining libraries could not be updated.",
+			"processing_bulk_update": "Processing bulk update..."
 		},
 		"supply_count": "{{count}} libraries enabled for supplying."
 	},
@@ -567,7 +572,19 @@
 			"shelving_scheme_id": "Shelving scheme ID",
 			"staff_password": "Staff password",
 			"staff_username": "Staff username",
-			"user_base_url": "User base URL"
+			"user_base_url": "User base URL",
+			"base_url": "Alma URL",
+			"default_circ_desk": "Default circ desk",
+			"item_policy": "Item policy",
+			"pickup_circ_desk": "Pickup circ desk",
+			"sharing_library": "Sharing library code",
+			"shelf_location": "Shelf location",
+			"user_identifier": "User identifier",
+			"virtual_library": "Virtual item library code",
+			"virtual_location": "Virtual item location code"
+		},
+		"error": {
+			"no_data_returned": "The Host LMS did not return any data."
 		}
 	},
 	"libraries": {
@@ -772,7 +789,8 @@
 			"success": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully.",
 			"success_ignored": "<bold>{{count}} pickup locations </bold> for <bold>{{libraryName}}</bold> have been imported successfully. {{ignoredCount}} pickup location(s) did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information",
 			"successful_replacement": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted.",
-			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup location(s) did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information."
+			"successful_replacement_ignored": "<bold>{{addedCount}} pickup locations </bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> pickup locations were deleted. {{ignoredCount}} pickup location(s) did not pass validation and were not imported: see the <linkComponent>user guide</linkComponent> for more information.",
+			"helper_text": "Upload a CSV to batch import multiple locations at once."
 		},
 		"name": "Location name",
 		"new": {
@@ -796,7 +814,11 @@
 			"service_point": "FOLIO service point ID",
 			"sierra": "Sierra location ID",
 			"success": "The new location was successfully created for {{name}}",
-			"title": "Add new location for {{name}}"
+			"title": "Add new location for {{name}}",
+			"title_no_library": "Add new location",
+			"helper_text": "Manually add a single pickup location to the system.",
+			"pickup_anywhere_disable": "Disable pickup anywhere",
+			"pickup_anywhere_enable": "Enable pickup anywhere"
 		},
 		"no_results": "No locations were found. Try changing your search terms or filters.",
 		"no_rows": "No locations available. If you're expecting data to be here, please refresh the page.",
@@ -805,7 +827,9 @@
 		"search_placeholder": "Search by name",
 		"type": "Location type",
 		"uuid": "Location UUID",
-		"view_location": "View pickup location"
+		"view_location": "View pickup location",
+		"pickup_count": "Pickup locations: {{count}}",
+		"pickup_locations": "Pickup locations"
 	},
 	"loginout": {
 		"expiring_warning": "Your session is about to expire. Press continue or move your mouse to stay securely signed in.",
@@ -820,6 +844,11 @@
 		"alert_text": "Failed to fetch the mappings, please refresh the page.",
 		"all_ref_value_short": "All reference",
 		"all_num_range_short": "All numeric",
+		"categories": {
+			"itemType": "Item type",
+			"location": "Location",
+			"patronType": "Patron type"
+		},
 		"upload_success": "<bold>{{count}} {{category}}</bold> for <bold>{{code}}</bold> have been imported successfully.",
 		"upload_success_replacement": "<bold>{{addedCount}} {{category}}</bold> for <bold>{{code}}</bold> were added and <bold>{{deletedMappingCount}}</bold> mappings were deleted.",
 		"drag_n_drop": "Drag and drop or click to select a file.",
@@ -884,7 +913,9 @@
 			"to_context": "To context",
 			"to_value": "To value",
 			"title": "New mapping",
-			"title_modal": "Add new {{category}} mapping for {{code}}"
+			"title_modal": "Add new {{category}} mapping for {{code}}",
+			"title_modal_no_category": "Add new mapping for {{code}}",
+			"title_modal_no_host_lms": "Add new {{category}} mapping"
 		},
 		"new_library": "Upload mappings for your new library here",
 		"new_library_num": "Upload numeric range mappings for your new library here",
@@ -913,7 +944,12 @@
 		"validation_expected_headers_nrm": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“context”</bold>, <bold>“domain”</bold> and <bold>“lowerBound”</bold>. Please correct the column headers and retry.</paragraph>",
 		"validation_expected_headers": "<paragraph>The column headers in <bold>{{fileName}}</bold> do not match the expected headers. The first three columns must be named <bold>“fromContext”</bold>, <bold>“fromCategory”</bold> and <bold>“fromValue”</bold>. Please correct the column headers and retry.</paragraph>",
 		"validation_no_hostlms": "You must provide a Host LMS code to import mappings. Please select a Host LMS and retry.",
-		"validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry."
+		"validation_missing_values": "The columns <bold>“Local code”</bold> and <bold>“Local meaning”</bold> must contain data. One or more cells in these columns is empty. Please fix and retry.",
+		"item_type_count": "Item types",
+		"patron_type_count": "Patron types",
+		"location_count": "Locations",
+		"numeric_range_count": "Numeric ranges",
+		"replacement_warning_text": "<bold>{{count}}</bold> existing {{category}} for <bold>{{code}}</bold> at <bold>{{libraryName}}</bold> will be <bold>deleted</bold> and replaced with the contents of <bold>{{fileName}}</bold>."
 	},
 	"nav": {
 		"agencies": "Agencies",
@@ -989,7 +1025,8 @@
 			"completed": "Completed",
 			"exception": "Exception",
 			"name": "Patron requests",
-			"outOfSequence": "Out of sequence"
+			"outOfSequence": "Out of sequence",
+			"accessibility_title": "Patron request navigation"
 		},
 		"profile": "Profile",
 		"search": {
@@ -1015,6 +1052,9 @@
 		},
 		"settings": {
 			"name": "Settings"
+		},
+		"supplierRequests": {
+			"name": "Supplier requests"
 		}
 	},
 	"new": {
@@ -1525,7 +1565,14 @@
 		"suppressed": "Suppressed",
 		"title": "Title",
 		"volume_parsed": "Parsed volume statement",
-		"volume_raw": "Raw volume statement"
+		"volume_raw": "Raw volume statement",
+		"aria": {
+			"remove_criterion": "Remove search criterion",
+			"select_operator": "Select search operator"
+		},
+		"invalid_uuid": "Please enter a valid UUID.",
+		"uuid_search_exclusive": "UUID search allows only one search criterion.",
+		"uuid_search_info": "Cluster record UUID search allows only a single search criterion. Enter a valid UUID to search for a specific record."
 	},
 	"service": {
 		"name": "Service",
@@ -1692,7 +1739,10 @@
 				"not_equal": "Does not equal",
 				"on_or_after": "On or after",
 				"on_or_before": "On or before",
-				"to": "To"
+				"to": "To",
+				"after": "after",
+				"and": "and",
+				"before": "before"
 			},
 			"find_column": "Find column",
 			"master_detail": "Master detail",
@@ -1716,7 +1766,8 @@
 			},
 			"value": "Value",
 			"view_items": "View items",
-			"warning": "Warning"
+			"warning": "Warning",
+			"this_item": "this item"
 		},
 		"error": {
 			"401": {
@@ -1758,7 +1809,10 @@
 			"consortium_not_found": "Unable to find the consortium",
 			"consortium_not_present": "No consortium exists on this DCB instance.",
 			"consortium_advice": "Please set up your consortium and try again.",
-			"unable_to_load_page": "Sorry, we were unable to load this page"
+			"unable_to_load_page": "Sorry, we were unable to load this page",
+			"general": "Something went wrong. Please try again.",
+			"title": "Error",
+			"update_failed": "The changes could not be saved."
 		},
 		"file": {
 			"no_file_selected": "No file selected"
@@ -1827,6 +1881,9 @@
 			"bib_tip": "Link to the bib record page in DCB Admin",
 			"discovery_tip": "Link to $t(app.service.discovery)",
 			"host_lms_tip": "Link to the Host LMS page in DCB Admin"
+		},
+		"common": {
+			"status": "Status"
 		}
 	},
 	"welcome": {
@@ -1834,3 +1891,4 @@
 		"context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
 	}
 }
+

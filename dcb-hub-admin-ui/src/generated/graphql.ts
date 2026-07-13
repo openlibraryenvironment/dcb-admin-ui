@@ -1,4 +1,3 @@
-/* eslint-disable */
 /** Internal type. DO NOT USE DIRECTLY. */
 type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
@@ -7,7 +6,6 @@ export type Incremental<T> =
 	| {
 			[P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never;
 	  };
-import { DocumentTypeDecoration } from "@graphql-typed-document-node/core";
 export type AddLibraryToGroupCommand = {
 	library: string | number;
 	libraryGroup: string | number;
@@ -28,7 +26,7 @@ export type ConsortiumContactInput = {
 export type CreateHostLmsInput = {
 	changeCategory?: string | null | undefined;
 	changeReferenceUrl?: string | null | undefined;
-	clientConfig?: unknown;
+	clientConfig?: Record<string, any> | null | undefined;
 	code: string;
 	ingestSourceClass?: string | null | undefined;
 	itemSuppressionRulesetName?: string | null | undefined;
@@ -692,7 +690,7 @@ export type LoadAgencyQuery = {
 				code: string | null;
 				name: string | null;
 				lmsClientClass: string | null;
-				clientConfig: unknown;
+				clientConfig: Record<string, any> | null;
 			} | null;
 			locations: Array<{
 				id: string;
@@ -732,7 +730,7 @@ export type LoadAlarmsQuery = {
 			lastSeen: string | null;
 			repeatCount: number | null;
 			expires: string | null;
-			alarmDetails: unknown;
+			alarmDetails: Record<string, any> | null;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	};
@@ -750,7 +748,7 @@ export type GetAuditByIdQuery = {
 			briefDescription: string | null;
 			fromStatus: string | null;
 			toStatus: string | null;
-			auditData: unknown;
+			auditData: Record<string, any> | null;
 			patronRequest: { id: string } | null;
 		} | null> | null;
 	};
@@ -771,7 +769,7 @@ export type GetAuditsByPatronRequestQuery = {
 			id: string;
 			auditDate: string | null;
 			briefDescription: string | null;
-			auditData: unknown;
+			auditData: Record<string, any> | null;
 			patronRequest: { id: string } | null;
 		} | null> | null;
 	};
@@ -789,7 +787,7 @@ export type LoadBibMainDetailsQuery = {
 			dateUpdated: string | null;
 			title: string | null;
 			author: string | null;
-			canonicalMetadata: unknown;
+			canonicalMetadata: Record<string, any> | null;
 			processVersion: number | null;
 			metadataScore: number | null;
 			placeOfPublication: string | null;
@@ -826,7 +824,7 @@ export type LoadBibSourceRecordQuery = {
 				lastProcessed: string | null;
 				processingState: ProcessingStatus | null;
 				processingInformation: string | null;
-				sourceRecordData: unknown;
+				sourceRecordData: Record<string, any> | null;
 			} | null;
 		} | null> | null;
 	};
@@ -901,7 +899,7 @@ export type ClusterRecordsQuery = {
 				title: string | null;
 				author: string | null;
 				typeOfRecord: string | null;
-				canonicalMetadata: unknown;
+				canonicalMetadata: Record<string, any> | null;
 				clusterReason: string | null;
 				sourceSystemId: string | null;
 				sourceRecordId: string | null;
@@ -913,7 +911,7 @@ export type ClusterRecordsQuery = {
 					lastProcessed: string | null;
 					processingState: ProcessingStatus | null;
 					processingInformation: string | null;
-					sourceRecordData: unknown;
+					sourceRecordData: Record<string, any> | null;
 				} | null;
 				matchPoints: Array<{ id: string; value: string } | null> | null;
 			} | null> | null;
@@ -1068,7 +1066,7 @@ export type LoadDataChangeLogQuery = {
 			reason: string | null;
 			changeReferenceUrl: string | null;
 			changeCategory: string | null;
-			changes: unknown;
+			changes: Record<string, any>;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	};
@@ -1091,7 +1089,7 @@ export type GetDataChangeLogByIdQuery = {
 			reason: string | null;
 			changeReferenceUrl: string | null;
 			changeCategory: string | null;
-			changes: unknown;
+			changes: Record<string, any>;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	};
@@ -1140,6 +1138,8 @@ export type LoadGroupQuery = {
 export type LoadGroupsSelectionQueryVariables = Exact<{
 	order: string;
 	orderBy: string;
+	pageno?: number | null | undefined;
+	pagesize?: number | null | undefined;
 }>;
 
 export type LoadGroupsSelectionQuery = {
@@ -1156,19 +1156,35 @@ export type LoadGroupsSelectionQuery = {
 
 export type LoadHostLmsQueryVariables = Exact<{
 	query: string;
+	pageno?: number | null | undefined;
+	pagesize?: number | null | undefined;
+	order?: string | null | undefined;
+	orderBy?: string | null | undefined;
 }>;
 
 export type LoadHostLmsQuery = {
 	hostLms: {
+		totalSize: number | null;
 		content: Array<{
 			id: string | null;
 			code: string | null;
 			name: string | null;
 			lmsClientClass: string | null;
-			clientConfig: unknown;
+			clientConfig: Record<string, any> | null;
 			itemSuppressionRulesetName: string | null;
 			suppressionRulesetName: string | null;
 		} | null> | null;
+	};
+};
+
+export type LoadHostLmsCodesQueryVariables = Exact<{
+	query: string;
+	pagesize: number;
+}>;
+
+export type LoadHostLmsCodesQuery = {
+	hostLms: {
+		content: Array<{ id: string | null; code: string | null } | null> | null;
 	};
 };
 
@@ -1202,14 +1218,14 @@ export type LoadLibrariesQuery = {
 				hostLms: {
 					id: string | null;
 					code: string | null;
-					clientConfig: unknown;
+					clientConfig: Record<string, any> | null;
 					lmsClientClass: string | null;
 				} | null;
 			} | null;
 			secondHostLms: {
 				id: string | null;
 				code: string | null;
-				clientConfig: unknown;
+				clientConfig: Record<string, any> | null;
 				lmsClientClass: string | null;
 			} | null;
 			membership: Array<{
@@ -1257,6 +1273,8 @@ export type LoadLibraryQuery = {
 			type: string | null;
 			backupDowntimeSchedule: string | null;
 			hostLmsConfiguration: string | null;
+			principalLabel: string | null;
+			secretLabel: string | null;
 			agency: {
 				id: string | null;
 				code: string | null;
@@ -1268,7 +1286,7 @@ export type LoadLibraryQuery = {
 					id: string | null;
 					code: string | null;
 					name: string | null;
-					clientConfig: unknown;
+					clientConfig: Record<string, any> | null;
 					lmsClientClass: string | null;
 					itemSuppressionRulesetName: string | null;
 					suppressionRulesetName: string | null;
@@ -1278,7 +1296,7 @@ export type LoadLibraryQuery = {
 				id: string | null;
 				code: string | null;
 				name: string | null;
-				clientConfig: unknown;
+				clientConfig: Record<string, any> | null;
 				lmsClientClass: string | null;
 				itemSuppressionRulesetName: string | null;
 				suppressionRulesetName: string | null;
@@ -1347,6 +1365,8 @@ export type LoadLibraryBasicsQuery = {
 				id: string | null;
 				code: string | null;
 				maxConsortialLoans: number | null;
+				isSupplyingAgency: boolean | null;
+				isBorrowingAgency: boolean | null;
 				hostLms: {
 					id: string | null;
 					code: string | null;
@@ -1523,7 +1543,7 @@ export type LoadLibraryServiceInfoQuery = {
 					id: string | null;
 					code: string | null;
 					name: string | null;
-					clientConfig: unknown;
+					clientConfig: Record<string, any> | null;
 					lmsClientClass: string | null;
 					itemSuppressionRulesetName: string | null;
 					suppressionRulesetName: string | null;
@@ -1533,7 +1553,7 @@ export type LoadLibraryServiceInfoQuery = {
 				id: string | null;
 				code: string | null;
 				name: string | null;
-				clientConfig: unknown;
+				clientConfig: Record<string, any> | null;
 				lmsClientClass: string | null;
 				itemSuppressionRulesetName: string | null;
 				suppressionRulesetName: string | null;
@@ -1587,7 +1607,7 @@ export type LoadLocationQuery = {
 					code: string | null;
 					name: string | null;
 					lmsClientClass: string | null;
-					clientConfig: unknown;
+					clientConfig: Record<string, any> | null;
 				} | null;
 			} | null;
 			hostSystem: {
@@ -1595,7 +1615,7 @@ export type LoadLocationQuery = {
 				code: string | null;
 				name: string | null;
 				lmsClientClass: string | null;
-				clientConfig: unknown;
+				clientConfig: Record<string, any> | null;
 			} | null;
 		} | null> | null;
 	};
@@ -1711,6 +1731,7 @@ export type LoadNumericRangeMappingsQuery = {
 };
 
 export type LoadPatronIdentitiesQueryVariables = Exact<{
+	query: string;
 	order: string;
 	orderBy: string;
 }>;
@@ -1750,6 +1771,9 @@ export type LoadPatronRequestQuery = {
 			pickupItemStatus: string | null;
 			pickupRequestId: string | null;
 			pickupRequestStatus: string | null;
+			pickupBibId: string | null;
+			rawPickupItemStatus: string | null;
+			rawPickupRequestStatus: string | null;
 			status: string | null;
 			localRequestId: string | null;
 			localRequestStatus: string | null;
@@ -1797,7 +1821,7 @@ export type LoadPatronRequestQuery = {
 				briefDescription: string | null;
 				fromStatus: string | null;
 				toStatus: string | null;
-				auditData: unknown;
+				auditData: Record<string, any> | null;
 			} | null> | null;
 			clusterRecord: {
 				id: string;
@@ -1819,7 +1843,7 @@ export type LoadPatronRequestQuery = {
 					isLargePrint: boolean | null;
 					clusterReason: string | null;
 					typeOfRecord: string | null;
-					canonicalMetadata: unknown;
+					canonicalMetadata: Record<string, any> | null;
 					metadataScore: number | null;
 					processVersion: number | null;
 					sourceSystemId: string | null;
@@ -1832,7 +1856,7 @@ export type LoadPatronRequestQuery = {
 						lastProcessed: string | null;
 						processingState: ProcessingStatus | null;
 						processingInformation: string | null;
-						sourceRecordData: unknown;
+						sourceRecordData: Record<string, any> | null;
 					} | null;
 				} | null> | null;
 			} | null;
@@ -2111,6 +2135,8 @@ export type LoadPatronRequestsForExportQuery = {
 			outOfSequenceFlag: boolean | null;
 			elapsedTimeInCurrentStatus: number | null;
 			pollCountForCurrentStatus: number | null;
+			renewalCount: number | null;
+			resolutionCount: number | null;
 			isManuallySelectedItem: boolean | null;
 			requesterNote: string | null;
 			activeWorkflow: string | null;
@@ -2207,2127 +2233,3 @@ export type LoadSupplierRequestsQuery = {
 		pageable: { number: number | null; offset: number | null } | null;
 	};
 };
-
-export class TypedDocumentString<TResult, TVariables>
-	extends String
-	implements DocumentTypeDecoration<TResult, TVariables>
-{
-	__apiType?: NonNullable<
-		DocumentTypeDecoration<TResult, TVariables>["__apiType"]
-	>;
-	private value: string;
-	public __meta__?: Record<string, any> | undefined;
-
-	constructor(value: string, __meta__?: Record<string, any> | undefined) {
-		super(value);
-		this.value = value;
-		this.__meta__ = __meta__;
-	}
-
-	override toString(): string & DocumentTypeDecoration<TResult, TVariables> {
-		return this.value;
-	}
-}
-
-export const AddFunctionalSettingDocument = new TypedDocumentString(`
-    mutation AddFunctionalSetting($input: FunctionalSettingInput!) {
-  createFunctionalSetting(input: $input) {
-    id
-    name
-    enabled
-    description
-  }
-}
-    `) as unknown as TypedDocumentString<
-	AddFunctionalSettingMutation,
-	AddFunctionalSettingMutationVariables
->;
-export const AddLibraryToGroupDocument = new TypedDocumentString(`
-    mutation addLibraryToGroup($input: AddLibraryToGroupCommand!) {
-  addLibraryToGroup(input: $input) {
-    id
-    library {
-      id
-      agencyCode
-      fullName
-    }
-    libraryGroup {
-      id
-      code
-      name
-      type
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	AddLibraryToGroupMutation,
-	AddLibraryToGroupMutationVariables
->;
-export const CreateConsortiumContactDocument = new TypedDocumentString(`
-    mutation CreateConsortiumContact($input: ConsortiumContactInput!) {
-  createContact(input: $input) {
-    id
-    person {
-      firstName
-      lastName
-    }
-    consortium {
-      id
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateConsortiumContactMutation,
-	CreateConsortiumContactMutationVariables
->;
-export const CreateHostLmsDocument = new TypedDocumentString(`
-    mutation CreateHostLms($input: CreateHostLmsInput!) {
-  createHostLms(input: $input) {
-    hostLms {
-      id
-      code
-      name
-      lmsClientClass
-    }
-    pingStatus
-    ingestStatus
-    warnings
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateHostLmsMutation,
-	CreateHostLmsMutationVariables
->;
-export const CreateLibraryDocument = new TypedDocumentString(`
-    mutation CreateLibrary($input: LibraryInput!) {
-  createLibrary(input: $input) {
-    id
-    agencyCode
-    fullName
-    shortName
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateLibraryMutation,
-	CreateLibraryMutationVariables
->;
-export const CreateLibraryContactDocument = new TypedDocumentString(`
-    mutation CreateLibraryContact($input: CreateLibraryContactInput!) {
-  createLibraryContact(input: $input) {
-    id
-    person {
-      firstName
-      lastName
-    }
-    library {
-      id
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateLibraryContactMutation,
-	CreateLibraryContactMutationVariables
->;
-export const CreateLibraryGroupDocument = new TypedDocumentString(`
-    mutation CreateLibraryGroup($input: LibraryGroupInput!) {
-  createLibraryGroup(input: $input) {
-    id
-    code
-    name
-    type
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateLibraryGroupMutation,
-	CreateLibraryGroupMutationVariables
->;
-export const CreateLocationDocument = new TypedDocumentString(`
-    mutation CreateLocation($input: CreateLocationInput!) {
-  createLocation(input: $input) {
-    id
-    name
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateLocationMutation,
-	CreateLocationMutationVariables
->;
-export const CreateReferenceValueMappingDocument = new TypedDocumentString(`
-    mutation CreateReferenceValueMapping($input: CreateReferenceValueMappingInput!) {
-  createReferenceValueMapping(input: $input) {
-    id
-    toValue
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CreateReferenceValueMappingMutation,
-	CreateReferenceValueMappingMutationVariables
->;
-export const DeleteConsortiumContactDocument = new TypedDocumentString(`
-    mutation DeleteConsortiumContact($input: DeleteConsortiumContactInput!) {
-  deleteContact(input: $input) {
-    success
-    message
-  }
-}
-    `) as unknown as TypedDocumentString<
-	DeleteConsortiumContactMutation,
-	DeleteConsortiumContactMutationVariables
->;
-export const DeleteLibraryDocument = new TypedDocumentString(`
-    mutation DeleteLibrary($input: DeleteEntityInput!) {
-  deleteLibrary(input: $input) {
-    success
-    message
-  }
-}
-    `) as unknown as TypedDocumentString<
-	DeleteLibraryMutation,
-	DeleteLibraryMutationVariables
->;
-export const DeleteLibraryContactDocument = new TypedDocumentString(`
-    mutation DeleteLibraryContact($input: DeleteLibraryContactInput!) {
-  deleteLibraryContact(input: $input) {
-    success
-    message
-  }
-}
-    `) as unknown as TypedDocumentString<
-	DeleteLibraryContactMutation,
-	DeleteLibraryContactMutationVariables
->;
-export const DeleteLocationDocument = new TypedDocumentString(`
-    mutation DeleteLocation($input: DeleteEntityInput!) {
-  deleteLocation(input: $input) {
-    success
-    message
-  }
-}
-    `) as unknown as TypedDocumentString<
-	DeleteLocationMutation,
-	DeleteLocationMutationVariables
->;
-export const DeleteNumericRangeMappingDocument = new TypedDocumentString(`
-    mutation DeleteNumericRangeMapping($input: DeleteEntityInput!) {
-  deleteNumericRangeMapping(input: $input) {
-    success
-    message
-  }
-}
-    `) as unknown as TypedDocumentString<
-	DeleteNumericRangeMappingMutation,
-	DeleteNumericRangeMappingMutationVariables
->;
-export const DeleteReferenceValueMappingDocument = new TypedDocumentString(`
-    mutation DeleteReferenceValueMapping($input: DeleteEntityInput!) {
-  deleteReferenceValueMapping(input: $input) {
-    success
-    message
-  }
-}
-    `) as unknown as TypedDocumentString<
-	DeleteReferenceValueMappingMutation,
-	DeleteReferenceValueMappingMutationVariables
->;
-export const UpdateAgencyDocument = new TypedDocumentString(`
-    mutation UpdateAgency($input: UpdateAgencyInput!) {
-  updateAgency(input: $input) {
-    id
-    code
-    name
-    isSupplyingAgency
-    isBorrowingAgency
-    maxConsortialLoans
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateAgencyMutation,
-	UpdateAgencyMutationVariables
->;
-export const UpdateAgencyParticipationStatusDocument = new TypedDocumentString(`
-    mutation UpdateAgencyParticipationStatus($input: UpdateAgencyParticipationInput!) {
-  updateAgencyParticipationStatus(input: $input) {
-    id
-    code
-    name
-    isSupplyingAgency
-    isBorrowingAgency
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateAgencyParticipationStatusMutation,
-	UpdateAgencyParticipationStatusMutationVariables
->;
-export const UpdateConsortiumDocument = new TypedDocumentString(`
-    mutation UpdateConsortium($input: UpdateConsortiumInput!) {
-  updateConsortium(input: $input) {
-    id
-    headerImageUrl
-    headerImageUploader
-    headerImageUploaderEmail
-    aboutImageUrl
-    aboutImageUploader
-    aboutImageUploaderEmail
-    description
-    catalogueSearchUrl
-    websiteUrl
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateConsortiumMutation,
-	UpdateConsortiumMutationVariables
->;
-export const UpdateFunctionalSettingDocument = new TypedDocumentString(`
-    mutation UpdateFunctionalSetting($input: UpdateFunctionalSettingInput!) {
-  updateFunctionalSetting(input: $input) {
-    id
-    name
-    enabled
-    description
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateFunctionalSettingMutation,
-	UpdateFunctionalSettingMutationVariables
->;
-export const UpdateLibraryDocument = new TypedDocumentString(`
-    mutation UpdateLibrary($input: UpdateLibraryInput!) {
-  updateLibrary(input: $input) {
-    id
-    fullName
-    shortName
-    abbreviatedName
-    backupDowntimeSchedule
-    supportHours
-    latitude
-    longitude
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateLibraryMutation,
-	UpdateLibraryMutationVariables
->;
-export const UpdateLocationDocument = new TypedDocumentString(`
-    mutation UpdateLocation($input: UpdateLocationInput!) {
-  updateLocation(input: $input) {
-    id
-    longitude
-    latitude
-    name
-    localId
-    printLabel
-    isPickup
-    isEnabledForPickupAnywhere
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateLocationMutation,
-	UpdateLocationMutationVariables
->;
-export const UpdateNumericRangeMappingDocument = new TypedDocumentString(`
-    mutation UpdateNumericRangeMapping($input: UpdateNumericRangeMappingInput!) {
-  updateNumericRangeMapping(input: $input) {
-    id
-    mappedValue
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateNumericRangeMappingMutation,
-	UpdateNumericRangeMappingMutationVariables
->;
-export const UpdatePersonDocument = new TypedDocumentString(`
-    mutation UpdatePerson($input: UpdatePersonInput!) {
-  updatePerson(input: $input) {
-    id
-    email
-    firstName
-    lastName
-    role {
-      id
-      name
-      displayName
-    }
-    isPrimaryContact
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdatePersonMutation,
-	UpdatePersonMutationVariables
->;
-export const UpdateReferenceValueMappingDocument = new TypedDocumentString(`
-    mutation UpdateReferenceValueMapping($input: UpdateReferenceValueMappingInput!) {
-  updateReferenceValueMapping(input: $input) {
-    id
-    toValue
-  }
-}
-    `) as unknown as TypedDocumentString<
-	UpdateReferenceValueMappingMutation,
-	UpdateReferenceValueMappingMutationVariables
->;
-export const CheckExistingLocationsDocument = new TypedDocumentString(`
-    query CheckExistingLocations($pagesize: Int!, $query: String!) {
-  locations(pagesize: $pagesize, query: $query) {
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CheckExistingLocationsQuery,
-	CheckExistingLocationsQueryVariables
->;
-export const CheckExistingMappingsDocument = new TypedDocumentString(`
-    query CheckExistingMappings($pagesize: Int!, $query: String!) {
-  referenceValueMappings(pagesize: $pagesize, query: $query) {
-    totalSize
-    content {
-      id
-      fromCategory
-      fromContext
-      fromValue
-      toCategory
-      toContext
-      toValue
-      reciprocal
-      label
-      lastImported
-      deleted
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	CheckExistingMappingsQuery,
-	CheckExistingMappingsQueryVariables
->;
-export const CheckExistingNumericRangeMappingsDocument =
-	new TypedDocumentString(`
-    query CheckExistingNumericRangeMappings($pagesize: Int!, $query: String!) {
-  numericRangeMappings(pagesize: $pagesize, query: $query) {
-    totalSize
-    content {
-      id
-      context
-      domain
-      lowerBound
-      upperBound
-      targetContext
-      mappedValue
-      deleted
-      lastImported
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-		CheckExistingNumericRangeMappingsQuery,
-		CheckExistingNumericRangeMappingsQueryVariables
-	>;
-export const LoadAgenciesDocument = new TypedDocumentString(`
-    query LoadAgencies($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  agencies(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      code
-      name
-      latitude
-      longitude
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadAgenciesQuery,
-	LoadAgenciesQueryVariables
->;
-export const LoadAgenciesForStaffRequestDocument = new TypedDocumentString(`
-    query LoadAgenciesForStaffRequest($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  agencies(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      code
-      name
-      hostLms {
-        id
-        code
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadAgenciesForStaffRequestQuery,
-	LoadAgenciesForStaffRequestQueryVariables
->;
-export const LoadAgencyDocument = new TypedDocumentString(`
-    query LoadAgency($query: String!) {
-  agencies(query: $query) {
-    content {
-      id
-      code
-      name
-      authProfile
-      longitude
-      latitude
-      isSupplyingAgency
-      isBorrowingAgency
-      hostLms {
-        id
-        code
-        name
-        lmsClientClass
-        clientConfig
-      }
-      locations {
-        id
-        dateCreated
-        dateUpdated
-        code
-        name
-        type
-        isPickup
-        isEnabledForPickupAnywhere
-        longitude
-        latitude
-        locationReference
-        deliveryStops
-        printLabel
-        localId
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadAgencyQuery,
-	LoadAgencyQueryVariables
->;
-export const LoadAlarmsDocument = new TypedDocumentString(`
-    query LoadAlarms($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  alarms(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      code
-      created
-      lastSeen
-      repeatCount
-      expires
-      alarmDetails
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadAlarmsQuery,
-	LoadAlarmsQueryVariables
->;
-export const GetAuditByIdDocument = new TypedDocumentString(`
-    query GetAuditById($query: String!) {
-  audits(query: $query) {
-    content {
-      id
-      auditDate
-      briefDescription
-      fromStatus
-      toStatus
-      auditData
-      patronRequest {
-        id
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	GetAuditByIdQuery,
-	GetAuditByIdQueryVariables
->;
-export const GetAuditsByPatronRequestDocument = new TypedDocumentString(`
-    query GetAuditsByPatronRequest($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  audits(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      auditDate
-      briefDescription
-      auditData
-      patronRequest {
-        id
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	GetAuditsByPatronRequestQuery,
-	GetAuditsByPatronRequestQueryVariables
->;
-export const LoadBibMainDetailsDocument = new TypedDocumentString(`
-    query LoadBibMainDetails($query: String!) {
-  sourceBibs(query: $query) {
-    content {
-      id
-      dateCreated
-      dateUpdated
-      title
-      author
-      canonicalMetadata
-      processVersion
-      metadataScore
-      processVersion
-      placeOfPublication
-      publisher
-      dateOfPublication
-      edition
-      isLargePrint
-      clusterReason
-      typeOfRecord
-      metadataScore
-      contributesTo {
-        id
-        title
-      }
-      sourceSystemId
-      sourceRecordId
-      matchPoints {
-        id
-        bibId
-        value
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadBibMainDetailsQuery,
-	LoadBibMainDetailsQueryVariables
->;
-export const LoadBibSourceRecordDocument = new TypedDocumentString(`
-    query LoadBibSourceRecord($query: String!) {
-  sourceBibs(query: $query) {
-    content {
-      sourceRecord {
-        id
-        hostLmsId
-        remoteId
-        lastFetched
-        lastProcessed
-        processingState
-        processingInformation
-        sourceRecordData
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadBibSourceRecordQuery,
-	LoadBibSourceRecordQueryVariables
->;
-export const LoadBibsDocument = new TypedDocumentString(`
-    query LoadBibs($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!) {
-  sourceBibs(pageno: $pageno, pagesize: $pagesize, order: $order, query: $query) {
-    totalSize
-    content {
-      id
-      dateCreated
-      dateUpdated
-      title
-      author
-      sourceSystemId
-      sourceRecordId
-      processVersion
-      isLargePrint
-      contributesTo {
-        id
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<LoadBibsQuery, LoadBibsQueryVariables>;
-export const LoadBibsForPublisherDocument = new TypedDocumentString(`
-    query LoadBibsForPublisher($query: String!, $pagesize: Int, $pageno: Int) {
-  sourceBibs(query: $query, pagesize: $pagesize, pageno: $pageno) {
-    content {
-      contributesTo {
-        id
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadBibsForPublisherQuery,
-	LoadBibsForPublisherQueryVariables
->;
-export const LoadClusterIdsByTitleDocument = new TypedDocumentString(`
-    query LoadClusterIdsByTitle($query: String!, $pagesize: Int, $pageno: Int) {
-  sourceBibs(query: $query, pagesize: $pagesize, pageno: $pageno) {
-    content {
-      contributesTo {
-        id
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadClusterIdsByTitleQuery,
-	LoadClusterIdsByTitleQueryVariables
->;
-export const ClusterRecordsDocument = new TypedDocumentString(`
-    query ClusterRecords($query: String!) {
-  instanceClusters(query: $query) {
-    content {
-      id
-      title
-      selectedBib
-      isDeleted
-      dateCreated
-      dateUpdated
-      lastIndexed
-      members {
-        id
-        title
-        author
-        typeOfRecord
-        canonicalMetadata
-        clusterReason
-        sourceSystemId
-        sourceRecordId
-        sourceRecord {
-          id
-          hostLmsId
-          remoteId
-          lastFetched
-          lastProcessed
-          processingState
-          processingInformation
-          sourceRecordData
-        }
-        matchPoints {
-          id
-          value
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	ClusterRecordsQuery,
-	ClusterRecordsQueryVariables
->;
-export const ClusterRecordsTitleOnlyDocument = new TypedDocumentString(`
-    query ClusterRecordsTitleOnly($query: String!) {
-  instanceClusters(query: $query) {
-    content {
-      id
-      title
-      selectedBib
-      isDeleted
-      dateCreated
-      dateUpdated
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	ClusterRecordsTitleOnlyQuery,
-	ClusterRecordsTitleOnlyQueryVariables
->;
-export const LoadConsortiumDocument = new TypedDocumentString(`
-    query LoadConsortium($order: String!, $orderBy: String!) {
-  consortia(order: $order, orderBy: $orderBy) {
-    totalSize
-    content {
-      id
-      name
-      libraryGroup {
-        id
-      }
-      dateOfLaunch
-      headerImageUrl
-      headerImageUploader
-      headerImageUploaderEmail
-      aboutImageUrl
-      aboutImageUploader
-      aboutImageUploaderEmail
-      description
-      catalogueSearchUrl
-      websiteUrl
-      displayName
-      contacts {
-        email
-        id
-      }
-      functionalSettings {
-        id
-        name
-        enabled
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadConsortiumQuery,
-	LoadConsortiumQueryVariables
->;
-export const LoadConsortiumHeaderDocument = new TypedDocumentString(`
-    query LoadConsortiumHeader($order: String!, $orderBy: String!) {
-  consortia(order: $order, orderBy: $orderBy) {
-    totalSize
-    content {
-      id
-      name
-      displayName
-      headerImageUrl
-      aboutImageUrl
-      description
-      catalogueSearchUrl
-      websiteUrl
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadConsortiumHeaderQuery,
-	LoadConsortiumHeaderQueryVariables
->;
-export const LoadConsortiumContactsDocument = new TypedDocumentString(`
-    query LoadConsortiumContacts($order: String!, $orderBy: String!) {
-  consortia(order: $order, orderBy: $orderBy) {
-    totalSize
-    content {
-      id
-      name
-      displayName
-      contacts {
-        id
-        firstName
-        lastName
-        role {
-          id
-          name
-          description
-          displayName
-          keycloakRole
-        }
-        isPrimaryContact
-        email
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadConsortiumContactsQuery,
-	LoadConsortiumContactsQueryVariables
->;
-export const LoadConsortiumFsDocument = new TypedDocumentString(`
-    query LoadConsortiumFS($order: String!, $orderBy: String!) {
-  consortia(order: $order, orderBy: $orderBy) {
-    totalSize
-    content {
-      id
-      name
-      displayName
-      functionalSettings {
-        id
-        name
-        enabled
-        description
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadConsortiumFsQuery,
-	LoadConsortiumFsQueryVariables
->;
-export const LoadDataChangeLogDocument = new TypedDocumentString(`
-    query LoadDataChangeLog($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  dataChangeLog(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      entityId
-      entityType
-      actionInfo
-      lastEditedBy
-      timestampLogged
-      reason
-      changeReferenceUrl
-      changeCategory
-      changes
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadDataChangeLogQuery,
-	LoadDataChangeLogQueryVariables
->;
-export const GetDataChangeLogByIdDocument = new TypedDocumentString(`
-    query GetDataChangeLogById($query: String!) {
-  dataChangeLog(query: $query) {
-    totalSize
-    content {
-      id
-      entityId
-      entityType
-      actionInfo
-      lastEditedBy
-      timestampLogged
-      reason
-      changeReferenceUrl
-      changeCategory
-      changes
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	GetDataChangeLogByIdQuery,
-	GetDataChangeLogByIdQueryVariables
->;
-export const LoadGroupDocument = new TypedDocumentString(`
-    query LoadGroup($query: String!) {
-  libraryGroups(query: $query) {
-    content {
-      id
-      code
-      name
-      type
-      consortium {
-        id
-        name
-      }
-      members {
-        id
-        library {
-          id
-          agencyCode
-          agency {
-            authProfile
-            code
-            id
-            isBorrowingAgency
-            isSupplyingAgency
-            hostLms {
-              lmsClientClass
-              code
-              id
-            }
-          }
-          shortName
-          fullName
-          abbreviatedName
-          longitude
-          latitude
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadGroupQuery,
-	LoadGroupQueryVariables
->;
-export const LoadGroupsSelectionDocument = new TypedDocumentString(`
-    query LoadGroupsSelection($order: String!, $orderBy: String!) {
-  libraryGroups(order: $order, orderBy: $orderBy) {
-    totalSize
-    content {
-      id
-      code
-      name
-      type
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadGroupsSelectionQuery,
-	LoadGroupsSelectionQueryVariables
->;
-export const LoadHostLmsDocument = new TypedDocumentString(`
-    query LoadHostLms($query: String!) {
-  hostLms(query: $query) {
-    content {
-      id
-      code
-      name
-      lmsClientClass
-      clientConfig
-      itemSuppressionRulesetName
-      suppressionRulesetName
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadHostLmsQuery,
-	LoadHostLmsQueryVariables
->;
-export const LoadLibrariesDocument = new TypedDocumentString(`
-    query LoadLibraries($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  libraries(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      fullName
-      shortName
-      abbreviatedName
-      agencyCode
-      supportHours
-      address
-      type
-      agency {
-        id
-        code
-        name
-        authProfile
-        hostLms {
-          id
-          code
-          clientConfig
-          lmsClientClass
-        }
-        isSupplyingAgency
-        isBorrowingAgency
-      }
-      secondHostLms {
-        id
-        code
-        clientConfig
-        lmsClientClass
-      }
-      membership {
-        libraryGroup {
-          id
-          code
-          name
-          type
-          consortium {
-            id
-            name
-            dateOfLaunch
-            functionalSettings {
-              id
-              name
-              enabled
-            }
-          }
-        }
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibrariesQuery,
-	LoadLibrariesQueryVariables
->;
-export const LoadLibraryDocument = new TypedDocumentString(`
-    query LoadLibrary($query: String!) {
-  libraries(query: $query) {
-    content {
-      id
-      fullName
-      shortName
-      abbreviatedName
-      agencyCode
-      supportHours
-      address
-      latitude
-      longitude
-      training
-      patronWebsite
-      discoverySystem
-      type
-      backupDowntimeSchedule
-      hostLmsConfiguration
-      agency {
-        id
-        code
-        name
-        authProfile
-        isSupplyingAgency
-        isBorrowingAgency
-        hostLms {
-          id
-          code
-          name
-          clientConfig
-          lmsClientClass
-          itemSuppressionRulesetName
-          suppressionRulesetName
-        }
-      }
-      secondHostLms {
-        id
-        code
-        name
-        clientConfig
-        lmsClientClass
-        itemSuppressionRulesetName
-        suppressionRulesetName
-      }
-      membership {
-        libraryGroup {
-          id
-          code
-          name
-          type
-          consortium {
-            id
-            name
-            functionalSettings {
-              id
-              name
-              enabled
-            }
-          }
-        }
-      }
-      contacts {
-        id
-        firstName
-        lastName
-        role {
-          id
-          name
-          description
-          displayName
-          keycloakRole
-        }
-        isPrimaryContact
-        email
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryQuery,
-	LoadLibraryQueryVariables
->;
-export const LoadLibraryBasicsDocument = new TypedDocumentString(`
-    query LoadLibraryBasics($query: String!) {
-  libraries(query: $query) {
-    content {
-      id
-      fullName
-      shortName
-      agencyCode
-      contacts {
-        id
-        firstName
-        lastName
-        role {
-          id
-          name
-          description
-          displayName
-          keycloakRole
-        }
-        isPrimaryContact
-        email
-      }
-      agency {
-        id
-        code
-        maxConsortialLoans
-        hostLms {
-          id
-          code
-          lmsClientClass
-        }
-      }
-      secondHostLms {
-        code
-        name
-        id
-        lmsClientClass
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryBasicsQuery,
-	LoadLibraryBasicsQueryVariables
->;
-export const LoadLibraryBasicsLocationDocument = new TypedDocumentString(`
-    query LoadLibraryBasicsLocation($query: String!) {
-  libraries(query: $query) {
-    content {
-      id
-      fullName
-      shortName
-      agencyCode
-      contacts {
-        id
-        firstName
-        lastName
-        role {
-          id
-          name
-          description
-          displayName
-          keycloakRole
-        }
-        isPrimaryContact
-        email
-      }
-      agency {
-        id
-        code
-        maxConsortialLoans
-        hostLms {
-          id
-          code
-          lmsClientClass
-        }
-      }
-      secondHostLms {
-        id
-        code
-        name
-        lmsClientClass
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryBasicsLocationQuery,
-	LoadLibraryBasicsLocationQueryVariables
->;
-export const LoadLibraryBasicsPrDocument = new TypedDocumentString(`
-    query LoadLibraryBasicsPR($query: String!) {
-  libraries(query: $query) {
-    content {
-      id
-      fullName
-      agencyCode
-      agency {
-        id
-        authProfile
-        hostLms {
-          id
-          code
-          name
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryBasicsPrQuery,
-	LoadLibraryBasicsPrQueryVariables
->;
-export const LoadLibraryBibClusterIdsDocument = new TypedDocumentString(`
-    query LoadLibraryBibClusterIds($query: String!, $pagesize: Int, $pageno: Int) {
-  patronRequests(query: $query, pagesize: $pagesize, pageno: $pageno) {
-    content {
-      bibClusterId
-      clusterRecord {
-        title
-        members {
-          publisher
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryBibClusterIdsQuery,
-	LoadLibraryBibClusterIdsQueryVariables
->;
-export const LoadLibraryContactsDocument = new TypedDocumentString(`
-    query LoadLibraryContacts($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  libraries(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      fullName
-      shortName
-      contacts {
-        id
-        firstName
-        lastName
-        role {
-          id
-          name
-          description
-          displayName
-          keycloakRole
-        }
-        isPrimaryContact
-        email
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryContactsQuery,
-	LoadLibraryContactsQueryVariables
->;
-export const LoadGroupsDocument = new TypedDocumentString(`
-    query LoadGroups($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  libraryGroups(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      code
-      name
-      type
-      consortium {
-        name
-        id
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadGroupsQuery,
-	LoadGroupsQueryVariables
->;
-export const LoadLibraryServiceInfoDocument = new TypedDocumentString(`
-    query LoadLibraryServiceInfo($query: String!) {
-  libraries(query: $query) {
-    content {
-      id
-      fullName
-      patronWebsite
-      discoverySystem
-      backupDowntimeSchedule
-      hostLmsConfiguration
-      agency {
-        id
-        authProfile
-        hostLms {
-          id
-          code
-          name
-          clientConfig
-          lmsClientClass
-          itemSuppressionRulesetName
-          suppressionRulesetName
-        }
-      }
-      secondHostLms {
-        id
-        code
-        name
-        clientConfig
-        lmsClientClass
-        itemSuppressionRulesetName
-        suppressionRulesetName
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLibraryServiceInfoQuery,
-	LoadLibraryServiceInfoQueryVariables
->;
-export const LoadLocationDocument = new TypedDocumentString(`
-    query LoadLocation($query: String!) {
-  locations(query: $query) {
-    content {
-      id
-      code
-      name
-      type
-      isPickup
-      isEnabledForPickupAnywhere
-      localId
-      longitude
-      latitude
-      agency {
-        id
-        code
-        name
-        authProfile
-        longitude
-        latitude
-      }
-      parentLocation {
-        id
-        code
-        name
-        type
-        isPickup
-        isEnabledForPickupAnywhere
-        longitude
-        latitude
-        dateCreated
-        dateUpdated
-        hostSystem {
-          id
-          code
-          name
-          lmsClientClass
-          clientConfig
-        }
-      }
-      hostSystem {
-        id
-        code
-        name
-        lmsClientClass
-        clientConfig
-      }
-      printLabel
-      deliveryStops
-      locationReference
-      dateCreated
-      dateUpdated
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLocationQuery,
-	LoadLocationQueryVariables
->;
-export const LoadLocationForPrGridDocument = new TypedDocumentString(`
-    query LoadLocationForPRGrid($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  locations(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      code
-      name
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLocationForPrGridQuery,
-	LoadLocationForPrGridQueryVariables
->;
-export const LoadLocationsDocument = new TypedDocumentString(`
-    query LoadLocations($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  locations(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      code
-      name
-      type
-      isPickup
-      isEnabledForPickupAnywhere
-      printLabel
-      localId
-      deliveryStops
-      lastImported
-      latitude
-      longitude
-      agency {
-        id
-        name
-        code
-      }
-      hostSystem {
-        name
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadLocationsQuery,
-	LoadLocationsQueryVariables
->;
-export const LoadMappingsDocument = new TypedDocumentString(`
-    query LoadMappings($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  referenceValueMappings(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      fromCategory
-      fromContext
-      fromValue
-      toCategory
-      toContext
-      toValue
-      reciprocal
-      label
-      lastImported
-      deleted
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadMappingsQuery,
-	LoadMappingsQueryVariables
->;
-export const LoadNumericRangeMappingsDocument = new TypedDocumentString(`
-    query LoadNumericRangeMappings($pageno: Int!, $pagesize: Int!, $order: String!, $orderBy: String!, $query: String!) {
-  numericRangeMappings(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    totalSize
-    content {
-      id
-      context
-      domain
-      lowerBound
-      upperBound
-      targetContext
-      mappedValue
-      lastImported
-      deleted
-    }
-    pageable {
-      number
-      offset
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadNumericRangeMappingsQuery,
-	LoadNumericRangeMappingsQueryVariables
->;
-export const LoadPatronIdentitiesDocument = new TypedDocumentString(`
-    query LoadPatronIdentities($order: String!, $orderBy: String!) {
-  patronIdentities(order: $order, orderBy: $orderBy) {
-    totalSize
-    content {
-      id
-      localId
-      homeIdentity
-      localBarcode
-      localNames
-      localPtype
-      canonicalPtype
-      localHomeLibraryCode
-      lastValidated
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronIdentitiesQuery,
-	LoadPatronIdentitiesQueryVariables
->;
-export const LoadPatronRequestDocument = new TypedDocumentString(`
-    query LoadPatronRequest($query: String!) {
-  patronRequests(query: $query) {
-    content {
-      id
-      dateUpdated
-      patronHostlmsCode
-      bibClusterId
-      pickupLocationCode
-      pickupPatronId
-      pickupItemId
-      pickupItemType
-      pickupItemStatus
-      pickupRequestId
-      pickupRequestStatus
-      status
-      localRequestId
-      localRequestStatus
-      localItemId
-      localItemStatus
-      localItemType
-      isExpeditedCheckout
-      localBibId
-      rawLocalItemStatus
-      rawLocalRequestStatus
-      description
-      nextScheduledPoll
-      errorMessage
-      previousStatus
-      pollCountForCurrentStatus
-      currentStatusTimestamp
-      nextExpectedStatus
-      outOfSequenceFlag
-      elapsedTimeInCurrentStatus
-      localItemHostlmsCode
-      localItemAgencyCode
-      isManuallySelectedItem
-      resolutionCount
-      renewalCount
-      renewalStatus
-      localRenewalCount
-      patron {
-        id
-      }
-      requestingIdentity {
-        id
-        localId
-        homeIdentity
-        localBarcode
-        localNames
-        localPtype
-        canonicalPtype
-        localHomeLibraryCode
-        lastValidated
-      }
-      audit {
-        id
-        auditDate
-        briefDescription
-        fromStatus
-        toStatus
-        auditData
-      }
-      clusterRecord {
-        id
-        title
-        selectedBib
-        isDeleted
-        dateCreated
-        dateUpdated
-        members {
-          id
-          dateCreated
-          dateUpdated
-          title
-          author
-          placeOfPublication
-          publisher
-          dateOfPublication
-          edition
-          isLargePrint
-          clusterReason
-          typeOfRecord
-          canonicalMetadata
-          metadataScore
-          processVersion
-          sourceSystemId
-          sourceRecordId
-          sourceRecord {
-            id
-            hostLmsId
-            remoteId
-            lastFetched
-            lastProcessed
-            processingState
-            processingInformation
-            sourceRecordData
-          }
-        }
-      }
-      dateCreated
-      activeWorkflow
-      requesterNote
-      suppliers {
-        id
-        canonicalItemType
-        dateCreated
-        dateUpdated
-        hostLmsCode
-        isActive
-        localItemId
-        localBibId
-        localItemBarcode
-        localItemLocationCode
-        localItemStatus
-        localItemType
-        localId
-        localRenewalCount
-        localStatus
-        localAgency
-        rawLocalItemStatus
-        rawLocalStatus
-        virtualPatron {
-          id
-          localId
-          homeIdentity
-          localBarcode
-          localNames
-          localPtype
-          canonicalPtype
-          localHomeLibraryCode
-          lastValidated
-        }
-      }
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronRequestQuery,
-	LoadPatronRequestQueryVariables
->;
-export const GetPatronRequestDashboardDocument = new TypedDocumentString(`
-    query GetPatronRequestDashboard($allQuery: String, $activeQuery: String, $exceptionQuery: String, $outOfSequenceQuery: String, $finishedQuery: String, $pageno: Int, $pagesize: Int, $order: String, $orderBy: String) {
-  allRequests: patronRequests(
-    query: $allQuery
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      dateCreated
-      dateUpdated
-      patronHostlmsCode
-      pickupLocationCode
-      description
-      status
-      previousStatus
-      nextExpectedStatus
-      errorMessage
-      nextScheduledPoll
-      outOfSequenceFlag
-      elapsedTimeInCurrentStatus
-      pollCountForCurrentStatus
-      isManuallySelectedItem
-      requesterNote
-      activeWorkflow
-      rawLocalRequestStatus
-      rawLocalItemStatus
-      localRequestId
-      localRequestStatus
-      localItemId
-      localItemStatus
-      localItemType
-      patron {
-        id
-      }
-      requestingIdentity {
-        id
-        localId
-        localBarcode
-        canonicalPtype
-      }
-      suppliers {
-        localAgency
-        canonicalItemType
-        localItemBarcode
-      }
-      clusterRecord {
-        id
-        title
-        members {
-          publisher
-        }
-      }
-    }
-    totalSize
-  }
-  activeRequests: patronRequests(query: $activeQuery, pageno: 0, pagesize: 1) {
-    totalSize
-  }
-  exceptionRequests: patronRequests(
-    query: $exceptionQuery
-    pageno: 0
-    pagesize: 1
-  ) {
-    totalSize
-  }
-  outOfSequenceRequests: patronRequests(
-    query: $outOfSequenceQuery
-    pageno: 0
-    pagesize: 1
-  ) {
-    totalSize
-  }
-  finishedRequests: patronRequests(query: $finishedQuery, pageno: 0, pagesize: 1) {
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	GetPatronRequestDashboardQuery,
-	GetPatronRequestDashboardQueryVariables
->;
-export const LoadPatronRequestsByIdDocument = new TypedDocumentString(`
-    query LoadPatronRequestsById($query: String!) {
-  patronRequests(query: $query) {
-    content {
-      id
-      dateUpdated
-      patronHostlmsCode
-      bibClusterId
-      status
-      localRequestId
-      localRequestStatus
-      localItemId
-      localItemStatus
-      localItemType
-      localBibId
-      rawLocalItemStatus
-      rawLocalRequestStatus
-      description
-      nextScheduledPoll
-      errorMessage
-      previousStatus
-      pollCountForCurrentStatus
-      currentStatusTimestamp
-      nextExpectedStatus
-      outOfSequenceFlag
-      elapsedTimeInCurrentStatus
-      localItemHostlmsCode
-      localItemAgencyCode
-      isManuallySelectedItem
-      resolutionCount
-      renewalCount
-      renewalStatus
-      localRenewalCount
-      dateCreated
-      activeWorkflow
-      requesterNote
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronRequestsByIdQuery,
-	LoadPatronRequestsByIdQueryVariables
->;
-export const LoadPatronRequestStatsDocument = new TypedDocumentString(`
-    query LoadPatronRequestStats($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  patronRequests(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      dateCreated
-      dateUpdated
-      patronHostlmsCode
-      suppliers {
-        localAgency
-        canonicalItemType
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronRequestStatsQuery,
-	LoadPatronRequestStatsQueryVariables
->;
-export const LoadPatronRequestTotalsDocument = new TypedDocumentString(`
-    query LoadPatronRequestTotals($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  patronRequests(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      dateCreated
-      dateUpdated
-      status
-      patronHostlmsCode
-      isExpeditedCheckout
-      outOfSequenceFlag
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronRequestTotalsQuery,
-	LoadPatronRequestTotalsQueryVariables
->;
-export const LoadPatronRequestsDocument = new TypedDocumentString(`
-    query LoadPatronRequests($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  patronRequests(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      dateCreated
-      dateUpdated
-      patronHostlmsCode
-      pickupLocationCode
-      description
-      status
-      previousStatus
-      nextExpectedStatus
-      errorMessage
-      nextScheduledPoll
-      outOfSequenceFlag
-      elapsedTimeInCurrentStatus
-      pollCountForCurrentStatus
-      isManuallySelectedItem
-      requesterNote
-      activeWorkflow
-      rawLocalRequestStatus
-      rawLocalItemStatus
-      localRequestId
-      localRequestStatus
-      localItemId
-      localItemStatus
-      localItemType
-      patron {
-        id
-      }
-      requestingIdentity {
-        id
-        localId
-        localBarcode
-        canonicalPtype
-      }
-      suppliers {
-        localAgency
-        canonicalItemType
-        localItemBarcode
-      }
-      clusterRecord {
-        id
-        title
-        members {
-          publisher
-        }
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronRequestsQuery,
-	LoadPatronRequestsQueryVariables
->;
-export const LoadPatronRequestsForExportDocument = new TypedDocumentString(`
-    query LoadPatronRequestsForExport($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  patronRequests(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      dateCreated
-      dateUpdated
-      patronHostlmsCode
-      pickupLocationCode
-      description
-      status
-      previousStatus
-      nextExpectedStatus
-      errorMessage
-      outOfSequenceFlag
-      elapsedTimeInCurrentStatus
-      pollCountForCurrentStatus
-      isManuallySelectedItem
-      requesterNote
-      activeWorkflow
-      pickupRequestId
-      pickupRequestStatus
-      pickupItemId
-      isExpeditedCheckout
-      rawLocalRequestStatus
-      rawLocalItemStatus
-      localRequestId
-      localRequestStatus
-      localItemId
-      localItemStatus
-      localItemType
-      patron {
-        id
-      }
-      requestingIdentity {
-        localBarcode
-        canonicalPtype
-      }
-      suppliers {
-        localAgency
-        canonicalItemType
-        localItemBarcode
-        localItemType
-      }
-      clusterRecord {
-        title
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadPatronRequestsForExportQuery,
-	LoadPatronRequestsForExportQueryVariables
->;
-export const LoadRolesDocument = new TypedDocumentString(`
-    query LoadRoles($order: String!, $orderBy: String!, $pagesize: Int!) {
-  roles(order: $order, orderBy: $orderBy, pagesize: $pagesize) {
-    totalSize
-    content {
-      id
-      name
-      keycloakRole
-      description
-      displayName
-    }
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadRolesQuery,
-	LoadRolesQueryVariables
->;
-export const LoadSupplierRequestsDocument = new TypedDocumentString(`
-    query LoadSupplierRequests($pageno: Int!, $pagesize: Int!, $order: String!, $query: String!, $orderBy: String!) {
-  supplierRequests(
-    pageno: $pageno
-    pagesize: $pagesize
-    order: $order
-    query: $query
-    orderBy: $orderBy
-  ) {
-    content {
-      id
-      canonicalItemType
-      dateCreated
-      dateUpdated
-      hostLmsCode
-      isActive
-      localItemId
-      localBibId
-      localItemBarcode
-      localItemLocationCode
-      localItemStatus
-      localItemType
-      localId
-      localStatus
-      localAgency
-      rawLocalItemStatus
-      rawLocalStatus
-      localRenewalCount
-      virtualPatron {
-        id
-        localId
-        homeIdentity
-        localBarcode
-        localNames
-        localPtype
-        canonicalPtype
-        localHomeLibraryCode
-        lastValidated
-      }
-      patronRequest {
-        id
-      }
-    }
-    pageable {
-      number
-      offset
-    }
-    totalSize
-  }
-}
-    `) as unknown as TypedDocumentString<
-	LoadSupplierRequestsQuery,
-	LoadSupplierRequestsQueryVariables
->;

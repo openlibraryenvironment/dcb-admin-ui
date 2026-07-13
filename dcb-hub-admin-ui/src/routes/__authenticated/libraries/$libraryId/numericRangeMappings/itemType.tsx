@@ -24,6 +24,7 @@ import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { updateNumericRangeMapping } from "@mutations/updateNumericRangeMapping";
 import { deleteNumericRangeMapping } from "@mutations/deleteNumericRangeMapping";
 import { numericRangeMappingColumnsNoCategoryFilter } from "@columns/numericRangeMappingColumnsNoCategoryFilter";
+import type { LoadLibraryQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/numericRangeMappings/itemType",
@@ -58,7 +59,9 @@ function AllNumericMappings() {
 	} = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 

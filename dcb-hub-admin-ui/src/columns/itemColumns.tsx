@@ -18,7 +18,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "agencyCode",
-		headerName: i18n.t("agency.code"),
+		headerName: i18n.t("agencies.code"),
 		flex: 0.3,
 		editable: false,
 		filterable: true,

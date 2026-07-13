@@ -5,6 +5,7 @@ import { Autocomplete, Stack, TextField, Typography } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getGroupsSelection } from "@queries/getGroupsSelection";
+import type { LoadGroupsSelectionQueryVariables } from "@generated/graphql";
 
 export default function GroupStep() {
 	const { t } = useTranslation();
@@ -17,13 +18,15 @@ export default function GroupStep() {
 	const { data: groupsData, isLoading } = useQuery({
 		queryKey: ["groupsSelection"],
 		queryFn: () =>
-			gqlClient.request<any>(getGroupsSelection, {
-				order: "name",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			}),
+			gqlClient.request<any, LoadGroupsSelectionQueryVariables>(
+				getGroupsSelection,
+				{
+					order: "name",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1000,
+				},
+			),
 		staleTime: 1000 * 60 * 5, // Just in case somebody is constantly going back and forth
 	});
 

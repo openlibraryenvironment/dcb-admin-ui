@@ -22,11 +22,9 @@ export default function SingleDateTimeFilter(props: GridFilterInputValueProps) {
 				onChange={handleChange}
 				inputRef={focusElementRef}
 				slotProps={{
-					textField: {
-						size: "small",
-						variant: "standard",
-						// helperText: "Local Time",// Should be unnecessary but do time zone testing
-					},
+					// Variant is left to the theme default (outlined) so this lines up
+					// with the panel's column/operator selects.
+					textField: { size: "small", fullWidth: true },
 					actionBar: { actions: ["clear", "today"] }, // the data grid MIGHT auto translate this but check
 				}}
 			/>

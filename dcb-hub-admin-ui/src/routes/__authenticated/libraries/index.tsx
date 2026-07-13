@@ -40,6 +40,11 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { libraryColumns } from "@columns/libraryColumns";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { defaultLibraryColumnVisibility } from "@columns/columnVisibility/defaultLibraryColumnVisibility";
+import type {
+	DeleteLibraryMutationVariables,
+	LoadLibrariesQueryVariables,
+	UpdateLibraryMutationVariables,
+} from "@generated/graphql";
 
 // Default-state prefetch: the component reads pagination/sort/filter state
 // from useGridStore (a Zustand store) at mount time, which the loader
@@ -74,7 +79,10 @@ export const Route = createFileRoute("/__authenticated/libraries/")({
 				DEFAULT_FILTER_MODEL,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getLibraries, {
+				createGraphQLClient(cfg, auth).request<
+					any,
+					LoadLibrariesQueryVariables
+				>(getLibraries, {
 					query: "",
 					pageno: DEFAULT_PAGINATION_MODEL.page,
 					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
@@ -143,7 +151,7 @@ function Libraries() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadLibrariesQueryVariables>(
 				getLibraries,
 				buildServerGridQueryVars({
 					filterModel,
@@ -158,12 +166,18 @@ function Libraries() {
 
 	const { mutateAsync: updateLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updateLibraryMutation, variables),
+			gqlClient.request<any, UpdateLibraryMutationVariables>(
+				updateLibraryMutation,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutate: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteLibraryMutation, variables),
+			gqlClient.request<any, DeleteLibraryMutationVariables>(
+				deleteLibraryMutation,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 
@@ -244,7 +258,9 @@ function Libraries() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 140,
-				getActions: ({ id, row }: GridRowParams) => {
+				getActions: ({ id, row, columns: rowColumns }: GridRowParams) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -294,7 +310,7 @@ function Libraries() {
 								e.stopPropagation();
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								});
 							}}
 							disabled={!isAnAdmin}

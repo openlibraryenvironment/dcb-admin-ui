@@ -12,6 +12,7 @@ import ErrorComponent from "@components/Error/Error";
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClusters } from "@queries/getClusters";
+import type { ClusterRecordsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/identifiers",
@@ -44,7 +45,9 @@ function Identifiers() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["cluster", "full", clusterId],
 		queryFn: () =>
-			gqlClient.request<any>(getClusters, { query: `id: ${clusterId}` }),
+			gqlClient.request<any, ClusterRecordsQueryVariables>(getClusters, {
+				query: `id: ${clusterId}`,
+			}),
 		enabled: !!clusterId,
 	});
 

@@ -28,11 +28,13 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { getILS } from "@helpers/getILS";
 import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
 
 import { getLibraryServiceInfo } from "@queries/getLibraryServiceInfo";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import type { LoadLibraryServiceInfoQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/service",
@@ -46,6 +48,7 @@ function Service() {
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
+	const client = useDcbRestClient();
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -76,9 +79,12 @@ function Service() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["library", "service", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryServiceInfo, {
-				query: `id:${libraryId}`,
-			}),
+			gqlClient.request<any, LoadLibraryServiceInfoQueryVariables>(
+				getLibraryServiceInfo,
+				{
+					query: `id:${libraryId}`,
+				},
+			),
 		enabled: !!libraryId,
 		refetchInterval: 120000,
 	});
@@ -99,15 +105,8 @@ function Service() {
 	) => {
 		if (!rulesetName || !auth.user?.access_token) return;
 		try {
-			const response = await fetch(
-				`${import.meta.env.VITE_DCB_API_BASE}/object-rules/${rulesetName}`,
-				{
-					headers: { Authorization: `Bearer ${auth.user.access_token}` },
-				},
-			);
-			if (!response.ok)
-				throw new Error(`Error fetching ruleset ${response.status}`);
-			setter(await response.json());
+			const response = await client.get(`/object-rules/${rulesetName}`);
+			setter(response.data);
 		} catch (fetchError) {
 			console.error(`Error fetching ruleset ${rulesetName}:`, fetchError);
 			setter({ error: `Failed to load details for ${rulesetName}.` });

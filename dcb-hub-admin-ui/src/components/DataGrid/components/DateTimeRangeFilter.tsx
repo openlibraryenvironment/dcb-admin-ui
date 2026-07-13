@@ -22,6 +22,10 @@ export function DateRangeFilterInput(props: GridFilterInputValueProps) {
 
 	// See if we can lift the provider up to app.tsx
 
+	// `variant` is left to the theme default (outlined), which is what the
+	// panel's own column/operator selects and MUI's stock value input use.
+	// Hardcoding `standard` here rendered an underline field against three
+	// outlined ones, at a different height - the misaligned row users saw.
 	return (
 		<LocalizationProvider dateAdapter={AdapterDayjs}>
 			<DateTimeRangePicker
@@ -34,11 +38,9 @@ export function DateRangeFilterInput(props: GridFilterInputValueProps) {
 				//     end: t("ui.data_grid.filters.to"),
 				// }}
 				slotProps={{
-					textField: {
-						size: "small",
-						variant: "standard",
-						// helperText: t("ui.data_grid.filters.local_time"),
-					},
+					// The field renders as a row Stack that fills the value cell, so
+					// fullWidth inputs split it evenly rather than overflowing it.
+					textField: { size: "small", fullWidth: true },
 					actionBar: { actions: ["clear", "nextOrAccept"] }, // can we add custom actions. today applies to both - maybe it's better to keep it separate?
 				}}
 			/>
@@ -63,11 +65,10 @@ export function SingleDateFilterInput(props: GridFilterInputValueProps) {
 				onChange={handleChange}
 				inputRef={focusElementRef}
 				slotProps={{
-					textField: {
-						size: "small",
-						variant: "standard",
-						helperText: "Local Time", // Needs translation key. and think about what else we can do here!
-					},
+					// No helperText: it is rendered below the input, so it made this
+					// field taller than the rest of the filter row and pushed the
+					// panel's height around.
+					textField: { size: "small", fullWidth: true },
 					actionBar: { actions: ["clear", "today"] },
 				}}
 			/>

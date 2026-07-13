@@ -24,6 +24,11 @@ import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport"
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import type {
+	GetPatronRequestDashboardQueryVariables,
+	LoadLibrariesQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	// Default-state prefetch: the loader has no access to the Zustand grid
@@ -47,7 +52,10 @@ export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 				currentFilter,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getPatronRequestDashboard, {
+				createGraphQLClient(cfg, auth).request<
+					any,
+					GetPatronRequestDashboardQueryVariables
+				>(getPatronRequestDashboard, {
 					allQuery: queries.all,
 					activeQuery: queries.inProgress,
 					exceptionQuery: queries.exception,
@@ -74,14 +82,17 @@ function All() {
 		paginationModel: currentPagination,
 		sortModel: currentSort,
 		filterModel: currentFilter,
+		columnVisibilityModel,
 		rowModesModel,
 		setRowModesModel,
 		onPaginationModelChange,
 		onSortModelChange,
 		onFilterModelChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
 	} = useGridState(gridId, {
 		pagination: { page: 0, pageSize: 20 },
 		sort: [{ field: "dateCreated", sort: "desc" }],
+		columnVisibility: defaultPatronRequestColumnVisibility,
 	});
 
 	// Ideally, this would know to fetch the full query for whichever tab is on screen (all active etc)
@@ -103,17 +114,20 @@ function All() {
 				defaultOrder: "dateCreated",
 				defaultPageSize: 20,
 			});
-			return gqlClient.request<any>(getPatronRequestDashboard, {
-				allQuery: gridVars.query,
-				activeQuery: queries.inProgress,
-				exceptionQuery: queries.exception,
-				outOfSequenceQuery: queries.outOfSequence,
-				finishedQuery: queries.finished,
-				pageno: gridVars.pageno,
-				pagesize: gridVars.pagesize,
-				order: gridVars.order,
-				orderBy: gridVars.orderBy,
-			});
+			return gqlClient.request<any, GetPatronRequestDashboardQueryVariables>(
+				getPatronRequestDashboard,
+				{
+					allQuery: gridVars.query,
+					activeQuery: queries.inProgress,
+					exceptionQuery: queries.exception,
+					outOfSequenceQuery: queries.outOfSequence,
+					finishedQuery: queries.finished,
+					pageno: gridVars.pageno,
+					pagesize: gridVars.pagesize,
+					order: gridVars.order,
+					orderBy: gridVars.orderBy,
+				},
+			);
 		},
 	});
 
@@ -146,13 +160,13 @@ function All() {
 			orderBy: "ASC",
 			pagesize: 100,
 		};
-		const firstPage = await gqlClient.request<any>(
-			getLocationForPatronRequestGrid,
-			{
-				...variables,
-				pageno: 0,
-			},
-		);
+		const firstPage = await gqlClient.request<
+			any,
+			LoadLocationForPrGridQueryVariables
+		>(getLocationForPatronRequestGrid, {
+			...variables,
+			pageno: 0,
+		});
 		let allLocations = [...(firstPage?.locations?.content || [])];
 		const totalSize = firstPage?.locations?.totalSize || 0;
 
@@ -161,10 +175,13 @@ function All() {
 			const promises = [];
 			for (let i = 1; i < totalPages; i++) {
 				promises.push(
-					gqlClient.request<any>(getLocationForPatronRequestGrid, {
-						...variables,
-						pageno: i,
-					}),
+					gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+						getLocationForPatronRequestGrid,
+						{
+							...variables,
+							pageno: i,
+						},
+					),
 				);
 			}
 			const results = await Promise.all(promises);
@@ -185,7 +202,7 @@ function All() {
 		useQuery({
 			queryKey: ["libraries", "allSupplying"],
 			queryFn: () =>
-				gqlClient.request<any>(getLibraries, {
+				gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 					order: "fullName",
 					orderBy: "ASC",
 					pageno: 0,
@@ -262,7 +279,8 @@ function All() {
 						autoRowHeight={false}
 						checkboxSelection={true}
 						columns={allColumns}
-						columnVisibilityModel={defaultPatronRequestColumnVisibility}
+						columnVisibilityModel={columnVisibilityModel}
+						onColumnVisibilityModelChange={handleColumnVisibilityChange}
 						disableAggregation={true}
 						disableHoverInteractions={false}
 						disablePivoting={true}

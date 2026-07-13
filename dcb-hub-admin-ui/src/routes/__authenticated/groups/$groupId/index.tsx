@@ -21,6 +21,7 @@ import { getLibraryGroupById } from "@queries/getGroupById";
 import { Group } from "@models/Group";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { groupParamsSchema } from "@schemas/routeParams/groupParams";
+import type { LoadGroupQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/groups/$groupId/")({
 	params: {
@@ -37,9 +38,12 @@ export const Route = createFileRoute("/__authenticated/groups/$groupId/")({
 		return queryClient.ensureQueryData({
 			queryKey: ["group", groupId],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getLibraryGroupById, {
-					query: `id:${groupId}`,
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadGroupQueryVariables>(
+					getLibraryGroupById,
+					{
+						query: `id:${groupId}`,
+					},
+				),
 		});
 	},
 	component: GroupDetails,
@@ -62,7 +66,9 @@ function GroupDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["group", groupId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryGroupById, { query: `id:${groupId}` }),
+			gqlClient.request<any, LoadGroupQueryVariables>(getLibraryGroupById, {
+				query: `id:${groupId}`,
+			}),
 		refetchInterval: 120000,
 	});
 

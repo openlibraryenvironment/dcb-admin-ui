@@ -977,6 +977,12 @@ const components: ThemeOptions["components"] = {
 			cell: {
 				"&:focus": { outline: "none" },
 				":focus-visible": { outline: "2px solid" },
+				// A cell put into edit mode is focused programmatically (from the Edit
+				// action button), and :focus-visible does not match a programmatic
+				// focus that followed a mouse click - so the cell being edited drew no
+				// indicator at all. Outline whatever holds focus, as the checkbox
+				// cells below already do. WCAG 2.2 SC 2.4.7.
+				"&:focus-within": { outline: "2px solid", outlineOffset: "-2px" },
 			},
 			cellCheckbox: {
 				"&:focus-within": { outline: "2px solid", outlineOffset: "-3px" },

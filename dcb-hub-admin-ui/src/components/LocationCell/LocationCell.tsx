@@ -6,6 +6,7 @@ import Link from "@components/Link/Link";
 import { Location } from "@models/Location";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import type { LoadLocationForPrGridQueryVariables } from "@generated/graphql";
 
 interface LocationCellProps {
 	locationId: string;
@@ -19,13 +20,16 @@ export const LocationCell = ({ locationId, linkable }: LocationCellProps) => {
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ["locationForGrid", locationId],
 		queryFn: async () => {
-			return gqlClient.request<any>(getLocationForPatronRequestGrid, {
-				query: `id:${locationId}`,
-				pageno: 0,
-				pagesize: 1,
-				orderBy: "DESC",
-				order: "name",
-			});
+			return gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+				getLocationForPatronRequestGrid,
+				{
+					query: `id:${locationId}`,
+					pageno: 0,
+					pagesize: 1,
+					orderBy: "DESC",
+					order: "name",
+				},
+			);
 		},
 		enabled: !!locationId, // Skip query execution if ID is blank
 	});

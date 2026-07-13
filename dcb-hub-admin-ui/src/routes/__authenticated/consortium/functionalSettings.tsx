@@ -22,6 +22,10 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getConsortiumFunctionalSettings } from "@queries/getConsortiumFunctionalSettings";
 import { updateFunctionalSettingQuery } from "@mutations/updateFunctionalSetting";
 import { computeMutation } from "@helpers/computeMutation";
+import type {
+	LoadConsortiumFsQueryVariables,
+	UpdateFunctionalSettingMutationVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/consortium/functionalSettings",
@@ -49,12 +53,13 @@ function FunctionalSettings() {
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadConsortiumFunctionalSettings"],
 		queryFn: () =>
-			gqlClient.request<any>(getConsortiumFunctionalSettings, {
-				order: "id",
-				orderBy: "DESC",
-				pageno: 0,
-				pagesize: 10,
-			}),
+			gqlClient.request<any, LoadConsortiumFsQueryVariables>(
+				getConsortiumFunctionalSettings,
+				{
+					order: "id",
+					orderBy: "DESC",
+				},
+			),
 	});
 
 	const consortium = data?.consortia?.content?.[0];
@@ -62,7 +67,10 @@ function FunctionalSettings() {
 
 	const { mutateAsync: updateSetting } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updateFunctionalSettingQuery, variables),
+			gqlClient.request<any, UpdateFunctionalSettingMutationVariables>(
+				updateFunctionalSettingQuery,
+				variables,
+			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				queryKey: ["LoadConsortiumFunctionalSettings"],
@@ -146,7 +154,9 @@ function FunctionalSettings() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 100,
-				getActions: ({ id }) => {
+				getActions: ({ id, columns: rowColumns }) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -184,7 +194,7 @@ function FunctionalSettings() {
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								})
 							}
 							disabled={!isAnAdmin}

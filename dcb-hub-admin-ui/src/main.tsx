@@ -126,6 +126,12 @@ const queryClient = new QueryClient({
 async function bootstrap() {
 	const cfg = await getCfg();
 
+	// Publish the resolved runtime config so non-React modules can read it too
+	// (homeConfig.ts). Without this, window.__APP_ENV__ is never populated - the
+	// image renders inject_env.json and getCfg() fetches it, so those modules fell
+	// back to import.meta.env, which .dockerignore leaves undefined in the build.
+	window.__APP_ENV__ = cfg as Window["__APP_ENV__"];
+
 	if (cfg.VITE_MUI_X_LICENSE_KEY) {
 		LicenseInfo.setLicenseKey(cfg.VITE_MUI_X_LICENSE_KEY);
 	}

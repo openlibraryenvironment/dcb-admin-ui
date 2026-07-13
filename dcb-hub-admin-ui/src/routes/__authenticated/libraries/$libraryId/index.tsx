@@ -47,6 +47,7 @@ import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
+import type { LoadLibraryQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/libraries/$libraryId/")({
 	params: {
@@ -63,9 +64,12 @@ export const Route = createFileRoute("/__authenticated/libraries/$libraryId/")({
 		return queryClient.ensureQueryData({
 			queryKey: ["library", libraryId],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getLibrary, {
-					query: `id:${libraryId}`,
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadLibraryQueryVariables>(
+					getLibrary,
+					{
+						query: `id:${libraryId}`,
+					},
+				),
 		});
 	},
 	component: LibraryProfile,
@@ -102,7 +106,9 @@ function LibraryProfile() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 		refetchInterval: 120000,
 	});
@@ -115,9 +121,7 @@ function LibraryProfile() {
 	const validationSchema = Yup.object().shape({
 		fullName: Yup.string()
 			.trim()
-			.required(
-				t("ui.validation.required", { field: t("libraries.full_name") }),
-			)
+			.required(t("ui.validation.required", { field: t("libraries.name") }))
 			.max(200),
 		shortName: Yup.string()
 			.trim()

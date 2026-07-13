@@ -47,6 +47,14 @@ import { SourceRecord } from "@models/SourceRecord";
 import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
 import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
 import PageContainer from "@layout/PageContainer/PageContainer";
+import type {
+	LoadAgencyQueryVariables,
+	LoadHostLmsQueryVariables,
+	LoadLibraryBasicsQueryVariables,
+	LoadLocationQueryVariables,
+	LoadPatronIdentitiesQueryVariables,
+	LoadPatronRequestQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
@@ -95,7 +103,10 @@ function RouteComponent() {
 	} = useQuery({
 		queryKey: ["patronRequest", id],
 		queryFn: async () =>
-			gqlClient.request<any>(getPatronRequest, { query: `id:${id}` }),
+			gqlClient.request<any, LoadPatronRequestQueryVariables>(
+				getPatronRequest,
+				{ query: `id:${id}` },
+			),
 		enabled: !!id,
 	});
 
@@ -103,13 +114,12 @@ function RouteComponent() {
 		useQuery({
 			queryKey: ["supplierLibraryData", id],
 			queryFn: async () =>
-				gqlClient.request<any>(getLibraryBasics, {
-					query: "agencyCode:" + patronRequest?.suppliers[0]?.localAgency,
-					pageno: 0,
-					pagesize: 10,
-					order: "agencyCode",
-					orderBy: "ASC",
-				}),
+				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
+					getLibraryBasics,
+					{
+						query: "agencyCode:" + patronRequest?.suppliers?.[0]?.localAgency,
+					},
+				),
 			enabled: !!id,
 		});
 
@@ -125,11 +135,14 @@ function RouteComponent() {
 	} = useQuery({
 		queryKey: ["patronIdentities", patronRequest?.pickupPatronId],
 		queryFn: async () =>
-			gqlClient.request<any>(getPatronIdentities, {
-				query: `localId:${patronRequest?.pickupPatronId}`,
-				order: "id",
-				orderBy: "ASC",
-			}),
+			gqlClient.request<any, LoadPatronIdentitiesQueryVariables>(
+				getPatronIdentities,
+				{
+					query: `localId:${patronRequest?.pickupPatronId}`,
+					order: "id",
+					orderBy: "ASC",
+				},
+			),
 		enabled: !!patronRequest?.pickupPatronId,
 	});
 	const pickupPatronIdentity =
@@ -142,7 +155,7 @@ function RouteComponent() {
 	} = useQuery({
 		queryKey: ["location", patronRequest?.pickupLocationCode],
 		queryFn: async () =>
-			gqlClient.request<any>(getLocation, {
+			gqlClient.request<any, LoadLocationQueryVariables>(getLocation, {
 				query: `id:${patronRequest?.pickupLocationCode}`,
 			}),
 		enabled: !!patronRequest?.pickupLocationCode,
@@ -153,9 +166,12 @@ function RouteComponent() {
 		{
 			queryKey: ["library", "pickup", pickupLocation?.agency?.code],
 			queryFn: async () =>
-				gqlClient.request<any>(getLibraryBasics, {
-					query: `agencyCode:${pickupLocation?.agency?.code}`,
-				}),
+				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
+					getLibraryBasics,
+					{
+						query: `agencyCode:${pickupLocation?.agency?.code}`,
+					},
+				),
 			enabled: !!pickupLocation?.agency?.code,
 		},
 	);
@@ -164,7 +180,7 @@ function RouteComponent() {
 	const { data: patronLmsData, isLoading: patronLmsLoading } = useQuery({
 		queryKey: ["hostLms", patronRequest?.patronHostlmsCode],
 		queryFn: async () =>
-			gqlClient.request<any>(getHostLms, {
+			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
 				query: `code:${patronRequest?.patronHostlmsCode}`,
 			}),
 		enabled: !!patronRequest?.patronHostlmsCode,
@@ -174,7 +190,7 @@ function RouteComponent() {
 	const { data: patronAgencyData, isLoading: patronAgencyLoading } = useQuery({
 		queryKey: ["agency", patronHostLms?.id],
 		queryFn: async () =>
-			gqlClient.request<any>(getAgency, {
+			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {
 				query: `hostLms:${patronHostLms?.id}`,
 			}),
 		enabled: !!patronHostLms?.id,
@@ -185,9 +201,12 @@ function RouteComponent() {
 		{
 			queryKey: ["library", "patron", patronAgency?.code],
 			queryFn: async () =>
-				gqlClient.request<any>(getLibraryBasics, {
-					query: `agencyCode:${patronAgency?.code}`,
-				}),
+				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
+					getLibraryBasics,
+					{
+						query: `agencyCode:${patronAgency?.code}`,
+					},
+				),
 			enabled: !!patronAgency?.code,
 		},
 	);

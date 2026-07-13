@@ -13,6 +13,7 @@ import { getAgency } from "@queries/getAgency";
 import { Agency } from "@models/Agency";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { agencyParamsSchema } from "@schemas/routeParams/agencyParams";
+import type { LoadAgencyQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/agencies/$agencyId")({
 	params: {
@@ -29,9 +30,12 @@ export const Route = createFileRoute("/__authenticated/agencies/$agencyId")({
 		return queryClient.ensureQueryData({
 			queryKey: ["agency", agencyId],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getAgency, {
-					query: `id:${agencyId}`,
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadAgencyQueryVariables>(
+					getAgency,
+					{
+						query: `id:${agencyId}`,
+					},
+				),
 		});
 	},
 	component: AgencyDetails,
@@ -45,7 +49,9 @@ function AgencyDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["agency", agencyId],
 		queryFn: () =>
-			gqlClient.request<any>(getAgency, { query: `id:${agencyId}` }),
+			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {
+				query: `id:${agencyId}`,
+			}),
 		enabled: !!agencyId,
 		refetchInterval: 120000,
 	});

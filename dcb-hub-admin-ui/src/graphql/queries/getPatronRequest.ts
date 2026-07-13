@@ -15,6 +15,9 @@ export const getPatronRequest = gql`
 				pickupItemStatus
 				pickupRequestId
 				pickupRequestStatus
+				pickupBibId
+				rawPickupItemStatus
+				rawPickupRequestStatus
 				status
 				localRequestId
 				localRequestStatus

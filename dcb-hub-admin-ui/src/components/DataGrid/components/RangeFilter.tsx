@@ -68,38 +68,34 @@ export default function RangeFilter(props: GridFilterInputValueProps) {
 		updateFilterValue(newLowerBound, filterValueState[1]);
 	};
 
+	// Variant is left to the theme default (outlined) to match the panel's own
+	// inputs. The previous hand-tuned height/padding box was aligning this
+	// against a standard-variant panel that no longer exists.
 	return (
-		<Box
-			sx={{
-				display: "inline-flex",
-				flexDirection: "row",
-				alignItems: "end",
-				height: 48,
-				pl: "20px",
-			}}
-		>
+		<Box sx={{ display: "flex", flexDirection: "row", gap: 2, width: "100%" }}>
 			<TextField
 				name="lower-bound-input"
 				placeholder={fromPlaceholder}
 				label={fromLabel}
-				variant="standard"
+				size="small"
+				fullWidth
 				value={filterValueState[0] ?? ""}
 				onChange={handleLowerFilterChange}
 				type="number"
 				inputRef={focusElementRef}
-				sx={{ mr: 2 }}
 			/>
 			<TextField
 				name="upper-bound-input"
 				placeholder={toPlaceholder}
 				label={toLabel}
-				variant="standard"
+				size="small"
+				fullWidth
 				value={filterValueState[1] ?? ""}
 				onChange={handleUpperFilterChange}
 				type="number"
 				slotProps={{
 					input: applying
-						? { endAdornment: <CircularProgress size={"sm"} /> }
+						? { endAdornment: <CircularProgress size={20} /> }
 						: {},
 				}}
 			/>

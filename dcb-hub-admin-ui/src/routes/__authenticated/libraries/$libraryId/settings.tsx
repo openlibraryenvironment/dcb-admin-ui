@@ -42,6 +42,7 @@ import {
 import { getLibraryBasics } from "@queries/getLibraryBasics";
 import { updateAgencyQuery } from "@mutations/updateAgency";
 import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import type { LoadLibraryBasicsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/settings",
@@ -79,7 +80,10 @@ function Settings() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["library", "settings", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryBasics, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
+				getLibraryBasics,
+				{ query: `id:${libraryId}` },
+			),
 		enabled: !!libraryId,
 	});
 

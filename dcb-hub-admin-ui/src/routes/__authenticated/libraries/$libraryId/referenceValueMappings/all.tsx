@@ -25,6 +25,7 @@ import { getMappings } from "@queries/getMappings";
 import { updateReferenceValueMapping } from "@mutations/updateReferenceValueMapping";
 import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapping";
 import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
+import type { LoadLibraryQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/referenceValueMappings/all",
@@ -65,7 +66,9 @@ function AllMappings() {
 	} = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 
@@ -75,8 +78,8 @@ function AllMappings() {
 	});
 
 	const library = libraryData?.libraries?.content?.[0];
-	const allPrimaryQuery = `(toContext:"${library.agency?.hostLms?.code}" OR fromContext:"${library.agency?.hostLms?.code}") AND NOT deleted:true`;
-	const allSecondaryQuery = `(toContext:"${library.secondHostLms?.code}" OR fromContext:"${library.secondHostLms?.code}") AND NOT deleted:true`;
+	const allPrimaryQuery = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:"${library?.agency?.hostLms?.code}") AND NOT deleted:true`;
+	const allSecondaryQuery = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:"${library?.secondHostLms?.code}") AND NOT deleted:true`;
 	if (isLoading)
 		return (
 			<Loading
@@ -137,7 +140,7 @@ function AllMappings() {
 						}}
 					>
 						{t("libraries.config.data.mappings.all_ref_value", {
-							hostLms: library.agency?.hostLms?.code,
+							hostLms: library?.agency?.hostLms?.code,
 						})}
 					</Typography>
 					{isAnAdmin && (

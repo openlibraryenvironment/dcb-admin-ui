@@ -26,6 +26,12 @@ import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRe
 
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
+import type {
+	LoadGroupQueryVariables,
+	LoadLibrariesQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/groups/$groupId/patronRequests/",
@@ -64,7 +70,9 @@ function GroupPatronRequests() {
 	} = useQuery({
 		queryKey: ["group", groupId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraryGroupById, { query: `id:${groupId}` }),
+			gqlClient.request<any, LoadGroupQueryVariables>(getLibraryGroupById, {
+				query: `id:${groupId}`,
+			}),
 		refetchInterval: 120000,
 	});
 
@@ -91,7 +99,7 @@ function GroupPatronRequests() {
 		queryKey: [gridId, groupId, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
 			const baseQuery = `(${groupVariables})`;
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
 				getPatronRequests,
 				buildServerGridQueryVars({
 					filterModel,
@@ -111,7 +119,7 @@ function GroupPatronRequests() {
 	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
 		queryKey: ["allLibrariesDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraries, {
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 				order: "fullName",
 				orderBy: "ASC",
 				pageno: 0,
@@ -124,13 +132,16 @@ function GroupPatronRequests() {
 	const { data: locationsData, isLoading: isLocationsLoading } = useQuery({
 		queryKey: ["allLocationsDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLocationForPatronRequestGrid, {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 1000,
-				pageno: 0,
-			}),
+			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+				getLocationForPatronRequestGrid,
+				{
+					query: "",
+					order: "name",
+					orderBy: "ASC",
+					pagesize: 1000,
+					pageno: 0,
+				},
+			),
 		staleTime: 1000 * 60 * 30,
 	});
 

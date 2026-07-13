@@ -100,7 +100,7 @@ export default function StaffRequest({
 			),
 		agencyCode: Yup.string().required(
 			t("ui.validation.required", {
-				field: t("agency.code").toLowerCase(),
+				field: t("agencies.code").toLowerCase(),
 			}),
 		),
 		pickupLocationId: Yup.string().required(

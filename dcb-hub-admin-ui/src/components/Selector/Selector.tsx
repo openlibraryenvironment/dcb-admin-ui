@@ -5,6 +5,7 @@ import { Autocomplete, TextField } from "@mui/material";
 import useCode from "@hooks/useCode";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getHostLms } from "@queries/getHostLms";
+import type { LoadHostLmsQueryVariables } from "@generated/graphql";
 
 type SelectorType = {
 	optionsType: string;
@@ -32,7 +33,10 @@ export default function Selector({ optionsType }: SelectorType) {
 			};
 
 			// Fetch page 0
-			const firstPage = await gqlClient.request<any>(getHostLms, variables);
+			const firstPage = await gqlClient.request<any, LoadHostLmsQueryVariables>(
+				getHostLms,
+				variables,
+			);
 			let allHostLms = [...(firstPage?.hostLms?.content || [])];
 			const totalSize = firstPage?.hostLms?.totalSize || 0;
 
@@ -43,7 +47,10 @@ export default function Selector({ optionsType }: SelectorType) {
 
 				for (let i = 1; i < totalPages; i++) {
 					promises.push(
-						gqlClient.request<any>(getHostLms, { ...variables, pageno: i }),
+						gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
+							...variables,
+							pageno: i,
+						}),
 					);
 				}
 

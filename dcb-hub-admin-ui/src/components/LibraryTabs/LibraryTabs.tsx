@@ -3,6 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import { Tab, Tabs } from "@mui/material";
 
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
+import { isInsightsEnabled } from "@helpers/featureFlags";
 
 // Single source of truth for the library detail page's primary tab bar. Each
 // landing page passes its own index via `value`. Previously every page inlined
@@ -41,13 +42,19 @@ export default function LibraryTabs({ libraryId, value }: LibraryTabsProps) {
 
 	const pathFor = (path: string) => `/libraries/${libraryId}${path}`;
 
+	// Insights is gated on a dcb-service release that is not out yet. It is the
+	// last tab, so hiding it leaves every other page's `value` index intact.
+	const visibleTabs = isInsightsEnabled()
+		? TABS
+		: TABS.filter((tab) => tab.path !== "/insights");
+
 	return (
 		<Tabs
 			value={pathFor(TABS[value].path)}
 			onChange={(_event, newValue) => handleTabChange({ newValue, router })}
 			variant="scrollable"
 		>
-			{TABS.map((tab) => (
+			{visibleTabs.map((tab) => (
 				<Tab key={tab.path} value={pathFor(tab.path)} label={t(tab.labelKey)} />
 			))}
 		</Tabs>

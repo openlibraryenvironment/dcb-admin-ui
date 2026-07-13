@@ -20,6 +20,7 @@ import useCode from "@hooks/useCode";
 import { getLocations } from "@queries/getLocations";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { defaultLocationColumns } from "@columns/locationColumns";
+import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/locations/")({
 	component: LocationsRouteComponent,
@@ -79,7 +80,7 @@ function LocationsRouteComponent() {
 	} = useQuery({
 		queryKey: ["locations", gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadLocationsQueryVariables>(
 				getLocations,
 				buildServerGridQueryVars({
 					filterModel,

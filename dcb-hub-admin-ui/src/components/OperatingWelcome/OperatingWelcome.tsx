@@ -14,6 +14,7 @@ import { getLibraries } from "@queries/getLibraries";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
 import { defaultWelcomeLibraryColumnVisibility } from "@columns/columnVisibility/defaultWelcomeLibraryColumnVisibility";
+import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 export default function OperatingWelcome() {
 	const { t } = useTranslation();
@@ -39,7 +40,7 @@ export default function OperatingWelcome() {
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadLibraries", paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadLibrariesQueryVariables>(
 				getLibraries,
 				buildServerGridQueryVars({
 					filterModel,

@@ -5,6 +5,7 @@ import { Autocomplete, TextField, Chip } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getLibraries } from "@queries/getLibraries";
+import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 export type ScopeOption = {
 	kind: "group" | "library";
@@ -29,7 +30,7 @@ export default function ScopeSelector({
 	const { data } = useQuery({
 		queryKey: ["insights-scope-libraries"],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraries, {
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 				pageno: 0,
 				pagesize: 1000,
 				order: "fullName",

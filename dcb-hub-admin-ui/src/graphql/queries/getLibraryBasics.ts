@@ -26,6 +26,8 @@ export const getLibraryBasics = gql`
 					id
 					code
 					maxConsortialLoans
+					isSupplyingAgency
+					isBorrowingAgency
 					hostLms {
 						id
 						code

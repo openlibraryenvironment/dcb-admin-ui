@@ -21,6 +21,10 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAuditById } from "@queries/getAuditById";
 import { getAuditsByPatronRequest } from "@queries/getAuditByPatronRequest";
 import { AuditItem } from "@models/AuditItem";
+import type {
+	GetAuditByIdQueryVariables,
+	GetAuditsByPatronRequestQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/audits/$auditId/",
@@ -37,7 +41,9 @@ function AuditDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["audit", auditId],
 		queryFn: () =>
-			gqlClient.request<any>(getAuditById, { query: `id:${auditId}` }),
+			gqlClient.request<any, GetAuditByIdQueryVariables>(getAuditById, {
+				query: `id:${auditId}`,
+			}),
 		enabled: !!auditId,
 		refetchInterval: 120000,
 	});
@@ -51,13 +57,16 @@ function AuditDetails() {
 	const { data: nextAuditData, isLoading: nextLoading } = useQuery({
 		queryKey: ["audit", "next", patronRequestId, auditDate],
 		queryFn: () =>
-			gqlClient.request<any>(getAuditsByPatronRequest, {
-				query: `patronRequest:"${patronRequestId}" AND auditDate>"${auditDate}"`,
-				order: "auditDate",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1,
-			}),
+			gqlClient.request<any, GetAuditsByPatronRequestQueryVariables>(
+				getAuditsByPatronRequest,
+				{
+					query: `patronRequest:"${patronRequestId}" AND auditDate>"${auditDate}"`,
+					order: "auditDate",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1,
+				},
+			),
 		enabled: !!patronRequestId && !!auditDate,
 	});
 
@@ -65,13 +74,16 @@ function AuditDetails() {
 	const { data: prevAuditData, isLoading: prevLoading } = useQuery({
 		queryKey: ["audit", "prev", patronRequestId, auditDate],
 		queryFn: () =>
-			gqlClient.request<any>(getAuditsByPatronRequest, {
-				query: `patronRequest:"${patronRequestId}" AND auditDate<"${auditDate}"`,
-				order: "auditDate",
-				orderBy: "DESC",
-				pageno: 0,
-				pagesize: 1,
-			}),
+			gqlClient.request<any, GetAuditsByPatronRequestQueryVariables>(
+				getAuditsByPatronRequest,
+				{
+					query: `patronRequest:"${patronRequestId}" AND auditDate<"${auditDate}"`,
+					order: "auditDate",
+					orderBy: "DESC",
+					pageno: 0,
+					pagesize: 1,
+				},
+			),
 		enabled: !!patronRequestId && !!auditDate,
 	});
 

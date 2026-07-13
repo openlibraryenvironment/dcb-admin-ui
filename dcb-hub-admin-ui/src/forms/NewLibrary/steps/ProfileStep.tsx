@@ -10,6 +10,7 @@ import {
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
+import type { LoadAgenciesQueryVariables } from "@generated/graphql";
 
 const filter = createFilterOptions<any>();
 // needs lat/long
@@ -24,7 +25,7 @@ export function ProfileStep() {
 	const { data: agenciesData, isLoading: agenciesLoading } = useQuery({
 		queryKey: ["agenciesSelection"],
 		queryFn: () =>
-			gqlClient.request<any>(getAgencies, {
+			gqlClient.request<any, LoadAgenciesQueryVariables>(getAgencies, {
 				order: "code",
 				orderBy: "ASC",
 				pageno: 0,

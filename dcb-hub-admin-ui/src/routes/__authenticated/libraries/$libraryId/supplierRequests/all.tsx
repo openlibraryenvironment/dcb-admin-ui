@@ -29,6 +29,12 @@ import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRe
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLibraryQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/supplierRequests/all",
@@ -82,7 +88,9 @@ function SupplierRequestsAll() {
 	} = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 
@@ -92,7 +100,7 @@ function SupplierRequestsAll() {
 	const { data: librariesData } = useQuery({
 		queryKey: ["allLibrariesDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraries, {
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 				order: "fullName",
 				orderBy: "ASC",
 				pageno: 0,
@@ -105,13 +113,16 @@ function SupplierRequestsAll() {
 	const { data: locationsData } = useQuery({
 		queryKey: ["allLocationsDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLocationForPatronRequestGrid, {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 1000,
-				pageno: 0,
-			}),
+			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+				getLocationForPatronRequestGrid,
+				{
+					query: "",
+					order: "name",
+					orderBy: "ASC",
+					pagesize: 1000,
+					pageno: 0,
+				},
+			),
 		staleTime: 1000 * 60 * 30,
 	});
 
@@ -134,7 +145,7 @@ function SupplierRequestsAll() {
 		queryKey: [gridId, code, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
 			const baseQuery = `supplyingAgencyCode: "${code}"`;
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
 				getPatronRequests,
 				buildServerGridQueryVars({
 					filterModel,

@@ -11,6 +11,7 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { getLibraries } from "@queries/getLibraries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import i18n from "@/i18n";
+import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 // Default-state prefetch: mirrors OperatingWelcome's own useGridState defaults
 // (pageSize 200, sort fullName ASC, no filter) AND its literal "LoadLibraries"
@@ -36,7 +37,10 @@ export const Route = createFileRoute("/__authenticated/")({
 				DEFAULT_FILTER_MODEL,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getLibraries, {
+				createGraphQLClient(cfg, auth).request<
+					any,
+					LoadLibrariesQueryVariables
+				>(getLibraries, {
 					query: "",
 					pageno: DEFAULT_PAGINATION_MODEL.page,
 					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,

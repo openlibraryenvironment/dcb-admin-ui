@@ -16,6 +16,7 @@ import { getHostLms } from "@queries/getHostLms";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import type { LoadHostLmsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/hostlmss/")({
 	// Default-state prefetch: the loader has no access to the Zustand grid
@@ -38,13 +39,16 @@ export const Route = createFileRoute("/__authenticated/hostlmss/")({
 				currentFilter,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getHostLms, {
-					pageno: currentPagination.page,
-					pagesize: currentPagination.pageSize,
-					order: currentSort[0]?.field ?? "name",
-					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-					query: "",
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadHostLmsQueryVariables>(
+					getHostLms,
+					{
+						pageno: currentPagination.page,
+						pagesize: currentPagination.pageSize,
+						order: currentSort[0]?.field ?? "name",
+						orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
+						query: "",
+					},
+				),
 		});
 	},
 	component: HostLmss,
@@ -81,7 +85,7 @@ function HostLmss() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadHostLmsQueryVariables>(
 				getHostLms,
 				buildServerGridQueryVars({
 					filterModel,

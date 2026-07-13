@@ -19,6 +19,7 @@ import { standardFilters } from "@filters/standardFilters";
 
 import { getLibraryGroups } from "@queries/getLibraryGroups";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import type { LoadGroupsQueryVariables } from "@generated/graphql";
 
 // Default-state prefetch: the component reads pagination/sort/filter state
 // from useGridStore (a Zustand store) at mount time, which the loader
@@ -45,13 +46,16 @@ export const Route = createFileRoute("/__authenticated/groups/")({
 				DEFAULT_FILTER_MODEL,
 			],
 			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any>(getLibraryGroups, {
-					query: "",
-					pageno: DEFAULT_PAGINATION_MODEL.page,
-					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-					order: DEFAULT_SORT_MODEL[0].field,
-					orderBy: "ASC",
-				}),
+				createGraphQLClient(cfg, auth).request<any, LoadGroupsQueryVariables>(
+					getLibraryGroups,
+					{
+						query: "",
+						pageno: DEFAULT_PAGINATION_MODEL.page,
+						pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
+						order: DEFAULT_SORT_MODEL[0].field,
+						orderBy: "ASC",
+					},
+				),
 		});
 	},
 	component: GroupsRouteComponent,
@@ -95,7 +99,7 @@ function GroupsRouteComponent() {
 	} = useQuery({
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
-			gqlClient.request<any>(
+			gqlClient.request<any, LoadGroupsQueryVariables>(
 				getLibraryGroups,
 				buildServerGridQueryVars({
 					filterModel,
@@ -113,28 +117,28 @@ function GroupsRouteComponent() {
 			...customColumns,
 			{
 				field: "name",
-				headerName: t("groups.group_name", "Group name"),
+				headerName: t("groups.name"),
 				minWidth: 150,
 				flex: 0.6,
 				filterOperators: standardFilters,
 			},
 			{
 				field: "code",
-				headerName: t("groups.group_code", "Group code"),
+				headerName: t("groups.code"),
 				minWidth: 50,
 				flex: 0.6,
 				filterOperators: standardFilters,
 			},
 			{
 				field: "type",
-				headerName: t("groups.group_type", "Group type"),
+				headerName: t("groups.type"),
 				minWidth: 50,
 				flex: 0.4,
 				filterOperators: standardFilters,
 			},
 			{
 				field: "id",
-				headerName: t("groups.group_uuid", "Group UUID"),
+				headerName: t("groups.id"),
 				minWidth: 100,
 				flex: 0.8,
 				filterOperators: standardFilters,

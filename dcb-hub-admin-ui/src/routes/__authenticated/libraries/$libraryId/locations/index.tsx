@@ -48,6 +48,13 @@ import { deleteLocationQuery } from "@mutations/deleteLocation";
 import { computeMutation } from "@helpers/computeMutation";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
+import type {
+	DeleteLibraryMutationVariables,
+	DeleteLocationMutationVariables,
+	LoadLibraryQueryVariables,
+	LoadLocationsQueryVariables,
+	UpdateLocationMutationVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/locations/",
@@ -124,7 +131,9 @@ function LibraryLocations() {
 	} = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 
@@ -146,7 +155,7 @@ function LibraryLocations() {
 			filterModel,
 		],
 		queryFn: async () => {
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadLocationsQueryVariables>(
 				getLocations,
 				buildServerGridQueryVars({
 					filterModel,
@@ -164,17 +173,26 @@ function LibraryLocations() {
 
 	const { mutateAsync: updateLocation } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updateLocationQuery, variables),
+			gqlClient.request<any, UpdateLocationMutationVariables>(
+				updateLocationQuery,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutate: deleteLocation } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteLocationQuery, variables),
+			gqlClient.request<any, DeleteLocationMutationVariables>(
+				deleteLocationQuery,
+				variables,
+			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
 	});
 	const { mutateAsync: deleteLibrary } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteLibraryMutation, variables),
+			gqlClient.request<any, DeleteLibraryMutationVariables>(
+				deleteLibraryMutation,
+				variables,
+			),
 	});
 
 	const processRowUpdate = useCallback(
@@ -337,7 +355,9 @@ function LibraryLocations() {
 				type: "actions",
 				headerName: t("ui.data_grid.actions"),
 				width: 100,
-				getActions: ({ id }: GridRowParams) => {
+				getActions: ({ id, columns: rowColumns }: GridRowParams) => {
+					// Without fieldToFocus the row swaps to inputs with nothing focused.
+					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
 					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
 						return [
 							<GridActionsCellItem
@@ -375,7 +395,7 @@ function LibraryLocations() {
 							onClick={() =>
 								setRowModesModel({
 									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit },
+									[id]: { mode: GridRowModes.Edit, fieldToFocus },
 								})
 							}
 							disabled={!isAnAdmin}

@@ -28,6 +28,12 @@ import { getLibraries } from "@queries/getLibraries";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLibraryQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/patronRequests/exception",
@@ -77,7 +83,9 @@ function PatronRequestsCompleted() {
 	const { data: libraryData } = useQuery({
 		queryKey: ["library", libraryId],
 		queryFn: () =>
-			gqlClient.request<any>(getLibrary, { query: `id:${libraryId}` }),
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
 		enabled: !!libraryId,
 	});
 
@@ -88,7 +96,7 @@ function PatronRequestsCompleted() {
 	const { data: librariesData } = useQuery({
 		queryKey: ["allLibrariesDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLibraries, {
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
 				order: "fullName",
 				orderBy: "ASC",
 				pageno: 0,
@@ -101,13 +109,16 @@ function PatronRequestsCompleted() {
 	const { data: locationsData } = useQuery({
 		queryKey: ["allLocationsDictionary"],
 		queryFn: () =>
-			gqlClient.request<any>(getLocationForPatronRequestGrid, {
-				query: "",
-				order: "name",
-				orderBy: "ASC",
-				pagesize: 1000,
-				pageno: 0,
-			}),
+			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+				getLocationForPatronRequestGrid,
+				{
+					query: "",
+					order: "name",
+					orderBy: "ASC",
+					pagesize: 1000,
+					pageno: 0,
+				},
+			),
 		staleTime: 1000 * 60 * 30,
 	});
 
@@ -130,7 +141,7 @@ function PatronRequestsCompleted() {
 		queryKey: [gridId, code, paginationModel, sortModel, filterModel],
 		queryFn: async () => {
 			const baseQuery = `patronHostlmsCode: "${code}" AND status: "ERROR"`;
-			return gqlClient.request<any>(
+			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
 				getPatronRequests,
 				buildServerGridQueryVars({
 					filterModel,

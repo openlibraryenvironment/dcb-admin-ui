@@ -1,12 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Box } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import InsightsDashboard from "@components/Insights/InsightsDashboard";
 import ScopeSelector, { ScopeOption } from "@components/Insights/ScopeSelector";
 import { createRestClient } from "@helpers/createRestClient";
+import { isInsightsEnabled } from "@helpers/featureFlags";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 import {
 	dashboardQueryOptions,
@@ -19,6 +20,14 @@ import {
 const DEFAULT_PRESET = "30d" as const;
 
 export const Route = createFileRoute("/__authenticated/consortium/insights")({
+	// The nav entry is hidden while the flag is off, but the URL is still
+	// typeable - and the page would call statistics endpoints that this
+	// environment's dcb-service does not serve yet.
+	beforeLoad: () => {
+		if (!isInsightsEnabled()) {
+			throw redirect({ to: "/consortium" });
+		}
+	},
 	loader: ({ context: { queryClient, cfg, auth } }) => {
 		// Skip prefetch for unauthenticated visitors (see consortium/index loader).
 		if (!auth?.isAuthenticated) return;

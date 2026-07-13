@@ -5,8 +5,11 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { useTranslation } from "react-i18next";
 
 // Supported UI languages. `label` is intentionally the endonym and is NOT translated.
+// `code` must match a resource i18next can actually resolve: "en-GB" is bundled in
+// i18n.ts, "es" is fetched from /locales/es/application.json. A bare "en" resolves to
+// neither and only rendered by falling through to fallbackLng, after a wasted 404.
 const LANGUAGES = [
-	{ code: "en", label: "English" },
+	{ code: "en-GB", label: "English" },
 	{ code: "es", label: "Español" },
 ];
 
@@ -20,10 +23,12 @@ export default function LanguageSwitcher({
 }: LanguageSwitcherProps) {
 	const { t, i18n } = useTranslation();
 
+	// Match on the base subtag so any regional variant ("en-US", "es-MX") still
+	// selects the right entry, but always hand the Select a full supported code.
 	const base = (i18n.resolvedLanguage ?? i18n.language ?? "en").split("-")[0];
-	const current = LANGUAGES.some((l) => l.code === base)
-		? base
-		: LANGUAGES[0].code;
+	const current =
+		LANGUAGES.find((l) => l.code.split("-")[0] === base)?.code ??
+		LANGUAGES[0].code;
 
 	const handleChange = (event: SelectChangeEvent) => {
 		i18n.changeLanguage(event.target.value);
