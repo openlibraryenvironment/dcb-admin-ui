@@ -20,17 +20,9 @@ const useDCBServiceInfo = () => {
 			Date.now() - lastFetchedAt >= REQUEST_DELAY ||
 			lastFetchedAt == null
 		) {
-			console.log(lastFetchedAt);
 			fetchVersionInfo();
-		} else {
-			console.log(
-				"Version is" +
-					version +
-					" and was fetched in the last two hours at" +
-					lastFetchedAt,
-			);
 		}
-	}, [lastFetchedAt, fetchVersionInfo, REQUEST_DELAY, version]);
+	}, [lastFetchedAt, fetchVersionInfo, REQUEST_DELAY]);
 
 	return { version, isDev, isAcceptableVersion, loading, error, type, branch };
 };

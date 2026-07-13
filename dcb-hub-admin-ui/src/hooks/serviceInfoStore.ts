@@ -37,7 +37,6 @@ const useDCBVersionStore = create<VersionInfo>()(
 
 					const versionStr = data.version || "";
 					const isDev = versionStr.includes("SNAPSHOT");
-					console.log(response);
 
 					// Update state with the fetched data
 					set({

@@ -23,6 +23,7 @@ import {
 	Info,
 	LocalLibrary,
 	Search,
+	Insights,
 } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
@@ -56,6 +57,8 @@ const SidebarIcon = (indexVal: number, isSelected: boolean) => {
 			return <Search fontSize="small" sx={sx} />;
 		case 11:
 			return <Info fontSize="small" sx={sx} />;
+		case 12:
+			return <Insights fontSize="small" sx={sx} />;
 		default:
 			return null;
 	}
@@ -77,6 +80,7 @@ const routes = [
 	{ path: "/bibs", translationKey: "nav.bibs" },
 	{ path: "/search", translationKey: "nav.search.name" },
 	{ path: "/serviceInfo", translationKey: "nav.serviceInfo.name" },
+	{ path: "/consortium/insights", translationKey: "nav.consortium.insights" },
 ];
 
 interface SidebarProps {

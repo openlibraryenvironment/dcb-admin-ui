@@ -7,8 +7,7 @@ const isValidLink = (url: string): boolean => {
 		const parsedUrl = new URL(url);
 		const validProtocols = ["http:", "https:", "mailto:"];
 		return validProtocols.includes(parsedUrl.protocol);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return false;
 	}
 };

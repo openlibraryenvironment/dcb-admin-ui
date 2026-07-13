@@ -166,7 +166,6 @@ async function bootstrap() {
 			});
 		},
 		onSigninCallback: (_user: User | void): void => {
-			console.log("Sign in for ", _user);
 			const isReadOnly = _user?.profile?.roles?.includes("LIBRARY_READ_ONLY");
 			const postLoginRedirectPath = sessionStorage.getItem(
 				"postLoginRedirectPath",

@@ -26,6 +26,7 @@ const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 	{ path: "/contacts", labelKey: "nav.libraries.contacts" },
 	{ path: "/locations", labelKey: "nav.locations" },
 	{ path: "/bibs", labelKey: "nav.bibs" },
+	{ path: "/insights", labelKey: "nav.libraries.insights" },
 ];
 
 interface LibraryTabsProps {

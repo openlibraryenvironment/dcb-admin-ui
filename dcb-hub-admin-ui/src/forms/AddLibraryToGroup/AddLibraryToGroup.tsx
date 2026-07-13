@@ -51,13 +51,13 @@ export default function AddLibraryToGroup({
 
 	const validationSchema = Yup.object().shape({
 		groupId: Yup.string().required(
-			t("validation.required", { field: t("groups.name") }),
+			t("ui.validation.required", { field: t("groups.name") }),
 		),
 		libraryId: Yup.string().when([], {
 			is: () => !isBulkMode,
 			then: (schema) =>
 				schema.required(
-					t("validation.required", { field: t("libraries.library") }),
+					t("ui.validation.required", { field: t("libraries.library") }),
 				),
 			otherwise: (schema) => schema.optional(),
 		}),
