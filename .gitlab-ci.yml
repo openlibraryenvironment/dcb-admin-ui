@@ -13,6 +13,7 @@ default:
     - ki-onprem
 
 stages:
+  - verify
   - build
   - release
   - container
@@ -21,10 +22,31 @@ stages:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - dcb-admin/.npm/
-    - dcb-admin/node_modules/
-    - .yarn
+    - dcb-hub-admin-ui/node_modules/
     - .npm
+# Regenerate and fail if the result differs from what is checked in - without this
+# gate the artifacts rot again and the types become a lie.
+codegen:
+  stage: verify
+  image:
+    name: node:22.12.0-bullseye
+    pull_policy: if-not-present
+  tags:
+    - ki-onprem
+  script:
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run codegen
+    # `git add -N` marks the file intent-to-add so that `git diff` also reports it
+    # when it is untracked. Without it a deleted or never-committed generated file
+    # would slip through as "no diff".
+    - git add -N src/generated/graphql.ts
+    - |
+      if ! git diff --exit-code -- src/generated/graphql.ts; then
+        echo "ERROR: src/generated/graphql.ts is out of date."
+        echo "Run 'npm run codegen' in dcb-hub-admin-ui/ and commit the result."
+        exit 1
+      fi
 
 build:
   stage: build
@@ -37,14 +59,16 @@ build:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - git config --global user.name "ianibbo"
     - git config --global user.email "ian.ibbotson@k-int.com"
-    - pwd
-    - ls -al
+    - cd dcb-hub-admin-ui
+    # vite.config.mts readFileSync's this with no fallback, so it must exist and
+    # must sit next to package.json - i.e. be written AFTER the cd.
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
     - npm ci
     - npm run build
   artifacts:
+    # Artifact paths are relative to the repo root, not to the job's cwd.
     paths:
-      - dist/
+      - dcb-hub-admin-ui/dist/
     expire_in: 1 hour
 
 release:
@@ -64,13 +88,17 @@ release:
     # Set up git credentials again for this job
     - git config --global user.name "ianibbo"
     - git config --global user.email "ian.ibbotson@k-int.com"
-    - pwd
-    - ls -al
+    # semantic-release reads .releaserc.json and package.json, both of which live
+    # here, and its @semantic-release/git assets list references ./release-info.json
+    # relative to this directory.
+    - cd dcb-hub-admin-ui
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
     - npm ci
     # Run the release, save the version so we can use it in the next stage
     - npm run semantic-release
-    - echo "RELEASE_VERSION=v$(node -p "require('./package.json').version")" > deploy.env
+    # deploy.env is picked up as a dotenv report, whose path IS relative to the
+    # repo root - so write it back up there, not into dcb-hub-admin-ui/.
+    - echo "RELEASE_VERSION=v$(node -p "require('./package.json').version")" > ../deploy.env
   artifacts:
     reports:
       dotenv: deploy.env
@@ -95,8 +123,8 @@ deploy_tag_to_s3:
     - ls
     - aws s3 ls
     # Uses $RELEASE_VERSION derived from the release job's dotenv artifact
-    - aws s3 sync dist/ "s3://ki-libs-spa-hosting/dcb-admin-$RELEASE_VERSION" --delete
-    - aws s3 sync dist/ "s3://ki-libs-spa-hosting/dcb-admin" --delete
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin-$RELEASE_VERSION" --delete
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin" --delete
   variables:
     AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
@@ -121,7 +149,7 @@ deploy_dev_to_s3:
   script:
     - ls
     - aws s3 ls
-    - aws s3 sync dist/ "s3://ki-libs-spa-hosting/dcb-admin-dev" --delete
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin-dev" --delete
   variables:
     AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
