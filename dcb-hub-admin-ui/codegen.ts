@@ -21,6 +21,20 @@ const config: CodegenConfig = {
 	schema: "./schema.graphqls",
 	documents: "src/graphql/**/*.ts",
 	overwrite: true,
+	// Format the artifact as part of generating it.
+	//
+	// Raw typescript-operations output puts each operation type on one line (the
+	// longest is ~3.8k characters). Prettier - via format-on-save, or the
+	// lint-staged hook this repo used to run - then reformatted it to 80 columns
+	// before it was committed. So the checked-in file was prettier(codegen),
+	// while CI's `npm run codegen` produced codegen(), and the CI gate diffed the
+	// two and failed every time. Locally it looked like nothing was wrong:
+	// codegen wrote the raw file, the editor reformatted it straight back to the
+	// committed bytes, and `git commit` reported nothing to commit.
+	//
+	// Generating the formatted file makes the two identical by construction, so
+	// the gate compares like with like no matter who or what runs it.
+	hooks: { afterOneFileWrite: ["prettier --write"] },
 	generates: {
 		"src/generated/graphql.ts": {
 			plugins: ["typescript-operations"],
