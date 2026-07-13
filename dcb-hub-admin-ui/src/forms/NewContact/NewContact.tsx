@@ -1,5 +1,9 @@
-import { useMutation } from "@apollo/client";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
 import {
 	Autocomplete,
 	Box,
@@ -13,17 +17,11 @@ import {
 	FormControlLabel,
 	TextField,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import {
-	createConsortiumContact,
-	createLibraryContact,
-	getConsortiaContacts,
-	getLibraryContacts,
-} from "src/queries/queries";
-import * as Yup from "yup";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { createConsortiumContact } from "@mutations/createConsortiumContact";
+import { createLibraryContact } from "@mutations/createLibraryContact";
 
 interface NewContactFormData {
 	firstName: string;
@@ -41,7 +39,7 @@ type NewContactType = {
 	onClose: () => void;
 	id: string;
 	name: string;
-	entity: "Library" | "Consortium"; // The entity we're creating a new contact for. Determines the mutation to use.
+	entity: "Library" | "Consortium";
 };
 
 export default function NewContact({
@@ -52,6 +50,18 @@ export default function NewContact({
 	entity,
 }: NewContactType) {
 	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: "success" | "error";
+		text: string | null;
+	}>({
+		open: false,
+		severity: "success",
+		text: null,
+	});
 
 	const validationSchema = Yup.object().shape({
 		firstName: Yup.string()
@@ -84,9 +94,7 @@ export default function NewContact({
 		role: Yup.string()
 			.trim()
 			.required(
-				t("ui.validation.required", {
-					field: t("libraries.contacts.role"),
-				}),
+				t("ui.validation.required", { field: t("libraries.contacts.role") }),
 			)
 			.max(128, t("ui.validation.max_length", { length: 128 })),
 	});
@@ -106,75 +114,63 @@ export default function NewContact({
 			reason: "",
 			changeCategory: "",
 			isPrimaryContact: false,
+			changeReferenceUrl: "",
 		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
 	});
 
-	const [createNewContact, { loading }] = useMutation(
-		entity == "Consortium" ? createConsortiumContact : createLibraryContact,
-		{
-			refetchQueries: [
-				entity == "Consortium" ? getConsortiaContacts : getLibraryContacts,
-			],
+	const contactMutation = useMutation({
+		mutationFn: async (data: NewContactFormData) => {
+			const targetMutation =
+				entity === "Consortium"
+					? createConsortiumContact
+					: createLibraryContact;
+			const payload =
+				entity === "Consortium"
+					? { ...data, consortiumId: id }
+					: { ...data, libraryId: id };
+
+			return gqlClient.request<any>(targetMutation, { input: payload });
 		},
-	);
+		onSuccess: (responseData) => {
+			if (responseData) {
+				const queryKeyToInvalidate =
+					entity === "Consortium"
+						? "getConsortiaContacts"
+						: "getLibraryContacts";
+				queryClient.invalidateQueries({ queryKey: [queryKeyToInvalidate] });
 
-	const [alert, setAlert] = useState<{
-		open: boolean;
-		severity: "success" | "error";
-		text: string | null;
-	}>({
-		open: false,
-		severity: "success",
-		text: null,
-	});
-
-	const onSubmit = async (data: NewContactFormData) => {
-		const payload =
-			entity == "Consortium"
-				? { ...data, consortiumId: id }
-				: { ...data, libraryId: id };
-		try {
-			const result = await createNewContact({
-				variables: { input: payload },
-			});
-
-			if (result.data) {
 				setAlert({
 					open: true,
 					severity: "success",
 					text:
-						entity == "Consortium"
-							? t("consortium.new_contact.success", {
-									consortium: name,
-								})
-							: t("libraries.new_contact.success", {
-									library: name,
-								}),
+						entity === "Consortium"
+							? t("consortium.new_contact.success", { consortium: name })
+							: t("libraries.new_contact.success", { library: name }),
 				});
 
-				// Delay the modal closing and form reset to ensure the alert is visible
 				setTimeout(() => {
 					reset();
 					onClose();
 				}, 1000);
 			}
-		} catch (error) {
+		},
+		onError: (error) => {
 			console.error("Error creating new contact:", error);
 			setAlert({
 				open: true,
 				severity: "error",
 				text:
-					entity == "Consortium"
-						? t("consortium.new_contact.error", {
-								consortium: name,
-							})
-						: t("libraries.new_contact.error", {
-								library: name,
-							}),
+					entity === "Consortium"
+						? t("consortium.new_contact.error", { consortium: name })
+						: t("libraries.new_contact.error", { library: name }),
 			});
-		}
+		},
+	});
+
+	const onSubmit = (data: NewContactFormData) => {
+		contactMutation.mutate(data);
 	};
 
 	return (
@@ -184,10 +180,10 @@ export default function NewContact({
 				onClose={onClose}
 				fullWidth
 				maxWidth="sm"
-				aria-labelledby="new-contact-modal"
+				aria-labelledby="new-contact-modal-title"
 			>
-				<DialogTitle variant="modalTitle">
-					{entity == "Consortium"
+				<DialogTitle id="new-contact-modal-title" variant="modalTitle">
+					{entity === "Consortium"
 						? t("consortium.new_contact.consortium")
 						: t("consortium.new_contact.library")}
 				</DialogTitle>
@@ -195,6 +191,7 @@ export default function NewContact({
 				<DialogContent>
 					<Box
 						component="form"
+						id="new-contact-form"
 						onSubmit={handleSubmit(onSubmit)}
 						sx={{
 							display: "flex",
@@ -254,11 +251,6 @@ export default function NewContact({
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									{...field}
-									value={field.value || null}
-									onChange={(_, newValue) => {
-										field.onChange(newValue);
-									}}
 									options={[
 										t("libraries.contacts.roles.implementation"),
 										t("libraries.contacts.roles.library_service_admin"),
@@ -267,6 +259,10 @@ export default function NewContact({
 										t("libraries.contacts.roles.support"),
 										t("libraries.contacts.roles.technical"),
 									]}
+									value={field.value || null}
+									onChange={(_, newValue) => {
+										field.onChange(newValue);
+									}}
 									renderInput={(params) => (
 										<TextField
 											{...params}
@@ -288,7 +284,12 @@ export default function NewContact({
 								control={control}
 								render={({ field }) => (
 									<FormControlLabel
-										control={<Checkbox {...field} checked={field.value} />}
+										control={
+											<Checkbox
+												checked={!!field.value}
+												onChange={(e) => field.onChange(e.target.checked)}
+											/>
+										}
 										label={t("libraries.contacts.primary")}
 									/>
 								)}
@@ -314,7 +315,6 @@ export default function NewContact({
 							fullWidth
 							variant="outlined"
 							label={t("data_change_log.reference_url")}
-							name={t("data_change_log.reference_url")}
 							error={!!errors.changeReferenceUrl}
 							helperText={errors.changeReferenceUrl?.message}
 						/>
@@ -327,13 +327,13 @@ export default function NewContact({
 					<div style={{ flex: "1 0 0" }} />
 					<Button
 						type="submit"
+						form="new-contact-form"
 						variant="contained"
 						color="primary"
-						disabled={!isValid || !isDirty || loading}
-						onClick={handleSubmit(onSubmit)}
+						disabled={!isValid || !isDirty || contactMutation.isPending}
 					>
-						{loading
-							? t("ui.action.submitting")
+						{contactMutation.isPending
+							? t("ui.actions.submitting")
 							: t("consortium.new_contact.title")}
 					</Button>
 				</DialogActions>

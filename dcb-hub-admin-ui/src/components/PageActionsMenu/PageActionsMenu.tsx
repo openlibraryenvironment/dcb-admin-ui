@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Menu, MenuItem, Stack } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 
 export interface Action {
 	key: string;

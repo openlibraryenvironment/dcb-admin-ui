@@ -1,148 +1,104 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
-import getConfig from "next/config";
-import { persist } from "zustand/middleware";
 
-interface DCBVersionInfo {
+interface VersionInfo {
 	version: string | null;
 	isDev: boolean;
 	isAcceptableVersion: boolean;
+	loading: boolean;
+	error: string | null;
 	type: string | null;
 	branch: string | null;
 	lastFetchedAt: number | null;
-}
-
-interface DCBVersionState extends DCBVersionInfo {
-	loading: boolean;
-	error: Error | null;
-	fetchVersionInfo: () => Promise<void>;
+	fetchedFrom: string | null;
+	fetchVersionInfo: (apiBase: string) => Promise<void>;
 	clearVersionStore: () => void;
 }
 
-const { publicRuntimeConfig } = getConfig();
-
-const isMaintenanceOrNetworkError = (error: any) => {
-	console.log("MNE");
-	console.log(error);
-	// Check for 503
-	if (error.response?.status === 503) return true;
-
-	// Check for CORS/Network Error (Axios specific codes)
-	if (
-		error.code === "ERR_NETWORK" ||
-		error.message === "Network Error" ||
-		error.code == "ERR_NAME_NOT_RESOLVED"
-	)
-		return true;
-
-	return false;
-};
-
-const useDCBVersionStore = create<DCBVersionState>()(
+const useDCBVersionStore = create<VersionInfo>()(
 	persist(
 		(set) => ({
 			version: null,
 			isDev: false,
-			isAcceptableVersion: false,
-			lastFetchedAt: null,
+			isAcceptableVersion: true,
 			loading: false,
 			error: null,
 			type: null,
 			branch: null,
-			clearVersionStore: () =>
-				set(() => ({
-					version: null,
-					isDev: false,
-					isAcceptableVersion: false,
-					lastFetchedAt: null,
-					loading: false,
-					error: null,
-					type: null,
-					branch: null,
-				})),
-			fetchVersionInfo: async () => {
-				const currentTime = Date.now();
-				set({ loading: true });
-				const fetchUrl = `${publicRuntimeConfig?.DCB_API_BASE}/info`;
+			lastFetchedAt: null,
+			fetchedFrom: null,
+
+			// The API base MUST be supplied by the caller from the runtime config
+			// (inject_env.json), not read from import.meta.env: .dockerignore excludes
+			// .env, so in the production image import.meta.env.VITE_DCB_API_BASE bakes
+			// to the literal `undefined` and "undefined/info" resolves against the
+			// admin host, where nginx's SPA fallback answers 200 with index.html.
+			fetchVersionInfo: async (apiBase: string) => {
+				if (!apiBase) {
+					set({ error: "No DCB API base configured", loading: false });
+					return;
+				}
+				set({ loading: true, error: null });
+
 				try {
-					// const response = await axios.get(
-					// 	`${publicRuntimeConfig?.DCB_API_BASE}/info`,
-					// );
-					let response;
+					const response = await axios.get(apiBase + "/info");
+					const data = response.data;
 
-					try {
-						response = await axios.get(fetchUrl);
-					} catch (firstErr: any) {
-						// If 503, wait briefly and retry
-						// Just in case it is a temp disruption
-						if (isMaintenanceOrNetworkError(firstErr)) {
-							console.log("503 received. Retrying...");
-							await new Promise((resolve) => setTimeout(resolve, 1000));
-							response = await axios.get(fetchUrl);
-						} else {
-							console.log(firstErr);
-							throw firstErr;
-						}
-					}
+					const versionStr = data.version || "";
+					const isDev = versionStr.includes("SNAPSHOT");
 
-					const version = response.data.git?.tags || null;
-					const systemType = response.data.env.code || "NOT SET";
-					const branch = response.data.git?.branch || "";
-
-					const isDev =
-						systemType.includes("DEV") || branch.toLowerCase() === "main";
-
-					console.log("IS DEV" + isDev);
-
-					const determineAcceptableVersion = (
-						version: string | null,
-						isDev: boolean,
-					) => {
-						if (version) {
-							const numericVersion = version.substring(1);
-							const [major, minor] = numericVersion.split(".").map(Number);
-							return major > 7 || (major === 7 && minor >= 3) || isDev;
-						} else {
-							return isDev;
-						}
-					};
-
-					const isAcceptableVersion = determineAcceptableVersion(
-						version,
-						isDev,
-					);
-
+					// Update state with the fetched data
 					set({
-						version,
+						version: data.version || "Unknown",
 						isDev,
-						isAcceptableVersion,
-						lastFetchedAt: currentTime,
+						isAcceptableVersion: true,
+						type: data.env.code || "",
+						branch: data.branch || "main",
+						lastFetchedAt: Date.now(),
+						fetchedFrom: apiBase,
 						loading: false,
-						error: null,
-						type: systemType,
-						branch,
 					});
 				} catch (error: any) {
-					console.error("Error fetching DCB Service version:", error);
-					if (isMaintenanceOrNetworkError(error)) {
-						if (
-							typeof window !== "undefined" &&
-							window.location.pathname !== "/maintenance"
-						) {
-							window.location.href = "/maintenance";
-						}
-					}
+					console.error("Failed to fetch DCB service info:", error);
 					set({
-						error:
-							error instanceof Error ? error : new Error("An error occurred"),
+						error: error.message || "Failed to fetch version info",
 						loading: false,
-						lastFetchedAt: currentTime, // Stops getting stuck in an error state.
 					});
 				}
+			},
+
+			clearVersionStore: () => {
+				set({
+					version: null,
+					isDev: false,
+					isAcceptableVersion: true,
+					loading: false,
+					error: null,
+					type: "",
+					branch: null,
+					lastFetchedAt: null,
+					fetchedFrom: null,
+				});
 			},
 		}),
 		{
 			name: "dcb-version-storage",
+			storage: createJSONStorage(() => sessionStorage),
+			// Bumped to discard caches written before the runtime-config fix; those
+			// hold an environment type fetched from the wrong /info endpoint.
+			version: 1,
+			// Only the fetched payload is worth caching. Persisting `loading`/`error`
+			// meant a reload mid-request rehydrated a stale transient state.
+			partialize: (state) => ({
+				version: state.version,
+				isDev: state.isDev,
+				isAcceptableVersion: state.isAcceptableVersion,
+				type: state.type,
+				branch: state.branch,
+				lastFetchedAt: state.lastFetchedAt,
+				fetchedFrom: state.fetchedFrom,
+			}),
 		},
 	),
 );

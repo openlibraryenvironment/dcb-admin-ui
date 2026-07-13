@@ -1,9 +1,9 @@
-import Footer from "@layout/AdminLayout/Footer/Footer";
-import Header from "@layout/AdminLayout/Header/Header";
-import LinkedFooter from "@layout/AdminLayout/LinkedFooter/LinkedFooter";
-import { Box, Paper, Stack, useTheme } from "@mui/material";
-import Head from "next/head";
 import { PropsWithChildren, ReactNode } from "react";
+import { Box, Paper, Stack } from "@mui/material";
+
+import Footer from "@layout/Footer/Footer";
+import Header from "@layout/Header/Header";
+import LinkedFooter from "@layout/LinkedFooter/LinkedFooter";
 
 interface LoginLayoutProps {
 	children?: ReactNode;
@@ -12,73 +12,58 @@ interface LoginLayoutProps {
 
 export default function LoginLayout({
 	children,
-	pageName,
 }: PropsWithChildren<LoginLayoutProps>) {
-	const theme = useTheme();
 	return (
 		<>
-			<Head>
-				<link rel="icon" href="/favicon.ico" />
-			</Head>
 			<Header iconsVisible={false} />
 			<Paper
 				elevation={12}
-				sx={{ backgroundColor: theme.palette.primary.landingBackground }}
+				sx={{ backgroundColor: "primary.landingBackground", borderRadius: 0 }}
 			>
 				<Box
 					sx={{
 						display: "flex",
-						height: "100%",
-						width: "100%",
 						flexDirection: "column",
 						minHeight: "100vh",
+						width: "100%",
 					}}
 				>
-					{/* This ternary condition is used to render pages that have specific styling applied to one part of them
-				- in this case it is the background of the login text needing to be extended
-				- the styling has been applied to the individual component and it is rendered here without additional styles if it is the landingPage */}
-					{/* This is a constant condition and should be removed: however this should be done as its own thing (removing pageName etc)*/}
-					{/* eslint-disable-next-line no-constant-condition*/}
-					{pageName === "landingPage" || "logOut" ? (
-						children
-					) : (
-						<Box
-							display="flex"
-							sx={{
-								flexGrow: 3,
-								overflow: "auto",
-								display: "flex",
-								flexDirection: "column",
-								minHeight: "100vh",
-								maxWidth: "1440px",
-								margin: "auto",
-							}}
-						>
-							<Stack
-								spacing={2}
-								sx={{ height: "100%", width: "100%", marginTop: 8 }}
-							>
-								<Box sx={{ flex: "1 0 auto" }}>{children}</Box>
-							</Stack>
-						</Box>
-					)}
+					{/*
+					 * Full-bleed content area. Each child (login card, LandingCard) owns a
+					 * full-width coloured band and caps its own inner content to 1400px —
+					 * matching the fixed Header's Toolbar. Do NOT cap width here, or the
+					 * bands get clipped and no longer align with the header bar.
+					 * `mt` clears the 70px fixed AppBar.
+					 */}
 					<Box
 						sx={{
-							overflow: "auto",
-							backgroundColor: theme.palette.primary.linkedFooterBackground,
-							paddingBottom: 2,
-							paddingTop: 2,
+							flexGrow: 1,
+							display: "flex",
+							flexDirection: "column",
+							width: "100%",
+						}}
+					>
+						<Stack spacing={2} sx={{ width: "100%", mt: "70px" }}>
+							<Box sx={{ flex: "1 0 auto" }}>{children}</Box>
+						</Stack>
+					</Box>
+
+					<Box
+						sx={{
+							backgroundColor: "primary.linkedFooterBackground",
+							py: 2,
 							flexShrink: 0,
+							overflow: "auto",
 						}}
 					>
 						<LinkedFooter />
 					</Box>
 					<Box
 						sx={{
-							overflow: "auto",
-							backgroundColor: theme.palette.primary.footerArea,
-							padding: 2,
+							backgroundColor: "primary.footerArea",
+							p: 2,
 							flexShrink: 0,
+							overflow: "auto",
 						}}
 					>
 						<Footer />

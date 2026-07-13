@@ -1,0 +1,14 @@
+# Shell scripts run inside Linux containers - must stay LF regardless of
+# core.autocrlf, or they break on checkout (e.g. Docker build on Windows).
+*.sh text eol=lf
+
+# The codegen artifact is regenerated and byte-compared by CI, so its line
+# endings cannot depend on who generated it. .prettierrc sets endOfLine=crlf, so
+# prettier (which codegen.ts runs on the output) writes CRLF. On Windows
+# core.autocrlf=true normalises that back to LF on the way into git, so the blob
+# is LF and everything looks clean. On CI's Linux runner there is no autocrlf:
+# the regenerated file keeps its CRLF, git diffs it against the LF blob, and all
+# 2235 lines come back as changed - which is the "src/generated/graphql.ts is out
+# of date" failure. Pinning the file to LF makes git's view of it identical on
+# every machine.
+src/generated/graphql.ts text eol=lf

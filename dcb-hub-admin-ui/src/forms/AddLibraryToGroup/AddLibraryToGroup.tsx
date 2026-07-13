@@ -1,14 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-	addLibraryToGroup,
-	getGroupsSelection,
-	getLibraries,
-	getLibraryGroupById,
-} from "src/queries/queries";
-import { useMutation, useQuery } from "@apollo/client";
 import * as Yup from "yup";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	Autocomplete,
 	Button,
@@ -19,143 +14,140 @@ import {
 	Stack,
 	TextField,
 	Typography,
+	Chip,
+	Box,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
 import { Close } from "@mui/icons-material";
-// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { Library } from "@models/Library";
-import { Group } from "@models/Group";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
-interface AddLibrariesResponse {
-	addLibraryToGroup: {
-		id: string;
-		library: {
-			id: string;
-			libraryCode: string;
-			fullName: string;
-		};
-		libraryGroup: {
-			id: string;
-			code: string;
-			name: string;
-			type: string;
-		};
-	};
-}
+import { getGroupsSelection } from "@queries/getGroupsSelection";
+import { getLibraries } from "@queries/getLibraries";
+import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
+import type {
+	LoadGroupsSelectionQueryVariables,
+	LoadLibrariesQueryVariables,
+} from "@generated/graphql";
 
-interface AddLibraryFormData {
-	groupId: string;
-	libraryId: string;
-}
-
-type AddLibraryType = {
+interface AddLibraryType {
 	show: boolean;
 	onClose: () => void;
-};
-type AutocompleteOption = {
-	label: string;
-	value: string;
-};
+	selectedLibraries?: { id: string; name: string }[]; //  prop to support bulk/row actions
+}
 
-export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
+export default function AddLibraryToGroup({
+	show,
+	onClose,
+	selectedLibraries = [],
+}: AddLibraryType) {
 	const { t } = useTranslation();
-	const [alert, setAlert] = useState<{
-		open: boolean;
-		severity: "success" | "error";
-		text: string | null;
-	}>({
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+
+	const [alert, setAlert] = useState({
 		open: false,
 		severity: "success",
-		text: null,
+		text: "",
 	});
 
+	const isBulkMode = selectedLibraries.length > 0;
+
 	const validationSchema = Yup.object().shape({
-		groupId: Yup.string().required(t("Group is required")),
-		libraryId: Yup.string().required(t("Library is required")),
+		groupId: Yup.string().required(
+			t("ui.validation.required", { field: t("groups.name") }),
+		),
+		libraryId: Yup.string().when([], {
+			is: () => !isBulkMode,
+			then: (schema) =>
+				schema.required(
+					t("ui.validation.required", { field: t("libraries.library") }),
+				),
+			otherwise: (schema) => schema.optional(),
+		}),
 	});
 
 	const {
 		control,
 		handleSubmit,
 		reset,
-		formState: { errors, isValid, isDirty },
-	} = useForm<AddLibraryFormData>({
-		defaultValues: {
-			groupId: "",
-			libraryId: "",
-		},
+		formState: { errors, isValid },
+	} = useForm({
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
+		defaultValues: { groupId: "", libraryId: "" },
 	});
 
-	const { data: libraries } = useQuery(getLibraries, {
-		variables: {
-			order: "fullName",
-			orderBy: "ASC",
-			pageno: 0,
-			pagesize: 1000,
-			query: "",
-		},
-		errorPolicy: "all",
+	// Only fetch libraries if we are NOT in bulk mode
+	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
+		queryKey: ["librariesSelection"],
+		queryFn: () =>
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			}),
+		enabled: !isBulkMode,
 	});
 
-	const { data: groups } = useQuery(getGroupsSelection, {
-		variables: {
-			order: "name",
-			orderBy: "ASC",
-			pageno: 0,
-			pagesize: 1000,
-			query: "",
-		},
-		errorPolicy: "all",
+	const { data: groupsData, isLoading: isGroupsLoading } = useQuery({
+		queryKey: ["groupsSelection"],
+		queryFn: () =>
+			gqlClient.request<any, LoadGroupsSelectionQueryVariables>(
+				getGroupsSelection,
+				{
+					order: "name",
+					orderBy: "ASC",
+					pageno: 0,
+					pagesize: 1000,
+				},
+			),
 	});
-	const librariesData: Library[] = libraries?.libraries?.content;
-	const groupsData: Group[] = groups?.libraryGroups?.content;
-	const libraryOptions: AutocompleteOption[] =
-		librariesData?.map((item: { fullName: string; id: string }) => ({
+
+	const libraryOptions =
+		librariesData?.libraries?.content?.map((item: any) => ({
 			label: item.fullName,
 			value: item.id,
 		})) || [];
-
-	const groupOptions: AutocompleteOption[] =
-		groupsData?.map((item: { name: string; id: string }) => ({
+	const groupOptions =
+		groupsData?.libraryGroups?.content?.map((item: any) => ({
 			label: item.name,
 			value: item.id,
 		})) || [];
 
-	const [addLibraryMutation, { loading }] = useMutation<AddLibrariesResponse>(
-		addLibraryToGroup,
-		{
-			refetchQueries: (mutationResult) => {
-				const groupId =
-					mutationResult?.data?.addLibraryToGroup?.libraryGroup?.id;
-				return [
-					{
-						query: getLibraryGroupById,
-						variables: { query: `id:${groupId}` },
-					},
-				];
-			},
-		},
-	);
+	const { mutateAsync: addLibraryMutation, isPending } = useMutation({
+		mutationFn: (variables: { input: any }) =>
+			gqlClient.request(addLibraryToGroup, variables),
+	});
 
-	const onSubmit = async (data: AddLibraryFormData) => {
+	const onSubmit = async (data: any) => {
 		try {
-			await addLibraryMutation({
-				variables: {
-					input: {
-						libraryGroup: data.groupId,
-						library: data.libraryId,
-					},
-				},
-			});
+			const librariesToProcess = isBulkMode
+				? selectedLibraries.map((l) => l.id)
+				: [data.libraryId];
+
+			// Execute all additions concurrently
+			await Promise.all(
+				librariesToProcess.map((libId) =>
+					addLibraryMutation({
+						input: { libraryGroup: data.groupId, library: libId },
+					}),
+				),
+			);
 
 			setAlert({
 				open: true,
 				severity: "success",
 				text: t("libraries.alert_text_success"),
 			});
+
+			// Invalidate relevant queries to refresh grids
+			queryClient.invalidateQueries({ queryKey: ["libraryGroups"] });
+			queryClient.invalidateQueries({ queryKey: ["libraries"] });
+			queryClient.invalidateQueries({ queryKey: ["libraries"] });
+			queryClient.invalidateQueries({ queryKey: ["group", data.groupId] });
 
 			setTimeout(() => {
 				reset();
@@ -167,20 +159,14 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 				severity: "error",
 				text: t("libraries.error_adding_to_group"),
 			});
-			console.error(t("libraries.error_adding_to_group"), error);
+			console.error(error);
 		}
 	};
 
 	return (
 		<>
-			<Dialog
-				open={show}
-				onClose={onClose}
-				aria-labelledby="new-group-modal"
-				fullWidth
-				maxWidth="sm"
-			>
-				<DialogTitle variant="modalTitle" id="form-dialog-title">
+			<Dialog open={show} onClose={onClose} fullWidth maxWidth="sm">
+				<DialogTitle variant="modalTitle">
 					{t("libraries.add_to_group")}
 				</DialogTitle>
 				<IconButton
@@ -190,30 +176,34 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 						position: "absolute",
 						right: 8,
 						top: 8,
-						color: (theme) => theme.palette.grey[500],
+						color: "text.secondary",
 					}}
 				>
 					<Close />
 				</IconButton>
 				<DialogContent>
 					<form onSubmit={handleSubmit(onSubmit)}>
-						<Stack spacing={2} direction={"column"}>
+						<Stack spacing={3} direction="column" sx={{ mt: 1 }}>
 							<Typography>{t("libraries.add_to_group_explanation")}</Typography>
+
 							<Controller
 								name="groupId"
 								control={control}
-								render={({ field: { onChange, value } }) => (
+								render={({ field }) => (
 									<Autocomplete
-										value={
-											groupOptions.find((option) => option.value === value) ||
-											null
-										}
-										onChange={(_, newValue: AutocompleteOption | null) => {
-											onChange(newValue?.value || "");
-										}}
+										{...field}
 										options={groupOptions}
-										getOptionLabel={(option: AutocompleteOption) =>
-											option.label
+										loading={isGroupsLoading}
+										onChange={(_, newValue) =>
+											field.onChange(newValue?.value || "")
+										}
+										value={
+											groupOptions.find(
+												(opt: any) => opt.value === field.value,
+											) || null
+										}
+										isOptionEqualToValue={(option, value) =>
+											option.value === value.value
 										}
 										renderInput={(params) => (
 											<TextField
@@ -224,75 +214,86 @@ export default function AddLibraryToGroup({ show, onClose }: AddLibraryType) {
 												helperText={errors.groupId?.message}
 											/>
 										)}
-										isOptionEqualToValue={(option, value) =>
-											option.value === value.value
-										}
 									/>
 								)}
 							/>
-							<Controller
-								name="libraryId"
-								control={control}
-								render={({ field: { onChange, value } }) => (
-									<Autocomplete
-										value={
-											libraryOptions.find((option) => option.value === value) ||
-											null
-										}
-										onChange={(_, newValue: AutocompleteOption | null) => {
-											onChange(newValue?.value || "");
+
+							{isBulkMode ? (
+								<Box>
+									<Typography variant="subtitle2" sx={{ mb: 1 }}>
+										{t("libraries.selected_libraries", {
+											count: selectedLibraries.length,
+										})}
+									</Typography>
+									<Box
+										sx={{
+											display: "flex",
+											flexWrap: "wrap",
+											gap: 1,
+											maxHeight: 150,
+											overflowY: "auto",
 										}}
-										options={libraryOptions}
-										getOptionLabel={(option: AutocompleteOption) =>
-											option.label
-										}
-										renderInput={(params) => (
-											<TextField
-												{...params}
-												required
-												label={t("libraries.library")}
-												error={!!errors.libraryId}
-												helperText={errors.libraryId?.message}
-											/>
-										)}
-										isOptionEqualToValue={(option, value) =>
-											option.value === value.value
-										}
-									/>
-								)}
-							/>
+									>
+										{selectedLibraries.map((lib) => (
+											<Chip key={lib.id} label={lib.name} size="small" />
+										))}
+									</Box>
+								</Box>
+							) : (
+								<Controller
+									name="libraryId"
+									control={control}
+									render={({ field }) => (
+										<Autocomplete
+											{...field}
+											options={libraryOptions}
+											loading={isLibrariesLoading}
+											onChange={(_, newValue) =>
+												field.onChange(newValue?.value || "")
+											}
+											value={
+												libraryOptions.find(
+													(opt: any) => opt.value === field.value,
+												) || null
+											}
+											isOptionEqualToValue={(option, value) =>
+												option.value === value.value
+											}
+											renderInput={(params) => (
+												<TextField
+													{...params}
+													required
+													label={t("libraries.library")}
+													error={!!errors.libraryId}
+													helperText={errors.libraryId?.message}
+												/>
+											)}
+										/>
+									)}
+								/>
+							)}
+
 							<Button
 								type="submit"
 								color="primary"
 								variant="contained"
-								disabled={!isValid || !isDirty || loading}
+								disabled={!isValid || isPending}
 							>
-								{loading ? t("ui.action.submitting") : t("general.submit")}
+								{isPending
+									? t("ui.actions.submitting")
+									: t("ui.actions.submit")}
 							</Button>
 						</Stack>
 					</form>
 				</DialogContent>
 			</Dialog>
 			<TimedAlert
-				severityType={alert.severity}
 				open={alert.open}
+				severityType={alert.severity}
+				alertText={alert.text}
 				autoHideDuration={3000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
-				alertText={alert.text || ""}
-				key="add-library-alert"
 			/>
 		</>
 	);
 }
-
-// export async function getStaticProps({ locale }: { locale: string }) {
-// 	return {
-// 		props: {
-// 			...(await serverSideTranslations(locale, [
-// 				"application",
-// 				"common",
-// 				"validation",
-// 			])),
-// 		},
-// 	};
-// }

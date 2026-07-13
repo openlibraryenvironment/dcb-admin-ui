@@ -1,0 +1,309 @@
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useAuth } from "react-oidc-context";
+import { Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
+import { Delete } from "@mui/icons-material";
+
+import PageContainer from "@layout/PageContainer/PageContainer";
+import DataGrid from "@components/DataGrid/DataGrid";
+import MasterDetail from "@components/MasterDetail/MasterDetail";
+import Confirmation from "@components/Confirmation/Confirmation";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
+
+import { useGridState } from "@hooks/useGridState";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useCustomColumns } from "@hooks/useCustomColumns";
+import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
+import { defaultSupplierRequestColumnVisibility } from "@columns/columnVisibility/defaultSupplierRequestColumnVisibility";
+
+import { getLibrary } from "@queries/getLibrary";
+import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import { getLibraries } from "@queries/getLibraries";
+import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { getPatronRequests } from "@queries/getPatronRequests";
+import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLibraryQueryVariables,
+	LoadLocationForPrGridQueryVariables,
+	LoadPatronRequestsQueryVariables,
+} from "@generated/graphql";
+
+export const Route = createFileRoute(
+	"/__authenticated/libraries/$libraryId/supplierRequests/all",
+)({
+	component: SupplierRequestsAll,
+});
+
+function SupplierRequestsAll() {
+	const { t } = useTranslation();
+	const router = useRouter();
+	const { libraryId } = Route.useParams();
+	const theme = useTheme();
+	const gqlClient = useGraphQLClient();
+	const customColumns = useCustomColumns();
+	const auth = useAuth();
+
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
+	const gridId = "supplierRequestsLibraryAll";
+
+	const {
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleColumnVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 20 },
+		sort: [{ field: "dateCreated", sort: "desc" }],
+		columnVisibility: defaultSupplierRequestColumnVisibility,
+	});
+	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
+	const [alert, setAlert] = useState({
+		open: false,
+		severity: "success",
+		text: "",
+		title: "",
+	});
+
+	const {
+		data: libraryData,
+		isLoading: isLibraryLoading,
+		isError: isLibraryError,
+	} = useQuery({
+		queryKey: ["library", libraryId],
+		queryFn: () =>
+			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+				query: `id:${libraryId}`,
+			}),
+		enabled: !!libraryId,
+	});
+
+	const library = libraryData?.libraries?.content?.[0];
+	const code = library?.agencyCode;
+
+	const { data: librariesData } = useQuery({
+		queryKey: ["allLibrariesDictionary"],
+		queryFn: () =>
+			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 1000,
+				query: "",
+			}),
+		staleTime: 1000 * 60 * 30,
+	});
+
+	const { data: locationsData } = useQuery({
+		queryKey: ["allLocationsDictionary"],
+		queryFn: () =>
+			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
+				getLocationForPatronRequestGrid,
+				{
+					query: "",
+					order: "name",
+					orderBy: "ASC",
+					pagesize: 1000,
+					pageno: 0,
+				},
+			),
+		staleTime: 1000 * 60 * 30,
+	});
+
+	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
+		locations: locationsData?.locations?.content ?? [],
+		libraries: librariesData?.libraries?.content ?? [],
+		variant: "standard",
+	});
+
+	const allColumns = useMemo(
+		() => [...customColumns, ...dynamicPatronRequestColumns],
+		[customColumns, dynamicPatronRequestColumns],
+	);
+
+	const {
+		data: requestsData,
+		isLoading: isRequestsLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: [gridId, code, paginationModel, sortModel, filterModel],
+		queryFn: async () => {
+			const baseQuery = `supplyingAgencyCode: "${code}"`;
+			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+				getPatronRequests,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					baseQuery,
+					quickFilterFields: ["status", "description"],
+					defaultOrder: "dateCreated",
+					defaultPageSize: 20,
+				}),
+			);
+		},
+		enabled: !!code,
+		placeholderData: (previousData) => previousData,
+	});
+
+	const { mutateAsync: deleteLibrary } = useMutation({
+		mutationFn: (variables: { input: any }) =>
+			gqlClient.request(deleteLibraryMutation, variables),
+	});
+
+	if (isLibraryLoading)
+		return (
+			<Loading
+				title={t("ui.info.loading.document", {
+					document_type: t("libraries.library"),
+				})}
+				subtitle={t("ui.info.wait")}
+			/>
+		);
+	if (isLibraryError || !library)
+		return (
+			<Error
+				title={t("ui.error.cannot_retrieve_record")}
+				action={t("ui.actions.go_back")}
+				goBack="/libraries"
+				message={t("ui.error.invalid_UUID")}
+			/>
+		);
+
+	return (
+		<PageContainer
+			title={library?.fullName}
+			pageActions={[
+				{
+					key: "delete",
+					onClick: () => setConfirmationDeletion(true),
+					disabled: !isAnAdmin,
+					label: t("ui.data_grid.delete_entity", {
+						entity: t("libraries.library").toLowerCase(),
+					}),
+					startIcon: (
+						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
+					),
+				},
+			]}
+		>
+			<Grid
+				container
+				spacing={{ xs: 2, md: 3 }}
+				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+			>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<LibraryTabs libraryId={libraryId} value={5} />
+				</Grid>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Tabs value={0} sx={{ mb: 2 }}>
+						<Tab
+							label={t("libraries.patronRequests.all", { number: "" }).trim()}
+						/>
+					</Tabs>
+
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+							mb: 2,
+						}}
+					>
+						{t("libraries.patronRequests.all", {
+							number: requestsData?.patronRequests?.totalSize ?? 0,
+						})}
+					</Typography>
+
+					<DataGrid
+						identifier={gridId}
+						type="patronRequests"
+						columns={allColumns}
+						rows={requestsData?.patronRequests?.content ?? []}
+						rowCount={requestsData?.patronRequests?.totalSize ?? 0}
+						loading={isRequestsLoading || isFetching}
+						paginationMode="server"
+						pagination
+						paginationModel={paginationModel}
+						onPaginationModelChange={handlePaginationChange}
+						sortingMode="server"
+						sortModel={sortModel}
+						onSortModelChange={handleSortChange}
+						filterMode="server"
+						filterModel={filterModel}
+						onFilterModelChange={handleFilterChange}
+						columnVisibilityModel={columnVisibilityModel}
+						onColumnVisibilityModelChange={handleColumnVisibilityChange}
+						getDetailPanelContent={({ row }: any) => (
+							<MasterDetail row={row} type="patronRequests" />
+						)}
+						checkboxSelection={true}
+						exportConfig={{
+							query: getPatronRequestsForExport,
+							coreType: "patronRequests",
+							baseQuery: `supplyingAgencyCode: "${code}"`,
+							quickFilterFields: ["status", "description"],
+							wizard: true,
+						}}
+						disableAggregation
+						disableRowGrouping
+						disableHoverInteractions={false}
+						disablePivoting={true}
+						rowModesModel={rowModesModel}
+						onRowModesModelChange={setRowModesModel}
+						listViewEnabled={false}
+						pivotingEnabled={false}
+						toolbarVisible
+						scrollbarVisible
+						noResultsText={t("patron_requests.no_results")}
+						searchText={t("patron_requests.search_placeholder_status")}
+					/>
+				</Grid>
+			</Grid>
+			<Confirmation
+				open={showConfirmationDeletion}
+				onClose={() => setConfirmationDeletion(false)}
+				onConfirm={(r, c, u) => {
+					handleDeleteEntity(
+						libraryId,
+						r,
+						c,
+						u,
+						setAlert,
+						deleteLibrary,
+						t,
+						router,
+						library?.fullName,
+						"deleteLibrary",
+						"/libraries",
+					);
+					setConfirmationDeletion(false);
+				}}
+				action="deletion"
+				entityName={library?.fullName}
+			/>
+			<TimedAlert
+				open={alert.open}
+				severityType={alert.severity}
+				alertText={alert.text}
+				alertTitle={alert.title}
+				onCloseFunc={() => setAlert({ ...alert, open: false })}
+			/>
+		</PageContainer>
+	);
+}

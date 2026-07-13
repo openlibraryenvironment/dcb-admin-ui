@@ -1,0 +1,1011 @@
+scalar JSON
+
+type Query {
+    agencies(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): AgencyPage!
+    hostLms(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): HostLmsPage!
+    locations(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): LocationPage!
+    patronRequests(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronRequestPage
+    supplierRequests(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): SupplierRequestPage!
+    inactiveSupplierRequests(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): InactiveSupplierRequestPage!
+    agencyGroups(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): AgencyGroupPage!
+    instanceClusters(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): ClusterRecordPage!
+    sourceBibs(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): BibRecordPage!
+    processStates(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ProcessStatePage!
+    audits(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronRequestAuditPage!
+    patronIdentities(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronIdentityPage!
+    numericRangeMappings(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): NumericRangeMappingPage!
+    referenceValueMappings(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ReferenceValueMappingPage!
+		pickupLocations(forAgency: String): [Location]
+		libraries(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): LibraryPage!
+		libraryGroups(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): LibraryGroupPage!
+		libraryGroupMembers: [LibraryGroupMember]!
+		consortia(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ConsortiumPage!
+		dataChangeLog(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): DataChangeLogPage!
+		roles(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): RolePage!
+		functionalSettings(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): FunctionalSettingPage!
+		alarms(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): AlarmPage!
+		patronRequestStatistics(startDate: String,endDate: String,borrowerCodes:[String] ,pickupCodes: [String],
+			statusCodes: [String], supplierCodes: [String], bibClusterId: ID): [DailyPatronRequestStat]!
+}
+
+type Mutation {
+		updateAgencyParticipationStatus(input: UpdateAgencyParticipationInput): Agency!
+		createAgencyGroup(input: AgencyGroupInput): AgencyGroup!
+    addAgencyToGroup(input: AddAgencyToGroupCommand): AgencyGroupMember!
+		deleteContact(input: DeleteConsortiumContactInput): DeleteEntityPayload!
+		createContact(input: ConsortiumContactInput): ConsortiumContact!
+		createConsortium(input: ConsortiumInput): Consortium!
+		deleteConsortium(input: DeleteEntityInput): DeleteEntityPayload!
+		updateConsortium(input: UpdateConsortiumInput): Consortium!
+		updateFunctionalSetting(input: UpdateFunctionalSettingInput): FunctionalSetting!
+		createFunctionalSetting(input: FunctionalSettingInput): FunctionalSetting!
+		createLibrary(input: LibraryInput): Library!
+		deleteLibrary(input: DeleteEntityInput): DeleteEntityPayload!
+		updateLibrary(input: UpdateLibraryInput): Library!
+		createLibraryContact(input: CreateLibraryContactInput): LibraryContact!
+		deleteLibraryContact(input: DeleteLibraryContactInput): DeleteEntityPayload!
+		addLibraryToGroup(input: AddLibraryToGroupCommand): LibraryGroupMember!
+		createLibraryGroup(input: LibraryGroupInput): LibraryGroup!
+		createLocation(input: CreateLocationInput): Location!
+		deleteLocation(input: DeleteEntityInput): DeleteEntityPayload!
+		updateLocation(input: UpdateLocationInput): Location!
+		updateReferenceValueMapping(input: UpdateReferenceValueMappingInput): ReferenceValueMapping!
+		deleteNumericRangeMapping(input: DeleteEntityInput): DeleteEntityPayload!
+		updateNumericRangeMapping(input: UpdateNumericRangeMappingInput): NumericRangeMapping!
+		updatePerson(input: UpdatePersonInput): Person!
+		createReferenceValueMapping(input: CreateReferenceValueMappingInput): ReferenceValueMapping!
+		deleteReferenceValueMapping(input: DeleteEntityInput): DeleteEntityPayload!
+		createRole(input: CreateRoleInput): Role!
+		updateRole(input: UpdateRoleInput): Role!
+		updateConsortialMaxLoans(input: UpdateConsortialMaxLoansInput): Agency!
+		updateAgency(input: UpdateAgencyInput): Agency!
+	  createHostLms(input: CreateHostLmsInput!): CreateHostLmsResult
+		updateHostLms(input: UpdateHostLmsInput!): UpdateHostLmsResult
+
+}
+
+input AddAgencyToGroupCommand {
+        agency: ID!
+        group: ID!
+}
+
+input AddLibraryToGroupCommand {
+	library: ID!
+	libraryGroup: ID!
+}
+
+enum FunctionalSettingType {
+	OWN_LIBRARY_BORROWING
+  PICKUP_ANYWHERE
+	RE_RESOLUTION
+	SELECT_UNAVAILABLE_ITEMS
+  TRIGGER_SUPPLIER_RENEWAL
+	DENY_LIBRARY_MAPPING_EDIT
+	VIRTUAL_PATRON_NAMES_VISIBLE,
+	VIRTUAL_PATRON_NAMES_POLARIS
+}
+
+enum ProcessingStatus {
+	PROCESSING_REQUIRED,
+	SUCCESS,
+	FAILURE
+}
+
+enum RenewalStatus {
+	ALLOWED,
+	DISALLOWED,
+	UNKNOWN,
+	UNSUPPORTED
+}
+
+
+"""
+Graphql does not allow types to be reused as input types as the semantics are different. We create the input types here.
+AgencyGroupInput : fields that define a new agency group.
+"""
+input AgencyGroupInput {
+    id: ID
+    code: String!
+    name: String!
+}
+
+input ConsortiumInput {
+	id: ID
+	name: String!
+	groupName: String!
+	dateOfLaunch: String!
+	headerImageUrl: String
+	aboutImageUrl: String
+	description: String
+	catalogueSearchUrl: String
+	websiteUrl: String
+	displayName: String!
+	reason: String!
+	changeCategory: String!
+	changeReferenceUrl: String
+	contacts: [PersonInput]
+	functionalSettings: [FunctionalSettingInput]
+}
+
+input ConsortiumContactInput {
+	firstName: String!
+	lastName: String!
+	role: String!
+	isPrimaryContact: Boolean!
+	email: String!
+	consortiumId: String!
+	reason: String!
+	changeCategory: String!
+	changeReferenceUrl: String
+}
+
+input CreateLocationInput {
+	code: String!
+	name: String!
+	isPickup: Boolean!
+	isEnabledForPickupAnywhere: Boolean
+	latitude: Float!
+	longitude: Float!
+	printLabel: String!
+	localId: String
+	type: String!
+	agencyCode: String!
+	hostLmsCode: String!
+	deliveryStops: String!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input CreateLibraryContactInput {
+	firstName: String!
+	lastName: String!
+	role: String!
+	isPrimaryContact: Boolean!
+	email: String!
+	libraryId: String!
+	reason: String!
+	changeCategory: String!
+	changeReferenceUrl: String
+}
+
+input CreateRoleInput {
+	name: String!
+	displayName: String!
+	description: String!
+	keycloakRole: String!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input CreateReferenceValueMappingInput {
+	toContext: String!
+	toCategory: String!
+	toValue: String!
+	fromContext: String!
+	fromCategory: String!
+	fromValue: String!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateRoleInput {
+	name: String!
+	displayName: String
+	description: String
+	keycloakRole: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input FunctionalSettingInput {
+	id: ID
+	name: FunctionalSettingType!
+	enabled: Boolean!
+	description: String
+	reason: String
+	changeCategory: String
+	changeReferenceUrl: String
+	consortiumName: String
+}
+
+input LibraryInput {
+	id: ID
+	agencyCode: String!
+	fullName: String!
+	shortName: String!
+	abbreviatedName: String!
+	address: String!
+	type: String!
+	contacts: [PersonInput]!
+	longitude: Float
+	latitude: Float
+	patronWebsite: String
+	discoverySystem: String
+	hostLmsConfiguration: String
+	targetLoanToBorrowRatio: String
+	supportHours: String
+	backupDowntimeSchedule: String
+	reason: String
+	changeCategory: String
+	changeReferenceUrl: String
+	isSupplyingAgency: Boolean
+	isBorrowingAgency: Boolean
+	maxConsortialLoans: Int
+	authProfile: String
+	hostLmsCode: String!
+}
+
+input LibraryGroupInput {
+	id: ID
+	code: String!
+	name: String!
+	type: String!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input PersonInput {
+	id: ID
+	firstName: String!
+	lastName: String!
+	role: String!
+	isPrimaryContact: Boolean!
+	email: String!
+}
+
+input DeleteConsortiumContactInput {
+	personId: ID!
+	consortiumId: ID!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input DeleteEntityInput {
+	id: ID!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input DeleteLibraryContactInput {
+	personId: ID!
+	libraryId: ID!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+type DeleteEntityPayload {
+	success: Boolean!
+	message: String
+}
+
+input UpdateAgencyParticipationInput {
+	code: String!
+	isSupplyingAgency: Boolean
+	isBorrowingAgency: Boolean
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+input UpdateConsortialMaxLoansInput {
+	code: String!
+	maxLoans: Int!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateConsortiumInput {
+	id: ID!
+	headerImageUrl: String
+	headerImageUploader: String
+	headerImageUploaderEmail: String
+	aboutImageUrl: String
+	aboutImageUploader: String
+	aboutImageUploaderEmail: String
+	description: String
+	catalogueSearchUrl: String
+	websiteUrl: String
+	displayName: String
+	reason: String!
+	changeCategory: String!
+	changeReferenceUrl: String
+	contacts: [UpdatePersonInput]
+}
+
+input UpdateLocationInput {
+	id: ID!
+	latitude: Float
+	longitude: Float
+	isPickup: Boolean
+	isEnabledForPickupAnywhere: Boolean
+	name: String
+	printLabel: String
+	localId: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateLibraryInput {
+	id: ID!
+	backupDowntimeSchedule: String
+	supportHours: String
+	latitude: Float
+	longitude: Float
+	fullName: String
+	shortName: String
+	targetLoanToBorrowRatio: String
+	abbreviatedName: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+	secretLabel: String
+	principalLabel: String
+	address: String
+	type: String
+	patronWebsite: String
+	discoverySystem: String
+}
+
+input UpdatePersonInput {
+	id: ID!
+	firstName: String
+	lastName: String
+	role: String
+	isPrimaryContact: Boolean
+	email: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateNumericRangeMappingInput {
+	id: ID!
+	mappedValue: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateReferenceValueMappingInput {
+	id: ID!
+	toValue: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateFunctionalSettingInput {
+	id: ID!
+	name: FunctionalSettingType
+	enabled: Boolean
+	description: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateAgencyInput {
+	code: String!
+	maxConsortialLoans: Int
+	longitude: Float
+	latitude: Float
+	isSupplyingAgency: Boolean
+	isBorrowingAgency: Boolean
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input CreateHostLmsInput {
+	code: String!
+	name: String
+	lmsClientClass: String!
+	ingestSourceClass: String
+	clientConfig: JSON
+	suppressionRulesetName: String
+	itemSuppressionRulesetName: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+input UpdateHostLmsInput {
+	id: ID!
+	name: String
+	lmsClientClass: String
+	ingestSourceClass: String
+	clientConfig: JSON
+	suppressionRulesetName: String
+	itemSuppressionRulesetName: String
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+}
+
+type ProcessState {
+  id: ID
+  context: ID
+  processName: String
+  processState: JSON
+}
+
+type HostLms {
+  id: ID
+  code: String
+  name: String
+  lmsClientClass: String
+	suppressionRulesetName: String
+	itemSuppressionRulesetName: String
+  clientConfig: JSON
+}
+
+"""
+An Agency is a legal entity participating in resource sharing - perhaps an institution, or a consortium or some  other service provider, for
+example Hathi Trust or internet archive. Agencies are the root object off which branch locations and other domain specific records can hang.
+"""
+type Agency {
+    id: ID
+    code: String
+    name: String
+    authProfile: String
+    longitude: Float
+    latitude: Float
+    hostLms: HostLms
+    locations: [Location]
+		isSupplyingAgency: Boolean
+		isBorrowingAgency: Boolean
+		maxConsortialLoans: Int
+}
+
+"""
+An agency group is a collection of Agencies that can be referred to as a group. Agencies are "Members" of agency groups and properties can be
+attached to the membership. Agency groups most often represent consortia. The consortium itself is probably still best modelled as an Agency 
+for the purposes of it's interactions with other systems, but for modelling the members of a consortium, agency group is a useful abstracton for
+expressing the aggregation of agencies under a single heading
+"""
+type AgencyGroup {
+    id: ID!
+    code: String!
+    name: String!
+    members: [AgencyGroupMember]
+}
+
+type AgencyGroupMember {
+  id: ID!
+  agency: Agency
+  group: AgencyGroup
+}
+
+type Alarm {
+	id: ID!
+	code: String
+	created: String
+	lastSeen: String
+	repeatCount: Float
+	expires: String
+	alarmDetails: JSON
+}
+
+type PatronRequest {
+  id: ID!
+  dateCreated: String
+  dateUpdated: String
+  patronHostlmsCode: String
+  patron: Patron
+  requestingIdentity: PatronIdentity
+  bibClusterId: ID
+  pickupLocationCode: String
+  pickupPatronId: String
+  pickupItemId: String
+  pickupItemType: String
+  pickupItemStatus: String
+  pickupRequestId: String
+  pickupRequestStatus: String
+  status: String
+  localRequestId: String
+  localRequestStatus: String
+  localItemId: String
+  localItemStatus: String
+  localItemType: String
+  localBibId: String
+  description: String
+  nextScheduledPoll: String
+  errorMessage: String
+  activeWorkflow: String
+  requesterNote: String
+  suppliers: [SupplierRequest]
+  audit: [PatronRequestAudit]
+  clusterRecord: ClusterRecord
+  previousStatus: String
+  pollCountForCurrentStatus: Int
+  manualPollCountForCurrentStatus: Int
+  autoPollCountForCurrentStatus: Int
+  currentStatusTimestamp: String
+  nextExpectedStatus: String
+  outOfSequenceFlag: Boolean
+  elapsedTimeInCurrentStatus: Float
+  rawLocalItemStatus: String
+  rawLocalRequestStatus: String
+  localItemHostlmsCode: String
+  localItemAgencyCode: String
+  isManuallySelectedItem: Boolean
+  resolutionCount: Int
+  renewalCount: Int
+  localRenewalCount: Int
+  rawPickupItemStatus: String
+  rawPickupRequestStatus: String
+  pickupBibId: String
+  pickupItemBarcode: String
+	isExpeditedCheckout: Boolean
+	localHoldingId: String
+	pickupHoldingId: String
+	isTooLong: Boolean
+	protocol: String
+	renewalStatus: RenewalStatus
+}
+
+type PatronRequestAudit {
+  id: ID!
+  auditDate: String
+  briefDescription: String
+  fromStatus: String
+  toStatus: String
+  auditData: JSON
+  patronRequest: PatronRequest
+}
+
+type SupplierRequest {
+  id: ID!
+  canonicalItemType: String
+  dateCreated: String
+  dateUpdated: String
+  hostLmsCode: String
+  isActive: Boolean
+  localItemId: String
+  localBibId: String
+  localItemBarcode: String
+  localItemLocationCode: String
+  localItemStatus: String
+  localItemType: String
+  localId: String
+  localStatus: String
+  localAgency: String
+  patronRequest: PatronRequest
+  virtualPatron: PatronIdentity
+  rawLocalItemStatus: String
+  rawLocalStatus: String
+  localRenewalCount: Int
+  localHoldingId: String
+	localRenewable: Boolean
+	localHoldCount: Int
+}
+
+type InactiveSupplierRequest {
+  id: ID!
+  canonicalItemType: String
+  dateCreated: String
+  dateUpdated: String
+  hostLmsCode: String
+  localItemId: String
+  localBibId: String
+  localItemBarcode: String
+  localItemLocationCode: String
+  localItemStatus: String
+  localItemType: String
+  localId: String
+  localStatus: String
+  localAgency: String
+  patronRequest: PatronRequest
+  virtualPatron: PatronIdentity
+  rawLocalItemStatus: String
+  rawLocalStatus: String
+  localRenewalCount: Int
+  localHoldingId: String
+}
+
+type Patron {
+  id: ID!
+}
+
+type PatronIdentity {
+  id: ID!
+  localId: String
+  homeIdentity: Boolean
+  localBarcode: String
+  localNames: String
+  localPtype: String
+  canonicalPtype: String
+  localHomeLibraryCode: String
+  lastValidated: String
+}
+
+type Location {
+  id: ID!
+  dateCreated: String
+  dateUpdated: String
+  code: String
+  name: String
+  type: String
+  agency: Agency
+  parentLocation: Location
+  hostSystem: HostLms
+  isPickup: Boolean
+	longitude: Float
+  latitude: Float
+  locationReference: String
+  deliveryStops: String
+  printLabel: String
+  localId: String
+	lastImported: String
+	isEnabledForPickupAnywhere: Boolean
+}
+
+type Library {
+	id: ID!
+	agencyCode: String
+	fullName: String
+	shortName: String
+	abbreviatedName: String
+	training: Boolean
+	backupDowntimeSchedule: String
+	supportHours: String
+	discoverySystem: String
+	patronWebsite: String
+	hostLmsConfiguration: String
+	longitude: Float
+	latitude: Float
+	address: String
+	agency: Agency
+	type: String
+	contacts: [Person]
+	secondHostLms: HostLms
+	membership: [LibraryGroupMember]
+	principalLabel: String
+	secretLabel: String
+	targetLoanToBorrowRatio: String
+}
+
+type LibraryContact {
+	id: ID
+	library: Library
+	person: Person
+}
+
+type LibraryGroup {
+	id: ID!
+	name: String!
+	code: String!
+	type: String!
+	members: [LibraryGroupMember]
+	consortium: Consortium
+}
+
+type LibraryGroupMember {
+	id: ID!
+	library: Library
+	libraryGroup: LibraryGroup
+}
+
+type Person {
+	id: ID
+	firstName: String
+	lastName: String
+	role: Role!
+	isPrimaryContact: Boolean
+	email: String
+}
+
+type Consortium {
+	id: ID!
+	name: String!
+	libraryGroup: LibraryGroup!
+	dateOfLaunch: String
+	headerImageUrl: String
+	headerImageUploader: String
+	headerImageUploaderEmail: String
+	aboutImageUrl: String
+	aboutImageUploader: String
+	aboutImageUploaderEmail: String
+	description: String
+	catalogueSearchUrl: String
+	websiteUrl: String
+	displayName: String
+	contacts: [Person]
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+	functionalSettings: [FunctionalSetting]
+}
+
+type ConsortiumContact {
+	id: ID
+	consortium: Consortium
+	person: Person
+}
+
+type DataChangeLog {
+	id: ID!
+	entityId: String!
+	entityType: String!
+	actionInfo: String!
+	lastEditedBy: String
+	timestampLogged: String!
+	reason: String
+	changeReferenceUrl: String
+	changeCategory: String
+	changes: JSON!
+}
+
+"""
+See: https://micronaut-projects.github.io/micronaut-data/2.4.0/api/io/micronaut/data/model/Page.html
+"""
+type Pageable {
+  number: Int
+  offset: Int
+}
+
+type AgencyPage {
+  content: [Agency]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type AgencyGroupPage {
+  content: [AgencyGroup]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type AlarmPage {
+	content: [Alarm]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type DataChangeLogPage {
+	content: [DataChangeLog]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type BibRecordPage {
+  content: [BibRecord]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type ClusterRecordPage {
+  content: [ClusterRecord]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type ConsortiumPage {
+	content: [Consortium]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type FunctionalSettingPage {
+	content: [FunctionalSetting]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type LibraryGroupPage {
+	content: [LibraryGroup]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type HostLmsPage {
+  content: [HostLms]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type LocationPage {
+  content: [Location]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type LibraryPage {
+	content: [Library]
+	totalSize: Int
+	pageable: Pageable
+}
+
+
+type PatronRequestPage {
+  content: [PatronRequest]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type ProcessStatePage {
+  content: [ProcessState]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type PatronRequestAuditPage {
+  content: [PatronRequestAudit]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type PatronIdentityPage {
+  content: [PatronIdentity]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type RolePage {
+	content: [Role]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type SupplierRequestPage {
+  content: [SupplierRequest]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type InactiveSupplierRequestPage {
+  content: [InactiveSupplierRequest]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type NumericRangeMappingPage {
+  content: [NumericRangeMapping]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type ReferenceValueMappingPage {
+  content: [ReferenceValueMapping]
+  totalSize: Int
+  pageable: Pageable
+}
+
+type ReferenceValueMapping {
+  id: ID!
+  fromCategory: String
+  fromContext: String
+  fromValue: String
+  toCategory: String
+  toContext: String
+  toValue: String
+  reciprocal: Boolean
+  label: String
+  lastImported: String
+  deleted: Boolean
+}
+
+type NumericRangeMapping {
+  id: ID!
+  context: String
+  domain: String
+  lowerBound: Int
+  upperBound: Int
+  targetContext: String
+  mappedValue: String
+	lastImported: String
+	deleted: Boolean
+}
+
+type ClusterRecord {
+  id: ID!
+  title: String
+  selectedBib: ID
+  isDeleted: Boolean
+  dateCreated: String
+  dateUpdated: String
+	lastIndexed: String
+  members: [BibRecord]
+}
+
+type BibRecord {
+  id: ID!
+  dateCreated: String
+  dateUpdated: String
+  title: String
+  author: String
+  placeOfPublication: String
+  publisher: String
+  dateOfPublication: String
+  edition: String
+  isLargePrint: Boolean
+  clusterReason: String
+  typeOfRecord: String
+  canonicalMetadata: JSON
+  metadataScore: Int
+  processVersion: Int
+  contributesTo: ClusterRecord
+  sourceSystemId: ID
+  sourceRecordId: String
+	sourceRecordUuid: String
+  sourceRecord: SourceRecord
+  matchPoints: [MatchPoint]
+}
+
+"""
+Used in ingest v1. Note that sourceRecordId is also legacy - source record UUID is the one for ingest v2 and later
+"""
+
+type RawSource {
+  id: ID!
+  hostLmsId: ID!
+  remoteId: String
+  json: JSON
+}
+
+"""
+Used in ingest v2
+"""
+type SourceRecord {
+	id: ID!
+	hostLmsId: ID!
+	remoteId: String!
+	lastFetched: String!
+	lastProcessed: String
+	processingState: ProcessingStatus
+	processingInformation: String
+	sourceRecordData: JSON
+}
+
+type MatchPoint {
+  id: ID!
+  value: ID!
+  bibId: ID!
+}
+
+type FunctionalSetting {
+	id: ID!
+	name: FunctionalSettingType!
+	enabled: Boolean!
+	description: String
+}
+
+type Role {
+	id: ID!
+	displayName: String!
+	name: String!
+	description: String
+	keycloakRole: String
+}
+
+type DailyPatronRequestStat {
+	dateCreated: String
+	count: Int
+	patronHostlmsCode: String
+	pickupLocationCode: String
+	statusCode: String
+	bibClusterId: ID
+}
+
+type CreateHostLmsResult {
+	hostLms: HostLms
+	pingStatus: String
+	ingestStatus: String
+	warnings: [String]
+}
+
+type UpdateHostLmsResult {
+	hostLms: HostLms
+	pingStatus: String
+	ingestStatus: String
+	warnings: [String]
+}

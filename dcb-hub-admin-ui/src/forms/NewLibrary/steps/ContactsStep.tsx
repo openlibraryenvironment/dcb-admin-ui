@@ -1,4 +1,10 @@
-import { NewLibraryFormData } from "@models/NewLibraryFormData";
+import { useTranslation } from "react-i18next";
+import {
+	useFormContext,
+	Controller,
+	useFieldArray,
+	FieldErrors,
+} from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
 import {
 	Autocomplete,
@@ -12,33 +18,45 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { TFunction } from "next-i18next";
-import {
-	Control,
-	Controller,
-	FieldErrors,
-	useFieldArray,
-} from "react-hook-form";
+import { newLibrarySchema } from "@schemas/newLibrarySchema";
+import { z } from "zod";
 
-type ContactsStepType = {
-	control: Control<NewLibraryFormData, any>;
-	errors: FieldErrors<NewLibraryFormData>;
-	t: TFunction;
-	handleClose: () => void;
-	handleSubmit: () => void;
-	isValid: boolean;
-	loading: boolean;
-};
+type LibraryFormValues = z.infer<typeof newLibrarySchema>;
 
-export default function ContactsStep({
-	control,
-	errors,
-	t,
-	handleClose,
-	handleSubmit,
-	loading,
-	isValid,
-}: ContactsStepType) {
+// The `value` MUST be the backend RoleName enum constant - CreateLibraryDataFetcher
+// upper-cases and matches it against RoleName. Sending the translated label breaks
+// for anything the naive coercion can't reconstruct (e.g. LIBRARY_SERVICES_ADMINISTRATOR).
+const ROLE_OPTIONS = [
+	{
+		value: "IMPLEMENTATION_CONTACT",
+		labelKey: "libraries.contacts.roles.implementation",
+	},
+	{
+		value: "LIBRARY_SERVICES_ADMINISTRATOR",
+		labelKey: "libraries.contacts.roles.library_service_admin",
+	},
+	{
+		value: "OPERATIONS_CONTACT",
+		labelKey: "libraries.contacts.roles.operations",
+	},
+	{
+		value: "SIGN_OFF_AUTHORITY",
+		labelKey: "libraries.contacts.roles.sign_off",
+	},
+	{ value: "SUPPORT", labelKey: "libraries.contacts.roles.support" },
+	{
+		value: "TECHNICAL_CONTACT",
+		labelKey: "libraries.contacts.roles.technical",
+	},
+] as const;
+
+export default function ContactsStep() {
+	const { t } = useTranslation();
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext();
+
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "contacts",
@@ -56,29 +74,28 @@ export default function ContactsStep({
 		}
 	};
 
-	const handleRemoveContact = (index: number) => {
-		if (fields.length > 1) {
-			remove(index);
-		}
-	};
+	const contactErrors = errors.contacts as unknown as FieldErrors<
+		LibraryFormValues["contacts"]
+	>;
+
 	return (
-		<>
+		<Stack spacing={3} sx={{ mt: 1 }}>
 			{fields.map((field, index) => (
-				<Paper key={field.id} sx={{ p: 2 }}>
+				<Paper key={field.id} sx={{ p: 3 }} variant="outlined">
 					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
 						<Typography variant="h6">
 							{t("libraries.contacts.one")} #{index + 1}
 						</Typography>
 						{fields.length > 1 && (
 							<IconButton
-								onClick={() => handleRemoveContact(index)}
+								onClick={() => remove(index)}
 								aria-label={t("libraries.contacts.remove")}
 							>
-								<Delete />
+								<Delete color="error" />
 							</IconButton>
 						)}
 					</Box>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+					<Stack spacing={2} direction="column">
 						<Controller
 							name={`contacts.${index}.firstName`}
 							control={control}
@@ -86,11 +103,10 @@ export default function ContactsStep({
 								<TextField
 									{...field}
 									label={t("libraries.contacts.first_name")}
-									variant="outlined"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.firstName}
-									helperText={errors.contacts?.[index]?.firstName?.message}
+									fullWidth
+									error={!!contactErrors?.[index]?.firstName}
+									helperText={contactErrors?.[index]?.firstName?.message}
 								/>
 							)}
 						/>
@@ -101,11 +117,10 @@ export default function ContactsStep({
 								<TextField
 									{...field}
 									label={t("libraries.contacts.last_name")}
-									variant="outlined"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.lastName}
-									helperText={errors.contacts?.[index]?.lastName?.message}
+									fullWidth
+									error={!!contactErrors?.[index]?.lastName}
+									helperText={contactErrors?.[index]?.lastName?.message}
 								/>
 							)}
 						/>
@@ -116,12 +131,11 @@ export default function ContactsStep({
 								<TextField
 									{...field}
 									label={t("libraries.contacts.email")}
-									variant="outlined"
 									type="email"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.email}
-									helperText={errors.contacts?.[index]?.email?.message}
+									fullWidth
+									error={!!contactErrors?.[index]?.email}
+									helperText={contactErrors?.[index]?.email?.message}
 								/>
 							)}
 						/>
@@ -130,31 +144,26 @@ export default function ContactsStep({
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									{...field}
+									options={ROLE_OPTIONS.map((option) => option.value)}
+									getOptionLabel={(value) =>
+										t(
+											ROLE_OPTIONS.find((option) => option.value === value)
+												?.labelKey ?? "",
+										)
+									}
+									onChange={(_, newValue) => field.onChange(newValue ?? "")}
+									onBlur={field.onBlur}
 									value={field.value || null}
-									onChange={(_, newValue) => {
-										field.onChange(newValue);
-									}}
-									options={[
-										t("libraries.contacts.roles.implementation"),
-										t("libraries.contacts.roles.library_service_admin"),
-										t("libraries.contacts.roles.operations"),
-										t("libraries.contacts.roles.sign_off"),
-										t("libraries.contacts.roles.support"),
-										t("libraries.contacts.roles.technical"),
-									]}
+									isOptionEqualToValue={(option, value) => option === value}
 									renderInput={(params) => (
 										<TextField
 											{...params}
 											required
 											label={t("libraries.contacts.role")}
-											error={!!errors.contacts?.[index]?.role}
-											helperText={errors.contacts?.[index]?.role?.message}
+											error={!!contactErrors?.[index]?.role}
+											helperText={contactErrors?.[index]?.role?.message}
 										/>
 									)}
-									isOptionEqualToValue={(option, value) =>
-										option === value || (!option && !value)
-									}
 								/>
 							)}
 						/>
@@ -168,7 +177,7 @@ export default function ContactsStep({
 								/>
 							)}
 						/>
-					</Box>
+					</Stack>
 				</Paper>
 			))}
 
@@ -177,7 +186,6 @@ export default function ContactsStep({
 					startIcon={<Add />}
 					onClick={handleAddContact}
 					variant="outlined"
-					color="primary"
 					sx={{ alignSelf: "flex-start" }}
 				>
 					{t("consortium.new_contact.title")}
@@ -187,23 +195,10 @@ export default function ContactsStep({
 			{errors.contacts &&
 				typeof errors.contacts === "object" &&
 				"message" in errors.contacts && (
-					<Typography color="error">{errors.contacts.message}</Typography>
+					<Typography color="error" role="alert" aria-live="assertive">
+						{errors.contacts.message as string}
+					</Typography>
 				)}
-			<Stack spacing={1} direction={"row"}>
-				<Button variant="outlined" onClick={handleClose}>
-					{t("mappings.cancel")}
-				</Button>
-				<div style={{ flex: "1 0 0" }} />
-				<Button
-					type="submit"
-					variant="contained"
-					color="primary"
-					disabled={!isValid || loading}
-					onClick={handleSubmit}
-				>
-					{loading ? t("ui.action.submitting") : t("libraries.new.title")}
-				</Button>
-			</Stack>
-		</>
+		</Stack>
 	);
 }

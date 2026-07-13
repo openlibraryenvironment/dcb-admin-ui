@@ -1,13 +1,14 @@
 import { useMemo } from "react";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import { Location } from "@models/Location";
 import { Library } from "@models/Library";
 import {
-	standardPatronRequestColumns,
 	patronRequestColumnsNoStatusFilter,
-} from "src/helpers/DataGrid/columns";
-import { isOnly } from "src/helpers/DataGrid/filters";
+	standardPatronRequestColumns,
+} from "@columns/getPatronRequestColumns";
+import { isOnly } from "@filters/isOnly";
+
 // A hook for injecting the dynamic columns
 // These are columns where we fetch the values to provide options for filtering (i.e. actual library names)
 

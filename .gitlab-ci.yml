@@ -5,7 +5,7 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
 
 default:
-  image: 
+  image:
     name: node:22.12.0-bullseye
     pull_policy: if-not-present
 
@@ -13,20 +13,44 @@ default:
     - ki-onprem
 
 stages:
+  - verify
   - build
+  - release
   - container
+  - deploy
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - dcb-hub-admin-ui/.npm/
-    - dcb-hub-admin-ui/node-modules/
-    - .yarn
+    - dcb-hub-admin-ui/node_modules/
     - .npm
+# Regenerate and fail if the result differs from what is checked in - without this
+# gate the artifacts rot again and the types become a lie.
+codegen:
+  stage: verify
+  image:
+    name: node:22.12.0-bullseye
+    pull_policy: if-not-present
+  tags:
+    - ki-onprem
+  script:
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run codegen
+    # `git add -N` marks the file intent-to-add so that `git diff` also reports it
+    # when it is untracked. Without it a deleted or never-committed generated file
+    # would slip through as "no diff".
+    - git add -N src/generated/graphql.ts
+    - |
+      if ! git diff --exit-code -- src/generated/graphql.ts; then
+        echo "ERROR: src/generated/graphql.ts is out of date."
+        echo "Run 'npm run codegen' in dcb-hub-admin-ui/ and commit the result."
+        exit 1
+      fi
 
 build:
   stage: build
-  image: 
+  image:
     name: node:22.12.0-bullseye
     pull_policy: if-not-present
   tags:
@@ -36,29 +60,99 @@ build:
     - git config --global user.name "ianibbo"
     - git config --global user.email "ian.ibbotson@k-int.com"
     - cd dcb-hub-admin-ui
-    - pwd
-    - ls -al
+    # vite.config.mts readFileSync's this with no fallback, so it must exist and
+    # must sit next to package.json - i.e. be written AFTER the cd.
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
-    - npm install
-    - npm run semantic-release
+    - npm ci
+    - npm run build
+  artifacts:
+    # Artifact paths are relative to the repo root, not to the job's cwd.
+    paths:
+      - dcb-hub-admin-ui/dist/
+    expire_in: 1 hour
 
-# build-container-image:
-#   image: 
-#     name: docker:stable
-#     pull_policy: if-not-present
-#   stage: build
-#   only:
-#     - release
-#   tags:
-#     - ki-onprem
-#   script:
-#     - echo Building container image
-#     - pwd
-#     - ls
-#     - cd dcb-hub-admin-ui
-#     - docker info
-#     - docker login -u $NEXUS_USER -p $NEXUS_PASS docker.libsdev.k-int.com
-#     - docker build -f ./docker/production/Dockerfile -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1 .
-#     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest
-#     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1
-#     - docker images
+release:
+  stage: release
+  image:
+    name: node:22.12.0-bullseye
+    pull_policy: if-not-present
+  tags:
+    - ki-onprem
+  # This rule ensures the job ONLY runs on the 'release' branch
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: always
+    - when: never
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    # Set up git credentials again for this job
+    - git config --global user.name "ianibbo"
+    - git config --global user.email "ian.ibbotson@k-int.com"
+    # semantic-release reads .releaserc.json and package.json, both of which live
+    # here, and its @semantic-release/git assets list references ./release-info.json
+    # relative to this directory.
+    - cd dcb-hub-admin-ui
+    - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
+    - npm ci
+    # Run the release, save the version so we can use it in the next stage
+    - npm run semantic-release
+    # deploy.env is picked up as a dotenv report, whose path IS relative to the
+    # repo root - so write it back up there, not into dcb-hub-admin-ui/.
+    - echo "RELEASE_VERSION=v$(node -p "require('./package.json').version")" > ../deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  # This job depends on the build job completing successfully
+  dependencies:
+    - build
+
+# Copy the dist build up to s3 where we can point cloudflare as a distribution service
+deploy_tag_to_s3:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: on_success
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    - echo "Deploying version $RELEASE_VERSION to S3..."
+    - ls
+    - aws s3 ls
+    # Uses $RELEASE_VERSION derived from the release job's dotenv artifact
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin-$RELEASE_VERSION" --delete
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin" --delete
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
+    AWS_REGION: eu-west-1
+  needs:
+    - build
+    - release
+  dependencies:
+    - build
+
+deploy_dev_to_s3:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: always
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    - ls
+    - aws s3 ls
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin-dev" --delete
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
+    AWS_REGION: eu-west-1
+  dependencies:
+    - build

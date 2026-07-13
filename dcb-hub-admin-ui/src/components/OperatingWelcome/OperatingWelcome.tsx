@@ -1,161 +1,232 @@
-import ServerPaginationGrid from "@components/ServerPaginatedGrid/ServerPaginatedGrid";
-import { useTranslation } from "next-i18next";
-import { equalsOnly, standardFilters } from "src/helpers/DataGrid/filters";
-import { getILS } from "src/helpers/getILS";
-import {
-	deleteLibraryQuery,
-	getLibraries,
-	updateLibraryQuery,
-} from "src/queries/queries";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { GridColDef, GridRowModel } from "@mui/x-data-grid-premium";
 
-// This is the unique content for the 'welcome' page for when a consortium is operational
+import DataGrid from "@components/DataGrid/DataGrid";
+import { getILS } from "@helpers/getILS";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+
+import { useGridState } from "@hooks/useGridState";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { updateLibraryMutation } from "@mutations/updateLibrary";
+import { getLibraries } from "@queries/getLibraries";
+import { standardFilters } from "@filters/standardFilters";
+import { equalsOnly } from "@filters/equalsOnly";
+import { defaultWelcomeLibraryColumnVisibility } from "@columns/columnVisibility/defaultWelcomeLibraryColumnVisibility";
+import type { LoadLibrariesQueryVariables } from "@generated/graphql";
+
 export default function OperatingWelcome() {
 	const { t } = useTranslation();
+	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+	const gridId = "welcomeLibraries";
+
+	const {
+		paginationModel,
+		sortModel,
+		filterModel,
+		columnVisibilityModel,
+		onPaginationModelChange: handlePaginationChange,
+		onSortModelChange: handleSortChange,
+		onFilterModelChange: handleFilterChange,
+		onColumnVisibilityModelChange: handleVisibilityChange,
+	} = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 200 },
+		sort: [{ field: "fullName", sort: "asc" }],
+		columnVisibility: defaultWelcomeLibraryColumnVisibility,
+	});
+
+	const { data, isLoading, isFetching } = useQuery({
+		queryKey: ["LoadLibraries", paginationModel, sortModel, filterModel],
+		queryFn: () =>
+			gqlClient.request<any, LoadLibrariesQueryVariables>(
+				getLibraries,
+				buildServerGridQueryVars({
+					filterModel,
+					sortModel,
+					paginationModel,
+					defaultOrder: "fullName",
+					defaultPageSize: 200,
+				}),
+			),
+		placeholderData: (previousData) => previousData,
+	});
+
+	const updateMutation = useMutation({
+		mutationFn: async (updatedRow: GridRowModel) => {
+			return gqlClient.request(updateLibraryMutation, {
+				input: updatedRow,
+			});
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["LoadLibraries"] });
+		},
+	});
+
+	const processRowUpdate = async (newRow: GridRowModel) => {
+		try {
+			await updateMutation.mutateAsync(newRow);
+			return newRow;
+		} catch {
+			// Make sure that this throws a custom object so DataGrid can extract the row's name for alerts
+
+			throw {
+				message: "Update failed",
+				rowName: newRow.fullName || newRow.name,
+			};
+		}
+	};
+
+	// 6. Column Definitions
+	const columns: GridColDef[] = useMemo(
+		() => [
+			{
+				field: "abbreviatedName",
+				headerName: "Abbreviated name",
+				flex: 0.3,
+				filterOperators: standardFilters,
+				editable: true,
+			},
+			{
+				field: "fullName",
+				headerName: "Full name",
+				flex: 0.5,
+				filterOperators: standardFilters,
+				editable: true,
+			},
+			{
+				field: "agencyCode",
+				headerName: "Agency code",
+				flex: 0.3,
+				filterOperators: standardFilters,
+			},
+			{
+				field: "ils",
+				headerName: "ILS",
+				flex: 0.3,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) =>
+					getILS(row?.agency?.hostLms?.lmsClientClass),
+			},
+			{
+				field: "clientConfigIngest",
+				headerName: "Ingest enabled",
+				minWidth: 50,
+				flex: 0.3,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => row?.agency?.hostLms?.clientConfig?.ingest,
+			},
+			{
+				field: "authProfile",
+				headerName: "Auth profile",
+				flex: 0.5,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => row?.agency?.authProfile,
+			},
+			{
+				field: "isSupplyingAgency",
+				headerName: "Supplying",
+				flex: 0.25,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => {
+					const agency = row?.agency;
+					if (
+						agency &&
+						Object.prototype.hasOwnProperty.call(agency, "isSupplyingAgency") &&
+						agency?.isSupplyingAgency == null
+					)
+						return t("libraries.circulation.not_set");
+					return row?.agency?.isSupplyingAgency;
+				},
+			},
+			{
+				field: "isBorrowingAgency",
+				headerName: "Borrowing",
+				flex: 0.25,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => {
+					const agency = row?.agency;
+					if (
+						agency &&
+						Object.prototype.hasOwnProperty.call(agency, "isBorrowingAgency") &&
+						agency?.isBorrowingAgency == null
+					)
+						return t("libraries.circulation.not_set");
+					return row?.agency?.isBorrowingAgency;
+				},
+			},
+			{
+				field: "hostLmsCirculation",
+				headerName: "Host LMS (circulation)",
+				flex: 0.5,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => row?.agency?.hostLms?.code,
+			},
+			{
+				field: "hostLmsCatalogue",
+				headerName: "Host LMS (catalogue)",
+				flex: 0.5,
+				filterable: false,
+				sortable: false,
+				valueGetter: (value, row) => row?.secondHostLms?.code,
+			},
+			{
+				field: "id",
+				headerName: "Library UUID",
+				flex: 0.5,
+				filterOperators: equalsOnly,
+			},
+		],
+		[t],
+	);
 
 	return (
-		<ServerPaginationGrid
-			query={getLibraries}
-			editQuery={updateLibraryQuery}
-			refetchQuery={["LoadLibraries"]}
-			deleteQuery={deleteLibraryQuery}
-			coreType="libraries"
+		<DataGrid
+			identifier={gridId}
 			type="welcomeLibraries"
-			operationDataType="Library"
-			columnVisibilityModel={{
-				id: false,
-				hostLmsCatalogue: false,
-				hostLmsCirculation: false,
-				authProfile: false,
-			}}
-			columns={[
-				{
-					field: "abbreviatedName",
-					headerName: "Abbreviated name",
-					flex: 0.3,
-					filterOperators: standardFilters,
-					editable: true,
-				},
-				{
-					field: "fullName",
-					headerName: "Full name",
-					flex: 0.5,
-					filterOperators: standardFilters,
-					editable: true,
-				},
-				{
-					field: "agencyCode",
-					headerName: "Agency code",
-					flex: 0.3,
-					filterOperators: standardFilters,
-				},
-				{
-					field: "ils",
-					headerName: "ILS",
-					flex: 0.3,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) =>
-						getILS(row?.agency?.hostLms?.lmsClientClass),
-					// These default to the ILS and ingest of the first Host LMS
-				},
-				{
-					field: "clientConfigIngest",
-					headerName: "Ingest enabled",
-					minWidth: 50,
-					flex: 0.3,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) =>
-						row?.agency?.hostLms?.clientConfig?.ingest,
-				},
-				// Hidden by default
-				{
-					field: "authProfile",
-					headerName: "Auth profile",
-					flex: 0.5,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) => row?.agency?.authProfile,
-				},
-				{
-					field: "isSupplyingAgency",
-					headerName: "Supplying",
-					flex: 0.25,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) => {
-						const agency = row?.agency;
-						if (
-							agency &&
-							Object.prototype.hasOwnProperty.call(
-								agency,
-								"isSupplyingAgency",
-							) &&
-							agency?.isSupplyingAgency == null
-						) {
-							// Returns "Not set" only for libraries where an agency with the property exists, but is set to null
-							// Does not return "Not set" for libraries without an agency
-							return t("libraries.circulation.not_set");
-						}
-
-						return row?.agency?.isSupplyingAgency;
-					},
-				},
-				{
-					field: "isBorrowingAgency",
-					headerName: "Borrowing",
-					flex: 0.25,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) => {
-						const agency = row?.agency;
-						if (
-							agency &&
-							Object.prototype.hasOwnProperty.call(
-								agency,
-								"isBorrowingAgency",
-							) &&
-							agency?.isBorrowingAgency == null
-						) {
-							// Returns "Not set" only for libraries where an agency with the property exists, but is set to null
-							// Does not return "Not set" for libraries without an agency
-							return t("libraries.circulation.not_set");
-						}
-
-						return row?.agency?.isBorrowingAgency;
-					},
-				},
-				{
-					field: "hostLmsCirculation",
-					headerName: "Host LMS (circulation)",
-					flex: 0.5,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) => row?.agency?.hostLms?.code,
-				},
-				{
-					field: "hostLmsCatalogue",
-					headerName: "Host LMS (catalogue)",
-					flex: 0.5,
-					filterable: false,
-					sortable: false,
-					valueGetter: (value, row) => row?.secondHostLms?.code,
-				},
-				{
-					field: "id",
-					headerName: "Library UUID",
-					flex: 0.5,
-					filterOperators: equalsOnly,
-				},
-			]}
-			selectable={true}
-			pageSize={200}
-			noDataMessage={t("libraries.none_available")}
-			noResultsMessage={t("libraries.none_found")}
-			searchPlaceholder={t("libraries.search_placeholder")}
-			sortDirection="ASC"
-			sortAttribute="fullName"
-			sortModel={[{ field: "fullName", sort: "asc" }]}
+			columns={columns}
+			// Map TanStack query response to grid props. Adjust 'libraries.content' to match your actual GraphQL shape
+			rows={data?.libraries?.content ?? []}
+			rowCount={data?.libraries?.totalSize ?? 0}
+			loading={isLoading || isFetching}
+			// Pagination
+			pagination={true}
+			paginationMode="server"
+			paginationModel={paginationModel}
+			onPaginationModelChange={handlePaginationChange}
+			// Sorting
+			sortingMode="server"
+			sortModel={sortModel}
+			onSortModelChange={handleSortChange}
+			// Filtering
+			filterMode="server"
+			filterModel={filterModel}
+			onFilterModelChange={handleFilterChange}
+			// Visibility
+			columnVisibilityModel={columnVisibilityModel}
+			onColumnVisibilityModelChange={handleVisibilityChange}
+			// Editing
+			processRowUpdate={processRowUpdate}
+			rowModesModel={{}}
+			// Feature Flags
+			checkboxSelection={true}
+			disableAggregation={true}
+			disableHoverInteractions={false}
+			disablePivoting={true}
+			disableRowGrouping={true}
+			listViewEnabled={false}
+			pivotingEnabled={false}
+			scrollbarVisible={true}
+			toolbarVisible={true}
+			noResultsText={t("libraries.none_found")}
+			searchText={t("libraries.search_placeholder")}
 		/>
 	);
 }
