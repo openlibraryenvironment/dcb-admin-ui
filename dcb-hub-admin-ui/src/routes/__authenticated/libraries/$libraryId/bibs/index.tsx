@@ -207,7 +207,7 @@ function LibraryBibs() {
 				title={t("ui.error.cannot_retrieve_record")}
 				action={t("ui.actions.go_back")}
 				goBack="/libraries"
-				message={t("error.invalid_UUID")}
+				message={t("ui.error.invalid_UUID")}
 			/>
 		);
 

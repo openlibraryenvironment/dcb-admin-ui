@@ -73,9 +73,10 @@ export default function Confirmation({
 
 	const getTitle = () => {
 		if (isSessionWarning) return t("ui.confirmation.session_warning");
-		if (isEdit) return t("ui.confirmation.edit_title", { entity: entityName });
+		if (isEdit)
+			return t("ui.confirmation.edit_title", { entityName: entityName });
 		if (isDelete)
-			return t("ui.confirmation.delete_title", { entity: entityName });
+			return t("ui.data_grid.delete_entity", { entity: entityName });
 		if (isUnsaved) return t("ui.unsaved_changes.header");
 		if (isUpload) return t("common.upload_title", { entityName: entityName });
 		return t("ui.confirmation.general_title");
@@ -119,9 +120,8 @@ export default function Confirmation({
 						id="confirmation-dialog-description"
 						sx={{ mb: 2 }}
 					>
-						{isDelete &&
-							t("ui.confirmation.delete_warning", { entity: entityName })}
-						{isUnsaved && t("ui.confirmation.unsaved_warning")}
+						{isDelete && t("ui.data_grid.delete_body", { entity: entityName })}
+						{isUnsaved && t("ui.unsaved_changes.body")}
 						{isEdit && t("ui.confirmation.edit_review")}
 					</DialogContentText>
 
@@ -142,7 +142,11 @@ export default function Confirmation({
 							<Controller
 								name="reason"
 								control={control}
-								rules={{ required: t("validation.required") }}
+								rules={{
+									required: t("ui.validation.required", {
+										field: t("data_change_log.reason"),
+									}),
+								}}
 								render={({ field, fieldState }) => (
 									<TextField
 										{...field}
@@ -201,11 +205,11 @@ export default function Confirmation({
 						// eslint-disable-next-line jsx-a11y/no-autofocus -- deliberate focus management for the modal's primary action; intentionally skipped for delete to avoid accidental confirmation
 						autoFocus={!isDelete}
 					>
-						{isDelete && t("ui.actions.confirm_delete")}
+						{isDelete && t("ui.data_grid.delete")}
 						{isEdit && t("ui.actions.save_changes")}
-						{isUnsaved && t("ui.actions.leave_without_saving")}
-						{isSessionWarning && t("loginout.stay_logged_in", "Stay Logged In")}
-						{isUpload && t("ui.actions.confirm_upload")}
+						{isUnsaved && t("ui.unsaved_changes.leave_without_saving")}
+						{isSessionWarning && t("loginout.stay_logged_in")}
+						{isUpload && t("common.upload")}
 					</Button>
 				</DialogActions>
 			</form>

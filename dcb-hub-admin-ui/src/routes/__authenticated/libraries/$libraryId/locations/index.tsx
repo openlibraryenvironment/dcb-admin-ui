@@ -343,7 +343,7 @@ function LibraryLocations() {
 							<GridActionsCellItem
 								key="save"
 								icon={<Save />}
-								label={t("ui.save")}
+								label={t("ui.data_grid.save")}
 								onClick={() =>
 									setRowModesModel({
 										...rowModesModel,
@@ -354,7 +354,7 @@ function LibraryLocations() {
 							<GridActionsCellItem
 								key="cancel"
 								icon={<Cancel />}
-								label={t("ui.cancel")}
+								label={t("ui.data_grid.cancel")}
 								onClick={() =>
 									setRowModesModel({
 										...rowModesModel,
@@ -409,7 +409,7 @@ function LibraryLocations() {
 				title={t("ui.error.cannot_retrieve_record")}
 				action={t("ui.actions.go_back")}
 				goBack="/libraries"
-				message={t("error.invalid_UUID")}
+				message={t("ui.error.invalid_UUID")}
 			/>
 		);
 

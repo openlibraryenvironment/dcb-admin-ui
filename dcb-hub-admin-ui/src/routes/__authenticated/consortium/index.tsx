@@ -142,7 +142,9 @@ function ConsortiumPage() {
 	const validationSchema = Yup.object().shape({
 		displayName: Yup.string()
 			.trim()
-			.required(t("validation.required"))
+			.required(
+				t("ui.validation.required", { field: t("consortium.display_name") }),
+			)
 			.max(200),
 		description: Yup.string().trim().max(400),
 		websiteUrl: Yup.string().trim().max(200),

@@ -147,7 +147,7 @@ function NumericRangeMappingsRoute() {
 							<GridActionsCellItem
 								key="save"
 								icon={<Save />}
-								label={t("ui.save")}
+								label={t("ui.data_grid.save")}
 								onClick={() =>
 									setRowModesModel({
 										...rowModesModel,
@@ -158,7 +158,7 @@ function NumericRangeMappingsRoute() {
 							<GridActionsCellItem
 								key="cancel"
 								icon={<Cancel />}
-								label={t("ui.cancel")}
+								label={t("ui.data_grid.cancel")}
 								onClick={() =>
 									setRowModesModel({
 										...rowModesModel,

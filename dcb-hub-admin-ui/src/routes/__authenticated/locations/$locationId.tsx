@@ -287,7 +287,7 @@ function LocationDetails() {
 					title={t("ui.error.cannot_retrieve_record")}
 					action={t("ui.actions.go_back")}
 					goBack="/locations"
-					message={t("error.invalid_UUID")}
+					message={t("ui.error.invalid_UUID")}
 				/>
 			</PageContainer>
 		);
