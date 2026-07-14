@@ -2,8 +2,7 @@
 
 This document outlines how to configure and deploy DCB Admin. The application is a React Single Page Application (SPA) built with Vite.
 
-Because it is a static SPA, it can be hosted in several ways. We officially support three deployment targets: **AWS (S3 + CloudFront)**, **Cloudflare Pages**, and **Docker**. Other methods of hosting SPAs may work, but are not officially supported. Feel free to contribute if you have a new way of hosting the app!
----
+Because it is a static SPA, it can be hosted in several ways. We officially support three deployment targets: **AWS (S3 + CloudFront)**, **Cloudflare Pages**, and **Docker**. Other methods of hosting SPAs may work, but are not officially supported. Please feel free to contribute if you have a new way of hosting the app!
 
 ## 1. Global Prerequisites: Keycloak Setup
 
