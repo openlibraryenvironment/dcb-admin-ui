@@ -64,7 +64,12 @@ build:
     # must sit next to package.json - i.e. be written AFTER the cd.
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
     - npm ci
-    - npm run build
+    # The base path is BAKED into the bundle (vite.config.mts: base =
+    # VITE_PUBLIC_URL || "/") and is read back as the router basepath. Build it
+    # without this and every asset URL comes out root-absolute - the Cloudflare
+    # worker then looks for them at the bucket root, 404s the lot, and the app
+    # is a white screen. It must equal the S3 app prefix the worker serves from.
+    - VITE_PUBLIC_URL=/dcb-admin/ npm run build
   artifacts:
     # Artifact paths are relative to the repo root, not to the job's cwd.
     paths:
@@ -120,11 +125,16 @@ deploy_tag_to_s3:
     pull_policy: if-not-present
   script:
     - echo "Deploying version $RELEASE_VERSION to S3..."
-    - ls
-    - aws s3 ls
+    # Key layout is <env-root>/<app>/, and the worker picks the root by hostname.
+    # Trailing slashes are explicit: --delete is scoped to the destination
+    # prefix, and one level up it would wipe the sibling apps in this root.
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/prod/dcb-admin/" --delete
+    # Immutable archive of the released bundle, NOT a servable path: the base
+    # ("/dcb-admin/") is baked in, so this copy only ever resolves its assets
+    # from /dcb-admin/. It exists to roll back from, by copying it over
+    # prod/dcb-admin/ - never to be served in place.
     # Uses $RELEASE_VERSION derived from the release job's dotenv artifact
-    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin-$RELEASE_VERSION" --delete
-    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin" --delete
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/archive/dcb-admin-$RELEASE_VERSION/" --delete
   variables:
     AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
@@ -147,9 +157,11 @@ deploy_dev_to_s3:
     name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
     pull_policy: if-not-present
   script:
-    - ls
-    - aws s3 ls
-    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dcb-admin-dev" --delete
+    # dev/, not dcb-admin-dev/. The worker resolves /dcb-admin/... against
+    # <env-root>/dcb-admin/, and dev.kihosting.net's root is "dev" - a key
+    # prefix it does not know about is a 502, which is precisely what
+    # "dcb-admin-dev" was giving us.
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dev/dcb-admin/" --delete
   variables:
     AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
