@@ -22,6 +22,7 @@ Log into your Keycloak dashboard, select the `dcb-hub` realm, and complete these
 9. Turn **OFF** client authentication (this must be a public access type, not a confidential OIDC client).
 10. Under the "Advanced" tab, set the Proof Key for Code Exchange (PKCE) Code Challenge Method to **S256**.
 11. Set the **Valid Redirect URIs** and **Web Origins** strictly to the exact URL where the application will be hosted (e.g., `https://admin.yourlibrary.org`). Never use a wildcard (`*`) in production, as this may allow malicious sites to steal user tokens.
+12. If the app is hosted under a **subpath** (see Section 3, Option A), the redirect URI must include that subpath — `https://mobius.kihosting.net/dcb-admin/*`, not the bare host. The app redirects to its own base, and the origin root serves no app when several are mounted under prefixes. **Web Origins** remains the bare origin (`https://mobius.kihosting.net`), as it is an origin, not a URL.
 
 ---
 
@@ -39,7 +40,7 @@ The application requires the following environment variables to function properl
 
                             |
 
-| `VITE_PUBLIC_URL` | No | Base path if hosting on a subpath. Defaults to `/`. If used, it must include leading and trailing slashes (e.g., `/dcb-admin/`). |
+| `VITE_PUBLIC_URL` | No | Base path if hosting on a subpath. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** Vite bakes it into the bundle as the asset base, and the router basepath, i18n load path and storage keys are all derived from it at build time via `import.meta.env.BASE_URL`. It is deliberately _not_ served in `inject_env.json`: two independently-settable copies of the base can disagree, and the app then mounts at a path from which its own assets do not resolve — a white screen. Set it in the build, never at runtime. |
 
 ---
 
@@ -47,23 +48,47 @@ The application requires the following environment variables to function properl
 
 Choose the deployment method that matches your infrastructure - Cloudflare is currently preferred for official OpenRS deployments, but choose what works for you.
 
-### Option A: Cloudflare Pages
+### Option A: Cloudflare Worker in front of S3
 
-**Architecture:** This uses a "Build Once, Deploy Anywhere" approach. You deploy the exact same static build to every environment, and a small Cloudflare Pages Function dynamically supplies the environment-specific configuration to the app at runtime via `/inject_env.json`.
+**Architecture:** CI builds each app and syncs it to its own key prefix in a shared S3 bucket. A single Cloudflare Worker ([docs/worker.js](./worker.js)) sits in front, mounting each app at a path prefix on every domain and supplying its environment-specific config at runtime via `<base>inject_env.json`:
+
+```
+mobius.kihosting.net/dcb-admin                -> s3://<bucket>/dcb-admin/
+mobius.kihosting.net/dcb-admin-for-libraries  -> s3://<bucket>/dcb-admin-for-libraries/
+```
+
+The URL path maps 1:1 onto the S3 key, so the worker does no asset-path rewriting.
+
+**"Build once, deploy anywhere" holds across _hostnames_, never across _base paths_.** The backends, Keycloak client and licence key are runtime config and vary by host, so one artifact serves every environment at a given mount point. The base path is not runtime config — it is baked in by Vite — so each mount point needs its own build. That costs nothing, since the apps are separate builds anyway.
 
 **Deployment Steps:**
 
-1. Create a Cloudflare Pages project pointing at your repository.
-2. Set the build command to `npm run build` and the output directory to `dist`.
-3. Add the variables from Section 2 directly into the Cloudflare dashboard under your Pages environment bindings.
-4. Deploy the application.
-5. Verify that Cloudflare automatically serves the configuration as JSON via `/inject_env.json`.
+1. Build each app with its mount point as the base, and sync it to the matching key prefix:
+
+   ```bash
+   VITE_PUBLIC_URL=/dcb-admin/ npm run build
+   aws s3 sync dist/ s3://<bucket>/dcb-admin/ --delete
+   ```
+
+   Keep `--delete` scoped to the prefix. Against the bucket root it will wipe the sibling apps.
+
+2. Set the environment variables from Section 2 on the Worker (Settings → Variables), keyed per environment as `hostConfig()` in the worker expects.
+3. Deploy the worker with `wrangler deploy`.
+4. Point traffic at it in the Cloudflare dashboard:
+   - **Routes** (`mobius.kihosting.net/dcb-admin*`) if the hostname also serves anything else — a route only claims matching paths.
+   - **A Custom Domain** if the hostname is dedicated to these apps; it claims the whole host and creates the DNS record for you.
+   - Routes require an existing **proxied (orange-cloud)** DNS record for the hostname. A grey-cloud record bypasses Workers entirely, and the usual symptom is that nothing you deploy appears to take effect.
+5. Update Keycloak's Valid Redirect URIs to include each subpath (Section 1, step 12).
+
+**Adding another app:** add its prefix to `APPS` and a case to `appConfig()` in the worker, then point its CI at the matching S3 key prefix. Nothing else changes.
 
 ### Option B: AWS (S3 + CloudFront)
 
 **Architecture:** This approach uses a static build. Because S3 has no server-side execution, environment variables cannot be injected at runtime. Every `VITE_*` value is permanently baked into the JavaScript bundle during the build phase. You must build a separate artifact for each environment (dev, staging, production).
 
-**Architecture Note** (main.tsx Fallback): On a plain S3 bucket, there is no server-side component to generate /inject_env.json. The application deliberately attempts to fetch this file, and when it receives a 404 error, it intentionally falls back to the build-time import.meta.env.VITE_* variables.
+**Architecture Note** (main.tsx Fallback): On a plain S3 bucket, there is no server-side component to generate `inject_env.json`. The application deliberately attempts to fetch this file, and when it receives a 404 error, it intentionally falls back to the build-time `import.meta.env.VITE_*` variables.
+
+**Do not combine this with Option A.** The `403/404 -> index.html (200)` error-document mapping below is what makes a root-hosted SPA work, but it means a missing asset comes back as _HTML with a 200_. Behind the worker that is fatal and indistinguishable from a real file: the browser parses HTML as a JavaScript module and you get a blank page and `Unexpected token '<'`. The worker therefore talks to the **S3 REST endpoint** (`https://<bucket>.s3.<region>.amazonaws.com`, which 404s honestly and is HTTPS), never the `s3-website` endpoint (which is plaintext HTTP and applies error-document rewriting), and does the SPA fallback itself.
 
 **Deployment Steps:**
 

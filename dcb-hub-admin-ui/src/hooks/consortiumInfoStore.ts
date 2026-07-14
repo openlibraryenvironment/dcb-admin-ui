@@ -2,6 +2,8 @@ import { create } from "zustand";
 
 import { persist } from "zustand/middleware";
 
+import { storageKey } from "@helpers/appBase";
+
 type ConsortiumInfo = {
 	name: string;
 	displayName: string;
@@ -60,7 +62,7 @@ export const useConsortiumInfoStore = create<
 				})),
 		}),
 		{
-			name: "consortium-storage",
+			name: storageKey("consortium-storage"),
 		},
 	),
 );

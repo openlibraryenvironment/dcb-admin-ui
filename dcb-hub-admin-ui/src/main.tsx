@@ -9,6 +9,7 @@ import { LicenseInfo } from "@mui/x-license";
 import "./i18n";
 import { routeTree } from "./routeTree.gen";
 import App from "@components/App/App";
+import { BASE, appUrl, toRoutePath } from "@helpers/appBase";
 
 // Do we still want these?
 import "@fontsource/roboto/300.css";
@@ -25,7 +26,6 @@ declare global {
 			VITE_DCB_API_BASE: string;
 			VITE_DCB_SEARCH_BASE: string;
 			VITE_ILL_API_BASE?: string;
-			VITE_PUBLIC_URL: string;
 			[key: string]: string | undefined;
 		};
 	}
@@ -37,7 +37,12 @@ async function getCfg() {
 			return window.__APP_ENV__;
 		}
 
-		const response = await fetch("/inject_env.json", { cache: "no-store" });
+		// Base-scoped, not "/inject_env.json": the origin may host several apps
+		// under path prefixes, and a root-relative fetch gives the server no way
+		// to tell which of them is asking.
+		const response = await fetch(`${BASE}inject_env.json`, {
+			cache: "no-store",
+		});
 
 		if (
 			!response.ok ||
@@ -50,16 +55,13 @@ async function getCfg() {
 				VITE_DCB_API_BASE: String(import.meta.env.VITE_DCB_API_BASE),
 				VITE_DCB_SEARCH_BASE: String(import.meta.env.VITE_DCB_SEARCH_BASE),
 				VITE_ILL_API_BASE: String(import.meta.env.VITE_ILL_API_BASE),
-				VITE_PUBLIC_URL: String(import.meta.env.VITE_PUBLIC_URL || "/"),
 			};
 		}
 
 		return await response.json();
 	} catch (err) {
 		console.warn("Could not load config, falling back to Vite defaults:", err);
-		return {
-			VITE_PUBLIC_URL: "/",
-		};
+		return {};
 	}
 }
 
@@ -73,10 +75,14 @@ const handleServiceErrors = (error: any) => {
 	const isServiceUnavailable = error?.response?.status === 503;
 	const isUnauthorized = error?.response?.status === 401;
 
+	// Router paths, so these comparisons still hold when the app is mounted under
+	// a base path (window.location.pathname would be "/dcb-admin/logout").
+	const routePath = toRoutePath();
+
 	if (
-		window.location.pathname === "/maintenance" ||
-		window.location.pathname === "/login" ||
-		window.location.pathname === "/logout" // Add this to prevent loops
+		routePath === "/maintenance" ||
+		routePath === "/login" ||
+		routePath === "/logout" // Add this to prevent loops
 	) {
 		return;
 	}
@@ -93,7 +99,7 @@ const handleServiceErrors = (error: any) => {
 		// Push them to logout instead of login
 		router.navigate({
 			to: "/logout",
-			search: { reason: "session_expired", redirect: window.location.pathname },
+			search: { reason: "session_expired", redirect: routePath },
 			replace: true,
 		});
 	} else if (isServiceUnavailable && router) {
@@ -138,7 +144,10 @@ async function bootstrap() {
 
 	router = createRouter({
 		routeTree,
-		basepath: cfg.VITE_PUBLIC_URL || "/",
+		// Build-time constant, NOT runtime config: it must be the exact value Vite
+		// used for the asset base, or the router mounts at a path from which its
+		// own assets don't resolve.
+		basepath: BASE,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
 		defaultStaleTime: 5000,
@@ -153,7 +162,10 @@ async function bootstrap() {
 	const oidcConfig = {
 		authority: cfg.VITE_KEYCLOAK_URL,
 		client_id: cfg.VITE_KEYCLOAK_ID,
-		redirect_uri: window.location.origin,
+		// The app's own base, not the bare origin: where several apps are mounted
+		// under path prefixes, the origin root serves none of them.
+		redirect_uri: appUrl(),
+		post_logout_redirect_uri: appUrl(),
 		response_type: "code",
 		scope: "openid profile email",
 		loadUserInfo: true,

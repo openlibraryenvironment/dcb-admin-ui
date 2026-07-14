@@ -14,6 +14,7 @@ import Error from "@components/Error/Error";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Confirmation from "@components/Confirmation/Confirmation";
 import i18n from "@/i18n";
+import { appUrl, clearAppStorage } from "@helpers/appBase";
 
 export const Route = createFileRoute("/__authenticated")({
 	component: AuthenticatedLayout,
@@ -58,13 +59,15 @@ function AuthenticatedLayout() {
 			}
 		},
 		onIdle: () => {
-			// Triggered at the 15-minute mark if they ignored the prompt
+			// Triggered at the 15-minute mark if they ignored the prompt.
+			// Scoped to this app's keys: a blanket storage.clear() would also wipe
+			// the state and OIDC session of any sibling app mounted under another
+			// path prefix on the same origin.
 			setShowSessionWarning(false);
-			sessionStorage.clear();
-			localStorage.clear();
+			clearAppStorage();
 
 			auth.signoutRedirect({
-				post_logout_redirect_uri: `${window.location.origin}/logout?reason=session_expired`,
+				post_logout_redirect_uri: appUrl("logout?reason=session_expired"),
 			});
 		},
 		debounce: 500,
