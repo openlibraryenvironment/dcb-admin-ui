@@ -7,9 +7,9 @@ Welcome to DCB Admin! DCB Admin is a Knowledge Integration application and is pa
 
 You can find the DCB Service repository [here](https://gitlab.com/knowledge-integration/libraries/dcb-service) and more information [here](https://openlibraryfoundation.atlassian.net/l/cp/67Q16M0Q). 
 
-DCB Admin is a Next.js application written in TypeScript. [Material UI](https://mui.com/) is used as the project's UI framework to deliver a dynamic, themable and resillient modern user interface.
+DCB Admin is a React application written in TypeScript. [Material UI](https://mui.com/) is used as the project's UI framework to deliver a dynamic, themable and resillient modern user interface. Vite is used for build tooling.
 
-This project conforms to the [WCAG 2.1](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. If you would like to experience DCB Admin in dark mode, please set your system settings accordingly.
+This project conforms to the [WCAG 2.2 AA](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. Users can select dark and high contrast modes from within the application settings.
 
 ## How to get started
 
@@ -27,8 +27,7 @@ See [developer guidance](https://openlibraryfoundation.atlassian.net/wiki/label/
 
 ## Testing
 
-[DCB Admin uses Cypress](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849/) for end-to-end automated tests. 
-
+DCB Admin uses Playwright for E2E tests and Vitest for unit tests.
 Please refer to the [DCB Admin documentation](https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2763128849#Configuration-/-setup-within-DCB-Admin) for guidance on getting started.
 
 ## Contributing
