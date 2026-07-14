@@ -6,7 +6,7 @@ variables:
 
 default:
   image:
-    name: node:22.12.0-bullseye
+    name: node:22.23.1-bullseye
     pull_policy: if-not-present
 
   tags:
@@ -28,11 +28,6 @@ cache:
 # gate the artifacts rot again and the types become a lie.
 codegen:
   stage: verify
-  image:
-    name: node:22.12.0-bullseye
-    pull_policy: if-not-present
-  tags:
-    - ki-onprem
   script:
     - cd dcb-hub-admin-ui
     - npm ci
@@ -50,11 +45,6 @@ codegen:
 
 build:
   stage: build
-  image:
-    name: node:22.12.0-bullseye
-    pull_policy: if-not-present
-  tags:
-    - ki-onprem
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - git config --global user.name "ianibbo"
@@ -78,11 +68,6 @@ build:
 
 release:
   stage: release
-  image:
-    name: node:22.12.0-bullseye
-    pull_policy: if-not-present
-  tags:
-    - ki-onprem
   # This rule ensures the job ONLY runs on the 'release' branch
   rules:
     - if: '$CI_COMMIT_BRANCH == "release"'
