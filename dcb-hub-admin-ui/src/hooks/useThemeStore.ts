@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import type { ThemeName, ThemeMode } from "@themes/openRS";
+import { storageKey } from "@helpers/appBase";
 
 type ThemePreferences = {
 	themeName: ThemeName;
@@ -28,6 +29,6 @@ export const useThemeStore = create<ThemePreferences & ThemeActions>()(
 			setThemeName: (themeName) => set({ themeName }),
 			setMode: (mode) => set({ mode }),
 		}),
-		{ name: "dcb-admin-theme" },
+		{ name: storageKey("dcb-admin-theme") },
 	),
 );

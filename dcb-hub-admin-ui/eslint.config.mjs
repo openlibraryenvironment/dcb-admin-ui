@@ -81,6 +81,26 @@ export default [
 	},
 
 	{
+		// The Cloudflare Worker that fronts the S3-hosted builds. It runs in the
+		// Workers runtime - not the browser, not Node - so its globals have to be
+		// declared here, and it serves no UI, so the i18n literal-string rule does
+		// not apply to it.
+		files: ["docs/worker.js"],
+		languageOptions: {
+			globals: {
+				fetch: "readonly",
+				Request: "readonly",
+				Response: "readonly",
+				URL: "readonly",
+				console: "readonly",
+			},
+		},
+		rules: {
+			"i18next/no-literal-string": "off",
+		},
+	},
+
+	{
 		rules: {
 			// Prop validation is handled by TypeScript; the runtime prop-types
 			// rule is redundant noise in a fully typed codebase.

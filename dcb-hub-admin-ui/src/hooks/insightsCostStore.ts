@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import { storageKey } from "@helpers/appBase";
+
 // The "traditional ILL" unit cost is deliberately NOT shipped with a default value -
 // stating a cost the consortium did not choose would poison the credibility of the
 // whole value story. It is entered by the user and remembered locally. Cost
@@ -21,6 +23,6 @@ export const useInsightsCostStore = create<InsightsCostState>()(
 			setIllUnitCost: (illUnitCost) => set({ illUnitCost }),
 			setCurrencySymbol: (currencySymbol) => set({ currencySymbol }),
 		}),
-		{ name: "dcb-insights-ill-cost" },
+		{ name: storageKey("dcb-insights-ill-cost") },
 	),
 );

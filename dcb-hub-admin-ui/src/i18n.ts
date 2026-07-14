@@ -15,7 +15,10 @@ i18n
 		partialBundledLanguages: true, // the rest are only partially bundled
 
 		backend: {
-			loadPath: "/locales/{{lng}}/{{ns}}.json",
+			// Base-relative: a root-absolute "/locales/..." escapes the app's base
+			// path, and on an origin hosting several apps it lands on a sibling (or
+			// the SPA fallback) and parses HTML as JSON.
+			loadPath: `${import.meta.env.BASE_URL}locales/{{lng}}/{{ns}}.json`,
 		},
 		ns: ["application"],
 		defaultNS: "application",

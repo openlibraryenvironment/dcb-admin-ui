@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { storageKey } from "@helpers/appBase";
+
 interface SidebarState {
 	sidebarOpen: boolean;
 }
@@ -25,7 +27,7 @@ export const useSidebarStore = create<SidebarState & SidebarActions>()(
 				set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 		}),
 		{
-			name: "sidebar-storage",
+			name: storageKey("sidebar-storage"),
 			storage: createJSONStorage(() => localStorage),
 		},
 	),

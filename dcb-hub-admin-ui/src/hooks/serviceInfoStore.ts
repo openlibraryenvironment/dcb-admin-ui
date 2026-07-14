@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 
+import { storageKey } from "@helpers/appBase";
+
 interface VersionInfo {
 	version: string | null;
 	isDev: boolean;
@@ -83,7 +85,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 			},
 		}),
 		{
-			name: "dcb-version-storage",
+			name: storageKey("dcb-version-storage"),
 			storage: createJSONStorage(() => sessionStorage),
 			// Bumped to discard caches written before the runtime-config fix; those
 			// hold an environment type fetched from the wrong /info endpoint.

@@ -7,6 +7,8 @@ import {
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import { storageKey } from "@helpers/appBase";
+
 // Persist all our grid options so we don't lose them on reload
 // Remember these need to be by library in some cases
 interface GridState {
@@ -69,7 +71,7 @@ export const useGridStore = create<GridState & GridActions>()(
 				})),
 		}),
 		{
-			name: "grid-storage",
+			name: storageKey("grid-storage"),
 			storage: createJSONStorage(() => sessionStorage), // or localStorage - make sure to append by library!
 		},
 	),

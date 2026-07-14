@@ -23,6 +23,7 @@ import { useGridStore } from "@/hooks/useDataGridStore";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import useDCBVersionStore from "@hooks/serviceInfoStore";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+import { appUrl } from "@helpers/appBase";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
@@ -80,7 +81,7 @@ export default function Header({
 			clearVersionStore();
 			queryClient.clear();
 			auth.signoutRedirect({
-				post_logout_redirect_uri: `${window.location.origin}/logout?loggedOut=true`,
+				post_logout_redirect_uri: appUrl("logout?loggedOut=true"),
 			});
 		} else {
 			auth.signinRedirect();
