@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -10,6 +10,7 @@ import {
 	AccordionDetails,
 	Stack,
 	Alert,
+	Tooltip,
 } from "@mui/material";
 import { Bolt, ExpandMore } from "@mui/icons-material";
 
@@ -99,16 +100,26 @@ function ItemsPageComponent() {
 						!item.isSuppressed &&
 						item.status?.code === "AVAILABLE";
 					if (!canWalkUp) return [];
+					// Tooltip explains the action to sighted users (the icon alone is
+					// ambiguous); the GridActionsCellItem `label` remains the button's
+					// accessible name (aria-label). MUI Tooltip shows on hover AND focus
+					// and is Esc-dismissable, satisfying WCAG 2.2 AA 1.4.13. The Fragment
+					// wrapper is required because GridActionsCell only accepts
+					// GridActionsCellItem or Fragment children - a bare Tooltip child is
+					// dropped - but it unwraps Fragments without a type check.
 					return [
-						<GridActionsCellItem
-							key="quickWalkUp"
-							icon={<Bolt />}
-							label={t("requesting.quick_walk_up.actions.place")}
-							onClick={() => {
-								setWalkUpBarcode(item.barcode);
-								setShowWalkUp(true);
-							}}
-						/>,
+						<Fragment key="quickWalkUp">
+							<Tooltip title={t("requesting.quick_walk_up.actions.tooltip")}>
+								<GridActionsCellItem
+									icon={<Bolt />}
+									label={t("requesting.quick_walk_up.actions.place")}
+									onClick={() => {
+										setWalkUpBarcode(item.barcode);
+										setShowWalkUp(true);
+									}}
+								/>
+							</Tooltip>
+						</Fragment>,
 					];
 				},
 			},

@@ -1414,7 +1414,8 @@
 		"quick_walk_up": {
 			"title": "Quick walk-up request",
 			"actions": {
-				"place": "Quick walk-up"
+				"place": "Quick walk-up",
+				"tooltip": "Quick walk-up: check this item out to a patron at the desk with the item in hand. Opens the request with this item’s barcode pre-filled."
 			},
 			"option_description": "Check an item out to a patron who is at the desk with the item in hand.",
 			"steps": {
