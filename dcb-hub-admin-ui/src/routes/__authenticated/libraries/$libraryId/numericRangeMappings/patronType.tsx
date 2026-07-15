@@ -138,7 +138,7 @@ function AllNumericMappings() {
 					</Typography>
 
 					<MappingsGrid
-						gridId="numMappingsPatronTypePrimary"
+						gridId={`numMappingsPatronTypePrimary-${libraryId}`}
 						hostLmsCode={library.agency?.hostLms?.code}
 						baseQuery={numericRangePatronTypePrimaryQuery}
 						isAnAdmin={isAnAdmin}
@@ -166,7 +166,7 @@ function AllNumericMappings() {
 								})}
 							</Typography>
 							<MappingsGrid
-								gridId="numMappingsPatronTypeSecondary"
+								gridId={`numMappingsPatronTypeSecondary-${libraryId}`}
 								hostLmsCode={library.secondHostLms.code}
 								baseQuery={numericRangePatronTypeSecondaryQuery}
 								isAnAdmin={isAnAdmin}

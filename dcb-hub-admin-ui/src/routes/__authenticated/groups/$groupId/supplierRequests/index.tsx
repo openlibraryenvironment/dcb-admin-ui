@@ -45,7 +45,7 @@ function GroupSupplierRequests() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 
-	const gridId = "groupSupplierRequests";
+	const gridId = `groupSupplierRequests-${groupId}`;
 
 	const {
 		paginationModel,

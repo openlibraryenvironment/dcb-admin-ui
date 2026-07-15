@@ -141,7 +141,7 @@ function AllNumericMappings() {
 
 					{/* UNIFIED COMPONENT */}
 					<MappingsGrid
-						gridId="numMappingsAllPrimary"
+						gridId={`numMappingsAllPrimary-${libraryId}`}
 						hostLmsCode={library.agency?.hostLms?.code}
 						baseQuery={numericRangeAll}
 						isAnAdmin={isAnAdmin}
@@ -169,7 +169,7 @@ function AllNumericMappings() {
 								})}
 							</Typography>
 							<MappingsGrid
-								gridId="numMappingsAllSecondary"
+								gridId={`numMappingsAllSecondary-${libraryId}`}
 								hostLmsCode={library.secondHostLms.code}
 								baseQuery={numericRangeAllSecond}
 								isAnAdmin={isAnAdmin}

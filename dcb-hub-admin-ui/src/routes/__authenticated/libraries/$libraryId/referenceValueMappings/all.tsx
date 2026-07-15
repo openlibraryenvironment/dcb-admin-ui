@@ -160,7 +160,7 @@ function AllMappings() {
 						</Button>
 					)}
 					<MappingsGrid
-						gridId="allMappingsPrimary"
+						gridId={`allMappingsPrimary-${libraryId}`}
 						hostLmsCode={library.agency?.hostLms?.code}
 						baseQuery={allPrimaryQuery}
 						isAnAdmin={isAnAdmin}
@@ -208,7 +208,7 @@ function AllMappings() {
 								</Button>
 							)}
 							<MappingsGrid
-								gridId="allMappingsLibrary"
+								gridId={`allMappingsLibrary-${libraryId}`}
 								hostLmsCode={library?.agency?.hostLms?.code}
 								baseQuery={allSecondaryQuery}
 								isAnAdmin={isAnAdmin}

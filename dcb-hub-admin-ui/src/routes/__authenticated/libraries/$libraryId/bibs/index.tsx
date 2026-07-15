@@ -6,7 +6,7 @@ import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
 import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef, GridSortModel } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -40,6 +40,18 @@ export const Route = createFileRoute(
 	component: LibraryBibs,
 });
 
+// Bibs are not user-sortable: server order is fixed to sourceRecordId asc. This
+// model MUST be a stable reference. MUI's useGridSorting effect re-applies the
+// controlled sortModel on every render whose reference changes, which publishes
+// a sortModelChange event that resets pagination to page 0. An inline array
+// literal (a new reference each render) therefore snapped the grid back to the
+// first page the instant the user paged. Hoisting it makes the reference constant.
+const BIB_SORT_MODEL: GridSortModel = [
+	{ field: "sourceRecordId", sort: "asc" },
+];
+const NO_OP = () => {};
+const NO_ROW_MODES = {};
+
 function LibraryBibs() {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -53,7 +65,11 @@ function LibraryBibs() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const gridId = "libraryBibs";
+	// Scope the persisted grid state (pagination / filter / column visibility) to
+	// THIS library. With a static id the sessionStorage-backed store leaked a
+	// page number or filter from one library into the next, so a library with
+	// records rendered empty until the user cleared storage. See useDataGridStore.
+	const gridId = `libraryBibs-${libraryId}`;
 
 	const {
 		paginationModel,
@@ -93,9 +109,19 @@ function LibraryBibs() {
 
 	const library = libraryData?.libraries?.content?.[0];
 
-	const presetQueryVariables = library?.secondHostLms
-		? `sourceSystemId: ${library?.agency?.hostLms?.id} OR sourceSystemId: ${library?.secondHostLms?.id}`
-		: `sourceSystemId: ${library?.agency?.hostLms?.id}`;
+	// A library's bibs live under its host LMS(es). Gate and query on ANY host
+	// LMS id present - the old code keyed solely off the primary agency hostLms,
+	// so a library whose records sit under a secondHostLms (or whose primary id
+	// was momentarily absent) built a malformed `sourceSystemId: undefined`
+	// query and never fetched, rendering an empty grid.
+	const hostLmsIds = [
+		library?.agency?.hostLms?.id,
+		library?.secondHostLms?.id,
+	].filter(Boolean);
+
+	const presetQueryVariables = hostLmsIds
+		.map((id) => `sourceSystemId: ${id}`)
+		.join(" OR ");
 
 	const {
 		data: gridData,
@@ -108,7 +134,7 @@ function LibraryBibs() {
 				getBibs,
 				buildServerGridQueryVars({
 					filterModel,
-					sortModel: [{ field: "sourceRecordId", sort: "asc" }],
+					sortModel: BIB_SORT_MODEL,
 					paginationModel,
 					baseQuery: presetQueryVariables,
 					defaultOrder: "sourceRecordId",
@@ -116,7 +142,7 @@ function LibraryBibs() {
 				}),
 			);
 		},
-		enabled: !!library?.agency?.hostLms?.id,
+		enabled: hostLmsIds.length > 0,
 		placeholderData: (previousData) => previousData,
 	});
 
@@ -254,7 +280,7 @@ function LibraryBibs() {
 
 					<DataGrid
 						identifier={gridId}
-						type="libraryBibs"
+						type="bibs"
 						columns={columns}
 						rows={gridData?.sourceBibs?.content ?? []}
 						rowCount={gridData?.sourceBibs?.totalSize ?? 0}
@@ -264,8 +290,8 @@ function LibraryBibs() {
 						paginationModel={paginationModel}
 						onPaginationModelChange={handlePaginationChange}
 						sortingMode="server"
-						sortModel={[{ field: "sourceRecordId", sort: "asc" }]} // Hardcoded to prevent frontend sorting state changes
-						onSortModelChange={() => {}} // Disabled intentionally
+						sortModel={BIB_SORT_MODEL} // Stable ref: see note by BIB_SORT_MODEL
+						onSortModelChange={NO_OP} // Disabled intentionally
 						filterMode="server"
 						filterModel={filterModel}
 						onFilterModelChange={handleFilterChange}
@@ -281,7 +307,7 @@ function LibraryBibs() {
 						disableRowGrouping
 						disableHoverInteractions={false}
 						disablePivoting={true}
-						rowModesModel={{}} // No inline editing on bibs
+						rowModesModel={NO_ROW_MODES} // No inline editing on bibs (stable ref)
 						listViewEnabled={false}
 						pivotingEnabled={false}
 						toolbarVisible

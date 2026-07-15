@@ -45,7 +45,7 @@ function GroupPatronRequests() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 
-	const gridId = "groupPatronRequests";
+	const gridId = `groupPatronRequests-${groupId}`;
 	const {
 		paginationModel,
 		sortModel,

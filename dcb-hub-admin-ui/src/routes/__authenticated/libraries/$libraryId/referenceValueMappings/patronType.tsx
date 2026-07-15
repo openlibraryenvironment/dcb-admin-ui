@@ -167,7 +167,7 @@ function LocationMappings() {
 						</Button>
 					)}
 					<MappingsGrid
-						gridId="refMappingsPatronTypePrimary"
+						gridId={`refMappingsPatronTypePrimary-${libraryId}`}
 						hostLmsCode={library?.agency?.hostLms?.code}
 						baseQuery={patronTypePrimaryQuery}
 						isAnAdmin={isAnAdmin}
@@ -214,7 +214,7 @@ function LocationMappings() {
 								</Button>
 							)}
 							<MappingsGrid
-								gridId="refMappingsPatronTypeSecondary"
+								gridId={`refMappingsPatronTypeSecondary-${libraryId}`}
 								hostLmsCode={library.secondHostLms.code}
 								baseQuery={patronTypeSecondaryQuery}
 								isAnAdmin={isAnAdmin}

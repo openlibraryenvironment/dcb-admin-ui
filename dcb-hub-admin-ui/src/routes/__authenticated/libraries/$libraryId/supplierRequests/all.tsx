@@ -55,7 +55,7 @@ function SupplierRequestsAll() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const gridId = "supplierRequestsLibraryAll";
+	const gridId = `supplierRequestsLibraryAll-${libraryId}`;
 
 	const {
 		paginationModel,

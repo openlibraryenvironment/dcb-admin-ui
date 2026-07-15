@@ -53,7 +53,7 @@ function PatronRequestsCompleted() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const gridId = "patronRequestsLibraryException";
+	const gridId = `patronRequestsLibraryException-${libraryId}`;
 
 	const {
 		paginationModel,

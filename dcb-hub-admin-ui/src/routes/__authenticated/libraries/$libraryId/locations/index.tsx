@@ -80,7 +80,7 @@ function LibraryLocations() {
 		["ADMIN", "CONSORTIUM_ADMIN", "LIBRARY_ADMIN"].includes(role),
 	);
 
-	const gridId = "libraryLocations";
+	const gridId = `libraryLocations-${libraryId}`;
 
 	const {
 		paginationModel,
