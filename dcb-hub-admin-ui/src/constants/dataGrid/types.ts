@@ -6,6 +6,15 @@ export const nonClickableTypes = [
 	"numericRangeMappings",
 	"alarms",
 	"searchInstances",
+	// Cluster detail tabs: informational grids with no per-row detail route.
+	"ClusterExplainer",
+	"Identifiers",
+	"Items",
+	// Contacts and functional settings have no dedicated detail page; they are
+	// edited in place, so a whole-row click must not navigate anywhere.
+	"contact",
+	"consortiumContact",
+	"consortiumFunctionalSettings",
 ];
 
 // Types of data grid where users can click through to a details page,
@@ -27,10 +36,11 @@ export const specialRedirectionTypes = [
 	"welcomeLibraries",
 	"libraryLocations",
 	"supplierRequestsLibrary",
-	"libraryBibs",
 	"patronRequestsGroupAll",
 	"supplierRequestsGroupAll",
 	"patronRequestsRecordHistory",
+	// Cluster members are bib records: a row click opens that bib's detail page.
+	"clusterMembers",
 ];
 
 // Types of data grid where we show the actions menu to the user.

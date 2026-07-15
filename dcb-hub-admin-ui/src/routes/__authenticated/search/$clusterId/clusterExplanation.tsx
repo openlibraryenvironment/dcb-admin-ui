@@ -27,7 +27,7 @@ function ClusterExplanation() {
 	const { clusterId } = Route.useParams();
 	const client = useDcbRestClient();
 
-	const gridId = "ClusterExplainer";
+	const gridId = `ClusterExplainer-${clusterId}`;
 	const {
 		paginationModel,
 		sortModel,

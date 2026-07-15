@@ -25,7 +25,7 @@ function Identifiers() {
 	const { clusterId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 
-	const gridId = "ClusterIdentifiers";
+	const gridId = `ClusterIdentifiers-${clusterId}`;
 	const {
 		paginationModel,
 		sortModel,

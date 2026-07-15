@@ -37,7 +37,7 @@ function RequestingHistory() {
 	const { clusterId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
-	const gridId = "patronRequestsRecordHistory";
+	const gridId = `patronRequestsRecordHistory-${clusterId}`;
 
 	const {
 		paginationModel,

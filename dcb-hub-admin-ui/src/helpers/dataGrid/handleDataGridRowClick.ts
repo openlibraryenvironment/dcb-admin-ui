@@ -50,6 +50,9 @@ export const handleDataGridRowClick = ({
 			targetPath = `/libraries/${rowId}`;
 		} else if (type === "audits") {
 			targetPath = `/patronRequests/audits/${params.row.id}`;
+		} else if (type === "clusterMembers") {
+			// A cluster member's id IS its source bib id (see getClusters `members`).
+			targetPath = `/bibs/${rowId}`;
 		} else {
 			targetPath = `/patronRequests/${rowId}`;
 		}
