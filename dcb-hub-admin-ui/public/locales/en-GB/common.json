@@ -990,7 +990,7 @@
 		"cleanup_in_progress": "Cleanup in progress",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
-		"excluded_from_tracking": "Excluded from tracking?",
+		"excluded_from_tracking": "Tracking stopped due to age?",
 		"pickup_location_name": "Pickup location name",
 		"pr_one": "patron request",
 		"loading_msg": "Loading requests....",
