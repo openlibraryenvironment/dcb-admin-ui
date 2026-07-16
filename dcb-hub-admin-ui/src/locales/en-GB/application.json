@@ -1600,6 +1600,12 @@
 			"empty": "Empty field",
 			"is_breadcrumb": "This is a breadcrumb trail"
 		},
+		"copy": {
+			"copy": "Copy to clipboard",
+			"copied": "Copied",
+			"failed": "Could not copy",
+			"aria_label": "Copy {{label}}"
+		},
 		"actions": {
 			"cancel": "Cancel",
 			"close_alert": "Close alert",

@@ -1297,6 +1297,12 @@
 			"empty": "Campo vacío",
 			"is_breadcrumb": "Esta es una ruta de navegación"
 		},
+		"copy": {
+			"copy": "Copiar al portapapeles",
+			"copied": "Copiado",
+			"failed": "No se pudo copiar",
+			"aria_label": "Copiar {{label}}"
+		},
 		"actions": {
 			"cancel": "Cancelar",
 			"close_alert": "Cerrar alerta",

@@ -32,6 +32,7 @@ import DataGrid from "@components/DataGrid/DataGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
+import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { formatDuration } from "@helpers/formatDuration";
@@ -441,9 +442,19 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("requesting.staff_request.patron.barcode")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.requestingIdentity?.localBarcode}
-								/>
+								<Stack
+									direction="row"
+									sx={{ alignItems: "center" }}
+									spacing={0.5}
+								>
+									<RenderAttribute
+										attribute={patronRequest?.requestingIdentity?.localBarcode}
+									/>
+									<CopyToClipboardButton
+										value={patronRequest?.requestingIdentity?.localBarcode}
+										label={t("requesting.staff_request.patron.barcode")}
+									/>
+								</Stack>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -451,9 +462,19 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.item_barcode")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localItemBarcode}
-								/>
+								<Stack
+									direction="row"
+									sx={{ alignItems: "center" }}
+									spacing={0.5}
+								>
+									<RenderAttribute
+										attribute={patronRequest?.suppliers[0]?.localItemBarcode}
+									/>
+									<CopyToClipboardButton
+										value={patronRequest?.suppliers[0]?.localItemBarcode}
+										label={t("patron_request.item_barcode")}
+									/>
+								</Stack>
 							</Stack>
 						</Grid>
 
