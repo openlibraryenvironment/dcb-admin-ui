@@ -302,11 +302,8 @@ const getPatronRequestColumns = (
 			filterable: true,
 			sortable: true,
 			valueGetter: (value: any, row: PatronRequest) => {
-				if (row?.suppliers?.length > 0 && !row?.localItemType) {
-					return row.suppliers[0].localItemType;
-				} else {
-					return "";
-				}
+				console.log(row);
+				return row?.suppliers?.length > 0 ? row.suppliers[0].localItemType : "";
 			},
 		},
 		{

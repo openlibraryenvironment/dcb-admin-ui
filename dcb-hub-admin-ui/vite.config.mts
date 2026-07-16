@@ -76,6 +76,7 @@ export default defineConfig(({ mode }) => {
 				"@constants": path.resolve(__dirname, "src/constants"),
 				"@filters": path.resolve(__dirname, "src/filters"),
 				"@forms": path.resolve(__dirname, "src/forms"),
+				"@fragments": path.resolve(__dirname, "src/graphql/fragments"),
 				"@generated": path.resolve(__dirname, "src/generated"),
 				"@helpers": path.resolve(__dirname, "src/helpers"),
 				"@hooks": path.resolve(__dirname, "src/hooks"),

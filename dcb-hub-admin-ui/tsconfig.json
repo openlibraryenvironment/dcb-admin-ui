@@ -7,6 +7,7 @@
 			"@constants/*": ["./src/constants/*"],
 			"@filters/*": ["./src/filters/*"],
 			"@forms/*": ["./src/forms/*"],
+			"@fragments/*": ["./src/graphql/fragments/*"],
 			"@generated/*": ["./src/generated/*"],
 			"@helpers/*": ["./src/helpers/*"],
 			"@hooks/*": ["./src/hooks/*"],

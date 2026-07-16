@@ -225,13 +225,49 @@ export const useGridExport = ({
 				rows = await fetchAllPages(mode);
 			}
 
+			const colLookup = new Map(columns.map((c) => [c.field, c]));
+
+			// Resolve each cell exactly as the grid does, so a server-fetched export
+			// matches the on-screen values for nested/derived columns.
+			const processedRows = rows.map((rawRow) => {
+				const flatRow: Record<string, any> = {};
+
+				chosenFields.forEach((field) => {
+					const col = colLookup.get(field);
+					let cellValue = rawRow[field];
+					// Execute the valueGetter if it exists on the column
+					if (col?.valueGetter) {
+						cellValue = (col.valueGetter as any)(
+							cellValue,
+							rawRow,
+							col,
+							apiRef.current,
+						);
+					}
+
+					if (col?.valueFormatter && cellValue != null) {
+						cellValue = (col.valueFormatter as any)(
+							cellValue,
+							rawRow,
+							col,
+							apiRef.current,
+						);
+					}
+
+					flatRow[field] = cellValue;
+				});
+
+				return flatRow;
+			});
+
 			const dataString = convertFileToString(
-				rows,
+				processedRows,
 				delimiter,
 				chosenFields,
 				chosenHeaders,
 				getValueLabelMaps(columns),
 			);
+
 			triggerDownload(dataString, `${baseFileName}.${format}`, format);
 			onSuccess(`Successfully exported ${rows.length} records.`, rows.length);
 		} catch (error) {

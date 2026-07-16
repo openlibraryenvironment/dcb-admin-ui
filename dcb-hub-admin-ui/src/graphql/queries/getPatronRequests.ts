@@ -1,6 +1,8 @@
 import { gql } from "graphql-request";
+import { patronRequestFields } from "@fragments/patronRequestFields";
 
 export const getPatronRequests = gql`
+	${patronRequestFields}
 	query LoadPatronRequests(
 		$pageno: Int!
 		$pagesize: Int!
@@ -16,51 +18,7 @@ export const getPatronRequests = gql`
 			orderBy: $orderBy
 		) {
 			content {
-				id
-				dateCreated
-				dateUpdated
-				patronHostlmsCode
-				pickupLocationCode
-				description
-				status
-				previousStatus
-				nextExpectedStatus
-				errorMessage
-				nextScheduledPoll
-				outOfSequenceFlag
-				elapsedTimeInCurrentStatus
-				pollCountForCurrentStatus
-				isManuallySelectedItem
-				requesterNote
-				activeWorkflow
-				rawLocalRequestStatus
-				rawLocalItemStatus
-				localRequestId
-				localRequestStatus
-				localItemId
-				localItemStatus
-				localItemType
-				patron {
-					id
-				}
-				requestingIdentity {
-					id
-					localId
-					localBarcode
-					canonicalPtype
-				}
-				suppliers {
-					localAgency
-					canonicalItemType
-					localItemBarcode
-				}
-				clusterRecord {
-					id
-					title
-					members {
-						publisher
-					}
-				}
+				...PatronRequestFields
 			}
 			pageable {
 				number

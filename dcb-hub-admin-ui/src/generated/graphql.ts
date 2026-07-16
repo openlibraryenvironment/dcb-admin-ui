@@ -285,6 +285,70 @@ export type UpdateReferenceValueMappingInput = {
 	toValue?: string | null | undefined;
 };
 
+export type PatronRequestFieldsFragment = {
+	id: string;
+	dateCreated: string | null;
+	dateUpdated: string | null;
+	patronHostlmsCode: string | null;
+	pickupLocationCode: string | null;
+	description: string | null;
+	status: string | null;
+	previousStatus: string | null;
+	nextExpectedStatus: string | null;
+	errorMessage: string | null;
+	outOfSequenceFlag: boolean | null;
+	elapsedTimeInCurrentStatus: number | null;
+	pollCountForCurrentStatus: number | null;
+	renewalCount: number | null;
+	resolutionCount: number | null;
+	isManuallySelectedItem: boolean | null;
+	requesterNote: string | null;
+	activeWorkflow: string | null;
+	pickupRequestId: string | null;
+	pickupRequestStatus: string | null;
+	pickupItemId: string | null;
+	isExpeditedCheckout: boolean | null;
+	rawLocalRequestStatus: string | null;
+	rawLocalItemStatus: string | null;
+	localRequestId: string | null;
+	localRequestStatus: string | null;
+	localItemId: string | null;
+	localItemStatus: string | null;
+	localItemType: string | null;
+	patron: { id: string } | null;
+	requestingIdentity: {
+		id: string;
+		localId: string | null;
+		localBarcode: string | null;
+		canonicalPtype: string | null;
+	} | null;
+	suppliers: Array<{
+		id: string;
+		canonicalItemType: string | null;
+		dateCreated: string | null;
+		dateUpdated: string | null;
+		hostLmsCode: string | null;
+		isActive: boolean | null;
+		localItemId: string | null;
+		localBibId: string | null;
+		localItemBarcode: string | null;
+		localItemLocationCode: string | null;
+		localItemStatus: string | null;
+		localItemType: string | null;
+		localId: string | null;
+		localRenewalCount: number | null;
+		localStatus: string | null;
+		localAgency: string | null;
+		rawLocalItemStatus: string | null;
+		rawLocalStatus: string | null;
+	} | null> | null;
+	clusterRecord: {
+		id: string;
+		title: string | null;
+		members: Array<{ publisher: string | null } | null> | null;
+	} | null;
+};
+
 export type AddFunctionalSettingMutationVariables = Exact<{
 	input: FunctionalSettingInput;
 }>;
@@ -1921,13 +1985,18 @@ export type GetPatronRequestDashboardQuery = {
 			previousStatus: string | null;
 			nextExpectedStatus: string | null;
 			errorMessage: string | null;
-			nextScheduledPoll: string | null;
 			outOfSequenceFlag: boolean | null;
 			elapsedTimeInCurrentStatus: number | null;
 			pollCountForCurrentStatus: number | null;
+			renewalCount: number | null;
+			resolutionCount: number | null;
 			isManuallySelectedItem: boolean | null;
 			requesterNote: string | null;
 			activeWorkflow: string | null;
+			pickupRequestId: string | null;
+			pickupRequestStatus: string | null;
+			pickupItemId: string | null;
+			isExpeditedCheckout: boolean | null;
 			rawLocalRequestStatus: string | null;
 			rawLocalItemStatus: string | null;
 			localRequestId: string | null;
@@ -1943,9 +2012,24 @@ export type GetPatronRequestDashboardQuery = {
 				canonicalPtype: string | null;
 			} | null;
 			suppliers: Array<{
-				localAgency: string | null;
+				id: string;
 				canonicalItemType: string | null;
+				dateCreated: string | null;
+				dateUpdated: string | null;
+				hostLmsCode: string | null;
+				isActive: boolean | null;
+				localItemId: string | null;
+				localBibId: string | null;
 				localItemBarcode: string | null;
+				localItemLocationCode: string | null;
+				localItemStatus: string | null;
+				localItemType: string | null;
+				localId: string | null;
+				localRenewalCount: number | null;
+				localStatus: string | null;
+				localAgency: string | null;
+				rawLocalItemStatus: string | null;
+				rawLocalStatus: string | null;
 			} | null> | null;
 			clusterRecord: {
 				id: string;
@@ -2074,13 +2158,18 @@ export type LoadPatronRequestsQuery = {
 			previousStatus: string | null;
 			nextExpectedStatus: string | null;
 			errorMessage: string | null;
-			nextScheduledPoll: string | null;
 			outOfSequenceFlag: boolean | null;
 			elapsedTimeInCurrentStatus: number | null;
 			pollCountForCurrentStatus: number | null;
+			renewalCount: number | null;
+			resolutionCount: number | null;
 			isManuallySelectedItem: boolean | null;
 			requesterNote: string | null;
 			activeWorkflow: string | null;
+			pickupRequestId: string | null;
+			pickupRequestStatus: string | null;
+			pickupItemId: string | null;
+			isExpeditedCheckout: boolean | null;
 			rawLocalRequestStatus: string | null;
 			rawLocalItemStatus: string | null;
 			localRequestId: string | null;
@@ -2096,9 +2185,24 @@ export type LoadPatronRequestsQuery = {
 				canonicalPtype: string | null;
 			} | null;
 			suppliers: Array<{
-				localAgency: string | null;
+				id: string;
 				canonicalItemType: string | null;
+				dateCreated: string | null;
+				dateUpdated: string | null;
+				hostLmsCode: string | null;
+				isActive: boolean | null;
+				localItemId: string | null;
+				localBibId: string | null;
 				localItemBarcode: string | null;
+				localItemLocationCode: string | null;
+				localItemStatus: string | null;
+				localItemType: string | null;
+				localId: string | null;
+				localRenewalCount: number | null;
+				localStatus: string | null;
+				localAgency: string | null;
+				rawLocalItemStatus: string | null;
+				rawLocalStatus: string | null;
 			} | null> | null;
 			clusterRecord: {
 				id: string;
@@ -2153,16 +2257,36 @@ export type LoadPatronRequestsForExportQuery = {
 			localItemType: string | null;
 			patron: { id: string } | null;
 			requestingIdentity: {
+				id: string;
+				localId: string | null;
 				localBarcode: string | null;
 				canonicalPtype: string | null;
 			} | null;
 			suppliers: Array<{
-				localAgency: string | null;
+				id: string;
 				canonicalItemType: string | null;
+				dateCreated: string | null;
+				dateUpdated: string | null;
+				hostLmsCode: string | null;
+				isActive: boolean | null;
+				localItemId: string | null;
+				localBibId: string | null;
 				localItemBarcode: string | null;
+				localItemLocationCode: string | null;
+				localItemStatus: string | null;
 				localItemType: string | null;
+				localId: string | null;
+				localRenewalCount: number | null;
+				localStatus: string | null;
+				localAgency: string | null;
+				rawLocalItemStatus: string | null;
+				rawLocalStatus: string | null;
 			} | null> | null;
-			clusterRecord: { title: string | null } | null;
+			clusterRecord: {
+				id: string;
+				title: string | null;
+				members: Array<{ publisher: string | null } | null> | null;
+			} | null;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	} | null;

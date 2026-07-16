@@ -1,8 +1,12 @@
-// A query for getting all info needed for the export of patron requests data
+// A query for getting all info needed for the export of patron requests data.
+// Field selection is deliberately identical to the on-screen grids' - see
+// patronRequestFields - so an export can never disagree with what the grid shows.
 
 import { gql } from "graphql-request";
+import { patronRequestFields } from "@fragments/patronRequestFields";
 
 export const getPatronRequestsForExport = gql`
+	${patronRequestFields}
 	query LoadPatronRequestsForExport(
 		$pageno: Int!
 		$pagesize: Int!
@@ -18,51 +22,7 @@ export const getPatronRequestsForExport = gql`
 			orderBy: $orderBy
 		) {
 			content {
-				id
-				dateCreated
-				dateUpdated
-				patronHostlmsCode
-				pickupLocationCode
-				description
-				status
-				previousStatus
-				nextExpectedStatus
-				errorMessage
-				outOfSequenceFlag
-				elapsedTimeInCurrentStatus
-				pollCountForCurrentStatus
-				renewalCount
-				resolutionCount
-				isManuallySelectedItem
-				requesterNote
-				activeWorkflow
-				pickupRequestId
-				pickupRequestStatus
-				pickupItemId
-				isExpeditedCheckout
-				rawLocalRequestStatus
-				rawLocalItemStatus
-				localRequestId
-				localRequestStatus
-				localItemId
-				localItemStatus
-				localItemType
-				patron {
-					id
-				}
-				requestingIdentity {
-					localBarcode
-					canonicalPtype
-				}
-				suppliers {
-					localAgency
-					canonicalItemType
-					localItemBarcode
-					localItemType
-				}
-				clusterRecord {
-					title
-				}
+				...PatronRequestFields
 			}
 			pageable {
 				number

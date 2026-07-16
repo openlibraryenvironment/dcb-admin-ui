@@ -1,5 +1,8 @@
 import { gql } from "graphql-request";
+import { patronRequestFields } from "@fragments/patronRequestFields";
+
 export const getPatronRequestDashboard = gql`
+	${patronRequestFields}
 	query GetPatronRequestDashboard(
 		$allQuery: String
 		$activeQuery: String
@@ -19,51 +22,7 @@ export const getPatronRequestDashboard = gql`
 			orderBy: $orderBy
 		) {
 			content {
-				id
-				dateCreated
-				dateUpdated
-				patronHostlmsCode
-				pickupLocationCode
-				description
-				status
-				previousStatus
-				nextExpectedStatus
-				errorMessage
-				nextScheduledPoll
-				outOfSequenceFlag
-				elapsedTimeInCurrentStatus
-				pollCountForCurrentStatus
-				isManuallySelectedItem
-				requesterNote
-				activeWorkflow
-				rawLocalRequestStatus
-				rawLocalItemStatus
-				localRequestId
-				localRequestStatus
-				localItemId
-				localItemStatus
-				localItemType
-				patron {
-					id
-				}
-				requestingIdentity {
-					id
-					localId
-					localBarcode
-					canonicalPtype
-				}
-				suppliers {
-					localAgency
-					canonicalItemType
-					localItemBarcode
-				}
-				clusterRecord {
-					id
-					title
-					members {
-						publisher
-					}
-				}
+				...PatronRequestFields
 			}
 			totalSize
 		}
