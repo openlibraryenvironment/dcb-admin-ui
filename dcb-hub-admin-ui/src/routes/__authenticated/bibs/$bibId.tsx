@@ -255,7 +255,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("requesting.contributor")}
+							{t("requesting.contributors")}
 						</Typography>
 						<RenderAttribute attribute={bib?.contributesTo?.title} />
 					</Stack>
