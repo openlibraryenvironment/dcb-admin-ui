@@ -4,6 +4,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { ArrowLeft, ArrowRight } from "@mui/icons-material";
 import {
+	Box,
 	Button,
 	CircularProgress,
 	Grid,
@@ -267,16 +268,18 @@ function AuditDetails() {
 					<Typography variant="attributeTitle">
 						{t("audit_log.audit_data")}
 					</Typography>
-					<pre
-						style={{
+					<Box
+						component="pre"
+						sx={{
 							overflowX: "auto",
 							padding: "1rem",
-							backgroundColor: "#f5f5f5",
+							backgroundColor: "primary.codeBlockBackground",
+							color: "text.primary",
 							borderRadius: "4px",
 						}}
 					>
 						{JSON.stringify(audit.auditData, null, 2)}
-					</pre>
+					</Box>
 				</Grid>
 			</Grid>
 		</PageContainer>

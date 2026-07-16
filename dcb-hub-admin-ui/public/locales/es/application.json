@@ -1110,7 +1110,7 @@
 		"notes": "Notas",
 		"options": "Opciones de solicitud",
 		"physical_descriptions": "Descripciones físicas",
-		"publication_date": "Fecha de publicación: {{publicationDate}} ",
+		"publication_date": "Fecha de publicación",
 		"publication_place": "Lugar de publicación",
 		"publication_year": "Año de publicación",
 		"publisher": "Editor",

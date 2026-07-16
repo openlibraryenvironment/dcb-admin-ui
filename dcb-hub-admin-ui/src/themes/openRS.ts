@@ -22,6 +22,7 @@ declare module "@mui/material/styles" {
 		breadcrumbs: string;
 		buttonForSelectedChildPage: string;
 		buttonForSelectedPage: string;
+		codeBlockBackground: string;
 		detailsAccordionSummary: string;
 		editableFieldBackground: string;
 		errorBackground: string;
@@ -63,6 +64,7 @@ declare module "@mui/material/styles" {
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
+		codeBlockBackground?: string;
 		detailsAccordionSummary?: string;
 		editableFieldBackground?: string;
 		errorBackground?: string;
@@ -103,6 +105,7 @@ declare module "@mui/material/styles" {
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
+		codeBlockBackground?: string;
 		detailsAccordionSummary?: string;
 		editableFieldBackground?: string;
 		errorBackground?: string;
@@ -144,6 +147,7 @@ declare module "@mui/material/styles" {
 		breadcrumbs?: string;
 		buttonForSelectedChildPage?: string;
 		buttonForSelectedPage?: string;
+		codeBlockBackground?: string;
 		detailsAccordionSummary?: string;
 		editableFieldBackground?: string;
 		errorBackground?: string;
@@ -310,10 +314,13 @@ const openRSLight = {
 	breadcrumbs: "#246F9E",
 	buttonForSelectedChildPage: "#707070",
 	buttonForSelectedPage: "#287BAF",
+	codeBlockBackground: "#F5F5F5",
 	detailsAccordionSummary: lightDetailsAccordion,
 	editableFieldBackground: "#E2EEF6",
 	errorBackground: "#FFDAE1",
-	exclamationIcon: "#999999",
+	// #999999 gave these icons only 2.85:1 on the white page, under the 3:1
+	// non-text minimum. Dark mode keeps #999999 (5.85:1 on its own page).
+	exclamationIcon: "#767676",
 	footerArea: "#FFFFFF",
 	footerText: "#000000",
 	linkedFooterBackground: "#0C4068",
@@ -325,7 +332,9 @@ const openRSLight = {
 	hover: "#EEEEEE",
 	hoverOnSelectedPage: "#A9A9A9",
 	iconSymbol: "#FFFFFF",
-	inactiveBackground: "#8C8C8C",
+	// Carries the white step number in DCBStepIcon, so it is a text ground:
+	// #8C8C8C left that number at 3.36:1.
+	inactiveBackground: "#757575",
 	link: "#0C4068",
 	linkText: "#246F9E",
 	landingBackground: "#F9F9F9",
@@ -351,10 +360,17 @@ const openRSDark = {
 	main: darkPrimary,
 	attributeTitle: "#FFFFFF",
 	breadcrumbs: "#35B7FF",
-	buttonForSelectedChildPage: "#999999",
+	// Ground for `selectedText` (white) in the sidebar: #999999 gave 2.85:1.
+	// #707070 matches the light theme and still reads against the dark page.
+	buttonForSelectedChildPage: "#707070",
 	buttonForSelectedPage: "#287BAF",
+	// Lifted one step off the #1E1E1E page so the block reads as inset, not a
+	// light panel: white text clears AAA on it.
+	codeBlockBackground: "#2A2A2A",
 	detailsAccordionSummary: darkDetailsAccordion,
-	editableFieldBackground: "#E2EEF6",
+	// Blue-tinted dark echoing the light theme's tint. Must stay dark: the field
+	// renders `text.primary` (white) in dark mode.
+	editableFieldBackground: "#33414D",
 	errorBackground: "transparent",
 	exclamationIcon: "#999999",
 	footerArea: "#202020",
@@ -368,7 +384,9 @@ const openRSDark = {
 	hover: "#424242",
 	hoverOnSelectedPage: "#424242",
 	iconSymbol: "#FFFFFF",
-	inactiveBackground: "#8C8C8C",
+	// Carries the white step number in DCBStepIcon, so it is a text ground:
+	// #8C8C8C left that number at 3.36:1.
+	inactiveBackground: "#757575",
 	link: "#B3E5FC",
 	linkText: "#35B7FF",
 	landingBackground: "#000000",
@@ -379,7 +397,8 @@ const openRSDark = {
 	navigationText: "#B3E5FC",
 	navigationTextActive: "#FFFFFF",
 	searchResultBackground: "#424242",
-	searchResultTitle: "#63B3ED",
+	// Lifted from #63B3ED, which sat at 4.40:1 on the #424242 result card.
+	searchResultTitle: "#7FC4F5",
 	selectedText: "#FFFFFF",
 	sidebar: "#292929",
 	titleArea: "#1E1E1E",
@@ -396,6 +415,11 @@ const openRSHighContrast = {
 	...openRSLight,
 	main: "#00407A",
 	breadcrumbs: "#00407A",
+	// The neutral greys inherited from the light palette are tuned to AA (4.5:1).
+	// This scheme promises AAA, so the two that carry white text are deepened to
+	// clear 7:1.
+	buttonForSelectedChildPage: "#565656",
+	inactiveBackground: "#565656",
 	buttonForSelectedPage: "#00407A",
 	editableFieldBackground: "#FFFFFF",
 	errorBackground: "#FFFFFF",
@@ -497,8 +521,10 @@ const itsComingHomeDark = {
 	linkText: "#FF4D4D",
 	loginCard: "#2A2E35",
 	tabsBackground: "#2A2E35",
-	navigationText: "#4B8BFF",
-	searchResultTitle: "#4B8BFF",
+	// #4B8BFF clears AA on the page itself but not on the grey surfaces it sits
+	// on here: 4.18:1 on the tab bar and 3.08:1 on the #424242 result card.
+	navigationText: "#81AEFF",
+	searchResultTitle: "#81AEFF",
 };
 
 const itsComingHomeHighContrast = {
@@ -512,22 +538,32 @@ const itsComingHomeHighContrast = {
 };
 
 // ---- Koha (ILS theme) ----
+// Koha Community Green is #5C8A2E, but it is used both as text on the white page
+// and as the ground under white text, and both roles are the same test: contrast
+// against white. At #5C8A2E that is 4.09:1. Darkening 2% to #57822B clears AA in
+// both directions and is visually near-indistinguishable from the brand green.
+const kohaGreen = "#57822B";
+
 const kohaLight = {
 	...openRSLight,
-	main: "#5C8A2E", // Koha Community Green
+	main: kohaGreen,
 	breadcrumbs: "#222222",
-	buttonForSelectedPage: "#5C8A2E",
-	linkedFooterBackground: "#5C8A2E",
-	header: "#5C8A2E",
-	headingColor: "#5C8A2E",
-	link: "#5C8A2E",
-	linkText: "#5C8A2E",
+	buttonForSelectedPage: kohaGreen,
+	linkedFooterBackground: kohaGreen,
+	header: kohaGreen,
+	headingColor: kohaGreen,
+	link: kohaGreen,
+	linkText: kohaGreen,
 	editableFieldBackground: "#F0F4EC",
 	loginCard: "#F0F4EC",
 	loginText: "#222222",
-	tabsBackground: "#5C8A2E",
-	navigationText: "#222222",
-	navigationTextActive: "#5C8A2E",
+	// Saturated green bar, so the labels must be white: #222222 only reached
+	// 3.89:1 on it, and the active label was the bar's own green (1.00:1 -
+	// literally invisible). Active state is carried by the Tabs indicator, so
+	// both labels share one colour, as in the OpenRS palette.
+	tabsBackground: kohaGreen,
+	navigationText: "#FFFFFF",
+	navigationTextActive: "#FFFFFF",
 	searchResultTitle: "#222222",
 };
 
@@ -535,7 +571,7 @@ const kohaDark = {
 	...openRSDark,
 	main: "#88B744",
 	breadcrumbs: "#D4D4D4",
-	buttonForSelectedPage: "#5C8A2E",
+	buttonForSelectedPage: kohaGreen,
 	link: "#88B744",
 	linkText: "#88B744",
 	loginCard: "#2D332A",
@@ -554,23 +590,33 @@ const kohaHighContrast = {
 	searchResultTitle: "#000000",
 };
 
+// ---- FOLIO ----
+// FOLIO coral (#FF674C) is a mid-tone: as a text ground it gives white only
+// 2.88:1 and the brand's dark blue only 3.32:1 - no ink passes AA on it. It is
+// darkened 20% here, the largest brand shift in this file, so that the header,
+// footer, and tab bar can carry white text. This is a visible change to FOLIO's
+// coral; a shared decision if FOLIO branding is contractual.
+const folioCoral = "#E52300";
+
 const folioLight = {
 	...openRSLight,
-	main: "#4C7EA5", // FOLIO Bright Blue
-	breadcrumbs: "#4C7EA5", // FOLIO Dark Blue
+	main: "#4A7BA2", // FOLIO Bright Blue, 1% darker for 4.52:1 on the white page
+	breadcrumbs: "#4A7BA2",
 	buttonForSelectedPage: "#0077C8",
-	linkedFooterBackground: "#FF674C",
-	header: "#FF674C",
+	linkedFooterBackground: folioCoral,
+	header: folioCoral,
 	headingColor: "#094970",
 	link: "#0077C8",
 	linkText: "#0077C8",
 	editableFieldBackground: "#EAF4FA",
 	loginCard: "#EAF4FA",
 	loginText: "#094970",
-	tabsBackground: "#FF674C",
-	navigationText: "#094970",
-	navigationTextActive: "#0077C8",
-	searchResultTitle: "#0077C8",
+	// White labels on the coral bar: the previous dark-blue pair sat at 3.32:1,
+	// and the active label at 1.63:1.
+	tabsBackground: folioCoral,
+	navigationText: "#FFFFFF",
+	navigationTextActive: "#FFFFFF",
+	searchResultTitle: "#0075C5",
 };
 
 const folioDark = {
@@ -583,7 +629,8 @@ const folioDark = {
 	loginCard: "#222C33",
 	tabsBackground: "#222C33",
 	navigationText: "#5AB5D4",
-	searchResultTitle: "#5AB5D4",
+	// Lifted 2% off the brand cyan: #5AB5D4 gave 4.30:1 on the #424242 card.
+	searchResultTitle: "#62B9D6",
 };
 
 const folioHighContrast = {
@@ -597,22 +644,29 @@ const folioHighContrast = {
 };
 
 // ---- MOBIUS ----
+// MOBIUS Light Blue (#0096A7) only reaches 3.55:1 against white, and it is used
+// both as text on the page and as the ground under white text. Darkened 4.5% to
+// #008190 (4.62:1) for both roles in light mode. On the tab bar's own tint it
+// needs a touch more (#007886). Dark mode keeps the true brand cyan: it clears
+// AA against a proper dark page.
+const mobiusCyan = "#008190";
+
 const mobiusLight = {
 	...openRSLight,
-	main: "#0096A7", // MOBIUS Light Blue
+	main: mobiusCyan,
 	breadcrumbs: "#003D6A", // MOBIUS Dark Blue
-	buttonForSelectedPage: "#0096A7",
+	buttonForSelectedPage: mobiusCyan,
 	linkedFooterBackground: "#003D6A",
 	header: "#003D6A",
 	headingColor: "#003D6A",
 	link: "#003D6A",
-	linkText: "#0096A7",
+	linkText: mobiusCyan,
 	editableFieldBackground: "#E5F4F6", // Soft 10% tint of the Light Blue
 	loginCard: "#E5F4F6",
 	loginText: "#003D6A",
 	tabsBackground: "#E5F4F6",
 	navigationText: "#003D6A",
-	navigationTextActive: "#0096A7",
+	navigationTextActive: "#007886",
 	searchResultTitle: "#003D6A",
 };
 
@@ -620,7 +674,7 @@ const mobiusDark = {
 	...openRSDark,
 	main: "#0096A7",
 	breadcrumbs: "#4DD0E1", // Lightened cyan for dark-mode text legibility
-	buttonForSelectedPage: "#0096A7",
+	buttonForSelectedPage: mobiusCyan,
 	link: "#4DD0E1",
 	linkText: "#4DD0E1",
 	loginCard: "#111C24", // Deep blue-grey tint
@@ -999,8 +1053,11 @@ const components: ThemeOptions["components"] = {
 	MuiTooltip: {
 		defaultProps: { arrow: true },
 		styleOverrides: {
-			tooltip: { backgroundColor: "#808080" },
-			arrow: { color: "#808080" },
+			// Neutral dark ground in both modes: #808080 gave white tooltip text only
+			// 3.95:1, below AA. #424242 takes it to 10.1:1 and matches the existing
+			// dark-mode neutrals (`hover`, `searchResultBackground`).
+			tooltip: { backgroundColor: "#424242", color: "#FFFFFF" },
+			arrow: { color: "#424242" },
 		},
 	},
 	MuiAlertTitle: {
@@ -1177,7 +1234,9 @@ const THEMES = {
 	},
 	mobius: {
 		light: buildTheme(mobiusLight, "#003D6A", "#FFFFFF", "light"),
-		dark: buildTheme(mobiusDark, "#4DD0E1", "#585353", "dark"),
+		// #585353 was a mid-grey, not a dark ground: it alone pushed the brand cyan
+		// to 2.13:1 and the links to 4.11:1. #1E1E1E matches every other brand.
+		dark: buildTheme(mobiusDark, "#4DD0E1", "#1E1E1E", "dark"),
 		highContrast: buildTheme(
 			mobiusHighContrast,
 			"#002A4A", // A slightly darker shade for the secondary active states

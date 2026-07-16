@@ -1405,7 +1405,7 @@
 		"notes": "Notes",
 		"options": "Request options",
 		"physical_descriptions": "Physical descriptions",
-		"publication_date": "Publication date: {{publicationDate}} ",
+		"publication_date": "Publication date",
 		"publication_place": "Publication place",
 		"publication_year": "Publication year",
 		"publisher": "Publisher",

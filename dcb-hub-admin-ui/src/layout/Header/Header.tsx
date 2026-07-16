@@ -247,7 +247,9 @@ export default function Header({
 									color: "primary.headerText",
 									p: 1,
 									minWidth: "0px",
-									"&.Mui-focusVisible": { outlineColor: "#FFFFFF" },
+									"&.Mui-focusVisible": {
+										outlineColor: "primary.loginButtonOutlineColor",
+									},
 									":hover": {
 										backgroundColor: lighten(
 											theme.palette.primary.header as string,

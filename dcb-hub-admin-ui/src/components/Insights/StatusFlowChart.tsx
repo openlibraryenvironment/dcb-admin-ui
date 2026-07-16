@@ -12,7 +12,7 @@ import {
 import { LineChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
-import { useChartPalette } from "@hooks/useChartPalette";
+import { useChartPalette, inkOn } from "@hooks/useChartPalette";
 import {
 	useInsightsPlotStore,
 	MAX_PLOT_SERIES,
@@ -102,6 +102,7 @@ export default function StatusFlowChart({
 				>
 					{availableStatuses.map((status) => {
 						const selected = selectedStatuses.includes(status);
+						const chipColor = colorForStatus(status);
 						return (
 							<Chip
 								key={status}
@@ -113,9 +114,9 @@ export default function StatusFlowChart({
 								sx={
 									selected
 										? {
-												bgcolor: colorForStatus(status),
-												color: "#fff",
-												"&:hover": { bgcolor: colorForStatus(status) },
+												bgcolor: chipColor,
+												color: inkOn(chipColor),
+												"&:hover": { bgcolor: chipColor },
 											}
 										: undefined
 								}

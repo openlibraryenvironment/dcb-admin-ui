@@ -25,6 +25,28 @@ const CATEGORICAL_DARK = [
 	"#d95926", // orange
 ];
 
+// The palettes above are built for chart MARKS. When a swatch is reused as a
+// text ground (e.g. a selected chip) the ink must be chosen per swatch: white
+// fails AA on most of them (1.8:1 on the yellows). MUI's getContrastText is not
+// usable here - its 87%-black ink leaves #2a78d6 at 4.33:1, still under AA -
+// so pick pure black/white by whichever actually wins. Every swatch clears
+// 4.5:1 this way.
+const relativeLuminance = (hex: string): number => {
+	const h = hex.replace("#", "");
+	const channel = (i: number) => {
+		const s = parseInt(h.slice(i, i + 2), 16) / 255;
+		return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+	};
+	return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+};
+
+export const inkOn = (background: string): "#000000" | "#FFFFFF" => {
+	const l = relativeLuminance(background);
+	const onWhite = 1.05 / (l + 0.05);
+	const onBlack = (l + 0.05) / 0.05;
+	return onBlack >= onWhite ? "#000000" : "#FFFFFF";
+};
+
 // Status palette - fixed, never themed. Ships with icon + label, never colour alone.
 const STATUS = {
 	good: "#0ca30c",

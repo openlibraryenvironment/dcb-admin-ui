@@ -27,10 +27,12 @@ export const StatusStepConnector = styled(
 		borderTopWidth: 3,
 		borderRadius: 1,
 		...theme.applyStyles("dark", {
+			// grey[800] (#424242) sat at 1.9:1 on the #1E1E1E page - the connector
+			// all but vanished. grey[600] clears the 3:1 non-text minimum.
 			borderColor:
 				activeStep == stepError
 					? theme.palette.error.main
-					: theme.palette.grey[800],
+					: theme.palette.grey[600],
 		}),
 	},
 }));

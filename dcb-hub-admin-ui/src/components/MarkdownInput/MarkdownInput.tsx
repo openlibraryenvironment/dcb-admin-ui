@@ -38,12 +38,13 @@ export const CustomLink = ({ href, children }: CustomLinkProps) => {
 	}
 
 	return (
-		<Link
+		<MuiLink
+			component={Link}
 			to={href || ""}
-			style={{ color: "#1976d2", textDecoration: "underline" }}
+			sx={{ color: "primary.main", textDecoration: "underline" }}
 		>
 			{children}
-		</Link>
+		</MuiLink>
 	);
 };
 
