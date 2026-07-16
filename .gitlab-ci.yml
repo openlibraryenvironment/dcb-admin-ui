@@ -49,6 +49,8 @@ build-container-image:
   stage: build
   only:
     - main
+    # Work on this is being pushed to the container image published in nexus
+    - feature/generic-oidc-auth
   tags:
     - ki-onprem
   script:
