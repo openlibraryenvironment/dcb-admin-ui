@@ -43,26 +43,29 @@ build:
     - npm run semantic-release
 
 build-container-image:
-  image: 
-    name: docker:stable
+  image:
+    name: moby/buildkit:rootless
+    entrypoint: [""]
     pull_policy: if-not-present
-  stage: build
-  only:
-    - main
-    # Work on this is being pushed to the container image published in nexus
-    - feature/generic-oidc-auth
+  stage: container
   tags:
     - ki-onprem
+  variables:
+    BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+    IMAGE: docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:next
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "feature/generic-oidc-auth"'
+  before_script:
+    - mkdir -p ~/.docker
+    - |
+      AUTH="$(printf '%s' "$NEXUS_USER:$NEXUS_PASS" | base64 | tr -d '\n')"
+      printf '{"auths":{"docker.libsdev.k-int.com":{"auth":"%s"}}}' "$AUTH" > ~/.docker/config.json
   script:
     - echo Building container image
-    - pwd
-    - ls
     - cd dcb-hub-admin-ui
-    - docker info
-    - docker login -u $NEXUS_USER -p $NEXUS_PASS docker.libsdev.k-int.com
-    # - docker build -f ./docker/production/Dockerfile -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:next -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1 .
-    - docker build -f ./docker/production/Dockerfile -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:next .
-    # - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest
-    # - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1
-    - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:next
-    - docker images
+    - |
+      buildctl-daemonless.sh build \
+        --frontend dockerfile.v0 \
+        --local context=. \
+        --local dockerfile=./docker/production \
+        --output type=image,name="$IMAGE",push=true
