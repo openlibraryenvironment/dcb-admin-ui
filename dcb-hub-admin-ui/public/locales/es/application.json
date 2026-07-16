@@ -1405,8 +1405,11 @@
 				"select_all": "Seleccionar todo",
 				"clear_all": "Borrar todo",
 				"scope": "Filas que se van a exportar",
-				"scope_all_pages": "Todas las páginas",
+				"scope_filtered": "Filtros actuales ({{count}})",
+				"scope_all_pages": "Todas las filas (ignorar filtros)",
 				"scope_selected": "Filas seleccionadas ({{count}})",
+				"no_filters": "No hay filtros aplicados a esta cuadrícula.",
+				"filter_search": "Búsqueda: {{terms}}",
 				"format": "Formato",
 				"file_name": "Nombre del archivo (opcional)",
 				"file_name_placeholder": "Por defecto, el nombre de la cuadrícula y cualquier filtro activo",
@@ -1570,5 +1573,11 @@
 	"welcome": {
 		"greeting": "Bienvenido, {{user}}",
 		"context": "Estás utilizando $t(app.name) para gestionar la configuración de $t(app.dcb_full) para el consorcio {{consortium_name}}."
+	},
+	"workflows": {
+		"RET-STD": "Estándar",
+		"RET-EXP": "Sin cita previa",
+		"RET-PUA": "Recogida en cualquier lugar",
+		"RET-LOCAL": "Local"
 	}
 }

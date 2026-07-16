@@ -9,6 +9,39 @@ import {
 // https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
 const toLuceneTerm = (value: any) => String(value).replaceAll(" ", "?");
 
+/**
+ * "Pickup library" is a virtual column: PatronRequest has no pickup agency or
+ * library field, only a pickup location id, so a library can only be expressed
+ * as the set of ITS pickup locations.
+ *
+ * That set travels inside the filter value (see PICKUP_LIBRARY_DELIMITER and
+ * useDynamicPatronRequestColumns, which builds the options) rather than being
+ * looked up here. buildFilterQuery is reached from ~30 grids and the export via
+ * processGridFilterModel, all of which pass nothing but field/operator/value -
+ * so a value that carries its own expansion is a value no caller can forget to
+ * resolve, which is the whole point of centralising query building.
+ */
+export const PICKUP_LIBRARY_FIELD = "pickupLibrary";
+/** Separates the location ids packed into a pickup library filter value. */
+export const PICKUP_LIBRARY_DELIMITER = "|";
+/** The real, indexed field a pickup library expands to. */
+const PICKUP_LIBRARY_TARGET_FIELD = "pickupLocationCode";
+
+const buildPickupLibraryQuery = (value: any): string => {
+	const locationIds = String(value)
+		.split(PICKUP_LIBRARY_DELIMITER)
+		.map((id) => id.trim())
+		.filter(Boolean);
+
+	if (locationIds.length === 0) return "";
+
+	const terms = locationIds.map(
+		(id) => `${PICKUP_LIBRARY_TARGET_FIELD}:${toLuceneTerm(id)}`,
+	);
+	// Parenthesised: processGridFilterModel ANDs this with the other filter items.
+	return terms.length === 1 ? terms[0] : `(${terms.join(" OR ")})`;
+};
+
 export const buildFilterQuery = (
 	field: string,
 	operator: string,
@@ -39,6 +72,13 @@ export const buildFilterQuery = (
 		(Array.isArray(value) && value.length === 0)
 	) {
 		return "";
+	}
+
+	// 2b. VIRTUAL FIELDS
+	// Resolved to a real indexed field before any of the generic paths below,
+	// which would otherwise emit a term for a field the index does not have.
+	if (field === PICKUP_LIBRARY_FIELD) {
+		return buildPickupLibraryQuery(value);
 	}
 
 	// 3. SAFE ARRAY EXTRACTION

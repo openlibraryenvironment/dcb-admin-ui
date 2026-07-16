@@ -1710,8 +1710,11 @@
 				"select_all": "Select all",
 				"clear_all": "Clear all",
 				"scope": "Rows to export",
-				"scope_all_pages": "All pages",
+				"scope_filtered": "Current filters ({{count}})",
+				"scope_all_pages": "All rows (ignore filters)",
 				"scope_selected": "Selected rows ({{count}})",
+				"no_filters": "No filters applied to this grid.",
+				"filter_search": "Search: {{terms}}",
 				"format": "Format",
 				"file_name": "File name (optional)",
 				"file_name_placeholder": "Defaults to the grid name and any active filters",
@@ -1890,6 +1893,12 @@
 	"welcome": {
 		"greeting": "Welcome {{user}}",
 		"context": "You are using $t(app.name) to manage the $t(app.dcb_full) configuration for the {{consortium_name}} consortium."
+	},
+	"workflows": {
+		"RET-STD": "Standard",
+		"RET-EXP": "Walk-up",
+		"RET-PUA": "Pickup anywhere",
+		"RET-LOCAL": "Local"
 	}
 }
 

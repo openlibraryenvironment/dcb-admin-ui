@@ -5,6 +5,7 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		canonicalItemType: false,
 		canonicalPtype: false,
 		pickupLocationCode: false,
+		pickupLibrary: false,
 		elapsedTimeInCurrentStatus: false,
 		pollCountForCurrentStatus: false,
 		outOfSequenceFlag: false,

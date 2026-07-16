@@ -1,6 +1,7 @@
 import { dateTimeRangeOperators } from "@filters/dateTimeRangeOperators";
 import { dcbStatusValueOptions } from "@constants/statuses/DCBStatuses";
-import { dcbWorkflowOptions } from "@constants/workflows/DCBWorkflows";
+import { getDcbWorkflowOptions } from "@constants/workflows/DCBWorkflows";
+import i18n from "@/i18n";
 import { formatDuration } from "@helpers/formatDuration";
 import { PatronRequest } from "@models/PatronRequest";
 import { GridColDef } from "@mui/x-data-grid-premium";
@@ -208,7 +209,7 @@ export const standardSupplierRequestColumns: GridColDef[] = [
 		sortable: true,
 		filterable: true,
 		type: "singleSelect",
-		valueOptions: dcbWorkflowOptions,
+		valueOptions: getDcbWorkflowOptions(i18n.t),
 		filterOperators: isOnly,
 	},
 	{

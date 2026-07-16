@@ -7,6 +7,7 @@ export const defaultPatronRequestGroupVisibility: GridColumnVisibilityModel = {
 	patronHostlmsCode: true,
 	supplyingAgencyCode: true,
 	pickupLocationCode: true,
+	pickupLibrary: false,
 	status: true,
 	canonicalItemType: false,
 	canonicalPtype: false,

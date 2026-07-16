@@ -342,11 +342,7 @@ export type PatronRequestFieldsFragment = {
 		rawLocalItemStatus: string | null;
 		rawLocalStatus: string | null;
 	} | null> | null;
-	clusterRecord: {
-		id: string;
-		title: string | null;
-		members: Array<{ publisher: string | null } | null> | null;
-	} | null;
+	clusterRecord: { id: string; title: string | null } | null;
 };
 
 export type AddFunctionalSettingMutationVariables = Exact<{
@@ -1700,6 +1696,7 @@ export type LoadLocationForPrGridQuery = {
 			id: string;
 			code: string | null;
 			name: string | null;
+			agency: { code: string | null } | null;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	};
@@ -2031,11 +2028,7 @@ export type GetPatronRequestDashboardQuery = {
 				rawLocalItemStatus: string | null;
 				rawLocalStatus: string | null;
 			} | null> | null;
-			clusterRecord: {
-				id: string;
-				title: string | null;
-				members: Array<{ publisher: string | null } | null> | null;
-			} | null;
+			clusterRecord: { id: string; title: string | null } | null;
 		} | null> | null;
 	} | null;
 	activeRequests: { totalSize: number | null } | null;
@@ -2204,11 +2197,7 @@ export type LoadPatronRequestsQuery = {
 				rawLocalItemStatus: string | null;
 				rawLocalStatus: string | null;
 			} | null> | null;
-			clusterRecord: {
-				id: string;
-				title: string | null;
-				members: Array<{ publisher: string | null } | null> | null;
-			} | null;
+			clusterRecord: { id: string; title: string | null } | null;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	} | null;
@@ -2282,11 +2271,7 @@ export type LoadPatronRequestsForExportQuery = {
 				rawLocalItemStatus: string | null;
 				rawLocalStatus: string | null;
 			} | null> | null;
-			clusterRecord: {
-				id: string;
-				title: string | null;
-				members: Array<{ publisher: string | null } | null> | null;
-			} | null;
+			clusterRecord: { id: string; title: string | null } | null;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	} | null;

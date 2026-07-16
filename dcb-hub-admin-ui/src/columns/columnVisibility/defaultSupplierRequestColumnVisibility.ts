@@ -5,6 +5,7 @@ export const defaultSupplierRequestColumnVisibility: GridColumnVisibilityModel =
 		canonicalItemType: false,
 		canonicalPtype: false,
 		pickupLocationCode: false,
+		pickupLibrary: false,
 		patronHostlmsCode: true,
 		previousStatus: false,
 		nextExpectedStatus: false,

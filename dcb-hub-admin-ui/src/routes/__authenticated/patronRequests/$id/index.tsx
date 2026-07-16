@@ -32,6 +32,7 @@ import DataGrid from "@components/DataGrid/DataGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
+import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { formatDuration } from "@helpers/formatDuration";
 import { getILS } from "@helpers/getILS";
@@ -110,21 +111,28 @@ function RouteComponent() {
 		enabled: !!id,
 	});
 
+	const patronRequest = data?.patronRequests?.content?.[0];
+	const members = patronRequest?.clusterRecord?.members;
+
+	// Keyed on - and gated by - the supplying agency, the way the patron and
+	// pickup library queries are. Keying on the request id and enabling on it
+	// fired this on the first render, before the request (and so its suppliers)
+	// had loaded: it asked for "agencyCode:undefined", got nothing, and cached
+	// that under a key that never changed again, so the supplying library never
+	// resolved and only its raw agency code was left on the page.
+	const supplyingAgencyCode = patronRequest?.suppliers?.[0]?.localAgency;
 	const { data: supplierLibraryData, isLoading: supplierLibraryLoading } =
 		useQuery({
-			queryKey: ["supplierLibraryData", id],
+			queryKey: ["library", "supplier", supplyingAgencyCode],
 			queryFn: async () =>
 				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
 					getLibraryBasics,
 					{
-						query: "agencyCode:" + patronRequest?.suppliers?.[0]?.localAgency,
+						query: `agencyCode:${supplyingAgencyCode}`,
 					},
 				),
-			enabled: !!id,
+			enabled: !!supplyingAgencyCode,
 		});
-
-	const patronRequest = data?.patronRequests?.content?.[0];
-	const members = patronRequest?.clusterRecord?.members;
 
 	const supplierLibrary = supplierLibraryData?.libraries?.content?.[0];
 
@@ -336,7 +344,9 @@ function RouteComponent() {
 										})}
 									>
 										<span>
-											<RenderAttribute attribute={patronLibrary?.fullName} />
+											<CustomLink to={`/libraries/${patronLibrary?.id}`}>
+												<RenderAttribute attribute={patronLibrary?.fullName} />
+											</CustomLink>
 										</span>
 									</Tooltip>
 								</Stack>
@@ -363,7 +373,11 @@ function RouteComponent() {
 										})}
 									>
 										<span>
-											<RenderAttribute attribute={supplierLibrary?.fullName} />
+											<CustomLink to={`/libraries/${supplierLibrary?.id}`}>
+												<RenderAttribute
+													attribute={supplierLibrary?.fullName}
+												/>
+											</CustomLink>
 										</span>
 									</Tooltip>
 								</Stack>
@@ -388,7 +402,9 @@ function RouteComponent() {
 										})}
 									>
 										<span>
-											<RenderAttribute attribute={pickupLibrary?.fullName} />
+											<CustomLink to={`/libraries/${pickupLibrary?.id}`}>
+												<RenderAttribute attribute={pickupLibrary?.fullName} />
+											</CustomLink>
 										</span>
 									</Tooltip>
 								</Stack>
@@ -396,6 +412,50 @@ function RouteComponent() {
 						) : pickupLibraryLoading ? (
 							<CircularProgress size="1rem" />
 						) : null}
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.pickup_location_name")}
+								</Typography>
+								{pickupLocationDataLoading ? (
+									<CircularProgress
+										color="inherit"
+										size={13}
+										sx={{ marginLeft: "10px" }}
+									/>
+								) : pickupLocationDataError ? (
+									t("patron_request.error_pickup")
+								) : auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
+									<Tooltip title={t("locations.view_location")}>
+										<CustomLink to={`/locations/${pickupLocation?.id}`}>
+											{pickupLocation?.name}
+										</CustomLink>
+									</Tooltip>
+								) : (
+									<RenderAttribute attribute={pickupLocation?.name} />
+								)}
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("requesting.staff_request.patron.barcode")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.requestingIdentity?.localBarcode}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.item_barcode")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localItemBarcode}
+								/>
+							</Stack>
+						</Grid>
 
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
@@ -405,16 +465,7 @@ function RouteComponent() {
 								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
 							</Stack>
 						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.borrowing_patron_barcode")}
-								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.requestingIdentity?.localBarcode}
-								/>
-							</Stack>
-						</Grid>
+
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -472,30 +523,6 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron_request.pickup_location_name")}
-								</Typography>
-								{pickupLocationDataLoading ? (
-									<CircularProgress
-										color="inherit"
-										size={13}
-										sx={{ marginLeft: "10px" }}
-									/>
-								) : pickupLocationDataError ? (
-									t("patron_request.error_pickup")
-								) : auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-									<Tooltip title={t("locations.view_location")}>
-										<CustomLink to={`/locations/${pickupLocation?.id}`}>
-											{pickupLocation?.name}
-										</CustomLink>
-									</Tooltip>
-								) : (
-									<RenderAttribute attribute={pickupLocation?.name} />
-								)}
-							</Stack>
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
 									{t("patron_request.request_created")}
 								</Typography>
 								<RenderAttribute
@@ -516,6 +543,48 @@ function RouteComponent() {
 									)}
 								/>
 							</Stack>
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.status")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.status} />
+							</Stack>
+							{auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
+								<Tooltip
+									title={
+										cleanupStatuses.includes(patronRequest?.status)
+											? // Must be both request with ERROR or non-terminal state and a user with LIBRARY_ADMIN
+												t("patron_request.cleanup_info")
+											: t("patron_request.cleanup_disabled") // Tooltip text when disabled
+									}
+								>
+									<span>
+										<Button
+											variant="outlined"
+											color="primary"
+											sx={{ marginTop: 1 }}
+											onClick={() => cleanupMutation.mutate()}
+											aria-disabled={cleanupMutation.isPending ? true : false}
+											disabled={
+												cleanupMutation.isPending ||
+												!cleanupStatuses.includes(patronRequest?.status)
+											}
+										>
+											{t("patron_request.cleanup")}
+											{cleanupMutation.isPending ? (
+												<CircularProgress
+													color="inherit"
+													size={13}
+													sx={{ marginLeft: "10px" }}
+												/>
+											) : null}
+										</Button>
+									</span>
+								</Tooltip>
+							) : null}
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
@@ -616,47 +685,6 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron_request.status")}
-								</Typography>
-								<RenderAttribute attribute={patronRequest?.status} />
-							</Stack>
-							{auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-								<Tooltip
-									title={
-										cleanupStatuses.includes(patronRequest?.status)
-											? // Must be both request with ERROR or non-terminal state and a user with LIBRARY_ADMIN
-												t("patron_request.cleanup_info")
-											: t("patron_request.cleanup_disabled") // Tooltip text when disabled
-									}
-								>
-									<span>
-										<Button
-											variant="outlined"
-											color="primary"
-											sx={{ marginTop: 1 }}
-											onClick={() => cleanupMutation.mutate()}
-											aria-disabled={cleanupMutation.isPending ? true : false}
-											disabled={
-												cleanupMutation.isPending ||
-												!cleanupStatuses.includes(patronRequest?.status)
-											}
-										>
-											{t("patron_request.cleanup")}
-											{cleanupMutation.isPending ? (
-												<CircularProgress
-													color="inherit"
-													size={13}
-													sx={{ marginLeft: "10px" }}
-												/>
-											) : null}
-										</Button>
-									</span>
-								</Tooltip>
-							) : null}
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
 									{t("patron_request.next_expected_status")}
 								</Typography>
 								<RenderAttribute
@@ -703,7 +731,12 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.active_workflow")}
 								</Typography>
-								<RenderAttribute attribute={patronRequest?.activeWorkflow} />
+								<RenderAttribute
+									attribute={translateWorkflow(
+										t,
+										patronRequest?.activeWorkflow,
+									)}
+								/>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>

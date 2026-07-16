@@ -345,6 +345,8 @@ export default function DataGrid({
 					columnVisibilityModel={
 						(rest.columnVisibilityModel as GridColumnVisibilityModel) ?? {}
 					}
+					filterModel={rest.filterModel ?? { items: [] }}
+					quickFilterFields={exportConfig.quickFilterFields}
 					selectedCount={selectionModel?.ids?.size || 0}
 					onExport={runExport}
 				/>

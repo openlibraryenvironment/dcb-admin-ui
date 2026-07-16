@@ -16,44 +16,14 @@ const getPatronRequestColumns = (
 	const isStandard = variant === "standard";
 
 	const columns: GridColDef[] = [
-		{
-			field: "dateCreated",
-			headerName: "Request created",
-			minWidth: 150,
-			filterOperators: luceneDateRangeOperators,
-			type: "dateTime",
-			valueGetter: (value: any, row: { dateCreated: string }) => {
-				return row.dateCreated ? new Date(row.dateCreated) : null;
-			},
-			valueFormatter: (value: Date) => {
-				return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
-			},
-		},
-		// Patron
+		// The four "where did this request come from / go to" filters lead the
+		// column list, so they are the first options in the filter drop-down (which
+		// takes its order from this array) rather than buried mid-list.
 		{
 			field: "patronHostlmsCode",
 			headerName: "Patron library",
 			filterOperators: isOnly,
 			sortable: false,
-		},
-		{
-			field: "patronBarcode",
-			headerName: "Patron barcode",
-			filterable: true,
-			filterOperators: equalsOnly,
-			sortable: false,
-			valueGetter: (value: any, row: PatronRequest) =>
-				row?.requestingIdentity?.localBarcode,
-		},
-		{
-			field: "clusterRecordTitle",
-			headerName: "Title",
-			minWidth: 100,
-			flex: 1.25,
-			filterable: false,
-			sortable: false,
-			valueGetter: (value: any, row: { clusterRecord: { title: string } }) =>
-				row?.clusterRecord?.title,
 		},
 		{
 			field: "supplyingAgencyCode",
@@ -78,6 +48,51 @@ const getPatronRequestColumns = (
 			filterOperators: isOnly,
 			sortable: false,
 			filterable: true,
+		},
+		{
+			// PatronRequest has no pickup agency/library field - only a pickup
+			// location id - so both this column's value and its filter are resolved
+			// client-side from the location list. See useDynamicPatronRequestColumns
+			// (which supplies valueOptions/valueGetter) and buildFilterQuery (which
+			// expands a chosen library into an OR over its location ids).
+			field: "pickupLibrary",
+			headerName: "Pickup library",
+			type: "singleSelect",
+			filterOperators: isOnly,
+			sortable: false,
+			filterable: true,
+		},
+		{
+			field: "dateCreated",
+			headerName: "Request created",
+			minWidth: 150,
+			filterOperators: luceneDateRangeOperators,
+			type: "dateTime",
+			valueGetter: (value: any, row: { dateCreated: string }) => {
+				return row.dateCreated ? new Date(row.dateCreated) : null;
+			},
+			valueFormatter: (value: Date) => {
+				return value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "";
+			},
+		},
+		{
+			field: "patronBarcode",
+			headerName: "Patron barcode",
+			filterable: true,
+			filterOperators: equalsOnly,
+			sortable: false,
+			valueGetter: (value: any, row: PatronRequest) =>
+				row?.requestingIdentity?.localBarcode,
+		},
+		{
+			field: "clusterRecordTitle",
+			headerName: "Title",
+			minWidth: 100,
+			flex: 1.25,
+			filterable: false,
+			sortable: false,
+			valueGetter: (value: any, row: { clusterRecord: { title: string } }) =>
+				row?.clusterRecord?.title,
 		},
 		{
 			field: "pickupRequestId",
@@ -233,11 +248,16 @@ const getPatronRequestColumns = (
 			filterOperators: equalsOnly,
 		},
 		{
+			// Workflow codes are a closed set (see DCBWorkflows), so the filter offers
+			// the readable names rather than asking the user to type "RET-PUA".
+			// useDynamicPatronRequestColumns supplies the translated valueOptions.
 			field: "activeWorkflow",
 			headerName: "Active workflow",
 			minWidth: 100,
 			sortable: true,
 			filterable: true,
+			type: "singleSelect",
+			filterOperators: isOnly,
 		},
 		{
 			field: "isExpeditedCheckout",

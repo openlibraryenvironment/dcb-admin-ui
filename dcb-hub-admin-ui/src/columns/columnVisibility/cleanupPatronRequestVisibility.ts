@@ -2,6 +2,7 @@ export const cleanupPatronRequestVisibility = {
 	canonicalItemType: false,
 	canonicalPtype: false,
 	pickupLocationCode: false,
+	pickupLibrary: false,
 	status: false,
 	previousStatus: false,
 	nextExpectedStatus: false,

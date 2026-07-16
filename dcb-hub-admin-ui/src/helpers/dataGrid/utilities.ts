@@ -1,10 +1,16 @@
 import {
+	GridColDef,
+	GridFilterItem,
 	GridFilterModel,
 	GridPaginationModel,
 	GridSortDirection,
 	GridSortModel,
 } from "@mui/x-data-grid-premium";
 import { buildFilterQuery } from "@helpers/dataGrid/buildFilterQuery";
+import {
+	getExportHeaderMap,
+	getValueLabelMaps,
+} from "@helpers/dataGrid/getExportColumns";
 import i18n from "@/i18n";
 import dayjs from "dayjs";
 
@@ -118,63 +124,127 @@ export const checkIfFiltering = (
 	return !!hasActiveFilters && isDifferent;
 };
 
+/** A filter item counts as active only once the user has entered a value. */
+const hasFilterValue = (item: GridFilterItem): boolean =>
+	item.value !== undefined && item.value !== null && item.value !== "";
+
+/** The active column filters, ignoring half-built ones with no value yet. */
+export const getActiveFilterItems = (
+	model?: GridFilterModel,
+): GridFilterItem[] => (model?.items ?? []).filter(hasFilterValue);
+
+/**
+ * Renders one filter item's operator and value for humans. Shared so that a file
+ * name, and the export wizard's summary of what it is about to export, can never
+ * describe the same filter two different ways.
+ */
+const formatFilterOperand = (
+	item: GridFilterItem,
+): { operator: string; value: string } => {
+	let val = item.value;
+	let operator = item.operator || "=";
+
+	// Smart handling for date ranges
+	if (operator === "luceneDateRange" && Array.isArray(val)) {
+		const [start, end] = val;
+		const hasStart = start !== null && start !== undefined && start !== "";
+		const hasEnd = end !== null && end !== undefined && end !== "";
+		const formattedStart = hasStart
+			? dayjs(start).format("YYYY-MM-DD HH:mm")
+			: "";
+		const formattedEnd = hasEnd ? dayjs(end).format("YYYY-MM-DD HH:mm") : "";
+
+		if (hasStart && hasEnd) {
+			operator = i18n
+				.t("ui.data_grid.filters.between", { defaultValue: "between" })
+				.toLowerCase();
+			val = `${formattedStart} ${i18n.t("ui.data_grid.filters.and")} ${formattedEnd}`;
+		} else if (hasStart) {
+			operator = i18n
+				.t("ui.data_grid.filters.after", { defaultValue: "after" })
+				.toLowerCase();
+			val = `${formattedStart}`;
+		} else if (hasEnd) {
+			operator = i18n
+				.t("ui.data_grid.filters.before", { defaultValue: "before" })
+				.toLowerCase();
+			val = `${formattedEnd}`;
+		}
+	} else {
+		// Fallback for any other arrays or objects
+		if (Array.isArray(val)) {
+			val = `(${val.join(", ")})`;
+		} else if (typeof val === "object") {
+			val = JSON.stringify(val);
+		}
+	}
+
+	return { operator, value: `${val}` };
+};
+
 export const generateFilterDescription = (model?: GridFilterModel): string => {
 	if (!model || !model.items || model.items.length === 0) return "Filters";
 
-	// Only count filters that actually have a value entered
-	const validItems = model.items.filter(
-		(item) =>
-			item.value !== undefined && item.value !== null && item.value !== "",
-	);
-
+	const validItems = getActiveFilterItems(model);
 	if (validItems.length === 0) return "Filters";
 
 	const logicOperator = model.logicOperator || "AND";
 
 	const descriptions = validItems.map((item) => {
-		let val = item.value;
-		let operator = item.operator || "=";
-
-		// Smart handling for date ranges
-		if (operator === "luceneDateRange" && Array.isArray(val)) {
-			const [start, end] = val;
-			const hasStart = start !== null && start !== undefined && start !== "";
-			const hasEnd = end !== null && end !== undefined && end !== "";
-			const formattedStart = hasStart
-				? dayjs(start).format("YYYY-MM-DD HH:mm")
-				: "";
-			const formattedEnd = hasEnd ? dayjs(end).format("YYYY-MM-DD HH:mm") : "";
-
-			if (hasStart && hasEnd) {
-				operator = i18n
-					.t("ui.data_grid.filters.between", { defaultValue: "between" })
-					.toLowerCase();
-				val = `${formattedStart} ${i18n.t("ui.data_grid.filters.and")} ${formattedEnd}`;
-			} else if (hasStart) {
-				operator = i18n
-					.t("ui.data_grid.filters.after", { defaultValue: "after" })
-					.toLowerCase();
-				val = `${formattedStart}`;
-			} else if (hasEnd) {
-				operator = i18n
-					.t("ui.data_grid.filters.before", { defaultValue: "before" })
-					.toLowerCase();
-				val = `${formattedEnd}`;
-			}
-		} else {
-			// Fallback for any other arrays or objects
-			if (Array.isArray(val)) {
-				val = `(${val.join(", ")})`;
-			} else if (typeof val === "object") {
-				val = JSON.stringify(val);
-			}
-		}
-
-		return `${item.field} ${operator} ${val}`;
+		const { operator, value } = formatFilterOperand(item);
+		return `${item.field} ${operator} ${value}`;
 	});
 
 	return i18n.t("ui.data_grid.filters.active_description", {
 		length: validItems.length,
 		description: descriptions.join(` ${logicOperator.toUpperCase()} `),
 	});
+};
+
+/**
+ * One human-readable line per active filter, for the export wizard's summary of
+ * the rows a "current filters" export will cover.
+ *
+ * Unlike generateFilterDescription (which names raw fields, and feeds file
+ * names), this speaks the grid's language: column headers and the same
+ * singleSelect labels the user picked, not the underlying codes.
+ *
+ * `quickFilterFields` mirrors processGridFilterModel: the toolbar search term
+ * only narrows the query when the grid declares fields for it to search, so it
+ * is only described when it will actually be applied.
+ */
+export const describeActiveFilters = (
+	model: GridFilterModel | undefined,
+	columns: GridColDef[],
+	quickFilterFields: string[] = [],
+): string[] => {
+	if (!model) return [];
+
+	const headers = getExportHeaderMap(columns);
+	const labels = getValueLabelMaps(columns);
+
+	const lines = getActiveFilterItems(model).map((item) => {
+		const { operator, value } = formatFilterOperand(item);
+		const header = headers[item.field] ?? item.field;
+		// Only scalars carry a valueOptions label; ranges are already formatted.
+		const isScalar =
+			!Array.isArray(item.value) && typeof item.value !== "object";
+		const labelled = isScalar
+			? (labels[item.field]?.[String(item.value)] ?? value)
+			: value;
+		return `${header} ${operator} ${labelled}`;
+	});
+
+	const searchTerms = (model.quickFilterValues ?? []).filter(
+		(term) => term !== undefined && term !== null && `${term}`.trim() !== "",
+	);
+	if (searchTerms.length > 0 && quickFilterFields.length > 0) {
+		lines.push(
+			i18n.t("ui.data_grid.export.filter_search", {
+				terms: searchTerms.join(" "),
+			}),
+		);
+	}
+
+	return lines;
 };

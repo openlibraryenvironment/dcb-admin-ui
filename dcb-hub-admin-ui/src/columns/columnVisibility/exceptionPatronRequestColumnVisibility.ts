@@ -2,6 +2,7 @@ export const exceptionPatronRequestColumnVisibility = {
 	canonicalItemType: false,
 	canonicalPtype: false,
 	pickupLocationCode: false,
+	pickupLibrary: false,
 	previousStatus: true,
 	status: false,
 	errorMessage: true,

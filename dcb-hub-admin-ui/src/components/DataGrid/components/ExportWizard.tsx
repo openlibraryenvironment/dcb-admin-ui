@@ -21,8 +21,10 @@ import {
 import {
 	GridColDef,
 	GridColumnVisibilityModel,
+	GridFilterModel,
 } from "@mui/x-data-grid-premium";
 import { getExportColumns } from "@helpers/dataGrid/getExportColumns";
+import { describeActiveFilters } from "@helpers/dataGrid/utilities";
 import { ExportFormat, RunExportOptions } from "@hooks/useGridExport";
 
 interface ExportWizardProps {
@@ -30,24 +32,41 @@ interface ExportWizardProps {
 	onClose: () => void;
 	columns: GridColDef[];
 	columnVisibilityModel: GridColumnVisibilityModel;
+	/** The grid's current filters - offered as the default export scope. */
+	filterModel: GridFilterModel;
+	/** Fields the toolbar search covers; empty means the term is not applied. */
+	quickFilterFields?: string[];
 	/** Number of checkbox-selected rows (enables the "selected rows" scope). */
 	selectedCount: number;
 	onExport: (options: RunExportOptions) => void;
 }
 
-type ExportScope = "all" | "selected";
+type ExportScope = "filtered" | "all" | "selected";
+
+/** Links the filter summary to the scope radio it describes, for screen readers. */
+const FILTER_SUMMARY_ID = "export-wizard-filter-summary";
 
 export default function ExportWizard({
 	open,
 	onClose,
 	columns,
 	columnVisibilityModel,
+	filterModel,
+	quickFilterFields,
 	selectedCount,
 	onExport,
 }: ExportWizardProps) {
 	const { t } = useTranslation();
 
 	const exportColumns = useMemo(() => getExportColumns(columns), [columns]);
+
+	// What a "current filters" export would actually cover, in the grid's own
+	// language - so the scope choice is a decision, not a guess.
+	const filterSummary = useMemo(
+		() => describeActiveFilters(filterModel, columns, quickFilterFields),
+		[filterModel, columns, quickFilterFields],
+	);
+	const hasFilters = filterSummary.length > 0;
 
 	// Default selection: every column currently visible in the grid.
 	const defaultSelected = useMemo(
@@ -60,9 +79,13 @@ export default function ExportWizard({
 		[exportColumns, columnVisibilityModel],
 	);
 
+	// Honouring the grid's filters is the least surprising default: the user
+	// filtered the grid, then asked to export it.
+	const defaultScope: ExportScope = hasFilters ? "filtered" : "all";
+
 	const [selectedFields, setSelectedFields] =
 		useState<Set<string>>(defaultSelected);
-	const [scope, setScope] = useState<ExportScope>("all");
+	const [scope, setScope] = useState<ExportScope>(defaultScope);
 	const [format, setFormat] = useState<ExportFormat>("tsv");
 	const [fileName, setFileName] = useState("");
 	// Re-seed the checklist whenever the dialog is (re)opened.
@@ -71,7 +94,7 @@ export default function ExportWizard({
 		setSeededFor(open);
 		if (open) {
 			setSelectedFields(defaultSelected);
-			setScope("all");
+			setScope(defaultScope);
 			setFileName("");
 		}
 	}
@@ -176,12 +199,54 @@ export default function ExportWizard({
 				/>
 
 				<Stack direction={{ xs: "column", sm: "row" }} spacing={4}>
-					<FormControl>
+					<FormControl sx={{ flex: 1 }}>
 						<FormLabel>{t("ui.data_grid.export.scope")}</FormLabel>
 						<RadioGroup
 							value={scope}
 							onChange={(event) => setScope(event.target.value as ExportScope)}
 						>
+							<FormControlLabel
+								value="filtered"
+								disabled={!hasFilters}
+								control={
+									<Radio
+										size="small"
+										slotProps={{
+											input: { "aria-describedby": FILTER_SUMMARY_ID },
+										}}
+									/>
+								}
+								label={t("ui.data_grid.export.scope_filtered", {
+									count: filterSummary.length,
+								})}
+							/>
+							{hasFilters ? (
+								<Box
+									id={FILTER_SUMMARY_ID}
+									component="ul"
+									sx={{ m: 0, mb: 1, pl: 4, listStyle: "none" }}
+								>
+									{filterSummary.map((line, index) => (
+										<Typography
+											key={`${line}-${index}`}
+											component="li"
+											variant="body2"
+											color="text.secondary"
+										>
+											{line}
+										</Typography>
+									))}
+								</Box>
+							) : (
+								<Typography
+									id={FILTER_SUMMARY_ID}
+									variant="body2"
+									color="text.secondary"
+									sx={{ mb: 1, pl: 4 }}
+								>
+									{t("ui.data_grid.export.no_filters")}
+								</Typography>
+							)}
 							<FormControlLabel
 								value="all"
 								control={<Radio size="small" />}

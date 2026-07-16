@@ -78,3 +78,53 @@ describe("processGridFilterModel: status filters compose with the tab base query
 		).toBe(queries.inProgress);
 	});
 });
+
+describe("buildFilterQuery: pickup library (virtual field)", () => {
+	// PatronRequest has no pickup agency field, so a pickup library filter value
+	// carries the library's own location ids and is expanded onto the real,
+	// indexed pickupLocationCode field.
+	it("expands a library's location ids into an OR over pickupLocationCode", () => {
+		expect(buildFilterQuery("pickupLibrary", "is", "loc-a|loc-b|loc-c")).toBe(
+			"(pickupLocationCode:loc-a OR pickupLocationCode:loc-b OR pickupLocationCode:loc-c)",
+		);
+	});
+
+	it("emits a bare term for a library with a single pickup location", () => {
+		expect(buildFilterQuery("pickupLibrary", "is", "loc-a")).toBe(
+			"pickupLocationCode:loc-a",
+		);
+	});
+
+	it("never emits a term for the virtual field itself", () => {
+		// pickupLibrary is not in the index - querying it would match nothing.
+		expect(
+			buildFilterQuery("pickupLibrary", "is", "loc-a|loc-b"),
+		).not.toContain("pickupLibrary:");
+	});
+
+	it("returns no clause when nothing is selected", () => {
+		expect(buildFilterQuery("pickupLibrary", "is", "")).toBe("");
+		expect(buildFilterQuery("pickupLibrary", "is", undefined)).toBe("");
+	});
+
+	it("tolerates a token with empty segments", () => {
+		expect(buildFilterQuery("pickupLibrary", "is", "loc-a||loc-b|")).toBe(
+			"(pickupLocationCode:loc-a OR pickupLocationCode:loc-b)",
+		);
+	});
+
+	it("ANDs the expansion with the grid's base query", () => {
+		expect(
+			processGridFilterModel(
+				{
+					items: [
+						{ field: "pickupLibrary", operator: "is", value: "loc-a|loc-b" },
+					],
+				} as GridFilterModel,
+				queries.inProgress,
+			),
+		).toBe(
+			`${queries.inProgress} AND (((pickupLocationCode:loc-a OR pickupLocationCode:loc-b)))`,
+		);
+	});
+});

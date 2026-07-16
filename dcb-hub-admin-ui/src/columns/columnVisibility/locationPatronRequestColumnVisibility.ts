@@ -2,6 +2,7 @@ export const locationPatronRequestColumnVisibility = {
 	canonicalItemType: false,
 	canonicalPtype: false,
 	pickupLocationCode: false,
+	pickupLibrary: false,
 	status: true,
 	previousStatus: false,
 	nextExpectedStatus: false,

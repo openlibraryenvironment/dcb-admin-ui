@@ -19,6 +19,11 @@ export const getLocationForPatronRequestGrid = gql`
 				id
 				code
 				name
+				# Maps a pickup location to its library, which PatronRequest itself
+				# cannot express - it only carries a pickup location id.
+				agency {
+					code
+				}
 			}
 			pageable {
 				number
