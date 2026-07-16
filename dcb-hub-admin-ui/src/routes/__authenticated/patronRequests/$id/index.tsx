@@ -480,31 +480,6 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron_request.request_created")}
-								</Typography>
-								<RenderAttribute
-									attribute={dayjs(patronRequest?.dateCreated).format(
-										"YYYY-MM-DD HH:mm",
-									)}
-								/>
-							</Stack>
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.request_updated")}
-								</Typography>
-								<RenderAttribute
-									attribute={dayjs(patronRequest?.dateUpdated).format(
-										"YYYY-MM-DD HH:mm",
-									)}
-								/>
-							</Stack>
-						</Grid>
-
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
 									{t("patron_request.status")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.status} />
@@ -542,6 +517,25 @@ function RouteComponent() {
 									</span>
 								</Tooltip>
 							) : null}
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.previous_status")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.previousStatus} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.next_expected_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.nextExpectedStatus?.toString()}
+								/>
+							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
@@ -634,24 +628,6 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
-									{t("patron_request.previous_status")}
-								</Typography>
-								<RenderAttribute attribute={patronRequest?.previousStatus} />
-							</Stack>
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.next_expected_status")}
-								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.nextExpectedStatus?.toString()}
-								/>
-							</Stack>
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
 									{t("patron_request.status_changed")}
 								</Typography>
 								<RenderAttribute
@@ -673,6 +649,31 @@ function RouteComponent() {
 								/>
 							</Stack>
 						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.request_created")}
+								</Typography>
+								<RenderAttribute
+									attribute={dayjs(patronRequest?.dateCreated).format(
+										"YYYY-MM-DD HH:mm",
+									)}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.request_updated")}
+								</Typography>
+								<RenderAttribute
+									attribute={dayjs(patronRequest?.dateUpdated).format(
+										"YYYY-MM-DD HH:mm",
+									)}
+								/>
+							</Stack>
+						</Grid>
+
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
