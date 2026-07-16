@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip } from "@mui/material";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import Check from "@mui/icons-material/Check";
+import { stripBrackets } from "@helpers/stripBrackets";
 
 type CopyState = "idle" | "copied" | "error";
 
@@ -45,12 +46,18 @@ export default function CopyToClipboardButton({
 	// that dash would be a lie.
 	if (value === null || value === undefined || value === "") return null;
 
+	// The page still shows the raw value; only what lands on the clipboard is
+	// cleaned up, so nothing on screen silently disagrees with the host LMS.
+	const copyValue = stripBrackets(String(value));
+	// "[]" strips to nothing - there is no barcode here to copy.
+	if (copyValue === "") return null;
+
 	const handleCopy = async () => {
 		try {
 			// Undefined off a secure origin (and in some embedded webviews), so this
 			// is a real branch rather than defensive noise.
 			if (!navigator.clipboard) throw new Error("Clipboard unavailable");
-			await navigator.clipboard.writeText(String(value));
+			await navigator.clipboard.writeText(copyValue);
 			setState("copied");
 		} catch {
 			setState("error");

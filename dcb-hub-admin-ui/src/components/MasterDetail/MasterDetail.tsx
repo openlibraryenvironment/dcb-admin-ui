@@ -18,6 +18,7 @@ import { ExpandMore } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import { LocationCell } from "@components/LocationCell/LocationCell";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import {
@@ -418,9 +419,19 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Typography variant="attributeTitle">
 								{t("patron_request.borrowing_patron_barcode")}
 							</Typography>
-							<RenderAttribute
-								attribute={row?.requestingIdentity?.localBarcode}
-							/>
+							<Stack
+								direction="row"
+								sx={{ alignItems: "center" }}
+								spacing={0.5}
+							>
+								<RenderAttribute
+									attribute={row?.requestingIdentity?.localBarcode}
+								/>
+								<CopyToClipboardButton
+									value={row?.requestingIdentity?.localBarcode}
+									label={t("patron_request.borrowing_patron_barcode")}
+								/>
+							</Stack>
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -587,7 +598,17 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Typography variant="attributeTitle">
 								{t("search.barcode")}
 							</Typography>
-							<RenderAttribute attribute={row?.barcode} />
+							<Stack
+								direction="row"
+								sx={{ alignItems: "center" }}
+								spacing={0.5}
+							>
+								<RenderAttribute attribute={row?.barcode} />
+								<CopyToClipboardButton
+									value={row?.barcode}
+									label={t("search.barcode")}
+								/>
+							</Stack>
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>

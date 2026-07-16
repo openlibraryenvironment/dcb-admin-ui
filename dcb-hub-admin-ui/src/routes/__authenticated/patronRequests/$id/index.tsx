@@ -477,70 +477,6 @@ function RouteComponent() {
 								</Stack>
 							</Stack>
 						</Grid>
-
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.patron_hostlms")}
-								</Typography>
-								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
-							</Stack>
-						</Grid>
-
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.supplying_agency_code")}
-								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localAgency}
-								/>
-							</Stack>
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.pickup_agency_code")}
-								</Typography>
-								{pickupLocationDataLoading ? (
-									<CircularProgress
-										color="inherit"
-										size={13}
-										sx={{ marginLeft: "10px" }}
-									/>
-								) : (
-									<RenderAttribute
-										attribute={
-											pickupLocationDataError
-												? t("patron_request.error_pickup")
-												: pickupLocation?.agency?.code
-										}
-									/>
-								)}
-							</Stack>
-						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography variant="attributeTitle">
-									{t("patron_request.pickup_hostlms_code")}
-								</Typography>
-								{pickupLocationDataLoading ? (
-									<CircularProgress
-										color="inherit"
-										size={13}
-										sx={{ marginLeft: "10px" }}
-									/>
-								) : (
-									<RenderAttribute
-										attribute={
-											pickupLocationDataError
-												? t("patron_request.error_pickup")
-												: pickupLocation?.hostSystem?.code
-										}
-									/>
-								)}
-							</Stack>
-						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
@@ -745,6 +681,69 @@ function RouteComponent() {
 								<RenderAttribute
 									attribute={patronRequest?.pollCountForCurrentStatus?.toString()}
 								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.patron_hostlms")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
+							</Stack>
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.supplying_agency_code")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers[0]?.localAgency}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.pickup_agency_code")}
+								</Typography>
+								{pickupLocationDataLoading ? (
+									<CircularProgress
+										color="inherit"
+										size={13}
+										sx={{ marginLeft: "10px" }}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={
+											pickupLocationDataError
+												? t("patron_request.error_pickup")
+												: pickupLocation?.agency?.code
+										}
+									/>
+								)}
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.pickup_hostlms_code")}
+								</Typography>
+								{pickupLocationDataLoading ? (
+									<CircularProgress
+										color="inherit"
+										size={13}
+										sx={{ marginLeft: "10px" }}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={
+											pickupLocationDataError
+												? t("patron_request.error_pickup")
+												: pickupLocation?.hostSystem?.code
+										}
+									/>
+								)}
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1131,9 +1130,19 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.local_item_barcode")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localItemBarcode}
-								/>
+								<Stack
+									direction="row"
+									sx={{ alignItems: "center" }}
+									spacing={0.5}
+								>
+									<RenderAttribute
+										attribute={patronRequest?.suppliers[0]?.localItemBarcode}
+									/>
+									<CopyToClipboardButton
+										value={patronRequest?.suppliers[0]?.localItemBarcode}
+										label={t("patron_request.local_item_barcode")}
+									/>
+								</Stack>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1274,11 +1283,23 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.local_barcode")}
 								</Typography>
-								<RenderAttribute
-									attribute={
-										patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
-									}
-								/>
+								<Stack
+									direction="row"
+									sx={{ alignItems: "center" }}
+									spacing={0.5}
+								>
+									<RenderAttribute
+										attribute={
+											patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
+										}
+									/>
+									<CopyToClipboardButton
+										value={
+											patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
+										}
+										label={t("patron_request.local_barcode")}
+									/>
+								</Stack>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1370,9 +1391,19 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.borrowing_patron_barcode")}
 								</Typography>
-								<RenderAttribute
-									attribute={patronRequest?.requestingIdentity?.localBarcode}
-								/>
+								<Stack
+									direction="row"
+									sx={{ alignItems: "center" }}
+									spacing={0.5}
+								>
+									<RenderAttribute
+										attribute={patronRequest?.requestingIdentity?.localBarcode}
+									/>
+									<CopyToClipboardButton
+										value={patronRequest?.requestingIdentity?.localBarcode}
+										label={t("patron_request.borrowing_patron_barcode")}
+									/>
+								</Stack>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1580,13 +1611,29 @@ function RouteComponent() {
 										sx={{ marginLeft: "10px" }}
 									/>
 								) : (
-									<RenderAttribute
-										attribute={
-											patronIdentitiesError
-												? t("patron_request.error_identities")
-												: pickupPatronIdentity?.localBarcode
-										}
-									/>
+									<Stack
+										direction="row"
+										sx={{ alignItems: "center" }}
+										spacing={0.5}
+									>
+										<RenderAttribute
+											attribute={
+												patronIdentitiesError
+													? t("patron_request.error_identities")
+													: pickupPatronIdentity?.localBarcode
+											}
+										/>
+										<CopyToClipboardButton
+											// No button on the error branch - the attribute is an error
+											// message there, not a barcode.
+											value={
+												patronIdentitiesError
+													? undefined
+													: pickupPatronIdentity?.localBarcode
+											}
+											label={t("patron_request.local_barcode")}
+										/>
+									</Stack>
 								)}
 							</Stack>
 						</Grid>
