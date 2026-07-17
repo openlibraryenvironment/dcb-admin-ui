@@ -40,6 +40,7 @@ import {
 import { useRouter } from "next/router";
 import { formatDuration } from "src/helpers/formatDuration";
 import { cleanupStatuses, untrackedStatuses } from "src/helpers/statuses";
+import { formatPatronRequestStatus } from "src/helpers/formatPatronRequestStatus";
 import { LocationCell } from "@components/LocationCell/LocationCell";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -652,7 +653,12 @@ export default function PatronRequestDetails() {
 								<Typography variant="attributeTitle">
 									{t("details.status")}
 								</Typography>
-								<RenderAttribute attribute={patronRequest?.status} />
+								<RenderAttribute
+									attribute={formatPatronRequestStatus(
+										patronRequest?.status,
+										patronRequest?.outcome,
+									)}
+								/>
 							</Stack>
 							{session?.profile?.roles?.includes("CONSORTIUM_ADMIN") ? (
 								<Tooltip

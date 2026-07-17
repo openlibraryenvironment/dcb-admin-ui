@@ -45,6 +45,7 @@ const headerMappings: Record<string, Record<string, string>> = {
 		canonicalItemType: "DCB Canonical item type",
 		previousStatus: "Previous status",
 		status: "Status",
+		outcome: "Outcome",
 		nextExpectedStatus: "Next expected status",
 		errorMessage: "Error message",
 		outOfSequenceFlag: "Out of sequence?",

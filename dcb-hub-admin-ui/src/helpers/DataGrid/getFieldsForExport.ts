@@ -48,6 +48,7 @@ export const getFieldsForExport = (coreType: string) => {
 				"canonicalItemType",
 				"previousStatus",
 				"status",
+				"outcome",
 				"nextExpectedStatus",
 				"errorMessage",
 				"outOfSequenceFlag",

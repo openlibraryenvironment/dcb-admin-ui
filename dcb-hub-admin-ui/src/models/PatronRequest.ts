@@ -21,6 +21,7 @@ export interface PatronRequest {
 	pickupRequestId: string;
 	pickupRequestStatus: string;
 	status: string;
+	outcome?: string | null;
 	localRequestId: string;
 	localRequestStatus: string;
 	localItemId: string;

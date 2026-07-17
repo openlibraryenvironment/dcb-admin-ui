@@ -1425,6 +1425,7 @@ export const getPatronRequests = gql`
 				pickupLocationCode
 				description
 				status
+				outcome
 				previousStatus
 				nextExpectedStatus
 				errorMessage
@@ -1495,6 +1496,7 @@ export const getPatronRequestsForExport = gql`
 				pickupLocationCode
 				description
 				status
+				outcome
 				previousStatus
 				nextExpectedStatus
 				errorMessage
@@ -1561,6 +1563,7 @@ export const getPatronRequestTotals = gql`
 				dateCreated
 				dateUpdated
 				status
+				outcome
 				patronHostlmsCode
 				isExpeditedCheckout
 				outOfSequenceFlag
@@ -1590,6 +1593,7 @@ export const getPatronRequestById = gql`
 				pickupRequestId
 				pickupRequestStatus
 				status
+				outcome
 				localRequestId
 				localRequestStatus
 				localItemId
@@ -1732,6 +1736,7 @@ export const getLegacyPatronRequestById = gql`
 				pickupRequestId
 				pickupRequestStatus
 				status
+				outcome
 				localRequestId
 				localRequestStatus
 				localItemId
@@ -1862,6 +1867,7 @@ export const getPatronRequestEssentials = gql`
 				patronHostlmsCode
 				bibClusterId
 				status
+				outcome
 				localRequestId
 				localRequestStatus
 				localItemId

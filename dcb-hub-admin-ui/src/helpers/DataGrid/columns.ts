@@ -1,4 +1,6 @@
 import dayjs from "dayjs";
+import { createElement } from "react";
+import Chip from "@mui/material/Chip";
 import {
 	containsOnly,
 	durationFilters,
@@ -13,6 +15,7 @@ import {
 	GridColumnVisibilityModel,
 } from "@mui/x-data-grid-premium";
 import { luceneDateRangeOperators } from "@components/ServerPaginatedGrid/components/DateTimeRangeFilter";
+import { formatPatronRequestStatus } from "../formatPatronRequestStatus";
 
 // Handles standard columns so we don't have to re-declare them everywhere
 
@@ -385,10 +388,35 @@ const getPatronRequestColumns = (
 		{
 			field: "status",
 			headerName: "Status",
-			minWidth: 100,
+			minWidth: 220,
 			flex: 1.5,
 			filterOperators: standardFilters,
 			filterable: isStandard ? true : false,
+			renderCell: (params) => {
+				const outcome = params.row.outcome;
+				const color =
+					outcome === "SUPPLIED"
+						? "success"
+						: outcome === "NOT_SUPPLIED"
+							? "warning"
+							: outcome === "CANCELLED"
+								? "error"
+								: "default";
+
+				return createElement(Chip, {
+					label: formatPatronRequestStatus(params.row.status, outcome),
+					color,
+					size: "small",
+					variant: outcome ? "filled" : "outlined",
+				});
+			},
+		},
+		{
+			field: "outcome",
+			headerName: "Outcome",
+			minWidth: 140,
+			flex: 1,
+			filterOperators: standardFilters,
 		},
 		{
 			field: "nextExpectedStatus",
@@ -598,6 +626,7 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		pickupLocationCode: false,
 		patronHostlmsCode: false,
 		previousStatus: false,
+		outcome: false,
 		nextExpectedStatus: false,
 		errorMessage: false,
 		outOfSequenceFlag: false,
@@ -626,6 +655,7 @@ export const defaultSupplierRequestLibraryColumnVisibility: GridColumnVisibility
 		pickupLocationCode: false,
 		patronHostlmsCode: true,
 		previousStatus: false,
+		outcome: false,
 		nextExpectedStatus: false,
 		errorMessage: false,
 		outOfSequenceFlag: false,
@@ -653,6 +683,7 @@ export const defaultPatronRequestColumnVisibility: GridColumnVisibilityModel = {
 	canonicalPtype: false,
 	pickupLocationCode: false,
 	previousStatus: false,
+	outcome: false,
 	nextExpectedStatus: false,
 	errorMessage: false,
 	outOfSequenceFlag: false,
@@ -682,6 +713,7 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		canonicalItemType: false,
 		canonicalPtype: false,
 		pickupLocationCode: false,
+		outcome: false,
 		elapsedTimeInCurrentStatus: false,
 		pollCountForCurrentStatus: false,
 		outOfSequenceFlag: false,
@@ -705,6 +737,7 @@ export const exceptionPatronRequestColumnVisibility = {
 	canonicalPtype: false,
 	pickupLocationCode: false,
 	previousStatus: true,
+	outcome: false,
 	status: false,
 	errorMessage: true,
 	elapsedTimeInCurrentStatus: false,
@@ -733,6 +766,7 @@ export const locationPatronRequestColumnVisibility = {
 	canonicalPtype: false,
 	pickupLocationCode: false,
 	status: true,
+	outcome: false,
 	previousStatus: false,
 	nextExpectedStatus: false,
 	errorMessage: false,
@@ -767,6 +801,7 @@ export const cleanupPatronRequestVisibility = {
 	canonicalPtype: false,
 	pickupLocationCode: false,
 	status: false,
+	outcome: false,
 	previousStatus: false,
 	nextExpectedStatus: false,
 	errorMessage: false,
@@ -806,6 +841,7 @@ export const defaultPatronRequestGroupVisibility: GridColumnVisibilityModel = {
 	supplyingAgencyCode: true,
 	pickupLocationCode: true,
 	status: true,
+	outcome: false,
 	canonicalItemType: false,
 	canonicalPtype: false,
 	previousStatus: false,
