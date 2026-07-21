@@ -24,6 +24,11 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import useDCBVersionStore from "@hooks/serviceInfoStore";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import { appUrl } from "@helpers/appBase";
+import {
+	assertOidcAuthorityReachable,
+	isOidcAuthorityUnavailableError,
+	oidcDiscoveryUrl,
+} from "@helpers/oidcPreflight";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
@@ -75,7 +80,7 @@ export default function Header({
 		setHeaderImageURL,
 	} = useConsortiumInfoStore();
 
-	const handleAuthClick = () => {
+	const handleAuthClick = async () => {
 		if (auth.isAuthenticated) {
 			clearGridState();
 			clearVersionStore();
@@ -84,7 +89,30 @@ export default function Header({
 				post_logout_redirect_uri: appUrl("logout?loggedOut=true"),
 			});
 		} else {
-			auth.signinRedirect();
+			const authority = window.__APP_ENV__?.VITE_KEYCLOAK_URL;
+			try {
+				await assertOidcAuthorityReachable(authority);
+				await auth.signinRedirect();
+			} catch (error) {
+				const discoveryUrl =
+					isOidcAuthorityUnavailableError(error) && error.discoveryUrl
+						? error.discoveryUrl
+						: authority
+							? oidcDiscoveryUrl(authority)
+							: "";
+				window.alert(
+					[
+						t("loginout.identity_provider_unreachable"),
+						t("loginout.identity_provider_unreachable_detail", {
+							error: error instanceof Error ? error.message : String(error),
+						}),
+						t("loginout.local_https_trust_hint"),
+						discoveryUrl,
+					]
+						.filter(Boolean)
+						.join("\n\n"),
+				);
+			}
 		}
 	};
 

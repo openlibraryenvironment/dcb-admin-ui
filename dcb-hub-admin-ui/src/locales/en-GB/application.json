@@ -833,9 +833,13 @@
 	},
 	"loginout": {
 		"expiring_warning": "Your session is about to expire. Press continue or move your mouse to stay securely signed in.",
+		"identity_provider_unreachable": "The identity provider could not be reached by this browser.",
+		"identity_provider_unreachable_detail": "Login cannot continue until the browser trusts the identity provider URL. Details: {{error}}",
 		"keycloak": "We use <linkComponent>Keycloak</linkComponent> for secure authentication",
 		"login": "Please login to gain full access to $t(app.name)",
+		"local_https_trust_hint": "For the local smoke stack, run ./qa-local.sh certs from dcb-ops/docker-local and restart the browser. If the browser still blocks the request, open the identity provider URL in a new tab and approve the local certificate.",
 		"logout": "Logout",
+		"open_identity_provider": "Open identity provider",
 		"stay_logged_in": "Stay logged in",
 		"logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>"
 	},
@@ -1907,4 +1911,3 @@
 		"RET-LOCAL": "Local"
 	}
 }
-
