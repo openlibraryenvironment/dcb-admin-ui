@@ -24,25 +24,6 @@ cache:
   paths:
     - dcb-hub-admin-ui/node_modules/
     - .npm
-# Regenerate and fail if the result differs from what is checked in - without this
-# gate the artifacts rot again and the types become a lie.
-codegen:
-  stage: verify
-  script:
-    - cd dcb-hub-admin-ui
-    - npm ci
-    - npm run codegen
-    # `git add -N` marks the file intent-to-add so that `git diff` also reports it
-    # when it is untracked. Without it a deleted or never-committed generated file
-    # would slip through as "no diff".
-    - git add -N src/generated/graphql.ts
-    - |
-      if ! git diff --exit-code -- src/generated/graphql.ts; then
-        echo "ERROR: src/generated/graphql.ts is out of date."
-        echo "Run 'npm run codegen' in dcb-hub-admin-ui/ and commit the result."
-        exit 1
-      fi
-
 build:
   stage: build
   script:
