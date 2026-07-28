@@ -111,8 +111,6 @@ deploy_tag_to_s3:
   dependencies:
     - build
 
-
-
 # This new option also deploys the bundle to an R2 bucket at cloudflare - but with the intention that this becomes a reusable deployment that is configured by hostname
 # My aim here is to add some code that talks to a service and resolves the backend and auth credentials based on hostname so we can deploy a wildcard domain like
 # *.dcb.kihosting.net and have all DCB installs served from that one bucket - saving us multiple different deployments. The config could be loaded from a static file
@@ -132,9 +130,9 @@ deploy_tag_to_r2:
   script:
     - echo "Deploying version $RELEASE_VERSION to CF R2..."
     # New
-    - aws s3 rm "s3://dcb-hub-admin-ui/dcb-hub-admin-ui-${CI_COMMIT_TAG}" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://dcb-hub-admin-ui/dcb-hub-admin-ui-${CI_COMMIT_TAG}" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    - aws s3 cp dcb-hub-admin-ui/public/config-prod.json "s3://dcb-hub-admin-ui/config.json" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+    - aws s3 rm "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    # We should also post a versoin update to s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json
   variables:
     AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
@@ -168,3 +166,31 @@ deploy_dev_to_s3:
     AWS_REGION: eu-west-1
   dependencies:
     - build
+
+deploy_dev_to_r2:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    - echo "Deploying version $RELEASE_VERSION to CF R2..."
+    # New
+    - aws s3 rm "s3://ki-front-end-bundles/dcb-hub-admin-ui/next" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/next" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    # We should also post a versoin update to s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json
+  variables:
+    AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
+    AWS_REGION: auto
+  needs:
+    - build
+    - release
+  dependencies:
+    - build
+
