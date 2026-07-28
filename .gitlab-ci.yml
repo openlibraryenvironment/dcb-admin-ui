@@ -190,7 +190,6 @@ deploy_dev_to_r2:
     AWS_REGION: auto
   needs:
     - build
-    - release
   dependencies:
     - build
 
