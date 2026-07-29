@@ -35,17 +35,25 @@ build:
     # must sit next to package.json - i.e. be written AFTER the cd.
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
     - npm ci
-    # The base path is BAKED into the bundle (vite.config.mts: base =
-    # VITE_PUBLIC_URL || "/") and is read back as the router basepath. Build it
-    # without this and every asset URL comes out root-absolute - the Cloudflare
-    # worker then looks for them at the bucket root, 404s the lot, and the app
-    # is a white screen. It must equal the S3 app prefix the worker serves from.
+    # This remains the standalone asset/router base. The same artifact's
+    # ki-bootstrap.js entry routes at "/" and resolves chunks from its own URL.
     - VITE_PUBLIC_URL=/dcb-admin/ npm run build
   artifacts:
     # Artifact paths are relative to the repo root, not to the job's cwd.
     paths:
       - dcb-hub-admin-ui/dist/
     expire_in: 1 hour
+
+verify_ki_bootstrap:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run e2e:ki-bootstrap
 
 release:
   stage: release
@@ -128,21 +136,19 @@ deploy_tag_to_r2:
     name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
     pull_policy: if-not-present
   script:
-    - echo "Deploying version $RELEASE_VERSION to CF R2..."
-    # New
-    - aws s3 rm "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    # We should also post a versoin update to s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json
+    - echo "Deploying version $CI_COMMIT_TAG to CF R2..."
+    - test -z "$(aws s3 ls "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive)"
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    - echo "{\"version\":\"${CI_COMMIT_TAG}\"}" > latest.json
+    - aws s3 cp latest.json "s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
   variables:
     AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
     AWS_REGION: auto
   needs:
     - build
-    - release
   dependencies:
     - build
-
 deploy_dev_to_s3:
   stage: deploy
   rules:
@@ -179,11 +185,7 @@ deploy_dev_to_r2:
     name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
     pull_policy: if-not-present
   script:
-    - echo "Deploying version $RELEASE_VERSION to CF R2..."
-    # New
-    - aws s3 rm "s3://ki-front-end-bundles/dcb-hub-admin-ui/next" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/next" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    # We should also post a versoin update to s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/next/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
   variables:
     AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
@@ -192,4 +194,3 @@ deploy_dev_to_r2:
     - build
   dependencies:
     - build
-
