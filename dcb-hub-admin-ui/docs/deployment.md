@@ -39,13 +39,31 @@ The application requires the following environment variables to function properl
 
                             |
 
-| `VITE_PUBLIC_URL` | No | Base path if hosting on a subpath. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** Vite bakes it into the bundle as the asset base, and the router basepath, i18n load path and storage keys are all derived from it at build time via `import.meta.env.BASE_URL`. It is deliberately _not_ served in `inject_env.json`: two independently-settable copies of the base can disagree, and the app then mounts at a path from which its own assets do not resolve — a white screen. Set it in the build, never at runtime. |
+| `VITE_PUBLIC_URL` | No | Standalone base path. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** The standalone entry uses it for assets, routing, translations and storage. The bootloader entry always routes at `/` and resolves assets from its own bundle URL. |
 
 ---
 
 ## 3. Deployment Pathways
 
 Choose the deployment method that matches your infrastructure - Cloudflare is currently preferred for official OpenRS deployments, but choose what works for you.
+
+### KI bootloader bundle
+
+`npm run build` creates one `dist/` artifact with the standalone `index.html`
+and a fixed adapter entry point:
+
+```ts
+mount({ element, config }): Promise<void>
+```
+
+Publish the same directory to existing standalone destinations and as
+`dcb-hub-admin-ui/<version>/`. Configure the neutral bootloader with app
+`dcb-hub-admin-ui` and that version. The supplied config uses the variables in
+Section 2. Asset and translation URLs resolve from the versioned bundle;
+application routes remain at `/`.
+
+The Docker image, S3 paths, `inject_env.json`, and local `npm run dev` flow remain
+unchanged.
 
 ### Option A: Cloudflare Worker in front of S3
 

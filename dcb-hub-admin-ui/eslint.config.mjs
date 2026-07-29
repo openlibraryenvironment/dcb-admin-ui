@@ -25,6 +25,7 @@ export default [
 		// its minified bundles).
 		ignores: [
 			"dist/**",
+			"dist-ki-bootstrap/**",
 			"coverage/**",
 			"src/generated/**",
 			"src/routeTree.gen.ts",

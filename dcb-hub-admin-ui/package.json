@@ -14,6 +14,7 @@
 		"prepare": "husky",
 		"build:vite": "vite build",
 		"e2e": "playwright test",
+		"e2e:ki-bootstrap": "playwright test --config playwright.ki-bootstrap.config.ts",
 		"e2e:ui": "playwright test --ui",
 		"i18n:missed": "i18n-unused display-missed",
 		"i18n:unused": "i18n-unused display-unused",
