@@ -14,7 +14,7 @@ import Error from "@components/Error/Error";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClusters } from "@queries/getClusters";
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useState } from "react";
 import type { ClusterRecordsQueryVariables } from "@generated/graphql";
 
@@ -39,10 +39,14 @@ function ClusterDetails() {
 		enabled: !!clusterId,
 	});
 
-	const { paginationModel } = useGridStore();
-
 	const cluster = data?.instanceClusters?.content?.[0];
 	const gridId = "clustermembers";
+	// Previously read paginationModel from the store with NO change handler, so the
+	// controlled model was frozen and cluster members past page 1 were unreachable.
+	// useGridState supplies the handler too, matching every other grid.
+	const { paginationModel, onPaginationModelChange } = useGridState(gridId, {
+		pagination: { page: 0, pageSize: 25 },
+	});
 
 	const columns: GridColDef[] = [
 		{
@@ -137,7 +141,8 @@ function ClusterDetails() {
 					columns={columns}
 					rows={cluster?.members ?? []}
 					loading={isLoading}
-					paginationModel={paginationModel[gridId] ?? { page: 0, pageSize: 25 }}
+					paginationModel={paginationModel}
+					onPaginationModelChange={onPaginationModelChange}
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail row={row} type="cluster" />
 					)}
