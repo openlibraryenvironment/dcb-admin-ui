@@ -182,7 +182,6 @@ function Identifiers() {
 					onFilterModelChange={handleFilterChange}
 					columnVisibilityModel={columnVisibilityModel}
 					onColumnVisibilityModelChange={handleColumnVisibilityChange}
-					checkboxSelection={false}
 					disableAggregation
 					disableRowGrouping
 					disableHoverInteractions={false}

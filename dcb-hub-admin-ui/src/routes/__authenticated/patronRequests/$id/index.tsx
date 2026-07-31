@@ -1835,7 +1835,6 @@ function RouteComponent() {
 						type="audits"
 						identifier="AuditPatronRequestDetails"
 						// This grid could show click-through details of its own for each audit log entry
-						checkboxSelection={false}
 						// sortModel={[{ field: "auditDate", sort: "desc" }]}
 						// operationDataType="Audit"
 						filterMode="client"

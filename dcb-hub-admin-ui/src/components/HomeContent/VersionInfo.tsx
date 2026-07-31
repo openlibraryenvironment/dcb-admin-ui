@@ -145,7 +145,6 @@ const VersionInfo: React.FC = () => {
 			columns={columns}
 			rows={versionData}
 			loading={loading}
-			checkboxSelection={false}
 			disableAggregation
 			disableRowGrouping
 			disablePivoting

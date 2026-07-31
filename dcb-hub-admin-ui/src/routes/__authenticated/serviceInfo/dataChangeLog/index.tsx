@@ -99,7 +99,6 @@ function DataChangeLogsGrid() {
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="dataChangeLog" />
 				)}
-				checkboxSelection={true}
 				exportConfig={{
 					query: getDataChangeLog,
 					coreType: "dataChangeLog",

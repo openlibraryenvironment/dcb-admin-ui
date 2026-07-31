@@ -194,7 +194,7 @@ export default function MappingsGrid({
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={processRowUpdate}
-				checkboxSelection={false}
+				rowSelection
 				exportConfig={{
 					query: getQuery,
 					coreType: dataKey,

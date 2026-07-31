@@ -229,7 +229,6 @@ export default function CombinedEnvironmentComponent() {
 				paginationModel={{ page: 0, pageSize: 20 }}
 				sortingMode="client"
 				filterMode="client"
-				checkboxSelection={false}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

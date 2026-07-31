@@ -121,7 +121,6 @@ export const CleanupProgressDialog = ({
 										columnVisibilityModel={cleanupPatronRequestVisibility}
 										rows={successRows}
 										loading={false}
-										checkboxSelection={false}
 										disableAggregation
 										disableRowGrouping
 										disablePivoting
@@ -176,7 +175,6 @@ export const CleanupProgressDialog = ({
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={errorRows}
 									loading={false}
-									checkboxSelection={false}
 									disableAggregation
 									disableRowGrouping
 									disablePivoting
@@ -230,7 +228,6 @@ export const CleanupProgressDialog = ({
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={skippedRows}
 									loading={false}
-									checkboxSelection={false}
 									disableAggregation
 									disableRowGrouping
 									disablePivoting

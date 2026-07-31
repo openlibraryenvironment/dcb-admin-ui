@@ -191,7 +191,6 @@ export default function ConsortiumDetails() {
 			columns={columns}
 			rows={rows}
 			loading={false}
-			checkboxSelection={false}
 			disableAggregation
 			disableRowGrouping
 			disablePivoting

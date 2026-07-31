@@ -56,7 +56,10 @@ declare module "@mui/x-data-grid-premium" {
 	}
 }
 const IMMUTABLE_FALLBACK_MODES = {};
-interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
+interface CustomDataGridProps extends Omit<
+	DataGridPremiumProps,
+	"sx" | "checkboxSelection"
+> {
 	autoRowHeight?: boolean;
 	identifier: string;
 	listViewEnabled: boolean;
@@ -78,6 +81,18 @@ interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
 	 */
 	exportConfig?: GridExportConfig;
 	disableToolbarFilter?: boolean;
+	/**
+	 * Opts this grid into row selection: checkboxes, the selection column and the
+	 * selection-driven toolbar actions. Off by default, because a checkbox the
+	 * user can tick but never act on is a lie. Turn it on only where the grid
+	 * offers a bulk action:
+	 *  - cleanup / rollback (any `type="patronRequests"` grid),
+	 *  - add libraries to a group (the libraries grid),
+	 *  - the export wizard's "selected rows" scope (`exportConfig.wizard`).
+	 * This is the single switch for selection - `checkboxSelection` is derived
+	 * from it, so the two can never disagree.
+	 */
+	rowSelection?: boolean;
 }
 
 export default function DataGrid({
@@ -103,6 +118,7 @@ export default function DataGrid({
 	rows,
 	onRowSelectionModelChange,
 	disableToolbarFilter,
+	rowSelection = false,
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
@@ -236,6 +252,11 @@ export default function DataGrid({
 				listView={listViewEnabled}
 				pivotActive={pivotingEnabled}
 				showToolbar={toolbarVisible}
+				// One switch, two MUI props: `rowSelection` gates the behaviour and
+				// `checkboxSelection` the column, so deriving the latter keeps a grid
+				// from rendering checkboxes that select nothing (or vice versa).
+				rowSelection={rowSelection}
+				checkboxSelection={rowSelection}
 				rowSelectionModel={selectionModel}
 				onRowSelectionModelChange={handleSelectionChange}
 				onRowClick={handleRowClick}

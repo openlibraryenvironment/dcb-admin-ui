@@ -230,7 +230,7 @@ function PatronRequestsActive() {
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="patronRequests" />
 						)}
-						checkboxSelection={true}
+						rowSelection
 						exportConfig={{
 							query: getPatronRequestsForExport,
 							coreType: "patronRequests",

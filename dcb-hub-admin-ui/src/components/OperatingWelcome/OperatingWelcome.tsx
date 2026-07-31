@@ -216,7 +216,6 @@ export default function OperatingWelcome() {
 			processRowUpdate={processRowUpdate}
 			rowModesModel={{}}
 			// Feature Flags
-			checkboxSelection={true}
 			disableAggregation={true}
 			disableHoverInteractions={false}
 			disablePivoting={true}

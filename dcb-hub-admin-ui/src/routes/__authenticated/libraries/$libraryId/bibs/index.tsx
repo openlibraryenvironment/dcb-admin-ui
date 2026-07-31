@@ -297,7 +297,6 @@ function LibraryBibs() {
 						onFilterModelChange={handleFilterChange}
 						columnVisibilityModel={columnVisibilityModel}
 						onColumnVisibilityModelChange={handleColumnVisibilityChange}
-						checkboxSelection={false}
 						exportConfig={{
 							query: getBibs,
 							coreType: "sourceBibs",

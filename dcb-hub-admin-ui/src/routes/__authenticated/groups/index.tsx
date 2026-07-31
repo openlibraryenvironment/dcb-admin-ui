@@ -196,7 +196,6 @@ function GroupsRouteComponent() {
 				onFilterModelChange={handleFilterChange}
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
-				checkboxSelection={true}
 				exportConfig={{
 					query: getLibraryGroups,
 					coreType: "libraryGroups",

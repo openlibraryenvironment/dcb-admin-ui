@@ -223,7 +223,6 @@ function GroupDetails() {
 						paginationMode="client"
 						sortingMode="client"
 						filterMode="client"
-						checkboxSelection={false}
 						disableAggregation
 						disableHoverInteractions={false}
 						disableRowGrouping

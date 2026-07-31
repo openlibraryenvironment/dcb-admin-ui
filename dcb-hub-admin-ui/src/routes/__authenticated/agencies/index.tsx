@@ -169,7 +169,6 @@ function AgenciesRouteComponent() {
 				onFilterModelChange={handleFilterChange}
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
-				checkboxSelection={true}
 				exportConfig={{
 					query: getAgencies,
 					coreType: "agencies",

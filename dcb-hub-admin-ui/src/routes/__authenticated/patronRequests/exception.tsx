@@ -315,7 +315,7 @@ function Exception() {
 					</Typography>
 					<DataGrid
 						autoRowHeight={false}
-						checkboxSelection={true}
+						rowSelection
 						columns={noStatusColumns}
 						columnVisibilityModel={columnVisibilityModel}
 						onColumnVisibilityModelChange={handleColumnVisibilityChange}

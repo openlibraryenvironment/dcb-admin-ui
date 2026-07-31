@@ -343,7 +343,6 @@ function LibraryContacts() {
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						processRowUpdate={processRowUpdate}
-						checkboxSelection={false}
 						disableAggregation
 						disableRowGrouping
 						toolbarVisible={false}

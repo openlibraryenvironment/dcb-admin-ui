@@ -253,7 +253,7 @@ function NumericRangeMappingsRoute() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={processRowUpdate}
-				checkboxSelection={false}
+				rowSelection
 				exportConfig={{
 					query: getNumericRangeMappings,
 					coreType: "numericRangeMappings",

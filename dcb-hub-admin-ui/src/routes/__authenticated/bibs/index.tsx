@@ -94,7 +94,6 @@ function BibsRouteComponent() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				checkboxSelection={false}
 				exportConfig={{
 					query: getBibs,
 					coreType: "sourceBibs",
