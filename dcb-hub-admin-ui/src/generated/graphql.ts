@@ -835,6 +835,44 @@ export type GetAuditsByPatronRequestQuery = {
 	};
 };
 
+export type LoadAuditIncidenceQueryVariables = Exact<{
+	query?: string | null | undefined;
+	interval?: string | null | undefined;
+	start?: string | null | undefined;
+	end?: string | null | undefined;
+}>;
+
+export type LoadAuditIncidenceQuery = {
+	auditIncidence: {
+		interval: string;
+		totalSize: number;
+		buckets: Array<{ bucketStart: string; count: number }>;
+	};
+};
+
+export type LoadAuditsQueryVariables = Exact<{
+	pageno: number;
+	pagesize: number;
+	order: string;
+	query: string;
+	orderBy: string;
+}>;
+
+export type LoadAuditsQuery = {
+	audits: {
+		totalSize: number | null;
+		content: Array<{
+			id: string;
+			auditDate: string | null;
+			briefDescription: string | null;
+			auditData: Record<string, any> | null;
+			fromStatus: string | null;
+			toStatus: string | null;
+			patronRequest: { id: string } | null;
+		} | null> | null;
+	};
+};
+
 export type LoadBibMainDetailsQueryVariables = Exact<{
 	query: string;
 }>;

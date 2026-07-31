@@ -1,24 +1,39 @@
 import { RefObject, useState } from "react";
 import axios from "axios";
+import { useAuth } from "react-oidc-context";
+import { useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	GridApiPremium,
 	gridRowSelectionIdsSelector,
 } from "@mui/x-data-grid-premium";
 import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
+import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
 
 interface UsePatronRequestCleanupProps {
 	apiRef: RefObject<GridApiPremium | null>;
-	dcbApiBase: string;
-	headers: Record<string, string>;
 	onSuccess?: () => void;
 }
 
+/**
+ * Bulk "force clean up" for the patron request grids. Standardised with
+ * usePatronRequestRollback: same shape, same self-resolved auth/API base (a grid
+ * opts in with just an apiRef), and the same patron-request cache invalidation on
+ * completion so the grid reflects the new statuses without a reload.
+ *
+ * Cleanup runs immediately (no confirmation step) - unlike rollback, which is
+ * only safe after an outage and so gates behind a warning. Eligibility is the
+ * broad cleanupStatuses set; anything else in the selection is skipped.
+ */
 export const usePatronRequestCleanup = ({
 	apiRef,
-	dcbApiBase,
-	headers,
 	onSuccess,
 }: UsePatronRequestCleanupProps) => {
+	const auth = useAuth();
+	const { cfg } = useRouter().options.context as { cfg: any };
+	const dcbApiBase = cfg?.VITE_DCB_API_BASE;
+	const queryClient = useQueryClient();
+
 	const [cleanupState, setCleanupState] = useState({
 		open: false,
 		isCleaning: false,
@@ -76,15 +91,20 @@ export const usePatronRequestCleanup = ({
 				batch.map(async (row) => {
 					try {
 						const cleanupUrl = `${dcbApiBase}/patrons/requests/${row.id}/transition/cleanup`;
-						await axios.post(cleanupUrl, {}, { headers });
+						await axios.post(
+							cleanupUrl,
+							{},
+							{
+								headers: {
+									Authorization: `Bearer ${auth.user?.access_token}`,
+								},
+							},
+						);
 						batchSuccess.push(row);
 					} catch (error) {
 						console.error(`Failed to clean up request ${row.id}`, error);
 						batchError.push(row);
 					}
-					// finally {
-					// 	processed++;
-					// }
 				}),
 			);
 			processed += batch.length;
@@ -98,6 +118,9 @@ export const usePatronRequestCleanup = ({
 		}
 
 		setCleanupState((prev) => ({ ...prev, isCleaning: false }));
+
+		// Refresh the grid (and detail/totals) so the finalised statuses show up.
+		invalidatePatronRequestQueries(queryClient);
 
 		if (onSuccess) onSuccess();
 

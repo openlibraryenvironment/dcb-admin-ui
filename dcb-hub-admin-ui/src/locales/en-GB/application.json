@@ -1,181 +1,4 @@
 {
-	"insights": {
-		"consortium": {
-			"title": "Consortium insights",
-			"subtitle": "Requesting activity, fulfilment and value across the whole consortium."
-		},
-		"library": {
-			"title": "Library insights",
-			"subtitle": "Requesting activity, fulfilment and value for this library.",
-			"no_hostlms": "This library has no associated Host LMS, so insights cannot be shown."
-		},
-		"no_data": "No data for the selected period.",
-		"scope": {
-			"label": "Libraries",
-			"placeholder": "All libraries — pick libraries or a group",
-			"groups": "Groups",
-			"libraries": "Libraries"
-		},
-		"range": {
-			"label": "Time range",
-			"7d": "7 days",
-			"30d": "30 days",
-			"90d": "90 days",
-			"365d": "1 year",
-			"from": "From",
-			"to": "To"
-		},
-		"kpi": {
-			"vs_prior": "vs previous period",
-			"fill_rate": {
-				"title": "Fill rate"
-			},
-			"error_rate": {
-				"title": "Error rate"
-			},
-			"time_to_loan": {
-				"title": "Median time to loan",
-				"subtitle": "p50 · p95 {{p95}}"
-			},
-			"resolved": {
-				"title": "Requests resolved",
-				"subtitle": "completed or failed"
-			},
-			"cost_avoidance": {
-				"title": "Estimated cost avoided",
-				"basis": "Based on {{count}} successful fulfilments",
-				"input_label": "Cost per ILL",
-				"input_help": "Your own average interlibrary loan cost"
-			},
-			"checkout_rate": {
-				"title": "Checkout rate",
-				"subtitle": "{{reached}} of {{total}} reached the shelf"
-			},
-			"total_borrows": {
-				"title": "Total borrows",
-				"subtitle": "requests placed as borrower"
-			},
-			"total_lends": {
-				"title": "Total lends",
-				"subtitle": "items supplied to the network"
-			},
-			"rescued": {
-				"title": "Requests rescued",
-				"subtitle": "fulfilled after re-resolution"
-			},
-			"unique_titles": {
-				"title": "Unique titles requested",
-				"subtitle": "across {{total}} requests"
-			}
-		},
-		"charts": {
-			"status_flow": {
-				"title": "Requesting activity over time",
-				"subtitle": "Requests entering each status per period. Pick the statuses to plot.",
-				"picker_label": "Choose which statuses to plot"
-			},
-			"failure_taxonomy": {
-				"title": "Why requests fail",
-				"subtitle": "Failed requests broken down by reason.",
-				"series": "Failed requests"
-			},
-			"supplier_reliability": {
-				"title": "Supplier reliability",
-				"subtitle": "Fulfilled versus failed requests per supplying library.",
-				"fulfilled": "Fulfilled",
-				"failed": "Failed"
-			},
-			"net_flow": {
-				"title": "Borrowing vs supplying",
-				"subtitle": "Reciprocity across the network — net givers and takers.",
-				"borrowed": "Borrowed",
-				"supplied": "Supplied"
-			},
-			"rare_gem": {
-				"title": "Unique collection value",
-				"subtitle": "Requested titles that only this library supplies to the network.",
-				"col_title": "Title",
-				"col_author": "Author",
-				"col_requests": "Requests"
-			},
-			"time_in_status": {
-				"title": "Where requests stall",
-				"subtitle": "Median time spent in each status — the biggest bottleneck first.",
-				"series": "Median dwell",
-				"axis_hours": "Hours"
-			},
-			"supplier_response": {
-				"title": "Supplier responsiveness",
-				"subtitle": "Median time from request placed to supplier confirmation, per lender.",
-				"series": "Median response",
-				"axis_hours": "Hours"
-			},
-			"demand_heatmap": {
-				"title": "When requests arrive",
-				"subtitle": "Request volume by day of week and hour of day (server time zone)."
-			},
-			"demand_by_format": {
-				"title": "Demand by format",
-				"subtitle": "Requesting volume by material format.",
-				"series": "Requests"
-			},
-			"top_titles": {
-				"title": "Most requested titles",
-				"subtitle": "The titles the network asks for most.",
-				"col_title": "Title",
-				"col_requests": "Requests"
-			},
-			"demand_by_pickup": {
-				"title": "Demand by pickup location",
-				"subtitle": "Where patrons collect their requests.",
-				"series": "Requests"
-			},
-			"demand_by_patron_group": {
-				"title": "Demand by patron group",
-				"subtitle": "Which patron categories drive requesting.",
-				"series": "Requests"
-			},
-			"unmet_local": {
-				"title": "Unmet local demand",
-				"subtitle": "Titles your own patrons requested but you do not hold.",
-				"col_supplied": "Supplied"
-			},
-			"acquisition_opportunities": {
-				"title": "Acquisition opportunities",
-				"subtitle": "Highly requested titles across the network that you do not hold.",
-				"col_supplied": "Supplied"
-			},
-			"consortial_lifeline": {
-				"title": "Consortial lifeline",
-				"subtitle": "Titles you uniquely keep flowing to the network.",
-				"col_supplied": "Supplied"
-			},
-			"peer_benchmark": {
-				"title": "Peer benchmarking",
-				"subtitle": "Each library vs the consortium median (fill {{fill}}, checkout {{checkout}}).",
-				"col_library": "Library",
-				"col_requests": "Requests",
-				"col_checkout": "Checkout rate",
-				"col_fill": "Fill rate"
-			},
-			"collection_dimension": {
-				"title": "Collection analysis",
-				"subtitle": "Requesting demand sliced by a bibliographic dimension.",
-				"select_label": "Dimension",
-				"series": "Requests",
-				"dim_format": "Format",
-				"dim_language": "Language",
-				"dim_subject": "Subject",
-				"dim_decade": "Publication decade"
-			},
-			"new_acquisitions": {
-				"title": "New acquisitions performance",
-				"subtitle": "How your recently-added titles perform in the network.",
-				"acquired_since": "Acquired since",
-				"col_supplied": "Supplied"
-			}
-		}
-	},
 	"agencies": {
 		"add_to_group": "Add agencies to a group",
 		"agencies_one": "agency",
@@ -222,6 +45,52 @@
 		},
 		"title": "{{consortium_name}} {{environment}} | $t(app.name)",
 		"version": "Version"
+	},
+	"audit_explorer": {
+		"intro": "Search every patron request audit by its brief description to find and monitor important events - including ones that do not fail a request, such as read timeouts. Results are grouped by their owning patron request by default.",
+		"search_label": "Search brief descriptions",
+		"search_placeholder": "e.g. Virtual checkout failed",
+		"common_signals": "Common signals:",
+		"presets": {
+			"virtual_checkout_failed": "Virtual checkout failed",
+			"read_timeout": "Read timeout",
+			"timeout": "Any timeout",
+			"tracking_failed": "Tracking failed",
+			"failed": "Any failure"
+		},
+		"incidence_one": "{{count}} matching audit event",
+		"incidence_other": "{{count}} matching audit events",
+		"group_by_request": "Group by patron request",
+		"patron_request": "Patron request",
+		"request_status": "Request status",
+		"no_request": "No request",
+		"chart": {
+			"title": "Incidence over time",
+			"subtitle": "How often the matching audit events occur.",
+			"subtitle_interval": "Matching audit events per {{interval}}.",
+			"series": "Events",
+			"no_data": "No matching audit events to plot.",
+			"error": "Could not load incidence data.",
+			"interval_label": "Bucket width",
+			"interval_option": {
+				"hour": "Hourly",
+				"day": "Daily",
+				"week": "Weekly"
+			},
+			"interval_too_fine": "Too many bars for this window - choose a shorter window or a wider bucket.",
+			"range_label": "Time window",
+			"range_option": {
+				"7d": "7 days",
+				"30d": "30 days",
+				"90d": "90 days",
+				"365d": "1 year"
+			},
+			"interval": {
+				"hour": "hour",
+				"day": "day",
+				"week": "week"
+			}
+		}
 	},
 	"audit_log": {
 		"audit": "Audit data",
@@ -483,8 +352,8 @@
 		"theme_label": "Theme",
 		"mode_label": "Mode",
 		"themes": {
+			"blueAndWhite": "Blue and White",
 			"folio": "FOLIO",
-			"itsComingHome": "England World Cup 26 (It's coming home)!",
 			"koha": "Koha",
 			"mobius": "MOBIUS",
 			"openRS": "OpenRS",
@@ -585,6 +454,183 @@
 		},
 		"error": {
 			"no_data_returned": "The Host LMS did not return any data."
+		}
+	},
+	"insights": {
+		"consortium": {
+			"title": "Consortium insights",
+			"subtitle": "Requesting activity, fulfilment and value across the whole consortium."
+		},
+		"library": {
+			"title": "Library insights",
+			"subtitle": "Requesting activity, fulfilment and value for this library.",
+			"no_hostlms": "This library has no associated Host LMS, so insights cannot be shown."
+		},
+		"no_data": "No data for the selected period.",
+		"scope": {
+			"label": "Libraries",
+			"placeholder": "All libraries — pick libraries or a group",
+			"groups": "Groups",
+			"libraries": "Libraries"
+		},
+		"range": {
+			"label": "Time range",
+			"7d": "7 days",
+			"30d": "30 days",
+			"90d": "90 days",
+			"365d": "1 year",
+			"from": "From",
+			"to": "To"
+		},
+		"kpi": {
+			"vs_prior": "vs previous period",
+			"fill_rate": {
+				"title": "Fill rate"
+			},
+			"error_rate": {
+				"title": "Error rate"
+			},
+			"time_to_loan": {
+				"title": "Median time to loan",
+				"subtitle": "p50 · p95 {{p95}}"
+			},
+			"resolved": {
+				"title": "Requests resolved",
+				"subtitle": "completed or failed"
+			},
+			"cost_avoidance": {
+				"title": "Estimated cost avoided",
+				"basis": "Based on {{count}} successful fulfilments",
+				"input_label": "Cost per ILL",
+				"input_help": "Your own average interlibrary loan cost"
+			},
+			"checkout_rate": {
+				"title": "Checkout rate",
+				"subtitle": "{{reached}} of {{total}} reached the shelf"
+			},
+			"total_borrows": {
+				"title": "Total borrows",
+				"subtitle": "requests placed as borrower"
+			},
+			"total_lends": {
+				"title": "Total lends",
+				"subtitle": "items supplied to the network"
+			},
+			"rescued": {
+				"title": "Requests rescued",
+				"subtitle": "fulfilled after re-resolution"
+			},
+			"unique_titles": {
+				"title": "Unique titles requested",
+				"subtitle": "across {{total}} requests"
+			}
+		},
+		"charts": {
+			"status_flow": {
+				"title": "Requesting activity over time",
+				"subtitle": "Requests entering each status per period. Pick the statuses to plot.",
+				"picker_label": "Choose which statuses to plot"
+			},
+			"failure_taxonomy": {
+				"title": "Why requests fail",
+				"subtitle": "Failed requests broken down by reason.",
+				"series": "Failed requests"
+			},
+			"supplier_reliability": {
+				"title": "Supplier reliability",
+				"subtitle": "Fulfilled versus failed requests per supplying library.",
+				"fulfilled": "Fulfilled",
+				"failed": "Failed"
+			},
+			"net_flow": {
+				"title": "Borrowing vs supplying",
+				"subtitle": "Reciprocity across the network — net givers and takers.",
+				"borrowed": "Borrowed",
+				"supplied": "Supplied"
+			},
+			"rare_gem": {
+				"title": "Unique collection value",
+				"subtitle": "Requested titles that only this library supplies to the network.",
+				"col_title": "Title",
+				"col_author": "Author",
+				"col_requests": "Requests"
+			},
+			"time_in_status": {
+				"title": "Where requests stall",
+				"subtitle": "Median time spent in each status — the biggest bottleneck first.",
+				"series": "Median dwell",
+				"axis_hours": "Hours"
+			},
+			"supplier_response": {
+				"title": "Supplier responsiveness",
+				"subtitle": "Median time from request placed to supplier confirmation, per lender.",
+				"series": "Median response",
+				"axis_hours": "Hours"
+			},
+			"demand_heatmap": {
+				"title": "When requests arrive",
+				"subtitle": "Request volume by day of week and hour of day (server time zone)."
+			},
+			"demand_by_format": {
+				"title": "Demand by format",
+				"subtitle": "Requesting volume by material format.",
+				"series": "Requests"
+			},
+			"top_titles": {
+				"title": "Most requested titles",
+				"subtitle": "The titles the network asks for most.",
+				"col_title": "Title",
+				"col_requests": "Requests"
+			},
+			"demand_by_pickup": {
+				"title": "Demand by pickup location",
+				"subtitle": "Where patrons collect their requests.",
+				"series": "Requests"
+			},
+			"demand_by_patron_group": {
+				"title": "Demand by patron group",
+				"subtitle": "Which patron categories drive requesting.",
+				"series": "Requests"
+			},
+			"unmet_local": {
+				"title": "Unmet local demand",
+				"subtitle": "Titles your own patrons requested but you do not hold.",
+				"col_supplied": "Supplied"
+			},
+			"acquisition_opportunities": {
+				"title": "Acquisition opportunities",
+				"subtitle": "Highly requested titles across the network that you do not hold.",
+				"col_supplied": "Supplied"
+			},
+			"consortial_lifeline": {
+				"title": "Consortial lifeline",
+				"subtitle": "Titles you uniquely keep flowing to the network.",
+				"col_supplied": "Supplied"
+			},
+			"peer_benchmark": {
+				"title": "Peer benchmarking",
+				"subtitle": "Each library vs the consortium median (fill {{fill}}, checkout {{checkout}}).",
+				"col_library": "Library",
+				"col_requests": "Requests",
+				"col_checkout": "Checkout rate",
+				"col_fill": "Fill rate"
+			},
+			"collection_dimension": {
+				"title": "Collection analysis",
+				"subtitle": "Requesting demand sliced by a bibliographic dimension.",
+				"select_label": "Dimension",
+				"series": "Requests",
+				"dim_format": "Format",
+				"dim_language": "Language",
+				"dim_subject": "Subject",
+				"dim_decade": "Publication decade"
+			},
+			"new_acquisitions": {
+				"title": "New acquisitions performance",
+				"subtitle": "How your recently-added titles perform in the network.",
+				"acquired_since": "Acquired since",
+				"col_supplied": "Supplied"
+			}
 		}
 	},
 	"libraries": {
@@ -841,7 +887,8 @@
 		"logout": "Logout",
 		"open_identity_provider": "Open identity provider",
 		"stay_logged_in": "Stay logged in",
-		"logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>"
+		"logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>",
+		"session_expired": "<bold>Your {{appName}} for {{consortium}} session has expired</bold>. <break/> This happens after 30 minutes of inactivity. Please log in again to carry on where you left off.<break/>"
 	},
 	"mappings": {
 		"add_success": "{{fileName}} has been added and is ready to be uploaded.",
@@ -1045,6 +1092,7 @@
 			"alarms": {
 				"name": "Alarms"
 			},
+			"auditExplorer": "Audit explorer",
 			"catalogMetricsByHostLms": "Catalog metrics by host LMS",
 			"dataChangeLog": "Data change log",
 			"name": "Service info",
@@ -1179,6 +1227,13 @@
 		"cleanup_in_progress": "Cleanup in progress",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
+		"rollback": "Roll back",
+		"rollback_confirm_title": "Roll back this request?",
+		"rollback_warning": "Only roll back a request that errored because of an environmental problem - an outage or network failure - when the request itself was otherwise fine, with no errors of its own. Rolling back a request that failed for any other reason will most likely just error again.",
+		"rollback_info": "Roll back this errored request to its previous status. Use only to recover from an outage.",
+		"rollback_disabled": "Rollback is only available for requests in an ERROR state.",
+		"rollback_successful": "The rollback has been requested. The patron request has been returned to its previous status.",
+		"rollback_unsuccessful": "The rollback failed, and the patron request remains in an ERROR state. Please try again later.",
 		"cluster_record_uuid": "Cluster record UUID",
 		"completed_requests": "{{completed}} completed requests",
 		"count": "Patron requests: {{count}}",
@@ -1298,6 +1353,10 @@
 		"cleanup_in_progress": "Cleanup in progress",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalised.",
 		"cleanup_unsuccessful": "The clean up operation has failed, and the patron request remains in an ERROR state. Please try again later.",
+		"rollback_in_progress": "Rollback in progress",
+		"rollback_complete": "Rollback complete",
+		"rollback_none_eligible": "None of the selected requests are in an ERROR state, so nothing was rolled back.",
+		"rollback_summary": "{{eligible}} of {{selected}} selected request(s) are in an ERROR state and will be rolled back. The remaining {{skipped}} will be skipped.",
 		"excluded_from_tracking": "Excluded from tracking?",
 		"pickup_location_name": "Pickup location name",
 		"pr_one": "patron request",
@@ -1734,6 +1793,9 @@
 			"cleanup": {
 				"selected": "Force clean up selected ({{count}})"
 			},
+			"rollback": {
+				"selected": "Roll back selected ({{count}})"
+			},
 			"error": "Error",
 			"error_count": "Error: ",
 			"expand": "Expand",
@@ -1788,19 +1850,19 @@
 				"name": "401 Unauthorised",
 				"summary": "Sorry, you do not have access to this page",
 				"description": "If you think you should have access, please contact your system administrator",
-				"action": "$t(ui.action.go_home)"
+				"action": "$t(ui.actions.go_home)"
 			},
 			"404": {
 				"name": "404 Page not found",
 				"summary": "This page seems to be missing",
 				"description": "Check the web address or try another page",
-				"action": "$t(ui.action.go_home)"
+				"action": "$t(ui.actions.go_home)"
 			},
 			"500": {
 				"name": "500 Server error",
 				"summary": "This doesn't seem to be working at the moment",
 				"description": "$t(ui.info.try_later)",
-				"action": "$t(ui.action.go_back)"
+				"action": "$t(ui.actions.go_back)"
 			},
 			"503": {
 				"name": "Maintenance in progress",

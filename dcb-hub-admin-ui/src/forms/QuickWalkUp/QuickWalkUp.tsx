@@ -387,7 +387,7 @@ export default function QuickWalkUpRequest({
 		if (patronRequest?.id)
 			navigate({ to: `/patronRequests/${patronRequest.id}` });
 	};
-	const handleReadOnlyReturn = () => navigate({ to: `/requesting` });
+	const handleReadOnlyReturn = () => navigate({ to: `/search` });
 	const handleAlertClose = useCallback(
 		() => setAlert((prev) => ({ ...prev, open: false })),
 		[],

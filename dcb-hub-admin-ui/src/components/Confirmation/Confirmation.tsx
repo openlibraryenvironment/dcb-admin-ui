@@ -2,6 +2,7 @@ import { useEffect, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import {
+	Alert,
 	Dialog,
 	DialogTitle,
 	DialogContent,
@@ -15,7 +16,12 @@ import {
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 
 type ConfirmationAction =
-	"gridEdit" | "deletion" | "unsaved" | "uploadReplacement" | "sessionWarning";
+	| "gridEdit"
+	| "deletion"
+	| "unsaved"
+	| "uploadReplacement"
+	| "sessionWarning"
+	| "rollback";
 
 interface AuditFormData {
 	reason: string;
@@ -49,6 +55,7 @@ export default function Confirmation({
 	const isUnsaved = action === "unsaved";
 	const isUpload = action === "uploadReplacement";
 	const isSessionWarning = action === "sessionWarning";
+	const isRollback = action === "rollback";
 	const requiresAuditFields = isEdit || isDelete || isUpload;
 
 	const {
@@ -79,6 +86,7 @@ export default function Confirmation({
 			return t("ui.data_grid.delete_entity", { entity: entityName });
 		if (isUnsaved) return t("ui.unsaved_changes.header");
 		if (isUpload) return t("common.upload_title", { entityName: entityName });
+		if (isRollback) return t("patron_request.rollback_confirm_title");
 		return t("ui.confirmation.general_title");
 	};
 
@@ -97,7 +105,20 @@ export default function Confirmation({
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={(_event, reason) => {
+				// For the session warning, onClose IS "log me out" - it is wired to the
+				// destructive action. A stray Escape or a click on the backdrop must
+				// therefore not go through it; dismissing an "are you still there?"
+				// prompt means "yes, I am here", so treat it as staying signed in.
+				if (
+					isSessionWarning &&
+					(reason === "backdropClick" || reason === "escapeKeyDown")
+				) {
+					handleSimpleConfirm();
+					return;
+				}
+				onClose();
+			}}
 			aria-labelledby="confirmation-dialog-title"
 			aria-describedby="confirmation-dialog-description"
 			maxWidth="md"
@@ -125,9 +146,21 @@ export default function Confirmation({
 						{isEdit && t("ui.confirmation.edit_review")}
 					</DialogContentText>
 
-					{isUpload && customWarningText && (
-						<Box sx={{ mb: 2 }}>{customWarningText}</Box>
+					{/* Rollback carries a non-negotiable caveat: it is only safe when the
+					    request itself was sound and only the environment failed (an
+					    outage). Rolling back anything else just re-errors, so the warning
+					    is a severity="warning" Alert, not fine print. */}
+					{isRollback && (
+						<Alert severity="warning" sx={{ mb: 2 }}>
+							{t("patron_request.rollback_warning")}
+						</Alert>
 					)}
+
+					{/* The session warning is gated in here too: it passes
+					    customWarningText and nothing rendered it, so the dialog asked the
+					    user to decide with a title and two buttons and no explanation. */}
+					{(isUpload || isSessionWarning || isRollback) &&
+						customWarningText && <Box sx={{ mb: 2 }}>{customWarningText}</Box>}
 
 					{isEdit && editInformation && (
 						<ChangesSummary
@@ -199,7 +232,13 @@ export default function Confirmation({
 					<Button
 						type={isSessionWarning ? "button" : "submit"} // Don't submit the form for session warning
 						onClick={isSessionWarning ? () => onConfirm("", "", "") : undefined}
-						color={isDelete || isUnsaved ? "error" : "primary"}
+						color={
+							isDelete || isUnsaved
+								? "error"
+								: isRollback
+									? "warning"
+									: "primary"
+						}
 						variant="contained"
 						disabled={requiresAuditFields && !isValid}
 						// eslint-disable-next-line jsx-a11y/no-autofocus -- deliberate focus management for the modal's primary action; intentionally skipped for delete to avoid accidental confirmation
@@ -210,6 +249,7 @@ export default function Confirmation({
 						{isUnsaved && t("ui.unsaved_changes.leave_without_saving")}
 						{isSessionWarning && t("loginout.stay_logged_in")}
 						{isUpload && t("common.upload")}
+						{isRollback && t("patron_request.rollback")}
 					</Button>
 				</DialogActions>
 			</form>

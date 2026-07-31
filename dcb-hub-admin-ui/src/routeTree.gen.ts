@@ -48,6 +48,7 @@ import { Route as _authenticatedServiceInfoServiceStatusIndexRouteImport } from 
 import { Route as _authenticatedServiceInfoRequestErrorsIndexRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/index'
 import { Route as _authenticatedServiceInfoDataChangeLogIndexRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/index'
 import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/index'
+import { Route as _authenticatedServiceInfoAuditExplorerIndexRouteImport } from './routes/__authenticated/serviceInfo/auditExplorer/index'
 import { Route as _authenticatedServiceInfoAlarmsIndexRouteImport } from './routes/__authenticated/serviceInfo/alarms/index'
 import { Route as _authenticatedPatronRequestsIdIndexRouteImport } from './routes/__authenticated/patronRequests/$id/index'
 import { Route as _authenticatedMappingsAllReferenceValueIndexRouteImport } from './routes/__authenticated/mappings/allReferenceValue/index'
@@ -305,6 +306,12 @@ const _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute =
   _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport.update({
     id: '/serviceInfo/catalogMetricsByHostLms/',
     path: '/serviceInfo/catalogMetricsByHostLms/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoAuditExplorerIndexRoute =
+  _authenticatedServiceInfoAuditExplorerIndexRouteImport.update({
+    id: '/serviceInfo/auditExplorer/',
+    path: '/serviceInfo/auditExplorer/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedServiceInfoAlarmsIndexRoute =
@@ -589,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/mappings/allReferenceValue/': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/patronRequests/$id/': typeof _authenticatedPatronRequestsIdIndexRoute
   '/serviceInfo/alarms/': typeof _authenticatedServiceInfoAlarmsIndexRoute
+  '/serviceInfo/auditExplorer/': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/serviceInfo/catalogMetricsByHostLms/': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   '/serviceInfo/dataChangeLog/': typeof _authenticatedServiceInfoDataChangeLogIndexRoute
   '/serviceInfo/requestErrors/': typeof _authenticatedServiceInfoRequestErrorsIndexRoute
@@ -665,6 +673,7 @@ export interface FileRoutesByTo {
   '/mappings/allReferenceValue': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/patronRequests/$id': typeof _authenticatedPatronRequestsIdIndexRoute
   '/serviceInfo/alarms': typeof _authenticatedServiceInfoAlarmsIndexRoute
+  '/serviceInfo/auditExplorer': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/serviceInfo/catalogMetricsByHostLms': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   '/serviceInfo/dataChangeLog': typeof _authenticatedServiceInfoDataChangeLogIndexRoute
   '/serviceInfo/requestErrors': typeof _authenticatedServiceInfoRequestErrorsIndexRoute
@@ -743,6 +752,7 @@ export interface FileRoutesById {
   '/__authenticated/mappings/allReferenceValue/': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/__authenticated/patronRequests/$id/': typeof _authenticatedPatronRequestsIdIndexRoute
   '/__authenticated/serviceInfo/alarms/': typeof _authenticatedServiceInfoAlarmsIndexRoute
+  '/__authenticated/serviceInfo/auditExplorer/': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/__authenticated/serviceInfo/catalogMetricsByHostLms/': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   '/__authenticated/serviceInfo/dataChangeLog/': typeof _authenticatedServiceInfoDataChangeLogIndexRoute
   '/__authenticated/serviceInfo/requestErrors/': typeof _authenticatedServiceInfoRequestErrorsIndexRoute
@@ -821,6 +831,7 @@ export interface FileRouteTypes {
     | '/mappings/allReferenceValue/'
     | '/patronRequests/$id/'
     | '/serviceInfo/alarms/'
+    | '/serviceInfo/auditExplorer/'
     | '/serviceInfo/catalogMetricsByHostLms/'
     | '/serviceInfo/dataChangeLog/'
     | '/serviceInfo/requestErrors/'
@@ -897,6 +908,7 @@ export interface FileRouteTypes {
     | '/mappings/allReferenceValue'
     | '/patronRequests/$id'
     | '/serviceInfo/alarms'
+    | '/serviceInfo/auditExplorer'
     | '/serviceInfo/catalogMetricsByHostLms'
     | '/serviceInfo/dataChangeLog'
     | '/serviceInfo/requestErrors'
@@ -974,6 +986,7 @@ export interface FileRouteTypes {
     | '/__authenticated/mappings/allReferenceValue/'
     | '/__authenticated/patronRequests/$id/'
     | '/__authenticated/serviceInfo/alarms/'
+    | '/__authenticated/serviceInfo/auditExplorer/'
     | '/__authenticated/serviceInfo/catalogMetricsByHostLms/'
     | '/__authenticated/serviceInfo/dataChangeLog/'
     | '/__authenticated/serviceInfo/requestErrors/'
@@ -1281,6 +1294,13 @@ declare module '@tanstack/react-router' {
       path: '/serviceInfo/catalogMetricsByHostLms'
       fullPath: '/serviceInfo/catalogMetricsByHostLms/'
       preLoaderRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/auditExplorer/': {
+      id: '/__authenticated/serviceInfo/auditExplorer/'
+      path: '/serviceInfo/auditExplorer'
+      fullPath: '/serviceInfo/auditExplorer/'
+      preLoaderRoute: typeof _authenticatedServiceInfoAuditExplorerIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/serviceInfo/alarms/': {
@@ -1607,6 +1627,7 @@ interface _authenticatedRouteChildren {
   _authenticatedMappingsAllReferenceValueIndexRoute: typeof _authenticatedMappingsAllReferenceValueIndexRoute
   _authenticatedPatronRequestsIdIndexRoute: typeof _authenticatedPatronRequestsIdIndexRoute
   _authenticatedServiceInfoAlarmsIndexRoute: typeof _authenticatedServiceInfoAlarmsIndexRoute
+  _authenticatedServiceInfoAuditExplorerIndexRoute: typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   _authenticatedServiceInfoDataChangeLogIndexRoute: typeof _authenticatedServiceInfoDataChangeLogIndexRoute
   _authenticatedServiceInfoRequestErrorsIndexRoute: typeof _authenticatedServiceInfoRequestErrorsIndexRoute
@@ -1693,6 +1714,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedPatronRequestsIdIndexRoute,
   _authenticatedServiceInfoAlarmsIndexRoute:
     _authenticatedServiceInfoAlarmsIndexRoute,
+  _authenticatedServiceInfoAuditExplorerIndexRoute:
+    _authenticatedServiceInfoAuditExplorerIndexRoute,
   _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute:
     _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute,
   _authenticatedServiceInfoDataChangeLogIndexRoute:

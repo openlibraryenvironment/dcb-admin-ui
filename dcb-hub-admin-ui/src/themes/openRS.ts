@@ -288,7 +288,10 @@ declare module "@mui/material/Tab" {
 	}
 }
 
-const lightPrimary = "#287BAF";
+// Page-level ink is measured against `pageBackground` (#F9F9F9), not white:
+// that is the surface StructuralLayout actually paints. #287BAF reached AA on
+// white but only 4.39:1 there, so it is darkened 2%.
+const lightPrimary = "#2778AB";
 const darkPrimary = "#35B7FF";
 const lightDetailsAccordion = "#F6F6F6";
 const darkDetailsAccordion = "#424242";
@@ -313,14 +316,15 @@ const openRSLight = {
 	attributeTitle: "#000000",
 	breadcrumbs: "#246F9E",
 	buttonForSelectedChildPage: "#707070",
-	buttonForSelectedPage: "#287BAF",
+	buttonForSelectedPage: lightPrimary,
 	codeBlockBackground: "#F5F5F5",
 	detailsAccordionSummary: lightDetailsAccordion,
 	editableFieldBackground: "#E2EEF6",
 	errorBackground: "#FFDAE1",
-	// #999999 gave these icons only 2.85:1 on the white page, under the 3:1
-	// non-text minimum. Dark mode keeps #999999 (5.85:1 on its own page).
-	exclamationIcon: "#767676",
+	// #999999 gave these icons only 2.85:1 on the page, under the 3:1 non-text
+	// minimum. #767676 cleared AA on white but only 4.31:1 on the #F9F9F9 page
+	// these actually sit on. Dark mode keeps #999999 (5.85:1 on its own page).
+	exclamationIcon: "#727272",
 	footerArea: "#FFFFFF",
 	footerText: "#000000",
 	linkedFooterBackground: "#0C4068",
@@ -492,57 +496,13 @@ const evergreenHighContrast = {
 	searchResultTitle: "#1B5E20",
 };
 
-// ---- It's Coming Home (England World Cup theme) ----
-const itsComingHomeLight = {
-	...openRSLight,
-	main: "#CE1126", // St. George's Cross Red
-	breadcrumbs: "#00247D", // Deep England Blue
-	buttonForSelectedPage: "#CE1126",
-	linkedFooterBackground: "#00247D",
-	header: "#00247D",
-	headingColor: "#00247D",
-	link: "#00247D",
-	linkText: "#CE1126",
-	editableFieldBackground: "#F5F6F8",
-	loginCard: "#F5F6F8",
-	loginText: "#00247D",
-	tabsBackground: "#F5F6F8",
-	navigationText: "#00247D",
-	navigationTextActive: "#CE1126",
-	searchResultTitle: "#00247D",
-};
-
-const itsComingHomeDark = {
-	...openRSDark,
-	main: "#FF4D4D",
-	breadcrumbs: "#4B8BFF",
-	buttonForSelectedPage: "#CE1126",
-	link: "#4B8BFF",
-	linkText: "#FF4D4D",
-	loginCard: "#2A2E35",
-	tabsBackground: "#2A2E35",
-	// #4B8BFF clears AA on the page itself but not on the grey surfaces it sits
-	// on here: 4.18:1 on the tab bar and 3.08:1 on the #424242 result card.
-	navigationText: "#81AEFF",
-	searchResultTitle: "#81AEFF",
-};
-
-const itsComingHomeHighContrast = {
-	...openRSHighContrast,
-	main: "#9E0013",
-	breadcrumbs: "#00164D",
-	buttonForSelectedPage: "#9E0013",
-	link: "#00164D",
-	linkText: "#00164D",
-	searchResultTitle: "#00164D",
-};
-
 // ---- Koha (ILS theme) ----
-// Koha Community Green is #5C8A2E, but it is used both as text on the white page
-// and as the ground under white text, and both roles are the same test: contrast
-// against white. At #5C8A2E that is 4.09:1. Darkening 2% to #57822B clears AA in
-// both directions and is visually near-indistinguishable from the brand green.
-const kohaGreen = "#57822B";
+// Koha Community Green is #5C8A2E, but it is used both as text on the page and
+// as the ground under white text, and both roles reduce to the same test:
+// contrast against the #F9F9F9 page. At #5C8A2E that is 3.94:1. Darkening 5% to
+// #547D29 clears AA in both directions and stays visually near-indistinguishable
+// from the brand green.
+const kohaGreen = "#547D29";
 
 const kohaLight = {
 	...openRSLight,
@@ -600,14 +560,15 @@ const folioCoral = "#E52300";
 
 const folioLight = {
 	...openRSLight,
-	main: "#4A7BA2", // FOLIO Bright Blue, 1% darker for 4.52:1 on the white page
-	breadcrumbs: "#4A7BA2",
-	buttonForSelectedPage: "#0077C8",
+	main: "#47769C", // FOLIO Bright Blue, 4% darker for 4.60:1 on the #F9F9F9 page
+	breadcrumbs: "#47769C",
+	// FOLIO Bright Blue #0077C8 reached only 4.46:1 on the page; 1% darker.
+	buttonForSelectedPage: "#0075C5",
 	linkedFooterBackground: folioCoral,
 	header: folioCoral,
 	headingColor: "#094970",
-	link: "#0077C8",
-	linkText: "#0077C8",
+	link: "#0075C5",
+	linkText: "#0075C5",
 	editableFieldBackground: "#EAF4FA",
 	loginCard: "#EAF4FA",
 	loginText: "#094970",
@@ -644,12 +605,12 @@ const folioHighContrast = {
 };
 
 // ---- MOBIUS ----
-// MOBIUS Light Blue (#0096A7) only reaches 3.55:1 against white, and it is used
-// both as text on the page and as the ground under white text. Darkened 4.5% to
-// #008190 (4.62:1) for both roles in light mode. On the tab bar's own tint it
-// needs a touch more (#007886). Dark mode keeps the true brand cyan: it clears
-// AA against a proper dark page.
-const mobiusCyan = "#008190";
+// MOBIUS Light Blue (#0096A7) only reaches 3.42:1 against the #F9F9F9 page, and
+// it is used both as text on the page and as the ground under white text.
+// Darkened 6% to #007E8C (4.58:1) for both roles in light mode. On the tab bar's
+// own tint it needs a touch more (#007886). Dark mode keeps the true brand cyan:
+// it clears AA against a proper dark page.
+const mobiusCyan = "#007E8C";
 
 const mobiusLight = {
 	...openRSLight,
@@ -692,6 +653,91 @@ const mobiusHighContrast = {
 	link: "#003D6A",
 	linkText: "#003D6A",
 	searchResultTitle: "#003D6A",
+};
+
+// ---- Blue and White (NHS) ----
+// Colours taken verbatim from the NHS design system palette
+// (https://service-manual.nhs.uk/design-system/styles/colour). Unlike every
+// other brand here, no hue needed shifting for AA: NHS Blue #005EB8 gives
+// 5.76:1 as ink on this theme's #F0F4F5 page and 6.38:1 as the ground under
+// white. NHS Dark Blue #003087 gives 10.70:1 and 11.85:1 respectively, clearing
+// AAA, so the high-contrast scheme is pure brand rather than a darkened
+// approximation of one.
+const nhsBlue = "#005EB8";
+const nhsDarkBlue = "#003087";
+const nhsBlack = "#212B32"; // NHS text colour
+const nhsGrey1 = "#4C6272"; // NHS secondary-text grey
+const nhsGrey5 = "#F0F4F5"; // NHS page tint - the "reduce glare" background
+// A 10% tint of NHS Blue. Not in the published palette, which offers no blue
+// surface tone; derived so the login card and tab bar read as blue-on-white
+// rather than grey, and dark enough to be distinguishable from the page.
+const nhsPaleBlue = "#E5EFF8";
+
+const nhsLight = {
+	...openRSLight,
+	main: nhsBlue,
+	attributeTitle: nhsBlack,
+	breadcrumbs: nhsBlue,
+	buttonForSelectedPage: nhsBlue,
+	codeBlockBackground: nhsGrey5,
+	detailsAccordionSummary: nhsGrey5,
+	editableFieldBackground: nhsPaleBlue,
+	// NHS grey-1 rather than the base #767676: same role, and it clears the 3:1
+	// non-text minimum on the grey-5 page (5.75:1), not just on white.
+	exclamationIcon: nhsGrey1,
+	footerText: nhsBlack,
+	linkedFooterBackground: nhsDarkBlue,
+	header: nhsBlue,
+	headingColor: nhsDarkBlue,
+	hitCountText: nhsBlack,
+	hover: nhsGrey5,
+	// White text ground, so it is a text test: NHS grey-1 gives 6.37:1.
+	inactiveBackground: nhsGrey1,
+	link: nhsDarkBlue,
+	linkText: nhsBlue,
+	landingBackground: nhsGrey5,
+	loginCard: nhsPaleBlue,
+	loginText: nhsDarkBlue,
+	// Pale-blue bar, not an NHS Blue one: the Tabs indicator is `primary.main`,
+	// so a solid #005EB8 bar would render the active indicator invisible.
+	tabsBackground: nhsPaleBlue,
+	navigationText: nhsDarkBlue,
+	navigationTextActive: nhsDarkBlue,
+	searchResultBackground: nhsGrey5,
+	searchResultTitle: nhsBlue,
+	sidebar: nhsGrey5,
+	pageBackground: nhsGrey5,
+	outlineColor: nhsBlack,
+};
+
+// The NHS palette is defined for light backgrounds only; it has no dark-mode
+// counterpart. NHS Blue is far too dark to sit on a #1E1E1E page (1.98:1), so
+// the accents here are lightened blues in the NHS family rather than brand hexes.
+const nhsDark = {
+	...openRSDark,
+	main: "#41B6E6",
+	breadcrumbs: "#41B6E6",
+	buttonForSelectedPage: nhsBlue,
+	link: "#A8D5F0",
+	linkText: "#41B6E6",
+	loginCard: "#1B2A33",
+	tabsBackground: "#1E2B36",
+	navigationText: "#A8D5F0",
+	// #41B6E6 clears AA on the page (7.19:1) but only reaches 4.34:1 on the
+	// #424242 result card. Lifted until it clears there too.
+	searchResultTitle: "#5BC3EA",
+};
+
+// NHS Dark Blue is already AAA on white in both directions, so the AAA scheme
+// keeps the brand colour instead of deepening it.
+const nhsHighContrast = {
+	...openRSHighContrast,
+	main: nhsDarkBlue,
+	breadcrumbs: nhsDarkBlue,
+	buttonForSelectedPage: nhsDarkBlue,
+	link: nhsDarkBlue,
+	linkText: nhsDarkBlue,
+	searchResultTitle: nhsDarkBlue,
 };
 
 // ---------------------------------------------------------------------------
@@ -1199,17 +1245,6 @@ const THEMES = {
 			true,
 		),
 	},
-	itsComingHome: {
-		light: buildTheme(itsComingHomeLight, "#00247D", "#FFFFFF", "light"),
-		dark: buildTheme(itsComingHomeDark, "#4B8BFF", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			itsComingHomeHighContrast,
-			"#00164D",
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
 	koha: {
 		light: buildTheme(kohaLight, "#88B744", "#FFFFFF", "light"),
 		dark: buildTheme(kohaDark, "#A5D25C", "#1E1E1E", "dark"),
@@ -1227,6 +1262,17 @@ const THEMES = {
 		highContrast: buildTheme(
 			folioHighContrast,
 			"#021B2A",
+			"#FFFFFF",
+			"light",
+			true,
+		),
+	},
+	blueAndWhite: {
+		light: buildTheme(nhsLight, nhsDarkBlue, "#FFFFFF", "light"),
+		dark: buildTheme(nhsDark, "#A8D5F0", "#1E1E1E", "dark"),
+		highContrast: buildTheme(
+			nhsHighContrast,
+			nhsDarkBlue,
 			"#FFFFFF",
 			"light",
 			true,

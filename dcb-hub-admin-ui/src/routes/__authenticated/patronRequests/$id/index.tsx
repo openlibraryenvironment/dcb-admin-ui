@@ -12,7 +12,6 @@ import {
 	Accordion,
 	AccordionDetails,
 	AccordionSummary,
-	Button,
 	CircularProgress,
 	Divider,
 	Grid,
@@ -33,9 +32,14 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
+import Confirmation from "@components/Confirmation/Confirmation";
+import PageActionsMenu, {
+	Action,
+} from "@components/PageActionsMenu/PageActionsMenu";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
 import { useGridStore } from "@/hooks/useDataGridStore";
 import { formatDuration } from "@helpers/formatDuration";
+import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
 import { getILS } from "@helpers/getILS";
 import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
@@ -48,6 +52,7 @@ import { getPatronIdentities } from "@queries/getPatronIdentities";
 import { SourceRecord } from "@models/SourceRecord";
 import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
 import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
+import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
 	LoadAgencyQueryVariables,
@@ -76,6 +81,11 @@ function RouteComponent() {
 		useState(false);
 	const [updateErrorAlertVisibility, setErrorAlertVisibility] = useState(false);
 	const [cleanupErrorAlertVisibility, setCleanupErrorAlertVisibility] =
+		useState(false);
+	const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
+	const [rollbackSuccessAlertVisibility, setRollbackSuccessAlertVisibility] =
+		useState(false);
+	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [activeTab, setActiveTab] = useState(0);
@@ -247,15 +257,41 @@ function RouteComponent() {
 			),
 		onSuccess: () => {
 			setCleanupSuccessAlertVisibility(true);
-			queryClient.invalidateQueries({ queryKey: ["patronRequest", id] });
+			// Refresh the detail AND every patron request grid/tab count so the
+			// finalised status shows up on navigating back.
+			invalidatePatronRequestQueries(queryClient);
 		},
 		onError: (error) => {
 			console.error("Error starting cleanup", error);
 			setCleanupErrorAlertVisibility(true);
 		},
 	});
+
+	// Rollback restores the previous status of an errored request. Gated to ADMIN
+	// and ERROR-only, and always confirmed first because it is only safe after an
+	// outage - see the warning in the confirmation modal.
+	const isAdmin = auth?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	const canRollback = rollbackStatuses.includes(patronRequest?.status);
+
+	const rollbackMutation = useMutation({
+		mutationFn: () =>
+			axios.post(
+				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/rollback`,
+				{},
+				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
+			),
+		onSuccess: () => {
+			setRollbackSuccessAlertVisibility(true);
+			invalidatePatronRequestQueries(queryClient);
+		},
+		onError: (error) => {
+			console.error("Error starting rollback", error);
+			setRollbackErrorAlertVisibility(true);
+		},
+	});
+
 	const bibClusterRecordUrl = cfg.VITE_DCB_SEARCH_BASE
-		? "/requesting/" + patronRequest?.bibClusterId
+		? "/search/" + patronRequest?.bibClusterId + "/cluster"
 		: "";
 
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -273,7 +309,14 @@ function RouteComponent() {
 		);
 	}
 
-	if (isError || !patronRequest) {
+	// Only replace the whole page with an error when there is genuinely nothing
+	// to show. Gating on `isError` as well meant a BACKGROUND refetch error - e.g.
+	// the one kicked off by invalidating after a cleanup/rollback, or a transient
+	// blip at a token boundary - flashed the full error page even though we still
+	// held the last-good request, then vanished when the retry succeeded. With
+	// data in hand we keep rendering it; `isError` only picks the copy for the
+	// genuine no-data case (fetch failed vs. unknown id).
+	if (!patronRequest) {
 		return (
 			<>
 				{isError ? (
@@ -297,8 +340,57 @@ function RouteComponent() {
 		);
 	}
 
+	// The page's actions, consolidated into a single "Actions" menu. Eligibility
+	// and the explanatory tooltips are unchanged from the old inline buttons:
+	// "Check for updates" is available to everyone (disabled on untracked
+	// statuses), cleanup to LIBRARY_ADMIN, rollback to ADMIN. A disabled item
+	// keeps its tooltip explaining why (PageActionsMenu spans it so it still
+	// fires).
+	const roles = (auth?.user?.profile?.roles as string[] | undefined) ?? [];
+	const canUpdate = !untrackedStatuses.includes(patronRequest?.status);
+	const canCleanup = cleanupStatuses.includes(patronRequest?.status);
+
+	const pageActions: Action[] = [
+		{
+			key: "check-for-updates",
+			label: t("patron_request.check_for_updates"),
+			onClick: () => updateMutation.mutate(),
+			disabled: updateMutation.isPending || !canUpdate,
+			tooltip: canUpdate
+				? undefined
+				: t("patron_request.check_for_updates_disabled", {
+						status: patronRequest?.status,
+					}),
+		},
+	];
+	if (roles.includes("LIBRARY_ADMIN")) {
+		pageActions.push({
+			key: "cleanup",
+			label: t("patron_request.cleanup"),
+			onClick: () => cleanupMutation.mutate(),
+			disabled: cleanupMutation.isPending || !canCleanup,
+			tooltip: canCleanup
+				? t("patron_request.cleanup_info")
+				: t("patron_request.cleanup_disabled"),
+		});
+	}
+	if (isAdmin) {
+		pageActions.push({
+			key: "rollback",
+			label: t("patron_request.rollback"),
+			onClick: () => setRollbackConfirmOpen(true),
+			disabled: rollbackMutation.isPending || !canRollback,
+			tooltip: canRollback
+				? t("patron_request.rollback_info")
+				: t("patron_request.rollback_disabled"),
+		});
+	}
+
 	return (
 		<PageContainer title={patronRequest?.clusterRecord?.title}>
+			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
+				<PageActionsMenu actions={pageActions} />
+			</Stack>
 			<TabContext value={activeTab}>
 				<TabList
 					onChange={handleTabChange}
@@ -484,39 +576,6 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.status} />
 							</Stack>
-							{auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-								<Tooltip
-									title={
-										cleanupStatuses.includes(patronRequest?.status)
-											? // Must be both request with ERROR or non-terminal state and a user with LIBRARY_ADMIN
-												t("patron_request.cleanup_info")
-											: t("patron_request.cleanup_disabled") // Tooltip text when disabled
-									}
-								>
-									<span>
-										<Button
-											variant="outlined"
-											color="primary"
-											sx={{ marginTop: 1 }}
-											onClick={() => cleanupMutation.mutate()}
-											aria-disabled={cleanupMutation.isPending ? true : false}
-											disabled={
-												cleanupMutation.isPending ||
-												!cleanupStatuses.includes(patronRequest?.status)
-											}
-										>
-											{t("patron_request.cleanup")}
-											{cleanupMutation.isPending ? (
-												<CircularProgress
-													color="inherit"
-													size={13}
-													sx={{ marginLeft: "10px" }}
-												/>
-											) : null}
-										</Button>
-									</span>
-								</Tooltip>
-							) : null}
 						</Grid>
 
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -548,40 +607,6 @@ function RouteComponent() {
 									)}
 								/>
 							</Stack>
-							<Tooltip
-								title={
-									!untrackedStatuses.includes(patronRequest?.status)
-										? ""
-										: t("patron_request.check_for_updates_disabled", {
-												status: patronRequest?.status,
-											}) // Tooltip text when disabled
-								}
-							>
-								<span>
-									<Button
-										variant="outlined"
-										color="primary"
-										sx={{ marginTop: 1 }}
-										onClick={() => updateMutation.mutate()}
-										aria-disabled={updateMutation.isPending ? true : false}
-										disabled={
-											updateMutation.isPending ||
-											untrackedStatuses.includes(patronRequest?.status)
-												? true
-												: false
-										}
-									>
-										{t("patron_request.check_for_updates")}
-										{updateMutation.isPending ? (
-											<CircularProgress
-												color="inherit"
-												size={13}
-												sx={{ marginLeft: "10px" }}
-											/>
-										) : null}
-									</Button>
-								</span>
-							</Tooltip>
 							<TimedAlert
 								open={
 									updateSuccessAlertVisibility || cleanupSuccessAlertVisibility
@@ -623,6 +648,31 @@ function RouteComponent() {
 										? () => setErrorAlertVisibility(false)
 										: () => setCleanupErrorAlertVisibility(false)
 								}
+							/>
+							<TimedAlert
+								open={rollbackSuccessAlertVisibility}
+								severityType="success"
+								autoHideDuration={6000}
+								alertText={t("patron_request.rollback_successful")}
+								key="rollback-success-alert"
+								onCloseFunc={() => setRollbackSuccessAlertVisibility(false)}
+							/>
+							<TimedAlert
+								open={rollbackErrorAlertVisibility}
+								severityType="error"
+								autoHideDuration={6000}
+								alertText={t("patron_request.rollback_unsuccessful")}
+								key="rollback-error-alert"
+								onCloseFunc={() => setRollbackErrorAlertVisibility(false)}
+							/>
+							<Confirmation
+								open={rollbackConfirmOpen}
+								action="rollback"
+								onClose={() => setRollbackConfirmOpen(false)}
+								onConfirm={() => {
+									setRollbackConfirmOpen(false);
+									rollbackMutation.mutate();
+								}}
 							/>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>

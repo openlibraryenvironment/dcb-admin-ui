@@ -4,6 +4,7 @@ import {
 	CleaningServicesRounded,
 	FileDownloadOutlined,
 	PrintOutlined,
+	SettingsBackupRestoreRounded,
 	TuneRounded,
 } from "@mui/icons-material";
 import {
@@ -37,6 +38,7 @@ interface ExportToolbarProps {
 	allDataLoading?: boolean;
 	type?: string;
 	onCleanup?: () => void;
+	onRollback?: () => void;
 	selectionCount?: number;
 	wizardEnabled?: boolean;
 	onOpenWizard?: () => void;
@@ -48,6 +50,7 @@ export default function ExportToolbar({
 	allDataLoading,
 	type,
 	onCleanup,
+	onRollback,
 	selectionCount = 0,
 	wizardEnabled,
 	onOpenWizard,
@@ -76,6 +79,11 @@ export default function ExportToolbar({
 
 	const handleCleanupClick = () => {
 		onCleanup?.();
+		handleMenuClose();
+	};
+
+	const handleRollbackClick = () => {
+		onRollback?.();
 		handleMenuClose();
 	};
 
@@ -153,7 +161,11 @@ export default function ExportToolbar({
 					</MenuItem>
 				</GridToolbarExportContainer>
 			) : null}
-			{type == "patronRequests" && (
+			{/* The Actions button appears only when the user actually has an action
+			    to take (each handler is passed by DataGrid only when the role allows
+			    it) - so a user with no permitted actions never sees an empty menu,
+			    and no menu item is a no-op the way the ungated cleanup item was. */}
+			{type == "patronRequests" && (onCleanup || onRollback) && (
 				<>
 					<Button
 						id="actions-button"
@@ -175,16 +187,30 @@ export default function ExportToolbar({
 						onClose={handleMenuClose}
 						slotProps={{ list: { "aria-labelledby": "actions-button" } }}
 					>
-						<MenuItem onClick={handleCleanupClick}>
-							<ListItemIcon>
-								<CleaningServicesRounded fontSize="small" />
-							</ListItemIcon>
-							<ListItemText>
-								{t("ui.data_grid.cleanup.selected", {
-									count: selectionCount,
-								})}
-							</ListItemText>
-						</MenuItem>
+						{onCleanup ? (
+							<MenuItem onClick={handleCleanupClick}>
+								<ListItemIcon>
+									<CleaningServicesRounded fontSize="small" />
+								</ListItemIcon>
+								<ListItemText>
+									{t("ui.data_grid.cleanup.selected", {
+										count: selectionCount,
+									})}
+								</ListItemText>
+							</MenuItem>
+						) : null}
+						{onRollback ? (
+							<MenuItem onClick={handleRollbackClick}>
+								<ListItemIcon>
+									<SettingsBackupRestoreRounded fontSize="small" />
+								</ListItemIcon>
+								<ListItemText>
+									{t("ui.data_grid.rollback.selected", {
+										count: selectionCount,
+									})}
+								</ListItemText>
+							</MenuItem>
+						) : null}
 					</Menu>
 				</>
 			)}

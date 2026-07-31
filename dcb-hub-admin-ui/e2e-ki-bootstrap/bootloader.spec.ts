@@ -94,7 +94,9 @@ test("preserves a deep-link redirect target", async ({ page }) => {
 	await expect(page).toHaveURL(/\/login\?redirect=%2Flibraries$/);
 });
 
-test("the same artifact retains its standalone entrypoint", async ({ page }) => {
+test("the same artifact retains its standalone entrypoint", async ({
+	page,
+}) => {
 	await mapPublishedPrefix(page, "/dcb-admin");
 	await mockServiceInfo(page);
 	await page.addInitScript((config) => {

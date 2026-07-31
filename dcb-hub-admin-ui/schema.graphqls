@@ -12,6 +12,7 @@ type Query {
     sourceBibs(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): BibRecordPage!
     processStates(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ProcessStatePage!
     audits(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronRequestAuditPage!
+    auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
     patronIdentities(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronIdentityPage!
     numericRangeMappings(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): NumericRangeMappingPage!
     referenceValueMappings(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ReferenceValueMappingPage!
@@ -561,6 +562,21 @@ type PatronRequestAudit {
   toStatus: String
   auditData: JSON
   patronRequest: PatronRequest
+}
+
+type AuditIncidenceBucket {
+  "ISO-8601 start of the interval (UTC)."
+  bucketStart: String!
+  count: Int!
+}
+
+type AuditIncidence {
+  "Echoed back so the client can label the axis: HOUR | DAY | WEEK."
+  interval: String!
+  "Total matching audits across the whole window (sum of bucket counts)."
+  totalSize: Int!
+  "Continuous, gap-filled, ascending by bucketStart."
+  buckets: [AuditIncidenceBucket!]!
 }
 
 type SupplierRequest {

@@ -5,6 +5,7 @@ import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import { adminOrConsortiumAdmin } from "@constants/roles";
+import { isAuditExplorerEnabled } from "@helpers/featureFlags";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/")({
 	component: ServiceInfo,
@@ -53,6 +54,14 @@ function ServiceInfo() {
 						<ListItemText primary={t("nav.serviceInfo.requestErrors.name")} />
 					</ListItemButton>
 				</ListItem>
+
+				{isAuditExplorerEnabled() && (
+					<ListItem disablePadding>
+						<ListItemButton component={Link} to="/serviceInfo/auditExplorer">
+							<ListItemText primary={t("nav.serviceInfo.auditExplorer")} />
+						</ListItemButton>
+					</ListItem>
+				)}
 			</List>
 		</PageContainer>
 	);

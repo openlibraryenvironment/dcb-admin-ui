@@ -16,6 +16,7 @@ import {
 export const serverSupportedOperators = new Set([
 	// Text
 	"contains",
+	"containsPhrase",
 	"does not contain",
 	"doesNotContain",
 	"equals",

@@ -7,6 +7,7 @@
 		"coverage": "vitest run --coverage",
 		"dev": "vite",
 		"build": "tsc && vite build",
+		"verify": "npm run build && vitest run",
 		"lint": "eslint",
 		"preview": "vite preview",
 		"semantic-release": "semantic-release",

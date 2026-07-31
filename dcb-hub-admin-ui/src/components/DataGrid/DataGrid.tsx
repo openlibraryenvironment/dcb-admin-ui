@@ -27,6 +27,13 @@ import {
 import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import Confirmation from "@components/Confirmation/Confirmation";
+import { RollbackResultDialog } from "./components/RollbackResultDialog";
+import { CleanupProgressDialog } from "./components/CleanupProgressDialog";
+import { usePatronRequestRollback } from "@hooks/usePatronRequestRollback";
+import { usePatronRequestCleanup } from "@hooks/usePatronRequestCleanup";
+import { useAuth } from "react-oidc-context";
+import { allAdmins } from "@constants/roles";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority
@@ -41,6 +48,7 @@ declare module "@mui/x-data-grid-premium" {
 		allDataLoading?: boolean;
 		type?: string;
 		onCleanup?: () => void;
+		onRollback?: () => void;
 		selectionCount?: number;
 		wizardEnabled?: boolean;
 		onOpenWizard?: () => void;
@@ -60,8 +68,6 @@ interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
 	styleOverrides?: SxProps<Theme>;
 	type: string;
 	parentApiRef?: RefObject<GridApiPremium | null>;
-	enableCleanup?: boolean;
-	onCleanup?: () => void;
 	onExport?: (fileType: string, exportMode: string) => Promise<void>;
 	isExporting?: boolean;
 	disableHoverInteractions?: boolean;
@@ -76,12 +82,10 @@ interface CustomDataGridProps extends Omit<DataGridPremiumProps, "sx"> {
 
 export default function DataGrid({
 	autoRowHeight,
-	enableCleanup,
 	identifier,
 	isExporting = false,
 	listViewEnabled,
 	noResultsText,
-	onCleanup,
 	onExport,
 	parentApiRef,
 	pivotingEnabled,
@@ -143,6 +147,29 @@ export default function DataGrid({
 			setAlert({ open: true, severity: "success", text: message }),
 		onError: (message) =>
 			setAlert({ open: true, severity: "error", text: message }),
+	});
+
+	// Bulk cleanup and rollback are standardised the same way: each is a
+	// patron-request-only toolbar action backed by its own hook, owned here (like
+	// export) because the toolbar action, the grid's apiRef, and the row selection
+	// all live inside this component. The hooks enforce the eligibility, the
+	// invalidation, and (rollback only) the confirmation; DataGrid decides
+	// visibility and renders each action's result dialog.
+	const auth = useAuth();
+	const roles = (auth?.user?.profile?.roles as string[] | undefined) ?? [];
+	const isPatronRequests = type === "patronRequests";
+	// Rollback: ADMIN only (it restores a previous status and is only safe after
+	// an outage). Cleanup: any admin, matching the backend's allowed role set.
+	const rollbackAvailable = isPatronRequests && roles.includes("ADMIN");
+	const cleanupAvailable =
+		isPatronRequests && roles.some((role) => allAdmins.includes(role));
+
+	const rollback = usePatronRequestRollback({ apiRef });
+	const cleanup = usePatronRequestCleanup({ apiRef });
+	const rollbackSummary = t("patron_requests.rollback_summary", {
+		eligible: rollback.eligibleCount,
+		selected: rollback.selectedCount,
+		skipped: rollback.skippedCount,
 	});
 
 	const handleExport = exportConfig
@@ -275,7 +302,10 @@ export default function DataGrid({
 							? exportProgress.isExporting
 							: isExporting,
 						type: type, // Pass type to determine menu options
-						onCleanup: enableCleanup ? onCleanup : undefined, // Pass cleanup handler
+						onCleanup: cleanupAvailable ? cleanup.handleCleanup : undefined, // admin-only bulk cleanup
+						onRollback: rollbackAvailable
+							? rollback.requestRollback
+							: undefined, // ADMIN-only bulk rollback for patron request grids
 						selectionCount: selectionModel?.ids?.size || 0,
 						wizardEnabled: exportConfig?.wizard,
 						onOpenWizard: () => setWizardOpen(true),
@@ -363,6 +393,51 @@ export default function DataGrid({
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
+			{/* Dialogs are gated on the STABLE grid type, not the role flag that
+			    controls the toolbar actions: a session tick (silent renew, expiry)
+			    could flip `roles` mid-operation and unmount a dialog that is showing
+			    an in-flight bulk result. They only ever open in response to the
+			    role-gated toolbar action, so rendering them for any patron request
+			    grid is harmless. */}
+			{isPatronRequests ? (
+				<CleanupProgressDialog
+					open={cleanup.cleanupState.open}
+					isCleaning={cleanup.cleanupState.isCleaning}
+					progress={
+						cleanup.cleanupState.total > 0
+							? (cleanup.cleanupState.processed / cleanup.cleanupState.total) *
+								100
+							: 100
+					}
+					total={cleanup.cleanupState.total}
+					processed={cleanup.cleanupState.processed}
+					successRows={cleanup.cleanupState.successRows}
+					errorRows={cleanup.cleanupState.errorRows}
+					skippedRows={cleanup.cleanupState.skippedRows}
+					onClose={cleanup.handleCloseCleanup}
+				/>
+			) : null}
+			{isPatronRequests ? (
+				<>
+					<Confirmation
+						open={rollback.confirmOpen}
+						action="rollback"
+						customWarningText={rollbackSummary}
+						onClose={rollback.cancelConfirm}
+						onConfirm={rollback.confirmAndRun}
+					/>
+					<RollbackResultDialog
+						open={rollback.rollbackState.open}
+						isRollingBack={rollback.rollbackState.isRollingBack}
+						total={rollback.rollbackState.total}
+						processed={rollback.rollbackState.processed}
+						successRows={rollback.rollbackState.successRows}
+						errorRows={rollback.rollbackState.errorRows}
+						skippedRows={rollback.rollbackState.skippedRows}
+						onClose={rollback.closeResult}
+					/>
+				</>
+			) : null}
 		</div>
 	);
 }

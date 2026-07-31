@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Menu, MenuItem, Stack } from "@mui/material";
+import { Box, Button, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +9,16 @@ export interface Action {
 	disabled?: boolean;
 	label: string;
 	startIcon?: React.ReactNode;
+	/**
+	 * Optional explanation for why an item is DISABLED, shown on hover. Only
+	 * rendered while the item is disabled: a disabled MUI MenuItem sets
+	 * pointer-events: none, so it is wrapped in a span the tooltip can anchor to
+	 * (the standard workaround for disabled controls) - but that span breaks
+	 * keyboard focus, a cost only acceptable on an item that is not keyboard-
+	 * reachable anyway. Enabled items stay bare MenuItems so arrow-key navigation
+	 * and Enter keep working, so no tooltip is shown on them.
+	 */
+	tooltip?: string;
 }
 
 interface PageActionsMenuProps {
@@ -62,8 +72,9 @@ export default function PageActionsMenu({
 							</MenuItem>
 						);
 					}
-					const { key, onClick, disabled, label, startIcon } = action as Action;
-					return (
+					const { key, onClick, disabled, label, startIcon, tooltip } =
+						action as Action;
+					const menuItem = (
 						<MenuItem
 							key={key}
 							onClick={() => {
@@ -75,6 +86,17 @@ export default function PageActionsMenu({
 							{startIcon && <span style={{ marginRight: 8 }}>{startIcon}</span>}
 							{label}
 						</MenuItem>
+					);
+					// Only a disabled item gets the span-wrapped tooltip; an enabled
+					// item stays a bare MenuItem so it remains keyboard-navigable.
+					if (!tooltip || !disabled) {
+						return menuItem;
+					}
+					return (
+						<Tooltip key={key} title={tooltip}>
+							{/* Span so the tooltip still fires over the disabled item. */}
+							<span style={{ display: "block" }}>{menuItem}</span>
+						</Tooltip>
 					);
 				})}
 			</Menu>

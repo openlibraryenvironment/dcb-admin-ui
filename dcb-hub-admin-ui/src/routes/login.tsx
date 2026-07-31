@@ -15,6 +15,7 @@ import {
 import LoginLayout from "@layout/LoginLayout/LoginLayout";
 import Link from "@components/Link/Link";
 import LandingCard from "@components/LandingCard/LandingCard";
+import { postLoginRedirectKey, toInternalPath } from "@helpers/appBase";
 import {
 	assertOidcAuthorityReachable,
 	isOidcAuthorityUnavailableError,
@@ -24,7 +25,9 @@ import {
 export const Route = createFileRoute("/login")({
 	// TanStack Router: Type-safe search params validation
 	validateSearch: (search: Record<string, unknown>) => ({
-		redirect: search.redirect as string | undefined,
+		// Constrained to an in-app path here as well as at the point of use, so a
+		// crafted ?redirect= never even reaches storage.
+		redirect: toInternalPath(search.redirect as string | undefined),
 	}),
 	component: Login,
 });
@@ -48,9 +51,11 @@ function Login() {
 		try {
 			await assertOidcAuthorityReachable(authority);
 
-			// Store the redirect path so main.tsx can route them back after OIDC completes
+			// Store the redirect path so application.tsx can route them back after
+			// OIDC completes. Key resolved at call time (runtime base), value already
+			// narrowed to an in-app path by validateSearch above.
 			if (redirect) {
-				sessionStorage.setItem("postLoginRedirectPath", redirect);
+				sessionStorage.setItem(postLoginRedirectKey(), redirect);
 			}
 			// Trigger react-oidc-context sign-in flow
 			await auth.signinRedirect();
