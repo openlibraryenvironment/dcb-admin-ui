@@ -14,7 +14,7 @@ import Error from "@components/Error/Error";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Confirmation from "@components/Confirmation/Confirmation";
 import i18n from "@/i18n";
-import { appUrl, clearAppStorage } from "@helpers/appBase";
+import { appUrl, clearAppStorage, storageKey } from "@helpers/appBase";
 
 export const Route = createFileRoute("/__authenticated")({
 	component: AuthenticatedLayout,
@@ -45,11 +45,23 @@ function AuthenticatedLayout() {
 	const originalPathnameRef = useRef(location.pathname);
 
 	const { reset: resetIdleTimer } = useIdleTimer({
-		timeout: 1000 * 60 * 15, // 15 minutes total
-		promptBeforeIdle: 1000 * 60, // Warn them 1 minute before the timeout hits (at 14 mins)
+		timeout: 1000 * 60 * 30, // 30 minutes total - matches the figure the logout page quotes
+		promptBeforeIdle: 1000 * 60, // Warn them 1 minute before the timeout hits (at 29 mins)
+
+		// Idleness is a property of the USER, not of a browser tab. Without
+		// crossTab the timers run independently per tab, so a forgotten second tab
+		// hit its own idle mark and called signoutRedirect() - which ends the
+		// Keycloak SSO session for every tab, yanking the user out of the one they
+		// were actively working in. syncTimers rebroadcasts activity so the tabs
+		// agree on when the countdown started.
+		crossTab: true,
+		syncTimers: 1000,
+		// Namespaced: sibling OpenRS apps share this origin, and an unnamespaced
+		// channel would let one app's idleness drive another's.
+		name: storageKey("idle-timer"),
 
 		onPrompt: () => {
-			// Triggered at the 14-minute mark
+			// Triggered at the 29-minute mark, once EVERY tab has gone quiet.
 			setShowSessionWarning(true);
 		},
 		onActive: () => {
@@ -59,7 +71,7 @@ function AuthenticatedLayout() {
 			}
 		},
 		onIdle: () => {
-			// Triggered at the 15-minute mark if they ignored the prompt.
+			// Triggered at the 30-minute mark if they ignored the prompt.
 			// Scoped to this app's keys: a blanket storage.clear() would also wipe
 			// the state and OIDC session of any sibling app mounted under another
 			// path prefix on the same origin.
@@ -80,8 +92,14 @@ function AuthenticatedLayout() {
 	};
 
 	const handleForceLogout = () => {
+		// Same purge as the idle path below and the Header's logout button. Leaving
+		// it out here meant the one route where the user is explicitly told the
+		// session is ending was the one that kept their preferences.
 		setShowSessionWarning(false);
-		auth.signoutRedirect();
+		clearAppStorage();
+		auth.signoutRedirect({
+			post_logout_redirect_uri: appUrl("logout?loggedOut=true"),
+		});
 	};
 
 	const isAuthResolving =

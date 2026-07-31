@@ -56,4 +56,3 @@ export const isOidcAuthorityUnavailableError = (
 	error: unknown,
 ): error is OidcAuthorityUnavailableError =>
 	error instanceof OidcAuthorityUnavailableError;
-

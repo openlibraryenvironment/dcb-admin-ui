@@ -17,8 +17,16 @@ const channel = (c: number) => {
 	return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
 };
 
-const luminance = (hex: string) => {
-	const h = hex.replace("#", "");
+// MUI's default `text.primary` is `rgba(0, 0, 0, 0.87)`, not a hex. Parsing it
+// as hex yields NaN, and `NaN < threshold` is false - so every text.primary pair
+// used to pass without being measured. Both notations are parsed to [r,g,b,a].
+const rgba = (colour: string): [number, number, number, number] => {
+	const match = colour.match(/^rgba?\(([^)]+)\)$/);
+	if (match) {
+		const parts = match[1].split(",").map((p) => parseFloat(p.trim()));
+		return [parts[0], parts[1], parts[2], parts[3] ?? 1];
+	}
+	const h = colour.replace("#", "");
 	const full =
 		h.length === 3
 			? h
@@ -27,14 +35,28 @@ const luminance = (hex: string) => {
 					.join("")
 			: h;
 	const at = (i: number) => parseInt(full.slice(i, i + 2), 16);
-	return (
-		0.2126 * channel(at(0)) + 0.7152 * channel(at(2)) + 0.0722 * channel(at(4))
-	);
+	return [at(0), at(2), at(4), 1];
 };
 
+const luminance = ([r, g, b]: [number, number, number, number]) =>
+	0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+
+// A translucent ink is only as dark as what shows through it, so composite it
+// over its own background before measuring.
+const over = (
+	fg: [number, number, number, number],
+	bg: [number, number, number, number],
+): [number, number, number, number] => [
+	fg[0] * fg[3] + bg[0] * (1 - fg[3]),
+	fg[1] * fg[3] + bg[1] * (1 - fg[3]),
+	fg[2] * fg[3] + bg[2] * (1 - fg[3]),
+	1,
+];
+
 const contrast = (fg: string, bg: string) => {
-	const a = luminance(fg);
-	const b = luminance(bg);
+	const ground = rgba(bg);
+	const a = luminance(over(rgba(fg), ground));
+	const b = luminance(ground);
 	const [hi, lo] = a > b ? [a, b] : [b, a];
 	return (hi + 0.05) / (lo + 0.05);
 };
@@ -45,9 +67,13 @@ describe("theme contrast", () => {
 		(name, mode) => {
 			const theme = getAppTheme(name, mode);
 			const p = theme.palette.primary as unknown as Record<string, string>;
-			const page = theme.palette.background.default;
 			// `transparent` surfaces resolve to the page beneath them.
-			const solid = (c: string) => (c === "transparent" ? page : c);
+			const solid = (c: string) =>
+				c === "transparent" ? theme.palette.background.default : c;
+			// StructuralLayout paints the content area with `pageBackground`, so that,
+			// not `background.default`, is what page-level ink actually sits on. The
+			// two differ per theme (Blue and White tints the page NHS grey #F0F4F5).
+			const page = solid(p.pageBackground);
 			const ink = theme.palette.text.primary;
 
 			const pairs: [string, string, string][] = [

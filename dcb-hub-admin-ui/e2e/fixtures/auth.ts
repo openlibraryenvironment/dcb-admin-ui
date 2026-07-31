@@ -45,18 +45,34 @@ export function getAuthStorageKey() {
 	return `oidc.user:${KEYCLOAK_URL}:${KEYCLOAK_ID}`;
 }
 
+// A sentinel recording that the initial seed already ran. Deliberately NOT
+// namespaced and NOT the OIDC key itself, so it survives both clearAppStorage()
+// (which only drops this app's namespaced keys) and userManager.removeUser()
+// (which drops only the OIDC user key). That is what lets the seed be a ONE-TIME
+// event rather than a resurrection on every reload - see seedAuth.
+const SEED_SENTINEL_KEY = "__e2e_auth_seeded__";
+
 // Call in a test.beforeEach (before page.goto) to start the test already
 // authenticated. Omit entirely to exercise the unauthenticated/login-redirect path.
 export async function seedAuth(page: Page, options?: FakeUserOptions) {
 	const key = getAuthStorageKey();
 	const value = JSON.stringify(buildFakeUser(options));
 
-	// Must run before any app script executes, so react-oidc-context's
-	// initial getUser() call already finds a session on first render.
+	// Must run before any app script executes, so react-oidc-context's initial
+	// getUser() call already finds a session on first render. addInitScript re-runs
+	// on EVERY document load, including a hard-reload logout path
+	// (endSession -> window.location.assign('/logout')); a blind setItem there would
+	// re-seed the session the app just tore down and mask real logout bugs. The
+	// sentinel makes this a one-time seed: on the first load it plants the user; on
+	// any reload it does nothing, so a session the app deliberately ended stays
+	// ended (and a session that is simply still live persists in localStorage on its
+	// own, needing no re-seed).
 	await page.addInitScript(
-		([storageKey, storageValue]) => {
+		([storageKey, storageValue, sentinelKey]) => {
+			if (window.localStorage.getItem(sentinelKey)) return;
 			window.localStorage.setItem(storageKey, storageValue);
+			window.localStorage.setItem(sentinelKey, "1");
 		},
-		[key, value] as const,
+		[key, value, SEED_SENTINEL_KEY] as const,
 	);
 }

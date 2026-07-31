@@ -540,7 +540,7 @@ export default function ExpeditedCheckout({
 
 	// For read only users who are not allowed to look at patron requests
 	const handleReadOnlyReturn = () => {
-		navigate({ to: `/requesting` });
+		navigate({ to: `/search` });
 	};
 
 	const handleAlertClose = useCallback(() => {

@@ -125,7 +125,6 @@ Using "staging" as an example environment.
 
 `VITE_KEYCLOAK_URL=https://staging-keycloak... VITE_DCB_API_BASE=https://staging-api... npm run build`
 
-
 ##### 2. Sync the built assets to your S3 bucket
 
 `aws s3 sync dist/ s3://dcb-admin-staging --delete`

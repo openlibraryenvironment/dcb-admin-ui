@@ -5,9 +5,25 @@ import {
 	numericOperators,
 } from "@constants/dataGridConstants";
 
+// Lucene query-syntax metacharacters that break the backend parser when they
+// appear raw inside a user-supplied term - e.g. the ":" in a brief description
+// like "Tracking failed: Supplying System" was read as a field separator and
+// the whole query failed with "cannot parse". We escape these BEFORE the space
+// substitution below.
+//
+// Deliberately excluded: "*" and "?", which this builder emits itself (the
+// contains wrappers, and the space substitute added right after); and "-"/"+",
+// which pass through mid-term unharmed and appear verbatim in codes like
+// "loc-a" that callers and tests expect unescaped.
+const LUCENE_SPECIAL_CHARS = /[!(){}[\]^"~:\\/]/g;
+
+const escapeLuceneTerm = (value: string): string =>
+	value.replace(LUCENE_SPECIAL_CHARS, (char) => `\\${char}`);
+
 // Question marks replace spaces in search terms - see Lucene docs
 // https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
-const toLuceneTerm = (value: any) => String(value).replaceAll(" ", "?");
+const toLuceneTerm = (value: any) =>
+	escapeLuceneTerm(String(value)).replaceAll(" ", "?");
 
 /**
  * "Pickup library" is a virtual column: PatronRequest has no pickup agency or
@@ -72,6 +88,18 @@ export const buildFilterQuery = (
 		(Array.isArray(value) && value.length === 0)
 	) {
 		return "";
+	}
+
+	// 2a. QUOTED PHRASE -> EXACT MATCH
+	// A quoted field node compiles to `column = 'term'` on the backend, not to a
+	// substring match, so this only finds whole-value hits. Use "contains" (below)
+	// for partial terms; the backend allows leading wildcards and turns `*term*`
+	// into `column ILIKE '%term%'`.
+	// Only `"` and `\` are special inside a Lucene phrase, so nothing else
+	// (colons, parentheses, spaces) needs touching here.
+	if (operator === "containsPhrase") {
+		const phrase = String(value).replace(/(["\\])/g, "\\$1");
+		return `${field}:"${phrase}"`;
 	}
 
 	// 2b. VIRTUAL FIELDS

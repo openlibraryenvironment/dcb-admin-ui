@@ -19,11 +19,9 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { Menu, AccountCircle } from "@mui/icons-material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { useGridStore } from "@/hooks/useDataGridStore";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
-import useDCBVersionStore from "@hooks/serviceInfoStore";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
-import { appUrl } from "@helpers/appBase";
+import { appUrl, clearAppStorage } from "@helpers/appBase";
 import {
 	assertOidcAuthorityReachable,
 	isOidcAuthorityUnavailableError,
@@ -62,10 +60,6 @@ export default function Header({
 
 	const auth = useAuth();
 	const { type } = useDCBServiceInfo();
-	const clearGridState = useGridStore((state) => state.clearGridState);
-	const clearVersionStore = useDCBVersionStore(
-		(state) => state.clearVersionStore,
-	);
 	const queryClient = useQueryClient();
 
 	const {
@@ -82,8 +76,11 @@ export default function Header({
 
 	const handleAuthClick = async () => {
 		if (auth.isAuthenticated) {
-			clearGridState();
-			clearVersionStore();
+			// One purge for every persisted store, replacing the two hand-picked
+			// resets that used to sit here: those cleared grid and version state but
+			// left theme, sidebar, insights cost and consortium data behind, so a
+			// user's preferences survived their own logout.
+			clearAppStorage();
 			queryClient.clear();
 			auth.signoutRedirect({
 				post_logout_redirect_uri: appUrl("logout?loggedOut=true"),

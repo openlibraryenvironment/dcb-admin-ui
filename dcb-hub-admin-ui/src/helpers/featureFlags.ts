@@ -26,3 +26,12 @@ const readFlag = (name: string): boolean => {
  */
 export const isInsightsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_INSIGHTS");
+
+/**
+ * The Audit Explorer depends on the `auditIncidence` aggregation endpoint and the
+ * audit search behaviour that only exist in the upcoming dcb-service release.
+ * Enable with VITE_FEATURE_AUDIT_EXPLORER=true once the environment's dcb-service
+ * is new enough.
+ */
+export const isAuditExplorerEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_AUDIT_EXPLORER");

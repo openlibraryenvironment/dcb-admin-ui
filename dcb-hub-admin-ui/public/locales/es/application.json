@@ -299,8 +299,8 @@
 		"theme_label": "Tema",
 		"mode_label": "Modo",
 		"themes": {
+			"blueAndWhite": "Azul y blanco",
 			"folio": "FOLIO",
-			"itsComingHome": "Inglaterra en el Mundial 26 («¡Vuelve a casa!»).",
 			"koha": "Koha",
 			"openRS": "OpenRS",
 			"evergreen": "Evergreen"
@@ -623,7 +623,8 @@
 		"keycloak": "Utilizamos <linkComponent>Keycloak</linkComponent> para una autenticación segura",
 		"login": "Inicia sesión para obtener acceso completo a $t(app.name)",
 		"logout": "Cerrar sesión",
-		"logged_out": "<bold>Tu sesión de {{appName}} para {{consortium}} ha finalizado</bold>. <break/> Inicia sesión. Ten en cuenta que se cerrará automáticamente tu sesión tras 30 minutos de inactividad.<break/>"
+		"logged_out": "<bold>Tu sesión de {{appName}} para {{consortium}} ha finalizado</bold>. <break/> Inicia sesión. Ten en cuenta que se cerrará automáticamente tu sesión tras 30 minutos de inactividad.<break/>",
+		"session_expired": "<bold>Tu sesión de {{appName}} para {{consortium}} ha caducado</bold>. <break/> Esto ocurre tras 30 minutos de inactividad. Inicia sesión de nuevo para continuar donde lo dejaste.<break/>"
 	},
 	"mappings": {
 		"add_success": "Se ha añadido {{fileName}} y está listo para subirse.",
@@ -812,6 +813,7 @@
 			"alarms": {
 				"name": "Alarmas"
 			},
+			"auditExplorer": "Auditoría explorar",
 			"catalogMetricsByHostLms": "Métricas del catálogo por LMS del host",
 			"dataChangeLog": "Registro de cambios de datos",
 			"name": "Información del servicio",
@@ -1475,19 +1477,19 @@
 				"name": "401 Sin autorización",
 				"summary": "Lo sentimos, no tienes acceso a esta página",
 				"description": "Si cree que debería tener acceso, póngase en contacto con el administrador del sistema",
-				"action": "$t(ui.action.go_home)"
+				"action": "$t(ui.actions.go_home)"
 			},
 			"404": {
 				"name": "404 Página no encontrada",
 				"summary": "Parece que esta página no existe",
 				"description": "Comprueba la dirección web o prueba con otra página",
-				"action": "$t(ui.action.go_home)"
+				"action": "$t(ui.actions.go_home)"
 			},
 			"500": {
 				"name": "500 Error del servidor",
 				"summary": "Parece que esto no funciona en este momento",
 				"description": "$t(ui.info.try_later)",
-				"action": "$t(ui.action.go_back)"
+				"action": "$t(ui.actions.go_back)"
 			},
 			"503": {
 				"name": "Mantenimiento en curso",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation, Trans } from "react-i18next";
 import { useAuth } from "react-oidc-context";
@@ -16,13 +16,24 @@ import Link from "@components/Link/Link";
 import Alert from "@components/Alert/Alert";
 import LandingCard from "@components/LandingCard/LandingCard";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import {
+	clearAppStorage,
+	postLoginRedirectKey,
+	toInternalPath,
+} from "@helpers/appBase";
 
 export const Route = createFileRoute("/logout")({
 	// Validate if the user landed here via an intentional logout
 	validateSearch: (search: Record<string, unknown>) => ({
-		loggedOut: search.loggedOut === "true",
+		// Undefined rather than false when absent. Returning a literal `false`
+		// stamped "?loggedOut=false" onto the URL of every session-expiry
+		// redirect, which read as a claim that the user had NOT been logged out -
+		// while they were staring at the logged-out page.
+		loggedOut: search.loggedOut === "true" ? true : undefined,
 		reason: search.reason as "session_expired" | "intentional" | undefined,
-		redirect: search.redirect as string | undefined,
+		// See login.tsx: this feeds the same post-login navigation, so it gets the
+		// same constraint.
+		redirect: toInternalPath(search.redirect as string | undefined),
 	}),
 
 	component: Logout,
@@ -31,12 +42,35 @@ export const Route = createFileRoute("/logout")({
 function Logout() {
 	const { t } = useTranslation();
 	const auth = useAuth();
-	const { displayName } = useConsortiumInfoStore();
+	// Atomic selector: destructuring the store subscribed this page to every
+	// consortium field when it renders one of them.
+	const displayName = useConsortiumInfoStore((s) => s.displayName);
 
-	const { loggedOut } = Route.useSearch();
-	const [alertDisplayed, setAlertDisplayed] = useState(loggedOut);
+	const { loggedOut, reason, redirect } = Route.useSearch();
+	const sessionExpired = reason === "session_expired";
+	// Both arrivals earn an explanation. Only the intentional-logout flag used to,
+	// so a user whose session timed out was dropped on a bare login page with no
+	// account of what had just happened to them.
+	const [alertDisplayed, setAlertDisplayed] = useState(
+		loggedOut === true || sessionExpired,
+	);
+
+	// Backstop for every route into this page. Each logout path purges before it
+	// leaves, but signoutRedirect() is asynchronous - it revokes tokens over the
+	// network before navigating - and any store that writes inside that window
+	// puts its key straight back. This page is where all four paths land, and
+	// nothing on it should be reading a signed-in user's state anyway.
+	useEffect(() => {
+		clearAppStorage();
+	}, []);
 
 	const handleSignIn = () => {
+		// Mirrors login.tsx: main.tsx reads this back once OIDC completes. Without
+		// it, an expired session sent the user home instead of to the page they
+		// were on when it expired.
+		if (redirect) {
+			sessionStorage.setItem(postLoginRedirectKey(), redirect);
+		}
 		auth.signinRedirect();
 	};
 
@@ -69,7 +103,11 @@ function Logout() {
 							alertText={
 								<Typography variant="loginCardText">
 									<Trans
-										i18nKey="loginout.logged_out"
+										i18nKey={
+											sessionExpired
+												? "loginout.session_expired"
+												: "loginout.logged_out"
+										}
 										t={t}
 										components={{ bold: <strong />, break: <br /> }}
 										values={{ appName: "DCB Admin", consortium: displayName }}

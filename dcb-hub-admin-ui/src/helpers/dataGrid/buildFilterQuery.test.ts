@@ -52,6 +52,58 @@ describe("buildFilterQuery: existing operators are unchanged", () => {
 	});
 });
 
+describe("buildFilterQuery: escapes Lucene metacharacters in terms", () => {
+	it("escapes a colon so a spaced description cannot break the parser", () => {
+		// Regression: "Tracking failed: Supplying System" emitted an unescaped ":"
+		// that the backend read as a field separator ("cannot parse").
+		expect(
+			buildFilterQuery(
+				"briefDescription",
+				"contains",
+				"Tracking failed: Supplying System",
+			),
+		).toBe("briefDescription:*Tracking?failed\\:?Supplying?System*");
+	});
+
+	it("escapes parentheses and quotes inside a term", () => {
+		expect(
+			buildFilterQuery(
+				"briefDescription",
+				"contains",
+				'Checkout failed (no "item")',
+			),
+		).toBe('briefDescription:*Checkout?failed?\\(no?\\"item\\"\\)*');
+	});
+
+	it("leaves hyphens in codes untouched", () => {
+		expect(buildFilterQuery("pickupLocationCode", "contains", "loc-a")).toBe(
+			"pickupLocationCode:*loc-a*",
+		);
+	});
+});
+
+describe("buildFilterQuery: containsPhrase (analysed text fields)", () => {
+	it("emits a quoted phrase instead of a rejected leading wildcard", () => {
+		expect(
+			buildFilterQuery(
+				"briefDescription",
+				"containsPhrase",
+				"Tracking failed: Supplying System",
+			),
+		).toBe('briefDescription:"Tracking failed: Supplying System"');
+	});
+
+	it("escapes only quotes and backslashes inside the phrase", () => {
+		expect(
+			buildFilterQuery("briefDescription", "containsPhrase", 'say "hi"\\bye'),
+		).toBe('briefDescription:"say \\"hi\\"\\\\bye"');
+	});
+
+	it("returns no clause when the phrase is empty", () => {
+		expect(buildFilterQuery("briefDescription", "containsPhrase", "")).toBe("");
+	});
+});
+
 describe("processGridFilterModel: status filters compose with the tab base query", () => {
 	const model = (operator: string, value: unknown): GridFilterModel => ({
 		items: [{ id: 1, field: "status", operator, value }],
