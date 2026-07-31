@@ -9,6 +9,7 @@ export const updateAgencyQuery = gql`
 			isSupplyingAgency
 			isBorrowingAgency
 			maxConsortialLoans
+			maxLocalHolds
 		}
 	}
 `;

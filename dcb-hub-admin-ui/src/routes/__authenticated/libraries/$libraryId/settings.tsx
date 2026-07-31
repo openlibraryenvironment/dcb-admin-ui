@@ -79,6 +79,15 @@ function Settings() {
 			)
 			.min(0, t("ui.validation.min_value", { min: 0 }))
 			.nullable(),
+		maxLocalHolds: Yup.number()
+			.transform((v, o) => (o === "" ? null : v))
+			.typeError(
+				t("ui.validation.number", {
+					field: t("libraries.max_local_holds"),
+				}),
+			)
+			.min(1, t("ui.validation.min_value", { min: 1 }))
+			.nullable(),
 		isSupplyingAgency: Yup.boolean().nullable(),
 		isBorrowingAgency: Yup.boolean().nullable(),
 	});
@@ -93,6 +102,7 @@ function Settings() {
 		mode: "onChange",
 		values: {
 			maxConsortialLoans: library?.agency?.maxConsortialLoans ?? null,
+			maxLocalHolds: library?.agency?.maxLocalHolds ?? null,
 			isSupplyingAgency: library?.agency?.isSupplyingAgency ?? null,
 			isBorrowingAgency: library?.agency?.isBorrowingAgency ?? null,
 		},
@@ -334,6 +344,42 @@ function Settings() {
 									<RenderAttribute
 										attribute={library.agency?.maxConsortialLoans}
 									/>
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle" id="label-max-local-holds">
+							{t("libraries.max_local_holds")}
+						</Typography>
+						<Controller
+							name="maxLocalHolds"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										type="number"
+										fullWidth
+										error={!!errors.maxLocalHolds}
+										// The visible label is a sibling Typography rather than a
+										// bound <label>, so without this the input has no
+										// accessible name at all. Pointing at the label element
+										// rather than repeating the string keeps the two from
+										// diverging, and satisfies Label in Name for free.
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-max-local-holds" },
+										}}
+										helperText={
+											(errors.maxLocalHolds?.message as string) ??
+											t("libraries.max_local_holds_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={library.agency?.maxLocalHolds} />
 								)
 							}
 						/>

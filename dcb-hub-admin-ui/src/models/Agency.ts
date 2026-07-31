@@ -11,4 +11,5 @@ export interface Agency {
 	isSupplyingAgency: boolean;
 	isBorrowingAgency: boolean;
 	maxConsortialLoans: number;
+	maxLocalHolds: number;
 }

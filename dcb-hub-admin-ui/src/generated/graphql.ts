@@ -612,6 +612,7 @@ export type UpdateAgencyMutation = {
 		isSupplyingAgency: boolean | null;
 		isBorrowingAgency: boolean | null;
 		maxConsortialLoans: number | null;
+		maxLocalHolds: number | null;
 	};
 };
 
@@ -1518,6 +1519,7 @@ export type LoadLibraryBasicsQuery = {
 				id: string | null;
 				code: string | null;
 				maxConsortialLoans: number | null;
+				maxLocalHolds: number | null;
 				isSupplyingAgency: boolean | null;
 				isBorrowingAgency: boolean | null;
 				hostLms: {
