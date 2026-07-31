@@ -198,7 +198,6 @@ function ItemsPageComponent() {
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
-					checkboxSelection={false}
 					pagination
 					paginationModel={
 						paginationModel[itemsGridId] ?? { page: 0, pageSize: 25 }
@@ -255,7 +254,6 @@ function ItemsPageComponent() {
 								columns={itemColumns}
 								rows={itemsNotShown}
 								loading={isLoading}
-								checkboxSelection={false}
 								disablePivoting
 								paginationMode="client"
 								sortingMode="client"

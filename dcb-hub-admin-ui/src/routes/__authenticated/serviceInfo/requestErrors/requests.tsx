@@ -163,7 +163,6 @@ function Requests() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				checkboxSelection={false}
 				disableAggregation
 				disableHoverInteractions={false}
 				disableRowGrouping

@@ -299,7 +299,7 @@ function ReferenceValueMappingsRoute() {
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={processRowUpdate}
-				checkboxSelection={false}
+				rowSelection
 				exportConfig={{
 					query: getMappings,
 					coreType: "referenceValueMappings",

@@ -176,7 +176,6 @@ function ClusterExplanation() {
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail row={row} type="ClusterExplainer" />
 					)}
-					checkboxSelection={false}
 					disableAggregation={false}
 					disableRowGrouping={false}
 					disableHoverInteractions={false}

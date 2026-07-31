@@ -169,7 +169,7 @@ function LocationsRouteComponent() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				checkboxSelection={true}
+				rowSelection
 				exportConfig={{
 					query: getLocations,
 					coreType: "locations",

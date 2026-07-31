@@ -169,7 +169,6 @@ function HostLmss() {
 				onFilterModelChange={handleFilterChange}
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
-				checkboxSelection={true}
 				exportConfig={{
 					query: getHostLms,
 					coreType: "hostLms",

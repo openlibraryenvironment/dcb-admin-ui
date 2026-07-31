@@ -144,7 +144,6 @@ function ClusterDetails() {
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
-					checkboxSelection={false}
 					disableAggregation
 					disableRowGrouping
 					disableHoverInteractions={false}

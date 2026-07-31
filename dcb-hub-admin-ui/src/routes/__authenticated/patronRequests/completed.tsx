@@ -314,7 +314,7 @@ function Completed() {
 					</Typography>
 					<DataGrid
 						autoRowHeight={false}
-						checkboxSelection={true}
+						rowSelection
 						columns={allColumns}
 						columnVisibilityModel={columnVisibilityModel}
 						onColumnVisibilityModelChange={handleColumnVisibilityChange}

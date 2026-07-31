@@ -237,7 +237,6 @@ function SearchPage() {
 					// The SearchQueryBuilder is the sole (advanced) filter surface, no need for MUI filter model
 					disableColumnFilter
 					disableColumnSorting
-					checkboxSelection={false}
 					disableAggregation
 					disableRowGrouping
 					disableHoverInteractions={false}

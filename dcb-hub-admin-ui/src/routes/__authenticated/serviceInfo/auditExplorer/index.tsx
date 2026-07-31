@@ -368,7 +368,6 @@ function AuditExplorer() {
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="audits" />
 						)}
-						checkboxSelection={true}
 						exportConfig={{
 							query: getAudits,
 							coreType: "audits",
@@ -383,7 +382,6 @@ function AuditExplorer() {
 						scrollbarVisible={false}
 						noResultsText={t("audit_log.audit_log_no_rows")}
 						searchText={t("audit_explorer.search_placeholder")}
-						rowSelection={false}
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 					/>

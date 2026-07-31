@@ -310,7 +310,6 @@ function Contacts() {
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						processRowUpdate={processRowUpdate}
-						checkboxSelection={false}
 						disableAggregation
 						disableHoverInteractions={false}
 						disableRowGrouping

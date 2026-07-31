@@ -241,7 +241,7 @@ function GroupSupplierRequests() {
 							getDetailPanelContent={({ row }: any) => (
 								<MasterDetail row={row} type="patronRequests" />
 							)}
-							checkboxSelection={false}
+							rowSelection
 							exportConfig={{
 								query: getPatronRequestsForExport,
 								coreType: "patronRequests",

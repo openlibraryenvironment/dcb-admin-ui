@@ -387,7 +387,7 @@ function Libraries() {
 				onFilterModelChange={handleFilterChange}
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
-				checkboxSelection={true} // Enable Bulk Selection
+				rowSelection
 				exportConfig={{
 					query: getLibraries,
 					coreType: "libraries",

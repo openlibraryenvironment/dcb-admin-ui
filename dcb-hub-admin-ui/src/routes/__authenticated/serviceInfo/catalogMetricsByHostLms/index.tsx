@@ -200,7 +200,6 @@ function CatalogMetricsByHostLms() {
 				onFilterModelChange={handleFilterChange}
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
-				checkboxSelection={false}
 				disableAggregation={false}
 				disableHoverInteractions={false}
 				disableRowGrouping

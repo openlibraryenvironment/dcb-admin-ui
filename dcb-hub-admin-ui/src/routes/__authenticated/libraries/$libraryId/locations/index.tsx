@@ -525,7 +525,7 @@ function LibraryLocations() {
 						onFilterModelChange={handleFilterChange}
 						columnVisibilityModel={columnVisibilityModel}
 						onColumnVisibilityModelChange={handleColumnVisibilityChange}
-						checkboxSelection={true}
+						rowSelection
 						exportConfig={{
 							query: getLocations,
 							coreType: "locations",

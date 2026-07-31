@@ -147,7 +147,6 @@ function AlarmsRouteComponent() {
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="alarms" />
 				)}
-				checkboxSelection={true}
 				exportConfig={{
 					query: getAlarms,
 					coreType: "alarms",
