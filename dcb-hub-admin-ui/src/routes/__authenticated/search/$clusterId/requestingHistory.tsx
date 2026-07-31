@@ -37,6 +37,9 @@ function RequestingHistory() {
 	const { clusterId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
+	// Per-cluster id so grid UI state (page/sort/filter) is persisted separately
+	// per bib cluster. The row-click `type` is kept as the static
+	// `patronRequestsRecordHistory` below so it still matches specialRedirectionTypes.
 	const gridId = `patronRequestsRecordHistory-${clusterId}`;
 
 	const {
@@ -157,7 +160,7 @@ function RequestingHistory() {
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 				<DataGrid
 					identifier={gridId}
-					type={gridId}
+					type="patronRequestsRecordHistory"
 					columns={allColumns}
 					rows={requestsData?.patronRequests?.content ?? []}
 					rowCount={requestsData?.patronRequests?.totalSize ?? 0}

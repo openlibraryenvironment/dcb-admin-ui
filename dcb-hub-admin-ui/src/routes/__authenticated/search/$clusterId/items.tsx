@@ -19,14 +19,13 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { itemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
 import {
 	GridActionsCellItem,
 	GridColDef,
-	GridPaginationModel,
 	GridRowModesModel,
 	GridRowParams,
 } from "@mui/x-data-grid-premium";
@@ -54,8 +53,27 @@ function ItemsPageComponent() {
 	const itemsGridId = "ClusterRecordItems";
 	const itemsNotShownGridId = "ClusterRecordItemsNotShown";
 
-	const { paginationModel, setPaginationModel, sortModel, setSortModel } =
-		useGridStore();
+	// One useGridState per grid: stable model refs + change handlers, atomic store
+	// selectors (no whole-store re-render). Client-side pagination/sort here - the
+	// hook is pagination-mode-agnostic, so the same wiring serves server grids too.
+	const {
+		paginationModel: itemsPagination,
+		sortModel: itemsSort,
+		onPaginationModelChange: handleItemsPaginationChange,
+		onSortModelChange: handleItemsSortChange,
+	} = useGridState(itemsGridId, {
+		pagination: { page: 0, pageSize: 25 },
+		sort: [{ field: "availabilityDate", sort: "desc" }],
+	});
+	const {
+		paginationModel: itemsNotShownPagination,
+		sortModel: itemsNotShownSort,
+		onPaginationModelChange: handleItemsNotShownPaginationChange,
+		onSortModelChange: handleItemsNotShownSortChange,
+	} = useGridState(itemsNotShownGridId, {
+		pagination: { page: 0, pageSize: 25 },
+		sort: [{ field: "availabilityDate", sort: "desc" }],
+	});
 
 	const { data, isLoading } = useQuery({
 		queryKey: ["clusterItems", clusterId],
@@ -199,18 +217,10 @@ function ItemsPageComponent() {
 					sortingMode="client"
 					filterMode="client"
 					pagination
-					paginationModel={
-						paginationModel[itemsGridId] ?? { page: 0, pageSize: 25 }
-					}
-					onPaginationModelChange={(model: GridPaginationModel) =>
-						setPaginationModel(itemsGridId, model)
-					}
-					sortModel={
-						sortModel[itemsGridId] ?? [
-							{ field: "availabilityDate", sort: "desc" },
-						]
-					}
-					onSortModelChange={(model) => setSortModel(itemsGridId, model)}
+					paginationModel={itemsPagination}
+					onPaginationModelChange={handleItemsPaginationChange}
+					sortModel={itemsSort}
+					onSortModelChange={handleItemsSortChange}
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail type="items" row={row} />
 					)}
@@ -259,23 +269,10 @@ function ItemsPageComponent() {
 								sortingMode="client"
 								filterMode="client"
 								pagination
-								paginationModel={
-									paginationModel[itemsNotShownGridId] ?? {
-										page: 0,
-										pageSize: 25,
-									}
-								}
-								onPaginationModelChange={(model: GridPaginationModel) =>
-									setPaginationModel(itemsNotShownGridId, model)
-								}
-								sortModel={
-									sortModel[itemsNotShownGridId] ?? [
-										{ field: "availabilityDate", sort: "desc" },
-									]
-								}
-								onSortModelChange={(model) =>
-									setSortModel(itemsNotShownGridId, model)
-								}
+								paginationModel={itemsNotShownPagination}
+								onPaginationModelChange={handleItemsNotShownPaginationChange}
+								sortModel={itemsNotShownSort}
+								onSortModelChange={handleItemsNotShownSortChange}
 								getDetailPanelContent={({ row }: any) => (
 									<MasterDetail type="items" row={row} />
 								)}

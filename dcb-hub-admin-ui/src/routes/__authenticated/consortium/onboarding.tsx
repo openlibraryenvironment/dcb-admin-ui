@@ -12,10 +12,7 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getILS } from "@helpers/getILS";
-import {
-	GridPaginationModel,
-	GridRowModesModel,
-} from "@mui/x-data-grid-premium";
+import { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import { getLibraries } from "@queries/getLibraries";
 import { getMappings } from "@queries/getMappings";
@@ -29,7 +26,7 @@ import type {
 	LoadNumericRangeMappingsQueryVariables,
 	LoadPatronRequestsQueryVariables,
 } from "@generated/graphql";
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 
 export const Route = createFileRoute("/__authenticated/consortium/onboarding")({
 	component: Onboarding,
@@ -40,7 +37,10 @@ function Onboarding() {
 	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const { paginationModel, setPaginationModel } = useGridStore();
+	const { paginationModel, onPaginationModelChange } = useGridState(
+		"onboardingLibraries",
+		{ pagination: { page: 0, pageSize: 20 } },
+	);
 	// Fetch libraries and then batch-fetch the individual totalSize counts for each
 	const { data: librariesWithCounts, isLoading } = useQuery({
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],
@@ -453,15 +453,8 @@ function Onboarding() {
 						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
-						paginationModel={
-							paginationModel["onboardingLibraries"] ?? {
-								page: 0,
-								pageSize: 20,
-							}
-						}
-						onPaginationModelChange={(model: GridPaginationModel) =>
-							setPaginationModel("onboardingLibraries", model)
-						}
+						paginationModel={paginationModel}
+						onPaginationModelChange={onPaginationModelChange}
 						scrollbarVisible={false}
 						noResultsText={t("ui.data_grid.no_results")}
 						searchText=""

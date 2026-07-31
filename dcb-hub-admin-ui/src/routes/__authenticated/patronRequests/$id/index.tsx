@@ -21,10 +21,7 @@ import {
 	Typography,
 } from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import {
-	GridPaginationModel,
-	GridRowModesModel,
-} from "@mui/x-data-grid-premium";
+import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import Error from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -37,7 +34,7 @@ import PageActionsMenu, {
 	Action,
 } from "@components/PageActionsMenu/PageActionsMenu";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
-import { useGridStore } from "@/hooks/useDataGridStore";
+import { useGridState } from "@hooks/useGridState";
 import { formatDuration } from "@helpers/formatDuration";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
 import { getILS } from "@helpers/getILS";
@@ -91,22 +88,22 @@ function RouteComponent() {
 	const [activeTab, setActiveTab] = useState(0);
 
 	const auditGridId = `audit-log-${id}`;
+	// Shared grid-state hook (as every other grid uses): seeds once from the store,
+	// subscribes with atomic selectors, and returns STABLE model references and
+	// change handlers. The stable `filterModel` reference is what stops MUI from
+	// resetting pagination to page 0 on every render (a changed filterModel ref is
+	// treated as a filter change, which resets the page).
 	const {
-		paginationModel: auditPaginationModel,
-		setPaginationModel: setAuditPaginationModel,
-		filterModel: auditFilterModel,
-		setFilterModel: setAuditFilterModel,
-		sortModel: auditSortModel,
-		setSortModel: setAuditSortModel,
-	} = useGridStore();
-	const currentPagination = auditPaginationModel[auditGridId] ?? {
-		page: 0,
-		pageSize: 25,
-	};
-	const currentFilter = auditFilterModel[auditGridId] ?? { items: [] };
-	const currentSort = auditSortModel[auditGridId] ?? [
-		{ field: "auditDate", sort: "desc" },
-	];
+		paginationModel: currentPagination,
+		sortModel: currentSort,
+		filterModel: currentFilter,
+		onPaginationModelChange: handleAuditPaginationChange,
+		onSortModelChange: handleAuditSortChange,
+		onFilterModelChange: handleAuditFilterChange,
+	} = useGridState(auditGridId, {
+		pagination: { page: 0, pageSize: 25 },
+		sort: [{ field: "auditDate", sort: "desc" }],
+	});
 
 	const {
 		data,
@@ -1839,9 +1836,7 @@ function RouteComponent() {
 						// operationDataType="Audit"
 						filterMode="client"
 						filterModel={currentFilter}
-						onFilterModelChange={(newModel) =>
-							setAuditFilterModel(auditGridId, newModel)
-						}
+						onFilterModelChange={handleAuditFilterChange}
 						disableAggregation={true}
 						disableHoverInteractions={true}
 						disableRowGrouping={true}
@@ -1851,9 +1846,7 @@ function RouteComponent() {
 						pagination
 						paginationMode="client"
 						paginationModel={currentPagination}
-						onPaginationModelChange={(newModel: GridPaginationModel) =>
-							setAuditPaginationModel(auditGridId, newModel)
-						}
+						onPaginationModelChange={handleAuditPaginationChange}
 						pivotingEnabled={false}
 						onRowModesModelChange={setRowModesModel}
 						toolbarVisible
@@ -1862,9 +1855,7 @@ function RouteComponent() {
 						scrollbarVisible={false}
 						sortingMode="client"
 						sortModel={currentSort}
-						onSortModelChange={(newModel) =>
-							setAuditSortModel(auditGridId, newModel)
-						}
+						onSortModelChange={handleAuditSortChange}
 					/>
 				</TabPanel>
 			</TabContext>
