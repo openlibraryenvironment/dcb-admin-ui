@@ -1323,6 +1323,7 @@
 			"LOANED": "Loaned",
 			"PICKUP_TRANSIT": "Pickup transit",
 			"RETURN_TRANSIT": "Return transit",
+			"AWAITING_RETURN_TO_SUPPLIER": "Awaiting return to supplier",
 			"CANCELLED": "Cancelled",
 			"COMPLETED": "Completed",
 			"FINALISED": "Finalised",
