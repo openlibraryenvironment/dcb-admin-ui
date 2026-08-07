@@ -1,18 +1,15 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Delete, Edit, Save, Cancel, GroupAdd } from "@mui/icons-material";
+import { GroupAdd } from "@mui/icons-material";
 import {
 	GridPaginationModel,
 	GridSortModel,
 	GridFilterModel,
 	GridColumnVisibilityModel,
-	GridRowModel,
-	GridRowModes,
 	GridActionsCellItem,
-	GridRowParams,
 	useGridApiRef,
 	GridColDef,
 	GridRowId,
@@ -21,30 +18,24 @@ import {
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import AddLibraryToGroup from "@forms/AddLibraryToGroup/AddLibraryToGroup";
 import NewLibrary from "@forms/NewLibrary/NewLibrary";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 
 import { getLibraries } from "@queries/getLibraries";
-import { updateLibraryMutation } from "@mutations/updateLibrary";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
-import { computeMutation } from "@helpers/computeMutation";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { libraryColumns } from "@columns/libraryColumns";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { defaultLibraryColumnVisibility } from "@columns/columnVisibility/defaultLibraryColumnVisibility";
-import type {
-	DeleteLibraryMutationVariables,
-	LoadLibrariesQueryVariables,
-	UpdateLibraryMutationVariables,
-} from "@generated/graphql";
+import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 // Default-state prefetch: the component reads pagination/sort/filter state
 // from useGridStore (a Zustand store) at mount time, which the loader
@@ -99,7 +90,6 @@ export const Route = createFileRoute("/__authenticated/libraries/")({
 function Libraries() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
 	const customColumns = useCustomColumns();
 	const auth = useAuth();
 	const { displayName } = useConsortiumInfoStore();
@@ -130,19 +120,12 @@ function Libraries() {
 		filter: DEFAULT_FILTER_MODEL,
 		columnVisibility: DEFAULT_COLUMN_VISIBILITY,
 	});
-	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-	const [deleteLibraryId, setDeleteLibraryId] = useState<string | null>(null);
+	const libraryMutation = useEntityMutation("library");
 
 	const [showNewLibrary, setShowNewLibrary] = useState(false);
 	const [groupModalLibraries, setGroupModalLibraries] = useState<
 		{ id: string; name: string }[] | null
 	>(null);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
 
 	const {
 		data: gridData,
@@ -163,73 +146,6 @@ function Libraries() {
 			),
 		placeholderData: (previousData) => previousData,
 	});
-
-	const { mutateAsync: updateLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, UpdateLibraryMutationVariables>(
-				updateLibraryMutation,
-				variables,
-			),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-	const { mutate: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteLibraryMutationVariables>(
-				deleteLibraryMutation,
-				variables,
-			),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (promiseArguments) {
-			const { resolve, reject, newRow, oldRow } = promiseArguments;
-			const input: Record<string, any> = {
-				id: newRow.id,
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			};
-			Object.keys(newRow).forEach((key) => {
-				if (newRow[key] !== oldRow[key]) input[key] = newRow[key];
-			});
-
-			try {
-				const result = await updateLibrary({ input });
-				resolve(result.updateLibrary);
-			} catch (error) {
-				reject(error);
-			} finally {
-				setPromiseArguments(null);
-			}
-		} else if (deleteLibraryId) {
-			deleteLibrary(
-				{
-					input: {
-						id: deleteLibraryId,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-				{ onSettled: () => setDeleteLibraryId(null) },
-			);
-		}
-	};
 
 	const handleBulkAddToGroup = () => {
 		if (!apiRef.current || selectedLibraryIds.length === 0) return;
@@ -253,85 +169,41 @@ function Libraries() {
 		() => [
 			...customColumns,
 			...libraryColumns,
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 140,
-				getActions: ({ id, row, columns: rowColumns }: GridRowParams) => {
-					// Without fieldToFocus the row swaps to inputs with nothing focused.
-					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.data_grid.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.data_grid.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="addToGroup"
-							icon={<GroupAdd />}
-							label={t("libraries.add_to_group")}
-							onClick={(e) => {
-								e.stopPropagation();
-								setGroupModalLibraries([{ id: row.id, name: row.fullName }]);
-							}}
-							disabled={!isAnAdmin}
-							showInMenu
-						/>,
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.data_grid.edit")}
-							onClick={(e) => {
-								e.stopPropagation();
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit, fieldToFocus },
-								});
-							}}
-							disabled={!isAnAdmin}
-							showInMenu
-						/>,
-						<GridActionsCellItem
-							key="delete"
-							icon={<Delete />}
-							label={t("ui.data_grid.delete")}
-							onClick={(e) => {
-								e.stopPropagation();
-								setDeleteLibraryId(id as string);
-							}}
-							disabled={!isAnAdmin}
-							showInMenu
-						/>,
-					];
-				},
-			},
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id, row) =>
+					libraryMutation.requestDelete({
+						id: id as string,
+						name: row.fullName,
+					}),
+				canEdit: isAnAdmin,
+				showInMenu: true,
+				extraActions: ({ row }) => [
+					<GridActionsCellItem
+						key="addToGroup"
+						showInMenu
+						icon={<GroupAdd />}
+						label={t("libraries.add_to_group")}
+						onClick={(e) => {
+							e.stopPropagation();
+							setGroupModalLibraries([{ id: row.id, name: row.fullName }]);
+						}}
+						disabled={!isAnAdmin}
+					/>,
+				],
+				column: { width: 140 },
+			}),
 		],
-		[customColumns, rowModesModel, setRowModesModel, isAnAdmin, t],
+		[
+			customColumns,
+			rowModesModel,
+			setRowModesModel,
+			isAnAdmin,
+			t,
+			libraryMutation,
+		],
 	);
 
 	const pageActions = [
@@ -399,7 +271,7 @@ function Libraries() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				processRowUpdate={processRowUpdate}
+				processRowUpdate={libraryMutation.requestGridEdit}
 				listViewEnabled={false}
 				pivotingEnabled={false}
 				toolbarVisible
@@ -433,26 +305,7 @@ function Libraries() {
 				/>
 			)}
 
-			<Confirmation
-				open={!!promiseArguments || !!deleteLibraryId}
-				onClose={() => {
-					if (promiseArguments) {
-						promiseArguments.resolve(promiseArguments.oldRow);
-						setPromiseArguments(null);
-					}
-					setDeleteLibraryId(null);
-				}}
-				onConfirm={handleModalConfirm}
-				action={promiseArguments ? "gridEdit" : "deletion"}
-				entityName="Library"
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

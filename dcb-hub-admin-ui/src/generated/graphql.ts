@@ -709,27 +709,6 @@ export type LoadAgenciesQuery = {
 	};
 };
 
-export type LoadAgenciesForStaffRequestQueryVariables = Exact<{
-	pageno: number;
-	pagesize: number;
-	order: string;
-	query: string;
-	orderBy: string;
-}>;
-
-export type LoadAgenciesForStaffRequestQuery = {
-	agencies: {
-		totalSize: number | null;
-		content: Array<{
-			id: string | null;
-			code: string | null;
-			name: string | null;
-			hostLms: { id: string | null; code: string | null } | null;
-		} | null> | null;
-		pageable: { number: number | null; offset: number | null } | null;
-	};
-};
-
 export type LoadAgencyQueryVariables = Exact<{
 	query: string;
 }>;
@@ -951,30 +930,6 @@ export type LoadBibsQuery = {
 			contributesTo: { id: string } | null;
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
-	};
-};
-
-export type LoadBibsForPublisherQueryVariables = Exact<{
-	query: string;
-	pagesize?: number | null | undefined;
-	pageno?: number | null | undefined;
-}>;
-
-export type LoadBibsForPublisherQuery = {
-	sourceBibs: {
-		content: Array<{ contributesTo: { id: string } | null } | null> | null;
-	};
-};
-
-export type LoadClusterIdsByTitleQueryVariables = Exact<{
-	query: string;
-	pagesize?: number | null | undefined;
-	pageno?: number | null | undefined;
-}>;
-
-export type LoadClusterIdsByTitleQuery = {
-	sourceBibs: {
-		content: Array<{ contributesTo: { id: string } | null } | null> | null;
 	};
 };
 
@@ -1479,92 +1434,6 @@ export type LoadLibraryBasicsQuery = {
 			} | null;
 		} | null> | null;
 	};
-};
-
-export type LoadLibraryBasicsLocationQueryVariables = Exact<{
-	query: string;
-}>;
-
-export type LoadLibraryBasicsLocationQuery = {
-	libraries: {
-		content: Array<{
-			id: string;
-			fullName: string | null;
-			shortName: string | null;
-			agencyCode: string | null;
-			contacts: Array<{
-				id: string | null;
-				firstName: string | null;
-				lastName: string | null;
-				isPrimaryContact: boolean | null;
-				email: string | null;
-				role: {
-					id: string;
-					name: string;
-					description: string | null;
-					displayName: string;
-					keycloakRole: string | null;
-				};
-			} | null> | null;
-			agency: {
-				id: string | null;
-				code: string | null;
-				maxConsortialLoans: number | null;
-				hostLms: {
-					id: string | null;
-					code: string | null;
-					lmsClientClass: string | null;
-				} | null;
-			} | null;
-			secondHostLms: {
-				id: string | null;
-				code: string | null;
-				name: string | null;
-				lmsClientClass: string | null;
-			} | null;
-		} | null> | null;
-	};
-};
-
-export type LoadLibraryBasicsPrQueryVariables = Exact<{
-	query: string;
-}>;
-
-export type LoadLibraryBasicsPrQuery = {
-	libraries: {
-		content: Array<{
-			id: string;
-			fullName: string | null;
-			agencyCode: string | null;
-			agency: {
-				id: string | null;
-				authProfile: string | null;
-				hostLms: {
-					id: string | null;
-					code: string | null;
-					name: string | null;
-				} | null;
-			} | null;
-		} | null> | null;
-	};
-};
-
-export type LoadLibraryBibClusterIdsQueryVariables = Exact<{
-	query: string;
-	pagesize?: number | null | undefined;
-	pageno?: number | null | undefined;
-}>;
-
-export type LoadLibraryBibClusterIdsQuery = {
-	patronRequests: {
-		content: Array<{
-			bibClusterId: string | null;
-			clusterRecord: {
-				title: string | null;
-				members: Array<{ publisher: string | null } | null> | null;
-			} | null;
-		} | null> | null;
-	} | null;
 };
 
 export type LoadLibraryContactsQueryVariables = Exact<{
@@ -2118,31 +1987,6 @@ export type LoadPatronRequestsByIdQuery = {
 	} | null;
 };
 
-export type LoadPatronRequestStatsQueryVariables = Exact<{
-	pageno: number;
-	pagesize: number;
-	order: string;
-	query: string;
-	orderBy: string;
-}>;
-
-export type LoadPatronRequestStatsQuery = {
-	patronRequests: {
-		totalSize: number | null;
-		content: Array<{
-			id: string;
-			dateCreated: string | null;
-			dateUpdated: string | null;
-			patronHostlmsCode: string | null;
-			suppliers: Array<{
-				localAgency: string | null;
-				canonicalItemType: string | null;
-			} | null> | null;
-		} | null> | null;
-		pageable: { number: number | null; offset: number | null } | null;
-	} | null;
-};
-
 export type LoadPatronRequestTotalsQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;
@@ -2331,52 +2175,5 @@ export type LoadRolesQuery = {
 			description: string | null;
 			displayName: string;
 		} | null> | null;
-	};
-};
-
-export type LoadSupplierRequestsQueryVariables = Exact<{
-	pageno: number;
-	pagesize: number;
-	order: string;
-	query: string;
-	orderBy: string;
-}>;
-
-export type LoadSupplierRequestsQuery = {
-	supplierRequests: {
-		totalSize: number | null;
-		content: Array<{
-			id: string;
-			canonicalItemType: string | null;
-			dateCreated: string | null;
-			dateUpdated: string | null;
-			hostLmsCode: string | null;
-			isActive: boolean | null;
-			localItemId: string | null;
-			localBibId: string | null;
-			localItemBarcode: string | null;
-			localItemLocationCode: string | null;
-			localItemStatus: string | null;
-			localItemType: string | null;
-			localId: string | null;
-			localStatus: string | null;
-			localAgency: string | null;
-			rawLocalItemStatus: string | null;
-			rawLocalStatus: string | null;
-			localRenewalCount: number | null;
-			virtualPatron: {
-				id: string;
-				localId: string | null;
-				homeIdentity: boolean | null;
-				localBarcode: string | null;
-				localNames: string | null;
-				localPtype: string | null;
-				canonicalPtype: string | null;
-				localHomeLibraryCode: string | null;
-				lastValidated: string | null;
-			} | null;
-			patronRequest: { id: string } | null;
-		} | null> | null;
-		pageable: { number: number | null; offset: number | null } | null;
 	};
 };

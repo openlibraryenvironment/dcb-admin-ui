@@ -1,35 +1,23 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Tab, Tabs, Button, Stack } from "@mui/material";
-import { Edit, Delete, Save, Cancel } from "@mui/icons-material";
-import {
-	GridRowModesModel,
-	GridRowModes,
-	GridRowModel,
-	GridColDef,
-	GridActionsCellItem,
-} from "@mui/x-data-grid-premium";
+import { GridRowModesModel, GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import Confirmation from "@components/Confirmation/Confirmation";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewContact from "@forms/NewContact/NewContact";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { getConsortiumContacts } from "@queries/getConsortiumContacts";
-import { updatePerson } from "@mutations/updatePerson";
-import { deleteConsortiumContact } from "@mutations/deleteConsortiumContact";
-import { computeMutation } from "@helpers/computeMutation";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { CellEdit } from "@components/CellEdit/CellEdit";
-import type {
-	DeleteConsortiumContactMutationVariables,
-	LoadConsortiumContactsQueryVariables,
-	UpdatePersonMutationVariables,
-} from "@generated/graphql";
+import type { LoadConsortiumContactsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/consortium/contacts")({
 	component: Contacts,
@@ -39,7 +27,6 @@ function Contacts() {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -48,11 +35,7 @@ function Contacts() {
 
 	const [showNewContact, setShowNewContact] = useState(false);
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-	const [editRecord, setEditRecord] = useState<string | null>(null);
-	const [deleteConfirmationId, setDeleteConfirmationId] = useState<
-		string | null
-	>(null);
+	const contactMutation = useEntityMutation("consortiumContact");
 
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadConsortiumContacts"],
@@ -68,84 +51,6 @@ function Contacts() {
 
 	const consortiumId = data?.consortia?.content?.[0]?.id;
 	const contacts = data?.consortia?.content?.[0]?.contacts ?? [];
-
-	const { mutateAsync: updateContact } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, UpdatePersonMutationVariables>(
-				updatePerson,
-				variables,
-			),
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: ["LoadConsortiumContacts"] }),
-	});
-
-	const { mutate: deleteContact } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteConsortiumContactMutationVariables>(
-				deleteConsortiumContact,
-				variables,
-			),
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: ["LoadConsortiumContacts"] }),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setEditRecord(changes);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (promiseArguments) {
-			const { resolve, reject, newRow, oldRow } = promiseArguments;
-			const input: Record<string, any> = {
-				id: newRow.id,
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			};
-
-			Object.keys(newRow).forEach((key) => {
-				if (newRow[key] !== oldRow[key]) {
-					input[key] = key === "role" ? newRow[key].name : newRow[key];
-				}
-			});
-
-			try {
-				const result = await updateContact({ input });
-				resolve(result.updatePerson);
-			} catch (error) {
-				reject(error);
-			} finally {
-				setPromiseArguments(null);
-				setEditRecord(null);
-			}
-		} else if (deleteConfirmationId) {
-			deleteContact(
-				{
-					input: {
-						personId: deleteConfirmationId,
-						consortiumId,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-				{
-					onSettled: () => setDeleteConfirmationId(null),
-				},
-			);
-		}
-	};
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -193,68 +98,20 @@ function Contacts() {
 					{ value: false, label: t("ui.actions.no") },
 				],
 			},
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 100,
-				getActions: ({ id, columns: rowColumns }) => {
-					// Without fieldToFocus the row swaps to inputs with nothing focused.
-					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.data_grid.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.data_grid.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.data_grid.edit")}
-							onClick={() =>
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit, fieldToFocus },
-								})
-							}
-							disabled={!isAnAdmin}
-						/>,
-						<GridActionsCellItem
-							key="delete"
-							icon={<Delete />}
-							label={t("ui.data_grid.delete")}
-							onClick={() => setDeleteConfirmationId(id as string)}
-							disabled={!isAnAdmin}
-						/>,
-					];
-				},
-			},
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id, row) =>
+					contactMutation.requestDelete({
+						id: id as string,
+						name: `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim(),
+						ownerId: consortiumId,
+					}),
+				canEdit: isAnAdmin,
+			}),
 		],
-		[rowModesModel, isAnAdmin, t],
+		[rowModesModel, isAnAdmin, t, consortiumId, contactMutation],
 	);
 
 	return (
@@ -309,7 +166,7 @@ function Contacts() {
 						editMode="row"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						processRowUpdate={processRowUpdate}
+						processRowUpdate={contactMutation.requestGridEdit}
 						disableAggregation
 						disableHoverInteractions={false}
 						disableRowGrouping
@@ -326,21 +183,7 @@ function Contacts() {
 				</Grid>
 			</Grid>
 
-			<Confirmation
-				open={!!promiseArguments || !!deleteConfirmationId}
-				onClose={() => {
-					if (promiseArguments) {
-						promiseArguments.resolve(promiseArguments.oldRow);
-						setPromiseArguments(null);
-						setEditRecord(null);
-					}
-					setDeleteConfirmationId(null);
-				}}
-				onConfirm={handleModalConfirm}
-				action={promiseArguments ? "gridEdit" : "deletion"}
-				entityName="Contact"
-				editInformation={editRecord ?? undefined}
-			/>
+			<EntityMutationDialogs {...contactMutation.dialogProps} />
 
 			{showNewContact && (
 				<NewContact

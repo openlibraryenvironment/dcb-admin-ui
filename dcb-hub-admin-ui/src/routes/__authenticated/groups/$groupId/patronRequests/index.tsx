@@ -21,15 +21,13 @@ import { defaultPatronRequestGroupVisibility } from "@columns/columnVisibility/d
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
-import { getLibraries } from "@queries/getLibraries";
-import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { allLibrariesQuery } from "@/queryOptions/libraries";
+import { allLocationsQuery } from "@/queryOptions/locations";
 
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import type {
 	LoadGroupQueryVariables,
-	LoadLibrariesQueryVariables,
-	LoadLocationForPrGridQueryVariables,
 	LoadPatronRequestsQueryVariables,
 } from "@generated/graphql";
 
@@ -116,37 +114,16 @@ function GroupPatronRequests() {
 		placeholderData: (previousData) => previousData,
 	});
 
-	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
-		queryKey: ["allLibrariesDictionary"],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			}),
-		staleTime: 1000 * 60 * 30,
-	});
+	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery(
+		allLibrariesQuery(gqlClient),
+	);
 
-	const { data: locationsData, isLoading: isLocationsLoading } = useQuery({
-		queryKey: ["allLocationsDictionary"],
-		queryFn: () =>
-			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
-				getLocationForPatronRequestGrid,
-				{
-					query: "",
-					order: "name",
-					orderBy: "ASC",
-					pagesize: 1000,
-					pageno: 0,
-				},
-			),
-		staleTime: 1000 * 60 * 30,
-	});
+	const { data: locationsData, isLoading: isLocationsLoading } = useQuery(
+		allLocationsQuery(gqlClient),
+	);
 
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
-		locations: locationsData?.locations?.content ?? [],
+		locations: locationsData ?? [],
 		libraries: librariesData?.libraries?.content ?? [],
 		variant: "standard",
 	});

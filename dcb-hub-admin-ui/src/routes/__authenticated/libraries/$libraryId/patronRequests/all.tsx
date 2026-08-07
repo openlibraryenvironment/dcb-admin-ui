@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
@@ -11,29 +11,22 @@ import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import LibraryPatronRequestSubTabs from "@components/LibraryPatronRequestSubTabs/LibraryPatronRequestSubTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
 import { defaultPatronRequestLibraryColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestLibraryColumnVisibility";
 
-import { getLibrary } from "@queries/getLibrary";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
-import { getLibraries } from "@queries/getLibraries";
-import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { libraryQuery } from "@/queryOptions/library";
+import { allLibrariesQuery } from "@/queryOptions/libraries";
+import { allLocationsQuery } from "@/queryOptions/locations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
-import type {
-	LoadLibrariesQueryVariables,
-	LoadLibraryQueryVariables,
-	LoadLocationForPrGridQueryVariables,
-	LoadPatronRequestsQueryVariables,
-} from "@generated/graphql";
+import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/patronRequests/all",
@@ -43,7 +36,6 @@ export const Route = createFileRoute(
 
 function PatronRequestsAll() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
@@ -54,6 +46,7 @@ function PatronRequestsAll() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
+	const libraryMutation = useEntityMutation("library");
 	const gridId = `patronRequestsLibraryAll-${libraryId}`;
 
 	const {
@@ -73,57 +66,16 @@ function PatronRequestsAll() {
 		columnVisibility: defaultPatronRequestLibraryColumnVisibility,
 	});
 
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
+	const { data: library } = useQuery(libraryQuery(gqlClient, libraryId));
 
-	const { data: libraryData } = useQuery({
-		queryKey: ["library", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
-				query: `id:${libraryId}`,
-			}),
-		enabled: !!libraryId,
-	});
-
-	const library = libraryData?.libraries?.content?.[0];
 	const code = library?.agency?.hostLms?.code;
 
-	const { data: librariesData } = useQuery({
-		queryKey: ["allLibrariesDictionary"],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			}),
-		staleTime: 1000 * 60 * 30,
-	});
+	const { data: librariesData } = useQuery(allLibrariesQuery(gqlClient));
 
-	const { data: locationsData } = useQuery({
-		queryKey: ["allLocationsDictionary"],
-		queryFn: () =>
-			gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
-				getLocationForPatronRequestGrid,
-				{
-					query: "",
-					order: "name",
-					orderBy: "ASC",
-					pagesize: 1000,
-					pageno: 0,
-				},
-			),
-		staleTime: 1000 * 60 * 30,
-	});
+	const { data: locationsData } = useQuery(allLocationsQuery(gqlClient));
 
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
-		locations: locationsData?.locations?.content ?? [],
+		locations: locationsData ?? [],
 		libraries: librariesData?.libraries?.content ?? [],
 		variant: "standard",
 	});
@@ -158,26 +110,17 @@ function PatronRequestsAll() {
 		placeholderData: (previousData) => previousData,
 	});
 
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
-	});
-
 	return (
 		<PageContainer
 			title={library?.fullName}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -253,35 +196,7 @@ function PatronRequestsAll() {
 					/>
 				</Grid>
 			</Grid>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						libraryId,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library?.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library?.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

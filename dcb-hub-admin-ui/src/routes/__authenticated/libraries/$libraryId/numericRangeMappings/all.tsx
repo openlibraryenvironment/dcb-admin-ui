@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
@@ -9,22 +8,17 @@ import { Delete } from "@mui/icons-material";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import MappingsSubTabs from "@components/MappingsSubTabs/MappingsSubTabs";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 
-import { getLibrary } from "@queries/getLibrary";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import { libraryQuery } from "@/queryOptions/library";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
-import { updateNumericRangeMapping } from "@mutations/updateNumericRangeMapping";
-import { deleteNumericRangeMapping } from "@mutations/deleteNumericRangeMapping";
 import { numericRangeMappingColumnsNoCategoryFilter } from "@columns/numericRangeMappingColumnsNoCategoryFilter";
-import type { LoadLibraryQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/numericRangeMappings/all",
@@ -34,7 +28,6 @@ export const Route = createFileRoute(
 
 function AllNumericMappings() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
@@ -44,33 +37,13 @@ function AllNumericMappings() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
+	const libraryMutation = useEntityMutation("library");
 
 	const {
-		data: libraryData,
+		data: library,
 		isLoading,
 		error,
-	} = useQuery({
-		queryKey: ["library", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
-				query: `id:${libraryId}`,
-			}),
-		enabled: !!libraryId,
-	});
-
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
-	});
-
-	const library = libraryData?.libraries?.content?.[0];
+	} = useQuery(libraryQuery(gqlClient, libraryId));
 
 	if (isLoading)
 		return (
@@ -98,17 +71,13 @@ function AllNumericMappings() {
 		<PageContainer
 			title={library.fullName}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -147,10 +116,7 @@ function AllNumericMappings() {
 						isAnAdmin={isAnAdmin}
 						columns={numericRangeMappingColumnsNoCategoryFilter}
 						getQuery={getNumericRangeMappings}
-						updateMutation={updateNumericRangeMapping}
-						deleteMutation={deleteNumericRangeMapping}
 						dataKey="numericRangeMappings"
-						mutationUpdateKey="updateNumericRangeMapping"
 						hiddenColumns={{ domain: false, lastImported: false }}
 					/>
 
@@ -175,45 +141,14 @@ function AllNumericMappings() {
 								isAnAdmin={isAnAdmin}
 								columns={numericRangeMappingColumnsNoCategoryFilter}
 								getQuery={getNumericRangeMappings}
-								updateMutation={updateNumericRangeMapping}
-								deleteMutation={deleteNumericRangeMapping}
 								dataKey="numericRangeMappings"
-								mutationUpdateKey="updateNumericRangeMapping"
 								hiddenColumns={{ domain: false, lastImported: false }}
 							/>
 						</>
 					)}
 				</Grid>
 			</Grid>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						library.id,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

@@ -20,7 +20,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getBibMainDetails } from "@queries/getBibMainDetails";
 import { getBibSourceRecord } from "@queries/getBibSourceRecord";
 import { getAgency } from "@queries/getAgency";
-import { getLibraryBasics } from "@queries/getLibraryBasics";
+import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 
 import { Bib } from "@models/Bib";
 import { Agency } from "@models/Agency";
@@ -29,7 +29,6 @@ import type {
 	LoadAgencyQueryVariables,
 	LoadBibMainDetailsQueryVariables,
 	LoadBibSourceRecordQueryVariables,
-	LoadLibraryBasicsQueryVariables,
 } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/bibs/$bibId")({
@@ -77,19 +76,10 @@ function SourceBibDetails() {
 	const bibAgency: Agency = agencyData?.agencies?.content?.[0];
 	const agencyCode = bibAgency?.code;
 
-	const { data: libraryData } = useQuery({
-		queryKey: ["library", "byAgencyCode", agencyCode],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-				getLibraryBasics,
-				{
-					query: `agencyCode:${agencyCode}`,
-				},
-			),
-		enabled: !!agencyCode,
-	});
-
-	const bibLibrary: Library = libraryData?.libraries?.content?.[0];
+	const { data } = useQuery(
+		libraryBasicsByAgencyCodeQuery(gqlClient, agencyCode, "byAgencyCode"),
+	);
+	const bibLibrary: Library = data;
 
 	const { data: sourceRecordData, isLoading: sourceRecordLoading } = useQuery({
 		queryKey: ["bibSourceRecord", bibId],

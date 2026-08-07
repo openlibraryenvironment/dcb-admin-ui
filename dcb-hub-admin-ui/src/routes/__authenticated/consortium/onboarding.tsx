@@ -3,7 +3,13 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Grid, Tab, Tabs, Typography, Box, Tooltip } from "@mui/material";
-import { WarningAmber, CheckCircle, Cancel } from "@mui/icons-material";
+import {
+	WarningAmber,
+	CheckCircle,
+	Cancel,
+	HourglassEmpty,
+	RemoveCircleOutlined,
+} from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -12,6 +18,11 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getILS } from "@helpers/getILS";
+import {
+	evaluateLibrarySetup,
+	evaluateLibraryTraffic,
+	requiresNumericRangeMappings,
+} from "@helpers/librarySetup";
 import { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import { getLibraries } from "@queries/getLibraries";
@@ -32,6 +43,16 @@ export const Route = createFileRoute("/__authenticated/consortium/onboarding")({
 	component: Onboarding,
 });
 
+/**
+ * Sort order for the grid: things needing action first. Incomplete setup >
+ * dormancy because an unconfigured library cannot have traffic anyway
+ */
+const rankForAttention = (row: any): number => {
+	if (!row.setup?.isComplete) return 0;
+	if (row.traffic?.isDormant) return 1;
+	return 2;
+};
+
 function Onboarding() {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -45,7 +66,6 @@ function Onboarding() {
 	const { data: librariesWithCounts, isLoading } = useQuery({
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],
 		queryFn: async () => {
-			// 1. Get the base libraries
 			const libRes = await gqlClient.request<any, LoadLibrariesQueryVariables>(
 				getLibraries,
 				{
@@ -58,8 +78,6 @@ function Onboarding() {
 			);
 
 			const libs = libRes?.libraries?.content ?? [];
-
-			// 2. Loop through and fetch the 'totalSize' for each configuration requirement
 			const enriched = await Promise.all(
 				libs.map(async (lib: any) => {
 					const hostLmsCode = lib?.agency?.hostLms?.code;
@@ -82,11 +100,6 @@ function Onboarding() {
 					}
 
 					try {
-						// Setting pagesize: 1 to purely retrieve the totalSize count efficiently.
-						// Inlined into Promise.all so TS infers a tuple: hoisting this into a
-						// `const queries = [...]` widens it to a union array, which is how
-						// `results[5].supplierRequests` (a field that query never returns) went
-						// unnoticed.
 						const [
 							itemTypeRes,
 							patronTypeRes,
@@ -176,10 +189,6 @@ function Onboarding() {
 								locationRes?.referenceValueMappings?.totalSize ?? 0,
 							pickupLocationCount: pickupRes?.locations?.totalSize ?? 0,
 							patronRequestCount: borrowingRes?.patronRequests?.totalSize ?? 0,
-							// This is a LoadPatronRequests query filtered by supplying agency,
-							// so it returns `patronRequests`. It previously read
-							// `.supplierRequests`, which that query never returns - the count
-							// was therefore always 0.
 							supplierRequestCount:
 								supplyingRes?.patronRequests?.totalSize ?? 0,
 							numericRangeMappingCount: requiresNumeric
@@ -197,52 +206,61 @@ function Onboarding() {
 		},
 	});
 
-	// Shared helper to render a tick or cross based on count > 0
 	const renderStatus = (count: number | undefined) => {
 		if (count && count > 0)
 			return <CheckCircle color="success" fontSize="small" />;
 		return <Cancel color="error" fontSize="small" />;
 	};
 
-	const showNumericRanges = useMemo(() => {
-		return (librariesWithCounts ?? []).some((lib: any) => {
-			const ils = getILS(lib.agency?.hostLms?.lmsClientClass || "");
-			return ils === "Sierra" || ils === "Polaris";
-		});
-	}, [librariesWithCounts]);
+	/**
+	 * A library with no requests is not misconfigured, so it must not be shown
+	 * as an error - but it is still worth surfacing, because "set up months ago
+	 * and never used" is the state staff most want to catch.
+	 */
+	const renderTrafficStatus = (count: number | undefined) => {
+		if (count && count > 0)
+			return <CheckCircle color="success" fontSize="small" />;
+		return <RemoveCircleOutlined color="disabled" fontSize="small" />;
+	};
+
+	const showNumericRanges = useMemo(
+		() => (librariesWithCounts ?? []).some(requiresNumericRangeMappings),
+		[librariesWithCounts],
+	);
 
 	const processedLibraries = useMemo(() => {
 		if (!librariesWithCounts) return [];
-		return [...librariesWithCounts].sort((a: any, b: any) => {
-			const aIls = getILS(a.agency?.hostLms?.lmsClientClass || "");
-			const bIls = getILS(b.agency?.hostLms?.lmsClientClass || "");
-
-			const aRequiresNumeric = aIls === "Sierra" || aIls === "Polaris";
-			const bRequiresNumeric = bIls === "Sierra" || bIls === "Polaris";
-
-			const aMissing =
-				!a.itemTypeMappingCount ||
-				!a.patronTypeMappingCount ||
-				!a.locationMappingCount ||
-				!a.pickupLocationCount ||
-				!a.patronRequestCount ||
-				!a.supplierRequestCount ||
-				(aRequiresNumeric && !a.numericRangeMappingCount);
-
-			const bMissing =
-				!b.itemTypeMappingCount ||
-				!b.patronTypeMappingCount ||
-				!b.locationMappingCount ||
-				!b.pickupLocationCount ||
-				!b.patronRequestCount ||
-				!b.supplierRequestCount ||
-				(bRequiresNumeric && !b.numericRangeMappingCount);
-
-			// Bubble rows with missing configs to the top
-			if (aMissing && !bMissing) return -1;
-			if (!aMissing && bMissing) return 1;
-			return 0;
-		});
+		// Decide "is anything missing" once, via the shared model, and hang the
+		// answer on the row.
+		return (
+			[...librariesWithCounts]
+				.map((library: any) => {
+					// The enriched row already carries the counts at top level, but pass
+					// them explicitly so it is clear which half of the row is being read
+					// as configuration and which as the library itself.
+					const setup = evaluateLibrarySetup(library, {
+						itemTypeMappingCount: library.itemTypeMappingCount,
+						patronTypeMappingCount: library.patronTypeMappingCount,
+						locationMappingCount: library.locationMappingCount,
+						pickupLocationCount: library.pickupLocationCount,
+						numericRangeMappingCount: library.numericRangeMappingCount,
+					});
+					return {
+						...library,
+						setup,
+						traffic: evaluateLibraryTraffic(
+							{
+								patronRequestCount: library.patronRequestCount,
+								supplierRequestCount: library.supplierRequestCount,
+							},
+							setup,
+						),
+					};
+				})
+				// Two separate concerns, ranked: something is missing (act on it),
+				// then configured but never used (watch it), then everything else.
+				.sort((a: any, b: any) => rankForAttention(a) - rankForAttention(b))
+		);
 	}, [librariesWithCounts]);
 
 	const columns = useMemo(() => {
@@ -253,18 +271,13 @@ function Onboarding() {
 				flex: 1.5,
 				renderCell: (params: any) => {
 					const row = params.row;
-					const ils = getILS(row.agency?.hostLms?.lmsClientClass || "");
-					const requiresNumeric = ils === "Sierra" || ils === "Polaris";
+					const requiresNumeric = requiresNumericRangeMappings(row);
+					const isMissing = !row.setup?.isComplete;
 
-					const isMissing =
-						!row.itemTypeMappingCount ||
-						!row.patronTypeMappingCount ||
-						!row.locationMappingCount ||
-						!row.pickupLocationCount ||
-						!row.patronRequestCount ||
-						!row.supplierRequestCount ||
-						(requiresNumeric && !row.numericRangeMappingCount);
-
+					// Configuration and traffic are reported separately, because they
+					// call for different actions: one is "go and finish the setup",
+					// the other is "the setup is fine, go and find out why nobody is
+					// using it".
 					const tooltipContent = (
 						<Box sx={{ p: 0.5 }}>
 							<Typography
@@ -285,7 +298,7 @@ function Onboarding() {
 							</Typography>
 							<Typography variant="body2">
 								{t("libraries.config.data.mappings.location_type_count", {
-									count: row.locationTypeMappingCount || 0,
+									count: row.locationMappingCount || 0,
 								})}
 							</Typography>
 							<Typography variant="body2">
@@ -300,6 +313,13 @@ function Onboarding() {
 									})}
 								</Typography>
 							)}
+
+							<Typography
+								variant="subtitle2"
+								sx={{ fontWeight: "bold", mt: 1, mb: 0.5 }}
+							>
+								{t("consortium.onboarding_traffic")}
+							</Typography>
 							<Typography variant="body2">
 								{t("patron_request.count", {
 									count: row.patronRequestCount || 0,
@@ -310,18 +330,42 @@ function Onboarding() {
 									count: row.supplierRequestCount || 0,
 								})}
 							</Typography>
+							{row.traffic?.isDormant && (
+								<Typography variant="body2" sx={{ mt: 0.5 }}>
+									{t("consortium.onboarding_dormant")}
+								</Typography>
+							)}
 						</Box>
+					);
+
+					// One icon slot, two possible meanings, never both: incomplete
+					// setup outranks dormancy because it is the cause, not a symptom.
+					// Also need a success icon
+					// And the tooltip content should be "configuration", not "Missing config" in the success case
+					console.log(row);
+					const indicator = isMissing ? (
+						<Tooltip title={tooltipContent} arrow placement="right">
+							<WarningAmber
+								color="warning"
+								fontSize="small"
+								titleAccess={t("consortium.onboarding_missing") as string}
+							/>
+						</Tooltip>
+					) : row.traffic?.isDormant ? (
+						<Tooltip title={tooltipContent} arrow placement="right">
+							<HourglassEmpty
+								color="info"
+								fontSize="small"
+								titleAccess={t("consortium.onboarding_dormant") as string}
+							/>
+						</Tooltip>
+					) : (
+						<Box sx={{ width: 20 }} />
 					);
 
 					return (
 						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-							{isMissing ? (
-								<Tooltip title={tooltipContent} arrow placement="right">
-									<WarningAmber color="warning" fontSize="small" />
-								</Tooltip>
-							) : (
-								<Box sx={{ width: 20 }} />
-							)}
+							{indicator}
 							{params.value}
 						</Box>
 					);
@@ -364,10 +408,8 @@ function Onboarding() {
 				flex: 0.5,
 				renderCell: (params: any) => {
 					const row = params.row;
-					const ils = getILS(row.agency?.hostLms?.lmsClientClass || "");
-					const requiresNumeric = ils === "Sierra" || ils === "Polaris";
 
-					if (!requiresNumeric) {
+					if (!requiresNumericRangeMappings(row)) {
 						return (
 							<Typography variant="body2" color="textSecondary">
 								{t("common.na", "N/A")}
@@ -379,11 +421,15 @@ function Onboarding() {
 			});
 		}
 
+		// Traffic, not configuration: a zero here is "unused", not "broken", so it
+		// renders as a neutral dash rather than the red cross the config columns
+		// use.
 		cols.push({
 			field: "patronRequestCount",
 			headerName: t("nav.patronRequests.name", "Patron Requests"),
 			flex: 0.5,
-			renderCell: (params: any) => renderStatus(params.row.patronRequestCount),
+			renderCell: (params: any) =>
+				renderTrafficStatus(params.row.patronRequestCount),
 		});
 
 		cols.push({
@@ -391,7 +437,7 @@ function Onboarding() {
 			headerName: t("nav.supplierRequests.name", "Supplier Requests"),
 			flex: 0.5,
 			renderCell: (params: any) =>
-				renderStatus(params.row.supplierRequestCount),
+				renderTrafficStatus(params.row.supplierRequestCount),
 		});
 
 		return cols;

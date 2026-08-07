@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -26,23 +26,16 @@ import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { formatChangedFields } from "@helpers/formatChangedFields";
-import {
-	handleCancel,
-	handleDeleteEntity,
-	handleEdit,
-	handleSaveConfirmation,
-} from "@helpers/actions/editAndDeleteActions";
+import { handleEdit } from "@helpers/actions/editAndDeleteActions";
 
-import { getLibraryBasics } from "@queries/getLibraryBasics";
-import { updateAgencyQuery } from "@mutations/updateAgency";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
-import type { LoadLibraryBasicsQueryVariables } from "@generated/graphql";
+import { libraryBasicsQuery } from "@/queryOptions/library";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/settings",
@@ -52,11 +45,9 @@ export const Route = createFileRoute(
 
 function Settings() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -67,27 +58,16 @@ function Settings() {
 	const saveButtonRef = useRef<HTMLButtonElement>(null);
 
 	const [editMode, setEditMode] = useState(false);
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
-	const [changedFields, setChangedFields] = useState<Record<string, any>>({});
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
+	// This page edits the AGENCY (participation flags, loan cap) but deletes the
+	// LIBRARY, so the two mutations are genuinely different entities.
+	const agencyMutation = useEntityMutation("agency");
+	const libraryMutation = useEntityMutation("library");
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["library", "settings", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-				getLibraryBasics,
-				{ query: `id:${libraryId}` },
-			),
-		enabled: !!libraryId,
-	});
-
-	const library = data?.libraries?.content?.[0];
+	const {
+		data: library,
+		isLoading,
+		error,
+	} = useQuery(libraryBasicsQuery(gqlClient, libraryId, "settings"));
 
 	const validationSchema = Yup.object().shape({
 		maxConsortialLoans: Yup.number()
@@ -118,16 +98,6 @@ function Settings() {
 		},
 	});
 
-	const { mutateAsync: updateAgency } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateAgencyQuery, variables),
-	});
-
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
-	});
-
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
@@ -138,7 +108,6 @@ function Settings() {
 			setTimeout(() => saveButtonRef.current?.focus(), 0);
 		},
 		() => {
-			setChangedFields({});
 			reset();
 			setEditMode(false);
 		},
@@ -154,9 +123,17 @@ function Settings() {
 			return acc;
 		}, {});
 
-		setChangedFields(newChangedFields);
 		if (Object.keys(newChangedFields).length === 0) return setEditMode(false);
-		setConfirmationEdit(true);
+		agencyMutation.requestFormEdit({
+			id: library.agencyCode,
+			name: library.fullName,
+			changedFields: newChangedFields,
+			changeSummary: formatChangedFields(newChangedFields, library.agency),
+			onSuccess: () => {
+				setEditMode(false);
+				reset();
+			},
+		});
 	};
 
 	if (isLoading)
@@ -178,6 +155,14 @@ function Settings() {
 			/>
 		);
 
+	const deleteAction = libraryMutation.buildDeleteAction({
+		id: library.id,
+		name: library.fullName,
+		redirect: "/libraries",
+		disabled: !isAnAdmin,
+		icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+	});
+
 	const viewModeActions = [
 		{
 			key: "edit",
@@ -187,15 +172,7 @@ function Settings() {
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
-		{
-			key: "delete",
-			onClick: () => setConfirmationDeletion(true),
-			disabled: !isAnAdmin,
-			label: t("ui.data_grid.delete_entity", {
-				entity: t("libraries.library").toLowerCase(),
-			}),
-			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
-		},
+		deleteAction,
 	];
 
 	const editModeActions = [
@@ -211,26 +188,14 @@ function Settings() {
 		<Button
 			key="cancel"
 			startIcon={<Cancel />}
-			onClick={() => handleCancel({ setEditMode, setChangedFields }, reset)}
+			onClick={() => {
+				setEditMode(false);
+				reset();
+			}}
 		>
 			{t("ui.data_grid.cancel")}
 		</Button>,
-		<MoreActionsMenu
-			key="more"
-			actions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
-					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
-			]}
-		/>,
+		<MoreActionsMenu key="more" actions={[deleteAction]} />,
 	];
 
 	return (
@@ -375,71 +340,14 @@ function Settings() {
 					</Stack>
 				</Grid>
 			</Grid>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						library.id,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library.fullName}
-			/>
-			<Confirmation
-				open={showConfirmationEdit}
-				onClose={() => setConfirmationEdit(false)}
-				onConfirm={(r, c, u) =>
-					handleSaveConfirmation(
-						library.agencyCode,
-						changedFields,
-						updateAgency,
-						queryClient,
-						{
-							setEditMode,
-							setChangedFields,
-							setAlert,
-							setConfirmation: setConfirmationEdit,
-						},
-						{
-							entityName: library.fullName,
-							entityType: t("libraries.library"),
-							mutationName: "updateAgency",
-							t,
-						},
-						{ reason: r, changeCategory: c, changeReferenceUrl: u },
-						[["library", "settings", libraryId]],
-						reset,
-					)
-				}
-				action="gridEdit"
-				editInformation={formatChangedFields(changedFields, library.agency)}
-				entityName={library.fullName}
-			/>
+			<EntityMutationDialogs {...agencyMutation.dialogProps} />
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 			<Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
 				action="unsaved"
 				entityName={library.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</PageContainer>
 	);

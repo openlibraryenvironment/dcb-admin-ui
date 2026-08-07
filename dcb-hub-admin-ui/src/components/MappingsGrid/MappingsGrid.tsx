@@ -1,20 +1,22 @@
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
-	GridRowModel,
 	GridColDef,
 	GridColumnVisibilityModel,
 } from "@mui/x-data-grid-premium";
 
 import DataGrid from "@components/DataGrid/DataGrid";
-import Confirmation from "@components/Confirmation/Confirmation";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
-import { computeMutation } from "@helpers/computeMutation";
+import type { EntityKey } from "@constants/entityRegistry";
+
+type MappingDataKey = "referenceValueMappings" | "numericRangeMappings";
 
 interface MappingsGridProps {
 	gridId: string;
@@ -23,13 +25,17 @@ interface MappingsGridProps {
 	isAnAdmin: boolean;
 	columns: GridColDef[];
 	getQuery: any;
-	updateMutation: any;
-	deleteMutation: any;
-	dataKey: "referenceValueMappings" | "numericRangeMappings";
-	mutationUpdateKey:
-		"updateReferenceValueMapping" | "updateNumericRangeMapping";
+	dataKey: MappingDataKey;
 	hiddenColumns?: GridColumnVisibilityModel;
 }
+
+// The mutations, their response keys and the caches to invalidate all follow
+// from which kind of mapping this is, so callers no longer pass them - they
+// passed three props that could disagree with each other and with `dataKey`.
+const ENTITY_FOR_DATA_KEY: Record<MappingDataKey, EntityKey> = {
+	referenceValueMappings: "referenceValueMapping",
+	numericRangeMappings: "numericRangeMapping",
+};
 
 export default function MappingsGrid({
 	gridId,
@@ -38,15 +44,12 @@ export default function MappingsGrid({
 	isAnAdmin,
 	columns,
 	getQuery,
-	updateMutation,
-	deleteMutation,
 	dataKey,
-	mutationUpdateKey,
 	hiddenColumns = {},
 }: MappingsGridProps) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
+	const mappingMutation = useEntityMutation(ENTITY_FOR_DATA_KEY[dataKey]);
 
 	const {
 		paginationModel,
@@ -61,9 +64,6 @@ export default function MappingsGrid({
 		pagination: { page: 0, pageSize: 200 },
 		sort: [{ field: "lastImported", sort: "asc" }],
 	});
-
-	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-	const [deleteMappingId, setDeleteMappingId] = useState<string | null>(null);
 
 	const {
 		data: gridData,
@@ -95,67 +95,6 @@ export default function MappingsGrid({
 		placeholderData: (previousData) => previousData,
 	});
 
-	const { mutateAsync: doUpdate } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(updateMutation, variables),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-	const { mutate: doDelete } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(deleteMutation, variables),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (promiseArguments) {
-			const { resolve, reject, newRow, oldRow } = promiseArguments;
-			const input: Record<string, any> = {
-				id: newRow.id,
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			};
-			Object.keys(newRow).forEach((key) => {
-				if (newRow[key] !== oldRow[key]) input[key] = newRow[key];
-			});
-
-			try {
-				const result = await doUpdate({ input });
-				resolve(result[mutationUpdateKey]);
-			} catch (error) {
-				reject(error);
-			} finally {
-				setPromiseArguments(null);
-			}
-		} else if (deleteMappingId) {
-			doDelete(
-				{
-					input: {
-						id: deleteMappingId,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-				{ onSettled: () => setDeleteMappingId(null) },
-			);
-		}
-	};
-
 	const gridColumns: GridColDef[] = useMemo(
 		() => [
 			...columns,
@@ -163,11 +102,15 @@ export default function MappingsGrid({
 				t,
 				rowModesModel,
 				setRowModesModel,
-				onDelete: (id) => setDeleteMappingId(id as string),
+				onDelete: (id) =>
+					mappingMutation.requestDelete({
+						id: id as string,
+						name: t("mappings.mappings"),
+					}),
 				canEdit: isAnAdmin,
 			}),
 		],
-		[columns, rowModesModel, setRowModesModel, isAnAdmin, t],
+		[columns, rowModesModel, setRowModesModel, isAnAdmin, t, mappingMutation],
 	);
 
 	return (
@@ -193,7 +136,7 @@ export default function MappingsGrid({
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				processRowUpdate={processRowUpdate}
+				processRowUpdate={mappingMutation.requestGridEdit}
 				rowSelection
 				exportConfig={{
 					query: getQuery,
@@ -212,19 +155,7 @@ export default function MappingsGrid({
 				noResultsText={t("mappings.no_results")}
 				searchText={t("ui.data_grid.search")}
 			/>
-			<Confirmation
-				open={!!promiseArguments || !!deleteMappingId}
-				onClose={() => {
-					if (promiseArguments) {
-						promiseArguments.resolve(promiseArguments.oldRow);
-						setPromiseArguments(null);
-					}
-					setDeleteMappingId(null);
-				}}
-				onConfirm={handleModalConfirm}
-				action={promiseArguments ? "gridEdit" : "deletion"}
-				entityName="Mapping"
-			/>
+			<EntityMutationDialogs {...mappingMutation.dialogProps} />
 		</>
 	);
 }

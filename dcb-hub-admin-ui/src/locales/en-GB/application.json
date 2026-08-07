@@ -231,7 +231,9 @@
 		"title": "Consortium",
 		"url": "Website URL",
 		"your": "Your consortium",
-		"onboarding_missing": "Missing configurations:"
+		"onboarding_missing": "Missing configurations:",
+		"onboarding_traffic": "Request activity:",
+		"onboarding_dormant": "Configured, but has never borrowed or supplied a request."
 	},
 	"data_change_log": {
 		"action": "Action",
@@ -379,6 +381,15 @@
 		"loading_msg": "Loading HostLMS....",
 		"lms_client": "LmsClientClass",
 		"name": "Host LMS name",
+		"names": {
+			"alma": "Alma",
+			"folio": "FOLIO",
+			"foundation": "Foundation connector system",
+			"koha": "Koha",
+			"ors_appliance": "OpenRS Appliance system",
+			"polaris": "Polaris",
+			"sierra": "Sierra"
+		},
 		"new": "New Host LMS",
 		"new_explanation": "Enter the details of the new host LMS you want to create.",
 		"no_results": "No Host LMSs were found. Try changing your search terms or filters.",
@@ -387,6 +398,7 @@
 		"roles": "Roles",
 		"search_placeholder": "Search by name",
 		"success_ping": "Host LMS created. Connection status: {{status}}",
+		"type": "LMS type",
 		"verification": {
 			"step": "Verification",
 			"subtitle": "Results of the connection and ingest checks for {{code}}.",
@@ -668,7 +680,8 @@
 			"error": "There was an error creating a new library",
 			"invalid_json_client_config": "Invalid JSON in client config",
 			"success": "The new library was successfully created",
-			"title": "Create a new library"
+			"title": "Create a new library",
+			"setup_profile_saved": "The profile for {{library}} has been saved."
 		},
 		"no_contact": "No primary contact set",
 		"none_found": "No libraries were found. Try changing your filters or search terms.",
@@ -806,6 +819,21 @@
 				"polaris_org_id": "Polaris staff account: Organisation ID",
 				"polaris_username": "Polaris staff account: Username"
 			}
+		},
+		"setup": {
+			"incomplete_title": "Setup is not finished",
+			"incomplete_body_other": "This library is missing configuration it needs before it can borrow or supply. {{count}} steps still to complete.",
+			"finish": "Finish setup",
+			"outstanding": "Outstanding: {{steps}}",
+			"step": {
+				"profile": "Library profile",
+				"contacts": "Contacts",
+				"group": "Group membership",
+				"refMappings": "Reference value mappings",
+				"numMappings": "Numeric range mappings",
+				"locations": "Pickup locations"
+			},
+			"incomplete_body_one": "This library is missing configuration it needs before it can borrow or supply. {{count}} step still to complete."
 		}
 	},
 	"locations": {

@@ -12,25 +12,19 @@ import PatronRequestTabs from "@components/PatronRequestTabs/PatronRequestTabs";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { useGridState } from "@hooks/useGridState";
-import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 
-import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
+import { allLocationsQuery } from "@/queryOptions/locations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
-import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
-import { getLibraries } from "@queries/getLibraries";
+import { patronRequestTotalQuery } from "@/queryOptions/patronRequestTotals";
+import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import type {
-	LoadLibrariesQueryVariables,
-	LoadLocationForPrGridQueryVariables,
-	LoadPatronRequestTotalsQueryVariables,
-	LoadPatronRequestsQueryVariables,
-} from "@generated/graphql";
+import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/outOfSequence",
@@ -94,120 +88,23 @@ function OutOfSequence() {
 	});
 	const currentPath = Route.fullPath;
 
-	const fetchAllLocations = async () => {
-		const variables = {
-			query: "",
-			order: "name",
-			orderBy: "ASC",
-			pagesize: 100,
-		};
-		const firstPage = await gqlClient.request<
-			any,
-			LoadLocationForPrGridQueryVariables
-		>(getLocationForPatronRequestGrid, {
-			...variables,
-			pageno: 0,
-		});
-		let allLocations = [...(firstPage?.locations?.content || [])];
-		const totalSize = firstPage?.locations?.totalSize || 0;
+	const { data: patronRequestLocations = [] } = useQuery(
+		allLocationsQuery(gqlClient),
+	);
 
-		if (allLocations.length < totalSize) {
-			const totalPages = Math.ceil(totalSize / 100);
-			const promises = [];
-			for (let i = 1; i < totalPages; i++) {
-				promises.push(
-					gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
-						getLocationForPatronRequestGrid,
-						{
-							...variables,
-							pageno: i,
-						},
-					),
-				);
-			}
-			const results = await Promise.all(promises);
-			results.forEach((res) => {
-				allLocations = [...allLocations, ...(res?.locations?.content || [])];
-			});
-		}
-		return allLocations;
-	};
-
-	const { data: locationsData } = useQuery({
-		queryKey: ["locations", "allPatronRequestGrid"],
-		queryFn: fetchAllLocations,
-	});
-	const patronRequestLocations: Location[] =
-		(locationsData as Location[]) || [];
-
-	const { data: excData, isLoading: exceptionLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "exception"],
-		queryFn: () =>
-			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
-				getPatronRequestTotals,
-				{
-					query: queries.exception,
-					pageno: 0,
-					pagesize: 1,
-					order: "dateCreated",
-					orderBy: "DESC",
-				},
-			),
-	});
-	const { data: oosData, isLoading: outOfSequenceLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "outOfSequence"],
-		queryFn: () =>
-			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
-				getPatronRequestTotals,
-				{
-					query: queries.outOfSequence,
-					pageno: 0,
-					pagesize: 1,
-					order: "dateCreated",
-					orderBy: "DESC",
-				},
-			),
-	});
-	const { data: inProgData, isLoading: inProgressLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "inProgress"],
-		queryFn: () =>
-			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
-				getPatronRequestTotals,
-				{
-					query: queries.inProgress,
-					pageno: 0,
-					pagesize: 1,
-					order: "dateCreated",
-					orderBy: "DESC",
-				},
-			),
-	});
-	const { data: finData, isLoading: finishedLoading } = useQuery({
-		queryKey: ["patronRequestTotals", "finished"],
-		queryFn: () =>
-			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(
-				getPatronRequestTotals,
-				{
-					query: queries.finished,
-					pageno: 0,
-					pagesize: 1,
-					order: "dateCreated",
-					orderBy: "DESC",
-				},
-			),
-	});
+	const { data: exceptionTotal = 0, isLoading: exceptionLoading } = useQuery(
+		patronRequestTotalQuery(gqlClient, "exception"),
+	);
+	const { data: outOfSequenceTotal = 0, isLoading: outOfSequenceLoading } =
+		useQuery(patronRequestTotalQuery(gqlClient, "outOfSequence"));
+	const { data: inProgressTotal = 0, isLoading: inProgressLoading } = useQuery(
+		patronRequestTotalQuery(gqlClient, "inProgress"),
+	);
+	const { data: finishedTotal = 0, isLoading: finishedLoading } = useQuery(
+		patronRequestTotalQuery(gqlClient, "finished"),
+	);
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
-		useQuery({
-			queryKey: ["libraries", "allSupplying"],
-			queryFn: () =>
-				gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
-					order: "fullName",
-					orderBy: "ASC",
-					pageno: 0,
-					pagesize: 1000,
-					query: "",
-				}),
-		});
+		useQuery(allLibrariesQuery(gqlClient));
 
 	const { data: gridData, isLoading: gridLoading } = useQuery({
 		queryKey: [
@@ -234,8 +131,7 @@ function OutOfSequence() {
 	// Counts are derived directly from the query data rather than pushed into
 	// state via effects. The out-of-sequence tab reflects the (possibly filtered)
 	// grid total, and the filter indicator compares it to the unfiltered total.
-	const unfilteredOutOfSequenceCount =
-		oosData?.patronRequests?.totalSize ?? null;
+	const unfilteredOutOfSequenceCount = outOfSequenceTotal;
 	const gridTotalSize = gridData?.patronRequests?.totalSize as
 		number | undefined;
 	const outOfSequenceCount = gridTotalSize ?? unfilteredOutOfSequenceCount ?? 0;
@@ -244,15 +140,11 @@ function OutOfSequence() {
 			? gridTotalSize < unfilteredOutOfSequenceCount
 			: false;
 	const totalSizes = {
-		exception: excData?.patronRequests?.totalSize ?? 0,
+		exception: exceptionTotal,
 		outOfSequence: outOfSequenceCount,
-		inProgress: inProgData?.patronRequests?.totalSize ?? 0,
-		finished: finData?.patronRequests?.totalSize ?? 0,
-		all:
-			(excData?.patronRequests?.totalSize ?? 0) +
-			outOfSequenceCount +
-			(inProgData?.patronRequests?.totalSize ?? 0) +
-			(finData?.patronRequests?.totalSize ?? 0),
+		inProgress: inProgressTotal,
+		finished: finishedTotal,
+		all: exceptionTotal + outOfSequenceCount + inProgressTotal + finishedTotal,
 	};
 
 	const customColumns = useCustomColumns();

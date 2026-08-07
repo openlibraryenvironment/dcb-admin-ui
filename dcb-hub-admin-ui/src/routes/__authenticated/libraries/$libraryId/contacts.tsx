@@ -1,16 +1,13 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Button, Typography, Stack, useTheme } from "@mui/material";
-import { Edit, Delete, Save, Cancel } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
 import {
 	GridRowModesModel,
-	GridRowModes,
-	GridRowModel,
 	GridColDef,
-	GridActionsCellItem,
 	GridRenderCellParams,
 } from "@mui/x-data-grid-premium";
 
@@ -18,23 +15,14 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewContact from "@forms/NewContact/NewContact";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { computeMutation } from "@helpers/computeMutation";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
+import { useEntityMutation } from "@hooks/useEntityMutation";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { getLibraryContacts } from "@queries/getLibraryContacts";
-import { updatePerson } from "@mutations/updatePerson";
-import { deleteLibraryContact } from "@mutations/deleteLibraryContact";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
-import type {
-	DeleteLibraryContactMutationVariables,
-	DeleteLibraryMutationVariables,
-	LoadLibraryContactsQueryVariables,
-	UpdatePersonMutationVariables,
-} from "@generated/graphql";
+import type { LoadLibraryContactsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/contacts",
@@ -44,11 +32,9 @@ export const Route = createFileRoute(
 
 function LibraryContacts() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -57,17 +43,11 @@ function LibraryContacts() {
 
 	const [showNewContact, setShowNewContact] = useState(false);
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-	const [editRecord, setEditRecord] = useState<string | null>(null);
-
-	const [deleteContactId, setDeleteContactId] = useState<string | null>(null);
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
+	// Two entities are mutable from this page: the contacts in the grid, and the
+	// library itself via the page's delete action. Separate registry entries, so
+	// separate hooks - each invalidates only what its own entity affects.
+	const contactMutation = useEntityMutation("libraryContact");
+	const libraryMutation = useEntityMutation("library");
 
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["library", "contacts", libraryId],
@@ -87,91 +67,6 @@ function LibraryContacts() {
 
 	const library = data?.libraries?.content?.[0];
 	const contacts = library?.contacts ?? [];
-
-	const { mutateAsync: updateContact } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, UpdatePersonMutationVariables>(
-				updatePerson,
-				variables,
-			),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
-				queryKey: ["library", "contacts", libraryId],
-			}),
-	});
-	const { mutate: deleteContact } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteLibraryContactMutationVariables>(
-				deleteLibraryContact,
-				variables,
-			),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
-				queryKey: ["library", "contacts", libraryId],
-			}),
-	});
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteLibraryMutationVariables>(
-				deleteLibraryMutation,
-				variables,
-			),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setEditRecord(changes);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (promiseArguments) {
-			const { resolve, reject, newRow, oldRow } = promiseArguments;
-			const input: Record<string, any> = {
-				id: newRow.id,
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			};
-
-			Object.keys(newRow).forEach((key) => {
-				if (newRow[key] !== oldRow[key])
-					input[key] = key === "role" ? newRow[key].name : newRow[key];
-			});
-
-			try {
-				const result = await updateContact({ input });
-				resolve(result.updatePerson);
-			} catch (error) {
-				reject(error);
-			} finally {
-				setPromiseArguments(null);
-				setEditRecord(null);
-			}
-		} else if (deleteContactId) {
-			deleteContact(
-				{
-					input: {
-						personId: deleteContactId,
-						libraryId,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-				{ onSettled: () => setDeleteContactId(null) },
-			);
-		}
-	};
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -218,85 +113,33 @@ function LibraryContacts() {
 					{ value: false, label: t("ui.actions.no") },
 				],
 			},
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 100,
-				getActions: ({ id, columns: rowColumns }) => {
-					// Without fieldToFocus the row swaps to inputs with nothing focused.
-					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.data_grid.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.data_grid.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.data_grid.edit")}
-							onClick={() =>
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit, fieldToFocus },
-								})
-							}
-							disabled={!isAnAdmin}
-						/>,
-						<GridActionsCellItem
-							key="delete"
-							icon={<Delete />}
-							label={t("ui.data_grid.delete")}
-							onClick={() => setDeleteContactId(id as string)}
-							disabled={!isAnAdmin}
-						/>,
-					];
-				},
-			},
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id, row) =>
+					contactMutation.requestDelete({
+						id: id as string,
+						name: `${row.firstName ?? ""} ${row.lastName ?? ""}`.trim(),
+						ownerId: libraryId,
+					}),
+				canEdit: isAnAdmin,
+			}),
 		],
-		[rowModesModel, isAnAdmin, t],
+		[rowModesModel, isAnAdmin, t, libraryId, contactMutation],
 	);
 
 	return (
 		<PageContainer
 			title={library?.fullName}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -342,7 +185,7 @@ function LibraryContacts() {
 						editMode="row"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						processRowUpdate={processRowUpdate}
+						processRowUpdate={contactMutation.requestGridEdit}
 						disableAggregation
 						disableRowGrouping
 						toolbarVisible={false}
@@ -358,43 +201,8 @@ function LibraryContacts() {
 					/>
 				</Grid>
 			</Grid>
-			<Confirmation
-				open={!!promiseArguments || !!deleteContactId}
-				onClose={() => {
-					if (promiseArguments) {
-						promiseArguments.resolve(promiseArguments.oldRow);
-						setPromiseArguments(null);
-						setEditRecord(null);
-					}
-					setDeleteContactId(null);
-				}}
-				onConfirm={handleModalConfirm}
-				action={promiseArguments ? "gridEdit" : "deletion"}
-				entityName="Contact"
-				editInformation={editRecord ?? undefined}
-			/>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						libraryId,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library?.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library?.fullName}
-			/>
+			<EntityMutationDialogs {...contactMutation.dialogProps} />
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 			{showNewContact && (
 				<NewContact
 					show={showNewContact}
@@ -404,13 +212,6 @@ function LibraryContacts() {
 					entity="Library"
 				/>
 			)}
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
 		</PageContainer>
 	);
 }

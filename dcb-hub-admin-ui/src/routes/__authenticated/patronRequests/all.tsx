@@ -10,12 +10,11 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import PatronRequestTabs from "@components/PatronRequestTabs/PatronRequestTabs";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
-import { Location } from "@models/Location";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 
-import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
-import { getLibraries } from "@queries/getLibraries";
+import { allLocationsQuery } from "@/queryOptions/locations";
+import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { useGridState } from "@hooks/useGridState";
 import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
@@ -24,11 +23,7 @@ import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport"
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import type {
-	GetPatronRequestDashboardQueryVariables,
-	LoadLibrariesQueryVariables,
-	LoadLocationForPrGridQueryVariables,
-} from "@generated/graphql";
+import type { GetPatronRequestDashboardQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	// Default-state prefetch: the loader has no access to the Zustand grid
@@ -153,67 +148,14 @@ function All() {
 	const isFilterApplied = currentFilter.items.length > 0;
 
 	// Cached asynchronous lookups configuration
-	const fetchAllLocations = async () => {
-		const variables = {
-			query: "",
-			order: "name",
-			orderBy: "ASC",
-			pagesize: 100,
-		};
-		const firstPage = await gqlClient.request<
-			any,
-			LoadLocationForPrGridQueryVariables
-		>(getLocationForPatronRequestGrid, {
-			...variables,
-			pageno: 0,
-		});
-		let allLocations = [...(firstPage?.locations?.content || [])];
-		const totalSize = firstPage?.locations?.totalSize || 0;
-
-		if (allLocations.length < totalSize) {
-			const totalPages = Math.ceil(totalSize / 100);
-			const promises = [];
-			for (let i = 1; i < totalPages; i++) {
-				promises.push(
-					gqlClient.request<any, LoadLocationForPrGridQueryVariables>(
-						getLocationForPatronRequestGrid,
-						{
-							...variables,
-							pageno: i,
-						},
-					),
-				);
-			}
-			const results = await Promise.all(promises);
-			results.forEach((res) => {
-				allLocations = [...allLocations, ...(res?.locations?.content || [])];
-			});
-		}
-		return allLocations;
-	};
-
-	const { data: locationsData } = useQuery({
-		queryKey: ["locations", "allPatronRequestGrid"],
-		queryFn: fetchAllLocations,
-		staleTime: 1000 * 60 * 15, // Cache for 15 minutes to prevent continuous unneeded calls
-	});
+	const { data: patronRequestLocations = [] } = useQuery(
+		allLocationsQuery(gqlClient),
+	);
 
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
-		useQuery({
-			queryKey: ["libraries", "allSupplying"],
-			queryFn: () =>
-				gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
-					order: "fullName",
-					orderBy: "ASC",
-					pageno: 0,
-					pagesize: 1000,
-					query: "",
-				}),
-		});
+		useQuery(allLibrariesQuery(gqlClient));
 
 	const customColumns = useCustomColumns();
-	const patronRequestLocations: Location[] =
-		(locationsData as Location[]) || [];
 	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
 
 	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({

@@ -12,14 +12,16 @@ import {
 } from "@mui/material";
 import { Trans, useTranslation } from "react-i18next";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { getLibraries } from "@queries/getLibraries";
 import { getLocations } from "@queries/getLocations";
+import {
+	borrowingLibraryOptionsQuery,
+	libraryOptionsQuery,
+} from "@/queryOptions/libraries";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "react-oidc-context";
 import { getRequestError } from "@helpers/getRequestError";
 import { Agency } from "@models/Agency";
-import { LibraryGroupMember } from "@models/LibraryGroupMember";
-import { findConsortium } from "@helpers/findConsortium";
 import { Location } from "@models/Location";
 import { Item } from "@models/Item";
 import { PatronRequestFormType } from "@models/PatronRequestFormType";
@@ -29,10 +31,7 @@ import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
 import { StaffRequestFormData } from "@models/StaffRequestFormData";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import request from "graphql-request";
-import {
-	LibrariesQueryData,
-	LocationsQueryData,
-} from "@models/ReactQueryHelperTypes";
+import { LocationsQueryData } from "@models/ReactQueryHelperTypes";
 import { StaffRequestDetailsStep } from "@forms/ExpeditedCheckout/steps/StaffRequestDetailsStep";
 import { PatronValidationStep } from "@forms/ExpeditedCheckout/steps/PatronValidationStep";
 import { useRouter } from "@tanstack/react-router";
@@ -57,6 +56,7 @@ export default function StaffRequest({
 	);
 	const router = useRouter();
 	const { cfg } = router.options.context;
+	const gqlClient = useGraphQLClient();
 	const agencyCode = auth.user?.profile?.code
 		? String(auth.user?.profile?.code)
 		: "";
@@ -178,41 +178,11 @@ export default function StaffRequest({
 	const itemAgencyCode = useWatch({ control, name: "itemAgencyCode" });
 	const patronBarcode = useWatch({ control, name: "patronBarcode" });
 
-	const { data: librariesData, isLoading: librariesDataLoading } =
-		useQuery<LibrariesQueryData>({
-			queryKey: ["librariesInfo", headers, cfg.VITE_DCB_API_BASE],
-			queryFn: () =>
-				request(
-					`${cfg.VITE_DCB_API_BASE}/graphql`,
-					getLibraries,
-					{
-						order: "fullName",
-						orderBy: "ASC",
-						pageno: 0,
-						pagesize: 1000,
-						query: "",
-					},
-					headers,
-				),
-		});
-
-	const libraryOptions: PatronRequestAutocompleteOption[] =
-		librariesData?.libraries?.content?.map(
-			(item: {
-				fullName: string;
-				id: string;
-				agencyCode: string;
-				agency: Agency;
-				membership: [LibraryGroupMember];
-			}) => ({
-				label: item.fullName,
-				value: item.agencyCode,
-				id: item.id,
-				agencyId: item.agency?.id,
-				functionalSettings: findConsortium(item?.membership)
-					?.functionalSettings,
-			}),
-		) || [];
+	// Patron library: borrowing-disabled agencies are excluded here, and ONLY
+	// here and in walk-up requesting. Item library below deliberately uses the
+	// unfiltered list.
+	const { data: libraryOptions = [], isLoading: librariesDataLoading } =
+		useQuery(borrowingLibraryOptionsQuery(gqlClient));
 
 	const selectedLibrary = libraryOptions.find(
 		(option) => option.value === patronAgencyCode,
@@ -320,14 +290,10 @@ export default function StaffRequest({
 		});
 	}, [pickupLocations?.locations?.content, t, agencyCode]);
 
-	const itemLibraryOptions: PatronRequestAutocompleteOption[] =
-		librariesData?.libraries?.content?.map(
-			(item: { fullName: string; agencyCode: string; agency: Agency }) => ({
-				label: item.fullName,
-				value: item.agencyCode,
-				hostLmsCode: item?.agency?.hostLms?.code,
-			}),
-		) || [];
+	// Every library, not just borrowing ones - this picks the SUPPLYING side.
+	const { data: itemLibraryOptions = [] } = useQuery(
+		libraryOptionsQuery(gqlClient),
+	);
 
 	const itemOptions: PatronRequestAutocompleteOption[] =
 		filteredItems?.map(

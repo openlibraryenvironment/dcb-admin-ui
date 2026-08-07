@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Typography, Button, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
@@ -9,27 +9,20 @@ import { Delete } from "@mui/icons-material";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import MappingsSubTabs from "@components/MappingsSubTabs/MappingsSubTabs";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import NewMapping from "@forms/NewMapping/NewMapping";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 
-import { getLibrary } from "@queries/getLibrary";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import { libraryQuery } from "@/queryOptions/library";
 
 import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
 import { referenceValueMappingColumnsNoCategoryFilter } from "@columns/referenceValueMappingsNoCategoryFilter";
 import { getMappings } from "@queries/getMappings";
-import { updateReferenceValueMapping } from "@mutations/updateReferenceValueMapping";
-import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapping";
-import type {
-	DeleteLibraryMutationVariables,
-	LoadLibraryQueryVariables,
-} from "@generated/graphql";
+import type {} from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/referenceValueMappings/itemType",
@@ -39,7 +32,6 @@ export const Route = createFileRoute(
 
 function LocationMappings() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
@@ -49,13 +41,7 @@ function LocationMappings() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
+	const libraryMutation = useEntityMutation("library");
 	const [newMapping, setNewMapping] = useState({
 		show: false,
 		hostLmsCode: "",
@@ -64,27 +50,11 @@ function LocationMappings() {
 	});
 
 	const {
-		data: libraryData,
+		data: library,
 		isLoading,
 		error,
-	} = useQuery({
-		queryKey: ["library", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
-				query: `id:${libraryId}`,
-			}),
-		enabled: !!libraryId,
-	});
+	} = useQuery(libraryQuery(gqlClient, libraryId));
 
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteLibraryMutationVariables>(
-				deleteLibraryMutation,
-				variables,
-			),
-	});
-
-	const library = libraryData?.libraries?.content?.[0];
 	const itemTypePrimaryQuery = `(toContext:"${library.agency?.hostLms?.code}" OR fromContext:"${library.agency?.hostLms?.code}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`;
 	const itemTypeSecondaryQuery = `(toContext:"${library.secondHostLms?.code}" OR fromContext:"${library.secondHostLms?.code}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`;
 	if (isLoading)
@@ -110,17 +80,13 @@ function LocationMappings() {
 		<PageContainer
 			title={library.fullName}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -173,10 +139,7 @@ function LocationMappings() {
 						isAnAdmin={isAnAdmin}
 						columns={referenceValueMappingColumnsNoCategoryFilter}
 						getQuery={getMappings}
-						updateMutation={updateReferenceValueMapping}
-						deleteMutation={deleteReferenceValueMapping}
 						dataKey="referenceValueMappings"
-						mutationUpdateKey="updateReferenceValueMapping"
 						hiddenColumns={{
 							fromCategory: false,
 							lastImported: false,
@@ -221,10 +184,7 @@ function LocationMappings() {
 								isAnAdmin={isAnAdmin}
 								columns={referenceValueMappingColumnsNoCategoryFilter}
 								getQuery={getMappings}
-								updateMutation={updateReferenceValueMapping}
-								deleteMutation={deleteReferenceValueMapping}
 								dataKey="referenceValueMappings"
-								mutationUpdateKey="updateReferenceValueMapping"
 								hiddenColumns={{
 									fromCategory: false,
 									lastImported: false,
@@ -252,35 +212,7 @@ function LocationMappings() {
 					libraryName={newMapping.libraryName}
 				/>
 			)}
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						library.id,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

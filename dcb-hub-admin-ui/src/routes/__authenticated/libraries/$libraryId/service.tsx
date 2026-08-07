@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import {
 	Grid,
@@ -20,20 +20,18 @@ import ErrorComponent from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import PrivateData from "@components/PrivateData/PrivateData";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import {
 	StyledAccordion,
 	StyledAccordionDetails,
 } from "@components/StyledAccordion/StyledAccordion";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { getILS } from "@helpers/getILS";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
 
 import { getLibraryServiceInfo } from "@queries/getLibraryServiceInfo";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import type { LoadLibraryServiceInfoQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
@@ -44,7 +42,6 @@ export const Route = createFileRoute(
 
 function Service() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
@@ -55,13 +52,7 @@ function Service() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
+	const libraryMutation = useEntityMutation("library");
 
 	const [expandedAccordions, setExpandedAccordions] = useState({
 		bib1: false,
@@ -87,11 +78,6 @@ function Service() {
 			),
 		enabled: !!libraryId,
 		refetchInterval: 120000,
-	});
-
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
 	});
 
 	const library = data?.libraries?.content?.[0];
@@ -152,17 +138,13 @@ function Service() {
 		<PageContainer
 			title={library.fullName}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -581,35 +563,7 @@ function Service() {
 					</>
 				)}
 			</Grid>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						library.id,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

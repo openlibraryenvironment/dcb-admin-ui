@@ -23,12 +23,9 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
 import { getGroupsSelection } from "@queries/getGroupsSelection";
-import { getLibraries } from "@queries/getLibraries";
+import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
-import type {
-	LoadGroupsSelectionQueryVariables,
-	LoadLibrariesQueryVariables,
-} from "@generated/graphql";
+import type { LoadGroupsSelectionQueryVariables } from "@generated/graphql";
 
 interface AddLibraryType {
 	show: boolean;
@@ -80,15 +77,7 @@ export default function AddLibraryToGroup({
 
 	// Only fetch libraries if we are NOT in bulk mode
 	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
-		queryKey: ["librariesSelection"],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
-				order: "fullName",
-				orderBy: "ASC",
-				pageno: 0,
-				pagesize: 1000,
-				query: "",
-			}),
+		...allLibrariesQuery(gqlClient),
 		enabled: !isBulkMode,
 	});
 
