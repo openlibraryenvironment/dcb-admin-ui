@@ -53,24 +53,32 @@ export default function HostLmsStep() {
 						select
 						required
 						fullWidth
-						label={t("hostlms.client_class")}
+						label={t("hostlms.type")}
 						error={!!errors.lmsClientClass}
 						helperText={errors.lmsClientClass?.message as string}
 					>
-						{/* eslint-disable i18next/no-literal-string -- LMS product names are proper nouns and are not translated. may need ingest classes too */}
-						<MenuItem value="org.olf.dcb.core.interaction.sierra.SierraLmsClient">
-							Sierra
+						<MenuItem value="org.olf.dcb.core.interaction.alma.AlmaHostLmsClient">
+							{t("hostlms.names.alma")}
 						</MenuItem>
 						<MenuItem value="org.olf.dcb.core.interaction.polaris.PolarisLmsClient">
-							Polaris
+							{t("hostlms.names.polaris")}
 						</MenuItem>
 						<MenuItem value="org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient">
-							FOLIO
+							{t("hostlms.names.folio")}
 						</MenuItem>
-						<MenuItem value="org.olf.dcb.core.interaction.alma.AlmaHostLmsClient">
-							Alma
+						<MenuItem value="org.olf.dcb.core.interaction.koha.KohaHostLmsClient">
+							{t("hostlms.names.koha")}
 						</MenuItem>
-						{/* eslint-enable i18next/no-literal-string */}
+						<MenuItem value="org.olf.dcb.core.interaction.sierra.SierraHostLmsClient">
+							{t("hostlms.names.sierra")}
+						</MenuItem>
+						<MenuItem value="org.olf.dcb.core.interaction.foundation.FoundationClient">
+							{t("hostlms.names.foundation")}
+						</MenuItem>
+						<MenuItem value="org.olf.dcb.core.interaction.AbstractHostLmsClient">
+							{t("hostlms.names.ors_appliance")}
+						</MenuItem>
+						{}
 					</TextField>
 				)}
 			/>

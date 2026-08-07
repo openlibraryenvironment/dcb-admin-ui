@@ -97,7 +97,7 @@ export function ProfileStep() {
 						freeSolo
 						options={agencyOptions}
 						loading={agenciesLoading}
-						// 1. Dynamically inject the "Add..." option if no exact match exists
+						// Dynamically inject the "Add..." option if no exact match exists
 						filterOptions={(options, params) => {
 							const filtered = filter(options, params);
 							const { inputValue } = params;
@@ -115,13 +115,12 @@ export function ProfileStep() {
 							}
 							return filtered;
 						}}
-						// 2. Safely extract the label based on what type of option it is
 						getOptionLabel={(option: any) => {
 							if (typeof option === "string") return option;
 							if (option.inputValue) return option.inputValue;
 							return option.label || option.value || "";
 						}}
-						// 3. Handle the selection cleanly without raw keystroke capture
+						// Handle the selection cleanly without raw keystroke capture
 						onChange={(_, newValue: any) => {
 							if (typeof newValue === "string") {
 								// User pressed enter on a raw string
@@ -161,7 +160,6 @@ export function ProfileStep() {
 						label={t("libraries.support_hours")}
 						variant="outlined"
 						fullWidth
-						required
 						error={!!errors.supportHours}
 						helperText={errors.supportHours?.message as string}
 					/>

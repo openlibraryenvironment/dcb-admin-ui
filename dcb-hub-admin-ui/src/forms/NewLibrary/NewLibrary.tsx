@@ -1,6 +1,12 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useForm, FormProvider, useWatch } from "react-hook-form";
+import {
+	useForm,
+	FormProvider,
+	useWatch,
+	type DefaultValues,
+	type Resolver,
+} from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Dialog,
@@ -36,6 +42,9 @@ import NumericMappingStep from "./steps/NumericRangeMappingStep";
 import LocationsStep from "./steps/LocationsStep";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import { newLibrarySchema } from "@/schemas/newLibrarySchema";
+import { describeGraphQLError } from "@helpers/graphQLErrors";
+import type { LibrarySetupStepId } from "@helpers/librarySetup";
+import { updateLibraryMutation } from "@mutations/updateLibrary";
 import type { z } from "zod";
 import type {
 	CreateHostLmsMutationVariables,
@@ -46,18 +55,39 @@ type NewLibraryType = {
 	show: boolean;
 	onClose: () => void;
 	consortiumName?: string;
+	/**
+	 * An existing, part-configured library to resume. When set the wizard skips
+	 * mode selection and Host LMS creation, prefills from the record, and starts
+	 * at `startAtStep` - see "finish setup" on the library page.
+	 */
+	resumeLibrary?: any;
+	startAtStep?: LibrarySetupStepId;
 };
 
-// Maps each wizard step to the newLibrarySchema fields it's responsible
-// for, so handleNext only validates the step actually being shown. Steps
-// not listed here (profile, refMappings, numMappings, locations) aren't
-// covered by newLibrarySchema yet - trigger() is skipped for them rather
-// than invented field names.
+// Maps each wizard step to the newLibrarySchema fields it's responsible for, so
+// handleNext only validates the step actually being shown.
+//
+// `profile` was missing from this map, and because handleNext treats an empty
+// field list as "valid", the profile step advanced unconditionally - every
+// `required` marker on it was decoration. The mapping steps genuinely have no
+// schema fields (they are import UI), so they stay absent.
 const STEP_SCHEMA_FIELDS: Record<
 	string,
 	(keyof z.infer<typeof newLibrarySchema>)[]
 > = {
 	hostLms: ["hostLmsCode", "hostLmsName", "lmsClientClass", "clientConfig"],
+	profile: [
+		"fullName",
+		"shortName",
+		"abbreviatedName",
+		"agencyCode",
+		"address",
+		"type",
+		"latitude",
+		"longitude",
+		"authProfile",
+		"reason",
+	],
 	contacts: ["contacts"],
 	group: ["groupId"],
 };
@@ -69,7 +99,7 @@ type LibraryFormValues = z.infer<typeof newLibrarySchema>;
 // makes the server reject the mutation with "field not defined in LibraryInput".
 // Build an explicit, typed payload instead - contacts are consumed inline by
 // CreateLibraryDataFetcher, so no separate createLibraryContact call is needed.
-const buildLibraryInput = (formData: LibraryFormValues) => ({
+const buildLibraryProfile = (formData: LibraryFormValues) => ({
 	agencyCode: formData.agencyCode,
 	fullName: formData.fullName,
 	shortName: formData.shortName,
@@ -84,8 +114,14 @@ const buildLibraryInput = (formData: LibraryFormValues) => ({
 	hostLmsConfiguration: formData.hostLmsConfiguration,
 	backupDowntimeSchedule: formData.backupDowntimeSchedule,
 	reason: formData.reason,
-	hostLmsCode: formData.hostLmsCode,
+	// Was rendered but never sent, so the audit trail lost its reference URL.
+	changeReferenceUrl: formData.changeReferenceUrl,
 	authProfile: formData.authProfile,
+});
+
+const buildLibraryInput = (formData: LibraryFormValues) => ({
+	...buildLibraryProfile(formData),
+	hostLmsCode: formData.hostLmsCode,
 	contacts: formData.contacts.map((contact) => ({
 		firstName: contact.firstName.trim(),
 		lastName: contact.lastName.trim(),
@@ -95,19 +131,114 @@ const buildLibraryInput = (formData: LibraryFormValues) => ({
 	})),
 });
 
+/**
+ * RHF's DefaultValues is a deep-partial, which is what lets the coordinates
+ * start out unset even though the schema requires them - the profile step then
+ * reports them as missing, which is the whole point.
+ */
+type LibraryFormDefaults = DefaultValues<LibraryFormValues>;
+
+const EMPTY_LIBRARY_FORM: LibraryFormDefaults = {
+	// Host LMS Fields
+	hostLmsCode: "",
+	hostLmsName: "",
+	lmsClientClass: "",
+	clientConfig: "",
+	suppressionRulesetName: "",
+	itemSuppressionRulesetName: "",
+	// Library Fields
+	agencyCode: "",
+	fullName: "",
+	shortName: "",
+	abbreviatedName: "",
+	address: "",
+	type: "",
+	latitude: undefined,
+	longitude: undefined,
+	supportHours: "",
+	patronWebsite: "",
+	hostLmsConfiguration: "",
+	discoverySystem: "",
+	backupDowntimeSchedule: "",
+	authProfile: "",
+	reason: "Adding a new library",
+	changeReferenceUrl: "",
+	contacts: [
+		{
+			firstName: "",
+			lastName: "",
+			email: "",
+			role: "",
+			isPrimaryContact: false,
+		},
+	],
+	groupId: "",
+};
+
+/**
+ * Prefills the wizard from a library that already exists. Absent values become
+ * "" / undefined rather than null so react-hook-form treats the inputs as
+ * controlled and the newly-required fields show as empty and invalid, which is
+ * the point: those are the ones the user has come back to fill in.
+ */
+const formValuesFromLibrary = (library: any): LibraryFormDefaults => ({
+	...EMPTY_LIBRARY_FORM,
+	hostLmsCode: library?.agency?.hostLms?.code ?? "",
+	hostLmsName: library?.agency?.hostLms?.name ?? "",
+	lmsClientClass: library?.agency?.hostLms?.lmsClientClass ?? "",
+	clientConfig: "",
+	suppressionRulesetName: "",
+	itemSuppressionRulesetName: "",
+	agencyCode: library?.agencyCode ?? "",
+	fullName: library?.fullName ?? "",
+	shortName: library?.shortName ?? "",
+	abbreviatedName: library?.abbreviatedName ?? "",
+	address: library?.address ?? "",
+	type: library?.type ?? "",
+	latitude: library?.latitude ?? undefined,
+	longitude: library?.longitude ?? undefined,
+	supportHours: library?.supportHours ?? "",
+	patronWebsite: library?.patronWebsite ?? "",
+	hostLmsConfiguration: library?.hostLmsConfiguration ?? "",
+	discoverySystem: library?.discoverySystem ?? "",
+	backupDowntimeSchedule: library?.backupDowntimeSchedule ?? "",
+	authProfile: library?.agency?.authProfile ?? "",
+	reason: "",
+	changeReferenceUrl: "",
+	libraryId: library?.id ?? "",
+	// Contacts already exist on any created library (LibraryInput requires at
+	// least one), so the step is satisfied and only shown for reference.
+	contacts: (library?.contacts ?? []).map((contact: any) => ({
+		firstName: contact.firstName ?? "",
+		lastName: contact.lastName ?? "",
+		email: contact.email ?? "",
+		role: contact.role?.name ?? contact.role ?? "",
+		isPrimaryContact: contact.isPrimaryContact ?? false,
+	})),
+	groupId: "",
+});
+
 export default function NewLibrary({
 	show,
 	onClose,
 	consortiumName,
+	resumeLibrary,
+	startAtStep,
 }: NewLibraryType) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 
+	const isResuming = !!resumeLibrary;
+
 	const [activeStepIndex, setActiveStepIndex] = useState(0);
 	const [wizardMode, setWizardMode] = useState<
 		"unselected" | "existing" | "new"
-	>("unselected");
+	>(
+		// Resuming means the library and its Host LMS already exist, so there is
+		// nothing to choose and no Host LMS to create.
+		isResuming ? "existing" : "unselected",
+	);
 	const [alert, setAlert] = useState({
 		open: false,
 		severity: "success",
@@ -116,44 +247,50 @@ export default function NewLibrary({
 	const [hostLmsResult, setHostLmsResult] =
 		useState<HostLmsVerificationResult | null>(null);
 
-	const methods = useForm({
+	// Pin the field type rather than letting it be inferred from defaultValues:
+	// the coordinates start unset, and inference would widen every field to
+	// optional and stop the resolver's own type from lining up.
+	const methods = useForm<LibraryFormValues>({
 		mode: "onTouched",
-		resolver: zodResolver(newLibrarySchema),
-		defaultValues: {
-			// Host LMS Fields
-			hostLmsCode: "",
-			hostLmsName: "",
-			lmsClientClass: "",
-			clientConfig: "",
-			suppressionRulesetName: "",
-			itemSuppressionRulesetName: "",
-			// Library Fields
-			agencyCode: "",
-			fullName: "",
-			shortName: "",
-			abbreviatedName: "",
-			address: "",
-			type: "",
-			latitude: undefined,
-			longitude: undefined,
-			supportHours: "",
-			patronWebsite: "",
-			hostLmsConfiguration: "",
-			discoverySystem: "",
-			backupDowntimeSchedule: "",
-			authProfile: "",
-			reason: "Adding a new library",
-			contacts: [
-				{
-					firstName: "",
-					lastName: "",
-					email: "",
-					role: "",
-					isPrimaryContact: false,
+		resolver: zodResolver(newLibrarySchema) as Resolver<LibraryFormValues>,
+		defaultValues: resumeLibrary
+			? formValuesFromLibrary(resumeLibrary)
+			: {
+					// Host LMS Fields
+					hostLmsCode: "",
+					hostLmsName: "",
+					lmsClientClass: "",
+					clientConfig: "",
+					suppressionRulesetName: "",
+					itemSuppressionRulesetName: "",
+					// Library Fields
+					agencyCode: "",
+					fullName: "",
+					shortName: "",
+					abbreviatedName: "",
+					address: "",
+					type: "",
+					latitude: undefined,
+					longitude: undefined,
+					supportHours: "",
+					patronWebsite: "",
+					hostLmsConfiguration: "",
+					discoverySystem: "",
+					backupDowntimeSchedule: "",
+					authProfile: "",
+					reason: "Adding a new library",
+					changeReferenceUrl: "",
+					contacts: [
+						{
+							firstName: "",
+							lastName: "",
+							email: "",
+							role: "",
+							isPrimaryContact: false,
+						},
+					],
+					groupId: "",
 				},
-			],
-			groupId: "",
-		},
 	});
 
 	const [watchedHostLmsCode, watchedAgencyCode, lmsClientClass] = useWatch({
@@ -197,6 +334,16 @@ export default function NewLibrary({
 
 	const currentStep = steps[activeStepIndex];
 
+	// Resuming drops the user at the first thing that is actually outstanding,
+	// rather than making them click Next through the parts already done. Applied
+	// once, when the dialog opens: after that the user owns the position.
+	const [hasJumpedToStartStep, setHasJumpedToStartStep] = useState(false);
+	if (show && startAtStep && !hasJumpedToStartStep && steps.length > 0) {
+		const index = steps.findIndex((step) => step.id === startAtStep);
+		setHasJumpedToStartStep(true);
+		if (index > 0) setActiveStepIndex(index);
+	}
+
 	// Mutations
 	const { mutateAsync: createHostLms, isPending: isHostLmsPending } =
 		useMutation({
@@ -209,6 +356,24 @@ export default function NewLibrary({
 				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
 		});
 
+	// One invalidation for both paths: whether the library was just created or
+	// just completed, every list, detail page and setup-completeness count that
+	// mentions it is now stale. The "library"/"libraries" prefixes are the same
+	// ones the entity registry sweeps.
+	const invalidateLibraryCaches = () => {
+		queryClient.invalidateQueries({
+			predicate: (query) => {
+				const root = query.queryKey[0];
+				return (
+					typeof root === "string" &&
+					["library", "libraries", "librariesList", "agencies", "agency"].some(
+						(prefix) => root.startsWith(prefix),
+					)
+				);
+			},
+		});
+	};
+
 	const { mutateAsync: createLibrary, isPending: isLibraryPending } =
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
@@ -216,11 +381,17 @@ export default function NewLibrary({
 					createLibraryMutation,
 					variables,
 				),
-			onSuccess: () => {
-				queryClient.invalidateQueries({ queryKey: ["librariesList"] });
-				queryClient.invalidateQueries({ queryKey: ["agencies"] });
-				queryClient.invalidateQueries({ queryKey: ["agenciesSelection"] });
-			},
+			onSuccess: invalidateLibraryCaches,
+		});
+
+	// Resuming edits a library that already exists, so the profile step saves
+	// with updateLibrary. Calling createLibrary again would either fail on the
+	// duplicate agency code or create a second record.
+	const { mutateAsync: updateLibrary, isPending: isLibraryUpdatePending } =
+		useMutation({
+			mutationFn: (variables: { input: any }) =>
+				gqlClient.request<any>(updateLibraryMutation, variables),
+			onSuccess: invalidateLibraryCaches,
 		});
 
 	const handleNext = async () => {
@@ -261,8 +432,30 @@ export default function NewLibrary({
 				setHostLmsResult(hostLmsData); // Surface ping/ingest/warnings on a dedicated verification step
 			}
 
-			// Phase 2: If creating Library + Contacts
-			if (currentStep?.id === "contacts") {
+			// Phase 2a: resuming saves the profile straight away, because the
+			// library already exists and the whole reason the user is here is that
+			// something on it is missing. Waiting until the contacts step (as the
+			// create flow does) would risk losing the correction.
+			if (isResuming && currentStep?.id === "profile") {
+				await updateLibrary({
+					input: {
+						id: formData.libraryId || resumeLibrary?.id,
+						...buildLibraryProfile(formData),
+					},
+				});
+				setAlert({
+					open: true,
+					severity: "success",
+					text: t("libraries.new.setup_profile_saved", {
+						library: formData.fullName,
+					}),
+				});
+			}
+
+			// Phase 2b: creating the library, contacts included - the create
+			// fetcher consumes them inline. Skipped when resuming: the library and
+			// its contacts are already there.
+			if (!isResuming && currentStep?.id === "contacts") {
 				const result = await createLibrary({
 					input: buildLibraryInput(formData),
 				});
@@ -295,10 +488,15 @@ export default function NewLibrary({
 			setActiveStepIndex((prev) => prev + 1);
 		} catch (error: any) {
 			console.error("Validation or mutation failed:", error);
+			// `error.message` on a graphql-request ClientError is the whole
+			// exchange serialised - the errors array, the status, the headers and
+			// the request document. Showing it put a JSON dump in front of the
+			// user and hid the one line dcb-service wrote for them ("Invalid role:
+			// 'x'. The roles currently available are: ...").
 			setAlert({
 				open: true,
 				severity: "error",
-				text: error.message || t("ui.error.general"),
+				text: describeGraphQLError(error, t("ui.error.general")),
 			});
 		}
 	};
@@ -393,9 +591,15 @@ export default function NewLibrary({
 										<Button
 											variant="contained"
 											onClick={handleNext}
-											disabled={isHostLmsPending || isLibraryPending}
+											disabled={
+												isHostLmsPending ||
+												isLibraryPending ||
+												isLibraryUpdatePending
+											}
 										>
-											{isHostLmsPending || isLibraryPending
+											{isHostLmsPending ||
+											isLibraryPending ||
+											isLibraryUpdatePending
 												? t("ui.info.wait")
 												: t("ui.actions.next")}
 										</Button>

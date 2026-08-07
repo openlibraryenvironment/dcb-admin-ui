@@ -50,12 +50,45 @@ export const newLibrarySchema = z.object({
 			field: i18n.t("libraries.name"),
 		}),
 	),
-	shortName: z.string().optional(),
-	abbreviatedName: z.string().optional(),
-	address: z.string().optional(),
-	type: z.string().optional(),
-	latitude: z.number(),
-	longitude: z.number(),
+	// The four below are `String!` in LibraryInput. They were optional here, so
+	// the wizard sent "" and GraphQL's non-null check passed on an empty string -
+	// the `!` protected nothing and the user was never asked.
+	shortName: z.string().min(
+		1,
+		i18n.t("ui.validation.required", {
+			field: i18n.t("libraries.short_name"),
+		}),
+	),
+	abbreviatedName: z.string().min(
+		1,
+		i18n.t("ui.validation.required", {
+			field: i18n.t("libraries.abbreviated_name"),
+		}),
+	),
+	address: z.string().min(
+		1,
+		i18n.t("ui.validation.required", {
+			field: i18n.t("libraries.primaryLocation.address"),
+		}),
+	),
+	type: z.string().min(
+		1,
+		i18n.t("ui.validation.required", {
+			field: i18n.t("libraries.type"),
+		}),
+	),
+	// Nullable in LibraryInput, but a library with no coordinates cannot be
+	// placed on a map or used for distance-based supplier selection.
+	latitude: z.number({
+		error: i18n.t("ui.validation.required", {
+			field: i18n.t("libraries.primaryLocation.latitude"),
+		}),
+	}),
+	longitude: z.number({
+		error: i18n.t("ui.validation.required", {
+			field: i18n.t("libraries.primaryLocation.longitude"),
+		}),
+	}),
 	supportHours: z.string().optional(),
 	patronWebsite: z.string().optional(),
 	authProfile: z.string().min(
@@ -67,7 +100,17 @@ export const newLibrarySchema = z.object({
 	hostLmsConfiguration: z.string().optional(),
 	discoverySystem: z.string().optional(),
 	backupDowntimeSchedule: z.string().optional(),
-	reason: z.string().optional(),
+	// Marked required in the UI and recorded in the data change log, so validate
+	// it rather than letting an empty reason through.
+	reason: z.string().min(
+		1,
+		i18n.t("ui.validation.required", {
+			field: i18n.t("data_change_log.reason"),
+		}),
+	),
+	// Was rendered on the profile step but absent from both this schema and the
+	// mutation payload, so whatever the user typed was silently discarded.
+	changeReferenceUrl: z.string().optional(),
 	libraryId: z.string().optional(),
 	contacts: z
 		.array(
