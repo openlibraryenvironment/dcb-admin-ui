@@ -1261,6 +1261,9 @@ export type LoadLibrariesQuery = {
 			supportHours: string | null;
 			address: string | null;
 			type: string | null;
+			latitude: number | null;
+			longitude: number | null;
+			contacts: Array<{ id: string | null } | null> | null;
 			agency: {
 				id: string | null;
 				code: string | null;

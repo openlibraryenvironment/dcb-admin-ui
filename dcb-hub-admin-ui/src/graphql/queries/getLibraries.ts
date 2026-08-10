@@ -24,6 +24,16 @@ export const getLibraries = gql`
 				supportHours
 				address
 				type
+				# Required profile fields: without them every library reports the
+				# profile step as outstanding.
+				latitude
+				longitude
+				# Ids only: the onboarding grid needs to know whether a library has
+				# any contacts at all, and without this every library reports the
+				# contacts step as outstanding.
+				contacts {
+					id
+				}
 				agency {
 					id
 					code

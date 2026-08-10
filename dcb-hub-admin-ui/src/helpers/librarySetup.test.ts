@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+	evaluateLibraryIngest,
+	evaluateLibraryMappings,
 	evaluateLibrarySetup,
 	evaluateLibraryTraffic,
 	missingProfileFields,
@@ -268,5 +270,235 @@ describe("evaluateLibraryTraffic", () => {
 		// configured but unused library was reported as misconfigured.
 		expect(complete.isComplete).toBe(true);
 		expect(evaluateLibraryTraffic({}, complete).hasAnyTraffic).toBe(false);
+	});
+});
+
+describe("participation-aware traffic", () => {
+	const complete = evaluateLibrarySetup(completeProfile, completeCounts);
+	const withFlags = (borrowing: any, supplying: any) => ({
+		...completeProfile,
+		agency: {
+			...completeProfile.agency,
+			isBorrowingAgency: borrowing,
+			isSupplyingAgency: supplying,
+		},
+	});
+
+	it("does not call a borrowing-disabled library dormant for not borrowing", () => {
+		// Working exactly as configured. Flagging it teaches people to ignore the
+		// indicator, which costs more than the missed signal.
+		const traffic = evaluateLibraryTraffic(
+			{ supplierRequestCount: 5 },
+			complete,
+			withFlags(false, true),
+		);
+		expect(traffic.borrowingDisabled).toBe(true);
+		expect(traffic.isDormant).toBe(false);
+	});
+
+	it("still flags a borrowing-disabled library that also never supplies", () => {
+		// Supplying is enabled and silent, so there is a real question here.
+		const traffic = evaluateLibraryTraffic(
+			{},
+			complete,
+			withFlags(false, true),
+		);
+		expect(traffic.isDormant).toBe(true);
+	});
+
+	it("treats a library disabled in both directions as intentional", () => {
+		const traffic = evaluateLibraryTraffic(
+			{},
+			complete,
+			withFlags(false, false),
+		);
+		expect(traffic.isFullyDisabled).toBe(true);
+		expect(traffic.isDormant).toBe(false);
+	});
+
+	it("treats an unset flag as enabled, not as disabled", () => {
+		// null means nobody has said, which is not the same as "no" - silence
+		// there is still worth asking about.
+		const traffic = evaluateLibraryTraffic({}, complete, withFlags(null, null));
+		expect(traffic.borrowingDisabled).toBe(false);
+		expect(traffic.isDormant).toBe(true);
+	});
+
+	it("ignores traffic in a direction that is switched off", () => {
+		// Historic requests from before borrowing was disabled must not make a
+		// now-silent supplying side look healthy.
+		const traffic = evaluateLibraryTraffic(
+			{ patronRequestCount: 9 },
+			complete,
+			withFlags(false, true),
+		);
+		expect(traffic.isDormant).toBe(true);
+	});
+
+	describe("lastRequestAt", () => {
+		it("reports the more recent of the two directions", () => {
+			expect(
+				evaluateLibraryTraffic({
+					lastBorrowingRequestAt: "2026-01-01T00:00:00Z",
+					lastSupplyingRequestAt: "2026-06-01T00:00:00Z",
+				}).lastRequestAt,
+			).toBe("2026-06-01T00:00:00Z");
+		});
+
+		it("copes when only one direction has ever been used", () => {
+			expect(
+				evaluateLibraryTraffic({
+					lastBorrowingRequestAt: "2026-01-01T00:00:00Z",
+				}).lastRequestAt,
+			).toBe("2026-01-01T00:00:00Z");
+		});
+
+		it("is null when nothing has ever happened", () => {
+			expect(evaluateLibraryTraffic({}).lastRequestAt).toBeNull();
+			expect(
+				evaluateLibraryTraffic({
+					lastBorrowingRequestAt: null,
+					lastSupplyingRequestAt: null,
+				}).lastRequestAt,
+			).toBeNull();
+		});
+	});
+});
+
+describe("evaluateLibraryIngest", () => {
+	it("reports a library with bib records as ingested", () => {
+		const ingest = evaluateLibraryIngest({ bibCount: 1200 }, completeProfile);
+		expect(ingest).toMatchObject({
+			bibCount: 1200,
+			hasBibs: true,
+			isIngestOutstanding: false,
+		});
+	});
+
+	it("flags a supplying library with no bib records", () => {
+		// However well configured, it has nothing anyone can request.
+		expect(
+			evaluateLibraryIngest({ bibCount: 0 }, completeProfile)
+				.isIngestOutstanding,
+		).toBe(true);
+	});
+
+	it("does not flag a library that is not meant to supply", () => {
+		const notSupplying = {
+			...completeProfile,
+			agency: { ...completeProfile.agency, isSupplyingAgency: false },
+		};
+		expect(
+			evaluateLibraryIngest({ bibCount: 0 }, notSupplying).isIngestOutstanding,
+		).toBe(false);
+	});
+
+	it("flags an unset supplying flag, because nobody has ruled it out", () => {
+		const unset = {
+			...completeProfile,
+			agency: { ...completeProfile.agency, isSupplyingAgency: null },
+		};
+		expect(
+			evaluateLibraryIngest({ bibCount: 0 }, unset).isIngestOutstanding,
+		).toBe(true);
+	});
+
+	it("treats an absent count as nothing ingested", () => {
+		expect(evaluateLibraryIngest({}, completeProfile)).toMatchObject({
+			bibCount: 0,
+			hasBibs: false,
+		});
+	});
+});
+
+const sierra = {
+	...completeProfile,
+	agency: {
+		hostLms: { code: "SIER", id: "h2", lmsClientClass: "SierraLmsClient" },
+	},
+};
+
+describe("evaluateLibraryMappings", () => {
+	it("is complete when every applicable category has mappings", () => {
+		const mappings = evaluateLibraryMappings(completeCounts, completeProfile);
+
+		expect(mappings.isComplete).toBe(true);
+		expect(mappings.isPartial).toBe(false);
+		expect(mappings.missing).toEqual([]);
+	});
+
+	it("names the missing category rather than just failing", () => {
+		const mappings = evaluateLibraryMappings(
+			{ ...completeCounts, locationMappingCount: 0 },
+			completeProfile,
+		);
+
+		expect(mappings.isComplete).toBe(false);
+		expect(mappings.missing).toEqual(["locationType"]);
+	});
+
+	it("distinguishes a half-finished job from an untouched library", () => {
+		const partial = evaluateLibraryMappings(
+			{ itemTypeMappingCount: 5 },
+			completeProfile,
+		);
+		expect(partial.isPartial).toBe(true);
+
+		const untouched = evaluateLibraryMappings({}, completeProfile);
+		expect(untouched.isPartial).toBe(false);
+		expect(untouched.missing).toEqual([
+			"itemType",
+			"patronType",
+			"locationType",
+		]);
+	});
+
+	it("excludes numeric ranges for an ILS that does not use them", () => {
+		const mappings = evaluateLibraryMappings(completeCounts, completeProfile);
+		const numericRange = mappings.categories.find(
+			(category) => category.id === "numericRange",
+		);
+
+		expect(numericRange?.applicable).toBe(false);
+		expect(mappings.missing).not.toContain("numericRange");
+	});
+
+	it("counts numeric ranges against Sierra and Polaris", () => {
+		const mappings = evaluateLibraryMappings(
+			{ ...completeCounts, numericRangeMappingCount: 0 },
+			sierra,
+		);
+
+		expect(mappings.missing).toEqual(["numericRange"]);
+		expect(mappings.isPartial).toBe(true);
+	});
+});
+
+describe("setup steps and the mappings indicator agree", () => {
+	it("reports the same categories the refMappings step is waiting on", () => {
+		const setup = evaluateLibrarySetup(completeProfile, {
+			...completeCounts,
+			patronTypeMappingCount: 0,
+		});
+
+		expect(setup.mappings.missing).toEqual(["patronType"]);
+		expect(
+			setup.steps.find((step) => step.id === "refMappings")?.complete,
+		).toBe(false);
+	});
+
+	it("keeps numeric ranges out of the reference value step", () => {
+		const setup = evaluateLibrarySetup(sierra, {
+			...completeCounts,
+			numericRangeMappingCount: 0,
+		});
+
+		expect(
+			setup.steps.find((step) => step.id === "refMappings")?.complete,
+		).toBe(true);
+		expect(
+			setup.steps.find((step) => step.id === "numMappings")?.complete,
+		).toBe(false);
+		expect(setup.firstIncompleteStep).toBe("numMappings");
 	});
 });

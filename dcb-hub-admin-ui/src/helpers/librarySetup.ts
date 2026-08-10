@@ -29,6 +29,20 @@ export interface LibrarySetupCounts {
 }
 
 /**
+ * Whether a library is even meant to borrow or supply.
+ *
+ * Only an explicit `false` counts as deliberately switched off. `null` means
+ * nobody has said either way, which is not the same as "no" - a library nobody
+ * has configured for borrowing that also has no borrowing traffic is still
+ * worth asking about.
+ */
+export const isBorrowingDisabled = (library: any): boolean =>
+	library?.agency?.isBorrowingAgency === false;
+
+export const isSupplyingDisabled = (library: any): boolean =>
+	library?.agency?.isSupplyingAgency === false;
+
+/**
  * Requests a library has actually taken part in. Deliberately NOT part of
  * setup completeness: a library can be configured perfectly and still never
  * have borrowed or supplied anything, and staff need to see that separately.
@@ -38,6 +52,9 @@ export interface LibrarySetupCounts {
 export interface LibraryTrafficCounts {
 	patronRequestCount?: number;
 	supplierRequestCount?: number;
+	/** Most recent request in either direction, ISO string or null. */
+	lastBorrowingRequestAt?: string | null;
+	lastSupplyingRequestAt?: string | null;
 }
 
 export interface LibraryTrafficState {
@@ -46,25 +63,100 @@ export interface LibraryTrafficState {
 	/** The library has supplied at least one request. */
 	hasSupplied: boolean;
 	hasAnyTraffic: boolean;
-	/** Configured and ready, but nothing has ever flowed through it. */
+	borrowingDisabled: boolean;
+	supplyingDisabled: boolean;
+	/** Switched off in both directions - silence is the intended outcome. */
+	isFullyDisabled: boolean;
+	/**
+	 * Configured, enabled in at least one direction, and still nothing has
+	 * flowed through it.
+	 */
 	isDormant: boolean;
+	/** Most recent request in either direction. */
+	lastRequestAt: string | null;
 }
+
+const latestOf = (...dates: (string | null | undefined)[]): string | null => {
+	const usable = dates.filter((date): date is string => !!date);
+	if (usable.length === 0) return null;
+	return usable.reduce((latest, date) =>
+		new Date(date) > new Date(latest) ? date : latest,
+	);
+};
 
 export const evaluateLibraryTraffic = (
 	counts: LibraryTrafficCounts = {},
 	setup?: LibrarySetupState,
+	library?: any,
 ): LibraryTrafficState => {
 	const hasBorrowed = (counts.patronRequestCount ?? 0) > 0;
 	const hasSupplied = (counts.supplierRequestCount ?? 0) > 0;
 	const hasAnyTraffic = hasBorrowed || hasSupplied;
 
+	const borrowingDisabled = isBorrowingDisabled(library);
+	const supplyingDisabled = isSupplyingDisabled(library);
+	const isFullyDisabled = borrowingDisabled && supplyingDisabled;
+
+	// Silence only counts as dormancy in a direction the library is actually
+	// meant to operate in. A borrowing-disabled library with no borrowing
+	// requests is working exactly as configured, and flagging it trains people
+	// to ignore the indicator.
+	const hasTrafficWhereEnabled =
+		(!borrowingDisabled && hasBorrowed) || (!supplyingDisabled && hasSupplied);
+
 	return {
 		hasBorrowed,
 		hasSupplied,
 		hasAnyTraffic,
+		borrowingDisabled,
+		supplyingDisabled,
+		isFullyDisabled,
 		// Only meaningful once setup is done - a half-configured library having no
 		// traffic is not news, it is the expected consequence.
-		isDormant: (setup?.isComplete ?? false) && !hasAnyTraffic,
+		isDormant:
+			(setup?.isComplete ?? false) &&
+			!isFullyDisabled &&
+			!hasTrafficWhereEnabled,
+		lastRequestAt: latestOf(
+			counts.lastBorrowingRequestAt,
+			counts.lastSupplyingRequestAt,
+		),
+	};
+};
+
+/**
+ * Has the library's catalogue actually been ingested?
+ *
+ * Ingest is configured on the Host LMS rather than in the library wizard, so
+ * it is not a setup step - but zero bib records means the library cannot supply
+ * anything at all, whatever else is configured. That is a distinct failure from
+ * "the wizard was not finished" and from "nobody has requested anything".
+ */
+export interface LibraryIngestCounts {
+	bibCount?: number;
+}
+
+export interface LibraryIngestState {
+	bibCount: number;
+	hasBibs: boolean;
+	/**
+	 * Nothing ingested, and the library is expected to supply - so this is a
+	 * problem rather than a setting.
+	 */
+	isIngestOutstanding: boolean;
+}
+
+export const evaluateLibraryIngest = (
+	counts: LibraryIngestCounts = {},
+	library?: any,
+): LibraryIngestState => {
+	const bibCount = counts.bibCount ?? 0;
+	const hasBibs = bibCount > 0;
+
+	return {
+		bibCount,
+		hasBibs,
+		isIngestOutstanding: !hasBibs && !isSupplyingDisabled(library),
 	};
 };
 
@@ -82,6 +174,8 @@ export interface LibrarySetupState {
 	isComplete: boolean;
 	/** Profile fields the library is missing, for messaging. */
 	missingProfileFields: string[];
+	/** Per-category mapping detail, for the one "mappings" indicator. */
+	mappings: LibraryMappingsState;
 }
 
 /**
@@ -91,6 +185,82 @@ export interface LibrarySetupState {
 export const requiresNumericRangeMappings = (library: any): boolean => {
 	const ils = getILS(library?.agency?.hostLms?.lmsClientClass ?? "");
 	return ils === "Sierra" || ils === "Polaris";
+};
+
+/**
+ * The four mapping categories, evaluated together.
+ *
+ * The grid shows one "mappings" indicator, but the answer staff need is which
+ * category is missing - "item types are mapped, locations are not" is a
+ * different job from "nothing is mapped at all". Deciding it here means the
+ * indicator, its tooltip, and the two wizard steps cannot disagree.
+ */
+export type MappingCategoryId =
+	"itemType" | "patronType" | "locationType" | "numericRange";
+
+export interface MappingCategoryState {
+	id: MappingCategoryId;
+	count: number;
+	/** False for categories this library's ILS does not use. */
+	applicable: boolean;
+	complete: boolean;
+}
+
+export interface LibraryMappingsState {
+	categories: MappingCategoryState[];
+	/** Applicable categories with no mappings at all. */
+	missing: MappingCategoryId[];
+	isComplete: boolean;
+	/**
+	 * Some categories mapped, some not. Worth distinguishing: a library nobody
+	 * has started on and a library somebody stopped halfway through call for
+	 * different conversations.
+	 */
+	isPartial: boolean;
+}
+
+export const evaluateLibraryMappings = (
+	counts: LibrarySetupCounts = {},
+	library?: any,
+): LibraryMappingsState => {
+	const needsNumeric = requiresNumericRangeMappings(library);
+
+	const categories: MappingCategoryState[] = (
+		[
+			{
+				id: "itemType",
+				count: counts.itemTypeMappingCount ?? 0,
+				applicable: true,
+			},
+			{
+				id: "patronType",
+				count: counts.patronTypeMappingCount ?? 0,
+				applicable: true,
+			},
+			{
+				id: "locationType",
+				count: counts.locationMappingCount ?? 0,
+				applicable: true,
+			},
+			{
+				id: "numericRange",
+				count: counts.numericRangeMappingCount ?? 0,
+				applicable: needsNumeric,
+			},
+		] as const
+	).map((category) => ({ ...category, complete: category.count > 0 }));
+
+	const applicable = categories.filter((category) => category.applicable);
+	const missing = applicable
+		.filter((category) => !category.complete)
+		.map((category) => category.id);
+
+	return {
+		categories,
+		missing,
+		isComplete: missing.length === 0,
+		isPartial: missing.length > 0 && missing.length < applicable.length,
+	};
 };
 
 /**
@@ -125,6 +295,13 @@ export const evaluateLibrarySetup = (
 ): LibrarySetupState => {
 	const missing = missingProfileFields(library);
 	const needsNumeric = requiresNumericRangeMappings(library);
+	// The wizard has two mapping screens, so setup keeps two steps - but both
+	// read the same evaluation, so the banner and the grid cannot disagree about
+	// what "mapped" means.
+	const mappings = evaluateLibraryMappings(counts, library);
+	const isMapped = (id: MappingCategoryId) =>
+		mappings.categories.find((category) => category.id === id)?.complete ??
+		false;
 
 	const steps: LibrarySetupStep[] = [
 		{
@@ -148,14 +325,14 @@ export const evaluateLibrarySetup = (
 			// All three categories are needed to route a request end to end, so
 			// having only one of them is not "done".
 			complete:
-				(counts.itemTypeMappingCount ?? 0) > 0 &&
-				(counts.patronTypeMappingCount ?? 0) > 0 &&
-				(counts.locationMappingCount ?? 0) > 0,
+				isMapped("itemType") &&
+				isMapped("patronType") &&
+				isMapped("locationType"),
 		},
 		{
 			id: "numMappings",
 			applicable: needsNumeric,
-			complete: !needsNumeric || (counts.numericRangeMappingCount ?? 0) > 0,
+			complete: !needsNumeric || isMapped("numericRange"),
 		},
 		{
 			id: "locations",
@@ -173,5 +350,6 @@ export const evaluateLibrarySetup = (
 		firstIncompleteStep: outstanding[0]?.id,
 		isComplete: outstanding.length === 0,
 		missingProfileFields: missing,
+		mappings,
 	};
 };

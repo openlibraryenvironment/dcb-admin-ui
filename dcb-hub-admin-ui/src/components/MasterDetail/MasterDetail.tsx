@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
@@ -881,83 +881,125 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					</Grid>
 				</MasterDetailLayout>
 			);
-		case "onboarding":
+		case "onboarding": {
+			// The grid carries five verdicts; this is where the numbers behind them
+			// live. Every count the columns collapsed - each mapping category, both
+			// request directions, both last-request dates - has to be readable here,
+			// or collapsing the columns would have lost it.
+			const attribute = (title: string, value: ReactNode) => (
+				<Grid size={{ xs: 2, sm: 4, md: 4 }} key={title}>
+					<Stack direction="column">
+						<Typography variant="attributeTitle">{title}</Typography>
+						<Typography variant="attributeText">{value}</Typography>
+					</Stack>
+				</Grid>
+			);
+			const outstanding = (row?.setup?.steps ?? []).filter(
+				(step: any) => step.applicable && !step.complete,
+			);
+			const numericRange = (row?.setup?.mappings?.categories ?? []).find(
+				(category: any) => category.id === "numericRange",
+			);
+			// A date or the reason there is not one - a blank cell reads as missing
+			// data rather than as an answer.
+			const requestDate = (value?: string | null) => (
+				<RenderAttribute
+					attribute={
+						value
+							? dayjs(value).format("YYYY-MM-DD HH:mm")
+							: t("consortium.onboarding_last_request_never")
+					}
+				/>
+			);
+			// Unset is not the same as off, and staff chasing a silent library need
+			// to know which one they are looking at.
+			const participation = (disabled: boolean, value?: boolean | null) => {
+				if (disabled) return t("consortium.onboarding_disabled");
+				if (value == null) return t("consortium.onboarding_not_set");
+				return t("consortium.onboarding_enabled");
+			};
+
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("mappings.item_type_count", "Item Types")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.itemTypeMappingCount || 0} />
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("mappings.patron_type_count", "Patron Types")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.patronTypeMappingCount || 0} />
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("mappings.location_count", "Locations")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.locationMappingCount || 0} />
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("locations.pickup_locations")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.pickupLocationCount || 0} />
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("mappings.numeric_range_count", "Numeric Ranges")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute
-									attribute={row?.numericRangeMappingCount || 0}
-								/>
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("nav.patronRequests.name", "Patron Requests")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.patronRequestCount || 0} />
-							</Typography>
-						</Stack>
-					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-						<Stack direction="column">
-							<Typography variant="attributeTitle">
-								{t("nav.supplierRequests.name", "Supplier Requests")}
-							</Typography>
-							<Typography variant="attributeText">
-								<RenderAttribute attribute={row?.supplierRequestCount || 0} />
-							</Typography>
-						</Stack>
-					</Grid>
+					{attribute(
+						t("consortium.onboarding_setup_status"),
+						outstanding.length === 0 ? (
+							t("consortium.onboarding_setup_complete")
+						) : (
+							<RenderAttribute
+								attribute={outstanding
+									.map((step: any) => t(`libraries.setup.step.${step.id}`))
+									.join(", ")}
+							/>
+						),
+					)}
+					{attribute(
+						t("mappings.item_type_count"),
+						<RenderAttribute attribute={row?.itemTypeMappingCount ?? 0} />,
+					)}
+					{attribute(
+						t("mappings.patron_type_count"),
+						<RenderAttribute attribute={row?.patronTypeMappingCount ?? 0} />,
+					)}
+					{attribute(
+						t("mappings.location_count"),
+						<RenderAttribute attribute={row?.locationMappingCount ?? 0} />,
+					)}
+					{attribute(
+						t("mappings.numeric_range_count"),
+						// Zero would read as "none configured" for an ILS that never
+						// needed them.
+						numericRange && !numericRange.applicable ? (
+							t("consortium.onboarding_not_required")
+						) : (
+							<RenderAttribute attribute={row?.numericRangeMappingCount ?? 0} />
+						),
+					)}
+					{attribute(
+						t("locations.pickup_locations"),
+						<RenderAttribute attribute={row?.pickupLocationCount ?? 0} />,
+					)}
+					{attribute(
+						t("consortium.onboarding_ingest_column"),
+						<RenderAttribute attribute={row?.bibCount ?? 0} />,
+					)}
+					{attribute(
+						t("consortium.onboarding_borrowing"),
+						participation(
+							row?.traffic?.borrowingDisabled ?? false,
+							row?.agency?.isBorrowingAgency,
+						),
+					)}
+					{attribute(
+						t("consortium.onboarding_supplying"),
+						participation(
+							row?.traffic?.supplyingDisabled ?? false,
+							row?.agency?.isSupplyingAgency,
+						),
+					)}
+					{attribute(
+						t("nav.patronRequests.name"),
+						<RenderAttribute attribute={row?.patronRequestCount ?? 0} />,
+					)}
+					{attribute(
+						t("nav.supplierRequests.name"),
+						<RenderAttribute attribute={row?.supplierRequestCount ?? 0} />,
+					)}
+					{attribute(
+						t("consortium.onboarding_last_borrowing_request"),
+						requestDate(row?.lastBorrowingRequestAt),
+					)}
+					{attribute(
+						t("consortium.onboarding_last_supplying_request"),
+						requestDate(row?.lastSupplyingRequestAt),
+					)}
+					{attribute(
+						t("consortium.onboarding_last_request_title"),
+						requestDate(row?.traffic?.lastRequestAt),
+					)}
 				</MasterDetailLayout>
 			);
+		}
 		default:
 			return null;
 	}
