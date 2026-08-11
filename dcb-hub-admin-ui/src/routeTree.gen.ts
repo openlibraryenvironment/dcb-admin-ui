@@ -46,6 +46,7 @@ import { Route as _authenticatedBibsBibIdRouteImport } from './routes/__authenti
 import { Route as _authenticatedAgenciesAgencyIdRouteImport } from './routes/__authenticated/agencies/$agencyId'
 import { Route as _authenticatedServiceInfoServiceStatusIndexRouteImport } from './routes/__authenticated/serviceInfo/serviceStatus/index'
 import { Route as _authenticatedServiceInfoRequestErrorsIndexRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/index'
+import { Route as _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport } from './routes/__authenticated/serviceInfo/dcbNcipOnboarding/index'
 import { Route as _authenticatedServiceInfoDataChangeLogIndexRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/index'
 import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/index'
 import { Route as _authenticatedServiceInfoAuditExplorerIndexRouteImport } from './routes/__authenticated/serviceInfo/auditExplorer/index'
@@ -294,6 +295,12 @@ const _authenticatedServiceInfoRequestErrorsIndexRoute =
   _authenticatedServiceInfoRequestErrorsIndexRouteImport.update({
     id: '/serviceInfo/requestErrors/',
     path: '/serviceInfo/requestErrors/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoDcbNcipOnboardingIndexRoute =
+  _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport.update({
+    id: '/serviceInfo/dcbNcipOnboarding/',
+    path: '/serviceInfo/dcbNcipOnboarding/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedServiceInfoDataChangeLogIndexRoute =
@@ -599,6 +606,7 @@ export interface FileRoutesByFullPath {
   '/serviceInfo/auditExplorer/': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/serviceInfo/catalogMetricsByHostLms/': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   '/serviceInfo/dataChangeLog/': typeof _authenticatedServiceInfoDataChangeLogIndexRoute
+  '/serviceInfo/dcbNcipOnboarding/': typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRoute
   '/serviceInfo/requestErrors/': typeof _authenticatedServiceInfoRequestErrorsIndexRoute
   '/serviceInfo/serviceStatus/': typeof _authenticatedServiceInfoServiceStatusIndexRoute
   '/libraries/$libraryId/numericRangeMappings/all': typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute
@@ -676,6 +684,7 @@ export interface FileRoutesByTo {
   '/serviceInfo/auditExplorer': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/serviceInfo/catalogMetricsByHostLms': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   '/serviceInfo/dataChangeLog': typeof _authenticatedServiceInfoDataChangeLogIndexRoute
+  '/serviceInfo/dcbNcipOnboarding': typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRoute
   '/serviceInfo/requestErrors': typeof _authenticatedServiceInfoRequestErrorsIndexRoute
   '/serviceInfo/serviceStatus': typeof _authenticatedServiceInfoServiceStatusIndexRoute
   '/libraries/$libraryId/numericRangeMappings/all': typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute
@@ -755,6 +764,7 @@ export interface FileRoutesById {
   '/__authenticated/serviceInfo/auditExplorer/': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/__authenticated/serviceInfo/catalogMetricsByHostLms/': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   '/__authenticated/serviceInfo/dataChangeLog/': typeof _authenticatedServiceInfoDataChangeLogIndexRoute
+  '/__authenticated/serviceInfo/dcbNcipOnboarding/': typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRoute
   '/__authenticated/serviceInfo/requestErrors/': typeof _authenticatedServiceInfoRequestErrorsIndexRoute
   '/__authenticated/serviceInfo/serviceStatus/': typeof _authenticatedServiceInfoServiceStatusIndexRoute
   '/__authenticated/libraries/$libraryId/numericRangeMappings/all': typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute
@@ -834,6 +844,7 @@ export interface FileRouteTypes {
     | '/serviceInfo/auditExplorer/'
     | '/serviceInfo/catalogMetricsByHostLms/'
     | '/serviceInfo/dataChangeLog/'
+    | '/serviceInfo/dcbNcipOnboarding/'
     | '/serviceInfo/requestErrors/'
     | '/serviceInfo/serviceStatus/'
     | '/libraries/$libraryId/numericRangeMappings/all'
@@ -911,6 +922,7 @@ export interface FileRouteTypes {
     | '/serviceInfo/auditExplorer'
     | '/serviceInfo/catalogMetricsByHostLms'
     | '/serviceInfo/dataChangeLog'
+    | '/serviceInfo/dcbNcipOnboarding'
     | '/serviceInfo/requestErrors'
     | '/serviceInfo/serviceStatus'
     | '/libraries/$libraryId/numericRangeMappings/all'
@@ -989,6 +1001,7 @@ export interface FileRouteTypes {
     | '/__authenticated/serviceInfo/auditExplorer/'
     | '/__authenticated/serviceInfo/catalogMetricsByHostLms/'
     | '/__authenticated/serviceInfo/dataChangeLog/'
+    | '/__authenticated/serviceInfo/dcbNcipOnboarding/'
     | '/__authenticated/serviceInfo/requestErrors/'
     | '/__authenticated/serviceInfo/serviceStatus/'
     | '/__authenticated/libraries/$libraryId/numericRangeMappings/all'
@@ -1280,6 +1293,13 @@ declare module '@tanstack/react-router' {
       path: '/serviceInfo/requestErrors'
       fullPath: '/serviceInfo/requestErrors/'
       preLoaderRoute: typeof _authenticatedServiceInfoRequestErrorsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/dcbNcipOnboarding/': {
+      id: '/__authenticated/serviceInfo/dcbNcipOnboarding/'
+      path: '/serviceInfo/dcbNcipOnboarding'
+      fullPath: '/serviceInfo/dcbNcipOnboarding/'
+      preLoaderRoute: typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/serviceInfo/dataChangeLog/': {
@@ -1630,6 +1650,7 @@ interface _authenticatedRouteChildren {
   _authenticatedServiceInfoAuditExplorerIndexRoute: typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
   _authenticatedServiceInfoDataChangeLogIndexRoute: typeof _authenticatedServiceInfoDataChangeLogIndexRoute
+  _authenticatedServiceInfoDcbNcipOnboardingIndexRoute: typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRoute
   _authenticatedServiceInfoRequestErrorsIndexRoute: typeof _authenticatedServiceInfoRequestErrorsIndexRoute
   _authenticatedServiceInfoServiceStatusIndexRoute: typeof _authenticatedServiceInfoServiceStatusIndexRoute
   _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute: typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute
@@ -1720,6 +1741,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute,
   _authenticatedServiceInfoDataChangeLogIndexRoute:
     _authenticatedServiceInfoDataChangeLogIndexRoute,
+  _authenticatedServiceInfoDcbNcipOnboardingIndexRoute:
+    _authenticatedServiceInfoDcbNcipOnboardingIndexRoute,
   _authenticatedServiceInfoRequestErrorsIndexRoute:
     _authenticatedServiceInfoRequestErrorsIndexRoute,
   _authenticatedServiceInfoServiceStatusIndexRoute:

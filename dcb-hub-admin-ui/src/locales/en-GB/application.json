@@ -1095,6 +1095,7 @@
 			"auditExplorer": "Audit explorer",
 			"catalogMetricsByHostLms": "Catalog metrics by host LMS",
 			"dataChangeLog": "Data change log",
+			"dcbNcipOnboarding": "DCB NCIP Onboarding",
 			"name": "Service info",
 			"requestErrors": {
 				"name": "Request errors",
@@ -1107,6 +1108,72 @@
 		},
 		"supplierRequests": {
 			"name": "Supplier requests"
+		}
+	},
+	"dcb_ncip_onboarding": {
+		"introduction": "Check that this DCB node can complete an ORS Appliance connection, then issue its single-use membership invitation.",
+		"actions": {
+			"back": "Back",
+			"copied": "Copied",
+			"copy_base": "Copy DCB base URL",
+			"copy_token": "Copy invitation token",
+			"issue": "Issue invitation",
+			"issuing": "Issuing invitation…",
+			"new_invitation": "Issue another invitation",
+			"refresh": "Refresh",
+			"retry": "Retry readiness check",
+			"review": "Review invitation"
+		},
+		"errors": {
+			"issue": "The invitation could not be issued.",
+			"readiness": "DCB onboarding readiness could not be loaded."
+		},
+		"policy": {
+			"advanced": "Advanced policy",
+			"agency_code": "Agency code",
+			"auth_profile": "Authentication profile",
+			"borrowing": "Borrowing",
+			"expected_symbol": "Expected ORS symbol",
+			"host_lms_code": "Host LMS code",
+			"ingest": "Catalogue ingest",
+			"item_suppression_ruleset": "Item suppression ruleset",
+			"max_loans": "Maximum consortial loans",
+			"permissions": "Permissions",
+			"supplying": "Supplying",
+			"suppression_ruleset": "Suppression ruleset",
+			"title": "Invitation policy"
+		},
+		"readiness": {
+			"checks": "DCB NCIP onboarding readiness checks",
+			"loading": "Checking DCB onboarding readiness…",
+			"not_ready": "This DCB node is not ready to issue an ORS Appliance invitation.",
+			"ready": "This DCB node is ready to issue an ORS Appliance invitation."
+		},
+		"result": {
+			"base_url": "DCB base URL",
+			"created": "Invitation created. It expires in {{minutes}}:{{seconds}}.",
+			"expired": "This invitation has expired. Issue a new invitation.",
+			"instructions": "Open Integrations → Connect to DCB in the ORS Appliance and enter these values. Validate before confirming redemption.",
+			"not_recoverable": "The invitation is displayed only here and cannot be recovered after leaving this page.",
+			"token": "Invitation token"
+		},
+		"review": {
+			"warning": "Issuing this invitation authorizes one matching ORS Appliance to become an active DCB member when it redeems the token."
+		},
+		"steps": {
+			"invitation": "Invitation",
+			"policy": "Policy",
+			"review": "Review"
+		},
+		"validation": {
+			"AGENCY_CODE_REQUIRED": "Agency code is required.",
+			"AGENCY_CODE_TOO_LONG": "Agency code must not exceed 32 characters.",
+			"EXPECTED_SYMBOL_REQUIRED": "Expected ORS symbol is required.",
+			"HOST_LMS_CODE_REQUIRED": "Host LMS code is required.",
+			"HOST_LMS_CODE_TOO_LONG": "Host LMS code must not exceed 32 characters.",
+			"INGEST_REQUIRES_SUPPLYING": "Catalogue ingest requires supplying.",
+			"MAX_LOANS_INVALID": "Maximum loans must be a positive whole number.",
+			"PARTICIPATION_ROLE_REQUIRED": "Select borrowing, supplying, or both."
 		}
 	},
 	"new": {

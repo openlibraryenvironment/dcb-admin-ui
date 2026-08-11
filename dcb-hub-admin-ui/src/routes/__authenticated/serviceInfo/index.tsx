@@ -4,7 +4,7 @@ import { useAuth } from "react-oidc-context";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
-import { adminOrConsortiumAdmin } from "@constants/roles";
+import { canManageDcbNcipOnboarding } from "@helpers/dcbNcipOnboarding";
 import { isAuditExplorerEnabled } from "@helpers/featureFlags";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/")({
@@ -16,13 +16,21 @@ function ServiceInfo() {
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
-	const isAnAdmin = userRoles.some((role) =>
-		adminOrConsortiumAdmin.includes(role),
-	);
+	const isAnAdmin = canManageDcbNcipOnboarding(userRoles);
 
 	return (
 		<PageContainer title={t("nav.serviceInfo.name")}>
 			<List component="nav" aria-labelledby="service-information">
+				{isAnAdmin && (
+					<ListItem disablePadding>
+						<ListItemButton
+							component={Link}
+							to="/serviceInfo/dcbNcipOnboarding"
+						>
+							<ListItemText primary={t("nav.serviceInfo.dcbNcipOnboarding")} />
+						</ListItemButton>
+					</ListItem>
+				)}
 				<ListItem disablePadding>
 					{/* Replaced 'a' tag with TanStack 'Link' for instantaneous SPA navigation */}
 					<ListItemButton

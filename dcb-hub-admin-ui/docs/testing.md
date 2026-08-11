@@ -51,6 +51,20 @@ Any operation not listed falls through to `route.continue()` (a real network req
 - `libraries-list.spec.ts` — grid loads mocked rows, the filter panel opens, row click navigates to detail.
 - `library-detail.spec.ts` — detail fields render from the mocked query, tab navigation between sub-pages.
 - `new-library.spec.ts` — the New Library wizard's mode-selection step, required-field validation blocking progression, cancel.
+- `dcb-ncip-onboarding.spec.ts` — admin-only access, failed-readiness blocking, policy review, invitation issuance and token disposal after navigation.
 - `session-expiry.spec.ts` — a 401 GraphQL response redirects to `/logout?reason=session_expired` and actually clears the stored OIDC session (regression test for the `localStorage`/`sessionStorage` mismatch fixed in `src/main.tsx`).
 
 Not covered: the real 15-minute idle-timeout path (`src/routes/__authenticated.tsx`, via `react-idle-timer`) isn't practically testable without either mocking the timer library's internals or making the timeout configurable for tests — `session-expiry.spec.ts` covers the other route into the same "session ended" state (a 401) instead.
+
+## DCB NCIP onboarding manual pass
+
+Use a disposable ORS Appliance and invitation. Never paste tokens into notes or logs.
+
+1. As a non-admin, confirm **DCB NCIP Onboarding** is absent from **Service info** and direct navigation to `/serviceInfo/dcbNcipOnboarding` redirects.
+2. As `ADMIN`, open the page. Confirm failed readiness checks give safe remediation without URLs containing credentials or key material, and invitation controls stay hidden.
+3. Complete the DCB deployment configuration, refresh, and confirm every check passes and the advertised DCB base URL is correct.
+4. Confirm policy validation requires Host LMS code, Agency code, expected symbol, borrowing or supplying, and supplying when ingest is enabled.
+5. Review the policy, issue once, and confirm the base URL, token and expiry countdown appear. Refresh or leave the page and confirm the token is gone.
+6. In ORS **Integrations → Connect to DCB**, validate without consuming the token, then explicitly redeem it. Confirm membership is active immediately.
+7. Confirm DCB created the expected HostLMS, Agency, Library and selected Locations, and reciprocal NCIP/JWT calls succeed.
+8. Let another invitation expire and confirm it cannot be copied or redeemed; issue a replacement.
