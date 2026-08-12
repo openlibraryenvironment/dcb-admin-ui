@@ -1,25 +1,23 @@
-# dcb-admin-ui
+# Welcome to DCB Admin
 
-
-## Welcome
-
-Welcome to DCB Admin! DCB Admin is a Knowledge Integration application and is part of the wider Direct Consortial Borrowing project. It is a web application designed to help people administrate instances of DCB.
-
-You can find the DCB Service repository [here](https://gitlab.com/knowledge-integration/libraries/dcb-service) and more information [here](https://openlibraryfoundation.atlassian.net/l/cp/67Q16M0Q). 
+Welcome to DCB Admin! DCB Admin is a modern web app, built to be the administrative UI for OpenRS DCB. It's used by central office staff, consortium administrators, and support providers, and can also be used to carry out OpenRS implementations.
+DCB Admin is developed by [Knowledge Integration](https://www.k-int.com/) and is part of the [OpenRS resource sharing initiative](https://openrs.org/). To get started with DCB Admin, you also need an [OpenRS DCB Service](https://github.com/openlibraryenvironment/dcb-service) running.
 
 DCB Admin is a React application written in TypeScript. [Material UI](https://mui.com/) is used as the project's UI framework to deliver a dynamic, themable and resillient modern user interface. Vite is used for build tooling.
 
+## Accessibility 
+
 This project conforms to the [WCAG 2.2 AA](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. Users can select dark and high contrast modes from within the application settings.
 
-## How to get started
+## How to get started as a developer
 
 To get started with this project, simply clone it into your IDE of choice. You will need to _npm install_ the project's dependencies, and for development you will also need a .env file - speak to your team about this.
 
-To see the application running, please visit https://admin.dcbdev.lsphost.com/ - this is based upon the _main_ branch. https://admin.dcbqa.lsphost.com/ currently plays host to our release branch deployment, which is typically behind main.
+To see the application running, please visit https://dev.kihosting.net/dcb-admin - this is based upon the _main_ branch.
 
 ## Deployment 
 
-See deployment guidance at https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/2853470224/How+to+deploy+DCB+Admin.
+Looking to deploy DCB Admin? See our [deployment guide](/dcb-hub-admin-ui/docs/deployment.md).
 
 ## Documentation
 
