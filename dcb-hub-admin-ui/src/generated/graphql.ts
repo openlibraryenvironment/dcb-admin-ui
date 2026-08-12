@@ -23,6 +23,25 @@ export type ConsortiumContactInput = {
 	role: string;
 };
 
+export type ConsortiumInput = {
+	aboutImageUrl?: string | null | undefined;
+	catalogueSearchUrl?: string | null | undefined;
+	changeCategory: string;
+	changeReferenceUrl?: string | null | undefined;
+	contacts?: Array<PersonInput | null | undefined> | null | undefined;
+	dateOfLaunch: string;
+	description?: string | null | undefined;
+	displayName: string;
+	functionalSettings?:
+		Array<FunctionalSettingInput | null | undefined> | null | undefined;
+	groupName: string;
+	headerImageUrl?: string | null | undefined;
+	id?: string | number | null | undefined;
+	name: string;
+	reason: string;
+	websiteUrl?: string | null | undefined;
+};
+
 export type CreateHostLmsInput = {
 	changeCategory?: string | null | undefined;
 	changeReferenceUrl?: string | null | undefined;
@@ -376,6 +395,20 @@ export type AddLibraryToGroupMutation = {
 			name: string;
 			type: string;
 		} | null;
+	};
+};
+
+export type CreateConsortiumMutationVariables = Exact<{
+	input: ConsortiumInput;
+}>;
+
+export type CreateConsortiumMutation = {
+	createConsortium: {
+		id: string;
+		name: string;
+		displayName: string | null;
+		dateOfLaunch: string | null;
+		libraryGroup: { id: string; name: string };
 	};
 };
 
@@ -1042,6 +1075,7 @@ export type LoadConsortiumHeaderQuery = {
 			description: string | null;
 			catalogueSearchUrl: string | null;
 			websiteUrl: string | null;
+			libraryGroup: { id: string };
 		} | null> | null;
 	};
 };
@@ -1238,6 +1272,22 @@ export type LoadHostLmsCodesQueryVariables = Exact<{
 export type LoadHostLmsCodesQuery = {
 	hostLms: {
 		content: Array<{ id: string | null; code: string | null } | null> | null;
+	};
+};
+
+export type LoadHostLmsSelectionQueryVariables = Exact<{
+	pagesize: number;
+}>;
+
+export type LoadHostLmsSelectionQuery = {
+	hostLms: {
+		totalSize: number | null;
+		content: Array<{
+			id: string | null;
+			code: string | null;
+			name: string | null;
+			lmsClientClass: string | null;
+		} | null> | null;
 	};
 };
 

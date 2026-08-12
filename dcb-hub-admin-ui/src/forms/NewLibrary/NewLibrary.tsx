@@ -1,29 +1,33 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	useForm,
 	FormProvider,
 	useWatch,
-	type DefaultValues,
 	type Resolver,
 } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import {
+	Alert,
+	AlertTitle,
+	Box,
+	Button,
 	Dialog,
 	DialogContent,
 	DialogTitle,
 	Divider,
-	Stepper,
+	IconButton,
+	LinearProgress,
+	Stack,
 	Step,
 	StepLabel,
-	Box,
-	Button,
-	Stack,
-	IconButton,
+	Stepper,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import Confirmation from "@components/Confirmation/Confirmation";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
 import { createHostLmsMutation } from "@mutations/createHostLms";
@@ -31,21 +35,46 @@ import { createLibraryMutation } from "@mutations/createLibrary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ModeSelectionStep from "./steps/ModeSelectionStep";
 import HostLmsStep from "./steps/HostLmsStep";
-import HostLmsResultStep, {
-	type HostLmsVerificationResult,
-} from "./steps/HostLmsResultStep";
+import HostLmsSelectStep from "./steps/HostLmsSelectStep";
+import HostLmsResultStep from "./steps/HostLmsResultStep";
 import { ProfileStep } from "./steps/ProfileStep";
 import ContactsStep from "./steps/ContactsStep";
 import GroupStep from "./steps/GroupStep";
 import RefValueMappingStep from "./steps/RefValueMappingStep";
 import NumericMappingStep from "./steps/NumericRangeMappingStep";
 import LocationsStep from "./steps/LocationsStep";
+import CompletionStep from "./steps/CompletionStep";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
-import { newLibrarySchema } from "@/schemas/newLibrarySchema";
+import {
+	newLibrarySchema,
+	resolveClientConfig,
+	type NewLibraryFormValues,
+} from "@schemas/newLibrarySchema";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
 import type { LibrarySetupStepId } from "@helpers/librarySetup";
+import {
+	isIngestTimeout,
+	type HostLmsVerificationResult,
+} from "@helpers/hostLmsVerification";
+import {
+	consortiumBasicsQuery,
+	readConsortiumPresence,
+} from "@/queryOptions/consortium";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
-import type { z } from "zod";
+import { updateAgencyQuery } from "@mutations/updateAgency";
+import { createLibraryContact } from "@mutations/createLibraryContact";
+import {
+	buildAgencyUpdateInput,
+	buildContactInput,
+	buildLibraryInput,
+	buildLibraryUpdateInput,
+	EMPTY_LIBRARY_FORM,
+	formValuesFromLibrary,
+	newContactsOf,
+	shouldCreateHostLms,
+	shouldCreateLibrary,
+	shouldJoinGroup,
+} from "./libraryPayloads";
 import type {
 	CreateHostLmsMutationVariables,
 	CreateLibraryMutationVariables,
@@ -62,6 +91,8 @@ type NewLibraryType = {
 	 */
 	resumeLibrary?: any;
 	startAtStep?: LibrarySetupStepId;
+	/** Shown when there is no consortium yet, so the user can go and make one. */
+	onCreateConsortium?: () => void;
 };
 
 // Maps each wizard step to the newLibrarySchema fields it's responsible for, so
@@ -71,11 +102,15 @@ type NewLibraryType = {
 // field list as "valid", the profile step advanced unconditionally - every
 // `required` marker on it was decoration. The mapping steps genuinely have no
 // schema fields (they are import UI), so they stay absent.
-const STEP_SCHEMA_FIELDS: Record<
-	string,
-	(keyof z.infer<typeof newLibrarySchema>)[]
-> = {
-	hostLms: ["hostLmsCode", "hostLmsName", "lmsClientClass", "clientConfig"],
+const STEP_SCHEMA_FIELDS: Record<string, (keyof NewLibraryFormValues)[]> = {
+	hostLms: [
+		"hostLmsCode",
+		"hostLmsName",
+		"lmsClientClass",
+		"clientConfig",
+		"clientConfigFields",
+	],
+	hostLmsSelect: ["hostLmsCode"],
 	profile: [
 		"fullName",
 		"shortName",
@@ -92,146 +127,29 @@ const STEP_SCHEMA_FIELDS: Record<
 	group: ["groupId"],
 };
 
-type LibraryFormValues = z.infer<typeof newLibrarySchema>;
-
-// The GraphQL LibraryInput type only accepts a fixed set of fields. Spreading
-// the whole form object (which also carries Host LMS/group/wizard-only state)
-// makes the server reject the mutation with "field not defined in LibraryInput".
-// Build an explicit, typed payload instead - contacts are consumed inline by
-// CreateLibraryDataFetcher, so no separate createLibraryContact call is needed.
-const buildLibraryProfile = (formData: LibraryFormValues) => ({
-	agencyCode: formData.agencyCode,
-	fullName: formData.fullName,
-	shortName: formData.shortName,
-	abbreviatedName: formData.abbreviatedName,
-	address: formData.address,
-	type: formData.type,
-	latitude: formData.latitude,
-	longitude: formData.longitude,
-	supportHours: formData.supportHours,
-	patronWebsite: formData.patronWebsite,
-	discoverySystem: formData.discoverySystem,
-	hostLmsConfiguration: formData.hostLmsConfiguration,
-	backupDowntimeSchedule: formData.backupDowntimeSchedule,
-	reason: formData.reason,
-	// Was rendered but never sent, so the audit trail lost its reference URL.
-	changeReferenceUrl: formData.changeReferenceUrl,
-	authProfile: formData.authProfile,
-});
-
-const buildLibraryInput = (formData: LibraryFormValues) => ({
-	...buildLibraryProfile(formData),
-	hostLmsCode: formData.hostLmsCode,
-	contacts: formData.contacts.map((contact) => ({
-		firstName: contact.firstName.trim(),
-		lastName: contact.lastName.trim(),
-		email: contact.email.trim(),
-		role: contact.role,
-		isPrimaryContact: contact.isPrimaryContact,
-	})),
-});
-
-/**
- * RHF's DefaultValues is a deep-partial, which is what lets the coordinates
- * start out unset even though the schema requires them - the profile step then
- * reports them as missing, which is the whole point.
- */
-type LibraryFormDefaults = DefaultValues<LibraryFormValues>;
-
-const EMPTY_LIBRARY_FORM: LibraryFormDefaults = {
-	// Host LMS Fields
-	hostLmsCode: "",
-	hostLmsName: "",
-	lmsClientClass: "",
-	clientConfig: "",
-	suppressionRulesetName: "",
-	itemSuppressionRulesetName: "",
-	// Library Fields
-	agencyCode: "",
-	fullName: "",
-	shortName: "",
-	abbreviatedName: "",
-	address: "",
-	type: "",
-	latitude: undefined,
-	longitude: undefined,
-	supportHours: "",
-	patronWebsite: "",
-	hostLmsConfiguration: "",
-	discoverySystem: "",
-	backupDowntimeSchedule: "",
-	authProfile: "",
-	reason: "Adding a new library",
-	changeReferenceUrl: "",
-	contacts: [
-		{
-			firstName: "",
-			lastName: "",
-			email: "",
-			role: "",
-			isPrimaryContact: false,
-		},
-	],
-	groupId: "",
-};
-
-/**
- * Prefills the wizard from a library that already exists. Absent values become
- * "" / undefined rather than null so react-hook-form treats the inputs as
- * controlled and the newly-required fields show as empty and invalid, which is
- * the point: those are the ones the user has come back to fill in.
- */
-const formValuesFromLibrary = (library: any): LibraryFormDefaults => ({
-	...EMPTY_LIBRARY_FORM,
-	hostLmsCode: library?.agency?.hostLms?.code ?? "",
-	hostLmsName: library?.agency?.hostLms?.name ?? "",
-	lmsClientClass: library?.agency?.hostLms?.lmsClientClass ?? "",
-	clientConfig: "",
-	suppressionRulesetName: "",
-	itemSuppressionRulesetName: "",
-	agencyCode: library?.agencyCode ?? "",
-	fullName: library?.fullName ?? "",
-	shortName: library?.shortName ?? "",
-	abbreviatedName: library?.abbreviatedName ?? "",
-	address: library?.address ?? "",
-	type: library?.type ?? "",
-	latitude: library?.latitude ?? undefined,
-	longitude: library?.longitude ?? undefined,
-	supportHours: library?.supportHours ?? "",
-	patronWebsite: library?.patronWebsite ?? "",
-	hostLmsConfiguration: library?.hostLmsConfiguration ?? "",
-	discoverySystem: library?.discoverySystem ?? "",
-	backupDowntimeSchedule: library?.backupDowntimeSchedule ?? "",
-	authProfile: library?.agency?.authProfile ?? "",
-	reason: "",
-	changeReferenceUrl: "",
-	libraryId: library?.id ?? "",
-	// Contacts already exist on any created library (LibraryInput requires at
-	// least one), so the step is satisfied and only shown for reference.
-	contacts: (library?.contacts ?? []).map((contact: any) => ({
-		firstName: contact.firstName ?? "",
-		lastName: contact.lastName ?? "",
-		email: contact.email ?? "",
-		role: contact.role?.name ?? contact.role ?? "",
-		isPrimaryContact: contact.isPrimaryContact ?? false,
-	})),
-	groupId: "",
-});
-
 export default function NewLibrary({
 	show,
 	onClose,
 	consortiumName,
 	resumeLibrary,
 	startAtStep,
+	onCreateConsortium,
 }: NewLibraryType) {
 	const { t } = useTranslation();
+	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 
-	const isResuming = !!resumeLibrary;
+	/**
+	 * Resuming is a mode the dialog can leave, not a fact about the props.
+	 *
+	 * "Add another library" resets the form, but the resumed library is still
+	 * sitting in the props - so without this the next library would be built in
+	 * resume mode, which skips the Host LMS step entirely and would send an
+	 * empty `hostLmsCode`.
+	 */
+	const [isResuming, setIsResuming] = useState(!!resumeLibrary);
 
-	const [activeStepIndex, setActiveStepIndex] = useState(0);
 	const [wizardMode, setWizardMode] = useState<
 		"unselected" | "existing" | "new"
 	>(
@@ -239,58 +157,35 @@ export default function NewLibrary({
 		// nothing to choose and no Host LMS to create.
 		isResuming ? "existing" : "unselected",
 	);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-	});
+	/**
+	 * The step is tracked by id, not index.
+	 *
+	 * The list is dynamic - picking Sierra or Polaris inserts a numeric range
+	 * mappings step - so an index quietly pointed at a different screen the
+	 * moment the ILS changed. An id cannot drift.
+	 */
+	const [activeStepId, setActiveStepId] = useState<string | null>(null);
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		// "warning" is for the things that went wrong AFTER the library was
+		// created - the wizard carries on, but the user has to know.
+		severity: "success" | "error" | "warning";
+		text: string;
+	}>({ open: false, severity: "success", text: "" });
 	const [hostLmsResult, setHostLmsResult] =
 		useState<HostLmsVerificationResult | null>(null);
+	/** What is happening right now, in words, while a mutation is in flight. */
+	const [busyMessage, setBusyMessage] = useState<string | null>(null);
+	const [showAbandonConfirmation, setShowAbandonConfirmation] = useState(false);
+	/** Group memberships this run has already written - see the group step. */
+	const [joinedGroupIds, setJoinedGroupIds] = useState<string[]>([]);
 
-	// Pin the field type rather than letting it be inferred from defaultValues:
-	// the coordinates start unset, and inference would widen every field to
-	// optional and stop the resolver's own type from lining up.
-	const methods = useForm<LibraryFormValues>({
+	const methods = useForm<NewLibraryFormValues>({
 		mode: "onTouched",
-		resolver: zodResolver(newLibrarySchema) as Resolver<LibraryFormValues>,
+		resolver: zodResolver(newLibrarySchema) as Resolver<NewLibraryFormValues>,
 		defaultValues: resumeLibrary
 			? formValuesFromLibrary(resumeLibrary)
-			: {
-					// Host LMS Fields
-					hostLmsCode: "",
-					hostLmsName: "",
-					lmsClientClass: "",
-					clientConfig: "",
-					suppressionRulesetName: "",
-					itemSuppressionRulesetName: "",
-					// Library Fields
-					agencyCode: "",
-					fullName: "",
-					shortName: "",
-					abbreviatedName: "",
-					address: "",
-					type: "",
-					latitude: undefined,
-					longitude: undefined,
-					supportHours: "",
-					patronWebsite: "",
-					hostLmsConfiguration: "",
-					discoverySystem: "",
-					backupDowntimeSchedule: "",
-					authProfile: "",
-					reason: "Adding a new library",
-					changeReferenceUrl: "",
-					contacts: [
-						{
-							firstName: "",
-							lastName: "",
-							email: "",
-							role: "",
-							isPrimaryContact: false,
-						},
-					],
-					groupId: "",
-				},
+			: EMPTY_LIBRARY_FORM,
 	});
 
 	const [watchedHostLmsCode, watchedAgencyCode, lmsClientClass] = useWatch({
@@ -300,6 +195,12 @@ export default function NewLibrary({
 	const requiresNumericMappings =
 		lmsClientClass?.toLowerCase().includes("sierra") ||
 		lmsClientClass?.toLowerCase().includes("polaris");
+
+	// A library belongs to a consortium; without one the wizard has nothing to
+	// add it to, and dcb-service will not accept a consortium later either.
+	const consortiumQuery = useQuery(consortiumBasicsQuery(gqlClient));
+	const { hasConsortium, consortiumGroup } =
+		readConsortiumPresence(consortiumQuery);
 
 	// Dynamically calculate the wizard steps
 	const steps = useMemo(() => {
@@ -322,6 +223,7 @@ export default function NewLibrary({
 		}
 
 		base.push({ id: "locations", label: t("nav.locations") });
+		base.push({ id: "done", label: t("libraries.new.step_done") });
 
 		if (wizardMode === "new")
 			return [
@@ -329,9 +231,19 @@ export default function NewLibrary({
 				{ id: "hostLmsResult", label: t("hostlms.verification.step") },
 				...base,
 			];
-		return base;
-	}, [wizardMode, requiresNumericMappings, t]);
 
+		// Resuming already has a Host LMS; adding a library to one that exists
+		// does not, and had no step to pick it - so `hostLmsCode`, which
+		// LibraryInput declares non-null, was sent as the empty string.
+		return isResuming
+			? base
+			: [{ id: "hostLmsSelect", label: t("hostlms.hostlms_one") }, ...base];
+	}, [wizardMode, requiresNumericMappings, isResuming, t]);
+
+	const activeStepIndex = Math.max(
+		0,
+		steps.findIndex((step) => step.id === activeStepId),
+	);
 	const currentStep = steps[activeStepIndex];
 
 	// Resuming drops the user at the first thing that is actually outstanding,
@@ -339,9 +251,9 @@ export default function NewLibrary({
 	// once, when the dialog opens: after that the user owns the position.
 	const [hasJumpedToStartStep, setHasJumpedToStartStep] = useState(false);
 	if (show && startAtStep && !hasJumpedToStartStep && steps.length > 0) {
-		const index = steps.findIndex((step) => step.id === startAtStep);
 		setHasJumpedToStartStep(true);
-		if (index > 0) setActiveStepIndex(index);
+		if (steps.some((step) => step.id === startAtStep))
+			setActiveStepId(startAtStep);
 	}
 
 	// Mutations
@@ -394,30 +306,102 @@ export default function NewLibrary({
 			onSuccess: invalidateLibraryCaches,
 		});
 
+	// Participation, the loan cap and the coordinates live on the agency, which
+	// updateLibrary does not own. Resuming has to save both halves of what one
+	// profile step shows.
+	const { mutateAsync: updateAgency, isPending: isAgencyUpdatePending } =
+		useMutation({
+			mutationFn: (variables: { input: any }) =>
+				gqlClient.request<any>(updateAgencyQuery, variables),
+			onSuccess: invalidateLibraryCaches,
+		});
+
+	// Resuming cannot send contacts through updateLibrary - UpdateLibraryInput
+	// has no contacts field - so each new one is created against the existing
+	// library instead.
+	const { mutateAsync: createContact, isPending: isContactPending } =
+		useMutation({
+			mutationFn: (variables: { input: any }) =>
+				gqlClient.request<any>(createLibraryContact, variables),
+			onSuccess: invalidateLibraryCaches,
+		});
+
+	const isBusy =
+		isHostLmsPending ||
+		isLibraryPending ||
+		isLibraryUpdatePending ||
+		isAgencyUpdatePending ||
+		isContactPending ||
+		!!busyMessage;
+
+	const goToStep = (index: number) => {
+		const target = steps[index];
+		if (target) setActiveStepId(target.id);
+	};
+
+	/**
+	 * Puts the caret on the first thing that is wrong. Without it, failing
+	 * validation on a sixteen-field step means scrolling to hunt for the red
+	 * box, and a keyboard or screen-reader user gets no signal at all.
+	 *
+	 * Walks down to a leaf, because a field name like `contacts` or
+	 * `clientConfigFields` names a subtree with no input of its own to focus.
+	 */
+	const focusFirstError = (fields: string[]) => {
+		const leafOf = (node: any, trail: string[]): string | undefined => {
+			if (!node || typeof node !== "object") return undefined;
+			if ("message" in node || "ref" in node) return trail.join(".");
+			for (const key of Object.keys(node)) {
+				const found = leafOf(node[key], [...trail, key]);
+				if (found) return found;
+			}
+			return undefined;
+		};
+
+		for (const name of fields) {
+			const target = leafOf((methods.formState.errors as any)[name], [name]);
+			if (target) {
+				methods.setFocus(target as any);
+				return;
+			}
+		}
+	};
+
 	const handleNext = async () => {
+		const stepId = currentStep?.id ?? "";
 		try {
 			// Scoped to the CURRENT step's own fields
-			const fieldsToValidate = STEP_SCHEMA_FIELDS[currentStep?.id ?? ""] ?? [];
+			const fieldsToValidate = STEP_SCHEMA_FIELDS[stepId] ?? [];
 			const isStepValid =
 				fieldsToValidate.length === 0 ||
 				(await methods.trigger(fieldsToValidate));
 
-			if (!isStepValid) return;
+			if (!isStepValid) {
+				focusFirstError(fieldsToValidate as string[]);
+				return;
+			}
 
 			const formData = methods.getValues();
 
-			// Phase 1: If creating a Host LMS
-			if (currentStep?.id === "hostLms") {
-				const parsedConfig = formData.clientConfig
-					? JSON.parse(formData.clientConfig)
-					: {};
-
+			// Phase 1: If creating a Host LMS.
+			//
+			// Guarded on the result, not on the step - see shouldCreateHostLms.
+			if (
+				stepId === "hostLms" &&
+				shouldCreateHostLms(formData.hostLmsCode, hostLmsResult)
+			) {
+				// Ping and ingest checks run server-side and are capped at 20
+				// seconds, so this step can sit there for a while. Say what it is
+				// doing rather than greying out a button.
+				setBusyMessage(
+					t("hostlms.busy_creating", { code: formData.hostLmsCode }),
+				);
 				const result = await createHostLms({
 					input: {
 						code: formData.hostLmsCode,
 						name: formData.hostLmsName,
 						lmsClientClass: formData.lmsClientClass,
-						clientConfig: parsedConfig,
+						clientConfig: resolveClientConfig(formData),
 						suppressionRulesetName: formData.suppressionRulesetName,
 						itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
 					},
@@ -436,13 +420,20 @@ export default function NewLibrary({
 			// library already exists and the whole reason the user is here is that
 			// something on it is missing. Waiting until the contacts step (as the
 			// create flow does) would risk losing the correction.
-			if (isResuming && currentStep?.id === "profile") {
+			if (isResuming && stepId === "profile") {
+				setBusyMessage(t("libraries.new.busy_saving_profile"));
 				await updateLibrary({
-					input: {
-						id: formData.libraryId || resumeLibrary?.id,
-						...buildLibraryProfile(formData),
-					},
+					input: buildLibraryUpdateInput(
+						formData,
+						formData.libraryId || resumeLibrary?.id,
+					),
 				});
+				// The agency half. Only attempted when there is an agency to address:
+				// a library with no agency code has no agency record to update, and
+				// updateLibrary cannot create one.
+				if (formData.agencyCode) {
+					await updateAgency({ input: buildAgencyUpdateInput(formData) });
+				}
 				setAlert({
 					open: true,
 					severity: "success",
@@ -455,11 +446,59 @@ export default function NewLibrary({
 			// Phase 2b: creating the library, contacts included - the create
 			// fetcher consumes them inline. Skipped when resuming: the library and
 			// its contacts are already there.
-			if (!isResuming && currentStep?.id === "contacts") {
+			// Phase 2c: resuming has a library already, so its contacts step creates
+			// the ones the user has just typed against it. Without this the step
+			// rendered, accepted input, validated it and wrote nothing - and a
+			// missing contact is one of the things that sends a library here.
+			if (isResuming && stepId === "contacts") {
+				const newContacts = newContactsOf(formData.contacts);
+				const libraryId = formData.libraryId || resumeLibrary?.id;
+				if (newContacts.length > 0 && libraryId) {
+					setBusyMessage(t("libraries.new.busy_saving_contacts"));
+					// Sequential rather than Promise.all: each one writes a data change
+					// log entry, and a partial failure has to leave the successful ones
+					// identifiable rather than an unordered pile.
+					const saved: NewLibraryFormValues["contacts"] = [];
+					for (const contact of formData.contacts) {
+						if (contact.id) {
+							saved.push(contact);
+							continue;
+						}
+						const result = await createContact({
+							input: buildContactInput(contact, formData, libraryId),
+						});
+						// Carrying the new id back is what stops Back-then-Next creating
+						// a second copy of every contact on the step.
+						saved.push({
+							...contact,
+							id: result?.createLibraryContact?.id ?? undefined,
+						});
+					}
+					methods.setValue("contacts", saved);
+					setAlert({
+						open: true,
+						severity: "success",
+						text: t("libraries.new.setup_contacts_saved", {
+							count: newContacts.length,
+						}),
+					});
+				}
+			}
+
+			// Guarded on libraryId - see shouldCreateLibrary.
+			if (
+				!isResuming &&
+				stepId === "contacts" &&
+				shouldCreateLibrary(formData.libraryId)
+			) {
+				setBusyMessage(
+					t("libraries.new.busy_creating", { library: formData.fullName }),
+				);
 				const result = await createLibrary({
 					input: buildLibraryInput(formData),
 				});
-				methods.setValue("libraryId", result.createLibrary.id);
+				const newLibraryId = result.createLibrary.id;
+				methods.setValue("libraryId", newLibraryId);
 				setAlert({
 					open: true,
 					severity: "success",
@@ -467,16 +506,59 @@ export default function NewLibrary({
 						consortium: consortiumName || "",
 					}),
 				});
+
+				// Membership of the consortium's own group is not a choice - every
+				// member library is in it, and leaving it to the group step meant
+				// a library could finish setup belonging to nothing. Done in its
+				// own try: the library exists by this point, so failing here must
+				// not strand the user on a step that would re-run createLibrary
+				// and collide on the agency code.
+				if (consortiumGroup?.id) {
+					try {
+						// Named by the consortium rather than by the group: only the
+						// group's id is safe to read from the consortium query, and
+						// asking for its name is what broke consortium detection
+						// across the whole app.
+						setBusyMessage(
+							t("libraries.new.busy_adding_to_consortium", {
+								consortium: consortiumName || "",
+							}),
+						);
+						await gqlClient.request(addLibraryToGroup, {
+							input: {
+								libraryGroup: consortiumGroup.id,
+								library: newLibraryId,
+							},
+						});
+						queryClient.invalidateQueries({ queryKey: ["groups"] });
+					} catch (groupError) {
+						console.error(
+							"Failed to add the new library to the consortium group:",
+							groupError,
+						);
+						setAlert({
+							open: true,
+							severity: "warning",
+							text: t("libraries.new.consortium_group_failed"),
+						});
+					}
+				}
 			}
 
-			// Phase 3: Group Step
-			if (currentStep?.id === "group" && formData.groupId) {
+			// Phase 3: Group Step. Remembering which groups have been joined keeps
+			// Back-then-Next from adding the same membership twice.
+			if (
+				stepId === "group" &&
+				shouldJoinGroup(formData.groupId, joinedGroupIds)
+			) {
+				setBusyMessage(t("libraries.new.busy_adding_to_group"));
 				await gqlClient.request(addLibraryToGroup, {
 					input: {
 						libraryGroup: formData.groupId,
 						library: formData.libraryId,
 					},
 				});
+				setJoinedGroupIds((joined) => [...joined, formData.groupId as string]);
 				queryClient.invalidateQueries({ queryKey: ["groups"] });
 				setAlert({
 					open: true,
@@ -485,7 +567,7 @@ export default function NewLibrary({
 				});
 			}
 
-			setActiveStepIndex((prev) => prev + 1);
+			goToStep(activeStepIndex + 1);
 		} catch (error: any) {
 			console.error("Validation or mutation failed:", error);
 			// `error.message` on a graphql-request ClientError is the whole
@@ -498,34 +580,87 @@ export default function NewLibrary({
 				severity: "error",
 				text: describeGraphQLError(error, t("ui.error.general")),
 			});
+		} finally {
+			setBusyMessage(null);
 		}
 	};
 
-	const handleClose = () => {
-		methods.reset();
+	const resetWizard = () => {
+		methods.reset(EMPTY_LIBRARY_FORM);
 		setWizardMode("unselected");
-		setActiveStepIndex(0);
+		setActiveStepId(null);
 		setHostLmsResult(null);
+		// "Add another library" starts a different library; the memberships and
+		// the created Host LMS belong to the previous one.
+		setJoinedGroupIds([]);
+	};
+
+	const closeWizard = () => {
+		resetWizard();
+		setShowAbandonConfirmation(false);
 		onClose();
+	};
+
+	/**
+	 * Anything typed after the last successful mutation is lost on close, and
+	 * the whole point of this wizard is that it is long. Ask - unless there is
+	 * genuinely nothing to lose.
+	 */
+	const requestClose = () => {
+		if (isBusy) return;
+		const nothingToLose =
+			currentStep?.id === "done" ||
+			(wizardMode === "unselected" && !methods.formState.isDirty);
+		if (nothingToLose) {
+			closeWizard();
+			return;
+		}
+		setShowAbandonConfirmation(true);
+	};
+
+	/** "Add another" is the common case at initial setup - keep them in here. */
+	const startAnotherLibrary = () => {
+		resetWizard();
+		// The next library is a new one, whatever brought the dialog up.
+		setIsResuming(false);
+		setShowAbandonConfirmation(false);
 	};
 
 	const renderStepContent = () => {
 		if (wizardMode === "unselected")
 			return (
-				<ModeSelectionStep setMode={setWizardMode} onCancel={handleClose} />
+				<ModeSelectionStep
+					setMode={(mode) => {
+						setWizardMode(mode);
+						// The schema needs to know which branch this is before the
+						// Host LMS step validates anything.
+						methods.setValue("isCreatingHostLms", mode === "new");
+						setActiveStepId(null);
+					}}
+					onCancel={requestClose}
+					hasConsortium={hasConsortium}
+					onCreateConsortium={onCreateConsortium}
+				/>
 			);
 
 		switch (currentStep?.id) {
 			case "hostLms":
-				return <HostLmsStep />;
+				return <HostLmsStep busy={isBusy} />;
+			case "hostLmsSelect":
+				return <HostLmsSelectStep />;
 			case "hostLmsResult":
-				return <HostLmsResultStep result={hostLmsResult} />;
+				return (
+					<HostLmsResultStep
+						result={hostLmsResult}
+						isVerifying={isHostLmsPending}
+					/>
+				);
 			case "profile":
 				return <ProfileStep />;
 			case "contacts":
 				return <ContactsStep />;
 			case "group":
-				return <GroupStep />;
+				return <GroupStep consortiumGroup={consortiumGroup} />;
 			case "refMappings":
 				return <RefValueMappingStep hostLmsCode={watchedHostLmsCode} />;
 			case "numMappings":
@@ -537,24 +672,52 @@ export default function NewLibrary({
 						agencyCode={watchedAgencyCode ?? ""}
 					/>
 				);
+			case "done":
+				return (
+					<CompletionStep
+						libraryId={methods.getValues("libraryId")}
+						libraryName={methods.getValues("fullName")}
+						consortiumName={consortiumName}
+						ingestTimedOut={isIngestTimeout(hostLmsResult?.ingestStatus)}
+					/>
+				);
 			default:
 				return null;
 		}
 	};
 
+	const isFinalStep = currentStep?.id === "done";
+
 	return (
 		<>
-			<Dialog open={show} onClose={handleClose} fullWidth maxWidth="md">
-				<DialogTitle variant="modalTitle">
-					{t("libraries.new.title")}
+			<Dialog
+				open={show}
+				// Backdrop and Escape are one careless movement away from discarding
+				// a half-finished library, so closing goes through the same
+				// confirmation as the buttons.
+				onClose={(_event, reason) => {
+					if (reason === "backdropClick") return;
+					requestClose();
+				}}
+				aria-labelledby="new-library-title"
+				fullWidth
+				maxWidth="md"
+			>
+				<DialogTitle id="new-library-title" variant="modalTitle">
+					{isResuming ? t("libraries.setup.finish") : t("libraries.new.title")}
 				</DialogTitle>
 				<IconButton
-					onClick={handleClose}
+					onClick={requestClose}
+					aria-label={t("ui.actions.close")}
+					disabled={isBusy}
 					sx={{ position: "absolute", right: 8, top: 8 }}
 				>
 					<Close />
 				</IconButton>
 				<Divider aria-hidden="true" />
+				{/* Always occupies its row so the content below does not jump by 4px
+				    every time a mutation starts and stops. */}
+				<Box sx={{ height: 4 }}>{isBusy && <LinearProgress />}</Box>
 
 				<DialogContent>
 					{wizardMode !== "unselected" && (
@@ -571,53 +734,98 @@ export default function NewLibrary({
 						</Stepper>
 					)}
 
+					{busyMessage && (
+						<Alert severity="info" role="status" sx={{ mb: 2 }}>
+							<AlertTitle>{t("ui.info.wait")}</AlertTitle>
+							{busyMessage}
+						</Alert>
+					)}
+
 					<FormProvider {...methods}>
-						<Box component="form" noValidate>
+						<Box component="form" noValidate aria-busy={isBusy}>
 							{renderStepContent()}
 
 							{wizardMode !== "unselected" && (
 								<Stack
 									direction="row"
-									sx={{
-										justifyContent: "space-between",
-										mt: 4,
-									}}
+									spacing={2}
+									sx={{ justifyContent: "space-between", mt: 4 }}
 								>
-									<Button variant="outlined" onClick={handleClose}>
-										{t("ui.actions.cancel")}
+									<Button
+										variant="outlined"
+										onClick={requestClose}
+										disabled={isBusy}
+									>
+										{isFinalStep
+											? t("ui.actions.close")
+											: t("ui.actions.cancel")}
 									</Button>
 
-									{activeStepIndex < steps.length - 1 ? (
-										<Button
-											variant="contained"
-											onClick={handleNext}
-											disabled={
-												isHostLmsPending ||
-												isLibraryPending ||
-												isLibraryUpdatePending
-											}
-										>
-											{isHostLmsPending ||
-											isLibraryPending ||
-											isLibraryUpdatePending
-												? t("ui.info.wait")
-												: t("ui.actions.next")}
-										</Button>
-									) : (
-										<Button
-											variant="contained"
-											onClick={handleClose}
-											color="success"
-										>
-											{t("ui.actions.submit")}
-										</Button>
-									)}
+									<Stack direction="row" spacing={2}>
+										{/*
+										 * There was no way back. Mis-typing a Host LMS code on
+										 * step one meant cancelling and starting the entire
+										 * wizard again. Steps that have already written to the
+										 * server are not re-run on the way forward.
+										 */}
+										{!isFinalStep && activeStepIndex > 0 && (
+											<Button
+												variant="outlined"
+												onClick={() => goToStep(activeStepIndex - 1)}
+												disabled={isBusy}
+											>
+												{t("ui.actions.back")}
+											</Button>
+										)}
+
+										{isFinalStep ? (
+											<>
+												<Button
+													variant="outlined"
+													onClick={startAnotherLibrary}
+												>
+													{t("libraries.new.add_another")}
+												</Button>
+												<Button
+													variant="contained"
+													color="success"
+													onClick={() => {
+														const libraryId = methods.getValues("libraryId");
+														closeWizard();
+														if (libraryId)
+															router.navigate({
+																to: "/libraries/$libraryId",
+																params: { libraryId },
+															});
+													}}
+												>
+													{t("libraries.new.go_to_library")}
+												</Button>
+											</>
+										) : (
+											<Button
+												variant="contained"
+												onClick={handleNext}
+												disabled={isBusy}
+											>
+												{isBusy ? t("ui.info.wait") : t("ui.actions.next")}
+											</Button>
+										)}
+									</Stack>
 								</Stack>
 							)}
 						</Box>
 					</FormProvider>
 				</DialogContent>
 			</Dialog>
+
+			<Confirmation
+				open={showAbandonConfirmation}
+				onClose={() => setShowAbandonConfirmation(false)}
+				onConfirm={closeWizard}
+				action="unsaved"
+			/>
+
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}

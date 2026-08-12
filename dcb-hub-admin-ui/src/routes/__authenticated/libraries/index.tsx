@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
+import { Alert, AlertTitle, Button } from "@mui/material";
 import { GroupAdd } from "@mui/icons-material";
 import {
 	GridPaginationModel,
@@ -22,6 +23,7 @@ import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutat
 
 import AddLibraryToGroup from "@forms/AddLibraryToGroup/AddLibraryToGroup";
 import NewLibrary from "@forms/NewLibrary/NewLibrary";
+import NewConsortium from "@forms/NewConsortium/NewConsortium";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -35,6 +37,10 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { libraryColumns } from "@columns/libraryColumns";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { defaultLibraryColumnVisibility } from "@columns/columnVisibility/defaultLibraryColumnVisibility";
+import {
+	consortiumBasicsQuery,
+	readConsortiumPresence,
+} from "@/queryOptions/consortium";
 import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 // Default-state prefetch: the component reads pagination/sort/filter state
@@ -123,9 +129,16 @@ function Libraries() {
 	const libraryMutation = useEntityMutation("library");
 
 	const [showNewLibrary, setShowNewLibrary] = useState(false);
+	const [showNewConsortium, setShowNewConsortium] = useState(false);
 	const [groupModalLibraries, setGroupModalLibraries] = useState<
 		{ id: string; name: string }[] | null
 	>(null);
+
+	// A library belongs to a consortium, and there is exactly one per instance.
+	// On a fresh system the grid is empty and "New library" leads nowhere useful,
+	// so the page says what is actually missing.
+	const consortiumQuery = useQuery(consortiumBasicsQuery(gqlClient));
+	const { hasConsortium } = readConsortiumPresence(consortiumQuery);
 
 	const {
 		data: gridData,
@@ -207,6 +220,19 @@ function Libraries() {
 	);
 
 	const pageActions = [
+		// Offered only where it can do anything: creating a consortium is a
+		// once-per-instance job, so on a configured system the button would be a
+		// permanent dead end.
+		...(hasConsortium === false
+			? [
+					{
+						key: "newConsortium",
+						onClick: () => setShowNewConsortium(true),
+						disabled: !isAnAdmin,
+						label: t("consortium.new.title"),
+					},
+				]
+			: []),
 		{
 			key: "newLibrary",
 			onClick: () => setShowNewLibrary(true),
@@ -239,6 +265,28 @@ function Libraries() {
 
 	return (
 		<PageContainer title={t("nav.libraries.name")} pageActions={pageActions}>
+			{hasConsortium === false && (
+				<Alert
+					severity="warning"
+					sx={{ mb: 3 }}
+					action={
+						isAnAdmin ? (
+							<Button
+								color="inherit"
+								size="small"
+								variant="outlined"
+								onClick={() => setShowNewConsortium(true)}
+							>
+								{t("consortium.new.title")}
+							</Button>
+						) : undefined
+					}
+				>
+					<AlertTitle>{t("consortium.new.required_title")}</AlertTitle>
+					{t("consortium.new.required_body")}
+				</Alert>
+			)}
+
 			<DataGrid
 				identifier={gridId}
 				type="libraries"
@@ -294,6 +342,20 @@ function Libraries() {
 					show={showNewLibrary}
 					onClose={() => setShowNewLibrary(false)}
 					consortiumName={displayName}
+					onCreateConsortium={() => {
+						setShowNewLibrary(false);
+						setShowNewConsortium(true);
+					}}
+				/>
+			)}
+
+			{showNewConsortium && (
+				<NewConsortium
+					show={showNewConsortium}
+					onClose={() => setShowNewConsortium(false)}
+					// Setting a consortium up is immediately followed by filling it,
+					// so the two workflows hand straight over to each other.
+					onAddFirstLibrary={() => setShowNewLibrary(true)}
 				/>
 			)}
 

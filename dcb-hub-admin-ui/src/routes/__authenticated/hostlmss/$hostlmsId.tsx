@@ -20,6 +20,9 @@ import FolioConfig from "@components/HostLmsConfig/FolioConfig";
 import SierraConfig from "@components/HostLmsConfig/SierraConfig";
 import AlmaConfig from "@components/HostLmsConfig/AlmaConfig";
 import PolarisConfig from "@components/HostLmsConfig/PolarisConfig";
+import KohaConfig from "@components/HostLmsConfig/KohaConfig";
+import FoundationConfig from "@components/HostLmsConfig/FoundationConfig";
+import OrsApplianceConfig from "@components/HostLmsConfig/OrsApplianceConfig";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { hostlmsParamsSchema } from "@schemas/routeParams/hostlmsParams";
 import type { LoadHostLmsQueryVariables } from "@generated/graphql";
@@ -180,6 +183,13 @@ function HostLMSDetails() {
 						)}
 						{ilsType === "FOLIO" && (
 							<FolioConfig config={hostlms.clientConfig} />
+						)}
+						{ilsType === "Koha" && <KohaConfig config={hostlms.clientConfig} />}
+						{ilsType === "Foundation" && (
+							<FoundationConfig config={hostlms.clientConfig} />
+						)}
+						{ilsType === "OpenRS appliance" && (
+							<OrsApplianceConfig config={hostlms.clientConfig} />
 						)}
 					</Grid>
 				</TabPanel>
