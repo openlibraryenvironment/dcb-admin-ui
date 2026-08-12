@@ -8,6 +8,7 @@ DCB Admin is a React application written in TypeScript. [Material UI](https://mu
 ## Accessibility 
 
 This project conforms to the [WCAG 2.2 AA](https://www.w3.org/TR/WCAG21/) accessibilty guidelines. Users can select dark and high contrast modes from within the application settings.
+We also publish a [VPAT](/dcb-hub-admin-ui/docs/DCB_Admin_VPAT.md) for this application.
 
 ## How to get started as a developer
 
