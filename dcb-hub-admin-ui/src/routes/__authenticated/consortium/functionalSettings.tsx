@@ -1,31 +1,21 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Tab, Tabs, Typography, Button, Stack } from "@mui/material";
-import { Edit, Save, Cancel } from "@mui/icons-material";
-import {
-	GridRowModesModel,
-	GridRowModes,
-	GridRowModel,
-	GridColDef,
-	GridActionsCellItem,
-} from "@mui/x-data-grid-premium";
+import { GridRowModesModel, GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
-import Confirmation from "@components/Confirmation/Confirmation";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewFunctionalSetting from "@forms/NewFunctionalSetting/NewFunctionalSetting";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { getConsortiumFunctionalSettings } from "@queries/getConsortiumFunctionalSettings";
-import { updateFunctionalSettingQuery } from "@mutations/updateFunctionalSetting";
-import { computeMutation } from "@helpers/computeMutation";
-import type {
-	LoadConsortiumFsQueryVariables,
-	UpdateFunctionalSettingMutationVariables,
-} from "@generated/graphql";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
+import type { LoadConsortiumFsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/consortium/functionalSettings",
@@ -37,7 +27,6 @@ function FunctionalSettings() {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -47,8 +36,7 @@ function FunctionalSettings() {
 	const [showNewFunctionalSetting, setShowNewFunctionalSetting] =
 		useState(false);
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-	const [editRecord, setEditRecord] = useState<string | null>(null);
+	const settingMutation = useEntityMutation("functionalSetting");
 
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadConsortiumFunctionalSettings"],
@@ -64,58 +52,6 @@ function FunctionalSettings() {
 
 	const consortium = data?.consortia?.content?.[0];
 	const settings = consortium?.functionalSettings ?? [];
-
-	const { mutateAsync: updateSetting } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, UpdateFunctionalSettingMutationVariables>(
-				updateFunctionalSettingQuery,
-				variables,
-			),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
-				queryKey: ["LoadConsortiumFunctionalSettings"],
-			}),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setEditRecord(changes);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (!promiseArguments) return;
-		const { resolve, reject, newRow, oldRow } = promiseArguments;
-		const input: Record<string, any> = {
-			id: newRow.id,
-			reason,
-			changeCategory,
-			changeReferenceUrl,
-		};
-
-		Object.keys(newRow).forEach((key) => {
-			if (newRow[key] !== oldRow[key]) input[key] = newRow[key];
-		});
-
-		try {
-			const result = await updateSetting({ input });
-			resolve(result.updateFunctionalSetting);
-		} catch (error) {
-			reject(error);
-		} finally {
-			setPromiseArguments(null);
-			setEditRecord(null);
-		}
-	};
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -149,59 +85,13 @@ function FunctionalSettings() {
 						? t("consortium.settings.enabled")
 						: t("consortium.settings.disabled"),
 			},
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 100,
-				getActions: ({ id, columns: rowColumns }) => {
-					// Without fieldToFocus the row swaps to inputs with nothing focused.
-					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.data_grid.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.data_grid.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.data_grid.edit")}
-							onClick={() =>
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit, fieldToFocus },
-								})
-							}
-							disabled={!isAnAdmin}
-						/>,
-					];
-				},
-			},
+			// No onDelete: functional settings are created and toggled, never deleted.
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				canEdit: isAnAdmin,
+			}),
 		],
 		[rowModesModel, isAnAdmin, t],
 	);
@@ -262,7 +152,7 @@ function FunctionalSettings() {
 						editMode="row"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						processRowUpdate={processRowUpdate}
+						processRowUpdate={settingMutation.requestGridEdit}
 						disableAggregation
 						disableHoverInteractions={false}
 						disableRowGrouping
@@ -279,18 +169,7 @@ function FunctionalSettings() {
 				</Grid>
 			</Grid>
 
-			<Confirmation
-				open={!!promiseArguments}
-				onClose={() => {
-					promiseArguments?.resolve(promiseArguments.oldRow);
-					setPromiseArguments(null);
-					setEditRecord(null);
-				}}
-				onConfirm={handleModalConfirm}
-				action="gridEdit"
-				entityName="Functional Setting"
-				editInformation={editRecord ?? undefined}
-			/>
+			<EntityMutationDialogs {...settingMutation.dialogProps} />
 
 			{showNewFunctionalSetting && (
 				<NewFunctionalSetting

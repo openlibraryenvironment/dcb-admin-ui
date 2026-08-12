@@ -32,7 +32,48 @@ export default function PolarisConfig({ config }: { config: any }) {
 			/>
 			<ConfigItem
 				title={t("hostlms.client_config.context_hierarchy")}
-				value={String(config?.contextHierarchy)}
+				value={
+					Array.isArray(config?.contextHierarchy)
+						? config.contextHierarchy.join(", ")
+						: config?.contextHierarchy
+				}
+			/>
+			<ConfigItem
+				title={t("hostlms.client_config.page_size")}
+				value={config?.["page-size"]}
+			/>
+			<ConfigItem
+				title={t("hostlms.config_fields.staff_ui")}
+				value={config?.["staff-ui"]}
+				type="url"
+			/>
+			<ConfigItem
+				title={t("hostlms.config_fields.use_new_bib_chunk_ingest")}
+				value={
+					config?.["use-new-bib-chunk-ingest"] === undefined
+						? undefined
+						: String(config["use-new-bib-chunk-ingest"])
+				}
+			/>
+			{/* A map of the site's own shelf locations to lending policies. Shown
+			    as a count with the detail in the tooltip - the full map can run to
+			    dozens of entries and would swamp the panel. */}
+			<ConfigItem
+				title={t("hostlms.config_fields.shelf_location_policy_map")}
+				value={
+					config?.shelfLocationPolicyMap
+						? t("hostlms.config_fields.policy_count", {
+								count: Object.keys(config.shelfLocationPolicyMap).length,
+							})
+						: undefined
+				}
+				tooltip={
+					config?.shelfLocationPolicyMap
+						? Object.entries(config.shelfLocationPolicyMap)
+								.map(([location, policy]) => `${location}: ${policy}`)
+								.join(", ")
+						: undefined
+				}
 			/>
 			<ConfigItem
 				title={t("hostlms.client_config.domain_id")}
@@ -103,6 +144,10 @@ export default function PolarisConfig({ config }: { config: any }) {
 								value={config.item?.["renewal-limit"]}
 							/>
 							<ConfigItem
+								title={t("hostlms.client_config.renewal_limit_av")}
+								value={config.item?.["av-renewal-limit"]}
+							/>
+							<ConfigItem
 								title={t("hostlms.client_config.history_action_id")}
 								value={config.item?.["history-action-id"]}
 							/>
@@ -113,6 +158,10 @@ export default function PolarisConfig({ config }: { config: any }) {
 							<ConfigItem
 								title={t("hostlms.client_config.loan_id")}
 								value={config.item?.["loan-period-code-id"]}
+							/>
+							<ConfigItem
+								title={t("hostlms.config_fields.av_loan_period_code_id")}
+								value={config.item?.["av-loan-period-code-id"]}
 							/>
 						</Grid>
 					</SubAccordionDetails>

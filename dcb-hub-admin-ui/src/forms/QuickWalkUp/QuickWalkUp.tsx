@@ -17,8 +17,9 @@ import { useAuth } from "react-oidc-context";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import request from "graphql-request";
 
-import { getLibraries } from "@queries/getLibraries";
 import { getLocations } from "@queries/getLocations";
+import { borrowingLibraryOptionsQuery } from "@/queryOptions/libraries";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getPatronRequestEssentials } from "@queries/getPatronRequestEssentials";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
@@ -27,16 +28,11 @@ import { PatronValidationStep } from "@forms/ExpeditedCheckout/steps/PatronValid
 import { CheckoutStep } from "@forms/ExpeditedCheckout/steps/CheckoutStep";
 import { QuickWalkUpRequestStep } from "@forms/ExpeditedCheckout/steps/QuickWalkUpStep";
 import { successfulExpeditedCheckoutStatuses } from "@constants/statuses/successfulExpeditedCheckoutStatuses";
-import { AutocompleteOption } from "@models/AutocompleteOption";
 import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
 import {
-	LibrariesQueryData,
 	LocationsQueryData,
 	PatronRequestQueryData,
 } from "@models/ReactQueryHelperTypes";
-import { Agency } from "@models/Agency";
-import { LibraryGroupMember } from "@models/LibraryGroupMember";
-import { findConsortium } from "@helpers/findConsortium";
 import {
 	getStepColors,
 	getStepLabelFontWeight,
@@ -57,6 +53,7 @@ export default function QuickWalkUpRequest({
 	const auth = useAuth();
 	const navigate = useNavigate();
 	const { cfg } = useRouter().options.context;
+	const gqlClient = useGraphQLClient();
 	const staffAgencyCode = String(auth.user?.profile?.code);
 
 	const headers = useMemo(
@@ -118,44 +115,10 @@ export default function QuickWalkUpRequest({
 	const agencyCode = useWatch({ control, name: "agencyCode" });
 	const itemBarcode = useWatch({ control, name: "itemBarcode" });
 
-	const { data: librariesData, isLoading: librariesLoading } =
-		useQuery<LibrariesQueryData>({
-			queryKey: ["librariesInfo", headers, cfg.VITE_DCB_API_BASE],
-			queryFn: () =>
-				request(
-					`${cfg.VITE_DCB_API_BASE}/graphql`,
-					getLibraries,
-					{
-						pageno: 0,
-						pagesize: 1000,
-						order: "fullName",
-						orderBy: "ASC",
-						query: "",
-					},
-					headers,
-				),
-		});
-
-	const libraryOptions: AutocompleteOption[] = useMemo(
-		() =>
-			(librariesData?.libraries?.content ?? []).map(
-				(item: {
-					fullName: string;
-					id: string;
-					agencyCode: string;
-					agency: Agency;
-					membership: [LibraryGroupMember];
-				}) => ({
-					label: item.fullName,
-					value: item.agencyCode,
-					id: item.id,
-					agencyId: item.agency?.id,
-					hostLmsCode: item?.agency?.hostLms?.code,
-					functionalSettings: findConsortium(item?.membership)
-						?.functionalSettings,
-				}),
-			),
-		[librariesData],
+	// Patron library: same criteria as staff requesting, so the same query -
+	// borrowing-disabled agencies are excluded.
+	const { data: libraryOptions = [], isLoading: librariesLoading } = useQuery(
+		borrowingLibraryOptionsQuery(gqlClient),
 	);
 
 	const staffLibraryOption = useMemo(

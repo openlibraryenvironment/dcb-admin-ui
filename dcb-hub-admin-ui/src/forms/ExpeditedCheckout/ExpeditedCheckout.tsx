@@ -14,13 +14,12 @@ import {
 } from "@mui/material";
 import { getPatronRequestEssentials } from "@queries/getPatronRequestEssentials";
 import { getLocations } from "@queries/getLocations";
-import { getLibraries } from "@queries/getLibraries";
+import { libraryOptionsQuery } from "@/queryOptions/libraries";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import axios from "axios";
 import { useAuth } from "react-oidc-context";
 import { getRequestError } from "@helpers/getRequestError";
 import { Agency } from "../../models/Agency";
-import { LibraryGroupMember } from "@models/LibraryGroupMember";
-import { findConsortium } from "@helpers/findConsortium";
 import { Location } from "@models/Location";
 import { Item } from "@models/Item";
 import { PatronRequestFormType } from "@models/PatronRequestFormType";
@@ -37,7 +36,6 @@ import { successfulExpeditedCheckoutStatuses } from "@constants/statuses/success
 import { StatusStepConnector } from "../../components/StatusStepConnector/StatusStepConnector";
 import request from "graphql-request";
 import { useNavigate, useRouter } from "@tanstack/react-router";
-import { AutocompleteOption } from "@models/AutocompleteOption";
 import { getLibrary } from "@queries/getLibrary";
 import {
 	LibrariesQueryData,
@@ -57,6 +55,7 @@ export default function ExpeditedCheckout({
 	const staffAgencyCode = String(auth.user?.profile?.code);
 	// Also the ID of the library of the item.
 	const { cfg } = useRouter().options.context;
+	const gqlClient = useGraphQLClient();
 
 	const navigate = useNavigate();
 	const headers = useMemo(
@@ -118,48 +117,12 @@ export default function ExpeditedCheckout({
 
 	const staffLibrary = staffLibraryData?.libraries?.content?.[0];
 
-	const {
-		data: patronLibrariesData,
-		isLoading: patronLibrariesLoading,
-		// isError: patronLibrariesError,
-	} = useQuery<LibrariesQueryData>({
-		queryKey: ["librariesInfo", headers, cfg.VITE_DCB_API_BASE],
-		queryFn: () =>
-			request(
-				`${cfg.VITE_DCB_API_BASE}/graphql`,
-				getLibraries,
-				{
-					order: "fullName",
-					orderBy: "ASC",
-					pageno: 0,
-					pagesize: 1000,
-					query: "",
-				},
-				headers,
-			),
-	});
-
-	const patronLibraryOptions: AutocompleteOption[] = useMemo(
-		() =>
-			(patronLibrariesData?.libraries?.content ?? []).map(
-				(item: {
-					fullName: string;
-					id: string;
-					agencyCode: string;
-					agency: Agency;
-					membership: [LibraryGroupMember];
-				}) => ({
-					label: item.fullName,
-					value: item.agencyCode,
-					id: item.id,
-					agencyId: item.agency?.id,
-					hostLmsCode: item?.agency?.hostLms?.code,
-					functionalSettings: findConsortium(item?.membership)
-						?.functionalSettings,
-				}),
-			),
-		[patronLibrariesData],
-	);
+	// Deliberately the UNFILTERED list. Expedited checkout hands an item to a
+	// patron standing at the desk; it is not a consortial borrowing request, so
+	// the isBorrowingAgency gate that staff and walk-up requesting apply does
+	// not belong here.
+	const { data: patronLibraryOptions = [], isLoading: patronLibrariesLoading } =
+		useQuery(libraryOptionsQuery(gqlClient));
 
 	// Pickup anywhere is not relevant here: you can only check out at a location of the staff user's library.
 

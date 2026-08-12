@@ -1,35 +1,21 @@
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Alert, AlertTitle, Stack, Typography } from "@mui/material";
+import { Alert, AlertTitle, Skeleton, Stack, Typography } from "@mui/material";
 
-// Mirror of CreateHostLmsDataFetcher.CreateHostLmsResult (dcb-service). The
-// status fields are human-readable diagnostic strings the backend builds, e.g.
-// "Status: OK", "Ping Failed: ...", "Success: Retrieved chunk with N records.",
-// "Skipped: ...", "Ingest Check Failed: ...".
-export type HostLmsVerificationResult = {
-	hostLms?: { code?: string | null; name?: string | null } | null;
-	pingStatus?: string | null;
-	ingestStatus?: string | null;
-	warnings?: (string | null)[] | null;
-};
-
-type OperationSeverity = "success" | "error" | "info";
+import {
+	classifyVerificationStatus,
+	isIngestTimeout,
+	type HostLmsVerificationResult,
+	type VerificationSeverity,
+} from "@helpers/hostLmsVerification";
 
 type TestOperation = {
 	key: string;
 	label: string;
-	severity: OperationSeverity;
+	severity: VerificationSeverity;
 	detail: string;
-};
-
-// The backend prefixes every diagnostic string with an outcome token, so we can
-// classify severity without the LMS-specific detail leaking into this layer.
-const classifyStatus = (status?: string | null): OperationSeverity => {
-	if (!status) return "info";
-	const lower = status.toLowerCase();
-	if (lower.includes("failed")) return "error";
-	if (lower.startsWith("skipped")) return "info";
-	return "success";
+	/** Extra guidance where the failure has a known, non-obvious meaning. */
+	advice?: string;
 };
 
 // Normalises the verification payload into a flat list of test operations.
@@ -42,23 +28,42 @@ const deriveTestOperations = (
 	{
 		key: "ping",
 		label: t("hostlms.verification.ping"),
-		severity: classifyStatus(result.pingStatus),
+		severity: classifyVerificationStatus(result.pingStatus),
 		detail: result.pingStatus ?? t("hostlms.verification.no_result"),
 	},
 	{
 		key: "ingest",
 		label: t("hostlms.verification.ingest"),
-		severity: classifyStatus(result.ingestStatus),
+		severity: classifyVerificationStatus(result.ingestStatus),
 		detail: result.ingestStatus ?? t("hostlms.verification.no_result"),
+		advice: isIngestTimeout(result.ingestStatus)
+			? t("hostlms.verification.ingest_timeout_advice")
+			: undefined,
 	},
 ];
 
 type HostLmsResultStepProps = {
 	result: HostLmsVerificationResult | null;
+	/** The checks take up to 20 seconds, so the wait gets a shape of its own. */
+	isVerifying?: boolean;
 };
 
-export default function HostLmsResultStep({ result }: HostLmsResultStepProps) {
+export default function HostLmsResultStep({
+	result,
+	isVerifying = false,
+}: HostLmsResultStepProps) {
 	const { t } = useTranslation();
+
+	if (isVerifying)
+		return (
+			<Stack spacing={2} sx={{ mt: 1 }} aria-busy="true">
+				<Typography>{t("hostlms.verification.in_progress")}</Typography>
+				{/* Sized to the two result alerts that replace them, so the dialog
+				    does not resize under the user when the checks return. */}
+				<Skeleton variant="rounded" height={72} />
+				<Skeleton variant="rounded" height={72} />
+			</Stack>
+		);
 
 	if (!result) {
 		return (
@@ -85,6 +90,11 @@ export default function HostLmsResultStep({ result }: HostLmsResultStepProps) {
 				<Alert key={operation.key} severity={operation.severity}>
 					<AlertTitle>{operation.label}</AlertTitle>
 					{operation.detail}
+					{operation.advice && (
+						<Typography variant="body2" sx={{ mt: 1 }}>
+							{operation.advice}
+						</Typography>
+					)}
 				</Alert>
 			))}
 
@@ -98,6 +108,13 @@ export default function HostLmsResultStep({ result }: HostLmsResultStepProps) {
 					</Stack>
 				</Alert>
 			)}
+
+			{/* The Host LMS exists at this point regardless of what the probes said,
+			    so the wizard can carry on - say so, or a red alert reads as a dead
+			    end. */}
+			<Alert severity="info">
+				{t("hostlms.verification.continue_explanation")}
+			</Alert>
 		</Stack>
 	);
 }

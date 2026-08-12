@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
 import { Grid, Typography, useTheme } from "@mui/material";
@@ -11,28 +11,23 @@ import { GridColDef, GridSortModel } from "@mui/x-data-grid-premium";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
-import { getLibraryBasicsLocation } from "@queries/getLibraryBasicsLocation";
+import { libraryBasicsQuery } from "@/queryOptions/library";
 import { getBibs } from "@queries/getBibs";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
 import { libraryBibColumnVisibility } from "@columns/columnVisibility/libraryBibColumnVisibility";
-import type {
-	LoadBibsQueryVariables,
-	LoadLibraryBasicsLocationQueryVariables,
-} from "@generated/graphql";
+import type { LoadBibsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/bibs/",
@@ -54,7 +49,6 @@ const NO_ROW_MODES = {};
 
 function LibraryBibs() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
@@ -65,6 +59,7 @@ function LibraryBibs() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
+	const libraryMutation = useEntityMutation("library");
 	// Scope the persisted grid state (pagination / filter / column visibility) to
 	// THIS library. With a static id the sessionStorage-backed store leaked a
 	// page number or filter from one library into the next, so a library with
@@ -83,31 +78,11 @@ function LibraryBibs() {
 		columnVisibility: libraryBibColumnVisibility,
 	});
 
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
-
 	const {
-		data: libraryData,
+		data: library,
 		isLoading: isLibraryLoading,
 		isError: isLibraryError,
-	} = useQuery({
-		queryKey: ["library", "basicsLocation", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryBasicsLocationQueryVariables>(
-				getLibraryBasicsLocation,
-				{
-					query: `id:${libraryId}`,
-				},
-			),
-		enabled: !!libraryId,
-	});
-
-	const library = libraryData?.libraries?.content?.[0];
+	} = useQuery(libraryBasicsQuery(gqlClient, libraryId, "basics"));
 
 	// A library's bibs live under its host LMS(es). Gate and query on ANY host
 	// LMS id present - the old code keyed solely off the primary agency hostLms,
@@ -144,11 +119,6 @@ function LibraryBibs() {
 		},
 		enabled: hostLmsIds.length > 0,
 		placeholderData: (previousData) => previousData,
-	});
-
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLibraryMutation, variables),
 	});
 
 	const columns: GridColDef[] = useMemo(
@@ -246,17 +216,13 @@ function LibraryBibs() {
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("ui.reference.catalog_build")}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -316,35 +282,7 @@ function LibraryBibs() {
 					/>
 				</Grid>
 			</Grid>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						libraryId,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

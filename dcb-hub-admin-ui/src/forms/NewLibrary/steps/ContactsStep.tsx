@@ -7,6 +7,7 @@ import {
 } from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
 import {
+	Alert,
 	Autocomplete,
 	Box,
 	Button,
@@ -20,40 +21,27 @@ import {
 } from "@mui/material";
 import { newLibrarySchema } from "@schemas/newLibrarySchema";
 import { z } from "zod";
+import {
+	CONTACT_ROLE_OPTIONS,
+	contactRoleLabelKey,
+} from "@constants/contactRoles";
 
 type LibraryFormValues = z.infer<typeof newLibrarySchema>;
 
-// The `value` MUST be the backend RoleName enum constant - CreateLibraryDataFetcher
-// upper-cases and matches it against RoleName. Sending the translated label breaks
-// for anything the naive coercion can't reconstruct (e.g. LIBRARY_SERVICES_ADMINISTRATOR).
-const ROLE_OPTIONS = [
-	{
-		value: "IMPLEMENTATION_CONTACT",
-		labelKey: "libraries.contacts.roles.implementation",
-	},
-	{
-		value: "LIBRARY_SERVICES_ADMINISTRATOR",
-		labelKey: "libraries.contacts.roles.library_service_admin",
-	},
-	{
-		value: "OPERATIONS_CONTACT",
-		labelKey: "libraries.contacts.roles.operations",
-	},
-	{
-		value: "SIGN_OFF_AUTHORITY",
-		labelKey: "libraries.contacts.roles.sign_off",
-	},
-	{ value: "SUPPORT", labelKey: "libraries.contacts.roles.support" },
-	{
-		value: "TECHNICAL_CONTACT",
-		labelKey: "libraries.contacts.roles.technical",
-	},
-] as const;
+const EMPTY_CONTACT = {
+	firstName: "",
+	lastName: "",
+	email: "",
+	role: "",
+	isPrimaryContact: false,
+};
 
 export default function ContactsStep() {
 	const { t } = useTranslation();
 	const {
 		control,
+		setValue,
+		getValues,
 		formState: { errors },
 	} = useFormContext();
 
@@ -62,78 +50,95 @@ export default function ContactsStep() {
 		name: "contacts",
 	});
 
-	const handleAddContact = () => {
-		if (fields.length < 2) {
-			append({
-				firstName: "",
-				lastName: "",
-				email: "",
-				role: "",
-				isPrimaryContact: false,
-			});
-		}
-	};
-
 	const contactErrors = errors.contacts as unknown as FieldErrors<
 		LibraryFormValues["contacts"]
 	>;
 
+	// Exactly one contact can be the primary one - it is who DCB writes to first.
+	// Letting two be ticked stores an ambiguity the backend has no way to settle.
+	const selectPrimary = (index: number, checked: boolean) => {
+		const contacts = getValues("contacts") ?? [];
+		contacts.forEach((_: unknown, position: number) => {
+			setValue(
+				`contacts.${position}.isPrimaryContact`,
+				checked && position === index,
+				{ shouldDirty: true },
+			);
+		});
+	};
+
 	return (
 		<Stack spacing={3} sx={{ mt: 1 }}>
+			{/* The schema requires at least one, and the library cannot be created
+			    without it - say so before the user hits Next rather than after. */}
+			<Alert severity="info">
+				{t("libraries.contacts.minimum_explanation")}
+			</Alert>
+
 			{fields.map((field, index) => (
 				<Paper key={field.id} sx={{ p: 3 }} variant="outlined">
 					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-						<Typography variant="h6">
-							{t("libraries.contacts.one")} #{index + 1}
+						<Typography variant="h6" component="h3">
+							{t("libraries.contacts.numbered", { number: index + 1 })}
 						</Typography>
 						{fields.length > 1 && (
 							<IconButton
 								onClick={() => remove(index)}
-								aria-label={t("libraries.contacts.remove")}
+								aria-label={t("libraries.contacts.remove_numbered", {
+									number: index + 1,
+								})}
 							>
 								<Delete color="error" />
 							</IconButton>
 						)}
 					</Box>
 					<Stack spacing={2} direction="column">
-						<Controller
-							name={`contacts.${index}.firstName`}
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("libraries.contacts.first_name")}
-									required
-									fullWidth
-									error={!!contactErrors?.[index]?.firstName}
-									helperText={contactErrors?.[index]?.firstName?.message}
-								/>
-							)}
-						/>
-						<Controller
-							name={`contacts.${index}.lastName`}
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("libraries.contacts.last_name")}
-									required
-									fullWidth
-									error={!!contactErrors?.[index]?.lastName}
-									helperText={contactErrors?.[index]?.lastName?.message}
-								/>
-							)}
-						/>
+						<Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+							<Controller
+								name={`contacts.${index}.firstName`}
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										id={`contact-${index}-first-name`}
+										label={t("libraries.contacts.first_name")}
+										required
+										fullWidth
+										autoComplete="given-name"
+										error={!!contactErrors?.[index]?.firstName}
+										helperText={contactErrors?.[index]?.firstName?.message}
+									/>
+								)}
+							/>
+							<Controller
+								name={`contacts.${index}.lastName`}
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										id={`contact-${index}-last-name`}
+										label={t("libraries.contacts.last_name")}
+										required
+										fullWidth
+										autoComplete="family-name"
+										error={!!contactErrors?.[index]?.lastName}
+										helperText={contactErrors?.[index]?.lastName?.message}
+									/>
+								)}
+							/>
+						</Stack>
 						<Controller
 							name={`contacts.${index}.email`}
 							control={control}
 							render={({ field }) => (
 								<TextField
 									{...field}
+									id={`contact-${index}-email`}
 									label={t("libraries.contacts.email")}
 									type="email"
 									required
 									fullWidth
+									autoComplete="email"
 									error={!!contactErrors?.[index]?.email}
 									helperText={contactErrors?.[index]?.email?.message}
 								/>
@@ -144,13 +149,8 @@ export default function ContactsStep() {
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									options={ROLE_OPTIONS.map((option) => option.value)}
-									getOptionLabel={(value) =>
-										t(
-											ROLE_OPTIONS.find((option) => option.value === value)
-												?.labelKey ?? "",
-										)
-									}
+									options={CONTACT_ROLE_OPTIONS.map((option) => option.value)}
+									getOptionLabel={(value) => t(contactRoleLabelKey(value))}
 									onChange={(_, newValue) => field.onChange(newValue ?? "")}
 									onBlur={field.onBlur}
 									value={field.value || null}
@@ -158,6 +158,7 @@ export default function ContactsStep() {
 									renderInput={(params) => (
 										<TextField
 											{...params}
+											id={`contact-${index}-role`}
 											required
 											label={t("libraries.contacts.role")}
 											error={!!contactErrors?.[index]?.role}
@@ -172,7 +173,15 @@ export default function ContactsStep() {
 							control={control}
 							render={({ field }) => (
 								<FormControlLabel
-									control={<Checkbox {...field} checked={field.value} />}
+									control={
+										<Checkbox
+											{...field}
+											checked={field.value === true}
+											onChange={(event) =>
+												selectPrimary(index, event.target.checked)
+											}
+										/>
+									}
 									label={t("libraries.contacts.primary")}
 								/>
 							)}
@@ -181,16 +190,16 @@ export default function ContactsStep() {
 				</Paper>
 			))}
 
-			{fields.length < 2 && (
-				<Button
-					startIcon={<Add />}
-					onClick={handleAddContact}
-					variant="outlined"
-					sx={{ alignSelf: "flex-start" }}
-				>
-					{t("consortium.new_contact.title")}
-				</Button>
-			)}
+			{/* The cap used to be two, for no reason the code gave. A library with a
+			    technical, an operations and a sign-off contact is normal. */}
+			<Button
+				startIcon={<Add />}
+				onClick={() => append({ ...EMPTY_CONTACT })}
+				variant="outlined"
+				sx={{ alignSelf: "flex-start" }}
+			>
+				{t("consortium.new_contact.title")}
+			</Button>
 
 			{errors.contacts &&
 				typeof errors.contacts === "object" &&

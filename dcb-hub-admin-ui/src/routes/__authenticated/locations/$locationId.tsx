@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,23 +24,17 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { getLocation } from "@queries/getLocation";
-import { deleteLocationQuery } from "@mutations/deleteLocation";
 import { getILS } from "@helpers/getILS";
 import { getLocalId } from "@helpers/getLocalId";
+import { handleEdit } from "@helpers/actions/editAndDeleteActions";
 import { formatChangedFields } from "@helpers/formatChangedFields";
-import {
-	handleCancel,
-	handleDeleteEntity,
-	handleEdit,
-	handleSaveConfirmation,
-} from "@helpers/actions/editAndDeleteActions";
 import { Location } from "@models/Location";
-import { updateLocationQuery } from "@mutations/updateLocation";
 import type { LoadLocationQueryVariables } from "@generated/graphql";
 
 interface LocationFormFields {
@@ -57,11 +51,9 @@ export const Route = createFileRoute("/__authenticated/locations/$locationId")({
 
 function LocationDetails() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { locationId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
-	const queryClient = useQueryClient();
 	const auth = useAuth();
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin =
@@ -71,25 +63,8 @@ function LocationDetails() {
 	const saveButtonRef = useRef<HTMLButtonElement>(null);
 
 	const [editMode, setEditMode] = useState(false);
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
-	const [showConfirmationPickup, setConfirmationPickup] = useState(false);
-	const [showConfirmationPickupAnywhere, setConfirmationPickupAnywhere] =
-		useState(false);
-	const [changedFields, setChangedFields] = useState<
-		Partial<LocationFormFields>
-	>({});
-	const [alert, setAlert] = useState<{
-		open: boolean;
-		severity: "success" | "error" | "warning";
-		text: string | null;
-		title: string | null;
-	}>({
-		open: false,
-		severity: "success",
-		text: null,
-		title: null,
-	});
+	const locationMutation = useEntityMutation("location");
+
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["location", locationId],
 		queryFn: () =>
@@ -191,18 +166,6 @@ function LocationDetails() {
 		},
 	});
 
-	const { mutateAsync: updateLocation } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(updateLocationQuery, variables),
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: ["location", locationId] }),
-	});
-
-	const { mutateAsync: deleteLocation } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request(deleteLocationQuery, variables),
-	});
-
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
@@ -221,55 +184,51 @@ function LocationDetails() {
 			return acc;
 		}, {} as Partial<LocationFormFields>);
 
-		setChangedFields(newChangedFields);
 		if (Object.keys(newChangedFields).length === 0) {
 			setEditMode(false);
 			return;
 		}
-		setConfirmationEdit(true);
+		locationMutation.requestFormEdit({
+			id: location.id,
+			name: location.name,
+			changedFields: newChangedFields,
+			changeSummary: formatChangedFields(newChangedFields, location),
+			onSuccess: (updated) => {
+				setEditMode(false);
+				reset(
+					{
+						name: updated?.name,
+						printLabel: updated?.printLabel,
+						latitude: updated?.latitude,
+						longitude: updated?.longitude,
+						localId: updated?.localId,
+					},
+					{ keepValues: false },
+				);
+			},
+		});
 	};
 
-	const handleStatusToggle = async (
+	// The pickup toggles are ordinary location edits with a specific message, so
+	// they go through the same confirm/mutate/invalidate path rather than a
+	// parallel one - only the wording differs.
+	const requestStatusToggle = (
 		field: "isPickup" | "isEnabledForPickupAnywhere",
-		action: "enable" | "disable",
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
 	) => {
-		const isEnabled = action === "enable";
-		try {
-			await updateLocation({
-				input: {
-					id: location.id,
-					[field]: isEnabled,
-					reason,
-					changeCategory,
-					changeReferenceUrl,
-				},
-			});
-			setAlert({
-				open: true,
-				severity: "success",
-				text: t(
-					`locations.${field === "isPickup" ? "pickup" : "pickup_anywhere"}_${isEnabled ? "enable" : "disable"}_success`,
-					{ location: location.name },
-				),
-				title: t("ui.data_grid.updated"),
-			});
-		} catch {
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t(
-					`locations.location_${field === "isPickup" ? "pickup" : "pickup_anywhere"}_error_${isEnabled ? "enable" : "disable"}`,
-					{ location: location.name },
-				),
-				title: t("ui.data_grid.error"),
-			});
-		} finally {
-			if (field === "isPickup") setConfirmationPickup(false);
-			else setConfirmationPickupAnywhere(false);
-		}
+		const isEnabled = !location[field];
+		const scope = field === "isPickup" ? "pickup" : "pickup_anywhere";
+		const verb = isEnabled ? "enable" : "disable";
+		locationMutation.requestFormEdit({
+			id: location.id,
+			name: location.name,
+			changedFields: { [field]: isEnabled },
+			successText: t(`locations.${scope}_${verb}_success`, {
+				location: location.name,
+			}),
+			errorText: t(`locations.location_${scope}_error_${verb}`, {
+				location: location.name,
+			}),
+		});
 	};
 
 	if (isLoading)
@@ -295,6 +254,14 @@ function LocationDetails() {
 			</PageContainer>
 		);
 
+	const deleteAction = locationMutation.buildDeleteAction({
+		id: location.id,
+		name: location.name,
+		redirect: "/locations",
+		disabled: !isAnAdmin,
+		icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+	});
+
 	const viewModeActions = [
 		{
 			key: "edit",
@@ -303,15 +270,7 @@ function LocationDetails() {
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
-		{
-			key: "delete",
-			onClick: () => setConfirmationDeletion(true),
-			disabled: !isAnAdmin,
-			label: t("ui.data_grid.delete_entity", {
-				entity: t("locations.location_one").toLowerCase(),
-			}),
-			startIcon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
-		},
+		deleteAction,
 	];
 
 	const editModeActions = [
@@ -327,26 +286,14 @@ function LocationDetails() {
 		<Button
 			key="cancel"
 			startIcon={<Cancel />}
-			onClick={() => handleCancel({ setEditMode, setChangedFields }, reset)}
+			onClick={() => {
+				setEditMode(false);
+				reset();
+			}}
 		>
 			{t("ui.data_grid.cancel")}
 		</Button>,
-		<MoreActionsMenu
-			key="more"
-			actions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
-					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("locations.location_one").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
-			]}
-		/>,
+		<MoreActionsMenu key="more" actions={[deleteAction]} />,
 	];
 
 	return (
@@ -517,7 +464,7 @@ function LocationDetails() {
 					</Stack>
 					{isAnAdmin && (
 						<Button
-							onClick={() => setConfirmationPickup(true)}
+							onClick={() => requestStatusToggle("isPickup")}
 							variant="outlined"
 							sx={{ mt: 1 }}
 						>
@@ -541,7 +488,7 @@ function LocationDetails() {
 					</Stack>
 					{isAnAdmin && (
 						<Button
-							onClick={() => setConfirmationPickupAnywhere(true)}
+							onClick={() => requestStatusToggle("isEnabledForPickupAnywhere")}
 							variant="outlined"
 							sx={{ mt: 1 }}
 						>
@@ -553,103 +500,14 @@ function LocationDetails() {
 				</Grid>
 			</Grid>
 
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						location.id,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLocation,
-						t,
-						router,
-						location.name,
-						"deleteLocation",
-						"/locations",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={location.name}
-			/>
-			<Confirmation
-				open={showConfirmationEdit}
-				onClose={() => setConfirmationEdit(false)}
-				onConfirm={(r, c, u) =>
-					handleSaveConfirmation(
-						location.id,
-						changedFields,
-						updateLocation,
-						queryClient as any,
-						{
-							setEditMode,
-							setChangedFields,
-							setAlert,
-							setConfirmation: setConfirmationEdit,
-						},
-						{
-							entityName: location.name,
-							entityType: t("locations.location_one"),
-							mutationName: "updateLocation",
-							t,
-						},
-						{ reason: r, changeCategory: c, changeReferenceUrl: u },
-						["location", locationId],
-						reset,
-						["name", "printLabel", "latitude", "longitude", "localId"],
-					)
-				}
-				action="gridEdit"
-				editInformation={formatChangedFields(changedFields, location)}
-				entityName={location.name}
-			/>
+			<EntityMutationDialogs {...locationMutation.dialogProps} />
+			{/* Not an entity mutation: this one guards navigation, not data. */}
 			<Confirmation
 				open={showUnsavedChangesModal}
 				onClose={handleKeepEditing}
 				onConfirm={handleLeaveWithoutSaving}
 				action="unsaved"
 				entityName={location.name}
-			/>
-			<Confirmation
-				open={showConfirmationPickup}
-				onClose={() => setConfirmationPickup(false)}
-				onConfirm={(r, c, u) =>
-					handleStatusToggle(
-						"isPickup",
-						location.isPickup ? "disable" : "enable",
-						r,
-						c,
-						u,
-					)
-				}
-				action="gridEdit"
-				entityName={location.name}
-			/>
-			<Confirmation
-				open={showConfirmationPickupAnywhere}
-				onClose={() => setConfirmationPickupAnywhere(false)}
-				onConfirm={(r, c, u) =>
-					handleStatusToggle(
-						"isEnabledForPickupAnywhere",
-						location.isEnabledForPickupAnywhere ? "disable" : "enable",
-						r,
-						c,
-						u,
-					)
-				}
-				action="gridEdit"
-				entityName={location.name}
-			/>
-
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
 			/>
 		</PageContainer>
 	);

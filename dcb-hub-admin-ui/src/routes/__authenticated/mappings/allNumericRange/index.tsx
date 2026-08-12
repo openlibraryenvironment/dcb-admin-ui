@@ -1,34 +1,25 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Button, Tooltip, Stack } from "@mui/material";
-import { Edit, Delete, Save, Cancel } from "@mui/icons-material";
-import {
-	GridColDef,
-	GridRowModes,
-	GridRowModel,
-	GridActionsCellItem,
-} from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Import from "@components/Import/Import";
-import Confirmation from "@components/Confirmation/Confirmation";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import { useMappingGridState } from "@/hooks/useMappingGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { standardNumRangeMappingColumns } from "@columns/numericRangeMappingColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { computeMutation } from "@helpers/computeMutation";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
-import { updateNumericRangeMapping } from "@mutations/updateNumericRangeMapping";
-import type {
-	LoadNumericRangeMappingsQueryVariables,
-	UpdateNumericRangeMappingMutationVariables,
-} from "@generated/graphql";
+import type { LoadNumericRangeMappingsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/mappings/allNumericRange/",
@@ -59,15 +50,11 @@ function NumericRangeMappingsRoute() {
 		handleColumnVisibilityChange,
 		rowModesModel,
 		setRowModesModel,
-		promiseArguments,
-		setPromiseArguments,
-		editRecord,
-		setEditRecord,
-		deleteConfirmationId,
-		setDeleteConfirmationId,
 		showImport,
 		setImport,
 	} = useMappingGridState(gridId, { lastImported: false });
+
+	const mappingMutation = useEntityMutation("numericRangeMapping");
 
 	const {
 		data: gridData,
@@ -91,119 +78,21 @@ function NumericRangeMappingsRoute() {
 		placeholderData: (previousData) => previousData,
 	});
 
-	const { mutateAsync: updateMapping } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, UpdateNumericRangeMappingMutationVariables>(
-				updateNumericRangeMapping,
-				variables,
-			),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setEditRecord(changes);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[setEditRecord, setPromiseArguments],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (!promiseArguments) return;
-		const { resolve, reject, newRow, oldRow } = promiseArguments;
-		const input: Record<string, any> = {
-			id: newRow.id,
-			reason,
-			changeCategory,
-			changeReferenceUrl,
-		};
-
-		Object.keys(newRow).forEach((key) => {
-			if (newRow[key] !== oldRow[key]) input[key] = newRow[key];
-		});
-
-		try {
-			const result = await updateMapping({ input });
-			resolve(result.updateNumericRangeMapping);
-		} catch (error) {
-			reject(error);
-		} finally {
-			setPromiseArguments(null);
-			setEditRecord(null);
-		}
-	};
-
 	const actionsColumn: GridColDef[] = useMemo(
 		() => [
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 100,
-				getActions: ({ id, columns: rowColumns }) => {
-					// Without fieldToFocus the row swaps to inputs with nothing focused.
-					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.data_grid.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.data_grid.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.data_grid.edit")}
-							onClick={() =>
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit, fieldToFocus },
-								})
-							}
-							disabled={!isAnAdmin}
-						/>,
-						<GridActionsCellItem
-							key="delete"
-							icon={<Delete />}
-							label={t("ui.data_grid.delete")}
-							onClick={() => setDeleteConfirmationId(id)}
-							disabled={!isAnAdmin}
-						/>,
-					];
-				},
-			},
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id) =>
+					mappingMutation.requestDelete({
+						id: id as string,
+						name: t("mappings.num_range_one"),
+					}),
+				canEdit: isAnAdmin,
+			}),
 		],
-		[rowModesModel, isAnAdmin, t, setRowModesModel, setDeleteConfirmationId],
+		[rowModesModel, isAnAdmin, t, setRowModesModel, mappingMutation],
 	);
 
 	const columns = useMemo(
@@ -252,7 +141,7 @@ function NumericRangeMappingsRoute() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				processRowUpdate={processRowUpdate}
+				processRowUpdate={mappingMutation.requestGridEdit}
 				rowSelection
 				exportConfig={{
 					query: getNumericRangeMappings,
@@ -272,21 +161,7 @@ function NumericRangeMappingsRoute() {
 				searchText={t("ui.data_grid.search")}
 			/>
 
-			<Confirmation
-				open={!!promiseArguments || !!deleteConfirmationId}
-				onClose={() => {
-					if (promiseArguments) {
-						promiseArguments.resolve(promiseArguments.oldRow);
-						setPromiseArguments(null);
-						setEditRecord(null);
-					}
-					setDeleteConfirmationId(null);
-				}}
-				onConfirm={handleModalConfirm}
-				entityName="NumericRangeMapping"
-				action={promiseArguments ? "gridEdit" : "deletion"}
-				editInformation={editRecord ?? ""}
-			/>
+			<EntityMutationDialogs {...mappingMutation.dialogProps} />
 			{showImport && (
 				<Import
 					show={showImport}

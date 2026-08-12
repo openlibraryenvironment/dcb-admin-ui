@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
 import {
@@ -12,20 +12,13 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
-import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
-import {
-	GridColDef,
-	GridRowModes,
-	GridRowModel,
-	GridActionsCellItem,
-	GridRowParams,
-} from "@mui/x-data-grid-premium";
+import { Delete } from "@mui/icons-material";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
-import Confirmation from "@components/Confirmation/Confirmation";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import Import from "@components/Import/Import";
@@ -33,28 +26,19 @@ import NewLocation from "@forms/NewLocation/NewLocation";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import useCode from "@hooks/useCode";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { handleDeleteEntity } from "@helpers/actions/editAndDeleteActions";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
 import { getILS } from "@helpers/getILS";
 
-import { getLibrary } from "@queries/getLibrary";
-import { deleteLibraryMutation } from "@mutations/deleteLibrary";
+import { libraryQuery } from "@/queryOptions/library";
 import { getLocations } from "@queries/getLocations";
-import { updateLocationQuery } from "@mutations/updateLocation";
-import { deleteLocationQuery } from "@mutations/deleteLocation";
-import { computeMutation } from "@helpers/computeMutation";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
-import type {
-	DeleteLibraryMutationVariables,
-	DeleteLocationMutationVariables,
-	LoadLibraryQueryVariables,
-	LoadLocationsQueryVariables,
-	UpdateLocationMutationVariables,
-} from "@generated/graphql";
+import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/locations/",
@@ -64,7 +48,6 @@ export const Route = createFileRoute(
 
 function LibraryLocations() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
@@ -104,11 +87,10 @@ function LibraryLocations() {
 			isEnabledForPickupAnywhere: false,
 		},
 	});
-	const [promiseArguments, setPromiseArguments] = useState<any>(null);
-	const [editRecord, setEditRecord] = useState<string | null>(null);
+	// The grid edits and deletes locations; the page action deletes the library.
+	const locationMutation = useEntityMutation("location");
+	const libraryMutation = useEntityMutation("library");
 
-	const [showConfirmationDeletion, setConfirmationDeletion] = useState(false);
-	const [deleteLocationId, setDeleteLocationId] = useState<string | null>(null);
 	const [showImport, setImport] = useState(false);
 	const [newLocation, setNewLocation] = useState({
 		show: false,
@@ -117,27 +99,13 @@ function LibraryLocations() {
 		libraryName: "",
 		ils: "",
 	});
-	const [alert, setAlert] = useState({
-		open: false,
-		severity: "success",
-		text: "",
-		title: "",
-	});
 
 	const {
-		data: libraryData,
+		data: library,
 		isLoading: isLibraryLoading,
 		isError: isLibraryError,
-	} = useQuery({
-		queryKey: ["library", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
-				query: `id:${libraryId}`,
-			}),
-		enabled: !!libraryId,
-	});
+	} = useQuery(libraryQuery(gqlClient, libraryId));
 
-	const library = libraryData?.libraries?.content?.[0];
 	const presetQueryVariables = library?.secondHostLms
 		? `hostSystem: ${library?.agency?.hostLms?.id} OR hostSystem: ${library?.secondHostLms?.id}`
 		: `hostSystem: ${library?.agency?.hostLms?.id}`;
@@ -170,82 +138,6 @@ function LibraryLocations() {
 		enabled: !!library?.agency?.hostLms?.id,
 		placeholderData: (previousData) => previousData,
 	});
-
-	const { mutateAsync: updateLocation } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, UpdateLocationMutationVariables>(
-				updateLocationQuery,
-				variables,
-			),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-	const { mutate: deleteLocation } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteLocationMutationVariables>(
-				deleteLocationQuery,
-				variables,
-			),
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: [gridId] }),
-	});
-	const { mutateAsync: deleteLibrary } = useMutation({
-		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any, DeleteLibraryMutationVariables>(
-				deleteLibraryMutation,
-				variables,
-			),
-	});
-
-	const processRowUpdate = useCallback(
-		(newRow: GridRowModel, oldRow: GridRowModel) =>
-			new Promise<GridRowModel>((resolve, reject) => {
-				const changes = computeMutation(newRow, oldRow);
-				if (!changes) return resolve(oldRow);
-				setEditRecord(changes);
-				setPromiseArguments({ resolve, reject, newRow, oldRow });
-			}),
-		[],
-	);
-
-	const handleModalConfirm = async (
-		reason: string,
-		changeCategory: string,
-		changeReferenceUrl: string,
-	) => {
-		if (promiseArguments) {
-			const { resolve, reject, newRow, oldRow } = promiseArguments;
-			const input: Record<string, any> = {
-				id: newRow.id,
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			};
-			Object.keys(newRow).forEach((key) => {
-				if (newRow[key] !== oldRow[key]) input[key] = newRow[key];
-			});
-
-			try {
-				const result = await updateLocation({ input });
-				resolve(result.updateLocation);
-			} catch (error) {
-				reject(error);
-			} finally {
-				setPromiseArguments(null);
-				setEditRecord(null);
-			}
-		} else if (deleteLocationId) {
-			deleteLocation(
-				{
-					input: {
-						id: deleteLocationId,
-						reason,
-						changeCategory,
-						changeReferenceUrl,
-					},
-				},
-				{ onSettled: () => setDeleteLocationId(null) },
-			);
-		}
-	};
 
 	const closeImport = () => {
 		setImport(false);
@@ -350,68 +242,26 @@ function LibraryLocations() {
 				valueFormatter: (val: Date) =>
 					val ? dayjs(val).format("YYYY-MM-DD HH:mm") : "",
 			},
-			{
-				field: "actions",
-				type: "actions",
-				headerName: t("ui.data_grid.actions"),
-				width: 100,
-				getActions: ({ id, columns: rowColumns }: GridRowParams) => {
-					// Without fieldToFocus the row swaps to inputs with nothing focused.
-					const fieldToFocus = rowColumns.find((col) => col.editable)?.field;
-					if (rowModesModel[id]?.mode === GridRowModes.Edit) {
-						return [
-							<GridActionsCellItem
-								key="save"
-								icon={<Save />}
-								label={t("ui.data_grid.save")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: { mode: GridRowModes.View },
-									})
-								}
-							/>,
-							<GridActionsCellItem
-								key="cancel"
-								icon={<Cancel />}
-								label={t("ui.data_grid.cancel")}
-								onClick={() =>
-									setRowModesModel({
-										...rowModesModel,
-										[id]: {
-											mode: GridRowModes.View,
-											ignoreModifications: true,
-										},
-									})
-								}
-							/>,
-						];
-					}
-					return [
-						<GridActionsCellItem
-							key="edit"
-							icon={<Edit />}
-							label={t("ui.data_grid.edit")}
-							onClick={() =>
-								setRowModesModel({
-									...rowModesModel,
-									[id]: { mode: GridRowModes.Edit, fieldToFocus },
-								})
-							}
-							disabled={!isAnAdmin}
-						/>,
-						<GridActionsCellItem
-							key="delete"
-							icon={<Delete />}
-							label={t("ui.data_grid.delete")}
-							onClick={() => setDeleteLocationId(id as string)}
-							disabled={!isAnAdmin}
-						/>,
-					];
-				},
-			},
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id, row) =>
+					locationMutation.requestDelete({
+						id: id as string,
+						name: row.name,
+					}),
+				canEdit: isAnAdmin,
+			}),
 		],
-		[customColumns, rowModesModel, setRowModesModel, isAnAdmin, t],
+		[
+			customColumns,
+			rowModesModel,
+			setRowModesModel,
+			isAnAdmin,
+			t,
+			locationMutation,
+		],
 	);
 
 	if (isLibraryLoading)
@@ -437,17 +287,13 @@ function LibraryLocations() {
 		<PageContainer
 			title={library?.fullName}
 			pageActions={[
-				{
-					key: "delete",
-					onClick: () => setConfirmationDeletion(true),
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
 					disabled: !isAnAdmin,
-					label: t("ui.data_grid.delete_entity", {
-						entity: t("libraries.library").toLowerCase(),
-					}),
-					startIcon: (
-						<Delete htmlColor={theme.palette.primary.exclamationIcon} />
-					),
-				},
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
 			]}
 		>
 			<Grid
@@ -539,7 +385,7 @@ function LibraryLocations() {
 						editMode="row"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						processRowUpdate={processRowUpdate}
+						processRowUpdate={locationMutation.requestGridEdit}
 						listViewEnabled={false}
 						pivotingEnabled={false}
 						toolbarVisible
@@ -578,50 +424,8 @@ function LibraryLocations() {
 					libraryName={library?.fullName}
 				/>
 			)}
-			<Confirmation
-				open={!!promiseArguments || !!deleteLocationId}
-				onClose={() => {
-					if (promiseArguments) {
-						promiseArguments.resolve(promiseArguments.oldRow);
-						setPromiseArguments(null);
-						setEditRecord(null);
-					}
-					setDeleteLocationId(null);
-				}}
-				onConfirm={handleModalConfirm}
-				action={promiseArguments ? "gridEdit" : "deletion"}
-				entityName="Location"
-				editInformation={editRecord ?? undefined}
-			/>
-			<Confirmation
-				open={showConfirmationDeletion}
-				onClose={() => setConfirmationDeletion(false)}
-				onConfirm={(r, c, u) => {
-					handleDeleteEntity(
-						libraryId,
-						r,
-						c,
-						u,
-						setAlert,
-						deleteLibrary,
-						t,
-						router,
-						library?.fullName,
-						"deleteLibrary",
-						"/libraries",
-					);
-					setConfirmationDeletion(false);
-				}}
-				action="deletion"
-				entityName={library?.fullName}
-			/>
-			<TimedAlert
-				open={alert.open}
-				severityType={alert.severity}
-				alertText={alert.text}
-				alertTitle={alert.title}
-				onCloseFunc={() => setAlert({ ...alert, open: false })}
-			/>
+			<EntityMutationDialogs {...locationMutation.dialogProps} />
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 		</PageContainer>
 	);
 }

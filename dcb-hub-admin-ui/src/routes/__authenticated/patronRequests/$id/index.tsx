@@ -41,7 +41,7 @@ import { getILS } from "@helpers/getILS";
 import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { getPatronRequest } from "@queries/getPatronRequest";
-import { getLibraryBasics } from "@queries/getLibraryBasics";
+import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { getAgency } from "@queries/getAgency";
 import { getHostLms } from "@queries/getHostLms";
 import { getLocation } from "@queries/getLocation";
@@ -54,7 +54,6 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
 	LoadAgencyQueryVariables,
 	LoadHostLmsQueryVariables,
-	LoadLibraryBasicsQueryVariables,
 	LoadLocationQueryVariables,
 	LoadPatronIdentitiesQueryVariables,
 	LoadPatronRequestQueryVariables,
@@ -129,20 +128,9 @@ function RouteComponent() {
 	// that under a key that never changed again, so the supplying library never
 	// resolved and only its raw agency code was left on the page.
 	const supplyingAgencyCode = patronRequest?.suppliers?.[0]?.localAgency;
-	const { data: supplierLibraryData, isLoading: supplierLibraryLoading } =
-		useQuery({
-			queryKey: ["library", "supplier", supplyingAgencyCode],
-			queryFn: async () =>
-				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-					getLibraryBasics,
-					{
-						query: `agencyCode:${supplyingAgencyCode}`,
-					},
-				),
-			enabled: !!supplyingAgencyCode,
-		});
-
-	const supplierLibrary = supplierLibraryData?.libraries?.content?.[0];
+	const { data: supplierLibrary, isLoading: supplierLibraryLoading } = useQuery(
+		libraryBasicsByAgencyCodeQuery(gqlClient, supplyingAgencyCode, "supplier"),
+	);
 
 	const {
 		data: patronIdentitiesData,
@@ -178,20 +166,13 @@ function RouteComponent() {
 	});
 	const pickupLocation = pickupLocationData?.locations?.content?.[0];
 
-	const { data: pickupLibraryData, isLoading: pickupLibraryLoading } = useQuery(
-		{
-			queryKey: ["library", "pickup", pickupLocation?.agency?.code],
-			queryFn: async () =>
-				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-					getLibraryBasics,
-					{
-						query: `agencyCode:${pickupLocation?.agency?.code}`,
-					},
-				),
-			enabled: !!pickupLocation?.agency?.code,
-		},
+	const { data: pickupLibrary, isLoading: pickupLibraryLoading } = useQuery(
+		libraryBasicsByAgencyCodeQuery(
+			gqlClient,
+			pickupLocation?.agency?.code,
+			"pickup",
+		),
 	);
-	const pickupLibrary = pickupLibraryData?.libraries?.content?.[0];
 
 	const { data: patronLmsData, isLoading: patronLmsLoading } = useQuery({
 		queryKey: ["hostLms", patronRequest?.patronHostlmsCode],
@@ -213,20 +194,9 @@ function RouteComponent() {
 	});
 	const patronAgency = patronAgencyData?.agencies?.content?.[0];
 
-	const { data: patronLibraryData, isLoading: patronLibraryLoading } = useQuery(
-		{
-			queryKey: ["library", "patron", patronAgency?.code],
-			queryFn: async () =>
-				gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-					getLibraryBasics,
-					{
-						query: `agencyCode:${patronAgency?.code}`,
-					},
-				),
-			enabled: !!patronAgency?.code,
-		},
+	const { data: patronLibrary, isLoading: patronLibraryLoading } = useQuery(
+		libraryBasicsByAgencyCodeQuery(gqlClient, patronAgency?.code, "patron"),
 	);
-	const patronLibrary = patronLibraryData?.libraries?.content?.[0];
 
 	const updateMutation = useMutation({
 		mutationFn: () =>

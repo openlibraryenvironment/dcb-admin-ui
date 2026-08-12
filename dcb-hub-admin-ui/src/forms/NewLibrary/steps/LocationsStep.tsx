@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { Stack, Typography, Button, Box, Alert } from "@mui/material";
 import { UploadFile, AddLocationAlt, CheckCircle } from "@mui/icons-material";
 
@@ -18,7 +18,7 @@ export default function LocationsStep({
 	agencyCode,
 }: LocationsStepProps) {
 	const { t } = useTranslation();
-	const { getValues } = useFormContext();
+	const { control } = useFormContext();
 
 	const [showImport, setShowImport] = useState(false);
 	const [showNewLocation, setShowNewLocation] = useState(false);
@@ -27,9 +27,14 @@ export default function LocationsStep({
 	const [addedCount, setAddedCount] = useState<number | null>(null);
 	const hasAdded = addedCount !== null;
 
-	// Retrieve values safely from the wizard's state machine context
-	const libraryName = getValues("fullName");
-	const lmsClientClass = getValues("lmsClientClass");
+	// Subscribed, not read once: `getValues` is a snapshot taken during the
+	// render that happened to run, so going back to the profile step and
+	// correcting the library name left this step still importing under the old
+	// one until something else forced a re-render.
+	const [libraryName, lmsClientClass] = useWatch({
+		control,
+		name: ["fullName", "lmsClientClass"],
+	});
 
 	return (
 		<Stack
@@ -41,6 +46,14 @@ export default function LocationsStep({
 			<Typography>
 				{t("libraries.new.locations_explanation", { library: libraryName })}
 			</Typography>
+
+			{/* Alma is the one case where the local ID is not a free choice: it has
+			    to be the code of the Alma library acting as the pickup point. */}
+			{getILS(lmsClientClass) === "Alma" && (
+				<Alert severity="info" sx={{ width: "100%" }}>
+					{t("libraries.new.locations_alma_local_id")}
+				</Alert>
+			)}
 
 			{hasAdded && (
 				<Alert

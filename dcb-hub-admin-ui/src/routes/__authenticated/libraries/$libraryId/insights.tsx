@@ -13,7 +13,11 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { createRestClient } from "@helpers/createRestClient";
 import { isInsightsEnabled } from "@helpers/featureFlags";
-import { getLibrary } from "@queries/getLibrary";
+import {
+	fetchLibrary,
+	libraryQuery,
+	libraryQueryKey,
+} from "@/queryOptions/library";
 import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 import {
@@ -21,15 +25,14 @@ import {
 	timeSeriesQueryOptions,
 	StatsParams,
 } from "@helpers/statsApi";
-import type { LoadLibraryQueryVariables } from "@generated/graphql";
 
 // Must mirror insightsPlotStore's default preset so the prefetched keys match.
 const DEFAULT_PRESET = "30d" as const;
 
 // The stats endpoints filter on a Host LMS code (patron_hostlms_code), which for a
 // library is Library.agency.hostLms.code - resolved from the library record here.
-function hostLmsCodeOf(libraryData: any): string | undefined {
-	return libraryData?.libraries?.content?.[0]?.agency?.hostLms?.code;
+function hostLmsCodeOf(library: any): string | undefined {
+	return library?.agency?.hostLms?.code;
 }
 
 export const Route = createFileRoute(
@@ -57,18 +60,16 @@ export const Route = createFileRoute(
 
 		// Load the library first (shared cache key with the other library pages),
 		// then derive its Host LMS code before prefetching the stats.
+		// ensureQueryData returns the raw response (a `select` is a view for
+		// components only), so unwrap here before deriving the code.
 		const libraryData = await queryClient.ensureQueryData({
-			queryKey: ["library", libraryId],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any, LoadLibraryQueryVariables>(
-					getLibrary,
-					{
-						query: `id:${libraryId}`,
-					},
-				),
+			queryKey: libraryQueryKey(libraryId),
+			queryFn: () => fetchLibrary(createGraphQLClient(cfg, auth), libraryId),
 		});
 
-		const libraryCode = hostLmsCodeOf(libraryData);
+		const libraryCode = hostLmsCodeOf(
+			(libraryData as any)?.libraries?.content?.[0],
+		);
 		if (!libraryCode) return;
 
 		const client = createRestClient(cfg, auth);
@@ -94,16 +95,11 @@ function LibraryInsights() {
 	const { libraryId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["library", libraryId],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
-				query: `id:${libraryId}`,
-			}),
-		enabled: !!libraryId,
-	});
+	const { data, isLoading, error } = useQuery(
+		libraryQuery(gqlClient, libraryId),
+	);
 
-	const library = data?.libraries?.content?.[0];
+	const library = data;
 	const libraryCode = hostLmsCodeOf(data);
 
 	if (isLoading)
