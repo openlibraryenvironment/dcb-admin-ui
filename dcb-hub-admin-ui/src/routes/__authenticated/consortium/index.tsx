@@ -9,6 +9,8 @@ import * as Yup from "yup";
 import { isEmpty } from "lodash";
 
 import {
+	Alert,
+	AlertTitle,
 	Button,
 	Grid,
 	Tab,
@@ -44,6 +46,7 @@ import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
+import NewConsortium from "@forms/NewConsortium/NewConsortium";
 
 // The page renders a single consortium: the newest one. Loader and component MUST
 // agree on both key and variables, or ensureQueryData warms a cache entry the
@@ -102,6 +105,7 @@ function ConsortiumPage() {
 	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState("");
 	const [aboutPreviewUrl, setAboutPreviewUrl] = useState("");
 
+	const [showNewConsortium, setShowNewConsortium] = useState(false);
 	const [editMode, setEditMode] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
 	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
@@ -370,6 +374,38 @@ function ConsortiumPage() {
 				/>
 			</PageContainer>
 		);
+	// No consortium is not an error, it is an unfinished installation - and it
+	// used to be reported as "cannot retrieve record" with a "go back" button,
+	// which told the one person who can fix it neither what was wrong nor how.
+	if (!error && !consortium)
+		return (
+			<PageContainer title={t("nav.consortium.name")} hideBreadcrumbs>
+				<Alert
+					severity="warning"
+					action={
+						isAnAdmin ? (
+							<Button
+								color="inherit"
+								variant="outlined"
+								onClick={() => setShowNewConsortium(true)}
+							>
+								{t("consortium.new.title")}
+							</Button>
+						) : undefined
+					}
+				>
+					<AlertTitle>{t("consortium.new.required_title")}</AlertTitle>
+					{t("consortium.new.required_body")}
+				</Alert>
+				{showNewConsortium && (
+					<NewConsortium
+						show={showNewConsortium}
+						onClose={() => setShowNewConsortium(false)}
+					/>
+				)}
+			</PageContainer>
+		);
+
 	if (error || !consortium)
 		return (
 			<PageContainer hideBreadcrumbs>

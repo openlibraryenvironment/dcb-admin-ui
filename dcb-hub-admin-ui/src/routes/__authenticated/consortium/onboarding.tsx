@@ -27,6 +27,8 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import OnboardingStats from "@components/OnboardingStats/OnboardingStats";
+import { mapWithConcurrency } from "@helpers/mapWithConcurrency";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getILS } from "@helpers/getILS";
@@ -195,153 +197,153 @@ function Onboarding() {
 			);
 
 			const libs = libRes?.libraries?.content ?? [];
-			const enriched = await Promise.all(
-				libs.map(async (lib: any) => {
-					const hostLmsCode = lib?.agency?.hostLms?.code;
-					const hostLmsId = lib?.agency?.hostLms?.id;
-					const agencyCode = lib?.agencyCode;
-					const ils = getILS(lib?.agency?.hostLms?.lmsClientClass || "");
-					const requiresNumeric = ils === "Sierra" || ils === "Polaris";
+			// Eight count queries per library, bounded rather than all at once -
+			// see mapWithConcurrency. Six is roughly a browser's per-host
+			// connection limit, so this is the point past which extra parallelism
+			// only buys queueing.
+			const enriched = await mapWithConcurrency(libs, 6, async (lib: any) => {
+				const hostLmsCode = lib?.agency?.hostLms?.code;
+				const hostLmsId = lib?.agency?.hostLms?.id;
+				const agencyCode = lib?.agencyCode;
+				const ils = getILS(lib?.agency?.hostLms?.lmsClientClass || "");
+				const requiresNumeric = ils === "Sierra" || ils === "Polaris";
 
-					if (!hostLmsCode || !hostLmsId) {
-						return {
-							...lib,
-							itemTypeMappingCount: 0,
-							patronTypeMappingCount: 0,
-							locationMappingCount: 0,
-							pickupLocationCount: 0,
-							patronRequestCount: 0,
-							supplierRequestCount: 0,
-							bibCount: 0,
-							lastBorrowingRequestAt: null,
-							lastSupplyingRequestAt: null,
-							numericRangeMappingCount: requiresNumeric ? 0 : null,
-						};
-					}
+				if (!hostLmsCode || !hostLmsId) {
+					return {
+						...lib,
+						itemTypeMappingCount: 0,
+						patronTypeMappingCount: 0,
+						locationMappingCount: 0,
+						pickupLocationCount: 0,
+						patronRequestCount: 0,
+						supplierRequestCount: 0,
+						bibCount: 0,
+						lastBorrowingRequestAt: null,
+						lastSupplyingRequestAt: null,
+						numericRangeMappingCount: requiresNumeric ? 0 : null,
+					};
+				}
 
-					try {
-						const [
-							itemTypeRes,
-							patronTypeRes,
-							locationRes,
-							pickupRes,
-							borrowingRes,
-							supplyingRes,
-							bibRes,
-						] = await Promise.all([
-							gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
-								query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
-								order: "id",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							}),
-							gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
-								query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"patronType" OR fromCategory:"patronType") AND NOT deleted:true`,
-								order: "id",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							}),
-							gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
-								query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`,
-								order: "id",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							}),
-							gqlClient.request<any, LoadLocationsQueryVariables>(
-								getLocations,
-								{
-									query: `hostSystem: ${hostLmsId} AND isPickup: true`,
-									order: "code",
-									orderBy: "ASC",
-									pageno: 0,
-									pagesize: 1,
-								},
-							),
-							gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-								getPatronRequests,
-								{
-									query: `patronHostlmsCode: "${hostLmsCode}"`,
-									order: "dateCreated",
-									orderBy: "DESC",
-									pageno: 0,
-									pagesize: 1,
-								},
-							),
-							gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-								getPatronRequests,
-								{
-									query: `supplyingAgencyCode: "${agencyCode}"`,
-									order: "dateCreated",
-									orderBy: "DESC",
-									pageno: 0,
-									pagesize: 1,
-								},
-							),
-							// Ingest health: bibs live under the Host LMS, and zero of them
-							// means the library cannot supply anything however well the
-							// rest is configured.
-							gqlClient.request<any, LoadBibsQueryVariables>(getBibs, {
-								query: `sourceSystemId: ${hostLmsId}`,
+				try {
+					const [
+						itemTypeRes,
+						patronTypeRes,
+						locationRes,
+						pickupRes,
+						borrowingRes,
+						supplyingRes,
+						bibRes,
+					] = await Promise.all([
+						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
+							order: "id",
+							orderBy: "ASC",
+							pageno: 0,
+							pagesize: 1,
+						}),
+						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"patronType" OR fromCategory:"patronType") AND NOT deleted:true`,
+							order: "id",
+							orderBy: "ASC",
+							pageno: 0,
+							pagesize: 1,
+						}),
+						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`,
+							order: "id",
+							orderBy: "ASC",
+							pageno: 0,
+							pagesize: 1,
+						}),
+						gqlClient.request<any, LoadLocationsQueryVariables>(getLocations, {
+							query: `hostSystem: ${hostLmsId} AND isPickup: true`,
+							order: "code",
+							orderBy: "ASC",
+							pageno: 0,
+							pagesize: 1,
+						}),
+						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+							getPatronRequests,
+							{
+								query: `patronHostlmsCode: "${hostLmsCode}"`,
 								order: "dateCreated",
+								orderBy: "DESC",
 								pageno: 0,
 								pagesize: 1,
-							}),
-						]);
-
-						let numericRangePromise = null;
-						if (requiresNumeric) {
-							numericRangePromise = gqlClient.request<
-								any,
-								LoadNumericRangeMappingsQueryVariables
-							>(getNumericRangeMappings, {
-								query: `context:"${hostLmsCode}" AND NOT deleted:true`,
-								order: "id",
-								orderBy: "ASC",
+							},
+						),
+						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+							getPatronRequests,
+							{
+								query: `supplyingAgencyCode: "${agencyCode}"`,
+								order: "dateCreated",
+								orderBy: "DESC",
 								pageno: 0,
 								pagesize: 1,
-							});
-						}
+							},
+						),
+						// Ingest health: bibs live under the Host LMS, and zero of them
+						// means the library cannot supply anything however well the
+						// rest is configured.
+						gqlClient.request<any, LoadBibsQueryVariables>(getBibs, {
+							query: `sourceSystemId: ${hostLmsId}`,
+							order: "dateCreated",
+							pageno: 0,
+							pagesize: 1,
+						}),
+					]);
 
-						const numericRes = requiresNumeric
-							? await numericRangePromise
-							: null;
-
-						return {
-							...lib,
-							itemTypeMappingCount:
-								itemTypeRes?.referenceValueMappings?.totalSize ?? 0,
-							patronTypeMappingCount:
-								patronTypeRes?.referenceValueMappings?.totalSize ?? 0,
-							locationMappingCount:
-								locationRes?.referenceValueMappings?.totalSize ?? 0,
-							pickupLocationCount: pickupRes?.locations?.totalSize ?? 0,
-							patronRequestCount: borrowingRes?.patronRequests?.totalSize ?? 0,
-							supplierRequestCount:
-								supplyingRes?.patronRequests?.totalSize ?? 0,
-							// Both request queries already sort dateCreated DESC and take a
-							// single row, so the most recent request is sitting in the same
-							// response the count came from - it was simply being discarded.
-							lastBorrowingRequestAt:
-								borrowingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
-							lastSupplyingRequestAt:
-								supplyingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
-							bibCount: bibRes?.sourceBibs?.totalSize ?? 0,
-							numericRangeMappingCount: requiresNumeric
-								? (numericRes?.numericRangeMappings?.totalSize ?? 0)
-								: null,
-						};
-					} catch (e) {
-						console.error("Failed fetching counts for", lib.fullName, e);
-						return lib;
+					let numericRangePromise = null;
+					if (requiresNumeric) {
+						numericRangePromise = gqlClient.request<
+							any,
+							LoadNumericRangeMappingsQueryVariables
+						>(getNumericRangeMappings, {
+							query: `context:"${hostLmsCode}" AND NOT deleted:true`,
+							order: "id",
+							orderBy: "ASC",
+							pageno: 0,
+							pagesize: 1,
+						});
 					}
-				}),
-			);
+
+					const numericRes = requiresNumeric ? await numericRangePromise : null;
+
+					return {
+						...lib,
+						itemTypeMappingCount:
+							itemTypeRes?.referenceValueMappings?.totalSize ?? 0,
+						patronTypeMappingCount:
+							patronTypeRes?.referenceValueMappings?.totalSize ?? 0,
+						locationMappingCount:
+							locationRes?.referenceValueMappings?.totalSize ?? 0,
+						pickupLocationCount: pickupRes?.locations?.totalSize ?? 0,
+						patronRequestCount: borrowingRes?.patronRequests?.totalSize ?? 0,
+						supplierRequestCount: supplyingRes?.patronRequests?.totalSize ?? 0,
+						// Both request queries already sort dateCreated DESC and take a
+						// single row, so the most recent request is sitting in the same
+						// response the count came from - it was simply being discarded.
+						lastBorrowingRequestAt:
+							borrowingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
+						lastSupplyingRequestAt:
+							supplyingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
+						bibCount: bibRes?.sourceBibs?.totalSize ?? 0,
+						numericRangeMappingCount: requiresNumeric
+							? (numericRes?.numericRangeMappings?.totalSize ?? 0)
+							: null,
+					};
+				} catch (e) {
+					console.error("Failed fetching counts for", lib.fullName, e);
+					return lib;
+				}
+			});
 
 			return enriched;
 		},
+		// Counting eight things per library is expensive enough that remounting
+		// the page should not redo it; the wizard invalidates "libraries*" keys
+		// when anything actually changes.
+		staleTime: 1000 * 60 * 2,
 	});
 
 	/**
@@ -831,6 +833,10 @@ function Onboarding() {
 					<Typography variant="h2" sx={{ mb: 2 }}>
 						{t("consortium.onboarding")}
 					</Typography>
+
+					{/* What the consortium is made of, separate from which rows need
+					    attention - the grid answers the second question only. */}
+					<OnboardingStats libraries={processedLibraries} loading={isLoading} />
 
 					<DataGrid
 						identifier="onboardingLibraries"
