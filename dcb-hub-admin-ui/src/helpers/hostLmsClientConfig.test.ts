@@ -6,6 +6,7 @@ import {
 	clientConfigFieldsFor,
 	clientConfigToFields,
 	getHostLmsProfile,
+	hasSharedSystemConflict,
 	missingRecommendedClientConfig,
 	missingRequiredClientConfig,
 } from "./hostLmsClientConfig";
@@ -95,7 +96,7 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).not.toContain("base-url");
 		});
 
-		it("demands Koha's OAuth pair and virtual item codes", () => {
+		it("demands Koha's OAuth pair and virtual item library", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.koha,
 				{},
@@ -108,7 +109,9 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).toContain("client_secret");
 			expect(missing).toContain("sharing-library-code");
 			expect(missing).toContain("virtual-item-library-code");
-			expect(missing).toContain("virtual-item-location-code");
+			// KohaHostLmsClient.createItem sets the branch and nothing else, so this
+			// was required configuration nothing read. Alma's is real and stays.
+			expect(missing).not.toContain("virtual-item-location-code");
 		});
 
 		it("demands the NCIP endpoint and system id for an OpenRS appliance", () => {
@@ -148,6 +151,114 @@ describe("hostLmsClientConfig", () => {
 			for (const lmsClientClass of Object.values(HOST_LMS_CLASSES)) {
 				expect(getHostLmsProfile(lmsClientClass)).toBeDefined();
 			}
+		});
+	});
+
+	/**
+	 * A shared Host LMS was unrepresentable through the guided form: there was no
+	 * `shared-system` field to set, and `default-agency-code` was unconditionally
+	 * required - so the form would not submit without the one key dcb-service returns
+	 * 400 for when the flag is set. Both scenarios the flag exists for, a Koha with
+	 * sixty members and a Sierra shared with a non-participant, needed the JSON editor.
+	 */
+	describe("shared systems", () => {
+		it("offers the flag on every ILS, because any of them can be shared", () => {
+			for (const lmsClientClass of Object.values(HOST_LMS_CLASSES)) {
+				const paths = clientConfigFieldsFor(lmsClientClass).map((configField) =>
+					configField.path.join("."),
+				);
+
+				expect(paths).toContain("shared-system");
+				// Layered mappings are how a shared system avoids repeating a mapping
+				// per co-tenant. This used to be offered on Polaris alone.
+				expect(paths).toContain("contextHierarchy");
+			}
+		});
+
+		it("stops requiring a default agency once the system is shared", () => {
+			const shared = { "shared-system": true };
+
+			for (const lmsClientClass of [
+				HOST_LMS_CLASSES.sierra,
+				HOST_LMS_CLASSES.koha,
+				HOST_LMS_CLASSES.alma,
+				HOST_LMS_CLASSES.folio,
+				HOST_LMS_CLASSES.polaris,
+				HOST_LMS_CLASSES.foundation,
+			]) {
+				expect(
+					missingRequiredClientConfig(lmsClientClass, shared).map(
+						(problem) => problem.name,
+					),
+				).not.toContain("default-agency-code");
+			}
+		});
+
+		it("still requires a default agency on a dedicated system", () => {
+			expect(
+				missingRequiredClientConfig(HOST_LMS_CLASSES.koha, {}).map(
+					(problem) => problem.name,
+				),
+			).toContain("default-agency-code");
+		});
+
+		it("keeps the appliance's default agency required even when shared", () => {
+			// There the key is the agency DCB names in NCIP messages, not a fallback
+			// for an unmapped location - dcb-service requires it either way.
+			expect(
+				missingRequiredClientConfig(HOST_LMS_CLASSES.orsAppliance, {
+					"shared-system": true,
+				}).map((problem) => problem.name),
+			).toContain("default-agency-code");
+		});
+
+		it("reports the combination dcb-service refuses", () => {
+			expect(
+				hasSharedSystemConflict(HOST_LMS_CLASSES.koha, {
+					"shared-system": true,
+					"default-agency-code": "one-co-tenant",
+				}),
+			).toBe(true);
+
+			expect(
+				hasSharedSystemConflict(HOST_LMS_CLASSES.koha, {
+					"shared-system": true,
+				}),
+			).toBe(false);
+
+			expect(
+				hasSharedSystemConflict(HOST_LMS_CLASSES.koha, {
+					"default-agency-code": "the-only-library",
+				}),
+			).toBe(false);
+
+			// Exempt, exactly as HostLmsConfigValidator.hasSharedSystemConflict is
+			expect(
+				hasSharedSystemConflict(HOST_LMS_CLASSES.orsAppliance, {
+					"shared-system": true,
+					"default-agency-code": "the-appliance-agency",
+				}),
+			).toBe(false);
+		});
+
+		it("writes the flag into the config as a boolean", () => {
+			const config = buildClientConfig(HOST_LMS_CLASSES.koha, {
+				"api-url": "https://koha.example.org/api/v1",
+				client_id: "id",
+				client_secret: "secret",
+				"sharing-library-code": "DCB",
+				"virtual-item-library-code": "DCB",
+				"shared-system": true,
+				contextHierarchy: "SHARED-KOHA, MOBIUS, GLOBAL",
+			});
+
+			expect(config["shared-system"]).toBe(true);
+			expect(config["contextHierarchy"]).toEqual([
+				"SHARED-KOHA",
+				"MOBIUS",
+				"GLOBAL",
+			]);
+			expect(config).not.toHaveProperty("default-agency-code");
 		});
 	});
 

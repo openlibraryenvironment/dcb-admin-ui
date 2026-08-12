@@ -190,10 +190,54 @@ describe("newLibrarySchema", () => {
 					"default-agency-code": "EX",
 					"sharing-library-code": "SHARE",
 					"virtual-item-library-code": "VLIB",
-					"virtual-item-location-code": "VLOC",
 				},
 			});
 			expect(result.success).toBe(true);
+		});
+
+		it("accepts a shared Koha with no default agency code", () => {
+			// The 60-library case. Before shared-system existed in this table the form
+			// demanded default-agency-code, which dcb-service then rejected outright -
+			// so a shared Host LMS could not be created through the guided form at all.
+			const result = newLibrarySchema.safeParse({
+				...validLibrary(),
+				isCreatingHostLms: true,
+				lmsClientClass: HOST_LMS_CLASSES.koha,
+				clientConfigFields: {
+					"api-url": "https://koha.example.org/api/v1",
+					client_id: "id",
+					client_secret: "secret",
+					"sharing-library-code": "SHARE",
+					"virtual-item-library-code": "VLIB",
+					"shared-system": true,
+				},
+			});
+			expect(result.success).toBe(true);
+		});
+
+		it("refuses a shared system that also names a default agency", () => {
+			const result = newLibrarySchema.safeParse({
+				...validLibrary(),
+				isCreatingHostLms: true,
+				lmsClientClass: HOST_LMS_CLASSES.koha,
+				clientConfigFields: {
+					"api-url": "https://koha.example.org/api/v1",
+					client_id: "id",
+					client_secret: "secret",
+					"sharing-library-code": "SHARE",
+					"virtual-item-library-code": "VLIB",
+					"shared-system": true,
+					"default-agency-code": "one-co-tenant",
+				},
+			});
+
+			expect(result.success).toBe(false);
+			// Reported against the value that has to go, not against the flag
+			expect(
+				result.error?.issues.some((issue) =>
+					issue.path.join(".").endsWith("default-agency-code"),
+				),
+			).toBe(true);
 		});
 
 		it("reports each missing required guided field against its own input", () => {

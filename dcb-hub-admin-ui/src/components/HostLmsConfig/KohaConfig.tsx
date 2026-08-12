@@ -37,10 +37,6 @@ export default function KohaConfig({ config }: { config: any }) {
 				value={config?.["virtual-item-library-code"]}
 			/>
 			<ConfigItem
-				title={t("hostlms.client_config.virtual_location")}
-				value={config?.["virtual-item-location-code"]}
-			/>
-			<ConfigItem
 				title={t("hostlms.client_config.page_size")}
 				value={config?.["page-size"]}
 			/>

@@ -172,6 +172,14 @@ function HostLMSDetails() {
 							title={t("hostlms.client_config.default_agency_code")}
 							value={hostlms.clientConfig?.["default-agency-code"]}
 						/>
+						{/* Identifies a shared system: important for troubleshooters*/}
+						<ConfigItem
+							title={t("hostlms.client_config.shared_system")}
+							value={String(
+								hostlms.clientConfig?.["shared-system"] === true ||
+									hostlms.clientConfig?.["shared-system"] === "true",
+							)}
+						/>
 
 						{/* ILS Specific config Rendering */}
 						{ilsType === "Polaris" && (

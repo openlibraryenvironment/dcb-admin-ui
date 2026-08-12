@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
 	buildClientConfig,
 	getHostLmsProfile,
+	hasSharedSystemConflict,
 	missingRequiredClientConfig,
 } from "@helpers/hostLmsClientConfig";
 
@@ -275,6 +276,13 @@ export const newLibrarySchema = z
 					}),
 				});
 			}
+			if (hasSharedSystemConflict(values.lmsClientClass, parsed)) {
+				ctx.addIssue({
+					code: "custom",
+					path: ["clientConfig"],
+					message: i18n.t("hostlms.config_fields.shared_system_conflict"),
+				});
+			}
 			return;
 		}
 
@@ -288,6 +296,22 @@ export const newLibrarySchema = z
 				message: i18n.t("ui.validation.required", {
 					field: i18n.t(problem.labelKey),
 				}),
+			});
+		}
+
+		// Reported against default-agency-code rather than shared-system: the flag is
+		// the deliberate statement about the system, and the agency code is the value
+		// that has to go.
+		if (
+			hasSharedSystemConflict(
+				values.lmsClientClass,
+				values.clientConfigFields ?? {},
+			)
+		) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["clientConfigFields", "default-agency-code"],
+				message: i18n.t("hostlms.config_fields.shared_system_conflict"),
 			});
 		}
 	});

@@ -73,6 +73,13 @@ export interface ClientConfigField {
 	type: ClientConfigFieldType;
 	placeholder?: string;
 	docs?: ClientConfigDocs;
+	/**
+	 * Suspends `required` while this holds. `default-agency-code` is the only case:
+	 * dcb-service rejects it outright on a shared system, so demanding it
+	 * unconditionally made a shared Host LMS impossible to submit - the form would not
+	 * let go without the key, and the server would not accept it with one.
+	 */
+	requiredUnless?: (values: any) => boolean;
 }
 
 export interface ClientConfigGroup {
@@ -120,6 +127,38 @@ const field = (
 	docs,
 });
 
+/**
+ * Does this config declare a system hosting more than one participating library?
+ *
+ * Read from the form values rather than the built config because it has to answer
+ * while the user is still typing, which is when `default-agency-code` stops being
+ * required.
+ */
+const sharedSystemSet = (values: any): boolean =>
+	values?.["shared-system"] === true || values?.["shared-system"] === "true";
+
+/**
+ * `default-agency-code`, in the six profiles where it means "the agency to assume
+ * when a patron's home location does not map".
+ *
+ * One definition rather than six copies, because the conditional part is easy to
+ * apply to five of them and forget on the sixth - and the failure mode of forgetting
+ * is a shared system that cannot be created, with the form and the server each
+ * blaming the other.
+ *
+ * ORS_APPLIANCE deliberately does not use this: there the key is the agency DCB
+ * names in every NCIP party element, not a resolution fallback, and dcb-service
+ * requires it whether the appliance is shared or not.
+ */
+const defaultAgencyCode = (): ClientConfigField => ({
+	path: ["default-agency-code"],
+	labelKey: "hostlms.config_fields.default_agency_code",
+	descriptionKey: "hostlms.config_fields.default_agency_code_description",
+	requirement: "required",
+	type: "text",
+	requiredUnless: sharedSystemSet,
+});
+
 /** Ex Libris' own developer documentation, linked from the Alma fields. */
 const ALMA_API_DOCS: ClientConfigDocs = {
 	url: "https://developers.exlibrisgroup.com/alma/apis/",
@@ -153,6 +192,30 @@ const SHARED_FIELDS: ClientConfigField[] = [
 		"stringList",
 		"CATALOGUE, CIRCULATION",
 	),
+	// Any ILS can host more than one participating library - one Koha with sixty
+	// members, one Sierra shared by a participant and a non-participant - so this
+	// is not a per-profile concern. Setting it disables the two shortcuts that
+	// silently attribute a co-tenant's patrons or holdings to the wrong library:
+	// `default-agency-code` and the `Location: *` wildcard mapping.
+	field(
+		["shared-system"],
+		"hostlms.config_fields.shared_system",
+		"hostlms.config_fields.shared_system_description",
+		"optional",
+		"boolean",
+	),
+	// Was on the Polaris profile alone, which is where it happened to be first used.
+	// LocationToAgencyMappingService reads it for every ILS, and layering per-library
+	// overrides over consortial defaults is how a shared system avoids repeating the
+	// same mapping for each co-tenant - so Koha and Sierra need it at least as much.
+	field(
+		["contextHierarchy"],
+		"hostlms.client_config.context_hierarchy",
+		"hostlms.config_fields.context_hierarchy_description",
+		"optional",
+		"stringList",
+		"SHARED-KOHA, MOBIUS, GLOBAL",
+	),
 ];
 
 const SIERRA: HostLmsProfile = {
@@ -185,12 +248,7 @@ const SIERRA: HostLmsProfile = {
 					"required",
 					"secret",
 				),
-				field(
-					["default-agency-code"],
-					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
-					"required",
-				),
+				defaultAgencyCode(),
 				field(
 					["page-size"],
 					"hostlms.config_fields.page_size",
@@ -292,12 +350,7 @@ const ALMA: HostLmsProfile = {
 					undefined,
 					ALMA_API_DOCS,
 				),
-				field(
-					["default-agency-code"],
-					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
-					"required",
-				),
+				defaultAgencyCode(),
 			],
 		},
 		{
@@ -431,12 +484,7 @@ const FOLIO: HostLmsProfile = {
 					"required",
 					"secret",
 				),
-				field(
-					["default-agency-code"],
-					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
-					"required",
-				),
+				defaultAgencyCode(),
 				// dcb-service returns these two as creation warnings rather than
 				// errors, so they are asked for but never block.
 				field(
@@ -539,12 +587,7 @@ const POLARIS: HostLmsProfile = {
 					"required",
 					"secret",
 				),
-				field(
-					["default-agency-code"],
-					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
-					"required",
-				),
+				defaultAgencyCode(),
 				// Everything below appears in real Polaris configurations but was
 				// absent from this table, so the guided form silently dropped it on
 				// anyone who switched out of the JSON editor.
@@ -563,14 +606,7 @@ const POLARIS: HostLmsProfile = {
 					"optional",
 					"url",
 				),
-				field(
-					["contextHierarchy"],
-					"hostlms.client_config.context_hierarchy",
-					"hostlms.config_fields.context_hierarchy_description",
-					"optional",
-					"stringList",
-					"SLOUC, MOBIUS-POLARIS, POLARIS, GLOBAL",
-				),
+				// contextHierarchy is in SHARED_FIELDS - every ILS reads it, not just this one.
 				// dcb-service warns when this is absent and falls back to defaults.
 				// The keys are the site's own shelf location names, so there is no
 				// fixed set of inputs to offer - it is edited as an object.
@@ -743,13 +779,15 @@ const POLARIS: HostLmsProfile = {
 };
 
 /**
- * Koha authenticates against its REST API with an OAuth client credential
- * pair, and needs somewhere to put the virtual items DCB creates. All six are
- * declared required by KohaClientConfig, so a Host LMS missing any of them
- * fails on its first real request rather than at creation - which is why
- * HostLmsConfigValidator now demands them up front.
+ * Koha authenticates against its REST API with an OAuth client credential pair, and
+ * needs somewhere to put the virtual items DCB creates. Each of these is declared
+ * required by KohaClientConfig, so a Host LMS missing any of them fails on its first
+ * real request rather than at creation - which is why HostLmsConfigValidator demands
+ * them up front.
  *
- * Note the URL key is `api-url`, not `base-url` as everywhere else.
+ * Note the URL key is `api-url`, not `base-url` as everywhere else. It is also what
+ * DCB derives Koha's system identity from, so two Host LMS records pointing at one
+ * Koha are recognised as one system.
  */
 const KOHA: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.koha,
@@ -781,12 +819,7 @@ const KOHA: HostLmsProfile = {
 					"required",
 					"secret",
 				),
-				field(
-					["default-agency-code"],
-					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
-					"required",
-				),
+				defaultAgencyCode(),
 				field(
 					["sharing-library-code"],
 					"hostlms.config_fields.sharing_library_code",
@@ -799,12 +832,10 @@ const KOHA: HostLmsProfile = {
 					"hostlms.config_fields.virtual_item_library_code_description",
 					"required",
 				),
-				field(
-					["virtual-item-location-code"],
-					"hostlms.config_fields.virtual_item_location_code",
-					"hostlms.config_fields.virtual_item_location_code_description",
-					"required",
-				),
+				// No virtual-item-location-code. KohaHostLmsClient.createItem sets
+				// home_library_id and holding_library_id and nothing else - a shelving
+				// location was never sent - so this was required configuration that no
+				// code path read. Alma still has one; that adapter does use it.
 				field(
 					["page-size"],
 					"hostlms.config_fields.page_size",
@@ -841,12 +872,7 @@ const FOUNDATION: HostLmsProfile = {
 					"text",
 					"NCIP",
 				),
-				field(
-					["default-agency-code"],
-					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
-					"required",
-				),
+				defaultAgencyCode(),
 				// Required for the NCIP branch, which is the default - but a SIP2
 				// host legitimately has no endpoint, so it cannot be a hard
 				// requirement of the form.
@@ -928,10 +954,16 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					"url",
 					"https://appliance.example.org",
 				),
+				// Not defaultAgencyCode(): on the appliance this is the agency DCB
+				// names in the NCIP party element of every LookupUser and
+				// LookupItemSet, not a fallback for an unmapped location. An
+				// appliance fronting several libraries needs it exactly as much as
+				// one fronting a single library, so it stays required even when
+				// `shared-system` is set - and dcb-service agrees.
 				field(
 					["default-agency-code"],
 					"hostlms.config_fields.default_agency_code",
-					"hostlms.config_fields.default_agency_code_description",
+					"hostlms.config_fields.ors_default_agency_code_description",
 					"required",
 				),
 				field(
@@ -1179,6 +1211,7 @@ export const missingRequiredClientConfig = (
 		.filter(
 			(configField) =>
 				configField.requirement === "required" &&
+				!(configField.requiredUnless?.(values) ?? false) &&
 				isBlank(readPath(values, configField.path)),
 		)
 		.map((configField) => ({
@@ -1186,6 +1219,27 @@ export const missingRequiredClientConfig = (
 			labelKey: configField.labelKey,
 			requirement: "required" as const,
 		}));
+
+/**
+ * The one combination dcb-service refuses outright, checked here so the user is told
+ * by the field they just filled in rather than by a 400 after submitting.
+ *
+ * A shared system hosts several participating libraries, so no single agency can
+ * stand in for an unrecognised location: `default-agency-code` would attribute every
+ * co-tenant's patrons - including libraries outside the consortium entirely - to
+ * whichever library happened to be configured, with nothing to say it happened.
+ *
+ * Mirrors `HostLmsConfigValidator.hasSharedSystemConflict`, appliance exemption
+ * included. Diverging from it means the form and the server disagree about what is
+ * valid, and the user is caught between them.
+ */
+export const hasSharedSystemConflict = (
+	lmsClientClass: string | undefined | null,
+	values: any,
+): boolean =>
+	lmsClientClass !== HOST_LMS_CLASSES.orsAppliance &&
+	sharedSystemSet(values) &&
+	!isBlank(readPath(values, ["default-agency-code"]));
 
 /** Recommended fields left blank. Surfaced as a warning, never a block. */
 export const missingRecommendedClientConfig = (
