@@ -217,16 +217,20 @@ export type UpdateConsortiumInput = {
 	aboutImageUploader?: string | null | undefined;
 	aboutImageUploaderEmail?: string | null | undefined;
 	aboutImageUrl?: string | null | undefined;
+	brandLogoAlt?: string | null | undefined;
+	brandLogoUrl?: string | null | undefined;
 	catalogueSearchUrl?: string | null | undefined;
 	changeCategory: string;
 	changeReferenceUrl?: string | null | undefined;
 	contacts?: Array<UpdatePersonInput | null | undefined> | null | undefined;
+	defaultThemeName?: string | null | undefined;
 	description?: string | null | undefined;
 	displayName?: string | null | undefined;
 	headerImageUploader?: string | null | undefined;
 	headerImageUploaderEmail?: string | null | undefined;
 	headerImageUrl?: string | null | undefined;
 	id: string | number;
+	patronWelcome?: string | null | undefined;
 	reason: string;
 	websiteUrl?: string | null | undefined;
 };
@@ -245,8 +249,11 @@ export type UpdateLibraryInput = {
 	abbreviatedName?: string | null | undefined;
 	address?: string | null | undefined;
 	backupDowntimeSchedule?: string | null | undefined;
+	brandLogoAlt?: string | null | undefined;
+	brandLogoUrl?: string | null | undefined;
 	changeCategory?: string | null | undefined;
 	changeReferenceUrl?: string | null | undefined;
+	defaultThemeName?: string | null | undefined;
 	discoverySystem?: string | null | undefined;
 	fullName?: string | null | undefined;
 	id: string | number;
@@ -584,6 +591,10 @@ export type UpdateConsortiumMutation = {
 		description: string | null;
 		catalogueSearchUrl: string | null;
 		websiteUrl: string | null;
+		brandLogoUrl: string | null;
+		brandLogoAlt: string | null;
+		patronWelcome: string | null;
+		defaultThemeName: string | null;
 	};
 };
 
@@ -1044,6 +1055,10 @@ export type LoadConsortiumQuery = {
 			catalogueSearchUrl: string | null;
 			websiteUrl: string | null;
 			displayName: string | null;
+			brandLogoUrl: string | null;
+			brandLogoAlt: string | null;
+			patronWelcome: string | null;
+			defaultThemeName: string | null;
 			libraryGroup: { id: string };
 			contacts: Array<{
 				email: string | null;

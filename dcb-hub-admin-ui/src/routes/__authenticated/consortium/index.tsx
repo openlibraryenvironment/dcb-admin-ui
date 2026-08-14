@@ -13,6 +13,7 @@ import {
 	AlertTitle,
 	Button,
 	Grid,
+	MenuItem,
 	Tab,
 	Tabs,
 	TextField,
@@ -46,6 +47,11 @@ import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
+import {
+	BRAND_LIMITS,
+	isValidLogoUrl,
+	themeOptions,
+} from "@constants/discoveryBranding";
 import NewConsortium from "@forms/NewConsortium/NewConsortium";
 
 // The page renders a single consortium: the newest one. Loader and component MUST
@@ -81,6 +87,25 @@ interface ConsortiumFormFields {
 	websiteUrl?: string;
 	catalogueSearchUrl?: string;
 	description?: string;
+	// Patron-facing brand (N-1B). These are rendered by the discovery app, not here.
+	brandLogoUrl?: string;
+	brandLogoAlt?: string;
+	patronWelcome?: string;
+	defaultThemeName?: string;
+}
+
+/**
+ * Whether an edit actually changed a field.
+ *
+ * An empty control and an unset column are the same state, and treating them as
+ * different made every untouched optional field appear in the confirmation dialog as a
+ * change the administrator was about to make. That was invisible while the form held four
+ * mostly-populated fields; the brand fields are mostly empty, so it is not any more.
+ */
+function hasChanged(next: unknown, current: unknown): boolean {
+	const normalise = (value: unknown) =>
+		value === null || value === undefined ? "" : value;
+	return normalise(next) !== normalise(current);
 }
 
 function ConsortiumPage() {
@@ -158,6 +183,21 @@ function ConsortiumPage() {
 		description: Yup.string().trim().max(400),
 		websiteUrl: Yup.string().trim().max(200),
 		catalogueSearchUrl: Yup.string().trim().max(200),
+		// Mirrors dcb-service's BrandingValidator, so an administrator is told at the
+		// field rather than by a rejected save. Blank is valid at every one of these and
+		// means "clear it" — an administrator who uploaded the wrong mark must be able to
+		// remove it.
+		brandLogoUrl: Yup.string()
+			.trim()
+			.max(BRAND_LIMITS.logoUrl)
+			.test(
+				"absolute-http-url",
+				t("consortium.brand.logo_url_invalid"),
+				isValidLogoUrl,
+			),
+		brandLogoAlt: Yup.string().trim().max(BRAND_LIMITS.logoAlt),
+		patronWelcome: Yup.string().trim().max(BRAND_LIMITS.patronWelcome),
+		defaultThemeName: Yup.string().trim().max(BRAND_LIMITS.themeName),
 	});
 
 	const {
@@ -189,6 +229,10 @@ function ConsortiumPage() {
 				description: consortium.description ?? "",
 				websiteUrl: consortium.websiteUrl ?? "",
 				catalogueSearchUrl: consortium.catalogueSearchUrl ?? "",
+				brandLogoUrl: consortium.brandLogoUrl ?? "",
+				brandLogoAlt: consortium.brandLogoAlt ?? "",
+				patronWelcome: consortium.patronWelcome ?? "",
+				defaultThemeName: consortium.defaultThemeName ?? "",
 			});
 		}
 	}, [
@@ -230,7 +274,7 @@ function ConsortiumPage() {
 		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
 			const field = key as keyof ConsortiumFormFields;
 			if (
-				formData[field] !== consortium[field] &&
+				hasChanged(formData[field], consortium[field]) &&
 				formData[field] !== undefined
 			) {
 				(acc[field] as any) = formData[field];
@@ -611,6 +655,172 @@ function ConsortiumPage() {
 									helperText={errors.description?.message}
 								/>
 							)}
+						/>
+					</Stack>
+				</Grid>
+
+				{/* Patron-facing brand — N-1B. Deliberately its own labelled block: these
+				    four fields are rendered by the DISCOVERY app, and nothing else on this
+				    page is. Without the heading an administrator has no way to tell which
+				    logo they are looking at, and the two directly above are the admin
+				    chrome's. */}
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Typography variant="h3" sx={{ mt: 2 }}>
+						{t("consortium.brand.section")}
+					</Typography>
+					<Typography variant="body1">
+						{t("consortium.brand.section_help")}
+					</Typography>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.brandLogoUrl && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.brand.logo_url")}
+						</Typography>
+						<Controller
+							name="brandLogoUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.brandLogoUrl}
+										helperText={
+											errors.brandLogoUrl?.message ??
+											t("consortium.brand.logo_url_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.brandLogoUrl} />
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.brandLogoAlt && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.brand.logo_alt")}
+						</Typography>
+						<Controller
+							name="brandLogoAlt"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.brandLogoAlt}
+										helperText={
+											errors.brandLogoAlt?.message ??
+											t("consortium.brand.logo_alt_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.brandLogoAlt} />
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.defaultThemeName && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.brand.theme")}
+						</Typography>
+						<Controller
+							name="defaultThemeName"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									// A list, not a text field, and not a colour picker. A theme
+									// from the registry has been contrast-tested in every mode;
+									// a hex an administrator types has not, and nothing here
+									// could tell them it failed.
+									<TextField
+										{...field}
+										select
+										fullWidth
+										error={!!errors.defaultThemeName}
+										helperText={
+											errors.defaultThemeName?.message ??
+											t("consortium.brand.theme_help")
+										}
+									>
+										<MenuItem value="">
+											{t("consortium.brand.theme_default")}
+										</MenuItem>
+										{themeOptions(consortium.defaultThemeName).map((name) => (
+											<MenuItem key={name} value={name}>
+												{name}
+											</MenuItem>
+										))}
+									</TextField>
+								) : (
+									<RenderAttribute attribute={consortium.defaultThemeName} />
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.patronWelcome && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.brand.patron_welcome")}
+						</Typography>
+						<Controller
+							name="patronWelcome"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										multiline
+										minRows={2}
+										error={!!errors.patronWelcome}
+										helperText={
+											errors.patronWelcome?.message ??
+											t("consortium.brand.patron_welcome_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.patronWelcome} />
+								)
+							}
 						/>
 					</Stack>
 				</Grid>
