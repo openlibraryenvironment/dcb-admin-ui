@@ -85,7 +85,7 @@ describe("clearAppStorage", () => {
 	it("leaves a sibling app's state on the shared origin alone", () => {
 		// The whole reason this is not a storage.clear().
 		local.setItem("dcb-admin-for-libraries:dcb-admin-theme", '{"mode":"dark"}');
-		session.setItem("openrs-reconnoitre:grid-storage", "{}");
+		session.setItem("symposia-ui:grid-storage", "{}");
 		local.setItem(storageKey("dcb-admin-theme"), '{"mode":"light"}');
 
 		clearAppStorage();
@@ -93,7 +93,7 @@ describe("clearAppStorage", () => {
 		expect(Object.keys(local)).toEqual([
 			"dcb-admin-for-libraries:dcb-admin-theme",
 		]);
-		expect(Object.keys(session)).toEqual(["openrs-reconnoitre:grid-storage"]);
+		expect(Object.keys(session)).toEqual(["symposia-ui:grid-storage"]);
 	});
 
 	it("leaves the OIDC user entry alone - removeUser/signoutRedirect retire that", () => {
