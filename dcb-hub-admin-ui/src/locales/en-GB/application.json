@@ -168,6 +168,20 @@
 			"minimum": "You must provide at least one contact for the consortium"
 		},
 		"description_generic": "Consortia that use OpenRS DCB can include any combination of public, academic and specialist libraries and collections. <paragraph/>DCB connects libraries across ILS, LMS and Discovery products to handle resource sharing at scale, whether they choose to use the same or a mix of commercial or open source interfaces and central indexes.<paragraph/>",
+		"brand": {
+			"section": "Patron-facing brand",
+			"section_help": "What patrons see in the discovery app. This is separate from the images above, which are used in DCB Admin.",
+			"logo_url": "Logo URL",
+			"logo_url_help": "A full web address beginning http:// or https://. Leave blank to show the consortium's name on its own.",
+			"logo_url_invalid": "Enter a full web address beginning http:// or https://, or leave this blank.",
+			"logo_alt": "Logo description",
+			"logo_alt_help": "Read aloud in place of the logo. Leave blank to use the consortium's display name.",
+			"theme": "Discovery theme",
+			"theme_help": "Chosen from the themes the discovery app ships. Every one has been checked for colour contrast in light, dark and high-contrast modes.",
+			"theme_default": "Use the default theme",
+			"patron_welcome": "Welcome message",
+			"patron_welcome_help": "Shown to patrons under the search box. This is not the description above, which is for staff."
+		},
 		"description_title": "Description",
 		"display_name": "Display name",
 		"id": "Consortium UUID",

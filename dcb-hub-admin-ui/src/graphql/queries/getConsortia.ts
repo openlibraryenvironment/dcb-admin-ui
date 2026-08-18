@@ -21,6 +21,13 @@ export const getConsortia = gql`
 				catalogueSearchUrl
 				websiteUrl
 				displayName
+				# Patron-facing brand (N-1B). Distinct from headerImageUrl/aboutImageUrl
+				# above, which are 36x36 and 48x48 admin-chrome icons rather than a mark
+				# a patron sees on the discovery app.
+				brandLogoUrl
+				brandLogoAlt
+				patronWelcome
+				defaultThemeName
 				contacts {
 					email
 					id

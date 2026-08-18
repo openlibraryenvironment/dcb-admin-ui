@@ -13,6 +13,10 @@ export const updateConsortiumQuery = gql`
 			description
 			catalogueSearchUrl
 			websiteUrl
+			brandLogoUrl
+			brandLogoAlt
+			patronWelcome
+			defaultThemeName
 		}
 	}
 `;
