@@ -15,6 +15,8 @@ export const updateConsortiumQuery = gql`
 			websiteUrl
 			brandLogoUrl
 			brandLogoAlt
+			brandHeaderIconUrl
+			brandBackgroundImageUrl
 			patronWelcome
 			defaultThemeName
 		}

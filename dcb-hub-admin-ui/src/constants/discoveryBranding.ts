@@ -27,13 +27,44 @@
  */
 export const DISCOVERY_THEME_NAMES = ["openRS", "kInt"] as const;
 
-/** Column widths in dcb-service's V8_73_001 / V8_73_002. Rejected here, not by Postgres. */
+/**
+ * Column widths in dcb-service's V8_73_001 / V8_73_002 / V8_73_003. Rejected here, not by
+ * Postgres.
+ */
 export const BRAND_LIMITS = {
 	logoUrl: 400,
 	logoAlt: 255,
+	headerIconUrl: 400,
+	backgroundImageUrl: 400,
 	patronWelcome: 500,
 	themeName: 64,
 } as const;
+
+/**
+ * The path dcb-service serves uploaded brand assets from — R-17b.
+ *
+ * An upload returns a site-relative URL under this prefix, and dcb-service's
+ * BrandingValidator accepts that form on write alongside an absolute http(s) URL. Kept in
+ * step with `dcb.branding.assets.public-path-prefix`, whose default this is.
+ */
+export const BRAND_ASSET_PATH_PREFIX = "/discovery/brand-assets/";
+
+/**
+ * What the file picker offers, and what dcb-service will actually accept — R-17c.
+ *
+ * PNG and JPEG only. SVG is refused because it is a script-capable document and one
+ * served from our own origin would be stored XSS in the chrome of every patron page,
+ * including the sign-in page. WebP is refused because the server cannot re-encode it, and
+ * an image it cannot decode is one it will not store.
+ *
+ * This attribute is a CONVENIENCE, never a control: a file picker filter is a hint to the
+ * operating system and says nothing about the bytes. dcb-service sniffs magic bytes and
+ * ignores both the filename and the declared content type.
+ */
+export const BRAND_IMAGE_ACCEPT = "image/png,image/jpeg";
+
+/** Matches `dcb.branding.assets.max-bytes`. Checked again, and properly, on the server. */
+export const BRAND_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
 
 /**
  * The theme choices to render, including whatever is currently stored.
@@ -48,19 +79,31 @@ export function themeOptions(current?: string | null): string[] {
 	return current && !known.includes(current) ? [...known, current] : known;
 }
 
+/** The shape dcb-service's asset store mints: a SHA-256 and an extension it re-encodes to. */
+const ASSET_KEY = /^[0-9a-f]{64}[.](png|jpg)$/;
+
 /**
  * Mirrors dcb-service's `BrandingValidator.logoUrl` so the administrator is told at the
  * field rather than by a rejected mutation.
  *
- * Absolute http(s) with a host, and nothing else. This URL becomes the `src` of an `<img>`
- * in the chrome of every page of the patron app, so `javascript:` and `data:` have no
+ * Absolute http(s) with a host, OR a path under dcb-service's own asset prefix — the two
+ * routes of R-17e, one column. Nothing else. This URL becomes the `src` of an `<img>` in
+ * the chrome of every page of the patron app, so `javascript:` and `data:` have no
  * legitimate use here, and a protocol-relative `//host/x` leaves the origin without
  * looking like it did. Blank is valid and means "clear it".
+ *
+ * The prefix branch checks the KEY as well as the prefix. A "starts with" test would
+ * accept `/discovery/brand-assets/../../something`, and a prefix test that can be walked
+ * out of is not a prefix test.
  */
 export function isValidLogoUrl(value?: string | null): boolean {
 	const trimmed = value?.trim();
 	if (!trimmed) {
 		return true;
+	}
+
+	if (trimmed.startsWith(BRAND_ASSET_PATH_PREFIX)) {
+		return ASSET_KEY.test(trimmed.slice(BRAND_ASSET_PATH_PREFIX.length));
 	}
 
 	let url: URL;

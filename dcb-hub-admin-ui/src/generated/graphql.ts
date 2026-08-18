@@ -217,6 +217,8 @@ export type UpdateConsortiumInput = {
 	aboutImageUploader?: string | null | undefined;
 	aboutImageUploaderEmail?: string | null | undefined;
 	aboutImageUrl?: string | null | undefined;
+	brandBackgroundImageUrl?: string | null | undefined;
+	brandHeaderIconUrl?: string | null | undefined;
 	brandLogoAlt?: string | null | undefined;
 	brandLogoUrl?: string | null | undefined;
 	catalogueSearchUrl?: string | null | undefined;
@@ -593,6 +595,8 @@ export type UpdateConsortiumMutation = {
 		websiteUrl: string | null;
 		brandLogoUrl: string | null;
 		brandLogoAlt: string | null;
+		brandHeaderIconUrl: string | null;
+		brandBackgroundImageUrl: string | null;
 		patronWelcome: string | null;
 		defaultThemeName: string | null;
 	};
@@ -1057,6 +1061,8 @@ export type LoadConsortiumQuery = {
 			displayName: string | null;
 			brandLogoUrl: string | null;
 			brandLogoAlt: string | null;
+			brandHeaderIconUrl: string | null;
+			brandBackgroundImageUrl: string | null;
 			patronWelcome: string | null;
 			defaultThemeName: string | null;
 			libraryGroup: { id: string };

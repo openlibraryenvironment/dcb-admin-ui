@@ -47,6 +47,7 @@ import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
+import { BrandImageField } from "@components/BrandImageField/BrandImageField";
 import {
 	BRAND_LIMITS,
 	isValidLogoUrl,
@@ -90,6 +91,8 @@ interface ConsortiumFormFields {
 	// Patron-facing brand (N-1B). These are rendered by the discovery app, not here.
 	brandLogoUrl?: string;
 	brandLogoAlt?: string;
+	brandHeaderIconUrl?: string;
+	brandBackgroundImageUrl?: string;
 	patronWelcome?: string;
 	defaultThemeName?: string;
 }
@@ -196,6 +199,22 @@ function ConsortiumPage() {
 				isValidLogoUrl,
 			),
 		brandLogoAlt: Yup.string().trim().max(BRAND_LIMITS.logoAlt),
+		brandHeaderIconUrl: Yup.string()
+			.trim()
+			.max(BRAND_LIMITS.headerIconUrl)
+			.test(
+				"absolute-http-url-or-asset",
+				t("consortium.brand.logo_url_invalid"),
+				isValidLogoUrl,
+			),
+		brandBackgroundImageUrl: Yup.string()
+			.trim()
+			.max(BRAND_LIMITS.backgroundImageUrl)
+			.test(
+				"absolute-http-url-or-asset",
+				t("consortium.brand.logo_url_invalid"),
+				isValidLogoUrl,
+			),
 		patronWelcome: Yup.string().trim().max(BRAND_LIMITS.patronWelcome),
 		defaultThemeName: Yup.string().trim().max(BRAND_LIMITS.themeName),
 	});
@@ -231,6 +250,8 @@ function ConsortiumPage() {
 				catalogueSearchUrl: consortium.catalogueSearchUrl ?? "",
 				brandLogoUrl: consortium.brandLogoUrl ?? "",
 				brandLogoAlt: consortium.brandLogoAlt ?? "",
+				brandHeaderIconUrl: consortium.brandHeaderIconUrl ?? "",
+				brandBackgroundImageUrl: consortium.brandBackgroundImageUrl ?? "",
 				patronWelcome: consortium.patronWelcome ?? "",
 				defaultThemeName: consortium.defaultThemeName ?? "",
 			});
@@ -671,6 +692,14 @@ function ConsortiumPage() {
 					<Typography variant="body1">
 						{t("consortium.brand.section_help")}
 					</Typography>
+					{/* Said once, in the section, rather than three times in three help
+					    texts. An administrator choosing between uploading and pasting a
+					    CDN address deserves to know what the second one costs. */}
+					{editMode && (
+						<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+							{t("consortium.brand.external_url_cost")}
+						</Typography>
+					)}
 				</Grid>
 
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -690,9 +719,10 @@ function ConsortiumPage() {
 							control={control}
 							render={({ field }) =>
 								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
+									<BrandImageField
+										value={field.value ?? ""}
+										onChange={field.onChange}
+										label={t("consortium.brand.logo_url")}
 										error={!!errors.brandLogoUrl}
 										helperText={
 											errors.brandLogoUrl?.message ??
@@ -701,6 +731,81 @@ function ConsortiumPage() {
 									/>
 								) : (
 									<RenderAttribute attribute={consortium.brandLogoUrl} />
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+
+				{/* R-17d/R-17e. Two more images, each with the same two routes in: upload
+				    into our bucket, or point at a CDN the consortium already runs. Neither
+				    is the fallback for the other. */}
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.brandHeaderIconUrl && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.brand.header_icon_url")}
+						</Typography>
+						<Controller
+							name="brandHeaderIconUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<BrandImageField
+										value={field.value ?? ""}
+										onChange={field.onChange}
+										label={t("consortium.brand.header_icon_url")}
+										error={!!errors.brandHeaderIconUrl}
+										helperText={
+											errors.brandHeaderIconUrl?.message ??
+											t("consortium.brand.header_icon_url_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={consortium.brandHeaderIconUrl} />
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction={"column"}>
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.brandBackgroundImageUrl && editMode
+									? "error"
+									: "primary.attributeTitle"
+							}
+						>
+							{t("consortium.brand.background_image_url")}
+						</Typography>
+						<Controller
+							name="brandBackgroundImageUrl"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<BrandImageField
+										value={field.value ?? ""}
+										onChange={field.onChange}
+										label={t("consortium.brand.background_image_url")}
+										error={!!errors.brandBackgroundImageUrl}
+										helperText={
+											errors.brandBackgroundImageUrl?.message ??
+											t("consortium.brand.background_image_url_help")
+										}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={consortium.brandBackgroundImageUrl}
+									/>
 								)
 							}
 						/>

@@ -26,6 +26,8 @@ export const getConsortia = gql`
 				# a patron sees on the discovery app.
 				brandLogoUrl
 				brandLogoAlt
+				brandHeaderIconUrl
+				brandBackgroundImageUrl
 				patronWelcome
 				defaultThemeName
 				contacts {

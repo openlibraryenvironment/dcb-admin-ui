@@ -73,11 +73,13 @@ describe("themeOptions", () => {
 
 describe("brand field limits", () => {
 	it("matches the column widths in dcb-service's brand migrations", () => {
-		// V8_73_001 / V8_73_002. A value the database would truncate must be refused
-		// here, with a message, rather than arriving mangled.
+		// V8_73_001 / V8_73_002 / V8_73_003. A value the database would truncate must be
+		// refused here, with a message, rather than arriving mangled.
 		expect(BRAND_LIMITS).toEqual({
 			logoUrl: 400,
 			logoAlt: 255,
+			headerIconUrl: 400,
+			backgroundImageUrl: 400,
 			patronWelcome: 500,
 			themeName: 64,
 		});
@@ -96,6 +98,17 @@ describe("brand translations", () => {
 			"logo_url_invalid",
 			"logo_alt",
 			"logo_alt_help",
+			"header_icon_url",
+			"header_icon_url_help",
+			"background_image_url",
+			"background_image_url_help",
+			"upload",
+			"uploading",
+			"upload_formats",
+			"upload_too_large",
+			"upload_failed",
+			"image_url",
+			"external_url_cost",
 			"theme",
 			"theme_help",
 			"theme_default",
@@ -104,5 +117,41 @@ describe("brand translations", () => {
 		]) {
 			expect(typeof brand[key], key).toBe("string");
 		}
+	});
+});
+
+// --- R-17e: one column, two ways to fill it ----------------------------------
+
+describe("an uploaded asset path", () => {
+	const key = "a".repeat(64);
+
+	/**
+	 * The new accepted form. An upload returns a site-relative URL under dcb-service's
+	 * own asset prefix — which is exactly the shape every other case here exists to
+	 * reject — so the rule is widened by one case rather than relaxed.
+	 */
+	it("accepts a path under dcb-service's asset prefix", () => {
+		expect(isValidLogoUrl(`/discovery/brand-assets/${key}.png`)).toBe(true);
+		expect(isValidLogoUrl(`/discovery/brand-assets/${key}.jpg`)).toBe(true);
+	});
+
+	/**
+	 * A "starts with" test would accept this. A prefix test that can be walked out of is
+	 * not a prefix test, which is why the key's shape is checked too.
+	 */
+	it("rejects a traversal out of the prefix", () => {
+		expect(isValidLogoUrl("/discovery/brand-assets/../../etc/passwd")).toBe(
+			false,
+		);
+	});
+
+	it("rejects anything under the prefix that is not a key this service minted", () => {
+		expect(isValidLogoUrl("/discovery/brand-assets/logo.png")).toBe(false);
+		expect(isValidLogoUrl(`/discovery/brand-assets/${key}.svg`)).toBe(false);
+	});
+
+	it("still rejects every other site-relative path", () => {
+		expect(isValidLogoUrl(`/uploads/${key}.png`)).toBe(false);
+		expect(isValidLogoUrl("/discovery/brand-assets-evil/x.png")).toBe(false);
 	});
 });

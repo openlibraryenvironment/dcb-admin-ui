@@ -21,6 +21,11 @@ export interface Consortium {
 	// Nullable everywhere: a consortium that has set none is complete, not unfinished.
 	brandLogoUrl?: string | null;
 	brandLogoAlt?: string | null;
+	// R-17d. A square mark for the discovery app's app bar and browser tab, and the
+	// canvas behind its landing page. Not sizes of the logo: a lockup in a 32px box is
+	// unreadable, and a canvas is not a mark at all.
+	brandHeaderIconUrl?: string | null;
+	brandBackgroundImageUrl?: string | null;
 	patronWelcome?: string | null;
 	// A name from the DISCOVERY app's theme registry — unrelated to this app's themes.
 	defaultThemeName?: string | null;
