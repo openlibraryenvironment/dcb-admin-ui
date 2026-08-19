@@ -12,7 +12,11 @@ set -eu
 # disagree - which mounted the router where its own assets did not resolve.
 # This image serves the app at "/"; subpath hosting is done by the Cloudflare
 # worker in front of S3 (see docs/worker.js), not here.
-vars='${VITE_MUI_X_LICENSE_KEY} ${VITE_KEYCLOAK_URL} ${VITE_KEYCLOAK_ID} ${VITE_DCB_API_BASE} ${VITE_DCB_SEARCH_BASE} ${VITE_ILL_API_BASE}'
+# Feature flags are listed here too, so an environment can turn a backend-gated
+# feature on without rebuilding the bundle (see src/helpers/featureFlags.ts).
+# envsubst renders an unset var as the empty string, which readFlag() reads as
+# false - so a flag absent from the environment leaves the feature off.
+vars='${VITE_MUI_X_LICENSE_KEY} ${VITE_KEYCLOAK_URL} ${VITE_KEYCLOAK_ID} ${VITE_DCB_API_BASE} ${VITE_DCB_SEARCH_BASE} ${VITE_ILL_API_BASE} ${VITE_FEATURE_INSIGHTS} ${VITE_FEATURE_AUDIT_EXPLORER}'
 
 envsubst "$vars" \
 	< /usr/share/nginx/html/inject_env.template.json \
