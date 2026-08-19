@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import useDCBVersionStore from "./serviceInfoStore";
+import { areBrandUploadsAvailable } from "@constants/discoveryBranding";
 
 // Stop constant /info requests: the service version changes rarely.
 const REQUEST_DELAY = 2 * 60 * 60 * 1000; // 2 hours
@@ -18,6 +19,7 @@ const useDCBServiceInfo = () => {
 	const error = useDCBVersionStore((state) => state.error);
 	const type = useDCBVersionStore((state) => state.type);
 	const branch = useDCBVersionStore((state) => state.branch);
+	const brandAssetStore = useDCBVersionStore((state) => state.brandAssetStore);
 	const lastFetchedAt = useDCBVersionStore((state) => state.lastFetchedAt);
 	const fetchedFrom = useDCBVersionStore((state) => state.fetchedFrom);
 	const fetchVersionInfo = useDCBVersionStore(
@@ -35,7 +37,18 @@ const useDCBServiceInfo = () => {
 		}
 	}, [apiBase, lastFetchedAt, fetchedFrom, fetchVersionInfo]);
 
-	return { version, isDev, isAcceptableVersion, loading, error, type, branch };
+	return {
+		version,
+		isDev,
+		isAcceptableVersion,
+		loading,
+		error,
+		type,
+		branch,
+		brandAssetStore,
+		/** Whether to offer brand image upload controls. See areBrandUploadsAvailable. */
+		brandUploadsAvailable: areBrandUploadsAvailable(brandAssetStore),
+	};
 };
 
 export default useDCBServiceInfo;

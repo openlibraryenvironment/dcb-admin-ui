@@ -1,4 +1,4 @@
-import { FunctionalSetting } from "./FunctionalSetting";
+﻿import { FunctionalSetting } from "./FunctionalSetting";
 import { Group } from "./Group";
 import { Person } from "./Person";
 
@@ -12,7 +12,7 @@ export interface Consortium {
 	websiteUrl: string;
 	displayName: string;
 	// The brand (N-1B). ONE set of marks for every DCB app, patron-facing and staff-facing
-	// alike: V8_74_002 merged headerImageUrl into brandHeaderIconUrl and aboutImageUrl into
+	// alike: V9_0_004 merged headerImageUrl into brandHeaderIconUrl and aboutImageUrl into
 	// brandLogoUrl, and dropped the uploader name/email columns that sat beside them.
 	// Nullable everywhere: a consortium that has set none is complete, not unfinished.
 	brandLogoUrl?: string | null;
@@ -23,7 +23,7 @@ export interface Consortium {
 	brandHeaderIconUrl?: string | null;
 	brandBackgroundImageUrl?: string | null;
 	patronWelcome?: string | null;
-	// A name from the DISCOVERY app's theme registry — unrelated to this app's themes.
+	// A name from the DISCOVERY app's theme registry â€” unrelated to this app's themes.
 	defaultThemeName?: string | null;
 	contacts: [Person];
 	functionalSettings: [FunctionalSetting];

@@ -28,8 +28,8 @@
 export const DISCOVERY_THEME_NAMES = ["openRS", "kInt"] as const;
 
 /**
- * Column widths in dcb-service's V8_73_001 / V8_73_002 / V8_73_003. Rejected here, not by
- * Postgres.
+ * Column widths in dcb-service's V9_0_001 (consortium) and V9_0_002 (library). Rejected
+ * here, not by Postgres.
  */
 export const BRAND_LIMITS = {
 	logoUrl: 400,
@@ -77,6 +77,39 @@ export const BRAND_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
 export function themeOptions(current?: string | null): string[] {
 	const known: string[] = [...DISCOVERY_THEME_NAMES];
 	return current && !known.includes(current) ? [...known, current] : known;
+}
+
+/**
+ * `dcb.branding.assets.store` out of an `/info` payload, or null when it is not there.
+ *
+ * Every level is optional on purpose. dcb-service only publishes the branding block when a
+ * `BrandAssetStore` bean exists, so its absence is an ordinary answer from an older or
+ * differently-configured deployment rather than a malformed response.
+ */
+export function brandAssetStoreFrom(info: unknown): string | null {
+	const store = (
+		info as { dcb?: { branding?: { assets?: { store?: unknown } } } } | null
+	)?.dcb?.branding?.assets?.store;
+
+	return typeof store === "string" ? store : null;
+}
+
+/**
+ * Whether this deployment accepts brand image uploads — R-17b.
+ *
+ * With `dcb.branding.assets.store=none` dcb-service's upload controller is not registered
+ * at all (`@Requires(beans = BrandAssetStore.class)`), so POST /brand-assets is a 404 and
+ * an upload button there can only ever fail.
+ *
+ * UNKNOWN IS AVAILABLE, deliberately. A null store means /info has not been read yet, or
+ * the request failed, or the payload predates the branding block — none of which is
+ * evidence that uploads are off. Hiding the control on unknown would remove a working
+ * feature whenever /info is briefly unreachable, and leave no way to explain why. Showing
+ * it costs a clear refusal at Save, which is the message dcb-service already writes. This
+ * is UX, not authorisation: the control on uploading is the role check on the route.
+ */
+export function areBrandUploadsAvailable(assetStore: string | null): boolean {
+	return assetStore !== "none";
 }
 
 /** The shape dcb-service's asset store mints: a SHA-256 and an extension it re-encodes to. */

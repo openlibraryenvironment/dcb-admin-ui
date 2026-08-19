@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -33,6 +33,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import { getConsortia } from "@queries/getConsortia";
 import type {
 	LoadConsortiumQueryVariables,
@@ -164,6 +165,11 @@ function ConsortiumPage() {
 		setDescription,
 	} = useConsortiumInfoStore();
 
+	// R-17b. A deployment with dcb.branding.assets.store=none has no upload route at all,
+	// so the button would 404. The URL field stays either way - pointing at a CDN the
+	// consortium already runs is a first-class route in, not a fallback.
+	const { brandUploadsAvailable } = useDCBServiceInfo();
+
 	const {
 		data: gridData,
 		isLoading: loading,
@@ -194,7 +200,7 @@ function ConsortiumPage() {
 		catalogueSearchUrl: Yup.string().trim().max(200),
 		// Mirrors dcb-service's BrandingValidator, so an administrator is told at the
 		// field rather than by a rejected save. Blank is valid at every one of these and
-		// means "clear it" — an administrator who uploaded the wrong mark must be able to
+		// means "clear it" â€” an administrator who uploaded the wrong mark must be able to
 		// remove it.
 		brandLogoUrl: Yup.string()
 			.trim()
@@ -226,7 +232,7 @@ function ConsortiumPage() {
 	});
 
 	/**
-	 * Brand images chosen but not yet uploaded, keyed by the field they belong to — R-17e.
+	 * Brand images chosen but not yet uploaded, keyed by the field they belong to â€” R-17e.
 	 *
 	 * Uploading at pick time left a stored image behind every time somebody reconsidered or
 	 * closed the tab. dcb-service cannot tell those from an image about to be used, so it
@@ -267,7 +273,7 @@ function ConsortiumPage() {
 			setCatalogueSearchURL(consortium.catalogueSearchUrl);
 			setDisplayName(consortium.displayName);
 			// The chrome images the app bar and the landing card render. These are the
-			// merged brand columns now: V8_74_002 replaced headerImageUrl with
+			// merged brand columns now: V9_0_004 replaced headerImageUrl with
 			// brandHeaderIconUrl and aboutImageUrl with brandLogoUrl, because a
 			// consortium's mark is one asset that CSS sizes, not four columns.
 			// Coalesced because the brand columns are nullable where the admin-chrome ones
@@ -679,7 +685,7 @@ function ConsortiumPage() {
 					</Stack>
 				</Grid>
 
-				{/* Patron-facing brand — N-1B. Deliberately its own labelled block: these
+				{/* Patron-facing brand â€” N-1B. Deliberately its own labelled block: these
 				    four fields are rendered by the DISCOVERY app, and nothing else on this
 				    page is. Without the heading an administrator has no way to tell which
 				    logo they are looking at, and the two directly above are the admin
@@ -724,6 +730,7 @@ function ConsortiumPage() {
 										stagedFile={stagedImages[field.name] ?? null}
 										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.logo_url")}
+										uploadsAvailable={brandUploadsAvailable}
 										error={!!errors.brandLogoUrl}
 										helperText={
 											errors.brandLogoUrl?.message ??
@@ -764,6 +771,7 @@ function ConsortiumPage() {
 										stagedFile={stagedImages[field.name] ?? null}
 										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.header_icon_url")}
+										uploadsAvailable={brandUploadsAvailable}
 										error={!!errors.brandHeaderIconUrl}
 										helperText={
 											errors.brandHeaderIconUrl?.message ??
@@ -801,6 +809,7 @@ function ConsortiumPage() {
 										stagedFile={stagedImages[field.name] ?? null}
 										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.background_image_url")}
+										uploadsAvailable={brandUploadsAvailable}
 										error={!!errors.brandBackgroundImageUrl}
 										helperText={
 											errors.brandBackgroundImageUrl?.message ??
