@@ -23,8 +23,10 @@ export const getConsortiumBasics = gql`
 					id
 				}
 				displayName
-				headerImageUrl
-				aboutImageUrl
+				# The app bar mark and the landing card mark. Formerly headerImageUrl and
+				# aboutImageUrl, merged into the brand columns by V8_74_002.
+				brandHeaderIconUrl
+				brandLogoUrl
 				description
 				catalogueSearchUrl
 				websiteUrl

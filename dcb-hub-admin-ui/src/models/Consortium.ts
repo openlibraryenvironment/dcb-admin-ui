@@ -7,22 +7,18 @@ export interface Consortium {
 	name: string;
 	libraryGroup: Group;
 	dateOfLaunch: string;
-	headerImageUrl: string;
-	headerImageUploader: string;
-	headerImageUploaderEmail: string;
-	aboutImageUrl: string;
-	aboutImageUploader: string;
-	aboutImageUploaderEmail: string;
 	description: string;
 	catalogueSearchUrl: string;
 	websiteUrl: string;
 	displayName: string;
-	// Patron-facing brand (N-1B), rendered by the discovery app rather than by this one.
+	// The brand (N-1B). ONE set of marks for every DCB app, patron-facing and staff-facing
+	// alike: V8_74_002 merged headerImageUrl into brandHeaderIconUrl and aboutImageUrl into
+	// brandLogoUrl, and dropped the uploader name/email columns that sat beside them.
 	// Nullable everywhere: a consortium that has set none is complete, not unfinished.
 	brandLogoUrl?: string | null;
 	brandLogoAlt?: string | null;
-	// R-17d. A square mark for the discovery app's app bar and browser tab, and the
-	// canvas behind its landing page. Not sizes of the logo: a lockup in a 32px box is
+	// R-17d. A square mark for an app bar and a browser tab, and the canvas behind the
+	// discovery app's landing page. Not sizes of the logo: a lockup in a 32px box is
 	// unreadable, and a canvas is not a mark at all.
 	brandHeaderIconUrl?: string | null;
 	brandBackgroundImageUrl?: string | null;

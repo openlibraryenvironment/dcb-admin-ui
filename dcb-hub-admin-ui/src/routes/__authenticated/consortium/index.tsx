@@ -19,17 +19,15 @@ import {
 	TextField,
 	Typography,
 	useTheme,
-	Box,
 	Stack,
 } from "@mui/material";
-import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
+import { Cancel, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
-import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
@@ -139,14 +137,7 @@ function ConsortiumPage() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const appHeaderFileRef = useRef<HTMLInputElement>(null);
-	const aboutFileRef = useRef<HTMLInputElement>(null);
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
-
-	const [headerIsUploading, setHeaderIsUploading] = useState(false);
-	const [aboutIsUploading, setAboutIsUploading] = useState(false);
-	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState("");
-	const [aboutPreviewUrl, setAboutPreviewUrl] = useState("");
 
 	const [showNewConsortium, setShowNewConsortium] = useState(false);
 	const [editMode, setEditMode] = useState(false);
@@ -275,8 +266,14 @@ function ConsortiumPage() {
 			setWebsiteURL(consortium.websiteUrl);
 			setCatalogueSearchURL(consortium.catalogueSearchUrl);
 			setDisplayName(consortium.displayName);
-			setHeaderImageURL(consortium.headerImageUrl);
-			setAboutImageURL(consortium.aboutImageUrl);
+			// The chrome images the app bar and the landing card render. These are the
+			// merged brand columns now: V8_74_002 replaced headerImageUrl with
+			// brandHeaderIconUrl and aboutImageUrl with brandLogoUrl, because a
+			// consortium's mark is one asset that CSS sizes, not four columns.
+			// Coalesced because the brand columns are nullable where the admin-chrome ones
+			// were not: the store holds a string and renders a fallback mark on "".
+			setHeaderImageURL(consortium.brandHeaderIconUrl ?? "");
+			setAboutImageURL(consortium.brandLogoUrl ?? "");
 			reset({
 				displayName: consortium.displayName ?? "",
 				description: consortium.description ?? "",
@@ -316,13 +313,6 @@ function ConsortiumPage() {
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
 	});
-
-	useEffect(() => {
-		return () => {
-			if (appHeaderPreviewUrl) URL.revokeObjectURL(appHeaderPreviewUrl);
-			if (aboutPreviewUrl) URL.revokeObjectURL(aboutPreviewUrl);
-		};
-	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
 
 	const onSubmit = async (formData: ConsortiumFormFields) => {
 		if (!consortium) return;
@@ -421,89 +411,6 @@ function ConsortiumPage() {
 			});
 		} finally {
 			setConfirmationEdit(false);
-		}
-	};
-
-	const validateImageSize = (
-		file: File,
-		width: number,
-		height: number,
-	): Promise<boolean> => {
-		return new Promise((resolve, reject) => {
-			const img = document.createElement("img");
-			img.onload = () => {
-				URL.revokeObjectURL(img.src);
-				resolve(img.width <= width && img.height === height);
-			};
-			img.onerror = () => {
-				URL.revokeObjectURL(img.src);
-				reject(false);
-			};
-			img.src = URL.createObjectURL(file);
-		});
-	};
-
-	const handleFileUpload = async (
-		fileRef: React.RefObject<HTMLInputElement | null>,
-		isHeader: boolean,
-	) => {
-		const file = fileRef.current?.files?.[0];
-		if (!file || !consortium) return;
-
-		const isValidSize = await validateImageSize(
-			file,
-			isHeader ? 36 : 180,
-			isHeader ? 36 : 48,
-		);
-		if (!isValidSize) {
-			setAlert({
-				open: true,
-				severity: "error",
-				text: isHeader
-					? t("consortium.image_size_error_header")
-					: t("consortium.image_size_error_about"),
-				title: t("ui.error.title"),
-			});
-			return;
-		}
-
-		const formData = new FormData();
-		formData.append("file", file);
-
-		try {
-			if (isHeader) setHeaderIsUploading(true);
-			else setAboutIsUploading(true);
-			const res = await client.post("/persistentAssets/serverUpload", formData);
-			const { url } = res.data;
-
-			await updateConsortium({
-				input: {
-					id: consortium.id,
-					[isHeader ? "headerImageUrl" : "aboutImageUrl"]: url,
-					reason: `Update of consortium ${isHeader ? "header" : "about"} image`,
-					changeCategory: "Initial setup",
-				},
-			});
-
-			if (isHeader) setAppHeaderPreviewUrl("");
-			else setAboutPreviewUrl("");
-			if (fileRef.current) fileRef.current.value = "";
-			setAlert({
-				open: true,
-				severity: "success",
-				text: t("ui.data_grid.success"),
-				title: t("ui.data_grid.success"),
-			});
-		} catch {
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("ui.error.update_failed"),
-				title: t("ui.error.title"),
-			});
-		} finally {
-			if (isHeader) setHeaderIsUploading(false);
-			else setAboutIsUploading(false);
 		}
 	};
 
@@ -1025,87 +932,6 @@ function ConsortiumPage() {
 								)
 							}
 						/>
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					{/* A column Stack stretches its children to the container width by
-					    default; these Grids span the full row, so the upload controls must
-					    be pinned to the start to size to their own content. */}
-					<Stack direction={"column"} sx={{ alignItems: "flex-start" }}>
-						<Typography variant="attributeTitle">
-							{t("consortium.logo_app_header")}
-						</Typography>
-						{consortium.headerImageUrl ? (
-							<Box
-								component="img"
-								src={consortium.headerImageUrl}
-								sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
-							/>
-						) : (
-							<Typography>{t("consortium.no_file_uploaded")}</Typography>
-						)}
-						<FileUploadButton
-							ref={appHeaderFileRef}
-							icon={<CloudUpload />}
-							buttonText={t("consortium.select_image")}
-							href="#appHeaderUpload"
-							isUploading={headerIsUploading}
-							onFileSelect={(e) =>
-								setAppHeaderPreviewUrl(URL.createObjectURL(e.target.files![0]))
-							}
-							previewUrl={appHeaderPreviewUrl}
-							handleRemove={() => setAppHeaderPreviewUrl("")}
-						/>
-						{appHeaderPreviewUrl && (
-							<Button
-								variant="outlined"
-								onClick={() => handleFileUpload(appHeaderFileRef, true)}
-								disabled={headerIsUploading}
-								sx={{ mt: 2 }}
-							>
-								{headerIsUploading ? t("common.uploading") : t("common.upload")}
-							</Button>
-						)}
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"} sx={{ alignItems: "flex-start" }}>
-						<Typography variant="attributeTitle">
-							{t("consortium.logo_about")}
-						</Typography>
-						{consortium.aboutImageUrl ? (
-							<Box
-								component="img"
-								src={consortium.aboutImageUrl}
-								sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
-							/>
-						) : (
-							<Typography>{t("consortium.no_file_uploaded")}</Typography>
-						)}
-						<FileUploadButton
-							ref={aboutFileRef}
-							icon={<CloudUpload />}
-							buttonText={t("consortium.select_image")}
-							href="#aboutFileUpload"
-							isUploading={aboutIsUploading}
-							onFileSelect={(e) =>
-								setAboutPreviewUrl(URL.createObjectURL(e.target.files![0]))
-							}
-							previewUrl={aboutPreviewUrl}
-							handleRemove={() => setAboutPreviewUrl("")}
-						/>
-						{aboutPreviewUrl && (
-							<Button
-								variant="outlined"
-								onClick={() => handleFileUpload(aboutFileRef, false)}
-								disabled={aboutIsUploading}
-								sx={{ mt: 2 }}
-							>
-								{aboutIsUploading ? t("common.uploading") : t("common.upload")}
-							</Button>
-						)}
 					</Stack>
 				</Grid>
 			</Grid>
