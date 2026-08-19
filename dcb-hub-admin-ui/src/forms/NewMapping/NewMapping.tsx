@@ -262,7 +262,17 @@ export default function NewMapping({
 				createReferenceValueMapping,
 				variables,
 			),
-		onSuccess: () => queryClient.invalidateQueries(), // Broad refresh to update any active grid
+		// A new mapping can land in any of the mappings grids and this form does not know
+		// which is mounted, so match on the grid id rather than name one key. Every grid
+		// id passed to MappingsGrid carries "Mappings" (allMappings*, numMappings*,
+		// refMappings*), so this refreshes all of them and leaves every other query
+		// alone — the previous bare invalidateQueries() re-fired the entire cache.
+		onSuccess: () =>
+			queryClient.invalidateQueries({
+				predicate: (query) =>
+					typeof query.queryKey[0] === "string" &&
+					query.queryKey[0].includes("Mappings"),
+			}),
 	});
 
 	const handleFromContextChange = useCallback(

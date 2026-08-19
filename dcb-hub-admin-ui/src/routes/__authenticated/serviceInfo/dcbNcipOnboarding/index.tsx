@@ -305,7 +305,6 @@ function PolicyForm({
 					"HOST_LMS_CODE_REQUIRED",
 					"HOST_LMS_CODE_TOO_LONG",
 				])}
-				autoComplete="off"
 			/>
 			<TextField
 				label={t("dcb_ncip_onboarding.policy.agency_code")}
@@ -313,7 +312,6 @@ function PolicyForm({
 				onChange={(event) => onChange("agencyCode", event.target.value)}
 				error={errors.some((code) => code.startsWith("AGENCY_CODE"))}
 				helperText={errorText(["AGENCY_CODE_REQUIRED", "AGENCY_CODE_TOO_LONG"])}
-				autoComplete="off"
 			/>
 			<TextField
 				label={t("dcb_ncip_onboarding.policy.expected_symbol")}
@@ -321,7 +319,6 @@ function PolicyForm({
 				onChange={(event) => onChange("expectedSymbol", event.target.value)}
 				error={errors.includes("EXPECTED_SYMBOL_REQUIRED")}
 				helperText={errorText(["EXPECTED_SYMBOL_REQUIRED"])}
-				autoComplete="off"
 			/>
 			<Stack>
 				<FormControlLabel

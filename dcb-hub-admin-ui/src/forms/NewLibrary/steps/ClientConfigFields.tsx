@@ -77,7 +77,11 @@ const SecretField = ({
 					required={configField.requirement === "required"}
 					error={!!error}
 					helperText={error ?? helperText}
-					autoComplete="off"
+					// Not "off": that blocks paste and password managers, which is exactly
+					// what an admin pasting a 40-character LMS secret needs (WCAG 2.2 SC
+					// 3.3.8). "new-password" still stops the browser autofilling the
+					// operator's own saved credential into an LMS config field.
+					autoComplete="new-password"
 					slotProps={{
 						input: {
 							endAdornment: (

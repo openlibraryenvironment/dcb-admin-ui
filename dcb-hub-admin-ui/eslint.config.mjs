@@ -129,4 +129,38 @@ export default [
 			"@tanstack/query/exhaustive-deps": "off",
 		},
 	},
+	{
+		// Doctrine tripwires, moved out of the pre-commit gate's regex matcher and into
+		// ESLint on 2026-08-19. The gate matched raw text; these match the AST, so they
+		// no longer fire on a comment, a string or an unrelated identifier.
+		rules: {
+			"react/no-danger": "error",
+			"no-restricted-syntax": [
+				"error",
+				{
+					selector:
+						"CallExpression[callee.property.name='invalidateQueries'][arguments.length=0]",
+					message:
+						"A bare invalidateQueries() nukes the cache and re-fires every mounted query. Invalidate the narrowest stale key.",
+				},
+				{
+					selector:
+						"JSXAttribute[name.name=/^auto[Cc]omplete$/][value.value='off']",
+					message:
+						"autocomplete=off breaks password managers and paste. WCAG 2.2 SC 3.3.8 (Accessible Authentication).",
+				},
+				{
+					selector:
+						"JSXAttribute[name.name=/^auto[Cc]omplete$/] JSXExpressionContainer > Literal[value='off']",
+					message:
+						"autocomplete=off breaks password managers and paste. WCAG 2.2 SC 3.3.8 (Accessible Authentication).",
+				},
+				{
+					selector: "CallExpression[callee.property.name='waitForTimeout']",
+					message:
+						"page.waitForTimeout() is banned. Use web-first auto-waiting assertions; a fixed wait is a flake you have not noticed yet.",
+				},
+			],
+		},
+	},
 ];

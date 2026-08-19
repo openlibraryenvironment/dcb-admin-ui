@@ -22,7 +22,12 @@ const valueCell = (page: Page) =>
 
 const chooseOption = async (page: Page, name: string) => {
 	await page.getByRole("option", { name, exact: true }).click();
-	await page.waitForTimeout(250);
+	// Wait for the condition, not for a duration. This replaced a fixed 250 ms sleep
+	// that was standing in for "the Select popover has closed and the panel has
+	// settled" — too short on a loaded CI runner, wasted time everywhere else. The
+	// listbox is portalled and unmounts on selection, and toHaveCount retries, so this
+	// also covers the close transition.
+	await expect(page.getByRole("listbox")).toHaveCount(0);
 };
 
 // Measured RELATIVE TO THE PANEL'S ANCHOR, so the numbers cannot be polluted by

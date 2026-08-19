@@ -220,7 +220,11 @@ export default function NewLocation({
 				createLocation,
 				variables,
 			),
-		onSuccess: () => queryClient.invalidateQueries(), // Broad refresh to update any active grid
+		// The locations grid keys on ["locations", gridId, pagination, sort, filter], and
+		// TanStack matches key prefixes, so this refreshes every locations grid and
+		// nothing else. The previous bare invalidateQueries() also re-fired libraries,
+		// patron requests, host LMS and insights on every location created.
+		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["locations"] }),
 	});
 
 	const onSubmit = async (data: NewLocationFormData) => {
