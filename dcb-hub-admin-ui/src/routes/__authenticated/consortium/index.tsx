@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,22 +19,21 @@ import {
 	TextField,
 	Typography,
 	useTheme,
-	Box,
 	Stack,
 } from "@mui/material";
-import { Cancel, CloudUpload, Edit, Save } from "@mui/icons-material";
+import { Cancel, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Loading from "@components/Loading/Loading";
-import FileUploadButton from "@components/FileUploadButton/FileUploadButton";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import { getConsortia } from "@queries/getConsortia";
 import type {
 	LoadConsortiumQueryVariables,
@@ -53,6 +52,21 @@ import {
 	isValidLogoUrl,
 	themeOptions,
 } from "@constants/discoveryBranding";
+import {
+	BrandUploadError,
+	hasStagedImages,
+	uploadStagedBrandImages,
+} from "@helpers/brandAssetUpload";
+
+/**
+ * Which label to name in an upload refusal. Three images on one form means the message
+ * alone does not say which one was refused.
+ */
+const BRAND_FIELD_LABELS: Record<string, string> = {
+	brandLogoUrl: "logo_url",
+	brandHeaderIconUrl: "header_icon_url",
+	brandBackgroundImageUrl: "background_image_url",
+};
 import NewConsortium from "@forms/NewConsortium/NewConsortium";
 
 // The page renders a single consortium: the newest one. Loader and component MUST
@@ -124,14 +138,7 @@ function ConsortiumPage() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const appHeaderFileRef = useRef<HTMLInputElement>(null);
-	const aboutFileRef = useRef<HTMLInputElement>(null);
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
-
-	const [headerIsUploading, setHeaderIsUploading] = useState(false);
-	const [aboutIsUploading, setAboutIsUploading] = useState(false);
-	const [appHeaderPreviewUrl, setAppHeaderPreviewUrl] = useState("");
-	const [aboutPreviewUrl, setAboutPreviewUrl] = useState("");
 
 	const [showNewConsortium, setShowNewConsortium] = useState(false);
 	const [editMode, setEditMode] = useState(false);
@@ -157,6 +164,11 @@ function ConsortiumPage() {
 		setWebsiteURL,
 		setDescription,
 	} = useConsortiumInfoStore();
+
+	// R-17b. A deployment with dcb.branding.assets.store=none has no upload route at all,
+	// so the button would 404. The URL field stays either way - pointing at a CDN the
+	// consortium already runs is a first-class route in, not a fallback.
+	const { brandUploadsAvailable } = useDCBServiceInfo();
 
 	const {
 		data: gridData,
@@ -188,7 +200,7 @@ function ConsortiumPage() {
 		catalogueSearchUrl: Yup.string().trim().max(200),
 		// Mirrors dcb-service's BrandingValidator, so an administrator is told at the
 		// field rather than by a rejected save. Blank is valid at every one of these and
-		// means "clear it" — an administrator who uploaded the wrong mark must be able to
+		// means "clear it" â€” an administrator who uploaded the wrong mark must be able to
 		// remove it.
 		brandLogoUrl: Yup.string()
 			.trim()
@@ -219,10 +231,29 @@ function ConsortiumPage() {
 		defaultThemeName: Yup.string().trim().max(BRAND_LIMITS.themeName),
 	});
 
+	/**
+	 * Brand images chosen but not yet uploaded, keyed by the field they belong to â€” R-17e.
+	 *
+	 * Uploading at pick time left a stored image behind every time somebody reconsidered or
+	 * closed the tab. dcb-service cannot tell those from an image about to be used, so it
+	 * keeps unreferenced uploads for a day and sweeps them; staging makes that the rare case
+	 * rather than the ordinary one. The cost is that a rejected image is reported at Save.
+	 */
+	const [stagedImages, setStagedImages] = useState<Record<string, File | null>>(
+		{},
+	);
+	const [uploadError, setUploadError] = useState<string | null>(null);
+
+	const stageImage = (field: string, file: File | null) => {
+		setUploadError(null);
+		setStagedImages((current) => ({ ...current, [field]: file }));
+	};
+
 	const {
 		control,
 		handleSubmit,
 		reset,
+		setValue,
 		formState: { errors, isDirty },
 	} = useForm<ConsortiumFormFields>({
 		// @hookform/resolvers@5 tightened the Resolver generics: yup infers
@@ -241,8 +272,14 @@ function ConsortiumPage() {
 			setWebsiteURL(consortium.websiteUrl);
 			setCatalogueSearchURL(consortium.catalogueSearchUrl);
 			setDisplayName(consortium.displayName);
-			setHeaderImageURL(consortium.headerImageUrl);
-			setAboutImageURL(consortium.aboutImageUrl);
+			// The chrome images the app bar and the landing card render. These are the
+			// merged brand columns now: V9_0_004 replaced headerImageUrl with
+			// brandHeaderIconUrl and aboutImageUrl with brandLogoUrl, because a
+			// consortium's mark is one asset that CSS sizes, not four columns.
+			// Coalesced because the brand columns are nullable where the admin-chrome ones
+			// were not: the store holds a string and renders a fallback mark on "".
+			setHeaderImageURL(consortium.brandHeaderIconUrl ?? "");
+			setAboutImageURL(consortium.brandLogoUrl ?? "");
 			reset({
 				displayName: consortium.displayName ?? "",
 				description: consortium.description ?? "",
@@ -283,22 +320,58 @@ function ConsortiumPage() {
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
 	});
 
-	useEffect(() => {
-		return () => {
-			if (appHeaderPreviewUrl) URL.revokeObjectURL(appHeaderPreviewUrl);
-			if (aboutPreviewUrl) URL.revokeObjectURL(aboutPreviewUrl);
-		};
-	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
-
-	const onSubmit = (formData: ConsortiumFormFields) => {
+	const onSubmit = async (formData: ConsortiumFormFields) => {
 		if (!consortium) return;
-		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
+
+		// Staged images are uploaded HERE, before the confirmation dialog rather than after
+		// it. A refusal is the administrator's to act on, and asking them to confirm a save
+		// that is about to be rejected would be asking them to approve something we already
+		// know will not happen.
+		let submitted = formData;
+
+		if (hasStagedImages(stagedImages)) {
+			setUploadError(null);
+
+			try {
+				const uploaded = await uploadStagedBrandImages(
+					stagedImages,
+					client,
+					t("consortium.brand.upload_failed"),
+				);
+
+				// Into the form as well as the diff, so the URL box shows what was stored
+				// rather than staying empty until the page is reloaded.
+				Object.entries(uploaded).forEach(([field, url]) =>
+					setValue(field as keyof ConsortiumFormFields, url, {
+						shouldDirty: true,
+					}),
+				);
+
+				submitted = { ...formData, ...uploaded };
+				setStagedImages({});
+			} catch (failure: unknown) {
+				const field =
+					failure instanceof BrandUploadError ? failure.field : undefined;
+
+				setUploadError(
+					field
+						? t("consortium.brand.upload_failed_field", {
+								label: t(`consortium.brand.${BRAND_FIELD_LABELS[field]}`),
+								reason: (failure as BrandUploadError).message,
+							})
+						: t("consortium.brand.upload_failed"),
+				);
+				return;
+			}
+		}
+
+		const newChangedFields = Object.keys(submitted).reduce((acc, key) => {
 			const field = key as keyof ConsortiumFormFields;
 			if (
-				hasChanged(formData[field], consortium[field]) &&
-				formData[field] !== undefined
+				hasChanged(submitted[field], consortium[field]) &&
+				submitted[field] !== undefined
 			) {
-				(acc[field] as any) = formData[field];
+				(acc[field] as any) = submitted[field];
 			}
 			return acc;
 		}, {} as Partial<Consortium>);
@@ -344,89 +417,6 @@ function ConsortiumPage() {
 			});
 		} finally {
 			setConfirmationEdit(false);
-		}
-	};
-
-	const validateImageSize = (
-		file: File,
-		width: number,
-		height: number,
-	): Promise<boolean> => {
-		return new Promise((resolve, reject) => {
-			const img = document.createElement("img");
-			img.onload = () => {
-				URL.revokeObjectURL(img.src);
-				resolve(img.width <= width && img.height === height);
-			};
-			img.onerror = () => {
-				URL.revokeObjectURL(img.src);
-				reject(false);
-			};
-			img.src = URL.createObjectURL(file);
-		});
-	};
-
-	const handleFileUpload = async (
-		fileRef: React.RefObject<HTMLInputElement | null>,
-		isHeader: boolean,
-	) => {
-		const file = fileRef.current?.files?.[0];
-		if (!file || !consortium) return;
-
-		const isValidSize = await validateImageSize(
-			file,
-			isHeader ? 36 : 180,
-			isHeader ? 36 : 48,
-		);
-		if (!isValidSize) {
-			setAlert({
-				open: true,
-				severity: "error",
-				text: isHeader
-					? t("consortium.image_size_error_header")
-					: t("consortium.image_size_error_about"),
-				title: t("ui.error.title"),
-			});
-			return;
-		}
-
-		const formData = new FormData();
-		formData.append("file", file);
-
-		try {
-			if (isHeader) setHeaderIsUploading(true);
-			else setAboutIsUploading(true);
-			const res = await client.post("/persistentAssets/serverUpload", formData);
-			const { url } = res.data;
-
-			await updateConsortium({
-				input: {
-					id: consortium.id,
-					[isHeader ? "headerImageUrl" : "aboutImageUrl"]: url,
-					reason: `Update of consortium ${isHeader ? "header" : "about"} image`,
-					changeCategory: "Initial setup",
-				},
-			});
-
-			if (isHeader) setAppHeaderPreviewUrl("");
-			else setAboutPreviewUrl("");
-			if (fileRef.current) fileRef.current.value = "";
-			setAlert({
-				open: true,
-				severity: "success",
-				text: t("ui.data_grid.success"),
-				title: t("ui.data_grid.success"),
-			});
-		} catch {
-			setAlert({
-				open: true,
-				severity: "error",
-				text: t("ui.error.update_failed"),
-				title: t("ui.error.title"),
-			});
-		} finally {
-			if (isHeader) setHeaderIsUploading(false);
-			else setAboutIsUploading(false);
 		}
 	};
 
@@ -542,6 +532,21 @@ function ConsortiumPage() {
 				<Tab label={t("nav.consortium.onboarding")} />
 				<Tab label={t("nav.consortium.contacts")} />
 			</Tabs>
+
+			{/* An upload refusal arrives at Save now that images are staged, so it belongs
+			    at the top of the form rather than beside one field: the administrator has
+			    just pressed a button and needs to know why nothing happened. role="alert"
+			    because it appears in response to their action and moves no focus. */}
+			{uploadError && (
+				<Alert
+					severity="error"
+					role="alert"
+					onClose={() => setUploadError(null)}
+					sx={{ mb: 2 }}
+				>
+					{uploadError}
+				</Alert>
+			)}
 
 			<Grid
 				container
@@ -680,7 +685,7 @@ function ConsortiumPage() {
 					</Stack>
 				</Grid>
 
-				{/* Patron-facing brand — N-1B. Deliberately its own labelled block: these
+				{/* Patron-facing brand â€” N-1B. Deliberately its own labelled block: these
 				    four fields are rendered by the DISCOVERY app, and nothing else on this
 				    page is. Without the heading an administrator has no way to tell which
 				    logo they are looking at, and the two directly above are the admin
@@ -722,7 +727,10 @@ function ConsortiumPage() {
 									<BrandImageField
 										value={field.value ?? ""}
 										onChange={field.onChange}
+										stagedFile={stagedImages[field.name] ?? null}
+										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.logo_url")}
+										uploadsAvailable={brandUploadsAvailable}
 										error={!!errors.brandLogoUrl}
 										helperText={
 											errors.brandLogoUrl?.message ??
@@ -760,7 +768,10 @@ function ConsortiumPage() {
 									<BrandImageField
 										value={field.value ?? ""}
 										onChange={field.onChange}
+										stagedFile={stagedImages[field.name] ?? null}
+										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.header_icon_url")}
+										uploadsAvailable={brandUploadsAvailable}
 										error={!!errors.brandHeaderIconUrl}
 										helperText={
 											errors.brandHeaderIconUrl?.message ??
@@ -795,7 +806,10 @@ function ConsortiumPage() {
 									<BrandImageField
 										value={field.value ?? ""}
 										onChange={field.onChange}
+										stagedFile={stagedImages[field.name] ?? null}
+										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.background_image_url")}
+										uploadsAvailable={brandUploadsAvailable}
 										error={!!errors.brandBackgroundImageUrl}
 										helperText={
 											errors.brandBackgroundImageUrl?.message ??
@@ -927,87 +941,6 @@ function ConsortiumPage() {
 								)
 							}
 						/>
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					{/* A column Stack stretches its children to the container width by
-					    default; these Grids span the full row, so the upload controls must
-					    be pinned to the start to size to their own content. */}
-					<Stack direction={"column"} sx={{ alignItems: "flex-start" }}>
-						<Typography variant="attributeTitle">
-							{t("consortium.logo_app_header")}
-						</Typography>
-						{consortium.headerImageUrl ? (
-							<Box
-								component="img"
-								src={consortium.headerImageUrl}
-								sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
-							/>
-						) : (
-							<Typography>{t("consortium.no_file_uploaded")}</Typography>
-						)}
-						<FileUploadButton
-							ref={appHeaderFileRef}
-							icon={<CloudUpload />}
-							buttonText={t("consortium.select_image")}
-							href="#appHeaderUpload"
-							isUploading={headerIsUploading}
-							onFileSelect={(e) =>
-								setAppHeaderPreviewUrl(URL.createObjectURL(e.target.files![0]))
-							}
-							previewUrl={appHeaderPreviewUrl}
-							handleRemove={() => setAppHeaderPreviewUrl("")}
-						/>
-						{appHeaderPreviewUrl && (
-							<Button
-								variant="outlined"
-								onClick={() => handleFileUpload(appHeaderFileRef, true)}
-								disabled={headerIsUploading}
-								sx={{ mt: 2 }}
-							>
-								{headerIsUploading ? t("common.uploading") : t("common.upload")}
-							</Button>
-						)}
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"} sx={{ alignItems: "flex-start" }}>
-						<Typography variant="attributeTitle">
-							{t("consortium.logo_about")}
-						</Typography>
-						{consortium.aboutImageUrl ? (
-							<Box
-								component="img"
-								src={consortium.aboutImageUrl}
-								sx={{ maxWidth: 200, maxHeight: 200, mt: 1 }}
-							/>
-						) : (
-							<Typography>{t("consortium.no_file_uploaded")}</Typography>
-						)}
-						<FileUploadButton
-							ref={aboutFileRef}
-							icon={<CloudUpload />}
-							buttonText={t("consortium.select_image")}
-							href="#aboutFileUpload"
-							isUploading={aboutIsUploading}
-							onFileSelect={(e) =>
-								setAboutPreviewUrl(URL.createObjectURL(e.target.files![0]))
-							}
-							previewUrl={aboutPreviewUrl}
-							handleRemove={() => setAboutPreviewUrl("")}
-						/>
-						{aboutPreviewUrl && (
-							<Button
-								variant="outlined"
-								onClick={() => handleFileUpload(aboutFileRef, false)}
-								disabled={aboutIsUploading}
-								sx={{ mt: 2 }}
-							>
-								{aboutIsUploading ? t("common.uploading") : t("common.upload")}
-							</Button>
-						)}
 					</Stack>
 				</Grid>
 			</Grid>

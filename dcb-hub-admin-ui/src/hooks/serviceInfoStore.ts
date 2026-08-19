@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 
 import { storageKey } from "@helpers/appBase";
+import { brandAssetStoreFrom } from "@constants/discoveryBranding";
 
 interface VersionInfo {
 	version: string | null;
@@ -12,6 +13,12 @@ interface VersionInfo {
 	error: string | null;
 	type: string | null;
 	branch: string | null;
+	/**
+	 * `dcb.branding.assets.store` — "database", "none", or null when /info has not been
+	 * read. Null is NOT "none": see areBrandUploadsAvailable for why unknown means
+	 * available.
+	 */
+	brandAssetStore: string | null;
 	lastFetchedAt: number | null;
 	fetchedFrom: string | null;
 	fetchVersionInfo: (apiBase: string) => Promise<void>;
@@ -28,6 +35,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 			error: null,
 			type: null,
 			branch: null,
+			brandAssetStore: null,
 			lastFetchedAt: null,
 			fetchedFrom: null,
 
@@ -57,6 +65,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 						isAcceptableVersion: true,
 						type: data.env.code || "",
 						branch: data.branch || "main",
+						brandAssetStore: brandAssetStoreFrom(data),
 						lastFetchedAt: Date.now(),
 						fetchedFrom: apiBase,
 						loading: false,
@@ -79,6 +88,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 					error: null,
 					type: "",
 					branch: null,
+					brandAssetStore: null,
 					lastFetchedAt: null,
 					fetchedFrom: null,
 				});
@@ -98,6 +108,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 				isAcceptableVersion: state.isAcceptableVersion,
 				type: state.type,
 				branch: state.branch,
+				brandAssetStore: state.brandAssetStore,
 				lastFetchedAt: state.lastFetchedAt,
 				fetchedFrom: state.fetchedFrom,
 			}),

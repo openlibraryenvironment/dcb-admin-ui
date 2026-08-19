@@ -1,4 +1,4 @@
-import { gql } from "graphql-request";
+﻿import { gql } from "graphql-request";
 
 export const getConsortiumBasics = gql`
 	query LoadConsortiumHeader($order: String!, $orderBy: String!) {
@@ -23,8 +23,10 @@ export const getConsortiumBasics = gql`
 					id
 				}
 				displayName
-				headerImageUrl
-				aboutImageUrl
+				# The app bar mark and the landing card mark. Formerly headerImageUrl and
+				# aboutImageUrl, merged into the brand columns by V9_0_004.
+				brandHeaderIconUrl
+				brandLogoUrl
 				description
 				catalogueSearchUrl
 				websiteUrl

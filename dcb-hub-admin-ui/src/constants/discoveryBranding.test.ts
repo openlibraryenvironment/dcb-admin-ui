@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 
 import {
+	areBrandUploadsAvailable,
+	brandAssetStoreFrom,
 	BRAND_LIMITS,
 	DISCOVERY_THEME_NAMES,
 	isValidLogoUrl,
@@ -73,7 +75,7 @@ describe("themeOptions", () => {
 
 describe("brand field limits", () => {
 	it("matches the column widths in dcb-service's brand migrations", () => {
-		// V8_73_001 / V8_73_002 / V8_73_003. A value the database would truncate must be
+		// V9_0_001 / V9_0_002. A value the database would truncate must be
 		// refused here, with a message, rather than arriving mangled.
 		expect(BRAND_LIMITS).toEqual({
 			logoUrl: 400,
@@ -153,5 +155,67 @@ describe("an uploaded asset path", () => {
 	it("still rejects every other site-relative path", () => {
 		expect(isValidLogoUrl(`/uploads/${key}.png`)).toBe(false);
 		expect(isValidLogoUrl("/discovery/brand-assets-evil/x.png")).toBe(false);
+	});
+});
+
+/**
+ * Whether the upload control is offered at all — R-17b.
+ *
+ * dcb-service publishes `dcb.branding.assets.store` on /info precisely so this decision can
+ * be made, and its BrandingCapabilityInfoTests pins the shape. These cases are the other
+ * half of that contract: without them the prop exists, defaults to true, and nothing ever
+ * passes it — which is exactly the state this replaced.
+ */
+describe("brandAssetStoreFrom", () => {
+	it("reads the store out of an /info payload", () => {
+		expect(
+			brandAssetStoreFrom({
+				dcb: { branding: { assets: { store: "database" } } },
+			}),
+		).toBe("database");
+
+		expect(
+			brandAssetStoreFrom({ dcb: { branding: { assets: { store: "none" } } } }),
+		).toBe("none");
+	});
+
+	it("returns null when the branding block is absent at any level", () => {
+		// Not a malformed response: dcb-service only publishes the block when a
+		// BrandAssetStore bean exists, and an older service has none of it.
+		expect(brandAssetStoreFrom({ version: "9.0.0" })).toBe(null);
+		expect(brandAssetStoreFrom({ dcb: {} })).toBe(null);
+		expect(brandAssetStoreFrom({ dcb: { branding: {} } })).toBe(null);
+		expect(brandAssetStoreFrom({ dcb: { branding: { assets: {} } } })).toBe(
+			null,
+		);
+	});
+
+	it("survives a payload that is not an object at all", () => {
+		expect(brandAssetStoreFrom(null)).toBe(null);
+		expect(brandAssetStoreFrom(undefined)).toBe(null);
+		expect(brandAssetStoreFrom("nope")).toBe(null);
+		expect(
+			brandAssetStoreFrom({ dcb: { branding: { assets: { store: 7 } } } }),
+		).toBe(null);
+	});
+});
+
+describe("areBrandUploadsAvailable", () => {
+	it("offers uploads when the service stores them", () => {
+		expect(areBrandUploadsAvailable("database")).toBe(true);
+	});
+
+	it("hides uploads only when the service says none", () => {
+		// store=none means the upload controller is not registered, so the button could
+		// only ever 404.
+		expect(areBrandUploadsAvailable("none")).toBe(false);
+	});
+
+	it("treats unknown as available, rather than hiding a working feature", () => {
+		// null is "/info not read yet, or unreachable, or older than the branding block".
+		// Hiding on null would remove uploads whenever /info blips, with nothing on screen
+		// to explain why; showing costs a clear refusal at Save. Hiding a button is UX
+		// here, not authorisation — the role check on the route is the control.
+		expect(areBrandUploadsAvailable(null)).toBe(true);
 	});
 });

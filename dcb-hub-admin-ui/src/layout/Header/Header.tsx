@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useNavigate } from "@tanstack/react-router";
@@ -137,9 +137,11 @@ export default function Header({
 			setDescription(consortium.description);
 			setCatalogueSearchURL(consortium.catalogueSearchUrl);
 			setWebsiteURL(consortium.websiteUrl);
-			setHeaderImageURL(consortium.headerImageUrl);
-			if (!isEmpty(consortium.aboutImageUrl)) {
-				setAboutImageURL(consortium.aboutImageUrl);
+			// The merged brand columns (V9_0_004). A consortium's mark is one asset that
+			// CSS sizes per app, not a separate column per app.
+			setHeaderImageURL(consortium.brandHeaderIconUrl ?? "");
+			if (!isEmpty(consortium.brandLogoUrl)) {
+				setAboutImageURL(consortium.brandLogoUrl);
 			}
 		}
 	}, [

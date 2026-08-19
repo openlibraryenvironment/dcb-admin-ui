@@ -24,7 +24,8 @@ export type ConsortiumContactInput = {
 };
 
 export type ConsortiumInput = {
-	aboutImageUrl?: string | null | undefined;
+	brandHeaderIconUrl?: string | null | undefined;
+	brandLogoUrl?: string | null | undefined;
 	catalogueSearchUrl?: string | null | undefined;
 	changeCategory: string;
 	changeReferenceUrl?: string | null | undefined;
@@ -35,7 +36,6 @@ export type ConsortiumInput = {
 	functionalSettings?:
 		Array<FunctionalSettingInput | null | undefined> | null | undefined;
 	groupName: string;
-	headerImageUrl?: string | null | undefined;
 	id?: string | number | null | undefined;
 	name: string;
 	reason: string;
@@ -214,9 +214,6 @@ export type UpdateAgencyParticipationInput = {
 };
 
 export type UpdateConsortiumInput = {
-	aboutImageUploader?: string | null | undefined;
-	aboutImageUploaderEmail?: string | null | undefined;
-	aboutImageUrl?: string | null | undefined;
 	brandBackgroundImageUrl?: string | null | undefined;
 	brandHeaderIconUrl?: string | null | undefined;
 	brandLogoAlt?: string | null | undefined;
@@ -228,9 +225,6 @@ export type UpdateConsortiumInput = {
 	defaultThemeName?: string | null | undefined;
 	description?: string | null | undefined;
 	displayName?: string | null | undefined;
-	headerImageUploader?: string | null | undefined;
-	headerImageUploaderEmail?: string | null | undefined;
-	headerImageUrl?: string | null | undefined;
 	id: string | number;
 	patronWelcome?: string | null | undefined;
 	reason: string;
@@ -584,12 +578,6 @@ export type UpdateConsortiumMutationVariables = Exact<{
 export type UpdateConsortiumMutation = {
 	updateConsortium: {
 		id: string;
-		headerImageUrl: string | null;
-		headerImageUploader: string | null;
-		headerImageUploaderEmail: string | null;
-		aboutImageUrl: string | null;
-		aboutImageUploader: string | null;
-		aboutImageUploaderEmail: string | null;
 		description: string | null;
 		catalogueSearchUrl: string | null;
 		websiteUrl: string | null;
@@ -1049,12 +1037,6 @@ export type LoadConsortiumQuery = {
 			id: string;
 			name: string;
 			dateOfLaunch: string | null;
-			headerImageUrl: string | null;
-			headerImageUploader: string | null;
-			headerImageUploaderEmail: string | null;
-			aboutImageUrl: string | null;
-			aboutImageUploader: string | null;
-			aboutImageUploaderEmail: string | null;
 			description: string | null;
 			catalogueSearchUrl: string | null;
 			websiteUrl: string | null;
@@ -1091,8 +1073,8 @@ export type LoadConsortiumHeaderQuery = {
 			id: string;
 			name: string;
 			displayName: string | null;
-			headerImageUrl: string | null;
-			aboutImageUrl: string | null;
+			brandHeaderIconUrl: string | null;
+			brandLogoUrl: string | null;
 			description: string | null;
 			catalogueSearchUrl: string | null;
 			websiteUrl: string | null;
