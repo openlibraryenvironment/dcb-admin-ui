@@ -25,9 +25,9 @@
  */
 
 /** Just enough of the REST client to post a file. Structural, so tests need no axios. */
-type UploadClient = {
+interface UploadClient {
 	post: (url: string, data: FormData) => Promise<{ data: { url: string } }>;
-};
+}
 
 /**
  * A refusal from dcb-service, carrying the field it belongs to.
