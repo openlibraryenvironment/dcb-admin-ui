@@ -53,6 +53,21 @@ import {
 	isValidLogoUrl,
 	themeOptions,
 } from "@constants/discoveryBranding";
+import {
+	BrandUploadError,
+	hasStagedImages,
+	uploadStagedBrandImages,
+} from "@helpers/brandAssetUpload";
+
+/**
+ * Which label to name in an upload refusal. Three images on one form means the message
+ * alone does not say which one was refused.
+ */
+const BRAND_FIELD_LABELS: Record<string, string> = {
+	brandLogoUrl: "logo_url",
+	brandHeaderIconUrl: "header_icon_url",
+	brandBackgroundImageUrl: "background_image_url",
+};
 import NewConsortium from "@forms/NewConsortium/NewConsortium";
 
 // The page renders a single consortium: the newest one. Loader and component MUST
@@ -219,10 +234,29 @@ function ConsortiumPage() {
 		defaultThemeName: Yup.string().trim().max(BRAND_LIMITS.themeName),
 	});
 
+	/**
+	 * Brand images chosen but not yet uploaded, keyed by the field they belong to — R-17e.
+	 *
+	 * Uploading at pick time left a stored image behind every time somebody reconsidered or
+	 * closed the tab. dcb-service cannot tell those from an image about to be used, so it
+	 * keeps unreferenced uploads for a day and sweeps them; staging makes that the rare case
+	 * rather than the ordinary one. The cost is that a rejected image is reported at Save.
+	 */
+	const [stagedImages, setStagedImages] = useState<Record<string, File | null>>(
+		{},
+	);
+	const [uploadError, setUploadError] = useState<string | null>(null);
+
+	const stageImage = (field: string, file: File | null) => {
+		setUploadError(null);
+		setStagedImages((current) => ({ ...current, [field]: file }));
+	};
+
 	const {
 		control,
 		handleSubmit,
 		reset,
+		setValue,
 		formState: { errors, isDirty },
 	} = useForm<ConsortiumFormFields>({
 		// @hookform/resolvers@5 tightened the Resolver generics: yup infers
@@ -290,15 +324,58 @@ function ConsortiumPage() {
 		};
 	}, [appHeaderPreviewUrl, aboutPreviewUrl]);
 
-	const onSubmit = (formData: ConsortiumFormFields) => {
+	const onSubmit = async (formData: ConsortiumFormFields) => {
 		if (!consortium) return;
-		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
+
+		// Staged images are uploaded HERE, before the confirmation dialog rather than after
+		// it. A refusal is the administrator's to act on, and asking them to confirm a save
+		// that is about to be rejected would be asking them to approve something we already
+		// know will not happen.
+		let submitted = formData;
+
+		if (hasStagedImages(stagedImages)) {
+			setUploadError(null);
+
+			try {
+				const uploaded = await uploadStagedBrandImages(
+					stagedImages,
+					client,
+					t("consortium.brand.upload_failed"),
+				);
+
+				// Into the form as well as the diff, so the URL box shows what was stored
+				// rather than staying empty until the page is reloaded.
+				Object.entries(uploaded).forEach(([field, url]) =>
+					setValue(field as keyof ConsortiumFormFields, url, {
+						shouldDirty: true,
+					}),
+				);
+
+				submitted = { ...formData, ...uploaded };
+				setStagedImages({});
+			} catch (failure: unknown) {
+				const field =
+					failure instanceof BrandUploadError ? failure.field : undefined;
+
+				setUploadError(
+					field
+						? t("consortium.brand.upload_failed_field", {
+								label: t(`consortium.brand.${BRAND_FIELD_LABELS[field]}`),
+								reason: (failure as BrandUploadError).message,
+							})
+						: t("consortium.brand.upload_failed"),
+				);
+				return;
+			}
+		}
+
+		const newChangedFields = Object.keys(submitted).reduce((acc, key) => {
 			const field = key as keyof ConsortiumFormFields;
 			if (
-				hasChanged(formData[field], consortium[field]) &&
-				formData[field] !== undefined
+				hasChanged(submitted[field], consortium[field]) &&
+				submitted[field] !== undefined
 			) {
-				(acc[field] as any) = formData[field];
+				(acc[field] as any) = submitted[field];
 			}
 			return acc;
 		}, {} as Partial<Consortium>);
@@ -543,6 +620,21 @@ function ConsortiumPage() {
 				<Tab label={t("nav.consortium.contacts")} />
 			</Tabs>
 
+			{/* An upload refusal arrives at Save now that images are staged, so it belongs
+			    at the top of the form rather than beside one field: the administrator has
+			    just pressed a button and needs to know why nothing happened. role="alert"
+			    because it appears in response to their action and moves no focus. */}
+			{uploadError && (
+				<Alert
+					severity="error"
+					role="alert"
+					onClose={() => setUploadError(null)}
+					sx={{ mb: 2 }}
+				>
+					{uploadError}
+				</Alert>
+			)}
+
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -722,6 +814,8 @@ function ConsortiumPage() {
 									<BrandImageField
 										value={field.value ?? ""}
 										onChange={field.onChange}
+										stagedFile={stagedImages[field.name] ?? null}
+										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.logo_url")}
 										error={!!errors.brandLogoUrl}
 										helperText={
@@ -760,6 +854,8 @@ function ConsortiumPage() {
 									<BrandImageField
 										value={field.value ?? ""}
 										onChange={field.onChange}
+										stagedFile={stagedImages[field.name] ?? null}
+										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.header_icon_url")}
 										error={!!errors.brandHeaderIconUrl}
 										helperText={
@@ -795,6 +891,8 @@ function ConsortiumPage() {
 									<BrandImageField
 										value={field.value ?? ""}
 										onChange={field.onChange}
+										stagedFile={stagedImages[field.name] ?? null}
+										onStageFile={(file) => stageImage(field.name, file)}
 										label={t("consortium.brand.background_image_url")}
 										error={!!errors.brandBackgroundImageUrl}
 										helperText={
