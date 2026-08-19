@@ -12,7 +12,7 @@
 		"preview": "vite preview",
 		"semantic-release": "semantic-release",
 		"test": "vitest",
-		"prepare": "husky",
+		"prepare": "cd .. && husky dcb-hub-admin-ui/.husky",
 		"build:vite": "vite build",
 		"e2e": "playwright test",
 		"e2e:ki-bootstrap": "playwright test --config playwright.ki-bootstrap.config.ts",
