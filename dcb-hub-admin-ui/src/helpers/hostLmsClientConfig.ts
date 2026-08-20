@@ -788,14 +788,26 @@ const POLARIS: HostLmsProfile = {
  * Note the URL key is `api-url`, not `base-url` as everywhere else. It is also what
  * DCB derives Koha's system identity from, so two Host LMS records pointing at one
  * Koha are recognised as one system.
+ *
+ * Koha uniquely needs *both* URLs. `api-url` is the REST API, commonly the staff
+ * interface; `base-url` is the OPAC, because that is where oai.pl is served from.
+ * The harvesting group below did not exist, so a Koha created here had no `base-url`
+ * and no `metadata-prefix` - KohaOaiPmhIngestSource cannot be constructed without
+ * either, which is a Host LMS that pings, reports "Ingest Check Failed" once, and
+ * then never harvests.
  */
 const KOHA: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.koha,
 	labelKey: "hostlms.names.koha",
 	groups: [
 		{
-			id: "",
-			required: true,
+			// Heading only, so nothing is nested under it - the empty-id group is the
+			// harvesting one below, where `withSharedFields` puts the `ingest` toggle
+			// beside the OAI keys it governs. Same arrangement as Alma.
+			id: "kohaConnection",
+			labelKey: "hostlms.config_fields.koha_connection_group",
+			descriptionKey: "hostlms.config_fields.koha_connection_group_description",
+			required: false,
 			fields: [
 				field(
 					["api-url"],
@@ -843,6 +855,51 @@ const KOHA: HostLmsProfile = {
 					"recommended",
 					"number",
 					"100",
+				),
+			],
+		},
+		{
+			id: "",
+			labelKey: "hostlms.config_fields.koha_harvesting_group",
+			descriptionKey: "hostlms.config_fields.koha_harvesting_group_description",
+			required: false,
+			fields: [
+				// Not `required`: a member that only borrows has nothing to contribute
+				// to the shared index and is legitimately created with `ingest` off.
+				// dcb-service warns on both of these rather than rejecting, for the
+				// same reason.
+				field(
+					["base-url"],
+					"hostlms.config_fields.koha_base_url",
+					"hostlms.config_fields.koha_base_url_description",
+					"recommended",
+					"url",
+					"https://catalogue.example.org",
+				),
+				field(
+					["metadata-prefix"],
+					"hostlms.config_fields.metadata_prefix",
+					"hostlms.config_fields.koha_metadata_prefix_description",
+					"recommended",
+					"text",
+					"marcxml",
+				),
+				// Koha only filters by set when the request carries one, so leaving
+				// this blank harvests the whole catalogue - which is what a member
+				// contributing everything wants.
+				field(
+					["oai-set"],
+					"hostlms.config_fields.oai_set",
+					"hostlms.config_fields.koha_oai_set_description",
+					"optional",
+				),
+				field(
+					["oai-path"],
+					"hostlms.config_fields.oai_path",
+					"hostlms.config_fields.koha_oai_path_description",
+					"optional",
+					"text",
+					"/cgi-bin/koha/oai.pl",
 				),
 			],
 		},

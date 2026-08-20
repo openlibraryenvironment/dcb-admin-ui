@@ -40,6 +40,29 @@ export default function KohaConfig({ config }: { config: any }) {
 				title={t("hostlms.client_config.page_size")}
 				value={config?.["page-size"]}
 			/>
+			{/*
+			 * Koha needs both URLs and they are not interchangeable: oai.pl is served
+			 * by the OPAC ("base-url"), the REST API often by the staff interface
+			 * ("api-url"). Showing only the API URL made a Koha that could not harvest
+			 * look completely configured.
+			 */}
+			<ConfigItem
+				title={t("hostlms.config_fields.koha_base_url")}
+				value={config?.["base-url"]}
+				type="url"
+			/>
+			<ConfigItem
+				title={t("hostlms.config_fields.metadata_prefix")}
+				value={config?.["metadata-prefix"]}
+			/>
+			<ConfigItem
+				title={t("hostlms.config_fields.oai_set")}
+				value={config?.["oai-set"]}
+			/>
+			<ConfigItem
+				title={t("hostlms.config_fields.oai_path")}
+				value={config?.["oai-path"]}
+			/>
 		</>
 	);
 }
