@@ -114,6 +114,63 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).not.toContain("virtual-item-location-code");
 		});
 
+		/**
+		 * Koha is the one ILS needing two URLs: `api-url` for the REST API, commonly
+		 * the staff interface, and `base-url` for the OPAC, which is where oai.pl
+		 * lives. The form asked for neither `base-url` nor `metadata-prefix`, so every
+		 * Koha created through it had a KohaOaiPmhIngestSource that threw on
+		 * construction - a Host LMS that pinged and never harvested.
+		 */
+		it("asks for the OAI keys a Koha harvest cannot be constructed without", () => {
+			const paths = clientConfigFieldsFor(HOST_LMS_CLASSES.koha).map((field) =>
+				field.path.join("."),
+			);
+
+			expect(paths).toContain("base-url");
+			expect(paths).toContain("metadata-prefix");
+			expect(paths).toContain("oai-set");
+			expect(paths).toContain("oai-path");
+		});
+
+		it("warns about the Koha OAI keys rather than blocking submission", () => {
+			// dcb-service warns rather than rejecting, because a member that only
+			// borrows is legitimately created with ingest off.
+			const missing = missingRequiredClientConfig(
+				HOST_LMS_CLASSES.koha,
+				{},
+			).map((problem) => problem.name);
+			const recommended = missingRecommendedClientConfig(
+				HOST_LMS_CLASSES.koha,
+				{},
+			).map((problem) => problem.name);
+
+			expect(missing).not.toContain("base-url");
+			expect(missing).not.toContain("metadata-prefix");
+			expect(recommended).toContain("base-url");
+			expect(recommended).toContain("metadata-prefix");
+		});
+
+		it("writes the Koha OAI keys at the top level, not into a nested group", () => {
+			const config = buildClientConfig(HOST_LMS_CLASSES.koha, {
+				"api-url": "https://koha.example.org",
+				client_id: "id",
+				client_secret: "secret",
+				"sharing-library-code": "DCB",
+				"virtual-item-library-code": "DCB",
+				"base-url": "https://catalogue.example.org",
+				"metadata-prefix": "marcxml",
+			});
+
+			expect(config["base-url"]).toBe("https://catalogue.example.org");
+			expect(config["metadata-prefix"]).toBe("marcxml");
+			// The harvesting group is a heading, so it must not appear as a key -
+			// dcb-service would store an object no adapter reads.
+			expect(config).not.toHaveProperty("kohaConnection");
+			// Omitted rather than sent as "": Koha only filters by set when the
+			// request carries one, and a blank set would harvest nothing.
+			expect(config).not.toHaveProperty("oai-set");
+		});
+
 		it("demands the NCIP endpoint and system id for an OpenRS appliance", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.orsAppliance,
