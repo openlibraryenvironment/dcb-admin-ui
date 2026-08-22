@@ -58,7 +58,7 @@ describe("DCB NCIP onboarding policy", () => {
 		policy.hostLmsCode = " HOST ";
 		policy.agencyCode = " AGENCY ";
 		policy.expectedSymbol = " symbol ";
-		policy.authProfile = "";
+		policy.allowedAuthProfiles = " BASIC/BARCODE+PIN \n OIDC ";
 
 		expect(buildDcbInvitationRequest(policy)).toEqual({
 			profile: "DCB-NCIP2.02+",
@@ -70,11 +70,36 @@ describe("DCB NCIP onboarding policy", () => {
 				borrowingAllowed: true,
 				supplyingAllowed: true,
 				ingestAllowed: true,
-				authProfile: undefined,
+				authProfile: "BASIC/BARCODE+PIN",
+				allowedAuthProfiles: ["BASIC/BARCODE+PIN", "OIDC"],
 				maxConsortialLoans: undefined,
 				suppressionRulesetName: undefined,
 				itemSuppressionRulesetName: undefined,
 			},
 		});
+	});
+
+	it("requires the default authentication profile to be allowed", () => {
+		const policy = initialDcbInvitationPolicy();
+		policy.hostLmsCode = "HOST";
+		policy.agencyCode = "AGENCY";
+		policy.expectedSymbol = "symbol";
+		policy.allowedAuthProfiles = "OIDC\nSAML";
+
+		expect(validateDcbInvitationPolicy(policy)).toEqual([
+			"AUTH_PROFILE_DEFAULT_NOT_ALLOWED",
+		]);
+	});
+
+	it("rejects duplicate allowed authentication profiles", () => {
+		const policy = initialDcbInvitationPolicy();
+		policy.hostLmsCode = "HOST";
+		policy.agencyCode = "AGENCY";
+		policy.expectedSymbol = "symbol";
+		policy.allowedAuthProfiles = "BASIC/BARCODE+PIN\nBASIC/BARCODE+PIN";
+
+		expect(validateDcbInvitationPolicy(policy)).toEqual([
+			"ALLOWED_AUTH_PROFILE_DUPLICATE",
+		]);
 	});
 });

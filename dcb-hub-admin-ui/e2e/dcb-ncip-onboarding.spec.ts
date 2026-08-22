@@ -87,6 +87,8 @@ test("reviews, issues and forgets a one-time invitation", async ({ page }) => {
 					hostLmsCode: "TECH-DEMO-001",
 					agencyCode: "TECH-DEMO-001",
 					expectedSymbol: "tech-demo-001",
+					authProfile: "BASIC/BARCODE+PIN",
+					allowedAuthProfiles: ["BASIC/BARCODE+PIN"],
 				},
 			});
 			await route.fulfill({
