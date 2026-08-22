@@ -1518,7 +1518,9 @@
 		"policy": {
 			"advanced": "Advanced policy",
 			"agency_code": "Agency code",
-			"auth_profile": "Authentication profile",
+			"allowed_auth_profiles": "Allowed authentication profiles",
+			"allowed_auth_profiles_help": "One profile per line. Leave empty to allow only the default.",
+			"auth_profile": "Default authentication profile",
 			"borrowing": "Borrowing",
 			"expected_symbol": "Expected ORS symbol",
 			"host_lms_code": "Host LMS code",
@@ -1555,6 +1557,11 @@
 		"validation": {
 			"AGENCY_CODE_REQUIRED": "Agency code is required.",
 			"AGENCY_CODE_TOO_LONG": "Agency code must not exceed 32 characters.",
+			"ALLOWED_AUTH_PROFILE_DUPLICATE": "Allowed authentication profiles must not contain duplicates.",
+			"ALLOWED_AUTH_PROFILE_TOO_LONG": "Authentication profiles must not exceed 64 characters.",
+			"AUTH_PROFILE_DEFAULT_NOT_ALLOWED": "The default authentication profile must be in the allowed set.",
+			"AUTH_PROFILE_REQUIRED": "A default authentication profile is required.",
+			"AUTH_PROFILE_TOO_LONG": "Authentication profiles must not exceed 64 characters.",
 			"EXPECTED_SYMBOL_REQUIRED": "Expected ORS symbol is required.",
 			"HOST_LMS_CODE_REQUIRED": "Host LMS code is required.",
 			"HOST_LMS_CODE_TOO_LONG": "Host LMS code must not exceed 32 characters.",
@@ -2434,4 +2441,3 @@
 		"RET-LOCAL": "Local"
 	}
 }
-

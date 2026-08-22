@@ -58,6 +58,9 @@ Not covered: the real 15-minute idle-timeout path (`src/routes/__authenticated.t
 
 ## DCB NCIP onboarding manual pass
 
+Confirm invitation review shows the default authentication profile and allowed profile set, and that
+the issued request carries both values.
+
 Use a disposable ORS Appliance and invitation. Never paste tokens into notes or logs.
 
 1. As a non-admin, confirm **DCB NCIP Onboarding** is absent from **Service info** and direct navigation to `/serviceInfo/dcbNcipOnboarding` redirects.

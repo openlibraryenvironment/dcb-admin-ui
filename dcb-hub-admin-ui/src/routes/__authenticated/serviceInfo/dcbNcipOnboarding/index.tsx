@@ -372,6 +372,37 @@ function PolicyForm({
 							label={t("dcb_ncip_onboarding.policy.auth_profile")}
 							value={policy.authProfile}
 							onChange={(event) => onChange("authProfile", event.target.value)}
+							error={errors.some(
+								(code) =>
+									code === "AUTH_PROFILE_REQUIRED" ||
+									code === "AUTH_PROFILE_TOO_LONG" ||
+									code === "AUTH_PROFILE_DEFAULT_NOT_ALLOWED",
+							)}
+							helperText={errorText([
+								"AUTH_PROFILE_REQUIRED",
+								"AUTH_PROFILE_TOO_LONG",
+								"AUTH_PROFILE_DEFAULT_NOT_ALLOWED",
+							])}
+						/>
+						<TextField
+							label={t("dcb_ncip_onboarding.policy.allowed_auth_profiles")}
+							value={policy.allowedAuthProfiles}
+							onChange={(event) =>
+								onChange("allowedAuthProfiles", event.target.value)
+							}
+							multiline
+							minRows={2}
+							error={errors.some(
+								(code) =>
+									code === "ALLOWED_AUTH_PROFILE_TOO_LONG" ||
+									code === "ALLOWED_AUTH_PROFILE_DUPLICATE",
+							)}
+							helperText={
+								errorText([
+									"ALLOWED_AUTH_PROFILE_TOO_LONG",
+									"ALLOWED_AUTH_PROFILE_DUPLICATE",
+								]) ?? t("dcb_ncip_onboarding.policy.allowed_auth_profiles_help")
+							}
 						/>
 						<TextField
 							label={t("dcb_ncip_onboarding.policy.max_loans")}
@@ -429,6 +460,11 @@ function ReviewPolicy({
 		[t("dcb_ncip_onboarding.policy.host_lms_code"), policy.hostLmsCode],
 		[t("dcb_ncip_onboarding.policy.agency_code"), policy.agencyCode],
 		[t("dcb_ncip_onboarding.policy.expected_symbol"), policy.expectedSymbol],
+		[t("dcb_ncip_onboarding.policy.auth_profile"), policy.authProfile],
+		[
+			t("dcb_ncip_onboarding.policy.allowed_auth_profiles"),
+			policy.allowedAuthProfiles || policy.authProfile,
+		],
 		[
 			t("dcb_ncip_onboarding.policy.permissions"),
 			[
