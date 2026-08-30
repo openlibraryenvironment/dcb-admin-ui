@@ -942,7 +942,8 @@
 				"col_library": "Library",
 				"col_requests": "Requests",
 				"col_checkout": "Checkout rate",
-				"col_fill": "Fill rate"
+				"col_fill": "Fill rate",
+				"your_library": "(your library)"
 			},
 			"collection_dimension": {
 				"title": "Collection analysis",
