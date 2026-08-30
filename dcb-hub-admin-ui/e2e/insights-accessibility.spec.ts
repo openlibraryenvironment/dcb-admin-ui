@@ -24,31 +24,8 @@ import libraries from "./fixtures-data/libraries.json";
 
 const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
-/**
- * The one exclusion, and it is a library defect rather than ours.
- *
- * @mui/x-charts 9.9.0 mounts ChartsAccessibilityProxy whenever keyboard navigation is on
- * (the default). It creates two `role="img"` divs whose `aria-labelledby` points at two
- * sibling divs that stay EMPTY until a keyboard interaction produces a description - so
- * every chart on the page reports role-img-alt while idle, in our markup and in anyone
- * else's. Nothing we can pass to the chart names them; `title` labels the container and
- * `desc` fills a different hidden span.
- *
- * Excluding by that id prefix is narrow enough that it can only ever match those internal
- * divs. Our own charts still have to be named: each is wrapped in a labelled role="img"
- * container, which this scan does see.
- *
- * Remove the exclusion when x-charts is next upgraded and this comes back green without
- * it. Do NOT widen it - disabling keyboard navigation would silence the rule by removing
- * the accessibility feature that caused it.
- */
-const MUI_CHART_PROXY = '[aria-labelledby^="voiceover-"]';
-
 async function scanWholePage(page: Page) {
-	const results = await new AxeBuilder({ page })
-		.withTags(WCAG)
-		.exclude(MUI_CHART_PROXY)
-		.analyze();
+	const results = await new AxeBuilder({ page }).withTags(WCAG).analyze();
 
 	expect(
 		results.violations.map((v) => ({
