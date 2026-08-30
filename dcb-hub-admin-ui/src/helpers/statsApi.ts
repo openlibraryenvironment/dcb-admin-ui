@@ -64,6 +64,68 @@ export interface FulfillmentStat {
 	failedCount: number;
 }
 
+/**
+ * Demand nothing in the consortium could satisfy: titles requested where no library
+ * holds a bib record. Distinct from the failure taxonomy, which says why requests that
+ * had a supplier still failed - this is demand with no supplier to begin with.
+ */
+export interface UnfillableDemandStat {
+	clusterId: string;
+	title: string;
+	author: string;
+	requestCount: number;
+}
+
+// --- Collection analysis ------------------------------------------------------
+// These aggregate bib_record - the catalogue as INGESTED - rather than patron_request,
+// so they take no date window and report on what the consortium holds rather than on
+// what it has been asked for. See docs/insights.md part 5 in dcb-service.
+
+/** The consortium in four numbers. Only as good as the clustering - read with ClusterSizeStat. */
+export interface CollectionTotalsStat {
+	distinctTitles: number;
+	singlyHeldTitles: number;
+	holdings: number;
+	contributingSources: number;
+}
+
+export interface CollectionProfileStat {
+	sourceSystemId: string;
+	// Host LMS code - the stable identifier, not display text.
+	sourceSystemCode: string;
+	clusterCount: number;
+	uniqueTitleCount: number;
+}
+
+// One unordered pair, emitted once (left < right), so a consumer drawing a full matrix
+// mirrors it. Requested for one library, so the rows are that library against the others.
+export interface CollectionOverlapStat {
+	leftSystemId: string;
+	leftSystemCode: string;
+	rightSystemId: string;
+	rightSystemCode: string;
+	sharedTitleCount: number;
+}
+
+/**
+ * How many source systems hold each work. The confidence signal for every other
+ * collection number: a corpus that is overwhelmingly holderCount = 1 is under-clustered,
+ * and the unique-title counts are then fiction. Never render the others without it.
+ */
+export interface ClusterSizeStat {
+	holderCount: number;
+	clusterCount: number;
+}
+
+export interface SourceFormatStat {
+	sourceSystemId: string;
+	sourceSystemCode: string;
+	// Nullable: derived_type has no NOT NULL, and an ingest that could not derive one
+	// produces a null. Reported rather than dropped, so the totals still add up.
+	derivedType: string | null;
+	titleCount: number;
+}
+
 // "Rare gem": clusters this library is the ONLY contributor to, that the network
 // requested - the unique collection value it brings to the consortium.
 export interface RareGem {
@@ -112,11 +174,6 @@ export interface DashboardSummary {
 	lendBorrowTotals: CollectionBalanceStat;
 	savedByReResolution: number;
 	collectionSummary: CollectionSummaryStat;
-}
-
-export interface FormatDemandStat {
-	format: string;
-	requestCount: number;
 }
 
 export interface CollectionSummaryStat {
@@ -347,14 +404,22 @@ export function netFlowQueryOptions(
 	};
 }
 
-export function borrowerFulfillmentQueryOptions(
+// libraryCode is REQUIRED by this endpoint (unique-to-one-library is meaningless
+// consortium-wide), so this is only used on the per-library page.
+/**
+ * The supplying half of the fill rate. The borrowing half is in the combined /dashboard
+ * call already, so only this one needs asking for separately: "how often do WE come
+ * through for the network" is a different question from "how often does the network come
+ * through for us", and a library can be good at one and poor at the other.
+ */
+export function supplierFulfillmentQueryOptions(
 	client: AxiosInstance,
 	params: StatsParams,
 ) {
 	return {
-		queryKey: ["stats", "fulfillment", "borrower", params] as const,
+		queryKey: ["stats", "fulfillment", "supplier", params] as const,
 		queryFn: async (): Promise<FulfillmentStat> => {
-			const { data } = await client.get(`${STATS_BASE}/fulfillment/borrower`, {
+			const { data } = await client.get(`${STATS_BASE}/fulfillment/supplier`, {
 				params: cleanParams(params),
 			});
 			return data;
@@ -362,8 +427,21 @@ export function borrowerFulfillmentQueryOptions(
 	};
 }
 
-// libraryCode is REQUIRED by this endpoint (unique-to-one-library is meaningless
-// consortium-wide), so this is only used on the per-library page.
+export function unfillableDemandQueryOptions(
+	client: AxiosInstance,
+	params: StatsParams,
+) {
+	return {
+		queryKey: ["stats", "unfillable-demand", params] as const,
+		queryFn: async (): Promise<UnfillableDemandStat[]> => {
+			const { data } = await client.get(`${STATS_BASE}/unfillable-demand`, {
+				params: cleanParams(params),
+			});
+			return data;
+		},
+	};
+}
+
 export function uniqueContributionsQueryOptions(
 	client: AxiosInstance,
 	params: StatsParams & { libraryCode: string },
@@ -440,51 +518,6 @@ export function dashboardQueryOptions(
 	};
 }
 
-export function checkoutRateQueryOptions(
-	client: AxiosInstance,
-	params: StatsParams,
-) {
-	return {
-		queryKey: ["stats", "checkout-rate", params] as const,
-		queryFn: async (): Promise<CheckoutRateStat> => {
-			const { data } = await client.get(`${STATS_BASE}/checkout-rate`, {
-				params: cleanParams(params),
-			});
-			return data;
-		},
-	};
-}
-
-export function collectionSummaryQueryOptions(
-	client: AxiosInstance,
-	params: StatsParams,
-) {
-	return {
-		queryKey: ["stats", "collection-summary", params] as const,
-		queryFn: async (): Promise<CollectionSummaryStat> => {
-			const { data } = await client.get(`${STATS_BASE}/collection-summary`, {
-				params: cleanParams(params),
-			});
-			return data;
-		},
-	};
-}
-
-export function demandByFormatQueryOptions(
-	client: AxiosInstance,
-	params: StatsParams,
-) {
-	return {
-		queryKey: ["stats", "demand-by-format", params] as const,
-		queryFn: async (): Promise<FormatDemandStat[]> => {
-			const { data } = await client.get(`${STATS_BASE}/demand-by-format`, {
-				params: cleanParams(params),
-			});
-			return data;
-		},
-	};
-}
-
 export function demandByPickupLocationQueryOptions(
 	client: AxiosInstance,
 	params: StatsParams,
@@ -531,24 +564,6 @@ export function topRequestedTitlesQueryOptions(
 				params: cleanParams({ ...params, size: 20 }),
 			});
 			return data?.content ?? [];
-		},
-	};
-}
-
-export function savedByReResolutionQueryOptions(
-	client: AxiosInstance,
-	params: StatsParams,
-) {
-	return {
-		queryKey: ["stats", "saved-by-re-resolution", params] as const,
-		queryFn: async (): Promise<number> => {
-			const { data } = await client.get(
-				`${STATS_BASE}/saved-by-re-resolution`,
-				{
-					params: cleanParams(params),
-				},
-			);
-			return data;
 		},
 	};
 }
@@ -655,6 +670,98 @@ export function turnaroundQueryOptions(
 }
 
 // Requires libraryCode + acquiredSince (both NotNull on the endpoint) - library scope.
+// --- Collection analysis ------------------------------------------------------
+//
+// Four of these five are consortium-wide and take NO parameters at all - not even the
+// date window - because they aggregate the catalogue as ingested rather than the traffic
+// over it. Their query keys are therefore constant: changing the range picker must not
+// refetch them, and would show the same numbers if it did.
+//
+// dcb-service runs them one at a time behind CollectionAnalysisService, caches each for
+// 15 minutes, and answers 429 when a caller has waited out its budget rather than
+// queueing a second 20M-row aggregate. Two consequences for this client, both deliberate:
+//
+//   staleTime 15m - matched to the server's own cache, so a remount inside that window
+//   costs nothing. The global default is 5 minutes, which would ask three times as often
+//   for an answer that cannot have changed.
+//
+//   retry: false - a 429 here means "the one permit is busy", and retrying immediately is
+//   exactly the wrong response: it spends the next caller's budget too. The panel surfaces
+//   the refusal and offers a manual retry instead.
+const COLLECTION_ANALYSIS_STALE_MS = 15 * 60 * 1000;
+
+const collectionAnalysisPolicy = {
+	staleTime: COLLECTION_ANALYSIS_STALE_MS,
+	retry: false as const,
+};
+
+export function collectionTotalsQueryOptions(client: AxiosInstance) {
+	return {
+		...collectionAnalysisPolicy,
+		queryKey: ["stats", "collection-totals"] as const,
+		queryFn: async (): Promise<CollectionTotalsStat> => {
+			const { data } = await client.get(`${STATS_BASE}/collection-totals`);
+			return data;
+		},
+	};
+}
+
+export function collectionProfileQueryOptions(client: AxiosInstance) {
+	return {
+		...collectionAnalysisPolicy,
+		queryKey: ["stats", "collection-profile"] as const,
+		queryFn: async (): Promise<CollectionProfileStat[]> => {
+			const { data } = await client.get(`${STATS_BASE}/collection-profile`);
+			return data;
+		},
+	};
+}
+
+export function clusterSizeDistributionQueryOptions(client: AxiosInstance) {
+	return {
+		...collectionAnalysisPolicy,
+		queryKey: ["stats", "cluster-size-distribution"] as const,
+		queryFn: async (): Promise<ClusterSizeStat[]> => {
+			const { data } = await client.get(
+				`${STATS_BASE}/cluster-size-distribution`,
+			);
+			return data;
+		},
+	};
+}
+
+export function formatProfileQueryOptions(client: AxiosInstance) {
+	return {
+		...collectionAnalysisPolicy,
+		queryKey: ["stats", "format-profile"] as const,
+		queryFn: async (): Promise<SourceFormatStat[]> => {
+			const { data } = await client.get(`${STATS_BASE}/format-profile`);
+			return data;
+		},
+	};
+}
+
+/**
+ * The one collection query that is scoped: it answers "who duplicates US", so it needs a
+ * "us". dcb-service returns this library against all others, never the full matrix - at
+ * 500 members a matrix is 124,750 pairs and no panel that renders it is honest.
+ */
+export function collectionOverlapQueryOptions(
+	client: AxiosInstance,
+	params: { libraryCode: string },
+) {
+	return {
+		...collectionAnalysisPolicy,
+		queryKey: ["stats", "collection-overlap", params.libraryCode] as const,
+		queryFn: async (): Promise<CollectionOverlapStat[]> => {
+			const { data } = await client.get(`${STATS_BASE}/collection-overlap`, {
+				params: cleanParams(params),
+			});
+			return data;
+		},
+	};
+}
+
 export function newAcquisitionsQueryOptions(
 	client: AxiosInstance,
 	params: StatsParams & { libraryCode: string; acquiredSince: string },

@@ -33,7 +33,7 @@ export default function SupplierResponseSlaChart({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" gutterBottom>
+				<Typography variant="h6" component="h3" gutterBottom>
 					{t("insights.charts.supplier_response.title")}
 				</Typography>
 				<Typography variant="body2" color="text.secondary" gutterBottom>

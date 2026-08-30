@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "@tanstack/react-router";
 import {
+	Box,
 	Drawer,
 	List,
 	Divider,
@@ -148,68 +149,76 @@ export default function Sidebar({
 		return { selected: -1, isChildPage: false, disabledIndex: -1 };
 	}, [location.pathname, visibleRoutes]);
 
+	// The nav landmark and the list are separate elements on purpose. Rendering the List
+	// itself as <nav> replaces the <ul>, which leaves every <li> with no list to belong to -
+	// a WCAG "listitem" failure, and a screen reader that no longer announces how many
+	// destinations there are. The landmark keeps the id and label; the list stays a list.
 	const navigation = (
-		<List
+		<Box
 			component="nav"
 			id="main-sidebar-nav"
 			aria-label={String(t("nav.main_menu"))}
 			data-tid="sidebar"
 		>
-			{visibleRoutes.map((route, index) => (
-				<ListItem key={route.path} disablePadding sx={{ display: "block" }}>
-					<ListItemButton
-						component={Link}
-						to={route.path}
-						selected={selected === index}
-						disabled={disabledIndex === index}
-						// On mobile, choosing a destination dismisses the overlay.
-						onClick={isMobile ? onClose : undefined}
-						aria-current={
-							!isChildPage && selected === index ? "page" : undefined
-						}
-						sx={{
-							minHeight: 48,
-							px: "24px",
+			<List>
+				{visibleRoutes.map((route, index) => (
+					<ListItem key={route.path} disablePadding sx={{ display: "block" }}>
+						<ListItemButton
+							component={Link}
+							to={route.path}
+							selected={selected === index}
+							disabled={disabledIndex === index}
+							// On mobile, choosing a destination dismisses the overlay.
+							onClick={isMobile ? onClose : undefined}
+							aria-current={
+								!isChildPage && selected === index ? "page" : undefined
+							}
+							sx={{
+								minHeight: 48,
+								px: "24px",
 
-							":hover": { backgroundColor: "primary.hover" },
-							":active": { backgroundColor: "primary.hover" },
+								":hover": { backgroundColor: "primary.hover" },
+								":active": { backgroundColor: "primary.hover" },
 
-							"&.Mui-selected": {
-								backgroundColor: isChildPage
-									? "primary.buttonForSelectedChildPage"
-									: "primary.buttonForSelectedPage",
-								color: "primary.selectedText",
-								"&.Mui-focusVisible": {
+								"&.Mui-selected": {
 									backgroundColor: isChildPage
 										? "primary.buttonForSelectedChildPage"
 										: "primary.buttonForSelectedPage",
-								},
-								":hover": {
-									backgroundColor: isChildPage
-										? "primary.hoverOnSelectedPage"
-										: "primary.buttonForSelectedPage",
-								},
-							},
-							"&.Mui-disabled": { opacity: 1 },
-						}}
-					>
-						<ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: "center" }}>
-							{SidebarIcon(index, selected === index)}
-						</ListItemIcon>
-						<ListItemText
-							primary={t(route.translationKey)}
-							slotProps={{
-								primary: {
-									sx: {
-										fontWeight: selected === index ? "bold" : "normal",
+									color: "primary.selectedText",
+									"&.Mui-focusVisible": {
+										backgroundColor: isChildPage
+											? "primary.buttonForSelectedChildPage"
+											: "primary.buttonForSelectedPage",
+									},
+									":hover": {
+										backgroundColor: isChildPage
+											? "primary.hoverOnSelectedPage"
+											: "primary.buttonForSelectedPage",
 									},
 								},
+								"&.Mui-disabled": { opacity: 1 },
 							}}
-						/>
-					</ListItemButton>
-				</ListItem>
-			))}
-		</List>
+						>
+							<ListItemIcon
+								sx={{ minWidth: 0, mr: 3, justifyContent: "center" }}
+							>
+								{SidebarIcon(index, selected === index)}
+							</ListItemIcon>
+							<ListItemText
+								primary={t(route.translationKey)}
+								slotProps={{
+									primary: {
+										sx: {
+											fontWeight: selected === index ? "bold" : "normal",
+										},
+									},
+								}}
+							/>
+						</ListItemButton>
+					</ListItem>
+				))}
+			</List>
+		</Box>
 	);
 
 	if (isMobile) {

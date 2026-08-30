@@ -57,6 +57,7 @@
 		"zustand": "5.0.14"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.13.0",
 		"@cloudflare/workers-types": "4.20260701.1",
 		"@eslint/js": "9.22.0",
 		"@graphql-codegen/cli": "7.1.3",

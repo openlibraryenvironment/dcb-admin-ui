@@ -4,7 +4,11 @@ import type { AxiosInstance } from "axios";
 import * as statsApi from "@helpers/statsApi";
 import {
 	LIBRARY_CODE_PARAM,
+	clusterSizeDistributionQueryOptions,
+	collectionProfileQueryOptions,
+	collectionTotalsQueryOptions,
 	dashboardMetricsQueryOptions,
+	formatProfileQueryOptions,
 	peerBenchmarksQueryOptions,
 	timeSeriesQueryOptions,
 	topPartnersQueryOptions,
@@ -172,5 +176,55 @@ describe("statsApi wire contract", () => {
 			expect(page.totalSize).toBe(37);
 			expect(page.content).toHaveLength(1);
 		});
+	});
+
+	describe("collection analysis", () => {
+		// Four consortium-wide catalogue aggregates. Each is a pass over bib_record, which
+		// dcb-service serves one at a time behind a 15-minute cache, so what this client
+		// must not do is ask often or retry on refusal.
+		const consortiumWide = [
+			["collection-totals", collectionTotalsQueryOptions],
+			["collection-profile", collectionProfileQueryOptions],
+			["cluster-size-distribution", clusterSizeDistributionQueryOptions],
+			["format-profile", formatProfileQueryOptions],
+		] as const;
+
+		it.each(consortiumWide)(
+			"calls /insights/%s with no parameters",
+			async (path, factory) => {
+				const { client, url, params } = recordingClient();
+
+				await factory(client).queryFn();
+
+				expect(url()).toBe(`/insights/${path}`);
+				// No date window: these count works held, not requests made. Sending the range
+				// would imply the numbers move with it.
+				expect(params()).toBeUndefined();
+			},
+		);
+
+		it.each(consortiumWide)(
+			"gives %s a constant key, so the range picker cannot refetch it",
+			(path, factory) => {
+				const { client } = recordingClient();
+
+				// Exactly this, and nothing window-dependent: a key carrying the range
+				// would evict on every preset change and re-run a 20M-row aggregate that
+				// would return the same numbers.
+				expect(factory(client).queryKey).toEqual(["stats", path]);
+			},
+		);
+
+		it.each(consortiumWide)(
+			"does not retry %s on refusal",
+			(_path, factory) => {
+				const { client } = recordingClient();
+
+				// A 429 means the one permit is taken. Retrying spends the next caller's
+				// budget too, so the panel offers a manual retry instead.
+				expect(factory(client).retry).toBe(false);
+				expect(factory(client).staleTime).toBe(15 * 60 * 1000);
+			},
+		);
 	});
 });
