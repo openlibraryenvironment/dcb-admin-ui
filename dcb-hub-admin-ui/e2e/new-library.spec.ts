@@ -17,6 +17,13 @@ import libraries from "./fixtures-data/libraries.json";
 // group ("Use existing system" / "Create new system") plus a Continue button -
 // NOT a pair of buttons, which is what these specs used to click and why they
 // timed out waiting for a "Create new" button that has never existed.
+// Cancelling raises a second dialog, so `getByRole("dialog")` stops being unique the
+// moment the confirmation is up. Name the one we mean.
+const wizard = (page: Page) =>
+	page
+		.getByRole("dialog")
+		.filter({ hasNot: page.getByText(/unsaved changes/i) });
+
 const openWizardOnHostLmsStep = async (page: Page) => {
 	await page.getByRole("button", { name: /actions/i }).click();
 	await page.getByRole("menuitem", { name: /create a new library/i }).click();
@@ -39,7 +46,7 @@ test.describe("New Library wizard", () => {
 		await page.getByRole("button", { name: /actions/i }).click();
 		await page.getByRole("menuitem", { name: /create a new library/i }).click();
 
-		await expect(page.getByRole("dialog")).toBeVisible();
+		await expect(wizard(page)).toBeVisible();
 		await expect(
 			page.getByRole("radio", { name: /create new system/i }),
 		).toBeVisible();
@@ -53,7 +60,7 @@ test.describe("New Library wizard", () => {
 	}) => {
 		await openWizardOnHostLmsStep(page);
 
-		const dialog = page.getByRole("dialog");
+		const dialog = wizard(page);
 		const codeField = dialog.getByLabel(/host lms code/i);
 		await expect(codeField).toBeVisible();
 
@@ -87,11 +94,28 @@ test.describe("New Library wizard", () => {
 		});
 		await openWizardOnHostLmsStep(page);
 
-		const dialog = page.getByRole("dialog");
+		const dialog = wizard(page);
 		await dialog.getByLabel(/host lms code/i).fill("testcode");
 		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
-		await dialog.getByLabel(/client class/i).click();
+		// "LMS type" (hostlms.type), not "client class". The picker is labelled for
+		// the librarian choosing Sierra or FOLIO; lmsClientClass is the field name
+		// behind it, and asserting on that was asserting on the implementation.
+		await dialog.getByLabel(/lms type/i).click();
 		await page.getByRole("option", { name: "Sierra" }).click();
+
+		// Choosing a type reveals that type's client configuration, and the five
+		// fields Sierra marks required are validated by this step too
+		// (STEP_SCHEMA_FIELDS.hostLms includes clientConfigFields). Leaving them
+		// empty is why this step does not advance - which is the form working.
+		// By role, not by label: a secret field ships a "Show <label>" toggle whose
+		// aria-label contains the field's own, so getByLabel matches the button too.
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
 
 		await dialog.getByRole("button", { name: /next/i }).click();
 
@@ -100,12 +124,60 @@ test.describe("New Library wizard", () => {
 		);
 	});
 
-	test("cancel closes the dialog without submitting", async ({ page }) => {
+	// Cancelling part-way through does NOT discard silently: requestClose() in
+	// NewLibrary.tsx asks first, because everything typed since the last successful
+	// mutation is lost on close and the whole point of this wizard is that it is long.
+	// The two tests below pin both halves of that - the ask, and the way out of it.
+	test("cancel asks before discarding, and keeping the wizard open leaves it open", async ({
+		page,
+	}) => {
 		await openWizardOnHostLmsStep(page);
 
-		const dialog = page.getByRole("dialog");
-		await dialog.getByRole("button", { name: /cancel/i }).click();
+		await wizard(page)
+			.getByRole("button", { name: /cancel/i })
+			.click();
 
-		await expect(dialog).not.toBeVisible();
+		const confirmation = page.getByRole("dialog", {
+			name: /you have unsaved changes/i,
+		});
+		await expect(confirmation).toBeVisible();
+
+		await confirmation.getByRole("button", { name: /keep editing/i }).click();
+
+		await expect(confirmation).not.toBeVisible();
+		await expect(wizard(page)).toBeVisible();
+	});
+
+	test("confirming the discard closes the wizard", async ({ page }) => {
+		await openWizardOnHostLmsStep(page);
+
+		await wizard(page)
+			.getByRole("button", { name: /cancel/i })
+			.click();
+		await page
+			.getByRole("dialog", { name: /you have unsaved changes/i })
+			.getByRole("button", { name: /leave without saving/i })
+			.click();
+
+		await expect(wizard(page)).not.toBeVisible();
+	});
+
+	// The other half of the same rule: with genuinely nothing to lose there is no
+	// prompt, so a mistaken click is one Cancel rather than two.
+	test("cancel on the untouched first step closes without asking", async ({
+		page,
+	}) => {
+		await page.getByRole("button", { name: /actions/i }).click();
+		await page.getByRole("menuitem", { name: /create a new library/i }).click();
+		await expect(wizard(page)).toBeVisible();
+
+		await wizard(page)
+			.getByRole("button", { name: /cancel/i })
+			.click();
+
+		await expect(wizard(page)).not.toBeVisible();
+		await expect(
+			page.getByRole("dialog", { name: /you have unsaved changes/i }),
+		).not.toBeVisible();
 	});
 });
