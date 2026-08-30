@@ -852,6 +852,14 @@
 			"unique_titles": {
 				"title": "Unique titles requested",
 				"subtitle": "across {{total}} requests"
+			},
+			"supply_rate": {
+				"title": "Supply fill rate",
+				"subtitle": "Requests we supplied, of those we were asked to"
+			},
+			"time_to_finalise": {
+				"title": "Time to finalise",
+				"subtitle": "Median round trip; 95th percentile {{p95}}"
 			}
 		},
 		"charts": {
@@ -899,11 +907,6 @@
 			"demand_heatmap": {
 				"title": "When requests arrive",
 				"subtitle": "Request volume by day of week and hour of day (server time zone)."
-			},
-			"demand_by_format": {
-				"title": "Demand by format",
-				"subtitle": "Requesting volume by material format.",
-				"series": "Requests"
 			},
 			"top_titles": {
 				"title": "Most requested titles",
@@ -960,6 +963,80 @@
 				"subtitle": "How your recently-added titles perform in the network.",
 				"acquired_since": "Acquired since",
 				"col_supplied": "Supplied"
+			},
+			"trading_partners": {
+				"title": "Trading partners",
+				"subtitle": "Who we trade with most, both directions, ranked on the total.",
+				"subtitle_consortium": "The busiest suppliers and borrowers across the consortium. Select a library to rank its own partners.",
+				"col_partner": "Partner",
+				"col_borrowed": "Borrowed from",
+				"col_supplied": "Supplied to",
+				"col_total": "Total",
+				"col_requests": "Requests",
+				"top_suppliers": "Top suppliers",
+				"top_borrowers": "Top borrowers",
+				"rows_per_page": "Partners per page"
+			},
+			"unfillable_demand": {
+				"title": "Demand nothing could supply",
+				"subtitle": "Titles that were requested but that no library in the consortium holds. Unlike a failed request, these never had a supplier to lose."
+			}
+		},
+		"sections": {
+			"overview": "Overview",
+			"performance": "Service performance",
+			"demand": "Demand",
+			"partners": "Trading partners",
+			"gaps": "Collection gaps and supply value"
+		},
+		"collection": {
+			"section_title": "Collection analysis",
+			"section_subtitle": "The catalogue as ingested, rather than the traffic over it. These figures count works held, not requests made, so the date range above does not apply to them.",
+			"busy": "The collection figures are being recalculated. Try again shortly.",
+			"failed": "The collection figures could not be loaded.",
+			"retry": "Retry",
+			"totals": {
+				"distinct_titles": "Distinct titles",
+				"distinct_titles_sub": "Works, after clustering",
+				"singly_held": "Singly held titles",
+				"singly_held_sub": "Works only one library holds",
+				"holdings": "Holdings",
+				"holdings_sub": "Work and library pairs, duplicates included",
+				"sources": "Contributing libraries",
+				"sources_sub": "Systems with at least one clustered record"
+			},
+			"cluster_quality": {
+				"title": "Clustering confidence",
+				"subtitle": "How many libraries hold each work. Read this before the figures beside it: they depend on it.",
+				"summary": "{{single}}% of {{total}} works are held by a single library. The commonest work is held by {{commonest}}.",
+				"under_clustered": "{{single}}% of works have exactly one holder. That is high enough to suggest records are not being matched to each other, in which case the unique-title figures describe the matching rather than the collection.",
+				"axis_holders": "Libraries holding the work",
+				"series": "Works",
+				"chart_label": "Distribution of works by number of holding libraries. {{single}}% are held by one library."
+			},
+			"profile": {
+				"title": "What each library contributes",
+				"subtitle": "Works contributed to the shared catalogue, and how many of them nobody else holds.",
+				"col_library": "Library",
+				"col_works": "Works",
+				"col_unique": "Unique",
+				"col_unique_share": "Unique share",
+				"caption": "Showing {{shown}} of {{total}} libraries."
+			},
+			"format_mix": {
+				"title": "Format mix of the catalogue",
+				"subtitle": "Works by format across the consortium. Compare with demand by format above: what is held and what is asked for need not match.",
+				"subtitle_library": "Works by format for the selected library.",
+				"series": "Works",
+				"unknown": "Not recorded",
+				"chart_label": "Catalogue format mix across {{count}} formats, largest is {{top}}."
+			},
+			"overlap": {
+				"title": "Who holds the same works",
+				"subtitle": "Works this library holds that another library also holds. High overlap means a partner can usually supply; low overlap means this library is the only route to those titles.",
+				"col_library": "Library",
+				"col_shared": "Shared works",
+				"caption": "Showing {{shown}} of {{total}} libraries."
 			}
 		}
 	},

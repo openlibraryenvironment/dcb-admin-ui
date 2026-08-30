@@ -56,7 +56,7 @@ export default function CollectionDimensionPanel({
 					sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
 				>
 					<Box>
-						<Typography variant="h6" gutterBottom>
+						<Typography variant="h6" component="h3" gutterBottom>
 							{t("insights.charts.collection_dimension.title")}
 						</Typography>
 						<Typography variant="body2" color="text.secondary" gutterBottom>

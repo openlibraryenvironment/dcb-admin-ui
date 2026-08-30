@@ -76,7 +76,7 @@ export default function PeerBenchmarkPanel({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" gutterBottom>
+				<Typography variant="h6" component="h3" gutterBottom>
 					{t("insights.charts.peer_benchmark.title")}
 				</Typography>
 				<Typography variant="body2" color="text.secondary" gutterBottom>

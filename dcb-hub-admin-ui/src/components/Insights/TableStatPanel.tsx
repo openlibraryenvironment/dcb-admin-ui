@@ -53,7 +53,7 @@ export default function TableStatPanel<T>({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" gutterBottom>
+				<Typography variant="h6" component="h3" gutterBottom>
 					{t(titleKey)}
 				</Typography>
 				<Typography variant="body2" color="text.secondary" gutterBottom>

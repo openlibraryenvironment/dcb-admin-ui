@@ -58,7 +58,7 @@ export default function NewAcquisitionsPanel({
 					sx={{ justifyContent: "space-between", alignItems: "flex-start" }}
 				>
 					<Box>
-						<Typography variant="h6" gutterBottom>
+						<Typography variant="h6" component="h3" gutterBottom>
 							{t("insights.charts.new_acquisitions.title")}
 						</Typography>
 						<Typography variant="body2" color="text.secondary" gutterBottom>
