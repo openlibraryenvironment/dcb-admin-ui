@@ -13,6 +13,7 @@ import {
 } from "@mui/icons-material";
 
 import { useThemeStore } from "@hooks/useThemeStore";
+import FontPicker from "./FontPicker";
 import {
 	THEME_MODES,
 	THEME_NAMES,
@@ -26,9 +27,19 @@ const MODE_ICON: Record<ThemeMode, React.ReactNode> = {
 	highContrast: <ContrastOutlined fontSize="small" sx={{ mr: 1 }} />,
 };
 
-// Two independent axes: the brand theme, and the light/dark/high-contrast mode.
-// Both persist via useThemeStore and drive the ThemeProvider in App.
-export default function ThemeControls() {
+interface ThemeControlsProps {
+	/**
+	 * Whether to offer the typeface. Off by default so the existing profile page is
+	 * unchanged; the setup flow and /settings turn it on.
+	 */
+	showFont?: boolean;
+}
+
+// Three independent axes: the brand theme, the light/dark/high-contrast mode, and the
+// reading typeface. All persist via useThemeStore and drive the ThemeProvider in App.
+export default function ThemeControls({
+	showFont = false,
+}: ThemeControlsProps = {}) {
 	const { t } = useTranslation();
 
 	const themeName = useThemeStore((s) => s.themeName);
@@ -76,6 +87,8 @@ export default function ThemeControls() {
 					))}
 				</ToggleButtonGroup>
 			</FormControl>
+
+			{showFont && <FontPicker />}
 		</Stack>
 	);
 }

@@ -18,11 +18,9 @@ import {
 	toRoutePath,
 } from "@helpers/appBase";
 
-// Do we still want these?
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
+// The @font-face rules moved to `src/themes/fonts.ts`, which is the registry the picker
+// and the theme both read. Two places declaring the same faces is how one of them ends up
+// shipping a family nothing selects.
 
 declare global {
 	interface Window {

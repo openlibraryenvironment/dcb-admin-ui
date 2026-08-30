@@ -2,7 +2,7 @@
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -14,8 +14,6 @@ import {
 	Button,
 	Grid,
 	MenuItem,
-	Tab,
-	Tabs,
 	TextField,
 	Typography,
 	useTheme,
@@ -24,6 +22,7 @@ import {
 import { Cancel, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -47,11 +46,8 @@ import Error from "@components/Error/Error";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
 import { BrandImageField } from "@components/BrandImageField/BrandImageField";
-import {
-	BRAND_LIMITS,
-	isValidLogoUrl,
-	themeOptions,
-} from "@constants/discoveryBranding";
+import { themeOptions } from "@constants/discoveryBranding";
+import { discoveryBrandFields } from "@schemas/discoveryBrandSchema";
 import {
 	BrandUploadError,
 	hasStagedImages,
@@ -128,7 +124,6 @@ function hasChanged(next: unknown, current: unknown): boolean {
 function ConsortiumPage() {
 	const { t } = useTranslation();
 	const auth = useAuth();
-	const router = useRouter();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
 	const client = useDcbRestClient();
@@ -198,37 +193,11 @@ function ConsortiumPage() {
 		description: Yup.string().trim().max(400),
 		websiteUrl: Yup.string().trim().max(200),
 		catalogueSearchUrl: Yup.string().trim().max(200),
-		// Mirrors dcb-service's BrandingValidator, so an administrator is told at the
-		// field rather than by a rejected save. Blank is valid at every one of these and
-		// means "clear it" â€” an administrator who uploaded the wrong mark must be able to
-		// remove it.
-		brandLogoUrl: Yup.string()
-			.trim()
-			.max(BRAND_LIMITS.logoUrl)
-			.test(
-				"absolute-http-url",
-				t("consortium.brand.logo_url_invalid"),
-				isValidLogoUrl,
-			),
-		brandLogoAlt: Yup.string().trim().max(BRAND_LIMITS.logoAlt),
-		brandHeaderIconUrl: Yup.string()
-			.trim()
-			.max(BRAND_LIMITS.headerIconUrl)
-			.test(
-				"absolute-http-url-or-asset",
-				t("consortium.brand.logo_url_invalid"),
-				isValidLogoUrl,
-			),
-		brandBackgroundImageUrl: Yup.string()
-			.trim()
-			.max(BRAND_LIMITS.backgroundImageUrl)
-			.test(
-				"absolute-http-url-or-asset",
-				t("consortium.brand.logo_url_invalid"),
-				isValidLogoUrl,
-			),
-		patronWelcome: Yup.string().trim().max(BRAND_LIMITS.patronWelcome),
-		defaultThemeName: Yup.string().trim().max(BRAND_LIMITS.themeName),
+		// The patron-facing brand rules live in one place, shared with setup's
+		// discovery chapter - see @schemas/discoveryBrandSchema. Two hand-maintained
+		// copies of a rule that mirrors a server validator is how one of them ends up
+		// accepting what the server refuses.
+		...discoveryBrandFields(t),
 	});
 
 	/**
@@ -513,25 +482,7 @@ function ConsortiumPage() {
 						]
 			}
 		>
-			<Tabs
-				value={0}
-				onChange={(_, val) =>
-					router.navigate({
-						to: [
-							"/consortium",
-							"/consortium/functionalSettings",
-							"/consortium/onboarding",
-							"/consortium/contacts",
-						][val],
-					})
-				}
-				sx={{ mb: 3 }}
-			>
-				<Tab label={t("nav.consortium.profile")} />
-				<Tab label={t("nav.consortium.functionalSettings")} />
-				<Tab label={t("nav.consortium.onboarding")} />
-				<Tab label={t("nav.consortium.contacts")} />
-			</Tabs>
+			<ConsortiumTabs current="profile" />
 
 			{/* An upload refusal arrives at Save now that images are staged, so it belongs
 			    at the top of the form rather than beside one field: the administrator has

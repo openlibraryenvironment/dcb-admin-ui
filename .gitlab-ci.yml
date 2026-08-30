@@ -44,6 +44,74 @@ build:
       - dcb-hub-admin-ui/dist/
     expire_in: 1 hour
 
+# W-3. Until this job existed the verify stage ran `e2e:ki-bootstrap` and nothing else:
+# no lint, no type-check, no unit tests, no Playwright suite. Every quality rule the repo
+# carries was therefore enforced by whoever remembered to run it locally, which is another
+# way of saying it was not enforced. A rule that is not gated is not a rule.
+#
+# --max-warnings=0 because ESLint exits 0 on warnings otherwise, and a warning nobody is
+# forced to read is a defect with a longer half-life.
+#
+# `npx vitest run`, never `npm run test` - that script is bare `vitest`, i.e. watch mode,
+# which in CI is a job that never finishes.
+verify_quality:
+  stage: verify
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run lint -- --max-warnings=0
+    - npx tsc --noEmit
+    - npx vitest run
+
+# Separate from verify_quality so a failing accessibility gate is legible as such in the
+# pipeline rather than as "the verify job went red". It needs the Playwright image; the
+# quality job does not, and pulling that image for a lint run wastes a minute per pipeline.
+#
+# This includes e2e/accessibility.spec.ts and e2e/setup-accessibility.spec.ts, which are
+# the WCAG 2.2 AA gate: zero axe violations in light, dark AND high contrast. High
+# contrast has no media query behind it and is only reachable by seeding the stored
+# preference - see e2e/fixtures/theme.ts.
+verify_e2e:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npx playwright test
+  artifacts:
+    when: on_failure
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/test-results/
+    expire_in: 1 week
+
+# The performance budget - W-2. Its own job because it needs a production build and three
+# Lighthouse runs, and because a red budget is a specific conversation ("cut weight or
+# bring an argument"), not a generic test failure.
+#
+# NEVER re-baseline lighthouserc.js to make this pass. See the file.
+verify_lighthouse:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    # No separate build step: lighthouserc.js's startServerCommand builds, because the
+    # budget must not audit whatever an earlier job happened to leave in dist/.
+    - npm run lighthouse
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/.lighthouseci/
+    expire_in: 1 week
+
 verify_ki_bootstrap:
   stage: verify
   image:

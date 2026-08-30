@@ -2,17 +2,9 @@ import { ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import {
-	Grid,
-	Stack,
-	Tab,
-	Tabs,
-	Typography,
-	Box,
-	Tooltip,
-} from "@mui/material";
+import { Grid, Stack, Typography, Box, Tooltip } from "@mui/material";
 import {
 	WarningAmber,
 	CheckCircle,
@@ -24,6 +16,7 @@ import {
 } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
@@ -174,7 +167,6 @@ const mappingsTooltip = (t: TFunction, mappings: LibraryMappingsState) => (
 
 function Onboarding() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const { paginationModel, onPaginationModelChange } = useGridState(
@@ -809,24 +801,7 @@ function Onboarding() {
 				sx={{ mb: 3 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={2}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									"/consortium",
-									"/consortium/functionalSettings",
-									"/consortium/onboarding",
-									"/consortium/contacts",
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.consortium.profile")} />
-						<Tab label={t("nav.consortium.functionalSettings")} />
-						<Tab label={t("nav.consortium.onboarding")} />
-						<Tab label={t("nav.consortium.contacts")} />
-					</Tabs>
+					<ConsortiumTabs current="onboarding" />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>

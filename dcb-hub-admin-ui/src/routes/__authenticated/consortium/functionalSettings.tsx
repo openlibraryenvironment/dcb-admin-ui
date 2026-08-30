@@ -1,12 +1,13 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Grid, Tab, Tabs, Typography, Button, Stack } from "@mui/material";
+import { Grid, Typography, Button, Stack } from "@mui/material";
 import { GridRowModesModel, GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewFunctionalSetting from "@forms/NewFunctionalSetting/NewFunctionalSetting";
@@ -25,7 +26,6 @@ export const Route = createFileRoute(
 
 function FunctionalSettings() {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 	const auth = useAuth();
 
@@ -105,24 +105,7 @@ function FunctionalSettings() {
 				sx={{ mb: 3 }}
 			>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs
-						value={1}
-						onChange={(_, val) =>
-							router.navigate({
-								to: [
-									"/consortium",
-									"/consortium/functionalSettings",
-									"/consortium/onboarding",
-									"/consortium/contacts",
-								][val],
-							})
-						}
-					>
-						<Tab label={t("nav.consortium.profile")} />
-						<Tab label={t("nav.consortium.functionalSettings")} />
-						<Tab label={t("nav.consortium.onboarding")} />
-						<Tab label={t("nav.consortium.contacts")} />
-					</Tabs>
+					<ConsortiumTabs current="functionalSettings" />
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>

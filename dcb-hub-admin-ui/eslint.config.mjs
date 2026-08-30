@@ -33,6 +33,10 @@ export default [
 			"*.config.js",
 			"*.config.mjs",
 			"*.config.ts",
+			// Tool config, the same category as the *.config.* entries above - it just
+			// does not carry the word "config" in its name. CommonJS on purpose
+			// (@lhci/cli requires it), which this ESM/browser ruleset would reject.
+			"lighthouserc.js",
 		],
 	},
 

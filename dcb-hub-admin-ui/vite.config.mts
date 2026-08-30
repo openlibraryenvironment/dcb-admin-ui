@@ -127,6 +127,35 @@ export default defineConfig(({ mode }) => {
 					),
 				},
 				output: {
+					// NO `codeSplitting.groups` HERE, DELIBERATELY, AND MEASURED.
+					//
+					// symposia-ui merges chunks in exactly this position and it took that
+					// app from 73 requests to 35 and its LCP under budget. The same move
+					// was tried here twice and made things worse or did nothing, so it is
+					// recorded rather than left for somebody to re-derive:
+					//
+					//   {test: /node_modules/, minShareCount: 2, minSize: 20KiB}
+					//     122 -> 89 script requests, but 638 KiB -> 1,024 KiB and
+					//     LCP 6.9s -> 8.8s. The premium data grid, x-charts-pro and
+					//     exceljs are each shared by two or more LAZY routes, so
+					//     minShareCount hoists them onto the critical path of a page
+					//     that renders a sign-in card.
+					//
+					//   {test: /@mui\/(material|system|utils|...)/, same constraints}
+					//     122 -> 110 requests, +17 KiB, LCP unchanged within noise - and
+					//     it produced a single 126 KiB chunk that Lighthouse measured as
+					//     69% unused on this page.
+					//
+					// The two applications differ in where their weight is. symposia-ui's
+					// problem was 32 tiny vendor chunks in front of first paint. This
+					// application's is a large EAGER APPLICATION GRAPH: `routeTree.gen.ts`
+					// statically imports all 81 route definitions, and those definitions
+					// pull `schemas`, `axios`, `dayjs` and the bundled locale catalogue in
+					// with them. Reshaping chunks moves that weight around; it does not
+					// remove it. See WELCOME_EXPERIENCE_PLAN.md §8.
+					//
+					// ki-bootstrap.js is the ONE public file name in the artefact - the
+					// bootloader resolves it by name, so it must not carry a hash.
 					entryFileNames: (chunk) =>
 						chunk.facadeModuleId?.endsWith("/src/ki-bootstrap.ts")
 							? "ki-bootstrap.js"

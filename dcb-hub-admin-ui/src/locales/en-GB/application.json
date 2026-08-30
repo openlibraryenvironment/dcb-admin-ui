@@ -475,6 +475,30 @@
 			"light": "Light",
 			"dark": "Dark",
 			"highContrast": "High contrast"
+		},
+		"font_label": "Reading typeface",
+		"font_sample": "Interlibrary loan requests across the consortium.",
+		"fonts": {
+			"roboto": {
+				"name": "Roboto",
+				"description": "The DCB Admin default."
+			},
+			"system": {
+				"name": "Your system font",
+				"description": "Uses the typeface your device already has. Downloads nothing."
+			},
+			"atkinsonHyperlegible": {
+				"name": "Atkinson Hyperlegible Next",
+				"description": "Designed by the Braille Institute so that similar letters stay distinct. Made for low vision."
+			},
+			"inter": {
+				"name": "Inter",
+				"description": "Tall letterforms that stay legible at small sizes, such as in dense tables."
+			},
+			"lexend": {
+				"name": "Lexend",
+				"description": "Shaped to reduce visual crowding. Often preferred by readers with dyslexia."
+			}
 		}
 	},
 	"hostlms": {
@@ -1479,7 +1503,8 @@
 			"onboarding": "Onboarding",
 			"functionalSettings": "Functional settings",
 			"profile": "Profile",
-			"insights": "Insights"
+			"insights": "Insights",
+			"setup": "Setup"
 		},
 		"groups": {
 			"bibs": "Bib records",
@@ -2517,5 +2542,189 @@
 		"RET-EXP": "Walk-up",
 		"RET-PUA": "Pickup anywhere",
 		"RET-LOCAL": "Local"
+	},
+	"setup": {
+		"page_title": "Set up OpenRS",
+		"rail_label": "Setup progress",
+		"rail_item": "{{number}}. {{label}}",
+		"step_of": "Step {{number}} of {{total}}",
+		"announcement": "Step {{number}} of {{total}}: {{title}}",
+		"needs_consortium": "This step needs your consortium to exist first. Go back and tell us about your consortium, and this will open up.",
+		"status": {
+			"done": "Done",
+			"skipped": "Skipped",
+			"not_started": "Not started",
+			"not_yet_available": "Not yet available"
+		},
+		"actions": {
+			"back": "Back",
+			"continue": "Continue",
+			"skip": "I'll do this later",
+			"save_and_continue": "Save and continue",
+			"looks_good": "Looks good, continue",
+			"finish": "Finish setup"
+		},
+		"error": {
+			"title": "We could not check how far along your setup is",
+			"message": "This is a problem reading from DCB, not a problem with your consortium. Reload to try again."
+		},
+		"chapters": {
+			"appearance": {
+				"label": "Appearance",
+				"title": "First, how should DCB Admin look to you?",
+				"subtitle": "Set this up the way you want to read it. You can change any of it later, and it only affects your own account."
+			},
+			"consortium": {
+				"label": "Your consortium",
+				"title": "Tell us about your consortium",
+				"subtitle": "This is the organisation everything else belongs to: its name, when it launched, and where people can find it."
+			},
+			"howItWorks": {
+				"label": "How requesting works",
+				"title": "How should requesting work?",
+				"subtitle": "These decide what your patrons and staff can do. Pick what suits your consortium - none of it is permanent."
+			},
+			"contacts": {
+				"label": "Contacts",
+				"title": "Who should we contact?",
+				"subtitle": "The person to reach about the consortium as a whole. You can add more people afterwards."
+			},
+			"discovery": {
+				"label": "Discovery branding",
+				"title": "How should Symposia look to your patrons?",
+				"subtitle": "Symposia is what your patrons search. This is the name, the marks and the welcome they see when they arrive."
+			},
+			"libraries": {
+				"label": "Your libraries",
+				"title": "Now let's add your libraries",
+				"subtitle": "Add one at a time with the guided wizard, or upload a spreadsheet if you already have your members listed."
+			}
+		},
+		"appearance": {
+			"scope_note": "These are your own preferences, stored in this browser. They do not change what anyone else sees, and they do not change how Symposia looks to patrons."
+		},
+		"consortium": {
+			"already_title": "Your consortium is already set up",
+			"already_body": "{{name}} already exists on this system, so there is nothing to create here. You can edit its details on the Consortium page at any time."
+		},
+		"how_it_works": {
+			"error": "We could not save your settings"
+		},
+		"contacts": {
+			"error": "We could not add that contact",
+			"existing": "Contacts already on this consortium",
+			"add_another": "Adding another contact here will not replace the ones above."
+		},
+		"discovery": {
+			"error": "We could not save your branding",
+			"skip": "We have not decided yet",
+			"preview_heading": "What your patrons will see",
+			"preview_no_name": "Your consortium",
+			"preview_search_placeholder": "Search for books, articles and more",
+			"preview_caveat": "An approximation of the arrangement, not an exact rendering. Symposia has its own typography and spacing."
+		},
+		"libraries": {
+			"already_title": "You have libraries already",
+			"already_body_one": "There is 1 library on this system.",
+			"already_body_other": "There are {{count}} libraries on this system.",
+			"one_title": "Add one library",
+			"one_body": "The guided wizard: the library, its Host LMS and connection details, its mappings and its pickup locations. Best for your first library, and for any library you are setting up carefully.",
+			"one_action": "Add a library",
+			"many_title": "Upload a spreadsheet",
+			"many_body": "Create many libraries at once from a CSV or TSV file. You will see exactly what would change before anything is written.",
+			"many_action": "Import from a spreadsheet",
+			"after_import": "Adding a library creates the record. Its mappings, pickup locations and ingest are set up per library afterwards - the Onboarding page tracks what each one still needs.",
+			"skip": "Add libraries later"
+		},
+		"banner": {
+			"title": "Your setup is not finished",
+			"body_one": "There is 1 step left.",
+			"body_other": "There are {{count}} steps left.",
+			"outstanding": "Still to do: {{steps}}.",
+			"continue": "Continue setup",
+			"fresh_title": "Welcome to OpenRS",
+			"fresh_body": "Nothing has been set up on this system yet. It takes about ten minutes, and you can stop and come back at any point.",
+			"start": "Start setup"
+		},
+		"done": {
+			"page_title": "Setup",
+			"title": "You are set up",
+			"title_partial": "Setup so far",
+			"subtitle_one": "Your consortium exists and has 1 library.",
+			"subtitle_other": "Your consortium exists and has {{count}} libraries.",
+			"revisit": "Go to this step",
+			"outstanding": "You passed over: {{steps}}. Each one is still there when you want it.",
+			"next_steps": "Adding a library is the start of configuring it. The Onboarding page shows what each library still needs - its mappings, its pickup locations, and whether its records have been ingested.",
+			"go_onboarding": "Go to Onboarding",
+			"go_consortium": "Go to Consortium",
+			"go_home": "Go to the home page"
+		},
+		"import": {
+			"title": "Import libraries from a spreadsheet",
+			"explanation": "Upload a CSV or TSV file with one row per library. Nothing is created until you have seen what would change and confirmed it.",
+			"download_template": "Download the template",
+			"choose_file": "Choose a file",
+			"limits": "Up to {{rows}} rows and {{size}}. CSV or TSV; the separator is detected from the file.",
+			"too_large": "That file is {{size}}, which is over the {{max}} limit. Split it into smaller files, or check that it is a spreadsheet export and not a whole workbook.",
+			"no_rows": "That file has a header but no library rows in it.",
+			"unknown_headers": "Columns we do not recognise, and have ignored: {{headers}}. Everything else in the file has been read normally.",
+			"summary": "{{create}} to create, {{update}} already exist, {{reject}} cannot be used.",
+			"table_caption": "Every row in your file, and what would happen to it. Rows matching a library that already exists are not ticked - tick one only if you mean to overwrite it.",
+			"apply_one": "Apply 1 row",
+			"apply_other": "Apply {{count}} rows",
+			"apply_row": "Apply line {{line}}, {{code}}",
+			"applying": "Applying {{done}} of {{total}}...",
+			"result_title": "Import finished",
+			"result": "{{applied}} applied, {{failed}} failed.",
+			"failures_title": "These rows were not applied",
+			"failure_line": "Line {{line}} ({{code}}): {{reason}}",
+			"will_update": "A library with this agency code already exists. Tick to overwrite it.",
+			"columns_heading": "What each column means",
+			"verdict": {
+				"create": "New",
+				"update": "Already exists",
+				"reject": "Cannot be used"
+			},
+			"column": {
+				"apply": "Apply",
+				"line": "Line",
+				"verdict": "Verdict",
+				"notes": "Notes",
+				"name": "Column",
+				"required": "Required",
+				"description": "What it is",
+				"agency_code": "Agency code",
+				"full_name": "Full name"
+			},
+			"problem": {
+				"required": "{{column}} is required and is empty.",
+				"not_a_number": "{{column}} must be a number.",
+				"unknown_host_lms": "No Host LMS called \"{{code}}\" exists. Known codes: {{known}}.",
+				"duplicate": "The agency code {{code}} appears more than once in this file.",
+				"latitude_range": "Latitude must be between -90 and 90.",
+				"longitude_range": "Longitude must be between -180 and 180.",
+				"email": "{{column}} is not a valid email address."
+			},
+			"columns": {
+				"agencyCode": "The unique code for this library, used everywhere in DCB. Cannot be changed later.",
+				"fullName": "The library's full official name.",
+				"shortName": "A shorter form, used in lists.",
+				"abbreviatedName": "An abbreviation or initialism.",
+				"address": "The postal address.",
+				"type": "Academic, Public, School, Special, or your own category.",
+				"hostLmsCode": "The code of the Host LMS this library uses. It must already exist in DCB.",
+				"longitude": "Decimal degrees, between -180 and 180.",
+				"latitude": "Decimal degrees, between -90 and 90.",
+				"backupDowntimeSchedule": "When the library's systems are routinely unavailable.",
+				"supportHours": "When someone at this library can be reached.",
+				"discoverySystem": "The discovery layer this library runs, if any.",
+				"patronWebsite": "The library website patrons are sent to.",
+				"contactFirstName": "First name of the main contact.",
+				"contactLastName": "Last name of the main contact.",
+				"contactEmail": "Email address of the main contact.",
+				"contactRole": "What the contact does.",
+				"contactIsPrimary": "true or false."
+			}
+		}
 	}
 }
