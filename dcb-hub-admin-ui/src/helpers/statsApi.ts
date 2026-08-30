@@ -15,7 +15,24 @@ export interface TurnaroundStat {
 
 export interface PartnerStat {
 	partnerCode: string;
+	// Null when the Host LMS has traffic but is not onboarded as a library - fall back to the
+	// code rather than rendering a blank. One Host LMS can serve several libraries, so
+	// dcb-service lists all of their names rather than picking one.
+	partnerName: string | null;
 	requestCount: number;
+}
+
+/**
+ * One partner and the traffic in BOTH directions, ranked on the total. Not derivable from
+ * topSuppliers and topBorrowers: a partner sixth in each can out-total one third in one, and
+ * appears in neither. The split is kept so an uneven relationship stays visible.
+ */
+export interface TradingPartnerStat {
+	partnerCode: string;
+	partnerName: string | null;
+	borrowedFromCount: number;
+	suppliedToCount: number;
+	totalCount: number;
 }
 
 export interface DashboardMetrics {
@@ -137,6 +154,10 @@ export interface ConsortialLifelineStat {
 
 export interface PeerBenchmarkStat {
 	libraryCode: string;
+	// The name a librarian recognises. Null when no library row maps to that Host LMS - a
+	// system with requests that is not onboarded as a library - so callers fall back to the
+	// code rather than rendering a blank row.
+	libraryName: string | null;
 	totalRequests: number;
 	checkoutCount: number;
 	successCount: number;
@@ -171,13 +192,46 @@ export interface StatsParams {
 
 export type TimeSeriesInterval = "day" | "week" | "month";
 
-const STATS_BASE = "/patrons/requests/stats";
+// dcb-service serves Insights from /insights. It was /patrons/requests/stats, which was
+// accurate when the surface was ten endpoints on the patron request controller and misleading
+// at thirty-five - half of them never read patron_request at all. Only /top-requestors and
+// /top-requested-titles are still answered under the old base, by LegacyStatsController, and
+// that class is marked for removal. Requires a dcb-service carrying the rename;
+// VITE_FEATURE_INSIGHTS gates that, see featureFlags.
+const STATS_BASE = "/insights";
 
-// Strip undefined so axios does not serialise `libraryCode=undefined` etc.
+/**
+ * The wire name for the library filter.
+ *
+ * dcb-service binds `requestedLibraryCode`, not `libraryCode` - deliberately, because
+ * StatsScopeGuard treats it as a REQUEST rather than an instruction and checks it against the
+ * caller's token. `StatsScopeArchitectureTests` fails the build if an endpoint ever goes back
+ * to binding the trusted name.
+ *
+ * We keep `libraryCode` throughout this app because that is what it is to us, and rename once
+ * here at the serialisation boundary. Sending the old name is silently wrong rather than an
+ * error: the endpoint ignores it, and a consortium administrator asking for one library gets
+ * consortium-wide figures rendered under that library's name.
+ *
+ * `libraryCodes` - the CSV taken by /turnaround - is a different parameter and keeps its own
+ * name, so the rename matches the exact key only.
+ */
+export const LIBRARY_CODE_PARAM = "requestedLibraryCode";
+
+// Strip undefined so axios does not serialise `libraryCode=undefined` etc., and rename the
+// library filter to the name the API actually binds.
 function cleanParams<T extends object>(params: T): Record<string, unknown> {
 	return Object.fromEntries(
-		Object.entries(params).filter(([, v]) => v !== undefined && v !== null),
+		Object.entries(params)
+			.filter(([, v]) => v !== undefined && v !== null)
+			.map(([k, v]) => [k === "libraryCode" ? LIBRARY_CODE_PARAM : k, v]),
 	);
+}
+
+/** The fields of a Micronaut Page this app actually reads. */
+export interface Paged<T> {
+	content: T[];
+	totalSize: number;
 }
 
 // --- TanStack Query options factories ---------------------------------------
@@ -211,6 +265,39 @@ export function dashboardMetricsQueryOptions(
 				params: cleanParams(params),
 			});
 			return data;
+		},
+	};
+}
+
+/**
+ * libraryCode is required by the endpoint - "who do we trade with" needs a "we" - so the
+ * caller must supply it rather than relying on the consortium-wide default.
+ *
+ * Returns the PAGE rather than unwrapping to the first one, unlike the summary endpoints
+ * around it. The whole point of this endpoint over dashboard-metrics' fixed top ten is that
+ * the tail is reachable, and a helper that quietly returned page zero would put it back out
+ * of reach. totalSize counts partners, not requests, so it drives a page control directly.
+ *
+ * Sorting is optional: dcb-service applies total_count descending when none is given, so
+ * "top partners" is the default without this client having to know the column name. Pass
+ * `sort` to rank by one direction instead.
+ */
+export function topPartnersQueryOptions(
+	client: AxiosInstance,
+	params: StatsParams & {
+		libraryCode: string;
+		page?: number;
+		size?: number;
+		sort?: string;
+	},
+) {
+	return {
+		queryKey: ["stats", "top-partners", params] as const,
+		queryFn: async (): Promise<Paged<TradingPartnerStat>> => {
+			const { data } = await client.get(`${STATS_BASE}/top-partners`, {
+				params: cleanParams(params),
+			});
+			return { content: data?.content ?? [], totalSize: data?.totalSize ?? 0 };
 		},
 	};
 }

@@ -48,6 +48,11 @@ export default function PeerBenchmarkPanel({
 			const resolved = r.successCount + r.failedCount;
 			return {
 				libraryCode: r.libraryCode,
+				// A Host LMS code means nothing to most librarians, so lead with the
+				// name. Fall back to the code rather than an empty cell when a system
+				// has requests but is not onboarded as a library.
+				libraryName: r.libraryName ?? r.libraryCode,
+				hasName: r.libraryName != null,
 				totalRequests: r.totalRequests,
 				fillRate: resolved > 0 ? (r.successCount / resolved) * 100 : null,
 				checkoutRate:
@@ -132,7 +137,26 @@ export default function PeerBenchmarkPanel({
 											<TableCell
 												sx={isCurrent ? { fontWeight: 700 } : undefined}
 											>
-												{row.libraryCode}
+												{row.libraryName}
+												{row.hasName ? (
+													<Typography
+														variant="caption"
+														component="span"
+														color="text.secondary"
+														sx={{ ml: 1 }}
+													>
+														{row.libraryCode}
+													</Typography>
+												) : null}
+												{isCurrent ? (
+													<Typography
+														variant="caption"
+														component="span"
+														sx={{ ml: 1 }}
+													>
+														{t("insights.charts.peer_benchmark.your_library")}
+													</Typography>
+												) : null}
 											</TableCell>
 											<TableCell align="right">
 												{row.totalRequests.toLocaleString()}
