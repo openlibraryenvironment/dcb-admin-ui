@@ -43,6 +43,7 @@ import { updateConsortiumQuery } from "@mutations/updateConsortium";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
+import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
 import { BrandImageField } from "@components/BrandImageField/BrandImageField";
@@ -63,7 +64,6 @@ const BRAND_FIELD_LABELS: Record<string, string> = {
 	brandHeaderIconUrl: "header_icon_url",
 	brandBackgroundImageUrl: "background_image_url",
 };
-import NewConsortium from "@forms/NewConsortium/NewConsortium";
 
 // The page renders a single consortium: the newest one. Loader and component MUST
 // agree on both key and variables, or ensureQueryData warms a cache entry the
@@ -135,7 +135,6 @@ function ConsortiumPage() {
 
 	const firstEditableFieldRef = useRef<HTMLInputElement>(null);
 
-	const [showNewConsortium, setShowNewConsortium] = useState(false);
 	const [editMode, setEditMode] = useState(false);
 	const [showConfirmationEdit, setConfirmationEdit] = useState(false);
 	const [changedFields, setChangedFields] = useState<Partial<Consortium>>({});
@@ -408,25 +407,25 @@ function ConsortiumPage() {
 					severity="warning"
 					action={
 						isAnAdmin ? (
-							<Button
+							// Into the setup flow, which is the ONLY place a consortium is
+							// created. It spans several sittings, has to survive a refresh and
+							// a bookmark, and gets handed between colleagues - a dialog can do
+							// none of that, and offering both was two implementations of one
+							// job.
+							<CustomLinkButton
 								color="inherit"
 								variant="outlined"
-								onClick={() => setShowNewConsortium(true)}
+								to="/setup/$step"
+								params={{ step: "consortium" }}
 							>
 								{t("consortium.new.title")}
-							</Button>
+							</CustomLinkButton>
 						) : undefined
 					}
 				>
 					<AlertTitle>{t("consortium.new.required_title")}</AlertTitle>
 					{t("consortium.new.required_body")}
 				</Alert>
-				{showNewConsortium && (
-					<NewConsortium
-						show={showNewConsortium}
-						onClose={() => setShowNewConsortium(false)}
-					/>
-				)}
 			</PageContainer>
 		);
 

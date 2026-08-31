@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Alert, AlertTitle, Button } from "@mui/material";
+import { Alert, AlertTitle } from "@mui/material";
 import { GroupAdd } from "@mui/icons-material";
 import {
 	GridPaginationModel,
@@ -23,7 +23,7 @@ import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutat
 
 import AddLibraryToGroup from "@forms/AddLibraryToGroup/AddLibraryToGroup";
 import NewLibrary from "@forms/NewLibrary/NewLibrary";
-import NewConsortium from "@forms/NewConsortium/NewConsortium";
+import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -128,8 +128,8 @@ function Libraries() {
 	});
 	const libraryMutation = useEntityMutation("library");
 
+	const navigate = useNavigate();
 	const [showNewLibrary, setShowNewLibrary] = useState(false);
-	const [showNewConsortium, setShowNewConsortium] = useState(false);
 	const [groupModalLibraries, setGroupModalLibraries] = useState<
 		{ id: string; name: string }[] | null
 	>(null);
@@ -219,15 +219,34 @@ function Libraries() {
 		],
 	);
 
+	// A library belongs to a consortium, and both of these produce something incoherent
+	// without one. Measured against a running service, not assumed: createLibrary with no
+	// consortium SUCCEEDS and yields a library that is part of nothing, and addLibraryToGroup
+	// with no groups fails with a null-on-non-null GraphQL error rather than a refusal. One
+	// is silently wrong, the other is loudly wrong in a way that reads as a bug.
+	//
+	// Disabled rather than hidden: hiding them would leave a first-time user wondering where
+	// the thing they came here for went. The tooltip says why, because a disabled control
+	// with no explanation is a dead end.
+	const consortiumMissing = hasConsortium === false;
+	const needsConsortium = consortiumMissing
+		? t("libraries.requires_consortium")
+		: undefined;
+
 	const pageActions = [
 		// Offered only where it can do anything: creating a consortium is a
 		// once-per-instance job, so on a configured system the button would be a
 		// permanent dead end.
-		...(hasConsortium === false
+		//
+		// It NAVIGATES rather than opening a modal. Setting a consortium up is a guided
+		// flow that spans several sittings and has to survive a refresh, a bookmark and
+		// being handed to a colleague - none of which a dialog can do. Offering a second,
+		// modal way to do the same job was two implementations of one task.
+		...(consortiumMissing
 			? [
 					{
 						key: "newConsortium",
-						onClick: () => setShowNewConsortium(true),
+						onClick: () => navigate({ to: "/setup/$step", params: { step: "consortium" } }),
 						disabled: !isAnAdmin,
 						label: t("consortium.new.title"),
 					},
@@ -236,19 +255,23 @@ function Libraries() {
 		{
 			key: "newLibrary",
 			onClick: () => setShowNewLibrary(true),
-			disabled: !isAnAdmin,
+			disabled: !isAnAdmin || consortiumMissing,
+			tooltip: needsConsortium,
 			label: t("libraries.new.title"),
 		},
 		{
 			key: "addToGroup",
 			onClick: () => setGroupModalLibraries([]),
-			disabled: !isAnAdmin,
+			disabled: !isAnAdmin || consortiumMissing,
+			tooltip: needsConsortium,
 			label: t("libraries.add_to_group"),
 		},
 		{
 			key: "addToGroupBulk",
 			onClick: handleBulkAddToGroup,
-			disabled: !isAnAdmin || selectedLibraryIds.length === 0,
+			disabled:
+				!isAnAdmin || consortiumMissing || selectedLibraryIds.length === 0,
+			tooltip: needsConsortium,
 			label: t("libraries.add_to_group_selected"),
 		},
 	];
@@ -271,14 +294,17 @@ function Libraries() {
 					sx={{ mb: 3 }}
 					action={
 						isAnAdmin ? (
-							<Button
+							// A real anchor, so it is openable in a new tab and announced as a
+							// link. Same destination as the page action above.
+							<CustomLinkButton
 								color="inherit"
 								size="small"
 								variant="outlined"
-								onClick={() => setShowNewConsortium(true)}
+								to="/setup/$step"
+								params={{ step: "consortium" }}
 							>
 								{t("consortium.new.title")}
-							</Button>
+							</CustomLinkButton>
 						) : undefined
 					}
 				>
@@ -342,22 +368,15 @@ function Libraries() {
 					show={showNewLibrary}
 					onClose={() => setShowNewLibrary(false)}
 					consortiumName={displayName}
+					// Closes the wizard and hands over to the setup flow, which is now the
+					// only place a consortium is created.
 					onCreateConsortium={() => {
 						setShowNewLibrary(false);
-						setShowNewConsortium(true);
+						navigate({ to: "/setup/$step", params: { step: "consortium" } });
 					}}
 				/>
 			)}
 
-			{showNewConsortium && (
-				<NewConsortium
-					show={showNewConsortium}
-					onClose={() => setShowNewConsortium(false)}
-					// Setting a consortium up is immediately followed by filling it,
-					// so the two workflows hand straight over to each other.
-					onAddFirstLibrary={() => setShowNewLibrary(true)}
-				/>
-			)}
 
 			{groupModalLibraries !== null && (
 				<AddLibraryToGroup

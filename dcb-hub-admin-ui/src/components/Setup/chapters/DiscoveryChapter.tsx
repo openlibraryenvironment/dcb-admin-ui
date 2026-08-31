@@ -43,7 +43,13 @@ const BRAND_FIELD_LABELS: Record<string, string> = {
 };
 
 /**
- * C5 — "How should Symposia look to your patrons?"
+ * C5 — "How should discovery look to your patrons?"
+ *
+ * The UI text says "discovery", not "Symposia". Symposia is the product's name, not
+ * necessarily what a consortium calls the thing its patrons search - the whole point of
+ * this chapter is that they brand it themselves - and "discovery" is what the rest of this
+ * application already calls it. The name stays in code and comments, where it identifies
+ * which service we mean.
  *
  * <h2>Cross-repo position</h2>
  *

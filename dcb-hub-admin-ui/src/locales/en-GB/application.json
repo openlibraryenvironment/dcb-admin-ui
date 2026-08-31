@@ -1337,7 +1337,8 @@
 				"error_title": "Account not created",
 				"error": "The account could not be created. {{error}}"
 			}
-		}
+		},
+		"requires_consortium": "Set up your consortium first — a library has to belong to one."
 	},
 	"locations": {
 		"alert_text": "Failed to fetch the locations, please refresh the page.",
@@ -2634,8 +2635,8 @@
 			},
 			"discovery": {
 				"label": "Discovery branding",
-				"title": "How should Symposia look to your patrons?",
-				"subtitle": "Symposia is what your patrons search. This is the name, the marks and the welcome they see when they arrive."
+				"title": "How should discovery look to your patrons?",
+				"subtitle": "Discovery is what your patrons search. This is the name, the marks and the welcome they see when they arrive."
 			},
 			"libraries": {
 				"label": "Your libraries",
@@ -2644,7 +2645,7 @@
 			}
 		},
 		"appearance": {
-			"scope_note": "These are your own preferences, stored in this browser. They do not change what anyone else sees, and they do not change how Symposia looks to patrons."
+			"scope_note": "These are your own preferences. They do not change what anyone else sees, and they do not change how discovery looks to patrons."
 		},
 		"consortium": {
 			"already_title": "Your consortium is already set up",
@@ -2664,7 +2665,7 @@
 			"preview_heading": "What your patrons will see",
 			"preview_no_name": "Your consortium",
 			"preview_search_placeholder": "Search for books, articles and more",
-			"preview_caveat": "An approximation of the arrangement, not an exact rendering. Symposia has its own typography and spacing."
+			"preview_caveat": "An approximation of the arrangement, not an exact rendering. Discovery has its own typography and spacing."
 		},
 		"libraries": {
 			"already_title": "You have libraries already",

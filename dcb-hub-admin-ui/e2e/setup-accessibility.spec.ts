@@ -148,14 +148,17 @@ test.describe("Setup - structure and behaviour", () => {
 	test("the URL is the state: a chapter survives a reload", async ({
 		page,
 	}) => {
+		// "discovery", not "Symposia": the product name is not necessarily what a
+		// consortium calls the thing its patrons search, and this chapter is where
+		// they brand it themselves.
 		await page.goto("/setup/discovery");
 		await expect(page.getByRole("heading", { level: 1 })).toContainText(
-			/symposia/i,
+			/discovery/i,
 		);
 
 		await page.reload();
 		await expect(page.getByRole("heading", { level: 1 })).toContainText(
-			/symposia/i,
+			/discovery/i,
 		);
 	});
 

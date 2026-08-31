@@ -73,7 +73,12 @@ const ROUTES: { path: string; ready: (page: Page) => Promise<void> }[] = [
 	{
 		path: "/settings",
 		ready: async (page) => {
-			await expect(page.getByRole("radiogroup")).toBeVisible();
+			// Named, because /settings now has three radio groups - theme, mode and
+			// typeface. An unnamed getByRole is a strict-mode violation the moment a
+			// second one appears, and this one only has to prove the panel has painted.
+			await expect(
+				page.getByRole("radiogroup", { name: /typeface/i }),
+			).toBeVisible();
 		},
 	},
 	{
