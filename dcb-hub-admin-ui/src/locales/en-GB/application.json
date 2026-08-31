@@ -1295,6 +1295,48 @@
 				"locations": "Pickup locations"
 			},
 			"incomplete_body_one": "This library is missing configuration it needs before it can borrow or supply. {{count}} step still to complete."
+		},
+		"accounts": {
+			"explanation": "DCB Admin for Libraries accounts for this library's staff. Creating one sends them an email asking them to set a password; no password is ever shown here.",
+			"unavailable": "Account provisioning is not configured on this deployment, so accounts cannot be created from here yet. Your OpenRS contact can enable it.",
+			"count": "{{count}} account",
+			"count_other": "{{count}} accounts",
+			"none": "No accounts have been created for this library.",
+			"load_error": "The accounts for this library could not be loaded.",
+			"name": "Name",
+			"first_name": "First name",
+			"last_name": "Last name",
+			"email": "Email address",
+			"role": "Role",
+			"status": "Status",
+			"actions": "Actions",
+			"enable": "Enable",
+			"disable": "Disable",
+			"resend_invite": "Resend invitation",
+			"roles": {
+				"library_admin": "Library administrator",
+				"library_read_only": "Read only"
+			},
+			"statuses": {
+				"invited": "Invited",
+				"active": "Active",
+				"disabled": "Disabled"
+			},
+			"validation": {
+				"role_not_provisionable": "Choose either Library administrator or Read only."
+			},
+			"new": {
+				"title": "Create an account",
+				"submit": "Create account",
+				"explanation": "The person will be emailed a link asking them to set their own password. No password is created or shown here.",
+				"from_contact": "Start from an existing contact",
+				"from_contact_help": "Fills in the name and email address of somebody already recorded on the Contacts tab.",
+				"email_help": "The invitation is sent to this address.",
+				"success_title": "Account created",
+				"success": "The account was created and an invitation sent for {{library}}.",
+				"error_title": "Account not created",
+				"error": "The account could not be created. {{error}}"
+			}
 		}
 	},
 	"locations": {
@@ -1549,7 +1591,8 @@
 			"service": "Service",
 			"settings": "Settings",
 			"insights": "Insights",
-			"name": "Libraries"
+			"name": "Libraries",
+			"accounts": "Accounts"
 		},
 		"locations": "Locations",
 		"login": "Login",

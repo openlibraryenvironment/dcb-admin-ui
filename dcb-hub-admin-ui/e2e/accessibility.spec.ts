@@ -8,6 +8,9 @@ import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import consortium from "./fixtures-data/consortium.json";
 import libraries from "./fixtures-data/libraries.json";
 import libraryCount from "./fixtures-data/library-count.json";
+import libraryDetail from "./fixtures-data/library-detail.json";
+import libraryUsers from "./fixtures-data/library-users.json";
+import libraryUserProvisioning from "./fixtures-data/library-user-provisioning.json";
 
 /**
  * The application-wide accessibility gate — W-1.
@@ -38,6 +41,9 @@ const MOCKS = {
 	LoadConsortium: consortium,
 	LoadLibraries: libraries,
 	LoadLibraryCount: libraryCount,
+	LoadLibraryContacts: libraryDetail,
+	LoadLibraryUsers: libraryUsers,
+	LibraryUserProvisioningAvailable: libraryUserProvisioning,
 };
 
 /**
@@ -74,6 +80,16 @@ const ROUTES: { path: string; ready: (page: Page) => Promise<void> }[] = [
 		path: "/profile",
 		ready: async (page) => {
 			await expect(page.getByRole("heading", { level: 2 })).toBeVisible();
+		},
+	},
+	{
+		// The accounts grid: a status chip and two text actions per row, in every scheme.
+		// Chips and dense row actions are where contrast and target size fail, so this
+		// route earns its place rather than being taken as covered by library pages that
+		// have neither.
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/accounts",
+		ready: async (page) => {
+			await expect(page.getByText("ada@alpha.example")).toBeVisible();
 		},
 	},
 ];
