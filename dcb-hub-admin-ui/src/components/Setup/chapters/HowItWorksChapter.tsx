@@ -17,6 +17,12 @@ import {
 	storedDescription,
 } from "@constants/functionalSettings";
 import type { NewConsortiumFormValues } from "@schemas/newConsortiumSchema";
+import type {
+	AddFunctionalSettingMutation,
+	AddFunctionalSettingMutationVariables,
+	UpdateFunctionalSettingMutation,
+	UpdateFunctionalSettingMutationVariables,
+} from "@generated/graphql";
 
 /**
  * C3 — "How should requesting work?"
@@ -84,7 +90,10 @@ export default function HowItWorksChapter() {
 				const current = existing.get(setting.name);
 
 				if (!current) {
-					await gqlClient.request<any>(addFunctionalSettingMutation, {
+					await gqlClient.request<
+						AddFunctionalSettingMutation,
+						AddFunctionalSettingMutationVariables
+					>(addFunctionalSettingMutation, {
 						input: {
 							name: setting.name,
 							enabled: wanted,
@@ -103,7 +112,10 @@ export default function HowItWorksChapter() {
 				// Nothing to say to the server about a setting nobody changed.
 				if (current.enabled === wanted) continue;
 
-				await gqlClient.request<any>(updateFunctionalSettingQuery, {
+				await gqlClient.request<
+					UpdateFunctionalSettingMutation,
+					UpdateFunctionalSettingMutationVariables
+				>(updateFunctionalSettingQuery, {
 					input: {
 						id: current.id,
 						enabled: wanted,

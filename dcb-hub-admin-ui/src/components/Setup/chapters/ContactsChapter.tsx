@@ -26,6 +26,11 @@ import {
 	type NewConsortiumFormValues,
 } from "@schemas/newConsortiumSchema";
 import { CONSORTIUM_BASICS_QUERY_KEY } from "@/queryOptions/consortium";
+import type {
+	ConsortiumContactInput,
+	CreateConsortiumContactMutation,
+	CreateConsortiumContactMutationVariables,
+} from "@generated/graphql";
 
 /**
  * C4 — "Who should we contact?"
@@ -87,16 +92,33 @@ export default function ContactsChapter() {
 	const { mutateAsync: addContact } = useMutation({
 		mutationFn: (values: NewConsortiumFormValues) => {
 			const contact = values.contacts[0];
-			return gqlClient.request<any>(createConsortiumContact, {
-				input: {
-					consortiumId: consortium?.id,
-					firstName: contact.firstName.trim(),
-					lastName: contact.lastName.trim(),
-					email: contact.email.trim(),
-					role: contact.role,
-					isPrimaryContact: contact.isPrimaryContact,
-				},
-			});
+
+			// TYPED, not `request<any>`. ConsortiumContactInput declares reason and
+			// changeCategory as String! and this call omitted both, so every contact
+			// failed with "Field 'reason' has coerced Null value for NonNull type" - and
+			// no compiler complained, because `any` on the variables switched the
+			// generated types off exactly where they would have caught it.
+			//
+			// The audit trail is why those fields are mandatory: a contact appears on a
+			// consortium record and somebody has to be able to ask who put it there and
+			// why. "Initial consortium setup" is the honest answer during first-run;
+			// adding a field to collect one would be asking the user to justify the thing
+			// they were just told to do.
+			const input: ConsortiumContactInput = {
+				consortiumId: consortium?.id ?? "",
+				firstName: contact.firstName.trim(),
+				lastName: contact.lastName.trim(),
+				email: contact.email.trim(),
+				role: contact.role,
+				isPrimaryContact: contact.isPrimaryContact,
+				reason: "Initial consortium setup",
+				changeCategory: "Initial setup",
+			};
+
+			return gqlClient.request<
+				CreateConsortiumContactMutation,
+				CreateConsortiumContactMutationVariables
+			>(createConsortiumContact, { input });
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] });

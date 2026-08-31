@@ -5,6 +5,14 @@ import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import { mapWithConcurrency } from "@helpers/mapWithConcurrency";
 import type { LibraryImportRow } from "@helpers/libraryImport";
+import type {
+	AddLibraryToGroupMutation,
+	AddLibraryToGroupMutationVariables,
+	CreateLibraryMutation,
+	CreateLibraryMutationVariables,
+	UpdateLibraryMutation,
+	UpdateLibraryMutationVariables,
+} from "@generated/graphql";
 
 /**
  * Writing the rows the user selected — W-10.
@@ -113,7 +121,10 @@ export async function applyLibraryImport(
 				// LibraryInput - sending the create shape here is a defect the New
 				// Library wizard already shipped once. Only the fields that exist on
 				// it are sent.
-				await gqlClient.request<any>(updateLibraryMutation, {
+				await gqlClient.request<
+					UpdateLibraryMutation,
+					UpdateLibraryMutationVariables
+				>(updateLibraryMutation, {
 					input: {
 						id: row.existingId,
 						fullName: text(values.fullName),
@@ -132,7 +143,10 @@ export async function applyLibraryImport(
 					},
 				});
 			} else {
-				const created = await gqlClient.request<any>(createLibraryMutation, {
+				const created = await gqlClient.request<
+					CreateLibraryMutation,
+					CreateLibraryMutationVariables
+				>(createLibraryMutation, {
 					input: {
 						agencyCode,
 						fullName: text(values.fullName),
@@ -160,7 +174,10 @@ export async function applyLibraryImport(
 				// nothing is exactly the half-configured state onboarding chases.
 				const libraryId = created?.createLibrary?.id;
 				if (consortiumGroupId && libraryId) {
-					await gqlClient.request<any>(addLibraryToGroup, {
+					await gqlClient.request<
+						AddLibraryToGroupMutation,
+						AddLibraryToGroupMutationVariables
+					>(addLibraryToGroup, {
 						input: { library: libraryId, libraryGroup: consortiumGroupId },
 					});
 				}

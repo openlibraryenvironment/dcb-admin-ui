@@ -164,6 +164,30 @@ export default [
 					message:
 						"page.waitForTimeout() is banned. Use web-first auto-waiting assertions; a fixed wait is a flake you have not noticed yet.",
 				},
+				{
+					// A GraphQL call whose VARIABLES are `any` is a call the compiler cannot
+					// check against the schema - and codegen has already produced the type
+					// that would.
+					//
+					// Observed: the setup flow's contact mutation omitted `reason` and
+					// `changeCategory`, both String! on ConsortiumContactInput. Every attempt
+					// failed with "Field 'reason' has coerced Null value for NonNull type",
+					// and nothing caught it - not tsc, not the e2e suite, which mocks the
+					// endpoint - because `request<any>` had switched off the one check that
+					// would have.
+					//
+					// `request<TData, TVariables>` is fine even when TData is loose: it is the
+					// SECOND argument, the variables, that has to be real. So this matches only
+					// a first-and-ONLY `any`.
+					//
+					// Matched by ATTRIBUTE rather than a child combinator: `typeArguments` is
+					// not among CallExpression's visitor keys, so esquery never descends into
+					// it and `> TSTypeParameterInstantiation > TSAnyKeyword` matches nothing.
+					selector:
+						"CallExpression[callee.property.name='request'][typeArguments.params.length=1][typeArguments.params.0.type='TSAnyKeyword']:has(Property > Identifier[name='input'])",
+					message:
+						"Type the GraphQL variables: request<TMutation, TMutationVariables>(...). `any` here hides a missing required input field until runtime - see ContactsChapter.",
+				},
 			],
 		},
 	},
