@@ -1,6 +1,6 @@
 import { useAuth } from "react-oidc-context";
 
-import { adminOrConsortiumAdmin } from "@constants/roles";
+import { isConsortiumStaff } from "@helpers/consortiumAccess";
 
 /**
  * Whether this user may administer the consortium — W-4.
@@ -27,6 +27,6 @@ import { adminOrConsortiumAdmin } from "@constants/roles";
  */
 export function useIsConsortiumAdmin(): boolean {
 	const auth = useAuth();
-	const roles = (auth?.user?.profile?.roles as string[]) || [];
-	return roles.some((role) => adminOrConsortiumAdmin.includes(role));
+
+	return isConsortiumStaff(auth?.user?.profile?.roles as string[] | undefined);
 }
