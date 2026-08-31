@@ -59,9 +59,9 @@ function LibraryLocations() {
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	const isMinLibraryAdmin = userRoles.some((role) =>
-		["ADMIN", "CONSORTIUM_ADMIN", "LIBRARY_ADMIN"].includes(role),
-	);
+	// Was widened with LIBRARY_ADMIN. That role cannot reach this application at all now,
+	// so the extra term was unreachable and the two flags had become the same answer.
+	const isMinLibraryAdmin = isAnAdmin;
 
 	const gridId = `libraryLocations-${libraryId}`;
 

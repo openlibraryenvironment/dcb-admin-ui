@@ -36,7 +36,9 @@ function LocationsRouteComponent() {
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
-	const isMinLibraryAdmin = isAnAdmin || userRoles.includes("LIBRARY_ADMIN");
+	// Was `isAnAdmin || LIBRARY_ADMIN`. The second term is unreachable now that role
+	// cannot reach this application at all.
+	const isMinLibraryAdmin = isAnAdmin;
 
 	const gridId = "locations";
 

@@ -33,7 +33,7 @@ import { CleanupProgressDialog } from "./components/CleanupProgressDialog";
 import { usePatronRequestRollback } from "@hooks/usePatronRequestRollback";
 import { usePatronRequestCleanup } from "@hooks/usePatronRequestCleanup";
 import { useAuth } from "react-oidc-context";
-import { allAdmins } from "@constants/roles";
+import { isConsortiumStaff } from "@helpers/consortiumAccess";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority
@@ -178,7 +178,7 @@ export default function DataGrid({
 	// an outage). Cleanup: any admin, matching the backend's allowed role set.
 	const rollbackAvailable = isPatronRequests && roles.includes("ADMIN");
 	const cleanupAvailable =
-		isPatronRequests && roles.some((role) => allAdmins.includes(role));
+		isPatronRequests && isConsortiumStaff(roles);
 
 	const rollback = usePatronRequestRollback({ apiRef });
 	const cleanup = usePatronRequestCleanup({ apiRef });
