@@ -173,6 +173,44 @@ test.describe("Setup - structure and behaviour", () => {
 		await expect(page).toHaveURL(/\/$/);
 	});
 
+	test("does not warn when the chapter's own Continue saves and moves on", async ({
+		page,
+	}) => {
+		// The guard exists to protect work that is about to be LOST. Firing it on the
+		// flow's own Continue warns the user they are about to discard something that
+		// has this moment been written to the server - which teaches them to dismiss the
+		// dialog without reading it, and then it protects nothing.
+		await page.goto("/setup/contacts");
+
+		await page.getByRole("textbox", { name: /first name/i }).fill("Ada");
+		await page.getByRole("textbox", { name: /last name/i }).fill("Lovelace");
+		await page
+			.getByRole("textbox", { name: /email/i })
+			.fill("ada@library.example");
+
+		await page.getByRole("button", { name: /continue|save and continue/i }).click();
+
+		// Moved on, and no dialog in the way.
+		await expect(page.getByRole("dialog")).toHaveCount(0);
+	});
+
+	test("the appearance chapter reads as done once it has been passed", async ({
+		page,
+	}) => {
+		// It writes nothing, so it can never be "complete" from the data - but walking
+		// through it IS the whole of the work, and a rail that still says "Optional"
+		// afterwards reads as though the click did not register.
+		await page.goto("/setup/appearance");
+
+		const rail = page.getByRole("navigation", { name: /setup progress/i });
+		await expect(rail).toContainText(/optional/i);
+
+		await page.getByRole("button", { name: /looks good/i }).click();
+
+		await expect(page).toHaveURL(/\/setup\/consortium$/);
+		await expect(rail).not.toContainText(/optional/i);
+	});
+
 	test("moves focus to the heading when the chapter changes", async ({
 		page,
 	}) => {
@@ -300,8 +338,11 @@ test.describe("Setup - authorisation", () => {
 
 		await page.goto("/setup/consortium");
 
+		// A library-only account gets the "wrong application" refusal rather than the
+		// generic one - it is in the wrong product, not short of a permission. Either way
+		// what matters here is that the chapter itself never renders.
 		await expect(
-			page.getByRole("heading", { name: /unauthorised|not authorised/i }),
+			page.getByRole("heading", { name: /wrong application/i }),
 		).toBeVisible();
 		await expect(
 			page.getByRole("textbox", { name: /consortium name/i }),

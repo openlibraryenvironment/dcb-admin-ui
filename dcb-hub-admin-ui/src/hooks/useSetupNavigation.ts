@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { useSetupStore } from "@hooks/useSetupStore";
+import { useSetupRunActions } from "@components/Setup/setupRun";
 import {
 	nextStep,
 	previousStep,
@@ -21,6 +22,7 @@ export function useSetupNavigation(current: ConsortiumSetupStepId) {
 	const skip = useSetupStore((s) => s.skip);
 	const unskip = useSetupStore((s) => s.unskip);
 	const setLastVisited = useSetupStore((s) => s.setLastVisited);
+	const { markVisited } = useSetupRunActions();
 
 	const goTo = useCallback(
 		(step: ConsortiumSetupStepId | undefined) => {
@@ -42,8 +44,13 @@ export function useSetupNavigation(current: ConsortiumSetupStepId) {
 		 */
 		goNext: useCallback(() => {
 			unskip(current);
+			// Marked on the way OUT, not on arrival. Landing on a chapter is not the same
+			// as having dealt with it, and a rail that ticks the moment you look at
+			// something is reporting your attention rather than your decision. It only
+			// matters for the optional chapter, which has no other way to settle.
+			markVisited(current);
 			goTo(nextStep(current));
-		}, [current, goTo, unskip]),
+		}, [current, goTo, unskip, markVisited]),
 
 		goBack: useCallback(() => {
 			const previous = previousStep(current);
@@ -52,7 +59,8 @@ export function useSetupNavigation(current: ConsortiumSetupStepId) {
 
 		skipAndContinue: useCallback(() => {
 			skip(current);
+			markVisited(current);
 			goTo(nextStep(current));
-		}, [current, goTo, skip]),
+		}, [current, goTo, skip, markVisited]),
 	};
 }

@@ -18,7 +18,7 @@ import {
 	type NewConsortiumFormValues,
 } from "@schemas/newConsortiumSchema";
 import { CONSORTIUM_BASICS_QUERY_KEY } from "@/queryOptions/consortium";
-import { useRegisterSetupDirty } from "../setupDirty";
+import { useRegisterSetupDirty } from "../setupRun";
 
 /** The details chapter's own fields. Everything else on the schema is another chapter's. */
 const DETAILS_FIELDS: (keyof NewConsortiumFormValues)[] = [
@@ -158,6 +158,11 @@ export default function ConsortiumChapter() {
 				return;
 			}
 			await create(methods.getValues());
+			// Settle the form against what was just saved BEFORE navigating. Without this
+			// the values are still "dirty" relative to the defaults, so the layout's
+			// unsaved-work guard fires on the flow's OWN Continue - warning the user they
+			// are about to lose work that has this moment been written to the server.
+			methods.reset(methods.getValues());
 			goNext();
 		} catch (failure: any) {
 			console.error("Consortium creation failed:", failure);

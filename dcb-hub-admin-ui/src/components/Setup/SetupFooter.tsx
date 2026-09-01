@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Button, CircularProgress, Divider, Stack } from "@mui/material";
+import { Close } from "@mui/icons-material";
+import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 
 interface SetupFooterProps {
 	/** Omitted on the first chapter, where there is nowhere to go back to. */
@@ -23,9 +25,14 @@ interface SetupFooterProps {
  * abandon halfway and never return to: the alternative is a user who cannot answer one
  * question closing the tab.
  *
- * Order is Back, then Skip, then Continue: the primary action is last in the DOM and last
- * in the tab order, which is where a keyboard user expects to arrive after reading the
- * chapter.
+ * Order is Finish later, Back, Skip, then Continue: the primary action is last in the DOM
+ * and last in the tab order, which is where a keyboard user expects to arrive after
+ * reading the chapter.
+ *
+ * "Finish later" lives here rather than up beside the step counter, where it started. A
+ * way out belongs with the other ways ON - somebody deciding what to do next is looking at
+ * the buttons, not back at the heading - and putting it first in the row keeps it clearly
+ * separate from Continue so it cannot be hit by accident.
  */
 export default function SetupFooter({
 	onBack,
@@ -46,6 +53,18 @@ export default function SetupFooter({
 				spacing={2}
 				sx={{ mt: 3, justifyContent: "flex-end" }}
 			>
+				{/* A real link, so it opens in a new tab and is announced as one. Pushed away
+				    from the others on wide viewports: leaving is a different KIND of action
+				    from moving through the flow. */}
+				<CustomLinkButton
+					to="/"
+					startIcon={<Close />}
+					disabled={busy}
+					sx={{ mr: { sm: "auto" } }}
+				>
+					{t("setup.actions.finish_later")}
+				</CustomLinkButton>
+
 				{onBack && (
 					<Button onClick={onBack} disabled={busy} variant="outlined">
 						{t("setup.actions.back")}

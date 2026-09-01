@@ -3,6 +3,7 @@ import { Box, Step, StepLabel, Stepper, Typography } from "@mui/material";
 
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
+import { useVisitedChapters } from "./setupRun";
 
 import {
 	CONSORTIUM_SETUP_STEPS,
@@ -65,6 +66,10 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 
 	const activeIndex = CONSORTIUM_SETUP_STEPS.indexOf(current);
 
+	// Chapters seen during THIS pass. Only used to settle the optional one - the rest
+	// report what the data says, which does not care whether anybody looked at it.
+	const visited = useVisitedChapters();
+
 	return (
 		<Box
 			component="nav"
@@ -95,8 +100,16 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					// Optional is checked FIRST. A chapter that writes nothing has no "done" to
 					// report, and calling it "Not started" for the life of the deployment is a
 					// nag about work that does not exist.
-					const status = step?.optional
-						? t("setup.status.optional")
+					// An optional chapter reads "Optional" until it has been seen and "Done"
+					// afterwards. Passing through IS the whole of the work - there is nothing
+					// to save - so a tick is the honest report of it, and it is per-run rather
+					// than remembered, which is what stops a wiped deployment inheriting one.
+					const settledOptional = step?.optional && visited.includes(id);
+
+					const status = settledOptional
+						? t("setup.status.done")
+						: step?.optional
+							? t("setup.status.optional")
 						: step?.complete
 							? t("setup.status.done")
 							: step?.skipped
@@ -129,14 +142,14 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					);
 
 					return (
-						<Step key={id} completed={step?.complete ?? false}>
+						<Step key={id} completed={(step?.complete ?? false) || !!settledOptional}>
 							<StepLabel
 								optional={optional}
 								icon={
 									<DCBStepIcon
 										icon={CONSORTIUM_SETUP_STEPS.indexOf(id) + 1}
 										active={isCurrent}
-										completed={step?.complete ?? false}
+										completed={(step?.complete ?? false) || !!settledOptional}
 									/>
 								}
 							>

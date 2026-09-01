@@ -31,7 +31,7 @@ import type {
 	CreateConsortiumContactMutation,
 	CreateConsortiumContactMutationVariables,
 } from "@generated/graphql";
-import { useRegisterSetupDirty } from "../setupDirty";
+import { useRegisterSetupDirty } from "../setupRun";
 
 /**
  * C4 — "Who should we contact?"
@@ -143,6 +143,11 @@ export default function ContactsChapter() {
 				return;
 			}
 			await addContact(methods.getValues());
+			// Settle the form against what was just saved BEFORE navigating. Without this
+			// the values are still "dirty" relative to the defaults, so the layout's
+			// unsaved-work guard fires on the flow's OWN Continue - warning the user they
+			// are about to lose work that has this moment been written to the server.
+			methods.reset(methods.getValues());
 			goNext();
 		} catch (failure: any) {
 			console.error("Consortium contact creation failed:", failure);

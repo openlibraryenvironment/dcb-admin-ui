@@ -34,7 +34,7 @@ import {
 } from "@schemas/discoveryBrandSchema";
 import { updateConsortiumQuery } from "@mutations/updateConsortium";
 import type { UpdateConsortiumMutationVariables } from "@generated/graphql";
-import { useRegisterSetupDirty } from "../setupDirty";
+import { useRegisterSetupDirty } from "../setupRun";
 
 /** Which label to name in an upload refusal - three images on one form. */
 const BRAND_FIELD_LABELS: Record<string, string> = {
@@ -95,6 +95,7 @@ export default function DiscoveryChapter() {
 	const {
 		control,
 		getValues,
+		reset,
 		setValue,
 		trigger,
 		formState: { errors, isDirty },
@@ -188,6 +189,11 @@ export default function DiscoveryChapter() {
 				},
 			});
 
+			// Settle the form against what was just saved BEFORE navigating. Without this
+			// the values are still "dirty" relative to the defaults, so the layout's
+			// unsaved-work guard fires on the flow's OWN Continue - warning the user they
+			// are about to lose work that has this moment been written to the server.
+			reset(getValues());
 			goNext();
 		} catch (failure: any) {
 			console.error("Discovery branding save failed:", failure);

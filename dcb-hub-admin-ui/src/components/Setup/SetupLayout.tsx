@@ -11,11 +11,9 @@ import {
 	Stack,
 	Typography,
 } from "@mui/material";
-import { Close } from "@mui/icons-material";
 import { useBlocker } from "@tanstack/react-router";
-import { CustomLinkButton } from "@components/CustomLink/CustomLink";
-import SetupDirtyProvider from "./SetupDirtyProvider";
-import { useSetupDirty } from "./setupDirty";
+import SetupRunProvider from "./SetupRunProvider";
+import { useSetupDirty } from "./setupRun";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import SetupRail from "./SetupRail";
@@ -55,6 +53,7 @@ function SetupLayoutInner({
 	const { t } = useTranslation();
 	const headingRef = useRef<HTMLHeadingElement>(null);
 	const isDirty = useSetupDirty();
+
 
 	const chapter = SETUP_CHAPTERS[step];
 	const announcement = t("setup.announcement", {
@@ -110,31 +109,12 @@ function SetupLayoutInner({
 				<SetupRail current={step} state={state} />
 
 				<Box sx={{ flexGrow: 1, maxWidth: 780, width: "100%" }}>
-					<Stack
-						direction="row"
-						spacing={2}
-						sx={{ alignItems: "flex-start", justifyContent: "space-between" }}
-					>
-						<Typography
-							variant="body2"
-							sx={{ color: "text.secondary", mb: 0.5 }}
-						>
-							{t("setup.step_of", {
-								number: stepNumber(step),
-								total: CONSORTIUM_SETUP_STEPS.length,
-							})}
-						</Typography>
-
-						{/* The way out. Setup is not one sitting and it is not compulsory, and
-						    a flow with no exit but the browser's back button reads as a trap -
-						    which is how people end up abandoning it in a state they cannot
-						    find their way back to. The banner on the home page brings them
-						    back to whichever chapter they left. */}
-						<CustomLinkButton to="/" size="small" startIcon={<Close />}>
-							{t("setup.actions.finish_later")}
-						</CustomLinkButton>
-					</Stack>
-
+					<Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5 }}>
+						{t("setup.step_of", {
+							number: stepNumber(step),
+							total: CONSORTIUM_SETUP_STEPS.length,
+						})}
+					</Typography>
 					<Typography
 						variant="h1"
 						component="h1"
@@ -199,8 +179,8 @@ function SetupLayoutInner({
  */
 export default function SetupLayout(props: PropsWithChildren<SetupLayoutProps>) {
 	return (
-		<SetupDirtyProvider>
+		<SetupRunProvider>
 			<SetupLayoutInner {...props} />
-		</SetupDirtyProvider>
+		</SetupRunProvider>
 	);
 }

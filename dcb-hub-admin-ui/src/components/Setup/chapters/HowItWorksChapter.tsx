@@ -23,7 +23,7 @@ import type {
 	UpdateFunctionalSettingMutation,
 	UpdateFunctionalSettingMutationVariables,
 } from "@generated/graphql";
-import { useRegisterSetupDirty } from "../setupDirty";
+import { useRegisterSetupDirty } from "../setupRun";
 
 /**
  * C3 — "How should requesting work?"
@@ -144,6 +144,11 @@ export default function HowItWorksChapter() {
 		setError(null);
 		try {
 			await save(methods.getValues().functionalSettings);
+			// Settle the form against what was just saved BEFORE navigating. Without this
+			// the values are still "dirty" relative to the defaults, so the layout's
+			// unsaved-work guard fires on the flow's OWN Continue - warning the user they
+			// are about to lose work that has this moment been written to the server.
+			methods.reset(methods.getValues());
 			goNext();
 		} catch (failure: any) {
 			console.error("Functional settings save failed:", failure);
