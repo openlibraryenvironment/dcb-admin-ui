@@ -210,6 +210,40 @@ test.describe("Setup - structure and behaviour", () => {
 		await expect(page.getByRole("dialog")).toHaveCount(0);
 	});
 
+	test("does not warn when the consortium chapter creates and moves on", async ({
+		page,
+	}) => {
+		// The chapter that COMMITS, and the one the existing guard test could never
+		// reach: the shared fixture already has a consortium, so /setup/consortium
+		// renders its "already set up" branch and the create path went untested.
+		//
+		// It is also the one where the reset-then-navigate dance is not enough on its
+		// own. `reset()` settles react-hook-form, but the layout learns about it through
+		// an effect, and `goNext()` navigates in the same tick - so the blocker is asked
+		// before the effect has run and reads the value from before the save.
+		await mockGraphQL(page, {
+			...MOCKS,
+			LoadConsortium: noConsortium,
+			LoadGroupsSelection: { libraryGroups: { content: [] } },
+			CreateLibraryGroup: { createLibraryGroup: { id: "group-1" } },
+			CreateConsortium: { createConsortium: { id: "consortium-1" } },
+		});
+
+		await page.goto("/setup/consortium");
+
+		await page.getByRole("textbox", { name: "Consortium name" }).fill("Demo");
+		await page.getByRole("textbox", { name: "Display name" }).fill("Demo");
+		await page.getByRole("textbox", { name: "Group name" }).fill("Demo group");
+		await page.getByRole("textbox", { name: "Group code" }).fill("DEMO");
+
+		await page
+			.getByRole("button", { name: /continue|save and continue/i })
+			.click();
+
+		await expect(page).toHaveURL(/\/setup\/howItWorks$/);
+		await expect(page.getByRole("dialog")).toHaveCount(0);
+	});
+
 	test("the appearance chapter reads as done once it has been passed", async ({
 		page,
 	}) => {

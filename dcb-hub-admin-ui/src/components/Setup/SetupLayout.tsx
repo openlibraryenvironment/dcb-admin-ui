@@ -53,7 +53,7 @@ function SetupLayoutInner({
 }: PropsWithChildren<SetupLayoutProps>) {
 	const { t } = useTranslation();
 	const headingRef = useRef<HTMLHeadingElement>(null);
-	const isDirty = useSetupDirty();
+	const isDirtyNow = useSetupDirty();
 
 
 	const chapter = SETUP_CHAPTERS[step];
@@ -76,9 +76,13 @@ function SetupLayoutInner({
 	// `enableBeforeUnload` covers the other half - a closed tab or a typed URL, which no
 	// router can intercept. The browser shows its own generic wording there; that is the
 	// price of the only hook that works at all outside the SPA.
+	// Both callbacks are asked at the moment they matter, so both read the probe rather
+	// than a value captured at render. A snapshot here is how the guard came to fire on
+	// the flow's own Continue: the chapter had settled its form a tick earlier and the
+	// captured boolean was still the one from before.
 	const blocker = useBlocker({
-		shouldBlockFn: () => isDirty,
-		enableBeforeUnload: () => isDirty,
+		shouldBlockFn: () => isDirtyNow(),
+		enableBeforeUnload: () => isDirtyNow(),
 		withResolver: true,
 	});
 

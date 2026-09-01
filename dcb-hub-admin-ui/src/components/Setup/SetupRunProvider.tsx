@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 
 import type { ConsortiumSetupStepId } from "@helpers/consortiumSetup";
 import { SetupRunContext, type SetupRunValue } from "./setupRun";
@@ -11,7 +11,11 @@ export default function SetupRunProvider({
 }) {
 	// A map rather than a boolean: a chapter can hold more than one form, and the last
 	// one to report must not overwrite what another is still saying.
-	const [dirtyById, setDirtyById] = useState<Record<string, boolean>>({});
+	//
+	// A REF rather than state, because the only reader is a guard that asks at the instant
+	// a navigation is attempted - see ./setupRun. State would answer with the value from
+	// before the save that has just happened.
+	const dirtyById = useRef<Record<string, boolean>>({});
 	const [visited, setVisited] = useState<ConsortiumSetupStepId[]>([]);
 
 	const markVisited = useCallback((id: ConsortiumSetupStepId) => {
@@ -21,32 +25,39 @@ export default function SetupRunProvider({
 	}, []);
 
 	const registerDirty = useCallback((id: string, dirty: boolean) => {
-		setDirtyById((current) =>
-			current[id] === dirty ? current : { ...current, [id]: dirty },
-		);
+		dirtyById.current[id] = dirty;
 	}, []);
 
 	const unregisterDirty = useCallback((id: string) => {
-		setDirtyById((current) => {
-			if (!(id in current)) {
-				return current;
-			}
-
-			const next = { ...current };
-			delete next[id];
-			return next;
-		});
+		delete dirtyById.current[id];
 	}, []);
+
+	const clearDirty = useCallback(() => {
+		dirtyById.current = {};
+	}, []);
+
+	const isDirtyNow = useCallback(
+		() => Object.values(dirtyById.current).some(Boolean),
+		[],
+	);
 
 	const value = useMemo<SetupRunValue>(
 		() => ({
-			isDirty: Object.values(dirtyById).some(Boolean),
+			isDirtyNow,
 			registerDirty,
 			unregisterDirty,
+			clearDirty,
 			visited,
 			markVisited,
 		}),
-		[dirtyById, registerDirty, unregisterDirty, visited, markVisited],
+		[
+			isDirtyNow,
+			registerDirty,
+			unregisterDirty,
+			clearDirty,
+			visited,
+			markVisited,
+		],
 	);
 
 	return (

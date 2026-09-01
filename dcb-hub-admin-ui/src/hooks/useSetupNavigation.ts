@@ -22,7 +22,7 @@ export function useSetupNavigation(current: ConsortiumSetupStepId) {
 	const skip = useSetupStore((s) => s.skip);
 	const unskip = useSetupStore((s) => s.unskip);
 	const setLastVisited = useSetupStore((s) => s.setLastVisited);
-	const { markVisited } = useSetupRunActions();
+	const { markVisited, clearDirty } = useSetupRunActions();
 
 	const goTo = useCallback(
 		(step: ConsortiumSetupStepId | undefined) => {
@@ -43,6 +43,15 @@ export function useSetupNavigation(current: ConsortiumSetupStepId) {
 		 * screen still reporting it as passed over.
 		 */
 		goNext: useCallback(() => {
+			// Continue is the SAVED path: every chapter with a form writes it and settles
+			// the form before calling this. The unsaved-work guard exists to protect work
+			// about to be lost, and there is none here - so say so directly rather than
+			// waiting for the chapter's own effect to report it, which does not run until
+			// after this navigation has already been offered to the guard.
+			//
+			// Back and Skip deliberately do NOT clear: both really do discard whatever is
+			// in the form, which is exactly what the guard is for.
+			clearDirty();
 			unskip(current);
 			// Marked on the way OUT, not on arrival. Landing on a chapter is not the same
 			// as having dealt with it, and a rail that ticks the moment you look at
@@ -50,7 +59,7 @@ export function useSetupNavigation(current: ConsortiumSetupStepId) {
 			// matters for the optional chapter, which has no other way to settle.
 			markVisited(current);
 			goTo(nextStep(current));
-		}, [current, goTo, unskip, markVisited]),
+		}, [current, goTo, unskip, markVisited, clearDirty]),
 
 		goBack: useCallback(() => {
 			const previous = previousStep(current);
