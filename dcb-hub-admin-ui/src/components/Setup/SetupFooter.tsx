@@ -25,11 +25,11 @@ interface SetupFooterProps {
  * abandon halfway and never return to: the alternative is a user who cannot answer one
  * question closing the tab.
  *
- * Order is Finish later, Back, Skip, then Continue: the primary action is last in the DOM
+ * Order is Leave, Back, Skip, then Continue: the primary action is last in the DOM
  * and last in the tab order, which is where a keyboard user expects to arrive after
  * reading the chapter.
  *
- * "Finish later" lives here rather than up beside the step counter, where it started. A
+ * The way out lives here rather than up beside the step counter, where it started. A
  * way out belongs with the other ways ON - somebody deciding what to do next is looking at
  * the buttons, not back at the heading - and putting it first in the row keeps it clearly
  * separate from Continue so it cannot be hit by accident.
@@ -55,9 +55,19 @@ export default function SetupFooter({
 			>
 				{/* A real link, so it opens in a new tab and is announced as one. Pushed away
 				    from the others on wide viewports: leaving is a different KIND of action
-				    from moving through the flow. */}
+				    from moving through the flow.
+				
+				    "Leave setup for now", not "Finish later": this sits next to "I'll do this
+				    later", which passes over ONE CHAPTER, and the two were near enough to read
+				    as the same offer. "Finish setup later" would have been the obvious repair
+				    and is worse - the last chapter's Continue button already says "Finish
+				    setup", so it would trade one ambiguity for another next to it.
+				
+				    Outlined like Back and Skip. Only Continue is contained: one primary action
+				    per screen, and it is not this one. */}
 				<CustomLinkButton
 					to="/"
+					variant="outlined"
 					startIcon={<Close />}
 					disabled={busy}
 					sx={{ mr: { sm: "auto" } }}

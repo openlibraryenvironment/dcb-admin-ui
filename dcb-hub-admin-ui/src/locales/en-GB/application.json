@@ -2616,7 +2616,7 @@
 			"save_and_continue": "Save and continue",
 			"looks_good": "Looks good, continue",
 			"finish": "Finish setup",
-			"finish_later": "Finish later"
+			"finish_later": "Leave setup for now"
 		},
 		"error": {
 			"title": "We could not check how far along your setup is",
@@ -2675,7 +2675,7 @@
 			"preview_heading": "What your patrons will see",
 			"preview_no_name": "Your consortium",
 			"preview_search_placeholder": "Search for books, articles and more",
-			"preview_caveat": "An approximation of the arrangement, not an exact rendering. Discovery has its own typography and spacing."
+			"preview_caveat": "An approximation of the arrangement: if your discovery system is using the OpenRS-provided branding, this is what it could look like. This will vary between systems."
 		},
 		"libraries": {
 			"already_title": "You have libraries already",

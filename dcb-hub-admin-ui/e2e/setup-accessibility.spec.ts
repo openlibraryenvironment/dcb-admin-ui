@@ -126,7 +126,7 @@ test.describe("Setup - structure and behaviour", () => {
 		// brings people back to whichever chapter they left.
 		await page.goto("/setup/consortium");
 
-		const exit = page.getByRole("link", { name: /finish later/i });
+		const exit = page.getByRole("link", { name: /leave setup for now/i });
 		await expect(exit).toBeVisible();
 
 		await exit.click();
@@ -141,7 +141,7 @@ test.describe("Setup - structure and behaviour", () => {
 
 		// Nothing typed yet: leaving is free. A guard that fires on a pristine form is one
 		// everybody learns to dismiss without reading.
-		await page.getByRole("link", { name: /finish later/i }).click();
+		await page.getByRole("link", { name: /leave setup for now/i }).click();
 		await expect(page).toHaveURL(/\/$/);
 
 		await page.goto("/setup/contacts");
@@ -150,7 +150,7 @@ test.describe("Setup - structure and behaviour", () => {
 			.fill("Half-typed");
 
 		// Now the same navigation has something to lose.
-		await page.getByRole("link", { name: /finish later/i }).click();
+		await page.getByRole("link", { name: /leave setup for now/i }).click();
 
 		const dialog = page.getByRole("dialog");
 		await expect(dialog).toBeVisible();
@@ -165,7 +165,7 @@ test.describe("Setup - structure and behaviour", () => {
 		).toHaveValue("Half-typed");
 
 		// And leaving deliberately still works.
-		await page.getByRole("link", { name: /finish later/i }).click();
+		await page.getByRole("link", { name: /leave setup for now/i }).click();
 		await page
 			.getByRole("dialog")
 			.getByRole("button", { name: /leave and discard/i })
