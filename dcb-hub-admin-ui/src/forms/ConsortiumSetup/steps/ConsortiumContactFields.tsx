@@ -20,7 +20,8 @@ interface ConsortiumContactFieldsProps {
 }
 
 /**
- * Who to contact about the consortium — extracted from `NewConsortium.tsx` for W-7.
+ * Who to contact about the consortium — extracted for W-7 from what was then the
+ * NewConsortium modal, and shared with the setup flow that replaced it.
  *
  * `autoComplete` is set on every field a browser or password manager could fill. That is
  * WCAG 1.3.5 (identify input purpose) and 3.3.7 (redundant entry): somebody entering their

@@ -19,7 +19,8 @@ interface FunctionalSettingsFieldsProps {
 }
 
 /**
- * How requesting should behave — extracted from `NewConsortium.tsx` for W-7.
+ * How requesting should behave — extracted for W-7 from what was then the
+ * NewConsortium modal, and shared with the setup flow that replaced it.
  *
  * Each setting carries the sentence that says what it DOES, not just its enum name.
  * `OWN_LIBRARY_BORROWING` means nothing to somebody standing up their first consortium;

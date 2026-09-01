@@ -20,7 +20,8 @@ interface ConsortiumDetailsFieldsProps {
 }
 
 /**
- * The consortium's own details — extracted from `NewConsortium.tsx` for W-7.
+ * The consortium's own details — extracted for W-7 from what was then the
+ * NewConsortium modal, and shared with the setup flow that replaced it.
  *
  * Rendered by BOTH the New Consortium dialog and the setup flow's chapter 2. It reads its
  * values through `useFormContext`, so each host owns the form instance, the resolver and
