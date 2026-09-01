@@ -40,3 +40,29 @@ export function isConsortiumStaff(roles: readonly string[] | undefined): boolean
 export function canAccessDcbAdmin(roles: readonly string[] | undefined): boolean {
 	return isConsortiumStaff(roles);
 }
+
+/** The roles that belong to DCB Admin for Libraries rather than to DCB Admin. */
+const LIBRARY_ROLES = ["LIBRARY_ADMIN", "LIBRARY_READ_ONLY"];
+
+/**
+ * Whether this account belongs in DCB Admin for Libraries INSTEAD of here.
+ *
+ * True only for somebody holding a library role and NO consortium role. That "and no" is
+ * the whole point: plenty of consortium staff are also administrators of their own
+ * library, and their token carries both. Telling that person they are in the wrong place
+ * would be telling them to leave an application they are entitled to use.
+ *
+ * Distinct from simply failing {@link canAccessDcbAdmin}, which is also true of an account
+ * with no roles at all, or with only DISCOVERY_SERVICE. Those are not people who took a
+ * wrong turning - there is no other application to send them to, and guessing would be
+ * worse than the generic refusal.
+ */
+export function belongsInLibrariesApp(
+	roles: readonly string[] | undefined,
+): boolean {
+	if (!roles || isConsortiumStaff(roles)) {
+		return false;
+	}
+
+	return roles.some((role) => LIBRARY_ROLES.includes(role));
+}

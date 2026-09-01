@@ -1420,7 +1420,14 @@
 		"open_identity_provider": "Open identity provider",
 		"stay_logged_in": "Stay logged in",
 		"logged_out": "<bold>Your {{appName}} for {{consortium}} session has ended</bold>. <break/> Please log in. Note that you will be automatically logged out after 30 minutes of inactivity.<break/>",
-		"session_expired": "<bold>Your {{appName}} for {{consortium}} session has expired</bold>. <break/> This happens after 30 minutes of inactivity. Please log in again to carry on where you left off.<break/>"
+		"session_expired": "<bold>Your {{appName}} for {{consortium}} session has expired</bold>. <break/> This happens after 30 minutes of inactivity. Please log in again to carry on where you left off.<break/>",
+		"wrong_app": {
+			"title": "You're in the wrong application",
+			"summary": "This is DCB Admin, for consortium staff",
+			"body": "Your account is set up for DCB Admin for Libraries — the application for managing your own library's requests, locations and mappings. Everything you need is there. Nothing is wrong with your account and there is nothing your administrator needs to change.",
+			"action": "Go to DCB Admin for Libraries",
+			"no_link": "Ask your consortium administrator for the address of DCB Admin for Libraries — this deployment has not been configured with one."
+		}
 	},
 	"mappings": {
 		"add_success": "{{fileName}} has been added and is ready to be uploaded.",
