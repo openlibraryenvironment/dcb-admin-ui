@@ -1,19 +1,17 @@
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Alert,
 	AlertTitle,
 	LinearProgress,
-	MenuItem,
 	Stack,
-	TextField,
 	Typography,
 } from "@mui/material";
 
-import { BrandImageField } from "@components/BrandImageField/BrandImageField";
+import DiscoveryBrandFields from "./DiscoveryBrandFields";
 import DiscoveryPreview from "../DiscoveryPreview";
 import SetupFooter from "../SetupFooter";
 import { useSetupNavigation } from "@hooks/useSetupNavigation";
@@ -27,7 +25,6 @@ import {
 	hasStagedImages,
 	uploadStagedBrandImages,
 } from "@helpers/brandAssetUpload";
-import { BRAND_LIMITS, themeOptions } from "@constants/discoveryBranding";
 import {
 	discoveryBrandSchema,
 	type DiscoveryBrandValues,
@@ -224,132 +221,13 @@ export default function DiscoveryChapter() {
 				{t("consortium.brand.external_url_cost")}
 			</Typography>
 
-			<Controller
-				name="brandLogoUrl"
+			<DiscoveryBrandFields
 				control={control}
-				render={({ field }) => (
-					<BrandImageField
-						value={field.value ?? ""}
-						onChange={field.onChange}
-						stagedFile={stagedImages[field.name] ?? null}
-						onStageFile={(file) => stageImage(field.name, file)}
-						label={t("consortium.brand.logo_url")}
-						uploadsAvailable={brandUploadsAvailable}
-						error={!!errors.brandLogoUrl}
-						helperText={
-							errors.brandLogoUrl?.message ??
-							t("consortium.brand.logo_url_help")
-						}
-					/>
-				)}
-			/>
-
-			<Controller
-				name="brandLogoAlt"
-				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						id="setup-brand-logo-alt"
-						label={t("consortium.brand.logo_alt")}
-						fullWidth
-						error={!!errors.brandLogoAlt}
-						helperText={
-							errors.brandLogoAlt?.message ??
-							t("consortium.brand.logo_alt_help")
-						}
-					/>
-				)}
-			/>
-
-			<Controller
-				name="brandHeaderIconUrl"
-				control={control}
-				render={({ field }) => (
-					<BrandImageField
-						value={field.value ?? ""}
-						onChange={field.onChange}
-						stagedFile={stagedImages[field.name] ?? null}
-						onStageFile={(file) => stageImage(field.name, file)}
-						label={t("consortium.brand.header_icon_url")}
-						uploadsAvailable={brandUploadsAvailable}
-						error={!!errors.brandHeaderIconUrl}
-						helperText={
-							errors.brandHeaderIconUrl?.message ??
-							t("consortium.brand.header_icon_url_help")
-						}
-					/>
-				)}
-			/>
-
-			<Controller
-				name="brandBackgroundImageUrl"
-				control={control}
-				render={({ field }) => (
-					<BrandImageField
-						value={field.value ?? ""}
-						onChange={field.onChange}
-						stagedFile={stagedImages[field.name] ?? null}
-						onStageFile={(file) => stageImage(field.name, file)}
-						label={t("consortium.brand.background_image_url")}
-						uploadsAvailable={brandUploadsAvailable}
-						error={!!errors.brandBackgroundImageUrl}
-						helperText={
-							errors.brandBackgroundImageUrl?.message ??
-							t("consortium.brand.background_image_url_help")
-						}
-					/>
-				)}
-			/>
-
-			<Controller
-				name="patronWelcome"
-				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						id="setup-patron-welcome"
-						label={t("consortium.brand.patron_welcome")}
-						fullWidth
-						multiline
-						rows={2}
-						slotProps={{ htmlInput: { maxLength: BRAND_LIMITS.patronWelcome } }}
-						error={!!errors.patronWelcome}
-						helperText={
-							errors.patronWelcome?.message ??
-							t("consortium.brand.patron_welcome_help")
-						}
-					/>
-				)}
-			/>
-
-			<Controller
-				name="defaultThemeName"
-				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						id="setup-default-theme-name"
-						select
-						label={t("consortium.brand.theme")}
-						fullWidth
-						error={!!errors.defaultThemeName}
-						helperText={
-							errors.defaultThemeName?.message ??
-							t("consortium.brand.theme_help")
-						}
-					>
-						<MenuItem value="">{t("consortium.brand.theme_default")}</MenuItem>
-						{/* themeOptions folds in whatever is stored, so a deployment
-						    running a discovery build we have never heard of keeps its
-						    theme instead of having it silently cleared on save. */}
-						{themeOptions(consortium?.defaultThemeName).map((name) => (
-							<MenuItem key={name} value={name}>
-								{name}
-							</MenuItem>
-						))}
-					</TextField>
-				)}
+				errors={errors}
+				stagedImages={stagedImages}
+				onStageFile={stageImage}
+				uploadsAvailable={brandUploadsAvailable}
+				storedThemeName={consortium?.defaultThemeName}
 			/>
 
 			<SetupFooter

@@ -1,5 +1,13 @@
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
-import { Box, Step, StepLabel, Stepper, Typography } from "@mui/material";
+import {
+	Box,
+	LinearProgress,
+	Step,
+	StepLabel,
+	Stepper,
+	Typography,
+} from "@mui/material";
 
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
@@ -53,6 +61,19 @@ interface SetupRailProps {
  * disabled control is a dead end a keyboard user still has to tab through, and the reason
  * it is unreachable ("you need a consortium first") is already on the screen they are
  * looking at.
+ *
+ * <h2>How much is left, in words as well as in a bar</h2>
+ *
+ * The rail said where the user was and what was behind them, and never said how much was
+ * left. "Five chapters, two behind you" is the thing somebody decides on when choosing
+ * whether to start now, and it existed only as a count of ticks the reader had to make
+ * themselves - or, on the home page, as a banner they had already navigated away from.
+ *
+ * The number is the answer and the bar is the illustration, not the other way round: a
+ * determinate `LinearProgress` on its own conveys proportion by length and colour, which is
+ * neither readable at a glance nor available to a screen reader beyond a bare percentage.
+ * The bar is named by the sentence above it, so it is announced as "3 of 5 steps done"
+ * rather than "60%".
  */
 export default function SetupRail({ current, state }: SetupRailProps) {
 	const { t } = useTranslation();
@@ -70,6 +91,24 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 	// report what the data says, which does not care whether anybody looked at it.
 	const visited = useVisitedChapters();
 
+	const { progress } = state;
+	const progressId = useId();
+	// Skips are reported separately rather than folded into one number. "4 of 5 done" when
+	// one of the four was passed over is the sentence that gets a half-configured
+	// consortium signed off as ready, which is the same failure the finish screen exists
+	// to prevent.
+	const progressSummary =
+		progress.skipped > 0
+			? t("setup.progress.summary_skipped", {
+					complete: progress.complete,
+					total: progress.total,
+					skipped: progress.skipped,
+				})
+			: t("setup.progress.summary", {
+					settled: progress.settled,
+					total: progress.total,
+				});
+
 	return (
 		<Box
 			component="nav"
@@ -79,6 +118,24 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 			// short enough not to need it.
 			sx={{ minWidth: { md: 260 }, flexShrink: 0 }}
 		>
+			<Box sx={{ mb: 2 }}>
+				<Typography
+					id={progressId}
+					variant="body2"
+					sx={{ color: "text.secondary" }}
+				>
+					{progressSummary}
+				</Typography>
+				<LinearProgress
+					variant="determinate"
+					value={progress.percent}
+					aria-labelledby={progressId}
+					// A track this thin is decorative when it is the only signal; here the
+					// sentence carries the meaning, so the bar is allowed to be quiet.
+					sx={{ mt: 1, height: 6, borderRadius: 1 }}
+				/>
+			</Box>
+
 			<Stepper
 				nonLinear
 				activeStep={activeIndex}

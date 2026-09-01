@@ -9,8 +9,8 @@ import { getConsortia } from "@queries/getConsortia";
 import { getLibraryCount } from "@queries/getLibraryCount";
 import { LIBRARY_COUNT_QUERY_KEY } from "@/queryOptions/setup";
 import {
-	CONSORTIUM_SETUP_STEPS,
 	evaluateConsortiumSetup,
+	setupEntryPoint,
 } from "@helpers/consortiumSetup";
 import { adminOrConsortiumAdmin } from "@constants/roles";
 import type {
@@ -84,15 +84,15 @@ export const Route = createFileRoute("/__authenticated/setup/")({
 			skipped: useSetupStore.getState().skipped,
 		});
 
-		throw redirect({
-			to: "/setup/$step",
-			params: {
-				// A finished setup revisited from the Consortium tab opens at the
-				// beginning rather than nowhere - the flow is also how appearance,
-				// branding and functional settings are changed afterwards.
-				step: state.resumeStep,
-			},
-		});
+		const entry = setupEntryPoint(state);
+
+		// A finished setup opens at the inventory, which lists and links every chapter.
+		// An unfinished one resumes where the work is.
+		throw redirect(
+			entry.kind === "finish"
+				? { to: "/setup/done" }
+				: { to: "/setup/$step", params: { step: entry.step } },
+		);
 	},
 
 	// The cold-load path. `beforeLoad` above resolves the chapter on any in-app
@@ -122,8 +122,15 @@ function ResolveSetupStep() {
 
 	// A failed read is not an empty instance; start at the beginning rather than
 	// asserting the consortium is missing.
-	const step =
-		(!isError && state.firstIncompleteStep) ?? CONSORTIUM_SETUP_STEPS[0];
+	if (isError) {
+		return <Navigate to="/setup/$step" params={{ step: "appearance" }} replace />;
+	}
 
-	return <Navigate to="/setup/$step" params={{ step }} replace />;
+	const entry = setupEntryPoint(state);
+
+	return entry.kind === "finish" ? (
+		<Navigate to="/setup/done" replace />
+	) : (
+		<Navigate to="/setup/$step" params={{ step: entry.step }} replace />
+	);
 }

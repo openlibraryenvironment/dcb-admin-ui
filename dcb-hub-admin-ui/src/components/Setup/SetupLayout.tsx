@@ -16,6 +16,7 @@ import SetupRunProvider from "./SetupRunProvider";
 import { useSetupDirty } from "./setupRun";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import SetupIntro from "./SetupIntro";
 import SetupRail from "./SetupRail";
 import { SETUP_CHAPTERS } from "./setupChapters";
 import {
@@ -56,6 +57,7 @@ function SetupLayoutInner({
 
 
 	const chapter = SETUP_CHAPTERS[step];
+	const isFirstChapter = step === CONSORTIUM_SETUP_STEPS[0];
 	const announcement = t("setup.announcement", {
 		number: stepNumber(step),
 		total: CONSORTIUM_SETUP_STEPS.length,
@@ -130,6 +132,10 @@ function SetupLayoutInner({
 					<Typography sx={{ color: "text.secondary", mb: 3 }}>
 						{t(chapter.subtitleKey)}
 					</Typography>
+
+					{/* First screen of a first run only. See SetupIntro on why it is not
+					    shown to somebody who has been here before. */}
+					{isFirstChapter && state.isFresh && <SetupIntro />}
 
 					{children}
 				</Box>

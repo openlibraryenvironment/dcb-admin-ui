@@ -84,6 +84,30 @@ export interface ConsortiumSetupStep {
 	optional?: boolean;
 }
 
+/**
+ * How far along, as numbers rather than as a feeling.
+ *
+ * The rail said which chapter was current and which were done, and never said how much was
+ * left - the one thing somebody deciding whether to start now or after lunch actually wants
+ * to know. The home-page banner counted it ("3 steps left"); the flow itself did not.
+ *
+ * `total` deliberately EXCLUDES the optional chapter. A denominator counting a chapter that
+ * can never be outstanding could never reach 100%, so a fully configured consortium would
+ * show a bar stuck at five sixths for the life of the deployment.
+ */
+export interface ConsortiumSetupProgress {
+	/** Chapters that can hold setup open. The optional one is not among them. */
+	total: number;
+	/** Chapters whose work is actually done. */
+	complete: number;
+	/** Chapters settled by a decision not to do them. Never counted as complete. */
+	skipped: number;
+	/** Complete plus skipped: everything with nothing outstanding left in it. */
+	settled: number;
+	/** 0-100, for a determinate bar. Reaches 100 exactly when `isComplete` is true. */
+	percent: number;
+}
+
 export interface ConsortiumSetupState {
 	steps: ConsortiumSetupStep[];
 	/** The first chapter with outstanding work. Undefined when nothing is outstanding. */
@@ -98,15 +122,19 @@ export interface ConsortiumSetupState {
 	 * Sending a brand new deployment straight to a form asking for a consortium name
 	 * would be a different, worse opening move.
 	 *
-	 * A partly-done one resumes at the first outstanding chapter; a finished one revisited
-	 * from the Consortium tab opens at the beginning again, because the flow is also how
-	 * appearance, branding and functional settings are changed afterwards.
+	 * A partly-done one resumes at the first outstanding chapter. A FINISHED one does not
+	 * come through here at all - see `setupEntryPoint`, which sends it to the inventory.
+	 * This still answers "appearance" for that case, because the value has to be some
+	 * chapter, and the start of the flow is the least surprising one for a caller that
+	 * ignores the distinction.
 	 */
 	resumeStep: ConsortiumSetupStepId;
 	/** True when nothing is left outstanding - every chapter is done or settled. */
 	isComplete: boolean;
 	/** True when there is no consortium at all: a genuinely fresh instance. */
 	isFresh: boolean;
+	/** How much of the flow is behind the user. */
+	progress: ConsortiumSetupProgress;
 }
 
 const isPresent = (value: unknown): boolean => {
@@ -195,6 +223,18 @@ export const evaluateConsortiumSetup = ({
 			step.available && !step.optional && !step.complete && !step.skipped,
 	);
 
+	// Counted over every chapter that can hold setup open, whether or not it is reachable
+	// yet: a fresh instance has five things to do, four of them behind the consortium
+	// record. Shrinking the denominator to what is reachable TODAY would show a bar that
+	// went backwards the moment creating the consortium unlocked the other four.
+	const tracked = steps.filter((step) => !step.optional);
+	const completeCount = tracked.filter((step) => step.complete).length;
+	// A chapter that was skipped and later filled in is complete, not both.
+	const skippedCount = tracked.filter(
+		(step) => !step.complete && step.skipped,
+	).length;
+	const settledCount = completeCount + skippedCount;
+
 	const firstIncompleteStep = outstanding[0]?.id;
 
 	return {
@@ -206,8 +246,44 @@ export const evaluateConsortiumSetup = ({
 				: firstIncompleteStep,
 		isComplete: outstanding.length === 0,
 		isFresh: !hasConsortium,
+		progress: {
+			total: tracked.length,
+			complete: completeCount,
+			skipped: skippedCount,
+			settled: settledCount,
+			percent:
+				tracked.length === 0
+					? 0
+					: Math.round((settledCount / tracked.length) * 100),
+		},
 	};
 };
+
+/**
+ * Where `/setup` should actually send somebody.
+ *
+ * <h2>Why a finished setup no longer opens at chapter one</h2>
+ *
+ * It used to. The reasoning was that the flow is also how appearance, branding and
+ * functional settings are changed afterwards - which is true - but it made the first screen
+ * of a return visit the one thing the visitor is least likely to have come for. Somebody
+ * opening setup from the Consortium tab to change a logo met a page about their own colour
+ * scheme, and had to find the rail to get anywhere near branding.
+ *
+ * A finished setup opens at the inventory instead, which names every chapter, says what
+ * happened to each and links all of them. That is the right shape for a return visit: an
+ * index, not the start of a queue. An unfinished one still resumes where the work is.
+ */
+export type SetupEntryPoint =
+	| { kind: "chapter"; step: ConsortiumSetupStepId }
+	| { kind: "finish" };
+
+export const setupEntryPoint = (
+	state: Pick<ConsortiumSetupState, "isComplete" | "resumeStep">,
+): SetupEntryPoint =>
+	state.isComplete
+		? { kind: "finish" }
+		: { kind: "chapter", step: state.resumeStep };
 
 /** A chapter's step number, for "Step 3 of 6" and for the rail. */
 export const stepNumber = (id: ConsortiumSetupStepId): number =>

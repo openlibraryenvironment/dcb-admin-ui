@@ -29,6 +29,22 @@ const MOCKS = {
 	LoadLibraryCount: libraryCount,
 };
 
+/** The same consortium with a patron-facing brand, i.e. nothing left outstanding. */
+const finishedConsortium = {
+	consortia: {
+		...consortium.consortia,
+		content: [
+			{
+				...consortium.consortia.content[0],
+				brandLogoUrl: "https://example.invalid/logo.png",
+			},
+		],
+	},
+};
+
+/** No consortium at all: the first-run case. */
+const noConsortium = { consortia: { ...consortium.consortia, content: [] } };
+
 const CHAPTERS = [
 	"appearance",
 	"consortium",
@@ -274,6 +290,90 @@ test.describe("Setup - structure and behaviour", () => {
 		//
 		// Resolved in beforeLoad, so there is no flash of the wrong chapter on the way.
 		await page.goto("/setup");
+
+		await expect(page).toHaveURL(/\/setup\/discovery$/);
+	});
+
+	test("says how much of the flow is left, in words", async ({ page }) => {
+		// The rail said where you were and what was behind you, and never how much was
+		// left. A bar alone would not fix that: it conveys proportion by length, which is
+		// neither readable at a glance nor available to a screen reader beyond a
+		// percentage. The sentence is the answer; the bar illustrates it.
+		await page.goto("/setup/consortium");
+
+		const rail = page.getByRole("navigation", { name: /setup progress/i });
+		// The fixture has the consortium, its contacts, its settings and three libraries,
+		// and no brand: four of the five tracked chapters done.
+		await expect(rail.getByText("4 of 5 steps done")).toBeVisible();
+
+		// Named by that sentence, so it is announced as "4 of 5 steps done" and not "80%".
+		await expect(
+			rail.getByRole("progressbar", { name: "4 of 5 steps done" }),
+		).toHaveAttribute("aria-valuenow", "80");
+	});
+
+	test("counts a skipped chapter apart from a finished one", async ({
+		page,
+	}) => {
+		// "5 of 5 done" when one of them was passed over is exactly how a half-configured
+		// consortium gets signed off as ready.
+		await page.goto("/setup/discovery");
+		await page.getByRole("button", { name: /we have not decided yet/i }).click();
+
+		await expect(page).toHaveURL(/\/setup\/libraries$/);
+		await expect(
+			page
+				.getByRole("navigation", { name: /setup progress/i })
+				.getByText("4 of 5 steps done, 1 skipped"),
+		).toBeVisible();
+	});
+
+	test("tells a first-run user what it will take before it starts", async ({
+		page,
+	}) => {
+		// Setup ends by asking for a Host LMS base URL and API credentials. Somebody who
+		// gets there without them has spent nine minutes to reach a form they cannot
+		// finish, and nothing before that point said so.
+		await mockGraphQL(page, { ...MOCKS, LoadConsortium: noConsortium });
+		await page.goto("/setup/appearance");
+
+		await expect(page.getByText(/before you start/i)).toBeVisible();
+		await expect(page.getByText(/about ten minutes/i)).toBeVisible();
+		await expect(page.getByText(/host lms connection details/i)).toBeVisible();
+	});
+
+	test("does not repeat the prerequisites at somebody who has been here", async ({
+		page,
+	}) => {
+		await page.goto("/setup/appearance");
+
+		await expect(page.getByText(/before you start/i)).toBeHidden();
+	});
+
+	test("a finished setup opens at the inventory, not at chapter one", async ({
+		page,
+	}) => {
+		// It used to open at appearance. Somebody coming from the Consortium tab to change
+		// a logo met a page about their own colour scheme and had to find the rail.
+		await mockGraphQL(page, { ...MOCKS, LoadConsortium: finishedConsortium });
+
+		await page.goto("/setup");
+
+		await expect(page).toHaveURL(/\/setup\/done$/);
+	});
+
+	test("the inventory links every chapter, finished ones included", async ({
+		page,
+	}) => {
+		// A list that only linked unfinished chapters is a dead end for exactly the person
+		// who came back to change something.
+		await mockGraphQL(page, { ...MOCKS, LoadConsortium: finishedConsortium });
+		await page.goto("/setup/done");
+
+		// Named by chapter, not six links all reading "Go to this step" (WCAG 2.4.4).
+		await page
+			.getByRole("link", { name: "Change the Discovery branding step" })
+			.click();
 
 		await expect(page).toHaveURL(/\/setup\/discovery$/);
 	});

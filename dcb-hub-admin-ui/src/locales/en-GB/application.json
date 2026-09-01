@@ -2600,6 +2600,18 @@
 		"rail_label": "Setup progress",
 		"rail_item": "{{number}}. {{label}}",
 		"step_of": "Step {{number}} of {{total}}",
+		"progress": {
+			"summary": "{{settled}} of {{total}} steps done",
+			"summary_skipped": "{{complete}} of {{total}} steps done, {{skipped}} skipped"
+		},
+		"intro": {
+			"title": "Before you start",
+			"time": "This takes about ten minutes. You can leave at any point and pick up where you stopped - nothing you have saved is lost.",
+			"needs_title": "What you will need",
+			"needs_consortium": "Your consortium's name, the date it launched, and its website.",
+			"needs_contact": "An email address for whoever should be contacted about the consortium as a whole.",
+			"needs_hostlms": "For the last step, your first library's Host LMS connection details: its base URL and API credentials. If you do not have those to hand, add your libraries later - everything before it still saves."
+		},
 		"announcement": "Step {{number}} of {{total}}: {{title}}",
 		"needs_consortium": "This step needs your consortium to exist first. Go back and tell us about your consortium, and this will open up.",
 		"status": {
@@ -2707,6 +2719,10 @@
 			"subtitle_one": "Your consortium exists and has 1 library.",
 			"subtitle_other": "Your consortium exists and has {{count}} libraries.",
 			"revisit": "Go to this step",
+			"revisit_named": "Go to the {{label}} step",
+			"change": "Change this",
+			"change_named": "Change the {{label}} step",
+			"revisit_hint": "Anything here can be changed - open any step to go back to it.",
 			"outstanding": "You passed over: {{steps}}. Each one is still there when you want it.",
 			"next_steps": "Adding a library is the start of configuring it. The Onboarding page shows what each library still needs - its mappings, its pickup locations, and whether its records have been ingested.",
 			"go_onboarding": "Go to Onboarding",

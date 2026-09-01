@@ -110,6 +110,7 @@ function SetupDonePage() {
 				</Typography>
 				<Typography sx={{ color: "text.secondary" }}>
 					{t("setup.done.subtitle", { count: libraryCount })}
+					{state.isComplete ? ` ${t("setup.done.revisit_hint")}` : ""}
 				</Typography>
 
 				<List>
@@ -137,9 +138,31 @@ function SetupDonePage() {
 									// The status is words, not the icon's colour.
 									secondary={status}
 								/>
-								{!step.complete && step.available && (
-									<CustomLink to="/setup/$step" params={{ step: step.id }}>
-										{t("setup.done.revisit")}
+								{/* EVERY reachable chapter is a link, complete ones included.
+								    This page is where a finished setup now opens, so it is the
+								    index of the flow rather than a report on it - and a list
+								    that only linked unfinished chapters would be a dead end for
+								    exactly the person who came back to change a logo. */}
+								{step.available && (
+									<CustomLink
+										to="/setup/$step"
+										params={{ step: step.id }}
+										// Six links all reading "Go to this step" are six
+										// identical entries in a screen reader's link list. The
+										// visible text stays short; the accessible name says
+										// which chapter (WCAG 2.4.4).
+										aria-label={t(
+											step.complete
+												? "setup.done.change_named"
+												: "setup.done.revisit_named",
+											{ label },
+										)}
+									>
+										{t(
+											step.complete
+												? "setup.done.change"
+												: "setup.done.revisit",
+										)}
 									</CustomLink>
 								)}
 							</ListItem>
