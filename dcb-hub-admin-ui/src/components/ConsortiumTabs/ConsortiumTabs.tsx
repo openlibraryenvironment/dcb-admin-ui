@@ -32,6 +32,10 @@ const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 	},
 	{ path: "/consortium/onboarding", labelKey: "nav.consortium.onboarding" },
 	{ path: "/consortium/contacts", labelKey: "nav.consortium.contacts" },
+	// Branding is its own tab rather than a block at the foot of the profile. It is five
+	// fields and a theme choice, and it answers a different question - what PATRONS see -
+	// from everything else on the record.
+	{ path: "/consortium/branding", labelKey: "nav.consortium.branding" },
 	// Setup stays reachable after it is finished: it is also how appearance, discovery
 	// branding and functional settings are revisited, and a flow that vanishes the moment
 	// it succeeds is a flow nobody can correct.
@@ -39,13 +43,19 @@ const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 ];
 
 export type ConsortiumTabId =
-	"profile" | "functionalSettings" | "onboarding" | "contacts" | "setup";
+	| "profile"
+	| "functionalSettings"
+	| "onboarding"
+	| "contacts"
+	| "branding"
+	| "setup";
 
 const PATH_BY_ID: Record<ConsortiumTabId, string> = {
 	profile: "/consortium",
 	functionalSettings: "/consortium/functionalSettings",
 	onboarding: "/consortium/onboarding",
 	contacts: "/consortium/contacts",
+	branding: "/consortium/branding",
 	setup: "/setup",
 };
 

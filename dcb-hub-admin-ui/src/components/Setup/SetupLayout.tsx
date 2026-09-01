@@ -1,6 +1,21 @@
 import { PropsWithChildren, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Box, Stack, Typography } from "@mui/material";
+import {
+	Box,
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
+	Stack,
+	Typography,
+} from "@mui/material";
+import { Close } from "@mui/icons-material";
+import { useBlocker } from "@tanstack/react-router";
+import { CustomLinkButton } from "@components/CustomLink/CustomLink";
+import SetupDirtyProvider from "./SetupDirtyProvider";
+import { useSetupDirty } from "./setupDirty";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import SetupRail from "./SetupRail";
@@ -32,13 +47,14 @@ interface SetupLayoutProps {
  *     say where in the flow the user now is. "Step 3 of 6" is information that exists only
  *     as position in the rail, i.e. only visually, so it is put in a live region as well.
  */
-export default function SetupLayout({
+function SetupLayoutInner({
 	step,
 	state,
 	children,
 }: PropsWithChildren<SetupLayoutProps>) {
 	const { t } = useTranslation();
 	const headingRef = useRef<HTMLHeadingElement>(null);
+	const isDirty = useSetupDirty();
 
 	const chapter = SETUP_CHAPTERS[step];
 	const announcement = t("setup.announcement", {
@@ -50,6 +66,20 @@ export default function SetupLayout({
 	useEffect(() => {
 		headingRef.current?.focus();
 	}, [step]);
+
+	// Leaving a chapter mid-edit throws the edits away, and the rail invites exactly that:
+	// six links, one click each, no warning. `withResolver` hands back proceed/reset so the
+	// decision is a real dialog rather than the browser's own confirm(), which cannot be
+	// styled, translated or made accessible.
+	//
+	// `enableBeforeUnload` covers the other half - a closed tab or a typed URL, which no
+	// router can intercept. The browser shows its own generic wording there; that is the
+	// price of the only hook that works at all outside the SPA.
+	const blocker = useBlocker({
+		shouldBlockFn: () => isDirty,
+		enableBeforeUnload: () => isDirty,
+		withResolver: true,
+	});
 
 	return (
 		<PageContainer title={t("setup.page_title")} hideTitleBox hideBreadcrumbs>
@@ -80,12 +110,31 @@ export default function SetupLayout({
 				<SetupRail current={step} state={state} />
 
 				<Box sx={{ flexGrow: 1, maxWidth: 780, width: "100%" }}>
-					<Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5 }}>
-						{t("setup.step_of", {
-							number: stepNumber(step),
-							total: CONSORTIUM_SETUP_STEPS.length,
-						})}
-					</Typography>
+					<Stack
+						direction="row"
+						spacing={2}
+						sx={{ alignItems: "flex-start", justifyContent: "space-between" }}
+					>
+						<Typography
+							variant="body2"
+							sx={{ color: "text.secondary", mb: 0.5 }}
+						>
+							{t("setup.step_of", {
+								number: stepNumber(step),
+								total: CONSORTIUM_SETUP_STEPS.length,
+							})}
+						</Typography>
+
+						{/* The way out. Setup is not one sitting and it is not compulsory, and
+						    a flow with no exit but the browser's back button reads as a trap -
+						    which is how people end up abandoning it in a state they cannot
+						    find their way back to. The banner on the home page brings them
+						    back to whichever chapter they left. */}
+						<CustomLinkButton to="/" size="small" startIcon={<Close />}>
+							{t("setup.actions.finish_later")}
+						</CustomLinkButton>
+					</Stack>
+
 					<Typography
 						variant="h1"
 						component="h1"
@@ -105,6 +154,53 @@ export default function SetupLayout({
 					{children}
 				</Box>
 			</Stack>
+
+			{/* Not a Confirmation: this asks about work in progress, not a destructive
+			    action on a named entity, and it needs its own wording. */}
+			<Dialog
+				open={blocker.status === "blocked"}
+				onClose={() => blocker.status === "blocked" && blocker.reset()}
+				aria-labelledby="setup-unsaved-title"
+			>
+				<DialogTitle id="setup-unsaved-title">
+					{t("setup.unsaved.title")}
+				</DialogTitle>
+				<DialogContent>
+					<DialogContentText>{t("setup.unsaved.body")}</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					{/* Safe action FIRST, against the usual primary-last order. This dialog
+					    guards work in progress, so the first control a keyboard user reaches
+					    should be the one that keeps it. autoFocus would say the same thing and
+					    is banned for good reason - it moves focus without being asked - so the
+					    DOM order carries it instead. */}
+					<Button
+						variant="contained"
+						onClick={() => blocker.status === "blocked" && blocker.reset()}
+					>
+						{t("setup.unsaved.stay")}
+					</Button>
+					<Button
+						onClick={() => blocker.status === "blocked" && blocker.proceed()}
+					>
+						{t("setup.unsaved.leave")}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</PageContainer>
+	);
+}
+
+/**
+ * The provider has to sit ABOVE the component that reads it, so the layout is split in
+ * two: this wrapper provides, the inner one consumes. A single component calling both
+ * would read the context it declares, which React resolves to the DEFAULT value - so the
+ * blocker would see isDirty false forever and never block anything.
+ */
+export default function SetupLayout(props: PropsWithChildren<SetupLayoutProps>) {
+	return (
+		<SetupDirtyProvider>
+			<SetupLayoutInner {...props} />
+		</SetupDirtyProvider>
 	);
 }

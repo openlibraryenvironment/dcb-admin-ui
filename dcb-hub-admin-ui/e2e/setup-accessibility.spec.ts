@@ -120,6 +120,59 @@ test.describe("Setup - structure and behaviour", () => {
 		await expect(rail.locator("[aria-current]")).toHaveCount(1);
 	});
 
+	test("offers a way out of the flow", async ({ page }) => {
+		// Setup is not one sitting and it is not compulsory. A flow whose only exit is the
+		// browser's back button reads as a trap, and the banner on the home page is what
+		// brings people back to whichever chapter they left.
+		await page.goto("/setup/consortium");
+
+		const exit = page.getByRole("link", { name: /finish later/i });
+		await expect(exit).toBeVisible();
+
+		await exit.click();
+		await expect(page).toHaveURL(/\/$|\/#/);
+	});
+
+	test("warns before throwing away unsaved edits", async ({ page }) => {
+		// The CONTACTS chapter, not the consortium one: these mocks return an existing
+		// consortium, so that chapter renders its "already set up" state and has no
+		// editable field to dirty. Contacts always offers one.
+		await page.goto("/setup/contacts");
+
+		// Nothing typed yet: leaving is free. A guard that fires on a pristine form is one
+		// everybody learns to dismiss without reading.
+		await page.getByRole("link", { name: /finish later/i }).click();
+		await expect(page).toHaveURL(/\/$/);
+
+		await page.goto("/setup/contacts");
+		await page
+			.getByRole("textbox", { name: /first name/i })
+			.fill("Half-typed");
+
+		// Now the same navigation has something to lose.
+		await page.getByRole("link", { name: /finish later/i }).click();
+
+		const dialog = page.getByRole("dialog");
+		await expect(dialog).toBeVisible();
+		await expect(dialog).toContainText(/without saving/i);
+
+		// Staying keeps both the chapter AND what was typed - a guard that discards the
+		// work it just protected is worse than none.
+		await dialog.getByRole("button", { name: /stay on this chapter/i }).click();
+		await expect(page).toHaveURL(/\/setup\/contacts/);
+		await expect(
+			page.getByRole("textbox", { name: /first name/i }),
+		).toHaveValue("Half-typed");
+
+		// And leaving deliberately still works.
+		await page.getByRole("link", { name: /finish later/i }).click();
+		await page
+			.getByRole("dialog")
+			.getByRole("button", { name: /leave and discard/i })
+			.click();
+		await expect(page).toHaveURL(/\/$/);
+	});
+
 	test("moves focus to the heading when the chapter changes", async ({
 		page,
 	}) => {

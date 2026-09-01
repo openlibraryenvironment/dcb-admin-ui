@@ -23,6 +23,7 @@ import type {
 	UpdateFunctionalSettingMutation,
 	UpdateFunctionalSettingMutationVariables,
 } from "@generated/graphql";
+import { useRegisterSetupDirty } from "../setupDirty";
 
 /**
  * C3 — "How should requesting work?"
@@ -82,6 +83,9 @@ export default function HowItWorksChapter() {
 			),
 		},
 	});
+
+	// Tells the layout there is unsaved work here, so leaving the chapter asks first.
+	useRegisterSetupDirty("howItWorks", methods.formState.isDirty);
 
 	const { mutateAsync: save } = useMutation({
 		mutationFn: async (selection: Record<string, boolean>) => {

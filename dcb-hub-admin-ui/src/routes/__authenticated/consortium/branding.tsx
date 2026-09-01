@@ -9,7 +9,7 @@ import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { getConsortia } from "@queries/getConsortia";
 import type { LoadConsortiumQueryVariables } from "@generated/graphql";
 
-export const Route = createFileRoute("/__authenticated/consortium/")({
+export const Route = createFileRoute("/__authenticated/consortium/branding")({
 	loader: ({ context: { queryClient, cfg, auth } }) => {
 		// Skip prefetching for unauthenticated visitors - the request would fail (no
 		// token) and its failure would trigger the global network/401 error handler in
@@ -25,9 +25,9 @@ export const Route = createFileRoute("/__authenticated/consortium/")({
 				>(getConsortia, CONSORTIUM_QUERY_VARIABLES),
 		});
 	},
-	component: ConsortiumProfilePage,
+	component: ConsortiumBrandingPage,
 });
 
-function ConsortiumProfilePage() {
-	return <ConsortiumRecord section="profile" />;
+function ConsortiumBrandingPage() {
+	return <ConsortiumRecord section="branding" />;
 }

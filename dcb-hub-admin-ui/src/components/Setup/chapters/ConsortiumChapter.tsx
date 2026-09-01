@@ -18,6 +18,7 @@ import {
 	type NewConsortiumFormValues,
 } from "@schemas/newConsortiumSchema";
 import { CONSORTIUM_BASICS_QUERY_KEY } from "@/queryOptions/consortium";
+import { useRegisterSetupDirty } from "../setupDirty";
 
 /** The details chapter's own fields. Everything else on the schema is another chapter's. */
 const DETAILS_FIELDS: (keyof NewConsortiumFormValues)[] = [
@@ -99,6 +100,11 @@ export default function ConsortiumChapter() {
 			],
 		},
 	});
+
+	// Tells the layout there is unsaved work here, so leaving the chapter asks first.
+	// Registered rather than set: it clears itself on unmount, so a chapter cannot
+	// leave the flow permanently blocked.
+	useRegisterSetupDirty("consortium", methods.formState.isDirty);
 
 	const { mutateAsync: create } = useMutation({
 		mutationFn: (values: NewConsortiumFormValues) =>

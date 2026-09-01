@@ -31,6 +31,7 @@ import type {
 	CreateConsortiumContactMutation,
 	CreateConsortiumContactMutationVariables,
 } from "@generated/graphql";
+import { useRegisterSetupDirty } from "../setupDirty";
 
 /**
  * C4 — "Who should we contact?"
@@ -88,6 +89,11 @@ export default function ContactsChapter() {
 			],
 		},
 	});
+
+	// Tells the layout there is unsaved work here, so leaving the chapter asks first.
+	// Registered rather than set: it clears itself on unmount, so a chapter cannot
+	// leave the flow permanently blocked.
+	useRegisterSetupDirty("contacts", methods.formState.isDirty);
 
 	const { mutateAsync: addContact } = useMutation({
 		mutationFn: (values: NewConsortiumFormValues) => {

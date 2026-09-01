@@ -170,7 +170,7 @@
 		"description_generic": "Consortia that use OpenRS DCB can include any combination of public, academic and specialist libraries and collections. <paragraph/>DCB connects libraries across ILS, LMS and Discovery products to handle resource sharing at scale, whether they choose to use the same or a mix of commercial or open source interfaces and central indexes.<paragraph/>",
 		"brand": {
 			"section": "Patron-facing brand",
-			"section_help": "What patrons see in the discovery app. This is separate from the images above, which are used in DCB Admin.",
+			"section_help": "The mark, background and welcome your patrons see in discovery. The logo and header icon are the SAME images DCB Admin uses in its own app bar and landing card — set them once and both follow.",
 			"logo_url": "Logo",
 			"logo_url_help": "The lockup shown above the search box. Upload one, or paste a full web address beginning http:// or https://. Leave blank to show the consortium's name on its own.",
 			"logo_url_invalid": "Upload an image, or enter a full web address beginning http:// or https://, or leave this blank.",
@@ -1547,7 +1547,8 @@
 			"functionalSettings": "Functional settings",
 			"profile": "Profile",
 			"insights": "Insights",
-			"setup": "Setup"
+			"setup": "Setup",
+			"branding": "Branding"
 		},
 		"groups": {
 			"bibs": "Bib records",
@@ -2606,7 +2607,8 @@
 			"skip": "I'll do this later",
 			"save_and_continue": "Save and continue",
 			"looks_good": "Looks good, continue",
-			"finish": "Finish setup"
+			"finish": "Finish setup",
+			"finish_later": "Finish later"
 		},
 		"error": {
 			"title": "We could not check how far along your setup is",
@@ -2769,6 +2771,12 @@
 				"contactRole": "What the contact does.",
 				"contactIsPrimary": "true or false."
 			}
+		},
+		"unsaved": {
+			"title": "Leave without saving?",
+			"body": "This chapter has changes you have not saved. Leaving now discards them — everything you saved in earlier chapters is kept.",
+			"leave": "Leave and discard",
+			"stay": "Stay on this chapter"
 		}
 	}
 }

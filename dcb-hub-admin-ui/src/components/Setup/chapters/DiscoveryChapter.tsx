@@ -34,6 +34,7 @@ import {
 } from "@schemas/discoveryBrandSchema";
 import { updateConsortiumQuery } from "@mutations/updateConsortium";
 import type { UpdateConsortiumMutationVariables } from "@generated/graphql";
+import { useRegisterSetupDirty } from "../setupDirty";
 
 /** Which label to name in an upload refusal - three images on one form. */
 const BRAND_FIELD_LABELS: Record<string, string> = {
@@ -96,7 +97,7 @@ export default function DiscoveryChapter() {
 		getValues,
 		setValue,
 		trigger,
-		formState: { errors },
+		formState: { errors, isDirty },
 	} = useForm<DiscoveryBrandValues>({
 		mode: "onTouched",
 		resolver: yupResolver(discoveryBrandSchema(t)) as any,
@@ -109,6 +110,9 @@ export default function DiscoveryChapter() {
 			defaultThemeName: consortium?.defaultThemeName ?? "",
 		},
 	});
+
+	// Tells the layout there is unsaved work here, so leaving the chapter asks first.
+	useRegisterSetupDirty("discovery", isDirty);
 
 	// useWatch, not a root-level watch(): the preview needs these six values and nothing
 	// else, and a root watch re-renders the whole chapter on every keystroke in any field.
