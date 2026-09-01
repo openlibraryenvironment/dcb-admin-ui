@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import axios from "axios";
 import {
 	Accordion,
@@ -48,7 +48,6 @@ export const Route = createFileRoute(
 function DcbNcipOnboarding() {
 	const { t } = useTranslation();
 	const auth = useAuth();
-	const navigate = useNavigate();
 	const client = useDcbRestClient();
 	const roles = (auth.user?.profile?.roles as string[] | undefined) ?? [];
 	const canManage = canManageDcbNcipOnboarding(roles);
@@ -89,9 +88,14 @@ function DcbNcipOnboarding() {
 		return () => window.clearTimeout(timeout);
 	}, [canManage, loadReadiness]);
 
-	useEffect(() => {
-		if (!canManage) void navigate({ to: "/serviceInfo", replace: true });
-	}, [canManage, navigate]);
+	// The redirect to /serviceInfo that used to live here is gone. canManageDcbNcipOnboarding
+	// is adminOrConsortiumAdmin - exactly the set the application-wide bar admits - so it
+	// could only ever fire for somebody the __authenticated layout has already sent to
+	// /unauthorised.
+	//
+	// Two effects racing to redirect the same user to two different places is not merely
+	// redundant: the e2e suite caught it failing intermittently under parallel load,
+	// landing on whichever guard happened to schedule first. One rule, one destination.
 
 	useEffect(() => {
 		if (!invitation) return;

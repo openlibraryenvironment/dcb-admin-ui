@@ -52,7 +52,7 @@ export default function ConsortiumSetupBanner() {
 			action={
 				<CustomLinkButton
 					to="/setup/$step"
-					params={{ step: state.firstIncompleteStep ?? "consortium" }}
+					params={{ step: state.resumeStep }}
 					color="inherit"
 					size="small"
 					variant="outlined"

@@ -226,13 +226,18 @@ test.describe("Setup - structure and behaviour", () => {
 	test("/setup resolves to the first chapter still outstanding", async ({
 		page,
 	}) => {
-		// The fixture consortium has contacts, functional settings and libraries, and
-		// nothing has been skipped - so appearance (which is settled only by being
-		// seen) is what is left. Resolved in beforeLoad, so there is no flash of the
-		// wrong chapter on the way.
+		// The fixture consortium has contacts, functional settings and libraries but NO
+		// patron-facing brand, so discovery is what is genuinely left.
+		//
+		// This used to assert appearance, and it passed for the wrong reason: appearance
+		// counted as outstanding until the browser recorded having seen it, so it always
+		// sorted first. It is optional now - it writes nothing, so there is nothing to
+		// finish - and the first OUTSTANDING chapter is the one with real work in it.
+		//
+		// Resolved in beforeLoad, so there is no flash of the wrong chapter on the way.
 		await page.goto("/setup");
 
-		await expect(page).toHaveURL(/\/setup\/appearance$/);
+		await expect(page).toHaveURL(/\/setup\/discovery$/);
 	});
 
 	test("Setup is reachable as a tab under Consortium", async ({ page }) => {

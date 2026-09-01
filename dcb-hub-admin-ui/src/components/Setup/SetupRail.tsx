@@ -92,13 +92,18 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 
 					// The state is on the icon, which is decorative, so it is also said in
 					// words. "Done", "skipped" and "not started" are not colours.
-					const status = step?.complete
-						? t("setup.status.done")
-						: step?.skipped
-							? t("setup.status.skipped")
-							: step?.available
-								? t("setup.status.not_started")
-								: t("setup.status.not_yet_available");
+					// Optional is checked FIRST. A chapter that writes nothing has no "done" to
+					// report, and calling it "Not started" for the life of the deployment is a
+					// nag about work that does not exist.
+					const status = step?.optional
+						? t("setup.status.optional")
+						: step?.complete
+							? t("setup.status.done")
+							: step?.skipped
+								? t("setup.status.skipped")
+								: step?.available
+									? t("setup.status.not_started")
+									: t("setup.status.not_yet_available");
 
 					const label = (
 						<Typography

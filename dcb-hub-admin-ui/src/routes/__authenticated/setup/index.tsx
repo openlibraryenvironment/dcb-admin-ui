@@ -90,7 +90,7 @@ export const Route = createFileRoute("/__authenticated/setup/")({
 				// A finished setup revisited from the Consortium tab opens at the
 				// beginning rather than nowhere - the flow is also how appearance,
 				// branding and functional settings are changed afterwards.
-				step: state.firstIncompleteStep ?? CONSORTIUM_SETUP_STEPS[0],
+				step: state.resumeStep,
 			},
 		});
 	},

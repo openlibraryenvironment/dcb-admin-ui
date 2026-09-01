@@ -477,7 +477,7 @@
 			"highContrast": "High contrast"
 		},
 		"font_label": "Reading typeface",
-		"font_sample": "Interlibrary loan requests across the consortium.",
+		"font_sample": "OpenRS is awesome!",
 		"fonts": {
 			"roboto": {
 				"name": "Roboto",
@@ -2599,7 +2599,8 @@
 			"done": "Done",
 			"skipped": "Skipped",
 			"not_started": "Not started",
-			"not_yet_available": "Not yet available"
+			"not_yet_available": "Not yet available",
+			"optional": "Optional"
 		},
 		"actions": {
 			"back": "Back",
@@ -2618,7 +2619,7 @@
 			"appearance": {
 				"label": "Appearance",
 				"title": "First, how should DCB Admin look to you?",
-				"subtitle": "Set this up the way you want to read it. You can change any of it later, and it only affects your own account."
+				"subtitle": "Tell us what you want your DCB Admin experience to look like. You can change any of it later, and it only affects your own account."
 			},
 			"consortium": {
 				"label": "Your consortium",

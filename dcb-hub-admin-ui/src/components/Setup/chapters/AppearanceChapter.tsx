@@ -19,15 +19,21 @@ import { useSetupNavigation } from "@hooks/useSetupNavigation";
  * reading five more screens of setup, rather than discovering the control on a profile
  * page afterwards.
  *
- * Every choice here is per user and stored locally. Nothing on this screen is a property
- * of the consortium, and a colleague signing in on another machine sets their own.
+ * Every choice here is per user. Nothing on this screen is a property of the consortium,
+ * and a colleague signing in on another machine sets their own - which is exactly why the
+ * chapter is OPTIONAL rather than completable: there is no consortium-level fact to read
+ * back, so any claim that it is "done" could only ever be a statement about one browser.
  */
 export default function AppearanceChapter() {
 	const { t } = useTranslation();
-	// `skipAndContinue`, not `goNext`: this chapter writes nothing, so there is no data
-	// to read back and "done" can only mean "seen". Recording it as settled is what stops
-	// the banner and the rail reporting it outstanding forever.
-	const { skipAndContinue } = useSetupNavigation("appearance");
+	// Plain `goNext`. This chapter used to record a SKIP on the way out, so that "seen"
+	// could stand in for "done" - which put browser state into a progress model that is
+	// otherwise derived, and produced a brand new deployment that believed this chapter
+	// was already finished because the same browser had been through it once before.
+	//
+	// It is marked optional in consortiumSetup instead: always offered, never outstanding.
+	// Nothing needs recording, so nothing is.
+	const { goNext } = useSetupNavigation("appearance");
 
 	return (
 		<Stack spacing={3}>
@@ -42,7 +48,7 @@ export default function AppearanceChapter() {
 			{/* Continuing IS the answer here - the defaults are a valid choice - so a
 			    separate "skip" would do exactly the same thing and only add a decision. */}
 			<SetupFooter
-				onContinue={skipAndContinue}
+				onContinue={goNext}
 				continueLabel={t("setup.actions.looks_good")}
 			/>
 		</Stack>

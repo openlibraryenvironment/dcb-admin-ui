@@ -77,12 +77,32 @@ export interface ConsortiumSetupStep {
 	 * group, and every other chapter is an update to a row that is not there yet.
 	 */
 	available: boolean;
+	/**
+	 * A chapter with nothing to finish. It never counts as outstanding, so it can neither
+	 * hold setup open nor claim to be done.
+	 */
+	optional?: boolean;
 }
 
 export interface ConsortiumSetupState {
 	steps: ConsortiumSetupStep[];
-	/** Where "continue setting up" should drop the user in. */
+	/** The first chapter with outstanding work. Undefined when nothing is outstanding. */
 	firstIncompleteStep?: ConsortiumSetupStepId;
+	/**
+	 * Where to actually drop the user in, which is not always the same thing.
+	 *
+	 * A FRESH deployment starts at the beginning, even though the first chapter is
+	 * optional and so never "outstanding". Appearance opens the flow on purpose: it
+	 * writes nothing, it is instantly reversible, and it lets somebody who needs high
+	 * contrast or a legible typeface set that BEFORE reading five screens of setup.
+	 * Sending a brand new deployment straight to a form asking for a consortium name
+	 * would be a different, worse opening move.
+	 *
+	 * A partly-done one resumes at the first outstanding chapter; a finished one revisited
+	 * from the Consortium tab opens at the beginning again, because the flow is also how
+	 * appearance, branding and functional settings are changed afterwards.
+	 */
+	resumeStep: ConsortiumSetupStepId;
 	/** True when nothing is left outstanding - every chapter is done or settled. */
 	isComplete: boolean;
 	/** True when there is no consortium at all: a genuinely fresh instance. */
@@ -111,13 +131,28 @@ export const evaluateConsortiumSetup = ({
 	const steps: ConsortiumSetupStep[] = [
 		{
 			id: "appearance",
-			// Nothing is written, so there is nothing to check. The chapter is complete
-			// the moment it has been seen, and being seen is recorded as a skip -
-			// which is honest: the default IS a valid answer, and treating "I kept
-			// Roboto" as unfinished business would leave the banner up forever.
-			complete: wasSkipped("appearance"),
-			skipped: wasSkipped("appearance"),
+			// OPTIONAL, and neither complete nor skippable.
+			//
+			// It writes nothing to the server - the theme, mode and typeface are one
+			// person's reading preferences, not a property of the consortium - so there is
+			// nothing to read back and nothing to derive completeness from.
+			//
+			// It used to count "the user skipped past it" as done, which put the ONE piece
+			// of browser state into a progress model whose whole point is being derived. The
+			// consequences were all wrong in different directions: a brand new deployment
+			// opened in an old browser claimed the chapter was done, the same consortium
+			// opened on another machine claimed it was not, and two colleagues saw different
+			// progress for the same system. "Complete" meant "this browser has been here",
+			// which is not a fact about the consortium at all.
+			//
+			// So it is simply optional: always offered, never outstanding, never claimed as
+			// done. When per-user preferences are stored server-side this could become a
+			// real derived answer - "this user has chosen" - and until then saying nothing
+			// is better than saying something untrue.
+			complete: false,
+			skipped: false,
 			available: true,
+			optional: true,
 		},
 		{
 			id: "consortium",
@@ -156,12 +191,19 @@ export const evaluateConsortiumSetup = ({
 	];
 
 	const outstanding = steps.filter(
-		(step) => step.available && !step.complete && !step.skipped,
+		(step) =>
+			step.available && !step.optional && !step.complete && !step.skipped,
 	);
+
+	const firstIncompleteStep = outstanding[0]?.id;
 
 	return {
 		steps,
-		firstIncompleteStep: outstanding[0]?.id,
+		firstIncompleteStep,
+		resumeStep:
+			!hasConsortium || !firstIncompleteStep
+				? CONSORTIUM_SETUP_STEPS[0]
+				: firstIncompleteStep,
 		isComplete: outstanding.length === 0,
 		isFresh: !hasConsortium,
 	};

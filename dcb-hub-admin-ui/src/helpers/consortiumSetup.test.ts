@@ -33,7 +33,10 @@ describe("evaluateConsortiumSetup", () => {
 
 		expect(state.isFresh).toBe(true);
 		expect(state.isComplete).toBe(false);
-		expect(state.firstIncompleteStep).toBe("appearance");
+		// The first OUTSTANDING chapter is the consortium record - appearance is optional
+		// and never outstanding - but a fresh deployment still opens at the beginning.
+		expect(state.firstIncompleteStep).toBe("consortium");
+		expect(state.resumeStep).toBe("appearance");
 	});
 
 	it("does not offer chapters that cannot be attempted without a consortium", () => {
@@ -134,5 +137,50 @@ describe("chapter order", () => {
 		expect(isConsortiumSetupStepId("nonsense")).toBe(false);
 		expect(isConsortiumSetupStepId(undefined)).toBe(false);
 		expect(isConsortiumSetupStepId(3)).toBe(false);
+	});
+});
+
+describe("the appearance chapter", () => {
+	// The bug this covers: appearance used to count "the user skipped past it" as done,
+	// and skips live in browser localStorage. A brand new deployment opened in a browser
+	// that had been through setup before therefore claimed the chapter was already
+	// finished - while the same consortium on a colleague's machine claimed it was not.
+	it("is never complete, and never outstanding, whatever the browser remembers", () => {
+		const fresh = evaluateConsortiumSetup({ consortium: null });
+		const appearance = fresh.steps.find((step) => step.id === "appearance");
+
+		expect(appearance?.optional).toBe(true);
+		expect(appearance?.complete).toBe(false);
+		expect(appearance?.skipped).toBe(false);
+		expect(fresh.firstIncompleteStep).not.toBe("appearance");
+	});
+
+	it("ignores a stale skip left over from a previous deployment", () => {
+		const withStaleSkip = evaluateConsortiumSetup({
+			consortium: null,
+			skipped: ["appearance"],
+		});
+		const appearance = withStaleSkip.steps.find((s) => s.id === "appearance");
+
+		// The whole point: browser state cannot make a new system look part-configured.
+		expect(appearance?.complete).toBe(false);
+		expect(appearance?.skipped).toBe(false);
+	});
+
+	it("does not hold setup open once everything else is done", () => {
+		const done = evaluateConsortiumSetup({
+			consortium: {
+				functionalSettings: [{ name: "PICKUP_ANYWHERE" }],
+				contacts: [{ id: "1" }],
+				brandLogoUrl: "https://example.invalid/logo.png",
+			},
+			libraryCount: 1,
+		});
+
+		// An optional chapter that counted as outstanding would leave the banner up for
+		// the life of the deployment, asking for work that does not exist.
+		expect(done.isComplete).toBe(true);
+		expect(done.firstIncompleteStep).toBeUndefined();
+		expect(done.resumeStep).toBe("appearance");
 	});
 });
