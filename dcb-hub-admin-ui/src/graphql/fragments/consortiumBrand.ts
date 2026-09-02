@@ -1,4 +1,9 @@
 import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
+import {
+	CONSORTIUM_BRAND_CHROME_FIELDS,
+	CONSORTIUM_BRAND_FIELDS,
+	CONSORTIUM_BRAND_LEGACY_FIELDS,
+} from "@constants/serviceCapabilities";
 
 /**
  * The consortium brand selection, in whichever shape this deployment's dcb-service
@@ -35,24 +40,6 @@ import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
  * nothing downstream has to know which server answered.
  */
 
-/** The two marks the DCB Admin chrome itself renders — header icon and logo. */
-const CHROME_V9 = ["brandHeaderIconUrl", "brandLogoUrl"];
-const CHROME_LEGACY = ["headerImageUrl", "aboutImageUrl"];
-
-/**
- * Everything the branding form edits. Patron-facing, rendered by the discovery app
- * rather than by DCB Admin, and with no pre-9.0.0 equivalent at all — before the merge
- * there was no alt text, no background image, no patron welcome and no theme name.
- */
-const FORM_V9 = [
-	"brandLogoUrl",
-	"brandLogoAlt",
-	"brandHeaderIconUrl",
-	"brandBackgroundImageUrl",
-	"patronWelcome",
-	"defaultThemeName",
-];
-
 /**
  * `chrome` is the header's two marks; `full` is everything the consortium record and
  * the branding form read. Legacy mode answers both with the two columns 8.71.0 has,
@@ -64,10 +51,12 @@ export const consortiumBrandSelection = (
 	form: ConsortiumBrandSelectionForm,
 ): string => {
 	if (!isConsortiumBrandingEnabled()) {
-		return CHROME_LEGACY.join("\n\t\t\t\t");
+		return CONSORTIUM_BRAND_LEGACY_FIELDS.join("\n\t\t\t\t");
 	}
 
-	return (form === "chrome" ? CHROME_V9 : FORM_V9).join("\n\t\t\t\t");
+	return (
+		form === "chrome" ? CONSORTIUM_BRAND_CHROME_FIELDS : CONSORTIUM_BRAND_FIELDS
+	).join("\n\t\t\t\t");
 };
 
 /**
@@ -78,4 +67,5 @@ export const consortiumBrandSelection = (
  * `brandLogoUrl: ""` to 8.71.0 is still an unknown input field and still fails
  * validation. See stripUnsupportedConsortiumInput in @helpers/consortiumBrand.
  */
-export const CONSORTIUM_BRAND_INPUT_KEYS = FORM_V9;
+export const CONSORTIUM_BRAND_INPUT_KEYS: readonly string[] =
+	CONSORTIUM_BRAND_FIELDS;

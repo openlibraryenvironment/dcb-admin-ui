@@ -1,6 +1,7 @@
 import { describe, expect, it, afterEach, vi } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { buildSchema, type GraphQLSchema } from "graphql";
 
 import {
 	SERVICE_CAPABILITIES,
@@ -123,4 +124,143 @@ describe("the matrix describes every flag, and only real ones", () => {
 			expect(copy.feature, entry.id).toHaveProperty(entry.id);
 		}
 	});
+});
+
+/**
+ * The registry has to be TRUE, not merely tidy — R-19.
+ *
+ * `since: "9.0.0"` is a claim about a dcb-service release. If it is wrong nothing else
+ * catches it: the flag gets switched on at the upgrade and the feature fails in an
+ * environment, which is the expensive place to find out. So the claim is checked against
+ * the schemas of the releases themselves, committed next to this application.
+ *
+ * This is what makes the mechanism extendable rather than a one-off. To gate the next
+ * feature — the local-holds work waiting on a dcb-service after 9.0.0, say — add a row
+ * with its `fields`, commit that release's schema as `schema.v<version>.graphqls`, and
+ * these tests either agree with you or fail.
+ */
+
+/** Every release schema committed here, oldest first. */
+const SUPPORTED_RELEASES = ["8.71.0", "9.0.0"] as const;
+
+const schemaFile = (version: string) =>
+	path.resolve(process.cwd(), `schema.v${version}.graphqls`);
+
+const schemaFor = (version: string): GraphQLSchema | null =>
+	existsSync(schemaFile(version))
+		? buildSchema(readFileSync(schemaFile(version), "utf8"))
+		: null;
+
+/** dcb-service main: what the next release will contain. */
+const MAIN = buildSchema(
+	readFileSync(path.resolve(process.cwd(), "schema.graphqls"), "utf8"),
+);
+
+/** Whether `schema` declares `field` on `type`, for object and input types alike. */
+const declaresField = (
+	schema: GraphQLSchema,
+	type: string,
+	field: string,
+): boolean => {
+	const named = schema.getType(type) as
+		{ getFields?: () => Record<string, unknown> } | null | undefined;
+
+	return Boolean(named?.getFields && field in named.getFields());
+};
+
+/** The newest committed release strictly older than `version`. */
+const releaseBefore = (version: string): string | null => {
+	const index = SUPPORTED_RELEASES.indexOf(
+		version as (typeof SUPPORTED_RELEASES)[number],
+	);
+	return index > 0 ? SUPPORTED_RELEASES[index - 1] : null;
+};
+
+describe("every capability names a release that really has its fields", () => {
+	it.each(SUPPORTED_RELEASES)("schema.v%s.graphqls is committed", (version) => {
+		// Guards the guard: without the file every assertion below skips silently and
+		// the registry goes back to being unchecked prose.
+		expect(schemaFor(version), schemaFile(version)).not.toBeNull();
+	});
+
+	const withFields = SERVICE_CAPABILITIES.filter(
+		(entry) => Object.keys(entry.fields).length > 0,
+	);
+
+	it("there is something to check", () => {
+		expect(withFields.length).toBeGreaterThan(0);
+	});
+
+	it.each(withFields)("$id: since names a release we hold", (entry) => {
+		expect(SUPPORTED_RELEASES as readonly string[]).toContain(entry.since);
+	});
+
+	it.each(withFields)("$id: its fields exist in that release", (entry) => {
+		const schema = schemaFor(entry.since!)!;
+
+		for (const [type, fields] of Object.entries(entry.fields)) {
+			for (const field of fields) {
+				expect(
+					declaresField(schema, type, field),
+					`${type}.${field} is not in dcb-service ${entry.since}`,
+				).toBe(true);
+			}
+		}
+	});
+
+	it.each(withFields)(
+		"$id: its fields are absent from the release before",
+		(entry) => {
+			// The half that catches a threshold set too LATE - a capability gated behind a
+			// release newer than the one that actually serves it stays hidden on deployments
+			// that could run it, which is a silent loss rather than a failure.
+			const previous = releaseBefore(entry.since!);
+			if (previous === null) return;
+
+			const schema = schemaFor(previous)!;
+
+			for (const [type, fields] of Object.entries(entry.fields)) {
+				for (const field of fields) {
+					expect(
+						declaresField(schema, type, field),
+						`${type}.${field} already exists in dcb-service ${previous}`,
+					).toBe(false);
+				}
+			}
+		},
+	);
+
+	it.each(withFields)("$id: its fields still exist on main", (entry) => {
+		// A field renamed again server-side would otherwise leave this capability
+		// switched on and failing against the NEWEST deployment - the same defect in the
+		// other direction.
+		for (const [type, fields] of Object.entries(entry.fields)) {
+			for (const field of fields) {
+				expect(
+					declaresField(MAIN, type, field),
+					`${type}.${field} is no longer in dcb-service main`,
+				).toBe(true);
+			}
+		}
+	});
+
+	it.each(withFields)(
+		"$id: its fallback exists in the older release",
+		(entry) => {
+			if (!entry.fallback) return;
+			const previous = releaseBefore(entry.since!);
+			if (previous === null) return;
+
+			const schema = schemaFor(previous)!;
+
+			for (const [type, fields] of Object.entries(entry.fallback)) {
+				for (const field of fields) {
+					expect(
+						declaresField(schema, type, field),
+						`fallback ${type}.${field} is not in dcb-service ${previous} either`,
+					).toBe(true);
+				}
+			}
+		},
+	);
 });

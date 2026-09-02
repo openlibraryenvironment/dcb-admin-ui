@@ -7,6 +7,35 @@ import {
 } from "@helpers/featureFlags";
 
 /**
+ * The six merged brand columns V9_0_004 introduced, and the two it replaced.
+ *
+ * Declared here rather than in the document that selects them, so the registry, the
+ * selection builder and the variables filter all read one list — and so
+ * serviceCapabilities.test.ts can check it against the schemas of the releases
+ * themselves.
+ */
+export const CONSORTIUM_BRAND_FIELDS = [
+	"brandLogoUrl",
+	"brandLogoAlt",
+	"brandHeaderIconUrl",
+	"brandBackgroundImageUrl",
+	"patronWelcome",
+	"defaultThemeName",
+] as const;
+
+/** The app-bar mark and the logo, which is all the DCB Admin chrome itself renders. */
+export const CONSORTIUM_BRAND_CHROME_FIELDS = [
+	"brandHeaderIconUrl",
+	"brandLogoUrl",
+] as const;
+
+/** Their pre-migration equivalents, still present on dcb-service 8.71.0. */
+export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
+	"headerImageUrl",
+	"aboutImageUrl",
+] as const;
+
+/**
  * Which DCB Admin features need which dcb-service, and whether this deployment has
  * switched them on — R-19.
  *
@@ -30,6 +59,9 @@ import {
  * be a lie about two of them, and turning it on when v9 landed would break both.
  */
 
+/** A GraphQL type name to the fields a capability adds to it. */
+export type CapabilityFields = Readonly<Record<string, readonly string[]>>;
+
 export interface ServiceCapability {
 	/** Stable id; also the i18n key suffix under `service_capabilities.`. */
 	id: string;
@@ -42,6 +74,24 @@ export interface ServiceCapability {
 	 * Inclusive: `since: "9.0.0"` means 9.0.0 is new enough.
 	 */
 	since: string | null;
+	/**
+	 * The GraphQL fields this capability adds, by the type they sit on — INPUT types
+	 * included, because stripping a key from mutation variables is a separate job from
+	 * leaving it out of a selection set, and both have to happen.
+	 *
+	 * Empty for a capability that is only REST (Insights) or only a route (NCIP
+	 * onboarding). It is not decoration: `serviceCapabilities.test.ts` checks these
+	 * against the committed release schemas, so a row claiming the wrong `since` fails
+	 * the build instead of an environment.
+	 */
+	fields: CapabilityFields;
+	/**
+	 * What an older deployment carries instead, by type. Only for a capability that
+	 * RENAMED something: V9_0_004 replaced two consortium columns that still exist
+	 * under their old names before it, and selecting nothing there would visibly remove
+	 * branding a deployment already shows.
+	 */
+	fallback?: CapabilityFields;
 }
 
 export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
@@ -50,18 +100,28 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_CONSORTIUM_BRANDING",
 		enabled: isConsortiumBrandingEnabled,
 		since: "9.0.0",
+		fields: {
+			Consortium: CONSORTIUM_BRAND_FIELDS,
+			UpdateConsortiumInput: CONSORTIUM_BRAND_FIELDS,
+		},
+		// The pre-migration columns. Read, never written: the branding form is hidden
+		// before 9.0.0, so nothing sends these.
+		fallback: { Consortium: CONSORTIUM_BRAND_LEGACY_FIELDS },
 	},
 	{
 		id: "ncip_onboarding",
 		flag: "VITE_FEATURE_NCIP_ONBOARDING",
 		enabled: isNcipOnboardingEnabled,
 		since: "9.0.0",
+		// A REST controller, not a schema change. Nothing to select or strip.
+		fields: {},
 	},
 	{
 		id: "insights",
 		flag: "VITE_FEATURE_INSIGHTS",
 		enabled: isInsightsEnabled,
 		since: "9.0.0",
+		fields: {},
 	},
 	{
 		// NOT 9.0.0. On dcb-service main only, which is why the flags are per
@@ -70,6 +130,9 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 		enabled: isLibraryUserProvisioningEnabled,
 		since: null,
+		// Whole root fields rather than fields on a type, so there is nothing here for
+		// the selection builder to do: the documents are gated at the route instead.
+		fields: {},
 	},
 	{
 		// `auditIncidence` is in no dcb-service branch yet, not even main.
@@ -77,6 +140,7 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_AUDIT_EXPLORER",
 		enabled: isAuditExplorerEnabled,
 		since: null,
+		fields: {},
 	},
 ];
 
