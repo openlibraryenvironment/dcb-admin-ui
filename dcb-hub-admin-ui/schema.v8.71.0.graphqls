@@ -1,3 +1,10 @@
+# dcb-service v8.71.0 (c99ba5d24), tagged 2026-07-23.
+#
+# THE RELEASE RUNNING IN PRODUCTION. Copied verbatim from
+# dcb/src/main/resources/schema.graphqls at that tag; do not hand-edit.
+# schemaConformance.test.ts validates every document this app can emit with its
+# feature flags OFF against this file.
+#
 scalar JSON
 
 type Query {

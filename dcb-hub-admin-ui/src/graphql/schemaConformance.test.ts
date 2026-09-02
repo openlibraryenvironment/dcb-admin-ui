@@ -21,8 +21,10 @@ import { buildSchema, parse, validate } from "graphql";
  *
  * <h2>The two schemas</h2>
  *
- * `schema.graphqls` is what the application targets: dcb-service main, plus the
- * unreleased `auditIncidence`. `schema.v8.71.0.graphqls` is the release before 9.0.0,
+ * `schema.graphqls` is what the application targets: dcb-service
+ * feat/library-account-provisioning, plus the unreleased `auditIncidence`. It is NOT
+ * main and NOT a release - see that file's own header for why, and for what has to
+ * merge first. `schema.v8.71.0.graphqls` is the release before 9.0.0,
  * taken verbatim from that tag, which the next DCB Admin release also has to run
  * against while v9 works its way to production.
  *
@@ -119,7 +121,7 @@ describe("documents validate against the dcb-service they target", () => {
 	});
 
 	it.each(files)(
-		"%s is valid against dcb-service main (all flags on)",
+		"%s is valid against the target schema (all flags on)",
 		async (file) => {
 			vi.stubGlobal("window", { __APP_ENV__: ALL_FLAGS_ON });
 

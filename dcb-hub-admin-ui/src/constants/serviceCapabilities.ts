@@ -124,8 +124,10 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
-		// NOT 9.0.0. On dcb-service main only, which is why the flags are per
-		// capability rather than per release.
+		// NOT 9.0.0, and NOT main either: this API lives on dcb-service
+		// feat/library-account-provisioning, which has not merged. That service branch
+		// must land before this app's feat/library-accounts does. It is exactly why the
+		// flags are per capability rather than per release.
 		id: "library_user_provisioning",
 		flag: "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 		enabled: isLibraryUserProvisioningEnabled,

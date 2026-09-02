@@ -151,7 +151,7 @@ const schemaFor = (version: string): GraphQLSchema | null =>
 		? buildSchema(readFileSync(schemaFile(version), "utf8"))
 		: null;
 
-/** dcb-service main: what the next release will contain. */
+/** The newest schema this app targets. See schema.graphqls's own header. */
 const MAIN = buildSchema(
 	readFileSync(path.resolve(process.cwd(), "schema.graphqls"), "utf8"),
 );
@@ -230,19 +230,22 @@ describe("every capability names a release that really has its fields", () => {
 		},
 	);
 
-	it.each(withFields)("$id: its fields still exist on main", (entry) => {
-		// A field renamed again server-side would otherwise leave this capability
-		// switched on and failing against the NEWEST deployment - the same defect in the
-		// other direction.
-		for (const [type, fields] of Object.entries(entry.fields)) {
-			for (const field of fields) {
-				expect(
-					declaresField(MAIN, type, field),
-					`${type}.${field} is no longer in dcb-service main`,
-				).toBe(true);
+	it.each(withFields)(
+		"$id: its fields still exist in the target schema",
+		(entry) => {
+			// A field renamed again server-side would otherwise leave this capability
+			// switched on and failing against the NEWEST deployment we build for - the same
+			// defect in the other direction.
+			for (const [type, fields] of Object.entries(entry.fields)) {
+				for (const field of fields) {
+					expect(
+						declaresField(MAIN, type, field),
+						`${type}.${field} is no longer in the target schema`,
+					).toBe(true);
+				}
 			}
-		}
-	});
+		},
+	);
 
 	it.each(withFields)(
 		"$id: its fallback exists in the older release",

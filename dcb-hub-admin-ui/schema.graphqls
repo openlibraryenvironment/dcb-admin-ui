@@ -1,4 +1,15 @@
-﻿scalar JSON
+﻿# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service feat/library-account-provisioning
+# (02b9de675), which is NOT main and NOT any release.
+#
+# It is ahead of main by the DCB Admin for Libraries account provisioning API
+# (libraryUsers, provisionLibraryUser, setLibraryUserEnabled,
+# resendLibraryUserInvite and their types), which this app's feat/library-accounts
+# work consumes. That service branch must merge BEFORE this app's does, or those
+# documents meet a dcb-service that has never heard of them.
+#
+# Re-point this file at dcb-service main once that lands, and re-run codegen.
+#
+scalar JSON
 
 type Query {
     agencies(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): AgencyPage!

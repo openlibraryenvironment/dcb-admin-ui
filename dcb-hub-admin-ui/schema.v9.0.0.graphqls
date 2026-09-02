@@ -1,3 +1,12 @@
+# dcb-service v9.0.0 (805c8c124), tagged 2026-08-20.
+#
+# Copied verbatim from that tag; do not hand-edit. dcb-service main (02b7548da) carries
+# a BYTE-IDENTICAL schema - the four commits since the tag are docs and a Koha
+# ingest fix - so this file is also 'what main serves' today.
+#
+# serviceCapabilities.test.ts checks each capability's 'since' against this and
+# against the 8.71.0 file: the fields must be here and absent there.
+#
 scalar JSON
 
 type Query {

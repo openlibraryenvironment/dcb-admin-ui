@@ -61,7 +61,8 @@ export const isNcipOnboardingEnabled = (): boolean =>
  *
  * Note the threshold: libraryUsers, libraryUserProvisioningAvailable,
  * provisionLibraryUser, setLibraryUserEnabled and resendLibraryUserInvite are on
- * dcb-service main but are NOT in the 9.0.0 tag. This is why there is no single
+ * dcb-service feat/library-account-provisioning - not main, not the 9.0.0 tag, not any
+ * release. That service branch must merge first. This is why there is no single
  * "dcb-service is v9" flag - it would be a lie about this feature and about the audit
  * explorer below, and turning it on when v9 landed would break both.
  *

@@ -30,8 +30,8 @@ export const Route = createFileRoute(
 )({
 	// The tab is hidden while the flag is off, but the URL is still typeable. Note the
 	// threshold on this one: libraryUsers and the three provisioning mutations are on
-	// dcb-service main and are NOT in the 9.0.0 tag, so this page's queries fail
-	// validation on a v9 deployment as surely as on an 8.71.0 one.
+	// dcb-service feat/library-account-provisioning only - not main, not the 9.0.0 tag -
+	// so this page's queries fail validation on a v9 deployment as surely as on 8.71.0.
 	beforeLoad: ({ params: { libraryId } }) => {
 		if (!isLibraryUserProvisioningEnabled()) {
 			throw redirect({
