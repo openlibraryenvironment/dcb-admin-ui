@@ -132,17 +132,31 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 		enabled: isLibraryUserProvisioningEnabled,
 		since: null,
-		// Whole root fields rather than fields on a type, so there is nothing here for
-		// the selection builder to do: the documents are gated at the route instead.
-		fields: {},
+		// Whole ROOT fields, so there is nothing here for the selection builder to do -
+		// the documents are gated at the route instead. They are listed anyway, and
+		// `Query`/`Mutation` are types like any other, because listing them is what makes
+		// `since: null` a CHECKED claim: serviceCapabilities.test.ts asserts these exist
+		// in the target schema and in none of the releases we hold. The day somebody
+		// commits the schema of the release that ships them, that test fails and says to
+		// set `since` - which is the whole reason this is a registry and not a comment.
+		fields: {
+			Query: ["libraryUsers", "libraryUserProvisioningAvailable"],
+			Mutation: [
+				"provisionLibraryUser",
+				"setLibraryUserEnabled",
+				"resendLibraryUserInvite",
+			],
+		},
 	},
 	{
-		// `auditIncidence` is in no dcb-service branch yet, not even main.
+		// `auditIncidence` is in no dcb-service branch yet, not even main. It is in
+		// schema.graphqls by hand - see that file's header - so this row is checked the
+		// same way as the one above.
 		id: "audit_explorer",
 		flag: "VITE_FEATURE_AUDIT_EXPLORER",
 		enabled: isAuditExplorerEnabled,
 		since: null,
-		fields: {},
+		fields: { Query: ["auditIncidence"] },
 	},
 ];
 

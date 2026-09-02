@@ -187,15 +187,19 @@ describe("every capability names a release that really has its fields", () => {
 		(entry) => Object.keys(entry.fields).length > 0,
 	);
 
+	/** Capabilities a committed release actually serves. */
+	const released = withFields.filter((entry) => entry.since !== null);
+
 	it("there is something to check", () => {
 		expect(withFields.length).toBeGreaterThan(0);
+		expect(released.length).toBeGreaterThan(0);
 	});
 
-	it.each(withFields)("$id: since names a release we hold", (entry) => {
+	it.each(released)("$id: since names a release we hold", (entry) => {
 		expect(SUPPORTED_RELEASES as readonly string[]).toContain(entry.since);
 	});
 
-	it.each(withFields)("$id: its fields exist in that release", (entry) => {
+	it.each(released)("$id: its fields exist in that release", (entry) => {
 		const schema = schemaFor(entry.since!)!;
 
 		for (const [type, fields] of Object.entries(entry.fields)) {
@@ -208,7 +212,7 @@ describe("every capability names a release that really has its fields", () => {
 		}
 	});
 
-	it.each(withFields)(
+	it.each(released)(
 		"$id: its fields are absent from the release before",
 		(entry) => {
 			// The half that catches a threshold set too LATE - a capability gated behind a
@@ -247,7 +251,7 @@ describe("every capability names a release that really has its fields", () => {
 		},
 	);
 
-	it.each(withFields)(
+	it.each(released)(
 		"$id: its fallback exists in the older release",
 		(entry) => {
 			if (!entry.fallback) return;
@@ -266,4 +270,57 @@ describe("every capability names a release that really has its fields", () => {
 			}
 		},
 	);
+});
+
+/**
+ * The half that makes `since: null` mean something.
+ *
+ * A capability waiting on an unmerged dcb-service branch — the DCB Admin for Libraries
+ * account provisioning API, today — is the case the flags exist for: on in a dev
+ * environment tracking that branch, off everywhere else, switched with an environment
+ * variable rather than a release. `since: null` is what tells the Service Info panel to
+ * say "no release serves this yet", and it has to stay true.
+ *
+ * So it is checked from both sides. The fields must be in the schema this app targets,
+ * which catches a typo or a server-side rename in the ordinary way; and they must be in
+ * NONE of the releases we hold, which is the interesting half. Committing the schema of
+ * the release that finally ships one of these turns that assertion red, and the failure
+ * names the capability whose `since` has to be filled in. Without it the flag would stay
+ * marked "unreleased" indefinitely and the panel would keep telling operators not to
+ * switch on a feature their deployment could already serve.
+ */
+describe("every unreleased capability really is unreleased", () => {
+	const unreleased = SERVICE_CAPABILITIES.filter(
+		(entry) => entry.since === null && Object.keys(entry.fields).length > 0,
+	);
+
+	it("there is something to check", () => {
+		expect(unreleased.length).toBeGreaterThan(0);
+	});
+
+	it.each(unreleased)("$id: its fields exist in the target schema", (entry) => {
+		for (const [type, fields] of Object.entries(entry.fields)) {
+			for (const field of fields) {
+				expect(
+					declaresField(MAIN, type, field),
+					`${type}.${field} is not in schema.graphqls — see its header for which ref that is`,
+				).toBe(true);
+			}
+		}
+	});
+
+	it.each(unreleased)("$id: no release we hold serves them yet", (entry) => {
+		for (const version of SUPPORTED_RELEASES) {
+			const schema = schemaFor(version)!;
+
+			for (const [type, fields] of Object.entries(entry.fields)) {
+				for (const field of fields) {
+					expect(
+						declaresField(schema, type, field),
+						`${type}.${field} IS in dcb-service ${version}: set ${entry.id}'s since to it`,
+					).toBe(false);
+				}
+			}
+		}
+	});
 });
