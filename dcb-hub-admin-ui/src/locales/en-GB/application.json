@@ -2601,8 +2601,11 @@
 		"rail_item": "{{number}}. {{label}}",
 		"step_of": "Step {{number}} of {{total}}",
 		"progress": {
-			"summary": "{{settled}} of {{total}} steps done",
-			"summary_skipped": "{{complete}} of {{total}} steps done, {{skipped}} skipped"
+			"left_one": "1 step left",
+			"left_other": "{{count}} steps left",
+			"left_none": "Nothing left to do",
+			"skipped_one": "1 step passed over",
+			"skipped_other": "{{count}} steps passed over"
 		},
 		"intro": {
 			"title": "Before you start",

@@ -201,6 +201,9 @@ describe("progress", () => {
 		expect(state.progress.total).toBe(5);
 		expect(state.progress.settled).toBe(0);
 		expect(state.progress.percent).toBe(0);
+		// The only one of these the user is shown, precisely because `total` disagrees
+		// with the six chapters the rail lists and no wording reconciles the two.
+		expect(state.progress.outstanding).toBe(5);
 	});
 
 	it("does not shrink the denominator to what is reachable today", () => {
@@ -223,6 +226,7 @@ describe("progress", () => {
 
 		expect(state.isComplete).toBe(true);
 		expect(state.progress.percent).toBe(100);
+		expect(state.progress.outstanding).toBe(0);
 	});
 
 	it("reports a skip as settled but never as complete", () => {
@@ -241,6 +245,7 @@ describe("progress", () => {
 		expect(state.progress.complete).toBe(4);
 		expect(state.progress.skipped).toBe(1);
 		expect(state.progress.settled).toBe(5);
+		expect(state.progress.outstanding).toBe(0);
 		expect(state.progress.percent).toBe(100);
 	});
 

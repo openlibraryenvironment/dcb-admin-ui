@@ -72,8 +72,20 @@ interface SetupRailProps {
  * The number is the answer and the bar is the illustration, not the other way round: a
  * determinate `LinearProgress` on its own conveys proportion by length and colour, which is
  * neither readable at a glance nor available to a screen reader beyond a bare percentage.
- * The bar is named by the sentence above it, so it is announced as "3 of 5 steps done"
- * rather than "60%".
+ * The bar is named by the sentence above it, so it is announced as "1 step left" rather
+ * than "80%".
+ *
+ * <h2>What is left, not how many of how many</h2>
+ *
+ * It first said "0 of 5 steps done" - above a rail listing SIX chapters, because the
+ * optional one is excluded from the denominator for a good reason (see
+ * `consortiumSetup.ts`) that is invisible to anybody reading the two together. Once the
+ * optional chapter ticked it got worse: a row marked Done beside a count of none done.
+ *
+ * A denominator was never the point. "3 steps left" is the number somebody deciding
+ * whether to start now actually wants, it claims no total for the rail to contradict, and
+ * it is the wording of the home-page banner they have already read. The bar still draws
+ * the proportion; it just no longer has to defend a number.
  */
 export default function SetupRail({ current, state }: SetupRailProps) {
 	const { t } = useTranslation();
@@ -93,21 +105,11 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 
 	const { progress } = state;
 	const progressId = useId();
-	// Skips are reported separately rather than folded into one number. "4 of 5 done" when
-	// one of the four was passed over is the sentence that gets a half-configured
-	// consortium signed off as ready, which is the same failure the finish screen exists
-	// to prevent.
+
 	const progressSummary =
-		progress.skipped > 0
-			? t("setup.progress.summary_skipped", {
-					complete: progress.complete,
-					total: progress.total,
-					skipped: progress.skipped,
-				})
-			: t("setup.progress.summary", {
-					settled: progress.settled,
-					total: progress.total,
-				});
+		progress.outstanding === 0
+			? t("setup.progress.left_none")
+			: t("setup.progress.left", { count: progress.outstanding });
 
 	return (
 		<Box
@@ -126,6 +128,20 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 				>
 					{progressSummary}
 				</Typography>
+				{/* A separate line rather than a clause, so neither string has to be glued
+				    to the other with punctuation a translator cannot move. It appears only
+				    when something was passed over - and it has to appear, because a skip
+				    quietly reducing "what is left" is how a half-configured consortium
+				    gets signed off as ready. */}
+				{progress.skipped > 0 && (
+					<Typography
+						variant="caption"
+						component="p"
+						sx={{ color: "text.secondary" }}
+					>
+						{t("setup.progress.skipped", { count: progress.skipped })}
+					</Typography>
+				)}
 				<LinearProgress
 					variant="determinate"
 					value={progress.percent}

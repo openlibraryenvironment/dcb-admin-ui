@@ -337,29 +337,42 @@ test.describe("Setup - structure and behaviour", () => {
 
 		const rail = page.getByRole("navigation", { name: /setup progress/i });
 		// The fixture has the consortium, its contacts, its settings and three libraries,
-		// and no brand: four of the five tracked chapters done.
-		await expect(rail.getByText("4 of 5 steps done")).toBeVisible();
+		// and no brand: discovery is the one thing genuinely left.
+		await expect(rail.getByText("1 step left")).toBeVisible();
 
-		// Named by that sentence, so it is announced as "4 of 5 steps done" and not "80%".
+		// Named by that sentence, so it is announced as "1 step left" and not "80%".
 		await expect(
-			rail.getByRole("progressbar", { name: "4 of 5 steps done" }),
+			rail.getByRole("progressbar", { name: "1 step left" }),
 		).toHaveAttribute("aria-valuenow", "80");
 	});
 
-	test("counts a skipped chapter apart from a finished one", async ({
+	test("never claims a total the rail contradicts", async ({ page }) => {
+		// It said "0 of 5 steps done" above a rail listing SIX chapters, because the
+		// optional one is excluded from the denominator for a reason that is invisible to
+		// anybody reading the two together - and once that chapter ticked, a row marked
+		// Done sat beside a count of none done.
+		await page.goto("/setup/consortium");
+
+		const rail = page.getByRole("navigation", { name: /setup progress/i });
+
+		// Six chapters on screen, and no sentence claiming a total of anything else.
+		await expect(rail.getByRole("link")).toHaveCount(6);
+		await expect(rail.getByText(/\d+ of \d+/)).toHaveCount(0);
+	});
+
+	test("says when a chapter was passed over rather than done", async ({
 		page,
 	}) => {
-		// "5 of 5 done" when one of them was passed over is exactly how a half-configured
-		// consortium gets signed off as ready.
+		// A skip quietly reducing "what is left" is how a half-configured consortium gets
+		// signed off as ready, so it is reported on its own line.
 		await page.goto("/setup/discovery");
 		await page.getByRole("button", { name: /we have not decided yet/i }).click();
 
 		await expect(page).toHaveURL(/\/setup\/libraries$/);
-		await expect(
-			page
-				.getByRole("navigation", { name: /setup progress/i })
-				.getByText("4 of 5 steps done, 1 skipped"),
-		).toBeVisible();
+
+		const rail = page.getByRole("navigation", { name: /setup progress/i });
+		await expect(rail.getByText("Nothing left to do")).toBeVisible();
+		await expect(rail.getByText("1 step passed over")).toBeVisible();
 	});
 
 	test("tells a first-run user what it will take before it starts", async ({

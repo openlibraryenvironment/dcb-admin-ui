@@ -94,6 +94,13 @@ export interface ConsortiumSetupStep {
  * `total` deliberately EXCLUDES the optional chapter. A denominator counting a chapter that
  * can never be outstanding could never reach 100%, so a fully configured consortium would
  * show a bar stuck at five sixths for the life of the deployment.
+ *
+ * That is why NOTHING SHOWS `total` TO THE USER. The rail lists six chapters and this
+ * counts five of them, and no wording reconciles those two numbers for somebody looking at
+ * both - "0 of 5 steps done" above six rows reads as a bug, and it reads as a worse one
+ * the moment the optional chapter ticks and the count still says none. `outstanding` is
+ * the number that means something on its own, needs no denominator, and matches the
+ * wording of the home-page banner people have already read.
  */
 export interface ConsortiumSetupProgress {
 	/** Chapters that can hold setup open. The optional one is not among them. */
@@ -104,6 +111,8 @@ export interface ConsortiumSetupProgress {
 	skipped: number;
 	/** Complete plus skipped: everything with nothing outstanding left in it. */
 	settled: number;
+	/** What is actually left to do. The only one of these numbers the user is shown. */
+	outstanding: number;
 	/** 0-100, for a determinate bar. Reaches 100 exactly when `isComplete` is true. */
 	percent: number;
 }
@@ -251,6 +260,7 @@ export const evaluateConsortiumSetup = ({
 			complete: completeCount,
 			skipped: skippedCount,
 			settled: settledCount,
+			outstanding: tracked.length - settledCount,
 			percent:
 				tracked.length === 0
 					? 0
