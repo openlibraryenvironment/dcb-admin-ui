@@ -14,7 +14,7 @@ import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { useVisitedChapters } from "./setupRun";
 
 import {
-	CONSORTIUM_SETUP_STEPS,
+	consortiumSetupSteps,
 	type ConsortiumSetupState,
 	type ConsortiumSetupStepId,
 } from "@helpers/consortiumSetup";
@@ -97,7 +97,10 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 	const stepFor = (id: ConsortiumSetupStepId) =>
 		state.steps.find((step) => step.id === id);
 
-	const activeIndex = CONSORTIUM_SETUP_STEPS.indexOf(current);
+	// The chapters this deployment asks, so the rail, its numbers and the announced
+	// total all come from one list. See consortiumSetupSteps.
+	const chapters = consortiumSetupSteps();
+	const activeIndex = chapters.indexOf(current);
 
 	// Chapters seen during THIS pass. Only used to settle the optional one - the rest
 	// report what the data says, which does not care whether anybody looked at it.
@@ -164,7 +167,7 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					"& .MuiStepLabel-root": { py: 1 },
 				}}
 			>
-				{CONSORTIUM_SETUP_STEPS.map((id) => {
+				{chapters.map((id) => {
 					const step = stepFor(id);
 					const isCurrent = id === current;
 
@@ -183,13 +186,13 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 						? t("setup.status.done")
 						: step?.optional
 							? t("setup.status.optional")
-						: step?.complete
-							? t("setup.status.done")
-							: step?.skipped
-								? t("setup.status.skipped")
-								: step?.available
-									? t("setup.status.not_started")
-									: t("setup.status.not_yet_available");
+							: step?.complete
+								? t("setup.status.done")
+								: step?.skipped
+									? t("setup.status.skipped")
+									: step?.available
+										? t("setup.status.not_started")
+										: t("setup.status.not_yet_available");
 
 					const label = (
 						<Typography
@@ -215,12 +218,15 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					);
 
 					return (
-						<Step key={id} completed={(step?.complete ?? false) || !!settledOptional}>
+						<Step
+							key={id}
+							completed={(step?.complete ?? false) || !!settledOptional}
+						>
 							<StepLabel
 								optional={optional}
 								icon={
 									<DCBStepIcon
-										icon={CONSORTIUM_SETUP_STEPS.indexOf(id) + 1}
+										icon={chapters.indexOf(id) + 1}
 										active={isCurrent}
 										completed={(step?.complete ?? false) || !!settledOptional}
 									/>
@@ -233,7 +239,11 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 										underline="hover"
 										// Fills the row so the hit area is the whole label rather than
 										// the few words in it (WCAG 2.5.8).
-										sx={{ display: "block", py: 0.5, color: "primary.linkText" }}
+										sx={{
+											display: "block",
+											py: 0.5,
+											color: "primary.linkText",
+										}}
 									>
 										{label}
 									</CustomLink>

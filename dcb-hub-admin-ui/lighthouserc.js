@@ -26,19 +26,27 @@ module.exports = {
 			// BUILDS FIRST, deliberately, and on a port of its own.
 			//
 			// `npm run e2e:ki-bootstrap` rebuilds dist with `--base=/dcb-admin/` and
-			// previews it on 4174. Serving that artefact from the root makes every script
+			// previews it on 4183. Serving that artefact from the root makes every script
 			// tag a 404, so nothing executes, nothing paints, and Lighthouse fails the
 			// whole run with `NO_FCP` - a message that reads as "your application does
 			// not render" and sent this investigation down a blind alley for two runs.
-			// Building here makes the budget independent of whatever last touched dist,
-			// and 4175 keeps it out of the bootloader suite's way.
-			startServerCommand: "npm run build && npm run preview -- --port 4175",
+			// Building here makes the budget independent of whatever last touched dist.
+			//
+			// 4193, not 4175. The workspace allocates ports as 41<gate><repo>, and 4175
+			// is symposia-ui's e2e port - with reuseExistingServer on whenever CI is
+			// unset, a preview that repo left running would have been measured here
+			// instead of this application. That failure does not look like a collision:
+			// it reports a number, and the number is wrong. --strictPort because without
+			// it vite does not fail on a taken port, it quietly increments to the next
+			// free one, which is a neighbour's.
+			startServerCommand:
+				"npm run build && npm run preview -- --port 4193 --strictPort",
 			// Match the PORT, not "Local:" — vite writes an ANSI reset between "Local"
 			// and its colon, so a /Local:/ pattern never matches and lhci silently waits
 			// out the full readiness timeout on every run.
-			startServerReadyPattern: "4175",
+			startServerReadyPattern: "4193",
 			startServerReadyTimeout: 180000,
-			url: ["http://localhost:4175/login"],
+			url: ["http://localhost:4193/login"],
 			numberOfRuns: 3,
 			settings: {
 				// Chrome throttles timers and suspends rendering in a window that is not

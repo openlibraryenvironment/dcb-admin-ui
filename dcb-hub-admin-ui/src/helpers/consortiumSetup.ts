@@ -21,6 +21,8 @@
  * the data, and re-asking forever is how a setup flow becomes something people click past.
  */
 
+import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
+
 export type ConsortiumSetupStepId =
 	| "appearance"
 	| "consortium"
@@ -29,8 +31,8 @@ export type ConsortiumSetupStepId =
 	| "discovery"
 	| "libraries";
 
-/** The chapters, in the order they are asked. */
-export const CONSORTIUM_SETUP_STEPS: ConsortiumSetupStepId[] = [
+/** Every chapter this flow knows about, in the order they are asked. */
+const ALL_CONSORTIUM_SETUP_STEPS: ConsortiumSetupStepId[] = [
 	"appearance",
 	"consortium",
 	"howItWorks",
@@ -39,13 +41,41 @@ export const CONSORTIUM_SETUP_STEPS: ConsortiumSetupStepId[] = [
 	"libraries",
 ];
 
-/** Every field of a brand level a consortium could have set. Any one of them counts. */
+/**
+ * The chapters this deployment actually asks — R-19.
+ *
+ * A FUNCTION, not a constant. The discovery chapter writes the six merged brand columns,
+ * which dcb-service does not have before 9.0.0, so on an older deployment it is not a
+ * chapter that fails - it is a chapter that cannot exist. The flag that decides is read
+ * from window.__APP_ENV__, which is populated after this module evaluates, so the list
+ * cannot be computed at module scope.
+ *
+ * Everything numbered, counted or navigated reads THIS, not the full list: the rail's
+ * step numbers, "Step 3 of 6", next/previous, and the progress denominator. Filtering the
+ * chapter out of one of them and not the others is how a rail comes to show five chapters
+ * above the words "Step 5 of 6", or a progress bar that can never reach 100%.
+ */
+export const consortiumSetupSteps = (): ConsortiumSetupStepId[] =>
+	isConsortiumBrandingEnabled()
+		? ALL_CONSORTIUM_SETUP_STEPS
+		: ALL_CONSORTIUM_SETUP_STEPS.filter((id) => id !== "discovery");
+
+/**
+ * Every field of a brand level a consortium could have set. Any one of them counts.
+ *
+ * The last two are the pre-9.0.0 columns V9_0_004 merged away. They are here because a
+ * deployment on 8.71.0 answers with those and none of the others, and a chapter that
+ * reported "nothing set" against a consortium that plainly has a mark would be wrong
+ * whether or not the chapter is currently shown.
+ */
 const BRAND_FIELDS = [
 	"brandLogoUrl",
 	"brandHeaderIconUrl",
 	"brandBackgroundImageUrl",
 	"patronWelcome",
 	"defaultThemeName",
+	"headerImageUrl",
+	"aboutImageUrl",
 ] as const;
 
 export interface ConsortiumSetupInputs {
@@ -165,7 +195,9 @@ export const evaluateConsortiumSetup = ({
 	const hasConsortium = !!consortium;
 	const wasSkipped = (id: ConsortiumSetupStepId) => skipped.includes(id);
 
-	const steps: ConsortiumSetupStep[] = [
+	const enabled = consortiumSetupSteps();
+
+	const allSteps: ConsortiumSetupStep[] = [
 		{
 			id: "appearance",
 			// OPTIONAL, and neither complete nor skippable.
@@ -227,6 +259,11 @@ export const evaluateConsortiumSetup = ({
 		},
 	];
 
+	// Not "hidden", REMOVED. Everything downstream counts these: the progress
+	// denominator, the outstanding list, and the rail. A chapter this deployment cannot
+	// ask must not be able to hold setup open forever.
+	const steps = allSteps.filter((step) => enabled.includes(step.id));
+
 	const outstanding = steps.filter(
 		(step) =>
 			step.available && !step.optional && !step.complete && !step.skipped,
@@ -250,9 +287,7 @@ export const evaluateConsortiumSetup = ({
 		steps,
 		firstIncompleteStep,
 		resumeStep:
-			!hasConsortium || !firstIncompleteStep
-				? CONSORTIUM_SETUP_STEPS[0]
-				: firstIncompleteStep,
+			!hasConsortium || !firstIncompleteStep ? enabled[0] : firstIncompleteStep,
 		isComplete: outstanding.length === 0,
 		isFresh: !hasConsortium,
 		progress: {
@@ -285,8 +320,7 @@ export const evaluateConsortiumSetup = ({
  * index, not the start of a queue. An unfinished one still resumes where the work is.
  */
 export type SetupEntryPoint =
-	| { kind: "chapter"; step: ConsortiumSetupStepId }
-	| { kind: "finish" };
+	{ kind: "chapter"; step: ConsortiumSetupStepId } | { kind: "finish" };
 
 export const setupEntryPoint = (
 	state: Pick<ConsortiumSetupState, "isComplete" | "resumeStep">,
@@ -297,24 +331,25 @@ export const setupEntryPoint = (
 
 /** A chapter's step number, for "Step 3 of 6" and for the rail. */
 export const stepNumber = (id: ConsortiumSetupStepId): number =>
-	CONSORTIUM_SETUP_STEPS.indexOf(id) + 1;
+	consortiumSetupSteps().indexOf(id) + 1;
 
 export const isConsortiumSetupStepId = (
 	value: unknown,
 ): value is ConsortiumSetupStepId =>
 	typeof value === "string" &&
-	(CONSORTIUM_SETUP_STEPS as string[]).includes(value);
+	(consortiumSetupSteps() as string[]).includes(value);
 
 /** The chapter after this one, or undefined at the end of the flow. */
 export const nextStep = (
 	id: ConsortiumSetupStepId,
 ): ConsortiumSetupStepId | undefined =>
-	CONSORTIUM_SETUP_STEPS[CONSORTIUM_SETUP_STEPS.indexOf(id) + 1];
+	consortiumSetupSteps()[consortiumSetupSteps().indexOf(id) + 1];
 
 /** The chapter before this one, or undefined at the start. */
 export const previousStep = (
 	id: ConsortiumSetupStepId,
 ): ConsortiumSetupStepId | undefined => {
-	const index = CONSORTIUM_SETUP_STEPS.indexOf(id);
-	return index > 0 ? CONSORTIUM_SETUP_STEPS[index - 1] : undefined;
+	const steps = consortiumSetupSteps();
+	const index = steps.indexOf(id);
+	return index > 0 ? steps[index - 1] : undefined;
 };

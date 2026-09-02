@@ -16,7 +16,7 @@ set -eu
 # feature on without rebuilding the bundle (see src/helpers/featureFlags.ts).
 # envsubst renders an unset var as the empty string, which readFlag() reads as
 # false - so a flag absent from the environment leaves the feature off.
-vars='${VITE_MUI_X_LICENSE_KEY} ${VITE_KEYCLOAK_URL} ${VITE_KEYCLOAK_ID} ${VITE_DCB_API_BASE} ${VITE_DCB_SEARCH_BASE} ${VITE_ILL_API_BASE} ${VITE_FEATURE_INSIGHTS} ${VITE_FEATURE_AUDIT_EXPLORER}'
+vars='${VITE_MUI_X_LICENSE_KEY} ${VITE_KEYCLOAK_URL} ${VITE_KEYCLOAK_ID} ${VITE_DCB_API_BASE} ${VITE_DCB_SEARCH_BASE} ${VITE_ILL_API_BASE} ${VITE_FEATURE_INSIGHTS} ${VITE_FEATURE_AUDIT_EXPLORER} ${VITE_FEATURE_CONSORTIUM_BRANDING} ${VITE_FEATURE_NCIP_ONBOARDING} ${VITE_FEATURE_LIBRARY_USER_PROVISIONING}'
 
 envsubst "$vars" \
 	< /usr/share/nginx/html/inject_env.template.json \

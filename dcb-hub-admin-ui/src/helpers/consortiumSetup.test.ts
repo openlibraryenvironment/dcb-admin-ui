@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-	CONSORTIUM_SETUP_STEPS,
+	consortiumSetupSteps,
 	evaluateConsortiumSetup,
 	hasDiscoveryBrand,
 	isConsortiumSetupStepId,
@@ -19,6 +19,20 @@ const consortium = (overrides: Record<string, unknown> = {}) => ({
 	contacts: [],
 	functionalSettings: [],
 	...overrides,
+});
+
+// Every case below describes a deployment on dcb-service 9.0.0 or later, which is
+// where all six chapters exist. The discovery chapter writes the merged brand columns,
+// so on 8.71.0 it is not a chapter that fails - it is a chapter this flow does not ask.
+// That world has its own block at the foot of this file.
+beforeEach(() => {
+	vi.stubGlobal("window", {
+		__APP_ENV__: { VITE_FEATURE_CONSORTIUM_BRANDING: "true" },
+	});
+});
+
+afterEach(() => {
+	vi.unstubAllGlobals();
 });
 
 const stepById = (
@@ -121,7 +135,7 @@ describe("evaluateConsortiumSetup", () => {
 describe("chapter order", () => {
 	it("numbers chapters from one", () => {
 		expect(stepNumber("appearance")).toBe(1);
-		expect(stepNumber("libraries")).toBe(CONSORTIUM_SETUP_STEPS.length);
+		expect(stepNumber("libraries")).toBe(consortiumSetupSteps().length);
 	});
 
 	it("walks forwards and backwards without falling off either end", () => {
@@ -294,5 +308,57 @@ describe("where /setup opens", () => {
 		});
 
 		expect(setupEntryPoint(state)).toEqual({ kind: "finish" });
+	});
+});
+
+describe("before dcb-service 9.0.0", () => {
+	beforeEach(() => {
+		// The state of an environment that has never heard of the flag.
+		vi.stubGlobal("window", undefined);
+	});
+
+	it("does not ask the discovery chapter at all", () => {
+		expect(consortiumSetupSteps()).toEqual([
+			"appearance",
+			"consortium",
+			"howItWorks",
+			"contacts",
+			"libraries",
+		]);
+		expect(isConsortiumSetupStepId("discovery")).toBe(false);
+	});
+
+	it("numbers and navigates the remaining chapters without a gap", () => {
+		// The failure this prevents: a rail showing five chapters above the words
+		// "Step 5 of 6", and a Continue from contacts landing on a chapter that is
+		// not there.
+		expect(stepNumber("libraries")).toBe(5);
+		expect(nextStep("contacts")).toBe("libraries");
+		expect(previousStep("libraries")).toBe("contacts");
+	});
+
+	it("can still reach 100%, because the chapter is removed and not merely hidden", () => {
+		// Left in the denominator, the discovery chapter would be outstanding forever
+		// on a deployment that cannot store a brand, and setup would never finish.
+		const state = evaluateConsortiumSetup({
+			consortium: consortium({
+				functionalSettings: [{ name: "PICKUP_ANYWHERE" }],
+				contacts: [{ id: "1" }],
+			}),
+			libraryCount: 1,
+		});
+
+		expect(state.steps.map((step) => step.id)).not.toContain("discovery");
+		expect(state.progress.total).toBe(4);
+		expect(state.progress.outstanding).toBe(0);
+		expect(state.progress.percent).toBe(100);
+		expect(state.isComplete).toBe(true);
+	});
+
+	it("still reads the pre-migration columns as a brand", () => {
+		// hasDiscoveryBrand has to be truthful whether or not the chapter is asked:
+		// 8.71.0 answers with headerImageUrl/aboutImageUrl and nothing else.
+		expect(hasDiscoveryBrand({ headerImageUrl: "/old-icon.png" })).toBe(true);
+		expect(hasDiscoveryBrand({ aboutImageUrl: "" })).toBe(false);
 	});
 });

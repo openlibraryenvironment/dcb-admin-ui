@@ -49,9 +49,18 @@ describe("runtime feature flags are wired through to deployment", () => {
 describe("flags fail closed", () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
+		vi.unstubAllEnvs();
 	});
 
 	it("is off when the environment has never heard of the flag", () => {
+		// The build-time fallback, cleared explicitly. readFlag falls back to
+		// import.meta.env when the injected value is undefined, and a developer's
+		// git-ignored .env commonly sets VITE_FEATURE_INSIGHTS=true - which made this
+		// case pass in CI and fail on their machine, for a reason the assertion could
+		// not name. The property under test is the READ, not what happens to be in a
+		// local .env.
+		vi.stubEnv("VITE_FEATURE_INSIGHTS", "");
+
 		// envsubst renders an unset variable as the empty string, and a bundle built
 		// without the var leaves it undefined - neither may read as enabled.
 		for (const value of [undefined, "", "false", "FALSE", "0", "yes"]) {

@@ -29,6 +29,7 @@ import {
 } from "@helpers/oidcPreflight";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
+import { readConsortiumBrand } from "@helpers/consortiumBrand";
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
 import type { LoadConsortiumHeaderQueryVariables } from "@generated/graphql";
 
@@ -120,7 +121,7 @@ export default function Header({
 		throwOnError: false,
 		queryFn: () =>
 			gqlClient.request<any, LoadConsortiumHeaderQueryVariables>(
-				getConsortiumBasics,
+				getConsortiumBasics(),
 				{
 					order: "name",
 					orderBy: "ASC",
@@ -156,10 +157,13 @@ export default function Header({
 			setCatalogueSearchURL(consortium.catalogueSearchUrl);
 			setWebsiteURL(consortium.websiteUrl);
 			// The merged brand columns (V9_0_004). A consortium's mark is one asset that
-			// CSS sizes per app, not a separate column per app.
-			setHeaderImageURL(consortium.brandHeaderIconUrl ?? "");
-			if (!isEmpty(consortium.brandLogoUrl)) {
-				setAboutImageURL(consortium.brandLogoUrl);
+			// CSS sizes per app, not a separate column per app - and which columns carry
+			// it depends on whether this deployment's dcb-service is 9.0.0 or older, so
+			// it is read through the normaliser rather than by name.
+			const chrome = readConsortiumBrand(consortium);
+			setHeaderImageURL(chrome.headerIconUrl);
+			if (!isEmpty(chrome.logoUrl)) {
+				setAboutImageURL(chrome.logoUrl);
 			}
 		}
 	}, [

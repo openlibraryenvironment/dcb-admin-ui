@@ -22,7 +22,7 @@ export const Route = createFileRoute("/__authenticated/consortium/")({
 				createGraphQLClient(cfg, auth).request<
 					any,
 					LoadConsortiumQueryVariables
-				>(getConsortia, CONSORTIUM_QUERY_VARIABLES),
+				>(getConsortia(), CONSORTIUM_QUERY_VARIABLES),
 		});
 	},
 	component: ConsortiumProfilePage,

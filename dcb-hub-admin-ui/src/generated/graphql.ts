@@ -178,6 +178,8 @@ export type LibraryInput = {
 	type: string;
 };
 
+export type LibraryUserStatus = "ACTIVE" | "DISABLED" | "INVITED";
+
 export type PersonInput = {
 	email: string;
 	firstName: string;
@@ -189,8 +191,33 @@ export type PersonInput = {
 
 export type ProcessingStatus = "FAILURE" | "PROCESSING_REQUIRED" | "SUCCESS";
 
+export type ProvisionLibraryUserInput = {
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	email: string;
+	firstName?: string | null | undefined;
+	lastName?: string | null | undefined;
+	libraryId: string | number;
+	reason?: string | null | undefined;
+	role: ProvisionableRole;
+};
+
+export type ProvisionableRole = "LIBRARY_ADMIN" | "LIBRARY_READ_ONLY";
+
 export type RenewalStatus =
 	"ALLOWED" | "DISALLOWED" | "UNKNOWN" | "UNSUPPORTED";
+
+export type ResendLibraryUserInviteInput = {
+	id: string | number;
+};
+
+export type SetLibraryUserEnabledInput = {
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	enabled: boolean;
+	id: string | number;
+	reason?: string | null | undefined;
+};
 
 export type UpdateAgencyInput = {
 	changeCategory?: string | null | undefined;
@@ -542,6 +569,35 @@ export type DeleteReferenceValueMappingMutation = {
 	deleteReferenceValueMapping: { success: boolean; message: string | null };
 };
 
+export type ProvisionLibraryUserMutationVariables = Exact<{
+	input: ProvisionLibraryUserInput;
+}>;
+
+export type ProvisionLibraryUserMutation = {
+	provisionLibraryUser: {
+		id: string;
+		email: string;
+		role: ProvisionableRole;
+		status: LibraryUserStatus;
+	};
+};
+
+export type SetLibraryUserEnabledMutationVariables = Exact<{
+	input: SetLibraryUserEnabledInput;
+}>;
+
+export type SetLibraryUserEnabledMutation = {
+	setLibraryUserEnabled: { id: string; status: LibraryUserStatus };
+};
+
+export type ResendLibraryUserInviteMutationVariables = Exact<{
+	input: ResendLibraryUserInviteInput;
+}>;
+
+export type ResendLibraryUserInviteMutation = {
+	resendLibraryUserInvite: { id: string; status: LibraryUserStatus };
+};
+
 export type UpdateAgencyMutationVariables = Exact<{
 	input: UpdateAgencyInput;
 }>;
@@ -581,12 +637,6 @@ export type UpdateConsortiumMutation = {
 		description: string | null;
 		catalogueSearchUrl: string | null;
 		websiteUrl: string | null;
-		brandLogoUrl: string | null;
-		brandLogoAlt: string | null;
-		brandHeaderIconUrl: string | null;
-		brandBackgroundImageUrl: string | null;
-		patronWelcome: string | null;
-		defaultThemeName: string | null;
 	};
 };
 
@@ -1041,12 +1091,6 @@ export type LoadConsortiumQuery = {
 			catalogueSearchUrl: string | null;
 			websiteUrl: string | null;
 			displayName: string | null;
-			brandLogoUrl: string | null;
-			brandLogoAlt: string | null;
-			brandHeaderIconUrl: string | null;
-			brandBackgroundImageUrl: string | null;
-			patronWelcome: string | null;
-			defaultThemeName: string | null;
 			libraryGroup: { id: string };
 			contacts: Array<{
 				email: string | null;
@@ -1073,8 +1117,6 @@ export type LoadConsortiumHeaderQuery = {
 			id: string;
 			name: string;
 			displayName: string | null;
-			brandHeaderIconUrl: string | null;
-			brandLogoUrl: string | null;
 			description: string | null;
 			catalogueSearchUrl: string | null;
 			websiteUrl: string | null;
@@ -1524,6 +1566,16 @@ export type LoadLibraryContactsQuery = {
 	};
 };
 
+export type LoadLibraryCountQueryVariables = Exact<{
+	pageno: number;
+	pagesize: number;
+	order: string;
+	query: string;
+	orderBy: string;
+}>;
+
+export type LoadLibraryCountQuery = { libraries: { totalSize: number | null } };
+
 export type LoadGroupsQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;
@@ -1583,6 +1635,32 @@ export type LoadLibraryServiceInfoQuery = {
 			} | null;
 		} | null> | null;
 	};
+};
+
+export type LoadLibraryUsersQueryVariables = Exact<{
+	libraryId: string | number;
+}>;
+
+export type LoadLibraryUsersQuery = {
+	libraryUsers: Array<{
+		id: string;
+		email: string;
+		firstName: string | null;
+		lastName: string | null;
+		role: ProvisionableRole;
+		status: LibraryUserStatus;
+		agencyCode: string;
+		dateCreated: string | null;
+		lastEditedBy: string | null;
+	}>;
+};
+
+export type LibraryUserProvisioningAvailableQueryVariables = Exact<{
+	[key: string]: never;
+}>;
+
+export type LibraryUserProvisioningAvailableQuery = {
+	libraryUserProvisioningAvailable: boolean;
 };
 
 export type LoadLocationQueryVariables = Exact<{

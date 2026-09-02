@@ -3,6 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import { Tab, Tabs } from "@mui/material";
 
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
+import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
 
 /**
  * The Consortium tab bar, in one place — W-12.
@@ -24,7 +25,14 @@ import { handleTabChange } from "@helpers/navigation/handleTabChange";
  *  - **No accessible name.** A bare `<Tabs>` announces as an unnamed tab list; with three
  *    other tab bars in this application that says nothing about which one it is.
  */
-const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
+interface ConsortiumTab {
+	path: string;
+	labelKey: string;
+	/** Absent means always shown. */
+	enabled?: () => boolean;
+}
+
+const TABS: ReadonlyArray<ConsortiumTab> = [
 	{ path: "/consortium", labelKey: "nav.consortium.profile" },
 	{
 		path: "/consortium/functionalSettings",
@@ -35,12 +43,27 @@ const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 	// Branding is its own tab rather than a block at the foot of the profile. It is five
 	// fields and a theme choice, and it answers a different question - what PATRONS see -
 	// from everything else on the record.
-	{ path: "/consortium/branding", labelKey: "nav.consortium.branding" },
+	//
+	// Hidden before dcb-service 9.0.0, which has none of the columns it edits. Hiding a
+	// tab is UX, not a control: the route's own beforeLoad is what stops a typed URL.
+	{
+		path: "/consortium/branding",
+		labelKey: "nav.consortium.branding",
+		enabled: isConsortiumBrandingEnabled,
+	},
 	// Setup stays reachable after it is finished: it is also how appearance, discovery
 	// branding and functional settings are revisited, and a flow that vanishes the moment
 	// it succeeds is a flow nobody can correct.
 	{ path: "/setup", labelKey: "nav.consortium.setup" },
 ];
+
+/**
+ * Evaluated per render, not once at module scope: the flags are read from
+ * window.__APP_ENV__, which application.tsx populates only after this module has been
+ * imported, so a list filtered at module scope would hide every gated tab everywhere.
+ */
+const visibleTabs = (): ReadonlyArray<ConsortiumTab> =>
+	TABS.filter((tab) => tab.enabled?.() ?? true);
 
 export type ConsortiumTabId =
 	| "profile"
@@ -76,7 +99,7 @@ export default function ConsortiumTabs({ current }: ConsortiumTabsProps) {
 			aria-label={t("nav.consortium.name")}
 			sx={{ mb: 3 }}
 		>
-			{TABS.map((tab) => (
+			{visibleTabs().map((tab) => (
 				<Tab key={tab.path} value={tab.path} label={t(tab.labelKey)} />
 			))}
 		</Tabs>

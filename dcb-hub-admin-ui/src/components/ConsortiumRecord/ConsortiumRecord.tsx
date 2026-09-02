@@ -39,6 +39,10 @@ import type {
 } from "@generated/graphql";
 
 import { updateConsortiumQuery } from "@mutations/updateConsortium";
+import {
+	readConsortiumBrand,
+	stripUnsupportedConsortiumInput,
+} from "@helpers/consortiumBrand";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Consortium } from "@models/Consortium";
 import Error from "@components/Error/Error";
@@ -102,7 +106,6 @@ export type ConsortiumRecordSection = "profile" | "branding";
 interface ConsortiumRecordProps {
 	section: ConsortiumRecordSection;
 }
-
 
 interface ConsortiumFormFields {
 	displayName: string;
@@ -183,7 +186,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 		queryKey: CONSORTIUM_QUERY_KEY,
 		queryFn: () =>
 			gqlClient.request<any, LoadConsortiumQueryVariables>(
-				getConsortia,
+				getConsortia(),
 				CONSORTIUM_QUERY_VARIABLES,
 			),
 	});
@@ -251,14 +254,15 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 			setWebsiteURL(consortium.websiteUrl);
 			setCatalogueSearchURL(consortium.catalogueSearchUrl);
 			setDisplayName(consortium.displayName);
-			// The chrome images the app bar and the landing card render. These are the
-			// merged brand columns now: V9_0_004 replaced headerImageUrl with
-			// brandHeaderIconUrl and aboutImageUrl with brandLogoUrl, because a
-			// consortium's mark is one asset that CSS sizes, not four columns.
-			// Coalesced because the brand columns are nullable where the admin-chrome ones
-			// were not: the store holds a string and renders a fallback mark on "".
-			setHeaderImageURL(consortium.brandHeaderIconUrl ?? "");
-			setAboutImageURL(consortium.brandLogoUrl ?? "");
+			// The chrome images the app bar and the landing card render. V9_0_004
+			// replaced headerImageUrl with brandHeaderIconUrl and aboutImageUrl with
+			// brandLogoUrl, because a consortium's mark is one asset that CSS sizes, not
+			// four columns - so which columns the response carries depends on the
+			// deployment's dcb-service. readConsortiumBrand answers from either shape,
+			// and always with a string: the store renders a fallback mark on "".
+			const chrome = readConsortiumBrand(consortium);
+			setHeaderImageURL(chrome.headerIconUrl);
+			setAboutImageURL(chrome.logoUrl);
 			reset({
 				displayName: consortium.displayName ?? "",
 				description: consortium.description ?? "",
@@ -290,10 +294,17 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 	} = useUnsavedChangesWarning(isDirty);
 
 	const { mutateAsync: updateConsortium } = useMutation({
+		// The brand keys are stripped HERE, not at each caller. UpdateConsortiumInput
+		// does not declare them before dcb-service 9.0.0, and an undeclared input field
+		// fails the WHOLE mutation - so on 8.71.0 forgetting this at one call site means
+		// nothing on the consortium form saves, brand or not.
 		mutationFn: (variables: UpdateConsortiumMutationVariables) =>
 			gqlClient.request<any, UpdateConsortiumMutationVariables>(
-				updateConsortiumQuery,
-				variables,
+				updateConsortiumQuery(),
+				{
+					...variables,
+					input: stripUnsupportedConsortiumInput(variables.input),
+				} as UpdateConsortiumMutationVariables,
 			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
@@ -518,137 +529,139 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 			>
 				{section === "profile" && (
 					<>
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography variant="attributeTitle">
-							{t("consortium.name")}
-						</Typography>
-						<RenderAttribute attribute={consortium.name} />
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("consortium.name")}
+								</Typography>
+								<RenderAttribute attribute={consortium.name} />
+							</Stack>
+						</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.displayName && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.display_name")}
-						</Typography>
-						<Controller
-							name="displayName"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										inputRef={firstEditableFieldRef}
-										fullWidth
-										error={!!errors.displayName}
-										helperText={errors.displayName?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.displayName} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.websiteUrl && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.url")}
-						</Typography>
-						<Controller
-							name="websiteUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										error={!!errors.websiteUrl}
-										helperText={errors.websiteUrl?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.websiteUrl} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.catalogueSearchUrl && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.search_url")}
-						</Typography>
-						<Controller
-							name="catalogueSearchUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										error={!!errors.catalogueSearchUrl}
-										helperText={errors.catalogueSearchUrl?.message}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.catalogueSearchUrl} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
-
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.description && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.description_title")}
-						</Typography>
-						<Controller
-							name="description"
-							control={control}
-							render={({ field }) => (
-								<MarkdownInput
-									{...field}
-									editMode={editMode}
-									error={!!errors.description}
-									helperText={errors.description?.message}
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.displayName && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.display_name")}
+								</Typography>
+								<Controller
+									name="displayName"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<TextField
+												{...field}
+												inputRef={firstEditableFieldRef}
+												fullWidth
+												error={!!errors.displayName}
+												helperText={errors.displayName?.message}
+											/>
+										) : (
+											<RenderAttribute attribute={consortium.displayName} />
+										)
+									}
 								/>
-							)}
-						/>
-					</Stack>
-				</Grid>
+							</Stack>
+						</Grid>
 
-				{/* Only the fields this tab is about. The FORM still holds every field - the
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.websiteUrl && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.url")}
+								</Typography>
+								<Controller
+									name="websiteUrl"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<TextField
+												{...field}
+												fullWidth
+												error={!!errors.websiteUrl}
+												helperText={errors.websiteUrl?.message}
+											/>
+										) : (
+											<RenderAttribute attribute={consortium.websiteUrl} />
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.catalogueSearchUrl && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.search_url")}
+								</Typography>
+								<Controller
+									name="catalogueSearchUrl"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<TextField
+												{...field}
+												fullWidth
+												error={!!errors.catalogueSearchUrl}
+												helperText={errors.catalogueSearchUrl?.message}
+											/>
+										) : (
+											<RenderAttribute
+												attribute={consortium.catalogueSearchUrl}
+											/>
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
+
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.description && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.description_title")}
+								</Typography>
+								<Controller
+									name="description"
+									control={control}
+									render={({ field }) => (
+										<MarkdownInput
+											{...field}
+											editMode={editMode}
+											error={!!errors.description}
+											helperText={errors.description?.message}
+										/>
+									)}
+								/>
+							</Stack>
+						</Grid>
+
+						{/* Only the fields this tab is about. The FORM still holds every field - the
 				    diff below compares against the loaded record, so anything the hidden
 				    section never touched compares equal and is not sent. */}
 					</>
@@ -656,264 +669,274 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 
 				{section === "branding" && (
 					<>
-				{/* Patron-facing brand - N-1B, and now a tab of its own.
+						{/* Patron-facing brand - N-1B, and now a tab of its own.
 				    The old comment here said these were separate from "the two directly above,
 				    which are the admin chrome's". There is nothing above: V9_0_004 merged
 				    header_image_url and about_image_url INTO brandHeaderIconUrl and
 				    brandLogoUrl, so one mark now serves both DCB Admin and discovery. */}
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Typography variant="h3" sx={{ mt: 2 }}>
-						{t("consortium.brand.section")}
-					</Typography>
-					<Typography variant="body1">
-						{t("consortium.brand.section_help")}
-					</Typography>
-					{/* Said once, in the section, rather than three times in three help
+						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+							<Typography variant="h3" sx={{ mt: 2 }}>
+								{t("consortium.brand.section")}
+							</Typography>
+							<Typography variant="body1">
+								{t("consortium.brand.section_help")}
+							</Typography>
+							{/* Said once, in the section, rather than three times in three help
 					    texts. An administrator choosing between uploading and pasting a
 					    CDN address deserves to know what the second one costs. */}
-					{editMode && (
-						<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-							{t("consortium.brand.external_url_cost")}
-						</Typography>
-					)}
-				</Grid>
+							{editMode && (
+								<Typography
+									variant="body2"
+									color="text.secondary"
+									sx={{ mt: 1 }}
+								>
+									{t("consortium.brand.external_url_cost")}
+								</Typography>
+							)}
+						</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.brandLogoUrl && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.brand.logo_url")}
-						</Typography>
-						<Controller
-							name="brandLogoUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<BrandImageField
-										value={field.value ?? ""}
-										onChange={field.onChange}
-										stagedFile={stagedImages[field.name] ?? null}
-										onStageFile={(file) => stageImage(field.name, file)}
-										label={t("consortium.brand.logo_url")}
-										uploadsAvailable={brandUploadsAvailable}
-										error={!!errors.brandLogoUrl}
-										helperText={
-											errors.brandLogoUrl?.message ??
-											t("consortium.brand.logo_url_help")
-										}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.brandLogoUrl} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.brandLogoUrl && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.brand.logo_url")}
+								</Typography>
+								<Controller
+									name="brandLogoUrl"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<BrandImageField
+												value={field.value ?? ""}
+												onChange={field.onChange}
+												stagedFile={stagedImages[field.name] ?? null}
+												onStageFile={(file) => stageImage(field.name, file)}
+												label={t("consortium.brand.logo_url")}
+												uploadsAvailable={brandUploadsAvailable}
+												error={!!errors.brandLogoUrl}
+												helperText={
+													errors.brandLogoUrl?.message ??
+													t("consortium.brand.logo_url_help")
+												}
+											/>
+										) : (
+											<RenderAttribute attribute={consortium.brandLogoUrl} />
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
 
-				{/* R-17d/R-17e. Two more images, each with the same two routes in: upload
+						{/* R-17d/R-17e. Two more images, each with the same two routes in: upload
 				    into our bucket, or point at a CDN the consortium already runs. Neither
 				    is the fallback for the other. */}
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.brandHeaderIconUrl && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.brand.header_icon_url")}
-						</Typography>
-						<Controller
-							name="brandHeaderIconUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<BrandImageField
-										value={field.value ?? ""}
-										onChange={field.onChange}
-										stagedFile={stagedImages[field.name] ?? null}
-										onStageFile={(file) => stageImage(field.name, file)}
-										label={t("consortium.brand.header_icon_url")}
-										uploadsAvailable={brandUploadsAvailable}
-										error={!!errors.brandHeaderIconUrl}
-										helperText={
-											errors.brandHeaderIconUrl?.message ??
-											t("consortium.brand.header_icon_url_help")
-										}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.brandHeaderIconUrl} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.brandHeaderIconUrl && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.brand.header_icon_url")}
+								</Typography>
+								<Controller
+									name="brandHeaderIconUrl"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<BrandImageField
+												value={field.value ?? ""}
+												onChange={field.onChange}
+												stagedFile={stagedImages[field.name] ?? null}
+												onStageFile={(file) => stageImage(field.name, file)}
+												label={t("consortium.brand.header_icon_url")}
+												uploadsAvailable={brandUploadsAvailable}
+												error={!!errors.brandHeaderIconUrl}
+												helperText={
+													errors.brandHeaderIconUrl?.message ??
+													t("consortium.brand.header_icon_url_help")
+												}
+											/>
+										) : (
+											<RenderAttribute
+												attribute={consortium.brandHeaderIconUrl}
+											/>
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.brandBackgroundImageUrl && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.brand.background_image_url")}
-						</Typography>
-						<Controller
-							name="brandBackgroundImageUrl"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<BrandImageField
-										value={field.value ?? ""}
-										onChange={field.onChange}
-										stagedFile={stagedImages[field.name] ?? null}
-										onStageFile={(file) => stageImage(field.name, file)}
-										label={t("consortium.brand.background_image_url")}
-										uploadsAvailable={brandUploadsAvailable}
-										error={!!errors.brandBackgroundImageUrl}
-										helperText={
-											errors.brandBackgroundImageUrl?.message ??
-											t("consortium.brand.background_image_url_help")
-										}
-									/>
-								) : (
-									<RenderAttribute
-										attribute={consortium.brandBackgroundImageUrl}
-									/>
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.brandBackgroundImageUrl && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.brand.background_image_url")}
+								</Typography>
+								<Controller
+									name="brandBackgroundImageUrl"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<BrandImageField
+												value={field.value ?? ""}
+												onChange={field.onChange}
+												stagedFile={stagedImages[field.name] ?? null}
+												onStageFile={(file) => stageImage(field.name, file)}
+												label={t("consortium.brand.background_image_url")}
+												uploadsAvailable={brandUploadsAvailable}
+												error={!!errors.brandBackgroundImageUrl}
+												helperText={
+													errors.brandBackgroundImageUrl?.message ??
+													t("consortium.brand.background_image_url_help")
+												}
+											/>
+										) : (
+											<RenderAttribute
+												attribute={consortium.brandBackgroundImageUrl}
+											/>
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.brandLogoAlt && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.brand.logo_alt")}
-						</Typography>
-						<Controller
-							name="brandLogoAlt"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										error={!!errors.brandLogoAlt}
-										helperText={
-											errors.brandLogoAlt?.message ??
-											t("consortium.brand.logo_alt_help")
-										}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.brandLogoAlt} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.brandLogoAlt && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.brand.logo_alt")}
+								</Typography>
+								<Controller
+									name="brandLogoAlt"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<TextField
+												{...field}
+												fullWidth
+												error={!!errors.brandLogoAlt}
+												helperText={
+													errors.brandLogoAlt?.message ??
+													t("consortium.brand.logo_alt_help")
+												}
+											/>
+										) : (
+											<RenderAttribute attribute={consortium.brandLogoAlt} />
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
 
-				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.defaultThemeName && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.brand.theme")}
-						</Typography>
-						<Controller
-							name="defaultThemeName"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									// A list, not a text field, and not a colour picker. A theme
-									// from the registry has been contrast-tested in every mode;
-									// a hex an administrator types has not, and nothing here
-									// could tell them it failed.
-									<TextField
-										{...field}
-										select
-										fullWidth
-										error={!!errors.defaultThemeName}
-										helperText={
-											errors.defaultThemeName?.message ??
-											t("consortium.brand.theme_help")
-										}
-									>
-										<MenuItem value="">
-											{t("consortium.brand.theme_default")}
-										</MenuItem>
-										{themeOptions(consortium.defaultThemeName).map((name) => (
-											<MenuItem key={name} value={name}>
-												{name}
-											</MenuItem>
-										))}
-									</TextField>
-								) : (
-									<RenderAttribute attribute={consortium.defaultThemeName} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.defaultThemeName && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.brand.theme")}
+								</Typography>
+								<Controller
+									name="defaultThemeName"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											// A list, not a text field, and not a colour picker. A theme
+											// from the registry has been contrast-tested in every mode;
+											// a hex an administrator types has not, and nothing here
+											// could tell them it failed.
+											<TextField
+												{...field}
+												select
+												fullWidth
+												error={!!errors.defaultThemeName}
+												helperText={
+													errors.defaultThemeName?.message ??
+													t("consortium.brand.theme_help")
+												}
+											>
+												<MenuItem value="">
+													{t("consortium.brand.theme_default")}
+												</MenuItem>
+												{themeOptions(consortium.defaultThemeName).map(
+													(name) => (
+														<MenuItem key={name} value={name}>
+															{name}
+														</MenuItem>
+													),
+												)}
+											</TextField>
+										) : (
+											<RenderAttribute
+												attribute={consortium.defaultThemeName}
+											/>
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Stack direction={"column"}>
-						<Typography
-							variant="attributeTitle"
-							color={
-								errors.patronWelcome && editMode
-									? "error"
-									: "primary.attributeTitle"
-							}
-						>
-							{t("consortium.brand.patron_welcome")}
-						</Typography>
-						<Controller
-							name="patronWelcome"
-							control={control}
-							render={({ field }) =>
-								editMode ? (
-									<TextField
-										{...field}
-										fullWidth
-										multiline
-										minRows={2}
-										error={!!errors.patronWelcome}
-										helperText={
-											errors.patronWelcome?.message ??
-											t("consortium.brand.patron_welcome_help")
-										}
-									/>
-								) : (
-									<RenderAttribute attribute={consortium.patronWelcome} />
-								)
-							}
-						/>
-					</Stack>
-				</Grid>
+						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+							<Stack direction={"column"}>
+								<Typography
+									variant="attributeTitle"
+									color={
+										errors.patronWelcome && editMode
+											? "error"
+											: "primary.attributeTitle"
+									}
+								>
+									{t("consortium.brand.patron_welcome")}
+								</Typography>
+								<Controller
+									name="patronWelcome"
+									control={control}
+									render={({ field }) =>
+										editMode ? (
+											<TextField
+												{...field}
+												fullWidth
+												multiline
+												minRows={2}
+												error={!!errors.patronWelcome}
+												helperText={
+													errors.patronWelcome?.message ??
+													t("consortium.brand.patron_welcome_help")
+												}
+											/>
+										) : (
+											<RenderAttribute attribute={consortium.patronWelcome} />
+										)
+									}
+								/>
+							</Stack>
+						</Grid>
 					</>
 				)}
 			</Grid>

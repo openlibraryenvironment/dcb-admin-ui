@@ -1,6 +1,15 @@
 ﻿import { gql } from "graphql-request";
 
-export const getConsortiumBasics = gql`
+import { consortiumBrandSelection } from "@fragments/consortiumBrand";
+
+/**
+ * A FUNCTION, not a constant — see getConsortia for why the flag cannot be read at
+ * module scope.
+ *
+ * This is the query the header runs on EVERY page, so it is the one with the widest
+ * blast radius if its selection set outruns the deployment's dcb-service.
+ */
+export const getConsortiumBasics = () => gql`
 	query LoadConsortiumHeader($order: String!, $orderBy: String!) {
 		consortia(order: $order, orderBy: $orderBy) {
 			totalSize
@@ -24,9 +33,10 @@ export const getConsortiumBasics = gql`
 				}
 				displayName
 				# The app bar mark and the landing card mark. Formerly headerImageUrl and
-				# aboutImageUrl, merged into the brand columns by V9_0_004.
-				brandHeaderIconUrl
-				brandLogoUrl
+				# aboutImageUrl, merged into the brand columns by V9_0_004; read from
+				# whichever pair this deployment's dcb-service actually has, and
+				# normalised by readConsortiumBrand.
+				${consortiumBrandSelection("chrome")}
 				description
 				catalogueSearchUrl
 				websiteUrl

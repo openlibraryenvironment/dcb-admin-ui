@@ -4,8 +4,12 @@ import { useAuth } from "react-oidc-context";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import ServiceCapabilities from "@components/ServiceCapabilities/ServiceCapabilities";
 import { canManageDcbNcipOnboarding } from "@helpers/dcbNcipOnboarding";
-import { isAuditExplorerEnabled } from "@helpers/featureFlags";
+import {
+	isAuditExplorerEnabled,
+	isNcipOnboardingEnabled,
+} from "@helpers/featureFlags";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/")({
 	component: ServiceInfo,
@@ -17,11 +21,16 @@ function ServiceInfo() {
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
 	const isAnAdmin = canManageDcbNcipOnboarding(userRoles);
+	// Two independent gates on the same entry, and both are needed. The role decides who
+	// may onboard; the flag decides whether this deployment's dcb-service can be asked at
+	// all. Neither is a substitute for the other, and neither is the security control -
+	// that is the route's own guard and dcb-service's @Secured.
+	const showNcipOnboarding = isAnAdmin && isNcipOnboardingEnabled();
 
 	return (
 		<PageContainer title={t("nav.serviceInfo.name")}>
 			<List component="nav" aria-labelledby="service-information">
-				{isAnAdmin && (
+				{showNcipOnboarding && (
 					<ListItem disablePadding>
 						<ListItemButton
 							component={Link}
@@ -71,6 +80,12 @@ function ServiceInfo() {
 					</ListItem>
 				)}
 			</List>
+
+			{/* Which of this application's features the deployment's dcb-service can
+			    actually serve, and whether each is switched on. Service Info is where
+			    somebody already comes to ask what version is running, so it is where
+			    the answer to "is the upgrade switch due yet" belongs. */}
+			<ServiceCapabilities />
 		</PageContainer>
 	);
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import axios from "axios";
 import {
 	Accordion,
@@ -38,10 +38,19 @@ import {
 	loadDcbNcipReadiness,
 	validateDcbInvitationPolicy,
 } from "@helpers/dcbNcipOnboarding";
+import { isNcipOnboardingEnabled } from "@helpers/featureFlags";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/dcbNcipOnboarding/",
 )({
+	// The entry is hidden while the flag is off, but the URL is still typeable - and
+	// DcbProfileRegistrationController does not exist before dcb-service 9.0.0, so every
+	// call from this page would 404 on an older deployment.
+	beforeLoad: () => {
+		if (!isNcipOnboardingEnabled()) {
+			throw redirect({ to: "/serviceInfo" });
+		}
+	},
 	component: DcbNcipOnboarding,
 });
 

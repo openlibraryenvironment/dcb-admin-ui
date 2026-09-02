@@ -1,15 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-	Button,
-	Chip,
-	Grid,
-	Skeleton,
-	Stack,
-	Typography,
-} from "@mui/material";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Button, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import { GridColDef, GridRenderCellParams } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -30,10 +23,23 @@ import {
 	resendLibraryUserInvite,
 	setLibraryUserEnabled,
 } from "@mutations/provisionLibraryUser";
+import { isLibraryUserProvisioningEnabled } from "@helpers/featureFlags";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/accounts",
 )({
+	// The tab is hidden while the flag is off, but the URL is still typeable. Note the
+	// threshold on this one: libraryUsers and the three provisioning mutations are on
+	// dcb-service main and are NOT in the 9.0.0 tag, so this page's queries fail
+	// validation on a v9 deployment as surely as on an 8.71.0 one.
+	beforeLoad: ({ params: { libraryId } }) => {
+		if (!isLibraryUserProvisioningEnabled()) {
+			throw redirect({
+				to: "/libraries/$libraryId",
+				params: { libraryId },
+			});
+		}
+	},
 	component: LibraryAccounts,
 	errorComponent: ({ error }) => (
 		<PageContainer hideTitleBox hideBreadcrumbs>
@@ -286,10 +292,7 @@ function LibraryAccounts() {
 				) : (
 					<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 						<Stack direction="row" sx={{ mb: 2 }}>
-							<Button
-								variant="contained"
-								onClick={() => setShowNewUser(true)}
-							>
+							<Button variant="contained" onClick={() => setShowNewUser(true)}>
 								{t("libraries.accounts.new.title")}
 							</Button>
 						</Stack>

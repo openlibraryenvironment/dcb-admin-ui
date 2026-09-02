@@ -4,6 +4,7 @@ import { scanForViolations } from "./fixtures/axe";
 import { seedAuth, READ_ONLY_ROLES } from "./fixtures/auth";
 import { seedTheme } from "./fixtures/theme";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { useAllFeatures } from "./fixtures/flags";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import consortium from "./fixtures-data/consortium.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -59,6 +60,10 @@ for (const scheme of ["light", "dark"] as const) {
 		test.use({ colorScheme: scheme });
 
 		test.beforeEach(async ({ page }) => {
+			// All six chapters, i.e. dcb-service 9.0.0 or later. The discovery chapter
+			// writes the merged brand columns, so before 9.0.0 the flow asks five and
+			// the renumbered rail is scanned in accessibility.spec.ts instead.
+			await useAllFeatures(page);
 			await seedAuth(page);
 			await mockGraphQL(page, MOCKS);
 		});
@@ -81,6 +86,7 @@ for (const scheme of ["light", "dark"] as const) {
 
 test.describe("Setup - WCAG 2.2 AA - high contrast", () => {
 	test.beforeEach(async ({ page }) => {
+		await useAllFeatures(page);
 		await seedAuth(page);
 		await seedTheme(page, { mode: "highContrast" });
 		await mockGraphQL(page, MOCKS);
@@ -97,6 +103,7 @@ test.describe("Setup - WCAG 2.2 AA - high contrast", () => {
 
 test.describe("Setup - structure and behaviour", () => {
 	test.beforeEach(async ({ page }) => {
+		await useAllFeatures(page);
 		await seedAuth(page);
 		await mockGraphQL(page, MOCKS);
 	});
@@ -161,9 +168,7 @@ test.describe("Setup - structure and behaviour", () => {
 		await expect(page).toHaveURL(/\/$/);
 
 		await page.goto("/setup/contacts");
-		await page
-			.getByRole("textbox", { name: /first name/i })
-			.fill("Half-typed");
+		await page.getByRole("textbox", { name: /first name/i }).fill("Half-typed");
 
 		// Now the same navigation has something to lose.
 		await page.getByRole("link", { name: /leave setup for now/i }).click();
@@ -204,7 +209,9 @@ test.describe("Setup - structure and behaviour", () => {
 			.getByRole("textbox", { name: /email/i })
 			.fill("ada@library.example");
 
-		await page.getByRole("button", { name: /continue|save and continue/i }).click();
+		await page
+			.getByRole("button", { name: /continue|save and continue/i })
+			.click();
 
 		// Moved on, and no dialog in the way.
 		await expect(page.getByRole("dialog")).toHaveCount(0);
@@ -366,7 +373,9 @@ test.describe("Setup - structure and behaviour", () => {
 		// A skip quietly reducing "what is left" is how a half-configured consortium gets
 		// signed off as ready, so it is reported on its own line.
 		await page.goto("/setup/discovery");
-		await page.getByRole("button", { name: /we have not decided yet/i }).click();
+		await page
+			.getByRole("button", { name: /we have not decided yet/i })
+			.click();
 
 		await expect(page).toHaveURL(/\/setup\/libraries$/);
 
