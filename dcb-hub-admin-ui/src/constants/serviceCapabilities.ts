@@ -3,6 +3,7 @@ import {
 	isConsortiumBrandingEnabled,
 	isInsightsEnabled,
 	isLibraryUserProvisioningEnabled,
+	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
 } from "@helpers/featureFlags";
 
@@ -29,6 +30,14 @@ export const CONSORTIUM_BRAND_CHROME_FIELDS = [
 	"brandLogoUrl",
 ] as const;
 
+/**
+ * The per-agency local holds limit, added by V9_0_007__agency_max_local_holds.sql.
+ *
+ * One name, three types. Declared here so the selection builder, the variables filter and
+ * serviceCapabilities.test.ts all read the same list.
+ */
+export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
+
 /** Their pre-migration equivalents, still present on dcb-service 8.71.0. */
 export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
 	"headerImageUrl",
@@ -54,9 +63,9 @@ export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
  *
  * <h2>Why there is no single "v9" flag</h2>
  *
- * Read the `since` column. Three of these arrived in 9.0.0, one is only on dcb-service
- * main and is not in the 9.0.0 tag, and one is in no release at all. One boolean would
- * be a lie about two of them, and turning it on when v9 landed would break both.
+ * Read the `since` column. Three of these arrived in 9.0.0; two are on dcb-service main
+ * and in no release; one is in no dcb-service anywhere. One boolean would be a lie about
+ * three of them, and turning it on at the v9 upgrade would break all three.
  */
 
 /** A GraphQL type name to the fields a capability adds to it. */
@@ -146,6 +155,19 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 				"setLibraryUserEnabled",
 				"resendLibraryUserInvite",
 			],
+		},
+	},
+	{
+		// On dcb-service MAIN as of 1eb37378c, and in no release - not 8.71.0, not the
+		// 9.0.0 tag. LibraryInput carries it too, but nothing in this app sends that field
+		// on a library create, so only the two types that are actually written appear here.
+		id: "local_holds",
+		flag: "VITE_FEATURE_LOCAL_HOLDS",
+		enabled: isLocalHoldsEnabled,
+		since: null,
+		fields: {
+			Agency: LOCAL_HOLDS_FIELDS,
+			UpdateAgencyInput: LOCAL_HOLDS_FIELDS,
 		},
 	},
 	{

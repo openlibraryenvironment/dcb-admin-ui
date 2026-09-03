@@ -90,6 +90,17 @@ export interface AlertState {
  * list is what let deletes ship with no invalidation at all: the caller simply
  * did not pass one, and nothing could tell. Here it is not the caller's job.
  */
+/**
+ * A registry entry's document, whether it is a string or a builder.
+ *
+ * Builders exist because a document whose selection depends on a feature flag cannot be
+ * built at module scope: window.__APP_ENV__ is assigned after an await in main.tsx, so a
+ * module-level `gql` template reads the flag before it exists. Calling it here means the
+ * flag is read when the mutation actually runs.
+ */
+const resolveDocument = (document?: string | (() => string)): string =>
+	typeof document === "function" ? document() : (document ?? "");
+
 export function useEntityMutation(entity: EntityKey) {
 	const { t } = useTranslation();
 	const router = useRouter();
@@ -109,12 +120,18 @@ export function useEntityMutation(entity: EntityKey) {
 
 	const { mutateAsync: runUpdate } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(definition.updateMutation ?? "", variables),
+			gqlClient.request<any>(
+				resolveDocument(definition.updateMutation),
+				variables,
+			),
 	});
 
 	const { mutateAsync: runDelete } = useMutation({
 		mutationFn: (variables: { input: any }) =>
-			gqlClient.request<any>(definition.deleteMutation ?? "", variables),
+			gqlClient.request<any>(
+				resolveDocument(definition.deleteMutation),
+				variables,
+			),
 	});
 
 	/**

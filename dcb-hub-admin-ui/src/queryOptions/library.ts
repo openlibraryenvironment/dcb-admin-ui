@@ -52,7 +52,7 @@ export const libraryBasicsByAgencyCodeQuery = (
 		queryKey: ["library", scope, agencyCode],
 		queryFn: () =>
 			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-				getLibraryBasics,
+				getLibraryBasics(),
 				{ query: `agencyCode:${agencyCode}` },
 			),
 		enabled: !!agencyCode,
@@ -69,7 +69,7 @@ export const libraryBasicsQuery = (
 		queryKey: ["library", scope, libraryId],
 		queryFn: () =>
 			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
-				getLibraryBasics,
+				getLibraryBasics(),
 				{ query: `id:${libraryId}` },
 			),
 		enabled: !!libraryId,

@@ -2827,7 +2827,8 @@
 			"ncip_onboarding": "DCB NCIP onboarding",
 			"insights": "Insights",
 			"library_user_provisioning": "Library account provisioning",
-			"audit_explorer": "Audit Explorer"
+			"audit_explorer": "Audit Explorer",
+			"local_holds": "Maximum local holds per agency"
 		},
 		"status": {
 			"ready": "On, and served by this dcb-service",

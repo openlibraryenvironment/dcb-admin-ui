@@ -1,6 +1,9 @@
 import { gql } from "graphql-request";
 
-export const getLibraryBasics = gql`
+import { localHoldsSelection } from "@fragments/localHolds";
+
+// A FUNCTION: see @fragments/localHolds.
+export const getLibraryBasics = () => gql`
 	query LoadLibraryBasics($query: String!) {
 		libraries(query: $query) {
 			content {
@@ -26,7 +29,7 @@ export const getLibraryBasics = gql`
 					id
 					code
 					maxConsortialLoans
-					maxLocalHolds
+					${localHoldsSelection()}
 					isSupplyingAgency
 					isBorrowingAgency
 					hostLms {

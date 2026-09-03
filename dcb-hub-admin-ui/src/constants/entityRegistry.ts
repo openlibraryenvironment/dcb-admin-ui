@@ -22,8 +22,12 @@ export interface DeleteContext {
 }
 
 export interface EntityDefinition {
-	/** GraphQL document for an update. Omit for read-only entities. */
-	updateMutation?: string;
+	/**
+	 * GraphQL document for an update, or a zero-argument builder returning one. A builder
+	 * where the document depends on a runtime feature flag, which cannot be read at module
+	 * scope - see @fragments/localHolds. useEntityMutation resolves either shape.
+	 */
+	updateMutation?: string | (() => string);
 	/** GraphQL document for a delete. Omit for entities that cannot be deleted. */
 	deleteMutation?: string;
 	/**
@@ -133,6 +137,8 @@ export const ENTITY_REGISTRY: Record<EntityKey, EntityDefinition> = {
 	// helper; it lives here, as data, so the next such entity is a line not a
 	// branch. Agencies are edited through their library, never deleted.
 	agency: {
+		// A BUILDER, not a document: maxLocalHolds is flag-gated. useEntityMutation
+		// resolves either shape.
 		updateMutation: updateAgencyQuery,
 		updateOperation: "updateAgency",
 		buildUpdateId: (code) => ({ code }),
