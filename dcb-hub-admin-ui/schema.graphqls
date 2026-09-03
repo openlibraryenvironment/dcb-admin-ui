@@ -1,13 +1,16 @@
-﻿# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service feat/library-account-provisioning
-# (02b9de675), which is NOT main and NOT any release.
+# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service main (1eb37378c).
 #
-# It is ahead of main by the DCB Admin for Libraries account provisioning API
-# (libraryUsers, provisionLibraryUser, setLibraryUserEnabled,
-# resendLibraryUserInvite and their types), which this app's feat/library-accounts
-# work consumes. That service branch must merge BEFORE this app's does, or those
-# documents meet a dcb-service that has never heard of them.
+# Taken verbatim from that ref, plus ONE hand-written addition at the end of this file:
+# auditIncidence and its two types, which exist in no dcb-service branch at all. They are
+# here so the Audit Explorer's documents can be validated against something; the feature
+# has no backend, which is why VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its
+# capability row carries since: null.
 #
-# Re-point this file at dcb-service main once that lands, and re-run codegen.
+# The provisioning API (libraryUsers, provisionLibraryUser, ...) and maxLocalHolds are now
+# on main - they merged as 43c7be56d and 1eb37378c. Neither is in a RELEASE yet, which is a
+# different claim and the one the capability registry makes.
+#
+# Re-take this file whenever dcb-service main moves, and re-run codegen.
 #
 scalar JSON
 
@@ -23,14 +26,6 @@ type Query {
     sourceBibs(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): BibRecordPage!
     processStates(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ProcessStatePage!
     audits(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronRequestAuditPage!
-		# One library's DCB Admin for Libraries accounts. Deliberately NOT consortium-wide:
-		# a library's staff list is tens of rows, and a roster across 500 libraries is a
-		# different query with different scale properties that nothing has asked for.
-		libraryUsers(libraryId: ID!): [LibraryUser!]!
-		# Whether this deployment has an identity provider configured at all, so the UI can
-		# hide a tab that could only fail rather than render a form nobody can submit.
-		libraryUserProvisioningAvailable: Boolean!
-    auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
     patronIdentities(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): PatronIdentityPage!
     numericRangeMappings(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): NumericRangeMappingPage!
     referenceValueMappings(query: String, pageno:Int, pagesize: Int, order: String, orderBy: String): ReferenceValueMappingPage!
@@ -45,6 +40,15 @@ type Query {
 		alarms(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): AlarmPage!
 		patronRequestStatistics(startDate: String,endDate: String,borrowerCodes:[String] ,pickupCodes: [String],
 			statusCodes: [String], supplierCodes: [String], bibClusterId: ID): [DailyPatronRequestStat]!
+		# One library's DCB Admin for Libraries accounts. Deliberately NOT consortium-wide:
+		# a library's staff list is tens of rows, and a roster across 500 libraries is a
+		# different query with different scale properties that nothing has asked for.
+		libraryUsers(libraryId: ID!): [LibraryUser!]!
+		# Whether this deployment has an identity provider configured at all, so the UI can
+		# hide a tab that could only fail rather than render a form nobody can submit.
+		libraryUserProvisioningAvailable: Boolean!
+		# Hand-added: see this file's header. No dcb-service branch serves this.
+		auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
 }
 
 type Mutation {
@@ -259,6 +263,7 @@ input LibraryInput {
 	isSupplyingAgency: Boolean
 	isBorrowingAgency: Boolean
 	maxConsortialLoans: Int
+	maxLocalHolds: Int
 	authProfile: String
 	hostLmsCode: String!
 }
@@ -434,6 +439,7 @@ input UpdateFunctionalSettingInput {
 input UpdateAgencyInput {
 	code: String!
 	maxConsortialLoans: Int
+	maxLocalHolds: Int
 	longitude: Float
 	latitude: Float
 	isSupplyingAgency: Boolean
@@ -502,6 +508,11 @@ type Agency {
 		isSupplyingAgency: Boolean
 		isBorrowingAgency: Boolean
 		maxConsortialLoans: Int
+		"""
+		The Host LMS limit on total holds per patron, local holds included. Null means
+		the agency has not told us, so DCB will not check it.
+		"""
+		maxLocalHolds: Int
 }
 
 """
@@ -549,6 +560,7 @@ type PatronRequest {
   pickupRequestId: String
   pickupRequestStatus: String
   status: String
+  outcome: String
   localRequestId: String
   localRequestStatus: String
   localItemId: String
@@ -599,21 +611,6 @@ type PatronRequestAudit {
   toStatus: String
   auditData: JSON
   patronRequest: PatronRequest
-}
-
-type AuditIncidenceBucket {
-  "ISO-8601 start of the interval (UTC)."
-  bucketStart: String!
-  count: Int!
-}
-
-type AuditIncidence {
-  "Echoed back so the client can label the axis: HOUR | DAY | WEEK."
-  interval: String!
-  "Total matching audits across the whole window (sum of bucket counts)."
-  totalSize: Int!
-  "Continuous, gap-filled, ascending by bucketStart."
-  buckets: [AuditIncidenceBucket!]!
 }
 
 type SupplierRequest {
@@ -679,6 +676,10 @@ type PatronIdentity {
   canonicalPtype: String
   localHomeLibraryCode: String
   lastValidated: String
+  # The library this patron belongs to, resolved from their home location during
+  # patron validation. The only place a request records it: patronHostlmsCode names
+  # the system, which on a shared one is every co-tenant rather than any of them.
+  resolvedAgency: Agency
 }
 
 type Location {
@@ -780,7 +781,7 @@ type Consortium {
 	# mark is in dataChangeLog, not on this type.
 	brandLogoUrl: String
 	brandLogoAlt: String
-	# R-17d â€” square app-bar mark, and the landing canvas.
+	# R-17d — square app-bar mark, and the landing canvas.
 	brandHeaderIconUrl: String
 	brandBackgroundImageUrl: String
 	patronWelcome: String
@@ -1132,4 +1133,24 @@ type LibraryUser {
 	status: LibraryUserStatus!
 	dateCreated: String
 	lastEditedBy: String
+}
+
+
+# ---------------------------------------------------------------------------
+# HAND-WRITTEN, and in no dcb-service branch. See this file's header.
+# ---------------------------------------------------------------------------
+
+type AuditIncidenceBucket {
+  "ISO-8601 start of the interval (UTC)."
+  bucketStart: String!
+  count: Int!
+}
+
+type AuditIncidence {
+  "Echoed back so the client can label the axis: HOUR | DAY | WEEK."
+  interval: String!
+  "Total matching audits across the whole window (sum of bucket counts)."
+  totalSize: Int!
+  "Continuous, gap-filled, ascending by bucketStart."
+  buckets: [AuditIncidenceBucket!]!
 }

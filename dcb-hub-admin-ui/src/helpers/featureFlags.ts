@@ -61,10 +61,11 @@ export const isNcipOnboardingEnabled = (): boolean =>
  *
  * Note the threshold: libraryUsers, libraryUserProvisioningAvailable,
  * provisionLibraryUser, setLibraryUserEnabled and resendLibraryUserInvite are on
- * dcb-service feat/library-account-provisioning - not main, not the 9.0.0 tag, not any
- * release. That service branch must merge first. This is why there is no single
- * "dcb-service is v9" flag - it would be a lie about this feature and about the audit
- * explorer below, and turning it on when v9 landed would break both.
+ * dcb-service MAIN (merged as 43c7be56d) and in NO RELEASE - not 8.71.0, not the 9.0.0
+ * tag. So this is on in a development environment tracking main and off everywhere else,
+ * which is why there is no single "dcb-service is v9" flag: it would be a lie about this
+ * feature and about the audit explorer below, and turning it on at the v9 upgrade would
+ * break both.
  *
  * Like the brand flag, this one gates a DOCUMENT: the fields are absent from 9.0.0's
  * schema too, so the query fails validation there as well.
@@ -78,9 +79,10 @@ export const isLibraryUserProvisioningEnabled = (): boolean =>
  * Enable with VITE_FEATURE_AUDIT_EXPLORER=true once the environment's dcb-service
  * is new enough.
  *
- * As of dcb-service 9.0.0 that release does not exist yet: `auditIncidence` is in
- * neither 8.71.0, nor the 9.0.0 tag, nor main. Do not switch this on expecting it to
- * work - see SERVICE_CAPABILITIES in @constants/serviceCapabilities.
+ * `auditIncidence` is in no dcb-service anywhere - not 8.71.0, not the 9.0.0 tag, not
+ * main, not any branch. It exists only as a hand-written block in this app's
+ * schema.graphqls so its documents can be validated. Do not switch this on expecting it
+ * to work - see SERVICE_CAPABILITIES in @constants/serviceCapabilities.
  */
 export const isAuditExplorerEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_AUDIT_EXPLORER");

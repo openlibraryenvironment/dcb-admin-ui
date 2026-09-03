@@ -170,6 +170,7 @@ export type LibraryInput = {
 	latitude?: number | null | undefined;
 	longitude?: number | null | undefined;
 	maxConsortialLoans?: number | null | undefined;
+	maxLocalHolds?: number | null | undefined;
 	patronWebsite?: string | null | undefined;
 	reason?: string | null | undefined;
 	shortName: string;
@@ -228,6 +229,7 @@ export type UpdateAgencyInput = {
 	latitude?: number | null | undefined;
 	longitude?: number | null | undefined;
 	maxConsortialLoans?: number | null | undefined;
+	maxLocalHolds?: number | null | undefined;
 	reason?: string | null | undefined;
 };
 

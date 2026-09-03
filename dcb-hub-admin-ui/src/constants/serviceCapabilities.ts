@@ -124,10 +124,10 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
-		// NOT 9.0.0, and NOT main either: this API lives on dcb-service
-		// feat/library-account-provisioning, which has not merged. That service branch
-		// must land before this app's feat/library-accounts does. It is exactly why the
-		// flags are per capability rather than per release.
+		// On dcb-service MAIN, and in no release: 8.71.0 does not have it and neither does
+		// the 9.0.0 tag. `since` stays null until a release ships it - see the test below,
+		// which will say so. Exactly why the flags are per capability rather than per
+		// release.
 		id: "library_user_provisioning",
 		flag: "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 		enabled: isLibraryUserProvisioningEnabled,
@@ -149,9 +149,9 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// `auditIncidence` is in no dcb-service branch yet, not even main. It is in
-		// schema.graphqls by hand - see that file's header - so this row is checked the
-		// same way as the one above.
+		// `auditIncidence` is in no dcb-service anywhere - no release, not main, no branch.
+		// It is in schema.graphqls by hand - see that file's header - so this row is
+		// checked the same way as the one above.
 		id: "audit_explorer",
 		flag: "VITE_FEATURE_AUDIT_EXPLORER",
 		enabled: isAuditExplorerEnabled,
