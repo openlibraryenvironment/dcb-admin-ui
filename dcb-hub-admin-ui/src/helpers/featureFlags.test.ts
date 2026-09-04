@@ -53,12 +53,11 @@ describe("flags fail closed", () => {
 	});
 
 	it("is off when the environment has never heard of the flag", () => {
-		// The build-time fallback, cleared explicitly. readFlag falls back to
-		// import.meta.env when the injected value is undefined, and a developer's
-		// git-ignored .env commonly sets VITE_FEATURE_INSIGHTS=true - which made this
-		// case pass in CI and fail on their machine, for a reason the assertion could
-		// not name. The property under test is the READ, not what happens to be in a
-		// local .env.
+		// The import.meta.env half has to be stubbed too, not just window. readFlag falls
+		// back to import.meta.env for local development, and a developer's git-ignored
+		// .env sets VITE_FEATURE_INSIGHTS=true - so this passed in CI, where no .env
+		// exists, and failed on the machine of anyone who had one. A test whose result
+		// depends on an untracked file is not a gate.
 		vi.stubEnv("VITE_FEATURE_INSIGHTS", "");
 
 		// envsubst renders an unset variable as the empty string, and a bundle built

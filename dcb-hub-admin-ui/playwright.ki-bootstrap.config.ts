@@ -1,5 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Port 4183: the bootloader band (418x) for dcb-admin-ui (…3). It was 4174 — the SAME
+// port as the Lighthouse gate below-stairs in lighthouserc.js — so whichever ran first
+// left a server the other silently reused. Allocation table in playwright.config.ts.
+
 export default defineConfig({
 	testDir: "./e2e-ki-bootstrap",
 	fullyParallel: true,
