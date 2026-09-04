@@ -11,7 +11,7 @@ const runtimeConfig = {
 const bundlePath = "/dcb-hub-admin-ui/v-test";
 
 async function mapPublishedPrefix(page: Page, prefix: string): Promise<void> {
-	await page.route(`http://localhost:4174${prefix}/**`, async (route) => {
+	await page.route(`http://localhost:4183${prefix}/**`, async (route) => {
 		const sourceUrl = new URL(route.request().url());
 		sourceUrl.pathname = sourceUrl.pathname.replace(prefix, "");
 		const response = await route.fetch({ url: sourceUrl.href });
@@ -81,11 +81,11 @@ test("mounts at the host root with runtime configuration", async ({ page }) => {
 
 	expect(state.apiBase).toBe(runtimeConfig.VITE_DCB_API_BASE);
 	expect(state.bundleBase).toBe(
-		"http://localhost:4174/dcb-hub-admin-ui/v-test/",
+		"http://localhost:4183/dcb-hub-admin-ui/v-test/",
 	);
 	expect(state.stylesheets).toHaveLength(1);
 	expect(state.stylesheets[0]).toMatch(
-		/^http:\/\/localhost:4174\/dcb-hub-admin-ui\/v-test\/assets\/.+\.css$/,
+		/^http:\/\/localhost:4183\/dcb-hub-admin-ui\/v-test\/assets\/.+\.css$/,
 	);
 });
 

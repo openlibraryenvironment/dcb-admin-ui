@@ -1,11 +1,11 @@
 import type { Page } from "@playwright/test";
 
-// Mirrors the values baked into the e2e build via .env.e2e / playwright.config.ts's
-// webServer.env - must match exactly, since they form the localStorage key below.
-const KEYCLOAK_URL =
-	process.env.VITE_KEYCLOAK_URL ||
-	"https://e2e-fake-keycloak.invalid/realms/dcb";
-const KEYCLOAK_ID = process.env.VITE_KEYCLOAK_ID || "dcb-admin-e2e";
+import { E2E_KEYCLOAK_ID, E2E_KEYCLOAK_URL } from "./keycloak";
+
+// The same constants playwright.config.ts bakes into the build. Imported rather than
+// re-derived: they form the localStorage key below and must match to the character.
+const KEYCLOAK_URL = E2E_KEYCLOAK_URL;
+const KEYCLOAK_ID = E2E_KEYCLOAK_ID;
 
 export const ADMIN_ROLES = ["ADMIN", "CONSORTIUM_ADMIN"];
 export const READ_ONLY_ROLES = ["LIBRARY_READ_ONLY"];
