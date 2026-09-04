@@ -81,7 +81,7 @@ describe("getConsortiumBasics", () => {
 		// getConsortiaDataFetcher does not join the association, so name, code
 		// and type come back null - and they are String! in the schema, which
 		// nulls the entire response rather than just the field.
-		const libraryGroupSelection = getConsortiumBasics
+		const libraryGroupSelection = getConsortiumBasics()
 			.replace(/#[^\n]*/g, "")
 			.match(/libraryGroup\s*{([^}]*)}/)?.[1];
 

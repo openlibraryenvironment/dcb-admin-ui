@@ -14,7 +14,7 @@ import LibrariesChapter from "@components/Setup/chapters/LibrariesChapter";
 import { useConsortiumSetup } from "@hooks/useConsortiumSetup";
 import { useIsConsortiumAdmin } from "@hooks/useIsConsortiumAdmin";
 import {
-	CONSORTIUM_SETUP_STEPS,
+	consortiumSetupSteps,
 	isConsortiumSetupStepId,
 	type ConsortiumSetupStepId,
 } from "@helpers/consortiumSetup";
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/__authenticated/setup/$step")({
 		if (!isConsortiumSetupStepId(step)) {
 			throw redirect({
 				to: "/setup/$step",
-				params: { step: CONSORTIUM_SETUP_STEPS[0] },
+				params: { step: consortiumSetupSteps()[0] },
 			});
 		}
 

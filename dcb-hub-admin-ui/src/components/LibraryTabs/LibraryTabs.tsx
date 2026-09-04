@@ -3,9 +3,11 @@ import { useRouter } from "@tanstack/react-router";
 import { Tab, Tabs } from "@mui/material";
 
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
-import { isInsightsEnabled } from "@helpers/featureFlags";
+import {
+	isInsightsEnabled,
+	isLibraryUserProvisioningEnabled,
+} from "@helpers/featureFlags";
 import { TABS } from "@constants/libraryTabs";
-
 
 interface LibraryTabsProps {
 	libraryId: string;
@@ -19,13 +21,17 @@ export default function LibraryTabs({ libraryId, value }: LibraryTabsProps) {
 
 	const pathFor = (path: string) => `/libraries/${libraryId}${path}`;
 
-	// Insights is gated on a dcb-service release that is not out yet. Hiding it is safe
-	// for every page's `value` index because those index the UNFILTERED array above -
-	// visibleTabs only decides what renders. That invariant now carries two conditional
-	// tabs' worth of weight rather than one, so it is asserted in LibraryTabs.test.tsx.
-	const visibleTabs = isInsightsEnabled()
-		? TABS
-		: TABS.filter((tab) => tab.path !== "/insights");
+	// Both of these are gated on a dcb-service version, and on DIFFERENT ones: Insights
+	// arrived in 9.0.0, account provisioning is only on main and is not in the 9.0.0 tag.
+	// Hiding either is safe for every page's `value` index because those index the
+	// UNFILTERED array above - hidden only decides what renders. That invariant now
+	// carries three conditional tabs' worth of weight, and it is asserted in
+	// LibraryTabs.test.ts.
+	const hidden = new Set<string>();
+	if (!isInsightsEnabled()) hidden.add("/insights");
+	if (!isLibraryUserProvisioningEnabled()) hidden.add("/accounts");
+
+	const visibleTabs = TABS.filter((tab) => !hidden.has(tab.path));
 
 	return (
 		<Tabs

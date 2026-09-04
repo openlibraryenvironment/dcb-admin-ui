@@ -25,7 +25,7 @@ export const consortiumBasicsQuery = (
 		throwOnError: false,
 		queryFn: () =>
 			gqlClient.request<any, LoadConsortiumHeaderQueryVariables>(
-				getConsortiumBasics,
+				getConsortiumBasics(),
 				CONSORTIUM_BASICS_VARIABLES,
 			),
 	});

@@ -20,7 +20,7 @@ import SetupIntro from "./SetupIntro";
 import SetupRail from "./SetupRail";
 import { SETUP_CHAPTERS } from "./setupChapters";
 import {
-	CONSORTIUM_SETUP_STEPS,
+	consortiumSetupSteps,
 	stepNumber,
 	type ConsortiumSetupState,
 	type ConsortiumSetupStepId,
@@ -55,12 +55,15 @@ function SetupLayoutInner({
 	const headingRef = useRef<HTMLHeadingElement>(null);
 	const isDirtyNow = useSetupDirty();
 
-
 	const chapter = SETUP_CHAPTERS[step];
-	const isFirstChapter = step === CONSORTIUM_SETUP_STEPS[0];
+	// The chapters this deployment actually asks. Not every one this flow knows about:
+	// the discovery chapter is absent before dcb-service 9.0.0, and announcing "Step 5
+	// of 6" over a rail showing five would be a worse answer than not asking at all.
+	const steps = consortiumSetupSteps();
+	const isFirstChapter = step === steps[0];
 	const announcement = t("setup.announcement", {
 		number: stepNumber(step),
-		total: CONSORTIUM_SETUP_STEPS.length,
+		total: steps.length,
 		title: t(chapter.labelKey),
 	});
 
@@ -118,7 +121,7 @@ function SetupLayoutInner({
 					<Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5 }}>
 						{t("setup.step_of", {
 							number: stepNumber(step),
-							total: CONSORTIUM_SETUP_STEPS.length,
+							total: steps.length,
 						})}
 					</Typography>
 					<Typography
@@ -187,7 +190,9 @@ function SetupLayoutInner({
  * would read the context it declares, which React resolves to the DEFAULT value - so the
  * blocker would see isDirty false forever and never block anything.
  */
-export default function SetupLayout(props: PropsWithChildren<SetupLayoutProps>) {
+export default function SetupLayout(
+	props: PropsWithChildren<SetupLayoutProps>,
+) {
 	return (
 		<SetupRunProvider>
 			<SetupLayoutInner {...props} />

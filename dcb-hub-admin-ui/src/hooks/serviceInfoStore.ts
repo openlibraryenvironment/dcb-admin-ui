@@ -63,7 +63,13 @@ const useDCBVersionStore = create<VersionInfo>()(
 						version: data.version || "Unknown",
 						isDev,
 						isAcceptableVersion: true,
-						type: data.env.code || "",
+						// Optional chaining, because this whole fetch is now what the
+						// Service Info capability panel reads the version from. `env` is
+						// in 8.71.0's info block and in main's, but an unguarded deref
+						// turns any future /info that lacks it into a caught TypeError -
+						// and then the panel reports every capability as "cannot tell"
+						// for a reason nothing on screen could explain.
+						type: data.env?.code || "",
 						branch: data.branch || "main",
 						brandAssetStore: brandAssetStoreFrom(data),
 						lastFetchedAt: Date.now(),

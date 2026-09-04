@@ -2805,5 +2805,38 @@
 			"leave": "Leave and discard",
 			"stay": "Stay on this chapter"
 		}
+	},
+	"service_capabilities": {
+		"title": "Feature availability",
+		"subtitle": "DCB Admin runs against more than one dcb-service release. These features are switched on per environment once its dcb-service is new enough. This deployment reports version {{version}}.",
+		"version_unknown": "unknown",
+		"needs_version": "dcb-service {{version}} or later",
+		"needs_unreleased": "Not in any dcb-service release yet",
+		"flag_on": "on",
+		"flag_off": "off",
+		"column": {
+			"feature": "Feature",
+			"needs": "Requires",
+			"flag": "Environment variable",
+			"status": "Status"
+		},
+		"feature": {
+			"consortium_branding": "Consortium branding",
+			"ncip_onboarding": "DCB NCIP onboarding",
+			"insights": "Insights",
+			"library_user_provisioning": "Library account provisioning",
+			"audit_explorer": "Audit Explorer"
+		},
+		"status": {
+			"ready": "On, and served by this dcb-service",
+			"available": "Available - not switched on yet",
+			"premature": "Switched on, but this dcb-service is too old",
+			"unavailable": "Not available on this dcb-service",
+			"unknown": "Cannot tell - the dcb-service version could not be read"
+		},
+		"alert": {
+			"available": "{{feature}} is now served by this dcb-service. Set {{flag}}=true to switch it on.",
+			"premature": "{{feature}} is switched on, but this dcb-service does not serve it. Set {{flag}}=false until the service is upgraded."
+		}
 	}
 }

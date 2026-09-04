@@ -4,6 +4,11 @@ import { expectPaintedScheme, scanForViolations } from "./fixtures/axe";
 import { seedAuth } from "./fixtures/auth";
 import { seedTheme } from "./fixtures/theme";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { useAllFeatures } from "./fixtures/flags";
+import {
+	legacyConsortiumMocks,
+	useLegacyService,
+} from "./fixtures/legacy-service-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import consortium from "./fixtures-data/consortium.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -104,6 +109,11 @@ for (const scheme of ["light", "dark"] as const) {
 		test.use({ colorScheme: scheme });
 
 		test.beforeEach(async ({ page }) => {
+			// The widest surface the application can render: every backend-gated
+			// feature on. A route behind a flag that is off is a route this gate would
+			// silently stop measuring. The narrower legacy surface has its own scan at
+			// the foot of this file.
+			await useAllFeatures(page);
 			await seedAuth(page);
 			await mockGraphQL(page, MOCKS);
 		});
@@ -125,6 +135,7 @@ for (const scheme of ["light", "dark"] as const) {
 
 test.describe("WCAG 2.2 AA - high contrast", () => {
 	test.beforeEach(async ({ page }) => {
+		await useAllFeatures(page);
 		await seedAuth(page);
 		// The only way to reach this mode: it is a stored choice, not an OS one.
 		await seedTheme(page, { mode: "highContrast" });
@@ -136,6 +147,54 @@ test.describe("WCAG 2.2 AA - high contrast", () => {
 			await page.goto(route.path);
 			await route.ready(page);
 			await scanForViolations(page);
+		});
+	}
+});
+
+/**
+ * The same floor on the narrower surface — R-19.
+ *
+ * DCB Admin also runs against dcb-service 8.71.0, where the branding tab, the setup
+ * wizard's discovery chapter, Insights, NCIP onboarding and the accounts grid are all
+ * absent. That is not the same page with something hidden: removing a tab changes the
+ * tab list's roving focus order, and removing a wizard chapter renumbers the rail and
+ * the announced total. Both are exactly the kind of change a diff does not show and a
+ * scan does.
+ */
+test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
+	// Every route above that a legacy deployment still has. /accounts is gone, and its
+	// absence is asserted in legacy-service.spec.ts rather than scanned here.
+	const LEGACY_ROUTES = ROUTES.filter(
+		(route) => !route.path.includes("/accounts"),
+	);
+
+	for (const scheme of ["light", "dark"] as const) {
+		test.describe(scheme, () => {
+			test.use({ colorScheme: scheme });
+
+			test.beforeEach(async ({ page }) => {
+				await useLegacyService(page);
+				await seedAuth(page);
+				await mockGraphQL(page, { ...MOCKS, ...legacyConsortiumMocks });
+			});
+
+			for (const route of LEGACY_ROUTES) {
+				test(`${route.path} has no violations`, async ({ page }) => {
+					await page.goto(route.path);
+					await route.ready(page);
+					await expectPaintedScheme(page, scheme);
+					await scanForViolations(page);
+				});
+			}
+
+			test("the setup rail has no violations with a chapter removed", async ({
+				page,
+			}) => {
+				// The renumbered rail, which is the surface this world actually changes.
+				await page.goto("/setup/consortium");
+				await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+				await scanForViolations(page);
+			});
 		});
 	}
 });

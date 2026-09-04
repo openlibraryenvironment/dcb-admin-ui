@@ -1,16 +1,9 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service main (1eb37378c).
+# dcb-service v8.71.0 (c99ba5d24), tagged 2026-07-23.
 #
-# Taken verbatim from that ref, plus ONE hand-written addition at the end of this file:
-# auditIncidence and its two types, which exist in no dcb-service branch at all. They are
-# here so the Audit Explorer's documents can be validated against something; the feature
-# has no backend, which is why VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its
-# capability row carries since: null.
-#
-# The provisioning API (libraryUsers, provisionLibraryUser, ...) and maxLocalHolds are now
-# on main - they merged as 43c7be56d and 1eb37378c. Neither is in a RELEASE yet, which is a
-# different claim and the one the capability registry makes.
-#
-# Re-take this file whenever dcb-service main moves, and re-run codegen.
+# THE RELEASE RUNNING IN PRODUCTION. Copied verbatim from
+# dcb/src/main/resources/schema.graphqls at that tag; do not hand-edit.
+# schemaConformance.test.ts validates every document this app can emit with its
+# feature flags OFF against this file.
 #
 scalar JSON
 
@@ -40,15 +33,6 @@ type Query {
 		alarms(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): AlarmPage!
 		patronRequestStatistics(startDate: String,endDate: String,borrowerCodes:[String] ,pickupCodes: [String],
 			statusCodes: [String], supplierCodes: [String], bibClusterId: ID): [DailyPatronRequestStat]!
-		# One library's DCB Admin for Libraries accounts. Deliberately NOT consortium-wide:
-		# a library's staff list is tens of rows, and a roster across 500 libraries is a
-		# different query with different scale properties that nothing has asked for.
-		libraryUsers(libraryId: ID!): [LibraryUser!]!
-		# Whether this deployment has an identity provider configured at all, so the UI can
-		# hide a tab that could only fail rather than render a form nobody can submit.
-		libraryUserProvisioningAvailable: Boolean!
-		# Hand-added: see this file's header. No dcb-service branch serves this.
-		auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
 }
 
 type Mutation {
@@ -84,9 +68,6 @@ type Mutation {
 		updateAgency(input: UpdateAgencyInput): Agency!
 	  createHostLms(input: CreateHostLmsInput!): CreateHostLmsResult
 		updateHostLms(input: UpdateHostLmsInput!): UpdateHostLmsResult
-		provisionLibraryUser(input: ProvisionLibraryUserInput): LibraryUser!
-		setLibraryUserEnabled(input: SetLibraryUserEnabledInput): LibraryUser!
-		resendLibraryUserInvite(input: ResendLibraryUserInviteInput): LibraryUser!
 
 }
 
@@ -140,10 +121,8 @@ input ConsortiumInput {
 	name: String!
 	groupName: String!
 	dateOfLaunch: String!
-	# The brand marks (N-1.3). These replaced headerImageUrl/aboutImageUrl in V9_0_004:
-	# the square header mark and the larger mark, one set for every DCB app.
-	brandHeaderIconUrl: String
-	brandLogoUrl: String
+	headerImageUrl: String
+	aboutImageUrl: String
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
@@ -263,7 +242,6 @@ input LibraryInput {
 	isSupplyingAgency: Boolean
 	isBorrowingAgency: Boolean
 	maxConsortialLoans: Int
-	maxLocalHolds: Int
 	authProfile: String
 	hostLmsCode: String!
 }
@@ -333,6 +311,12 @@ input UpdateConsortialMaxLoansInput {
 
 input UpdateConsortiumInput {
 	id: ID!
+	headerImageUrl: String
+	headerImageUploader: String
+	headerImageUploaderEmail: String
+	aboutImageUrl: String
+	aboutImageUploader: String
+	aboutImageUploaderEmail: String
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
@@ -341,21 +325,6 @@ input UpdateConsortiumInput {
 	changeCategory: String!
 	changeReferenceUrl: String
 	contacts: [UpdatePersonInput]
-	# The brand (N-1.3), one set of marks for every DCB app. Sending an explicit null or
-	# an empty string CLEARS the field; omitting the key leaves it alone.
-	brandLogoUrl: String
-	brandLogoAlt: String
-	# R-17d. The header icon is a SQUARE mark for the app bar and the favicon, not a
-	# small logo: the logo is a lockup and a 32x32 box has no horizontal room. The
-	# background is the canvas behind the landing hero, consortium level only.
-	# Both accept an absolute http(s) URL or a path under this service's asset prefix.
-	brandHeaderIconUrl: String
-	brandBackgroundImageUrl: String
-	# Patron-facing copy under the search box. NOT `description`, which is staff prose.
-	patronWelcome: String
-	# A name from the discovery app's theme registry, not a colour. Rejected on write
-	# if it is not in dcb.branding.theme-names.
-	defaultThemeName: String
 }
 
 input UpdateLocationInput {
@@ -391,11 +360,6 @@ input UpdateLibraryInput {
 	type: String
 	patronWebsite: String
 	discoverySystem: String
-	# Patron-facing brand (N-1.3). patronWebsite above is the logo's link target, so
-	# there is no second URL here. Explicit null or empty string clears the field.
-	brandLogoUrl: String
-	brandLogoAlt: String
-	defaultThemeName: String
 }
 
 input UpdatePersonInput {
@@ -439,7 +403,6 @@ input UpdateFunctionalSettingInput {
 input UpdateAgencyInput {
 	code: String!
 	maxConsortialLoans: Int
-	maxLocalHolds: Int
 	longitude: Float
 	latitude: Float
 	isSupplyingAgency: Boolean
@@ -508,11 +471,6 @@ type Agency {
 		isSupplyingAgency: Boolean
 		isBorrowingAgency: Boolean
 		maxConsortialLoans: Int
-		"""
-		The Host LMS limit on total holds per patron, local holds included. Null means
-		the agency has not told us, so DCB will not check it.
-		"""
-		maxLocalHolds: Int
 }
 
 """
@@ -560,7 +518,6 @@ type PatronRequest {
   pickupRequestId: String
   pickupRequestStatus: String
   status: String
-  outcome: String
   localRequestId: String
   localRequestStatus: String
   localItemId: String
@@ -676,10 +633,6 @@ type PatronIdentity {
   canonicalPtype: String
   localHomeLibraryCode: String
   lastValidated: String
-  # The library this patron belongs to, resolved from their home location during
-  # patron validation. The only place a request records it: patronHostlmsCode names
-  # the system, which on a shared one is every co-tenant rather than any of them.
-  resolvedAgency: Agency
 }
 
 type Location {
@@ -726,10 +679,6 @@ type Library {
 	principalLabel: String
 	secretLabel: String
 	targetLoanToBorrowRatio: String
-	# Patron-facing brand (N-1.3), read by dcb-admin-for-libraries' library form.
-	brandLogoUrl: String
-	brandLogoAlt: String
-	defaultThemeName: String
 }
 
 type LibraryContact {
@@ -767,6 +716,12 @@ type Consortium {
 	name: String!
 	libraryGroup: LibraryGroup!
 	dateOfLaunch: String
+	headerImageUrl: String
+	headerImageUploader: String
+	headerImageUploaderEmail: String
+	aboutImageUrl: String
+	aboutImageUploader: String
+	aboutImageUploaderEmail: String
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
@@ -776,16 +731,6 @@ type Consortium {
 	changeReferenceUrl: String
 	changeCategory: String
 	functionalSettings: [FunctionalSetting]
-	# The brand (N-1.3), read by dcb-admin-ui's consortium form and served to patrons
-	# by /discovery/consortium. There is deliberately no uploader field: who changed a
-	# mark is in dataChangeLog, not on this type.
-	brandLogoUrl: String
-	brandLogoAlt: String
-	# R-17d — square app-bar mark, and the landing canvas.
-	brandHeaderIconUrl: String
-	brandBackgroundImageUrl: String
-	patronWelcome: String
-	defaultThemeName: String
 }
 
 type ConsortiumContact {
@@ -1070,87 +1015,4 @@ type UpdateHostLmsResult {
 	pingStatus: String
 	ingestStatus: String
 	warnings: [String]
-}
-
-
-# ---------------------------------------------------------------------------
-# DCB Admin for Libraries accounts
-#
-# The enum is gate one of four on the role: a request naming ADMIN is a GraphQL
-# validation error before any resolver runs. It is not the security control -
-# ProvisionableRole.parse, the Postgres CHECK constraint and the identity provider's
-# own role-mapping grant are the others - but it is free and it removes a class of
-# mistake at the boundary.
-# ---------------------------------------------------------------------------
-
-enum ProvisionableRole {
-	LIBRARY_ADMIN
-	LIBRARY_READ_ONLY
-}
-
-enum LibraryUserStatus {
-	INVITED
-	ACTIVE
-	DISABLED
-}
-
-# Note the ABSENCE of an agencyCode field. It is derived server-side from libraryId, so
-# a client that cannot name an agency cannot scope an account to somebody else's library.
-input ProvisionLibraryUserInput {
-	libraryId: ID!
-	email: String!
-	firstName: String
-	lastName: String
-	role: ProvisionableRole!
-	reason: String
-	changeCategory: String
-	changeReferenceUrl: String
-}
-
-input SetLibraryUserEnabledInput {
-	id: ID!
-	enabled: Boolean!
-	reason: String
-	changeCategory: String
-	changeReferenceUrl: String
-}
-
-input ResendLibraryUserInviteInput {
-	id: ID!
-}
-
-# No password field exists on this type, deliberately, and none ever should. The
-# credential flow is entirely the provider's actions email.
-type LibraryUser {
-	id: ID!
-	identityProviderUserId: String!
-	libraryId: ID!
-	agencyCode: String!
-	email: String!
-	firstName: String
-	lastName: String
-	role: ProvisionableRole!
-	status: LibraryUserStatus!
-	dateCreated: String
-	lastEditedBy: String
-}
-
-
-# ---------------------------------------------------------------------------
-# HAND-WRITTEN, and in no dcb-service branch. See this file's header.
-# ---------------------------------------------------------------------------
-
-type AuditIncidenceBucket {
-  "ISO-8601 start of the interval (UTC)."
-  bucketStart: String!
-  count: Int!
-}
-
-type AuditIncidence {
-  "Echoed back so the client can label the axis: HOUR | DAY | WEEK."
-  interval: String!
-  "Total matching audits across the whole window (sum of bucket counts)."
-  totalSize: Int!
-  "Continuous, gap-filled, ascending by bucketStart."
-  buckets: [AuditIncidenceBucket!]!
 }

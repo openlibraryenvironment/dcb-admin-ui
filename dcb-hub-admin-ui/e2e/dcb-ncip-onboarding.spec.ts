@@ -2,9 +2,17 @@ import { expect, test } from "@playwright/test";
 
 import { READ_ONLY_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { useAllFeatures } from "./fixtures/flags";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 
 const onboardingPath = "/serviceInfo/dcbNcipOnboarding";
+
+// DcbProfileRegistrationController arrived in dcb-service 9.0.0, so this page is behind
+// VITE_FEATURE_NCIP_ONBOARDING. Every case below is about a deployment new enough to
+// have it; the flag being OFF is covered in legacy-service.spec.ts.
+test.beforeEach(async ({ page }) => {
+	await useAllFeatures(page);
+});
 
 test("conceals DCB NCIP onboarding from non-admin users", async ({ page }) => {
 	await seedAuth(page, { roles: READ_ONLY_ROLES });

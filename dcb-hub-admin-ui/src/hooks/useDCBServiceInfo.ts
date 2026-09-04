@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import useDCBVersionStore from "./serviceInfoStore";
 import { areBrandUploadsAvailable } from "@constants/discoveryBranding";
+import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
 
 // Stop constant /info requests: the service version changes rarely.
 const REQUEST_DELAY = 2 * 60 * 60 * 1000; // 2 hours
@@ -46,8 +47,19 @@ const useDCBServiceInfo = () => {
 		type,
 		branch,
 		brandAssetStore,
-		/** Whether to offer brand image upload controls. See areBrandUploadsAvailable. */
-		brandUploadsAvailable: areBrandUploadsAvailable(brandAssetStore),
+		/**
+		 * Whether to offer brand image upload controls.
+		 *
+		 * Two independent facts, and both have to hold. The flag says whether this
+		 * deployment's dcb-service has the brand columns at all (9.0.0 registers the
+		 * upload controller; 8.71.0 has neither the route nor anywhere to store the
+		 * URL). The /info asset store then says whether a 9.0.0 configured with
+		 * dcb.branding.assets.store=none registered it. See areBrandUploadsAvailable
+		 * for why an UNKNOWN store still counts as available.
+		 */
+		brandUploadsAvailable:
+			isConsortiumBrandingEnabled() &&
+			areBrandUploadsAvailable(brandAssetStore),
 	};
 };
 

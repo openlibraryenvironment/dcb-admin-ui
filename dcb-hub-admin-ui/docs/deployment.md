@@ -43,6 +43,47 @@ The application requires the following environment variables to function properl
 
 ---
 
+## 2a. Feature flags: which dcb-service this deployment is talking to
+
+DCB Admin runs against **more than one dcb-service release**. That is deliberate: a v9
+upgrade takes time to reach production, and the admin UI ships on its own cadence. The
+features that need a newer backend are each behind a runtime flag, so an environment turns
+them on **when its own dcb-service is upgraded, with no rebuild and no new artifact** —
+`docker-entrypoint.sh` renders `inject_env.json` from the container environment on every
+start, so a changed variable plus a container restart is the whole procedure.
+
+**Every flag is off unless it is explicitly `true`.** An unset variable, an empty string,
+`0` and `yes` are all read as off, so an environment that has never heard of a flag simply
+does not show the feature.
+
+| Variable                                 | Enable at dcb-service                  | What it turns on                                                                                                                              |
+| ---------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_FEATURE_CONSORTIUM_BRANDING`       | **9.0.0** or later                     | The consortium Branding tab, the setup wizard's Discovery chapter, brand image upload, and the merged brand columns in the consortium queries |
+| `VITE_FEATURE_NCIP_ONBOARDING`           | **9.0.0** or later                     | Service Info → DCB NCIP onboarding (`/api/v1/dcb-profile-ncip2`)                                                                              |
+| `VITE_FEATURE_INSIGHTS`                  | **9.0.0** or later                     | Insights, consortium- and library-level (`/insights`)                                                                                         |
+| `VITE_FEATURE_LIBRARY_USER_PROVISIONING` | **after 9.0.0** — not in the 9.0.0 tag | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                    |
+| `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**         | Service Info → Audit Explorer                                                                                                                 |
+
+Note the fourth and fifth rows. There is deliberately **no single "we are on v9 now"
+switch**: account provisioning is on dcb-service `main` but is _not_ in the 9.0.0 tag, and
+the audit explorer's backend is unmerged. One boolean would be a lie about both, and
+turning it on at the v9 upgrade would break them.
+
+### Checking, and what happens if you get it wrong
+
+**Service Info → Feature availability** lists every flag, the dcb-service version it needs,
+the version this deployment reports from `/info`, and whether the flag is on. It warns in
+two directions: a feature that is now served but still switched off (turn it on), and a
+flag switched on ahead of the upgrade (turn it off — the feature will fail).
+
+A flag left **off** after the upgrade costs nothing but a hidden feature. A flag switched
+**on** too early is the expensive mistake: the newer GraphQL fields do not degrade
+gracefully, because a field the server does not declare is a validation error that fails
+the whole operation. Switched on against 8.71.0, the consortium section, the setup wizard
+and the header all stop working at once.
+
+---
+
 ## 3. Deployment Pathways
 
 Choose the deployment method that matches your infrastructure - Cloudflare is currently preferred for official OpenRS deployments, but choose what works for you.
@@ -154,9 +195,17 @@ docker run -p 8080:80 \
   -e VITE_KEYCLOAK_ID="dcb-admin" \
   -e VITE_DCB_API_BASE="https://api..." \
   -e VITE_DCB_SEARCH_BASE="https://search..." \
+  -e VITE_FEATURE_CONSORTIUM_BRANDING="true" \
+  -e VITE_FEATURE_NCIP_ONBOARDING="true" \
+  -e VITE_FEATURE_INSIGHTS="true" \
   dcb-admin-ui
 
 ```
+
+The three feature flags above are the dcb-service **9.0.0** set (see Section 2a). Against
+8.71.0, leave them out. Switching them on later is a changed `-e` and a container restart:
+`docker-entrypoint.sh` re-renders `inject_env.json` on every start, so the bundle never has
+to be rebuilt.
 
 ## 4. Security Note: PKCE vs. Traditional Client Secrets
 

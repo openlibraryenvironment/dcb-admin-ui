@@ -60,7 +60,7 @@ export const Route = createFileRoute("/__authenticated/setup/")({
 				queryKey: CONSORTIUM_QUERY_KEY,
 				queryFn: () =>
 					client.request<any, LoadConsortiumQueryVariables>(
-						getConsortia,
+						getConsortia(),
 						CONSORTIUM_QUERY_VARIABLES,
 					),
 			}),
@@ -123,7 +123,9 @@ function ResolveSetupStep() {
 	// A failed read is not an empty instance; start at the beginning rather than
 	// asserting the consortium is missing.
 	if (isError) {
-		return <Navigate to="/setup/$step" params={{ step: "appearance" }} replace />;
+		return (
+			<Navigate to="/setup/$step" params={{ step: "appearance" }} replace />
+		);
 	}
 
 	const entry = setupEntryPoint(state);

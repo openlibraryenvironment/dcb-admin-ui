@@ -30,6 +30,7 @@ import {
 	type DiscoveryBrandValues,
 } from "@schemas/discoveryBrandSchema";
 import { updateConsortiumQuery } from "@mutations/updateConsortium";
+import { stripUnsupportedConsortiumInput } from "@helpers/consortiumBrand";
 import type { UpdateConsortiumMutationVariables } from "@generated/graphql";
 import { useRegisterSetupDirty } from "../setupRun";
 
@@ -120,10 +121,17 @@ export default function DiscoveryChapter() {
 		setStagedImages((current) => ({ ...current, [field]: file }));
 
 	const { mutateAsync: updateConsortium } = useMutation({
+		// The brand keys are stripped HERE, not at each caller. UpdateConsortiumInput
+		// does not declare them before dcb-service 9.0.0, and an undeclared input field
+		// fails the WHOLE mutation - so on 8.71.0 forgetting this at one call site means
+		// nothing on the consortium form saves, brand or not.
 		mutationFn: (variables: UpdateConsortiumMutationVariables) =>
 			gqlClient.request<any, UpdateConsortiumMutationVariables>(
-				updateConsortiumQuery,
-				variables,
+				updateConsortiumQuery(),
+				{
+					...variables,
+					input: stripUnsupportedConsortiumInput(variables.input),
+				} as UpdateConsortiumMutationVariables,
 			),
 		onSuccess: () =>
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),

@@ -1,16 +1,11 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service main (1eb37378c).
+# dcb-service v9.0.0 (805c8c124), tagged 2026-08-20.
 #
-# Taken verbatim from that ref, plus ONE hand-written addition at the end of this file:
-# auditIncidence and its two types, which exist in no dcb-service branch at all. They are
-# here so the Audit Explorer's documents can be validated against something; the feature
-# has no backend, which is why VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its
-# capability row carries since: null.
+# Copied verbatim from that tag; do not hand-edit. dcb-service main (02b7548da) carries
+# a BYTE-IDENTICAL schema - the four commits since the tag are docs and a Koha
+# ingest fix - so this file is also 'what main serves' today.
 #
-# The provisioning API (libraryUsers, provisionLibraryUser, ...) and maxLocalHolds are now
-# on main - they merged as 43c7be56d and 1eb37378c. Neither is in a RELEASE yet, which is a
-# different claim and the one the capability registry makes.
-#
-# Re-take this file whenever dcb-service main moves, and re-run codegen.
+# serviceCapabilities.test.ts checks each capability's 'since' against this and
+# against the 8.71.0 file: the fields must be here and absent there.
 #
 scalar JSON
 
@@ -40,15 +35,6 @@ type Query {
 		alarms(query: String, pageno: Int, pagesize: Int, order: String, orderBy: String): AlarmPage!
 		patronRequestStatistics(startDate: String,endDate: String,borrowerCodes:[String] ,pickupCodes: [String],
 			statusCodes: [String], supplierCodes: [String], bibClusterId: ID): [DailyPatronRequestStat]!
-		# One library's DCB Admin for Libraries accounts. Deliberately NOT consortium-wide:
-		# a library's staff list is tens of rows, and a roster across 500 libraries is a
-		# different query with different scale properties that nothing has asked for.
-		libraryUsers(libraryId: ID!): [LibraryUser!]!
-		# Whether this deployment has an identity provider configured at all, so the UI can
-		# hide a tab that could only fail rather than render a form nobody can submit.
-		libraryUserProvisioningAvailable: Boolean!
-		# Hand-added: see this file's header. No dcb-service branch serves this.
-		auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
 }
 
 type Mutation {
@@ -84,9 +70,6 @@ type Mutation {
 		updateAgency(input: UpdateAgencyInput): Agency!
 	  createHostLms(input: CreateHostLmsInput!): CreateHostLmsResult
 		updateHostLms(input: UpdateHostLmsInput!): UpdateHostLmsResult
-		provisionLibraryUser(input: ProvisionLibraryUserInput): LibraryUser!
-		setLibraryUserEnabled(input: SetLibraryUserEnabledInput): LibraryUser!
-		resendLibraryUserInvite(input: ResendLibraryUserInviteInput): LibraryUser!
 
 }
 
@@ -263,7 +246,6 @@ input LibraryInput {
 	isSupplyingAgency: Boolean
 	isBorrowingAgency: Boolean
 	maxConsortialLoans: Int
-	maxLocalHolds: Int
 	authProfile: String
 	hostLmsCode: String!
 }
@@ -439,7 +421,6 @@ input UpdateFunctionalSettingInput {
 input UpdateAgencyInput {
 	code: String!
 	maxConsortialLoans: Int
-	maxLocalHolds: Int
 	longitude: Float
 	latitude: Float
 	isSupplyingAgency: Boolean
@@ -508,11 +489,6 @@ type Agency {
 		isSupplyingAgency: Boolean
 		isBorrowingAgency: Boolean
 		maxConsortialLoans: Int
-		"""
-		The Host LMS limit on total holds per patron, local holds included. Null means
-		the agency has not told us, so DCB will not check it.
-		"""
-		maxLocalHolds: Int
 }
 
 """
@@ -1070,87 +1046,4 @@ type UpdateHostLmsResult {
 	pingStatus: String
 	ingestStatus: String
 	warnings: [String]
-}
-
-
-# ---------------------------------------------------------------------------
-# DCB Admin for Libraries accounts
-#
-# The enum is gate one of four on the role: a request naming ADMIN is a GraphQL
-# validation error before any resolver runs. It is not the security control -
-# ProvisionableRole.parse, the Postgres CHECK constraint and the identity provider's
-# own role-mapping grant are the others - but it is free and it removes a class of
-# mistake at the boundary.
-# ---------------------------------------------------------------------------
-
-enum ProvisionableRole {
-	LIBRARY_ADMIN
-	LIBRARY_READ_ONLY
-}
-
-enum LibraryUserStatus {
-	INVITED
-	ACTIVE
-	DISABLED
-}
-
-# Note the ABSENCE of an agencyCode field. It is derived server-side from libraryId, so
-# a client that cannot name an agency cannot scope an account to somebody else's library.
-input ProvisionLibraryUserInput {
-	libraryId: ID!
-	email: String!
-	firstName: String
-	lastName: String
-	role: ProvisionableRole!
-	reason: String
-	changeCategory: String
-	changeReferenceUrl: String
-}
-
-input SetLibraryUserEnabledInput {
-	id: ID!
-	enabled: Boolean!
-	reason: String
-	changeCategory: String
-	changeReferenceUrl: String
-}
-
-input ResendLibraryUserInviteInput {
-	id: ID!
-}
-
-# No password field exists on this type, deliberately, and none ever should. The
-# credential flow is entirely the provider's actions email.
-type LibraryUser {
-	id: ID!
-	identityProviderUserId: String!
-	libraryId: ID!
-	agencyCode: String!
-	email: String!
-	firstName: String
-	lastName: String
-	role: ProvisionableRole!
-	status: LibraryUserStatus!
-	dateCreated: String
-	lastEditedBy: String
-}
-
-
-# ---------------------------------------------------------------------------
-# HAND-WRITTEN, and in no dcb-service branch. See this file's header.
-# ---------------------------------------------------------------------------
-
-type AuditIncidenceBucket {
-  "ISO-8601 start of the interval (UTC)."
-  bucketStart: String!
-  count: Int!
-}
-
-type AuditIncidence {
-  "Echoed back so the client can label the axis: HOUR | DAY | WEEK."
-  interval: String!
-  "Total matching audits across the whole window (sum of bucket counts)."
-  totalSize: Int!
-  "Continuous, gap-filled, ascending by bucketStart."
-  buckets: [AuditIncidenceBucket!]!
 }

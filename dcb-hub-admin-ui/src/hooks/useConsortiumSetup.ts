@@ -55,7 +55,7 @@ export function useConsortiumSetup(): UseConsortiumSetupResult {
 		queryKey: CONSORTIUM_QUERY_KEY,
 		queryFn: () =>
 			gqlClient.request<any, LoadConsortiumQueryVariables>(
-				getConsortia,
+				getConsortia(),
 				CONSORTIUM_QUERY_VARIABLES,
 			),
 		// A missing consortium is an ANSWER here, not a failure, and the flow renders it
