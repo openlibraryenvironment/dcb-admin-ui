@@ -12,7 +12,11 @@ test("conceals DCB NCIP onboarding from non-admin users", async ({ page }) => {
 
 	await page.goto(onboardingPath);
 
-	await expect(page).toHaveURL(/\/serviceInfo\/?$/);
+	// /unauthorised, not /serviceInfo. DCB Admin is consortium-only now, so a read-only
+	// library account is refused the whole application rather than nudged to a different
+	// page inside it. The page used to redirect here itself, which raced the app-wide bar
+	// and made this test flaky under parallel load.
+	await expect(page).toHaveURL(/\/unauthorised$/);
 	await expect(
 		page.getByRole("link", { name: "DCB NCIP Onboarding" }),
 	).toHaveCount(0);

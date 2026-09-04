@@ -14,6 +14,17 @@ type ConsortiumInfo = {
 	websiteURL: string;
 };
 
+/** What the header shows before any consortium has been created, and after one is gone. */
+const DEFAULTS: ConsortiumInfo = {
+	name: "OpenRS Consortium",
+	displayName: "OpenRS Consortium",
+	headerImageURL: "",
+	aboutImageURL: "",
+	description: "",
+	catalogueSearchURL: "",
+	websiteURL: "",
+};
+
 type ConsortiumActions = {
 	setName: (name: string) => void;
 	setHeaderImageURL: (headerImageURL: string) => void;
@@ -22,7 +33,7 @@ type ConsortiumActions = {
 	setWebsiteURL: (websiteUrl: string) => void;
 	setCatalogueSearchURL: (catalogueSearchUrl: string) => void;
 	setDescription: (description: string) => void;
-	clearConsortiumStore: () => void;
+	resetConsortiumStore: () => void;
 };
 
 export const useConsortiumInfoStore = create<
@@ -30,14 +41,7 @@ export const useConsortiumInfoStore = create<
 >()(
 	persist(
 		(set) => ({
-			// Intended to display when no consortium is available
-			name: "OpenRS Consortium",
-			displayName: "OpenRS Consortium",
-			headerImageURL: "",
-			aboutImageURL: "",
-			description: "",
-			catalogueSearchURL: "",
-			websiteURL: "",
+			...DEFAULTS,
 
 			// Build a combined setter
 			setName: (name: string) => set({ name }),
@@ -49,17 +53,18 @@ export const useConsortiumInfoStore = create<
 				set({ catalogueSearchURL }),
 			setDescription: (description: string) => set({ description }),
 
-			// Do we need to call this on logout at all?
-			clearConsortiumStore: () =>
-				set(() => ({
-					name: "",
-					headerImageURL: "",
-					aboutImageURL: "",
-					description: "",
-					catalogueSearchURL: "",
-					websiteURL: "",
-					displayName: "",
-				})),
+			// Answering the question this used to ask itself ("do we need to call this on
+			// logout at all?"): no. The key is deliberately exempt from the sign-out purge,
+			// because the logout screen renders "your session with {consortium} has ended"
+			// and has no token left to fetch that name with.
+			//
+			// What IS needed is a reset for when the consortium is GONE - deleted, or the
+			// deployment rebuilt. Nothing used to do that, so a name outlived the record it
+			// described and there was no sequence of actions in the application that could
+			// clear it. It restores the DEFAULTS rather than blanking the fields: an empty
+			// header is not the answer to "there is no consortium yet", which is exactly the
+			// state a first run is in.
+			resetConsortiumStore: () => set(() => ({ ...DEFAULTS })),
 		}),
 		{
 			name: storageKey("consortium-storage"),

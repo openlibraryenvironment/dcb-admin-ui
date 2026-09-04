@@ -15,6 +15,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import Confirmation from "@components/Confirmation/Confirmation";
 import i18n from "@/i18n";
 import { appUrl, clearAppStorage, storageKey } from "@helpers/appBase";
+import { canAccessDcbAdmin } from "@helpers/consortiumAccess";
 
 export const Route = createFileRoute("/__authenticated")({
 	component: AuthenticatedLayout,
@@ -113,6 +114,33 @@ function AuthenticatedLayout() {
 	const shouldRedirectToLogin =
 		!auth.error && !isAuthResolving && !auth.isAuthenticated;
 
+	// DCB Admin is a consortium-level tool, and until now nothing said so: a library
+	// account could sign in and meet an application whose every query it was refused.
+	//
+	// CHECKED HERE, NOT IN beforeLoad, and that is a measured decision rather than a
+	// stylistic one. `context.auth` comes from react-oidc-context, which restores the
+	// stored session ASYNCHRONOUSLY, so on a cold load - a pasted URL, a bookmark -
+	// beforeLoad runs while isAuthenticated is still false, takes its "not signed in
+	// yet" branch and never sees the roles. The guard then silently does nothing, which
+	// is the worst behaviour a guard can have. The e2e gate caught exactly that on the
+	// setup routes; see hooks/useIsConsortiumAdmin.
+	//
+	// This layout is the single choke point every authenticated page passes through, and
+	// by the time it renders content the auth state has resolved.
+	//
+	// THIS LAYER IS UX. It gives a barred user one clear page instead of a wall of failed
+	// queries. The control is dcb-service's AdminUiAccessPolicy, which refuses the token
+	// outright, and the per-fetcher role checks behind it.
+	const isBarred =
+		!auth.error &&
+		!isAuthResolving &&
+		auth.isAuthenticated &&
+		!canAccessDcbAdmin(auth.user?.profile?.roles as string[] | undefined);
+
+	// Not while already there, or the redirect chases its own tail.
+	const shouldRedirectToUnauthorised =
+		isBarred && location.pathname !== "/unauthorised";
+
 	// Navigating imperatively (rather than rendering a declarative
 	// <Navigate>) deliberately: TanStack Router's <Navigate> re-triggers
 	// navigate() whenever it receives a new props *object* (see
@@ -131,8 +159,20 @@ function AuthenticatedLayout() {
 		}
 	}, [shouldRedirectToLogin, navigate]);
 
+	useEffect(() => {
+		if (shouldRedirectToUnauthorised) {
+			navigate({ to: "/unauthorised", replace: true });
+		}
+	}, [shouldRedirectToUnauthorised, navigate]);
+
 	// Nothing to lay out while the effect above sends the user to /login.
 	if (shouldRedirectToLogin) {
+		return null;
+	}
+
+	// Same reasoning: render nothing rather than one frame of a page this account is
+	// not entitled to see.
+	if (shouldRedirectToUnauthorised) {
 		return null;
 	}
 

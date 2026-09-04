@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom/client";
 import { createRouter, AnyRouter } from "@tanstack/react-router";
 import { AuthProvider } from "react-oidc-context";
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
-import { User, UserManager, WebStorageStateStore } from "oidc-client-ts";
+import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import { LicenseInfo } from "@mui/x-license";
 
 import "./i18n";
@@ -18,11 +18,9 @@ import {
 	toRoutePath,
 } from "@helpers/appBase";
 
-// Do we still want these?
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
+// The @font-face rules moved to `src/themes/fonts.ts`, which is the registry the picker
+// and the theme both read. Two places declaring the same faces is how one of them ends up
+// shipping a family nothing selects.
 
 declare global {
 	interface Window {
@@ -33,6 +31,10 @@ declare global {
 			VITE_DCB_API_BASE: string;
 			VITE_DCB_SEARCH_BASE: string;
 			VITE_ILL_API_BASE?: string;
+			/** Where DCB Admin for Libraries lives, for redirecting staff who open the
+			    wrong application. Optional: without it they are still told which
+			    application they want, just not handed a link. */
+			VITE_DCB_ADMIN_FOR_LIBRARIES_URL?: string;
 			[key: string]: string | undefined;
 		};
 		__DCB_BUNDLE_BASE_URL__?: string;
@@ -63,6 +65,8 @@ export async function getStandaloneConfig() {
 				VITE_DCB_API_BASE: String(import.meta.env.VITE_DCB_API_BASE),
 				VITE_DCB_SEARCH_BASE: String(import.meta.env.VITE_DCB_SEARCH_BASE),
 				VITE_ILL_API_BASE: String(import.meta.env.VITE_ILL_API_BASE),
+				VITE_DCB_ADMIN_FOR_LIBRARIES_URL: import.meta.env
+					.VITE_DCB_ADMIN_FOR_LIBRARIES_URL as string | undefined,
 			};
 		}
 
@@ -267,8 +271,7 @@ export async function mountDcbAdmin(
 
 	const oidcConfig = {
 		userManager,
-		onSigninCallback: (_user: User | void): void => {
-			const isReadOnly = _user?.profile?.roles?.includes("LIBRARY_READ_ONLY");
+		onSigninCallback: (): void => {
 			const postLoginRedirectPath = sessionStorage.getItem(
 				postLoginRedirectKey(),
 			);
@@ -276,11 +279,11 @@ export async function mountDcbAdmin(
 			// Clear the OIDC code from the URL cleanly
 			window.history.replaceState({}, document.title, window.location.pathname);
 
-			// SPA-Native redirects
-			if (isReadOnly) {
-				router.navigate({ to: "/search", replace: true });
-				return;
-			}
+			// The LIBRARY_READ_ONLY -> /search redirect that used to sit here is gone. It was
+			// the old, weaker version of the consortium-only rule now enforced in the
+			// __authenticated layout, and two rules about the same thing would have raced:
+			// this one runs once at sign-in, the layout runs on every navigation, and a user
+			// who reached /search would then have been sent to /unauthorised anyway.
 
 			// Re-validated at the sink, not just where it was stored. This value
 			// originates in an attacker-suppliable ?redirect= param and has since

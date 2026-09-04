@@ -4,31 +4,8 @@ import { Tab, Tabs } from "@mui/material";
 
 import { handleTabChange } from "@helpers/navigation/handleTabChange";
 import { isInsightsEnabled } from "@helpers/featureFlags";
+import { TABS } from "@constants/libraryTabs";
 
-// Single source of truth for the library detail page's primary tab bar. Each
-// landing page passes its own index via `value`. Previously every page inlined
-// its own copy of this bar, which drifted out of sync (some showed only 3 tabs,
-// bibs pointed "Mappings" at a route that doesn't exist). Tab values are full
-// route paths so selection and navigation both flow through the shared
-// handleTabChange.
-const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
-	{ path: "", labelKey: "nav.libraries.profile" }, // Profile (the $libraryId index)
-	{ path: "/service", labelKey: "nav.libraries.service" },
-	{ path: "/settings", labelKey: "nav.libraries.settings" },
-	{ path: "/referenceValueMappings/all", labelKey: "nav.mappings.name" }, // Mappings
-	{
-		path: "/patronRequests/all",
-		labelKey: "nav.libraries.patronRequests.name",
-	},
-	{
-		path: "/supplierRequests/all",
-		labelKey: "nav.libraries.supplierRequests.name",
-	},
-	{ path: "/contacts", labelKey: "nav.libraries.contacts" },
-	{ path: "/locations", labelKey: "nav.locations" },
-	{ path: "/bibs", labelKey: "nav.bibs" },
-	{ path: "/insights", labelKey: "nav.libraries.insights" },
-];
 
 interface LibraryTabsProps {
 	libraryId: string;
@@ -42,8 +19,10 @@ export default function LibraryTabs({ libraryId, value }: LibraryTabsProps) {
 
 	const pathFor = (path: string) => `/libraries/${libraryId}${path}`;
 
-	// Insights is gated on a dcb-service release that is not out yet. It is the
-	// last tab, so hiding it leaves every other page's `value` index intact.
+	// Insights is gated on a dcb-service release that is not out yet. Hiding it is safe
+	// for every page's `value` index because those index the UNFILTERED array above -
+	// visibleTabs only decides what renders. That invariant now carries two conditional
+	// tabs' worth of weight rather than one, so it is asserted in LibraryTabs.test.tsx.
 	const visibleTabs = isInsightsEnabled()
 		? TABS
 		: TABS.filter((tab) => tab.path !== "/insights");

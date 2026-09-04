@@ -22,6 +22,10 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { createConsortiumContact } from "@mutations/createConsortiumContact";
 import { createLibraryContact } from "@mutations/createLibraryContact";
+import type {
+	CreateConsortiumContactMutation,
+	CreateLibraryContactMutation,
+} from "@generated/graphql";
 
 interface NewContactFormData {
 	firstName: string;
@@ -131,7 +135,9 @@ export default function NewContact({
 					? { ...data, consortiumId: id }
 					: { ...data, libraryId: id };
 
-			return gqlClient.request<any>(targetMutation, { input: payload });
+			return gqlClient.request<
+				CreateConsortiumContactMutation | CreateLibraryContactMutation
+			>(targetMutation, { input: payload });
 		},
 		onSuccess: (responseData) => {
 			if (responseData) {

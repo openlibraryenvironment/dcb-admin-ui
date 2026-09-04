@@ -19,6 +19,7 @@ import { Route as R404RouteImport } from './routes/404'
 import { Route as _authenticatedIndexRouteImport } from './routes/__authenticated/index'
 import { Route as _authenticatedUnauthorisedRouteImport } from './routes/__authenticated/unauthorised'
 import { Route as _authenticatedProfileRouteImport } from './routes/__authenticated/profile'
+import { Route as _authenticatedSetupIndexRouteImport } from './routes/__authenticated/setup/index'
 import { Route as _authenticatedSettingsIndexRouteImport } from './routes/__authenticated/settings/index'
 import { Route as _authenticatedServiceInfoIndexRouteImport } from './routes/__authenticated/serviceInfo/index'
 import { Route as _authenticatedSearchIndexRouteImport } from './routes/__authenticated/search/index'
@@ -30,6 +31,8 @@ import { Route as _authenticatedGroupsIndexRouteImport } from './routes/__authen
 import { Route as _authenticatedConsortiumIndexRouteImport } from './routes/__authenticated/consortium/index'
 import { Route as _authenticatedBibsIndexRouteImport } from './routes/__authenticated/bibs/index'
 import { Route as _authenticatedAgenciesIndexRouteImport } from './routes/__authenticated/agencies/index'
+import { Route as _authenticatedSetupDoneRouteImport } from './routes/__authenticated/setup/done'
+import { Route as _authenticatedSetupStepRouteImport } from './routes/__authenticated/setup/$step'
 import { Route as _authenticatedSearchClusterIdRouteImport } from './routes/__authenticated/search/$clusterId'
 import { Route as _authenticatedPatronRequestsOutOfSequenceRouteImport } from './routes/__authenticated/patronRequests/outOfSequence'
 import { Route as _authenticatedPatronRequestsExceptionRouteImport } from './routes/__authenticated/patronRequests/exception'
@@ -42,6 +45,7 @@ import { Route as _authenticatedConsortiumOnboardingRouteImport } from './routes
 import { Route as _authenticatedConsortiumInsightsRouteImport } from './routes/__authenticated/consortium/insights'
 import { Route as _authenticatedConsortiumFunctionalSettingsRouteImport } from './routes/__authenticated/consortium/functionalSettings'
 import { Route as _authenticatedConsortiumContactsRouteImport } from './routes/__authenticated/consortium/contacts'
+import { Route as _authenticatedConsortiumBrandingRouteImport } from './routes/__authenticated/consortium/branding'
 import { Route as _authenticatedBibsBibIdRouteImport } from './routes/__authenticated/bibs/$bibId'
 import { Route as _authenticatedAgenciesAgencyIdRouteImport } from './routes/__authenticated/agencies/$agencyId'
 import { Route as _authenticatedServiceInfoServiceStatusIndexRouteImport } from './routes/__authenticated/serviceInfo/serviceStatus/index'
@@ -67,6 +71,7 @@ import { Route as _authenticatedLibrariesLibraryIdSettingsRouteImport } from './
 import { Route as _authenticatedLibrariesLibraryIdServiceRouteImport } from './routes/__authenticated/libraries/$libraryId/service'
 import { Route as _authenticatedLibrariesLibraryIdInsightsRouteImport } from './routes/__authenticated/libraries/$libraryId/insights'
 import { Route as _authenticatedLibrariesLibraryIdContactsRouteImport } from './routes/__authenticated/libraries/$libraryId/contacts'
+import { Route as _authenticatedLibrariesLibraryIdAccountsRouteImport } from './routes/__authenticated/libraries/$libraryId/accounts'
 import { Route as _authenticatedGroupsGroupIdSettingsRouteImport } from './routes/__authenticated/groups/$groupId/settings'
 import { Route as _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport } from './routes/__authenticated/patronRequests/audits/$auditId/index'
 import { Route as _authenticatedLibrariesLibraryIdLocationsIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/locations/index'
@@ -137,6 +142,12 @@ const _authenticatedProfileRoute = _authenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => _authenticatedRoute,
 } as any)
+const _authenticatedSetupIndexRoute =
+  _authenticatedSetupIndexRouteImport.update({
+    id: '/setup/',
+    path: '/setup/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedSettingsIndexRoute =
   _authenticatedSettingsIndexRouteImport.update({
     id: '/settings/',
@@ -202,6 +213,16 @@ const _authenticatedAgenciesIndexRoute =
     path: '/agencies/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedSetupDoneRoute = _authenticatedSetupDoneRouteImport.update({
+  id: '/setup/done',
+  path: '/setup/done',
+  getParentRoute: () => _authenticatedRoute,
+} as any)
+const _authenticatedSetupStepRoute = _authenticatedSetupStepRouteImport.update({
+  id: '/setup/$step',
+  path: '/setup/$step',
+  getParentRoute: () => _authenticatedRoute,
+} as any)
 const _authenticatedSearchClusterIdRoute =
   _authenticatedSearchClusterIdRouteImport.update({
     id: '/search/$clusterId',
@@ -272,6 +293,12 @@ const _authenticatedConsortiumContactsRoute =
   _authenticatedConsortiumContactsRouteImport.update({
     id: '/consortium/contacts',
     path: '/consortium/contacts',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumBrandingRoute =
+  _authenticatedConsortiumBrandingRouteImport.update({
+    id: '/consortium/branding',
+    path: '/consortium/branding',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedBibsBibIdRoute = _authenticatedBibsBibIdRouteImport.update({
@@ -423,6 +450,12 @@ const _authenticatedLibrariesLibraryIdContactsRoute =
     path: '/libraries/$libraryId/contacts',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedLibrariesLibraryIdAccountsRoute =
+  _authenticatedLibrariesLibraryIdAccountsRouteImport.update({
+    id: '/libraries/$libraryId/accounts',
+    path: '/libraries/$libraryId/accounts',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedGroupsGroupIdSettingsRoute =
   _authenticatedGroupsGroupIdSettingsRouteImport.update({
     id: '/groups/$groupId/settings',
@@ -562,6 +595,7 @@ export interface FileRoutesByFullPath {
   '/unauthorised': typeof _authenticatedUnauthorisedRoute
   '/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
+  '/consortium/branding': typeof _authenticatedConsortiumBrandingRoute
   '/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
   '/consortium/functionalSettings': typeof _authenticatedConsortiumFunctionalSettingsRoute
   '/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
@@ -574,6 +608,8 @@ export interface FileRoutesByFullPath {
   '/patronRequests/exception': typeof _authenticatedPatronRequestsExceptionRoute
   '/patronRequests/outOfSequence': typeof _authenticatedPatronRequestsOutOfSequenceRoute
   '/search/$clusterId': typeof _authenticatedSearchClusterIdRouteWithChildren
+  '/setup/$step': typeof _authenticatedSetupStepRoute
+  '/setup/done': typeof _authenticatedSetupDoneRoute
   '/agencies/': typeof _authenticatedAgenciesIndexRoute
   '/bibs/': typeof _authenticatedBibsIndexRoute
   '/consortium/': typeof _authenticatedConsortiumIndexRoute
@@ -585,7 +621,9 @@ export interface FileRoutesByFullPath {
   '/search/': typeof _authenticatedSearchIndexRoute
   '/serviceInfo/': typeof _authenticatedServiceInfoIndexRoute
   '/settings/': typeof _authenticatedSettingsIndexRoute
+  '/setup/': typeof _authenticatedSetupIndexRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
+  '/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
   '/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -640,6 +678,7 @@ export interface FileRoutesByTo {
   '/': typeof _authenticatedIndexRoute
   '/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
+  '/consortium/branding': typeof _authenticatedConsortiumBrandingRoute
   '/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
   '/consortium/functionalSettings': typeof _authenticatedConsortiumFunctionalSettingsRoute
   '/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
@@ -652,6 +691,8 @@ export interface FileRoutesByTo {
   '/patronRequests/exception': typeof _authenticatedPatronRequestsExceptionRoute
   '/patronRequests/outOfSequence': typeof _authenticatedPatronRequestsOutOfSequenceRoute
   '/search/$clusterId': typeof _authenticatedSearchClusterIdRouteWithChildren
+  '/setup/$step': typeof _authenticatedSetupStepRoute
+  '/setup/done': typeof _authenticatedSetupDoneRoute
   '/agencies': typeof _authenticatedAgenciesIndexRoute
   '/bibs': typeof _authenticatedBibsIndexRoute
   '/consortium': typeof _authenticatedConsortiumIndexRoute
@@ -663,7 +704,9 @@ export interface FileRoutesByTo {
   '/search': typeof _authenticatedSearchIndexRoute
   '/serviceInfo': typeof _authenticatedServiceInfoIndexRoute
   '/settings': typeof _authenticatedSettingsIndexRoute
+  '/setup': typeof _authenticatedSetupIndexRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
+  '/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
   '/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -720,6 +763,7 @@ export interface FileRoutesById {
   '/__authenticated/': typeof _authenticatedIndexRoute
   '/__authenticated/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/__authenticated/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
+  '/__authenticated/consortium/branding': typeof _authenticatedConsortiumBrandingRoute
   '/__authenticated/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
   '/__authenticated/consortium/functionalSettings': typeof _authenticatedConsortiumFunctionalSettingsRoute
   '/__authenticated/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
@@ -732,6 +776,8 @@ export interface FileRoutesById {
   '/__authenticated/patronRequests/exception': typeof _authenticatedPatronRequestsExceptionRoute
   '/__authenticated/patronRequests/outOfSequence': typeof _authenticatedPatronRequestsOutOfSequenceRoute
   '/__authenticated/search/$clusterId': typeof _authenticatedSearchClusterIdRouteWithChildren
+  '/__authenticated/setup/$step': typeof _authenticatedSetupStepRoute
+  '/__authenticated/setup/done': typeof _authenticatedSetupDoneRoute
   '/__authenticated/agencies/': typeof _authenticatedAgenciesIndexRoute
   '/__authenticated/bibs/': typeof _authenticatedBibsIndexRoute
   '/__authenticated/consortium/': typeof _authenticatedConsortiumIndexRoute
@@ -743,7 +789,9 @@ export interface FileRoutesById {
   '/__authenticated/search/': typeof _authenticatedSearchIndexRoute
   '/__authenticated/serviceInfo/': typeof _authenticatedServiceInfoIndexRoute
   '/__authenticated/settings/': typeof _authenticatedSettingsIndexRoute
+  '/__authenticated/setup/': typeof _authenticatedSetupIndexRoute
   '/__authenticated/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
+  '/__authenticated/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
   '/__authenticated/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/__authenticated/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/__authenticated/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -800,6 +848,7 @@ export interface FileRouteTypes {
     | '/unauthorised'
     | '/agencies/$agencyId'
     | '/bibs/$bibId'
+    | '/consortium/branding'
     | '/consortium/contacts'
     | '/consortium/functionalSettings'
     | '/consortium/insights'
@@ -812,6 +861,8 @@ export interface FileRouteTypes {
     | '/patronRequests/exception'
     | '/patronRequests/outOfSequence'
     | '/search/$clusterId'
+    | '/setup/$step'
+    | '/setup/done'
     | '/agencies/'
     | '/bibs/'
     | '/consortium/'
@@ -823,7 +874,9 @@ export interface FileRouteTypes {
     | '/search/'
     | '/serviceInfo/'
     | '/settings/'
+    | '/setup/'
     | '/groups/$groupId/settings'
+    | '/libraries/$libraryId/accounts'
     | '/libraries/$libraryId/contacts'
     | '/libraries/$libraryId/insights'
     | '/libraries/$libraryId/service'
@@ -878,6 +931,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agencies/$agencyId'
     | '/bibs/$bibId'
+    | '/consortium/branding'
     | '/consortium/contacts'
     | '/consortium/functionalSettings'
     | '/consortium/insights'
@@ -890,6 +944,8 @@ export interface FileRouteTypes {
     | '/patronRequests/exception'
     | '/patronRequests/outOfSequence'
     | '/search/$clusterId'
+    | '/setup/$step'
+    | '/setup/done'
     | '/agencies'
     | '/bibs'
     | '/consortium'
@@ -901,7 +957,9 @@ export interface FileRouteTypes {
     | '/search'
     | '/serviceInfo'
     | '/settings'
+    | '/setup'
     | '/groups/$groupId/settings'
+    | '/libraries/$libraryId/accounts'
     | '/libraries/$libraryId/contacts'
     | '/libraries/$libraryId/insights'
     | '/libraries/$libraryId/service'
@@ -957,6 +1015,7 @@ export interface FileRouteTypes {
     | '/__authenticated/'
     | '/__authenticated/agencies/$agencyId'
     | '/__authenticated/bibs/$bibId'
+    | '/__authenticated/consortium/branding'
     | '/__authenticated/consortium/contacts'
     | '/__authenticated/consortium/functionalSettings'
     | '/__authenticated/consortium/insights'
@@ -969,6 +1028,8 @@ export interface FileRouteTypes {
     | '/__authenticated/patronRequests/exception'
     | '/__authenticated/patronRequests/outOfSequence'
     | '/__authenticated/search/$clusterId'
+    | '/__authenticated/setup/$step'
+    | '/__authenticated/setup/done'
     | '/__authenticated/agencies/'
     | '/__authenticated/bibs/'
     | '/__authenticated/consortium/'
@@ -980,7 +1041,9 @@ export interface FileRouteTypes {
     | '/__authenticated/search/'
     | '/__authenticated/serviceInfo/'
     | '/__authenticated/settings/'
+    | '/__authenticated/setup/'
     | '/__authenticated/groups/$groupId/settings'
+    | '/__authenticated/libraries/$libraryId/accounts'
     | '/__authenticated/libraries/$libraryId/contacts'
     | '/__authenticated/libraries/$libraryId/insights'
     | '/__authenticated/libraries/$libraryId/service'
@@ -1106,6 +1169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedProfileRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/setup/': {
+      id: '/__authenticated/setup/'
+      path: '/setup'
+      fullPath: '/setup/'
+      preLoaderRoute: typeof _authenticatedSetupIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/settings/': {
       id: '/__authenticated/settings/'
       path: '/settings'
@@ -1181,6 +1251,20 @@ declare module '@tanstack/react-router' {
       path: '/agencies'
       fullPath: '/agencies/'
       preLoaderRoute: typeof _authenticatedAgenciesIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/setup/done': {
+      id: '/__authenticated/setup/done'
+      path: '/setup/done'
+      fullPath: '/setup/done'
+      preLoaderRoute: typeof _authenticatedSetupDoneRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/setup/$step': {
+      id: '/__authenticated/setup/$step'
+      path: '/setup/$step'
+      fullPath: '/setup/$step'
+      preLoaderRoute: typeof _authenticatedSetupStepRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/search/$clusterId': {
@@ -1265,6 +1349,13 @@ declare module '@tanstack/react-router' {
       path: '/consortium/contacts'
       fullPath: '/consortium/contacts'
       preLoaderRoute: typeof _authenticatedConsortiumContactsRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/consortium/branding': {
+      id: '/__authenticated/consortium/branding'
+      path: '/consortium/branding'
+      fullPath: '/consortium/branding'
+      preLoaderRoute: typeof _authenticatedConsortiumBrandingRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/bibs/$bibId': {
@@ -1442,6 +1533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedLibrariesLibraryIdContactsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/libraries/$libraryId/accounts': {
+      id: '/__authenticated/libraries/$libraryId/accounts'
+      path: '/libraries/$libraryId/accounts'
+      fullPath: '/libraries/$libraryId/accounts'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdAccountsRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/groups/$groupId/settings': {
       id: '/__authenticated/groups/$groupId/settings'
       path: '/groups/$groupId/settings'
@@ -1611,6 +1709,7 @@ interface _authenticatedRouteChildren {
   _authenticatedIndexRoute: typeof _authenticatedIndexRoute
   _authenticatedAgenciesAgencyIdRoute: typeof _authenticatedAgenciesAgencyIdRoute
   _authenticatedBibsBibIdRoute: typeof _authenticatedBibsBibIdRoute
+  _authenticatedConsortiumBrandingRoute: typeof _authenticatedConsortiumBrandingRoute
   _authenticatedConsortiumContactsRoute: typeof _authenticatedConsortiumContactsRoute
   _authenticatedConsortiumFunctionalSettingsRoute: typeof _authenticatedConsortiumFunctionalSettingsRoute
   _authenticatedConsortiumInsightsRoute: typeof _authenticatedConsortiumInsightsRoute
@@ -1623,6 +1722,8 @@ interface _authenticatedRouteChildren {
   _authenticatedPatronRequestsExceptionRoute: typeof _authenticatedPatronRequestsExceptionRoute
   _authenticatedPatronRequestsOutOfSequenceRoute: typeof _authenticatedPatronRequestsOutOfSequenceRoute
   _authenticatedSearchClusterIdRoute: typeof _authenticatedSearchClusterIdRouteWithChildren
+  _authenticatedSetupStepRoute: typeof _authenticatedSetupStepRoute
+  _authenticatedSetupDoneRoute: typeof _authenticatedSetupDoneRoute
   _authenticatedAgenciesIndexRoute: typeof _authenticatedAgenciesIndexRoute
   _authenticatedBibsIndexRoute: typeof _authenticatedBibsIndexRoute
   _authenticatedConsortiumIndexRoute: typeof _authenticatedConsortiumIndexRoute
@@ -1634,7 +1735,9 @@ interface _authenticatedRouteChildren {
   _authenticatedSearchIndexRoute: typeof _authenticatedSearchIndexRoute
   _authenticatedServiceInfoIndexRoute: typeof _authenticatedServiceInfoIndexRoute
   _authenticatedSettingsIndexRoute: typeof _authenticatedSettingsIndexRoute
+  _authenticatedSetupIndexRoute: typeof _authenticatedSetupIndexRoute
   _authenticatedGroupsGroupIdSettingsRoute: typeof _authenticatedGroupsGroupIdSettingsRoute
+  _authenticatedLibrariesLibraryIdAccountsRoute: typeof _authenticatedLibrariesLibraryIdAccountsRoute
   _authenticatedLibrariesLibraryIdContactsRoute: typeof _authenticatedLibrariesLibraryIdContactsRoute
   _authenticatedLibrariesLibraryIdInsightsRoute: typeof _authenticatedLibrariesLibraryIdInsightsRoute
   _authenticatedLibrariesLibraryIdServiceRoute: typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -1679,6 +1782,7 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedIndexRoute: _authenticatedIndexRoute,
   _authenticatedAgenciesAgencyIdRoute: _authenticatedAgenciesAgencyIdRoute,
   _authenticatedBibsBibIdRoute: _authenticatedBibsBibIdRoute,
+  _authenticatedConsortiumBrandingRoute: _authenticatedConsortiumBrandingRoute,
   _authenticatedConsortiumContactsRoute: _authenticatedConsortiumContactsRoute,
   _authenticatedConsortiumFunctionalSettingsRoute:
     _authenticatedConsortiumFunctionalSettingsRoute,
@@ -1699,6 +1803,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedPatronRequestsOutOfSequenceRoute,
   _authenticatedSearchClusterIdRoute:
     _authenticatedSearchClusterIdRouteWithChildren,
+  _authenticatedSetupStepRoute: _authenticatedSetupStepRoute,
+  _authenticatedSetupDoneRoute: _authenticatedSetupDoneRoute,
   _authenticatedAgenciesIndexRoute: _authenticatedAgenciesIndexRoute,
   _authenticatedBibsIndexRoute: _authenticatedBibsIndexRoute,
   _authenticatedConsortiumIndexRoute: _authenticatedConsortiumIndexRoute,
@@ -1710,8 +1816,11 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedSearchIndexRoute: _authenticatedSearchIndexRoute,
   _authenticatedServiceInfoIndexRoute: _authenticatedServiceInfoIndexRoute,
   _authenticatedSettingsIndexRoute: _authenticatedSettingsIndexRoute,
+  _authenticatedSetupIndexRoute: _authenticatedSetupIndexRoute,
   _authenticatedGroupsGroupIdSettingsRoute:
     _authenticatedGroupsGroupIdSettingsRoute,
+  _authenticatedLibrariesLibraryIdAccountsRoute:
+    _authenticatedLibrariesLibraryIdAccountsRoute,
   _authenticatedLibrariesLibraryIdContactsRoute:
     _authenticatedLibrariesLibraryIdContactsRoute,
   _authenticatedLibrariesLibraryIdInsightsRoute:

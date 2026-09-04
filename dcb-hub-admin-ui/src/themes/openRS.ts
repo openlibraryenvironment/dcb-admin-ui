@@ -6,6 +6,7 @@ import {
 	type ThemeOptions,
 } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-premium/themeAugmentation";
+import { DEFAULT_FONT, fontStack, type FontName } from "@themes/fonts";
 declare module "@mui/material/Button" {
 	interface ButtonPropsSizeOverrides {
 		xlarge: true;
@@ -760,7 +761,7 @@ const TYPOGRAPHY_COLOUR: Record<string, keyof Theme["palette"]["primary"]> = {
 };
 
 const typography: ThemeOptions["typography"] = {
-	fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+	fontFamily: fontStack(DEFAULT_FONT),
 	h1: { fontSize: 32, fontWeight: 400 },
 	h2: { fontSize: 24, fontWeight: 400 },
 	h3: { fontSize: 18 },
@@ -787,6 +788,37 @@ const typography: ThemeOptions["typography"] = {
 };
 
 const components: ThemeOptions["components"] = {
+	/**
+	 * The SELECTED state of a toggle button — found by the axe gate, W-1.
+	 *
+	 * MUI's default paints a selected `color="primary"` toggle as the primary hue on a
+	 * 12%-alpha wash of the same hue. Against a white ground that composites to roughly
+	 * the primary colour on near-white, which fails 4.5:1 for every brand in this
+	 * registry whose primary is a mid-tone blue or green - and the control it is used
+	 * for is the theme and mode picker, so the first thing a user with low vision meets
+	 * is a control they cannot read telling them how to make things readable.
+	 *
+	 * A filled selected state fixes it properly rather than nudging the alpha: the pair
+	 * is `primary.main` against `primary.contrastText`, which MUI derives to meet the
+	 * palette's own contrastThreshold - 4.5 normally, 7 in high contrast.
+	 *
+	 * An app-wide defect, so an app-wide override, not an `sx` on one component: the
+	 * same default is behind the Host LMS step's toggles and the Insights range picker.
+	 */
+	MuiToggleButton: {
+		styleOverrides: {
+			root: ({ theme }) => ({
+				"&.Mui-selected": {
+					backgroundColor: theme.palette.primary.main,
+					color: theme.palette.primary.contrastText,
+					"&:hover": {
+						backgroundColor: theme.palette.primary.dark,
+						color: theme.palette.primary.contrastText,
+					},
+				},
+			}),
+		},
+	},
 	MuiTypography: {
 		styleOverrides: {
 			root: ({ theme, ownerState }) => {
@@ -1299,8 +1331,74 @@ export type ThemeMode = keyof (typeof THEMES)["openRS"];
 export const THEME_NAMES = Object.keys(THEMES) as ThemeName[];
 export const THEME_MODES: ThemeMode[] = ["light", "dark", "highContrast"];
 
-export const getAppTheme = (name: ThemeName, mode: ThemeMode): Theme =>
-	THEMES[name]?.[mode] ?? THEMES.openRS.light;
+/**
+ * Themes with a non-default typeface applied, built once each and kept.
+ *
+ * The registry above prebuilds 6 brands x 3 modes at module scope. Multiplying that by the
+ * typeface list would prebuild 90 themes to use one, so the font is a thin overlay built on
+ * FIRST USE instead: `createTheme(base, overrides)` merges onto an already-built theme, and
+ * the result is cached so the identity handed to ThemeProvider is stable across renders.
+ * An unstable theme object re-renders the entire tree on every keystroke.
+ *
+ * The cache is bounded by construction - its key space is THEME_NAMES x THEME_MODES x
+ * FONT_NAMES, three fixed vocabularies, so at most 90 entries and no user input can add a
+ * ninety-first. That is why a plain Map is acceptable here where it would not be for
+ * anything record- or request-scaled.
+ */
+const themesWithFont = new Map<string, Theme>();
+
+export const getAppTheme = (
+	name: ThemeName,
+	mode: ThemeMode,
+	fontName: FontName = DEFAULT_FONT,
+): Theme => {
+	const base = THEMES[name]?.[mode] ?? THEMES.openRS.light;
+
+	// The base themes are already built with the default stack, so the common case
+	// costs nothing and returns the same object it always did.
+	if (fontName === DEFAULT_FONT) return base;
+
+	const key = `${name}:${mode}:${fontName}`;
+	const cached = themesWithFont.get(key);
+	if (cached) return cached;
+
+	const built = createTheme(base, {
+		typography: withFontFamily(base.typography, fontStack(fontName)),
+	});
+	themesWithFont.set(key, built);
+	return built;
+};
+
+/**
+ * Every typography variant repointed at a new family, not just the top-level key.
+ *
+ * `createTheme(builtTheme, options)` deep-merges; it does NOT re-derive. A built theme's
+ * `typography` already holds h1, body1, button and the rest as fully resolved objects,
+ * each carrying its own `fontFamily` copied from the family that was current when the
+ * theme was built. Overriding only `typography.fontFamily` therefore changed a value
+ * nothing reads: CssBaseline paints the body from `body1`, and every `<Typography>` reads
+ * its own variant, so the page stayed in Roboto while the theme claimed otherwise.
+ *
+ * The e2e gate caught this. The unit test that asserted `theme.typography.fontFamily` did
+ * not, because that field was correct - it was the only correct one.
+ *
+ * Mapped rather than enumerated so a variant added to the theme later is covered without
+ * anybody remembering to add it here.
+ */
+function withFontFamily(
+	typographyOfBase: Theme["typography"],
+	family: string,
+): Record<string, unknown> {
+	const next: Record<string, unknown> = { fontFamily: family };
+
+	for (const [variant, value] of Object.entries(typographyOfBase)) {
+		if (value && typeof value === "object" && "fontFamily" in value) {
+			next[variant] = { ...(value as object), fontFamily: family };
+		}
+	}
+
+	return next;
+}
 
 // Back-compat default export used as the initial theme.
 export const openRSTheme = THEMES.openRS.light;

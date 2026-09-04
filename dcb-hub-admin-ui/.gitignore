@@ -184,3 +184,6 @@ yarn.lock
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# Lighthouse CI reports. The BUDGET (lighthouserc.js) is committed; its output is not.
+/.lighthouseci/

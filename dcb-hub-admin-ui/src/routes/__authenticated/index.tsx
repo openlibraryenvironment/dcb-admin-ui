@@ -6,6 +6,7 @@ import { Stack, Typography } from "@mui/material";
 // Note: Using PageContainer instead of PageContainer!
 import PageContainer from "@layout/PageContainer/PageContainer";
 import OperatingWelcome from "@components/OperatingWelcome/OperatingWelcome";
+import ConsortiumSetupBanner from "@components/Setup/ConsortiumSetupBanner";
 import Error from "@components/Error/Error";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { getLibraries } from "@queries/getLibraries";
@@ -82,6 +83,11 @@ function Home() {
 				<Typography variant="h1">
 					{t("welcome.greeting", { user: nameOfUser })}
 				</Typography>
+
+				{/* Above the fold and above the grid: on an instance with nothing set up,
+				    the grid below is empty and says nothing about why. Renders nothing at
+				    all once setup is finished - see the component. */}
+				<ConsortiumSetupBanner />
 
 				<Typography variant="homePageText">
 					{t("welcome.context", {

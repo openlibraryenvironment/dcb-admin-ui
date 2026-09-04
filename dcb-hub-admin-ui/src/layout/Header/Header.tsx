@@ -70,6 +70,7 @@ export default function Header({
 		setDescription,
 		setCatalogueSearchURL,
 		setWebsiteURL,
+		resetConsortiumStore,
 		setName,
 		setHeaderImageURL,
 	} = useConsortiumInfoStore();
@@ -113,7 +114,7 @@ export default function Header({
 		}
 	};
 
-	const { data: headerContentData } = useQuery({
+	const { data: headerContentData, isSuccess: headerLoaded } = useQuery({
 		queryKey: ["consortiaKeyInfo"],
 		enabled: auth.isAuthenticated,
 		throwOnError: false,
@@ -129,8 +130,25 @@ export default function Header({
 
 	const consortium = headerContentData?.consortia?.content?.[0];
 
-	// Sync consortium store state if data changes
+	// Sync consortium store state if data changes.
+	//
+	// The cached copy exists for the SIGNED-OUT screens: the logout page says "your DCB
+	// Admin for {consortium} session has ended" and has no token left to ask with, which
+	// is why consortium-storage is exempt from the sign-out purge.
+	//
+	// That exemption assumed a consortium always exists. It does not: one can be deleted,
+	// or a deployment rebuilt. This effect only ever WROTE - on absence it did nothing at
+	// all - so a name outlived the record it described, survived sign-out by design, and
+	// no sequence of actions in the application could clear it. Hence the else.
 	useEffect(() => {
+		// Only once the query has actually answered. A transient failure or the first
+		// render must not blank the branding - "we have not asked yet" and "there is none"
+		// are different facts and only the second one means anything.
+		if (headerLoaded && !consortium) {
+			resetConsortiumStore();
+			return;
+		}
+
 		if (consortium && consortium.displayName !== displayName) {
 			setName(consortium.name);
 			setDisplayName(consortium.displayName);
@@ -147,6 +165,8 @@ export default function Header({
 	}, [
 		consortium,
 		displayName,
+		headerLoaded,
+		resetConsortiumStore,
 		setName,
 		setDisplayName,
 		setDescription,

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
+import { isConsortiumStaff } from "@helpers/consortiumAccess";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import axios from "axios";
@@ -310,10 +311,24 @@ function RouteComponent() {
 	// The page's actions, consolidated into a single "Actions" menu. Eligibility
 	// and the explanatory tooltips are unchanged from the old inline buttons:
 	// "Check for updates" is available to everyone (disabled on untracked
-	// statuses), cleanup to LIBRARY_ADMIN, rollback to ADMIN. A disabled item
+	// statuses), cleanup to any admin, rollback to ADMIN. A disabled item
 	// keeps its tooltip explaining why (PageActionsMenu spans it so it still
 	// fires).
 	const roles = (auth?.user?.profile?.roles as string[] | undefined) ?? [];
+
+	// The link to the pickup location rendered only for LIBRARY_ADMIN; every other role,
+	// consortium administrators included, got plain text. There is no defensible reason
+	// for that, and the block was duplicated verbatim in two places - so it is now one
+	// node, gated on the roles that can actually reach /locations.
+	const pickupLocationLink = isConsortiumStaff(roles) ? (
+		<Tooltip title={t("locations.view_location")}>
+			<CustomLink to={`/locations/${pickupLocation?.id}`}>
+				{pickupLocation?.name}
+			</CustomLink>
+		</Tooltip>
+	) : (
+		<RenderAttribute attribute={pickupLocation?.name} />
+	);
 	const canUpdate = !untrackedStatuses.includes(patronRequest?.status);
 	const canCleanup = cleanupStatuses.includes(patronRequest?.status);
 
@@ -330,7 +345,12 @@ function RouteComponent() {
 					}),
 		},
 	];
-	if (roles.includes("LIBRARY_ADMIN")) {
+	// Was gated on LIBRARY_ADMIN ALONE, so a consortium administrator could not see
+	// Cleanup here at all - while the bulk action for the same capability on the grid
+	// (DataGrid.tsx) allowed any admin. One capability, two gates, disagreeing. With
+	// LIBRARY_ADMIN barred from this application the old gate would have left Cleanup
+	// belonging to nobody, so this is reassigned rather than deleted.
+	if (isConsortiumStaff(roles)) {
 		pageActions.push({
 			key: "cleanup",
 			label: t("patron_request.cleanup"),
@@ -485,14 +505,8 @@ function RouteComponent() {
 									/>
 								) : pickupLocationDataError ? (
 									t("patron_request.error_pickup")
-								) : auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-									<Tooltip title={t("locations.view_location")}>
-										<CustomLink to={`/locations/${pickupLocation?.id}`}>
-											{pickupLocation?.name}
-										</CustomLink>
-									</Tooltip>
 								) : (
-									<RenderAttribute attribute={pickupLocation?.name} />
+									pickupLocationLink
 								)}
 							</Stack>
 						</Grid>
@@ -1555,14 +1569,8 @@ function RouteComponent() {
 									/>
 								) : pickupLocationDataError ? (
 									t("patron_request.error_pickup")
-								) : auth?.user?.profile?.roles?.includes("LIBRARY_ADMIN") ? (
-									<Tooltip title={t("locations.view_location")}>
-										<CustomLink to={`/locations/${pickupLocation?.id}`}>
-											{pickupLocation?.name}
-										</CustomLink>
-									</Tooltip>
 								) : (
-									<RenderAttribute attribute={pickupLocation?.name} />
+									pickupLocationLink
 								)}
 							</Stack>
 						</Grid>
