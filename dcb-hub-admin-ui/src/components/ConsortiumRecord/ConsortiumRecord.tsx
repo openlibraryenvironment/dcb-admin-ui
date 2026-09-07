@@ -70,8 +70,20 @@ import {
  * Which label to name in an upload refusal. Three images on one form means the message
  * alone does not say which one was refused.
  */
-/** Ties the support URL box to the heading above it — see the field for why. */
-const SUPPORT_URL_LABEL_ID = "consortium-support-url-label";
+/**
+ * The id of a field's visible heading, so the input beneath it can point at one.
+ *
+ * Every field on this form renders its name as a `Typography` above the control rather
+ * than as MUI's own floating `label`. That is a deliberate look and it is fine — but a
+ * heading that merely SITS above an input is not its label, and a `TextField` with neither
+ * `label` nor `aria-labelledby` has no accessible name at all: a screen-reader user meets
+ * a column of boxes announced as "edit text".
+ *
+ * A helper rather than six string literals, so the seventh field is free and cannot be
+ * added without one. The axe gate scans this form in edit mode on both tabs, which is what
+ * makes that a rule rather than a hope.
+ */
+const labelId = (field: string) => `consortium-${field}-label`;
 
 const BRAND_FIELD_LABELS: Record<string, string> = {
 	brandLogoUrl: "logo_url",
@@ -572,6 +584,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography
+									id={labelId("displayName")}
 									variant="attributeTitle"
 									color={
 										errors.displayName && editMode
@@ -588,6 +601,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 										editMode ? (
 											<TextField
 												{...field}
+												slotProps={{
+													htmlInput: { "aria-labelledby": labelId("displayName") },
+												}}
 												inputRef={firstEditableFieldRef}
 												fullWidth
 												error={!!errors.displayName}
@@ -604,6 +620,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography
+									id={labelId("websiteUrl")}
 									variant="attributeTitle"
 									color={
 										errors.websiteUrl && editMode
@@ -620,6 +637,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 										editMode ? (
 											<TextField
 												{...field}
+												slotProps={{
+													htmlInput: { "aria-labelledby": labelId("websiteUrl") },
+												}}
 												fullWidth
 												error={!!errors.websiteUrl}
 												helperText={errors.websiteUrl?.message}
@@ -651,7 +671,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 										// called "edit text". Fixed here for the field this
 										// change adds; the rest of the form is the same defect
 										// and is not this change's to rewrite.
-										id={SUPPORT_URL_LABEL_ID}
+										id={labelId("supportUrl")}
 										color={
 											errors.supportUrl && editMode
 												? "error"
@@ -670,7 +690,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 													fullWidth
 													slotProps={{
 														htmlInput: {
-															"aria-labelledby": SUPPORT_URL_LABEL_ID,
+															"aria-labelledby": labelId("supportUrl"),
 														},
 													}}
 													error={!!errors.supportUrl}
@@ -691,6 +711,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography
+									id={labelId("catalogueSearchUrl")}
 									variant="attributeTitle"
 									color={
 										errors.catalogueSearchUrl && editMode
@@ -707,6 +728,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 										editMode ? (
 											<TextField
 												{...field}
+												slotProps={{
+													htmlInput: { "aria-labelledby": labelId("catalogueSearchUrl") },
+												}}
 												fullWidth
 												error={!!errors.catalogueSearchUrl}
 												helperText={errors.catalogueSearchUrl?.message}
@@ -906,6 +930,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography
+									id={labelId("brandLogoAlt")}
 									variant="attributeTitle"
 									color={
 										errors.brandLogoAlt && editMode
@@ -922,6 +947,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 										editMode ? (
 											<TextField
 												{...field}
+												slotProps={{
+													htmlInput: { "aria-labelledby": labelId("brandLogoAlt") },
+												}}
 												fullWidth
 												error={!!errors.brandLogoAlt}
 												helperText={
@@ -940,6 +968,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography
+									id={labelId("defaultThemeName")}
 									variant="attributeTitle"
 									color={
 										errors.defaultThemeName && editMode
@@ -960,6 +989,20 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 											// could tell them it failed.
 											<TextField
 												{...field}
+												// `select`, not `htmlInput`. A TextField in select mode
+												// renders MUI's Select: the native input is hidden and
+												// the thing a screen reader meets is a div with
+												// role="combobox", so an aria-labelledby on the input
+												// names something nobody can reach. SelectDisplayProps
+												// is that div. The axe gate told the difference — the
+												// other five fields went green and this one did not.
+												slotProps={{
+													select: {
+														SelectDisplayProps: {
+															"aria-labelledby": labelId("defaultThemeName"),
+														},
+													},
+												}}
 												select
 												fullWidth
 												error={!!errors.defaultThemeName}
@@ -992,6 +1035,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 							<Stack direction={"column"}>
 								<Typography
+									id={labelId("patronWelcome")}
 									variant="attributeTitle"
 									color={
 										errors.patronWelcome && editMode
@@ -1008,6 +1052,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 										editMode ? (
 											<TextField
 												{...field}
+												slotProps={{
+													htmlInput: { "aria-labelledby": labelId("patronWelcome") },
+												}}
 												fullWidth
 												multiline
 												minRows={2}
