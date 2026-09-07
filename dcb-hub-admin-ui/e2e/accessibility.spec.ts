@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 import { expectPaintedScheme, scanForViolations } from "./fixtures/axe";
-import { seedAuth } from "./fixtures/auth";
+import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { seedTheme } from "./fixtures/theme";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
@@ -131,6 +131,51 @@ for (const scheme of ["light", "dark"] as const) {
 			});
 		}
 	});
+}
+
+/**
+ * The consortium form in EDIT mode, on both tabs, in both schemes.
+ *
+ * The route table above scans `/consortium` as it first renders, which is read mode: a
+ * column of headings and their values, and not a single input. Every control on this page
+ * is therefore behind a click the gate never made, and a form is precisely where accessible
+ * names, error association and focus order fail.
+ *
+ * It was not a hypothetical gap. Six controls across these two tabs had neither `label` nor
+ * `aria-labelledby` — the visible heading sat above each input without being tied to it —
+ * so a screen-reader user met a row of boxes announced as "edit text". Nothing else would
+ * have caught it: it type-checks, it lints, and it looks entirely normal.
+ *
+ * Readiness is the Save button rather than a named field, deliberately. A field could not
+ * be located by name while the defect existed, which is the shape of the problem: a gate
+ * that has to name a control to wait for it cannot be written before the control has a
+ * name.
+ */
+const EDITABLE_SECTIONS = [
+	{ path: "/consortium", label: "profile" },
+	{ path: "/consortium/branding", label: "branding" },
+] as const;
+
+for (const scheme of ["light", "dark"] as const) {
+	for (const section of EDITABLE_SECTIONS) {
+		test.describe(`WCAG 2.2 AA - consortium ${section.label} form, ${scheme}`, () => {
+			test.use({ colorScheme: scheme });
+
+			test("editing has no violations", async ({ page }) => {
+				await useAllFeatures(page);
+				await seedAuth(page, { roles: ADMIN_ROLES });
+				await mockGraphQL(page, MOCKS);
+
+				await page.goto(section.path);
+				await page.getByRole("button", { name: "Actions" }).click();
+				await page.getByRole("menuitem", { name: "Edit" }).click();
+				await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+
+				await expectPaintedScheme(page, scheme);
+				await scanForViolations(page);
+			});
+		});
+	}
 }
 
 test.describe("WCAG 2.2 AA - high contrast", () => {
