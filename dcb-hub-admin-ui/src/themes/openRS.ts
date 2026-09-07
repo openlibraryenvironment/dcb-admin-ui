@@ -6,7 +6,21 @@ import {
 	type ThemeOptions,
 } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-premium/themeAugmentation";
-import { DEFAULT_FONT, fontStack, type FontName } from "@themes/fonts";
+import {
+	DEFAULT_FONT,
+	fontStack,
+	isFontName,
+	type FontName,
+} from "@themes/fonts";
+import {
+	DEFAULT_DISPLAY,
+	DENSITIES,
+	isDisplayValue,
+	rootFontSize,
+	spacingUnit,
+	TEXT_SIZES,
+	type ThemeDisplay,
+} from "@themes/display";
 declare module "@mui/material/Button" {
 	interface ButtonPropsSizeOverrides {
 		xlarge: true;
@@ -760,29 +774,43 @@ const TYPOGRAPHY_COLOUR: Record<string, keyof Theme["palette"]["primary"]> = {
 	hitCount: "hitCountText",
 };
 
+// EVERY SIZE IN `rem`, AND THAT IS LOAD-BEARING.
+//
+// Eleven of these were bare numbers (rendered as px) or explicit "14px"/"18px". At the
+// browser default root of 16px each value below renders identically to the literal it
+// replaces - 32px is 2rem, 12px is 0.75rem - so nothing about today's appearance moves.
+//
+// What changes is that they can now be scaled. The text-size preference works by setting
+// the ROOT font size (see `rootFontSize` in display.ts): `rem` follows the root, px does
+// not. Left as px, raising the text size would have scaled MUI's own body variants and
+// left every heading and the whole custom scale exactly where they were - a setting that
+// half works, which is worse than one that does not exist.
+//
+// So: no px in this object. A new variant added in px is a variant that silently opts out
+// of the text-size preference.
 const typography: ThemeOptions["typography"] = {
 	fontFamily: fontStack(DEFAULT_FONT),
-	h1: { fontSize: 32, fontWeight: 400 },
-	h2: { fontSize: 24, fontWeight: 400 },
-	h3: { fontSize: 18 },
-	h4: { fontSize: 18 },
-	appTitle: { fontSize: 20 },
-	loginCardText: { fontSize: 18 },
+	h1: { fontSize: "2rem", fontWeight: 400 },
+	h2: { fontSize: "1.5rem", fontWeight: 400 },
+	h3: { fontSize: "1.125rem" },
+	h4: { fontSize: "1.125rem" },
+	appTitle: { fontSize: "1.25rem" },
+	loginCardText: { fontSize: "1.125rem" },
 	cardActionText: { fontSize: "1rem" },
 	subheading: { fontSize: "1.3rem" },
 	componentSubheading: { fontSize: "1.3rem" },
 	attributeTitle: { fontWeight: "bold" },
 	attributeText: { wordBreak: "break-word", textWrap: "wrap" },
-	loginHeader: { fontSize: 32, fontWeight: "bold" },
+	loginHeader: { fontSize: "2rem", fontWeight: "bold" },
 	modalTitle: { textAlign: "center", fontWeight: "bold" },
 	homePageText: { fontSize: "1.1rem" },
 	notFoundTitle: { fontSize: "3rem" },
 	notFoundText: { fontSize: "1.5rem" },
-	linkedFooterTextSize: { fontSize: "14px" },
-	linkedFooterHeader: { fontSize: "18px", fontWeight: "bold" },
-	loadingText: { fontSize: 32, fontWeight: 400, textAlign: "center" },
-	accordionSummary: { fontSize: 20, fontWeight: 700 },
-	subTabTitle: { fontSize: 12 },
+	linkedFooterTextSize: { fontSize: "0.875rem" },
+	linkedFooterHeader: { fontSize: "1.125rem", fontWeight: "bold" },
+	loadingText: { fontSize: "2rem", fontWeight: 400, textAlign: "center" },
+	accordionSummary: { fontSize: "1.25rem", fontWeight: 700 },
+	subTabTitle: { fontSize: "0.75rem" },
 	hitCount: { fontWeight: "bold" },
 	searchResultTitle: { fontSize: "1.3rem" },
 };
@@ -1221,17 +1249,89 @@ const components: ThemeOptions["components"] = {
 };
 
 // ---------------------------------------------------------------------------
-// Theme registry. These could be separated into other files if needed, leave for now though
+// Theme registry.
+//
+// TOKEN SETS, NOT BUILT THEMES. This used to prebuild 6 brands x 3 modes at module scope
+// and overlay the typeface onto the built object. That worked for a font family and does
+// not generalise, because `createTheme(builtTheme, overrides)` DEEP-MERGES and does not
+// re-derive - which the typeface overlay learned the hard way, and which two of the three
+// display preferences would have hit again, differently and worse:
+//
+//   `typography.fontSize` - MUI derives its variants from it once, at build time. Merging
+//   a new value over a built theme changes a field nothing reads. (Text size sidesteps
+//   this entirely by scaling the ROOT font size instead; see display.ts.)
+//
+//   `spacing` - `theme.spacing` is a FUNCTION. Deep-merging `{ spacing: 6 }` over it
+//   replaces the function with a number, after which every `sx={{ p: 2 }}` in the
+//   application throws.
+//
+// So the registry holds descriptors and `getAppTheme` builds. Measured at ~0.26ms per
+// theme, which is why this is affordable and why nothing is prebuilt: a session touches a
+// handful of combinations, not all of them.
+//
+// `withFontFamily` is gone with the overlay. Building fresh means `createTypography`
+// applies the family to every variant it owns, which is what that function existed to
+// simulate.
 // ---------------------------------------------------------------------------
 
 type PrimaryTokens = typeof openRSLight;
 
+type BrandDescriptor = {
+	primary: PrimaryTokens;
+	secondaryMain: string;
+	backgroundDefault: string;
+	mode: "light" | "dark";
+	highContrast?: boolean;
+};
+
+/**
+ * Reduced motion, as two global rules rather than a theme property.
+ *
+ * `system` is the default and needs no attribute: the media query alone answers it, before
+ * any JavaScript has run. An explicit choice stamps `data-motion` on `<html>` (see
+ * `useMotionPreference`), and `:not([data-motion="full"])` is what lets a user who has
+ * asked for motion override an OS setting that is not theirs - a shared or borrowed
+ * machine is exactly where that matters.
+ *
+ * `!important` IS CORRECT HERE, and this is the only place in the application where that
+ * is true. MUI's transition components (Fade, Grow, Collapse, Drawer, Accordion) write
+ * `transition-duration` as an INLINE style at runtime. No stylesheet rule beats an inline
+ * declaration by specificity; `!important` is the only mechanism that does. A
+ * reduced-motion rule without it does nothing to the components that actually animate.
+ *
+ * 0.01ms rather than 0: a zero duration skips the transitionend event, and code waiting on
+ * it - MUI's own transition callbacks included - then never runs.
+ */
+const REDUCE_MOTION_DECLARATIONS = {
+	animationDuration: "0.01ms !important",
+	animationIterationCount: "1 !important",
+	transitionDuration: "0.01ms !important",
+	scrollBehavior: "auto !important",
+} as const;
+
+const NOT_FULL = 'html:not([data-motion="full"])';
+const FORCED = 'html[data-motion="reduced"]';
+
+const reduceMotionFor = (root: string) => ({
+	[`${root}, ${root} *, ${root} *::before, ${root} *::after`]:
+		REDUCE_MOTION_DECLARATIONS,
+});
+
+const motionStyles = {
+	"@media (prefers-reduced-motion: reduce)": reduceMotionFor(NOT_FULL),
+	...reduceMotionFor(FORCED),
+};
+
 const buildTheme = (
-	primary: PrimaryTokens,
-	secondaryMain: string,
-	backgroundDefault: string,
-	mode: "light" | "dark",
-	highContrast = false,
+	{
+		primary,
+		secondaryMain,
+		backgroundDefault,
+		mode,
+		highContrast = false,
+	}: BrandDescriptor,
+	fontName: FontName,
+	display: ThemeDisplay,
 ): Theme =>
 	createTheme({
 		palette: {
@@ -1250,155 +1350,207 @@ const buildTheme = (
 					}
 				: {}),
 		},
-		typography,
-		components,
+		spacing: spacingUnit(display.density),
+		typography: { ...typography, fontFamily: fontStack(fontName) },
+		components: {
+			...components,
+			MuiCssBaseline: {
+				styleOverrides: {
+					html: {
+						// The text-size preference. Every size in `typography` is in `rem`
+						// so that this one declaration moves the whole scale together.
+						fontSize: rootFontSize(display.textSize),
+						// WCAG 2.2 2.4.11 Focus Not Obscured. The AppBar is position:fixed
+						// at 70px, and the browser scrolls a focused element to the top of
+						// the scrollport knowing nothing about what is painted over it.
+						// True whether the document or an inner box is the scroller, which
+						// this layout has changed before.
+						scrollPaddingTop: "70px",
+					},
+					...motionStyles,
+				},
+			},
+		},
 	});
 
-const THEMES = {
+const THEME_TOKENS = {
 	openRS: {
-		light: buildTheme(openRSLight, "#1e7ebf", "#FFFFFF", "light"),
-		dark: buildTheme(openRSDark, "#75BEDB", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			openRSHighContrast,
-			"#00407A",
-			"#FFFFFF",
-			"light",
-			true,
-		),
+		light: {
+			primary: openRSLight,
+			secondaryMain: "#1e7ebf",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: openRSDark,
+			secondaryMain: "#75BEDB",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: openRSHighContrast,
+			secondaryMain: "#00407A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
 	},
 	evergreen: {
-		light: buildTheme(evergreenLight, "#2E7D32", "#FFFFFF", "light"),
-		dark: buildTheme(evergreenDark, "#81C784", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			evergreenHighContrast,
-			"#1B5E20",
-			"#FFFFFF",
-			"light",
-			true,
-		),
+		light: {
+			primary: evergreenLight,
+			secondaryMain: "#2E7D32",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: evergreenDark,
+			secondaryMain: "#81C784",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: evergreenHighContrast,
+			secondaryMain: "#1B5E20",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
 	},
 	koha: {
-		light: buildTheme(kohaLight, "#88B744", "#FFFFFF", "light"),
-		dark: buildTheme(kohaDark, "#A5D25C", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			kohaHighContrast,
-			"#1F330D",
-			"#FFFFFF",
-			"light",
-			true,
-		),
+		light: {
+			primary: kohaLight,
+			secondaryMain: "#88B744",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: kohaDark,
+			secondaryMain: "#A5D25C",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: kohaHighContrast,
+			secondaryMain: "#1F330D",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
 	},
 	folio: {
-		light: buildTheme(folioLight, "#5AB5D4", "#FFFFFF", "light"),
-		dark: buildTheme(folioDark, "#87CEEB", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			folioHighContrast,
-			"#021B2A",
-			"#FFFFFF",
-			"light",
-			true,
-		),
+		light: {
+			primary: folioLight,
+			secondaryMain: "#5AB5D4",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: folioDark,
+			secondaryMain: "#87CEEB",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: folioHighContrast,
+			secondaryMain: "#021B2A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
 	},
 	blueAndWhite: {
-		light: buildTheme(nhsLight, nhsDarkBlue, "#FFFFFF", "light"),
-		dark: buildTheme(nhsDark, "#A8D5F0", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			nhsHighContrast,
-			nhsDarkBlue,
-			"#FFFFFF",
-			"light",
-			true,
-		),
+		light: {
+			primary: nhsLight,
+			secondaryMain: nhsDarkBlue,
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: nhsDark,
+			secondaryMain: "#A8D5F0",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: nhsHighContrast,
+			secondaryMain: nhsDarkBlue,
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
 	},
 	mobius: {
-		light: buildTheme(mobiusLight, "#003D6A", "#FFFFFF", "light"),
-		// #585353 was a mid-grey, not a dark ground: it alone pushed the brand cyan
-		// to 2.13:1 and the links to 4.11:1. #1E1E1E matches every other brand.
-		dark: buildTheme(mobiusDark, "#4DD0E1", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			mobiusHighContrast,
-			"#002A4A", // A slightly darker shade for the secondary active states
-			"#FFFFFF",
-			"light",
-			true,
-		),
+		light: {
+			primary: mobiusLight,
+			secondaryMain: "#003D6A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: mobiusDark,
+			secondaryMain: "#4DD0E1",
+			// #585353 was a mid-grey, not a dark ground: it alone pushed the brand cyan
+			// to 2.13:1 and the links to 4.11:1. #1E1E1E matches every other brand.
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: mobiusHighContrast,
+			// A slightly darker shade for the secondary active states.
+			secondaryMain: "#002A4A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
 	},
-};
+} as const satisfies Record<string, Record<string, BrandDescriptor>>;
 
-export type ThemeName = keyof typeof THEMES;
-export type ThemeMode = keyof (typeof THEMES)["openRS"];
+export type ThemeName = keyof typeof THEME_TOKENS;
+export type ThemeMode = keyof (typeof THEME_TOKENS)["openRS"];
 
-export const THEME_NAMES = Object.keys(THEMES) as ThemeName[];
+export const THEME_NAMES = Object.keys(THEME_TOKENS) as ThemeName[];
 export const THEME_MODES: ThemeMode[] = ["light", "dark", "highContrast"];
 
 /**
- * Themes with a non-default typeface applied, built once each and kept.
+ * Built themes, kept so the object handed to ThemeProvider is stable across renders. An
+ * unstable theme identity re-renders the entire tree on every unrelated state change.
  *
- * The registry above prebuilds 6 brands x 3 modes at module scope. Multiplying that by the
- * typeface list would prebuild 90 themes to use one, so the font is a thin overlay built on
- * FIRST USE instead: `createTheme(base, overrides)` merges onto an already-built theme, and
- * the result is cached so the identity handed to ThemeProvider is stable across renders.
- * An unstable theme object re-renders the entire tree on every keystroke.
+ * The key space is THEME_NAMES x THEME_MODES x FONT_NAMES x TEXT_SIZES x DENSITIES: five
+ * fixed vocabularies, 720 combinations, and no user input can add a 721st. Motion is
+ * deliberately absent from the key - it is CSS on the root element, not a theme property.
  *
- * The cache is bounded by construction - its key space is THEME_NAMES x THEME_MODES x
- * FONT_NAMES, three fixed vocabularies, so at most 90 entries and no user input can add a
- * ninety-first. That is why a plain Map is acceptable here where it would not be for
- * anything record- or request-scaled.
+ * In practice a session builds one theme and then one more per preference change, because
+ * a user picks a combination and stays in it. 720 is the ceiling that makes a plain Map
+ * defensible here, not an expectation.
  */
-const themesWithFont = new Map<string, Theme>();
+const themeCache = new Map<string, Theme>();
 
 export const getAppTheme = (
 	name: ThemeName,
 	mode: ThemeMode,
 	fontName: FontName = DEFAULT_FONT,
+	display: ThemeDisplay = DEFAULT_DISPLAY,
 ): Theme => {
-	const base = THEMES[name]?.[mode] ?? THEMES.openRS.light;
+	// Every input is tolerated on read, like every other stored preference: a brand, mode,
+	// typeface or step written by a later release must render the default rather than
+	// white-screen an administrator or put `undefined` into a CSS declaration.
+	const descriptor = THEME_TOKENS[name]?.[mode] ?? THEME_TOKENS.openRS.light;
+	const font = isFontName(fontName) ? fontName : DEFAULT_FONT;
+	const textSize = isDisplayValue(TEXT_SIZES, display?.textSize)
+		? display.textSize
+		: DEFAULT_DISPLAY.textSize;
+	const density = isDisplayValue(DENSITIES, display?.density)
+		? display.density
+		: DEFAULT_DISPLAY.density;
 
-	// The base themes are already built with the default stack, so the common case
-	// costs nothing and returns the same object it always did.
-	if (fontName === DEFAULT_FONT) return base;
-
-	const key = `${name}:${mode}:${fontName}`;
-	const cached = themesWithFont.get(key);
+	const key = `${name}:${mode}:${font}:${textSize}:${density}`;
+	const cached = themeCache.get(key);
 	if (cached) return cached;
 
-	const built = createTheme(base, {
-		typography: withFontFamily(base.typography, fontStack(fontName)),
-	});
-	themesWithFont.set(key, built);
+	const built = buildTheme(descriptor, font, { textSize, density });
+	themeCache.set(key, built);
 	return built;
 };
 
-/**
- * Every typography variant repointed at a new family, not just the top-level key.
- *
- * `createTheme(builtTheme, options)` deep-merges; it does NOT re-derive. A built theme's
- * `typography` already holds h1, body1, button and the rest as fully resolved objects,
- * each carrying its own `fontFamily` copied from the family that was current when the
- * theme was built. Overriding only `typography.fontFamily` therefore changed a value
- * nothing reads: CssBaseline paints the body from `body1`, and every `<Typography>` reads
- * its own variant, so the page stayed in Roboto while the theme claimed otherwise.
- *
- * The e2e gate caught this. The unit test that asserted `theme.typography.fontFamily` did
- * not, because that field was correct - it was the only correct one.
- *
- * Mapped rather than enumerated so a variant added to the theme later is covered without
- * anybody remembering to add it here.
- */
-function withFontFamily(
-	typographyOfBase: Theme["typography"],
-	family: string,
-): Record<string, unknown> {
-	const next: Record<string, unknown> = { fontFamily: family };
-
-	for (const [variant, value] of Object.entries(typographyOfBase)) {
-		if (value && typeof value === "object" && "fontFamily" in value) {
-			next[variant] = { ...(value as object), fontFamily: family };
-		}
-	}
-
-	return next;
-}
-
 // Back-compat default export used as the initial theme.
-export const openRSTheme = THEMES.openRS.light;
+export const openRSTheme = getAppTheme("openRS", "light");
