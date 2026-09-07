@@ -64,6 +64,49 @@ export async function scanForViolations(page: Page) {
 }
 
 /**
+ * The landmark structure the tag list above cannot see — and the reason it exists.
+ *
+ * `WCAG_TAGS` is the A + AA ladder, which is the right statement of the legal floor and is
+ * also why this shipped: axe tags `landmark-one-main` and `region` as `best-practice`
+ * rather than `wcag2a`, so a scan that asks for the ladder is structurally incapable of
+ * reporting them. The application had NO `<main>` on any route, no `<footer>`, and no skip
+ * link — measured at fifteen tab stops from the top of /libraries to the first control on
+ * the page — while the gate stayed green.
+ *
+ * WCAG 2.4.1 Bypass Blocks (Level A) is satisfiable by a skip link OR by landmarks that
+ * let assistive technology jump the repeated header and sidebar. Neither existed, so this
+ * is a Level A failure that the Level A tag list did not catch. Hence a second scan with
+ * the rules named explicitly.
+ *
+ * `bypass` is included even though it passed before the fix: it passes on a page that has
+ * only a heading, which is exactly how the gap stayed invisible, and it is the rule that
+ * regresses if the skip link is ever removed along with the landmarks.
+ */
+export const LANDMARK_RULES = [
+	"landmark-one-main",
+	"landmark-unique",
+	"region",
+	"bypass",
+];
+
+export async function scanForLandmarks(page: Page) {
+	await tagLicenceWatermarks(page);
+
+	const results = await new AxeBuilder({ page })
+		.withRules(LANDMARK_RULES)
+		.exclude("[data-e2e-licence-watermark]")
+		.analyze();
+
+	expect(
+		results.violations.map((violation) => ({
+			id: violation.id,
+			impact: violation.impact,
+			nodes: violation.nodes.map((node) => node.target.join(" ")),
+		})),
+	).toEqual([]);
+}
+
+/**
  * Proves the emulated colour scheme actually reached the application.
  *
  * `useThemeStore` seeds its mode from `prefers-color-scheme`. If that never arrived, a
