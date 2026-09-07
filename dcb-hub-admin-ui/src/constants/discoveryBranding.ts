@@ -32,6 +32,8 @@ export const DISCOVERY_THEME_NAMES = ["openRS", "kInt"] as const;
  * here, not by Postgres.
  */
 export const BRAND_LIMITS = {
+	/** V-11.1. consortium.website_url and consortium.support_url are both varchar(200). */
+	linkUrl: 200,
 	logoUrl: 400,
 	logoAlt: 255,
 	headerIconUrl: 400,
@@ -137,6 +139,35 @@ export function isValidLogoUrl(value?: string | null): boolean {
 
 	if (trimmed.startsWith(BRAND_ASSET_PATH_PREFIX)) {
 		return ASSET_KEY.test(trimmed.slice(BRAND_ASSET_PATH_PREFIX.length));
+	}
+
+	let url: URL;
+	try {
+		url = new URL(trimmed);
+	} catch {
+		return false;
+	}
+
+	return (
+		(url.protocol === "https:" || url.protocol === "http:") && url.host !== ""
+	);
+}
+
+/**
+ * Mirrors dcb-service's `BrandingValidator.linkUrl` — V-11.1.
+ *
+ * STRICTER than {@link isValidLogoUrl}, and deliberately: absolute http(s) with a host,
+ * and no asset-prefix form. That prefix names an image this service stored, and a
+ * "report a problem" link pointing at a stored PNG is not a support desk.
+ *
+ * dcb-service refuses anything else on write, so without this the administrator meets a
+ * 400 with no field attached rather than a message under the box they typed in. Blank is
+ * valid and means "clear it".
+ */
+export function isValidLinkUrl(value?: string | null): boolean {
+	const trimmed = value?.trim();
+	if (!trimmed) {
+		return true;
 	}
 
 	let url: URL;

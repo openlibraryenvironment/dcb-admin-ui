@@ -112,9 +112,10 @@ export const legacyConsortiumMocks = {
 };
 
 /**
- * The brand fields 9.0.0 introduced. Nothing sent to an 8.71.0 server may name one:
- * an undeclared field is a validation error that fails the whole operation, which is
- * why these specs assert on the REQUEST and not only on what renders.
+ * Every field that arrived after 8.71.0 — the brand set in 9.0.0, and `supportUrl` after
+ * it. Nothing sent to an 8.71.0 server may name one: an undeclared field is a validation
+ * error that fails the whole operation, which is why these specs assert on the REQUEST
+ * and not only on what renders.
  */
 export const V9_ONLY_FIELDS = [
 	"brandLogoUrl",
@@ -123,4 +124,5 @@ export const V9_ONLY_FIELDS = [
 	"brandBackgroundImageUrl",
 	"patronWelcome",
 	"defaultThemeName",
+	"supportUrl",
 ];

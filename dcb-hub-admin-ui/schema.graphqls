@@ -1,4 +1,4 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service main (1eb37378c).
+# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service main (804699693).
 #
 # Taken verbatim from that ref, plus ONE hand-written addition at the end of this file:
 # auditIncidence and its two types, which exist in no dcb-service branch at all. They are
@@ -7,8 +7,9 @@
 # capability row carries since: null.
 #
 # The provisioning API (libraryUsers, provisionLibraryUser, ...) and maxLocalHolds are now
-# on main - they merged as 43c7be56d and 1eb37378c. Neither is in a RELEASE yet, which is a
-# different claim and the one the capability registry makes.
+# on main - they merged as 43c7be56d and 1eb37378c. `supportUrl`, on Consortium, Library
+# and their two update inputs, is on main as of V9_0_008. None of the three is in a RELEASE
+# yet, which is a different claim and the one the capability registry makes.
 #
 # Re-take this file whenever dcb-service main moves, and re-run codegen.
 #
@@ -147,6 +148,7 @@ input ConsortiumInput {
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
+	supportUrl: String
 	displayName: String!
 	reason: String!
 	changeCategory: String!
@@ -251,7 +253,12 @@ input LibraryInput {
 	contacts: [PersonInput]!
 	longitude: Float
 	latitude: Float
+	# V-11.1. Both are rendered as an href in the patron app's footer, so both must be
+	# an absolute http(s) URL naming a host. An explicit null or an empty string clears
+	# the field. patronWebsite answers opening hours and joining; supportUrl is where a
+	# patron reports that discovery itself is wrong.
 	patronWebsite: String
+	supportUrl: String
 	discoverySystem: String
 	hostLmsConfiguration: String
 	targetLoanToBorrowRatio: String
@@ -335,7 +342,10 @@ input UpdateConsortiumInput {
 	id: ID!
 	description: String
 	catalogueSearchUrl: String
+	# V-11.1. Rendered as an href in the patron app's footer: an absolute http(s) URL
+	# naming a host, and an explicit null or empty string clears the field.
 	websiteUrl: String
+	supportUrl: String
 	displayName: String
 	reason: String!
 	changeCategory: String!
@@ -390,6 +400,7 @@ input UpdateLibraryInput {
 	address: String
 	type: String
 	patronWebsite: String
+	supportUrl: String
 	discoverySystem: String
 	# Patron-facing brand (N-1.3). patronWebsite above is the logo's link target, so
 	# there is no second URL here. Explicit null or empty string clears the field.
@@ -714,6 +725,7 @@ type Library {
 	supportHours: String
 	discoverySystem: String
 	patronWebsite: String
+	supportUrl: String
 	hostLmsConfiguration: String
 	longitude: Float
 	latitude: Float
@@ -770,6 +782,7 @@ type Consortium {
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
+	supportUrl: String
 	displayName: String
 	contacts: [Person]
 	reason: String

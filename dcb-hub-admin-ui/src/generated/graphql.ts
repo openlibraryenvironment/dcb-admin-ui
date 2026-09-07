@@ -39,6 +39,7 @@ export type ConsortiumInput = {
 	id?: string | number | null | undefined;
 	name: string;
 	reason: string;
+	supportUrl?: string | null | undefined;
 	websiteUrl?: string | null | undefined;
 };
 
@@ -175,6 +176,7 @@ export type LibraryInput = {
 	reason?: string | null | undefined;
 	shortName: string;
 	supportHours?: string | null | undefined;
+	supportUrl?: string | null | undefined;
 	targetLoanToBorrowRatio?: string | null | undefined;
 	type: string;
 };
@@ -257,6 +259,7 @@ export type UpdateConsortiumInput = {
 	id: string | number;
 	patronWelcome?: string | null | undefined;
 	reason: string;
+	supportUrl?: string | null | undefined;
 	websiteUrl?: string | null | undefined;
 };
 
@@ -290,6 +293,7 @@ export type UpdateLibraryInput = {
 	secretLabel?: string | null | undefined;
 	shortName?: string | null | undefined;
 	supportHours?: string | null | undefined;
+	supportUrl?: string | null | undefined;
 	targetLoanToBorrowRatio?: string | null | undefined;
 	type?: string | null | undefined;
 };

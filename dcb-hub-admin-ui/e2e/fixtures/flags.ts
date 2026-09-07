@@ -27,8 +27,12 @@ export async function useAllFeatures(page: Page) {
 			VITE_FEATURE_INSIGHTS: "true",
 			VITE_FEATURE_AUDIT_EXPLORER: "true",
 			VITE_FEATURE_CONSORTIUM_BRANDING: "true",
+			VITE_FEATURE_CONSORTIUM_SUPPORT_URL: "true",
 			VITE_FEATURE_NCIP_ONBOARDING: "true",
 			VITE_FEATURE_LIBRARY_USER_PROVISIONING: "true",
+			// Was missing: this fixture says "everything on", and a flag left out of it
+			// silently tests the legacy path in every spec that asks for the new one.
+			VITE_FEATURE_LOCAL_HOLDS: "true",
 		};
 	});
 }

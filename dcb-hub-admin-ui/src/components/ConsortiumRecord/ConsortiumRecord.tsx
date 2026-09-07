@@ -49,7 +49,12 @@ import Error from "@components/Error/Error";
 import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 import MarkdownInput from "@components/MarkdownInput/MarkdownInput";
 import { BrandImageField } from "@components/BrandImageField/BrandImageField";
-import { themeOptions } from "@constants/discoveryBranding";
+import {
+	BRAND_LIMITS,
+	isValidLinkUrl,
+	themeOptions,
+} from "@constants/discoveryBranding";
+import { isConsortiumSupportUrlEnabled } from "@helpers/featureFlags";
 import { discoveryBrandFields } from "@schemas/discoveryBrandSchema";
 import {
 	BrandUploadError,
@@ -65,6 +70,9 @@ import {
  * Which label to name in an upload refusal. Three images on one form means the message
  * alone does not say which one was refused.
  */
+/** Ties the support URL box to the heading above it — see the field for why. */
+const SUPPORT_URL_LABEL_ID = "consortium-support-url-label";
+
 const BRAND_FIELD_LABELS: Record<string, string> = {
 	brandLogoUrl: "logo_url",
 	brandHeaderIconUrl: "header_icon_url",
@@ -110,6 +118,9 @@ interface ConsortiumRecordProps {
 interface ConsortiumFormFields {
 	displayName: string;
 	websiteUrl?: string;
+	// V-11.1. Patron-facing, like the brand fields below: discovery renders it in the
+	// footer of every page, and nothing in this application links to it.
+	supportUrl?: string;
 	catalogueSearchUrl?: string;
 	description?: string;
 	// Patron-facing brand (N-1B). These are rendered by the discovery app, not here.
@@ -204,7 +215,26 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 			)
 			.max(200),
 		description: Yup.string().trim().max(400),
-		websiteUrl: Yup.string().trim().max(200),
+		// V-11.1. Both become an href in the patron app's footer and dcb-service refuses
+		// anything that is not an absolute http(s) URL on write, so the rule is checked
+		// under the box rather than reported as a 400 with no field attached. `websiteUrl`
+		// gains the check with `supportUrl` because the server gained it for both at once.
+		websiteUrl: Yup.string()
+			.trim()
+			.max(BRAND_LIMITS.linkUrl)
+			.test(
+				"absolute-http-url",
+				t("consortium.link_url_invalid"),
+				isValidLinkUrl,
+			),
+		supportUrl: Yup.string()
+			.trim()
+			.max(BRAND_LIMITS.linkUrl)
+			.test(
+				"absolute-http-url",
+				t("consortium.link_url_invalid"),
+				isValidLinkUrl,
+			),
 		catalogueSearchUrl: Yup.string().trim().max(200),
 		// The patron-facing brand rules live in one place, shared with setup's
 		// discovery chapter - see @schemas/discoveryBrandSchema. Two hand-maintained
@@ -267,6 +297,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 				displayName: consortium.displayName ?? "",
 				description: consortium.description ?? "",
 				websiteUrl: consortium.websiteUrl ?? "",
+				supportUrl: consortium.supportUrl ?? "",
 				catalogueSearchUrl: consortium.catalogueSearchUrl ?? "",
 				brandLogoUrl: consortium.brandLogoUrl ?? "",
 				brandLogoAlt: consortium.brandLogoAlt ?? "",
@@ -600,6 +631,62 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 								/>
 							</Stack>
 						</Grid>
+
+						{/* V-11.1. Behind its own flag, not the branding one: support_url
+						    arrived in V9_0_008, after the 9.0.0 tag, and the brand columns
+						    arrived in it. The flag is not a render switch — it also keeps
+						    the field out of the document and out of the mutation
+						    variables, without which the whole consortium form stops
+						    saving on a deployment that cannot accept it. */}
+						{isConsortiumSupportUrlEnabled() && (
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography
+										variant="attributeTitle"
+										// The visible label, linked to the input below rather
+										// than merely sitting above it. Every field on this
+										// form renders its name this way, and a TextField with
+										// no `label` and no `aria-labelledby` has no accessible
+										// name at all — a screen-reader user meets six boxes
+										// called "edit text". Fixed here for the field this
+										// change adds; the rest of the form is the same defect
+										// and is not this change's to rewrite.
+										id={SUPPORT_URL_LABEL_ID}
+										color={
+											errors.supportUrl && editMode
+												? "error"
+												: "primary.attributeTitle"
+										}
+									>
+										{t("consortium.support_url")}
+									</Typography>
+									<Controller
+										name="supportUrl"
+										control={control}
+										render={({ field }) =>
+											editMode ? (
+												<TextField
+													{...field}
+													fullWidth
+													slotProps={{
+														htmlInput: {
+															"aria-labelledby": SUPPORT_URL_LABEL_ID,
+														},
+													}}
+													error={!!errors.supportUrl}
+													helperText={
+														errors.supportUrl?.message ??
+														t("consortium.support_url_help")
+													}
+												/>
+											) : (
+												<RenderAttribute attribute={consortium.supportUrl} />
+											)
+										}
+									/>
+								</Stack>
+							</Grid>
+						)}
 
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
