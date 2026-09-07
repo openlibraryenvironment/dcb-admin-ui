@@ -50,6 +50,30 @@ export default defineConfig({
 	retries: process.env.CI ? 2 : 0,
 	reporter: "html",
 
+	/*
+	 * FOUR, NOT `os.cpus().length / 2`, AND IT IS MEASURED.
+	 *
+	 * Playwright's default gave 16 workers on a 32-thread machine. All sixteen drive their
+	 * own Chromium against ONE `vite preview`, and the application they are loading is 665
+	 * KB across 142 requests that has to boot the whole router before anything paints. The
+	 * server and the CPU both saturate, pages miss the 5s expect timeout, and tests fail
+	 * with "element(s) not found" on assertions that are perfectly correct.
+	 *
+	 * Measured on this machine, same commit, full suite:
+	 *
+	 *   16 workers ->  21 failed / 108 passed   1.8 min
+	 *    4 workers ->   0 failed / 129 passed   2.0 min
+	 *
+	 * Twelve seconds slower and the difference between a suite that is evidence and one
+	 * that is noise. It also failed 25, then 9, then 34 across three consecutive runs of
+	 * the same tree, which is the signature: a count that moves is measuring the machine.
+	 *
+	 * THIS IS NOT A RETRY. `retries: 2` in CI already hides this, which is why it has gone
+	 * unnoticed there while making every local run unusable as evidence - and a retry that
+	 * masks contention masks a real regression just as effectively.
+	 */
+	workers: 4,
+
 	use: {
 		baseURL: "http://localhost:4173",
 		trace: "on-first-retry",
