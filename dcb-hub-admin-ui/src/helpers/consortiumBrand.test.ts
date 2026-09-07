@@ -152,3 +152,62 @@ describe("consortiumBrandSelection", () => {
 		}
 	});
 });
+
+describe("stripUnsupportedConsortiumInput across two thresholds (V-11.1)", () => {
+	/**
+	 * The reason this reads the registry rather than one capability's constant.
+	 * UpdateConsortiumInput now has fields at two different dcb-service thresholds: the
+	 * brand needs 9.0.0, and supportUrl needs a release that does not exist yet. A
+	 * deployment ON 9.0.0 has one and not the other, and a per-capability branch would
+	 * have got that case wrong in whichever direction it was written.
+	 */
+	const withFlags = (flags: Record<string, string>) =>
+		vi.stubGlobal("window", { __APP_ENV__: flags });
+
+	const input = {
+		id: "c1",
+		reason: "test",
+		websiteUrl: "https://mobiusconsortium.org",
+		supportUrl: "https://mobiusconsortium.org/report-a-problem",
+		brandLogoUrl: "https://cdn.example.org/logo.png",
+	};
+
+	it("keeps everything when the deployment tracks main", () => {
+		withFlags({
+			VITE_FEATURE_CONSORTIUM_BRANDING: "true",
+			VITE_FEATURE_CONSORTIUM_SUPPORT_URL: "true",
+		});
+
+		expect(stripUnsupportedConsortiumInput(input)).toEqual(input);
+	});
+
+	it("drops only supportUrl on the 9.0.0 release", () => {
+		withFlags({
+			VITE_FEATURE_CONSORTIUM_BRANDING: "true",
+			VITE_FEATURE_CONSORTIUM_SUPPORT_URL: "false",
+		});
+
+		const stripped = stripUnsupportedConsortiumInput(input);
+
+		expect(stripped).not.toHaveProperty("supportUrl");
+		expect(stripped.brandLogoUrl).toBe("https://cdn.example.org/logo.png");
+		// websiteUrl has been on Consortium since 6.2.0 and is never gated.
+		expect(stripped.websiteUrl).toBe("https://mobiusconsortium.org");
+	});
+
+	it("drops both on 8.71.0, and the key is absent rather than blank", () => {
+		// Blanking is not enough: `supportUrl: ""` is still a field the input type does
+		// not declare, so the mutation fails validation and NOTHING on the form saves.
+		withFlags({});
+
+		const stripped = stripUnsupportedConsortiumInput(input);
+
+		expect(stripped).not.toHaveProperty("supportUrl");
+		expect(stripped).not.toHaveProperty("brandLogoUrl");
+		expect(Object.keys(stripped).sort()).toEqual([
+			"id",
+			"reason",
+			"websiteUrl",
+		]);
+	});
+});

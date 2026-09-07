@@ -273,6 +273,8 @@
 		},
 		"title": "Consortium",
 		"url": "Website URL",
+		"support_url": "Patron support URL",
+		"support_url_help": "Where a patron reports that discovery itself is wrong — a record with the wrong details, a result that will not request. Shown in the discovery app's footer beside the website above, which answers opening hours and joining.",
 		"your": "Your consortium",
 		"onboarding_missing": "Missing configurations:",
 		"onboarding_traffic": "Request activity:",
@@ -341,7 +343,8 @@
 			"settings_explanation": "These settings decide how requesting behaves across the whole consortium. The defaults suit most consortia.",
 			"settings_legend": "Consortium functional settings",
 			"settings_changeable": "Every setting here can be changed later on the consortium's functional settings page."
-		}
+		},
+		"link_url_invalid": "Enter a full web address starting with https:// or http://"
 	},
 	"data_change_log": {
 		"action": "Action",
@@ -2824,6 +2827,7 @@
 		},
 		"feature": {
 			"consortium_branding": "Consortium branding",
+			"consortium_support_url": "Consortium patron support link",
 			"ncip_onboarding": "DCB NCIP onboarding",
 			"insights": "Insights",
 			"library_user_provisioning": "Library account provisioning",

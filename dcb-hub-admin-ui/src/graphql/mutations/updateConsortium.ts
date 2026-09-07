@@ -1,6 +1,7 @@
 import { gql } from "graphql-request";
 
 import { consortiumBrandSelection } from "@fragments/consortiumBrand";
+import { capabilitySelection } from "@helpers/capabilityFields";
 
 /**
  * A FUNCTION, not a constant — see getConsortia for why the flag cannot be read at
@@ -20,6 +21,7 @@ export const updateConsortiumQuery = () => gql`
 			description
 			catalogueSearchUrl
 			websiteUrl
+			${capabilitySelection("consortium_support_url", "Consortium")}
 			${consortiumBrandSelection("full")}
 		}
 	}

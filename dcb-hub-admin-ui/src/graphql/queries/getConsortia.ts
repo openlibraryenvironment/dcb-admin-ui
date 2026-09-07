@@ -1,6 +1,7 @@
 ﻿import { gql } from "graphql-request";
 
 import { consortiumBrandSelection } from "@fragments/consortiumBrand";
+import { capabilitySelection } from "@helpers/capabilityFields";
 
 /**
  * A FUNCTION, not a constant — R-19.
@@ -26,6 +27,12 @@ export const getConsortia = () => gql`
 				description
 				catalogueSearchUrl
 				websiteUrl
+				# V-11.1. Where a patron reports that discovery itself is wrong — a
+				# different destination from websiteUrl, which answers opening hours and
+				# joining, and the wrong desk for "your search is broken". New in
+				# V9_0_008, which is on dcb-service main and in no release, so an older
+				# deployment selects nothing here rather than failing this query whole.
+				${capabilitySelection("consortium_support_url", "Consortium")}
 				displayName
 				# The brand (N-1B), one set of marks for every DCB app. These replaced
 				# headerImageUrl/aboutImageUrl and their uploader fields in V9_0_004:

@@ -10,6 +10,11 @@ export interface Consortium {
 	description: string;
 	catalogueSearchUrl: string;
 	websiteUrl: string;
+	// V-11.1. Where a patron reports that discovery itself is wrong — a different
+	// destination from websiteUrl, which answers opening hours and joining. Nullable and
+	// optional: V9_0_008 is on dcb-service main and in no release, so a deployment on the
+	// 9.0.0 tag does not select it at all.
+	supportUrl?: string | null;
 	displayName: string;
 	// The brand (N-1B). ONE set of marks for every DCB app, patron-facing and staff-facing
 	// alike: V9_0_004 merged headerImageUrl into brandHeaderIconUrl and aboutImageUrl into

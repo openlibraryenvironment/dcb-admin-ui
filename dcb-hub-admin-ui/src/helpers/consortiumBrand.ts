@@ -1,5 +1,4 @@
-import { CONSORTIUM_BRAND_INPUT_KEYS } from "@fragments/consortiumBrand";
-import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
+import { unsupportedInputKeys } from "@helpers/capabilityFields";
 
 /**
  * Reading and writing the consortium brand across two dcb-service shapes — R-19.
@@ -36,26 +35,29 @@ export const readConsortiumBrand = (
 });
 
 /**
- * The variables for updateConsortium, with the brand keys removed when this
- * deployment's dcb-service cannot accept them.
+ * The variables for updateConsortium, with every key this deployment's dcb-service
+ * cannot accept removed.
  *
  * Blanking them is NOT enough. `brandLogoUrl: ""` is still a field that
  * UpdateConsortiumInput does not declare before 9.0.0, so the mutation fails
  * validation and NOTHING on the consortium form saves - name, description and website
  * included. The key has to be absent.
  *
+ * The key list comes from the capability registry rather than from one capability's
+ * constant, because there is now more than one threshold on this input type: the brand
+ * needs 9.0.0 and `supportUrl` needs a release that does not exist yet (V-11.1). A
+ * per-capability branch here would have to grow a line every time, and the line nobody
+ * adds is the one that breaks the form.
+ *
  * Returns a new object; the caller's input is never mutated.
  */
 export const stripUnsupportedConsortiumInput = <T extends Record<string, any>>(
 	input: T,
 ): Partial<T> => {
-	if (isConsortiumBrandingEnabled()) {
-		return { ...input };
-	}
+	const unsupported = unsupportedInputKeys();
+	if (unsupported.size === 0) return { ...input };
 
 	return Object.fromEntries(
-		Object.entries(input).filter(
-			([key]) => !CONSORTIUM_BRAND_INPUT_KEYS.includes(key),
-		),
+		Object.entries(input).filter(([key]) => !unsupported.has(key)),
 	) as Partial<T>;
 };

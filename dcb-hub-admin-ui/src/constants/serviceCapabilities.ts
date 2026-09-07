@@ -1,6 +1,7 @@
 import {
 	isAuditExplorerEnabled,
 	isConsortiumBrandingEnabled,
+	isConsortiumSupportUrlEnabled,
 	isInsightsEnabled,
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
@@ -29,6 +30,16 @@ export const CONSORTIUM_BRAND_CHROME_FIELDS = [
 	"brandHeaderIconUrl",
 	"brandLogoUrl",
 ] as const;
+
+/**
+ * The consortium's support link, added by V9_0_008__support_url.sql — V-11.1.
+ *
+ * `websiteUrl` is deliberately NOT here. It has been on Consortium since 6.2.0, so it
+ * needs no gate; only the column that arrived after the 9.0.0 tag does. Discovery renders
+ * the two as separate links because "when do you open" and "your search is broken" are
+ * different questions and rarely the same desk.
+ */
+export const CONSORTIUM_SUPPORT_FIELDS = ["supportUrl"] as const;
 
 /**
  * The per-agency local holds limit, added by V9_0_007__agency_max_local_holds.sql.
@@ -171,6 +182,20 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
+		// On dcb-service MAIN, and in no release: V9_0_008 landed after the 9.0.0 tag.
+		// A SEPARATE row from consortium_branding, whose `since` is 9.0.0 — one flag over
+		// both would be a lie about one of them, and switching it on at the v9 upgrade
+		// would break the consortium form on every deployment running the release.
+		id: "consortium_support_url",
+		flag: "VITE_FEATURE_CONSORTIUM_SUPPORT_URL",
+		enabled: isConsortiumSupportUrlEnabled,
+		since: null,
+		fields: {
+			Consortium: CONSORTIUM_SUPPORT_FIELDS,
+			UpdateConsortiumInput: CONSORTIUM_SUPPORT_FIELDS,
+		},
+	},
+	{
 		// `auditIncidence` is in no dcb-service anywhere - no release, not main, no branch.
 		// It is in schema.graphqls by hand - see that file's header - so this row is
 		// checked the same way as the one above.
@@ -181,6 +206,21 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: { Query: ["auditIncidence"] },
 	},
 ];
+
+const byId = new Map(SERVICE_CAPABILITIES.map((entry) => [entry.id, entry]));
+
+/**
+ * One capability by id. Throws on an unknown one rather than returning undefined: a typo
+ * at a call site would otherwise select nothing and read exactly like a deployment that
+ * is too old, which is the failure this registry exists to make visible.
+ */
+export const capability = (id: string): ServiceCapability => {
+	const found = byId.get(id);
+	if (!found) {
+		throw new Error(`Unknown service capability: ${id}`);
+	}
+	return found;
+};
 
 /**
  * The leading numeric triplet of a version string, or null when there is not one.

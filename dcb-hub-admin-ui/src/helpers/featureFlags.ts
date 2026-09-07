@@ -48,6 +48,20 @@ export const isConsortiumBrandingEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_CONSORTIUM_BRANDING");
 
 /**
+ * The consortium's support link — dcb-service AFTER 9.0.0, V-11.1.
+ *
+ * `consortium.support_url` arrived in V9_0_008, which is on main and in no release, so
+ * this is a SEPARATE flag from the branding one above rather than a sixth field on it.
+ * Selecting `supportUrl` against the 9.0.0 tag fails LoadConsortium whole, exactly as the
+ * brand fields do against 8.71.0 — same failure, different threshold, which is the entire
+ * reason the flags are per capability.
+ *
+ * `websiteUrl` beside it is ungated: Consortium has carried it since 6.2.0.
+ */
+export const isConsortiumSupportUrlEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_CONSORTIUM_SUPPORT_URL");
+
+/**
  * DCB NCIP onboarding — dcb-service 9.0.0 and later.
  *
  * DcbProfileRegistrationController serves /api/v1/dcb-profile-ncip2 and does not exist
