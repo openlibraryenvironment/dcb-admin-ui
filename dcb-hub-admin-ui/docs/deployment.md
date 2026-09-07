@@ -56,18 +56,20 @@ start, so a changed variable plus a container restart is the whole procedure.
 `0` and `yes` are all read as off, so an environment that has never heard of a flag simply
 does not show the feature.
 
-| Variable                                 | Enable at dcb-service                  | What it turns on                                                                                                                              |
-| ---------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_FEATURE_CONSORTIUM_BRANDING`       | **9.0.0** or later                     | The consortium Branding tab, the setup wizard's Discovery chapter, brand image upload, and the merged brand columns in the consortium queries |
-| `VITE_FEATURE_NCIP_ONBOARDING`           | **9.0.0** or later                     | Service Info → DCB NCIP onboarding (`/api/v1/dcb-profile-ncip2`)                                                                              |
-| `VITE_FEATURE_INSIGHTS`                  | **9.0.0** or later                     | Insights, consortium- and library-level (`/insights`)                                                                                         |
-| `VITE_FEATURE_LIBRARY_USER_PROVISIONING` | **after 9.0.0** — not in the 9.0.0 tag | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                    |
-| `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**         | Service Info → Audit Explorer                                                                                                                 |
+| Variable                                 | Enable at dcb-service                 | What it turns on                                                                                                                              |
+| ---------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_FEATURE_CONSORTIUM_BRANDING`       | **9.0.0** or later                    | The consortium Branding tab, the setup wizard's Discovery chapter, brand image upload, and the merged brand columns in the consortium queries |
+| `VITE_FEATURE_NCIP_ONBOARDING`           | **9.0.0** or later                    | Service Info → DCB NCIP onboarding (`/api/v1/dcb-profile-ncip2`)                                                                              |
+| `VITE_FEATURE_INSIGHTS`                  | **9.0.0** or later                    | Insights, consortium- and library-level (`/insights`)                                                                                         |
+| `VITE_FEATURE_LIBRARY_USER_PROVISIONING` | **dcb-service main** — no release yet | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                    |
+| `VITE_FEATURE_LOCAL_HOLDS`               | **dcb-service main** — no release yet | The per-agency maximum local holds field on a library's Settings tab                                                                          |
+| `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**        | Service Info → Audit Explorer                                                                                                                 |
 
-Note the fourth and fifth rows. There is deliberately **no single "we are on v9 now"
-switch**: account provisioning is on dcb-service `main` but is _not_ in the 9.0.0 tag, and
-the audit explorer's backend is unmerged. One boolean would be a lie about both, and
-turning it on at the v9 upgrade would break them.
+Note the last three rows. There is deliberately **no single "we are on v9 now" switch**:
+account provisioning and the local holds limit are on dcb-service `main` but in _no
+release_ — not 8.71.0, not the 9.0.0 tag — and the audit explorer has no backend anywhere.
+One boolean would be a lie about all three, and turning it on at the v9 upgrade would break
+all three.
 
 ### Checking, and what happens if you get it wrong
 

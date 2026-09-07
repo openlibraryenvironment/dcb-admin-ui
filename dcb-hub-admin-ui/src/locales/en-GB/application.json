@@ -1077,6 +1077,8 @@
 		"library_management_system": "Library management system(s)",
 		"name": "Full name",
 		"max_consortial_loans": "Max consortial loans",
+		"max_local_holds": "Max local holds",
+		"max_local_holds_help": "The maximum number of holds a patron may have in your library system, including holds placed outside DCB. Leave blank if you do not want DCB to check this. DCB cannot read this limit from your library system, so it must be kept in step with it.",
 		"new_contact": {
 			"error": "There was an error creating the new contact for the library {{library}}.",
 			"success": "New contact successfully created for {{library}}"
@@ -2825,7 +2827,8 @@
 			"ncip_onboarding": "DCB NCIP onboarding",
 			"insights": "Insights",
 			"library_user_provisioning": "Library account provisioning",
-			"audit_explorer": "Audit Explorer"
+			"audit_explorer": "Audit Explorer",
+			"local_holds": "Maximum local holds per agency"
 		},
 		"status": {
 			"ready": "On, and served by this dcb-service",

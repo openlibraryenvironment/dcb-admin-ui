@@ -31,6 +31,8 @@ import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
+import { isLocalHoldsEnabled } from "@helpers/featureFlags";
+import { stripUnsupportedAgencyInput } from "@fragments/localHolds";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
@@ -79,6 +81,18 @@ function Settings() {
 			)
 			.min(0, t("ui.validation.min_value", { min: 0 }))
 			.nullable(),
+		// Always in the SCHEMA, only sometimes in the form. Yup ignores a rule for a field
+		// that is not present, and keeping it here means the resolver's inferred type stays
+		// one shape whichever way the flag falls.
+		maxLocalHolds: Yup.number()
+			.transform((v, o) => (o === "" ? null : v))
+			.typeError(
+				t("ui.validation.number", {
+					field: t("libraries.max_local_holds"),
+				}),
+			)
+			.min(1, t("ui.validation.min_value", { min: 1 }))
+			.nullable(),
 		isSupplyingAgency: Yup.boolean().nullable(),
 		isBorrowingAgency: Yup.boolean().nullable(),
 	});
@@ -93,6 +107,12 @@ function Settings() {
 		mode: "onChange",
 		values: {
 			maxConsortialLoans: library?.agency?.maxConsortialLoans ?? null,
+			// Undefined, not null, when the deployment cannot store it. onSubmit skips
+			// undefined values, so the field never reaches changedFields - and
+			// UpdateAgencyInput on 8.71.0 has no maxLocalHolds to receive it.
+			maxLocalHolds: isLocalHoldsEnabled()
+				? (library?.agency?.maxLocalHolds ?? null)
+				: undefined,
 			isSupplyingAgency: library?.agency?.isSupplyingAgency ?? null,
 			isBorrowingAgency: library?.agency?.isBorrowingAgency ?? null,
 		},
@@ -123,12 +143,16 @@ function Settings() {
 			return acc;
 		}, {});
 
-		if (Object.keys(newChangedFields).length === 0) return setEditMode(false);
+		// The form above already omits maxLocalHolds when the flag is off. This is the
+		// guard for the next person who adds a field to the form without reading that.
+		const supportedFields = stripUnsupportedAgencyInput(newChangedFields);
+
+		if (Object.keys(supportedFields).length === 0) return setEditMode(false);
 		agencyMutation.requestFormEdit({
 			id: library.agencyCode,
 			name: library.fullName,
-			changedFields: newChangedFields,
-			changeSummary: formatChangedFields(newChangedFields, library.agency),
+			changedFields: supportedFields,
+			changeSummary: formatChangedFields(supportedFields, library.agency),
 			onSuccess: () => {
 				setEditMode(false);
 				reset();
@@ -339,6 +363,48 @@ function Settings() {
 						/>
 					</Stack>
 				</Grid>
+
+				{isLocalHoldsEnabled() && (
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle" id="label-max-local-holds">
+								{t("libraries.max_local_holds")}
+							</Typography>
+							<Controller
+								name="maxLocalHolds"
+								control={control}
+								render={({ field }) =>
+									editMode ? (
+										<TextField
+											{...field}
+											type="number"
+											fullWidth
+											error={!!errors.maxLocalHolds}
+											// The visible label is a sibling Typography rather than a
+											// bound <label>, so without this the input has no
+											// accessible name at all. Pointing at the label element
+											// rather than repeating the string keeps the two from
+											// diverging, and satisfies Label in Name for free.
+											slotProps={{
+												htmlInput: {
+													"aria-labelledby": "label-max-local-holds",
+												},
+											}}
+											helperText={
+												(errors.maxLocalHolds?.message as string) ??
+												t("libraries.max_local_holds_help")
+											}
+										/>
+									) : (
+										<RenderAttribute
+											attribute={library.agency?.maxLocalHolds}
+										/>
+									)
+								}
+							/>
+						</Stack>
+					</Grid>
+				)}
 			</Grid>
 			<EntityMutationDialogs {...agencyMutation.dialogProps} />
 			<EntityMutationDialogs {...libraryMutation.dialogProps} />

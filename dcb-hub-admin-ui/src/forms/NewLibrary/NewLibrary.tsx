@@ -312,7 +312,7 @@ export default function NewLibrary({
 	const { mutateAsync: updateAgency, isPending: isAgencyUpdatePending } =
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
-				gqlClient.request<any>(updateAgencyQuery, variables),
+				gqlClient.request<any>(updateAgencyQuery(), variables),
 			onSuccess: invalidateLibraryCaches,
 		});
 

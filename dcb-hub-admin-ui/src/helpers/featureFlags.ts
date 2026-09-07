@@ -86,3 +86,17 @@ export const isLibraryUserProvisioningEnabled = (): boolean =>
  */
 export const isAuditExplorerEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_AUDIT_EXPLORER");
+
+/**
+ * Per-agency maximum local holds — dcb-service main, and no release.
+ *
+ * `maxLocalHolds` was added to Agency, UpdateAgencyInput and LibraryInput by
+ * V9_0_007__agency_max_local_holds.sql, merged as 1eb37378c. It is in neither 8.71.0 nor
+ * the 9.0.0 tag, so selecting it against either is a validation error that fails the whole
+ * operation - LoadLibraryBasics and UpdateAgency both, which is the library settings tab.
+ *
+ * So this gates a DOCUMENT and the mutation VARIABLES, not a rendered control.
+ * See src/graphql/fragments/localHolds.ts.
+ */
+export const isLocalHoldsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_LOCAL_HOLDS");
