@@ -1,4 +1,8 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service main (804699693).
+# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service `v11-presence-links`, which is
+# main (e82945731) plus §V-11.1's `supportUrl`. NOT yet on main: that branch is under
+# evaluation, and this file is ahead of main by exactly the six supportUrl lines until it
+# merges. Nothing here can reach a deployment before then — the capability row carries
+# `since: null` and its flag is off everywhere.
 #
 # Taken verbatim from that ref, plus ONE hand-written addition at the end of this file:
 # auditIncidence and its two types, which exist in no dcb-service branch at all. They are
