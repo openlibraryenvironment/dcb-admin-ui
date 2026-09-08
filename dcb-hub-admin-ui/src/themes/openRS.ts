@@ -1156,6 +1156,31 @@ const components: ThemeOptions["components"] = {
 			},
 		},
 	},
+	/**
+	 * A scrollable region a keyboard user can actually scroll — WCAG 2.1.1.
+	 *
+	 * `TableContainer` is `overflow: auto`, and eleven of the twelve in this application
+	 * also cap their height. So they scroll, and without a tab stop the only way to scroll
+	 * one is a pointer: a keyboard-only user reaches the table and cannot see past the
+	 * rows that happen to fit.
+	 *
+	 * Found by the `narrow` Playwright project on its first run, as a SERIOUS
+	 * `scrollable-region-focusable` on the consortium insights page at 320px. It is not a
+	 * narrow-viewport problem though — the height caps make it true at any width, and the
+	 * desktop run simply had no test on a page with one of these tables.
+	 *
+	 * A theme default rather than twelve props: the next TableContainer someone adds is
+	 * covered without their having to know this rule exists. The cost is a tab stop on a
+	 * container that is not currently overflowing, which is what MUI's own guidance
+	 * accepts - the alternative is measuring overflow at runtime to decide focusability,
+	 * and nobody maintains that.
+	 */
+	MuiTableContainer: {
+		defaultProps: {
+			tabIndex: 0,
+		},
+	},
+
 	MuiTooltip: {
 		defaultProps: { arrow: true },
 		styleOverrides: {

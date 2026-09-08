@@ -10,6 +10,7 @@ import {
 	BRAND_IMAGE_ACCEPT,
 	BRAND_IMAGE_MAX_BYTES,
 } from "@constants/discoveryBranding";
+import { visuallyHidden } from "@mui/utils";
 
 type Props = {
 	/** The stored value. Whichever control produced it, it is one column. */
@@ -140,23 +141,23 @@ export function BrandImageField({
 
 			{/* Visually hidden rather than display:none — a hidden input is still the
 			    labelled control the button proxies for, and display:none takes it out of
-			    the accessibility tree entirely. */}
+			    the accessibility tree entirely.
+
+			    MUI's own `visuallyHidden`, not a hand-written copy. The copy that used to
+			    be here set `width: 1`/`height: 1`, which in `sx` is 100% and not 1px —
+			    sx's sizing transform reads any number <= 1 as a fraction. Three
+			    full-width inputs then pushed the document to 2221px inside a 1280px
+			    viewport, in controls nobody can see. MUI's constant uses '1px' strings
+			    and cannot be misread that way. */}
 			{uploadsAvailable && (
 				<Box
 					component="input"
+					sx={visuallyHidden}
 					ref={fileInput}
 					type="file"
 					accept={BRAND_IMAGE_ACCEPT}
 					onChange={handleFile}
 					aria-label={label}
-					sx={{
-						position: "absolute",
-						width: 1,
-						height: 1,
-						overflow: "hidden",
-						clip: "rect(0 0 0 0)",
-						whiteSpace: "nowrap",
-					}}
 				/>
 			)}
 

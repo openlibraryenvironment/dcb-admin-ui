@@ -74,6 +74,23 @@ export default defineConfig({
 	 */
 	workers: 4,
 
+	/*
+	 * 10s, against Playwright's 5s default, for the same reason `workers` is pinned.
+	 *
+	 * Four Chromiums share one `vite preview` serving an application that boots its whole
+	 * router before it paints, and the heaviest page in it - the insights dashboard -
+	 * renders eight panels of charts and tables. Under that contention a correct
+	 * assertion on a correct page misses 5s: `insights-accessibility.spec.ts` failed once
+	 * in a full run waiting for a heading that was on its way, and passed four times out
+	 * of four in isolation.
+	 *
+	 * This is NOT a retry and not a relaxed budget. A genuinely broken assertion still
+	 * fails, five seconds later; what it stops failing on is how busy the machine was.
+	 * Retries were the other option and they are worse - they hide a real regression as
+	 * readily as they hide contention.
+	 */
+	expect: { timeout: 10_000 },
+
 	use: {
 		baseURL: "http://localhost:4173",
 		trace: "on-first-retry",
@@ -83,6 +100,52 @@ export default defineConfig({
 		{
 			name: "chromium",
 			use: { ...devices["Desktop Chrome"] },
+		},
+		{
+			/*
+			 * WCAG 2.2 1.4.10 Reflow: usable at 320 CSS px with no two-dimensional
+			 * scrolling.
+			 *
+			 * This application is a desktop staff console and is audited as one - the
+			 * Lighthouse budget uses the desktop preset for exactly that reason. Reflow is
+			 * a conformance criterion regardless of who we expect to be holding the
+			 * device, and it is the one an unmeasured layout change silently breaks.
+			 *
+			 * It was measured clean before this project existed: zero horizontal overflow
+			 * and zero axe violations on all six routes at 320x640. That is a fact about
+			 * one commit, not a property of the application - the whole suite ran at ONE
+			 * viewport, and there is exactly one `useMediaQuery` in the entire codebase
+			 * holding the responsive behaviour up.
+			 *
+			 * Scoped by `testMatch` to the application-wide accessibility spec rather than
+			 * the whole suite. Re-running every journey at 320px would roughly double CI
+			 * for a second copy of assertions that are not about layout; that one spec
+			 * walks every route a user cannot avoid, which is the surface reflow breaks.
+			 *
+			 * INSIGHTS IS DELIBERATELY NOT IN SCOPE, and it is worth saying why rather
+			 * than leaving the pattern to imply it. A looser pattern picked
+			 * `insights-accessibility.spec.ts` up by accident, and it immediately earned
+			 * its place: a serious `scrollable-region-focusable` on a table no keyboard
+			 * user could scroll, now fixed in the theme for all twelve TableContainers.
+			 *
+			 * It is excluded anyway because it is not reliable here. That dashboard renders
+			 * eight chart panels and calls the ILL stats API, which the spec does not stub -
+			 * so the requests go through vite's proxy to an unset VITE_ILL_API_BASE and
+			 * fail slowly ("Must set target or forward" in the server log). At 320px with
+			 * four workers that tipped it over the assertion timeout on a different test
+			 * each run: 1 failure, then 2, then 1, never the same one twice. A gate that
+			 * fires on which tests happened to be slow is the gate everyone learns to
+			 * ignore.
+			 *
+			 * Stubbing those calls is the fix and it belongs with that spec, not in this
+			 * config. Until then the desktop project still scans the page.
+			 */
+			name: "narrow",
+			use: {
+				...devices["Desktop Chrome"],
+				viewport: { width: 320, height: 640 },
+			},
+			testMatch: /(^|[\\/])accessibility\.spec\.ts$/,
 		},
 	],
 
