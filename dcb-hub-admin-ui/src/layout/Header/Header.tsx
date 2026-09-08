@@ -11,9 +11,7 @@ import {
 	Typography,
 	IconButton,
 	Button,
-	lighten,
 	styled,
-	useTheme,
 } from "@mui/material";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import { Menu, AccountCircle } from "@mui/icons-material";
@@ -54,7 +52,6 @@ export default function Header({
 	menuOpen = false,
 	iconsVisible = true,
 }: HeaderProps) {
-	const theme = useTheme();
 	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
@@ -217,18 +214,8 @@ export default function Header({
 								sx={{
 									mr: 2,
 									color: "primary.headerText",
-									":hover": {
-										backgroundColor: lighten(
-											theme.palette.primary.header as string,
-											theme.palette.mode === "light" ? 0.08 : 0.16,
-										),
-									},
-									":active": {
-										backgroundColor: lighten(
-											theme.palette.primary.header as string,
-											theme.palette.mode === "light" ? 0.16 : 0.24,
-										),
-									},
+									":hover": { backgroundColor: "primary.headerHover" },
+									":active": { backgroundColor: "primary.headerActive" },
 								}}
 							>
 								<Menu sx={{ fontSize: 20 }} data-tid="menu-icon" />
@@ -273,18 +260,8 @@ export default function Header({
 								onClick={() => navigate({ to: "/profile" })}
 								sx={{
 									color: "primary.headerText",
-									":hover": {
-										backgroundColor: lighten(
-											theme.palette.primary.header as string,
-											theme.palette.mode === "light" ? 0.08 : 0.16,
-										),
-									},
-									":active": {
-										backgroundColor: lighten(
-											theme.palette.primary.header as string,
-											theme.palette.mode === "light" ? 0.16 : 0.24,
-										),
-									},
+									":hover": { backgroundColor: "primary.headerHover" },
+									":active": { backgroundColor: "primary.headerActive" },
 								}}
 							>
 								<AccountCircle sx={{ fontSize: 20 }} />
@@ -301,18 +278,8 @@ export default function Header({
 									"&.Mui-focusVisible": {
 										outlineColor: "primary.loginButtonOutlineColor",
 									},
-									":hover": {
-										backgroundColor: lighten(
-											theme.palette.primary.header as string,
-											theme.palette.mode === "light" ? 0.08 : 0.16,
-										),
-									},
-									":active": {
-										backgroundColor: lighten(
-											theme.palette.primary.header as string,
-											theme.palette.mode === "light" ? 0.16 : 0.24,
-										),
-									},
+									":hover": { backgroundColor: "primary.headerHover" },
+									":active": { backgroundColor: "primary.headerActive" },
 								}}
 							>
 								{auth.isAuthenticated ? t("nav.logout") : t("nav.login")}

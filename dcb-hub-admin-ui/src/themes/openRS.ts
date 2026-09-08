@@ -2,6 +2,7 @@ import {
 	createTheme,
 	darken,
 	enhanceHighContrast,
+	getLuminance,
 	lighten,
 	type Theme,
 	type ThemeOptions,
@@ -94,6 +95,18 @@ interface BrandTokens {
 	loginButtonOutlineColor: string;
 	outlineColor: string;
 	tabsBackground: string;
+	/**
+	 * The header bar's hover and pressed grounds.
+	 *
+	 * Derived in buildTheme from `header` itself rather than computed in the component,
+	 * which is where they used to be: six `lighten(header, mode === "light" ? … : …)`
+	 * expressions in Header.tsx. That rule keyed off the wrong thing. What decides how far
+	 * to lift a hover is how dark the BAR is, not which palette the user picked - and since
+	 * FOLIO and Koha now have near-black headers in LIGHT mode, the light-mode branch was
+	 * lifting them by 0.08, which is 1.25:1 against the bar and invisible.
+	 */
+	headerHover: string;
+	headerActive: string;
 	/**
 	 * The bar under the selected tab, and the one place a brand's accent colour is
 	 * allowed to be itself.
@@ -233,6 +246,11 @@ declare module "@mui/material/Tab" {
 const lightPrimary = "#2778AB";
 const darkPrimary = "#35B7FF";
 const lightDetailsAccordion = "#F6F6F6";
+
+// The chrome for the brands whose own colour cannot carry text - FOLIO's coral and
+// Koha's green. Not pure black: #1A1A1A keeps the bar readable as a surface rather than
+// a hole, and still gives white 17.40:1, FOLIO's coral 6.05:1 and Koha's #88B744 7.38:1.
+const brandInk = "#1A1A1A";
 const darkDetailsAccordion = "#424242";
 
 // ---------------------------------------------------------------------------
@@ -447,36 +465,34 @@ const kohaLight = {
 	...openRSLight,
 	main: kohaGreen,
 	breadcrumbs: "#222222",
+	// White on this green is 4.84:1, so the sidebar's selected item still works as a
+	// green fill even though the chrome no longer does.
 	buttonForSelectedPage: kohaGreen,
-	linkedFooterBackground: kohaGreen,
-	header: kohaGreen,
 	headingColor: kohaGreen,
 	link: kohaGreen,
 	linkText: kohaGreen,
 	editableFieldBackground: "#F0F4EC",
 	loginCard: "#F0F4EC",
 	loginText: "#222222",
-	// Saturated green bar, so the labels must be white: #222222 only reached
-	// 3.89:1 on it, and the active label was the bar's own green (1.00:1 -
-	// literally invisible). Active state is carried by the Tabs indicator, so
-	// both labels share one colour, as in the OpenRS palette.
-	tabsBackground: kohaGreen,
+	// THE SAME TREATMENT AS FOLIO, and for the same reason.
+	//
+	// kohaGreen is a mid-tone doing a text ground's job. As the header, tab bar and
+	// linked footer it forced white labels (4.84:1, the only ink that passed) and left
+	// no room for an accent on either side: nothing darker than the bar cleared 3:1,
+	// and nothing lighter was distinguishable from those white labels. The selected tab
+	// was marked by bold weight alone, because the indicator was the bar's own colour.
+	//
+	// On a near-black bar the brand gets MORE of itself back, not less. #88B744 is
+	// Koha's lighter green - the very colour that was 2.05:1 on the green bar and could
+	// not be used - and it is 7.38:1 here.
+	header: brandInk,
+	headerText: "#FFFFFF",
+	linkedFooterBackground: brandInk,
+	linkedFooterText: "#FFFFFF",
+	tabsBackground: brandInk,
 	navigationText: "#FFFFFF",
 	navigationTextActive: "#FFFFFF",
-	// ...and the indicator has to be visible for that sentence to be true. It was
-	// `main`, which here IS kohaGreen - the bar's own colour, 1.00:1, so the selected
-	// tab was marked by bold weight and nothing else. Found by the non-text contrast
-	// assertion in openRS.contrast.test.ts.
-	//
-	// White, at 4.84:1, and not the lighter brand green #88B744, which is 2.05:1 on
-	// this bar and would have swapped one invisible indicator for another. A white
-	// indicator on a brand-coloured bar is the ordinary Material pattern: the labels
-	// are white too, and selection reads from the mark's position and the bold weight.
-	//
-	// The deeper problem is that kohaGreen is a mid-tone doing a text ground's job -
-	// the same thing that forced FOLIO's coral to be darkened 20%. Koha is a candidate
-	// for the same near-black bar treatment; see DCB_ADMIN_2_0_UX_REVIEW.md.
-	tabIndicator: "#FFFFFF",
+	tabIndicator: "#88B744",
 	searchResultTitle: "#222222",
 };
 
@@ -522,9 +538,6 @@ const kohaHighContrast = {
 // graphical object against what sits beside it, against 4.5:1 for text. Coral is 2.88:1
 // on white, which is why it appears nowhere on the page itself.
 const folioCoral = "#FF674C";
-// The chrome. Not pure black: #1A1A1A keeps the bar readable as a surface rather than a
-// hole, and still gives white 17.40:1 and the coral 6.05:1.
-const folioInk = "#1A1A1A";
 
 const folioLight = {
 	...openRSLight,
@@ -532,11 +545,11 @@ const folioLight = {
 	breadcrumbs: "#47769C",
 	// FOLIO Bright Blue #0077C8 reached only 4.46:1 on the page; 1% darker.
 	buttonForSelectedPage: "#0075C5",
-	header: folioInk,
+	header: brandInk,
 	headerText: "#FFFFFF",
-	linkedFooterBackground: folioInk,
+	linkedFooterBackground: brandInk,
 	linkedFooterText: "#FFFFFF",
-	tabsBackground: folioInk,
+	tabsBackground: brandInk,
 	navigationText: "#FFFFFF",
 	navigationTextActive: "#FFFFFF",
 	tabIndicator: folioCoral,
@@ -1331,6 +1344,15 @@ const motionStyles = {
 	...reduceMotionFor(FORCED),
 };
 
+/**
+ * Whether a bar is dark enough that a hover has to be lifted further to be seen.
+ *
+ * 0.5 is the midpoint of relative luminance, not a tuned constant: above it a colour
+ * takes dark ink, below it light ink, and the same split is what decides which direction
+ * a hover has to move.
+ */
+const isDark = (colour: string) => getLuminance(colour) < 0.5;
+
 const buildTheme = (
 	{
 		primary,
@@ -1349,7 +1371,21 @@ const buildTheme = (
 			// `tabIndicator` falls back to the brand's own `main`, so a brand that has no
 			// separate accent looks exactly as it did before the token existed. Only FOLIO
 			// sets it, because only FOLIO has an accent it cannot use as ink.
-			primary: { tabIndicator: primary.main, ...primary },
+			primary: {
+				tabIndicator: primary.main,
+				// Lifted further on a dark bar than a light one, because the same step is
+				// far less visible there: lighten("#1A1A1A", 0.08) is 1.25:1 against its own
+				// bar, where lighten("#0C4068", 0.08) reads clearly.
+				headerHover: lighten(
+					primary.header,
+					isDark(primary.header) ? 0.16 : 0.08,
+				),
+				headerActive: lighten(
+					primary.header,
+					isDark(primary.header) ? 0.28 : 0.16,
+				),
+				...primary,
+			},
 			secondary: { main: secondaryMain },
 			background: { default: backgroundDefault, paper: backgroundDefault },
 			...(highContrast

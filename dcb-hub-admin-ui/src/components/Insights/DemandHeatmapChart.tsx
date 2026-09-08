@@ -38,6 +38,10 @@ export default function DemandHeatmapChart({
 }) {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
+	// `palette.mode`, and NOT `theme.applyStyles("dark", …)`, which is what the rest of this
+	// application now uses. applyStyles emits a CSS rule; this returns an ARRAY OF COLOURS
+	// handed to a chart component as a prop. There is no stylesheet for the cascade to
+	// resolve, so the branch has to happen in JavaScript.
 	const isDark = useTheme().palette.mode === "dark";
 
 	const { data, isLoading } = useQuery(
