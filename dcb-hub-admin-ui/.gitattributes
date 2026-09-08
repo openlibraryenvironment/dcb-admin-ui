@@ -12,3 +12,7 @@
 # of date" failure. Pinning the file to LF makes git's view of it identical on
 # every machine.
 src/generated/graphql.ts text eol=lf
+
+# Same reasoning for the router's codegen artifact: the TanStack plugin rewrites it on
+# every build with LF, so pinning it removes the machine as a variable in its diff.
+src/routeTree.gen.ts text eol=lf
