@@ -31,173 +31,96 @@ declare module "@mui/material/IconButton" {
 		xlarge: true;
 	}
 }
+/**
+ * The brand's semantic colour tokens.
+ *
+ * ONE list. It used to be four byte-identical copies — `Palette`, `PaletteColor`,
+ * `PaletteOptions` and `SimplePaletteColorOptions` each spelled out the same forty keys,
+ * about 200 lines of this file. A key added to three of the four type-checked and then
+ * failed at the call site with a message about whichever interface was missed.
+ *
+ * WHY THESE LIVE UNDER `primary` AND WHY THAT IS THE WRONG SHAPE. `theme.palette.primary.X`
+ * and `sx={{ color: "primary.X" }}` resolve identically in every theme and mode, which is
+ * the property the file was after. But `primary` is a `PaletteColor` — an intensity ramp
+ * around one hue, whose `light`/`dark`/`contrastText` MUI derives from `main` — and forty
+ * unrelated surfaces and inks are now sitting in it. `sx={{ color: "primary.hover" }}`
+ * reads as a shade of the brand colour and is a hover ground.
+ *
+ * MUI's documented pattern for brand keys is a palette node of their own
+ * (https://mui.com/material-ui/customization/palette/), which would give the same
+ * resolution with none of the collision — `surface.sidebar`, `ink.navigation`. That is a
+ * ~240-reference change and is recorded in DCB_ADMIN_2_0_UX_REVIEW.md §2.4 rather than
+ * done here. Collapsing the duplication first is what makes it a rename instead of a
+ * rewrite.
+ */
+interface BrandTokens {
+	attributeTitle: string;
+	breadcrumbs: string;
+	buttonForSelectedChildPage: string;
+	buttonForSelectedPage: string;
+	codeBlockBackground: string;
+	detailsAccordionSummary: string;
+	editableFieldBackground: string;
+	errorBackground: string;
+	exclamationIcon: string;
+	footerArea: string;
+	footerText: string;
+	linkedFooterBackground: string;
+	linkedFooterText: string;
+	header: string;
+	headerText: string;
+	headingColor: string;
+	hitCountText: string;
+	hover: string;
+	hoverOnSelectedPage: string;
+	iconSymbol: string;
+	inactiveBackground: string;
+	link: string;
+	linkText: string;
+	landingBackground: string;
+	landingCard: string;
+	loginCard: string;
+	loginText: string;
+	navigationText: string;
+	navigationTextActive: string;
+	searchResultBackground: string;
+	searchResultTitle: string;
+	selectedText: string;
+	sidebar: string;
+	titleArea: string;
+	pageBackground: string;
+	pageContentBackground: string;
+	loginButtonOutlineColor: string;
+	outlineColor: string;
+	tabsBackground: string;
+	/**
+	 * The bar under the selected tab, and the one place a brand's accent colour is
+	 * allowed to be itself.
+	 *
+	 * It exists because an indicator is a GRAPHICAL OBJECT, not text: WCAG 1.4.11 asks
+	 * 3:1 against what sits beside it, where a label would need 4.5:1. FOLIO's coral is
+	 * the case in point — 2.88:1 on white, so it can never be ink or a text ground, and
+	 * 6.05:1 on the near-black tab bar it now sits on.
+	 *
+	 * Defaults to the brand's own `main` for every theme that has no separate accent, so
+	 * this token changed nothing anywhere except FOLIO.
+	 */
+	tabIndicator: string;
+}
+
 declare module "@mui/material/styles" {
-	interface Palette {
-		attributeTitle: string;
-		breadcrumbs: string;
-		buttonForSelectedChildPage: string;
-		buttonForSelectedPage: string;
-		codeBlockBackground: string;
-		detailsAccordionSummary: string;
-		editableFieldBackground: string;
-		errorBackground: string;
-		exclamationIcon: string;
-		footerArea: string;
-		footerText: string;
-		linkedFooterBackground: string;
-		linkedFooterText: string;
-		header: string;
-		headerText: string;
-		headingColor: string;
-		hitCountText: string;
-		hover: string;
-		hoverOnSelectedPage: string;
-		iconSymbol: string;
-		inactiveBackground: string;
-		link: string;
-		linkText: string;
-		landingBackground: string;
-		landingCard: string;
-		loginCard: string;
-		loginText: string;
-		navigationText: string;
-		navigationTextActive: string;
-		searchResultBackground: string;
-		searchResultTitle: string;
-		selectedText: string;
-		sidebar: string;
-		titleArea: string;
-		pageBackground: string;
-		pageContentBackground: string;
-		loginButtonOutlineColor: string;
-		outlineColor: string;
-		tabsBackground: string;
-	}
-
-	interface PaletteColor {
-		attributeTitle?: string;
-		breadcrumbs?: string;
-		buttonForSelectedChildPage?: string;
-		buttonForSelectedPage?: string;
-		codeBlockBackground?: string;
-		detailsAccordionSummary?: string;
-		editableFieldBackground?: string;
-		errorBackground?: string;
-		exclamationIcon?: string;
-		footerArea?: string;
-		footerText?: string;
-		linkedFooterBackground?: string;
-		linkedFooterText?: string;
-		header?: string;
-		headerText?: string;
-		headingColor?: string;
-		hitCountText?: string;
-		hover?: string;
-		hoverOnSelectedPage?: string;
-		iconSymbol?: string;
-		inactiveBackground?: string;
-		link?: string;
-		linkText?: string;
-		landingBackground?: string;
-		landingCard?: string;
-		loginCard?: string;
-		loginText?: string;
-		navigationText?: string;
-		navigationTextActive?: string;
-		searchResultBackground?: string;
-		searchResultTitle?: string;
-		selectedText?: string;
-		sidebar?: string;
-		titleArea?: string;
-		pageBackground?: string;
-		pageContentBackground?: string;
-		loginButtonOutlineColor?: string;
-		outlineColor?: string;
-		tabsBackground?: string;
-	}
-	interface PaletteOptions {
-		attributeTitle?: string;
-		breadcrumbs?: string;
-		buttonForSelectedChildPage?: string;
-		buttonForSelectedPage?: string;
-		codeBlockBackground?: string;
-		detailsAccordionSummary?: string;
-		editableFieldBackground?: string;
-		errorBackground?: string;
-		exclamationIcon?: string;
-		footerArea?: string;
-		footerText?: string;
-		linkedFooterBackground?: string;
-		linkedFooterText?: string;
-		header?: string;
-		headerText?: string;
-		headingColor?: string;
-		hitCountText?: string;
-		hover?: string;
-		hoverOnSelectedPage?: string;
-		iconSymbol?: string;
-		inactiveBackground?: string;
-		link?: string;
-		linkText?: string;
-		landingBackground?: string;
-		landingCard?: string;
-		loginCard?: string;
-		loginText?: string;
-		navigationText?: string;
-		navigationTextActive?: string;
-		searchResultBackground?: string;
-		searchResultTitle?: string;
-		selectedText?: string;
-		sidebar?: string;
-		titleArea?: string;
-		pageBackground?: string;
-		pageContentBackground?: string;
-		loginButtonOutlineColor?: string;
-		outlineColor?: string;
-		tabsBackground?: string;
-	}
-
-	interface SimplePaletteColorOptions {
-		attributeTitle?: string;
-		breadcrumbs?: string;
-		buttonForSelectedChildPage?: string;
-		buttonForSelectedPage?: string;
-		codeBlockBackground?: string;
-		detailsAccordionSummary?: string;
-		editableFieldBackground?: string;
-		errorBackground?: string;
-		exclamationIcon?: string;
-		footerArea?: string;
-		footerText?: string;
-		linkedFooterBackground?: string;
-		linkedFooterText?: string;
-		header?: string;
-		headerText?: string;
-		headingColor?: string;
-		hitCountText?: string;
-		hover?: string;
-		hoverOnSelectedPage?: string;
-		iconSymbol?: string;
-		inactiveBackground?: string;
-		link?: string;
-		linkText?: string;
-		landingBackground?: string;
-		landingCard?: string;
-		loginCard?: string;
-		loginText?: string;
-		navigationText?: string;
-		navigationTextActive?: string;
-		searchResultBackground?: string;
-		searchResultTitle?: string;
-		selectedText?: string;
-		sidebar?: string;
-		titleArea?: string;
-		pageBackground?: string;
-		pageContentBackground?: string;
-		loginButtonOutlineColor?: string;
-		outlineColor?: string;
-		tabsBackground?: string;
-	}
+	/*
+	 * `no-empty-object-type` is right in general and wrong here. These four are MODULE
+	 * AUGMENTATION: TypeScript merges a declaration into MUI's own only through an
+	 * `interface`, so the type alias the rule wants would not augment anything. An empty
+	 * body is the whole mechanism, not an oversight.
+	 */
+	/* eslint-disable @typescript-eslint/no-empty-object-type */
+	interface Palette extends BrandTokens {}
+	interface PaletteColor extends Partial<BrandTokens> {}
+	interface PaletteOptions extends Partial<BrandTokens> {}
+	interface SimplePaletteColorOptions extends Partial<BrandTokens> {}
+	/* eslint-enable @typescript-eslint/no-empty-object-type */
 
 	interface TypographyVariants {
 		appTitle?: React.CSSProperties;
@@ -539,6 +462,20 @@ const kohaLight = {
 	tabsBackground: kohaGreen,
 	navigationText: "#FFFFFF",
 	navigationTextActive: "#FFFFFF",
+	// ...and the indicator has to be visible for that sentence to be true. It was
+	// `main`, which here IS kohaGreen - the bar's own colour, 1.00:1, so the selected
+	// tab was marked by bold weight and nothing else. Found by the non-text contrast
+	// assertion in openRS.contrast.test.ts.
+	//
+	// White, at 4.84:1, and not the lighter brand green #88B744, which is 2.05:1 on
+	// this bar and would have swapped one invisible indicator for another. A white
+	// indicator on a brand-coloured bar is the ordinary Material pattern: the labels
+	// are white too, and selection reads from the mark's position and the bold weight.
+	//
+	// The deeper problem is that kohaGreen is a mid-tone doing a text ground's job -
+	// the same thing that forced FOLIO's coral to be darkened 20%. Koha is a candidate
+	// for the same near-black bar treatment; see DCB_ADMIN_2_0_UX_REVIEW.md.
+	tabIndicator: "#FFFFFF",
 	searchResultTitle: "#222222",
 };
 
@@ -566,12 +503,27 @@ const kohaHighContrast = {
 };
 
 // ---- FOLIO ----
-// FOLIO coral (#FF674C) is a mid-tone: as a text ground it gives white only
-// 2.88:1 and the brand's dark blue only 3.32:1 - no ink passes AA on it. It is
-// darkened 20% here, the largest brand shift in this file, so that the header,
-// footer, and tab bar can carry white text. This is a visible change to FOLIO's
-// coral; a shared decision if FOLIO branding is contractual.
-const folioCoral = "#E52300";
+//
+// FOLIO's coral is #FF674C and this theme now uses it, unaltered.
+//
+// It could not before. As a TEXT GROUND coral gives white 2.88:1 and FOLIO's own dark
+// blue 3.32:1 — no ink passes AA on it — so the previous version darkened it 20% to
+// #E52300 and painted the header, tab bar and linked footer in that. It cleared the gate
+// at 4.59:1 and it was no longer FOLIO's colour: a 20% shift is not a shade, and the one
+// thing a brand theme has to get right is the brand.
+//
+// The fix is to stop asking the accent to carry text. FOLIO's own applications put their
+// chrome on a near-black bar and let the coral be an accent on it, and that is what this
+// does: #1A1A1A for the header, the tab bar and the linked footer, white labels at
+// 17.40:1, and the true coral as the selected-tab indicator at 6.05:1 against that bar.
+//
+// An indicator may be an accent where a label may not: WCAG 1.4.11 asks 3:1 of a
+// graphical object against what sits beside it, against 4.5:1 for text. Coral is 2.88:1
+// on white, which is why it appears nowhere on the page itself.
+const folioCoral = "#FF674C";
+// The chrome. Not pure black: #1A1A1A keeps the bar readable as a surface rather than a
+// hole, and still gives white 17.40:1 and the coral 6.05:1.
+const folioInk = "#1A1A1A";
 
 const folioLight = {
 	...openRSLight,
@@ -579,19 +531,20 @@ const folioLight = {
 	breadcrumbs: "#47769C",
 	// FOLIO Bright Blue #0077C8 reached only 4.46:1 on the page; 1% darker.
 	buttonForSelectedPage: "#0075C5",
-	linkedFooterBackground: folioCoral,
-	header: folioCoral,
+	header: folioInk,
+	headerText: "#FFFFFF",
+	linkedFooterBackground: folioInk,
+	linkedFooterText: "#FFFFFF",
+	tabsBackground: folioInk,
+	navigationText: "#FFFFFF",
+	navigationTextActive: "#FFFFFF",
+	tabIndicator: folioCoral,
 	headingColor: "#094970",
 	link: "#0075C5",
 	linkText: "#0075C5",
 	editableFieldBackground: "#EAF4FA",
 	loginCard: "#EAF4FA",
 	loginText: "#094970",
-	// White labels on the coral bar: the previous dark-blue pair sat at 3.32:1,
-	// and the active label at 1.63:1.
-	tabsBackground: folioCoral,
-	navigationText: "#FFFFFF",
-	navigationTextActive: "#FFFFFF",
 	searchResultTitle: "#0075C5",
 };
 
@@ -605,6 +558,9 @@ const folioDark = {
 	loginCard: "#222C33",
 	tabsBackground: "#222C33",
 	navigationText: "#5AB5D4",
+	// The coral reads on the dark tab bar too (4.94:1 on #222C33), so dark mode keeps the
+	// brand accent rather than falling back to the cyan the rest of the theme uses.
+	tabIndicator: folioCoral,
 	// Lifted 2% off the brand cyan: #5AB5D4 gave 4.30:1 on the #424242 card.
 	searchResultTitle: "#62B9D6",
 };
@@ -617,6 +573,12 @@ const folioHighContrast = {
 	link: "#042D45",
 	linkText: "#042D45",
 	searchResultTitle: "#042D45",
+	// NO CORAL HERE, deliberately. High contrast is a light-grounded AAA scheme and its
+	// tab bar is the pale #E2EEF6 inherited from openRS; coral is 2.44:1 on it, under even
+	// the 3:1 an indicator needs. A user who has asked for maximum contrast is not the
+	// person to spend the brand's last legible margin on, so the indicator stays the deep
+	// navy the rest of this scheme uses.
+	tabIndicator: "#042D45",
 };
 
 // ---- MOBIUS ----
@@ -961,7 +923,10 @@ const components: ThemeOptions["components"] = {
 				borderRadius: 4,
 			}),
 			indicator: ({ theme }) => ({
-				backgroundColor: theme.palette.primary.main,
+				// The brand's accent, which for five of the six themes IS `main` - see the
+				// token's default in buildTheme. FOLIO is the exception and the reason the
+				// token exists: its coral cannot be ink anywhere, but it can be this.
+				backgroundColor: theme.palette.primary.tabIndicator,
 				height: 3,
 			}),
 		},
@@ -1362,7 +1327,10 @@ const buildTheme = (
 		palette: {
 			mode,
 			contrastThreshold: highContrast ? 7 : 4.5,
-			primary,
+			// `tabIndicator` falls back to the brand's own `main`, so a brand that has no
+			// separate accent looks exactly as it did before the token existed. Only FOLIO
+			// sets it, because only FOLIO has an accent it cannot use as ink.
+			primary: { tabIndicator: primary.main, ...primary },
 			secondary: { main: secondaryMain },
 			background: { default: backgroundDefault, paper: backgroundDefault },
 			...(highContrast
