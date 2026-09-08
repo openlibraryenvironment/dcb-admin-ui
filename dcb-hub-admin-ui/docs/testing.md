@@ -87,6 +87,7 @@ npx tsc --noEmit                     # types
 npm run lint -- --max-warnings=0     # a warning is broken code
 npx vitest run                       # NOT `npm run test`, which is watch mode
 npx playwright test                  # both viewport projects
+npm run e2e:base-path                # the app mounted at /dcb-admin, port 4203
 npm run e2e:ki-bootstrap             # the bootloader artefact
 npm run lighthouse                   # the payload budget
 ```
@@ -133,6 +134,8 @@ still holds the port, and the result reads as a catastrophic regression.
 | `helpers/chunkReload.test.ts`                                          | the single reload, and the refusal to loop                                                                                        | The loop is the failure it exists to prevent                                                                       |
 | `helpers/nginxConfig.test.ts`                                          | every nginx `location` re-includes the security headers                                                                           | Verified failing against the exact regression (a new location with its own `Cache-Control`)                        |
 | `components/tabsAreLinks.test.ts`                                      | navigating tabs are anchors, across all six bars                                                                                  | Source-level; the e2e suite proves three of the six                                                                |
+| `e2e-base-path/navigation.spec.ts`                                     | the app mounted at `/dcb-admin`, which is how it ships and the one configuration every other spec does not run                    | Verified failing against a root build and against a root-absolute `inject_env.json` fetch                          |
+| the co-hosting block in the same file                                  | storage namespaced by the base rather than as `root`; `inject_env.json` fetched under the base                                    | Verified failing against a root-absolute fetch — the sibling app's config sits at the origin root                  |
 | `npm run lighthouse`                                                   | the payload budget, 750,000 B                                                                                                     | Yes — but see the caveat below                                                                                     |
 
 ## Guards on the guards

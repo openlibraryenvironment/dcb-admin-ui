@@ -23,7 +23,7 @@ import { E2E_KEYCLOAK_ID, E2E_KEYCLOAK_URL } from "./e2e/fixtures/keycloak";
  *
  *   |              | e2e  | bootloader | Lighthouse | base-path |
  *   |--------------|------|------------|------------|-----------|
- *   | dcb-admin-ui | 4173 | 4183       | 4193       | -         |
+ *   | dcb-admin-ui | 4173 | 4183       | 4193       | 4203      |
  *   | …-libraries  | 4174 | 4184       | -          | 4204      |
  *   | symposia-ui  | 4175 | 4185       | 4195       | -         |
  *

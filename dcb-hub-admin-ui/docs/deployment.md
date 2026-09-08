@@ -142,6 +142,35 @@ The URL path maps 1:1 onto the S3 key, so the worker does no asset-path rewritin
 
 **Adding another app:** add its prefix to `APPS` and a case to `appConfig()` in the worker, then point its CI at the matching S3 key prefix. Nothing else changes.
 
+#### Sharing one origin with DCB Admin for Libraries
+
+Both apps are gated for it — `npm run e2e:base-path` here, and the equivalent suite in
+`dcb-admin-for-libraries`. What the gates cannot see is the four things outside the bundle.
+
+**`/dcb-admin` is a proper prefix of `/dcb-admin-for-libraries`.** Any prefix match in the
+worker must be longest-first or segment-exact. A `startsWith` over `APPS` in declaration
+order serves the consortium app's `index.html` for every libraries URL, and the browser
+then parses HTML as a JavaScript module: blank page, `Unexpected token '<'`. The same
+applies to a Cloudflare **Route** of `mobius.kihosting.net/dcb-admin*`, which claims both
+paths.
+
+**Two Keycloak clients, and confirm they are two.** oidc-client-ts keys the stored session
+`oidc.user:{authority}:{client_id}`, so one client id shared by both apps is one session
+object shared by both apps — and their role expectations differ. Today they cannot collide,
+but only by accident: this app sets `userStore` to `localStorage` explicitly and the other
+sets none, and the library's default is `sessionStorage`. Harmonising that while sharing a
+client is the collision. Both subpaths also need to be in the client's Valid Redirect URIs.
+
+**Everything else in web storage is namespaced by the base** — `dcb-admin:` here,
+`dcb-admin-for-libraries:` there, and the sign-out purge is prefix-scoped rather than a
+`storage.clear()` that would take the sibling's state with it. The colon is what keeps
+`dcb-admin:` from matching `dcb-admin-for-libraries:`; the base-path gate asserts the
+namespace is not `root:`.
+
+**The security headers are the worker's, not this repo's.** `docker/production/` is the
+nginx image; there is no nginx on this path. On a shared origin one app's XSS is the
+other's, so the CSP matters more here, not less — and it has to live somewhere reviewable.
+
 ### Option B: AWS (S3 + CloudFront)
 
 **Architecture:** This approach uses a static build. Because S3 has no server-side execution, environment variables cannot be injected at runtime. Every `VITE_*` value is permanently baked into the JavaScript bundle during the build phase. You must build a separate artifact for each environment (dev, staging, production).

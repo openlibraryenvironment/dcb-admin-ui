@@ -117,6 +117,31 @@ verify_lighthouse:
       - dcb-hub-admin-ui/.lighthouseci/
     expire_in: 1 week
 
+# The base path is baked in by Vite, so the shipped configuration - mounted at
+# /dcb-admin so one origin can host dcb-admin-for-libraries beside it - is the one
+# configuration verify_e2e does not run: that suite pins the base to "/". A base
+# counted twice, by Vite AND by the router, reaches production looking green.
+#
+# It also carries the co-hosting assertions: storage namespaced by the base rather
+# than as "root", and inject_env.json fetched under the base rather than at the
+# origin root, where a sibling app's config sits.
+verify_base_path:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run e2e:base-path
+  artifacts:
+    when: on_failure
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/test-results/
+    expire_in: 1 week
+
 verify_ki_bootstrap:
   stage: verify
   image:
