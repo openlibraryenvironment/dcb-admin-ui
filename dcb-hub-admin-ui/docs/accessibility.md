@@ -129,7 +129,7 @@ because the attribute is present and syntactically valid; the gate is structural
 of seeing this. The fix is an `i18n.on("languageChanged", …)` that writes
 `document.documentElement.lang`, plus `lang="en-GB"` to match the bundled catalogue.
 
-The Spanish catalogue is **1,326 of 2,334 strings — 57%**. The remainder falls back to en-GB
+The Spanish catalogue is **1,326 of 2,349 strings — 56%**. The remainder falls back to en-GB
 and renders inside a page declared as one language, unmarked: **WCAG 3.1.2, Level AA**.
 Either finish it or withdraw the option for now; a half-translated console reads as an
 unfinished product to exactly the buyers bilingual capability is meant to reassure.
