@@ -151,6 +151,41 @@ a silent false pass.
 - `tabsAreLinks.test.ts` asserts it found at least six tab bars, and that every entry in its
   allow-list still exists. A glob matching nothing passes everything.
 
+## Hooks are not the CI gates
+
+`.husky/pre-commit` runs `lint-staged` on a developer's machine, over the files being
+staged. It is a convenience, not a gate: the real checks are the `verify_*` jobs, which run
+the whole suite over the whole tree. `.gitlab-ci.yml` therefore sets `HUSKY: "0"` for every
+job.
+
+That is not belt-and-braces, it is a fix. **The 2.0.0 release failed on it.** The release
+job is the one job that makes a commit — `@semantic-release/git` writes `package.json`,
+`CHANGELOG.md` and `release-info.json` — and husky ran `lint-staged` on that commit:
+
+```
+Error: ✖ lint-staged requires at least Git version 2.32.0.
+  [cause]: 'git version 2.30.2'
+husky - pre-commit script failed (code 1)
+  pluginName: '@semantic-release/git'
+```
+
+`node:22.23.1-bullseye` ships git 2.30.2. semantic-release failed in `prepare`, so no tag
+was pushed and nothing was half-released — but no release happened either.
+
+It had never fired before because `.husky/pre-commit` was not on the `release` branch until
+`main` was merged for 2.0.0. Husky's runner is `[ ! -f "$s" ] && exit 0`, so with no user
+hook file the tracked shim is a no-op, and every release up to 1.58.1 committed happily.
+
+**Do not fix this by bumping the image.** git 2.39 in bookworm would clear the version
+check and hand you a quieter version of the same problem: `CHANGELOG.md` matches the
+prettier glob in `.lintstagedrc.json`, so lint-staged would reformat, on every release, the
+changelog semantic-release had generated seconds earlier — and the two would disagree
+forever.
+
+`HUSKY=0` is husky's own switch, honoured in both places it matters: `index.mjs` returns
+early so `core.hooksPath` is never set, and the runner copied to `.husky/_/h` exits 0.
+Verified against husky's own runner: the hook blocks a commit, and `HUSKY=0` skips it.
+
 ## What the gates do not reach
 
 **Everything they measure is `vite preview` or a mocked page.** Nothing renders the

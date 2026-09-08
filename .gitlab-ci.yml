@@ -3,6 +3,13 @@ variables:
   # These can be specified per job or per pipeline
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
+  # Git hooks off in CI - husky's own switch, honoured at install and in the runner.
+  # The release job commits (@semantic-release/git), which fired lint-staged, which
+  # needs git >= 2.32.0 against the 2.30.2 in node:22-bullseye. Do NOT "fix" this by
+  # bumping the image: lint-staged would then reformat the changelog semantic-release
+  # had just generated. The checks themselves run as verify_* jobs.
+  # See docs/testing.md, "Hooks are not the CI gates".
+  HUSKY: "0"
 
 default:
   image:
