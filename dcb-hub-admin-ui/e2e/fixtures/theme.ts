@@ -2,6 +2,12 @@ import type { Page } from "@playwright/test";
 
 import type { ThemeMode, ThemeName } from "../../src/themes/openRS";
 import type { FontName } from "../../src/themes/fonts";
+import {
+	DEFAULT_DISPLAY,
+	type Density,
+	type Motion,
+	type TextSize,
+} from "../../src/themes/display";
 
 /**
  * The localStorage key `useThemeStore` persists under.
@@ -20,6 +26,9 @@ export interface SeedThemeOptions {
 	mode?: ThemeMode;
 	themeName?: ThemeName;
 	fontName?: FontName;
+	textSize?: TextSize;
+	density?: Density;
+	motion?: Motion;
 }
 
 /**
@@ -33,8 +42,15 @@ export interface SeedThemeOptions {
 export async function seedTheme(page: Page, options: SeedThemeOptions = {}) {
 	const state = {
 		themeName: options.themeName ?? "openRS",
+		// "light", not null. A seeded run must not depend on the emulated colour scheme
+		// unless the caller says so - null means "follow my device", which is the store's
+		// default but is exactly the ambiguity a gate should not carry.
 		mode: options.mode ?? "light",
 		fontName: options.fontName ?? "roboto",
+		...DEFAULT_DISPLAY,
+		...(options.textSize ? { textSize: options.textSize } : {}),
+		...(options.density ? { density: options.density } : {}),
+		...(options.motion ? { motion: options.motion } : {}),
 	};
 
 	await page.addInitScript(

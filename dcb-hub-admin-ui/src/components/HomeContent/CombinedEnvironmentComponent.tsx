@@ -209,7 +209,7 @@ export default function CombinedEnvironmentComponent() {
 
 	return (
 		<Box>
-			<Typography variant="h2" sx={{ mb: 1, fontSize: 32 }}>
+			<Typography variant="h2" sx={{ mb: 1 }}>
 				{t("environment.your")}
 			</Typography>
 			<Typography variant="homePageText" sx={{ mb: 2 }}>
@@ -252,7 +252,7 @@ export default function CombinedEnvironmentComponent() {
 						}}
 					/>
 				</Typography>
-				<Typography variant="h2" sx={{ mb: 1, fontSize: 32 }}>
+				<Typography variant="h2" sx={{ mb: 1 }}>
 					{t("environment.versions")}
 				</Typography>
 				<Typography variant="homePageText">

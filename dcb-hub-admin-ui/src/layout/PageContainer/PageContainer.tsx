@@ -78,7 +78,28 @@ export default function PageContainer({
 	};
 
 	return (
-		<Stack spacing={2} sx={{ height: "100%", width: "100%" }}>
+		/*
+		 * THE MAIN LANDMARK, for 78 of the 84 routes - this component wraps all of them
+		 * except the login shell, which carries its own.
+		 *
+		 * There was no <main> anywhere in the application. A screen-reader user had no
+		 * way to jump past the header and the twelve-item sidebar, and the skip link in
+		 * StructuralLayout has nothing to target without it - measured at fifteen tab
+		 * stops from the top of the page to its first control.
+		 *
+		 * tabIndex={-1} is load-bearing, not decoration: a skip link whose target cannot
+		 * receive focus moves the viewport and leaves focus where it was, so the next Tab
+		 * goes straight back into the navigation the user was trying to skip. The outline
+		 * is suppressed because this element is only ever focused programmatically, and a
+		 * ring around the whole page is noise rather than information.
+		 */
+		<Stack
+			component="main"
+			id="main-content"
+			tabIndex={-1}
+			spacing={2}
+			sx={{ height: "100%", width: "100%", outline: "none" }}
+		>
 			{!hideBreadcrumbs && title && (
 				<Box>
 					<Breadcrumbs titleAttribute={title} />

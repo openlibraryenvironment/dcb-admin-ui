@@ -1,10 +1,10 @@
-import { Tab, Tabs } from "@mui/material";
+import { Tabs } from "@mui/material";
+
+import { TabLink } from "@components/TabLink/TabLink";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "@tanstack/react-router";
 import { useQueries } from "@tanstack/react-query";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import {
 	getLibraryPatronRequestQueries,
@@ -44,7 +44,6 @@ export default function LibraryPatronRequestSubTabs({
 	activeBucket,
 }: LibraryPatronRequestSubTabsProps) {
 	const { t } = useTranslation();
-	const router = useRouter();
 	const gqlClient = useGraphQLClient();
 
 	const bucketQueries = code ? getLibraryPatronRequestQueries(code) : null;
@@ -77,14 +76,14 @@ export default function LibraryPatronRequestSubTabs({
 	return (
 		<Tabs
 			value={pathFor(activeBucket)}
-			onChange={(_event, value) => handleTabChange({ newValue: value, router })}
 			sx={{ mb: 2 }}
 			aria-label={t("nav.libraries.patronRequests.name")}
 		>
 			{SUBTABS.map((tab, index) => (
-				<Tab
+				<TabLink
 					key={tab.bucket}
 					value={pathFor(tab.bucket)}
+					to={pathFor(tab.bucket)}
 					label={t(tab.labelKey, {
 						number: results[index]?.data?.patronRequests?.totalSize ?? 0,
 					})}

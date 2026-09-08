@@ -71,3 +71,96 @@ Use a disposable ORS Appliance and invitation. Never paste tokens into notes or 
 6. In ORS **Integrations → Connect to DCB**, validate without consuming the token, then explicitly redeem it. Confirm membership is active immediately.
 7. Confirm DCB created the expected HostLMS, Agency, Library and selected Locations, and reciprocal NCIP/JWT calls succeed.
 8. Let another invitation expire and confirm it cannot be copied or redeemed; issue a replacement.
+
+---
+
+# The gates
+
+A gate here is a check that fails a build. This section records what each one exists for and,
+where it applies, what it actually caught — because a guard never seen to fail is not a
+guard, and knowing which ones have earned their keep is how you decide what to trust.
+
+## Running them
+
+```bash
+npx tsc --noEmit                     # types
+npm run lint -- --max-warnings=0     # a warning is broken code
+npx vitest run                       # NOT `npm run test`, which is watch mode
+npx playwright test                  # both viewport projects
+npm run e2e:ki-bootstrap             # the bootloader artefact
+npm run lighthouse                   # the payload budget
+```
+
+Read the **exit code**, not a grep of the output. Playwright's reporter writes ANSI escapes,
+and a `grep -c failed` over it has already reported a suite with 25 failures as green once
+during this project.
+
+## Parallelism, and why `workers` is pinned
+
+`playwright.config.ts` sets `workers: 4` against a default that gave 16 on a 32-thread
+machine. All of them drive their own Chromium against **one** `vite preview` serving an
+application that boots its whole router before it paints. The server and the CPU both
+saturate and correct assertions fail with `element(s) not found`.
+
+Measured on unmodified `main`, full suite:
+
+```
+16 workers   21 failed / 108 passed   1.8 min
+ 4 workers    0 failed / 129 passed   2.0 min
+```
+
+Twelve seconds, for the difference between a suite that is evidence and one that is noise.
+`expect.timeout` is 10s for the same reason. **Neither is a retry** — `retries: 2` in CI
+already hides this, which is why it went unnoticed there, and a retry that masks contention
+masks a real regression just as readily.
+
+If a run fails en masse with `ERR_CONNECTION_REFUSED` on 4173, look for an orphaned preview
+server before reading a single assertion: `--strictPort` correctly refuses to start when one
+still holds the port, and the result reads as a catastrophic regression.
+
+## What each gate is for
+
+| Gate                                                                   | Guards                                                                                                                            | Has it caught something?                                                                                           |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `themes/openRS.contrast.test.ts`                                       | every token pairing, 18 brand × mode combinations, at AA or AAA; the tab indicator at the non-text 3:1; hover and pressed grounds | **Yes, repeatedly.** An invisible Koha tab indicator (1.00:1); two brands whose pressed header state fell under AA |
+| `themes/display.test.ts`                                               | text size actually moves the scale; a typography variant returning to px                                                          | Yes — it is the guard that makes the px→rem conversion permanent                                                   |
+| `e2e/accessibility.spec.ts`                                            | axe over every unavoidable route, light/dark/high-contrast, plus the 8.71.0 surface                                               | Yes — six controls with no accessible name, before this work                                                       |
+| `scanForLandmarks` (same file)                                         | `landmark-one-main`, `region`, `bypass` — rules the WCAG tag list **cannot see**, because axe tags them `best-practice`           | **Yes.** No `<main>` on any route, no `<footer>`, 15 tab stops to reach page content                               |
+| `expectNoHorizontalScroll` in `fixtures/axe.ts` + the `narrow` project | WCAG 1.4.10 reflow at 320px. axe cannot see reflow at all                                                                         | **Yes, on its first run.** Two visually-hidden elements 100% wide, and a serious `scrollable-region-focusable`     |
+| `e2e/forced-colors.spec.ts`                                            | Windows High Contrast Mode                                                                                                        | **Yes.** Contained buttons with no boundary at all                                                                 |
+| `e2e/display-preferences.spec.ts`                                      | that preferences reach the rendered page, read from computed styles                                                               | Yes — this class of feature fails by changing a theme value nothing reads                                          |
+| `e2e/system-preferences.spec.ts`                                       | `prefers-contrast` and `prefers-color-scheme` reaching the theme                                                                  | Written after the fact for a claim that had no end-to-end evidence                                                 |
+| `helpers/chunkReload.test.ts`                                          | the single reload, and the refusal to loop                                                                                        | The loop is the failure it exists to prevent                                                                       |
+| `helpers/nginxConfig.test.ts`                                          | every nginx `location` re-includes the security headers                                                                           | Verified failing against the exact regression (a new location with its own `Cache-Control`)                        |
+| `components/tabsAreLinks.test.ts`                                      | navigating tabs are anchors, across all six bars                                                                                  | Source-level; the e2e suite proves three of the six                                                                |
+| `npm run lighthouse`                                                   | the payload budget, 750,000 B                                                                                                     | Yes — but see the caveat below                                                                                     |
+
+## Guards on the guards
+
+Several gates assert that their own setup took effect. These are not ceremony; each replaced
+a silent false pass.
+
+- `expectPaintedScheme` — a "passing" dark run could otherwise be a second light run.
+- The first test in `forced-colors.spec.ts` — `test.use({ forcedColors: "active" })` at file
+  scope **silently does not take**. The option is accepted, the run is green, and
+  `matchMedia` reports false inside the page. `page.emulateMedia` in a `beforeEach` works.
+  Two tests "passed" against an ordinary render before this guard existed.
+- `tabsAreLinks.test.ts` asserts it found at least six tab bars, and that every entry in its
+  allow-list still exists. A glob matching nothing passes everything.
+
+## What the gates do not reach
+
+**Everything they measure is `vite preview` or a mocked page.** Nothing renders the
+container, and two real defects lived in exactly that gap:
+
+- the image served **1,576 KB uncompressed** where the budget approved 665 KB, because the
+  budget audits a preview server that compresses and Cloudflare compresses at the edge;
+- the Content Security Policy blocked **40 font loads per session**, which the config test
+  and `curl` both missed — a CSP failure is not a failed request and not an exception.
+
+Both were found by building the image and driving it in a browser. **A CI step that does
+that, and fails on any `securitypolicyviolation`, is the highest-value gate still missing.**
+
+Also not covered: real Keycloak flows (silent renewal, session expiry, logout) are mocked
+throughout, and the CSP's `frame-ancestors 'self'` was reasoned from the code rather than
+exercised against a live identity provider.

@@ -12,7 +12,10 @@ function NetworkError() {
 	const { t } = useTranslation();
 
 	return (
+		// This route renders no layout at all, so it carries its own main landmark
+		// rather than being the one page with no main region.
 		<Box
+			component="main"
 			sx={{
 				display: "flex",
 				justifyContent: "center",

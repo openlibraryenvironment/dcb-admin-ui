@@ -46,11 +46,89 @@ async function tagLicenceWatermarks(page: Page): Promise<number> {
 	});
 }
 
+/**
+ * The document must not scroll sideways — WCAG 2.2 1.4.10 Reflow.
+ *
+ * axe cannot see this. Reflow is a layout property, not a DOM one, and no automated rule
+ * in the ruleset reports it; it is the failure the `narrow` project in playwright.config
+ * exists to catch, and this is what actually catches it.
+ *
+ * The DOCUMENT, not its contents. A data grid or a wide code block scrolling inside its own
+ * `overflow-x: auto` container is correct and expected — the criterion is about the page,
+ * and a container that scrolls itself does not widen the document.
+ *
+ * One pixel of tolerance: sub-pixel layout rounding puts scrollWidth a fraction over
+ * clientWidth on pages that are visually fine, and a gate that fires on 0.5px is a gate
+ * somebody disables.
+ */
+async function expectNoHorizontalScroll(page: Page) {
+	const overflow = await page.evaluate(() => {
+		const root = document.documentElement;
+		const offenders = [];
+
+		if (root.scrollWidth > root.clientWidth + 1) {
+			for (const element of Array.from(document.body.querySelectorAll("*"))) {
+				const box = element.getBoundingClientRect();
+				if (box.width > 0 && box.right > root.clientWidth + 1) {
+					offenders.push(
+						`${element.tagName.toLowerCase()}.${String(element.className).split(" ").slice(0, 2).join(".")} right=${Math.round(box.right)}`,
+					);
+				}
+				if (offenders.length >= 5) break;
+			}
+		}
+
+		return {
+			overshoot: root.scrollWidth - root.clientWidth,
+			viewport: root.clientWidth,
+			offenders,
+		};
+	});
+
+	expect(
+		overflow,
+		`document scrolls horizontally at ${overflow.viewport}px`,
+	).toMatchObject({ offenders: [] });
+	expect(overflow.overshoot).toBeLessThanOrEqual(1);
+}
+
 export async function scanForViolations(page: Page) {
+	await expectNoHorizontalScroll(page);
 	await tagLicenceWatermarks(page);
 
 	const results = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
+		.exclude("[data-e2e-licence-watermark]")
+		.analyze();
+
+	expect(
+		results.violations.map((violation) => ({
+			id: violation.id,
+			impact: violation.impact,
+			nodes: violation.nodes.map((node) => node.target.join(" ")),
+		})),
+	).toEqual([]);
+}
+
+/**
+ * The landmark structure the tag list above cannot see.
+ *
+ * axe tags `landmark-one-main` and `region` as `best-practice`, so a scan asking for the
+ * WCAG A+AA ladder is structurally incapable of reporting them - which is how a Level A
+ * failure sat behind a green Level A gate. See docs/accessibility.md.
+ */
+export const LANDMARK_RULES = [
+	"landmark-one-main",
+	"landmark-unique",
+	"region",
+	"bypass",
+];
+
+export async function scanForLandmarks(page: Page) {
+	await tagLicenceWatermarks(page);
+
+	const results = await new AxeBuilder({ page })
+		.withRules(LANDMARK_RULES)
 		.exclude("[data-e2e-licence-watermark]")
 		.analyze();
 

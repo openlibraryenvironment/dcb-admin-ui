@@ -1,12 +1,28 @@
 import {
 	createTheme,
 	darken,
+	enhanceHighContrast,
+	getContrastRatio,
 	lighten,
 	type Theme,
 	type ThemeOptions,
 } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-premium/themeAugmentation";
-import { DEFAULT_FONT, fontStack, type FontName } from "@themes/fonts";
+import {
+	DEFAULT_FONT,
+	fontStack,
+	isFontName,
+	type FontName,
+} from "@themes/fonts";
+import {
+	DEFAULT_DISPLAY,
+	DENSITIES,
+	isDisplayValue,
+	rootFontSize,
+	spacingUnit,
+	TEXT_SIZES,
+	type ThemeDisplay,
+} from "@themes/display";
 declare module "@mui/material/Button" {
 	interface ButtonPropsSizeOverrides {
 		xlarge: true;
@@ -17,173 +33,82 @@ declare module "@mui/material/IconButton" {
 		xlarge: true;
 	}
 }
+/**
+ * The brand's semantic colour tokens - one list, reused by all four augmented
+ * interfaces.
+ *
+ * These live under `palette.primary`, which is the wrong shape for forty unrelated
+ * surfaces and inks; docs/theming.md section 2 has the argument and the migration.
+ */
+interface BrandTokens {
+	attributeTitle: string;
+	breadcrumbs: string;
+	buttonForSelectedChildPage: string;
+	buttonForSelectedPage: string;
+	codeBlockBackground: string;
+	detailsAccordionSummary: string;
+	editableFieldBackground: string;
+	errorBackground: string;
+	exclamationIcon: string;
+	footerArea: string;
+	footerText: string;
+	linkedFooterBackground: string;
+	linkedFooterText: string;
+	header: string;
+	headerText: string;
+	headingColor: string;
+	hitCountText: string;
+	hover: string;
+	hoverOnSelectedPage: string;
+	iconSymbol: string;
+	inactiveBackground: string;
+	link: string;
+	linkText: string;
+	landingBackground: string;
+	landingCard: string;
+	loginCard: string;
+	loginText: string;
+	navigationText: string;
+	navigationTextActive: string;
+	searchResultBackground: string;
+	searchResultTitle: string;
+	selectedText: string;
+	sidebar: string;
+	titleArea: string;
+	pageBackground: string;
+	pageContentBackground: string;
+	loginButtonOutlineColor: string;
+	outlineColor: string;
+	tabsBackground: string;
+	/**
+	 * The header bar's hover and pressed grounds, derived from `header` by `liftWithin`.
+	 * They are TEXT GROUNDS - the header's label sits on them - and the contrast gate
+	 * holds them to the same floor as the bar itself.
+	 */
+	headerHover: string;
+	headerActive: string;
+	/**
+	 * The bar under the selected tab, and the one place a brand's accent may be itself:
+	 * WCAG 1.4.11 asks 3:1 of a graphical object where text needs 4.5:1.
+	 *
+	 * Defaults to the brand's own `main`, so it changed nothing except FOLIO and Koha.
+	 */
+	tabIndicator: string;
+}
+
 declare module "@mui/material/styles" {
-	interface Palette {
-		attributeTitle: string;
-		breadcrumbs: string;
-		buttonForSelectedChildPage: string;
-		buttonForSelectedPage: string;
-		codeBlockBackground: string;
-		detailsAccordionSummary: string;
-		editableFieldBackground: string;
-		errorBackground: string;
-		exclamationIcon: string;
-		footerArea: string;
-		footerText: string;
-		linkedFooterBackground: string;
-		linkedFooterText: string;
-		header: string;
-		headerText: string;
-		headingColor: string;
-		hitCountText: string;
-		hover: string;
-		hoverOnSelectedPage: string;
-		iconSymbol: string;
-		inactiveBackground: string;
-		link: string;
-		linkText: string;
-		landingBackground: string;
-		landingCard: string;
-		loginCard: string;
-		loginText: string;
-		navigationText: string;
-		navigationTextActive: string;
-		searchResultBackground: string;
-		searchResultTitle: string;
-		selectedText: string;
-		sidebar: string;
-		titleArea: string;
-		pageBackground: string;
-		pageContentBackground: string;
-		loginButtonOutlineColor: string;
-		outlineColor: string;
-		tabsBackground: string;
-	}
-
-	interface PaletteColor {
-		attributeTitle?: string;
-		breadcrumbs?: string;
-		buttonForSelectedChildPage?: string;
-		buttonForSelectedPage?: string;
-		codeBlockBackground?: string;
-		detailsAccordionSummary?: string;
-		editableFieldBackground?: string;
-		errorBackground?: string;
-		exclamationIcon?: string;
-		footerArea?: string;
-		footerText?: string;
-		linkedFooterBackground?: string;
-		linkedFooterText?: string;
-		header?: string;
-		headerText?: string;
-		headingColor?: string;
-		hitCountText?: string;
-		hover?: string;
-		hoverOnSelectedPage?: string;
-		iconSymbol?: string;
-		inactiveBackground?: string;
-		link?: string;
-		linkText?: string;
-		landingBackground?: string;
-		landingCard?: string;
-		loginCard?: string;
-		loginText?: string;
-		navigationText?: string;
-		navigationTextActive?: string;
-		searchResultBackground?: string;
-		searchResultTitle?: string;
-		selectedText?: string;
-		sidebar?: string;
-		titleArea?: string;
-		pageBackground?: string;
-		pageContentBackground?: string;
-		loginButtonOutlineColor?: string;
-		outlineColor?: string;
-		tabsBackground?: string;
-	}
-	interface PaletteOptions {
-		attributeTitle?: string;
-		breadcrumbs?: string;
-		buttonForSelectedChildPage?: string;
-		buttonForSelectedPage?: string;
-		codeBlockBackground?: string;
-		detailsAccordionSummary?: string;
-		editableFieldBackground?: string;
-		errorBackground?: string;
-		exclamationIcon?: string;
-		footerArea?: string;
-		footerText?: string;
-		linkedFooterBackground?: string;
-		linkedFooterText?: string;
-		header?: string;
-		headerText?: string;
-		headingColor?: string;
-		hitCountText?: string;
-		hover?: string;
-		hoverOnSelectedPage?: string;
-		iconSymbol?: string;
-		inactiveBackground?: string;
-		link?: string;
-		linkText?: string;
-		landingBackground?: string;
-		landingCard?: string;
-		loginCard?: string;
-		loginText?: string;
-		navigationText?: string;
-		navigationTextActive?: string;
-		searchResultBackground?: string;
-		searchResultTitle?: string;
-		selectedText?: string;
-		sidebar?: string;
-		titleArea?: string;
-		pageBackground?: string;
-		pageContentBackground?: string;
-		loginButtonOutlineColor?: string;
-		outlineColor?: string;
-		tabsBackground?: string;
-	}
-
-	interface SimplePaletteColorOptions {
-		attributeTitle?: string;
-		breadcrumbs?: string;
-		buttonForSelectedChildPage?: string;
-		buttonForSelectedPage?: string;
-		codeBlockBackground?: string;
-		detailsAccordionSummary?: string;
-		editableFieldBackground?: string;
-		errorBackground?: string;
-		exclamationIcon?: string;
-		footerArea?: string;
-		footerText?: string;
-		linkedFooterBackground?: string;
-		linkedFooterText?: string;
-		header?: string;
-		headerText?: string;
-		headingColor?: string;
-		hitCountText?: string;
-		hover?: string;
-		hoverOnSelectedPage?: string;
-		iconSymbol?: string;
-		inactiveBackground?: string;
-		link?: string;
-		linkText?: string;
-		landingBackground?: string;
-		landingCard?: string;
-		loginCard?: string;
-		loginText?: string;
-		navigationText?: string;
-		navigationTextActive?: string;
-		searchResultBackground?: string;
-		searchResultTitle?: string;
-		selectedText?: string;
-		sidebar?: string;
-		titleArea?: string;
-		pageBackground?: string;
-		pageContentBackground?: string;
-		loginButtonOutlineColor?: string;
-		outlineColor?: string;
-		tabsBackground?: string;
-	}
+	/*
+	 * `no-empty-object-type` is right in general and wrong here. These four are MODULE
+	 * AUGMENTATION: TypeScript merges a declaration into MUI's own only through an
+	 * `interface`, so the type alias the rule wants would not augment anything. An empty
+	 * body is the whole mechanism, not an oversight.
+	 */
+	/* eslint-disable @typescript-eslint/no-empty-object-type */
+	interface Palette extends BrandTokens {}
+	interface PaletteColor extends Partial<BrandTokens> {}
+	interface PaletteOptions extends Partial<BrandTokens> {}
+	interface SimplePaletteColorOptions extends Partial<BrandTokens> {}
+	/* eslint-enable @typescript-eslint/no-empty-object-type */
 
 	interface TypographyVariants {
 		appTitle?: React.CSSProperties;
@@ -297,18 +222,16 @@ const darkPrimary = "#35B7FF";
 const lightDetailsAccordion = "#F6F6F6";
 const darkDetailsAccordion = "#424242";
 
+// The chrome for the brands whose own colour cannot carry text - FOLIO's coral and Koha's
+// green. Not pure black: #1A1A1A gives white 17.40:1, the coral 6.05:1 and #88B744 7.38:1.
+const brandInk = "#1A1A1A";
+
 // ---------------------------------------------------------------------------
-// Design tokens
+// Design tokens. High contrast is a light-grounded AAA (>= 7:1) scheme; light and dark
+// target AA (>= 4.5:1). Every pairing below is measured by openRS.contrast.test.ts.
 //
-// Every custom semantic token lives under `primary`, so `theme.palette.primary.X`
-// and `sx="primary.X"` resolve identically in every theme and mode. High contrast
-// is a light-grounded WCAG 2.2 AAA (>= 7:1) scheme; light/dark target AA (>= 4.5:1).
-//
-// Themes are separate `createTheme` objects swapped at the provider (see
-// `getAppTheme`) rather than custom MUI colour schemes: a custom-named colour
-// scheme is not given MUI's default palette baseline, so `createThemeWithVars`
-// throws "Cannot read properties of undefined (reading 'background')". Swapping
-// whole themes is the supported path for multiple brands + modes.
+// Separate themes swapped at the provider, NOT MUI colour schemes: a custom-named scheme
+// gets no palette baseline and createThemeWithVars throws. See docs/theming.md.
 // ---------------------------------------------------------------------------
 
 // ---- OpenRS (default brand) ----
@@ -509,22 +432,26 @@ const kohaLight = {
 	...openRSLight,
 	main: kohaGreen,
 	breadcrumbs: "#222222",
+	// White on this green is 4.84:1, so the sidebar's selected item still works as a
+	// green fill even though the chrome no longer does.
 	buttonForSelectedPage: kohaGreen,
-	linkedFooterBackground: kohaGreen,
-	header: kohaGreen,
 	headingColor: kohaGreen,
 	link: kohaGreen,
 	linkText: kohaGreen,
 	editableFieldBackground: "#F0F4EC",
 	loginCard: "#F0F4EC",
 	loginText: "#222222",
-	// Saturated green bar, so the labels must be white: #222222 only reached
-	// 3.89:1 on it, and the active label was the bar's own green (1.00:1 -
-	// literally invisible). Active state is carried by the Tabs indicator, so
-	// both labels share one colour, as in the OpenRS palette.
-	tabsBackground: kohaGreen,
+	// THE SAME TREATMENT AS FOLIO, and for the same reason: kohaGreen is a mid-tone that
+	// cannot carry text, and on a near-black bar the brand gets MORE of itself back.
+	// #88B744 was 2.05:1 on the old green bar and is 7.38:1 here.
+	header: brandInk,
+	headerText: "#FFFFFF",
+	linkedFooterBackground: brandInk,
+	linkedFooterText: "#FFFFFF",
+	tabsBackground: brandInk,
 	navigationText: "#FFFFFF",
 	navigationTextActive: "#FFFFFF",
+	tabIndicator: "#88B744",
 	searchResultTitle: "#222222",
 };
 
@@ -552,12 +479,11 @@ const kohaHighContrast = {
 };
 
 // ---- FOLIO ----
-// FOLIO coral (#FF674C) is a mid-tone: as a text ground it gives white only
-// 2.88:1 and the brand's dark blue only 3.32:1 - no ink passes AA on it. It is
-// darkened 20% here, the largest brand shift in this file, so that the header,
-// footer, and tab bar can carry white text. This is a visible change to FOLIO's
-// coral; a shared decision if FOLIO branding is contractual.
-const folioCoral = "#E52300";
+// FOLIO's coral is #FF674C and this theme uses it unaltered, as the tab indicator on a
+// near-black bar. It cannot be ink anywhere: white on it is 2.88:1. The previous
+// version darkened the brand 20% to make it a text ground, which is not a shade.
+// See docs/theming.md section 3.
+const folioCoral = "#FF674C";
 
 const folioLight = {
 	...openRSLight,
@@ -565,19 +491,20 @@ const folioLight = {
 	breadcrumbs: "#47769C",
 	// FOLIO Bright Blue #0077C8 reached only 4.46:1 on the page; 1% darker.
 	buttonForSelectedPage: "#0075C5",
-	linkedFooterBackground: folioCoral,
-	header: folioCoral,
+	header: brandInk,
+	headerText: "#FFFFFF",
+	linkedFooterBackground: brandInk,
+	linkedFooterText: "#FFFFFF",
+	tabsBackground: brandInk,
+	navigationText: "#FFFFFF",
+	navigationTextActive: "#FFFFFF",
+	tabIndicator: folioCoral,
 	headingColor: "#094970",
 	link: "#0075C5",
 	linkText: "#0075C5",
 	editableFieldBackground: "#EAF4FA",
 	loginCard: "#EAF4FA",
 	loginText: "#094970",
-	// White labels on the coral bar: the previous dark-blue pair sat at 3.32:1,
-	// and the active label at 1.63:1.
-	tabsBackground: folioCoral,
-	navigationText: "#FFFFFF",
-	navigationTextActive: "#FFFFFF",
 	searchResultTitle: "#0075C5",
 };
 
@@ -591,6 +518,9 @@ const folioDark = {
 	loginCard: "#222C33",
 	tabsBackground: "#222C33",
 	navigationText: "#5AB5D4",
+	// The coral reads on the dark tab bar too (4.94:1 on #222C33), so dark mode keeps the
+	// brand accent rather than falling back to the cyan the rest of the theme uses.
+	tabIndicator: folioCoral,
 	// Lifted 2% off the brand cyan: #5AB5D4 gave 4.30:1 on the #424242 card.
 	searchResultTitle: "#62B9D6",
 };
@@ -603,6 +533,12 @@ const folioHighContrast = {
 	link: "#042D45",
 	linkText: "#042D45",
 	searchResultTitle: "#042D45",
+	// NO CORAL HERE, deliberately. High contrast is a light-grounded AAA scheme and its
+	// tab bar is the pale #E2EEF6 inherited from openRS; coral is 2.44:1 on it, under even
+	// the 3:1 an indicator needs. A user who has asked for maximum contrast is not the
+	// person to spend the brand's last legible margin on, so the indicator stays the deep
+	// navy the rest of this scheme uses.
+	tabIndicator: "#042D45",
 };
 
 // ---- MOBIUS ----
@@ -760,29 +696,32 @@ const TYPOGRAPHY_COLOUR: Record<string, keyof Theme["palette"]["primary"]> = {
 	hitCount: "hitCountText",
 };
 
+// EVERY SIZE IN `rem`, AND THAT IS LOAD-BEARING: the text-size preference scales the
+// ROOT font size, and only rem follows the root. A variant added in px silently opts
+// out of it. Identical rendering at a 16px root; see docs/theming.md section 1.
 const typography: ThemeOptions["typography"] = {
 	fontFamily: fontStack(DEFAULT_FONT),
-	h1: { fontSize: 32, fontWeight: 400 },
-	h2: { fontSize: 24, fontWeight: 400 },
-	h3: { fontSize: 18 },
-	h4: { fontSize: 18 },
-	appTitle: { fontSize: 20 },
-	loginCardText: { fontSize: 18 },
+	h1: { fontSize: "2rem", fontWeight: 400 },
+	h2: { fontSize: "1.5rem", fontWeight: 400 },
+	h3: { fontSize: "1.125rem" },
+	h4: { fontSize: "1.125rem" },
+	appTitle: { fontSize: "1.25rem" },
+	loginCardText: { fontSize: "1.125rem" },
 	cardActionText: { fontSize: "1rem" },
 	subheading: { fontSize: "1.3rem" },
 	componentSubheading: { fontSize: "1.3rem" },
 	attributeTitle: { fontWeight: "bold" },
 	attributeText: { wordBreak: "break-word", textWrap: "wrap" },
-	loginHeader: { fontSize: 32, fontWeight: "bold" },
+	loginHeader: { fontSize: "2rem", fontWeight: "bold" },
 	modalTitle: { textAlign: "center", fontWeight: "bold" },
 	homePageText: { fontSize: "1.1rem" },
 	notFoundTitle: { fontSize: "3rem" },
 	notFoundText: { fontSize: "1.5rem" },
-	linkedFooterTextSize: { fontSize: "14px" },
-	linkedFooterHeader: { fontSize: "18px", fontWeight: "bold" },
-	loadingText: { fontSize: 32, fontWeight: 400, textAlign: "center" },
-	accordionSummary: { fontSize: 20, fontWeight: 700 },
-	subTabTitle: { fontSize: 12 },
+	linkedFooterTextSize: { fontSize: "0.875rem" },
+	linkedFooterHeader: { fontSize: "1.125rem", fontWeight: "bold" },
+	loadingText: { fontSize: "2rem", fontWeight: 400, textAlign: "center" },
+	accordionSummary: { fontSize: "1.25rem", fontWeight: 700 },
+	subTabTitle: { fontSize: "0.75rem" },
 	hitCount: { fontWeight: "bold" },
 	searchResultTitle: { fontSize: "1.3rem" },
 };
@@ -933,7 +872,10 @@ const components: ThemeOptions["components"] = {
 				borderRadius: 4,
 			}),
 			indicator: ({ theme }) => ({
-				backgroundColor: theme.palette.primary.main,
+				// The brand's accent, which for five of the six themes IS `main` - see the
+				// token's default in buildTheme. FOLIO is the exception and the reason the
+				// token exists: its coral cannot be ink anywhere, but it can be this.
+				backgroundColor: theme.palette.primary.tabIndicator,
 				height: 3,
 			}),
 		},
@@ -963,6 +905,16 @@ const components: ThemeOptions["components"] = {
 				"&.Mui-focusVisible": {
 					outline: "2px solid",
 					outlineColor: theme.palette.primary.outlineColor,
+				},
+				/*
+				 * A border in Windows High Contrast Mode, which `enhanceHighContrast` does
+				 * NOT add - it only restores focus outlines. Measured under forced colours, a
+				 * contained button was white on white with `border: 0px none`, identical to
+				 * the body text beside it. `ButtonBorder` is a system keyword, so the browser
+				 * guarantees the contrast. See docs/theming.md section 6.
+				 */
+				"@media (forced-colors: active)": {
+					border: "1px solid ButtonBorder",
 				},
 				"&.MuiButton-contained": {
 					"&:disabled": {
@@ -1128,6 +1080,19 @@ const components: ThemeOptions["components"] = {
 			},
 		},
 	},
+	/**
+	 * A scrollable region a keyboard user can actually scroll - WCAG 2.1.1.
+	 *
+	 * Eleven of the twelve TableContainers cap their height, so they scroll, and none
+	 * had a tab stop. A theme default rather than twelve props, so the thirteenth is
+	 * covered too. See docs/accessibility.md.
+	 */
+	MuiTableContainer: {
+		defaultProps: {
+			tabIndex: 0,
+		},
+	},
+
 	MuiTooltip: {
 		defaultProps: { arrow: true },
 		styleOverrides: {
@@ -1221,23 +1186,112 @@ const components: ThemeOptions["components"] = {
 };
 
 // ---------------------------------------------------------------------------
-// Theme registry. These could be separated into other files if needed, leave for now though
+// Theme registry.
+//
+// TOKEN SETS, NOT BUILT THEMES: `createTheme(builtTheme, overrides)` deep-merges and
+// does not re-derive, which silently breaks typography and actively breaks `spacing`.
+// See docs/theming.md section 1 before changing how these are assembled.
 // ---------------------------------------------------------------------------
 
 type PrimaryTokens = typeof openRSLight;
 
+type BrandDescriptor = {
+	primary: PrimaryTokens;
+	secondaryMain: string;
+	backgroundDefault: string;
+	mode: "light" | "dark";
+	highContrast?: boolean;
+};
+
+/**
+ * Reduced motion, as two global rules rather than a theme value. See
+ * docs/theming.md section 5 for why it is CSS and why `system` writes no attribute.
+ *
+ * `!important` is correct here and nowhere else in this application: MUI's transition
+ * components write `transition-duration` INLINE at runtime, and no stylesheet rule
+ * beats an inline declaration. 0.01ms rather than 0, because a zero duration skips
+ * `transitionend` and MUI's own callbacks wait on it.
+ */
+const REDUCE_MOTION_DECLARATIONS = {
+	animationDuration: "0.01ms !important",
+	animationIterationCount: "1 !important",
+	transitionDuration: "0.01ms !important",
+	scrollBehavior: "auto !important",
+} as const;
+
+const NOT_FULL = 'html:not([data-motion="full"])';
+const FORCED = 'html[data-motion="reduced"]';
+
+const reduceMotionFor = (root: string) => ({
+	[`${root}, ${root} *, ${root} *::before, ${root} *::after`]:
+		REDUCE_MOTION_DECLARATIONS,
+});
+
+const motionStyles = {
+	"@media (prefers-reduced-motion: reduce)": reduceMotionFor(NOT_FULL),
+	...reduceMotionFor(FORCED),
+};
+
+/**
+ * The strongest lift a bar can take while the text on it stays readable.
+ *
+ * Per-brand, because lightening a header moves it towards its own white label. The
+ * first attempt used a luminance threshold and put two brands under AA; the contrast
+ * gate caught it. See docs/theming.md section 3.
+ */
+const liftWithin = (
+	header: string,
+	text: string,
+	floor: number,
+	candidates: readonly number[],
+): number =>
+	candidates.find(
+		(amount) => getContrastRatio(text, lighten(header, amount)) >= floor,
+	) ?? candidates[candidates.length - 1];
+
 const buildTheme = (
-	primary: PrimaryTokens,
-	secondaryMain: string,
-	backgroundDefault: string,
-	mode: "light" | "dark",
-	highContrast = false,
-): Theme =>
-	createTheme({
+	{
+		primary,
+		secondaryMain,
+		backgroundDefault,
+		mode,
+		highContrast = false,
+	}: BrandDescriptor,
+	fontName: FontName,
+	display: ThemeDisplay,
+): Theme => {
+	// The same threshold the contrast gate holds these tokens to.
+	const headerFloor = highContrast ? 7 : 4.5;
+
+	const theme = createTheme({
 		palette: {
 			mode,
 			contrastThreshold: highContrast ? 7 : 4.5,
-			primary,
+			// `tabIndicator` falls back to the brand's own `main`, so a brand that has no
+			// separate accent looks exactly as it did before the token existed. Only FOLIO
+			// sets it, because only FOLIO has an accent it cannot use as ink.
+			primary: {
+				tabIndicator: primary.main,
+				headerHover: lighten(
+					primary.header,
+					liftWithin(
+						primary.header,
+						primary.headerText,
+						headerFloor,
+						[0.16, 0.08],
+					),
+				),
+				headerActive: lighten(
+					primary.header,
+					liftWithin(
+						primary.header,
+						primary.headerText,
+						headerFloor,
+						[0.28, 0.2, 0.12],
+					),
+				),
+				...primary,
+			},
 			secondary: { main: secondaryMain },
 			background: { default: backgroundDefault, paper: backgroundDefault },
 			...(highContrast
@@ -1250,155 +1304,213 @@ const buildTheme = (
 					}
 				: {}),
 		},
-		typography,
-		components,
+		spacing: spacingUnit(display.density),
+		typography: { ...typography, fontFamily: fontStack(fontName) },
+		components: {
+			...components,
+			MuiCssBaseline: {
+				styleOverrides: {
+					html: {
+						// The text-size preference. Every size in `typography` is in `rem`
+						// so that this one declaration moves the whole scale together.
+						fontSize: rootFontSize(display.textSize),
+						// WCAG 2.2 2.4.11 Focus Not Obscured. The AppBar is position:fixed
+						// at 70px, and the browser scrolls a focused element to the top of
+						// the scrollport knowing nothing about what is painted over it.
+						// True whether the document or an inner box is the scroller, which
+						// this layout has changed before.
+						scrollPaddingTop: "70px",
+					},
+					...motionStyles,
+				},
+			},
+		},
 	});
 
-const THEMES = {
-	openRS: {
-		light: buildTheme(openRSLight, "#1e7ebf", "#FFFFFF", "light"),
-		dark: buildTheme(openRSDark, "#75BEDB", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			openRSHighContrast,
-			"#00407A",
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
-	evergreen: {
-		light: buildTheme(evergreenLight, "#2E7D32", "#FFFFFF", "light"),
-		dark: buildTheme(evergreenDark, "#81C784", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			evergreenHighContrast,
-			"#1B5E20",
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
-	koha: {
-		light: buildTheme(kohaLight, "#88B744", "#FFFFFF", "light"),
-		dark: buildTheme(kohaDark, "#A5D25C", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			kohaHighContrast,
-			"#1F330D",
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
-	folio: {
-		light: buildTheme(folioLight, "#5AB5D4", "#FFFFFF", "light"),
-		dark: buildTheme(folioDark, "#87CEEB", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			folioHighContrast,
-			"#021B2A",
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
-	blueAndWhite: {
-		light: buildTheme(nhsLight, nhsDarkBlue, "#FFFFFF", "light"),
-		dark: buildTheme(nhsDark, "#A8D5F0", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			nhsHighContrast,
-			nhsDarkBlue,
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
-	mobius: {
-		light: buildTheme(mobiusLight, "#003D6A", "#FFFFFF", "light"),
-		// #585353 was a mid-grey, not a dark ground: it alone pushed the brand cyan
-		// to 2.13:1 and the links to 4.11:1. #1E1E1E matches every other brand.
-		dark: buildTheme(mobiusDark, "#4DD0E1", "#1E1E1E", "dark"),
-		highContrast: buildTheme(
-			mobiusHighContrast,
-			"#002A4A", // A slightly darker shade for the secondary active states
-			"#FFFFFF",
-			"light",
-			true,
-		),
-	},
+	/*
+	 * Windows High Contrast Mode - the OS `forced-colors: active`, NOT the
+	 * `highContrast` argument above, which selects one of our own palettes.
+	 *
+	 * Wraps createTheme because the enhancer takes a BUILT theme. It composes with
+	 * this file's own overrides rather than replacing them, and it is NOT sufficient
+	 * on its own - see docs/theming.md section 6 and the MuiButton override above.
+	 */
+	return enhanceHighContrast(theme);
 };
 
-export type ThemeName = keyof typeof THEMES;
-export type ThemeMode = keyof (typeof THEMES)["openRS"];
+const THEME_TOKENS = {
+	openRS: {
+		light: {
+			primary: openRSLight,
+			secondaryMain: "#1e7ebf",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: openRSDark,
+			secondaryMain: "#75BEDB",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: openRSHighContrast,
+			secondaryMain: "#00407A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
+	},
+	evergreen: {
+		light: {
+			primary: evergreenLight,
+			secondaryMain: "#2E7D32",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: evergreenDark,
+			secondaryMain: "#81C784",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: evergreenHighContrast,
+			secondaryMain: "#1B5E20",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
+	},
+	koha: {
+		light: {
+			primary: kohaLight,
+			secondaryMain: "#88B744",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: kohaDark,
+			secondaryMain: "#A5D25C",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: kohaHighContrast,
+			secondaryMain: "#1F330D",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
+	},
+	folio: {
+		light: {
+			primary: folioLight,
+			secondaryMain: "#5AB5D4",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: folioDark,
+			secondaryMain: "#87CEEB",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: folioHighContrast,
+			secondaryMain: "#021B2A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
+	},
+	blueAndWhite: {
+		light: {
+			primary: nhsLight,
+			secondaryMain: nhsDarkBlue,
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: nhsDark,
+			secondaryMain: "#A8D5F0",
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: nhsHighContrast,
+			secondaryMain: nhsDarkBlue,
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
+	},
+	mobius: {
+		light: {
+			primary: mobiusLight,
+			secondaryMain: "#003D6A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+		},
+		dark: {
+			primary: mobiusDark,
+			secondaryMain: "#4DD0E1",
+			// #585353 was a mid-grey, not a dark ground: it alone pushed the brand cyan
+			// to 2.13:1 and the links to 4.11:1. #1E1E1E matches every other brand.
+			backgroundDefault: "#1E1E1E",
+			mode: "dark",
+		},
+		highContrast: {
+			primary: mobiusHighContrast,
+			// A slightly darker shade for the secondary active states.
+			secondaryMain: "#002A4A",
+			backgroundDefault: "#FFFFFF",
+			mode: "light",
+			highContrast: true,
+		},
+	},
+} as const satisfies Record<string, Record<string, BrandDescriptor>>;
 
-export const THEME_NAMES = Object.keys(THEMES) as ThemeName[];
+export type ThemeName = keyof typeof THEME_TOKENS;
+export type ThemeMode = keyof (typeof THEME_TOKENS)["openRS"];
+
+export const THEME_NAMES = Object.keys(THEME_TOKENS) as ThemeName[];
 export const THEME_MODES: ThemeMode[] = ["light", "dark", "highContrast"];
 
 /**
- * Themes with a non-default typeface applied, built once each and kept.
+ * Built themes, kept so the object handed to ThemeProvider is stable across renders.
  *
- * The registry above prebuilds 6 brands x 3 modes at module scope. Multiplying that by the
- * typeface list would prebuild 90 themes to use one, so the font is a thin overlay built on
- * FIRST USE instead: `createTheme(base, overrides)` merges onto an already-built theme, and
- * the result is cached so the identity handed to ThemeProvider is stable across renders.
- * An unstable theme object re-renders the entire tree on every keystroke.
- *
- * The cache is bounded by construction - its key space is THEME_NAMES x THEME_MODES x
- * FONT_NAMES, three fixed vocabularies, so at most 90 entries and no user input can add a
- * ninety-first. That is why a plain Map is acceptable here where it would not be for
- * anything record- or request-scaled.
+ * Bounded by construction: name x mode x font x textSize x density, five fixed
+ * vocabularies and a 720 ceiling that no user input can add to. Motion is absent
+ * because it is CSS on the root element, not a theme property.
  */
-const themesWithFont = new Map<string, Theme>();
+const themeCache = new Map<string, Theme>();
 
 export const getAppTheme = (
 	name: ThemeName,
 	mode: ThemeMode,
 	fontName: FontName = DEFAULT_FONT,
+	display: ThemeDisplay = DEFAULT_DISPLAY,
 ): Theme => {
-	const base = THEMES[name]?.[mode] ?? THEMES.openRS.light;
+	// Every input is tolerated on read, like every other stored preference: a brand, mode,
+	// typeface or step written by a later release must render the default rather than
+	// white-screen an administrator or put `undefined` into a CSS declaration.
+	const descriptor = THEME_TOKENS[name]?.[mode] ?? THEME_TOKENS.openRS.light;
+	const font = isFontName(fontName) ? fontName : DEFAULT_FONT;
+	const textSize = isDisplayValue(TEXT_SIZES, display?.textSize)
+		? display.textSize
+		: DEFAULT_DISPLAY.textSize;
+	const density = isDisplayValue(DENSITIES, display?.density)
+		? display.density
+		: DEFAULT_DISPLAY.density;
 
-	// The base themes are already built with the default stack, so the common case
-	// costs nothing and returns the same object it always did.
-	if (fontName === DEFAULT_FONT) return base;
-
-	const key = `${name}:${mode}:${fontName}`;
-	const cached = themesWithFont.get(key);
+	const key = `${name}:${mode}:${font}:${textSize}:${density}`;
+	const cached = themeCache.get(key);
 	if (cached) return cached;
 
-	const built = createTheme(base, {
-		typography: withFontFamily(base.typography, fontStack(fontName)),
-	});
-	themesWithFont.set(key, built);
+	const built = buildTheme(descriptor, font, { textSize, density });
+	themeCache.set(key, built);
 	return built;
 };
 
-/**
- * Every typography variant repointed at a new family, not just the top-level key.
- *
- * `createTheme(builtTheme, options)` deep-merges; it does NOT re-derive. A built theme's
- * `typography` already holds h1, body1, button and the rest as fully resolved objects,
- * each carrying its own `fontFamily` copied from the family that was current when the
- * theme was built. Overriding only `typography.fontFamily` therefore changed a value
- * nothing reads: CssBaseline paints the body from `body1`, and every `<Typography>` reads
- * its own variant, so the page stayed in Roboto while the theme claimed otherwise.
- *
- * The e2e gate caught this. The unit test that asserted `theme.typography.fontFamily` did
- * not, because that field was correct - it was the only correct one.
- *
- * Mapped rather than enumerated so a variant added to the theme later is covered without
- * anybody remembering to add it here.
- */
-function withFontFamily(
-	typographyOfBase: Theme["typography"],
-	family: string,
-): Record<string, unknown> {
-	const next: Record<string, unknown> = { fontFamily: family };
-
-	for (const [variant, value] of Object.entries(typographyOfBase)) {
-		if (value && typeof value === "object" && "fontFamily" in value) {
-			next[variant] = { ...(value as object), fontFamily: family };
-		}
-	}
-
-	return next;
-}
-
 // Back-compat default export used as the initial theme.
-export const openRSTheme = THEMES.openRS.light;
+export const openRSTheme = getAppTheme("openRS", "light");

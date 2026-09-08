@@ -9,6 +9,12 @@ import { LicenseInfo } from "@mui/x-license";
 import "./i18n";
 import { routeTree } from "./routeTree.gen";
 import App from "@components/App/App";
+import { GlobalError, NotFound } from "@components/GlobalErrors/GlobalErrors";
+import RoutePending from "@components/RoutePending/RoutePending";
+import {
+	clearChunkReloadGuard,
+	installChunkReloadGuard,
+} from "@helpers/chunkReload";
 import {
 	appUrl,
 	clearAppStorage,
@@ -216,12 +222,30 @@ export async function mountDcbAdmin(
 		defaultPreloadStaleTime: 0,
 		defaultStaleTime: 5000,
 		scrollRestoration: true,
+		// Inherited by every route, which is the point: six of the 84 route files
+		// declared an errorComponent and three a pendingComponent, so the other 78
+		// fell through to TanStack's built-in default - an unstyled, untranslated
+		// panel that prints the raw error text. That was not a latent risk, because
+		// `queryClient`'s throwOnError above sends every failure that is not a 401 or
+		// a 503 to exactly this boundary.
+		//
+		// Set here rather than added to 78 files: a per-route declaration still wins
+		// where a route has a better answer than the generic one, and route 85 is
+		// covered without anybody remembering.
+		defaultErrorComponent: GlobalError,
+		defaultNotFoundComponent: NotFound,
+		defaultPendingComponent: RoutePending,
 		context: {
 			cfg, // Injected config
 			auth: undefined!, // Will be provided by OIDC at the component level
 			queryClient, // Injected React Query
 		},
 	});
+
+	// A deploy deletes the chunks the currently-loaded index.html names; see
+	// helpers/chunkReload.ts for why this reloads once and then deliberately stops.
+	installChunkReloadGuard();
+	router.subscribe("onResolved", clearChunkReloadGuard);
 
 	userManager = new UserManager({
 		authority: cfg.VITE_KEYCLOAK_URL!,

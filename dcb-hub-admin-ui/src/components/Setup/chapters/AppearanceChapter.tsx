@@ -39,7 +39,7 @@ export default function AppearanceChapter() {
 		<Stack spacing={3}>
 			<Alert severity="info">{t("setup.appearance.scope_note")}</Alert>
 
-			<ThemeControls showFont />
+			<ThemeControls />
 
 			<Stack spacing={1}>
 				<LanguageSwitcher />

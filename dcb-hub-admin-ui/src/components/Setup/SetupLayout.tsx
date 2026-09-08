@@ -19,6 +19,7 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import SetupIntro from "./SetupIntro";
 import SetupRail from "./SetupRail";
 import { SETUP_CHAPTERS } from "./setupChapters";
+import { visuallyHidden } from "@mui/utils";
 import {
 	consortiumSetupSteps,
 	stepNumber,
@@ -94,19 +95,7 @@ function SetupLayoutInner({
 			{/* Polite, and keyed on the step so the text genuinely changes between
 			    chapters - an identical string rewritten into a live region is not
 			    re-announced by most screen readers. */}
-			<Box
-				key={step}
-				aria-live="polite"
-				aria-atomic="true"
-				sx={{
-					position: "absolute",
-					width: 1,
-					height: 1,
-					overflow: "hidden",
-					clip: "rect(0 0 0 0)",
-					whiteSpace: "nowrap",
-				}}
-			>
+			<Box key={step} aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
 				{announcement}
 			</Box>
 

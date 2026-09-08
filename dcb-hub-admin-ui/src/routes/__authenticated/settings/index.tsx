@@ -14,9 +14,11 @@ export const Route = createFileRoute("/__authenticated/settings/")({
  * Where a choice made during setup is changed afterwards — W-6.
  *
  * This route existed and rendered the string "missing". Setup's first chapter offers the
- * theme, the mode, the typeface and the language, and a preference that can only be set
- * during a first-run flow is a preference somebody is stuck with - so the same controls
- * live here permanently.
+ * brand theme, the mode, the typeface, the text size, the spacing, the animation setting
+ * and the language, and a preference that can only be set during a first-run flow is a
+ * preference somebody is stuck with - so the same controls live here permanently, and on
+ * /profile. All three render the identical panel: an appearance setting a user can find in
+ * one place and not another is one they will conclude does not exist.
  *
  * Everything on this page is per user and stored in this browser. Nothing here is a
  * property of the consortium and nothing here reaches a patron: a consortium-wide typeface
@@ -40,7 +42,7 @@ function SettingsComponent() {
 					>
 						{t("theme.appearance")}
 					</Typography>
-					<ThemeControls showFont />
+					<ThemeControls />
 				</section>
 
 				<section aria-labelledby="settings-language-heading">

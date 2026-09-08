@@ -170,7 +170,25 @@ deploy_tag_to_s3:
     # Key layout is <env-root>/<app>/, and the worker picks the root by hostname.
     # Trailing slashes are explicit: --delete is scoped to the destination
     # prefix, and one level up it would wipe the sibling apps in this root.
+    #
+    # TWO PASSES, AND THE ORDER IS LOAD-BEARING.
+    #
+    # Every asset filename carries a content hash, so a change is a NEW name and the
+    # old name can be cached forever. index.html can never be: it is the only file
+    # that names the hashes, and --delete has just removed the previous build's. A
+    # browser holding a cached index.html therefore asks for chunks that no longer
+    # exist and every lazy route fails with "Failed to fetch dynamically imported
+    # module" - a blank page. docs/deployment.md has required this since it was
+    # written; the sync did not do it. src/helpers/chunkReload.ts is the client-side
+    # half, and it is a recovery, not a substitute for getting the headers right.
+    #
+    # Assets first, shell last, so the new index.html is never live before the chunks
+    # it names are fetchable.
     - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/prod/dcb-admin/" --delete
+      --exclude "index.html" --exclude "inject_env.json"
+      --cache-control "public, max-age=31536000, immutable"
+    - aws s3 cp dcb-hub-admin-ui/dist/index.html "s3://ki-libs-spa-hosting/prod/dcb-admin/index.html"
+      --cache-control "no-store, no-cache, must-revalidate"
     # Immutable archive of the released bundle, NOT a servable path: the base
     # ("/dcb-admin/") is baked in, so this copy only ever resolves its assets
     # from /dcb-admin/. It exists to roll back from, by copying it over
@@ -233,7 +251,14 @@ deploy_dev_to_s3:
     # <env-root>/dcb-admin/, and dev.kihosting.net's root is "dev" - a key
     # prefix it does not know about is a 502, which is precisely what
     # "dcb-admin-dev" was giving us.
+    #
+    # Same two passes as the prod job, and for the same reason - dev deploys far more
+    # often, so a cached shell pointing at deleted chunks bites here first.
     - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dev/dcb-admin/" --delete
+      --exclude "index.html" --exclude "inject_env.json"
+      --cache-control "public, max-age=31536000, immutable"
+    - aws s3 cp dcb-hub-admin-ui/dist/index.html "s3://ki-libs-spa-hosting/dev/dcb-admin/index.html"
+      --cache-control "no-store, no-cache, must-revalidate"
   variables:
     AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET

@@ -11,6 +11,8 @@ import { inkOn } from "../hooks/useChartPalette";
 
 const AA = 4.5;
 const AAA = 7;
+/** WCAG 1.4.11: a graphical object against what sits beside it, not text on a ground. */
+const NON_TEXT = 3;
 
 const channel = (c: number) => {
 	const s = c / 255;
@@ -94,6 +96,13 @@ describe("theme contrast", () => {
 				],
 				["text.primary / hover", ink, p.hover],
 				["headerText / header", p.headerText, p.header],
+				// The hover and pressed grounds are TEXT GROUNDS too - the header's label
+				// and icons sit on them while the pointer is down. They are derived from
+				// `header` by lighten(), so a brand whose header only just passes can be
+				// lifted into failing by its own hover, which is not something anybody
+				// would notice by looking at the token list.
+				["headerText / headerHover", p.headerText, p.headerHover],
+				["headerText / headerActive", p.headerText, p.headerActive],
 				[
 					"linkedFooterText / linkedFooterBackground",
 					p.linkedFooterText,
@@ -158,6 +167,38 @@ describe("theme contrast", () => {
 				);
 
 			expect(failures).toEqual([]);
+		},
+	);
+
+	/**
+	 * The selected-tab indicator, at the NON-TEXT threshold.
+	 *
+	 * Separate from the loop above because the number is different, not because the rule
+	 * is softer: WCAG 1.4.11 asks 3:1 of a graphical object against what sits beside it,
+	 * where 1.4.3 asks 4.5:1 of text. Folding it into the AA/AAA pairs would either fail
+	 * every brand for missing a threshold that does not apply to it, or quietly relax the
+	 * threshold that does.
+	 *
+	 * This is the assertion that lets FOLIO keep its real coral. #FF674C is 2.88:1 on
+	 * white and could never be ink; it is 6.05:1 on the near-black bar it now indicates
+	 * against. If somebody later moves that bar back to a light colour, this fails.
+	 */
+	it.each(THEME_NAMES.flatMap((n) => THEME_MODES.map((m) => [n, m] as const)))(
+		"%s/%s draws a tab indicator visible against its own tab bar",
+		(name, mode) => {
+			const theme = getAppTheme(name, mode);
+			const p = theme.palette.primary as unknown as Record<string, string>;
+			const bar =
+				p.tabsBackground === "transparent"
+					? theme.palette.background.default
+					: p.tabsBackground;
+
+			const ratio = contrast(p.tabIndicator, bar);
+
+			expect(
+				ratio,
+				`${p.tabIndicator} on ${bar} is ${ratio.toFixed(2)}:1`,
+			).toBeGreaterThanOrEqual(NON_TEXT);
 		},
 	);
 });

@@ -1,18 +1,14 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-	createFileRoute,
-	Outlet,
-	useNavigate,
-	useLocation,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Tab, Typography, Alert } from "@mui/material";
+import { Typography, Alert } from "@mui/material";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 
+import { TabLink } from "@components/TabLink/TabLink";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
@@ -27,7 +23,6 @@ export const Route = createFileRoute("/__authenticated/search/$clusterId")({
 function ClusterLayout() {
 	const { clusterId } = Route.useParams();
 	const { t } = useTranslation();
-	const navigate = useNavigate();
 	const location = useLocation();
 	const gqlClient = useGraphQLClient();
 	const auth = useAuth();
@@ -65,11 +60,10 @@ function ClusterLayout() {
 	if (currentPath.endsWith("/requestingHistory"))
 		activeTab = "requestingHistory";
 
-	const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
-		// Every tab (including "cluster") is a child route - navigating to the bare
-		// /search/$clusterId layout renders an empty Outlet.
-		navigate({ to: `/search/${clusterId}/${newValue}` });
-	};
+	// Every tab (including "cluster") is a child route - navigating to the bare
+	// /search/$clusterId layout renders an empty Outlet. The tabs are anchors, so this
+	// builds their href rather than running a navigation from an onChange.
+	const tabHref = (segment: string) => `/search/${clusterId}/${segment}`;
 
 	const pageActions = [
 		{
@@ -105,18 +99,25 @@ function ClusterLayout() {
 			)}
 
 			<TabContext value={activeTab}>
-				<TabList onChange={handleTabChange} variant="scrollable" sx={{ mb: 3 }}>
-					<Tab label={t("nav.search.cluster")} value="cluster" />
-					<Tab
-						label={t("nav.search.cluster_explainer")}
-						value="clusterExplanation"
-					/>
-					<Tab label={t("nav.search.items")} value="items" />
-					<Tab label={t("nav.search.identifiers")} value="identifiers" />
-					<Tab
-						label={t("nav.search.requesting_history")}
-						value="requestingHistory"
-					/>
+				{/* No `onChange`: each tab is an anchor and the router handles its own
+				    click, so an onChange navigating as well would fire twice. */}
+				<TabList variant="scrollable" sx={{ mb: 3 }}>
+					{(
+						[
+							["cluster", "nav.search.cluster"],
+							["clusterExplanation", "nav.search.cluster_explainer"],
+							["items", "nav.search.items"],
+							["identifiers", "nav.search.identifiers"],
+							["requestingHistory", "nav.search.requesting_history"],
+						] as const
+					).map(([segment, labelKey]) => (
+						<TabLink
+							key={segment}
+							value={segment}
+							to={tabHref(segment)}
+							label={t(labelKey)}
+						/>
+					))}
 				</TabList>
 
 				<TabPanel value={activeTab} sx={{ p: 0 }}>

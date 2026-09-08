@@ -18,7 +18,6 @@ import {
 import PageContainer from "@layout/PageContainer/PageContainer";
 import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
-import CombinedEnvironmentComponent from "@components/HomeContent/CombinedEnvironmentComponent";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import OnboardingStats from "@components/OnboardingStats/OnboardingStats";
 import { mapWithConcurrency } from "@helpers/mapWithConcurrency";
@@ -841,10 +840,6 @@ function Onboarding() {
 						noResultsText={t("ui.data_grid.no_results")}
 						searchText=""
 					/>
-				</Grid>
-
-				<Grid size={{ xs: 4, sm: 8, md: 12 }} sx={{ mt: 2 }}>
-					<CombinedEnvironmentComponent />
 				</Grid>
 			</Grid>
 		</PageContainer>

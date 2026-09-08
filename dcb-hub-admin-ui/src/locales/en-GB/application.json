@@ -316,7 +316,7 @@
 		"onboarding_stats_complete": "Setup complete",
 		"onboarding_stats_outstanding_one": "{{count}} still outstanding",
 		"onboarding_stats_outstanding_other": "{{count}} still outstanding",
-		"onboarding_stats_ils_caption": "libraries on this ILS",
+		"onboarding_stats_ils_caption": "libraries in this consortium.",
 		"onboarding_stats_unknown_ils": "Other or unknown",
 		"new": {
 			"title": "Create a consortium",
@@ -477,7 +477,8 @@
 		"modes": {
 			"light": "Light",
 			"dark": "Dark",
-			"highContrast": "High contrast"
+			"highContrast": "High contrast",
+			"system": "Match my device"
 		},
 		"font_label": "Reading typeface",
 		"font_sample": "OpenRS is awesome!",
@@ -502,7 +503,26 @@
 				"name": "Lexend",
 				"description": "Shaped to reduce visual crowding. Often preferred by readers with dyslexia."
 			}
-		}
+		},
+		"text_size_label": "Text size",
+		"text_sizes": {
+			"small": "Small",
+			"normal": "Normal",
+			"large": "Large",
+			"largest": "Largest"
+		},
+		"density_label": "Spacing",
+		"densities": {
+			"comfortable": "Comfortable",
+			"compact": "Compact"
+		},
+		"motion_label": "Animation",
+		"motions": {
+			"system": "Match my device",
+			"full": "Show animations",
+			"reduced": "Reduce animations"
+		},
+		"reset": "Reset appearance to defaults"
 	},
 	"hostlms": {
 		"alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.",
@@ -1554,6 +1574,7 @@
 		"bibs": "Bib records",
 		"consortium": {
 			"contacts": "Contacts",
+			"environment": "Environment",
 			"name": "Consortium",
 			"onboarding": "Onboarding",
 			"functionalSettings": "Functional settings",
@@ -1653,6 +1674,7 @@
 		"settings": {
 			"name": "Settings"
 		},
+		"skip_to_content": "Skip to main content",
 		"supplierRequests": {
 			"name": "Supplier requests"
 		}
