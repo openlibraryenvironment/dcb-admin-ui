@@ -321,3 +321,69 @@ static file with no input, no interpolation and no imports.
 and not a thrown exception; `curl` cannot see one. Build the image, load it in a browser and
 listen for `securitypolicyviolation`. That is how the font blocks above were found, after the
 config test and `curl` had both passed.
+
+## The version the artefact reports
+
+`vite.config.mts` reads `package.json` at build time and bakes the version into the bundle
+as `__APP_VERSION__`, which `Footer.tsx` renders. That is a **build-time** constant, unlike
+everything in `inject_env.json`, so the artefact is only as accurate as the `package.json`
+that was on disk when it was built.
+
+semantic-release decides the version, and it runs in the `release` stage — _after_ the
+`build` stage. So the artefact the pipeline shipped had always been built from the pre-bump
+`package.json`, and every release to date named its predecessor in the footer:
+
+```
+package.json at release~1, i.e. what the build job saw while releasing 1.58.1   1.58.0
+```
+
+The archive prefix is derived separately, from `$RELEASE_VERSION` in the release job's dotenv
+report, so `archive/dcb-admin-v1.58.1/` was at least named for the right release — assuming
+that variable arrived at all, which the `dependencies` note below puts in doubt. The bundle
+inside it said 1.58.0 either way.
+
+`build_released_bundle` (stage `rebuild`, release branch only) is the fix: it `needs` the
+release job, writes `$RELEASE_VERSION` into `package.json` with
+`npm version --no-git-tag-version`, and builds again. `deploy_tag_to_s3` consumes that
+artefact instead. The `build`-stage job still runs on the release branch, now purely as a
+gate — nothing should be released that does not build — and its output is no longer deployed.
+
+**`dependencies` overrides `needs` for downloads, and that matters here.** `deploy_tag_to_s3`
+wants two things from two jobs: the bundle from `build_released_bundle` and
+`$RELEASE_VERSION` from `release`'s dotenv. Setting `dependencies` at all makes it — not
+`needs` — the list of jobs whose artefacts arrive, so the job now lists both in `needs` and
+sets no `dependencies`.
+
+### Why the gate reads a meta tag and not the bundle
+
+`versionMetaPlugin` in `vite.config.mts` emits
+`<meta name="dcb-admin-version" content="…">` into `index.html`, and the rebuild job asserts
+that tag carries `$RELEASE_VERSION`.
+
+The obvious gate — grep `dist/assets/` for the version — is **unsound**, and this was
+measured rather than assumed. A fixed-string search for `9.9.9` passes against a bundle
+built at 2.0.0, because it matches the SVG path fragment `.9c-.5 0-.9.4-.9.9v16.2` in an
+icon chunk. A version number is three integers and two dots; so is a run of path
+coordinates. A gate that can pass when the thing it checks is false is worse than no gate.
+
+The tag earns its place twice over: it also means **what is deployed can be read with one
+request**, `curl -s https://…/dcb-admin/index.html | grep dcb-admin-version`, rather than by
+finding and opening a content-hashed JS chunk.
+
+### `main` stays one release behind
+
+`@semantic-release/git` commits the bumped `package.json` to the branch it released from,
+and `.releaserc.json` sets `"branches": ["release"]`. Nothing carries that commit back, so
+`main` reads the previous version indefinitely. Back-merge after each release:
+
+```bash
+git fetch origin
+git checkout main
+git merge --no-ff origin/release -m "chore: back-merge the <version> release commit [skip ci]"
+git push origin main
+```
+
+`--no-ff` so `main` keeps its own history rather than fast-forwarding onto `release`, and
+`[skip ci]` because a pipeline for a one-line version change is waste. This does not affect
+what is deployed — `deploy_dev_to_s3` builds from `main` and its footer will simply name the
+last release rather than an unreleased number.

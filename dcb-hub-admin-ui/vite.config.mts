@@ -50,6 +50,26 @@ ${adapterEntry.code}`;
 	};
 }
 
+/**
+ * Names the built version in the served HTML, so what is live can be read with one request
+ * instead of by opening a hashed JS chunk. The CI gate that proves the released version was
+ * baked reads this; grepping the minified bundle instead is unsound - see docs/deployment.md.
+ */
+function versionMetaPlugin(version: string): Plugin {
+	return {
+		name: "dcb-admin-version-meta",
+		transformIndexHtml() {
+			return [
+				{
+					tag: "meta",
+					attrs: { name: "dcb-admin-version", content: version },
+					injectTo: "head",
+				},
+			];
+		},
+	};
+}
+
 export default defineConfig(({ mode }) => {
 	// Wisdom from Ian: this is done to allow us to deploy the app to a folder rather than the root of a URI.
 	// This approach shold also work for deployment at root.
@@ -78,6 +98,7 @@ export default defineConfig(({ mode }) => {
 			}),
 			react(),
 			kiBootstrapCssPlugin(),
+			versionMetaPlugin(pkg.version),
 		],
 		server: {
 			historyApiFallback: true,

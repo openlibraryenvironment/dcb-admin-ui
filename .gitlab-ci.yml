@@ -16,6 +16,7 @@ stages:
   - verify
   - build
   - release
+  - rebuild
   - container
   - deploy
 
@@ -24,6 +25,10 @@ cache:
   paths:
     - dcb-hub-admin-ui/node_modules/
     - .npm
+
+# On main this artefact is the deployment. On the release branch it is only a gate:
+# it is built before semantic-release bumps the version, so build_released_bundle
+# supersedes it there.
 build:
   stage: build
   script:
@@ -153,6 +158,41 @@ release:
   dependencies:
     - build
 
+# Builds the bundle AFTER semantic-release has decided the version. vite bakes
+# __APP_VERSION__ from package.json at build time, so the `build` stage - which runs
+# before `release` - produces an artefact naming the PREVIOUS release. Do not deploy
+# that one. See docs/deployment.md, "The version the artefact reports".
+build_released_bundle:
+  stage: rebuild
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: on_success
+    - when: never
+  # No `dependencies`: setting it would override `needs` as the list of jobs whose
+  # artefacts arrive, and $RELEASE_VERSION arrives as the release job's dotenv report.
+  needs:
+    - release
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    # A bundle stamped with a version that was never published is worse than a failed job.
+    - test -n "$RELEASE_VERSION"
+    - cd dcb-hub-admin-ui
+    - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
+    - npm ci
+    # semantic-release owns the tag and has already pushed it. --allow-same-version so
+    # re-running the job is not a failure.
+    - npm version --no-git-tag-version --allow-same-version "${RELEASE_VERSION#v}"
+    - VITE_PUBLIC_URL=/dcb-admin/ npm run build
+    # The version vite read, then the version that reached the artefact. The second reads
+    # the <meta> tag, NOT the minified JS: `grep -rF 9.9.9 dist/assets/` passes against a
+    # 2.0.0 bundle, matching an SVG path fragment. See docs/deployment.md.
+    - test "v$(node -p "require('./package.json').version")" = "$RELEASE_VERSION"
+    - grep -qF "<meta name=\"dcb-admin-version\" content=\"${RELEASE_VERSION#v}\">" dist/index.html
+  artifacts:
+    paths:
+      - dcb-hub-admin-ui/dist/
+    expire_in: 1 hour
+
 # Copy the dist build up to s3 where we can point cloudflare as a distribution service
 deploy_tag_to_s3:
   stage: deploy
@@ -199,11 +239,12 @@ deploy_tag_to_s3:
     AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
     AWS_REGION: eu-west-1
+  # Both jobs in `needs` and no `dependencies`: the bundle comes from build_released_bundle
+  # and $RELEASE_VERSION from release's dotenv, and a `dependencies` list would override
+  # which of the two actually arrives.
   needs:
-    - build
     - release
-  dependencies:
-    - build
+    - build_released_bundle
 
 # This new option also deploys the bundle to an R2 bucket at cloudflare - but with the intention that this becomes a reusable deployment that is configured by hostname
 # My aim here is to add some code that talks to a service and resolves the backend and auth credentials based on hostname so we can deploy a wildcard domain like
