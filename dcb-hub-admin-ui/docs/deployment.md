@@ -154,12 +154,14 @@ then parses HTML as a JavaScript module: blank page, `Unexpected token '<'`. The
 applies to a Cloudflare **Route** of `mobius.kihosting.net/dcb-admin*`, which claims both
 paths.
 
-**Two Keycloak clients, and confirm they are two.** oidc-client-ts keys the stored session
-`oidc.user:{authority}:{client_id}`, so one client id shared by both apps is one session
-object shared by both apps — and their role expectations differ. Today they cannot collide,
-but only by accident: this app sets `userStore` to `localStorage` explicitly and the other
-sets none, and the library's default is `sessionStorage`. Harmonising that while sharing a
-client is the collision. Both subpaths also need to be in the client's Valid Redirect URIs.
+**Two Keycloak clients, and they must stay two.** Confirmed 2026-09-08: one client for
+`dcb-admin`, one for `dcb-admin-for-libraries`. Keep it that way. oidc-client-ts keys the
+stored session `oidc.user:{authority}:{client_id}`, so a single client id shared by both
+apps would be a single session object shared by both — and their role expectations differ.
+Nothing in the code enforces the separation, and a shared client would not collide today
+only by accident: this app sets `userStore` to `localStorage` explicitly, the other sets
+none, and oidc-client-ts defaults it to `sessionStorage`. Harmonising that while sharing a
+client is the collision. Both subpaths also need to be in each client's Valid Redirect URIs.
 
 **Everything else in web storage is namespaced by the base** — `dcb-admin:` here,
 `dcb-admin-for-libraries:` there, and the sign-out purge is prefix-scoped rather than a
