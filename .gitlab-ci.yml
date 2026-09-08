@@ -236,22 +236,33 @@ deploy_tag_to_s3:
     # Trailing slashes are explicit: --delete is scoped to the destination
     # prefix, and one level up it would wipe the sibling apps in this root.
     #
-    # TWO PASSES, AND THE ORDER IS LOAD-BEARING.
+    # THREE PASSES, AND THE ORDER IS LOAD-BEARING.
     #
-    # Every asset filename carries a content hash, so a change is a NEW name and the
-    # old name can be cached forever. index.html can never be: it is the only file
-    # that names the hashes, and --delete has just removed the previous build's. A
-    # browser holding a cached index.html therefore asks for chunks that no longer
-    # exist and every lazy route fails with "Failed to fetch dynamically imported
-    # module" - a blank page. docs/deployment.md has required this since it was
-    # written; the sync did not do it. src/helpers/chunkReload.ts is the client-side
-    # half, and it is a recovery, not a substitute for getting the headers right.
+    # A file may be cached forever only if its NAME changes when its content does.
+    # Under assets/ every name carries a content hash, so a change is a new name and
+    # the old one can be kept for a year. Six files in dist/ have stable names and
+    # cannot: index.html, ki-bootstrap.js, silent-renew.html, locales/**,
+    # config-prod.json and the favicon. See docs/deployment.md.
     #
-    # Assets first, shell last, so the new index.html is never live before the chunks
-    # it names are fetchable.
+    # A cached file that names hashed chunks --delete has just removed asks for
+    # chunks that no longer exist, and every lazy route fails with "Failed to fetch
+    # dynamically imported module" - a blank page. That is true of index.html, and
+    # equally of ki-bootstrap.js, which is the bootloader's public entry point
+    # (vite.config.mts pins its name deliberately) and names those same chunks.
+    # src/helpers/chunkReload.ts cannot rescue that one: the reload re-fetches the
+    # same immutably-cached bootloader.
+    #
+    # Hashed assets first, stable names next, shell last, so nothing is ever live
+    # before the chunks it names are fetchable. --delete on the first two passes
+    # covers the same keys the single pass did, so only the headers change here.
     - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/prod/dcb-admin/" --delete
-      --exclude "index.html" --exclude "inject_env.json"
+      --exclude "*" --include "assets/*"
       --cache-control "public, max-age=31536000, immutable"
+    # `no-cache` stores the file and revalidates it against the ETag, which is a 304
+    # in the common case - not `no-store`, which would refetch these on every load.
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/prod/dcb-admin/" --delete
+      --exclude "assets/*" --exclude "index.html" --exclude "inject_env.json"
+      --cache-control "public, no-cache"
     - aws s3 cp dcb-hub-admin-ui/dist/index.html "s3://ki-libs-spa-hosting/prod/dcb-admin/index.html"
       --cache-control "no-store, no-cache, must-revalidate"
     # Immutable archive of the released bundle, NOT a servable path: the base
@@ -318,11 +329,14 @@ deploy_dev_to_s3:
     # prefix it does not know about is a 502, which is precisely what
     # "dcb-admin-dev" was giving us.
     #
-    # Same two passes as the prod job, and for the same reason - dev deploys far more
-    # often, so a cached shell pointing at deleted chunks bites here first.
+    # The same three passes as the prod job, and for the same reason - dev deploys far
+    # more often, so a cached file naming deleted chunks bites here first.
     - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dev/dcb-admin/" --delete
-      --exclude "index.html" --exclude "inject_env.json"
+      --exclude "*" --include "assets/*"
       --cache-control "public, max-age=31536000, immutable"
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dev/dcb-admin/" --delete
+      --exclude "assets/*" --exclude "index.html" --exclude "inject_env.json"
+      --cache-control "public, no-cache"
     - aws s3 cp dcb-hub-admin-ui/dist/index.html "s3://ki-libs-spa-hosting/dev/dcb-admin/index.html"
       --cache-control "no-store, no-cache, must-revalidate"
   variables:

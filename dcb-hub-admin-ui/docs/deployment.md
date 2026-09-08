@@ -272,10 +272,11 @@ on every hosting provider, for as long as that tab lives.
 
 Three halves of one defect, and all three are required:
 
-1. **Sync in two passes.** Hashed filenames are content-addressed, so they get a year and
-   `immutable`; `index.html` can never be cached, because it is the only file naming the
-   hashes `--delete` just removed. **Assets first, shell last**, so a new shell is never live
-   before the chunks it names.
+1. **Sync in three passes** — see "Only a hashed name may be cached forever" below.
+   Hashed assets get a year and `immutable`, the stable names get `no-cache`, and
+   `index.html` is never cached at all, because it is the only file naming the hashes
+   `--delete` just removed. **Hashed assets first, stable names next, shell last**, so
+   nothing is ever live before the chunks it names.
 2. **Listen for `vite:preloadError`** (`src/helpers/chunkReload.ts`). Reloading is the fix
    rather than a retry, because the stale artefact is the `index.html` itself: the names this
    tab is asking for do not exist anywhere.
@@ -290,6 +291,58 @@ navigate away. So the first failure reloads once and records it in `sessionStora
 is left alone, `preventDefault` is **not** called, and the error propagates to the router's
 `defaultErrorComponent` — a translated page with a way out, which is the correct end state
 for a deployment that is genuinely broken.
+
+## Only a hashed name may be cached forever
+
+`Cache-Control: immutable, max-age=31536000` is a promise that this URL's bytes will never
+change. It is only safe where the filename changes when the content does. In `dist/` that is
+true of 439 of 445 files and false of six:
+
+```
+assets/**                     439 files, every one content-hashed
+config-prod.json                stable name
+favicon.ico                     stable name
+index.html                      stable name
+ki-bootstrap.js                 stable name
+locales/**                      stable name
+silent-renew.html               stable name
+```
+
+The single sync gave `immutable` to everything except `index.html`, so five stable names were
+promised for a year.
+
+**`ki-bootstrap.js` is the one that breaks the app**, and it breaks it the same way a stale
+shell does. `vite.config.mts` pins its name on purpose — it is the bootloader's public entry
+point, resolved by name from a host page — and it names the hashed chunks it loads. Cached
+immutably, a host page keeps last release's bootloader for a year while `--delete` removes the
+chunks it asks for. `src/helpers/chunkReload.ts` cannot recover this one: its reload re-fetches
+the same immutable file.
+
+The other four are quieter and the same mistake — a Spanish translation fix or a change to the
+OIDC renewal page would not reach an existing user for a year.
+
+So the sync is three passes:
+
+| Pass | Selects                                                                   | `Cache-Control`                       |
+| ---- | ------------------------------------------------------------------------- | ------------------------------------- |
+| 1    | `--exclude "*" --include "assets/*"`                                      | `public, max-age=31536000, immutable` |
+| 2    | `--exclude "assets/*" --exclude "index.html" --exclude "inject_env.json"` | `public, no-cache`                    |
+| 3    | `index.html` alone, via `cp`                                              | `no-store, no-cache, must-revalidate` |
+
+`no-cache` rather than a short `max-age`: it stores the file and revalidates against the ETag,
+which is a 304 in the common case. A `max-age=300` would leave a five-minute window in which a
+fresh `index.html` names chunks a stale `ki-bootstrap.js` cannot reach — the same failure, just
+briefer. It is also not `no-store`, which would refetch all six on every load.
+
+`--delete` stays on passes 1 and 2, whose union is the same key set the single pass deleted, so
+this changes headers and nothing else. Verified against a real `dist/`: the three passes
+partition all 445 files with no overlap and nothing uncovered, and every file in pass 1 carries
+a hash.
+
+**Contrast the R2 channel**, where `fe-bootloader`'s worker gives `immutable` to everything
+except `/next/` and `latest.json` — correct there, because the key itself carries the version
+(`/{app}/v2.0.0/…`). A flat `prod/dcb-admin/` prefix has no version in the path and cannot
+borrow that header.
 
 ## Compression
 
