@@ -9,21 +9,11 @@ import consortium from "./fixtures-data/consortium.json";
 /**
  * The Environment tab.
  *
- * Service versions, tracking configuration and RAG status used to sit at the foot of the
- * onboarding page, below the grid of libraries needing attention — two different
- * questions stacked, so the second was only found by somebody scrolling past the first.
- * They are a tab of their own now.
- *
- * <h2>What this catches that nothing else does</h2>
- *
- * `ConsortiumTabs` names its tabs by translation key, and a key that does not exist is not
- * an error in i18next — it renders the key itself. The tab shipped reading
+ * `ConsortiumTabs` names its tabs by translation key, and a missing key is not an error in
+ * i18next - it renders the key itself. This tab shipped reading
  * "nav.consortium.environment" because only `consortium.environment` had been added, and
- * neither the type-checker, the linter nor any unit test can see that: the string is
- * correct TypeScript, the component is correct React, and the page renders.
- *
- * Asserting the tab by its ACCESSIBLE NAME is what makes it visible, which is the general
- * argument for role-based queries over test ids.
+ * nothing else can see that: it is correct TypeScript, correct React, and the page renders.
+ * Asserting the tab by its ACCESSIBLE NAME is what makes it visible.
  */
 const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,

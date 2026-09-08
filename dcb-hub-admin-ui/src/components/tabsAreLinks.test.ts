@@ -3,22 +3,13 @@ import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve, sep } from "path";
 
 /**
- * Every tab that navigates is a link — the invariant, not one instance of it.
+ * Every tab that navigates is a link - the invariant, not one instance of it.
  *
- * Six tab bars in this application navigate between routes, and all six were `<Tab>`
- * buttons with an `onChange` calling `router.navigate`: no href, so a middle-click, a
- * ctrl-click, "open in new tab" and "copy link address" all silently did nothing.
+ * Asserted at the source because the e2e suite proves only three of the six bars, and
+ * reaching the others means mocking a page's whole data set for an assertion about markup.
+ * This is also where it regresses: somebody adds a seventh bar by copying a sixth.
  *
- * The e2e suite proves three of them work (consortium, library detail, patron requests).
- * It cannot cheaply prove the other three, because reaching a groups or mappings tab bar
- * means mocking that page's data for the sake of an assertion about markup. This asserts
- * the property at the source instead, which is also where the regression will happen:
- * somebody adds a seventh tab bar by copying a sixth, and copies `<Tab>`.
- *
- * `<Tab>` is not banned outright — the patron request DETAIL page uses tabs correctly, to
- * switch panels within one document, and those are buttons because that is what the tab
- * pattern is for. The rule is narrower and matches the actual defect: a file that
- * navigates must not also render a plain `<Tab>`.
+ * `<Tab>` is not banned - see the allow-list below and docs/accessibility.md.
  */
 const SRC = resolve(__dirname, "..");
 
@@ -57,10 +48,6 @@ describe("tab bars", () => {
 	 * silently widened.
 	 */
 	const NOT_NAVIGATION = new Map([
-		[
-			"components/TabLink/TabLink.tsx",
-			"defines the wrapper; its doc comment is what matches",
-		],
 		[
 			"routes/__authenticated/patronRequests/$id/index.tsx",
 			"switches panels within one document - the tab pattern used correctly, so these are buttons on purpose",

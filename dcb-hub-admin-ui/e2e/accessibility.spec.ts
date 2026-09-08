@@ -249,22 +249,12 @@ test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 });
 
 /**
- * Landmarks and the skip link — WCAG 2.4.1 Bypass Blocks, Level A.
+ * Landmarks and the skip link - WCAG 2.4.1, Level A.
  *
- * <h2>Why this is a separate block from the scans above</h2>
- *
- * It uses a different rule set. `scanForViolations` asks axe for the A + AA tag ladder,
- * and axe tags `landmark-one-main` and `region` as `best-practice` — so the gate above
- * cannot report them however many routes it walks. See `LANDMARK_RULES` in fixtures/axe.ts.
- *
- * Once, not once per colour scheme: document structure does not vary with the palette, and
- * a gate that measures the same thing six times is six times the CI minutes for one answer.
- *
- * <h2>What it caught</h2>
- *
- * There was no `<main>` on any route, no `<footer>`, and no skip link. Measured from the
- * top of /libraries: three header buttons and then all twelve sidebar links before the
- * first control on the page itself — fifteen tab stops, on every navigation.
+ * A separate block because it needs a different RULE SET, not a softer one: axe tags
+ * `landmark-one-main` and `region` as `best-practice`, so the A+AA scans above cannot
+ * report them however many routes they walk. Run once, not once per colour scheme -
+ * document structure does not vary with the palette. See docs/accessibility.md.
  */
 test.describe("WCAG 2.4.1 - landmarks and the skip link", () => {
 	test.beforeEach(async ({ page }) => {

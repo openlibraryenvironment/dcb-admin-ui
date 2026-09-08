@@ -7,21 +7,9 @@ import consortiumBasics from "./fixtures-data/consortium-basics.json";
 /**
  * What the operating system asks for, when the user has chosen nothing.
  *
- * `useThemeStore` holds null for "follow my device" and `useResolvedMode` is the only
- * thing that turns that into a mode. Two properties matter and neither is provable
- * without a browser:
- *
- *   - CONTRAST OUTRANKS COLOUR SCHEME. Asking the OS for more contrast is an
- *     accessibility request; answering it with dark mode because the user also asked for
- *     dark would answer the smaller of the two. This application has a high-contrast
- *     theme and, before this, never offered it to the people who had already said they
- *     needed one.
- *   - The unit test in useResolvedMode.test.ts covers `readSystemMode` with a stubbed
- *     matchMedia. It cannot show that the resolved mode reaches ThemeProvider and paints,
- *     which is the half that actually failed for the typeface picker.
- *
- * `stored` is asserted null on purpose: it proves the OS is deciding rather than a
- * persisted preference happening to agree.
+ * The unit test covers `readSystemMode` with a stubbed matchMedia. It cannot show the
+ * resolved mode reaching ThemeProvider and painting, which is the half that failed for the
+ * typeface picker. See docs/theming.md section 5.
  */
 test("prefers-contrast: more selects the high contrast theme", async ({
 	page,

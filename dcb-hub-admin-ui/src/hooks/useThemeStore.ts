@@ -16,31 +16,14 @@ import {
 import { storageKey } from "@helpers/appBase";
 
 /**
- * Every appearance preference this application has, and all of them PER USER.
- *
- * None of this is a property of the consortium. A consortium-wide typeface or text size
- * would let one administrator decide what a colleague's screen looks like, which is the
- * opposite of an accessibility feature.
- *
- * Nothing here reaches a server yet. When a user-preferences API exists these become the
- * client half of a sync (symposia-ui already does this, merging on a `updatedAt` stamp);
- * until then localStorage is the whole story, and the sign-out purge in `appBase.ts`
- * clears it along with everything else this app owns.
+ * Every appearance preference, all of them per user and none of them reaching a server
+ * yet. See docs/theming.md section 5.
  */
 type ThemePreferences = {
 	themeName: ThemeName;
 	/**
-	 * NULL MEANS "FOLLOW MY DEVICE", and it is the default.
-	 *
-	 * This used to be seeded from `prefers-color-scheme` once, at module scope, and
-	 * immediately persisted as a concrete choice. Three things followed, all wrong: the
-	 * operating system switching to dark at sunset did nothing while the app was open;
-	 * it did nothing on the next visit either, because a value had already been written;
-	 * and `prefers-contrast: more` was never consulted at all, so a user who had asked
-	 * their OS for higher contrast was not given the high-contrast theme that exists.
-	 *
-	 * `useResolvedMode` is the only place that turns this null into a mode, so nothing
-	 * else has to know that an unset mode is not a broken one.
+	 * NULL MEANS "FOLLOW MY DEVICE", and it is the default. `useResolvedMode` is the only
+	 * place that resolves it, so nothing else has to know an unset mode is not a broken one.
 	 */
 	mode: ThemeMode | null;
 	/**
@@ -65,15 +48,7 @@ type ThemeActions = {
 	setTextSize: (textSize: TextSize) => void;
 	setDensity: (density: Density) => void;
 	setMotion: (motion: Motion) => void;
-	/**
-	 * One control that undoes the lot.
-	 *
-	 * A user who has made the interface unreadable while experimenting needs a way back
-	 * that does not involve reading the thing they have just broken. It resets the display
-	 * settings and the typeface, and deliberately NOT the brand theme: that is a
-	 * deployment's identity rather than an accessibility setting, and resetting it would
-	 * surprise somebody who only wanted their text size back.
-	 */
+	/** Resets the display settings and the typeface, deliberately NOT the brand theme. */
 	resetDisplay: () => void;
 };
 
@@ -118,19 +93,8 @@ export const useThemeStore = create<ThemePreferences & ThemeActions>()(
 		{
 			name: storageKey("dcb-admin-theme"),
 			/**
-			 * Every field validated on the way out of storage, not just on the way in.
-			 *
-			 * A preference persisted before a control existed is absent; one persisted by
-			 * a later build may name a value this build does not ship; one edited by hand
-			 * may be anything at all. The setters above never run for any of those, because
-			 * the value arrives from localStorage rather than from a click - so this is the
-			 * only place that can catch them, and `undefined` reaching a CSS declaration is
-			 * what it is catching.
-			 *
-			 * `mode` is the interesting one: an EXISTING user has "light" or "dark"
-			 * persisted from the old module-scope seeding, and that is honoured as a choice
-			 * rather than reset. It is the safe direction - they keep what they were
-			 * seeing, and one visit to the picker puts them on "match my device".
+			 * Validated on the way OUT of storage, not just in. The setters never run for a
+			 * value written by an older build, so this is the only place that can catch one.
 			 */
 			merge: (persisted, current) => {
 				const stored = (persisted ?? {}) as Partial<ThemePreferences>;

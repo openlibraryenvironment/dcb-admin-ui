@@ -7,18 +7,9 @@ const DARK_QUERY = "(prefers-color-scheme: dark)";
 const CONTRAST_QUERY = "(prefers-contrast: more)";
 
 /**
- * What the operating system is asking for.
- *
- * CONTRAST IS CHECKED FIRST AND OUTRANKS THE COLOUR SCHEME. A user who has asked their OS
- * for more contrast has made an accessibility request; answering it with dark mode because
- * they also asked for dark would be answering the smaller of the two. This application has
- * a high-contrast theme and never offered it to the people who had already said they
- * needed one.
- *
- * SUBSCRIBED, NOT SAMPLED. The previous implementation read `prefers-color-scheme` once at
- * module scope, which honoured whoever happened to load the page: the OS switching to dark
- * at sunset did nothing, and neither did somebody at an assistive setup changing the
- * contrast setting mid-session.
+ * What the operating system is asking for. Contrast outranks the colour scheme, and both
+ * are SUBSCRIBED rather than sampled - they change while the app is open. Reasoning in
+ * docs/theming.md section 5.
  */
 function useSystemMode(): ThemeMode {
 	const [systemMode, setSystemMode] = useState<ThemeMode>(readSystemMode);

@@ -53,25 +53,11 @@ const MODE_ICON: Record<ThemeMode | typeof SYSTEM_MODE, React.ReactNode> = {
 /**
  * Every appearance choice this application offers, all per user and all persisted.
  *
- * <h2>Radio groups, not toggle button groups</h2>
+ * Radio groups throughout, because all of them ask the same kind of question - pick one
+ * from a short fixed list - and a toggle group carries its selected state almost entirely
+ * by fill colour, which is what made it fail contrast in every brand.
  *
- * All of these are the same kind of question - pick exactly one from a short fixed list -
- * and they now look like it. The first version drew two of them as `ToggleButtonGroup` and
- * the third as a `RadioGroup`, which made one panel ask the same thing three ways.
- *
- * A radio group is also the better control here on its own merits: it is the native
- * single-choice idiom, one arrow-key journey with the current value announced, and it has
- * room for a label per option rather than whatever fits in a segmented button. A toggle
- * button group reads as a set of independent switches even when it is `exclusive`, and its
- * selected state is carried almost entirely by fill colour - which is what made the
- * selected toggle fail contrast in every brand before it was patched.
- *
- * <h2>Why text size, density and motion are here</h2>
- *
- * They existed in symposia-ui, the patron application, and not here. A patron looks at
- * Symposia for a few minutes; a library administrator looks at this for a working day. The
- * three of them plus the typeface are the settings the neurodivergence literature names as
- * reliably helping, and this console offered one of the four.
+ * Why text size, spacing and animation exist at all: docs/theming.md section 5.
  */
 export default function ThemeControls() {
 	const { t } = useTranslation();

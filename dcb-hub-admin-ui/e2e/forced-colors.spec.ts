@@ -10,22 +10,12 @@ import libraries from "./fixtures-data/libraries.json";
 import libraryCount from "./fixtures-data/library-count.json";
 
 /**
- * Windows High Contrast Mode — `forced-colors: active`.
+ * Windows High Contrast Mode - the OS `forced-colors: active`, not the high-contrast
+ * palette on /settings. See docs/theming.md section 6.
  *
- * <h2>Not the same thing as the high-contrast theme</h2>
- *
- * `/settings` offers a high-contrast PALETTE, which a user opts into and which this
- * application controls. This is the operating system throwing author colours away and
- * substituting its own, which many low-vision users run permanently and which no amount of
- * palette work reaches. The two are tested separately because they fail separately.
- *
- * <h2>What can and cannot be asserted here</h2>
- *
- * Contrast cannot: in forced colours the browser guarantees its own pairings, and axe
- * reports `color-contrast` as inapplicable rather than passing. What matters instead is
- * whether a control still has a BOUNDARY once its background is discarded - a contained
- * button becomes text on a canvas, indistinguishable from a label, unless something draws
- * an edge. That is exactly what `enhanceHighContrast` adds, and it is what these assert.
+ * Contrast cannot be asserted here: in forced colours the browser guarantees its own
+ * pairings and axe reports color-contrast as inapplicable. What matters is whether a
+ * control still has a BOUNDARY once its background is discarded.
  */
 const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,

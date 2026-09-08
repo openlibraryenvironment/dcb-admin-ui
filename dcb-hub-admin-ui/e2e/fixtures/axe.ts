@@ -111,23 +111,11 @@ export async function scanForViolations(page: Page) {
 }
 
 /**
- * The landmark structure the tag list above cannot see — and the reason it exists.
+ * The landmark structure the tag list above cannot see.
  *
- * `WCAG_TAGS` is the A + AA ladder, which is the right statement of the legal floor and is
- * also why this shipped: axe tags `landmark-one-main` and `region` as `best-practice`
- * rather than `wcag2a`, so a scan that asks for the ladder is structurally incapable of
- * reporting them. The application had NO `<main>` on any route, no `<footer>`, and no skip
- * link — measured at fifteen tab stops from the top of /libraries to the first control on
- * the page — while the gate stayed green.
- *
- * WCAG 2.4.1 Bypass Blocks (Level A) is satisfiable by a skip link OR by landmarks that
- * let assistive technology jump the repeated header and sidebar. Neither existed, so this
- * is a Level A failure that the Level A tag list did not catch. Hence a second scan with
- * the rules named explicitly.
- *
- * `bypass` is included even though it passed before the fix: it passes on a page that has
- * only a heading, which is exactly how the gap stayed invisible, and it is the rule that
- * regresses if the skip link is ever removed along with the landmarks.
+ * axe tags `landmark-one-main` and `region` as `best-practice`, so a scan asking for the
+ * WCAG A+AA ladder is structurally incapable of reporting them - which is how a Level A
+ * failure sat behind a green Level A gate. See docs/accessibility.md.
  */
 export const LANDMARK_RULES = [
 	"landmark-one-main",

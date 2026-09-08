@@ -225,3 +225,99 @@ When the application requests an access token, it must provide the original veri
 
 **OAuth Best Practice**
 Using PKCE (specifically with the S256 hashing method) is the current industry gold standard and is recommended by the OAuth 2.0 Security Best Current Practice guidelines.
+
+---
+
+# Serving the built artefact
+
+Three things about the artefact itself, all of which shipped broken at least once and each
+of which is invisible from the code that causes them.
+
+## A deploy must not white-screen a cached tab
+
+`autoCodeSplitting` makes all 84 routes dynamic imports, and every deploy removes the
+previous build's hashed chunks (`aws s3 sync --delete`, and the R2 channel likewise). A
+browser still holding the **old** `index.html` therefore asks for filenames that are gone,
+and every navigation dies with `Failed to fetch dynamically imported module` — a blank page,
+on every hosting provider, for as long as that tab lives.
+
+Three halves of one defect, and all three are required:
+
+1. **Sync in two passes.** Hashed filenames are content-addressed, so they get a year and
+   `immutable`; `index.html` can never be cached, because it is the only file naming the
+   hashes `--delete` just removed. **Assets first, shell last**, so a new shell is never live
+   before the chunks it names.
+2. **Listen for `vite:preloadError`** (`src/helpers/chunkReload.ts`). Reloading is the fix
+   rather than a retry, because the stale artefact is the `index.html` itself: the names this
+   tab is asking for do not exist anywhere.
+3. **Serve a missing asset as 404**, not as the SPA fallback. HTML with a 200 is parsed as a
+   JavaScript module and reports `Unexpected token '<'`, which looks like a corrupt bundle
+   rather than a file that is simply absent.
+
+**The reload guard is not optional.** If the newly-fetched shell is also broken — a
+half-finished sync, a CDN serving a mixed generation — an unconditional reload is an infinite
+refresh loop, which is materially worse: the user cannot read an error, open devtools or
+navigate away. So the first failure reloads once and records it in `sessionStorage`; a second
+is left alone, `preventDefault` is **not** called, and the error propagates to the router's
+`defaultErrorComponent` — a translated page with a way out, which is the correct end state
+for a deployment that is genuinely broken.
+
+## Compression
+
+`nginx:stable-alpine` ships gzip commented out in its http block, and the image replaces only
+`conf.d/default.conf`, so the container served everything uncompressed. Measured on one
+build:
+
+```
+one sign-in page load      1,576 KB raw  ->  665 KB gzipped
+the whole asset directory  4,997 KB raw  ->  1,427 KB gzipped   (429 files)
+```
+
+2.4× the payload on a page load, and it survived because of where it sat: the Lighthouse
+budget audits `vite preview`, which compresses, and Cloudflare compresses at the edge. Both
+of the paths that are measured hid the one that is not.
+
+`woff2` is deliberately absent from `gzip_types` — already compressed, and gzipping it spends
+CPU to make the file marginally larger.
+
+## Security headers
+
+`docker/production/security-headers.conf`, included in the server block **and in every
+location**.
+
+**`add_header` does not merge across levels.** A `location` containing any `add_header` of
+its own discards every one inherited from the enclosing server, and this config has four
+locations that each set a `Cache-Control`. Headers declared once at server level would have
+applied to nothing a browser actually fetches — not `index.html`, not `/assets/`, not
+`inject_env.json` — while `nginx -t` reported the config as perfectly valid. That is why
+they live in an included file, and why `src/helpers/nginxConfig.test.ts` asserts every
+location includes it: the way they get lost is somebody adding a `/locales/` cache rule, not
+somebody deleting them.
+
+Three decisions worth keeping:
+
+- **`frame-ancestors 'self'`, not `'none'`.** `'none'` is the reflex answer and it breaks
+  authentication: oidc-client-ts renews the session in a hidden iframe pointed at this
+  origin's own `silent-renew.html`, and `'none'` blocks same-origin framing too. Users would
+  be signed out whenever their token expired, by a header added to make them safer.
+- **`connect-src`/`frame-src` are `'self' https:`** rather than an enumeration, because the
+  backends and the Keycloak realm are runtime configuration rendered per container and are
+  unknowable when the file is written. Templating the policy through `envsubst` the way
+  `inject_env.json` already is, is the follow-up.
+- **`font-src` allows `data:`** because Vite inlines our own fonts. Roboto's Greek-Extended
+  subsets are each under the 4KB `assetsInlineLimit`, so four weights × woff+woff2 become
+  eight `data:` URIs. Without it the browser blocked all eight on every page load.
+
+`/silent-renew.html` gets one relaxation, `script-src 'unsafe-inline'`, scoped to that one
+location. It carries an inline `<script>` it cannot avoid — files in `public/` are served
+verbatim and it cannot import oidc-client-ts to call `_notifyParent()`. A sha256 hash is the
+textbook answer and is **wrong here**: the hash is over exact bytes, git stores the file LF
+and hands a Windows checkout CRLF, so a hash computed on a developer's machine does not match
+what a Linux CI job builds. That fails as a policy which passes review, passes locally, and
+silently kills session renewal in production. The exception is bounded to one twenty-line
+static file with no input, no interpolation and no imports.
+
+**Verify against the running image, not the config.** A CSP failure is not a failed request
+and not a thrown exception; `curl` cannot see one. Build the image, load it in a browser and
+listen for `securitypolicyviolation`. That is how the font blocks above were found, after the
+config test and `curl` had both passed.

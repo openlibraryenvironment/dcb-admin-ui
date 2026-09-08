@@ -11,18 +11,11 @@ import libraries from "./fixtures-data/libraries.json";
 import libraryCount from "./fixtures-data/library-count.json";
 
 /**
- * Text size, spacing and animation — the display preferences.
+ * Text size, spacing and animation, read from COMPUTED STYLES.
  *
- * <h2>Why these have to be measured in a browser</h2>
- *
- * The unit tests in `src/themes/display.test.ts` prove the theme CARRIES the right values.
- * They cannot prove the page renders differently, and that distinction is exactly where
- * this class of feature fails: `typography.fontSize` was the obvious lever for text size
- * and it does nothing once a theme is built, which a unit test asserting
- * `theme.typography.fontSize` would have happily confirmed. The typeface picker shipped
- * with that defect and the e2e gate is what caught it.
- *
- * So each of these reads a COMPUTED style off a real element.
+ * The unit tests prove the theme carries the right values. They cannot prove the page
+ * renders differently, and that is exactly how this class of feature fails - the typeface
+ * picker once shipped setting a theme field nothing reads.
  */
 const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,

@@ -34,26 +34,11 @@ declare module "@mui/material/IconButton" {
 	}
 }
 /**
- * The brand's semantic colour tokens.
+ * The brand's semantic colour tokens - one list, reused by all four augmented
+ * interfaces.
  *
- * ONE list. It used to be four byte-identical copies — `Palette`, `PaletteColor`,
- * `PaletteOptions` and `SimplePaletteColorOptions` each spelled out the same forty keys,
- * about 200 lines of this file. A key added to three of the four type-checked and then
- * failed at the call site with a message about whichever interface was missed.
- *
- * WHY THESE LIVE UNDER `primary` AND WHY THAT IS THE WRONG SHAPE. `theme.palette.primary.X`
- * and `sx={{ color: "primary.X" }}` resolve identically in every theme and mode, which is
- * the property the file was after. But `primary` is a `PaletteColor` — an intensity ramp
- * around one hue, whose `light`/`dark`/`contrastText` MUI derives from `main` — and forty
- * unrelated surfaces and inks are now sitting in it. `sx={{ color: "primary.hover" }}`
- * reads as a shade of the brand colour and is a hover ground.
- *
- * MUI's documented pattern for brand keys is a palette node of their own
- * (https://mui.com/material-ui/customization/palette/), which would give the same
- * resolution with none of the collision — `surface.sidebar`, `ink.navigation`. That is a
- * ~240-reference change and is recorded in DCB_ADMIN_2_0_UX_REVIEW.md §2.4 rather than
- * done here. Collapsing the duplication first is what makes it a rename instead of a
- * rewrite.
+ * These live under `palette.primary`, which is the wrong shape for forty unrelated
+ * surfaces and inks; docs/theming.md section 2 has the argument and the migration.
  */
 interface BrandTokens {
 	attributeTitle: string;
@@ -96,29 +81,17 @@ interface BrandTokens {
 	outlineColor: string;
 	tabsBackground: string;
 	/**
-	 * The header bar's hover and pressed grounds.
-	 *
-	 * Derived in buildTheme from `header` itself rather than computed in the component,
-	 * which is where they used to be: six `lighten(header, mode === "light" ? … : …)`
-	 * expressions in Header.tsx, the last place in the application that branched on
-	 * `palette.mode` for a style.
-	 *
-	 * How far each brand can be lifted is decided by `liftWithin` — see the note there for
-	 * why the amount is a per-brand answer and not a constant.
+	 * The header bar's hover and pressed grounds, derived from `header` by `liftWithin`.
+	 * They are TEXT GROUNDS - the header's label sits on them - and the contrast gate
+	 * holds them to the same floor as the bar itself.
 	 */
 	headerHover: string;
 	headerActive: string;
 	/**
-	 * The bar under the selected tab, and the one place a brand's accent colour is
-	 * allowed to be itself.
+	 * The bar under the selected tab, and the one place a brand's accent may be itself:
+	 * WCAG 1.4.11 asks 3:1 of a graphical object where text needs 4.5:1.
 	 *
-	 * It exists because an indicator is a GRAPHICAL OBJECT, not text: WCAG 1.4.11 asks
-	 * 3:1 against what sits beside it, where a label would need 4.5:1. FOLIO's coral is
-	 * the case in point — 2.88:1 on white, so it can never be ink or a text ground, and
-	 * 6.05:1 on the near-black tab bar it now sits on.
-	 *
-	 * Defaults to the brand's own `main` for every theme that has no separate accent, so
-	 * this token changed nothing anywhere except FOLIO.
+	 * Defaults to the brand's own `main`, so it changed nothing except FOLIO and Koha.
 	 */
 	tabIndicator: string;
 }
@@ -247,25 +220,18 @@ declare module "@mui/material/Tab" {
 const lightPrimary = "#2778AB";
 const darkPrimary = "#35B7FF";
 const lightDetailsAccordion = "#F6F6F6";
-
-// The chrome for the brands whose own colour cannot carry text - FOLIO's coral and
-// Koha's green. Not pure black: #1A1A1A keeps the bar readable as a surface rather than
-// a hole, and still gives white 17.40:1, FOLIO's coral 6.05:1 and Koha's #88B744 7.38:1.
-const brandInk = "#1A1A1A";
 const darkDetailsAccordion = "#424242";
 
+// The chrome for the brands whose own colour cannot carry text - FOLIO's coral and Koha's
+// green. Not pure black: #1A1A1A gives white 17.40:1, the coral 6.05:1 and #88B744 7.38:1.
+const brandInk = "#1A1A1A";
+
 // ---------------------------------------------------------------------------
-// Design tokens
+// Design tokens. High contrast is a light-grounded AAA (>= 7:1) scheme; light and dark
+// target AA (>= 4.5:1). Every pairing below is measured by openRS.contrast.test.ts.
 //
-// Every custom semantic token lives under `primary`, so `theme.palette.primary.X`
-// and `sx="primary.X"` resolve identically in every theme and mode. High contrast
-// is a light-grounded WCAG 2.2 AAA (>= 7:1) scheme; light/dark target AA (>= 4.5:1).
-//
-// Themes are separate `createTheme` objects swapped at the provider (see
-// `getAppTheme`) rather than custom MUI colour schemes: a custom-named colour
-// scheme is not given MUI's default palette baseline, so `createThemeWithVars`
-// throws "Cannot read properties of undefined (reading 'background')". Swapping
-// whole themes is the supported path for multiple brands + modes.
+// Separate themes swapped at the provider, NOT MUI colour schemes: a custom-named scheme
+// gets no palette baseline and createThemeWithVars throws. See docs/theming.md.
 // ---------------------------------------------------------------------------
 
 // ---- OpenRS (default brand) ----
@@ -475,17 +441,9 @@ const kohaLight = {
 	editableFieldBackground: "#F0F4EC",
 	loginCard: "#F0F4EC",
 	loginText: "#222222",
-	// THE SAME TREATMENT AS FOLIO, and for the same reason.
-	//
-	// kohaGreen is a mid-tone doing a text ground's job. As the header, tab bar and
-	// linked footer it forced white labels (4.84:1, the only ink that passed) and left
-	// no room for an accent on either side: nothing darker than the bar cleared 3:1,
-	// and nothing lighter was distinguishable from those white labels. The selected tab
-	// was marked by bold weight alone, because the indicator was the bar's own colour.
-	//
-	// On a near-black bar the brand gets MORE of itself back, not less. #88B744 is
-	// Koha's lighter green - the very colour that was 2.05:1 on the green bar and could
-	// not be used - and it is 7.38:1 here.
+	// THE SAME TREATMENT AS FOLIO, and for the same reason: kohaGreen is a mid-tone that
+	// cannot carry text, and on a near-black bar the brand gets MORE of itself back.
+	// #88B744 was 2.05:1 on the old green bar and is 7.38:1 here.
 	header: brandInk,
 	headerText: "#FFFFFF",
 	linkedFooterBackground: brandInk,
@@ -521,23 +479,10 @@ const kohaHighContrast = {
 };
 
 // ---- FOLIO ----
-//
-// FOLIO's coral is #FF674C and this theme now uses it, unaltered.
-//
-// It could not before. As a TEXT GROUND coral gives white 2.88:1 and FOLIO's own dark
-// blue 3.32:1 — no ink passes AA on it — so the previous version darkened it 20% to
-// #E52300 and painted the header, tab bar and linked footer in that. It cleared the gate
-// at 4.59:1 and it was no longer FOLIO's colour: a 20% shift is not a shade, and the one
-// thing a brand theme has to get right is the brand.
-//
-// The fix is to stop asking the accent to carry text. FOLIO's own applications put their
-// chrome on a near-black bar and let the coral be an accent on it, and that is what this
-// does: #1A1A1A for the header, the tab bar and the linked footer, white labels at
-// 17.40:1, and the true coral as the selected-tab indicator at 6.05:1 against that bar.
-//
-// An indicator may be an accent where a label may not: WCAG 1.4.11 asks 3:1 of a
-// graphical object against what sits beside it, against 4.5:1 for text. Coral is 2.88:1
-// on white, which is why it appears nowhere on the page itself.
+// FOLIO's coral is #FF674C and this theme uses it unaltered, as the tab indicator on a
+// near-black bar. It cannot be ink anywhere: white on it is 2.88:1. The previous
+// version darkened the brand 20% to make it a text ground, which is not a shade.
+// See docs/theming.md section 3.
 const folioCoral = "#FF674C";
 
 const folioLight = {
@@ -751,20 +696,9 @@ const TYPOGRAPHY_COLOUR: Record<string, keyof Theme["palette"]["primary"]> = {
 	hitCount: "hitCountText",
 };
 
-// EVERY SIZE IN `rem`, AND THAT IS LOAD-BEARING.
-//
-// Eleven of these were bare numbers (rendered as px) or explicit "14px"/"18px". At the
-// browser default root of 16px each value below renders identically to the literal it
-// replaces - 32px is 2rem, 12px is 0.75rem - so nothing about today's appearance moves.
-//
-// What changes is that they can now be scaled. The text-size preference works by setting
-// the ROOT font size (see `rootFontSize` in display.ts): `rem` follows the root, px does
-// not. Left as px, raising the text size would have scaled MUI's own body variants and
-// left every heading and the whole custom scale exactly where they were - a setting that
-// half works, which is worse than one that does not exist.
-//
-// So: no px in this object. A new variant added in px is a variant that silently opts out
-// of the text-size preference.
+// EVERY SIZE IN `rem`, AND THAT IS LOAD-BEARING: the text-size preference scales the
+// ROOT font size, and only rem follows the root. A variant added in px silently opts
+// out of it. Identical rendering at a 16px root; see docs/theming.md section 1.
 const typography: ThemeOptions["typography"] = {
 	fontFamily: fontStack(DEFAULT_FONT),
 	h1: { fontSize: "2rem", fontWeight: 400 },
@@ -973,19 +907,11 @@ const components: ThemeOptions["components"] = {
 					outlineColor: theme.palette.primary.outlineColor,
 				},
 				/*
-				 * A BORDER IN WINDOWS HIGH CONTRAST MODE, which `enhanceHighContrast` does
-				 * not add — it gives MuiButtonBase a focus outline and nothing else.
-				 *
-				 * Measured under `forced-colors: active`: a contained button computed to
-				 * background white, colour black, `border: 0px none` — pixel-identical to
-				 * the page body beside it. The fill MUI relies on to say "this is a
-				 * control" is exactly what forced colours discards, so the primary action
-				 * on every form was a bare run of text with no boundary. WCAG 1.4.11 wants
-				 * 3:1 for a component's boundary; there was no boundary to measure.
-				 *
-				 * `ButtonBorder` is a CSS system colour keyword, so the browser guarantees
-				 * it contrasts with the button face whatever theme the user is running.
-				 * Outside forced colours this rule does not apply and nothing changes.
+				 * A border in Windows High Contrast Mode, which `enhanceHighContrast` does
+				 * NOT add - it only restores focus outlines. Measured under forced colours, a
+				 * contained button was white on white with `border: 0px none`, identical to
+				 * the body text beside it. `ButtonBorder` is a system keyword, so the browser
+				 * guarantees the contrast. See docs/theming.md section 6.
 				 */
 				"@media (forced-colors: active)": {
 					border: "1px solid ButtonBorder",
@@ -1155,23 +1081,11 @@ const components: ThemeOptions["components"] = {
 		},
 	},
 	/**
-	 * A scrollable region a keyboard user can actually scroll — WCAG 2.1.1.
+	 * A scrollable region a keyboard user can actually scroll - WCAG 2.1.1.
 	 *
-	 * `TableContainer` is `overflow: auto`, and eleven of the twelve in this application
-	 * also cap their height. So they scroll, and without a tab stop the only way to scroll
-	 * one is a pointer: a keyboard-only user reaches the table and cannot see past the
-	 * rows that happen to fit.
-	 *
-	 * Found by the `narrow` Playwright project on its first run, as a SERIOUS
-	 * `scrollable-region-focusable` on the consortium insights page at 320px. It is not a
-	 * narrow-viewport problem though — the height caps make it true at any width, and the
-	 * desktop run simply had no test on a page with one of these tables.
-	 *
-	 * A theme default rather than twelve props: the next TableContainer someone adds is
-	 * covered without their having to know this rule exists. The cost is a tab stop on a
-	 * container that is not currently overflowing, which is what MUI's own guidance
-	 * accepts - the alternative is measuring overflow at runtime to decide focusability,
-	 * and nobody maintains that.
+	 * Eleven of the twelve TableContainers cap their height, so they scroll, and none
+	 * had a tab stop. A theme default rather than twelve props, so the thirteenth is
+	 * covered too. See docs/accessibility.md.
 	 */
 	MuiTableContainer: {
 		defaultProps: {
@@ -1274,27 +1188,9 @@ const components: ThemeOptions["components"] = {
 // ---------------------------------------------------------------------------
 // Theme registry.
 //
-// TOKEN SETS, NOT BUILT THEMES. This used to prebuild 6 brands x 3 modes at module scope
-// and overlay the typeface onto the built object. That worked for a font family and does
-// not generalise, because `createTheme(builtTheme, overrides)` DEEP-MERGES and does not
-// re-derive - which the typeface overlay learned the hard way, and which two of the three
-// display preferences would have hit again, differently and worse:
-//
-//   `typography.fontSize` - MUI derives its variants from it once, at build time. Merging
-//   a new value over a built theme changes a field nothing reads. (Text size sidesteps
-//   this entirely by scaling the ROOT font size instead; see display.ts.)
-//
-//   `spacing` - `theme.spacing` is a FUNCTION. Deep-merging `{ spacing: 6 }` over it
-//   replaces the function with a number, after which every `sx={{ p: 2 }}` in the
-//   application throws.
-//
-// So the registry holds descriptors and `getAppTheme` builds. Measured at ~0.26ms per
-// theme, which is why this is affordable and why nothing is prebuilt: a session touches a
-// handful of combinations, not all of them.
-//
-// `withFontFamily` is gone with the overlay. Building fresh means `createTypography`
-// applies the family to every variant it owns, which is what that function existed to
-// simulate.
+// TOKEN SETS, NOT BUILT THEMES: `createTheme(builtTheme, overrides)` deep-merges and
+// does not re-derive, which silently breaks typography and actively breaks `spacing`.
+// See docs/theming.md section 1 before changing how these are assembled.
 // ---------------------------------------------------------------------------
 
 type PrimaryTokens = typeof openRSLight;
@@ -1308,22 +1204,13 @@ type BrandDescriptor = {
 };
 
 /**
- * Reduced motion, as two global rules rather than a theme property.
+ * Reduced motion, as two global rules rather than a theme value. See
+ * docs/theming.md section 5 for why it is CSS and why `system` writes no attribute.
  *
- * `system` is the default and needs no attribute: the media query alone answers it, before
- * any JavaScript has run. An explicit choice stamps `data-motion` on `<html>` (see
- * `useMotionPreference`), and `:not([data-motion="full"])` is what lets a user who has
- * asked for motion override an OS setting that is not theirs - a shared or borrowed
- * machine is exactly where that matters.
- *
- * `!important` IS CORRECT HERE, and this is the only place in the application where that
- * is true. MUI's transition components (Fade, Grow, Collapse, Drawer, Accordion) write
- * `transition-duration` as an INLINE style at runtime. No stylesheet rule beats an inline
- * declaration by specificity; `!important` is the only mechanism that does. A
- * reduced-motion rule without it does nothing to the components that actually animate.
- *
- * 0.01ms rather than 0: a zero duration skips the transitionend event, and code waiting on
- * it - MUI's own transition callbacks included - then never runs.
+ * `!important` is correct here and nowhere else in this application: MUI's transition
+ * components write `transition-duration` INLINE at runtime, and no stylesheet rule
+ * beats an inline declaration. 0.01ms rather than 0, because a zero duration skips
+ * `transitionend` and MUI's own callbacks wait on it.
  */
 const REDUCE_MOTION_DECLARATIONS = {
 	animationDuration: "0.01ms !important",
@@ -1348,16 +1235,9 @@ const motionStyles = {
 /**
  * The strongest lift a bar can take while the text on it stays readable.
  *
- * Lightening a header for hover moves it TOWARDS its own white label, so the affordance
- * and the legibility pull against each other and the right amount is per-brand. The first
- * attempt keyed off `getLuminance(header) < 0.5`, which is useless here: every header in
- * this file is dark, from #000000 to #005EB8, so the branch always took one side. It also
- * broke two brands — Evergreen's pressed state fell to 3.97:1 and NHS blue to 3.61:1, both
- * under AA — and the contrast gate caught that, not review.
- *
- * So the constraint IS the answer: try the boldest lift first and take the first one that
- * keeps the header text above its own threshold. A near-black bar gets the full 0.28,
- * because white on it is still 6.91:1; NHS blue settles at 0.16 for 4.65:1.
+ * Per-brand, because lightening a header moves it towards its own white label. The
+ * first attempt used a luminance threshold and put two brands under AA; the contrast
+ * gate caught it. See docs/theming.md section 3.
  */
 const liftWithin = (
 	header: string,
@@ -1448,29 +1328,12 @@ const buildTheme = (
 	});
 
 	/*
-	 * WINDOWS HIGH CONTRAST MODE, which is NOT the `highContrast` argument above.
+	 * Windows High Contrast Mode - the OS `forced-colors: active`, NOT the
+	 * `highContrast` argument above, which selects one of our own palettes.
 	 *
-	 * That argument picks one of OUR palettes - a scheme a user opts into from /settings.
-	 * This is the operating system's `forced-colors: active`, where the OS throws away
-	 * author colours wholesale and substitutes its own, and which many low-vision users run
-	 * permanently. Nothing this file chooses about colour reaches them. What reaches them is
-	 * whether a control still has a BOUNDARY once its background has been discarded - and
-	 * without this, a contained MUI Button in forced colours is text on a canvas with no
-	 * edge at all.
-	 *
-	 * The enhancer adds `@media (forced-colors: active)` rules to 21 components: borders on
-	 * buttons and inputs, `forced-color-adjust` on the marks that must keep their own
-	 * colour, system keywords for selected and disabled states. It COMPOSES rather than
-	 * replaces - each slot becomes `[ourOverride, itsHcmRule]` so Emotion emits two rules and
-	 * the cascade resolves them - which is why the four components we already style
-	 * (ToggleButton, AccordionSummary, ListItemButton, Tooltip) keep everything said above.
-	 *
-	 * Applied to every brand and mode, because forced colours are orthogonal to which
-	 * palette was chosen. The default tokens are kept: they must be CSS system colour
-	 * keywords, and those are the only values a browser guarantees contrast between.
-	 *
-	 * It takes a BUILT theme and returns an enhanced one, so it wraps createTheme rather
-	 * than living inside it.
+	 * Wraps createTheme because the enhancer takes a BUILT theme. It composes with
+	 * this file's own overrides rather than replacing them, and it is NOT sufficient
+	 * on its own - see docs/theming.md section 6 and the MuiButton override above.
 	 */
 	return enhanceHighContrast(theme);
 };
@@ -1614,16 +1477,11 @@ export const THEME_NAMES = Object.keys(THEME_TOKENS) as ThemeName[];
 export const THEME_MODES: ThemeMode[] = ["light", "dark", "highContrast"];
 
 /**
- * Built themes, kept so the object handed to ThemeProvider is stable across renders. An
- * unstable theme identity re-renders the entire tree on every unrelated state change.
+ * Built themes, kept so the object handed to ThemeProvider is stable across renders.
  *
- * The key space is THEME_NAMES x THEME_MODES x FONT_NAMES x TEXT_SIZES x DENSITIES: five
- * fixed vocabularies, 720 combinations, and no user input can add a 721st. Motion is
- * deliberately absent from the key - it is CSS on the root element, not a theme property.
- *
- * In practice a session builds one theme and then one more per preference change, because
- * a user picks a combination and stays in it. 720 is the ceiling that makes a plain Map
- * defensible here, not an expectation.
+ * Bounded by construction: name x mode x font x textSize x density, five fixed
+ * vocabularies and a 720 ceiling that no user input can add to. Motion is absent
+ * because it is CSS on the root element, not a theme property.
  */
 const themeCache = new Map<string, Theme>();
 

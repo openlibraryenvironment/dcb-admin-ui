@@ -3,28 +3,15 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 
 /**
- * The container's nginx config, checked for the one thing that will actually go wrong.
+ * The container's nginx config, checked for the one thing that actually goes wrong.
  *
- * <h2>Why a test and not a review comment</h2>
+ * `add_header` does not merge across levels: a location containing any add_header of its
+ * own DISCARDS every inherited one, silently, with `nginx -t` reporting the config valid.
+ * So the headers get lost by somebody ADDING a location with a Cache-Control on it, not by
+ * anybody deleting them - invisible in review and in the config. See docs/deployment.md.
  *
- * nginx's `add_header` does not merge across levels. A `location` block containing any
- * `add_header` of its own DISCARDS every `add_header` inherited from the enclosing server
- * block — silently, with no warning from `nginx -t`, which reports this config as
- * perfectly valid.
- *
- * So the way the security headers get lost is not somebody deleting them. It is somebody
- * adding a location — a new `/api/` proxy, a `/health` endpoint, a cache rule for
- * `/locales/` — with a Cache-Control on it, and thereby turning the headers off for that
- * path without touching the file that declares them. That is invisible in review and
- * invisible in the config, and only shows up in a response header nobody is looking at.
- *
- * This asserts the invariant instead: every location includes the headers, and the one
- * that includes the relaxed variant is the one file that is allowed it.
- *
- * A response-level check against the built image would be stronger and is the right thing
- * to add when CI gains a docker build step. It was run by hand for this change — every
- * location returned the four headers, /silent-renew.html returned the relaxed CSP, and a
- * missing asset returned 404 rather than HTML.
+ * A response-level check against the built image would be stronger; it was run by hand for
+ * this change and is the gate still missing. See docs/testing.md.
  */
 const nginxConf = readFileSync(
 	resolve(__dirname, "../../docker/production/nginx.conf"),

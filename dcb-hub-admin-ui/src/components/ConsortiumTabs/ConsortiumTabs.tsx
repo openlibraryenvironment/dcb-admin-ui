@@ -5,27 +5,12 @@ import { TabLink } from "@components/TabLink/TabLink";
 import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
 
 /**
- * The Consortium tab bar, in one place — W-12.
+ * The Consortium tab bar, in one place - W-12.
  *
- * <h2>Why this component now exists</h2>
- *
- * This bar was copy-pasted into four route files (`consortium/index.tsx`,
- * `functionalSettings.tsx`, `onboarding.tsx`, `contacts.tsx`), each with its own hardcoded
- * array of destination paths AND its own hardcoded active index. Adding a fifth tab meant
- * editing the same list five times and getting five indices right; that is not a thing
- * that stays correct.
- *
- * It also fixes two defects the copies shared:
- *
- *  - **Selection was by INDEX.** `value` was a number each copy hardcoded for itself, so
- *    adding a tab meant getting five indices right in five files. It is by PATH now.
- *  - **The tabs were not links.** They are now — each is a `TabLink`, so a middle-click, a
- *    ctrl-click and "copy link address" all do what they should. That took a second change
- *    and did NOT come free with the first: this comment previously claimed both were fixed
- *    while the elements were still buttons. See `TabLink` for what it does and does not
- *    buy, because it is not everything.
- *  - **No accessible name.** A bare `<Tabs>` announces as an unnamed tab list; with three
- *    other tab bars in this application that says nothing about which one it is.
+ * It was copy-pasted into four route files, each with its own hardcoded path list AND its
+ * own hardcoded active index, so adding a tab meant getting five indices right in five
+ * files. Selection is by PATH now, and each tab is a real link - see docs/accessibility.md
+ * for what that does and does not buy.
  */
 interface ConsortiumTab {
 	path: string;
