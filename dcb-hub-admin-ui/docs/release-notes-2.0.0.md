@@ -1,8 +1,8 @@
 # DCB Admin 2.0.0 — release notes
 
 DCB Admin is rebuilt. The version is 2.0.0 because the framework underneath it changed, not
-because the console was redesigned: your routes, your data and your workflows are where you
-left them, and a good deal has been added around them.
+because the app was redesigned: your routes, your data and your workflows are where you
+left them. 2.0.0 focuses on a framework change and adding features and stability fixes.
 
 **208 commits since 1.58.1** — 37 features, 52 fixes, 807 files.
 
