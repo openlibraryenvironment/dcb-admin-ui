@@ -2,7 +2,7 @@ import {
 	createTheme,
 	darken,
 	enhanceHighContrast,
-	getLuminance,
+	getContrastRatio,
 	lighten,
 	type Theme,
 	type ThemeOptions,
@@ -1345,13 +1345,28 @@ const motionStyles = {
 };
 
 /**
- * Whether a bar is dark enough that a hover has to be lifted further to be seen.
+ * The strongest lift a bar can take while the text on it stays readable.
  *
- * 0.5 is the midpoint of relative luminance, not a tuned constant: above it a colour
- * takes dark ink, below it light ink, and the same split is what decides which direction
- * a hover has to move.
+ * Lightening a header for hover moves it TOWARDS its own white label, so the affordance
+ * and the legibility pull against each other and the right amount is per-brand. The first
+ * attempt keyed off `getLuminance(header) < 0.5`, which is useless here: every header in
+ * this file is dark, from #000000 to #005EB8, so the branch always took one side. It also
+ * broke two brands — Evergreen's pressed state fell to 3.97:1 and NHS blue to 3.61:1, both
+ * under AA — and the contrast gate caught that, not review.
+ *
+ * So the constraint IS the answer: try the boldest lift first and take the first one that
+ * keeps the header text above its own threshold. A near-black bar gets the full 0.28,
+ * because white on it is still 6.91:1; NHS blue settles at 0.16 for 4.65:1.
  */
-const isDark = (colour: string) => getLuminance(colour) < 0.5;
+const liftWithin = (
+	header: string,
+	text: string,
+	floor: number,
+	candidates: readonly number[],
+): number =>
+	candidates.find(
+		(amount) => getContrastRatio(text, lighten(header, amount)) >= floor,
+	) ?? candidates[candidates.length - 1];
 
 const buildTheme = (
 	{
@@ -1364,6 +1379,9 @@ const buildTheme = (
 	fontName: FontName,
 	display: ThemeDisplay,
 ): Theme => {
+	// The same threshold the contrast gate holds these tokens to.
+	const headerFloor = highContrast ? 7 : 4.5;
+
 	const theme = createTheme({
 		palette: {
 			mode,
@@ -1373,16 +1391,23 @@ const buildTheme = (
 			// sets it, because only FOLIO has an accent it cannot use as ink.
 			primary: {
 				tabIndicator: primary.main,
-				// Lifted further on a dark bar than a light one, because the same step is
-				// far less visible there: lighten("#1A1A1A", 0.08) is 1.25:1 against its own
-				// bar, where lighten("#0C4068", 0.08) reads clearly.
 				headerHover: lighten(
 					primary.header,
-					isDark(primary.header) ? 0.16 : 0.08,
+					liftWithin(
+						primary.header,
+						primary.headerText,
+						headerFloor,
+						[0.16, 0.08],
+					),
 				),
 				headerActive: lighten(
 					primary.header,
-					isDark(primary.header) ? 0.28 : 0.16,
+					liftWithin(
+						primary.header,
+						primary.headerText,
+						headerFloor,
+						[0.28, 0.2, 0.12],
+					),
 				),
 				...primary,
 			},

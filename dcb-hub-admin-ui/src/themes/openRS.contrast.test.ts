@@ -96,6 +96,13 @@ describe("theme contrast", () => {
 				],
 				["text.primary / hover", ink, p.hover],
 				["headerText / header", p.headerText, p.header],
+				// The hover and pressed grounds are TEXT GROUNDS too - the header's label
+				// and icons sit on them while the pointer is down. They are derived from
+				// `header` by lighten(), so a brand whose header only just passes can be
+				// lifted into failing by its own hover, which is not something anybody
+				// would notice by looking at the token list.
+				["headerText / headerHover", p.headerText, p.headerHover],
+				["headerText / headerActive", p.headerText, p.headerActive],
 				[
 					"linkedFooterText / linkedFooterBackground",
 					p.linkedFooterText,
