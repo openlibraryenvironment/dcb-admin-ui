@@ -6,6 +6,9 @@ left them. 2.0.0 focuses on a framework change and adding features and stability
 
 **208 commits since 1.58.1** — 37 features, 52 fixes, 807 files.
 
+For the console's users rather than its operators, see
+[whats-new-2.0.0.md](./whats-new-2.0.0.md).
+
 ---
 
 ## 1. What changed underneath
