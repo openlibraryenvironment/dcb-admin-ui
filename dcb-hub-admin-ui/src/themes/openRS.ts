@@ -1,6 +1,7 @@
 import {
 	createTheme,
 	darken,
+	enhanceHighContrast,
 	lighten,
 	type Theme,
 	type ThemeOptions,
@@ -957,6 +958,24 @@ const components: ThemeOptions["components"] = {
 					outline: "2px solid",
 					outlineColor: theme.palette.primary.outlineColor,
 				},
+				/*
+				 * A BORDER IN WINDOWS HIGH CONTRAST MODE, which `enhanceHighContrast` does
+				 * not add — it gives MuiButtonBase a focus outline and nothing else.
+				 *
+				 * Measured under `forced-colors: active`: a contained button computed to
+				 * background white, colour black, `border: 0px none` — pixel-identical to
+				 * the page body beside it. The fill MUI relies on to say "this is a
+				 * control" is exactly what forced colours discards, so the primary action
+				 * on every form was a bare run of text with no boundary. WCAG 1.4.11 wants
+				 * 3:1 for a component's boundary; there was no boundary to measure.
+				 *
+				 * `ButtonBorder` is a CSS system colour keyword, so the browser guarantees
+				 * it contrasts with the button face whatever theme the user is running.
+				 * Outside forced colours this rule does not apply and nothing changes.
+				 */
+				"@media (forced-colors: active)": {
+					border: "1px solid ButtonBorder",
+				},
 				"&.MuiButton-contained": {
 					"&:disabled": {
 						background: "#E0E0E0",
@@ -1322,8 +1341,8 @@ const buildTheme = (
 	}: BrandDescriptor,
 	fontName: FontName,
 	display: ThemeDisplay,
-): Theme =>
-	createTheme({
+): Theme => {
+	const theme = createTheme({
 		palette: {
 			mode,
 			contrastThreshold: highContrast ? 7 : 4.5,
@@ -1365,6 +1384,34 @@ const buildTheme = (
 			},
 		},
 	});
+
+	/*
+	 * WINDOWS HIGH CONTRAST MODE, which is NOT the `highContrast` argument above.
+	 *
+	 * That argument picks one of OUR palettes - a scheme a user opts into from /settings.
+	 * This is the operating system's `forced-colors: active`, where the OS throws away
+	 * author colours wholesale and substitutes its own, and which many low-vision users run
+	 * permanently. Nothing this file chooses about colour reaches them. What reaches them is
+	 * whether a control still has a BOUNDARY once its background has been discarded - and
+	 * without this, a contained MUI Button in forced colours is text on a canvas with no
+	 * edge at all.
+	 *
+	 * The enhancer adds `@media (forced-colors: active)` rules to 21 components: borders on
+	 * buttons and inputs, `forced-color-adjust` on the marks that must keep their own
+	 * colour, system keywords for selected and disabled states. It COMPOSES rather than
+	 * replaces - each slot becomes `[ourOverride, itsHcmRule]` so Emotion emits two rules and
+	 * the cascade resolves them - which is why the four components we already style
+	 * (ToggleButton, AccordionSummary, ListItemButton, Tooltip) keep everything said above.
+	 *
+	 * Applied to every brand and mode, because forced colours are orthogonal to which
+	 * palette was chosen. The default tokens are kept: they must be CSS system colour
+	 * keywords, and those are the only values a browser guarantees contrast between.
+	 *
+	 * It takes a BUILT theme and returns an enhanced one, so it wraps createTheme rather
+	 * than living inside it.
+	 */
+	return enhanceHighContrast(theme);
+};
 
 const THEME_TOKENS = {
 	openRS: {
