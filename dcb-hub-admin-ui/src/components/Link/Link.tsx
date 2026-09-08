@@ -1,157 +1,65 @@
-// This is an adaptor for the use of Next.js links with the MUI Link component
-// https://mui.com/material-ui/guides/routing/#next-js-pages-router
-import clsx from "clsx";
-import { useRouter } from "next/router";
-import NextLink, { LinkProps as NextLinkProps } from "next/link";
-import MuiLink, { LinkProps as MuiLinkProps } from "@mui/material/Link";
-import { styled, useTheme } from "@mui/material/styles";
 import { forwardRef } from "react";
+import { Link as TanStackLink } from "@tanstack/react-router";
+import MuiLink, { LinkProps as MuiLinkProps } from "@mui/material/Link";
+import { useTheme } from "@mui/material/styles";
 
-// Add support for the sx prop for consistency with the other branches.
-const Anchor = styled("a")({});
-
-interface NextLinkComposedProps
-	extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href">,
-		Omit<
-			NextLinkProps,
-			"href" | "as" | "passHref" | "onMouseEnter" | "onClick" | "onTouchStart"
-		> {
-	to: NextLinkProps["href"];
-	linkAs?: NextLinkProps["as"];
+export interface CustomLinkProps extends Omit<
+	MuiLinkProps,
+	"href" | "classes"
+> {
+	href?: string;
+	to?: string;
+	search?: any; // Added to support TanStack query parameters
+	params?: any; // Added to support TanStack path parameters
+	noLinkStyle?: boolean;
+	className?: string;
 }
 
-export const NextLinkComposed = forwardRef<
-	HTMLAnchorElement,
-	NextLinkComposedProps
->(function NextLinkComposed(props, ref) {
-	const {
-		to,
-		linkAs,
-		replace,
-		scroll,
-		shallow,
-		prefetch,
-		legacyBehavior = true,
-		locale,
-		...other
-	} = props;
+const Link = forwardRef<HTMLAnchorElement, CustomLinkProps>(function Link(
+	{ href, to, search, params, noLinkStyle, className, sx, ...other },
+	ref,
+) {
+	const theme = useTheme();
+	const destination = to || href;
 
-	return (
-		<NextLink
-			href={to}
-			prefetch={prefetch}
-			as={linkAs}
-			replace={replace}
-			scroll={scroll}
-			shallow={shallow}
-			passHref
-			locale={locale}
-			legacyBehavior={legacyBehavior}
-		>
-			<Anchor ref={ref} {...other} />
-		</NextLink>
-	);
-});
+	const isExternal =
+		typeof destination === "string" &&
+		(destination.startsWith("http") || destination.startsWith("mailto:"));
 
-export type LinkProps = {
-	activeClassName?: string;
-	as?: NextLinkProps["as"];
-	href: NextLinkProps["href"];
-	linkAs?: NextLinkProps["as"]; // Useful when the as prop is shallow by styled().
-	noLinkStyle?: boolean;
-} & Omit<NextLinkComposedProps, "to" | "linkAs" | "href"> &
-	Omit<MuiLinkProps, "href">;
+	const baseStyles = {
+		color: theme.palette.primary.linkText,
+		textDecoration: noLinkStyle ? "none" : undefined,
+		...sx,
+	};
 
-// A styled version of the Next.js Link component:
-// https://nextjs.org/docs/pages/api-reference/components/link
-const Link = forwardRef<HTMLAnchorElement, LinkProps>(
-	function Link(props, ref) {
-		const {
-			activeClassName = "active",
-			as,
-			className: classNameProps,
-			href,
-			legacyBehavior,
-			linkAs: linkAsProp,
-			locale,
-			noLinkStyle,
-			prefetch,
-			replace,
-			scroll,
-			shallow,
-			...other
-		} = props;
-
-		const router = useRouter();
-		const theme = useTheme();
-		const pathname = typeof href === "string" ? href : href.pathname;
-		const className = clsx(classNameProps, {
-			[activeClassName]: router.pathname === pathname && activeClassName,
-		});
-
-		const isExternal =
-			typeof href === "string" &&
-			(href.indexOf("http") === 0 || href.indexOf("mailto:") === 0);
-
-		if (isExternal) {
-			if (noLinkStyle) {
-				return (
-					<Anchor
-						sx={{ color: theme.palette.primary.linkText }}
-						className={className}
-						href={href}
-						ref={ref}
-						{...other}
-					/>
-				);
-			}
-
-			return (
-				<MuiLink
-					sx={{ color: theme.palette.primary.linkText }}
-					className={className}
-					href={href}
-					ref={ref}
-					{...other}
-				/>
-			);
-		}
-
-		const linkAs = linkAsProp || as;
-		const nextjsProps = {
-			to: href,
-			linkAs,
-			replace,
-			scroll,
-			shallow,
-			prefetch,
-			legacyBehavior,
-			locale,
-		};
-
-		if (noLinkStyle) {
-			return (
-				<NextLinkComposed
-					sx={{ color: theme.palette.primary.linkText }}
-					className={className}
-					ref={ref}
-					{...nextjsProps}
-					{...other}
-				/>
-			);
-		}
-
+	if (isExternal) {
 		return (
 			<MuiLink
-				sx={{ color: theme.palette.primary.linkText }}
-				component={NextLinkComposed}
-				className={className}
 				ref={ref}
-				{...nextjsProps}
+				href={destination}
+				target={destination?.startsWith("http") ? "_blank" : undefined}
+				rel={
+					destination?.startsWith("http") ? "noopener noreferrer" : undefined
+				}
+				className={className}
+				sx={baseStyles}
 				{...other}
 			/>
 		);
-	},
-);
+	}
+
+	return (
+		<MuiLink
+			component={TanStackLink}
+			to={destination as any}
+			search={search}
+			params={params}
+			ref={ref}
+			className={className}
+			sx={baseStyles}
+			{...other}
+		/>
+	);
+});
 
 export default Link;

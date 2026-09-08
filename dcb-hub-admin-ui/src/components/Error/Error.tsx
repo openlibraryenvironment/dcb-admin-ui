@@ -1,6 +1,6 @@
+import { ErrorOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
-import { useRouter } from "next/router";
-import { ErrorOutline } from "@mui/icons-material";
+import { useRouter } from "@tanstack/react-router";
 
 interface ErrorProps {
 	title: string;
@@ -23,28 +23,32 @@ export default function Error({
 	const theme = useTheme();
 
 	const handleReturn = () => {
-		router.push(actionLink);
+		router.navigate({ to: actionLink });
 	};
 	const handleReload = () => {
 		location.reload();
 	};
 	return (
 		<Box
-			display="flex"
-			alignItems="center"
-			justifyContent="center"
-			width="100%" // Takes the full width of the content area
-			height="100%"
-			flex="1" // Takes up the available space in the flex container
-			minHeight="0" // Override minHeight to allow the Box to shrink if necessary
+			sx={{
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				width: "100%",
+				height: "100%",
+				flex: "1",
+				minHeight: "0",
+			}}
 		>
 			<Stack
 				direction="column"
-				alignItems={"center"}
-				alignSelf={"center"}
 				spacing={2}
+				sx={{
+					alignItems: "center",
+					alignSelf: "center",
+				}}
 			>
-				<ErrorOutline
+				<ErrorOutlined
 					sx={{ fontSize: 200 }}
 					htmlColor={theme.palette.primary.exclamationIcon}
 				/>

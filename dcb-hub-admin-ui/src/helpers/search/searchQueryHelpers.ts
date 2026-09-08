@@ -1,12 +1,7 @@
 import { v4 as uuidv4, validate } from "uuid";
-import {
-	GridFilterModel,
-	GridFilterItem,
-	GridLogicOperator,
-} from "@mui/x-data-grid-premium";
 import { SearchCriterion } from "@models/SearchCriterion";
 import { SearchField } from "@models/SearchField";
-import { searchFieldPrefixes } from "src/constants/searchFieldPrefixes";
+import { searchFieldPrefixes } from "@constants/searchFieldPrefixes";
 import { formatQueryPart } from "./formatQueryPart";
 
 /**
@@ -102,64 +97,4 @@ export const parseQueryToCriteria = (query: string): SearchCriterion[] => {
 	}
 	if (criteria.length > 0) criteria[0].operator = "AND";
 	return criteria;
-};
-
-/**
- * Maps search criteria to the MUI DataGrid's filter model.
- * Note: This can only represent criteria that map to a grid column (e.g., Title).
- * Searches on fields like 'Author' will not appear as grid filters.
- * ClusterRecordID searches are excluded as they don't correspond to grid columns.
- */
-export const mapCriteriaToFilterModel = (
-	criteria: SearchCriterion[],
-): GridFilterModel => {
-	const items: GridFilterItem[] = [];
-	criteria
-		.filter((c) => c.value.trim() !== "")
-		// Exclude ClusterRecordID from grid filters as it doesn't map to a column
-		.filter((c) => c.field !== SearchField.ClusterRecordID)
-		.forEach((criterion) => {
-			let columnField: string | null = null;
-			if (criterion.field === SearchField.Title) columnField = "title";
-			if (criterion.field === SearchField.Keyword) columnField = "title"; // Map keyword to title column
-
-			if (columnField) {
-				items.push({
-					field: columnField,
-					operator: "contains",
-					value: criterion.value,
-				});
-			}
-		});
-
-	// A limitation of GridFilterModel is a single logic operator for all items.
-	// We default to AND, but switch to OR if any criterion uses it.
-	const hasOr = criteria.some((c) => c.operator === "OR");
-	return {
-		items,
-		logicOperator: hasOr ? GridLogicOperator.Or : GridLogicOperator.And,
-	};
-};
-
-/**
- * Maps the MUI DataGrid's filter model back to search criteria.
- * This will replace existing criteria.
- */
-export const mapFilterModelToCriteria = (
-	filterModel: GridFilterModel,
-): SearchCriterion[] => {
-	const logicOp =
-		(filterModel.logicOperator?.toUpperCase() as "AND" | "OR" | "NOT") || "AND";
-
-	return filterModel.items.map((item, index) => {
-		let field = SearchField.Keyword; // Default fallback
-		if (item.field === "title") field = SearchField.Title;
-
-		return {
-			id: uuidv4(),
-			field,
-			value: item.value ?? "",
-			operator: index === 0 ? "AND" : logicOp,
-		};
-	});
 };

@@ -4,24 +4,12 @@ import {
 	Button,
 	CircularProgress,
 	Stack,
-	styled,
 	SvgIconProps,
 	Tooltip,
 } from "@mui/material";
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import { forwardRef, ReactElement, ChangeEvent } from "react";
-
-const VisuallyHiddenInput = styled("input")`
-	clip: rect(0 0 0 0);
-	clip-path: inset(50%);
-	height: 1px;
-	overflow: hidden;
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	white-space: nowrap;
-	width: 1px;
-`;
+import { visuallyHidden } from "@mui/utils";
 
 interface FileUploadButtonProps {
 	buttonText: string;
@@ -51,7 +39,9 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 		const { t } = useTranslation();
 
 		return (
-			<Stack spacing={2}>
+			// alignItems keeps the trigger sized to its label: a column Stack stretches
+			// its children, which made the button span the full width of any wide parent.
+			<Stack spacing={2} sx={{ alignItems: "flex-start" }}>
 				<Button
 					component="label"
 					variant="outlined"
@@ -66,7 +56,9 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						/>
 					) : null}
 					{buttonText}
-					<VisuallyHiddenInput
+					<Box
+						component="input"
+						sx={visuallyHidden}
 						name="file"
 						ref={ref}
 						type="file"
@@ -80,7 +72,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						sx={{
 							mt: 2,
 							maxWidth: "200px",
-							maxHeight: "200",
+							maxHeight: "200px",
 							position: "relative", // Add this to position the remove button
 							overflow: "hidden",
 							borderRadius: 1,
@@ -91,7 +83,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						<Tooltip title={t("consortium.remove_image")}>
 							<Button
 								onClick={handleRemove}
-								aria-label="Remove image"
+								aria-label={t("consortium.remove_image")}
 								sx={{
 									position: "absolute",
 									top: 0,
@@ -102,8 +94,6 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 								<CancelRounded />
 							</Button>
 						</Tooltip>
-						{/* Just until we figure out the issues with <Image */}
-						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img
 							src={previewUrl}
 							alt="Preview"

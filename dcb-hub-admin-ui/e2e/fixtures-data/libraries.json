@@ -1,0 +1,60 @@
+{
+	"libraries": {
+		"totalSize": 2,
+		"pageable": { "number": 0, "offset": 0 },
+		"content": [
+			{
+				"id": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+				"fullName": "Alpha Test Library",
+				"shortName": "Alpha",
+				"abbreviatedName": "ALPHA",
+				"agencyCode": "alpha",
+				"supportHours": "9-5 Mon-Fri",
+				"address": "1 Alpha Street",
+				"type": "Public",
+				"agency": {
+					"id": "a1b2c3d4-1111-5111-9111-111111111111",
+					"code": "alpha",
+					"name": "Alpha Agency",
+					"authProfile": "BASIC/UNIQUE-ID+PIN",
+					"hostLms": {
+						"id": "h1h1h1h1-1111-5111-9111-111111111111",
+						"code": "alpha-lms",
+						"clientConfig": null,
+						"lmsClientClass": null
+					},
+					"isSupplyingAgency": true,
+					"isBorrowingAgency": true
+				},
+				"secondHostLms": null,
+				"membership": []
+			},
+			{
+				"id": "d34ef4bc-88d1-679a-c67e-ad9b3e7b6033",
+				"fullName": "Beta Test Library",
+				"shortName": "Beta",
+				"abbreviatedName": "BETA",
+				"agencyCode": "beta",
+				"supportHours": "9-5 Mon-Fri",
+				"address": "2 Beta Street",
+				"type": "Academic",
+				"agency": {
+					"id": "b2c3d4e5-2222-5222-9222-222222222222",
+					"code": "beta",
+					"name": "Beta Agency",
+					"authProfile": "BASIC/UNIQUE-ID+PIN",
+					"hostLms": {
+						"id": "h2h2h2h2-2222-5222-9222-222222222222",
+						"code": "beta-lms",
+						"clientConfig": null,
+						"lmsClientClass": null
+					},
+					"isSupplyingAgency": true,
+					"isBorrowingAgency": false
+				},
+				"secondHostLms": null,
+				"membership": []
+			}
+		]
+	}
+}

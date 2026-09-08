@@ -1,0 +1,37 @@
+{
+	"libraryUsers": [
+		{
+			"id": "6f1a1c4e-1111-5111-9111-aaaaaaaaaaaa",
+			"email": "ada@alpha.example",
+			"firstName": "Ada",
+			"lastName": "Lovelace",
+			"role": "LIBRARY_ADMIN",
+			"status": "ACTIVE",
+			"agencyCode": "alpha",
+			"dateCreated": "2026-08-01T09:00:00Z",
+			"lastEditedBy": "e2e-test-user"
+		},
+		{
+			"id": "6f1a1c4e-2222-5222-9222-bbbbbbbbbbbb",
+			"email": "grace@alpha.example",
+			"firstName": "Grace",
+			"lastName": "Hopper",
+			"role": "LIBRARY_READ_ONLY",
+			"status": "INVITED",
+			"agencyCode": "alpha",
+			"dateCreated": "2026-08-20T09:00:00Z",
+			"lastEditedBy": "e2e-test-user"
+		},
+		{
+			"id": "6f1a1c4e-3333-5333-9333-cccccccccccc",
+			"email": "karen@alpha.example",
+			"firstName": "Karen",
+			"lastName": "Spärck Jones",
+			"role": "LIBRARY_READ_ONLY",
+			"status": "DISABLED",
+			"agencyCode": "alpha",
+			"dateCreated": "2026-07-11T09:00:00Z",
+			"lastEditedBy": "e2e-test-user"
+		}
+	]
+}

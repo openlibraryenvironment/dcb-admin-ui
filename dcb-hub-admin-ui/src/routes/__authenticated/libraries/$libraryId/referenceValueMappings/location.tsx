@@ -1,0 +1,217 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useAuth } from "react-oidc-context";
+import { Grid, Typography, Button, useTheme } from "@mui/material";
+import { Delete } from "@mui/icons-material";
+
+import PageContainer from "@layout/PageContainer/PageContainer";
+import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
+import MappingsSubTabs from "@components/MappingsSubTabs/MappingsSubTabs";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
+import Loading from "@components/Loading/Loading";
+import Error from "@components/Error/Error";
+import NewMapping from "@forms/NewMapping/NewMapping";
+
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useEntityMutation } from "@hooks/useEntityMutation";
+
+import { libraryQuery } from "@/queryOptions/library";
+
+import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
+import { getMappings } from "@queries/getMappings";
+import { referenceValueMappingColumnsNoCategoryFilter } from "@columns/referenceValueMappingsNoCategoryFilter";
+import type {} from "@generated/graphql";
+
+export const Route = createFileRoute(
+	"/__authenticated/libraries/$libraryId/referenceValueMappings/location",
+)({
+	component: LocationMappings,
+});
+
+function LocationMappings() {
+	const { t } = useTranslation();
+	const { libraryId } = Route.useParams();
+	const theme = useTheme();
+	const gqlClient = useGraphQLClient();
+	const auth = useAuth();
+
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
+	const libraryMutation = useEntityMutation("library");
+	const [newMapping, setNewMapping] = useState({
+		show: false,
+		hostLmsCode: "",
+		agencyCode: "",
+		libraryName: "",
+	});
+
+	const {
+		data: library,
+		isLoading,
+		error,
+	} = useQuery(libraryQuery(gqlClient, libraryId));
+
+	const locationPrimaryQuery = `(toContext:"${library.agency?.hostLms?.code}" OR fromContext:"${library.agency?.hostLms?.code}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`;
+	const locationSecondaryQuery = `(toContext:"${library.secondHostLms?.code}" OR fromContext:"${library.secondHostLms?.code}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`;
+	if (isLoading)
+		return (
+			<Loading
+				title={t("ui.info.loading.document", {
+					document_type: t("libraries.library"),
+				})}
+				subtitle={t("ui.info.wait")}
+			/>
+		);
+	if (error || !library)
+		return (
+			<Error
+				title={t("ui.error.cannot_retrieve_record")}
+				action={t("ui.actions.go_back")}
+				goBack="/libraries"
+				message={t("ui.error.invalid_UUID")}
+			/>
+		);
+
+	return (
+		<PageContainer
+			title={library.fullName}
+			pageActions={[
+				libraryMutation.buildDeleteAction({
+					id: libraryId,
+					name: library?.fullName,
+					redirect: "/libraries",
+					disabled: !isAnAdmin,
+					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+				}),
+			]}
+		>
+			<Grid
+				container
+				spacing={{ xs: 2, md: 3 }}
+				columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
+			>
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<LibraryTabs libraryId={libraryId} value={3} />
+				</Grid>
+
+				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+					<MappingsSubTabs
+						libraryId={libraryId}
+						type="referenceValue"
+						activeCategory="location"
+					/>
+
+					{/* Primary Host LMS Grid */}
+					<Typography
+						variant="h3"
+						sx={{
+							fontWeight: "bold",
+						}}
+					>
+						{t("libraries.config.data.mappings.location", {
+							hostLms: library.agency?.hostLms?.code,
+						})}
+					</Typography>
+					{isAnAdmin && (
+						<Button
+							variant="outlined"
+							sx={{ mt: 1, mb: 2 }}
+							onClick={() =>
+								setNewMapping({
+									show: true,
+									hostLmsCode: library.agency?.hostLms?.code,
+									agencyCode: library.agencyCode,
+									libraryName: library.fullName,
+								})
+							}
+						>
+							{t("mappings.new.title")}
+						</Button>
+					)}
+					<MappingsGrid
+						gridId={`refMappingsLocationPrimary-${libraryId}`}
+						hostLmsCode={library.agency?.hostLms?.code}
+						baseQuery={locationPrimaryQuery}
+						isAnAdmin={isAnAdmin}
+						columns={referenceValueMappingColumnsNoCategoryFilter}
+						getQuery={getMappings}
+						dataKey="referenceValueMappings"
+						hiddenColumns={{
+							fromCategory: false,
+							lastImported: false,
+							toCategory: false,
+						}}
+					/>
+					{/* Secondary Host LMS Grid (If exists) */}
+					{library.secondHostLms && (
+						<>
+							<Typography
+								variant="h3"
+								sx={{
+									fontWeight: "bold",
+									mt: 4,
+								}}
+							>
+								{t("libraries.config.data.mappings.location", {
+									hostLms: library.secondHostLms.code,
+								})}
+							</Typography>
+							{isAnAdmin && (
+								<Button
+									variant="outlined"
+									sx={{ mt: 1, mb: 2 }}
+									onClick={() =>
+										setNewMapping({
+											show: true,
+											hostLmsCode: library.secondHostLms.code,
+											agencyCode: library.agencyCode,
+											libraryName: library.fullName,
+										})
+									}
+								>
+									{t("mappings.new.title")}
+								</Button>
+							)}
+							<MappingsGrid
+								gridId={`refMappingsLocationSecondary-${libraryId}`}
+								hostLmsCode={library.secondHostLms.code}
+								baseQuery={locationSecondaryQuery}
+								isAnAdmin={isAnAdmin}
+								columns={referenceValueMappingColumnsNoCategoryFilter}
+								getQuery={getMappings}
+								dataKey="referenceValueMappings"
+								hiddenColumns={{
+									fromCategory: false,
+									lastImported: false,
+									toCategory: false,
+								}}
+							/>
+						</>
+					)}
+				</Grid>
+			</Grid>
+			{newMapping.show && (
+				<NewMapping
+					show={newMapping.show}
+					onClose={() =>
+						setNewMapping({
+							show: false,
+							hostLmsCode: "",
+							agencyCode: "",
+							libraryName: "",
+						})
+					}
+					category="Location"
+					hostLmsCode={newMapping.hostLmsCode}
+					agencyCode={newMapping.agencyCode}
+					libraryName={newMapping.libraryName}
+				/>
+			)}
+			<EntityMutationDialogs {...libraryMutation.dialogProps} />
+		</PageContainer>
+	);
+}

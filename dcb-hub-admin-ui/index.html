@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!-- Root-absolute, so Vite rewrites it for VITE_PUBLIC_URL. Without the link at
+		     all the browser asks the ORIGIN root for /favicon.ico, which under a path
+		     prefix is a sibling app's territory. -->
+		<link rel="icon" href="/favicon.ico" />
+		<title>DCB Admin</title>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
+</html>

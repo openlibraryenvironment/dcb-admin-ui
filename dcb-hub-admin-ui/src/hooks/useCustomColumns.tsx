@@ -1,4 +1,4 @@
-import { useTranslation } from "next-i18next";
+import { useTranslation } from "react-i18next";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GRID_CHECKBOX_SELECTION_COL_DEF,

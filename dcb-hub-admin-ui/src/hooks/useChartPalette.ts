@@ -1,0 +1,101 @@
+import { useTheme } from "@mui/material";
+
+// Validated categorical palette (dataviz skill reference instance). Light and dark
+// are SELECTED sets, not an auto-flip: each was validated against its own surface.
+// Fixed hue order - never cycle, never reassign by rank.
+const CATEGORICAL_LIGHT = [
+	"#2a78d6", // blue
+	"#1baf7a", // aqua
+	"#eda100", // yellow
+	"#008300", // green
+	"#4a3aa7", // violet
+	"#e34948", // red
+	"#e87ba4", // magenta
+	"#eb6834", // orange
+];
+
+const CATEGORICAL_DARK = [
+	"#3987e5", // blue
+	"#199e70", // aqua
+	"#c98500", // yellow
+	"#008300", // green
+	"#9085e9", // violet
+	"#e66767", // red
+	"#d55181", // magenta
+	"#d95926", // orange
+];
+
+// The palettes above are built for chart MARKS. When a swatch is reused as a
+// text ground (e.g. a selected chip) the ink must be chosen per swatch: white
+// fails AA on most of them (1.8:1 on the yellows). MUI's getContrastText is not
+// usable here - its 87%-black ink leaves #2a78d6 at 4.33:1, still under AA -
+// so pick pure black/white by whichever actually wins. Every swatch clears
+// 4.5:1 this way.
+const relativeLuminance = (hex: string): number => {
+	const h = hex.replace("#", "");
+	const channel = (i: number) => {
+		const s = parseInt(h.slice(i, i + 2), 16) / 255;
+		return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+	};
+	return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+};
+
+export const inkOn = (background: string): "#000000" | "#FFFFFF" => {
+	const l = relativeLuminance(background);
+	const onWhite = 1.05 / (l + 0.05);
+	const onBlack = (l + 0.05) / 0.05;
+	return onBlack >= onWhite ? "#000000" : "#FFFFFF";
+};
+
+// Status palette - fixed, never themed. Ships with icon + label, never colour alone.
+const STATUS = {
+	good: "#0ca30c",
+	warning: "#fab219",
+	serious: "#ec835a",
+	critical: "#d03b3b",
+};
+
+// Canonical DCB status order. A status is coloured by its POSITION here, modulo the
+// palette length, so "LOANED" is always the same hue whether or not other series
+// are plotted alongside it. Beyond 8 distinct series the skill says fold into
+// "Other" / small multiples rather than inventing hues - the plot-builder caps
+// selection accordingly.
+const STATUS_ORDER = [
+	"SUBMITTED_TO_DCB",
+	"PATRON_VERIFIED",
+	"RESOLVED",
+	"REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+	"CONFIRMED",
+	"REQUEST_PLACED_AT_BORROWING_AGENCY",
+	"REQUEST_PLACED_AT_PICKUP_AGENCY",
+	"RECEIVED_AT_PICKUP",
+	"READY_FOR_PICKUP",
+	"PICKUP_TRANSIT",
+	"LOANED",
+	"RETURN_TRANSIT",
+	"COMPLETED",
+	"FINALISED",
+	"CANCELLED",
+	"NO_ITEMS_SELECTABLE_AT_ANY_AGENCY",
+	"ERROR",
+];
+
+export function useChartPalette() {
+	// `palette.mode`, and NOT `theme.applyStyles("dark", …)`, which is what the rest of this
+	// application now uses. applyStyles emits a CSS rule; this returns an ARRAY OF COLOURS
+	// handed to a chart component as a prop. There is no stylesheet for the cascade to
+	// resolve, so the branch has to happen in JavaScript.
+	const isDark = useTheme().palette.mode === "dark";
+	const categorical = isDark ? CATEGORICAL_DARK : CATEGORICAL_LIGHT;
+
+	return {
+		categorical,
+		status: STATUS,
+		// Stable colour for a given status code, independent of selection order.
+		colorForStatus: (status: string): string => {
+			const idx = STATUS_ORDER.indexOf(status);
+			const slot = idx >= 0 ? idx % categorical.length : 0;
+			return categorical[slot];
+		},
+	};
+}

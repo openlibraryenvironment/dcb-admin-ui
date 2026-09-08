@@ -1,6 +1,13 @@
-import { NewLibraryFormData } from "@models/NewLibraryFormData";
+import { useTranslation } from "react-i18next";
+import {
+	useFormContext,
+	Controller,
+	useFieldArray,
+	FieldErrors,
+} from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
 import {
+	Alert,
 	Autocomplete,
 	Box,
 	Button,
@@ -12,116 +19,128 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { TFunction } from "next-i18next";
+import { newLibrarySchema } from "@schemas/newLibrarySchema";
+import { z } from "zod";
 import {
-	Control,
-	Controller,
-	FieldErrors,
-	useFieldArray,
-} from "react-hook-form";
+	CONTACT_ROLE_OPTIONS,
+	contactRoleLabelKey,
+} from "@constants/contactRoles";
 
-type ContactsStepType = {
-	control: Control<NewLibraryFormData, any>;
-	errors: FieldErrors<NewLibraryFormData>;
-	t: TFunction;
-	handleClose: () => void;
-	handleSubmit: () => void;
-	isValid: boolean;
-	loading: boolean;
+type LibraryFormValues = z.infer<typeof newLibrarySchema>;
+
+const EMPTY_CONTACT = {
+	firstName: "",
+	lastName: "",
+	email: "",
+	role: "",
+	isPrimaryContact: false,
 };
 
-export default function ContactsStep({
-	control,
-	errors,
-	t,
-	handleClose,
-	handleSubmit,
-	loading,
-	isValid,
-}: ContactsStepType) {
+export default function ContactsStep() {
+	const { t } = useTranslation();
+	const {
+		control,
+		setValue,
+		getValues,
+		formState: { errors },
+	} = useFormContext();
+
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: "contacts",
 	});
 
-	const handleAddContact = () => {
-		if (fields.length < 2) {
-			append({
-				firstName: "",
-				lastName: "",
-				email: "",
-				role: "",
-				isPrimaryContact: false,
-			});
-		}
+	const contactErrors = errors.contacts as unknown as FieldErrors<
+		LibraryFormValues["contacts"]
+	>;
+
+	// Exactly one contact can be the primary one - it is who DCB writes to first.
+	// Letting two be ticked stores an ambiguity the backend has no way to settle.
+	const selectPrimary = (index: number, checked: boolean) => {
+		const contacts = getValues("contacts") ?? [];
+		contacts.forEach((_: unknown, position: number) => {
+			setValue(
+				`contacts.${position}.isPrimaryContact`,
+				checked && position === index,
+				{ shouldDirty: true },
+			);
+		});
 	};
 
-	const handleRemoveContact = (index: number) => {
-		if (fields.length > 1) {
-			remove(index);
-		}
-	};
 	return (
-		<>
+		<Stack spacing={3} sx={{ mt: 1 }}>
+			{/* The schema requires at least one, and the library cannot be created
+			    without it - say so before the user hits Next rather than after. */}
+			<Alert severity="info">
+				{t("libraries.contacts.minimum_explanation")}
+			</Alert>
+
 			{fields.map((field, index) => (
-				<Paper key={field.id} sx={{ p: 2 }}>
+				<Paper key={field.id} sx={{ p: 3 }} variant="outlined">
 					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-						<Typography variant="h6">
-							{t("libraries.contacts.one")} #{index + 1}
+						<Typography variant="h6" component="h3">
+							{t("libraries.contacts.numbered", { number: index + 1 })}
 						</Typography>
 						{fields.length > 1 && (
 							<IconButton
-								onClick={() => handleRemoveContact(index)}
-								aria-label={t("libraries.contacts.remove")}
+								onClick={() => remove(index)}
+								aria-label={t("libraries.contacts.remove_numbered", {
+									number: index + 1,
+								})}
 							>
-								<Delete />
+								<Delete color="error" />
 							</IconButton>
 						)}
 					</Box>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-						<Controller
-							name={`contacts.${index}.firstName`}
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("libraries.contacts.first_name")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.contacts?.[index]?.firstName}
-									helperText={errors.contacts?.[index]?.firstName?.message}
-								/>
-							)}
-						/>
-						<Controller
-							name={`contacts.${index}.lastName`}
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									label={t("libraries.contacts.last_name")}
-									variant="outlined"
-									fullWidth
-									required
-									error={!!errors.contacts?.[index]?.lastName}
-									helperText={errors.contacts?.[index]?.lastName?.message}
-								/>
-							)}
-						/>
+					<Stack spacing={2} direction="column">
+						<Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+							<Controller
+								name={`contacts.${index}.firstName`}
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										id={`contact-${index}-first-name`}
+										label={t("libraries.contacts.first_name")}
+										required
+										fullWidth
+										autoComplete="given-name"
+										error={!!contactErrors?.[index]?.firstName}
+										helperText={contactErrors?.[index]?.firstName?.message}
+									/>
+								)}
+							/>
+							<Controller
+								name={`contacts.${index}.lastName`}
+								control={control}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										id={`contact-${index}-last-name`}
+										label={t("libraries.contacts.last_name")}
+										required
+										fullWidth
+										autoComplete="family-name"
+										error={!!contactErrors?.[index]?.lastName}
+										helperText={contactErrors?.[index]?.lastName?.message}
+									/>
+								)}
+							/>
+						</Stack>
 						<Controller
 							name={`contacts.${index}.email`}
 							control={control}
 							render={({ field }) => (
 								<TextField
 									{...field}
+									id={`contact-${index}-email`}
 									label={t("libraries.contacts.email")}
-									variant="outlined"
 									type="email"
-									fullWidth
 									required
-									error={!!errors.contacts?.[index]?.email}
-									helperText={errors.contacts?.[index]?.email?.message}
+									fullWidth
+									autoComplete="email"
+									error={!!contactErrors?.[index]?.email}
+									helperText={contactErrors?.[index]?.email?.message}
 								/>
 							)}
 						/>
@@ -130,31 +149,22 @@ export default function ContactsStep({
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
-									{...field}
+									options={CONTACT_ROLE_OPTIONS.map((option) => option.value)}
+									getOptionLabel={(value) => t(contactRoleLabelKey(value))}
+									onChange={(_, newValue) => field.onChange(newValue ?? "")}
+									onBlur={field.onBlur}
 									value={field.value || null}
-									onChange={(_, newValue) => {
-										field.onChange(newValue);
-									}}
-									options={[
-										t("libraries.contacts.roles.implementation"),
-										t("libraries.contacts.roles.library_service_admin"),
-										t("libraries.contacts.roles.operations"),
-										t("libraries.contacts.roles.sign_off"),
-										t("libraries.contacts.roles.support"),
-										t("libraries.contacts.roles.technical"),
-									]}
+									isOptionEqualToValue={(option, value) => option === value}
 									renderInput={(params) => (
 										<TextField
 											{...params}
+											id={`contact-${index}-role`}
 											required
 											label={t("libraries.contacts.role")}
-											error={!!errors.contacts?.[index]?.role}
-											helperText={errors.contacts?.[index]?.role?.message}
+											error={!!contactErrors?.[index]?.role}
+											helperText={contactErrors?.[index]?.role?.message}
 										/>
 									)}
-									isOptionEqualToValue={(option, value) =>
-										option === value || (!option && !value)
-									}
 								/>
 							)}
 						/>
@@ -163,47 +173,41 @@ export default function ContactsStep({
 							control={control}
 							render={({ field }) => (
 								<FormControlLabel
-									control={<Checkbox {...field} checked={field.value} />}
+									control={
+										<Checkbox
+											{...field}
+											checked={field.value === true}
+											onChange={(event) =>
+												selectPrimary(index, event.target.checked)
+											}
+										/>
+									}
 									label={t("libraries.contacts.primary")}
 								/>
 							)}
 						/>
-					</Box>
+					</Stack>
 				</Paper>
 			))}
 
-			{fields.length < 2 && (
-				<Button
-					startIcon={<Add />}
-					onClick={handleAddContact}
-					variant="outlined"
-					color="primary"
-					sx={{ alignSelf: "flex-start" }}
-				>
-					{t("consortium.new_contact.title")}
-				</Button>
-			)}
+			{/* The cap used to be two, for no reason the code gave. A library with a
+			    technical, an operations and a sign-off contact is normal. */}
+			<Button
+				startIcon={<Add />}
+				onClick={() => append({ ...EMPTY_CONTACT })}
+				variant="outlined"
+				sx={{ alignSelf: "flex-start" }}
+			>
+				{t("consortium.new_contact.title")}
+			</Button>
 
 			{errors.contacts &&
 				typeof errors.contacts === "object" &&
 				"message" in errors.contacts && (
-					<Typography color="error">{errors.contacts.message}</Typography>
+					<Typography color="error" role="alert" aria-live="assertive">
+						{errors.contacts.message as string}
+					</Typography>
 				)}
-			<Stack spacing={1} direction={"row"}>
-				<Button variant="outlined" onClick={handleClose}>
-					{t("mappings.cancel")}
-				</Button>
-				<div style={{ flex: "1 0 0" }} />
-				<Button
-					type="submit"
-					variant="contained"
-					color="primary"
-					disabled={!isValid || loading}
-					onClick={handleSubmit}
-				>
-					{loading ? t("ui.action.submitting") : t("libraries.new.title")}
-				</Button>
-			</Stack>
-		</>
+		</Stack>
 	);
 }

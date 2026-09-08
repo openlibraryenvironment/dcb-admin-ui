@@ -1,0 +1,43 @@
+{
+	"libraries": {
+		"content": [
+			{
+				"id": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+				"fullName": "Alpha Test Library",
+				"shortName": "Alpha",
+				"abbreviatedName": "ALPHA",
+				"agencyCode": "alpha",
+				"supportHours": "9-5 Mon-Fri",
+				"address": "1 Alpha Street",
+				"latitude": null,
+				"longitude": null,
+				"training": false,
+				"patronWebsite": null,
+				"discoverySystem": null,
+				"type": "Public",
+				"backupDowntimeSchedule": null,
+				"hostLmsConfiguration": null,
+				"agency": {
+					"id": "a1b2c3d4-1111-5111-9111-111111111111",
+					"code": "alpha",
+					"name": "Alpha Agency",
+					"authProfile": "BASIC/UNIQUE-ID+PIN",
+					"isSupplyingAgency": true,
+					"isBorrowingAgency": true,
+					"hostLms": {
+						"id": "h1h1h1h1-1111-5111-9111-111111111111",
+						"code": "alpha-lms",
+						"name": "Alpha LMS",
+						"clientConfig": null,
+						"lmsClientClass": null,
+						"itemSuppressionRulesetName": null,
+						"suppressionRulesetName": null
+					}
+				},
+				"secondHostLms": null,
+				"membership": [],
+				"contacts": []
+			}
+		]
+	}
+}

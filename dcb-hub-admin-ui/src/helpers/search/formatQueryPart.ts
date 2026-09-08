@@ -1,6 +1,6 @@
 import { SearchField } from "@models/SearchField";
-import { searchFieldPrefixes } from "src/constants/searchFieldPrefixes";
-import { languageAliasMap } from "src/constants/searchLanguageAliasMap";
+import { searchFieldPrefixes } from "@constants/searchFieldPrefixes";
+import { languageAliasMap } from "@constants/searchLanguageAliasMap";
 
 // Gets the query in the format for dcb-locate
 export const formatQueryPart = (field: SearchField, value: string): string => {

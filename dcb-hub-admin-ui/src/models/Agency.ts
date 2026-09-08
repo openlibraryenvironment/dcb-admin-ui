@@ -1,7 +1,7 @@
 import { HostLMS } from "./HostLMS";
 
 export interface Agency {
-	id: number;
+	id: string;
 	code: string;
 	name: string;
 	hostLms: HostLMS;
@@ -11,4 +11,5 @@ export interface Agency {
 	isSupplyingAgency: boolean;
 	isBorrowingAgency: boolean;
 	maxConsortialLoans: number;
+	maxLocalHolds: number;
 }

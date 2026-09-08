@@ -1,346 +1,248 @@
-import { Button, Divider, Stack, Typography } from "@mui/material";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { Trans, useTranslation } from "next-i18next";
-import getConfig from "next/config";
-import useCode from "@hooks/useCode";
-import TimedAlert from "@components/TimedAlert/TimedAlert";
-import { useSession } from "next-auth/react";
-import Confirmation from "./Confirmation/Confirmation";
-import { useLazyQuery } from "@apollo/client/react";
-import {
-	checkExistingLocations,
-	checkExistingMappings,
-	checkExistingNumericRangeMappings,
-} from "src/queries/queries";
+import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
-import { fileSizeConvertor } from "src/helpers/fileSizeConverter";
-import { getErrorMessageKey } from "src/helpers/MappingsImport/getErrorMessageKey";
-import Link from "next/link";
-import { checkValidFileType } from "src/helpers/checkValidFileType";
-import { getSuccessKey } from "src/helpers/MappingsImport/getSuccessMessageKey";
 
-// WIP: Re-implementing what was previously done for us by Uppy.
-// Long-term aim: feature parity with Uppy for what we need and a better UI.
-const { publicRuntimeConfig } = getConfig();
-const url = publicRuntimeConfig.DCB_API_BASE + "/uploadedMappings/upload";
+import useCode from "@hooks/useCode";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import TimedAlert from "@components/TimedAlert/TimedAlert";
+import Confirmation from "../Confirmation/Confirmation";
 
-const locationUrl = publicRuntimeConfig.DCB_API_BASE + "/locations/upload";
+import { checkExistingMappings } from "@queries/checkExistingMappings";
+
+import { fileSizeConvertor } from "@helpers/fileSizeConverter";
+import { checkValidFileType } from "@helpers/checkValidFileType";
+import { getErrorMessageKey } from "@helpers/MappingsImport/getErrorMessageKey";
+import { getSuccessKey } from "@helpers/MappingsImport/getSuccessMessageKey";
+import { checkExistingLocations } from "@queries/checkExistingLocations";
+import { checkExistingNumericRangeMappings } from "@queries/checkExistingNumericRangeMappings";
+import type {
+	CheckExistingLocationsQueryVariables,
+	CheckExistingMappingsQueryVariables,
+	CheckExistingNumericRangeMappingsQueryVariables,
+} from "@generated/graphql";
+
 const ALLOWED_FILE_TYPES = {
 	"text/csv": [".csv"],
 	"text/tab-separated-values": [".tsv"],
 };
 
-const FileUpload = ({
-	category,
-	onCancel,
-	type,
-	presetHostLmsId,
-	libraryName,
-}: {
+interface FileUploadProps {
 	category: string;
 	onCancel: () => void;
 	type: "Reference value mappings" | "Numeric range mappings" | "Locations";
 	presetHostLmsId?: string;
 	libraryName?: string;
-}) => {
+	// Fired once a upload succeeds, with the number of records imported. Lets a
+	// parent (e.g. the New Library wizard) reflect progress before proceeding.
+	onImported?: (count: number) => void;
+}
+
+export default function FileUpload({
+	category,
+	onCancel,
+	type,
+	presetHostLmsId,
+	libraryName,
+	onImported,
+}: FileUploadProps) {
 	const { t } = useTranslation();
-	const { data } = useSession();
-	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
-	const [isValidationErrorDisplayed, setValidationErrorDisplayed] =
-		useState(false);
-	const [isSuccess, setSuccess] = useState(false);
+	const gqlClient = useGraphQLClient();
+	const client = useDcbRestClient();
+	const { code, resetAll } = useCode();
+
+	const [addedFile, setAddedFile] = useState<File | null>(null);
+	const [failedFile, setFailedFile] = useState<File | null>(null);
+
+	const [isConfirmOpen, setConfirmOpen] = useState(false);
 	const [replacement, setReplacement] = useState(false);
 	const [existingMappingCount, setExistingMappingCount] = useState(0);
-	const [isConfirmOpen, setConfirmOpen] = useState(false);
-	const { code, resetAll } = useCode();
+
+	const [isErrorDisplayed, setErrorDisplayed] = useState(false);
 	const [uploadErrorMessage, setUploadErrorMessage] = useState("");
+	const [lineNumber, setLineNumber] = useState("0");
+
+	const [isValidationErrorDisplayed, setValidationErrorDisplayed] =
+		useState(false);
 	const [validationErrorMessage, setValidationErrorMessage] = useState("");
+
+	const [isSuccess, setSuccess] = useState(false);
 	const [successCount, setSuccessCount] = useState(0);
 	const [ignoredCount, setIgnoredCount] = useState(0);
 	const [deletedCount, setDeletedCount] = useState(0);
-	const [lineNumber, setLineNumber] = useState(0);
-	const [addedFile, setAddedFile] = useState<File | null>(null);
-	const [failedFile, setFailedFile] = useState<File | null>(null);
-	const [uploadButtonClicked, setUploadButtonClicked] = useState(false);
-	const headers = { Authorization: `Bearer ${data?.accessToken}` };
 
-	const refVariablesAll = {
-		query:
-			"(toContext:" +
-			code +
-			" OR fromContext: " +
-			code +
-			") AND NOT deleted:true",
-		pagesize: 200,
+	const uploadPath =
+		type === "Locations" ? "/locations/upload" : "/uploadedMappings/upload";
+
+	// Close the confirmation dialog when the target entity changes, adjusting
+	// state during render rather than via an effect.
+	const [prevCode, setPrevCode] = useState(code);
+	const [prevCategory, setPrevCategory] = useState(category);
+	if (code !== prevCode || category !== prevCategory) {
+		setPrevCode(code);
+		setPrevCategory(category);
+		setConfirmOpen(false);
+	}
+
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		if (file.size > 1 * 1024 * 1024) {
+			setFailedFile(file);
+			setValidationErrorDisplayed(true);
+			setValidationErrorMessage("File size exceeds the limit");
+			return;
+		}
+
+		if (file.size === 0) {
+			setFailedFile(file);
+			setValidationErrorDisplayed(true);
+			setValidationErrorMessage("File is empty");
+			return;
+		}
+
+		if (!checkValidFileType(file, ALLOWED_FILE_TYPES)) {
+			setFailedFile(file);
+			setValidationErrorDisplayed(true);
+			setValidationErrorMessage(
+				"Invalid file type. Only CSV and TSV files are allowed.",
+			);
+			return;
+		}
+
+		setAddedFile(file);
+		setErrorDisplayed(false);
+		setValidationErrorDisplayed(false);
 	};
 
-	const refVariablesCategory = {
-		query:
-			"(toContext:" +
-			code +
-			" OR fromContext: " +
-			code +
-			") AND (fromCategory: " +
-			category +
-			" OR toCategory: " +
-			category +
-			") AND NOT deleted:true",
-		pagesize: 200,
-	};
+	const handleUploadCheck = async () => {
+		if (!addedFile) {
+			setUploadErrorMessage("No file selected for upload.");
+			setErrorDisplayed(true);
+			return;
+		}
 
-	const numRangeVariablesAll = {
-		query: "context:" + code + " AND NOT deleted:true",
-		pagesize: 200,
-	};
+		if (!code) return;
+		if (type !== "Locations" && !category) return;
+		try {
+			let totalSize = 0;
 
-	const numRangeVariablesDomain = {
-		query:
-			"context:" + code + " AND domain:" + category + " AND NOT deleted:true",
-		pagesize: 200,
-	};
-
-	const locationVariables = {
-		query: "hostSystem:" + presetHostLmsId,
-		pagesize: 200,
-	};
-
-	const [checkMappingsPresent] = useLazyQuery(checkExistingMappings, {
-		variables: category == "all" ? refVariablesAll : refVariablesCategory,
-		fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
-		onCompleted: (data) => {
-			setExistingMappingCount(data?.referenceValueMappings?.totalSize);
-			if (uploadButtonClicked) {
-				if (data?.referenceValueMappings?.totalSize == 0 || data.isEmpty) {
-					setConfirmOpen(false);
-					console.log(
-						"DEV: Upload file activated in non-replacement condition",
-					);
-					uploadFile();
-				} else {
-					setConfirmOpen(true);
-					setReplacement(true);
-				}
+			if (type === "Reference value mappings") {
+				const queryVars =
+					category === "all"
+						? {
+								query: `(toContext:${code} OR fromContext:${code}) AND NOT deleted:true`,
+								pagesize: 1,
+							}
+						: {
+								query: `(toContext:${code} OR fromContext:${code}) AND (fromCategory:${category} OR toCategory:${category}) AND NOT deleted:true`,
+								pagesize: 1,
+							};
+				const res = await gqlClient.request<
+					any,
+					CheckExistingMappingsQueryVariables
+				>(checkExistingMappings, queryVars);
+				totalSize = res?.referenceValueMappings?.totalSize ?? 0;
+			} else if (type === "Locations" && presetHostLmsId) {
+				const res = await gqlClient.request<
+					any,
+					CheckExistingLocationsQueryVariables
+				>(checkExistingLocations, {
+					query: `hostSystem:${presetHostLmsId}`,
+					pagesize: 1,
+				});
+				totalSize = res?.locations?.totalSize ?? 0;
+			} else if (type === "Numeric range mappings") {
+				const queryVars =
+					category === "all"
+						? { query: `context:${code} AND NOT deleted:true`, pagesize: 1 }
+						: {
+								query: `context:${code} AND domain:${category} AND NOT deleted:true`,
+								pagesize: 1,
+							};
+				const res = await gqlClient.request<
+					any,
+					CheckExistingNumericRangeMappingsQueryVariables
+				>(checkExistingNumericRangeMappings, queryVars);
+				totalSize = res?.numericRangeMappings?.totalSize ?? 0;
 			}
-		},
-	});
 
-	const [checkNumericRangeMappingsPresent] = useLazyQuery(
-		checkExistingNumericRangeMappings,
-		{
-			fetchPolicy: "network-only", // This stops it relying on cache, as mappings data needs to be up-to-date and could have changed in the last few seconds.
-			onCompleted: (data) => {
-				setExistingMappingCount(data?.numericRangeMappings?.totalSize);
-				if (uploadButtonClicked) {
-					// Add this condition
-					if (data?.numericRangeMappings?.totalSize == 0 || data.isEmpty) {
-						setConfirmOpen(false);
-						uploadFile();
-					} else {
-						setConfirmOpen(true);
-						setReplacement(true);
-					}
-				}
-			},
-		},
-	);
+			setExistingMappingCount(totalSize);
 
-	const [checkLocationsPresent] = useLazyQuery(checkExistingLocations, {
-		fetchPolicy: "network-only",
-		onCompleted: (data) => {
-			setExistingMappingCount(data?.locations?.totalSize);
-			if (uploadButtonClicked) {
-				// Add this condition
-				if (data?.locations?.totalSize == 0 || data.isEmpty) {
-					setConfirmOpen(false);
-					uploadFile();
-				} else {
-					setConfirmOpen(true);
-					setReplacement(true);
-				}
+			if (totalSize === 0) {
+				uploadFile();
+			} else {
+				setReplacement(true);
+				setConfirmOpen(true);
 			}
-		},
-	});
-	const handleFileChange = (event: any) => {
-		const file = event.target.files[0];
-		if (file) {
-			if (file.size > 1 * 1024 * 1024) {
-				// 1 MB size limit
-				setFailedFile(file);
-				setErrorDisplayed(true);
-				setValidationErrorDisplayed(true);
-				setValidationErrorMessage("File size exceeds the limit");
-				return;
-			} else if (file.size == 0) {
-				setFailedFile(file);
-				setErrorDisplayed(true);
-				setValidationErrorDisplayed(true);
-				setValidationErrorMessage("File is empty");
-				return;
-			} else if (checkValidFileType(file, ALLOWED_FILE_TYPES) == false) {
-				setFailedFile(file);
-				setErrorDisplayed(true);
-				setValidationErrorDisplayed(true);
-				setValidationErrorMessage(
-					"Invalid file type. Only CSV and TSV files are allowed.",
-				);
-
-				return;
-			}
-			setAddedFile(file);
-			setErrorDisplayed(false);
+		} catch (error) {
+			console.error("Error checking existing entities:", error);
+			setErrorDisplayed(true);
 		}
 	};
 
-	const handleConfirmUpload = (
-		reason: string,
-		changeCategory?: string,
-		changeReferenceUrl?: string,
-	) => {
-		setConfirmOpen(false);
-		uploadFile(reason, changeCategory, changeReferenceUrl);
-	};
-
-	const handleCancelUpload = () => {
-		setConfirmOpen(false);
-		setUploadButtonClicked(false); // Reset uploadButtonClicked when cancelling
-	};
-
-	const handleReset = () => {
-		onCancel();
-	};
-
-	const uploadFile = (
+	const uploadFile = async (
 		reason?: string,
 		changeCategory?: string,
 		changeReferenceUrl?: string,
 	) => {
-		console.log(
-			"DEV: Upload file method triggered, replacement:" +
-				replacement +
-				" and UBC" +
-				uploadButtonClicked,
-		);
-		if (!addedFile) {
-			setErrorDisplayed(true);
-			setUploadErrorMessage("No file selected for upload.");
-			setUploadButtonClicked(false);
-			setConfirmOpen(false);
-			return;
-		}
+		if (!addedFile) return;
+
 		const formData = new FormData();
 		formData.append("file", addedFile);
 		formData.append("code", code);
-		if (type != "Locations") {
-			formData.append("category", category);
-		}
 		formData.append("type", type);
-		if (reason) {
-			formData.append("reason", reason);
-		} else {
-			if (type == "Locations") {
-				formData.append("reason", "Pickup locations upload");
-			} else {
-				formData.append("reason", "Initial upload of mappings");
-			}
-		}
-		if (changeCategory) {
-			formData.append("changeCategory", changeCategory);
-		} else {
-			if (type == "Locations") {
-				formData.append("changeCategory", "Pickup locations upload");
-			} else {
-				formData.append("changeCategory", "Initial mappings upload");
-			}
-		}
-		if (changeReferenceUrl) {
-			formData.append("changeReferenceUrl", changeReferenceUrl);
-		}
 
-		axios
-			.post(type == "Locations" ? locationUrl : url, formData, {
-				headers,
-			})
-			.then((response) => {
-				// Handle successful upload response
-				setSuccess(true);
-				setSuccessCount(response.data.recordsImported ?? 0);
-				setDeletedCount(response.data.recordsDeleted ?? 0);
-				setIgnoredCount(response.data.recordsIgnored ?? 0);
-				console.log(response.data.ignoredConfigItems);
-				setUploadButtonClicked(false);
-				setTimeout(() => {
-					onCancel(); // Close the modal
-					resetAll(); // Clear all selected values
-					setAddedFile(null);
-					// Reset file input
-					const fileInput = document.getElementById(
-						"file-upload",
-					) as HTMLInputElement;
-					if (fileInput) {
-						fileInput.value = "";
-					}
-				}, 6000);
-			})
-			.catch((error) => {
-				// Error handling
-				setUploadButtonClicked(false);
-				console.error("Axios error:", error);
-				if (error.response) {
-					// The request was made and the server responded with a non-2xx status code
-					console.error("Server responded with status:", error.response.status);
-					console.error("Response data:", error.response.data);
-					setUploadErrorMessage(error.response.data);
-					const lineNoMatch1 = error.response.data.match(/line (\d+)/i) ?? "";
-					setLineNumber(lineNoMatch1[1]);
-					setErrorDisplayed(true);
-				} else if (error.request) {
-					// The request was made but no response was received
-					console.error("No response received:", error.request);
-					setErrorDisplayed(true);
-				} else {
-					// Something happened in setting up the request that triggered an error
-					console.error("Error making the upload request:", error.message);
-					setErrorDisplayed(true);
-				}
-			});
+		if (type !== "Locations") formData.append("category", category);
+		formData.append(
+			"reason",
+			reason ||
+				(type === "Locations"
+					? "Pickup locations upload"
+					: "Initial upload of mappings"),
+		);
+		formData.append(
+			"changeCategory",
+			changeCategory ||
+				(type === "Locations"
+					? "Pickup locations upload"
+					: "Initial mappings upload"),
+		);
+		if (changeReferenceUrl)
+			formData.append("changeReferenceUrl", changeReferenceUrl);
+
+		try {
+			const response = await client.post(uploadPath, formData);
+
+			setSuccess(true);
+			setSuccessCount(response.data.recordsImported ?? 0);
+			setDeletedCount(response.data.recordsDeleted ?? 0);
+			setIgnoredCount(response.data.recordsIgnored ?? 0);
+			onImported?.(response.data.recordsImported ?? 0);
+
+			setTimeout(() => {
+				onCancel();
+				resetAll();
+				setAddedFile(null);
+			}, 6000);
+		} catch (error: any) {
+			if (error.response) {
+				setUploadErrorMessage(error.response.data);
+				const match = error.response.data.match(/line (\d+)/i);
+				if (match) setLineNumber(match[1]);
+			}
+			setErrorDisplayed(true);
+		}
 	};
 
-	useEffect(() => {
-		setUploadButtonClicked(false);
-		setConfirmOpen(false);
-	}, [code, category]);
+	const docLink =
+		type === "Locations"
+			? "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3411804195/Importing+pickup+locations+in+DCB+Admin"
+			: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin";
 
 	const filesAdded = addedFile !== null;
-
-	const handleUpload = () => {
-		if (!addedFile) {
-			setErrorDisplayed(true);
-			setUploadErrorMessage("No file selected for upload.");
-			return;
-		}
-		setUploadButtonClicked(true);
-		if (code && category) {
-			if (type === "Reference value mappings") {
-				checkMappingsPresent({
-					variables:
-						category === "all" ? refVariablesAll : refVariablesCategory,
-				});
-			} else if (type == "Locations" && presetHostLmsId) {
-				checkLocationsPresent({
-					variables: locationVariables,
-				});
-			} else {
-				checkNumericRangeMappingsPresent({
-					variables:
-						category === "all" ? numRangeVariablesAll : numRangeVariablesDomain,
-				});
-			}
-		} else {
-			setConfirmOpen(false);
-			setUploadButtonClicked(false); // Reset if there's no code
-		}
-	};
 
 	return (
 		<Stack spacing={1}>
@@ -351,7 +253,14 @@ const FileUpload = ({
 				style={{ display: "none" }}
 				id="file-upload"
 			/>
-			<Stack direction={"column"} alignContent={"center"} spacing={1} pb={3}>
+			<Stack
+				direction="column"
+				spacing={1}
+				sx={{
+					alignContent: "center",
+					pb: 3,
+				}}
+			>
 				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
 					{t("mappings.file")}
 				</Typography>
@@ -359,24 +268,17 @@ const FileUpload = ({
 					{filesAdded ? addedFile.name : t("mappings.no_file_selected")}
 				</Typography>
 				<Trans
-					i18nKey={"mappings.import_body_warning"}
-					t={t}
+					i18nKey="mappings.import_body_warning"
 					components={{
 						linkComponent: (
-							<Link
-								key="import-user-guide"
-								href={
-									type == "Locations"
-										? "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3411804195/Importing+pickup+locations+in+DCB+Admin"
-										: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin"
-								}
-							/>
+							// eslint-disable-next-line jsx-a11y/anchor-has-content -- link text is injected by <Trans> from the translation string
+							<a href={docLink} target="_blank" rel="noopener noreferrer" />
 						),
 						paragraph: <p />,
 					}}
 				/>
 				<Typography>{t("mappings.file_type_requirements")}</Typography>
-				<Typography> {t("mappings.file_size_requirements")}</Typography>
+				<Typography>{t("mappings.file_size_requirements")}</Typography>
 				<label htmlFor="file-upload">
 					<Button
 						startIcon={<CloudUpload />}
@@ -387,44 +289,56 @@ const FileUpload = ({
 					</Button>
 				</label>
 			</Stack>
-			<Divider aria-hidden="true"></Divider>
-			<Stack spacing={1} direction={"row"}>
-				<Button variant="outlined" onClick={handleReset}>
+			<Divider aria-hidden="true" />
+			<Stack spacing={1} direction="row">
+				<Button variant="outlined" onClick={onCancel}>
 					{t("mappings.cancel")}
 				</Button>
-				<div style={{ flex: "1 0 0" }} />
-				{/* // Button should be enabled only if category, code, filesAdded all true */}
+				<Box sx={{ flex: 1 }} />
 				<Button
-					disabled={!filesAdded || !code || !category}
-					onClick={handleUpload}
+					disabled={
+						type != "Locations"
+							? !filesAdded || !code || !category
+							: !filesAdded || !code
+					}
+					onClick={handleUploadCheck}
 					color="primary"
 					variant="contained"
-					type="submit"
 				>
-					{t("mappings.import_file")}
+					{type == "Locations"
+						? t("locations.import.button")
+						: t("mappings.import_file")}
 				</Button>
 			</Stack>
 			<Confirmation
 				open={isConfirmOpen}
-				onClose={handleCancelUpload}
-				onConfirm={(reason, changeCategory, changeReferenceUrl) =>
-					handleConfirmUpload(reason, changeCategory, changeReferenceUrl)
-				}
-				existingMappingCount={existingMappingCount}
-				fileName={addedFile?.name}
-				code={code}
-				type={type == "Locations" ? "locations" : "mappings"}
-				mappingCategory={category}
-				mappingType={type}
-				entity={
-					type == "Reference value mappings"
+				onClose={() => setConfirmOpen(false)}
+				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
+					setConfirmOpen(false);
+					uploadFile(reason, changeCategory, changeReferenceUrl);
+				}}
+				action="uploadReplacement"
+				entityName={
+					type === "Reference value mappings"
 						? t("mappings.ref_value_one")
-						: type == "Numeric range mappings"
+						: type === "Numeric range mappings"
 							? t("mappings.num_range_one")
 							: t("locations.location_one")
 				}
-				gridEdit={false}
-				libraryName={libraryName}
+				customWarningText={
+					<Trans
+						i18nKey="mappings.replacement_warning_text"
+						values={{
+							count: existingMappingCount,
+							fileName: addedFile?.name,
+							code,
+							category,
+							type,
+							libraryName,
+						}}
+						components={{ bold: <strong /> }}
+					/>
+				}
 			/>
 			<TimedAlert
 				open={isErrorDisplayed}
@@ -513,6 +427,4 @@ const FileUpload = ({
 			/>
 		</Stack>
 	);
-};
-
-export default FileUpload;
+}

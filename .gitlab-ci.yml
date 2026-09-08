@@ -5,60 +5,365 @@ variables:
   CACHE_COMPRESSION_LEVEL: "fast"
 
 default:
-  image: 
-    name: node:22.12.0-bullseye
+  image:
+    name: node:22.23.1-bullseye
     pull_policy: if-not-present
 
   tags:
     - ki-onprem
 
 stages:
+  - verify
   - build
+  - release
+  - rebuild
   - container
+  - deploy
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - dcb-hub-admin-ui/.npm/
-    - dcb-hub-admin-ui/node-modules/
-    - .yarn
+    - dcb-hub-admin-ui/node_modules/
     - .npm
 
+# On main this artefact is the deployment. On the release branch it is only a gate:
+# it is built before semantic-release bumps the version, so build_released_bundle
+# supersedes it there.
 build:
   stage: build
-  image: 
-    name: node:22.12.0-bullseye
-    pull_policy: if-not-present
-  tags:
-    - ki-onprem
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - git config --global user.name "ianibbo"
     - git config --global user.email "ian.ibbotson@k-int.com"
     - cd dcb-hub-admin-ui
-    - pwd
-    - ls -al
+    # vite.config.mts readFileSync's this with no fallback, so it must exist and
+    # must sit next to package.json - i.e. be written AFTER the cd.
     - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
-    - npm install
-    - npm run semantic-release
+    - npm ci
+    # This remains the standalone asset/router base. The same artifact's
+    # ki-bootstrap.js entry routes at "/" and resolves chunks from its own URL.
+    - VITE_PUBLIC_URL=/dcb-admin/ npm run build
+  artifacts:
+    # Artifact paths are relative to the repo root, not to the job's cwd.
+    paths:
+      - dcb-hub-admin-ui/dist/
+    expire_in: 1 hour
 
-# build-container-image:
-#   image: 
-#     name: docker:stable
-#     pull_policy: if-not-present
-#   stage: build
-#   only:
-#     - release
-#   tags:
-#     - ki-onprem
-#   script:
-#     - echo Building container image
-#     - pwd
-#     - ls
-#     - cd dcb-hub-admin-ui
-#     - docker info
-#     - docker login -u $NEXUS_USER -p $NEXUS_PASS docker.libsdev.k-int.com
-#     - docker build -f ./docker/production/Dockerfile -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest -t docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1 .
-#     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:latest
-#     - docker push docker.libsdev.k-int.com/knowledgeintegration/ki-dcb-admin:v1
-#     - docker images
+# W-3. Until this job existed the verify stage ran `e2e:ki-bootstrap` and nothing else:
+# no lint, no type-check, no unit tests, no Playwright suite. Every quality rule the repo
+# carries was therefore enforced by whoever remembered to run it locally, which is another
+# way of saying it was not enforced. A rule that is not gated is not a rule.
+#
+# --max-warnings=0 because ESLint exits 0 on warnings otherwise, and a warning nobody is
+# forced to read is a defect with a longer half-life.
+#
+# `npx vitest run`, never `npm run test` - that script is bare `vitest`, i.e. watch mode,
+# which in CI is a job that never finishes.
+verify_quality:
+  stage: verify
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run lint -- --max-warnings=0
+    - npx tsc --noEmit
+    - npx vitest run
+
+# Separate from verify_quality so a failing accessibility gate is legible as such in the
+# pipeline rather than as "the verify job went red". It needs the Playwright image; the
+# quality job does not, and pulling that image for a lint run wastes a minute per pipeline.
+#
+# This includes e2e/accessibility.spec.ts and e2e/setup-accessibility.spec.ts, which are
+# the WCAG 2.2 AA gate: zero axe violations in light, dark AND high contrast. High
+# contrast has no media query behind it and is only reachable by seeding the stored
+# preference - see e2e/fixtures/theme.ts.
+verify_e2e:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npx playwright test
+  artifacts:
+    when: on_failure
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/test-results/
+    expire_in: 1 week
+
+# The performance budget - W-2. Its own job because it needs a production build and three
+# Lighthouse runs, and because a red budget is a specific conversation ("cut weight or
+# bring an argument"), not a generic test failure.
+#
+# NEVER re-baseline lighthouserc.js to make this pass. See the file.
+verify_lighthouse:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    # No separate build step: lighthouserc.js's startServerCommand builds, because the
+    # budget must not audit whatever an earlier job happened to leave in dist/.
+    - npm run lighthouse
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/.lighthouseci/
+    expire_in: 1 week
+
+# The base path is baked in by Vite, so the shipped configuration - mounted at
+# /dcb-admin so one origin can host dcb-admin-for-libraries beside it - is the one
+# configuration verify_e2e does not run: that suite pins the base to "/". A base
+# counted twice, by Vite AND by the router, reaches production looking green.
+#
+# It also carries the co-hosting assertions: storage namespaced by the base rather
+# than as "root", and inject_env.json fetched under the base rather than at the
+# origin root, where a sibling app's config sits.
+verify_base_path:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run e2e:base-path
+  artifacts:
+    when: on_failure
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/test-results/
+    expire_in: 1 week
+
+verify_ki_bootstrap:
+  stage: verify
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run e2e:ki-bootstrap
+
+release:
+  stage: release
+  # This rule ensures the job ONLY runs on the 'release' branch
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: always
+    - when: never
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    # Set up git credentials again for this job
+    - git config --global user.name "ianibbo"
+    - git config --global user.email "ian.ibbotson@k-int.com"
+    # semantic-release reads .releaserc.json and package.json, both of which live
+    # here, and its @semantic-release/git assets list references ./release-info.json
+    # relative to this directory.
+    - cd dcb-hub-admin-ui
+    - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
+    - npm ci
+    # Run the release, save the version so we can use it in the next stage
+    - npm run semantic-release
+    # deploy.env is picked up as a dotenv report, whose path IS relative to the
+    # repo root - so write it back up there, not into dcb-hub-admin-ui/.
+    - echo "RELEASE_VERSION=v$(node -p "require('./package.json').version")" > ../deploy.env
+  artifacts:
+    reports:
+      dotenv: deploy.env
+  # This job depends on the build job completing successfully
+  dependencies:
+    - build
+
+# Builds the bundle AFTER semantic-release has decided the version. vite bakes
+# __APP_VERSION__ from package.json at build time, so the `build` stage - which runs
+# before `release` - produces an artefact naming the PREVIOUS release. Do not deploy
+# that one. See docs/deployment.md, "The version the artefact reports".
+build_released_bundle:
+  stage: rebuild
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: on_success
+    - when: never
+  # No `dependencies`: setting it would override `needs` as the list of jobs whose
+  # artefacts arrive, and $RELEASE_VERSION arrives as the release job's dotenv report.
+  needs:
+    - release
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    # A bundle stamped with a version that was never published is worse than a failed job.
+    - test -n "$RELEASE_VERSION"
+    - cd dcb-hub-admin-ui
+    - echo " { \"releaseDate\":\"`date +"%Y-%m-%dT%H:%M:%S%z"`\", \"RELEASED_AT\":\"$RELEASED_AT\" } " > ./release-info.json
+    - npm ci
+    # semantic-release owns the tag and has already pushed it. --allow-same-version so
+    # re-running the job is not a failure.
+    - npm version --no-git-tag-version --allow-same-version "${RELEASE_VERSION#v}"
+    - VITE_PUBLIC_URL=/dcb-admin/ npm run build
+    # The version vite read, then the version that reached the artefact. The second reads
+    # the <meta> tag, NOT the minified JS: `grep -rF 9.9.9 dist/assets/` passes against a
+    # 2.0.0 bundle, matching an SVG path fragment. See docs/deployment.md.
+    - test "v$(node -p "require('./package.json').version")" = "$RELEASE_VERSION"
+    - grep -qF "<meta name=\"dcb-admin-version\" content=\"${RELEASE_VERSION#v}\">" dist/index.html
+  artifacts:
+    paths:
+      - dcb-hub-admin-ui/dist/
+    expire_in: 1 hour
+
+# Copy the dist build up to s3 where we can point cloudflare as a distribution service
+deploy_tag_to_s3:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: on_success
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    - echo "Deploying version $RELEASE_VERSION to S3..."
+    # Key layout is <env-root>/<app>/, and the worker picks the root by hostname.
+    # Trailing slashes are explicit: --delete is scoped to the destination
+    # prefix, and one level up it would wipe the sibling apps in this root.
+    #
+    # THREE PASSES, AND THE ORDER IS LOAD-BEARING.
+    #
+    # A file may be cached forever only if its NAME changes when its content does.
+    # Under assets/ every name carries a content hash, so a change is a new name and
+    # the old one can be kept for a year. Six files in dist/ have stable names and
+    # cannot: index.html, ki-bootstrap.js, silent-renew.html, locales/**,
+    # config-prod.json and the favicon. See docs/deployment.md.
+    #
+    # A cached file that names hashed chunks --delete has just removed asks for
+    # chunks that no longer exist, and every lazy route fails with "Failed to fetch
+    # dynamically imported module" - a blank page. That is true of index.html, and
+    # equally of ki-bootstrap.js, which is the bootloader's public entry point
+    # (vite.config.mts pins its name deliberately) and names those same chunks.
+    # src/helpers/chunkReload.ts cannot rescue that one: the reload re-fetches the
+    # same immutably-cached bootloader.
+    #
+    # Hashed assets first, stable names next, shell last, so nothing is ever live
+    # before the chunks it names are fetchable. --delete on the first two passes
+    # covers the same keys the single pass did, so only the headers change here.
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/prod/dcb-admin/" --delete
+      --exclude "*" --include "assets/*"
+      --cache-control "public, max-age=31536000, immutable"
+    # `no-cache` stores the file and revalidates it against the ETag, which is a 304
+    # in the common case - not `no-store`, which would refetch these on every load.
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/prod/dcb-admin/" --delete
+      --exclude "assets/*" --exclude "index.html" --exclude "inject_env.json"
+      --cache-control "public, no-cache"
+    - aws s3 cp dcb-hub-admin-ui/dist/index.html "s3://ki-libs-spa-hosting/prod/dcb-admin/index.html"
+      --cache-control "no-store, no-cache, must-revalidate"
+    # Immutable archive of the released bundle, NOT a servable path: the base
+    # ("/dcb-admin/") is baked in, so this copy only ever resolves its assets
+    # from /dcb-admin/. It exists to roll back from, by copying it over
+    # prod/dcb-admin/ - never to be served in place.
+    # Uses $RELEASE_VERSION derived from the release job's dotenv artifact
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/archive/dcb-admin-$RELEASE_VERSION/" --delete
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
+    AWS_REGION: eu-west-1
+  # Both jobs in `needs` and no `dependencies`: the bundle comes from build_released_bundle
+  # and $RELEASE_VERSION from release's dotenv, and a `dependencies` list would override
+  # which of the two actually arrives.
+  needs:
+    - release
+    - build_released_bundle
+
+# This new option also deploys the bundle to an R2 bucket at cloudflare - but with the intention that this becomes a reusable deployment that is configured by hostname
+# My aim here is to add some code that talks to a service and resolves the backend and auth credentials based on hostname so we can deploy a wildcard domain like
+# *.dcb.kihosting.net and have all DCB installs served from that one bucket - saving us multiple different deployments. The config could be loaded from a static file
+# (Mirroring the current setup) or be a dynamic service for self service deployments. this will give is parkhill-test.dcb.kihosting.net or something similar without needing todo
+# zillions of deployments.
+deploy_tag_to_r2:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: on_success
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    - echo "Deploying version $CI_COMMIT_TAG to CF R2..."
+    - test -z "$(aws s3 ls "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive)"
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    - echo "{\"version\":\"${CI_COMMIT_TAG}\"}" > latest.json
+    - aws s3 cp latest.json "s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
+  variables:
+    AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
+    AWS_REGION: auto
+  needs:
+    - build
+  dependencies:
+    - build
+deploy_dev_to_s3:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: always
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    # dev/, not dcb-admin-dev/. The worker resolves /dcb-admin/... against
+    # <env-root>/dcb-admin/, and dev.kihosting.net's root is "dev" - a key
+    # prefix it does not know about is a 502, which is precisely what
+    # "dcb-admin-dev" was giving us.
+    #
+    # The same three passes as the prod job, and for the same reason - dev deploys far
+    # more often, so a cached file naming deleted chunks bites here first.
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dev/dcb-admin/" --delete
+      --exclude "*" --include "assets/*"
+      --cache-control "public, max-age=31536000, immutable"
+    - aws s3 sync dcb-hub-admin-ui/dist/ "s3://ki-libs-spa-hosting/dev/dcb-admin/" --delete
+      --exclude "assets/*" --exclude "index.html" --exclude "inject_env.json"
+      --cache-control "public, no-cache"
+    - aws s3 cp dcb-hub-admin-ui/dist/index.html "s3://ki-libs-spa-hosting/dev/dcb-admin/index.html"
+      --cache-control "no-store, no-cache, must-revalidate"
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_DEVOPS_AGENT_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_DEVOPS_AGENT_ACCESS_KEY_SECRET
+    AWS_REGION: eu-west-1
+  dependencies:
+    - build
+
+deploy_dev_to_r2:
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
+  tags:
+    - ki-onprem
+  image:
+    name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+    pull_policy: if-not-present
+  script:
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/next/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+  variables:
+    AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
+    AWS_REGION: auto
+  needs:
+    - build
+  dependencies:
+    - build

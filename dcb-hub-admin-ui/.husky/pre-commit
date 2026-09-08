@@ -1,0 +1,7 @@
+# Husky v9 user hook. This file is the one husky never overwrites — the shims in
+# .husky/_/ are regenerated on every install and must not carry logic.
+#
+# Git runs hooks from the repository root, and the app lives one level down.
+cd ./dcb-hub-admin-ui
+echo "The DCB Admin pre-commit checks will now run. If you need to skip pre-commit checks, please commit again with --no-verify."
+node_modules/.bin/lint-staged

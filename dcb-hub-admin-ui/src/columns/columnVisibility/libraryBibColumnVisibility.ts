@@ -1,0 +1,18 @@
+export const libraryBibColumnVisibility = {
+	id: false,
+	dateCreated: false,
+	dateUpdated: true,
+	title: true,
+	author: false,
+	placeOfPublication: false,
+	publisher: false,
+	dateOfPublication: false,
+	edition: false,
+	isLargePrint: false,
+	typeOfRecord: false,
+	metadataScore: false,
+	processVersion: false,
+	contributesTo: false,
+	sourceSystemId: false,
+	sourceRecordId: true,
+};

@@ -7,13 +7,15 @@ interface LoadingProps {
 export default function Loading({ title, subtitle }: LoadingProps) {
 	return (
 		<Box
-			display="flex"
-			alignItems="center"
-			justifyContent="center"
-			width="100%" // Takes the full width of the content area
-			height="100%"
-			flex="1" // Takes up the available space in the flex container
-			minHeight="0" // Override minHeight to allow the Box to shrink if necessary
+			sx={{
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center",
+				width: "100%",
+				height: "100%",
+				flex: "1",
+				minHeight: "0",
+			}}
 		>
 			<Fade
 				in={true}
@@ -24,9 +26,11 @@ export default function Loading({ title, subtitle }: LoadingProps) {
 			>
 				<Stack
 					direction="column"
-					alignItems="center"
-					alignSelf={"center"}
 					spacing={2}
+					sx={{
+						alignItems: "center",
+						alignSelf: "center",
+					}}
 				>
 					<CircularProgress size={125} />
 					<Typography variant="loadingText">{title}</Typography>

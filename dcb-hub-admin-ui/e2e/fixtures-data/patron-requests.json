@@ -1,0 +1,80 @@
+{
+	"patronRequests": {
+		"totalSize": 2,
+		"pageable": { "number": 0, "offset": 0 },
+		"content": [
+			{
+				"id": "aa000000-1111-5111-9111-111111111111",
+				"dateCreated": "2026-05-01T09:30:00Z",
+				"dateUpdated": "2026-05-01T10:00:00Z",
+				"patronHostlmsCode": "ALPHA-HOST",
+				"pickupLocationCode": "1f0c9b3a-1111-5111-9111-111111111111",
+				"description": "Alpha request",
+				"status": "ERROR",
+				"previousStatus": "RESOLVED",
+				"nextExpectedStatus": "CANCELLED",
+				"errorMessage": "Alpha exploded",
+				"nextScheduledPoll": null,
+				"outOfSequenceFlag": false,
+				"elapsedTimeInCurrentStatus": 3600,
+				"pollCountForCurrentStatus": 1,
+				"isManuallySelectedItem": false,
+				"requesterNote": null,
+				"activeWorkflow": "RET-STD",
+				"rawLocalRequestStatus": null,
+				"rawLocalItemStatus": null,
+				"localRequestId": null,
+				"localRequestStatus": null,
+				"localItemId": null,
+				"localItemStatus": null,
+				"localItemType": null,
+				"pickupRequestId": null,
+				"pickupRequestStatus": null,
+				"pickupItemId": null,
+				"pickupItemStatus": null,
+				"suppliers": [],
+				"clusterRecord": { "title": "Alpha Title" },
+				"requestingIdentity": {
+					"localBarcode": "111",
+					"canonicalPtype": "STANDARD"
+				}
+			},
+			{
+				"id": "bb000000-2222-5222-9222-222222222222",
+				"dateCreated": "2026-05-02T09:30:00Z",
+				"dateUpdated": "2026-05-02T10:00:00Z",
+				"patronHostlmsCode": "BETA-HOST",
+				"pickupLocationCode": "2f0c9b3a-2222-5222-9222-222222222222",
+				"description": "Beta request",
+				"status": "ERROR",
+				"previousStatus": "RESOLVED",
+				"nextExpectedStatus": "CANCELLED",
+				"errorMessage": "Beta exploded",
+				"nextScheduledPoll": null,
+				"outOfSequenceFlag": false,
+				"elapsedTimeInCurrentStatus": 7200,
+				"pollCountForCurrentStatus": 2,
+				"isManuallySelectedItem": false,
+				"requesterNote": null,
+				"activeWorkflow": "RET-STD",
+				"rawLocalRequestStatus": null,
+				"rawLocalItemStatus": null,
+				"localRequestId": null,
+				"localRequestStatus": null,
+				"localItemId": null,
+				"localItemStatus": null,
+				"localItemType": null,
+				"pickupRequestId": null,
+				"pickupRequestStatus": null,
+				"pickupItemId": null,
+				"pickupItemStatus": null,
+				"suppliers": [],
+				"clusterRecord": { "title": "Beta Title" },
+				"requestingIdentity": {
+					"localBarcode": "222",
+					"canonicalPtype": "STANDARD"
+				}
+			}
+		]
+	}
+}
