@@ -70,8 +70,9 @@ function Unauthorised() {
 
 					{librariesUrl ? (
 						<Stack direction="row">
-							{/* An external application on another origin, so a plain anchor
-							    rather than a router link - and it says that it leaves. */}
+							{/* A different application - which may be this same origin under
+							    another path prefix - so outside this router's basepath either
+							    way, and a plain anchor rather than a router link. */}
 							<Button
 								variant="contained"
 								href={librariesUrl}

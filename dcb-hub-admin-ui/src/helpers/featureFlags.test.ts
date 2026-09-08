@@ -46,6 +46,42 @@ describe("runtime feature flags are wired through to deployment", () => {
 	});
 });
 
+describe("runtime config is wired through to deployment", () => {
+	// The flag tests above start from featureFlags.ts, so they only ever see keys read
+	// through readFlag(). VITE_DCB_ADMIN_FOR_LIBRARIES_URL is runtime config that is not
+	// a flag, and it was in neither file: unauthorised.tsx read it, no deployment could
+	// set it, and the "you want the other application" button was dead everywhere except
+	// npm run dev. These two assertions cover every key, flag or not.
+	const template = repoFile("docker/production/inject_env.template.json");
+	const entrypoint = repoFile("docker/production/docker-entrypoint.sh");
+
+	const envsubstVars = (): string[] => {
+		const vars = entrypoint.match(/^vars='([^']*)'/m);
+		expect(vars, "docker-entrypoint.sh has no vars='...' line").not.toBeNull();
+		return [...vars![1].matchAll(/\$\{([A-Z0-9_]+)\}/g)].map((m) => m[1]);
+	};
+
+	it("names the same keys in the template and the envsubst list", () => {
+		// A key in only one of them fails in a way nothing else catches: envsubst leaves
+		// an unlisted placeholder as the literal "${VITE_X}", so the app reads that
+		// string as a configured value.
+		expect(envsubstVars().sort()).toEqual(
+			Object.keys(JSON.parse(template)).sort(),
+		);
+	});
+
+	it("gives every template key its own placeholder", () => {
+		// "${VITE_A}" sitting under key VITE_B renders A's value under B's name, which
+		// looks configured and is wrong - a copy-paste away in a file of 14 near-identical
+		// lines.
+		for (const [key, value] of Object.entries(JSON.parse(template))) {
+			expect(value, `${key} is rendered from the wrong variable`).toBe(
+				`\${${key}}`,
+			);
+		}
+	});
+});
+
 describe("flags fail closed", () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
