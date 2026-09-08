@@ -20,6 +20,11 @@ FROM nginx:stable-alpine AS runner
 RUN apk add --no-cache gettext
 
 COPY docker/production/nginx.conf /etc/nginx/conf.d/default.conf
+# Included by default.conf in the server block AND in every location - nginx's add_header
+# does not merge across levels, so a location with any add_header of its own drops every
+# inherited one. See security-headers.conf.
+COPY docker/production/security-headers.conf /etc/nginx/security-headers.conf
+COPY docker/production/security-headers-silent-renew.conf /etc/nginx/security-headers-silent-renew.conf
 COPY docker/production/inject_env.template.json /usr/share/nginx/html/inject_env.template.json
 COPY docker/production/docker-entrypoint.sh /docker-entrypoint.d/40-inject-env.sh
 RUN chmod +x /docker-entrypoint.d/40-inject-env.sh
