@@ -294,10 +294,21 @@ deploy_tag_to_s3:
 # *.dcb.kihosting.net and have all DCB installs served from that one bucket - saving us multiple different deployments. The config could be loaded from a static file
 # (Mirroring the current setup) or be a dynamic service for self service deployments. this will give is parkhill-test.dcb.kihosting.net or something similar without needing todo
 # zillions of deployments.
-deploy_tag_to_r2:
+# WAS `deploy_tag_to_r2`, on `rules: if: $CI_COMMIT_TAG`, and it had never once run.
+# semantic-release tags its own release commit, whose message is
+# "chore(release): x.y.z [skip ci]" - and GitLab reads that message on the tag push too,
+# so the tag pipeline is skipped every time. `ki-front-end-bundles/dcb-hub-admin-ui/v*/`
+# was empty and latest.json had never been written, which is why the KI Console bootloader
+# answered 404 for `latest` and for any version. The Cloudflare/S3 path worked because
+# deploy_tag_to_s3 runs on the release BRANCH pipeline, which is not skipped.
+#
+# So this runs where the release actually happens, off $RELEASE_VERSION rather than
+# $CI_COMMIT_TAG. It is the same value ("v2.0.0"): the release job derives it from
+# package.json after the bump, and fe-bootloader's VERSION_PATTERN requires the v prefix.
+deploy_release_to_r2:
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == "release"'
       when: on_success
     - when: never
   tags:
@@ -306,19 +317,26 @@ deploy_tag_to_r2:
     name: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
     pull_policy: if-not-present
   script:
-    - echo "Deploying version $CI_COMMIT_TAG to CF R2..."
-    - test -z "$(aws s3 ls "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive)"
-    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/${CI_COMMIT_TAG}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
-    - echo "{\"version\":\"${CI_COMMIT_TAG}\"}" > latest.json
+    - test -n "$RELEASE_VERSION"
+    - echo "Publishing $RELEASE_VERSION to CF R2..."
+    # A published version directory is immutable - the worker serves it with
+    # max-age=31536000. Refuse to overwrite one rather than change bytes a client may
+    # already hold forever.
+    - test -z "$(aws s3 ls "s3://ki-front-end-bundles/dcb-hub-admin-ui/${RELEASE_VERSION}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive)"
+    - aws s3 cp dcb-hub-admin-ui/dist/ "s3://ki-front-end-bundles/dcb-hub-admin-ui/${RELEASE_VERSION}/" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" --recursive
+    # The channel file fe-bootloader reads for version "latest". Written AFTER the bundle,
+    # so it never names a directory that is not there yet.
+    - echo "{\"version\":\"${RELEASE_VERSION}\"}" > latest.json
     - aws s3 cp latest.json "s3://ki-front-end-bundles/dcb-hub-admin-ui/latest.json" --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com"
   variables:
     AWS_ACCESS_KEY_ID: $CF_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY: $CF_SECRET_ACCESS_KEY
     AWS_REGION: auto
+  # $RELEASE_VERSION comes from release's dotenv, the bundle from build_released_bundle -
+  # which is the one built AFTER the version bump, so what it names is what it is.
   needs:
-    - build
-  dependencies:
-    - build
+    - release
+    - build_released_bundle
 deploy_dev_to_s3:
   stage: deploy
   rules:

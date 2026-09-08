@@ -107,6 +107,25 @@ application routes remain at `/`.
 
 The Docker image, S3 paths, `inject_env.json`, and local `npm run dev` flow remain
 unchanged.
+**How versions get there, and what to set in KI Console.** `deploy_release_to_r2` runs on
+the **release branch** pipeline, not on a tag. It has to: semantic-release tags its own
+commit, whose message ends `[skip ci]`, and GitLab reads that on the tag push too — so a
+tag-triggered job is skipped every time and never runs. That is why the bootloader answered
+404 for every version until this was moved.
+
+It publishes `dcb-hub-admin-ui/$RELEASE_VERSION/` and then rewrites
+`dcb-hub-admin-ui/latest.json`, in that order, so the channel never names a directory that
+is not there yet. `deploy_dev_to_r2` keeps `dcb-hub-admin-ui/next/` in step with `main`.
+
+The version string must match fe-bootloader's `VERSION_PATTERN`:
+
+```
+next | latest | vX.Y.Z
+```
+
+**The `v` is mandatory** — `2.0.0` is rejected as "Invalid version" before any request is
+made. `latest` resolves through `latest.json`, so it only works once a release has been
+published.
 
 ### Option A: Cloudflare Worker in front of S3
 
