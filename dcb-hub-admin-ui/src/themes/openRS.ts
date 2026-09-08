@@ -100,10 +100,11 @@ interface BrandTokens {
 	 *
 	 * Derived in buildTheme from `header` itself rather than computed in the component,
 	 * which is where they used to be: six `lighten(header, mode === "light" ? … : …)`
-	 * expressions in Header.tsx. That rule keyed off the wrong thing. What decides how far
-	 * to lift a hover is how dark the BAR is, not which palette the user picked - and since
-	 * FOLIO and Koha now have near-black headers in LIGHT mode, the light-mode branch was
-	 * lifting them by 0.08, which is 1.25:1 against the bar and invisible.
+	 * expressions in Header.tsx, the last place in the application that branched on
+	 * `palette.mode` for a style.
+	 *
+	 * How far each brand can be lifted is decided by `liftWithin` — see the note there for
+	 * why the amount is a per-brand answer and not a constant.
 	 */
 	headerHover: string;
 	headerActive: string;
