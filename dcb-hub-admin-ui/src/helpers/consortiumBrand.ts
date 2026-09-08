@@ -11,7 +11,7 @@ import { unsupportedInputKeys } from "@helpers/capabilityFields";
 
 /** The two marks DCB Admin's own chrome renders, whichever columns carried them. */
 export interface ConsortiumChromeBrand {
-	/** The square app-bar mark and favicon. `brandHeaderIconUrl`, or 8.71.0's `headerImageUrl`. */
+	/** The square app-bar mark. `brandHeaderIconUrl`, or 8.71.0's `headerImageUrl`. */
 	headerIconUrl: string;
 	/** The larger lockup. `brandLogoUrl`, or 8.71.0's `aboutImageUrl`. */
 	logoUrl: string;

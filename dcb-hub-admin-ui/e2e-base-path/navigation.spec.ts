@@ -171,6 +171,22 @@ test.describe("co-hosting under a shared origin", () => {
 		).toBeGreaterThan(0);
 	});
 
+	test("points at its own favicon, not the origin root's", async ({ page }) => {
+		await useAllFeatures(page);
+		await page.goto(`${BASE}/`);
+
+		// With no <link rel="icon"> at all the browser asks the ORIGIN root for
+		// /favicon.ico, which under a path prefix belongs to a sibling app or to
+		// nothing - so the app shipped a favicon that was never requested. Vite
+		// rewrites a root-absolute href in index.html for the base; it does not
+		// rewrite public/ paths referenced from TSX.
+		const icon = page.locator('link[rel="icon"]');
+		await expect(icon).toHaveAttribute("href", `${BASE}/favicon.ico`);
+
+		const response = await page.request.get(`${BASE}/favicon.ico`);
+		expect(response.status()).toBe(200);
+	});
+
 	test("asks for its own runtime config, not the origin root's", async ({
 		page,
 	}) => {
