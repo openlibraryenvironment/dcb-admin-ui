@@ -1,9 +1,9 @@
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tabs, Typography } from "@mui/material";
+
+import { TabLink } from "@components/TabLink/TabLink";
 import { FilterAltOutlined } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "@tanstack/react-router";
 
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
 import { a11yTabProps } from "@helpers/navigation/a11yTabProps";
 
 // The five workflow buckets shared by every top-level patron request grid.
@@ -74,12 +74,10 @@ export default function PatronRequestTabs({
 	isFilterApplied = false,
 }: PatronRequestTabsProps) {
 	const { t } = useTranslation();
-	const router = useRouter();
 
 	return (
 		<Tabs
 			value={currentPath}
-			onChange={(_event, value) => handleTabChange({ newValue: value, router })}
 			aria-label={t(
 				"nav.patronRequests.accessibility_title",
 				"Patron request navigation",
@@ -89,9 +87,10 @@ export default function PatronRequestTabs({
 				const isLoading = Boolean(loading[tab.key]);
 				const showFilter = isFilterApplied && currentPath === tab.path;
 				return (
-					<Tab
+					<TabLink
 						key={tab.path}
 						{...a11yTabProps(tab.path)}
+						to={tab.path}
 						label={
 							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
 								<Typography variant="subTabTitle">

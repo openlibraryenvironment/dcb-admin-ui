@@ -1,8 +1,7 @@
-import { Tab, Tabs } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "@tanstack/react-router";
+import { Tabs } from "@mui/material";
 
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
+import { TabLink } from "@components/TabLink/TabLink";
+import { useTranslation } from "react-i18next";
 
 export type MappingsType = "referenceValue" | "numericRange";
 export type MappingCategory = "itemType" | "location" | "patronType" | "all";
@@ -46,7 +45,6 @@ export default function MappingsSubTabs({
 	activeCategory,
 }: MappingsSubTabsProps) {
 	const { t } = useTranslation();
-	const router = useRouter();
 
 	const pathFor = (category: MappingCategory) =>
 		`/libraries/${libraryId}/${BASE[type]}/${category}`;
@@ -54,14 +52,14 @@ export default function MappingsSubTabs({
 	return (
 		<Tabs
 			value={pathFor(activeCategory)}
-			onChange={(_event, newValue) => handleTabChange({ newValue, router })}
 			sx={{ mb: 2 }}
 			aria-label={t("nav.mappings.name")}
 		>
 			{CATEGORIES[type].map((c) => (
-				<Tab
+				<TabLink
 					key={c.category}
 					value={pathFor(c.category)}
+					to={pathFor(c.category)}
 					label={t(c.labelKey)}
 				/>
 			))}

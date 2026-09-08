@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
-import { useRouter } from "@tanstack/react-router";
-import { Tab, Tabs } from "@mui/material";
+import { Tabs } from "@mui/material";
 
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
+import { TabLink } from "@components/TabLink/TabLink";
+
 import {
 	isInsightsEnabled,
 	isLibraryUserProvisioningEnabled,
@@ -17,7 +17,6 @@ interface LibraryTabsProps {
 
 export default function LibraryTabs({ libraryId, value }: LibraryTabsProps) {
 	const { t } = useTranslation();
-	const router = useRouter();
 
 	const pathFor = (path: string) => `/libraries/${libraryId}${path}`;
 
@@ -34,13 +33,14 @@ export default function LibraryTabs({ libraryId, value }: LibraryTabsProps) {
 	const visibleTabs = TABS.filter((tab) => !hidden.has(tab.path));
 
 	return (
-		<Tabs
-			value={pathFor(TABS[value].path)}
-			onChange={(_event, newValue) => handleTabChange({ newValue, router })}
-			variant="scrollable"
-		>
+		<Tabs value={pathFor(TABS[value].path)} variant="scrollable">
 			{visibleTabs.map((tab) => (
-				<Tab key={tab.path} value={pathFor(tab.path)} label={t(tab.labelKey)} />
+				<TabLink
+					key={tab.path}
+					value={pathFor(tab.path)}
+					to={pathFor(tab.path)}
+					label={t(tab.labelKey)}
+				/>
 			))}
 		</Tabs>
 	);

@@ -1,8 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { useRouter } from "@tanstack/react-router";
-import { Tab, Tabs } from "@mui/material";
+import { Tabs } from "@mui/material";
 
-import { handleTabChange } from "@helpers/navigation/handleTabChange";
+import { TabLink } from "@components/TabLink/TabLink";
 import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
 
 /**
@@ -18,10 +17,13 @@ import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
  *
  * It also fixes two defects the copies shared:
  *
- *  - **The tabs were not links.** `value` was an index and `onChange` navigated, so a tab
- *    could not be opened in a new tab, was not announced as a link, and did not appear in
- *    a screen reader's link list. Selection is by PATH now, which the group, library and
- *    patron-request tab bars already do through `handleTabChange`.
+ *  - **Selection was by INDEX.** `value` was a number each copy hardcoded for itself, so
+ *    adding a tab meant getting five indices right in five files. It is by PATH now.
+ *  - **The tabs were not links.** They are now — each is a `TabLink`, so a middle-click, a
+ *    ctrl-click and "copy link address" all do what they should. That took a second change
+ *    and did NOT come free with the first: this comment previously claimed both were fixed
+ *    while the elements were still buttons. See `TabLink` for what it does and does not
+ *    buy, because it is not everything.
  *  - **No accessible name.** A bare `<Tabs>` announces as an unnamed tab list; with three
  *    other tab bars in this application that says nothing about which one it is.
  */
@@ -92,18 +94,24 @@ interface ConsortiumTabsProps {
 
 export default function ConsortiumTabs({ current }: ConsortiumTabsProps) {
 	const { t } = useTranslation();
-	const router = useRouter();
 
 	return (
+		// NO `onChange`. Each tab is an anchor and the router handles its own click, so an
+		// onChange calling router.navigate as well would run a second navigation for every
+		// selection.
 		<Tabs
 			value={PATH_BY_ID[current]}
-			onChange={(_event, newValue) => handleTabChange({ newValue, router })}
 			variant="scrollable"
 			aria-label={t("nav.consortium.name")}
 			sx={{ mb: 3 }}
 		>
 			{visibleTabs().map((tab) => (
-				<Tab key={tab.path} value={tab.path} label={t(tab.labelKey)} />
+				<TabLink
+					key={tab.path}
+					value={tab.path}
+					to={tab.path}
+					label={t(tab.labelKey)}
+				/>
 			))}
 		</Tabs>
 	);

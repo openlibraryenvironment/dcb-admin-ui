@@ -50,6 +50,11 @@ test.describe("the consortium's environment tab", () => {
 
 		await expect(tab).toBeVisible();
 
+		// A REAL ANCHOR, not a button with an onChange. Without an href a middle-click,
+		// a ctrl-click, "open in new tab" and "copy link address" all silently do
+		// nothing, which is what every tab bar in this application used to do.
+		await expect(tab).toHaveAttribute("href", /\/consortium\/environment$/);
+
 		await tab.click();
 
 		await expect(page).toHaveURL(/\/consortium\/environment$/);

@@ -3,7 +3,7 @@
 // its own copy of this bar, which drifted out of sync (some showed only 3 tabs,
 // bibs pointed "Mappings" at a route that doesn't exist). Tab values are full
 // route paths so selection and navigation both flow through the shared
-// handleTabChange.
+// TabLink, which makes each tab a real anchor to that path.
 export const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 	{ path: "", labelKey: "nav.libraries.profile" }, // Profile (the $libraryId index)
 	{ path: "/service", labelKey: "nav.libraries.service" },
@@ -23,4 +23,3 @@ export const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 	{ path: "/insights", labelKey: "nav.libraries.insights" },
 	{ path: "/accounts", labelKey: "nav.libraries.accounts" },
 ];
-
