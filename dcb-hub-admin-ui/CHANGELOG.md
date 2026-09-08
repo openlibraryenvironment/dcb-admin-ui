@@ -1,3 +1,124 @@
+# [2.0.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.58.1...v2.0.0) (2026-09-08)
+
+
+### Bug Fixes
+
+* **a11y:** give the application a main landmark and a skip link (WCAG 2.4.1) ([dbd3c15](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/dbd3c155f15dea72c438e79d62486d00918c7a7d))
+* **a11y:** give the consortium form's controls an accessible name ([37696eb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/37696eb2d131e8c2f53c89d5e46ffe9cb0f36e83))
+* **a11y:** make every tab bar a set of real links ([97c7ceb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/97c7cebea4212504c307e8ccae0504d2d50f03d1))
+* **admin-ui:** surface local oidc trust failures ([8b31d50](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/8b31d50e439ef9219c901e6d6443313f34fe9bcd))
+* **admin:** resolve relative GraphQL API base ([fe9e0e1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fe9e0e1048c116d4c4fe1ab786d630a801f9e5f4))
+* Ask for the Koha OAI keys a harvest cannot run without [DCB-2146] ([a460e7e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a460e7e25ab5d36ed1e3fec752babc45b03d0eda))
+* Better support for shared systems in new library setup ([1f63771](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1f63771cb5d79b0c411bb9a8c5ead1ca098ba3f0))
+* Branding fixes ([7e16b7e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7e16b7e4528b22e18751ffbcd87044a4d49acbc3))
+* **ci:** build the deployed bundle after semantic-release bumps the version ([4587d37](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/4587d377d3fd682e3aabc92ff531e56fef610c5d))
+* **ci:** stop promising a year of cache for files whose names never change ([18bd22b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/18bd22bf1b398a9fbb7d7a8de61f54cda94a90c9))
+* **ci:** turn git hooks off in CI, which is what failed the 2.0.0 release ([81adcab](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/81adcab04c92b5f6aa1f6e1487f2ee4a570b043b))
+* **compat:** Name the schemas' provenance, and correct "dcb-service main" ([4522070](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/45220708742b34293c3c522ec7af25baca555054))
+* **compat:** Re-point the schema at dcb-service main, and stop saying it has not merged ([9f8a13e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9f8a13eb8786dc271ed5979337df7a26d300c73d))
+* **config:** let a deployment set where DCB Admin for Libraries lives ([59099aa](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/59099aa1e8c29120fb70ff0cc8dd7e582d7fef06))
+* **deploy:** stop a release white-screening everyone holding a cached shell ([781269a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/781269a6406665b48a95c98c79d26de2616430a2))
+* **docker:** allow the data: fonts Vite inlines, which the CSP was blocking ([e38305a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e38305a995ba3271dedacf9aa2368938c4a34946))
+* **e2e:** Build the suite against the same Keycloak identity the fixture seeds ([de7a400](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/de7a40040c214b98bed939c62cba41f42244caef))
+* enforce four doctrine rules in ESLint, and fix the seven they found ([d22b3a1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d22b3a181546314a90c38febb861241a907570ec))
+* Fix broken pagination on the onboarding page ([897127b](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/897127b6c2867c23bf55b85852df421d1c66fb42))
+* Fix bug with audit log navigation [DCB-1971] ([8832389](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/883238984a289e24a06bcc41a631fe9c8de0e8d4))
+* Fix codegen issues ([571c5b3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/571c5b3633f4136373d8e8e05e0444bfe5881249))
+* Fix contributors text on bib page ([d5bcf8f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d5bcf8f8afc1350c4e058ffc4e66ae8ca7dc0869))
+* Fix copy behaviour for barcodes ([04270b1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/04270b1f6ab0e9c374a5a60157fb0c2c2a35e83d))
+* Fix incorrect click-throughs [DCB-1971] ([169cb52](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/169cb52cf7d3aad25a1f85ca227ed340efa5c588))
+* Fix master detail layouts and the onboarding page ([2ad0e3f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2ad0e3f5aab5640417f0a9f087f9d937a701882e))
+* Fix pagination failures, incorrect empty grid [DCB-1971] ([b92f70e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b92f70e1661ae0fe873c67a69a3a33bba3b52e0e))
+* Fix pagination failures, standardise on useGridState ([0f7b7b3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0f7b7b35946c3947ce3c6153b7774e147f774d30))
+* Fix some fields not showing up in export ([47b334e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/47b334e497a727c23071c705a86d0664dab2d9d5))
+* Fixes for deployment purposes [DCB-1971] ([19e27c7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/19e27c78cea57a7f92ccf0291b21ccb8e16eaca9))
+* Fixes for the consortium setup path ([df6b3a2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/df6b3a28b62a9fa27d675b3528bfce95f0c11ddb))
+* Fixing info issues, migrating more components ([051d312](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/051d312d3d693de1309f8f2983aabd6da67ce3f5))
+* **header:** Clear the cached consortium name when there is no longer a consortium ([352abdf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/352abdf0c9d79dbd0892bdc9041aea3d31309673))
+* Improvements to "New Consortium" and onboarding pages ([f1549ec](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f1549ec5f05907bda386444deb5d388bd1f7873f))
+* **insights:** Call the Insights surface dcb-service actually serves ([6b3ca5d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6b3ca5d4f349d275fef12cea01e19f7fcd54c2c6))
+* **lighthouse:** Audit this as the desktop console it is, and stop gating on the runner ([5dba329](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5dba329e6a56b0284db67a29265f0a6993c07f4f))
+* link the favicon, so the browser asks this app for it and not the origin ([ed6e6d0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/ed6e6d026f1134b84ac347a87506232d0faff066))
+* make husky actually install its hooks ([1ed7f14](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1ed7f14d9ab4cbfe13f281312cd1e1d648dd2182))
+* New copy to clipboard button for barcodes ([49ee519](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/49ee5196c4189ad12b9362159ae7fb59fd742a1b))
+* **patron-requests:** Give consortium admins the two capabilities only LIBRARY_ADMIN had ([0a8c67d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0a8c67ded73ccaf52fe336d31be9a27fd0c65ab4))
+* Remove release prereq from dev to r2 task ([33898c1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/33898c1e2ddd6717cf7068772fff4dd9c7a4bbd8))
+* Restrict cleanup statuses ([2a94ee1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/2a94ee12930467f7c7cb29201605724e2fd8acba))
+* **router:** give all 84 routes an error, pending and not-found boundary ([6e1e45f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6e1e45f49e4ddb1f81e9e618dc5dd5106bb8cba0))
+* **setup:** A new deployment no longer believes the appearance chapter is done ([376bde8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/376bde8dc0c93c8fc5cd4789f0f6c085aaf2a1d3))
+* **setup:** Consortium contacts could never be created, and gate the reason they could not ([28ed668](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/28ed66873e5c68d3161a2d7f6fd5d971fea55c89))
+* **setup:** Continue no longer warns about work it has just saved, and three UX corrections ([18ca613](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/18ca6138d88e820b7b20b9344566c233908afd03))
+* **setup:** Distinguish leaving the flow from skipping a chapter, and match the button styles ([875a705](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/875a705237e15e4d28bef6096ab45058b4eb477e))
+* **setup:** stop the unsaved-work guard firing on the consortium chapter's own Continue ([d721ed5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d721ed5fe7d8dc6147dd02407ee0edaf88c9ded3))
+* Stop i18n-unused picking up [secure] positives ([57671a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/57671a584eb9fc1f8df4bfcbe4394f1f9fb34a5c))
+* **theme:** derive the header hover lift from what its own text can afford ([e763fa7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e763fa7986fb0bdc6108b6014b69e65c8a81da13)), closes [#000000](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/000000) [#005EB8](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/005EB8)
+* Timed alerts now have an error variant, which does not auto-hide ([81893fa](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/81893fa7cd204293931e6a96af5fbb803a85d4b8))
+* Types, snag fixes and UI improvements [DCB-1971] ([5f9f4fe](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5f9f4fe63c5cf7a4c8c76bc4a0844a8cf089b3c5))
+* Wire the insights feature flags through runtime env injection ([b6a8822](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b6a88220e8dbbf298107828e1b2d6c229de131f3))
+
+
+### Features
+
+* **a11y:** support Windows High Contrast Mode ([0865ecd](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0865ecd4251bc8f5c6f383260a54a8c655226a79))
+* **a11y:** text size, spacing, animation and "match my device" ([db569c3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/db569c3a91674ac27fb02c51f3c389ea07abd784))
+* **accounts:** Add the library accounts tab, so consortium staff provision accounts here ([262c36e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/262c36ee69ec76aaaae42cd0f9790b7392b7a83a))
+* Add a new library from DCB Admin ([f8355fc](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f8355fcbe913981a2bb97fca35ff2f60658e8edc))
+* add DCB NCIP onboarding workflow ([e1c9907](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e1c9907d25d8c6ef951a232e0fb962c7e9729a1a))
+* add KI bootloader adapter ([be9ff53](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/be9ff5390a356bc082a136c75fcb1d7e44065a1b))
+* Audit explorer ([115246f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/115246fd35927374562e9537e41ec66ef20cc3f5))
+* **auth:** Bar non-consortium accounts from DCB Admin, and collapse the dead role code ([714dc63](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/714dc63cc84a2fb09c171d88cb0917e0905f29a2))
+* **auth:** Tell a library account it is in the wrong application, not that it lacks access ([c2db1ee](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c2db1eebdc8d53ce112bc420f0bdd4c5185749c7))
+* **branding:** follow the merged brand columns, stop fetching uploader PII ([d6e838e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d6e838eff1cd0791b922dd90914b83873289330d))
+* **branding:** upload brand images on save, not on pick ([35e9477](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/35e9477a8fce245392e28f7a2bb742e95a9c53c2))
+* **compat:** Gate the local holds limit behind VITE_FEATURE_LOCAL_HOLDS ([a26ad8e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/a26ad8e96387a5073d06ede0cfa5eb4cc9b761c7))
+* **compat:** Run against dcb-service 8.71.0 as well as 9.0.0 ([f934e6a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f934e6a5dff4e0e1d24b771b1f9c67659cbd3225))
+* Consortium patron-facing brand form (N-1B) ([16e4940](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/16e4940e8c95dde6b4ce7eda347ba0c03c34e52e))
+* **consortium:** administer the patron support link ([939efb9](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/939efb95116fe869718a075fb9f77d932b0fd8b0))
+* **consortium:** give environment information a tab of its own ([231a408](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/231a4085d72b6e8ae2f9568c24a19d858c5b0434))
+* Continue migration, add directions for AI agents ([9605456](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9605456ca5a3fc54b6e33c7243d9ece0dd4d1ece))
+* DCB Admin 2.0 - Vite, React 19 and TanStack Router ([e5e3d79](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/e5e3d79539aa8ce0b8bbb6c805aae7dc6585721c))
+* **dcb:** configure invitation auth profiles ([9367f7d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9367f7d50bf6d1226cc2b29b567ab5bab39e1949))
+* **docker:** serve the security headers, including on every location ([1d50342](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1d50342f91a994192065e06e6e49b0a2ff591d1c))
+* Gate row selection on grids that have a bulk action ([d4e5980](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d4e598006a3b8955ad9bbf1484da57f1991e34ce))
+* Improvements to onboarding page and setup ([93841a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/93841a5bd93a1ccd036109e9d8979642aa044b2d))
+* **insights:** Expose the collection, partner and supply figures nothing rendered ([0cfedad](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0cfedad7295afc7e8bd58f570caca713b35358a8))
+* New export wizard, improvements to export [DCB-1971] ([290735d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/290735d8a342054b14d496b4f8a681ac79562df7))
+* New Library workflow now has ILS-specific steps ([c0cafbb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/c0cafbbaf2424c818e606b5e64ff9365e994fc03))
+* New pickup library filter, other improvements [DCB-1971] ([0e60ef4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/0e60ef42aa8044ec61292e68c33e232382968b09))
+* Provide max local holds configuration [DCB-1428] ([1c9d88d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/1c9d88dc9b6cdbb8304d6c2434d9f9d7b372c3df))
+* Resumable new library workflow and improved onboarding ([f067013](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f0670139efad2ec64a9925516f7860546bc1cdab))
+* **setup,consortium:** A way out of setup, a guard on unsaved work, and branding as its own tab ([159f6b3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/159f6b30b4fe88ed34bb383bb7ec1d5789913fc9))
+* **setup:** One door to consortium setup, and a rail that looks like the rest of the app ([b180715](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b1807154ac3eed658a6937421a474b6036b10fda))
+* **setup:** Reframe first-run configuration as a guided conversation ([7a48e06](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7a48e065fa4d95f57d8b611ac6bd670cc5786acb))
+* **setup:** say how much is left, and open a finished setup at the inventory ([5217a28](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/5217a28609aaa3abf51ab3fbda252f09e4e38259))
+* Statistics and insights ([6a509a5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6a509a53318cf7c71cf9ee6b18baf799bc51bbee))
+* Theme and mode switching ([275b2ea](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/275b2ea0117bf64e4cb6a0d81e2a839ddd506ae3))
+* **theme:** give FOLIO its real coral back, on a black bar ([684017d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/684017dfb2df442f1346efc47f029990732b49d5)), closes [#E52300](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/E52300) [#1A1A1A](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/1A1A1A) [#222C33](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/222C33) [#88B744](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/88B744)
+* **theme:** Koha on a black bar, and hover moves into the theme ([f35f0d7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/f35f0d70af57dedc59606444f0cc47d42c7c039b)), closes [#547D29](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/547D29) [#88B744](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/88B744) [#1A1A1A](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/1A1A1A) [#547D29](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/547D29) [#88B744](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/issues/88B744)
+* Upload or CDN for every consortium brand image (R-17e, R-17d) ([fc1d8e5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fc1d8e5df2e972deb90247e4bf89b7eaa9caa95c))
+
+
+### Performance Improvements
+
+* **docker:** turn on compression, which the base image does not ([4284465](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/42844655dcb1259f2e296a804c9ac2d69b1cde39))
+
+
+### BREAKING CHANGES
+
+* The application is rebuilt on Vite, React 19 and TanStack
+Router, replacing Next.js. Routing, the build output and the deployment
+artefact all change: DCB Admin now ships as a static bundle served by nginx
+(docker/production/) rather than a Next.js server, and its configuration is
+read at runtime from inject_env.json rather than baked in at build time.
+
+Any deployment pinned to the Next.js container image, or to build-time
+NEXT_PUBLIC_* variables, must be reconfigured before upgrading. See
+docs/deployment.md for the artefact, the required cache-control headers and
+the two-pass upload order, and docs/theming.md and docs/accessibility.md for
+the theming and WCAG 2.2 AA work that ships with this release.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+
 ## [1.58.1](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.58.0...v1.58.1) (2026-05-12)
 
 
