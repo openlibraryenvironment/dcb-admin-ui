@@ -316,7 +316,7 @@
 		"onboarding_stats_complete": "Setup complete",
 		"onboarding_stats_outstanding_one": "{{count}} still outstanding",
 		"onboarding_stats_outstanding_other": "{{count}} still outstanding",
-		"onboarding_stats_ils_caption": "libraries on this ILS",
+		"onboarding_stats_ils_caption": "libraries in this consortium.",
 		"onboarding_stats_unknown_ils": "Other or unknown",
 		"new": {
 			"title": "Create a consortium",
@@ -1574,6 +1574,7 @@
 		"bibs": "Bib records",
 		"consortium": {
 			"contacts": "Contacts",
+			"environment": "Environment",
 			"name": "Consortium",
 			"onboarding": "Onboarding",
 			"functionalSettings": "Functional settings",

@@ -70,6 +70,17 @@ export const DEFAULT_DISPLAY: DisplayPreferences = {
  *
  * The top step is +12.5%. Beyond that, browser zoom and the 400% reflow requirement are
  * the right tool, and the layout already meets those.
+ *
+ * <h2>The rule this creates for every component</h2>
+ *
+ * A px font size OPTS THAT ELEMENT OUT, silently. Ten existing `sx={{ fontSize: … }}`
+ * declarations did exactly that, and six of them were `variant="h2" sx={{ fontSize: 32 }}`
+ * — restating the variant's own 2rem in px, so they looked like no-ops and were not.
+ *
+ * ICONS ARE THE EXCEPTION AND SHOULD STAY IN PX. `fontSize` on an MUI icon is its box, not
+ * text, and the five that remain are sized to something fixed: two sit inside the 70px
+ * AppBar, which they would overflow, and two are status marks in a dense grid row. Scaling
+ * those with the reading size is not the same request.
  */
 const TEXT_SIZE_ROOT: Record<TextSize, string> = {
 	small: "93.75%", // 15px

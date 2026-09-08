@@ -39,6 +39,7 @@ const TABS: ReadonlyArray<ConsortiumTab> = [
 		labelKey: "nav.consortium.functionalSettings",
 	},
 	{ path: "/consortium/onboarding", labelKey: "nav.consortium.onboarding" },
+	{ path: "/consortium/environment", labelKey: "nav.consortium.environment" },
 	{ path: "/consortium/contacts", labelKey: "nav.consortium.contacts" },
 	// Branding is its own tab rather than a block at the foot of the profile. It is five
 	// fields and a theme choice, and it answers a different question - what PATRONS see -
@@ -68,6 +69,7 @@ const visibleTabs = (): ReadonlyArray<ConsortiumTab> =>
 export type ConsortiumTabId =
 	| "profile"
 	| "functionalSettings"
+	| "environment"
 	| "onboarding"
 	| "contacts"
 	| "branding"
@@ -76,6 +78,7 @@ export type ConsortiumTabId =
 const PATH_BY_ID: Record<ConsortiumTabId, string> = {
 	profile: "/consortium",
 	functionalSettings: "/consortium/functionalSettings",
+	environment: "/consortium/environment",
 	onboarding: "/consortium/onboarding",
 	contacts: "/consortium/contacts",
 	branding: "/consortium/branding",

@@ -214,7 +214,7 @@ export default function Breadcrumbs({
 						: t(breadcrumb.key);
 				return (
 					<Typography
-						sx={{ color: "inherit", fontSize: "14px" }}
+						sx={{ color: "inherit", fontSize: "0.875rem" }}
 						key={breadcrumb.href}
 						title={title}
 						aria-current="page"
@@ -226,7 +226,7 @@ export default function Breadcrumbs({
 
 			return (
 				<Link
-					sx={{ color: "primary.breadcrumbs", fontSize: "14px" }}
+					sx={{ color: "primary.breadcrumbs", fontSize: "0.875rem" }}
 					underline="hover"
 					key={breadcrumb.href}
 					href={getSpecialRedirects(
@@ -251,13 +251,13 @@ export default function Breadcrumbs({
 			{breadcrumbs.length === 0 ? (
 				<Typography
 					title={String(t("nav.home"))}
-					sx={{ color: "inherit", fontSize: "14px" }}
+					sx={{ color: "inherit", fontSize: "0.875rem" }}
 				>
 					{t("nav.home")}
 				</Typography>
 			) : (
 				<Link
-					sx={{ color: "primary.breadcrumbs", fontSize: "14px" }}
+					sx={{ color: "primary.breadcrumbs", fontSize: "0.875rem" }}
 					underline="hover"
 					href="/"
 					title={t("nav.home")}
