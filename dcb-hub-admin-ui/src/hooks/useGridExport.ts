@@ -1,6 +1,6 @@
-import { RefObject, useState } from "react";
-import request from "graphql-request";
+import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import {
 	GridApiPremium,
 	GridColDef,
@@ -8,7 +8,14 @@ import {
 	GridSortModel,
 } from "@mui/x-data-grid-premium";
 import { getFileNameForExport } from "@helpers/dataGrid/getFileNameForExport";
-import { convertFileToString } from "@helpers/dataGrid/convertFileToString";
+import {
+	serialiseExportHeader,
+	serialiseExportRows,
+} from "@helpers/dataGrid/serialiseExportRows";
+import {
+	fetchExportPages,
+	isAbortError,
+} from "@helpers/dataGrid/fetchExportPages";
 import {
 	getExportColumns,
 	getExportHeaderMap,
@@ -64,11 +71,14 @@ const EXPORT_PAGE_SIZE = 1000;
 const EMPTY_FILTER: GridFilterModel = { items: [] };
 
 const triggerDownload = (
-	dataString: string,
+	parts: BlobPart[],
 	fileName: string,
 	format: ExportFormat,
 ) => {
-	const blob = new Blob([dataString], {
+	// Blob over a single joined string: the parts are one page of text each, so
+	// the browser assembles the file without the tab first holding a second,
+	// contiguous copy of it.
+	const blob = new Blob(parts, {
 		type: `text/${format};charset=utf-8;`,
 	});
 	const link = document.createElement("a");
@@ -90,9 +100,8 @@ const triggerDownload = (
  * - `filtered`: every page matching the current filter + base query.
  * - `all`:      every page of the base query only (filters stripped, scope kept).
  *
- * Server-fetched modes page through the dataset (1000/page) and report progress
- * so an "all" export of a very large grid stays observable and cancellable by
- * navigating away rather than freezing the tab.
+ * Server-fetched modes page via fetchExportPages, serialising and releasing each
+ * page as it arrives. See docs/large-exports.md.
  */
 export const useGridExport = ({
 	apiRef,
@@ -104,15 +113,14 @@ export const useGridExport = ({
 	onSuccess,
 	onError,
 }: UseGridExportProps) => {
-	const { cfg, auth } = useRouter().options.context as {
-		cfg: any;
-		auth: any;
-	};
+	const { t } = useTranslation();
+	const router = useRouter();
+	const { cfg } = router.options.context as { cfg: any };
 	const dcbApiBase = cfg?.VITE_DCB_API_BASE ?? "";
-	const token = auth?.user?.access_token;
-	const headers: Record<string, string> = token
-		? { Authorization: `Bearer ${token}` }
-		: {};
+	const endpoint = `${dcbApiBase}/graphql`;
+
+	const abortRef = useRef<AbortController | null>(null);
+	const renewedTokenRef = useRef<string | null>(null);
 
 	const [exportProgress, setExportProgress] = useState({
 		isExporting: false,
@@ -120,53 +128,35 @@ export const useGridExport = ({
 		totalRecords: 0,
 	});
 
-	const fetchAllPages = async (mode: "filtered" | "all"): Promise<any[]> => {
-		setExportProgress({ isExporting: true, progress: 0, totalRecords: 0 });
+	// Abandoning the grid abandons its export; nothing else stops the loop.
+	useEffect(() => () => abortRef.current?.abort(), []);
 
-		const queryVariables = buildServerGridQueryVars({
-			filterModel: mode === "filtered" ? filterModel : EMPTY_FILTER,
-			sortModel,
-			paginationModel: { page: 0, pageSize: EXPORT_PAGE_SIZE },
-			baseQuery: config.baseQuery ?? "",
-			quickFilterFields: config.quickFilterFields ?? [],
-			defaultOrder: sortModel[0]?.field ?? "id",
-			defaultPageSize: EXPORT_PAGE_SIZE,
-		});
+	const cancelExport = useCallback(() => abortRef.current?.abort(), []);
 
-		const endpoint = `${dcbApiBase}/graphql`;
-		const initial = await request<any>(
-			endpoint,
-			config.query,
-			queryVariables,
-			headers,
-		);
+	/** Read at call time, never destructured at render - see authHeaders. */
+	const currentAuth = () => (router.options.context as { auth: any }).auth;
 
-		const totalSize = initial?.[config.coreType]?.totalSize || 0;
-		let allContent: any[] = initial?.[config.coreType]?.content ?? [];
-		setExportProgress({
-			isExporting: true,
-			totalRecords: totalSize,
-			progress: totalSize
-				? Math.round((allContent.length / totalSize) * 100)
-				: 100,
-		});
-
-		const totalPages = Math.ceil(totalSize / EXPORT_PAGE_SIZE);
-		for (let page = 1; page < totalPages; page++) {
-			const next = await request<any>(
-				endpoint,
-				config.query,
-				{ ...queryVariables, pageno: page },
-				headers,
-			);
-			allContent = [...allContent, ...(next?.[config.coreType]?.content ?? [])];
-			setExportProgress((prev) => ({
-				...prev,
-				progress: Math.round((allContent.length / totalSize) * 100),
-			}));
+	const authHeaders = (): Record<string, string> => {
+		const contextToken = currentAuth()?.user?.access_token;
+		// Prefer the token from an explicit mid-export renewal until React has
+		// pushed it into the router context: signinSilent() resolving only
+		// dispatches the new user, and the context this reads is replaced a render
+		// later. Clears itself once the context has caught up.
+		if (contextToken && contextToken === renewedTokenRef.current) {
+			renewedTokenRef.current = null;
 		}
+		const token = renewedTokenRef.current ?? contextToken;
+		return token ? { Authorization: `Bearer ${token}` } : {};
+	};
 
-		return allContent;
+	const renewSession = async () => {
+		// A failed renewal is not handled here: the retry then sends the same dead
+		// token, the 401 stands, and the export reports it. application.tsx owns
+		// deciding whether the session is actually over.
+		const user = await currentAuth()
+			?.signinSilent()
+			.catch(() => null);
+		renewedTokenRef.current = user?.access_token ?? null;
 	};
 
 	const runExport = async ({
@@ -216,67 +206,120 @@ export const useGridExport = ({
 		const chosenHeaders = chosenFields.map(
 			(field) => headerMap[field] ?? field,
 		);
+		const colLookup = new Map(columns.map((c) => [c.field, c]));
+		const valueLabelMaps = getValueLabelMaps(columns);
 
-		try {
-			let rows: any[];
-			if (mode === "selected") {
-				rows = Array.from(apiRef.current.getSelectedRows().values());
-			} else {
-				rows = await fetchAllPages(mode);
-			}
+		// Resolve each cell exactly as the grid does, so a server-fetched export
+		// matches the on-screen values for nested/derived columns.
+		const flattenRow = (rawRow: any): Record<string, any> => {
+			const flatRow: Record<string, any> = {};
 
-			const colLookup = new Map(columns.map((c) => [c.field, c]));
+			chosenFields.forEach((field) => {
+				const col = colLookup.get(field);
+				let cellValue = rawRow[field];
+				// Execute the valueGetter if it exists on the column
+				if (col?.valueGetter) {
+					cellValue = (col.valueGetter as any)(
+						cellValue,
+						rawRow,
+						col,
+						apiRef.current,
+					);
+				}
 
-			// Resolve each cell exactly as the grid does, so a server-fetched export
-			// matches the on-screen values for nested/derived columns.
-			const processedRows = rows.map((rawRow) => {
-				const flatRow: Record<string, any> = {};
+				if (col?.valueFormatter && cellValue != null) {
+					cellValue = (col.valueFormatter as any)(
+						cellValue,
+						rawRow,
+						col,
+						apiRef.current,
+					);
+				}
 
-				chosenFields.forEach((field) => {
-					const col = colLookup.get(field);
-					let cellValue = rawRow[field];
-					// Execute the valueGetter if it exists on the column
-					if (col?.valueGetter) {
-						cellValue = (col.valueGetter as any)(
-							cellValue,
-							rawRow,
-							col,
-							apiRef.current,
-						);
-					}
-
-					if (col?.valueFormatter && cellValue != null) {
-						cellValue = (col.valueFormatter as any)(
-							cellValue,
-							rawRow,
-							col,
-							apiRef.current,
-						);
-					}
-
-					flatRow[field] = cellValue;
-				});
-
-				return flatRow;
+				flatRow[field] = cellValue;
 			});
 
-			const dataString = convertFileToString(
-				processedRows,
+			return flatRow;
+		};
+
+		// One text chunk per page. The rows behind each chunk are unreachable as
+		// soon as it is pushed, so peak memory is the file plus a page - not the
+		// whole result set, its flattened copy and a contiguous string of both.
+		const parts: BlobPart[] = [
+			`${serialiseExportHeader(chosenHeaders, delimiter)}\n`,
+		];
+		const appendPage = (rows: any[]) => {
+			if (rows.length === 0) return;
+			const lines = serialiseExportRows(
+				rows.map(flattenRow),
 				delimiter,
 				chosenFields,
-				chosenHeaders,
-				getValueLabelMaps(columns),
+				valueLabelMaps,
 			);
+			parts.push(`${lines.join("\n")}\n`);
+		};
 
-			triggerDownload(dataString, `${baseFileName}.${format}`, format);
-			onSuccess(`Successfully exported ${rows.length} records.`, rows.length);
+		const controller = new AbortController();
+		abortRef.current = controller;
+
+		try {
+			let rowCount: number;
+
+			if (mode === "selected") {
+				const rows = Array.from(apiRef.current.getSelectedRows().values());
+				appendPage(rows);
+				rowCount = rows.length;
+			} else {
+				setExportProgress({
+					isExporting: true,
+					progress: 0,
+					totalRecords: 0,
+				});
+
+				rowCount = await fetchExportPages({
+					endpoint,
+					query: config.query,
+					coreType: config.coreType,
+					variables: buildServerGridQueryVars({
+						filterModel: mode === "filtered" ? filterModel : EMPTY_FILTER,
+						sortModel,
+						paginationModel: { page: 0, pageSize: EXPORT_PAGE_SIZE },
+						baseQuery: config.baseQuery ?? "",
+						quickFilterFields: config.quickFilterFields ?? [],
+						defaultOrder: sortModel[0]?.field ?? "id",
+						defaultPageSize: EXPORT_PAGE_SIZE,
+					}),
+					authHeaders,
+					renewSession,
+					onPage: appendPage,
+					onProgress: (fetched, totalSize) =>
+						setExportProgress({
+							isExporting: true,
+							totalRecords: totalSize,
+							progress: totalSize
+								? Math.round((fetched / totalSize) * 100)
+								: 100,
+						}),
+					signal: controller.signal,
+				});
+			}
+
+			triggerDownload(parts, `${baseFileName}.${format}`, format);
+			onSuccess(
+				t("ui.data_grid.export_success", { count: rowCount }),
+				rowCount,
+			);
 		} catch (error) {
+			// A cancelled export is the outcome the user asked for, not a failure.
+			if (isAbortError(error)) return;
 			console.error("Grid export failed", error);
-			onError("Failed to export records.");
+			onError(t("ui.data_grid.export_failed"));
 		} finally {
+			abortRef.current = null;
+			renewedTokenRef.current = null;
 			setExportProgress({ isExporting: false, progress: 0, totalRecords: 0 });
 		}
 	};
 
-	return { exportProgress, runExport };
+	return { exportProgress, runExport, cancelExport };
 };
