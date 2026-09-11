@@ -24,8 +24,23 @@ import libraries from "./fixtures-data/libraries.json";
 
 const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
+/**
+ * Outside the WCAG tag sets, asserted anyway because it caught something real: every KPI
+ * tile label rendered as an <h6> directly under the page <h1>, because MUI's subtitle2 is
+ * an <h6> element unless you say otherwise. A screen-reader user navigating by heading met
+ * an outline claiming each tile sat four levels deep inside nothing.
+ *
+ * Named one rule at a time rather than by enabling best-practice wholesale, so the gate
+ * still cannot fail on opinion. Lighthouse scored this 0.99 on the Insights route and the
+ * axe gate here scored it clean, which is the gap this closes.
+ */
+const EXTRA_RULES = ["heading-order"];
+
 async function scanWholePage(page: Page) {
-	const results = await new AxeBuilder({ page }).withTags(WCAG).analyze();
+	const results = await new AxeBuilder({ page })
+		.withTags(WCAG)
+		.withRules(EXTRA_RULES)
+		.analyze();
 
 	expect(
 		results.violations.map((v) => ({

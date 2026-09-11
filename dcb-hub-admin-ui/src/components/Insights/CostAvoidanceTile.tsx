@@ -42,7 +42,12 @@ export default function CostAvoidanceTile({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+				<Typography
+					variant="subtitle2"
+					component="p"
+					color="text.secondary"
+					gutterBottom
+				>
 					{t("insights.kpi.cost_avoidance.title")}
 				</Typography>
 

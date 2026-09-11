@@ -45,7 +45,12 @@ export default function KpiTile({
 	return (
 		<Card variant="outlined" sx={{ height: FIXED_HEIGHT }}>
 			<CardContent>
-				<Typography variant="subtitle2" color="text.secondary" gutterBottom>
+				<Typography
+					variant="subtitle2"
+					component="p"
+					color="text.secondary"
+					gutterBottom
+				>
 					{title}
 				</Typography>
 				{loading ? (
