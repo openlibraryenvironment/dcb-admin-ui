@@ -5,7 +5,6 @@ import {
 	Card,
 	CardContent,
 	Typography,
-	Skeleton,
 	Box,
 	Stack,
 	Table,
@@ -21,6 +20,8 @@ import dayjs, { Dayjs } from "dayjs";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { newAcquisitionsQueryOptions, StatsParams } from "@helpers/statsApi";
+
+import PanelState from "./PanelState";
 
 const PANEL_MIN_HEIGHT = 280;
 
@@ -39,7 +40,7 @@ export default function NewAcquisitionsPanel({
 		dayjs().subtract(1, "year"),
 	);
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		newAcquisitionsQueryOptions(client, {
 			...params,
 			libraryCode,
@@ -76,49 +77,44 @@ export default function NewAcquisitionsPanel({
 					</LocalizationProvider>
 				</Stack>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={PANEL_MIN_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							minHeight: PANEL_MIN_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<TableContainer sx={{ maxHeight: 420 }}>
-						<Table size="small" stickyHeader>
-							<TableHead>
-								<TableRow>
-									<TableCell>
-										{t("insights.charts.top_titles.col_title")}
-									</TableCell>
-									<TableCell>
-										{t("insights.charts.rare_gem.col_author")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.new_acquisitions.col_supplied")}
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{rows.map((row) => (
-									<TableRow key={row.clusterId} hover>
-										<TableCell>{row.title ?? "—"}</TableCell>
-										<TableCell>{row.author ?? "—"}</TableCell>
-										<TableCell align="right">{row.supplyCount}</TableCell>
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={PANEL_MIN_HEIGHT}
+				>
+					{() => (
+						<TableContainer sx={{ maxHeight: 420 }}>
+							<Table size="small" stickyHeader>
+								<TableHead>
+									<TableRow>
+										<TableCell>
+											{t("insights.charts.top_titles.col_title")}
+										</TableCell>
+										<TableCell>
+											{t("insights.charts.rare_gem.col_author")}
+										</TableCell>
+										<TableCell align="right">
+											{t("insights.charts.new_acquisitions.col_supplied")}
+										</TableCell>
 									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</TableContainer>
-				)}
+								</TableHead>
+								<TableBody>
+									{rows.map((row) => (
+										<TableRow key={row.clusterId} hover>
+											<TableCell>{row.title ?? "—"}</TableCell>
+											<TableCell>{row.author ?? "—"}</TableCell>
+											<TableCell align="right">{row.supplyCount}</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

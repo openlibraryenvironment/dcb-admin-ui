@@ -1085,6 +1085,16 @@
 				"col_shared": "Shared works",
 				"caption": "Showing {{shown}} of {{total}} libraries."
 			}
+		},
+		"panel": {
+			"retry": "Retry",
+			"failed": "This panel could not be loaded."
+		},
+		"announce": {
+			"view": "Showing {{range}} for {{scope}}.",
+			"whole_consortium": "the whole consortium",
+			"one_library": "1 library",
+			"libraries": "{{count}} libraries"
 		}
 	},
 	"libraries": {

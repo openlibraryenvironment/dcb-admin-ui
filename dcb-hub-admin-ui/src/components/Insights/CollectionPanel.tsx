@@ -1,24 +1,16 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-	Alert,
-	Box,
-	Button,
-	Card,
-	CardContent,
-	Skeleton,
-	Typography,
-} from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 
-import { isBusy } from "@helpers/insightsCollection";
+import PanelState from "./PanelState";
 
 /**
- * Shell for the five collection-analysis panels.
+ * Shell for the five collection-analysis panels: the card, and a query that must not retry.
  *
- * They share a failure mode nothing else on this dashboard has: a 429 that means "the one
- * permit is busy, ask again shortly" rather than "something broke" - see isBusy. So the
- * refusal gets its own message and a MANUAL retry, and the query carries retry: false.
+ * `retry: false` in the options type is the load-bearing part. These aggregates answer 429
+ * when the one permit is busy, and an automatic retry spends the next caller's budget.
+ * PanelState reads that 429 and offers a manual retry instead.
  */
 
 interface CollectionPanelProps<T> {
@@ -47,55 +39,6 @@ export default function CollectionPanel<T>({
 	const { data, isLoading, isError, error, refetch, isFetching } =
 		useQuery(queryOptions);
 
-	// Fixed height on every state, so the skeleton and the refusal occupy exactly what the
-	// loaded panel will - the one metric a reviewer cannot see in a diff is CLS.
-	const frame = (content: ReactNode) => (
-		<Box
-			sx={{
-				minHeight,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-			}}
-		>
-			{content}
-		</Box>
-	);
-
-	let body: ReactNode;
-
-	if (isLoading) {
-		body = <Skeleton variant="rounded" height={minHeight} />;
-	} else if (isError) {
-		body = frame(
-			<Alert
-				severity={isBusy(error) ? "info" : "warning"}
-				action={
-					<Button
-						color="inherit"
-						size="small"
-						onClick={() => refetch()}
-						disabled={isFetching}
-					>
-						{t("insights.collection.retry")}
-					</Button>
-				}
-			>
-				{t(
-					isBusy(error)
-						? "insights.collection.busy"
-						: "insights.collection.failed",
-				)}
-			</Alert>,
-		);
-	} else if (data === undefined || isEmpty(data)) {
-		body = frame(
-			<Typography color="text.secondary">{t("insights.no_data")}</Typography>,
-		);
-	} else {
-		body = children(data);
-	}
-
 	return (
 		<Card variant="outlined">
 			<CardContent>
@@ -105,7 +48,18 @@ export default function CollectionPanel<T>({
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t(subtitleKey)}
 				</Typography>
-				{body}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={data === undefined || isEmpty(data)}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={minHeight}
+					failedKey="insights.collection.failed"
+				>
+					{() => children(data as T)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

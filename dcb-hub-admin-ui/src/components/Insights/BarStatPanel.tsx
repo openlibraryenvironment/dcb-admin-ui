@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography, Skeleton, Box } from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+
+import PanelState from "./PanelState";
 
 const CHART_HEIGHT = 320;
 
@@ -35,7 +37,8 @@ export default function BarStatPanel<T>({
 	limit = 15,
 }: BarStatPanelProps<T>) {
 	const { t } = useTranslation();
-	const { data, isLoading } = useQuery(queryOptions);
+	const { data, isLoading, isError, error, refetch, isFetching } =
+		useQuery(queryOptions);
 
 	const rows = (data ?? []).slice(0, limit);
 	const labels = rows.map(getLabel);
@@ -54,32 +57,33 @@ export default function BarStatPanel<T>({
 					{t(subtitleKey)}
 				</Typography>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={CHART_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							height: CHART_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : horizontal ? (
-					<BarChartPro
-						height={CHART_HEIGHT}
-						layout="horizontal"
-						yAxis={bandAxis}
-						series={series}
-						margin={{ left: 160 }}
-					/>
-				) : (
-					<BarChartPro height={CHART_HEIGHT} xAxis={bandAxis} series={series} />
-				)}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={CHART_HEIGHT}
+				>
+					{() =>
+						horizontal ? (
+							<BarChartPro
+								height={CHART_HEIGHT}
+								layout="horizontal"
+								yAxis={bandAxis}
+								series={series}
+								margin={{ left: 160 }}
+							/>
+						) : (
+							<BarChartPro
+								height={CHART_HEIGHT}
+								xAxis={bandAxis}
+								series={series}
+							/>
+						)
+					}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

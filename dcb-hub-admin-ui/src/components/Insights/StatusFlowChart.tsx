@@ -1,18 +1,13 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-	Card,
-	CardContent,
-	Typography,
-	Chip,
-	Skeleton,
-	Box,
-} from "@mui/material";
+import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
 import { LineChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette, inkOn } from "@hooks/useChartPalette";
+
+import PanelState from "./PanelState";
 import {
 	useInsightsPlotStore,
 	MAX_PLOT_SERIES,
@@ -42,7 +37,7 @@ export default function StatusFlowChart({
 	const selectedStatuses = useInsightsPlotStore((s) => s.selectedStatuses);
 	const toggleStatus = useInsightsPlotStore((s) => s.toggleStatus);
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		timeSeriesQueryOptions(client, params, interval),
 	);
 
@@ -125,34 +120,29 @@ export default function StatusFlowChart({
 					})}
 				</Box>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={CHART_HEIGHT} />
-				) : xAxisData.length === 0 || series.length === 0 ? (
-					<Box
-						sx={{
-							height: CHART_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<LineChartPro
-						height={CHART_HEIGHT}
-						xAxis={[
-							{
-								data: xAxisData,
-								scaleType: "time",
-								zoom: true,
-							},
-						]}
-						series={series}
-					/>
-				)}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={xAxisData.length === 0 || series.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={CHART_HEIGHT}
+				>
+					{() => (
+						<LineChartPro
+							height={CHART_HEIGHT}
+							xAxis={[
+								{
+									data: xAxisData,
+									scaleType: "time",
+									zoom: true,
+								},
+							]}
+							series={series}
+						/>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

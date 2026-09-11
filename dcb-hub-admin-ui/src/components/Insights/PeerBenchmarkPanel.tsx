@@ -5,8 +5,6 @@ import {
 	Card,
 	CardContent,
 	Typography,
-	Skeleton,
-	Box,
 	Table,
 	TableBody,
 	TableCell,
@@ -17,6 +15,8 @@ import {
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { peerBenchmarksQueryOptions } from "@helpers/statsApi";
+
+import PanelState from "./PanelState";
 
 const PANEL_MIN_HEIGHT = 300;
 
@@ -39,7 +39,7 @@ export default function PeerBenchmarkPanel({
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		peerBenchmarksQueryOptions(client, params),
 	);
 
@@ -86,104 +86,99 @@ export default function PeerBenchmarkPanel({
 					})}
 				</Typography>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={PANEL_MIN_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							minHeight: PANEL_MIN_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<TableContainer sx={{ maxHeight: 440 }}>
-						<Table size="small" stickyHeader>
-							<TableHead>
-								<TableRow>
-									<TableCell>
-										{t("insights.charts.peer_benchmark.col_library")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.peer_benchmark.col_requests")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.peer_benchmark.col_checkout")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.peer_benchmark.col_fill")}
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{rows.map((row) => {
-									const isCurrent = row.libraryCode === libraryCode;
-									const aboveMedian =
-										medianFill != null &&
-										row.fillRate != null &&
-										row.fillRate >= medianFill;
-									return (
-										<TableRow
-											key={row.libraryCode}
-											hover
-											selected={isCurrent}
-											sx={isCurrent ? { fontWeight: "bold" } : undefined}
-										>
-											<TableCell
-												sx={isCurrent ? { fontWeight: 700 } : undefined}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={PANEL_MIN_HEIGHT}
+				>
+					{() => (
+						<TableContainer sx={{ maxHeight: 440 }}>
+							<Table size="small" stickyHeader>
+								<TableHead>
+									<TableRow>
+										<TableCell>
+											{t("insights.charts.peer_benchmark.col_library")}
+										</TableCell>
+										<TableCell align="right">
+											{t("insights.charts.peer_benchmark.col_requests")}
+										</TableCell>
+										<TableCell align="right">
+											{t("insights.charts.peer_benchmark.col_checkout")}
+										</TableCell>
+										<TableCell align="right">
+											{t("insights.charts.peer_benchmark.col_fill")}
+										</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{rows.map((row) => {
+										const isCurrent = row.libraryCode === libraryCode;
+										const aboveMedian =
+											medianFill != null &&
+											row.fillRate != null &&
+											row.fillRate >= medianFill;
+										return (
+											<TableRow
+												key={row.libraryCode}
+												hover
+												selected={isCurrent}
+												sx={isCurrent ? { fontWeight: "bold" } : undefined}
 											>
-												{row.libraryName}
-												{row.hasName ? (
-													<Typography
-														variant="caption"
-														component="span"
-														color="text.secondary"
-														sx={{ ml: 1 }}
-													>
-														{row.libraryCode}
-													</Typography>
-												) : null}
-												{isCurrent ? (
-													<Typography
-														variant="caption"
-														component="span"
-														sx={{ ml: 1 }}
-													>
-														{t("insights.charts.peer_benchmark.your_library")}
-													</Typography>
-												) : null}
-											</TableCell>
-											<TableCell align="right">
-												{row.totalRequests.toLocaleString()}
-											</TableCell>
-											<TableCell align="right">
-												{pct(row.checkoutRate)}
-											</TableCell>
-											<TableCell
-												align="right"
-												sx={{
-													color:
-														row.fillRate == null
-															? "text.secondary"
-															: aboveMedian
-																? "success.main"
-																: "error.main",
-												}}
-											>
-												{pct(row.fillRate)}
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
-						</Table>
-					</TableContainer>
-				)}
+												<TableCell
+													sx={isCurrent ? { fontWeight: 700 } : undefined}
+												>
+													{row.libraryName}
+													{row.hasName ? (
+														<Typography
+															variant="caption"
+															component="span"
+															color="text.secondary"
+															sx={{ ml: 1 }}
+														>
+															{row.libraryCode}
+														</Typography>
+													) : null}
+													{isCurrent ? (
+														<Typography
+															variant="caption"
+															component="span"
+															sx={{ ml: 1 }}
+														>
+															{t("insights.charts.peer_benchmark.your_library")}
+														</Typography>
+													) : null}
+												</TableCell>
+												<TableCell align="right">
+													{row.totalRequests.toLocaleString()}
+												</TableCell>
+												<TableCell align="right">
+													{pct(row.checkoutRate)}
+												</TableCell>
+												<TableCell
+													align="right"
+													sx={{
+														color:
+															row.fillRate == null
+																? "text.secondary"
+																: aboveMedian
+																	? "success.main"
+																	: "error.main",
+													}}
+												>
+													{pct(row.fillRate)}
+												</TableCell>
+											</TableRow>
+										);
+									})}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

@@ -61,6 +61,9 @@ import NewAcquisitionsPanel from "./NewAcquisitionsPanel";
 import TradingPartnersPanel from "./TradingPartnersPanel";
 import CollectionAnalysisSection from "./CollectionAnalysisSection";
 
+import { visuallyHidden } from "@mui/utils";
+import { announcementParts } from "@helpers/insightsAnnouncement";
+
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
 
 function fillRate(successful: number, failed: number): number | null {
@@ -184,6 +187,22 @@ export default function InsightsDashboard({
 		? fillRate(supplierFill.data.successfulCount, supplierFill.data.failedCount)
 		: null;
 
+	// Changing the range or the scope rewrites every panel below it, and a screen-reader
+	// user was told none of that - WCAG 2.2 SC 4.1.3. One announcement for the settled view,
+	// not one per panel: both controls only emit when the choice is complete, so there is
+	// nothing here to debounce. Keyed on the text so the region remounts and speaks again,
+	// which is the pattern SetupLayout already uses.
+	const parts = announcementParts(
+		rangePreset,
+		customRange,
+		libraryCode,
+		(iso) => dayjs(iso).format("D MMM YYYY"),
+	);
+	const announcement = t("insights.announce.view", {
+		range: "literal" in parts.range ? parts.range.literal : t(parts.range.key),
+		scope: t(parts.scope.key, { count: parts.scope.count }),
+	});
+
 	return (
 		<Stack spacing={4}>
 			<Stack
@@ -240,6 +259,15 @@ export default function InsightsDashboard({
 					/>
 				</LocalizationProvider>
 			</Stack>
+
+			<Box
+				key={announcement}
+				aria-live="polite"
+				aria-atomic="true"
+				sx={visuallyHidden}
+			>
+				{announcement}
+			</Box>
 
 			<Section
 				id="insights-overview-heading"

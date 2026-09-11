@@ -291,6 +291,16 @@ export interface Paged<T> {
 	totalSize: number;
 }
 
+/**
+ * Every Insights panel handles its own failure.
+ *
+ * The app's query client throws to the route error boundary on anything that is not a 401
+ * or a 503, which for a dashboard of twenty independent panels means one broken endpoint
+ * takes out the whole page. A panel is the right place to report a panel: PanelState shows
+ * the failure and offers a retry, and the nineteen that worked stay on screen.
+ */
+export const panelQuery = { throwOnError: false as const };
+
 // --- TanStack Query options factories ---------------------------------------
 // Shared by route loaders (queryClient.ensureQueryData) and components (useQuery)
 // so the query keys can never drift between prefetch and read.
@@ -301,6 +311,7 @@ export function timeSeriesQueryOptions(
 	interval: TimeSeriesInterval,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "timeseries", interval, params] as const,
 		queryFn: async (): Promise<TimeSeriesPoint[]> => {
 			const { data } = await client.get(`${STATS_BASE}/timeseries`, {
@@ -316,6 +327,7 @@ export function dashboardMetricsQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "dashboard-metrics", params] as const,
 		queryFn: async (): Promise<DashboardMetrics> => {
 			const { data } = await client.get(`${STATS_BASE}/dashboard-metrics`, {
@@ -349,6 +361,7 @@ export function topPartnersQueryOptions(
 	},
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "top-partners", params] as const,
 		queryFn: async (): Promise<Paged<TradingPartnerStat>> => {
 			const { data } = await client.get(`${STATS_BASE}/top-partners`, {
@@ -364,6 +377,7 @@ export function failureTaxonomyQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "failure-taxonomy", params] as const,
 		queryFn: async (): Promise<FailureReasonStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/failure-taxonomy`, {
@@ -379,6 +393,7 @@ export function supplierReliabilityQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "supplier-reliability", params] as const,
 		queryFn: async (): Promise<SupplierReliabilityStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/supplier-reliability`, {
@@ -394,6 +409,7 @@ export function netFlowQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "net-flow", params] as const,
 		queryFn: async (): Promise<NetFlowStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/net-flow`, {
@@ -417,6 +433,7 @@ export function supplierFulfillmentQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "fulfillment", "supplier", params] as const,
 		queryFn: async (): Promise<FulfillmentStat> => {
 			const { data } = await client.get(`${STATS_BASE}/fulfillment/supplier`, {
@@ -432,6 +449,7 @@ export function unfillableDemandQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "unfillable-demand", params] as const,
 		queryFn: async (): Promise<UnfillableDemandStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/unfillable-demand`, {
@@ -447,6 +465,7 @@ export function uniqueContributionsQueryOptions(
 	params: StatsParams & { libraryCode: string },
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "unique-contributions", params] as const,
 		queryFn: async (): Promise<RareGem[]> => {
 			const { data } = await client.get(`${STATS_BASE}/unique-contributions`, {
@@ -462,6 +481,7 @@ export function timeInStatusQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "time-in-status", params] as const,
 		queryFn: async (): Promise<StatusDwellStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/time-in-status`, {
@@ -477,6 +497,7 @@ export function supplierResponseSlaQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "supplier-response-sla", params] as const,
 		queryFn: async (): Promise<SupplierResponseStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/supplier-response-sla`, {
@@ -492,6 +513,7 @@ export function demandHeatmapQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "demand-heatmap", params] as const,
 		queryFn: async (): Promise<DemandHeatCell[]> => {
 			const { data } = await client.get(`${STATS_BASE}/demand-heatmap`, {
@@ -508,6 +530,7 @@ export function dashboardQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "dashboard", params] as const,
 		queryFn: async (): Promise<DashboardSummary> => {
 			const { data } = await client.get(`${STATS_BASE}/dashboard`, {
@@ -523,6 +546,7 @@ export function demandByPickupLocationQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "demand-by-pickup-location", params] as const,
 		queryFn: async (): Promise<PickupLocationDemandStat[]> => {
 			const { data } = await client.get(
@@ -539,6 +563,7 @@ export function demandByPatronGroupQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "demand-by-patron-group", params] as const,
 		queryFn: async (): Promise<PatronGroupDemandStat[]> => {
 			const { data } = await client.get(
@@ -558,6 +583,7 @@ export function topRequestedTitlesQueryOptions(
 	params: StatsParams,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "top-requested-titles", params] as const,
 		queryFn: async (): Promise<RequestedTitleStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/top-requested-titles`, {
@@ -574,6 +600,7 @@ export function unmetLocalDemandQueryOptions(
 	params: StatsParams & { libraryCode: string },
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "unmet-local-demand", params] as const,
 		queryFn: async (): Promise<TopClusterStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/unmet-local-demand`, {
@@ -589,6 +616,7 @@ export function acquisitionOpportunitiesQueryOptions(
 	params: StatsParams & { libraryCode: string },
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "acquisition-opportunities", params] as const,
 		queryFn: async (): Promise<TopClusterStat[]> => {
 			const { data } = await client.get(
@@ -605,6 +633,7 @@ export function consortialLifelineQueryOptions(
 	params: StatsParams & { libraryCode: string },
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "consortial-lifeline", params] as const,
 		queryFn: async (): Promise<ConsortialLifelineStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/consortial-lifeline`, {
@@ -622,6 +651,7 @@ export function peerBenchmarksQueryOptions(
 	params: { startDate?: string; endDate?: string },
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "peer-benchmarks", params] as const,
 		queryFn: async (): Promise<PeerBenchmarkStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/peer-benchmarks`, {
@@ -638,6 +668,7 @@ export function demandByDimensionQueryOptions(
 	dimension: CollectionDimension,
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "demand-by-dimension", dimension, params] as const,
 		queryFn: async (): Promise<DimensionDemandStat[]> => {
 			const { data } = await client.get(`${STATS_BASE}/demand-by-dimension`, {
@@ -659,6 +690,7 @@ export function turnaroundQueryOptions(
 	},
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "turnaround", params] as const,
 		queryFn: async (): Promise<TurnaroundStat> => {
 			const { data } = await client.get(`${STATS_BASE}/turnaround`, {
@@ -691,6 +723,7 @@ export function turnaroundQueryOptions(
 const COLLECTION_ANALYSIS_STALE_MS = 15 * 60 * 1000;
 
 const collectionAnalysisPolicy = {
+	...panelQuery,
 	staleTime: COLLECTION_ANALYSIS_STALE_MS,
 	retry: false as const,
 };
@@ -767,6 +800,7 @@ export function newAcquisitionsQueryOptions(
 	params: StatsParams & { libraryCode: string; acquiredSince: string },
 ) {
 	return {
+		...panelQuery,
 		queryKey: ["stats", "new-acquisitions-performance", params] as const,
 		queryFn: async (): Promise<NewAcquisitionPerformanceStat[]> => {
 			const { data } = await client.get(

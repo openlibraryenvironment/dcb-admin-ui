@@ -1,10 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography, Skeleton, Box } from "@mui/material";
+import { Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
+
+import PanelState from "./PanelState";
 import {
 	supplierReliabilityQueryOptions,
 	StatsParams,
@@ -21,7 +23,7 @@ export default function SupplierReliabilityChart({
 	const client = useDcbRestClient();
 	const { status } = useChartPalette();
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		supplierReliabilityQueryOptions(client, params),
 	);
 
@@ -41,44 +43,39 @@ export default function SupplierReliabilityChart({
 					{t("insights.charts.supplier_reliability.subtitle")}
 				</Typography>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={CHART_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							height: CHART_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					// Status encoding (good/critical) - labelled via the legend, never colour alone.
-					<BarChartPro
-						height={CHART_HEIGHT}
-						xAxis={[
-							{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
-						]}
-						series={[
-							{
-								data: rows.map((r) => r.fulfilledCount),
-								label: t("insights.charts.supplier_reliability.fulfilled"),
-								color: status.good,
-								stack: "total",
-							},
-							{
-								data: rows.map((r) => r.failedCount),
-								label: t("insights.charts.supplier_reliability.failed"),
-								color: status.critical,
-								stack: "total",
-							},
-						]}
-					/>
-				)}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={CHART_HEIGHT}
+				>
+					{() => (
+						// Status encoding (good/critical) - labelled via the legend, never colour alone.
+						<BarChartPro
+							height={CHART_HEIGHT}
+							xAxis={[
+								{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
+							]}
+							series={[
+								{
+									data: rows.map((r) => r.fulfilledCount),
+									label: t("insights.charts.supplier_reliability.fulfilled"),
+									color: status.good,
+									stack: "total",
+								},
+								{
+									data: rows.map((r) => r.failedCount),
+									label: t("insights.charts.supplier_reliability.failed"),
+									color: status.critical,
+									stack: "total",
+								},
+							]}
+						/>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);
