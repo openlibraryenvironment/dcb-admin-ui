@@ -86,6 +86,24 @@ export default [
 	},
 
 	{
+		// Build-time Node scripts. They never reach a browser and serve no UI, so the
+		// Node globals have to be declared and the i18n literal-string rule does not
+		// apply - a console message to a developer is not a user-facing string.
+		files: ["scripts/**/*.mjs"],
+		languageOptions: {
+			globals: {
+				process: "readonly",
+				console: "readonly",
+				Buffer: "readonly",
+				URL: "readonly",
+			},
+		},
+		rules: {
+			"i18next/no-literal-string": "off",
+		},
+	},
+
+	{
 		// The Cloudflare Worker that fronts the S3-hosted builds. It runs in the
 		// Workers runtime - not the browser, not Node - so its globals have to be
 		// declared here, and it serves no UI, so the i18n literal-string rule does
