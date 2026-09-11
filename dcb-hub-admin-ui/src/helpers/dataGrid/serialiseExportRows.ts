@@ -14,28 +14,30 @@ const formatCellValue = (value: any, delimiter: string): string => {
 	return stringValue;
 };
 
+/** The header line, from the same `headers` array the rows are aligned to. */
+export const serialiseExportHeader = (
+	headers: string[],
+	delimiter: string,
+): string => headers.join(delimiter);
+
 /**
- * Serialises server-fetched export rows to a delimited string. `fields` and
- * `headers` are aligned arrays derived from the grid's own columns (see
- * getExportColumns), so the column picker, the grid, and the file all agree.
+ * Serialises export rows to one delimited string per row, so a caller can
+ * serialise a page at a time (docs/large-exports.md). `fields` aligns with the
+ * `headers` passed to serialiseExportHeader; both come from getExportColumns.
  *
- * Rows arriving here are already flat: useGridExport resolves each cell through
- * the column's own valueGetter/valueFormatter, so nested and derived fields are
- * the columns' business, not this function's. Do not reintroduce a source-path
- * registry here - it drifts from the columns and silently blanks cells.
+ * Rows arriving here are already flat - useGridExport resolves each cell through
+ * the column's own valueGetter/valueFormatter. Do not reintroduce a source-path
+ * registry here: it drifts from the columns and silently blanks cells.
  */
-export const convertFileToString = (
+export const serialiseExportRows = (
 	data: any[],
 	delimiter: string,
 	fields: string[],
-	headers: string[],
 	// field -> (value -> label) for singleSelect columns; maps codes/UUIDs to the
 	// same human labels the grid shows (see getValueLabelMaps).
 	valueLabelMaps: Record<string, Record<string, string>> = {},
-) => {
-	const headerRow = headers.join(delimiter);
-
-	const rows = data.map((item: any) =>
+): string[] =>
+	data.map((item: any) =>
 		fields
 			.map((field: string) => {
 				const rawValue = item[field];
@@ -48,6 +50,3 @@ export const convertFileToString = (
 			})
 			.join(delimiter),
 	);
-
-	return [headerRow, ...rows].join("\n");
-};

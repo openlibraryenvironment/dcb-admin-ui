@@ -2435,7 +2435,8 @@
 				"file_name": "File name (optional)",
 				"file_name_placeholder": "Defaults to the grid name and any active filters",
 				"export_button": "Export",
-				"no_columns": "Select at least one column to export."
+				"no_columns": "Select at least one column to export.",
+				"cancel": "Cancel export"
 			},
 			"cleanup": {
 				"selected": "Force clean up selected ({{count}})"

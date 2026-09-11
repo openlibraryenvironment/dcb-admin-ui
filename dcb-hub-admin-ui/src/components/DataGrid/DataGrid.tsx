@@ -152,7 +152,7 @@ export default function DataGrid({
 	// the export/progress/wizard plumbing each time.
 	const exportColumns = (rest.columns as GridColDef[]) ?? [];
 	const [wizardOpen, setWizardOpen] = useState(false);
-	const { exportProgress, runExport } = useGridExport({
+	const { exportProgress, runExport, cancelExport } = useGridExport({
 		apiRef,
 		config: exportConfig ?? { query: null, coreType: "" },
 		filterModel: rest.filterModel ?? { items: [] },
@@ -177,8 +177,7 @@ export default function DataGrid({
 	// Rollback: ADMIN only (it restores a previous status and is only safe after
 	// an outage). Cleanup: any admin, matching the backend's allowed role set.
 	const rollbackAvailable = isPatronRequests && roles.includes("ADMIN");
-	const cleanupAvailable =
-		isPatronRequests && isConsortiumStaff(roles);
+	const cleanupAvailable = isPatronRequests && isConsortiumStaff(roles);
 
 	const rollback = usePatronRequestRollback({ apiRef });
 	const cleanup = usePatronRequestCleanup({ apiRef });
@@ -406,6 +405,7 @@ export default function DataGrid({
 				open={exportProgress.isExporting}
 				progress={exportProgress.progress}
 				totalRecords={exportProgress.totalRecords}
+				onCancel={cancelExport}
 			/>
 			<TimedAlert
 				open={alert.open}
