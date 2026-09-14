@@ -833,6 +833,10 @@
 		}
 	},
 	"insights": {
+		"group": {
+			"subtitle": "Requesting activity, fulfilment and value across this group's libraries.",
+			"no_codes": "No library in this group has an associated Host LMS, so insights cannot be shown."
+		},
 		"consortium": {
 			"title": "Consortium insights",
 			"subtitle": "Requesting activity, fulfilment and value across the whole consortium."
@@ -1722,6 +1726,7 @@
 		"groups": {
 			"bibs": "Bib records",
 			"info": "Group info",
+			"insights": "Insights",
 			"membership": "Membership",
 			"name": "Groups",
 			"profile": "Profile",

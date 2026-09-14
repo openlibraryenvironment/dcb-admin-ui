@@ -8,14 +8,19 @@ import { expectPaintedScheme } from "./fixtures/axe";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
+import groupDetail from "./fixtures-data/group-detail.json";
 
 /** The library the fixtures describe; its Host LMS code is what scopes the panels. */
 const LIBRARY = "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22";
+
+/** The group, whose two members scope the panels as a set. */
+const GROUP = "aa11bb22-3333-5444-9555-666677778888";
 
 const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,
 	LoadLibraries: libraries,
 	LoadLibrary: libraryDetail,
+	LoadGroup: groupDetail,
 };
 
 /**
@@ -123,6 +128,15 @@ for (const scheme of ["light", "dark"] as const) {
 			// renders rather than left to the five above.
 			await page.goto(`/libraries/${LIBRARY}/insights?tab=gaps`);
 			await revealSubject(page, "Consortial lifeline");
+			await scan(page);
+		});
+
+		test("a group has no violations", async ({ page }) => {
+			// The group route is the only place the subject bar sits under a TAB bar.
+			// Two navigation strips stacked is where focus order and duplicated
+			// accessible names go wrong, and neither of the other two routes has it.
+			await page.goto(`/groups/${GROUP}/insights?tab=partners`);
+			await revealSubject(page, "Borrowing vs supplying");
 			await scan(page);
 		});
 
