@@ -337,7 +337,11 @@ export default function InsightsDashboard({
 					/>
 				</Box>
 
-				<Accordion variant="outlined" disableGutters>
+				{/* h3 because this sits INSIDE the Overview section, alongside the panels,
+				    and the sections are the h2s. MUI's default is h3 already; saying it
+				    explicitly is what stops the next reader "fixing" it to h2 and skipping
+				    a level in the app where the sections do not exist. */}
+				<Accordion variant="outlined" disableGutters slots={{ heading: "h3" }}>
 					<AccordionSummary expandIcon={<ExpandMore />}>
 						<Typography variant="body2">
 							{t("insights.headline.more")}
