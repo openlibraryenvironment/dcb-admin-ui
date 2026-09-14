@@ -16,6 +16,7 @@ import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 
+import { requiresNumericRangeMappings } from "@helpers/librarySetup";
 import { libraryQuery } from "@/queryOptions/library";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { numericRangeMappingColumnsNoCategoryFilter } from "@columns/numericRangeMappingColumnsNoCategoryFilter";
@@ -91,8 +92,9 @@ function AllNumericMappings() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<MappingsSubTabs
 						libraryId={libraryId}
-						type="numericRange"
+						activeType="numericRange"
 						activeCategory="patronType"
+						includeNumericRange={requiresNumericRangeMappings(library)}
 					/>
 
 					<Typography

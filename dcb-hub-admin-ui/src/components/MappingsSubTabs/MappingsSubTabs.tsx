@@ -1,66 +1,59 @@
 import { Tabs } from "@mui/material";
-
-import { TabLink } from "@components/TabLink/TabLink";
 import { useTranslation } from "react-i18next";
 
-export type MappingsType = "referenceValue" | "numericRange";
-export type MappingCategory = "itemType" | "location" | "patronType" | "all";
+import { TabLink } from "@components/TabLink/TabLink";
+import {
+	MAPPING_TABS,
+	mappingTabPath,
+	type MappingCategory,
+	type MappingsType,
+} from "@constants/mappingsTabs";
 
-// Route base per mapping type; also the URL segment the tabs navigate within.
-const BASE: Record<MappingsType, string> = {
-	referenceValue: "referenceValueMappings",
-	numericRange: "numericRangeMappings",
-};
-
-// Categories per type. numericRange deliberately omits "location": there is no
-// numericRangeMappings/location route, so the inlined bars that previously
-// showed it produced a dead tab.
-const CATEGORIES: Record<
-	MappingsType,
-	ReadonlyArray<{ category: MappingCategory; labelKey: string }>
-> = {
-	referenceValue: [
-		{ category: "itemType", labelKey: "mappings.categories.itemType" },
-		{ category: "location", labelKey: "mappings.categories.location" },
-		{ category: "patronType", labelKey: "mappings.categories.patronType" },
-		{ category: "all", labelKey: "nav.mappings.allReferenceValue" },
-	],
-	numericRange: [
-		{ category: "itemType", labelKey: "mappings.categories.itemType" },
-		{ category: "patronType", labelKey: "mappings.categories.patronType" },
-		{ category: "all", labelKey: "nav.mappings.allReferenceValue" },
-	],
-};
+export type { MappingCategory, MappingsType };
 
 interface MappingsSubTabsProps {
 	libraryId: string;
-	type: MappingsType;
+	/** Which mapping type's page is currently showing. */
+	activeType: MappingsType;
 	/** Which category's page is currently showing. */
 	activeCategory: MappingCategory;
+	/**
+	 * Whether this library's ILS uses numeric range mappings at all — Sierra and
+	 * Polaris do, nothing else does. Pass `requiresNumericRangeMappings(library)`.
+	 */
+	includeNumericRange: boolean;
 }
 
 export default function MappingsSubTabs({
 	libraryId,
-	type,
+	activeType,
 	activeCategory,
+	includeNumericRange,
 }: MappingsSubTabsProps) {
 	const { t } = useTranslation();
 
-	const pathFor = (category: MappingCategory) =>
-		`/libraries/${libraryId}/${BASE[type]}/${category}`;
+	// Showing the numeric tabs whenever one of them is the open page keeps `value` in the
+	// rendered set. MUI selects nothing and logs when `value` matches no tab, which is
+	// what a typed numeric URL on a FOLIO or Alma library would otherwise produce.
+	const showNumericRange = includeNumericRange || activeType === "numericRange";
+
+	const visibleTabs = MAPPING_TABS.filter(
+		(tab) => showNumericRange || tab.type !== "numericRange",
+	);
 
 	return (
 		<Tabs
-			value={pathFor(activeCategory)}
+			value={mappingTabPath(libraryId, activeType, activeCategory)}
 			sx={{ mb: 2 }}
+			variant="scrollable"
 			aria-label={t("nav.mappings.name")}
 		>
-			{CATEGORIES[type].map((c) => (
+			{visibleTabs.map((tab) => (
 				<TabLink
-					key={c.category}
-					value={pathFor(c.category)}
-					to={pathFor(c.category)}
-					label={t(c.labelKey)}
+					key={`${tab.type}-${tab.category}`}
+					value={mappingTabPath(libraryId, tab.type, tab.category)}
+					to={mappingTabPath(libraryId, tab.type, tab.category)}
+					label={t(tab.labelKey)}
 				/>
 			))}
 		</Tabs>
