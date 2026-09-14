@@ -3,13 +3,9 @@ import { z } from "zod";
 /**
  * The whole Insights view, in the URL.
  *
- * Everything a reader would expect a link to carry: the window, which libraries, which
- * series are plotted, and the cost assumption behind the value figure. It lived in a
- * Zustand store and in component state, so a link to "the last quarter for these three
- * libraries" opened on somebody else's default and nobody noticed, because nobody tried.
- *
- * Every field `.catch()`es to its default: a hand-typed or truncated URL degrades to a
- * sensible view rather than throwing a route error at somebody who mistyped a date.
+ * Every field `.catch()`es to its default, so a truncated or hand-edited link degrades to a
+ * view rather than throwing a route error at somebody who mistyped a date. What belongs in
+ * the link and why, including the scope encoding: INSIGHTS_IA_AND_UX_PLAN.md section 2.
  */
 
 export const RANGE_PRESETS = ["7d", "30d", "90d", "365d"] as const;
