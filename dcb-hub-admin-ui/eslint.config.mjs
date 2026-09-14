@@ -165,6 +165,23 @@ export default [
 					message:
 						"A bare invalidateQueries() nukes the cache and re-fires every mounted query. Invalidate the narrowest stale key.",
 				},
+				// The Insights view belongs in the URL. The range, the plotted series and
+				// the scope were held in a Zustand store and in component state, so a link
+				// to "last quarter for these three libraries" opened on somebody else's
+				// default. These two catch the next piece of dashboard state reaching for
+				// the same place. insightsCostStore is deliberately NOT banned: it is the
+				// per-user default for a fresh visit, and the tile writes through to the URL.
+				{
+					selector:
+						"CallExpression[callee.name='useState'] > Literal[value=/^(7d|30d|90d|365d)$/]",
+					message:
+						"A time range is part of the view: put it in the URL (insightsSearch.ts), not in component state.",
+				},
+				{
+					selector: "ImportDeclaration[source.value=/insightsPlotStore/]",
+					message:
+						"insightsPlotStore was deleted: the range, the plotted series and the scope live in the URL now. See insightsSearch.ts.",
+				},
 				{
 					selector:
 						"JSXAttribute[name.name=/^auto[Cc]omplete$/][value.value='off']",

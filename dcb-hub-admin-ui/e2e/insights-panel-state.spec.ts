@@ -190,6 +190,46 @@ test.describe("Insights panel states", () => {
 		await expect(popover).toContainText("the unit cost is yours");
 	});
 
+	test("a link carries the whole view, and survives a reload and the back button", async ({
+		page,
+	}) => {
+		// The thing that did not work before: this URL opened on somebody else's default,
+		// because the range and the plotted series lived in a store.
+		await page.goto(
+			"/consortium/insights?range=90d&series=LOANED&unitCost=17.5",
+		);
+
+		const live = page.locator('[aria-live="polite"]');
+		await expect(live).toHaveText("Showing 90 days for the whole consortium.");
+
+		await page.reload();
+		await expect(live).toHaveText("Showing 90 days for the whole consortium.");
+
+		// Changing a control writes to the URL rather than to a store.
+		await page.getByRole("button", { name: "7 days" }).click();
+		await expect(page).toHaveURL(/range=7d/);
+		await expect(live).toHaveText("Showing 7 days for the whole consortium.");
+
+		// replace: true, so the range control does not fill the reader's history - going
+		// back leaves the page rather than stepping through every range they tried.
+		await page.goBack();
+		await expect(page).not.toHaveURL(/\/consortium\/insights/);
+	});
+
+	test("a junk URL degrades to a view rather than an error", async ({
+		page,
+	}) => {
+		await page.goto(
+			"/consortium/insights?range=forever&from=last%20tuesday&series=%3Cscript%3E",
+		);
+
+		const live = page.locator('[aria-live="polite"]');
+		await expect(live).toHaveText("Showing 30 days for the whole consortium.");
+		await expect(
+			page.getByRole("heading", { level: 1, name: "Consortium insights" }),
+		).toBeVisible();
+	});
+
 	test("the view change is announced once, not once per panel", async ({
 		page,
 	}) => {

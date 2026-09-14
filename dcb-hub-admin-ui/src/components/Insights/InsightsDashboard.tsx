@@ -18,7 +18,6 @@ import dayjs from "dayjs";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
-import { useInsightsPlotStore, RangePreset } from "@hooks/insightsPlotStore";
 import {
 	ConsortialLifelineStat,
 	PatronGroupDemandStat,
@@ -72,6 +71,9 @@ import { announcementParts } from "@helpers/insightsAnnouncement";
 import { ExpandMore } from "@mui/icons-material";
 import { activeSystems } from "@helpers/insightsHeadline";
 
+import type { InsightsView } from "@hooks/useInsightsView";
+import type { RangePreset } from "@helpers/insightsSearch";
+
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
 
 function fillRate(successful: number, failed: number): number | null {
@@ -111,18 +113,20 @@ function Section({
 
 export default function InsightsDashboard({
 	libraryCode,
+	view,
 }: {
 	// Omitted = consortium-wide.
 	libraryCode?: string;
+	/** The view as the URL states it, and the writers that change it. */
+	view: InsightsView;
 }) {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 	const { categorical } = useChartPalette();
 
-	const rangePreset = useInsightsPlotStore((s) => s.rangePreset);
-	const setRangePreset = useInsightsPlotStore((s) => s.setRangePreset);
-	const customRange = useInsightsPlotStore((s) => s.customRange);
-	const setCustomRange = useInsightsPlotStore((s) => s.setCustomRange);
+	const { range: rangePreset, custom: customRange } = view;
+	const setRangePreset = view.setRange;
+	const setCustomRange = view.setCustomRange;
 
 	const { params, interval } = useMemo(() => {
 		// An explicit custom window wins over the preset.
@@ -424,6 +428,8 @@ export default function InsightsDashboard({
 							    earned; here it keeps its arithmetic on its own face. */}
 							<CostAvoidanceTile
 								fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
+								unitCost={view.unitCost}
+								onUnitCostChange={view.setUnitCost}
 								loading={loading}
 							/>
 						</Box>
@@ -431,7 +437,7 @@ export default function InsightsDashboard({
 				</Accordion>
 
 				{/* Trend spine + plot-builder */}
-				<StatusFlowChart params={params} interval={interval} />
+				<StatusFlowChart params={params} interval={interval} view={view} />
 
 				<DurationsPanel
 					params={params}

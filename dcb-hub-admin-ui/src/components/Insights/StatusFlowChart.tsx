@@ -8,10 +8,8 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette, inkOn } from "@hooks/useChartPalette";
 
 import PanelState from "./PanelState";
-import {
-	useInsightsPlotStore,
-	MAX_PLOT_SERIES,
-} from "@hooks/insightsPlotStore";
+import { MAX_PLOT_SERIES } from "@helpers/insightsSearch";
+import type { InsightsView } from "@hooks/useInsightsView";
 import {
 	timeSeriesQueryOptions,
 	StatsParams,
@@ -21,6 +19,8 @@ import {
 interface StatusFlowChartProps {
 	params: StatsParams;
 	interval: TimeSeriesInterval;
+	/** Which series are plotted is part of the view, so it travels in the URL. */
+	view: InsightsView;
 }
 
 const CHART_HEIGHT = 360;
@@ -28,14 +28,15 @@ const CHART_HEIGHT = 360;
 export default function StatusFlowChart({
 	params,
 	interval,
+	view,
 }: StatusFlowChartProps) {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 	const { colorForStatus } = useChartPalette();
 
 	// Atomic selectors - never destructure the whole store.
-	const selectedStatuses = useInsightsPlotStore((s) => s.selectedStatuses);
-	const toggleStatus = useInsightsPlotStore((s) => s.toggleStatus);
+	const selectedStatuses = view.series;
+	const toggleStatus = view.toggleSeries;
 
 	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		timeSeriesQueryOptions(client, params, interval),

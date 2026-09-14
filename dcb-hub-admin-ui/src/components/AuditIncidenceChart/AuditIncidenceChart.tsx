@@ -19,7 +19,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 import { getAuditIncidence } from "@queries/getAuditIncidence";
 import { rangeToParams } from "@helpers/insightsRange";
-import type { RangePreset } from "@hooks/insightsPlotStore";
+import type { RangePreset } from "@helpers/insightsSearch";
 import type {
 	LoadAuditIncidenceQuery,
 	LoadAuditIncidenceQueryVariables,

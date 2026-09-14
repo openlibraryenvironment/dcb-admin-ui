@@ -14,22 +14,38 @@ import { useInsightsCostStore } from "@hooks/insightsCostStore";
 
 import MetricInfo from "./MetricInfo";
 
-// Value tile. The successful-fulfilment count comes from the combined dashboard call
-// (passed in), and the monetary figure is entirely user-driven (see insightsCostStore) -
-// the backend never ships a "traditional ILL cost".
+/**
+ * Value tile. The count comes from the combined dashboard call; the money figure is
+ * entirely the reader's own assumption - dcb-service never ships a "traditional ILL cost".
+ *
+ * The assumption lives in the URL, not only in the store, because this is the figure most
+ * likely to end up in a board pack: a link that shows one recipient a different number
+ * from the one the sender saw is worse than no link. The store remains the per-user
+ * default for a fresh visit, and the first thing typed writes through to the URL.
+ */
 export default function CostAvoidanceTile({
 	fulfilled,
+	unitCost,
+	onUnitCostChange,
 	loading = false,
 }: {
 	fulfilled: number;
+	unitCost: number | null;
+	onUnitCostChange: (cost: number | null) => void;
 	loading?: boolean;
 }) {
 	const { t } = useTranslation();
 
 	// Atomic selectors.
-	const illUnitCost = useInsightsCostStore((s) => s.illUnitCost);
+	const storedCost = useInsightsCostStore((s) => s.illUnitCost);
 	const currencySymbol = useInsightsCostStore((s) => s.currencySymbol);
-	const setIllUnitCost = useInsightsCostStore((s) => s.setIllUnitCost);
+	const setStoredCost = useInsightsCostStore((s) => s.setIllUnitCost);
+
+	const illUnitCost = unitCost ?? storedCost;
+	const setIllUnitCost = (cost: number | null) => {
+		setStoredCost(cost);
+		onUnitCostChange(cost);
+	};
 
 	const avoidance =
 		illUnitCost != null && illUnitCost >= 0 ? fulfilled * illUnitCost : null;
