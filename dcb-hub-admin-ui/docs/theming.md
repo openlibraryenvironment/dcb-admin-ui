@@ -244,3 +244,23 @@ Every image passes `isValidLogoUrl`, the check symposia-ui runs on read and dcb-
 write, so the preview cannot show an image the patron app would refuse. The arrangement is
 `previewArrangement` in `src/constants/discoveryBranding.ts`, which is where it is tested. The
 no-photograph gradient is kept in step with symposia-ui/docs/hero-canvas.md by hand.
+
+## The discovery theme list
+
+`DISCOVERY_THEME_NAMES` in `src/constants/discoveryBranding.ts` is what an administrator may
+choose for the patron-facing discovery app. It is a copy of symposia-ui's theme registry, so
+the administrator picks from a list rather than typing a name and learning it was wrong from a
+rejected save.
+
+**Every theme this console offers itself is in it.** A consortium branded MOBIUS in the console
+used to fall back to OpenRS blue for its patrons, because the discovery app had no MOBIUS
+theme. `evergreen`, `koha`, `folio`, `blueAndWhite` and `mobius` now exist in both, under the
+same names. `discoveryBranding.test.ts` fails if a theme is added here without being added to
+the discovery list. `kInt` is the discovery app's alone.
+
+Two rules keep the copy harmless when it drifts:
+
+1. A stored theme this build has never heard of still renders as itself. `themeOptions` folds
+   the current value into the list, so it is not silently cleared on the next save.
+2. The discovery app tolerates an unknown theme on read and falls back to its default, so the
+   worst case of drift is an administrator not being offered a theme, never a broken patron.

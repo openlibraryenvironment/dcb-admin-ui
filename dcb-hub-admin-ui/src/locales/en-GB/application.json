@@ -473,7 +473,8 @@
 			"koha": "Koha",
 			"mobius": "MOBIUS",
 			"openRS": "OpenRS",
-			"evergreen": "Evergreen"
+			"evergreen": "Evergreen",
+			"kInt": "K-Int"
 		},
 		"modes": {
 			"light": "Light",
