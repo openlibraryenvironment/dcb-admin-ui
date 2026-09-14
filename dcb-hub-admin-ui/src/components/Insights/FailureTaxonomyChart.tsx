@@ -1,13 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import { BarChartPro } from "@mui/x-charts-pro";
+import { BarChartPro, ChartsToolbarPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 import { failureTaxonomyQueryOptions, StatsParams } from "@helpers/statsApi";
 
 import PanelState from "./PanelState";
+import { DrillList } from "./DrillLink";
+import { failureDrill } from "@helpers/insightsDrill";
 
 import MetricInfo from "./MetricInfo";
 
@@ -57,6 +59,11 @@ export default function FailureTaxonomyChart({
 						// Magnitude ranking -> one hue, horizontal for legible reason labels.
 						<BarChartPro
 							height={CHART_HEIGHT}
+							// The image and print export the MUI X Premium licence already covers,
+							// which nothing in this application used. A picture for a slide is a
+							// different need from the numbers, and this is where a reader looks for it.
+							showToolbar
+							slots={{ toolbar: ChartsToolbarPro }}
 							layout="horizontal"
 							yAxis={[{ scaleType: "band", data: rows.map((r) => r.reason) }]}
 							series={[
@@ -70,6 +77,17 @@ export default function FailureTaxonomyChart({
 						/>
 					)}
 				</PanelState>
+
+				{/* The bars are not focusable and a click handler on one is a pointer-only
+				    affordance, so the drill-downs are links beneath the chart. */}
+				<DrillList
+					panel={t("insights.charts.failure_taxonomy.title")}
+					items={rows.map((row) => ({
+						key: row.reason,
+						label: row.reason,
+						drill: failureDrill(row.reason, params),
+					}))}
+				/>
 			</CardContent>
 		</Card>
 	);

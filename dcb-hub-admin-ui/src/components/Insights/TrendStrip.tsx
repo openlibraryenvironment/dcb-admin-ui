@@ -17,6 +17,8 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 import MetricInfo from "./MetricInfo";
 import PanelState from "./PanelState";
+import DrillLink from "./DrillLink";
+import { errorDrill } from "@helpers/insightsDrill";
 import {
 	TrendSeries,
 	noiseFor,
@@ -106,6 +108,7 @@ export default function TrendStrip({
 									key={trend.id}
 									trend={trend}
 									colour={categorical[0]}
+									params={params}
 								/>
 							))}
 						</Box>
@@ -116,7 +119,15 @@ export default function TrendStrip({
 	);
 }
 
-function TrendTile({ trend, colour }: { trend: TrendSeries; colour: string }) {
+function TrendTile({
+	trend,
+	colour,
+	params,
+}: {
+	trend: TrendSeries;
+	colour: string;
+	params: StatsParams;
+}) {
 	const { t } = useTranslation();
 
 	const latest = trend.values.at(-1);
@@ -152,7 +163,25 @@ function TrendTile({ trend, colour }: { trend: TrendSeries; colour: string }) {
 			</Box>
 
 			<Typography variant="h4" component="p">
-				{latest === undefined ? "—" : format(latest)}
+				{latest === undefined ? (
+					"—"
+				) : trend.id === "error_rate" ? (
+					// The only one of the three with an exact answer waiting. Volume and
+					// fill rate are ratios the grid cannot reproduce as a set of rows, so
+					// they stay figures.
+					<DrillLink
+						drill={errorDrill(params)}
+						panel={t("insights.trends.strip.title")}
+						// The headline above carries the same two words, and two links with
+						// one accessible name is a reader hearing the same sentence twice
+						// with no way to tell which figure each belongs to.
+						subject={t("insights.trends.over_time", { label: title })}
+					>
+						{format(latest)}
+					</DrillLink>
+				) : (
+					format(latest)
+				)}
 			</Typography>
 
 			<Verdict trend={trend} verdict={verdict} format={format} />

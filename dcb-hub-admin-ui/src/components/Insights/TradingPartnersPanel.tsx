@@ -19,6 +19,8 @@ import {
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 import MetricInfo from "./MetricInfo";
+import DrillLink from "./DrillLink";
+import { partnerDrill } from "@helpers/insightsDrill";
 import {
 	StatsParams,
 	dashboardMetricsQueryOptions,
@@ -103,6 +105,12 @@ function ScopedPartners({
 
 	const rows = data?.content ?? [];
 
+	// The pair, in the direction the column is showing. Only when the scope is ONE Host
+	// LMS: across a set "we" is several libraries and there is no single borrower to name,
+	// so the counts stay figures rather than becoming a link to the wrong question.
+	const own = libraryCode.includes(",") ? null : libraryCode;
+	const panel = t("insights.charts.trading_partners.title");
+
 	return (
 		<PanelFrame
 			title={t("insights.charts.trading_partners.title")}
@@ -149,10 +157,28 @@ function ScopedPartners({
 											) : null}
 										</TableCell>
 										<TableCell align="right">
-											{row.borrowedFromCount.toLocaleString()}
+											{own ? (
+												<DrillLink
+													drill={partnerDrill(own, row.partnerCode, params)}
+													panel={panel}
+												>
+													{row.borrowedFromCount.toLocaleString()}
+												</DrillLink>
+											) : (
+												row.borrowedFromCount.toLocaleString()
+											)}
 										</TableCell>
 										<TableCell align="right">
-											{row.suppliedToCount.toLocaleString()}
+											{own ? (
+												<DrillLink
+													drill={partnerDrill(row.partnerCode, own, params)}
+													panel={panel}
+												>
+													{row.suppliedToCount.toLocaleString()}
+												</DrillLink>
+											) : (
+												row.suppliedToCount.toLocaleString()
+											)}
 										</TableCell>
 										<TableCell align="right">
 											{row.totalCount.toLocaleString()}
