@@ -48,6 +48,7 @@ const NOT_FIGURES = new Set([
 	"PanelState",
 	"InsightsDashboard",
 	"ScopeSelector",
+	"SubjectBar",
 ]);
 
 describe("the metric registry", () => {

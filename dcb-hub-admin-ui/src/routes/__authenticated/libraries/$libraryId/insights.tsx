@@ -140,7 +140,12 @@ function LibraryInsights() {
 			<LibraryTabs libraryId={libraryId} value={9} />
 			<Box sx={{ mt: 3 }}>
 				{libraryCode ? (
-					<InsightsDashboard libraryCode={libraryCode} view={view} />
+					<InsightsDashboard
+						libraryCode={libraryCode}
+						view={view}
+						subjectBarTo="/libraries/$libraryId/insights"
+						subjectBarParams={{ libraryId }}
+					/>
 				) : (
 					<Typography color="text.secondary">
 						{t("insights.library.no_hostlms")}

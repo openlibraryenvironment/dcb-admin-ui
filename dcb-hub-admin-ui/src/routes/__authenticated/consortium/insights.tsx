@@ -86,7 +86,11 @@ function ConsortiumInsightsPage() {
 					onOptionsLoaded={setOptions}
 				/>
 			</Box>
-			<InsightsDashboard libraryCode={libraryCode} view={view} />
+			<InsightsDashboard
+				libraryCode={libraryCode}
+				view={view}
+				subjectBarTo="/consortium/insights"
+			/>
 		</PageContainer>
 	);
 }

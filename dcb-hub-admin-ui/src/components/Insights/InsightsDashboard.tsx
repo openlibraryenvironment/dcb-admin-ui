@@ -74,6 +74,9 @@ import { activeSystems } from "@helpers/insightsHeadline";
 import type { InsightsView } from "@hooks/useInsightsView";
 import type { RangePreset } from "@helpers/insightsSearch";
 
+import SubjectBar from "./SubjectBar";
+import { resolveSubject, Subject } from "@helpers/insightsSubjects";
+
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
 
 function fillRate(successful: number, failed: number): number | null {
@@ -93,13 +96,25 @@ function fillRate(successful: number, failed: number): number | null {
 function Section({
 	id,
 	titleKey,
+	subject,
+	current,
 	children,
 }: {
 	id: string;
 	titleKey: string;
+	/** Which subject this section belongs to; omitted means always shown. */
+	subject?: Subject;
+	current: Subject;
 	children: ReactNode;
 }) {
 	const { t } = useTranslation();
+
+	// One place decides what is open, rather than five conditionals at the call sites.
+	// Returning null rather than hiding with CSS is the point: a subject that is not open
+	// must not mount its panels, or the cost the subjects exist to make opt-in is paid
+	// anyway - and the panels below the fold would fetch on an IntersectionObserver that
+	// a hidden element never fires.
+	if (subject && subject !== current) return null;
 
 	return (
 		<Box component="section" aria-labelledby={id}>
@@ -114,15 +129,27 @@ function Section({
 export default function InsightsDashboard({
 	libraryCode,
 	view,
+	subjectBarTo,
+	subjectBarParams,
 }: {
 	// Omitted = consortium-wide.
 	libraryCode?: string;
 	/** The view as the URL states it, and the writers that change it. */
 	view: InsightsView;
+	/** Where the subject links point; the route knows its own path, this does not. */
+	subjectBarTo: string;
+	subjectBarParams?: Record<string, string>;
 }) {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 	const { categorical } = useChartPalette();
+
+	const scopedCodes = libraryCode
+		? libraryCode.split(",").filter(Boolean).length
+		: 0;
+	// A subject the current scope cannot show falls back rather than rendering nothing -
+	// which is what an old link to Gaps does once the reader widens to the consortium.
+	const subject = resolveSubject(view.tab, scopedCodes);
 
 	const { range: rangePreset, custom: customRange } = view;
 	const setRangePreset = view.setRange;
@@ -276,6 +303,13 @@ export default function InsightsDashboard({
 				</LocalizationProvider>
 			</Stack>
 
+			<SubjectBar
+				current={subject}
+				scopedCodes={scopedCodes}
+				to={subjectBarTo}
+				params={subjectBarParams}
+			/>
+
 			<Box
 				key={announcement}
 				aria-live="polite"
@@ -287,6 +321,7 @@ export default function InsightsDashboard({
 
 			<Section
 				id="insights-overview-heading"
+				current={subject}
 				titleKey="insights.sections.overview"
 			>
 				{/* THE FIVE. Twelve equal tiles was an index, not a summary: a reader had
@@ -435,22 +470,32 @@ export default function InsightsDashboard({
 						</Box>
 					</AccordionDetails>
 				</Accordion>
+			</Section>
 
+			<Section
+				id="insights-trends-heading"
+				subject="trends"
+				current={subject}
+				titleKey="insights.sections.trends"
+			>
 				{/* Trend spine + plot-builder */}
 				<StatusFlowChart params={params} interval={interval} view={view} />
+			</Section>
 
+			<Section
+				id="insights-performance-heading"
+				subject="service"
+				current={subject}
+				titleKey="insights.sections.performance"
+			>
+				{/* First, because every other panel here is a breakdown of one of these. */}
 				<DurationsPanel
 					params={params}
 					toLoaned={d?.turnaroundToLoaned}
 					toFinalised={toFinalised.data}
 					loading={loading}
 				/>
-			</Section>
 
-			<Section
-				id="insights-performance-heading"
-				titleKey="insights.sections.performance"
-			>
 				{/* Peer benchmarking - this library vs the consortium median */}
 				<LazyPanel minHeight={320}>
 					<PeerBenchmarkPanel
@@ -488,7 +533,12 @@ export default function InsightsDashboard({
 				</LazyPanel>
 			</Section>
 
-			<Section id="insights-demand-heading" titleKey="insights.sections.demand">
+			<Section
+				id="insights-demand-heading"
+				subject="demand"
+				current={subject}
+				titleKey="insights.sections.demand"
+			>
 				{/* Demand pattern (staffing) */}
 				<LazyPanel minHeight={320}>
 					<DemandHeatmapChart params={params} />
@@ -586,6 +636,8 @@ export default function InsightsDashboard({
 
 			<Section
 				id="insights-partners-heading"
+				subject="partners"
+				current={subject}
 				titleKey="insights.sections.partners"
 			>
 				<LazyPanel minHeight={360}>
@@ -600,7 +652,12 @@ export default function InsightsDashboard({
 
 			{/* Collection gaps + supply value - library scope only. */}
 			{libraryCode && (
-				<Section id="insights-gaps-heading" titleKey="insights.sections.gaps">
+				<Section
+					id="insights-gaps-heading"
+					subject="gaps"
+					current={subject}
+					titleKey="insights.sections.gaps"
+				>
 					<LazyPanel minHeight={400}>
 						<Stack spacing={3}>
 							<Box
@@ -691,7 +748,9 @@ export default function InsightsDashboard({
 
 			{/* The catalogue itself, rather than the traffic over it. Its own section, and
 			    last, because it answers a different question and costs more to answer. */}
-			<CollectionAnalysisSection libraryCode={libraryCode} />
+			{subject === "collection" && (
+				<CollectionAnalysisSection libraryCode={libraryCode} />
+			)}
 		</Stack>
 	);
 }

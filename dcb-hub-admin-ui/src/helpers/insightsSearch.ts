@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { SUBJECTS } from "@helpers/insightsSubjects";
+
 /**
  * The whole Insights view, in the URL.
  *
@@ -40,6 +42,10 @@ const csv = <T>(parse: (value: string) => T | null) =>
 	);
 
 export const insightsSearchSchema = z.object({
+	// Which subject is open. A name this deployment does not offer - an old link, a
+	// renamed subject - falls back rather than rendering nothing; resolveSubject decides,
+	// because whether a subject is available also depends on the scope.
+	tab: z.enum(SUBJECTS).optional().catch(undefined),
 	range: z.enum(RANGE_PRESETS).optional().catch(undefined),
 	// Only meaningful together, and only when the reader chose an explicit window.
 	from: z.string().date().optional().catch(undefined),
@@ -66,6 +72,7 @@ export function resolveSearch(search: InsightsSearch) {
 			: null;
 
 	return {
+		tab: search.tab,
 		// An explicit window wins over a preset, and clearing it falls back to one.
 		range: search.range ?? DEFAULT_RANGE,
 		custom,

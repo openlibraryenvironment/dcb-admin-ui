@@ -1034,7 +1034,8 @@
 			"performance": "Service performance",
 			"demand": "Demand",
 			"partners": "Trading partners",
-			"gaps": "Collection gaps and supply value"
+			"gaps": "Collection gaps and supply value",
+			"trends": "Trends"
 		},
 		"collection": {
 			"section_title": "Collection analysis",
@@ -1211,6 +1212,15 @@
 				"how": "Successful fulfilments in the window multiplied by a unit cost you supply. No cost is shipped with the product.",
 				"not": "It is an assumption multiplied by a count, not a measurement. The count is ours; the unit cost is yours, and the figure is only as defensible as that number."
 			}
+		},
+		"subjects": {
+			"label": "Insights subjects",
+			"trends": "Trends",
+			"service": "Service",
+			"demand": "Demand",
+			"partners": "Partners",
+			"collection": "Collection",
+			"gaps": "Gaps"
 		}
 	},
 	"libraries": {

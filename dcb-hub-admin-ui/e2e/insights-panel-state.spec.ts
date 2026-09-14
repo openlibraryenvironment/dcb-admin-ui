@@ -76,7 +76,7 @@ test.describe("Insights panel states", () => {
 			});
 		});
 
-		await page.goto("/consortium/insights");
+		await page.goto("/consortium/insights?tab=service");
 
 		await reveal(page, "Why requests fail");
 		const panel = cardFor(page, "Why requests fail");
@@ -103,7 +103,7 @@ test.describe("Insights panel states", () => {
 			await route.fulfill({ json: [] });
 		});
 
-		await page.goto("/consortium/insights");
+		await page.goto("/consortium/insights?tab=service");
 
 		await reveal(page, "Why requests fail");
 		const panel = cardFor(page, "Why requests fail");
@@ -129,7 +129,7 @@ test.describe("Insights panel states", () => {
 	test("the durations panel names both transit legs, and says when one is unreported", async ({
 		page,
 	}) => {
-		await page.goto("/consortium/insights");
+		await page.goto("/consortium/insights?tab=service");
 		await reveal(page, "How long things take");
 
 		const panel = cardFor(page, "How long things take");
