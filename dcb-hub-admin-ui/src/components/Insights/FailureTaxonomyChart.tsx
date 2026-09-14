@@ -1,13 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import { BarChartPro, ChartsToolbarPro } from "@mui/x-charts-pro";
+import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 import { failureTaxonomyQueryOptions, StatsParams } from "@helpers/statsApi";
 
 import PanelState from "./PanelState";
+import ChartExportToolbar from "./ChartExportToolbar";
 import { DrillList } from "./DrillLink";
 import { failureDrill } from "@helpers/insightsDrill";
 
@@ -63,7 +64,7 @@ export default function FailureTaxonomyChart({
 							// which nothing in this application used. A picture for a slide is a
 							// different need from the numbers, and this is where a reader looks for it.
 							showToolbar
-							slots={{ toolbar: ChartsToolbarPro }}
+							slots={{ toolbar: ChartExportToolbar }}
 							layout="horizontal"
 							yAxis={[{ scaleType: "band", data: rows.map((r) => r.reason) }]}
 							series={[

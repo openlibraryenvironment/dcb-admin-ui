@@ -54,7 +54,7 @@ test.describe("Insights drill-down", () => {
 		await page.goto("/consortium/insights?tab=service");
 
 		const link = page.getByRole("link", {
-			name: "Open the requests behind NO_ITEMS_SELECTABLE_AT_ANY_AGENCY",
+			name: /Open the requests behind NO_ITEMS_SELECTABLE_AT_ANY_AGENCY$/,
 		});
 
 		for (let i = 0; i < 12 && !(await link.isVisible()); i++) {
@@ -81,7 +81,7 @@ test.describe("Insights drill-down", () => {
 		await page.goto("/consortium/insights?tab=service&range=90d");
 
 		const link = page.getByRole("link", {
-			name: "Open the requests behind NO_ITEMS_SELECTABLE_AT_ANY_AGENCY",
+			name: /Open the requests behind NO_ITEMS_SELECTABLE_AT_ANY_AGENCY$/,
 		});
 
 		for (let i = 0; i < 12 && !(await link.isVisible()); i++) {
@@ -109,17 +109,19 @@ test.describe("Insights drill-down", () => {
 	}) => {
 		await page.goto("/consortium/insights");
 
+		// The name STARTS with the figure painted on the link - WCAG 2.5.3 Label in Name,
+		// because a voice-control user says what they can see - and then says where it
+		// goes, because a reader listing the page's links hears only the name.
 		const link = page.getByRole("link", {
-			name: "Open the requests behind Error rate",
-			exact: true,
+			name: /^[\d.]+%: Open the requests behind Error rate$/,
 		});
 		await expect(link).toBeVisible();
 
 		// The trend tile beside it counts the same measure over time, so its link has to
-		// be distinguishable by NAME - which is all a reader listing the page's links gets.
+		// be distinguishable by NAME too.
 		await expect(
 			page.getByRole("link", {
-				name: "Open the requests behind Error rate over time",
+				name: /Open the requests behind Error rate over time$/,
 			}),
 		).toBeVisible();
 

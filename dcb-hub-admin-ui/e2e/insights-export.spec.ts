@@ -91,7 +91,17 @@ test.describe("Insights export", () => {
 		}
 
 		// MUI X Premium ships these triggers and nothing in this application used them.
-		// A picture for a slide is a different need from the numbers.
-		await expect(chart.getByRole("button", { name: /export/i })).toHaveCount(1);
+		// A picture for a slide is a different need from the numbers. Each carries its own
+		// name: the icon is the only other thing in the button.
+		await expect(
+			chart.getByRole("button", { name: "Download this chart as an image" }),
+		).toBeVisible();
+		await expect(
+			chart.getByRole("button", { name: "Print this chart" }),
+		).toBeVisible();
+
+		// NOT the stock pro toolbar, which also renders zoom controls these charts cannot
+		// use - and renders their labels on a span, where aria-label is prohibited.
+		await expect(chart.getByRole("button", { name: /zoom/i })).toHaveCount(0);
 	});
 });

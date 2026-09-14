@@ -1,15 +1,9 @@
 /**
  * A panel's own numbers, as a CSV.
  *
- * NOT a second export engine. The requests BEHIND a number are exported by the grid a
- * drill-down leads to, which already pages a whole result set and carries its costs in
- * docs/large-exports.md. This is the handful of rows already on screen: they are in the
- * query cache and already bounded by the query's own limit, so it costs no request and
- * cannot grow with the corpus.
- *
- * The header rows are the point. A CSV of figures with no statement of what they are, what
- * they cover or when they were taken becomes wrong the moment it is forwarded, and the
- * reader who receives it has no way to tell.
+ * NOT a second export engine: the rows are already in the query cache and bounded by the
+ * query's own limit. Why the header rows carry the scope, window and method, and what is
+ * deliberately not built: INSIGHTS_IA_AND_UX_PLAN.md section 9.
  */
 
 export interface CsvColumn<T> {

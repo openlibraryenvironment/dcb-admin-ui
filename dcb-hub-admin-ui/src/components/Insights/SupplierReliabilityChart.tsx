@@ -1,12 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import { BarChartPro, ChartsToolbarPro } from "@mui/x-charts-pro";
+import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 
 import PanelState from "./PanelState";
+import ChartExportToolbar from "./ChartExportToolbar";
 import { DrillList } from "./DrillLink";
 import { supplierDrill } from "@helpers/insightsDrill";
 
@@ -70,7 +71,7 @@ export default function SupplierReliabilityChart({
 							// which nothing in this application used. A picture for a slide is a
 							// different need from the numbers, and this is where a reader looks for it.
 							showToolbar
-							slots={{ toolbar: ChartsToolbarPro }}
+							slots={{ toolbar: ChartExportToolbar }}
 							xAxis={[
 								{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
 							]}

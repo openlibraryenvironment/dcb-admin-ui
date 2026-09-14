@@ -47,11 +47,17 @@ export default function DrillLink({
 			to={drill.to}
 			search={{ q: drill.q, from: here(), fromLabel: panel }}
 			// The visible text is a status, a code or a figure - none of which says what
-			// following the link DOES. A reader listing the page's links hears only the
-			// name, so the name has to carry the destination.
-			aria-label={t("insights.drill.open", {
-				subject: subject ?? (typeof children === "string" ? children : panel),
-			})}
+			// following the link DOES, and a reader listing the page's links hears only the
+			// name. So the name carries the destination - and STARTS with the visible text,
+			// because WCAG 2.5.3 Label in Name requires the accessible name to contain what
+			// is painted: a voice-control user says what they can see.
+			aria-label={
+				typeof children === "string"
+					? `${children}: ${t("insights.drill.open", {
+							subject: subject ?? children,
+						})}`
+					: t("insights.drill.open", { subject: subject ?? panel })
+			}
 		>
 			{children}
 		</RouterLink>

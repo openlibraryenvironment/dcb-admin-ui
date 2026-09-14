@@ -2,12 +2,13 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
-import { ChartsToolbarPro, LineChartPro } from "@mui/x-charts-pro";
+import { LineChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette, inkOn } from "@hooks/useChartPalette";
 
 import PanelState from "./PanelState";
+import ChartExportToolbar from "./ChartExportToolbar";
 import { MAX_PLOT_SERIES } from "@helpers/insightsSearch";
 import type { InsightsView } from "@hooks/useInsightsView";
 import {
@@ -137,7 +138,7 @@ export default function StatusFlowChart({
 							// which nothing in this application used. A picture for a slide is a
 							// different need from the numbers, and this is where a reader looks for it.
 							showToolbar
-							slots={{ toolbar: ChartsToolbarPro }}
+							slots={{ toolbar: ChartExportToolbar }}
 							xAxis={[
 								{
 									data: xAxisData,
