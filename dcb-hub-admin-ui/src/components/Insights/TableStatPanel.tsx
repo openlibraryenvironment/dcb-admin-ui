@@ -3,16 +3,20 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 
 import PanelState from "./PanelState";
+
+import { MetricId } from "@helpers/insightsMetrics";
+import MetricInfo from "./MetricInfo";
 import {
+	Box,
 	Card,
 	CardContent,
-	Typography,
 	Table,
 	TableBody,
 	TableCell,
 	TableContainer,
 	TableHead,
 	TableRow,
+	Typography,
 } from "@mui/material";
 
 const PANEL_MIN_HEIGHT = 280;
@@ -32,6 +36,8 @@ interface TableStatPanelProps<T> {
 	};
 	columns: StatColumn<T>[];
 	getRowKey: (row: T) => string;
+	/** Set by callers whose figure has a registry entry; see insightsMetrics. */
+	metric?: MetricId;
 	limit?: number;
 }
 
@@ -43,6 +49,7 @@ export default function TableStatPanel<T>({
 	queryOptions,
 	columns,
 	getRowKey,
+	metric,
 	limit = 20,
 }: TableStatPanelProps<T>) {
 	const { t } = useTranslation();
@@ -54,9 +61,12 @@ export default function TableStatPanel<T>({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t(titleKey)}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t(titleKey)}
+					</Typography>
+					{metric ? <MetricInfo metric={metric} label={t(titleKey)} /> : null}
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t(subtitleKey)}
 				</Typography>

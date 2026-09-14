@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
@@ -12,6 +12,8 @@ import {
 import { formatDuration } from "@helpers/insightsRange";
 
 import PanelState from "./PanelState";
+
+import MetricInfo from "./MetricInfo";
 
 const CHART_HEIGHT = 340;
 
@@ -35,9 +37,15 @@ export default function SupplierResponseSlaChart({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t("insights.charts.supplier_response.title")}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t("insights.charts.supplier_response.title")}
+					</Typography>
+					<MetricInfo
+						metric="supplier_response"
+						label={t("insights.charts.supplier_response.title")}
+					/>
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t("insights.charts.supplier_response.subtitle")}
 				</Typography>

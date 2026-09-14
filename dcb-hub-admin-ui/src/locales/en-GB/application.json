@@ -1113,6 +1113,104 @@
 			"active_systems": "Libraries active",
 			"active_systems_sub": "Host LMS systems that borrowed or supplied",
 			"more": "More measures"
+		},
+		"method": {
+			"trigger": "How {{label}} is calculated",
+			"title": "How {{label}} is calculated",
+			"part": {
+				"what": "What it counts",
+				"how": "How it is computed",
+				"not": "What it does not include",
+				"data": "How much data"
+			},
+			"sample": "{{count}} observations in this window.",
+			"sample_low": "Only {{count}} observations in this window - a single outlier moves this figure.",
+			"sample_unknown": "This endpoint reports percentiles without a count, so how many requests are behind this figure is not known here.",
+			"requests_fulfilled": {
+				"what": "Requests that reached a settled outcome in the window, whether they were filled or not.",
+				"how": "The successful and failed counts from the borrower fulfilment query, added together. Successful means the request reached loaned, completed or finalised.",
+				"not": "Requests still in flight when the window closed are in neither count, so a busy week looks smaller until its requests settle."
+			},
+			"fill_rate": {
+				"what": "The share of settled requests that reached the patron.",
+				"how": "Successful divided by successful plus failed, over the same window. The delta compares it with the equal-length window immediately before.",
+				"not": "It says nothing about how long the fill took, and nothing about requests still open. A service that fills everything slowly scores the same as one that fills everything quickly."
+			},
+			"error_rate": {
+				"what": "The share of settled requests that did not reach the patron.",
+				"how": "The exact complement of the fill rate: one minus successful over successful plus failed.",
+				"not": "It does not separate a cancellation from a breakdown. The failure taxonomy panel answers why; this only answers how often."
+			},
+			"libraries_active": {
+				"what": "Members that borrowed or supplied at least once in the window.",
+				"how": "One row per Host LMS from the net flow query, counting those whose borrowed and supplied counts do not both sit at zero.",
+				"not": "It counts Host LMS systems, not libraries. Where several libraries share one system they cannot be told apart here, so a shared system counts once however many members sit behind it."
+			},
+			"net_flow": {
+				"what": "Whether this library gave the network more than it took.",
+				"how": "Items supplied to other members minus items borrowed from them, over the window. Errored requests are excluded from both sides.",
+				"not": "It is a count of requests, not of value or of effort, and it says nothing about which titles moved."
+			},
+			"items_supplied": {
+				"what": "Requests this library filled for another member's patron.",
+				"how": "Requests whose supplying Host LMS is this library, excluding errored ones.",
+				"not": "Local fulfilment is excluded: an item this library supplied to its own patron is not network traffic."
+			},
+			"turnaround_to_loan": {
+				"what": "How long a patron waits between asking for an item and being issued it.",
+				"how": "Median and 95th percentile of the interval from request creation to the first audit entry reaching loaned. A status re-entered during tracking counts once.",
+				"not": "Requests that never reached loaned are absent, and so are those still open. A rising median can therefore mean faster failures as well as slower loans."
+			},
+			"turnaround_to_finalise": {
+				"what": "The full administrative cycle, from request to the point where nothing is left to do.",
+				"how": "Median and 95th percentile from request creation to the first audit entry reaching finalised.",
+				"not": "Finalisation trails the patron's experience by a long way - the item has usually been back on the shelf for some time - so this is an operations figure, not a service one."
+			},
+			"supplier_response": {
+				"what": "How quickly a supplying library answers a request placed with it.",
+				"how": "Median from the request being placed at the supplying agency to that supplier confirming it, using the earliest audit entry for each so a tracking repeat cannot double-count.",
+				"not": "It deliberately does not start at request creation, which would fold DCB's own resolution time into a supplier's score. Across several libraries it is one figure per supplier, so no single number is shown."
+			},
+			"transit_dwell": {
+				"what": "How long an item spends in transit on one leg of its journey.",
+				"how": "Median time between the request entering the transit status and leaving it, taken from the audit trail.",
+				"not": "It depends on the host LMS reporting the status at all. A system that never sets it produces no observation, which is shown as not reported rather than as a fast leg. A journey that began before the window opened is excluded."
+			},
+			"failure_taxonomy": {
+				"what": "Why requests failed, grouped by the reason rather than counted together.",
+				"how": "Requests that ended in error or cancellation, or whose previous status was that no item was selectable at any agency, bucketed by that reason.",
+				"not": "A request that failed and was then re-resolved successfully is not here: it succeeded. The rescued count in the header is where those appear."
+			},
+			"supplier_reliability": {
+				"what": "How often each supplying library delivered what it was asked for.",
+				"how": "Per supplier, requests that reached loaned, completed or finalised against those that errored, were cancelled, or found no selectable item.",
+				"not": "A supplier that is asked rarely can look perfect or terrible on a handful of requests, so read it with the count beside it."
+			},
+			"trading_partners": {
+				"what": "Which members this library exchanges most traffic with, in each direction.",
+				"how": "Requests grouped by the partner at the other end, excluding errored requests and local fulfilment, because a failed request is not traffic and a local loan is not a partnership.",
+				"not": "A partner is never one of the caller's own libraries. Consortium-wide there is no own set to exclude, so the lists rank every supplier and every borrower."
+			},
+			"unfillable_demand": {
+				"what": "Titles patrons asked for that nothing in the network could satisfy.",
+				"how": "Requests whose previous status was that no item was selectable at any agency, grouped by title.",
+				"not": "It is demand nobody could meet, not demand that failed for another reason - a request that errored during transit is in the failure taxonomy instead."
+			},
+			"peer_benchmarks": {
+				"what": "This library's volume and outcomes beside every other member's.",
+				"how": "One row per borrowing library, with its request count, checkouts, successes and failures over the window.",
+				"not": "It is deliberately not pseudonymised: members are named, because a benchmark nobody can act on is decoration."
+			},
+			"checkout_rate": {
+				"what": "How often an item that arrived was actually collected.",
+				"how": "Requests that reached loaned as a share of those that got far enough to be collectable.",
+				"not": "An item a patron never came for is a cost the fill rate cannot see, which is why this sits beside it rather than inside it."
+			},
+			"cost_avoidance": {
+				"what": "What these fulfilments would have cost through traditional interlibrary loan.",
+				"how": "Successful fulfilments in the window multiplied by a unit cost you supply. No cost is shipped with the product.",
+				"not": "It is an assumption multiplied by a count, not a measurement. The count is ours; the unit cost is yours, and the figure is only as defensible as that number."
+			}
 		}
 	},
 	"libraries": {

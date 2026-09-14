@@ -2,21 +2,24 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
+	Box,
 	Card,
 	CardContent,
-	Typography,
 	Table,
 	TableBody,
 	TableCell,
 	TableContainer,
 	TableHead,
 	TableRow,
+	Typography,
 } from "@mui/material";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { peerBenchmarksQueryOptions } from "@helpers/statsApi";
 
 import PanelState from "./PanelState";
+
+import MetricInfo from "./MetricInfo";
 
 const PANEL_MIN_HEIGHT = 300;
 
@@ -76,9 +79,15 @@ export default function PeerBenchmarkPanel({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t("insights.charts.peer_benchmark.title")}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t("insights.charts.peer_benchmark.title")}
+					</Typography>
+					<MetricInfo
+						metric="peer_benchmarks"
+						label={t("insights.charts.peer_benchmark.title")}
+					/>
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t("insights.charts.peer_benchmark.subtitle", {
 						fill: pct(medianFill),

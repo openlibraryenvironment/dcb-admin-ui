@@ -20,11 +20,19 @@ import libraries from "./fixtures-data/libraries.json";
 
 const FAILING_PANEL = "**/insights/failure-taxonomy**";
 
-/** The card a heading belongs to, without reaching for an internal MUI class name. */
+/**
+ * The card a heading belongs to.
+ *
+ * MuiCard-root, not an ancestor-with-a-heading walk: once a heading is wrapped alongside
+ * its info button, the nearest ancestor holding it is that wrapper rather than the panel,
+ * and the locator silently starts matching two elements instead of the card. This is one
+ * of MUI's DOCUMENTED class names, which is the distinction the doctrine draws - a css-
+ * hash is not.
+ */
 const cardFor = (page: Page, heading: string) =>
 	page
 		.getByRole("heading", { level: 3, name: heading })
-		.locator("xpath=ancestor::*[self::div][.//h3][1]");
+		.locator("xpath=ancestor::div[contains(@class,'MuiCard-root')][1]");
 
 /**
  * Wheel down until the panel mounts. Below-the-fold panels render a placeholder until an
@@ -134,6 +142,52 @@ test.describe("Insights panel states", () => {
 
 		await expect(panel).toContainText("Transit, return");
 		await expect(panel).toContainText("Not reported by this system");
+	});
+
+	test("a figure explains where it came from, by keyboard alone", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights");
+
+		// Named for its metric, not "info": a screen-reader user listing the buttons on
+		// this page would otherwise hear the same word twenty times.
+		const trigger = page.getByRole("button", {
+			name: "How Fill rate is calculated",
+		});
+		await expect(trigger).toBeVisible();
+
+		// Click, not hover. Four paragraphs behind a tooltip meets none of the
+		// dismissable, hoverable, persistent requirements of WCAG 2.2 SC 1.4.13.
+		await trigger.focus();
+		await page.keyboard.press("Enter");
+
+		const popover = page.getByRole("dialog", {
+			name: "How Fill rate is calculated",
+		});
+		await expect(popover).toBeVisible();
+		await expect(popover).toContainText("What it counts");
+		await expect(popover).toContainText("What it does not include");
+
+		// Escape closes it and focus comes back to the control that opened it, so the
+		// keyboard user is not dropped at the top of the document.
+		await page.keyboard.press("Escape");
+		await expect(popover).toBeHidden();
+		await expect(trigger).toBeFocused();
+	});
+
+	test("a money figure says which half of it is an assumption", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights");
+		await page.getByRole("button", { name: "More measures" }).click();
+
+		await page
+			.getByRole("button", { name: "How Estimated cost avoided is calculated" })
+			.click();
+
+		const popover = page.getByRole("dialog");
+		await expect(popover).toContainText("assumption multiplied by a count");
+		await expect(popover).toContainText("the unit cost is yours");
 	});
 
 	test("the view change is announced once, not once per panel", async ({

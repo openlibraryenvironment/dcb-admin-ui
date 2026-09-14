@@ -1,12 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 
 import PanelState from "./PanelState";
+
+import MetricInfo from "./MetricInfo";
 import {
 	supplierReliabilityQueryOptions,
 	StatsParams,
@@ -36,9 +38,15 @@ export default function SupplierReliabilityChart({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t("insights.charts.supplier_reliability.title")}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t("insights.charts.supplier_reliability.title")}
+					</Typography>
+					<MetricInfo
+						metric="supplier_reliability"
+						label={t("insights.charts.supplier_reliability.title")}
+					/>
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t("insights.charts.supplier_reliability.subtitle")}
 				</Typography>

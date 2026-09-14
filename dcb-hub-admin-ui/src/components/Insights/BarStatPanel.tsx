@@ -1,9 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
 import PanelState from "./PanelState";
+
+import { MetricId } from "@helpers/insightsMetrics";
+import MetricInfo from "./MetricInfo";
 
 const CHART_HEIGHT = 320;
 
@@ -17,6 +20,8 @@ interface BarStatPanelProps<T> {
 		queryFn: () => Promise<T[]>;
 	};
 	getLabel: (row: T) => string;
+	/** Set by callers whose figure has a registry entry; see insightsMetrics. */
+	metric?: MetricId;
 	getValue: (row: T) => number;
 	color: string;
 	horizontal?: boolean;
@@ -31,6 +36,7 @@ export default function BarStatPanel<T>({
 	seriesLabelKey,
 	queryOptions,
 	getLabel,
+	metric,
 	getValue,
 	color,
 	horizontal = false,
@@ -50,9 +56,12 @@ export default function BarStatPanel<T>({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t(titleKey)}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t(titleKey)}
+					</Typography>
+					{metric ? <MetricInfo metric={metric} label={t(titleKey)} /> : null}
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t(subtitleKey)}
 				</Typography>

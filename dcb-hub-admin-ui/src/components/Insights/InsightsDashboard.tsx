@@ -299,12 +299,14 @@ export default function InsightsDashboard({
 				>
 					<KpiTile
 						title={t("insights.kpi.resolved.title")}
+						metric="requests_fulfilled"
 						value={resolved.toLocaleString()}
 						subtitle={t("insights.kpi.resolved.subtitle")}
 						loading={loading}
 					/>
 					<KpiTile
 						title={t("insights.kpi.fill_rate.title")}
+						metric="fill_rate"
 						value={currentRate != null ? `${currentRate.toFixed(1)}%` : "—"}
 						deltaPct={rateDelta}
 						higherIsBetter
@@ -313,6 +315,7 @@ export default function InsightsDashboard({
 					/>
 					<KpiTile
 						title={t("insights.kpi.time_to_loan.title")}
+						metric="turnaround_to_loan"
 						value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
 						subtitle={t("insights.kpi.time_to_loan.subtitle", {
 							p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
@@ -321,6 +324,7 @@ export default function InsightsDashboard({
 					/>
 					<KpiTile
 						title={t("insights.kpi.error_rate.title")}
+						metric="error_rate"
 						value={
 							currentErrRate != null ? `${currentErrRate.toFixed(1)}%` : "—"
 						}
@@ -331,6 +335,7 @@ export default function InsightsDashboard({
 					/>
 					<KpiTile
 						title={t("insights.headline.active_systems")}
+						metric="libraries_active"
 						value={`${activeSystems(netFlow.data)}`}
 						subtitle={t("insights.headline.active_systems_sub")}
 						loading={netFlow.isLoading}
@@ -363,6 +368,7 @@ export default function InsightsDashboard({
 							/>
 							<KpiTile
 								title={t("insights.kpi.time_to_finalise.title")}
+								metric="turnaround_to_finalise"
 								value={formatDuration(toFinalised.data?.p50Seconds)}
 								subtitle={t("insights.kpi.time_to_finalise.subtitle", {
 									p95: formatDuration(toFinalised.data?.p95Seconds),
@@ -371,6 +377,7 @@ export default function InsightsDashboard({
 							/>
 							<KpiTile
 								title={t("insights.kpi.checkout_rate.title")}
+								metric="checkout_rate"
 								value={
 									checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"
 								}
@@ -550,6 +557,7 @@ export default function InsightsDashboard({
 						titleKey="insights.charts.unfillable_demand.title"
 						subtitleKey="insights.charts.unfillable_demand.subtitle"
 						queryOptions={unfillableDemandQueryOptions(client, params)}
+						metric="unfillable_demand"
 						getRowKey={(r) => r.clusterId}
 						columns={[
 							{

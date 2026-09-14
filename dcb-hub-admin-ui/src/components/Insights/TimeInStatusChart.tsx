@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
@@ -9,6 +9,8 @@ import { timeInStatusQueryOptions, StatsParams } from "@helpers/statsApi";
 import { formatDuration } from "@helpers/insightsRange";
 
 import PanelState from "./PanelState";
+
+import MetricInfo from "./MetricInfo";
 
 const CHART_HEIGHT = 340;
 
@@ -29,9 +31,15 @@ export default function TimeInStatusChart({ params }: { params: StatsParams }) {
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t("insights.charts.time_in_status.title")}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t("insights.charts.time_in_status.title")}
+					</Typography>
+					<MetricInfo
+						metric="transit_dwell"
+						label={t("insights.charts.time_in_status.title")}
+					/>
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t("insights.charts.time_in_status.subtitle")}
 				</Typography>

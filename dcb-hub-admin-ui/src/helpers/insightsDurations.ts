@@ -1,3 +1,4 @@
+import type { MetricId } from "@helpers/insightsMetrics";
 import type {
 	StatusDwellStat,
 	SupplierResponseStat,
@@ -15,6 +16,8 @@ import type {
 export interface DurationRow {
 	/** Translation key for the name a reader sees. */
 	key: string;
+	/** Which registry entry explains it. Transit shares one: both legs are the same measure. */
+	metric: MetricId;
 	/** The transition it measures, shown small beneath the name. */
 	detail: string;
 	p50Seconds: number | null;
@@ -46,10 +49,12 @@ const noObservations = (stat?: TurnaroundStat) =>
 
 const turnaround = (
 	key: string,
+	metric: MetricId,
 	detail: string,
 	stat?: TurnaroundStat,
 ): DurationRow => ({
 	key,
+	metric,
 	detail,
 	// The turnaround endpoints return percentiles and nothing else, so there is no count
 	// to show. An estimate would be worse than the blank.
@@ -68,6 +73,7 @@ const fromDwell = (
 
 	return {
 		key,
+		metric: "transit_dwell",
 		detail: status,
 		// Dwell is a median only - there is no p95 in StatusDwellStat.
 		p50Seconds: row?.medianDwellSeconds ?? null,
@@ -87,8 +93,18 @@ export function durationRows({
 	scopedCodes,
 }: DurationInputs): DurationRow[] {
 	const rows: DurationRow[] = [
-		turnaround("insights.durations.to_loan", "LOANED", toLoaned),
-		turnaround("insights.durations.to_finalise", "FINALISED", toFinalised),
+		turnaround(
+			"insights.durations.to_loan",
+			"turnaround_to_loan",
+			"LOANED",
+			toLoaned,
+		),
+		turnaround(
+			"insights.durations.to_finalise",
+			"turnaround_to_finalise",
+			"FINALISED",
+			toFinalised,
+		),
 	];
 
 	// Supplier response is per SUPPLYING library, so it is one number only when the view
@@ -100,6 +116,7 @@ export function durationRows({
 
 		rows.push({
 			key: "insights.durations.supplier_response",
+			metric: "supplier_response",
 			detail: "PLACED -> CONFIRMED",
 			p50Seconds: row?.medianResponseSeconds ?? null,
 			p95Seconds: null,

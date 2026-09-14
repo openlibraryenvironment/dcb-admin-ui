@@ -14,6 +14,7 @@ import { formatDuration } from "@helpers/insightsRange";
 import { durationRows, longestDuration } from "@helpers/insightsDurations";
 
 import PanelState from "./PanelState";
+import MetricInfo from "./MetricInfo";
 
 const PANEL_HEIGHT = 300;
 
@@ -98,7 +99,16 @@ export default function DurationsPanel({
 									}}
 								>
 									<Box component="dt" sx={{ minWidth: 0 }}>
-										<Typography variant="body2">{t(row.key)}</Typography>
+										<Box
+											sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+										>
+											<Typography variant="body2">{t(row.key)}</Typography>
+											<MetricInfo
+												metric={row.metric}
+												label={t(row.key)}
+												sampleCount={row.sampleCount}
+											/>
+										</Box>
 										<Typography variant="caption" color="text.secondary">
 											{row.detail}
 										</Typography>

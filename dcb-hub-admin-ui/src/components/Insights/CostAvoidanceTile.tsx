@@ -12,6 +12,8 @@ import {
 
 import { useInsightsCostStore } from "@hooks/insightsCostStore";
 
+import MetricInfo from "./MetricInfo";
+
 // Value tile. The successful-fulfilment count comes from the combined dashboard call
 // (passed in), and the monetary figure is entirely user-driven (see insightsCostStore) -
 // the backend never ships a "traditional ILL cost".
@@ -42,14 +44,20 @@ export default function CostAvoidanceTile({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography
-					variant="subtitle2"
-					component="p"
-					color="text.secondary"
-					gutterBottom
-				>
-					{t("insights.kpi.cost_avoidance.title")}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
+					<Typography variant="subtitle2" component="p" color="text.secondary">
+						{t("insights.kpi.cost_avoidance.title")}
+					</Typography>
+					{/* The one figure whose method belongs on its face as well as behind the
+					    button: the count is ours and the unit cost is the reader's, and a
+					    money figure that hides which half is which is the one most likely to
+					    be quoted without either. */}
+					<MetricInfo
+						metric="cost_avoidance"
+						label={t("insights.kpi.cost_avoidance.title")}
+						sampleCount={fulfilled}
+					/>
+				</Box>
 
 				{loading ? (
 					<Skeleton variant="text" width="60%" height={40} />
