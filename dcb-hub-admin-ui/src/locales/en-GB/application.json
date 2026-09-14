@@ -2913,6 +2913,7 @@
 			"skip": "We have not decided yet",
 			"preview_heading": "What your patrons will see",
 			"preview_no_name": "Your consortium",
+			"preview_task": "Find it, and borrow it from any library",
 			"preview_search_placeholder": "Search for books, articles and more",
 			"preview_caveat": "An approximation of the arrangement: if your discovery system is using the OpenRS-provided branding, this is what it could look like. This will vary between systems."
 		},

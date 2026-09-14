@@ -1,3 +1,5 @@
+import type { DiscoveryBrandValues } from "@schemas/discoveryBrandSchema";
+
 /**
  * The patron-facing brand fields an administrator sets here, and what may go in them.
  *
@@ -180,4 +182,40 @@ export function isValidLinkUrl(value?: string | null): boolean {
 	return (
 		(url.protocol === "https:" || url.protocol === "http:") && url.host !== ""
 	);
+}
+
+/** What the discovery app's landing page and app bar draw from these values. */
+export type PreviewArrangement = {
+	appBarName: string;
+	headerIcon?: string;
+	logo?: string;
+	background?: string;
+	welcome?: string;
+};
+
+/**
+ * The discovery app's arrangement, for the Setup preview - S-11.
+ *
+ * The name belongs to the app bar and never to the lockup, so a consortium with no logo shows
+ * no mark rather than its name set large. Images that would not pass {@link isValidLogoUrl}
+ * are dropped, as the patron app drops them on read.
+ */
+export function previewArrangement(
+	values: Pick<
+		DiscoveryBrandValues,
+		"brandLogoUrl" | "brandHeaderIconUrl" | "brandBackgroundImageUrl" | "patronWelcome"
+	>,
+	consortiumName: string | undefined,
+	unnamed: string,
+): PreviewArrangement {
+	const image = (url?: string) =>
+		url?.trim() && isValidLogoUrl(url) ? url.trim() : undefined;
+
+	return {
+		appBarName: consortiumName?.trim() || unnamed,
+		headerIcon: image(values.brandHeaderIconUrl),
+		logo: image(values.brandLogoUrl),
+		background: image(values.brandBackgroundImageUrl),
+		welcome: values.patronWelcome?.trim() || undefined,
+	};
 }

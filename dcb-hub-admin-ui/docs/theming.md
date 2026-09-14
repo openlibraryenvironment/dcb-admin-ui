@@ -227,3 +227,20 @@ colours discards; the enhancer gives `MuiButtonBase` a focus outline and nothing
 
 A brand whose tokens cannot pass has not earned its place; fix the tokens rather than the
 threshold.
+
+## The discovery preview
+
+The Setup chapter's preview draws the discovery app from the values in the form rather than
+framing the live app, which would need its origin reachable from the console and a
+frame-ancestors decision for the sake of a thumbnail. It is an approximation and says so on
+screen.
+
+It follows symposia-ui's arrangement (symposia-ui/docs/brand-chain.md). The consortium's name
+and its square icon sit in the app bar, which the discovery app shows on every screen. The
+landing plate carries the logo, the task line and the welcome sentence. **A consortium with no
+logo shows no mark**: the name is not set large in its place, and no other mark is borrowed.
+
+Every image passes `isValidLogoUrl`, the check symposia-ui runs on read and dcb-service runs on
+write, so the preview cannot show an image the patron app would refuse. The arrangement is
+`previewArrangement` in `src/constants/discoveryBranding.ts`, which is where it is tested. The
+no-photograph gradient is kept in step with symposia-ui/docs/hero-canvas.md by hand.
