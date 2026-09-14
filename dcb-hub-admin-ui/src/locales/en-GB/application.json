@@ -187,7 +187,7 @@
 			"upload_failed": "The image could not be uploaded. Try again, or paste a web address instead.",
 			"staged": "{{filename}} will be uploaded when you save.",
 			"staged_remove": "Remove",
-"remove": "Remove image",
+			"remove": "Remove image",
 			"upload_failed_field": "{{label}} — {{reason}}",
 			"image_url": "Or paste a web address",
 			"image_url_staged": "Remove the chosen file to enter a web address instead.",

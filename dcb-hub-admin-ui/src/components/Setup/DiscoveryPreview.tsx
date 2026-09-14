@@ -1,3 +1,4 @@
+import { alpha, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import { SearchOutlined } from "@mui/icons-material";
@@ -40,6 +41,7 @@ export default function DiscoveryPreview({
 	consortiumName,
 }: DiscoveryPreviewProps) {
 	const { t } = useTranslation();
+	const theme = useTheme();
 
 	const logo = isValidLogoUrl(values.brandLogoUrl)
 		? values.brandLogoUrl?.trim()
@@ -49,6 +51,15 @@ export default function DiscoveryPreview({
 		: undefined;
 
 	const name = consortiumName?.trim() || t("setup.discovery.preview_no_name");
+
+	// The same radial wash symposia-ui paints when a consortium has supplied no
+	// photograph. Kept in step by hand, which is the cost of two repos rendering one
+	// brand - symposia-ui/docs/hero-canvas.md is the other half.
+	const themeTreatment =
+		"radial-gradient(120% 100% at 50% 0%, " +
+		`${alpha(theme.palette.primary.main, 0.16)} 0%, ` +
+		`${alpha(theme.palette.primary.main, 0.04)} 45%, ` +
+		`${theme.palette.primary.landingBackground} 100%)`;
 
 	return (
 		<Stack spacing={1}>
@@ -78,31 +89,53 @@ export default function DiscoveryPreview({
 						justifyContent: "center",
 						gap: 1.5,
 						p: 3,
-						backgroundImage: background ? `url(${background})` : undefined,
+						// With no photograph the discovery app draws its own theme
+						// treatment, so the preview draws it too - an operator who clears
+						// the image must see what they are switching TO, not a flat panel
+						// that the product never renders.
+						backgroundImage: background ? `url(${background})` : themeTreatment,
 						backgroundSize: "cover",
 						backgroundPosition: "center",
 					}}
 				>
-					{logo ? (
-						<Box
-							component="img"
-							src={logo}
-							// Decorative inside a preview that is already aria-hidden;
-							// the real alt text is the brandLogoAlt field above.
-							alt=""
-							sx={{ maxHeight: 64, maxWidth: "70%", objectFit: "contain" }}
-						/>
-					) : (
-						<Typography variant="h2" sx={{ textAlign: "center" }}>
-							{name}
-						</Typography>
-					)}
+					{/* THE PLATE. symposia-ui puts the copy on its own ground rather than
+					    washing the whole picture out, so a preview that draws the copy
+					    straight onto the photograph is showing an arrangement the product
+					    does not render. */}
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "center",
+							gap: 1.5,
+							px: 3,
+							py: 2,
+							borderRadius: 1,
+							maxWidth: 480,
+							backgroundColor: alpha(theme.palette.background.default, 0.94),
+						}}
+					>
+						{logo ? (
+							<Box
+								component="img"
+								src={logo}
+								// Decorative inside a preview that is already aria-hidden;
+								// the real alt text is the brandLogoAlt field above.
+								alt=""
+								sx={{ maxHeight: 64, maxWidth: "70%", objectFit: "contain" }}
+							/>
+						) : (
+							<Typography variant="h2" sx={{ textAlign: "center" }}>
+								{name}
+							</Typography>
+						)}
 
-					{values.patronWelcome?.trim() && (
-						<Typography sx={{ textAlign: "center", maxWidth: 420 }}>
-							{values.patronWelcome.trim()}
-						</Typography>
-					)}
+						{values.patronWelcome?.trim() && (
+							<Typography sx={{ textAlign: "center", maxWidth: 420 }}>
+								{values.patronWelcome.trim()}
+							</Typography>
+						)}
+					</Box>
 
 					<Paper
 						elevation={0}
