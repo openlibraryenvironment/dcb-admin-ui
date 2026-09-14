@@ -104,6 +104,38 @@ test.describe("Insights panel states", () => {
 		await expect(panel).not.toContainText("This panel could not be loaded.");
 	});
 
+	test("the header is five figures, and the rest are a disclosure away", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights");
+
+		// Twelve equal tiles was an index, not a summary. The other seven are still
+		// reachable, which is what makes this a hierarchy rather than a deletion.
+		await expect(page.getByText("Libraries active")).toBeVisible();
+		await expect(page.getByText("Estimated cost avoided")).toBeHidden();
+
+		await page.getByRole("button", { name: "More measures" }).click();
+		await expect(page.getByText("Estimated cost avoided")).toBeVisible();
+	});
+
+	test("the durations panel names both transit legs, and says when one is unreported", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights");
+		await reveal(page, "How long things take");
+
+		const panel = cardFor(page, "How long things take");
+
+		// The outbound leg is reported by the fixture; the return leg is not, and the
+		// difference has to be visible rather than drawn as an instant journey.
+		await expect(panel).toContainText("Transit, outbound");
+		await expect(panel).toContainText("PICKUP_TRANSIT");
+		await expect(panel).toContainText("5233 observations");
+
+		await expect(panel).toContainText("Transit, return");
+		await expect(panel).toContainText("Not reported by this system");
+	});
+
 	test("the view change is announced once, not once per panel", async ({
 		page,
 	}) => {

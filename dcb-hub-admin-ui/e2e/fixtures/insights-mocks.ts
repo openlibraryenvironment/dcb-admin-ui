@@ -84,13 +84,33 @@ const INSIGHTS: Record<string, unknown> = {
 		{ libraryCode: "NORTH", borrowedCount: 120, suppliedCount: 210 },
 		{ libraryCode: "WEST", borrowedCount: 187, suppliedCount: 64 },
 	],
+	// StatusDwellStat, as dcb-service actually serdes it. These carried fromStatus and
+	// medianSeconds, which no endpoint has ever returned, so every panel reading them
+	// rendered empty and the gate scanned a page with less on it than production has.
+	//
+	// RETURN_TRANSIT is deliberately absent: a host LMS that never reports the status
+	// produces no row, and the durations panel has to say "not reported" rather than draw
+	// an instant leg.
 	"time-in-status": [
-		{ fromStatus: "REQUEST_PLACED_AT_SUPPLYING_AGENCY", medianSeconds: 86_400 },
-		{ fromStatus: "CONFIRMED", medianSeconds: 43_200 },
+		{
+			status: "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+			medianDwellSeconds: 86_400,
+			sampleCount: 812,
+		},
+		{ status: "CONFIRMED", medianDwellSeconds: 43_200, sampleCount: 790 },
+		{
+			status: "PICKUP_TRANSIT",
+			medianDwellSeconds: 108_000,
+			sampleCount: 5233,
+		},
 	],
 	"supplier-response-sla": [
-		{ supplierCode: "NORTH", medianSeconds: 21_600 },
-		{ supplierCode: "CENTRAL", medianSeconds: 46_800 },
+		{ supplierCode: "NORTH", medianResponseSeconds: 21_600, sampleCount: 900 },
+		{
+			supplierCode: "CENTRAL",
+			medianResponseSeconds: 46_800,
+			sampleCount: 640,
+		},
 	],
 	"demand-heatmap": [
 		{ dayOfWeek: 1, hourOfDay: 9, requestCount: 12 },

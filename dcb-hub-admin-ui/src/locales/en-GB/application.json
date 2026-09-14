@@ -1095,6 +1095,24 @@
 			"whole_consortium": "the whole consortium",
 			"one_library": "1 library",
 			"libraries": "{{count}} libraries"
+		},
+		"durations": {
+			"title": "How long things take",
+			"subtitle": "Median and 95th percentile, for the legs this deployment reports.",
+			"to_loan": "Time to loan",
+			"to_finalise": "Time to finalise",
+			"supplier_response": "My response time",
+			"transit_out": "Transit, outbound",
+			"transit_back": "Transit, return",
+			"pair": "p50 {{p50}} · p95 {{p95}}",
+			"median": "median {{value}}",
+			"sample": "· {{count}} observations",
+			"not_reported": "Not reported by this system"
+		},
+		"headline": {
+			"active_systems": "Libraries active",
+			"active_systems_sub": "Host LMS systems that borrowed or supplied",
+			"more": "More measures"
 		}
 	},
 	"libraries": {

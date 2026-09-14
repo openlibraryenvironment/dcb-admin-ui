@@ -2,6 +2,9 @@ import { ReactNode, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
 	Box,
 	Stack,
 	ToggleButton,
@@ -17,23 +20,24 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 import { useInsightsPlotStore, RangePreset } from "@hooks/insightsPlotStore";
 import {
+	ConsortialLifelineStat,
+	PatronGroupDemandStat,
+	PickupLocationDemandStat,
+	RequestedTitleStat,
+	StatsParams,
+	TopClusterStat,
+	UnfillableDemandStat,
+	acquisitionOpportunitiesQueryOptions,
+	consortialLifelineQueryOptions,
 	dashboardQueryOptions,
-	demandByPickupLocationQueryOptions,
 	demandByPatronGroupQueryOptions,
+	demandByPickupLocationQueryOptions,
+	netFlowQueryOptions,
 	supplierFulfillmentQueryOptions,
 	topRequestedTitlesQueryOptions,
 	turnaroundQueryOptions,
 	unfillableDemandQueryOptions,
 	unmetLocalDemandQueryOptions,
-	acquisitionOpportunitiesQueryOptions,
-	consortialLifelineQueryOptions,
-	StatsParams,
-	PickupLocationDemandStat,
-	PatronGroupDemandStat,
-	RequestedTitleStat,
-	TopClusterStat,
-	ConsortialLifelineStat,
-	UnfillableDemandStat,
 } from "@helpers/statsApi";
 import {
 	rangeToParams,
@@ -43,6 +47,7 @@ import {
 } from "@helpers/insightsRange";
 
 import KpiTile from "./KpiTile";
+import DurationsPanel from "./DurationsPanel";
 import CostAvoidanceTile from "./CostAvoidanceTile";
 import StatusFlowChart from "./StatusFlowChart";
 import FailureTaxonomyChart from "./FailureTaxonomyChart";
@@ -63,6 +68,9 @@ import CollectionAnalysisSection from "./CollectionAnalysisSection";
 
 import { visuallyHidden } from "@mui/utils";
 import { announcementParts } from "@helpers/insightsAnnouncement";
+
+import { ExpandMore } from "@mui/icons-material";
+import { activeSystems } from "@helpers/insightsHeadline";
 
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
 
@@ -139,6 +147,10 @@ export default function InsightsDashboard({
 	const supplierFill = useQuery(
 		supplierFulfillmentQueryOptions(client, params),
 	);
+	// One row per Host LMS with what it borrowed and what it supplied, which is exactly
+	// "did this member take part". No endpoint of its own is needed for the headline.
+	const netFlow = useQuery(netFlowQueryOptions(client, params));
+
 	const toFinalised = useQuery(
 		turnaroundQueryOptions(client, {
 			libraryCodes: libraryCode,
@@ -273,20 +285,38 @@ export default function InsightsDashboard({
 				id="insights-overview-heading"
 				titleKey="insights.sections.overview"
 			>
-				{/* KPI row - auto-fit so the tile count can flex. */}
+				{/* THE FIVE. Twelve equal tiles was an index, not a summary: a reader had
+				    to decide for themselves which of them their board cared about, and ten
+				    of the twelve carried no direction at all. The rest are still here,
+				    under a disclosure, until subjects give them somewhere better to live -
+				    INSIGHTS_IA_AND_UX_PLAN.md section 3. */}
 				<Box
 					sx={{
 						display: "grid",
 						gap: 2,
-						gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+						gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
 					}}
 				>
+					<KpiTile
+						title={t("insights.kpi.resolved.title")}
+						value={resolved.toLocaleString()}
+						subtitle={t("insights.kpi.resolved.subtitle")}
+						loading={loading}
+					/>
 					<KpiTile
 						title={t("insights.kpi.fill_rate.title")}
 						value={currentRate != null ? `${currentRate.toFixed(1)}%` : "—"}
 						deltaPct={rateDelta}
 						higherIsBetter
 						subtitle={t("insights.kpi.vs_prior")}
+						loading={loading}
+					/>
+					<KpiTile
+						title={t("insights.kpi.time_to_loan.title")}
+						value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
+						subtitle={t("insights.kpi.time_to_loan.subtitle", {
+							p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
+						})}
 						loading={loading}
 					/>
 					<KpiTile
@@ -300,92 +330,104 @@ export default function InsightsDashboard({
 						loading={loading}
 					/>
 					<KpiTile
-						title={t("insights.kpi.supply_rate.title")}
-						value={supplyRate != null ? `${supplyRate.toFixed(1)}%` : "—"}
-						subtitle={t("insights.kpi.supply_rate.subtitle")}
-						loading={supplierFill.isLoading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.time_to_loan.title")}
-						value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
-						subtitle={t("insights.kpi.time_to_loan.subtitle", {
-							p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
-						})}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.time_to_finalise.title")}
-						value={formatDuration(toFinalised.data?.p50Seconds)}
-						subtitle={t("insights.kpi.time_to_finalise.subtitle", {
-							p95: formatDuration(toFinalised.data?.p95Seconds),
-						})}
-						loading={toFinalised.isLoading}
+						title={t("insights.headline.active_systems")}
+						value={`${activeSystems(netFlow.data)}`}
+						subtitle={t("insights.headline.active_systems_sub")}
+						loading={netFlow.isLoading}
 					/>
 				</Box>
 
-				{/* Second KPI row: volume, checkout, rescues, unique demand, value. */}
-				<Box
-					sx={{
-						display: "grid",
-						gap: 2,
-						gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-					}}
-				>
-					<KpiTile
-						title={t("insights.kpi.resolved.title")}
-						value={resolved.toLocaleString()}
-						subtitle={t("insights.kpi.resolved.subtitle")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.checkout_rate.title")}
-						value={checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"}
-						subtitle={
-							d
-								? t("insights.kpi.checkout_rate.subtitle", {
-										reached: d.checkoutRate.reachedCount,
-										total: d.checkoutRate.totalCount,
-									})
-								: undefined
-						}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.total_borrows.title")}
-						value={totalBorrows.toLocaleString()}
-						subtitle={t("insights.kpi.total_borrows.subtitle")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.total_lends.title")}
-						value={totalLends.toLocaleString()}
-						subtitle={t("insights.kpi.total_lends.subtitle")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.rescued.title")}
-						value={(d?.savedByReResolution ?? 0).toLocaleString()}
-						subtitle={t("insights.kpi.rescued.subtitle")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.unique_titles.title")}
-						value={(
-							d?.collectionSummary.uniqueTitlesRequested ?? 0
-						).toLocaleString()}
-						subtitle={t("insights.kpi.unique_titles.subtitle", {
-							total: d?.collectionSummary.totalRequests ?? 0,
-						})}
-						loading={loading}
-					/>
-					<CostAvoidanceTile
-						fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
-						loading={loading}
-					/>
-				</Box>
+				<Accordion variant="outlined" disableGutters>
+					<AccordionSummary expandIcon={<ExpandMore />}>
+						<Typography variant="body2">
+							{t("insights.headline.more")}
+						</Typography>
+					</AccordionSummary>
+					<AccordionDetails>
+						<Box
+							sx={{
+								display: "grid",
+								gap: 2,
+								gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+							}}
+						>
+							<KpiTile
+								title={t("insights.kpi.supply_rate.title")}
+								value={supplyRate != null ? `${supplyRate.toFixed(1)}%` : "—"}
+								subtitle={t("insights.kpi.supply_rate.subtitle")}
+								loading={supplierFill.isLoading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.time_to_finalise.title")}
+								value={formatDuration(toFinalised.data?.p50Seconds)}
+								subtitle={t("insights.kpi.time_to_finalise.subtitle", {
+									p95: formatDuration(toFinalised.data?.p95Seconds),
+								})}
+								loading={toFinalised.isLoading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.checkout_rate.title")}
+								value={
+									checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"
+								}
+								subtitle={
+									d
+										? t("insights.kpi.checkout_rate.subtitle", {
+												reached: d.checkoutRate.reachedCount,
+												total: d.checkoutRate.totalCount,
+											})
+										: undefined
+								}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.total_borrows.title")}
+								value={totalBorrows.toLocaleString()}
+								subtitle={t("insights.kpi.total_borrows.subtitle")}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.total_lends.title")}
+								value={totalLends.toLocaleString()}
+								subtitle={t("insights.kpi.total_lends.subtitle")}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.rescued.title")}
+								value={(d?.savedByReResolution ?? 0).toLocaleString()}
+								subtitle={t("insights.kpi.rescued.subtitle")}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.unique_titles.title")}
+								value={(
+									d?.collectionSummary.uniqueTitlesRequested ?? 0
+								).toLocaleString()}
+								subtitle={t("insights.kpi.unique_titles.subtitle", {
+									total: d?.collectionSummary.totalRequests ?? 0,
+								})}
+								loading={loading}
+							/>
+							{/* An assumption multiplied by a count, not a measurement. Beside
+							    four measured figures it borrowed a confidence it has not
+							    earned; here it keeps its arithmetic on its own face. */}
+							<CostAvoidanceTile
+								fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
+								loading={loading}
+							/>
+						</Box>
+					</AccordionDetails>
+				</Accordion>
 
 				{/* Trend spine + plot-builder */}
 				<StatusFlowChart params={params} interval={interval} />
+
+				<DurationsPanel
+					params={params}
+					toLoaned={d?.turnaroundToLoaned}
+					toFinalised={toFinalised.data}
+					loading={loading}
+				/>
 			</Section>
 
 			<Section
