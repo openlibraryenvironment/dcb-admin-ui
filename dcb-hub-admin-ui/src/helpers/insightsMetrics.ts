@@ -1,18 +1,13 @@
 /**
  * What every Insights figure counts, how it is computed, and what it leaves out.
  *
- * ONE registry, because the same four answers are wanted in three places: the popover a
- * reader opens beside a number, the documentation page that will be generated from this,
- * and the header rows of an export. Three copies of a definition is one copy nobody
- * updates, and the copy beside the number is the one people trust.
+ * Read off the SQL in dcb-service's PatronRequestRepository, never inferred from the panel
+ * that renders it: a methodology that is nearly right is the text a library quotes back
+ * when it disputes a figure. Why one registry rather than three copies, and what the four
+ * parts are for: INSIGHTS_IA_AND_UX_PLAN.md section 5.
  *
- * Every entry here was read off the SQL in dcb-service's PatronRequestRepository, not
- * inferred from the panel that renders it. A methodology that is nearly right is worse
- * than none: it is the thing a library will quote back when it disputes a figure.
- *
- * Translation keys are derived from the id by convention -
- * `insights.method.<id>.{what,how,not}` - and insightsMetrics.test.ts fails if any of the
- * three is missing, so the convention cannot rot quietly.
+ * Keys are derived from the id, and insightsMetrics.test.ts fails on a missing part, so
+ * the convention cannot rot quietly.
  */
 
 export const METRIC_IDS = [
