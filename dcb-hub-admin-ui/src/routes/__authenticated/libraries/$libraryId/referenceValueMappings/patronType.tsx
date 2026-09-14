@@ -17,6 +17,7 @@ import NewMapping from "@forms/NewMapping/NewMapping";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 
+import { requiresNumericRangeMappings } from "@helpers/librarySetup";
 import { libraryQuery } from "@/queryOptions/library";
 
 import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
@@ -101,8 +102,9 @@ function LocationMappings() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<MappingsSubTabs
 						libraryId={libraryId}
-						type="referenceValue"
+						activeType="referenceValue"
 						activeCategory="patronType"
+						includeNumericRange={requiresNumericRangeMappings(library)}
 					/>
 
 					{/* Primary Host LMS Grid */}
