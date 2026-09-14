@@ -8,6 +8,29 @@ export interface TimeSeriesPoint {
 	count: number;
 }
 
+/**
+ * One bucket of a percentile trend.
+ *
+ * An empty bucket is ABSENT rather than zero, unlike the flow series where a zero count is
+ * a fact: a bucket with no observations has no median, and a zero would read as instant.
+ * `sampleCount` is how far the bucket can be trusted.
+ */
+export interface TrendPoint {
+	bucket: string;
+	p50Seconds: number | null;
+	p95Seconds: number | null;
+	sampleCount: number | null;
+}
+
+/** The durations `/insights/trend` will plot, as the fixed vocabulary the service owns. */
+export const TREND_METRICS = [
+	"TURNAROUND_TO_STATUS",
+	"SUPPLIER_RESPONSE",
+	"STATUS_DWELL",
+] as const;
+
+export type TrendMetric = (typeof TREND_METRICS)[number];
+
 export interface TurnaroundStat {
 	p50Seconds: number;
 	p95Seconds: number;
@@ -316,6 +339,39 @@ export function timeSeriesQueryOptions(
 		queryFn: async (): Promise<TimeSeriesPoint[]> => {
 			const { data } = await client.get(`${STATS_BASE}/timeseries`, {
 				params: cleanParams({ interval, ...params }),
+			});
+			return data;
+		},
+	};
+}
+
+/**
+ * A percentile over time, from `/insights/trend`.
+ *
+ * `metric` is an id from the service's own vocabulary, never a column name and never
+ * caller text - the endpoint rejects an unknown one rather than defaulting, so a typo is
+ * an error and not a chart that is quietly empty.
+ */
+export function trendQueryOptions(
+	client: AxiosInstance,
+	params: StatsParams,
+	interval: TimeSeriesInterval,
+	metric: TrendMetric,
+	extra?: { targetStatus?: string; status?: string },
+) {
+	return {
+		...panelQuery,
+		queryKey: [
+			"stats",
+			"trend",
+			metric,
+			interval,
+			params,
+			extra ?? null,
+		] as const,
+		queryFn: async (): Promise<TrendPoint[]> => {
+			const { data } = await client.get(`${STATS_BASE}/trend`, {
+				params: cleanParams({ metric, interval, ...extra, ...params }),
 			});
 			return data;
 		},

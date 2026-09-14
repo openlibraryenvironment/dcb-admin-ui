@@ -58,20 +58,15 @@ const INSIGHTS: Record<string, unknown> = {
 	turnaround: { p50Seconds: 1_209_600, p95Seconds: 2_592_000 },
 	"fulfillment/borrower": { successfulCount: 812, failedCount: 96 },
 	"fulfillment/supplier": { successfulCount: 941, failedCount: 100 },
-	timeseries: [
-		{ bucket: "2026-07-01T00:00:00Z", series: "LOANED", count: 41 },
-		{ bucket: "2026-07-08T00:00:00Z", series: "LOANED", count: 55 },
-		{
-			bucket: "2026-07-01T00:00:00Z",
-			series: "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-			count: 62,
-		},
-		{
-			bucket: "2026-07-08T00:00:00Z",
-			series: "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
-			count: 71,
-		},
-	],
+	// Thirteen weekly buckets, because the direction rule needs nine CLOSED ones and the
+	// last is dropped as partial. Shaped deliberately: submissions flat, the fill rate
+	// climbing and the error rate falling, so a run over this fixture exercises a good
+	// direction, a bad one and the arithmetic between them rather than the empty state.
+	timeseries: flowSeries(),
+	// Percentile trend. One bucket is deliberately ABSENT rather than zero - a period with
+	// no completions has no median, and the panel must leave a gap rather than draw an
+	// instant journey through it.
+	trend: trendSeries(),
 	"failure-taxonomy": [
 		{ reason: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY", count: 44 },
 		{ reason: "PATRON_VERIFICATION_FAILED", count: 21 },
@@ -250,6 +245,54 @@ const INSIGHTS: Record<string, unknown> = {
 	},
 };
 
+/**
+ * The flow series the trend strip and the plot builder both read.
+ *
+ * Generated rather than written out: thirteen buckets of four series is fifty-two literal
+ * objects, and the SHAPE is what the tests are about - a rising fill rate and a falling
+ * error rate - which a list of numbers hides.
+ */
+function flowSeries() {
+	const WEEKS = 13;
+	const rows: { bucket: string; series: string; count: number }[] = [];
+
+	for (let week = 0; week < WEEKS; week += 1) {
+		const bucket = new Date(
+			Date.UTC(2026, 5, 1) + week * 7 * 24 * 60 * 60 * 1000,
+		).toISOString();
+
+		const submitted = 100;
+		// 78% climbing to 90%, and 9% falling to 3%.
+		const loaned = 78 + week;
+		const errored = Math.max(3, 9 - Math.floor(week / 2));
+
+		rows.push(
+			{ bucket, series: "SUBMITTED_TO_DCB", count: submitted },
+			{ bucket, series: "LOANED", count: loaned },
+			{ bucket, series: "ERROR", count: errored },
+			{
+				bucket,
+				series: "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+				count: submitted - errored,
+			},
+		);
+	}
+
+	return rows;
+}
+
+/** Eight weekly buckets of a percentile trend, one of them missing entirely. */
+function trendSeries() {
+	return [0, 1, 2, 3, 5, 6, 7].map((week) => ({
+		bucket: new Date(
+			Date.UTC(2026, 5, 1) + week * 7 * 24 * 60 * 60 * 1000,
+		).toISOString(),
+		p50Seconds: 150_000 + week * 4_000,
+		p95Seconds: 420_000 + week * 9_000,
+		sampleCount: 40 + week,
+	}));
+}
+
 export async function mockInsights(page: Page) {
 	await page.route("**/insights/**", async (route) => {
 		const path = new URL(route.request().url()).pathname;
@@ -273,8 +316,16 @@ export async function mockInsights(page: Page) {
  * script runs both enables the flag and spares the run a fetch of inject_env.json that the
  * preview server does not answer.
  */
-export async function enableInsights(page: Page) {
-	await page.addInitScript(() => {
+export async function enableInsights(
+	page: Page,
+	// Off by default, exactly as the deployed flag is: /insights/trend is on no
+	// dcb-service release, so a run that did not ask for it should see what a current
+	// deployment sees.
+	options: { trends?: boolean } = {},
+) {
+	const trends = options.trends === true;
+
+	await page.addInitScript((trendsOn: boolean) => {
 		window.__APP_ENV__ = {
 			VITE_MUI_X_LICENSE_KEY: "",
 			VITE_KEYCLOAK_URL: "https://e2e-fake-keycloak.invalid/realms/dcb",
@@ -282,6 +333,7 @@ export async function enableInsights(page: Page) {
 			VITE_DCB_API_BASE: "http://localhost:4173/api",
 			VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
 			VITE_FEATURE_INSIGHTS: "true",
+			VITE_FEATURE_INSIGHTS_TRENDS: trendsOn ? "true" : "false",
 		};
-	});
+	}, trends);
 }

@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import axe from "axe-core";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -65,11 +66,30 @@ const SUBJECTS = [
 	{ tab: "collection", lastPanel: "Clustering confidence" },
 ] as const;
 
+/**
+ * The tag sets AND the extra rules, as one list of rule ids.
+ *
+ * NOT `.withTags(WCAG).withRules(EXTRA_RULES)`. Both of those set `runOnly`, so chaining
+ * them does not combine - the second silently replaces the first, and this gate spent its
+ * life asserting `heading-order` alone while reporting green on the whole WCAG ladder.
+ * Lighthouse caught the aria-hidden-focus failure this missed, which is the only reason
+ * anybody looked.
+ */
+const RULES = [
+	...new Set([
+		...axe.getRules(WCAG).map((rule) => rule.ruleId),
+		...EXTRA_RULES,
+	]),
+];
+
 async function scan(page: Page) {
-	const results = await new AxeBuilder({ page })
-		.withTags(WCAG)
-		.withRules(EXTRA_RULES)
-		.analyze();
+	// Guards the gate: a rule list that has lost the tag sets is exactly what this file
+	// looked like before, and it looked green.
+	expect(RULES).toContain("color-contrast");
+	expect(RULES).toContain("heading-order");
+	expect(RULES.length).toBeGreaterThan(50);
+
+	const results = await new AxeBuilder({ page }).withRules(RULES).analyze();
 
 	expect(
 		results.violations.map((v) => ({
@@ -128,6 +148,16 @@ for (const scheme of ["light", "dark"] as const) {
 			// renders rather than left to the five above.
 			await page.goto(`/libraries/${LIBRARY}/insights?tab=gaps`);
 			await revealSubject(page, "Consortial lifeline");
+			await scan(page);
+		});
+
+		test("the duration trends have no violations", async ({ page }) => {
+			// Behind a flag that is off everywhere today, so the default scans above do
+			// not reach this panel at all - a chart with its own toggle group, which is
+			// where focus order and unlabelled controls go wrong.
+			await enableInsights(page, { trends: true });
+			await page.goto("/consortium/insights?tab=trends");
+			await revealSubject(page, "How durations are moving");
 			await scan(page);
 		});
 

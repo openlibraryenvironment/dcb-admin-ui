@@ -75,7 +75,10 @@ import type { InsightsView } from "@hooks/useInsightsView";
 import type { RangePreset } from "@helpers/insightsSearch";
 
 import SubjectBar from "./SubjectBar";
+import TrendStrip from "./TrendStrip";
+import DurationTrendPanel from "./DurationTrendPanel";
 import { resolveSubject, Subject } from "@helpers/insightsSubjects";
+import { isInsightsTrendsEnabled } from "@helpers/featureFlags";
 
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
 
@@ -478,6 +481,19 @@ export default function InsightsDashboard({
 				current={subject}
 				titleKey="insights.sections.trends"
 			>
+				{/* Direction first: it answers the question the subject is named for, and
+				    it reads the series the spine below already fetched. */}
+				<TrendStrip params={params} interval={interval} />
+
+				{/* The three durations over time. Behind its own flag: /insights/trend is
+				    on no dcb-service release, and a 404 through the panel contract reads
+				    as a fault rather than as a server that is older. */}
+				{isInsightsTrendsEnabled() ? (
+					<LazyPanel minHeight={360}>
+						<DurationTrendPanel params={params} interval={interval} />
+					</LazyPanel>
+				) : null}
+
 				{/* Trend spine + plot-builder */}
 				<StatusFlowChart params={params} interval={interval} view={view} />
 			</Section>

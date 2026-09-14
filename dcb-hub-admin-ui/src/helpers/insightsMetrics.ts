@@ -32,6 +32,12 @@ export const METRIC_IDS = [
 	"peer_benchmarks",
 	"checkout_rate",
 	"cost_avoidance",
+	// --- trends -----------------------------------------------------------------------
+	"request_volume",
+	"trend_direction",
+	"turnaround_trend",
+	"supplier_response_trend",
+	"transit_dwell_trend",
 ] as const;
 
 export type MetricId = (typeof METRIC_IDS)[number];
