@@ -54,6 +54,79 @@ test.describe("Service Status versions", () => {
 		}
 	});
 
+	test("operates the detail toggles from the keyboard", async ({ page }) => {
+		await page.goto("/serviceInfo/serviceStatus");
+
+		const versions = page.getByRole("grid").filter({ hasText: "dcb-admin-ui" });
+		const toggle = (component: string) =>
+			versions
+				.getByRole("row")
+				.filter({ hasText: component })
+				.getByRole("button", { name: /details/ });
+		await expect(toggle("dcb-admin-ui")).toBeVisible();
+
+		const header = versions.getByRole("columnheader", {
+			name: "Expand all details",
+		});
+		await page.evaluate(() =>
+			(document.activeElement as HTMLElement | null)?.blur(),
+		);
+		// Bounded rather than a fixed count: how many stops precede the grid is the
+		// layout's business, not this test's.
+		for (
+			let presses = 0;
+			presses < 60 &&
+			!(await header.evaluate((el) => el === document.activeElement));
+			presses++
+		) {
+			await page.keyboard.press("Tab");
+		}
+		await expect(header).toBeFocused();
+
+		await page.keyboard.press("Enter");
+		await expect(toggle("dcb-admin-ui")).toHaveAttribute(
+			"aria-expanded",
+			"true",
+		);
+		await expect(toggle("dcb-service")).toHaveAttribute(
+			"aria-expanded",
+			"true",
+		);
+		await page.keyboard.press(" ");
+		await expect(toggle("dcb-admin-ui")).toHaveAttribute(
+			"aria-expanded",
+			"false",
+		);
+		await expect(toggle("dcb-service")).toHaveAttribute(
+			"aria-expanded",
+			"false",
+		);
+
+		await page.keyboard.press("ArrowDown");
+		await expect(
+			versions
+				.getByRole("row")
+				.filter({ hasText: "dcb-admin-ui" })
+				.getByRole("gridcell")
+				.filter({ has: page.getByRole("button", { name: /details/ }) }),
+		).toBeFocused();
+		// One press, one toggle: a Space that also reached the grid would open and
+		// close the panel in the same keystroke.
+		await page.keyboard.press(" ");
+		await expect(toggle("dcb-admin-ui")).toHaveAttribute(
+			"aria-expanded",
+			"true",
+		);
+		await expect(toggle("dcb-admin-ui")).toHaveAccessibleName(
+			"Collapse details",
+		);
+		await page.keyboard.press("Enter");
+		await expect(toggle("dcb-admin-ui")).toHaveAttribute(
+			"aria-expanded",
+			"false",
+		);
+	});
+
 	test("still shows the running builds when GitHub refuses", async ({
 		page,
 	}) => {

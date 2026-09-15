@@ -2395,6 +2395,8 @@
 			"checkbox_selection": "Checkbox selection",
 			"close": "Close",
 			"collapse": "Collapse",
+			"collapse_all_details": "Collapse all details",
+			"collapse_details": "Collapse details",
 			"confirm_changes": "Confirm changes",
 			"complete": "{{percentage}} complete",
 			"delete": "Delete",
@@ -2462,6 +2464,8 @@
 			"error": "Error",
 			"error_count": "Error: ",
 			"expand": "Expand",
+			"expand_all_details": "Expand all details",
+			"expand_details": "Expand details",
 			"filters": {
 				"active_description": "{{length}} filter(s) active: {{description}}",
 				"between": "Between",

@@ -218,7 +218,7 @@ for (const scheme of ["light", "dark"] as const) {
 			await page.goto("/serviceInfo/serviceStatus");
 			const service = page.getByRole("row").filter({ hasText: "dcb-service" });
 			await expect(service).toContainText("v9.0.0");
-			await service.getByRole("button", { name: "Open" }).click();
+			await service.getByRole("button", { name: "Expand details" }).click();
 			await expect(page.getByText("Closest release tag")).toBeVisible();
 			// The click leaves the pointer on the toggle, whose tooltip then fades in. Scanned
 			// mid-fade it fails colour-contrast on blended colours; fully shown it is 10.1:1.

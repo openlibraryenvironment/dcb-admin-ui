@@ -121,9 +121,7 @@ export default function VersionInfo({ serviceInfo }: VersionInfoProps) {
 			{
 				...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 				headerName: t("ui.data_grid.master_detail"),
-				renderCell: (params) => (
-					<DetailPanelToggle id={params.id} value={params.value} />
-				),
+				renderCell: (params) => <DetailPanelToggle id={params.id} />,
 				renderHeader: () => <DetailPanelHeader />,
 			},
 			{

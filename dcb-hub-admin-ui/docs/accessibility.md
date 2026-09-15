@@ -130,10 +130,29 @@ because nothing had ever scanned one expanded.
 may carry `row` or `gridcell` itself** — a gridcell inside that gridcell is its own violation.
 `MasterDetail` had ten such roles, placed by hand on individual `Grid`s; they are gone.
 
-**One open defect in the same component, which no gate can see.** `DetailPanelToggle` sets
-`tabIndex={-1}` on its button, so a keyboard user cannot reach it by tabbing, and its
-`aria-label` is a hardcoded "Open"/"Close" rather than a translated string. axe passes both:
-it checks that the button has a name, not whether it can be reached or is translated.
+### The toggles work inside the grid's keyboard model
+
+A data grid is **one** Tab stop; arrow keys move between cells inside it. That is the ARIA
+grid pattern and MUI X enforces it with a roving `tabIndex`, so a Tab stop per row is not the
+fix and would fight the grid. Before this, both toggles pinned `tabIndex={-1}`, and on Service
+Status, measured in Chromium:
+
+- Tab entered the grid on the "expand all" column header, where **Enter and Space did nothing** —
+  expand-all had no keyboard path at all.
+- ArrowDown reached a row's toggle cell and Space opened it, but Enter did nothing, and focus sat
+  on the cell rather than the button, so no name or expanded state was announced.
+- Labels were hardcoded "Open", "Close", "Expand All". axe passed all of it: it checks that a
+  button has a name, not that it can be operated or is translated.
+
+Now the row button carries a translated name that changes with its state, plus
+`aria-expanded`, and `DetailPanelToggle` handles Enter through the grid's `cellKeyDown` event.
+Space was already handled by the grid. Focus stays on the cell, as in MUI's own toggle. Giving
+the button the cell's roving `tabIndex` was tried and rejected: the cell and its button become
+two nested targets, and axe `target-size` failed the 50×52px cell at the 50×13px the button left
+of it. The header button also stays `tabIndex={-1}`, because the grid ignores keys from
+focusable header content, which would stop arrow navigation. `DetailPanelHeader` handles Enter
+and Space through the grid's `columnHeaderKeyDown` event. Proved by `e2e/service-status.spec.ts` › "operates the
+detail toggles from the keyboard"; every master-detail grid shares these two components.
 
 ---
 

@@ -11,9 +11,7 @@ export const itemColumns: GridColDef[] = [
 	{
 		...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 		headerName: i18n.t("ui.data_grid.master_detail"),
-		renderCell: (params) => (
-			<DetailPanelToggle id={params.id} value={params.value} />
-		),
+		renderCell: (params) => <DetailPanelToggle id={params.id} />,
 		renderHeader: () => <DetailPanelHeader />,
 	},
 	{
