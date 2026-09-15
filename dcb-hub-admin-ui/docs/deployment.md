@@ -71,6 +71,15 @@ release_ — not 8.71.0, not the 9.0.0 tag — and the audit explorer has no bac
 One boolean would be a lie about all three, and turning it on at the v9 upgrade would break
 all three.
 
+### Linking to discovery's staff settings
+
+`VITE_DISCOVERY_URL` is where symposia-ui is mounted, for example `https://discovery.example.org/`.
+With it set, the consortium Branding tab links to symposia-ui's `/staff` pages, where discovery's
+front page, relevance rules, search ranking and online access holdings are changed. Those
+settings live in symposia-service and symposia-ui is their one editor, so DCB Admin links to it
+rather than carrying a second copy of the forms. Unset, the link is not offered. Unlike the
+flags above, this depends on no dcb-service release.
+
 ### Checking, and what happens if you get it wrong
 
 **Service Info → Feature availability** lists every flag, the dcb-service version it needs,

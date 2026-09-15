@@ -2,6 +2,7 @@
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
@@ -18,7 +19,7 @@ import {
 	useTheme,
 	Stack,
 } from "@mui/material";
-import { Cancel, Edit, Save } from "@mui/icons-material";
+import { Cancel, Edit, OpenInNew, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
@@ -55,6 +56,7 @@ import {
 	themeOptions,
 } from "@constants/discoveryBranding";
 import { isConsortiumSupportUrlEnabled } from "@helpers/featureFlags";
+import { discoveryStaffUrl } from "@helpers/discoveryStaffUrl";
 import { discoveryBrandFields } from "@schemas/discoveryBrandSchema";
 import {
 	BrandUploadError,
@@ -163,6 +165,11 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 	const auth = useAuth();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
+	const router = useRouter();
+	const discoverySettingsUrl = discoveryStaffUrl(
+		(router.options.context as { cfg?: { VITE_DISCOVERY_URL?: string } })?.cfg
+			?.VITE_DISCOVERY_URL,
+	);
 	const client = useDcbRestClient();
 	const queryClient = useQueryClient();
 
@@ -602,7 +609,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 											<TextField
 												{...field}
 												slotProps={{
-													htmlInput: { "aria-labelledby": labelId("displayName") },
+													htmlInput: {
+														"aria-labelledby": labelId("displayName"),
+													},
 												}}
 												inputRef={firstEditableFieldRef}
 												fullWidth
@@ -638,7 +647,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 											<TextField
 												{...field}
 												slotProps={{
-													htmlInput: { "aria-labelledby": labelId("websiteUrl") },
+													htmlInput: {
+														"aria-labelledby": labelId("websiteUrl"),
+													},
 												}}
 												fullWidth
 												error={!!errors.websiteUrl}
@@ -729,7 +740,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 											<TextField
 												{...field}
 												slotProps={{
-													htmlInput: { "aria-labelledby": labelId("catalogueSearchUrl") },
+													htmlInput: {
+														"aria-labelledby": labelId("catalogueSearchUrl"),
+													},
 												}}
 												fullWidth
 												error={!!errors.catalogueSearchUrl}
@@ -803,6 +816,21 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 								>
 									{t("consortium.brand.external_url_cost")}
 								</Typography>
+							)}
+							{discoverySettingsUrl && (
+								<Stack spacing={1} sx={{ mt: 2, alignItems: "flex-start" }}>
+									<Typography variant="body2">
+										{t("consortium.brand.discovery_settings_help")}
+									</Typography>
+									{/* Another application, so a plain anchor rather than a router link. */}
+									<Button
+										variant="outlined"
+										href={discoverySettingsUrl}
+										endIcon={<OpenInNew />}
+									>
+										{t("consortium.brand.discovery_settings")}
+									</Button>
+								</Stack>
 							)}
 						</Grid>
 
@@ -948,7 +976,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 											<TextField
 												{...field}
 												slotProps={{
-													htmlInput: { "aria-labelledby": labelId("brandLogoAlt") },
+													htmlInput: {
+														"aria-labelledby": labelId("brandLogoAlt"),
+													},
 												}}
 												fullWidth
 												error={!!errors.brandLogoAlt}
@@ -1053,7 +1083,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 											<TextField
 												{...field}
 												slotProps={{
-													htmlInput: { "aria-labelledby": labelId("patronWelcome") },
+													htmlInput: {
+														"aria-labelledby": labelId("patronWelcome"),
+													},
 												}}
 												fullWidth
 												multiline
