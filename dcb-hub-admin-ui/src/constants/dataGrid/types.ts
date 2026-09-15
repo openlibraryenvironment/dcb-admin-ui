@@ -15,6 +15,9 @@ export const nonClickableTypes = [
 	"contact",
 	"consortiumContact",
 	"consortiumFunctionalSettings",
+	// Service Status grids describe this deployment; their rows expand, they do not route.
+	"environmentInfo",
+	"versionInfo",
 ];
 
 // Types of data grid where users can click through to a details page,

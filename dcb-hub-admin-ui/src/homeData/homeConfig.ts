@@ -1,10 +1,3 @@
-const API_LINKS = {
-	SERVICE:
-		"https://api.github.com/repos/openlibraryenvironment/dcb-service/tags",
-	ADMIN_UI:
-		"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
-};
-
 // Helper utility to safely retrieve the environment configuration globally
 // following the bootstrap injection strategy in your main.tsx
 const getEnvConfig = () => {
@@ -87,7 +80,6 @@ const DCB_SERVICE_STATUS_LINKS = {
 };
 
 export {
-	API_LINKS,
 	DCB_SERVICE_STATUS_LINKS,
 	LOCAL_VERSION_LINKS,
 	REPO_LINKS,

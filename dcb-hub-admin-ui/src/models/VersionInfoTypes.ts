@@ -1,49 +1,21 @@
-export interface Tag {
-	name: string;
-	commit: {
-		sha: string;
-		url: string;
-	};
-	zipball_url: string;
-	tarball_url: string;
-	node_id: string;
+/** The `git` block of dcb-service's `/info`. gradle-git-properties publishes every leaf as a string. */
+export interface ServiceInfoGit {
+	build?: { version?: string };
+	commit?: { id?: string; time?: string };
+	closest?: { tag?: { name?: string; commit?: { count?: string } } };
 }
 
-export interface ServiceInfo {
-	app: {
-		name: string;
-		version: string;
-	};
-	[key: string]: any;
-}
-
-export interface Release {
-	url: string;
-	html_url: string;
-	id: number;
-	tag_name: string;
-	name: string;
-	draft: boolean;
-	prerelease: boolean;
-	created_at: string;
-	published_at: string;
-	body: string;
-	author: {
-		login: string;
-		id: number;
-		avatar_url: string;
-		url: string;
-	};
-	[key: string]: any;
-}
-
-export interface VersionData {
-	id: number;
-	repository: string;
+export interface VersionRow {
+	id: "dcb-admin-ui" | "dcb-service";
+	version: string;
+	releasesUrl: string;
+	releaseDate?: string;
+	commitId?: string;
+	commitTime?: string;
+	closestTag?: string;
+	commitsSinceTag?: number;
 	latestVersion: string;
-	currentVersion: string;
-	status: "current" | "outdated" | "loading" | "error";
-	latestData?: Tag | Release | ServiceInfo;
-	currentData?: any;
-	detailType: "tag" | "release" | "serviceInfo";
+	releaseStatus: string;
+	latestReleaseDate?: string;
+	latestReleaseUrl?: string;
 }

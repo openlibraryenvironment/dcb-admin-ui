@@ -13,6 +13,7 @@ import {
 	legacyConsortiumMocks,
 	useLegacyService,
 } from "./fixtures/legacy-service-mocks";
+import { mockLatestReleases } from "./fixtures/service-status-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import consortium from "./fixtures-data/consortium.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -60,7 +61,12 @@ const MOCKS = {
  * the route's own data has arrived, so the scan never runs against a skeleton - a gate that
  * measures a spinner passes for the wrong reason.
  */
-const ROUTES: { path: string; ready: (page: Page) => Promise<void> }[] = [
+const ROUTES: {
+	path: string;
+	/** Route-specific mocks, registered before navigation. */
+	setup?: (page: Page) => Promise<void>;
+	ready: (page: Page) => Promise<void>;
+}[] = [
 	{
 		path: "/",
 		ready: async (page) => {
@@ -97,6 +103,17 @@ const ROUTES: { path: string; ready: (page: Page) => Promise<void> }[] = [
 		},
 	},
 	{
+		// Service Status: the environment and version grids. GitHub is mocked so the
+		// Latest version column is painted, not left at "Checking…".
+		path: "/serviceInfo/serviceStatus",
+		setup: mockLatestReleases,
+		ready: async (page) => {
+			await expect(
+				page.getByRole("row").filter({ hasText: "dcb-admin-ui" }),
+			).toContainText("Up to date");
+		},
+	},
+	{
 		// The accounts grid: a status chip and two text actions per row, in every scheme.
 		// Chips and dense row actions are where contrast and target size fail, so this
 		// route earns its place rather than being taken as covered by library pages that
@@ -124,6 +141,7 @@ for (const scheme of ["light", "dark"] as const) {
 
 		for (const route of ROUTES) {
 			test(`${route.path} has no violations`, async ({ page }) => {
+				await route.setup?.(page);
 				await page.goto(route.path);
 				await route.ready(page);
 
@@ -182,6 +200,37 @@ for (const scheme of ["light", "dark"] as const) {
 	}
 }
 
+/**
+ * The version grid with dcb-service's detail panel open. The route table scans the grid as
+ * it first renders; the panel's attributes and release links do not exist until a row is
+ * expanded.
+ */
+for (const scheme of ["light", "dark"] as const) {
+	test.describe(`WCAG 2.2 AA - service status detail panel, ${scheme}`, () => {
+		test.use({ colorScheme: scheme });
+
+		test("the expanded version row has no violations", async ({ page }) => {
+			await useAllFeatures(page);
+			await seedAuth(page);
+			await mockGraphQL(page, MOCKS);
+			await mockLatestReleases(page);
+
+			await page.goto("/serviceInfo/serviceStatus");
+			const service = page.getByRole("row").filter({ hasText: "dcb-service" });
+			await expect(service).toContainText("v9.0.0");
+			await service.getByRole("button", { name: "Open" }).click();
+			await expect(page.getByText("Closest release tag")).toBeVisible();
+			// The click leaves the pointer on the toggle, whose tooltip then fades in. Scanned
+			// mid-fade it fails colour-contrast on blended colours; fully shown it is 10.1:1.
+			await page.mouse.move(0, 0);
+			await expect(page.getByRole("tooltip")).toBeHidden();
+
+			await expectPaintedScheme(page, scheme);
+			await scanForViolations(page);
+		});
+	});
+}
+
 test.describe("WCAG 2.2 AA - high contrast", () => {
 	test.beforeEach(async ({ page }) => {
 		await useAllFeatures(page);
@@ -193,6 +242,7 @@ test.describe("WCAG 2.2 AA - high contrast", () => {
 
 	for (const route of ROUTES) {
 		test(`${route.path} has no violations`, async ({ page }) => {
+			await route.setup?.(page);
 			await page.goto(route.path);
 			await route.ready(page);
 			await scanForViolations(page);
@@ -229,6 +279,7 @@ test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 
 			for (const route of LEGACY_ROUTES) {
 				test(`${route.path} has no violations`, async ({ page }) => {
+					await route.setup?.(page);
 					await page.goto(route.path);
 					await route.ready(page);
 					await expectPaintedScheme(page, scheme);
@@ -265,6 +316,7 @@ test.describe("WCAG 2.4.1 - landmarks and the skip link", () => {
 
 	for (const route of ROUTES) {
 		test(`${route.path} is fully landmarked`, async ({ page }) => {
+			await route.setup?.(page);
 			await page.goto(route.path);
 			await route.ready(page);
 			await scanForLandmarks(page);

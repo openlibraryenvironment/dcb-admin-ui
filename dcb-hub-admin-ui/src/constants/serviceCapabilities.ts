@@ -239,6 +239,32 @@ export const parseServiceVersion = (
 };
 
 /**
+ * dcb-service's own version from an `/info` payload, or null when it is not there.
+ *
+ * `git.build.version` is the Gradle project version: "8.71.0" on a release build,
+ * "9.1.0-SNAPSHOT" on a development one. `/info` has no top-level `version`.
+ */
+export const serviceVersionFrom = (info: unknown): string | null => {
+	const version = (info as { git?: { build?: { version?: unknown } } } | null)
+		?.git?.build?.version;
+	return typeof version === "string" && version !== "" ? version : null;
+};
+
+export type ReleaseStatus = "current" | "behind" | "ahead" | "unknown";
+
+/** Where a running version stands against the latest release. "v2.0.0" and "2.0.0" compare equal. */
+export const releaseStatus = (
+	running: string | null,
+	latest: string | undefined,
+): ReleaseStatus => {
+	const atLeastLatest = meetsServiceVersion(running, latest ?? "");
+	const latestAtLeastRunning = meetsServiceVersion(latest ?? "", running ?? "");
+	if (atLeastLatest === null || latestAtLeastRunning === null) return "unknown";
+	if (atLeastLatest && latestAtLeastRunning) return "current";
+	return atLeastLatest ? "ahead" : "behind";
+};
+
+/**
  * Whether `version` is at least `minimum`. Null when either cannot be read, which the
  * panel renders as "unknown" rather than as either answer.
  */

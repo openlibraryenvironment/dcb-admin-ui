@@ -116,6 +116,27 @@ is happening, and there is no single layout to match across 84 routes.
 
 ---
 
+## Detail panels are grid rows
+
+MUI X renders an expanded detail panel as `role="none"` directly inside the grid's
+`rowgroup`. `none` drops out of the accessibility tree, so everything focusable in a panel —
+every link `RenderAttribute` draws — becomes a child of the rowgroup, which may only own rows.
+axe reports it as `aria-required-children`, critical. It was found the first time the gate
+opened a panel (Service Status), and it applied to every master-detail grid in the app,
+because nothing had ever scanned one expanded.
+
+`MasterDetailLayout` now supplies the missing structure once: a `row` holding a single
+`gridcell` around the panel content. The rule that follows is that **nothing inside a panel
+may carry `row` or `gridcell` itself** — a gridcell inside that gridcell is its own violation.
+`MasterDetail` had ten such roles, placed by hand on individual `Grid`s; they are gone.
+
+**One open defect in the same component, which no gate can see.** `DetailPanelToggle` sets
+`tabIndex={-1}` on its button, so a keyboard user cannot reach it by tabbing, and its
+`aria-label` is a hardcoded "Open"/"Close" rather than a translated string. axe passes both:
+it checks that the button has a name, not whether it can be reached or is translated.
+
+---
+
 ## Language
 
 **Two open defects, recorded here because neither is visible from the code and no gate can

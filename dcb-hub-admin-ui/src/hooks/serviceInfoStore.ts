@@ -4,6 +4,7 @@ import axios from "axios";
 
 import { storageKey } from "@helpers/appBase";
 import { brandAssetStoreFrom } from "@constants/discoveryBranding";
+import { serviceVersionFrom } from "@constants/serviceCapabilities";
 
 interface VersionInfo {
 	version: string | null;
@@ -54,14 +55,11 @@ const useDCBVersionStore = create<VersionInfo>()(
 				try {
 					const response = await axios.get(apiBase + "/info");
 					const data = response.data;
+					const version = serviceVersionFrom(data);
 
-					const versionStr = data.version || "";
-					const isDev = versionStr.includes("SNAPSHOT");
-
-					// Update state with the fetched data
 					set({
-						version: data.version || "Unknown",
-						isDev,
+						version,
+						isDev: version?.includes("SNAPSHOT") ?? false,
 						isAcceptableVersion: true,
 						// Optional chaining, because this whole fetch is now what the
 						// Service Info capability panel reads the version from. `env` is
@@ -70,7 +68,7 @@ const useDCBVersionStore = create<VersionInfo>()(
 						// and then the panel reports every capability as "cannot tell"
 						// for a reason nothing on screen could explain.
 						type: data.env?.code || "",
-						branch: data.branch || "main",
+						branch: data.git?.branch ?? null,
 						brandAssetStore: brandAssetStoreFrom(data),
 						lastFetchedAt: Date.now(),
 						fetchedFrom: apiBase,
@@ -103,9 +101,10 @@ const useDCBVersionStore = create<VersionInfo>()(
 		{
 			name: storageKey("dcb-version-storage"),
 			storage: createJSONStorage(() => sessionStorage),
-			// Bumped to discard caches written before the runtime-config fix; those
-			// hold an environment type fetched from the wrong /info endpoint.
-			version: 1,
+			// Bumped to discard older caches: 1 dropped an environment type fetched from
+			// the wrong /info endpoint, 2 drops the literal "Unknown" version that every
+			// deployment was cached with before the version was read from git.build.
+			version: 2,
 			// Only the fetched payload is worth caching. Persisting `loading`/`error`
 			// meant a reload mid-request rehydrated a stale transient state.
 			partialize: (state) => ({
