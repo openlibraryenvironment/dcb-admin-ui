@@ -41,6 +41,8 @@ declare global {
 			    wrong application. Optional: without it they are still told which
 			    application they want, just not handed a link. */
 			VITE_DCB_ADMIN_FOR_LIBRARIES_URL?: string;
+			/** Where symposia-ui is mounted, for the Branding tab's link to its staff pages. */
+			VITE_DISCOVERY_URL?: string;
 			[key: string]: string | undefined;
 		};
 		__DCB_BUNDLE_BASE_URL__?: string;
@@ -73,6 +75,8 @@ export async function getStandaloneConfig() {
 				VITE_ILL_API_BASE: String(import.meta.env.VITE_ILL_API_BASE),
 				VITE_DCB_ADMIN_FOR_LIBRARIES_URL: import.meta.env
 					.VITE_DCB_ADMIN_FOR_LIBRARIES_URL as string | undefined,
+				VITE_DISCOVERY_URL: import.meta.env.VITE_DISCOVERY_URL as
+					string | undefined,
 			};
 		}
 

@@ -24,6 +24,7 @@ export async function useAllFeatures(page: Page) {
 			VITE_KEYCLOAK_ID: "dcb-admin-e2e",
 			VITE_DCB_API_BASE: "http://localhost:4173/api",
 			VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
+			VITE_DISCOVERY_URL: "https://discovery.e2e.invalid/",
 			VITE_FEATURE_INSIGHTS: "true",
 			VITE_FEATURE_AUDIT_EXPLORER: "true",
 			VITE_FEATURE_CONSORTIUM_BRANDING: "true",

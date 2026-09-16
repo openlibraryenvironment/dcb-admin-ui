@@ -16,11 +16,13 @@ set -eu
 # a library account that reaches this application is handed a link rather than only
 # told which application it wants. Optional: unset renders empty and the page drops
 # to the no-link wording.
+# VITE_DISCOVERY_URL is where symposia-ui is mounted, for the Branding tab's link to
+# its staff pages. Optional: unset, the link is not offered.
 # Feature flags are listed here too, so an environment can turn a backend-gated
 # feature on without rebuilding the bundle (see src/helpers/featureFlags.ts).
 # envsubst renders an unset var as the empty string, which readFlag() reads as
 # false - so a flag absent from the environment leaves the feature off.
-vars='${VITE_MUI_X_LICENSE_KEY} ${VITE_KEYCLOAK_URL} ${VITE_KEYCLOAK_ID} ${VITE_DCB_API_BASE} ${VITE_DCB_SEARCH_BASE} ${VITE_ILL_API_BASE} ${VITE_DCB_ADMIN_FOR_LIBRARIES_URL} ${VITE_FEATURE_INSIGHTS} ${VITE_FEATURE_INSIGHTS_TRENDS} ${VITE_FEATURE_GUARDED_CLEANUP} ${VITE_FEATURE_AUDIT_EXPLORER} ${VITE_FEATURE_CONSORTIUM_BRANDING} ${VITE_FEATURE_CONSORTIUM_SUPPORT_URL} ${VITE_FEATURE_NCIP_ONBOARDING} ${VITE_FEATURE_LIBRARY_USER_PROVISIONING} ${VITE_FEATURE_LOCAL_HOLDS}'
+vars='${VITE_MUI_X_LICENSE_KEY} ${VITE_KEYCLOAK_URL} ${VITE_KEYCLOAK_ID} ${VITE_DCB_API_BASE} ${VITE_DCB_SEARCH_BASE} ${VITE_ILL_API_BASE} ${VITE_DCB_ADMIN_FOR_LIBRARIES_URL} ${VITE_DISCOVERY_URL} ${VITE_FEATURE_INSIGHTS} ${VITE_FEATURE_INSIGHTS_TRENDS} ${VITE_FEATURE_GUARDED_CLEANUP} ${VITE_FEATURE_AUDIT_EXPLORER} ${VITE_FEATURE_CONSORTIUM_BRANDING} ${VITE_FEATURE_CONSORTIUM_SUPPORT_URL} ${VITE_FEATURE_NCIP_ONBOARDING} ${VITE_FEATURE_LIBRARY_USER_PROVISIONING} ${VITE_FEATURE_LOCAL_HOLDS}'
 
 envsubst "$vars" \
 	< /usr/share/nginx/html/inject_env.template.json \

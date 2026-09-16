@@ -192,6 +192,8 @@
 			"image_url": "Or paste a web address",
 			"image_url_staged": "Remove the chosen file to enter a web address instead.",
 			"external_url_cost": "An address on someone else's server means every patron's browser fetches the image from them: if their site is down the branding disappears, and their logs record each patron's IP address. Uploading avoids both.",
+			"discovery_settings": "Open discovery staff settings",
+			"discovery_settings_help": "Discovery's front page, relevance rules, search ranking and online access holdings are changed on its own staff pages.",
 			"theme": "Discovery theme",
 			"theme_help": "Chosen from the themes the discovery app ships. Every one has been checked for colour contrast in light, dark and high-contrast modes.",
 			"theme_default": "Use the default theme",
