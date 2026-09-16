@@ -1,3 +1,4 @@
+import { isValidElement } from "react";
 import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip } from "@mui/material";
 import { UnfoldLess, UnfoldMore } from "@mui/icons-material";
@@ -56,6 +57,20 @@ export default function DetailPanelHeader() {
 		) {
 			event.preventDefault();
 			expandOrCollapseAll();
+		}
+	});
+
+	// ONE listener per grid rather than one per rendered cell. Each toggle cell used to
+	// subscribe for itself, and MUI's EventManager warns past 20 listeners on an event -
+	// a page of 20 rows reached 21. Space is useGridDetailPanel's; Enter is nobody's.
+	useGridEvent(apiRef, "cellKeyDown", (params, event) => {
+		if (
+			params.field === GRID_DETAIL_PANEL_TOGGLE_FIELD &&
+			event.key === "Enter" &&
+			isValidElement(rowsWithDetailPanels[params.id])
+		) {
+			event.preventDefault();
+			apiRef.current.toggleDetailPanel(params.id);
 		}
 	});
 

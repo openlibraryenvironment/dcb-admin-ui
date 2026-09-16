@@ -3,10 +3,8 @@ import { useTranslation } from "react-i18next";
 import { IconButton, Tooltip } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
-	GRID_DETAIL_PANEL_TOGGLE_FIELD,
 	GridRenderCellParams,
 	useGridApiContext,
-	useGridEvent,
 	useGridSelector,
 	gridDetailPanelExpandedRowsContentCacheSelector,
 	gridDetailPanelExpandedRowIdsSelector,
@@ -25,19 +23,6 @@ export function DetailPanelToggle({ id }: Pick<GridRenderCellParams, "id">) {
 		apiRef,
 		gridDetailPanelExpandedRowsContentCacheSelector,
 	);
-
-	// Space on the focused cell is useGridDetailPanel's; the grid does nothing on Enter.
-	useGridEvent(apiRef, "cellKeyDown", (params, event) => {
-		if (
-			params.id === id &&
-			params.field === GRID_DETAIL_PANEL_TOGGLE_FIELD &&
-			event.key === "Enter" &&
-			isValidElement(contentCache[id])
-		) {
-			event.preventDefault();
-			apiRef.current.toggleDetailPanel(id);
-		}
-	});
 
 	// eslint-disable-next-line react-hooks/refs -- MUI DataGrid apiRef is populated and safe to read during render
 	const rowNode = apiRef.current.getRowNode(id);
