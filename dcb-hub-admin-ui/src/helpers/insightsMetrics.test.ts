@@ -50,6 +50,7 @@ const NOT_FIGURES = new Set([
 	"ScopeSelector",
 	"SubjectBar",
 	"DrillLink",
+	"ChartExportToolbar",
 	"ExportContext",
 	"PanelExport",
 	"ReturnToInsights",
