@@ -21,7 +21,8 @@ type ConfirmationAction =
 	| "unsaved"
 	| "uploadReplacement"
 	| "sessionWarning"
-	| "rollback";
+	| "rollback"
+	| "cleanupOverride";
 
 interface AuditFormData {
 	reason: string;
@@ -56,6 +57,7 @@ export default function Confirmation({
 	const isUpload = action === "uploadReplacement";
 	const isSessionWarning = action === "sessionWarning";
 	const isRollback = action === "rollback";
+	const isCleanupOverride = action === "cleanupOverride";
 	const requiresAuditFields = isEdit || isDelete || isUpload;
 
 	const {
@@ -87,6 +89,7 @@ export default function Confirmation({
 		if (isUnsaved) return t("ui.unsaved_changes.header");
 		if (isUpload) return t("common.upload_title", { entityName: entityName });
 		if (isRollback) return t("patron_request.rollback_confirm_title");
+		if (isCleanupOverride) return t("patron_request.cleanup_override_title");
 		return t("ui.confirmation.general_title");
 	};
 
@@ -159,6 +162,15 @@ export default function Confirmation({
 					{/* The session warning is gated in here too: it passes
 					    customWarningText and nothing rendered it, so the dialog asked the
 					    user to decide with a title and two buttons and no explanation. */}
+					{/* Cleanup override carries the same shape of caveat as rollback: the server
+					    refused because the item is not back at the supplying library, and going
+					    ahead deletes the borrowing library's records regardless. */}
+					{isCleanupOverride && (
+						<Alert severity="warning" sx={{ mb: 2 }}>
+							{customWarningText}
+						</Alert>
+					)}
+
 					{(isUpload || isSessionWarning || isRollback) &&
 						customWarningText && <Box sx={{ mb: 2 }}>{customWarningText}</Box>}
 
@@ -235,7 +247,7 @@ export default function Confirmation({
 						color={
 							isDelete || isUnsaved
 								? "error"
-								: isRollback
+								: isRollback || isCleanupOverride
 									? "warning"
 									: "primary"
 						}
@@ -250,6 +262,7 @@ export default function Confirmation({
 						{isSessionWarning && t("loginout.stay_logged_in")}
 						{isUpload && t("common.upload")}
 						{isRollback && t("patron_request.rollback")}
+						{isCleanupOverride && t("patron_request.cleanup_override_confirm")}
 					</Button>
 				</DialogActions>
 			</form>

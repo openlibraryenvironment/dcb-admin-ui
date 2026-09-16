@@ -2,6 +2,7 @@ import {
 	isAuditExplorerEnabled,
 	isConsortiumBrandingEnabled,
 	isConsortiumSupportUrlEnabled,
+	isGuardedCleanupEnabled,
 	isInsightsEnabled,
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
@@ -140,6 +141,15 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		id: "insights",
 		flag: "VITE_FEATURE_INSIGHTS",
 		enabled: isInsightsEnabled,
+		since: "9.0.0",
+		fields: {},
+	},
+	{
+		// The cleanup guard, its 409 and the force override are REST behaviour rather than
+		// schema, so there is nothing to select or strip.
+		id: "guarded_cleanup",
+		flag: "VITE_FEATURE_GUARDED_CLEANUP",
+		enabled: isGuardedCleanupEnabled,
 		since: "9.0.0",
 		fields: {},
 	},

@@ -435,6 +435,10 @@ export default function DataGrid({
 					successRows={cleanup.cleanupState.successRows}
 					errorRows={cleanup.cleanupState.errorRows}
 					skippedRows={cleanup.cleanupState.skippedRows}
+					refusedRows={cleanup.cleanupState.refusedRows}
+					onOverride={
+						cleanup.overrideAvailable ? cleanup.requestOverride : undefined
+					}
 					onClose={cleanup.handleCloseCleanup}
 				/>
 			) : null}
@@ -446,6 +450,15 @@ export default function DataGrid({
 						customWarningText={rollbackSummary}
 						onClose={rollback.cancelConfirm}
 						onConfirm={rollback.confirmAndRun}
+					/>
+					<Confirmation
+						open={cleanup.overrideConfirmOpen}
+						action="cleanupOverride"
+						customWarningText={t("patron_request.cleanup_override_warning", {
+							status: cleanup.cleanupState.refusedRows[0]?.status,
+						})}
+						onClose={cleanup.cancelOverride}
+						onConfirm={cleanup.confirmOverride}
 					/>
 					<RollbackResultDialog
 						open={rollback.rollbackState.open}

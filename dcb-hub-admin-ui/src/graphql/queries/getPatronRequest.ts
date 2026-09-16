@@ -32,6 +32,7 @@ export const getPatronRequest = gql`
 				nextScheduledPoll
 				errorMessage
 				previousStatus
+				isTooLong
 				pollCountForCurrentStatus
 				currentStatusTimestamp
 				nextExpectedStatus

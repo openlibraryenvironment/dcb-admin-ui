@@ -28,6 +28,7 @@ export const patronRequestFields = gql`
 		description
 		status
 		previousStatus
+		isTooLong
 		nextExpectedStatus
 		errorMessage
 		outOfSequenceFlag

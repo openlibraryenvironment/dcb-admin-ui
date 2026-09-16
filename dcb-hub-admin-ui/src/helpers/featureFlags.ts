@@ -20,6 +20,17 @@ const readFlag = (name: string): boolean => {
 };
 
 /**
+ * The guarded cleanup flow — dcb-service 9.0.0 and later.
+ *
+ * 9.0.0 refuses a cleanup that would delete the borrowing library's virtual records while
+ * the item is out, with a 409 carrying the offending status, and accepts force=true to
+ * override it. 8.71.0 has neither the refusal nor the override: it cleans up whatever it is
+ * asked to. So with this off, the UI's own status list stays the only gate.
+ */
+export const isGuardedCleanupEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_GUARDED_CLEANUP");
+
+/**
  * Insights depends on the /insights endpoints, first released in dcb-service 9.0.0.
  * Enable with VITE_FEATURE_INSIGHTS=true once the environment's dcb-service is new
  * enough; an older one answers 404 to all of them.

@@ -32,6 +32,9 @@ interface CleanupProgressDialogProps {
 	successRows: any[];
 	errorRows: any[];
 	skippedRows: any[];
+	refusedRows?: any[];
+	/** Offered only where dcb-service can refuse a cleanup, and only once it has. */
+	onOverride?: () => void;
 	onClose: () => void;
 }
 
@@ -44,6 +47,8 @@ export const CleanupProgressDialog = ({
 	successRows,
 	errorRows,
 	skippedRows,
+	refusedRows = [],
+	onOverride,
 	onClose,
 }: CleanupProgressDialogProps) => {
 	const { t } = useTranslation();
@@ -51,6 +56,7 @@ export const CleanupProgressDialog = ({
 	const [isSuccessRowsExpanded, setIsSuccessRowsExpanded] = useState(false);
 	const [isErrorRowsExpanded, setIsErrorRowsExpanded] = useState(false);
 	const [isSkippedRowsExpanded, setIsSkippedRowsExpanded] = useState(false);
+	const [isRefusedRowsExpanded, setIsRefusedRowsExpanded] = useState(false);
 
 	return (
 		<Dialog open={open} fullWidth maxWidth="sm">
@@ -196,6 +202,60 @@ export const CleanupProgressDialog = ({
 						</Accordion>
 					)}
 
+					{refusedRows?.length > 0 && (
+						<Accordion
+							expanded={isRefusedRowsExpanded}
+							onChange={() => setIsRefusedRowsExpanded(!isRefusedRowsExpanded)}
+							sx={{ mt: 2 }}
+						>
+							<AccordionSummary
+								expandIcon={<ExpandMore />}
+								aria-controls="refused-rows-content"
+								id="refused-rows-header"
+							>
+								<Stack
+									direction="row"
+									spacing={1}
+									sx={{
+										alignItems: "center",
+									}}
+								>
+									<WarningAmber color="warning" />
+									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+										{t("patron_requests.cleanup_refused_count")}{" "}
+										{refusedRows.length}
+									</Typography>
+								</Stack>
+							</AccordionSummary>
+							<AccordionDetails>
+								<DataGrid
+									identifier="cleanupRefusedGrid"
+									type="refusedCleanupRequests"
+									columns={standardPatronRequestColumns}
+									columnVisibilityModel={cleanupPatronRequestVisibility}
+									rows={refusedRows}
+									loading={false}
+									disableAggregation
+									disableRowGrouping
+									disablePivoting
+									disableHoverInteractions={false}
+									pagination={true}
+									paginationMode="client"
+									paginationModel={{ page: 0, pageSize: 5 }}
+									sortingMode="client"
+									filterMode="client"
+									rowModesModel={{}}
+									listViewEnabled={false}
+									pivotingEnabled={false}
+									toolbarVisible={false}
+									scrollbarVisible={true}
+									noResultsText=""
+									searchText=""
+								/>
+							</AccordionDetails>
+						</Accordion>
+					)}
+
 					{skippedRows?.length > 0 && (
 						<Accordion
 							expanded={isSkippedRowsExpanded}
@@ -251,6 +311,13 @@ export const CleanupProgressDialog = ({
 				</Stack>
 			</DialogContent>
 			<DialogActions>
+				{onOverride && refusedRows?.length > 0 && !isCleaning ? (
+					<Button onClick={onOverride} color="warning" variant="outlined">
+						{t("patron_requests.cleanup_override_action", {
+							count: refusedRows.length,
+						})}
+					</Button>
+				) : null}
 				<Button onClick={onClose} disabled={isCleaning} variant="contained">
 					{t("ui.data_grid.close")}
 				</Button>
