@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import PanelState from "./PanelState";
 
-import { MetricId } from "@helpers/insightsMetrics";
+import { MetricId, methodKeys } from "@helpers/insightsMetrics";
 import MetricInfo from "./MetricInfo";
+import PanelExport from "./PanelExport";
 import {
 	Box,
 	Card,
@@ -25,6 +26,15 @@ export interface StatColumn<T> {
 	headerKey: string;
 	align?: "left" | "right";
 	cell: (row: T) => ReactNode;
+	/**
+	 * The same value as plain text, for the CSV.
+	 *
+	 * Separate from `cell` because a cell is a ReactNode - increasingly a link, since the
+	 * drill-downs landed - and a file cannot hold one. Where it is omitted the column is
+	 * left out of the export rather than guessed at: a column of "[object Object]" is
+	 * worse than a column that is not there.
+	 */
+	text?: (row: T) => string | number | null | undefined;
 }
 
 interface TableStatPanelProps<T> {
@@ -66,6 +76,17 @@ export default function TableStatPanel<T>({
 						{t(titleKey)}
 					</Typography>
 					{metric ? <MetricInfo metric={metric} label={t(titleKey)} /> : null}
+					<PanelExport
+						rows={rows}
+						panel={t(titleKey)}
+						method={metric ? t(methodKeys(metric).how) : undefined}
+						columns={columns
+							.filter((col) => col.text)
+							.map((col) => ({
+								header: t(col.headerKey),
+								value: col.text!,
+							}))}
+					/>
 				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t(subtitleKey)}

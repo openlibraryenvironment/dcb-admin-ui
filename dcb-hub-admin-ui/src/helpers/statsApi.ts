@@ -206,6 +206,11 @@ export interface CollectionSummaryStat {
 
 // Shapes for the previously-unsurfaced endpoints.
 export interface RequestedTitleStat {
+	/**
+	 * The work this row counts. Optional because a dcb-service older than the release that
+	 * added it omits the field entirely - the row still renders, it just does not link.
+	 */
+	clusterId?: string;
 	title: string;
 	requestCount: number;
 }

@@ -50,7 +50,14 @@ const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
  * Named one rule at a time rather than by enabling best-practice wholesale, so the gate
  * still cannot fail on opinion.
  */
-const EXTRA_RULES = ["heading-order"];
+const EXTRA_RULES = [
+	"heading-order",
+	// axe marks this EXPERIMENTAL, so the tag sets do not run it however many of them are
+	// asked for - and it is tagged wcag21a. Lighthouse runs it, and caught a drill-down
+	// link whose accessible name did not contain the figure painted on it: a voice-control
+	// user says what they can see. Named explicitly so this gate meets it first next time.
+	"label-content-name-mismatch",
+];
 
 /**
  * The subject, and the heading that proves its last panel has mounted.

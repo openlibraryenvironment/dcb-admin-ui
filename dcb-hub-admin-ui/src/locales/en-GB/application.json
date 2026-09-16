@@ -850,6 +850,17 @@
 		}
 	},
 	"insights": {
+		"drill": {
+			"open": "Open the requests behind {{subject}}",
+			"list_label": "Open in the request grid:",
+			"back": "Back to insights",
+			"back_to_panel": "Back to insights: {{panel}}"
+		},
+		"export": {
+			"csv": "Download {{panel}} as CSV",
+			"image": "Download this chart as an image",
+			"print": "Print this chart"
+		},
 		"trends": {
 			"strip": {
 				"title": "Is it getting better or worse?",

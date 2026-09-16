@@ -49,6 +49,11 @@ const NOT_FIGURES = new Set([
 	"InsightsDashboard",
 	"ScopeSelector",
 	"SubjectBar",
+	"DrillLink",
+	"ChartExportToolbar",
+	"ExportContext",
+	"PanelExport",
+	"ReturnToInsights",
 ]);
 
 describe("the metric registry", () => {

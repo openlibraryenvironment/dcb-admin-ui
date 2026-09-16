@@ -8,6 +8,7 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette, inkOn } from "@hooks/useChartPalette";
 
 import PanelState from "./PanelState";
+import ChartExportToolbar from "./ChartExportToolbar";
 import { MAX_PLOT_SERIES } from "@helpers/insightsSearch";
 import type { InsightsView } from "@hooks/useInsightsView";
 import {
@@ -133,6 +134,11 @@ export default function StatusFlowChart({
 					{() => (
 						<LineChartPro
 							height={CHART_HEIGHT}
+							// The image and print export the MUI X Premium licence already covers,
+							// which nothing in this application used. A picture for a slide is a
+							// different need from the numbers, and this is where a reader looks for it.
+							showToolbar
+							slots={{ toolbar: ChartExportToolbar }}
 							xAxis={[
 								{
 									data: xAxisData,

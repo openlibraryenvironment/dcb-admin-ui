@@ -7,6 +7,9 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 
 import PanelState from "./PanelState";
+import ChartExportToolbar from "./ChartExportToolbar";
+import { DrillList } from "./DrillLink";
+import { supplierDrill } from "@helpers/insightsDrill";
 
 import MetricInfo from "./MetricInfo";
 import {
@@ -64,6 +67,11 @@ export default function SupplierReliabilityChart({
 						// Status encoding (good/critical) - labelled via the legend, never colour alone.
 						<BarChartPro
 							height={CHART_HEIGHT}
+							// The image and print export the MUI X Premium licence already covers,
+							// which nothing in this application used. A picture for a slide is a
+							// different need from the numbers, and this is where a reader looks for it.
+							showToolbar
+							slots={{ toolbar: ChartExportToolbar }}
 							xAxis={[
 								{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
 							]}
@@ -84,6 +92,16 @@ export default function SupplierReliabilityChart({
 						/>
 					)}
 				</PanelState>
+
+				{/* Links rather than clickable bars: a bar is not focusable. */}
+				<DrillList
+					panel={t("insights.charts.supplier_reliability.title")}
+					items={rows.map((row) => ({
+						key: row.supplierCode,
+						label: row.supplierCode,
+						drill: supplierDrill(row.supplierCode, params),
+					}))}
+				/>
 			</CardContent>
 		</Card>
 	);

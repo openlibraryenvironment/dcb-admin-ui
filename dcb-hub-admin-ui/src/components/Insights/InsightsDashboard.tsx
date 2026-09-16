@@ -76,6 +76,9 @@ import type { RangePreset } from "@helpers/insightsSearch";
 
 import SubjectBar from "./SubjectBar";
 import TrendStrip from "./TrendStrip";
+import DrillLink from "./DrillLink";
+import { InsightsExportProvider } from "./ExportContext";
+import { clusterDrill, errorDrill } from "@helpers/insightsDrill";
 import DurationTrendPanel from "./DurationTrendPanel";
 import { resolveSubject, Subject } from "@helpers/insightsSubjects";
 import { isInsightsTrendsEnabled } from "@helpers/featureFlags";
@@ -249,524 +252,582 @@ export default function InsightsDashboard({
 		scope: t(parts.scope.key, { count: parts.scope.count }),
 	});
 
+	const exportContext = {
+		scope: t(parts.scope.key, { count: parts.scope.count }),
+		window: "literal" in parts.range ? parts.range.literal : t(parts.range.key),
+	};
+
 	return (
-		<Stack spacing={4}>
-			<Stack
-				direction="row"
-				spacing={2}
-				sx={{
-					justifyContent: "flex-end",
-					alignItems: "center",
-					flexWrap: "wrap",
-					rowGap: 1,
-				}}
-			>
-				<Typography variant="body2" color="text.secondary">
-					{t("insights.range.label")}
-				</Typography>
-				<ToggleButtonGroup
-					size="small"
-					exclusive
-					// No preset is highlighted while a custom range is active.
-					value={customRange ? null : rangePreset}
-					onChange={(_e, value) => value && setRangePreset(value)}
-					aria-label={t("insights.range.label")}
+		<InsightsExportProvider value={exportContext}>
+			<Stack spacing={4}>
+				<Stack
+					direction="row"
+					spacing={2}
+					sx={{
+						justifyContent: "flex-end",
+						alignItems: "center",
+						flexWrap: "wrap",
+						rowGap: 1,
+					}}
 				>
-					{RANGE_PRESETS.map((preset) => (
-						<ToggleButton key={preset} value={preset}>
-							{t(`insights.range.${preset}`)}
-						</ToggleButton>
-					))}
-				</ToggleButtonGroup>
-				<LocalizationProvider dateAdapter={AdapterDayjs}>
-					<DateRangePicker
-						value={
-							customRange
-								? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
-								: [null, null]
-						}
-						onChange={(value) => {
-							const [start, end] = value;
-							if (start && end) {
-								setCustomRange({
-									startDate: start.startOf("day").toISOString(),
-									endDate: end.endOf("day").toISOString(),
-								});
-							} else if (!start && !end) {
-								setCustomRange(null);
+					<Typography variant="body2" color="text.secondary">
+						{t("insights.range.label")}
+					</Typography>
+					<ToggleButtonGroup
+						size="small"
+						exclusive
+						// No preset is highlighted while a custom range is active.
+						value={customRange ? null : rangePreset}
+						onChange={(_e, value) => value && setRangePreset(value)}
+						aria-label={t("insights.range.label")}
+					>
+						{RANGE_PRESETS.map((preset) => (
+							<ToggleButton key={preset} value={preset}>
+								{t(`insights.range.${preset}`)}
+							</ToggleButton>
+						))}
+					</ToggleButtonGroup>
+					<LocalizationProvider dateAdapter={AdapterDayjs}>
+						<DateRangePicker
+							value={
+								customRange
+									? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
+									: [null, null]
 							}
-						}}
-						disableFuture
-						slotProps={{ textField: { size: "small" } }}
-						localeText={{
-							start: t("insights.range.from"),
-							end: t("insights.range.to"),
-						}}
-					/>
-				</LocalizationProvider>
-			</Stack>
+							onChange={(value) => {
+								const [start, end] = value;
+								if (start && end) {
+									setCustomRange({
+										startDate: start.startOf("day").toISOString(),
+										endDate: end.endOf("day").toISOString(),
+									});
+								} else if (!start && !end) {
+									setCustomRange(null);
+								}
+							}}
+							disableFuture
+							slotProps={{ textField: { size: "small" } }}
+							localeText={{
+								start: t("insights.range.from"),
+								end: t("insights.range.to"),
+							}}
+						/>
+					</LocalizationProvider>
+				</Stack>
 
-			<SubjectBar
-				current={subject}
-				scopedCodes={scopedCodes}
-				to={subjectBarTo}
-				params={subjectBarParams}
-			/>
+				<SubjectBar
+					current={subject}
+					scopedCodes={scopedCodes}
+					to={subjectBarTo}
+					params={subjectBarParams}
+				/>
 
-			<Box
-				key={announcement}
-				aria-live="polite"
-				aria-atomic="true"
-				sx={visuallyHidden}
-			>
-				{announcement}
-			</Box>
+				<Box
+					key={announcement}
+					aria-live="polite"
+					aria-atomic="true"
+					sx={visuallyHidden}
+				>
+					{announcement}
+				</Box>
 
-			<Section
-				id="insights-overview-heading"
-				current={subject}
-				titleKey="insights.sections.overview"
-			>
-				{/* THE FIVE. Twelve equal tiles was an index, not a summary: a reader had
+				<Section
+					id="insights-overview-heading"
+					current={subject}
+					titleKey="insights.sections.overview"
+				>
+					{/* THE FIVE. Twelve equal tiles was an index, not a summary: a reader had
 				    to decide for themselves which of them their board cared about, and ten
 				    of the twelve carried no direction at all. The rest are still here,
 				    under a disclosure, until subjects give them somewhere better to live -
 				    INSIGHTS_IA_AND_UX_PLAN.md section 3. */}
-				<Box
-					sx={{
-						display: "grid",
-						gap: 2,
-						gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-					}}
-				>
-					<KpiTile
-						title={t("insights.kpi.resolved.title")}
-						metric="requests_fulfilled"
-						value={resolved.toLocaleString()}
-						subtitle={t("insights.kpi.resolved.subtitle")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.fill_rate.title")}
-						metric="fill_rate"
-						value={currentRate != null ? `${currentRate.toFixed(1)}%` : "—"}
-						deltaPct={rateDelta}
-						higherIsBetter
-						subtitle={t("insights.kpi.vs_prior")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.time_to_loan.title")}
-						metric="turnaround_to_loan"
-						value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
-						subtitle={t("insights.kpi.time_to_loan.subtitle", {
-							p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
-						})}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.kpi.error_rate.title")}
-						metric="error_rate"
-						value={
-							currentErrRate != null ? `${currentErrRate.toFixed(1)}%` : "—"
-						}
-						deltaPct={errDelta}
-						higherIsBetter={false}
-						subtitle={t("insights.kpi.vs_prior")}
-						loading={loading}
-					/>
-					<KpiTile
-						title={t("insights.headline.active_systems")}
-						metric="libraries_active"
-						value={`${activeSystems(netFlow.data)}`}
-						subtitle={t("insights.headline.active_systems_sub")}
-						loading={netFlow.isLoading}
-					/>
-				</Box>
+					<Box
+						sx={{
+							display: "grid",
+							gap: 2,
+							gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+						}}
+					>
+						<KpiTile
+							title={t("insights.kpi.resolved.title")}
+							metric="requests_fulfilled"
+							value={resolved.toLocaleString()}
+							subtitle={t("insights.kpi.resolved.subtitle")}
+							loading={loading}
+						/>
+						<KpiTile
+							title={t("insights.kpi.fill_rate.title")}
+							metric="fill_rate"
+							value={currentRate != null ? `${currentRate.toFixed(1)}%` : "—"}
+							deltaPct={rateDelta}
+							higherIsBetter
+							subtitle={t("insights.kpi.vs_prior")}
+							loading={loading}
+						/>
+						<KpiTile
+							title={t("insights.kpi.time_to_loan.title")}
+							metric="turnaround_to_loan"
+							value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
+							subtitle={t("insights.kpi.time_to_loan.subtitle", {
+								p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
+							})}
+							loading={loading}
+						/>
+						<KpiTile
+							title={t("insights.kpi.error_rate.title")}
+							metric="error_rate"
+							value={
+								currentErrRate == null ? (
+									"—"
+								) : (
+									// The one headline figure with an exact answer waiting: the
+									// requests it counted, on the exception tab.
+									<DrillLink
+										drill={errorDrill(params)}
+										panel={t("insights.kpi.error_rate.title")}
+										subject={t("insights.kpi.error_rate.title")}
+									>
+										{`${currentErrRate.toFixed(1)}%`}
+									</DrillLink>
+								)
+							}
+							deltaPct={errDelta}
+							higherIsBetter={false}
+							subtitle={t("insights.kpi.vs_prior")}
+							loading={loading}
+						/>
+						<KpiTile
+							title={t("insights.headline.active_systems")}
+							metric="libraries_active"
+							value={`${activeSystems(netFlow.data)}`}
+							subtitle={t("insights.headline.active_systems_sub")}
+							loading={netFlow.isLoading}
+						/>
+					</Box>
 
-				{/* h3 because this sits INSIDE the Overview section, alongside the panels,
+					{/* h3 because this sits INSIDE the Overview section, alongside the panels,
 				    and the sections are the h2s. MUI's default is h3 already; saying it
 				    explicitly is what stops the next reader "fixing" it to h2 and skipping
 				    a level in the app where the sections do not exist. */}
-				<Accordion variant="outlined" disableGutters slots={{ heading: "h3" }}>
-					<AccordionSummary expandIcon={<ExpandMore />}>
-						<Typography variant="body2">
-							{t("insights.headline.more")}
-						</Typography>
-					</AccordionSummary>
-					<AccordionDetails>
+					<Accordion
+						variant="outlined"
+						disableGutters
+						slots={{ heading: "h3" }}
+					>
+						<AccordionSummary expandIcon={<ExpandMore />}>
+							<Typography variant="body2">
+								{t("insights.headline.more")}
+							</Typography>
+						</AccordionSummary>
+						<AccordionDetails>
+							<Box
+								sx={{
+									display: "grid",
+									gap: 2,
+									gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+								}}
+							>
+								<KpiTile
+									title={t("insights.kpi.supply_rate.title")}
+									value={supplyRate != null ? `${supplyRate.toFixed(1)}%` : "—"}
+									subtitle={t("insights.kpi.supply_rate.subtitle")}
+									loading={supplierFill.isLoading}
+								/>
+								<KpiTile
+									title={t("insights.kpi.time_to_finalise.title")}
+									metric="turnaround_to_finalise"
+									value={formatDuration(toFinalised.data?.p50Seconds)}
+									subtitle={t("insights.kpi.time_to_finalise.subtitle", {
+										p95: formatDuration(toFinalised.data?.p95Seconds),
+									})}
+									loading={toFinalised.isLoading}
+								/>
+								<KpiTile
+									title={t("insights.kpi.checkout_rate.title")}
+									metric="checkout_rate"
+									value={
+										checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"
+									}
+									subtitle={
+										d
+											? t("insights.kpi.checkout_rate.subtitle", {
+													reached: d.checkoutRate.reachedCount,
+													total: d.checkoutRate.totalCount,
+												})
+											: undefined
+									}
+									loading={loading}
+								/>
+								<KpiTile
+									title={t("insights.kpi.total_borrows.title")}
+									value={totalBorrows.toLocaleString()}
+									subtitle={t("insights.kpi.total_borrows.subtitle")}
+									loading={loading}
+								/>
+								<KpiTile
+									title={t("insights.kpi.total_lends.title")}
+									value={totalLends.toLocaleString()}
+									subtitle={t("insights.kpi.total_lends.subtitle")}
+									loading={loading}
+								/>
+								<KpiTile
+									title={t("insights.kpi.rescued.title")}
+									value={(d?.savedByReResolution ?? 0).toLocaleString()}
+									subtitle={t("insights.kpi.rescued.subtitle")}
+									loading={loading}
+								/>
+								<KpiTile
+									title={t("insights.kpi.unique_titles.title")}
+									value={(
+										d?.collectionSummary.uniqueTitlesRequested ?? 0
+									).toLocaleString()}
+									subtitle={t("insights.kpi.unique_titles.subtitle", {
+										total: d?.collectionSummary.totalRequests ?? 0,
+									})}
+									loading={loading}
+								/>
+								{/* An assumption multiplied by a count, not a measurement. Beside
+							    four measured figures it borrowed a confidence it has not
+							    earned; here it keeps its arithmetic on its own face. */}
+								<CostAvoidanceTile
+									fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
+									unitCost={view.unitCost}
+									onUnitCostChange={view.setUnitCost}
+									loading={loading}
+								/>
+							</Box>
+						</AccordionDetails>
+					</Accordion>
+				</Section>
+
+				<Section
+					id="insights-trends-heading"
+					subject="trends"
+					current={subject}
+					titleKey="insights.sections.trends"
+				>
+					{/* Direction first: it answers the question the subject is named for, and
+				    it reads the series the spine below already fetched. */}
+					<TrendStrip params={params} interval={interval} />
+
+					{/* The three durations over time. Behind its own flag: /insights/trend is
+				    on no dcb-service release, and a 404 through the panel contract reads
+				    as a fault rather than as a server that is older. */}
+					{isInsightsTrendsEnabled() ? (
+						<LazyPanel minHeight={360}>
+							<DurationTrendPanel params={params} interval={interval} />
+						</LazyPanel>
+					) : null}
+
+					{/* Trend spine + plot-builder */}
+					<StatusFlowChart params={params} interval={interval} view={view} />
+				</Section>
+
+				<Section
+					id="insights-performance-heading"
+					subject="service"
+					current={subject}
+					titleKey="insights.sections.performance"
+				>
+					{/* First, because every other panel here is a breakdown of one of these. */}
+					<DurationsPanel
+						params={params}
+						toLoaned={d?.turnaroundToLoaned}
+						toFinalised={toFinalised.data}
+						loading={loading}
+					/>
+
+					{/* Peer benchmarking - this library vs the consortium median */}
+					<LazyPanel minHeight={320}>
+						<PeerBenchmarkPanel
+							params={{ startDate: params.startDate, endDate: params.endDate }}
+							libraryCode={libraryCode}
+						/>
+					</LazyPanel>
+
+					{/* Operational breakdowns */}
+					<LazyPanel minHeight={360}>
 						<Box
 							sx={{
 								display: "grid",
-								gap: 2,
-								gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+								gap: 3,
+								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
 							}}
 						>
-							<KpiTile
-								title={t("insights.kpi.supply_rate.title")}
-								value={supplyRate != null ? `${supplyRate.toFixed(1)}%` : "—"}
-								subtitle={t("insights.kpi.supply_rate.subtitle")}
-								loading={supplierFill.isLoading}
-							/>
-							<KpiTile
-								title={t("insights.kpi.time_to_finalise.title")}
-								metric="turnaround_to_finalise"
-								value={formatDuration(toFinalised.data?.p50Seconds)}
-								subtitle={t("insights.kpi.time_to_finalise.subtitle", {
-									p95: formatDuration(toFinalised.data?.p95Seconds),
-								})}
-								loading={toFinalised.isLoading}
-							/>
-							<KpiTile
-								title={t("insights.kpi.checkout_rate.title")}
-								metric="checkout_rate"
-								value={
-									checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"
-								}
-								subtitle={
-									d
-										? t("insights.kpi.checkout_rate.subtitle", {
-												reached: d.checkoutRate.reachedCount,
-												total: d.checkoutRate.totalCount,
-											})
-										: undefined
-								}
-								loading={loading}
-							/>
-							<KpiTile
-								title={t("insights.kpi.total_borrows.title")}
-								value={totalBorrows.toLocaleString()}
-								subtitle={t("insights.kpi.total_borrows.subtitle")}
-								loading={loading}
-							/>
-							<KpiTile
-								title={t("insights.kpi.total_lends.title")}
-								value={totalLends.toLocaleString()}
-								subtitle={t("insights.kpi.total_lends.subtitle")}
-								loading={loading}
-							/>
-							<KpiTile
-								title={t("insights.kpi.rescued.title")}
-								value={(d?.savedByReResolution ?? 0).toLocaleString()}
-								subtitle={t("insights.kpi.rescued.subtitle")}
-								loading={loading}
-							/>
-							<KpiTile
-								title={t("insights.kpi.unique_titles.title")}
-								value={(
-									d?.collectionSummary.uniqueTitlesRequested ?? 0
-								).toLocaleString()}
-								subtitle={t("insights.kpi.unique_titles.subtitle", {
-									total: d?.collectionSummary.totalRequests ?? 0,
-								})}
-								loading={loading}
-							/>
-							{/* An assumption multiplied by a count, not a measurement. Beside
-							    four measured figures it borrowed a confidence it has not
-							    earned; here it keeps its arithmetic on its own face. */}
-							<CostAvoidanceTile
-								fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
-								unitCost={view.unitCost}
-								onUnitCostChange={view.setUnitCost}
-								loading={loading}
+							<FailureTaxonomyChart params={params} />
+							<SupplierReliabilityChart params={params} />
+						</Box>
+					</LazyPanel>
+
+					{/* Bottleneck + lender responsiveness */}
+					<LazyPanel minHeight={360}>
+						<Box
+							sx={{
+								display: "grid",
+								gap: 3,
+								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
+							}}
+						>
+							<TimeInStatusChart params={params} />
+							<SupplierResponseSlaChart params={params} />
+						</Box>
+					</LazyPanel>
+				</Section>
+
+				<Section
+					id="insights-demand-heading"
+					subject="demand"
+					current={subject}
+					titleKey="insights.sections.demand"
+				>
+					{/* Demand pattern (staffing) */}
+					<LazyPanel minHeight={320}>
+						<DemandHeatmapChart params={params} />
+					</LazyPanel>
+
+					{/* What is being asked for: by collection dimension, and by title */}
+					<LazyPanel minHeight={360}>
+						<Box
+							sx={{
+								display: "grid",
+								gap: 3,
+								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
+							}}
+						>
+							<CollectionDimensionPanel params={params} />
+							<TableStatPanel<RequestedTitleStat>
+								titleKey="insights.charts.top_titles.title"
+								subtitleKey="insights.charts.top_titles.subtitle"
+								queryOptions={topRequestedTitlesQueryOptions(client, params)}
+								getRowKey={(r) => r.title}
+								columns={[
+									{
+										headerKey: "insights.charts.top_titles.col_title",
+										text: (r) => r.title,
+										cell: (r) =>
+											r.clusterId ? (
+												<DrillLink
+													drill={clusterDrill(r.clusterId, params)}
+													panel={t("insights.charts.top_titles.title")}
+												>
+													{r.title ?? "—"}
+												</DrillLink>
+											) : (
+												(r.title ?? "—")
+											),
+									},
+									{
+										headerKey: "insights.charts.top_titles.col_requests",
+										align: "right",
+										text: (r) => r.requestCount,
+										cell: (r) => r.requestCount,
+									},
+								]}
 							/>
 						</Box>
-					</AccordionDetails>
-				</Accordion>
-			</Section>
-
-			<Section
-				id="insights-trends-heading"
-				subject="trends"
-				current={subject}
-				titleKey="insights.sections.trends"
-			>
-				{/* Direction first: it answers the question the subject is named for, and
-				    it reads the series the spine below already fetched. */}
-				<TrendStrip params={params} interval={interval} />
-
-				{/* The three durations over time. Behind its own flag: /insights/trend is
-				    on no dcb-service release, and a 404 through the panel contract reads
-				    as a fault rather than as a server that is older. */}
-				{isInsightsTrendsEnabled() ? (
-					<LazyPanel minHeight={360}>
-						<DurationTrendPanel params={params} interval={interval} />
 					</LazyPanel>
-				) : null}
 
-				{/* Trend spine + plot-builder */}
-				<StatusFlowChart params={params} interval={interval} view={view} />
-			</Section>
+					{/* Demand breakdowns: pickup location + patron group */}
+					<LazyPanel minHeight={360}>
+						<Box
+							sx={{
+								display: "grid",
+								gap: 3,
+								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
+							}}
+						>
+							<BarStatPanel<PickupLocationDemandStat>
+								titleKey="insights.charts.demand_by_pickup.title"
+								subtitleKey="insights.charts.demand_by_pickup.subtitle"
+								seriesLabelKey="insights.charts.demand_by_pickup.series"
+								queryOptions={demandByPickupLocationQueryOptions(
+									client,
+									params,
+								)}
+								getLabel={(r) => r.pickupLocationName ?? r.pickupLocationCode}
+								getValue={(r) => r.requestCount}
+								color={categorical[0]}
+								horizontal
+							/>
+							<BarStatPanel<PatronGroupDemandStat>
+								titleKey="insights.charts.demand_by_patron_group.title"
+								subtitleKey="insights.charts.demand_by_patron_group.subtitle"
+								seriesLabelKey="insights.charts.demand_by_patron_group.series"
+								queryOptions={demandByPatronGroupQueryOptions(client, params)}
+								getLabel={(r) => r.patronGroup}
+								getValue={(r) => r.requestCount}
+								color={categorical[0]}
+								horizontal
+							/>
+						</Box>
+					</LazyPanel>
 
-			<Section
-				id="insights-performance-heading"
-				subject="service"
-				current={subject}
-				titleKey="insights.sections.performance"
-			>
-				{/* First, because every other panel here is a breakdown of one of these. */}
-				<DurationsPanel
-					params={params}
-					toLoaned={d?.turnaroundToLoaned}
-					toFinalised={toFinalised.data}
-					loading={loading}
-				/>
-
-				{/* Peer benchmarking - this library vs the consortium median */}
-				<LazyPanel minHeight={320}>
-					<PeerBenchmarkPanel
-						params={{ startDate: params.startDate, endDate: params.endDate }}
-						libraryCode={libraryCode}
-					/>
-				</LazyPanel>
-
-				{/* Operational breakdowns */}
-				<LazyPanel minHeight={360}>
-					<Box
-						sx={{
-							display: "grid",
-							gap: 3,
-							gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-						}}
-					>
-						<FailureTaxonomyChart params={params} />
-						<SupplierReliabilityChart params={params} />
-					</Box>
-				</LazyPanel>
-
-				{/* Bottleneck + lender responsiveness */}
-				<LazyPanel minHeight={360}>
-					<Box
-						sx={{
-							display: "grid",
-							gap: 3,
-							gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-						}}
-					>
-						<TimeInStatusChart params={params} />
-						<SupplierResponseSlaChart params={params} />
-					</Box>
-				</LazyPanel>
-			</Section>
-
-			<Section
-				id="insights-demand-heading"
-				subject="demand"
-				current={subject}
-				titleKey="insights.sections.demand"
-			>
-				{/* Demand pattern (staffing) */}
-				<LazyPanel minHeight={320}>
-					<DemandHeatmapChart params={params} />
-				</LazyPanel>
-
-				{/* What is being asked for: by collection dimension, and by title */}
-				<LazyPanel minHeight={360}>
-					<Box
-						sx={{
-							display: "grid",
-							gap: 3,
-							gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-						}}
-					>
-						<CollectionDimensionPanel params={params} />
-						<TableStatPanel<RequestedTitleStat>
-							titleKey="insights.charts.top_titles.title"
-							subtitleKey="insights.charts.top_titles.subtitle"
-							queryOptions={topRequestedTitlesQueryOptions(client, params)}
-							getRowKey={(r) => r.title}
+					{/* Demand nothing could satisfy - the acquisition signal the failure
+				    taxonomy cannot give, because these requests never had a supplier. */}
+					<LazyPanel minHeight={320}>
+						<TableStatPanel<UnfillableDemandStat>
+							titleKey="insights.charts.unfillable_demand.title"
+							subtitleKey="insights.charts.unfillable_demand.subtitle"
+							queryOptions={unfillableDemandQueryOptions(client, params)}
+							metric="unfillable_demand"
+							getRowKey={(r) => r.clusterId}
 							columns={[
 								{
 									headerKey: "insights.charts.top_titles.col_title",
-									cell: (r) => r.title ?? "—",
+									text: (r) => r.title,
+									cell: (r) => (
+										<DrillLink
+											drill={clusterDrill(r.clusterId, params)}
+											panel={t("insights.charts.unfillable_demand.title")}
+										>
+											{r.title ?? "—"}
+										</DrillLink>
+									),
+								},
+								{
+									headerKey: "insights.charts.rare_gem.col_author",
+									text: (r) => r.author,
+									cell: (r) => r.author ?? "—",
 								},
 								{
 									headerKey: "insights.charts.top_titles.col_requests",
 									align: "right",
+									text: (r) => r.requestCount,
 									cell: (r) => r.requestCount,
 								},
 							]}
 						/>
-					</Box>
-				</LazyPanel>
-
-				{/* Demand breakdowns: pickup location + patron group */}
-				<LazyPanel minHeight={360}>
-					<Box
-						sx={{
-							display: "grid",
-							gap: 3,
-							gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-						}}
-					>
-						<BarStatPanel<PickupLocationDemandStat>
-							titleKey="insights.charts.demand_by_pickup.title"
-							subtitleKey="insights.charts.demand_by_pickup.subtitle"
-							seriesLabelKey="insights.charts.demand_by_pickup.series"
-							queryOptions={demandByPickupLocationQueryOptions(client, params)}
-							getLabel={(r) => r.pickupLocationName ?? r.pickupLocationCode}
-							getValue={(r) => r.requestCount}
-							color={categorical[0]}
-							horizontal
-						/>
-						<BarStatPanel<PatronGroupDemandStat>
-							titleKey="insights.charts.demand_by_patron_group.title"
-							subtitleKey="insights.charts.demand_by_patron_group.subtitle"
-							seriesLabelKey="insights.charts.demand_by_patron_group.series"
-							queryOptions={demandByPatronGroupQueryOptions(client, params)}
-							getLabel={(r) => r.patronGroup}
-							getValue={(r) => r.requestCount}
-							color={categorical[0]}
-							horizontal
-						/>
-					</Box>
-				</LazyPanel>
-
-				{/* Demand nothing could satisfy - the acquisition signal the failure
-				    taxonomy cannot give, because these requests never had a supplier. */}
-				<LazyPanel minHeight={320}>
-					<TableStatPanel<UnfillableDemandStat>
-						titleKey="insights.charts.unfillable_demand.title"
-						subtitleKey="insights.charts.unfillable_demand.subtitle"
-						queryOptions={unfillableDemandQueryOptions(client, params)}
-						metric="unfillable_demand"
-						getRowKey={(r) => r.clusterId}
-						columns={[
-							{
-								headerKey: "insights.charts.top_titles.col_title",
-								cell: (r) => r.title ?? "—",
-							},
-							{
-								headerKey: "insights.charts.rare_gem.col_author",
-								cell: (r) => r.author ?? "—",
-							},
-							{
-								headerKey: "insights.charts.top_titles.col_requests",
-								align: "right",
-								cell: (r) => r.requestCount,
-							},
-						]}
-					/>
-				</LazyPanel>
-			</Section>
-
-			<Section
-				id="insights-partners-heading"
-				subject="partners"
-				current={subject}
-				titleKey="insights.sections.partners"
-			>
-				<LazyPanel minHeight={360}>
-					<TradingPartnersPanel params={params} libraryCode={libraryCode} />
-				</LazyPanel>
-
-				{/* Reciprocity / value */}
-				<LazyPanel minHeight={360}>
-					<NetFlowChart params={params} />
-				</LazyPanel>
-			</Section>
-
-			{/* Collection gaps + supply value - library scope only. */}
-			{libraryCode && (
-				<Section
-					id="insights-gaps-heading"
-					subject="gaps"
-					current={subject}
-					titleKey="insights.sections.gaps"
-				>
-					<LazyPanel minHeight={400}>
-						<Stack spacing={3}>
-							<Box
-								sx={{
-									display: "grid",
-									gap: 3,
-									gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-								}}
-							>
-								<TableStatPanel<TopClusterStat>
-									titleKey="insights.charts.unmet_local.title"
-									subtitleKey="insights.charts.unmet_local.subtitle"
-									queryOptions={unmetLocalDemandQueryOptions(client, {
-										...params,
-										libraryCode,
-									})}
-									getRowKey={(r) => r.clusterId}
-									columns={[
-										{
-											headerKey: "insights.charts.top_titles.col_title",
-											cell: (r) => r.title ?? "—",
-										},
-										{
-											headerKey: "insights.charts.top_titles.col_requests",
-											align: "right",
-											cell: (r) => r.requestCount,
-										},
-									]}
-								/>
-								<TableStatPanel<TopClusterStat>
-									titleKey="insights.charts.acquisition_opportunities.title"
-									subtitleKey="insights.charts.acquisition_opportunities.subtitle"
-									queryOptions={acquisitionOpportunitiesQueryOptions(client, {
-										...params,
-										libraryCode,
-									})}
-									getRowKey={(r) => r.clusterId}
-									columns={[
-										{
-											headerKey: "insights.charts.top_titles.col_title",
-											cell: (r) => r.title ?? "—",
-										},
-										{
-											headerKey: "insights.charts.top_titles.col_requests",
-											align: "right",
-											cell: (r) => r.requestCount,
-										},
-									]}
-								/>
-							</Box>
-
-							<TableStatPanel<ConsortialLifelineStat>
-								titleKey="insights.charts.consortial_lifeline.title"
-								subtitleKey="insights.charts.consortial_lifeline.subtitle"
-								queryOptions={consortialLifelineQueryOptions(client, {
-									...params,
-									libraryCode,
-								})}
-								getRowKey={(r) => r.clusterId}
-								columns={[
-									{
-										headerKey: "insights.charts.top_titles.col_title",
-										cell: (r) => r.title ?? "—",
-									},
-									{
-										headerKey: "insights.charts.rare_gem.col_author",
-										cell: (r) => r.author ?? "—",
-									},
-									{
-										headerKey:
-											"insights.charts.consortial_lifeline.col_supplied",
-										align: "right",
-										cell: (r) => r.supplyCount,
-									},
-								]}
-							/>
-
-							<NewAcquisitionsPanel params={params} libraryCode={libraryCode} />
-						</Stack>
-					</LazyPanel>
-
-					{/* Unique collection value - requires a libraryCode. */}
-					<LazyPanel minHeight={320}>
-						<RareGemPanel params={{ ...params, libraryCode }} />
 					</LazyPanel>
 				</Section>
-			)}
 
-			{/* The catalogue itself, rather than the traffic over it. Its own section, and
+				<Section
+					id="insights-partners-heading"
+					subject="partners"
+					current={subject}
+					titleKey="insights.sections.partners"
+				>
+					<LazyPanel minHeight={360}>
+						<TradingPartnersPanel params={params} libraryCode={libraryCode} />
+					</LazyPanel>
+
+					{/* Reciprocity / value */}
+					<LazyPanel minHeight={360}>
+						<NetFlowChart params={params} />
+					</LazyPanel>
+				</Section>
+
+				{/* Collection gaps + supply value - library scope only. */}
+				{libraryCode && (
+					<Section
+						id="insights-gaps-heading"
+						subject="gaps"
+						current={subject}
+						titleKey="insights.sections.gaps"
+					>
+						<LazyPanel minHeight={400}>
+							<Stack spacing={3}>
+								<Box
+									sx={{
+										display: "grid",
+										gap: 3,
+										gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
+									}}
+								>
+									<TableStatPanel<TopClusterStat>
+										titleKey="insights.charts.unmet_local.title"
+										subtitleKey="insights.charts.unmet_local.subtitle"
+										queryOptions={unmetLocalDemandQueryOptions(client, {
+											...params,
+											libraryCode,
+										})}
+										getRowKey={(r) => r.clusterId}
+										columns={[
+											{
+												headerKey: "insights.charts.top_titles.col_title",
+												text: (r) => r.title,
+												cell: (r) => r.title ?? "—",
+											},
+											{
+												headerKey: "insights.charts.top_titles.col_requests",
+												align: "right",
+												text: (r) => r.requestCount,
+												cell: (r) => r.requestCount,
+											},
+										]}
+									/>
+									<TableStatPanel<TopClusterStat>
+										titleKey="insights.charts.acquisition_opportunities.title"
+										subtitleKey="insights.charts.acquisition_opportunities.subtitle"
+										queryOptions={acquisitionOpportunitiesQueryOptions(client, {
+											...params,
+											libraryCode,
+										})}
+										getRowKey={(r) => r.clusterId}
+										columns={[
+											{
+												headerKey: "insights.charts.top_titles.col_title",
+												text: (r) => r.title,
+												cell: (r) => r.title ?? "—",
+											},
+											{
+												headerKey: "insights.charts.top_titles.col_requests",
+												align: "right",
+												text: (r) => r.requestCount,
+												cell: (r) => r.requestCount,
+											},
+										]}
+									/>
+								</Box>
+
+								<TableStatPanel<ConsortialLifelineStat>
+									titleKey="insights.charts.consortial_lifeline.title"
+									subtitleKey="insights.charts.consortial_lifeline.subtitle"
+									queryOptions={consortialLifelineQueryOptions(client, {
+										...params,
+										libraryCode,
+									})}
+									getRowKey={(r) => r.clusterId}
+									columns={[
+										{
+											headerKey: "insights.charts.top_titles.col_title",
+											text: (r) => r.title,
+											cell: (r) => r.title ?? "—",
+										},
+										{
+											headerKey: "insights.charts.rare_gem.col_author",
+											text: (r) => r.author,
+											cell: (r) => r.author ?? "—",
+										},
+										{
+											headerKey:
+												"insights.charts.consortial_lifeline.col_supplied",
+											align: "right",
+											text: (r) => r.supplyCount,
+											cell: (r) => r.supplyCount,
+										},
+									]}
+								/>
+
+								<NewAcquisitionsPanel
+									params={params}
+									libraryCode={libraryCode}
+								/>
+							</Stack>
+						</LazyPanel>
+
+						{/* Unique collection value - requires a libraryCode. */}
+						<LazyPanel minHeight={320}>
+							<RareGemPanel params={{ ...params, libraryCode }} />
+						</LazyPanel>
+					</Section>
+				)}
+
+				{/* The catalogue itself, rather than the traffic over it. Its own section, and
 			    last, because it answers a different question and costs more to answer. */}
-			{subject === "collection" && (
-				<CollectionAnalysisSection libraryCode={libraryCode} />
-			)}
-		</Stack>
+				{subject === "collection" && (
+					<CollectionAnalysisSection libraryCode={libraryCode} />
+				)}
+			</Stack>
+		</InsightsExportProvider>
 	);
 }
