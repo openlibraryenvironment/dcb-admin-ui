@@ -30,6 +30,7 @@ export async function useAllFeatures(page: Page) {
 			VITE_FEATURE_CONSORTIUM_SUPPORT_URL: "true",
 			VITE_FEATURE_NCIP_ONBOARDING: "true",
 			VITE_FEATURE_LIBRARY_USER_PROVISIONING: "true",
+			VITE_FEATURE_GUARDED_CLEANUP: "true",
 			// Was missing: this fixture says "everything on", and a flag left out of it
 			// silently tests the legacy path in every spec that asks for the new one.
 			VITE_FEATURE_LOCAL_HOLDS: "true",
