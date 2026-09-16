@@ -227,3 +227,40 @@ colours discards; the enhancer gives `MuiButtonBase` a focus outline and nothing
 
 A brand whose tokens cannot pass has not earned its place; fix the tokens rather than the
 threshold.
+
+## The discovery preview
+
+The Setup chapter's preview draws the discovery app from the values in the form rather than
+framing the live app, which would need its origin reachable from the console and a
+frame-ancestors decision for the sake of a thumbnail. It is an approximation and says so on
+screen.
+
+It follows symposia-ui's arrangement (symposia-ui/docs/brand-chain.md). The consortium's name
+and its square icon sit in the app bar, which the discovery app shows on every screen. The
+landing plate carries the logo, the task line and the welcome sentence. **A consortium with no
+logo shows no mark**: the name is not set large in its place, and no other mark is borrowed.
+
+Every image passes `isValidLogoUrl`, the check symposia-ui runs on read and dcb-service runs on
+write, so the preview cannot show an image the patron app would refuse. The arrangement is
+`previewArrangement` in `src/constants/discoveryBranding.ts`, which is where it is tested. The
+no-photograph gradient is kept in step with symposia-ui/docs/hero-canvas.md by hand.
+
+## The discovery theme list
+
+`DISCOVERY_THEME_NAMES` in `src/constants/discoveryBranding.ts` is what an administrator may
+choose for the patron-facing discovery app. It is a copy of symposia-ui's theme registry, so
+the administrator picks from a list rather than typing a name and learning it was wrong from a
+rejected save.
+
+**Every theme this console offers itself is in it.** A consortium branded MOBIUS in the console
+used to fall back to OpenRS blue for its patrons, because the discovery app had no MOBIUS
+theme. `evergreen`, `koha`, `folio`, `blueAndWhite` and `mobius` now exist in both, under the
+same names. `discoveryBranding.test.ts` fails if a theme is added here without being added to
+the discovery list. `kInt` is the discovery app's alone.
+
+Two rules keep the copy harmless when it drifts:
+
+1. A stored theme this build has never heard of still renders as itself. `themeOptions` folds
+   the current value into the list, so it is not silently cleared on the next save.
+2. The discovery app tolerates an unknown theme on read and falls back to its default, so the
+   worst case of drift is an administrator not being offered a theme, never a broken patron.

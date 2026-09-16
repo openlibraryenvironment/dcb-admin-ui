@@ -1,0 +1,14 @@
+# Line endings are a test-result variable on this estate, not a preference. Every clone
+# here has core.autocrlf=true, so without this file the working tree holds CRLF while CI
+# holds LF, and a test that compares exact file content passes in one place and fails in
+# the other. Pinning the working tree to LF makes the two agree.
+* text=auto eol=lf
+
+# Windows launchers must keep CRLF or cmd.exe cannot run them.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Tracked binaries: never normalise, never diff.
+*.png binary
+*.ico binary
+*.ttf binary

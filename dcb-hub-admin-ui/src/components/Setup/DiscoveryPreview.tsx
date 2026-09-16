@@ -1,54 +1,43 @@
+import { alpha, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import { SearchOutlined } from "@mui/icons-material";
 
-import { isValidLogoUrl } from "@constants/discoveryBranding";
+import { previewArrangement } from "@constants/discoveryBranding";
 import type { DiscoveryBrandValues } from "@schemas/discoveryBrandSchema";
 
 interface DiscoveryPreviewProps {
 	values: DiscoveryBrandValues;
-	/** The consortium's display name, which is the lockup's text when there is no logo. */
+	/** The consortium's display name, which the discovery app shows in its app bar. */
 	consortiumName?: string;
 }
 
 /**
- * What a patron will see — W-8.
- *
- * The argument for this chapter existing at all is that today nobody can see what they are
- * branding: the fields sit in a 971-line staff record page and the result appears in a
- * different application, on a different origin, that the administrator may never open.
- *
- * <h2>A mock, not an iframe</h2>
- *
- * Framing the live Symposia app would need its origin to be reachable from the admin
- * console and would need a frame-ancestors decision taken for the sake of a thumbnail. So
- * this draws the lockup itself, from the same values symposia-service will serve.
- *
- * It is therefore an APPROXIMATION and says so on screen. It shows the arrangement - mark,
- * name, welcome sentence, canvas - not the discovery app's exact typography or spacing,
- * and it deliberately does not try to: a preview that claims to be pixel-exact and is not
- * is worse than one that admits what it is.
- *
- * <h2>Only what would really render</h2>
- *
- * `isValidLogoUrl` is the same check symposia-ui runs on read and dcb-service runs on
- * write. Applying it here means the preview cannot show an image the patron app would
- * reject, which is the whole point of showing anything.
+ * What a patron will see, drawn from the same values symposia-service serves. A mock rather
+ * than a frame of the live app, and an approximation that says so on screen - see
+ * docs/theming.md.
  */
 export default function DiscoveryPreview({
 	values,
 	consortiumName,
 }: DiscoveryPreviewProps) {
 	const { t } = useTranslation();
+	const theme = useTheme();
 
-	const logo = isValidLogoUrl(values.brandLogoUrl)
-		? values.brandLogoUrl?.trim()
-		: undefined;
-	const background = isValidLogoUrl(values.brandBackgroundImageUrl)
-		? values.brandBackgroundImageUrl?.trim()
-		: undefined;
+	const parts = previewArrangement(
+		values,
+		consortiumName,
+		t("setup.discovery.preview_no_name"),
+	);
 
-	const name = consortiumName?.trim() || t("setup.discovery.preview_no_name");
+	// The same radial wash symposia-ui paints when a consortium has supplied no
+	// photograph. Kept in step by hand, which is the cost of two repos rendering one
+	// brand - symposia-ui/docs/hero-canvas.md is the other half.
+	const themeTreatment =
+		"radial-gradient(120% 100% at 50% 0%, " +
+		`${alpha(theme.palette.primary.main, 0.16)} 0%, ` +
+		`${alpha(theme.palette.primary.main, 0.04)} 45%, ` +
+		`${theme.palette.primary.landingBackground} 100%)`;
 
 	return (
 		<Stack spacing={1}>
@@ -69,6 +58,32 @@ export default function DiscoveryPreview({
 					backgroundColor: "primary.landingBackground",
 				}}
 			>
+				{/* The discovery app's app bar, which carries the consortium's name on every
+				    screen. */}
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						gap: 1,
+						px: 2,
+						py: 1,
+						backgroundColor: "primary.main",
+						color: "primary.contrastText",
+					}}
+				>
+					{parts.headerIcon && (
+						<Box
+							component="img"
+							src={parts.headerIcon}
+							alt=""
+							sx={{ height: 24, width: 24, objectFit: "contain", flexShrink: 0 }}
+						/>
+					)}
+					<Typography variant="subtitle1" noWrap sx={{ fontWeight: 500 }}>
+						{parts.appBarName}
+					</Typography>
+				</Box>
+
 				<Box
 					sx={{
 						minHeight: 220,
@@ -78,31 +93,51 @@ export default function DiscoveryPreview({
 						justifyContent: "center",
 						gap: 1.5,
 						p: 3,
-						backgroundImage: background ? `url(${background})` : undefined,
+						// With no photograph the discovery app draws its own theme
+						// treatment, so the preview draws it too.
+						backgroundImage: parts.background
+							? `url(${parts.background})`
+							: themeTreatment,
 						backgroundSize: "cover",
 						backgroundPosition: "center",
 					}}
 				>
-					{logo ? (
-						<Box
-							component="img"
-							src={logo}
-							// Decorative inside a preview that is already aria-hidden;
-							// the real alt text is the brandLogoAlt field above.
-							alt=""
-							sx={{ maxHeight: 64, maxWidth: "70%", objectFit: "contain" }}
-						/>
-					) : (
-						<Typography variant="h2" sx={{ textAlign: "center" }}>
-							{name}
-						</Typography>
-					)}
+					{/* THE PLATE. symposia-ui puts the copy on its own ground rather than
+					    washing the whole picture out. */}
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "center",
+							gap: 1.5,
+							px: 3,
+							py: 2,
+							borderRadius: 1,
+							maxWidth: 480,
+							backgroundColor: alpha(theme.palette.background.default, 0.94),
+						}}
+					>
+						{parts.logo && (
+							<Box
+								component="img"
+								src={parts.logo}
+								// Decorative inside a preview that is already aria-hidden;
+								// the real alt text is the brandLogoAlt field above.
+								alt=""
+								sx={{ maxHeight: 64, maxWidth: "70%", objectFit: "contain" }}
+							/>
+						)}
 
-					{values.patronWelcome?.trim() && (
-						<Typography sx={{ textAlign: "center", maxWidth: 420 }}>
-							{values.patronWelcome.trim()}
+						<Typography variant="h2" component="p" sx={{ textAlign: "center" }}>
+							{t("setup.discovery.preview_task")}
 						</Typography>
-					)}
+
+						{parts.welcome && (
+							<Typography sx={{ textAlign: "center", maxWidth: 420 }}>
+								{parts.welcome}
+							</Typography>
+						)}
+					</Box>
 
 					<Paper
 						elevation={0}

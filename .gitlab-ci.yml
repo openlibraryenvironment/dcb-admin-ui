@@ -160,6 +160,28 @@ verify_ki_bootstrap:
     - npm ci
     - npm run e2e:ki-bootstrap
 
+# Every secret this repository has ever committed stays readable in its history: deleting
+# the line does not un-leak it, only rotation does. The baseline holds the 21 findings that
+# predate this job, so the pipeline goes red on a NEW secret rather than on the backlog.
+verify_secrets:
+  stage: verify
+  image:
+    name: zricethezav/gitleaks:v8.30.1
+    entrypoint: [""]
+  variables:
+    # GitLab clones 20 commits deep by default, so without this the scan would cover a
+    # sliding window and quietly report clean on a repository it never read.
+    GIT_DEPTH: "0"
+  script:
+    # --redact so a finding does not print the secret into a job log that is readable by
+    # everyone who can see the pipeline.
+    - gitleaks git --redact --exit-code 1 --config .gitleaks.toml --baseline-path .gitleaks-baseline.json --report-format sarif --report-path gitleaks.sarif .
+  artifacts:
+    when: always
+    paths:
+      - gitleaks.sarif
+    expire_in: 1 month
+
 release:
   stage: release
   # This rule ensures the job ONLY runs on the 'release' branch

@@ -12,6 +12,11 @@ import {
 } from "./display";
 import { getAppTheme, THEME_MODES, THEME_NAMES } from "./openRS";
 import { FONT_NAMES } from "./fonts";
+import {
+	SCROLL_PADDING_TOP,
+	SUBJECT_BAR_HEIGHT,
+	SUBJECT_BAR_TOP,
+} from "./stickyOffsets";
 
 describe("display vocabularies", () => {
 	it("defaults to today's appearance, so nobody's interface moves", () => {
@@ -102,8 +107,16 @@ describe("the theme actually carries the display preferences", () => {
 		expect(getAppTheme("openRS", "light").spacing(2)).toBe("16px");
 	});
 
-	it("keeps focus clear of the fixed header (WCAG 2.4.11)", () => {
-		expect(html(getAppTheme("openRS", "light")).scrollPaddingTop).toBe("70px");
+	it("keeps focus clear of everything pinned above it (WCAG 2.4.11)", () => {
+		// Read from the token rather than restated as a literal: the number changed the
+		// day Insights grew a sticky subject bar, and a test asserting 70px would have
+		// gone red while the defect it exists to catch was being introduced.
+		expect(html(getAppTheme("openRS", "light")).scrollPaddingTop).toBe(
+			`${SCROLL_PADDING_TOP}px`,
+		);
+
+		// The bar and the padding have to agree, or the ring lands under the bar.
+		expect(SCROLL_PADDING_TOP).toBe(SUBJECT_BAR_TOP + SUBJECT_BAR_HEIGHT);
 	});
 
 	/**

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
 //localisation
@@ -15,12 +15,12 @@ function MappingsRouteComponent() {
 		<PageContainer title={t("nav.mappings.name")}>
 			<List component="nav" aria-labelledby="mappings-title">
 				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/mappings/allNumericRange">
+					<ListItemButton component={Link} to="/mappings/allNumericRange">
 						<ListItemText primary={t("nav.mappings.allNumericRange")} />
 					</ListItemButton>
 				</ListItem>
 				<ListItem component="nav" disablePadding>
-					<ListItemButton component="a" href="/mappings/allReferenceValue">
+					<ListItemButton component={Link} to="/mappings/allReferenceValue">
 						<ListItemText primary={t("nav.mappings.allReferenceValue")} />
 					</ListItemButton>
 				</ListItem>

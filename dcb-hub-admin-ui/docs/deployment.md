@@ -23,6 +23,85 @@ Log into your Keycloak dashboard, select the `dcb-hub` realm, and complete these
 11. Set the **Valid Redirect URIs** and **Web Origins** strictly to the exact URL where the application will be hosted (e.g., `https://admin.yourlibrary.org`). Never use a wildcard (`*`) in production, as this may allow malicious sites to steal user tokens.
 12. If the app is hosted under a **subpath** (see Section 3, Option A), the redirect URI must include that subpath — `https://mobius.kihosting.net/dcb-admin/*`, not the bare host. The app redirects to its own base, and the origin root serves no app when several are mounted under prefixes. **Web Origins** remains the bare origin (`https://mobius.kihosting.net`), as it is an origin, not a URL.
 
+13. Add the **`roles` mapper** described immediately below. Every other step can be right and the application still refuse everyone without it.
+
+### The `roles` claim, and why sign-in succeeds without it
+
+**Confirmed 2026-09-09 on `mobius-test`.** Every account signed in successfully and then met
+"401 Unauthorised — Sorry, you do not have access to this page". Nothing was wrong with the
+deployment, the consortium or the backend. The client had no mapper putting roles in the
+token.
+
+DCB Admin decides what an account may do from a **flat `roles` claim**, read as
+`auth.user.profile.roles` and folded into one predicate in `helpers/consortiumAccess.ts`. It
+must contain `ADMIN` or `CONSORTIUM_ADMIN`, spelled in exact upper case. Anything else,
+including the claim being absent, means the account may not use DCB Admin at all and is sent
+to `/unauthorised`.
+
+**Keycloak's built-in roles scope does not satisfy this.** It writes `realm_access.roles`,
+nested one level down, and the application does not read that. Assigning somebody the realm
+role is therefore _not enough on its own_: the role exists, the token does not carry it where
+anything looks.
+
+On the client, under _Client scopes → `<client>-dedicated` → Add mapper → By configuration →
+**User Realm Role**_:
+
+| Field               | Value   |
+| ------------------- | ------- |
+| Token Claim Name    | `roles` |
+| Claim JSON Type     | String  |
+| Multivalued         | **On**  |
+| Add to ID token     | **On**  |
+| Add to access token | **On**  |
+| Add to userinfo     | **On**  |
+
+**All three token targets, and they are not redundant.** The UI reads the ID token and the
+userinfo response, because it runs with `loadUserInfo: true`. `dcb-service` reads the
+**access token**, for `CallerScope` and for `AdminUiAccessPolicy`. Set only the ID token and
+the UI works while the API refuses; set only the access token and the UI refuses before a
+request is ever sent. Do both applications' clients, not just this one.
+
+#### The symptom is a refusal page, not an HTTP status
+
+This failure announces itself in the least helpful way available: the sign-in succeeds, so
+the identity provider looks fine, and the page that follows is titled with a number that
+sends people to look at the network tab, where nothing is wrong.
+
+- **It is not an HTTP 401.** The page is `ui.error.401`, rendered by a client-side role
+  check. No request failed to produce it.
+- **A genuine 403 from `/graphql` is a different fault** — `AdminUiAccessPolicy` refusing a
+  token whose `azp` is DCB Admin's client. Same root cause, opposite side.
+- **A genuine 401 from `/graphql` is neither.** That is the token being rejected outright:
+  wrong issuer, wrong realm, or expired. Check `VITE_KEYCLOAK_URL` against the issuer
+  `dcb-service` trusts.
+
+Confirm which you have from the browser console, signed in:
+
+```js
+Object.keys(localStorage)
+	.filter((k) => k.startsWith("oidc.user:"))
+	.forEach((k) => {
+		const u = JSON.parse(localStorage.getItem(k));
+		const claims = JSON.parse(
+			atob(u.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")),
+		);
+		console.log(k, "roles:", u.profile.roles, "azp:", claims.azp);
+	});
+```
+
+`undefined` roles is this mapper. A populated array without `ADMIN` or `CONSORTIUM_ADMIN` is
+the role assignment on the account instead. It iterates rather than naming one key because a
+shared origin holds a session per app: read the row whose `azp` is DCB Admin's client.
+
+**Roles do not travel between environments.** Each one has its own realm, so a new hostname
+pointed at a Keycloak that has never served DCB Admin needs the mapper and the role
+assignments made again there. `mobius-staging` and `mobius-test` use different identity
+providers entirely.
+
+The backend's own account of the roles, the `code` agency claim and the client separation is
+`dcb-service/docs/identity-provider-setup.md` §1.1–1.4. It is the authority on what the roles
+mean; this section is the part DCB Admin cannot start without.
+
 ---
 
 ## 2. Environment Variables
@@ -56,6 +135,12 @@ start, so a changed variable plus a container restart is the whole procedure.
 `0` and `yes` are all read as off, so an environment that has never heard of a flag simply
 does not show the feature.
 
+**On Cloudflare these are not variables you set.** Section 3, Option A derives the whole
+block from one field — the dcb-service version named in the host's `hostEnv()` case — so
+the table below is the reference for what the flags mean, not a list of bindings to create.
+Setting them by hand belongs to the other two pathways, where the config is written rather
+than computed.
+
 | Variable                                 | Enable at dcb-service                 | What it turns on                                                                                                                              |
 | ---------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `VITE_FEATURE_CONSORTIUM_BRANDING`       | **9.0.0** or later                    | The consortium Branding tab, the setup wizard's Discovery chapter, brand image upload, and the merged brand columns in the consortium queries |
@@ -63,6 +148,7 @@ does not show the feature.
 | `VITE_FEATURE_INSIGHTS`                  | **9.0.0** or later                    | Insights, consortium- and library-level (`/insights`)                                                                                         |
 | `VITE_FEATURE_LIBRARY_USER_PROVISIONING` | **dcb-service main** — no release yet | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                    |
 | `VITE_FEATURE_LOCAL_HOLDS`               | **dcb-service main** — no release yet | The per-agency maximum local holds field on a library's Settings tab                                                                          |
+| `VITE_FEATURE_CONSORTIUM_SUPPORT_URL`    | **no release serves this yet**        | The consortium's patron support link on the consortium form                                                                                   |
 | `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**        | Service Info → Audit Explorer                                                                                                                 |
 
 Note the last three rows. There is deliberately **no single "we are on v9 now" switch**:
@@ -129,14 +215,20 @@ published.
 
 ### Option A: Cloudflare Worker in front of S3
 
-**Architecture:** CI builds each app and syncs it to its own key prefix in a shared S3 bucket. A single Cloudflare Worker ([docs/worker.js](./worker.js)) sits in front, mounting each app at a path prefix on every domain and supplying its environment-specific config at runtime via `<base>inject_env.json`:
+**Architecture:** CI builds each app and syncs it to its own key prefix in a shared S3 bucket. A single Cloudflare Worker, whose source is not held in this repository, sits in front, mounting each app at a path prefix on every domain and supplying its environment-specific config at runtime via `<base>inject_env.json`:
 
 ```
-mobius.kihosting.net/dcb-admin                -> s3://<bucket>/dcb-admin/
-mobius.kihosting.net/dcb-admin-for-libraries  -> s3://<bucket>/dcb-admin-for-libraries/
+mobius.kihosting.net/dcb-admin                -> s3://<bucket>/prod/dcb-admin/
+mobius.kihosting.net/dcb-admin-for-libraries  -> s3://<bucket>/prod/dcb-admin-for-libraries/
+dev.kihosting.net/dcb-admin                   -> s3://<bucket>/dev/dcb-admin/
 ```
 
-The URL path maps 1:1 onto the S3 key, so the worker does no asset-path rewriting.
+**The key is `<env-root>/<app>/`.** The app prefix is the first URL path segment and maps
+1:1 onto the key, so the worker does no asset-path rewriting. The env root is chosen by
+hostname and never appears in the URL, which is what stops a merge to `main` from
+overwriting production: without it every host reads the same key and CI has nowhere to put
+a dev build that is not also the prod build. Staging and the EBSCO integration read the
+`prod` root deliberately, being production builds pointed at different backends.
 
 **"Build once, deploy anywhere" holds across _hostnames_, never across _base paths_.** The backends, Keycloak client and licence key are runtime config and vary by host, so one artifact serves every environment at a given mount point. The base path is not runtime config — it is baked in by Vite — so each mount point needs its own build. That costs nothing, since the apps are separate builds anyway.
 
@@ -146,12 +238,15 @@ The URL path maps 1:1 onto the S3 key, so the worker does no asset-path rewritin
 
    ```bash
    VITE_PUBLIC_URL=/dcb-admin/ npm run build
-   aws s3 sync dist/ s3://<bucket>/dcb-admin/ --delete
+   aws s3 sync dist/ s3://<bucket>/dev/dcb-admin/ --delete
    ```
 
-   Keep `--delete` scoped to the prefix. Against the bucket root it will wipe the sibling apps.
+   The base path carries no env root; the S3 key does. One build is promoted between roots.
 
-2. Set the environment variables from Section 2 on the Worker (Settings → Variables), keyed per environment as `hostConfig()` in the worker expects.
+   Keep `--delete` scoped to `<env-root>/<app>/`. One level up it wipes the sibling apps,
+   two levels up it wipes the sibling environments.
+
+2. Set the environment variables from Section 2 on the Worker (Settings → Variables), keyed per environment as `hostEnv()` in the worker expects. **Not the feature flags** — those are derived, see below.
 3. Deploy the worker with `wrangler deploy`.
 4. Point traffic at it in the Cloudflare dashboard:
    - **Routes** (`mobius.kihosting.net/dcb-admin*`) if the hostname also serves anything else — a route only claims matching paths.
@@ -159,7 +254,107 @@ The URL path maps 1:1 onto the S3 key, so the worker does no asset-path rewritin
    - Routes require an existing **proxied (orange-cloud)** DNS record for the hostname. A grey-cloud record bypasses Workers entirely, and the usual symptom is that nothing you deploy appears to take effect.
 5. Update Keycloak's Valid Redirect URIs to include each subpath (Section 1, step 12).
 
-**Adding another app:** add its prefix to `APPS` and a case to `appConfig()` in the worker, then point its CI at the matching S3 key prefix. Nothing else changes.
+**Adding another app:** add its prefix to `APPS`, a case to `appConfig()` and a table to
+`APP_FEATURES` in the worker, then point its CI at the matching S3 key prefix. Nothing else
+changes.
+
+#### Feature flags are derived from the host's dcb-service, not bound per environment
+
+The worker serves both apps on every host, and each app has its own flag names with their
+own version thresholds. Setting those by hand would be thirty worker variables whose only
+job is to be got right twice, and an unbound one is indistinguishable from a deliberate
+`false`. So each `hostEnv()` case names the dcb-service that host talks to, and
+`APP_FEATURES` maps each flag to the version that first serves it. The block in
+`inject_env.json` is computed from the two.
+
+| Host                               | dcb-service | S3 root |
+| ---------------------------------- | ----------- | ------- |
+| `mobius.kihosting.net`             | 8.71.0      | `prod`  |
+| `mobius-staging.kihosting.net`     | 8.71.0      | `prod`  |
+| `ebsco-integration.kihosting.net`  | 8.71.0      | `prod`  |
+| `dev.kihosting.net`                | `main`      | `dev`   |
+| `mobius-test.kihosting.net`        | `main`      | `dev`   |
+| `prospector-staging.kihosting.net` | `main`      | `dev`   |
+
+`root` and `service` are separate fields although they agree on every host today. They
+answer different questions — which _build_ of the apps, and which _backend_ that build is
+pointed at — and the first host to run a production build against a main-tracking service
+is the one a single field would silently give the wrong flags.
+
+**So an upgrade is a one-line worker change**: move the host's `service` to the new version
+and `wrangler deploy`. `inject_env.json` is served `no-store`, so it takes effect on the
+next page load — no rebuild, no re-sync, no cache purge. A rollback is the same line back.
+
+**Nothing in this repository gates this.** No check here compares a flag declared in
+`featureFlags.ts` against `APP_FEATURES`, or a host's `service` against the table above, so
+a flag added on one side and not the other is caught by review or not at all. The
+`dcb-admin-for-libraries` table is unchecked for the same reason and one more: that repo
+cannot see this file, and its flag list is not published as a build artefact alongside its
+bundle. Both flag sets live in the worker because one worker serves both apps, not because
+this repo owns them.
+
+**Adding another environment** is a different job with a different order and its own
+failure modes. It is the section below, and the code change is the last step in it.
+
+#### Adding an environment: a new hostname
+
+`hostEnv()` is keyed by hostname and returns the S3 root, the backends and the dcb-service
+version, so a new environment is one `case` there. **That case is inert until Cloudflare is told to run the
+worker for the hostname, and that is a dashboard change no edit in this repository can
+make.** Do the binding first; the code is the last step and the smallest.
+
+Confirmed 2026-09-09: `mobius-test` and `prospector-staging` were added to `hostEnv()`
+alongside a working `mobius-staging` and appeared to change nothing. Both hostnames
+answered, so nothing looked unbound. What answered was S3, not the worker.
+
+In order:
+
+1. **A proxied (orange-cloud) DNS record** for the hostname must exist. A grey-cloud record
+   bypasses Workers entirely.
+2. **Bind the hostname to the worker.** A **Custom Domain** on the worker if the host is
+   dedicated to these apps, which claims the whole host and creates the DNS record for you;
+   a **Route** of `<host>/*` if the host serves anything else. Copy whatever an already
+   working hostname has.
+3. **Set the three variables** on the worker, named for the environment exactly as the new
+   `case` reads them: `KEYCLOAK_URL_<ENV>`, `DCB_API_BASE_<ENV>`, `DCB_SEARCH_BASE_<ENV>`.
+   The per-app `KEYCLOAK_ID_*` and the licence key are shared and already set.
+4. **Check the S3 root is populated** for every app the host will serve, and point that
+   environment's CI at `<env-root>/<app>/`. A root with no build is a 502, not a 404.
+5. **Add the `hostEnv()` case** — including `service`, the dcb-service version that host
+   talks to — add its row to the host table above, and deploy the worker. Getting `service`
+   wrong is the quiet failure: too low hides features that work, too high takes both apps
+   down, and nothing checks that the case and the table agree.
+6. **Add the redirect URIs to Keycloak** for each subpath on that hostname, in both clients
+   (Section 1, step 12). This is the step that fails last and looks like an app bug.
+
+**This repository holds neither the worker nor its wrangler config.** Nothing here deploys
+it and no copy of `worker.js` is kept here to read. Find out where the worker project
+actually lives before assuming an edit made from this guide has shipped.
+
+##### Triage: read the response body, not the status code
+
+Every failure below returns something that renders as "the site is broken". The body says
+which one it is, and they need different people to fix them.
+
+| What comes back                                                           | What actually happened                                                                                                                                                                         | Fix                                         |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| S3 XML, `<Code>NoSuchBucket</Code>` naming the **hostname** as the bucket | The request never reached the worker. No Route or Custom Domain claims this host, so Cloudflare passed it through to the zone's origin, which is S3 resolving a bucket from the `Host` header. | Step 2. Editing the worker cannot fix this. |
+| Plain text, `No configuration for host "<host>"`                          | The worker ran and `hostEnv()` returned `null`. Either the `case` is missing, or the deployed worker predates your edit.                                                                       | Step 5.                                     |
+| Plain text, `Missing runtime config for "<app>" on "<host>": <names>`     | Route and `case` are both fine. The named worker variables are unbound.                                                                                                                        | Step 3, using the names in the message.     |
+| Plain text, `Host "<host>" declares dcb-service "<value>"`                | The `case` has a `service` that is neither `main` nor an `x.y.z` release. Left unchecked this resolves every flag to `false`, which looks like a deliberately cautious environment.            | Step 5.                                     |
+| Plain text, `App "<app>" is not deployed to "<root>"` (502)               | The worker resolved the host to an env root that holds no `index.html` for that app.                                                                                                           | Step 4.                                     |
+| A 302 to `/dcb-admin-for-libraries/`                                      | The first path segment is not in `APPS`. Expected at `/`; otherwise the URL is wrong.                                                                                                          | None, if you asked for `/`.                 |
+| The app loads, then the sign-in button does nothing                       | Keycloak has no redirect URI for this hostname.                                                                                                                                                | Step 6.                                     |
+
+Verify a new hostname end to end with the status code alone:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}' https://<host>/dcb-admin/inject_env.json; echo
+```
+
+**Do not paste that response into a ticket or a chat.** It carries the MUI X licence key,
+which is fine in a bundle the browser fetches and not fine in a pastebin. A `200` is the
+whole answer you need; anything else, read the body yourself and match it against the table.
 
 #### Sharing one origin with DCB Admin for Libraries
 
@@ -181,6 +376,14 @@ Nothing in the code enforces the separation, and a shared client would not colli
 only by accident: this app sets `userStore` to `localStorage` explicitly, the other sets
 none, and oidc-client-ts defaults it to `sessionStorage`. Harmonising that while sharing a
 client is the collision. Both subpaths also need to be in each client's Valid Redirect URIs.
+
+**Every internal link must go through the router.** TanStack Router adds the base to what it
+renders; nothing else does. A plain `href="/mappings/…"`, a raw MUI `Link` with a
+root-relative `href`, or `window.open("/patronRequests/…")` resolves against the origin root —
+outside this app — and on Mobius that sent users into DCB Admin for Libraries (reported against
+2.0). Navigate with `to` on a router link, and pass `appUrl(path)` to `window.open`. ESLint
+fails a root-relative string `href` and a `window.open` without `appUrl` in both repos; it
+cannot see a path held in a variable, so review those.
 
 **Everything else in web storage is namespaced by the base** — `dcb-admin:` here,
 `dcb-admin-for-libraries:` there, and the sign-out purge is prefix-scoped rather than a

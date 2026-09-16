@@ -97,6 +97,23 @@ test.describe("navigation under a deployment base path", () => {
 		).toBeVisible();
 	});
 
+	test("mappings links stay inside the app", async ({ page }) => {
+		// Reported on 2.0: plain anchors to "/mappings/…" were served from outside this
+		// app, into DCB Admin for Libraries.
+		await page.goto(`${BASE}/mappings`);
+
+		const links = page.getByRole("main").locator('a[href*="/mappings/all"]');
+		await expect(links).toHaveCount(2);
+		for (const link of await links.all()) {
+			expect(await link.getAttribute("href")).toMatch(
+				new RegExp(`^${BASE}/mappings/all`),
+			);
+		}
+
+		await links.first().click();
+		await expect(page).toHaveURL(new RegExp(`${BASE}/mappings/all`));
+	});
+
 	test("not found routes home to the app, not to the origin root", async ({
 		page,
 	}) => {

@@ -29,6 +29,10 @@ import {
 } from "../../homeData/homeConfig";
 import VersionInfo from "./VersionInfo";
 
+// A bare inline link is 17px tall and overflows a narrow cell into its neighbour's target.
+// Filling the cell with vertical padding keeps it at least 24px tall (WCAG 2.5.8).
+const CELL_LINK_SX = { display: "block", py: 0.5 } as const;
+
 interface TrackingConfigurationData {
 	trackingIntervals: Record<string, string>;
 	globalActiveRequestLimit: number;
@@ -134,6 +138,8 @@ export default function CombinedEnvironmentComponent() {
 
 			return {
 				environments,
+				serviceInfo:
+					dcbInfoRes.status === "fulfilled" ? dcbInfoRes.value.data : null,
 				trackingConfig:
 					trackingConfigRes.status === "fulfilled"
 						? (trackingConfigRes.value.data as TrackingConfigurationData)
@@ -166,6 +172,8 @@ export default function CombinedEnvironmentComponent() {
 								? LOCAL_VERSION_LINKS.SERVICE_INFO
 								: import.meta.env.VITE_KEYCLOAK_URL
 						}
+						noWrap
+						sx={CELL_LINK_SX}
 					>
 						{params.value}
 					</Link>
@@ -176,7 +184,9 @@ export default function CombinedEnvironmentComponent() {
 				headerName: t("service.status"),
 				flex: 0.3,
 				renderCell: (params) => (
-					<Link href={params.row.healthLink}>{params.value}</Link>
+					<Link href={params.row.healthLink} noWrap sx={CELL_LINK_SX}>
+						{params.value}
+					</Link>
 				),
 			},
 		],
@@ -260,7 +270,7 @@ export default function CombinedEnvironmentComponent() {
 				</Typography>
 			</Stack>
 
-			<VersionInfo />
+			<VersionInfo serviceInfo={data?.serviceInfo ?? null} />
 
 			<Typography variant="homePageText" sx={{ mb: 2 }}>
 				<Trans

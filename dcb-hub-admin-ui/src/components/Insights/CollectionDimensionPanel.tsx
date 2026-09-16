@@ -5,7 +5,6 @@ import {
 	Card,
 	CardContent,
 	Typography,
-	Skeleton,
 	Box,
 	Stack,
 	Select,
@@ -15,6 +14,8 @@ import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
+
+import PanelState from "./PanelState";
 import {
 	demandByDimensionQueryOptions,
 	StatsParams,
@@ -41,7 +42,7 @@ export default function CollectionDimensionPanel({
 	const { categorical } = useChartPalette();
 	const [dimension, setDimension] = useState<CollectionDimension>("format");
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		demandByDimensionQueryOptions(client, params, dimension),
 	);
 
@@ -79,36 +80,31 @@ export default function CollectionDimensionPanel({
 					</Select>
 				</Stack>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={CHART_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							height: CHART_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<BarChartPro
-						height={CHART_HEIGHT}
-						layout="horizontal"
-						yAxis={[{ scaleType: "band", data: rows.map((r) => r.category) }]}
-						series={[
-							{
-								data: rows.map((r) => r.requestCount),
-								label: t("insights.charts.collection_dimension.series"),
-								color: categorical[0],
-							},
-						]}
-						margin={{ left: 160 }}
-					/>
-				)}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={CHART_HEIGHT}
+				>
+					{() => (
+						<BarChartPro
+							height={CHART_HEIGHT}
+							layout="horizontal"
+							yAxis={[{ scaleType: "band", data: rows.map((r) => r.category) }]}
+							series={[
+								{
+									data: rows.map((r) => r.requestCount),
+									label: t("insights.charts.collection_dimension.series"),
+									color: categorical[0],
+								},
+							]}
+							margin={{ left: 160 }}
+						/>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

@@ -4,12 +4,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import {
 	DialogContent,
-	Link,
 	Step,
 	StepLabel,
 	Stepper,
 	Typography,
 } from "@mui/material";
+import Link from "@components/Link/Link";
 import { Trans, useTranslation } from "react-i18next";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { getLocations } from "@queries/getLocations";

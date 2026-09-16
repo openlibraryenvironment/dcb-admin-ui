@@ -40,13 +40,18 @@ export async function useLegacyService(page: Page) {
 		};
 	});
 
-	// `/info` from 8.71.0: a version, and no dcb.branding block at all - that block is
-	// only published when a BrandAssetStore bean exists, which is a 9.0.0 thing.
+	// `/info` from 8.71.0, in the shape a production 8.71.0 answers: the version under
+	// git.build and nothing at the top level, and no dcb.branding block at all - that
+	// block is only published when a BrandAssetStore bean exists, which is a 9.0.0 thing.
 	await page.route("**/info", (route) =>
 		route.fulfill({
 			json: {
-				version: "8.71.0",
-				branch: "main",
+				git: {
+					build: { version: "8.71.0" },
+					branch: "HEAD",
+					tags: "v8.71.0",
+					closest: { tag: { name: "v8.71.0", commit: { count: "0" } } },
+				},
 				env: { code: "e2e" },
 			},
 		}),

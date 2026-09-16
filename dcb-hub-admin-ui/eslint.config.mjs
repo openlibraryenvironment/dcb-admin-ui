@@ -86,6 +86,24 @@ export default [
 	},
 
 	{
+		// Build-time Node scripts. They never reach a browser and serve no UI, so the
+		// Node globals have to be declared and the i18n literal-string rule does not
+		// apply - a console message to a developer is not a user-facing string.
+		files: ["scripts/**/*.mjs"],
+		languageOptions: {
+			globals: {
+				process: "readonly",
+				console: "readonly",
+				Buffer: "readonly",
+				URL: "readonly",
+			},
+		},
+		rules: {
+			"i18next/no-literal-string": "off",
+		},
+	},
+
+	{
 		// The Cloudflare Worker that fronts the S3-hosted builds. It runs in the
 		// Workers runtime - not the browser, not Node - so its globals have to be
 		// declared here, and it serves no UI, so the i18n literal-string rule does
@@ -147,6 +165,23 @@ export default [
 					message:
 						"A bare invalidateQueries() nukes the cache and re-fires every mounted query. Invalidate the narrowest stale key.",
 				},
+				// The Insights view belongs in the URL. The range, the plotted series and
+				// the scope were held in a Zustand store and in component state, so a link
+				// to "last quarter for these three libraries" opened on somebody else's
+				// default. These two catch the next piece of dashboard state reaching for
+				// the same place. insightsCostStore is deliberately NOT banned: it is the
+				// per-user default for a fresh visit, and the tile writes through to the URL.
+				{
+					selector:
+						"CallExpression[callee.name='useState'] > Literal[value=/^(7d|30d|90d|365d)$/]",
+					message:
+						"A time range is part of the view: put it in the URL (insightsSearch.ts), not in component state.",
+				},
+				{
+					selector: "ImportDeclaration[source.value=/insightsPlotStore/]",
+					message:
+						"insightsPlotStore was deleted: the range, the plotted series and the scope live in the URL now. See insightsSearch.ts.",
+				},
 				{
 					selector:
 						"JSXAttribute[name.name=/^auto[Cc]omplete$/][value.value='off']",
@@ -158,6 +193,27 @@ export default [
 						"JSXAttribute[name.name=/^auto[Cc]omplete$/] JSXExpressionContainer > Literal[value='off']",
 					message:
 						"autocomplete=off breaks password managers and paste. WCAG 2.2 SC 3.3.8 (Accessible Authentication).",
+				},
+				// Mobius serves this app at /dcb-admin/ beside dcb-admin-for-libraries on one
+				// origin, and only the router adds the base: a root-relative href or a bare
+				// window.open leaves the app. docs/deployment.md, "Sharing one origin".
+				{
+					selector:
+						"JSXAttribute[name.name='href'] > Literal[value=/^\\/(?!\\/)/]",
+					message:
+						"A root-relative href leaves the app's base path. Navigate with `to` on a router link (`component={Link} to=…`, or `to` on @components/Link/Link).",
+				},
+				{
+					selector:
+						"JSXAttribute[name.name='href'] > JSXExpressionContainer > TemplateLiteral[quasis.0.value.raw=/^\\/(?!\\/)/]",
+					message:
+						"A root-relative href leaves the app's base path. Navigate with `to` on a router link (`component={Link} to=…`, or `to` on @components/Link/Link).",
+				},
+				{
+					selector:
+						"CallExpression[callee.object.name='window'][callee.property.name='open']:not([arguments.0.callee.name='appUrl']):not([arguments.0.value=/^https?:/])",
+					message:
+						"window.open resolves a path against the origin root, outside the deployment base. Pass appUrl(path).",
 				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",

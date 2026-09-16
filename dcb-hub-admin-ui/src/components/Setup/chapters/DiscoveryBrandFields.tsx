@@ -145,7 +145,7 @@ export default function DiscoveryBrandFields({
 						    having it silently cleared on save. */}
 						{themeOptions(storedThemeName).map((name) => (
 							<MenuItem key={name} value={name}>
-								{name}
+								{t(`theme.themes.${name}`, { defaultValue: name })}
 							</MenuItem>
 						))}
 					</TextField>

@@ -8,6 +8,7 @@ import {
 	nonClickableTypes,
 	specialRedirectionTypes,
 } from "@constants/dataGrid/types";
+import { appUrl } from "@helpers/appBase";
 
 interface RowClickConfig {
 	params: GridRowParams;
@@ -68,7 +69,7 @@ export const handleDataGridRowClick = ({
 	const openInNewTab = event.ctrlKey || event.metaKey;
 
 	if (openInNewTab) {
-		window.open(targetPath, "_blank");
+		window.open(appUrl(targetPath), "_blank");
 	} else {
 		navigate({ to: targetPath });
 	}

@@ -185,7 +185,7 @@ function SourceBibDetails() {
 						</Typography>
 						{bibLibrary?.fullName ? (
 							<Link
-								href={`/libraries/${bibLibrary.id}`}
+								to={`/libraries/${bibLibrary.id}`}
 								title={bibLibrary.fullName}
 								underline="hover"
 							>
@@ -230,7 +230,7 @@ function SourceBibDetails() {
 						{cfg?.VITE_DCB_SEARCH_BASE ? (
 							<Typography variant="attributeText" component="div">
 								<Link
-									href={`/search/${bib?.contributesTo?.id}/cluster`}
+									to={`/search/${bib?.contributesTo?.id}/cluster`}
 									underline="hover"
 									onClick={(e: any) => e.stopPropagation()}
 								>
