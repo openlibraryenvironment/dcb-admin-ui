@@ -4,8 +4,6 @@ import {
 	Card,
 	CardContent,
 	Typography,
-	Skeleton,
-	Box,
 	Table,
 	TableBody,
 	TableCell,
@@ -15,6 +13,8 @@ import {
 } from "@mui/material";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+
+import PanelState from "./PanelState";
 import {
 	uniqueContributionsQueryOptions,
 	StatsParams,
@@ -32,7 +32,7 @@ export default function RareGemPanel({
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		uniqueContributionsQueryOptions(client, params),
 	);
 
@@ -48,49 +48,44 @@ export default function RareGemPanel({
 					{t("insights.charts.rare_gem.subtitle")}
 				</Typography>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={PANEL_MIN_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							minHeight: PANEL_MIN_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<TableContainer sx={{ maxHeight: 420 }}>
-						<Table size="small" stickyHeader>
-							<TableHead>
-								<TableRow>
-									<TableCell>
-										{t("insights.charts.rare_gem.col_title")}
-									</TableCell>
-									<TableCell>
-										{t("insights.charts.rare_gem.col_author")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.rare_gem.col_requests")}
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{rows.map((gem) => (
-									<TableRow key={gem.clusterId} hover>
-										<TableCell>{gem.title ?? "—"}</TableCell>
-										<TableCell>{gem.author ?? "—"}</TableCell>
-										<TableCell align="right">{gem.supplyCount}</TableCell>
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={PANEL_MIN_HEIGHT}
+				>
+					{() => (
+						<TableContainer sx={{ maxHeight: 420 }}>
+							<Table size="small" stickyHeader>
+								<TableHead>
+									<TableRow>
+										<TableCell>
+											{t("insights.charts.rare_gem.col_title")}
+										</TableCell>
+										<TableCell>
+											{t("insights.charts.rare_gem.col_author")}
+										</TableCell>
+										<TableCell align="right">
+											{t("insights.charts.rare_gem.col_requests")}
+										</TableCell>
 									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</TableContainer>
-				)}
+								</TableHead>
+								<TableBody>
+									{rows.map((gem) => (
+										<TableRow key={gem.clusterId} hover>
+											<TableCell>{gem.title ?? "—"}</TableCell>
+											<TableCell>{gem.author ?? "—"}</TableCell>
+											<TableCell align="right">{gem.supplyCount}</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</TableContainer>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

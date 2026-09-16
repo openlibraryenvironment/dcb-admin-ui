@@ -20,6 +20,9 @@ import {
 } from "@/queryOptions/library";
 import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
+
+import { insightsSearchSchema } from "@helpers/insightsSearch";
+import { useInsightsView } from "@hooks/useInsightsView";
 import {
 	dashboardQueryOptions,
 	timeSeriesQueryOptions,
@@ -41,6 +44,9 @@ export const Route = createFileRoute(
 	params: {
 		parse: (raw) => libraryParamsSchema.parse(raw),
 	},
+	// Scope is fixed here - the library is in the path - but the window, the plotted
+	// series and the cost assumption are as shareable as anywhere else.
+	validateSearch: insightsSearchSchema,
 	// The tab is hidden while the flag is off, but the URL is still typeable -
 	// and the page would call statistics endpoints that this environment's
 	// dcb-service does not serve yet.
@@ -93,6 +99,10 @@ export const Route = createFileRoute(
 function LibraryInsights() {
 	const { t } = useTranslation();
 	const { libraryId } = Route.useParams();
+	const view = useInsightsView(
+		Route.useSearch(),
+		"/libraries/$libraryId/insights",
+	);
 	const gqlClient = useGraphQLClient();
 
 	const { data, isLoading, error } = useQuery(
@@ -130,7 +140,12 @@ function LibraryInsights() {
 			<LibraryTabs libraryId={libraryId} value={9} />
 			<Box sx={{ mt: 3 }}>
 				{libraryCode ? (
-					<InsightsDashboard libraryCode={libraryCode} />
+					<InsightsDashboard
+						libraryCode={libraryCode}
+						view={view}
+						subjectBarTo="/libraries/$libraryId/insights"
+						subjectBarParams={{ libraryId }}
+					/>
 				) : (
 					<Typography color="text.secondary">
 						{t("insights.library.no_hostlms")}

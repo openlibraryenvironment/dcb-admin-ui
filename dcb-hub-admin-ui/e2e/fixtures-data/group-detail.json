@@ -1,0 +1,66 @@
+{
+  "libraryGroups": {
+    "content": [
+      {
+        "id": "aa11bb22-3333-5444-9555-666677778888",
+        "code": "MIDLANDS",
+        "name": "Midlands Group",
+        "type": "Consortium",
+        "consortium": {
+          "id": "c0c0c0c0-1111-5111-9111-111111111111",
+          "name": "Test Consortium"
+        },
+        "members": [
+          {
+            "id": "m1111111-1111-5111-9111-111111111111",
+            "library": {
+              "id": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+              "agencyCode": "alpha",
+              "agency": {
+                "authProfile": "BASIC/UNIQUE-ID+PIN",
+                "code": "alpha",
+                "id": "a1b2c3d4-1111-5111-9111-111111111111",
+                "isBorrowingAgency": true,
+                "isSupplyingAgency": true,
+                "hostLms": {
+                  "lmsClientClass": null,
+                  "code": "alpha-lms",
+                  "id": "h1h1h1h1-1111-5111-9111-111111111111"
+                }
+              },
+              "shortName": "Alpha",
+              "fullName": "Alpha Test Library",
+              "abbreviatedName": "ALPHA",
+              "longitude": null,
+              "latitude": null
+            }
+          },
+          {
+            "id": "m2222222-2222-5222-9222-222222222222",
+            "library": {
+              "id": "d34ef4bc-88d1-679a-c67e-ad9b3e7b6033",
+              "agencyCode": "beta",
+              "agency": {
+                "authProfile": "BASIC/UNIQUE-ID+PIN",
+                "code": "beta",
+                "id": "b1b2c3d4-2222-5222-9222-222222222222",
+                "isBorrowingAgency": true,
+                "isSupplyingAgency": true,
+                "hostLms": {
+                  "lmsClientClass": null,
+                  "code": "beta-lms",
+                  "id": "h2h2h2h2-2222-5222-9222-222222222222"
+                }
+              },
+              "shortName": "Beta",
+              "fullName": "Beta Test Library",
+              "abbreviatedName": "BETA",
+              "longitude": null,
+              "latitude": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

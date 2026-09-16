@@ -98,8 +98,24 @@ export default function ExportToolbar({
 				<Tooltip title={filterTooltipText}>
 					<FilterPanelTrigger
 						render={(props, state) => (
-							<ToolbarButton {...props} color="default">
-								<Badge badgeContent={state.filterCount} color="primary">
+							<ToolbarButton
+								{...props}
+								color="default"
+								// The count is PAINTED on this button, so it has to be in the
+								// button's name: a reader who cannot see the badge was told
+								// "Show filters" whether two filters were applied or none.
+								// WCAG 2.5.3 Label in Name.
+								aria-label={
+									state.filterCount
+										? t("ui.data_grid.filters.trigger_applied", {
+												count: state.filterCount,
+											})
+										: t("ui.data_grid.filters.trigger")
+								}
+							>
+								{/* null rather than 0, so an unfiltered grid paints no digit
+								    at all and there is no visible text to match. */}
+								<Badge badgeContent={state.filterCount || null} color="primary">
 									<GridFilterListIcon fontSize="small" />
 								</Badge>
 							</ToolbarButton>

@@ -1,31 +1,21 @@
+import type { DiscoveryBrandValues } from "@schemas/discoveryBrandSchema";
+
 /**
- * The patron-facing brand fields an administrator sets here, and what may go in them.
+ * The themes the discovery app (Symposia) can render, which a consortium may choose for its
+ * patrons - docs/theming.md, "The discovery theme list".
  *
- * These describe the DISCOVERY app (Symposia), not this one. `defaultThemeName` names a
- * theme from the discovery frontend's registry — it is not one of this application's own
- * themes in `src/themes/openRS.ts`, and the two lists are unrelated.
- *
- * <h2>Where the vocabulary really lives</h2>
- *
- * dcb-service validates `defaultThemeName` on write against `dcb.branding.theme-names`,
- * whose default is exactly the list below. That is the authority; this constant exists so
- * an administrator picks from a list instead of typing a name and discovering it was
- * wrong from a rejected save — which is §C-5's requirement that configuration survive a
- * non-specialist.
- *
- * It is therefore a duplicate, and it is one on purpose for now: dcb-service does not
- * expose the configured list, and the honest fix is a query that returns it, done in
- * dcb-service's own batch rather than by checking out its branch mid-flight. Until then,
- * two rules keep the duplication harmless:
- *
- *  1. A deployment that has WIDENED `dcb.branding.theme-names` still renders whatever is
- *     stored — {@link themeOptions} folds the current value in, so a theme this build has
- *     never heard of appears as itself rather than vanishing from the control and being
- *     silently cleared on the next save.
- *  2. A stored theme is tolerated on read by the discovery app regardless, so the worst
- *     case of drift is an administrator not being offered a theme, never a broken patron.
+ * A copy of symposia-ui's registry. Every theme this console offers itself is in it, so a
+ * consortium can use one brand in both; `kInt` is the discovery app's alone.
  */
-export const DISCOVERY_THEME_NAMES = ["openRS", "kInt"] as const;
+export const DISCOVERY_THEME_NAMES = [
+	"openRS",
+	"kInt",
+	"evergreen",
+	"koha",
+	"folio",
+	"blueAndWhite",
+	"mobius",
+] as const;
 
 /**
  * Column widths in dcb-service's V9_0_001 (consortium) and V9_0_002 (library). Rejected
@@ -180,4 +170,40 @@ export function isValidLinkUrl(value?: string | null): boolean {
 	return (
 		(url.protocol === "https:" || url.protocol === "http:") && url.host !== ""
 	);
+}
+
+/** What the discovery app's landing page and app bar draw from these values. */
+export type PreviewArrangement = {
+	appBarName: string;
+	headerIcon?: string;
+	logo?: string;
+	background?: string;
+	welcome?: string;
+};
+
+/**
+ * The discovery app's arrangement, for the Setup preview - S-11.
+ *
+ * The name belongs to the app bar and never to the lockup, so a consortium with no logo shows
+ * no mark rather than its name set large. Images that would not pass {@link isValidLogoUrl}
+ * are dropped, as the patron app drops them on read.
+ */
+export function previewArrangement(
+	values: Pick<
+		DiscoveryBrandValues,
+		"brandLogoUrl" | "brandHeaderIconUrl" | "brandBackgroundImageUrl" | "patronWelcome"
+	>,
+	consortiumName: string | undefined,
+	unnamed: string,
+): PreviewArrangement {
+	const image = (url?: string) =>
+		url?.trim() && isValidLogoUrl(url) ? url.trim() : undefined;
+
+	return {
+		appBarName: consortiumName?.trim() || unnamed,
+		headerIcon: image(values.brandHeaderIconUrl),
+		logo: image(values.brandLogoUrl),
+		background: image(values.brandBackgroundImageUrl),
+		welcome: values.patronWelcome?.trim() || undefined,
+	};
 }

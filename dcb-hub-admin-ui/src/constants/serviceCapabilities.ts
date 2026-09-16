@@ -3,6 +3,7 @@ import {
 	isConsortiumBrandingEnabled,
 	isConsortiumSupportUrlEnabled,
 	isInsightsEnabled,
+	isInsightsTrendsEnabled,
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
@@ -141,6 +142,17 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_INSIGHTS",
 		enabled: isInsightsEnabled,
 		since: "9.0.0",
+		fields: {},
+	},
+	{
+		// `/insights/trend` is on dcb-service branch `insights-improvements` and in no
+		// release. A REST endpoint, not a schema change, so there is nothing to select or
+		// strip - and a SEPARATE row from `insights`, whose `since` is 9.0.0: a
+		// deployment on the release has the surface and 404s this one path.
+		id: "insights_trends",
+		flag: "VITE_FEATURE_INSIGHTS_TRENDS",
+		enabled: isInsightsTrendsEnabled,
+		since: null,
 		fields: {},
 	},
 	{

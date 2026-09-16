@@ -17,6 +17,8 @@ import {
 } from "@mui/material";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+
+import MetricInfo from "./MetricInfo";
 import {
 	StatsParams,
 	dashboardMetricsQueryOptions,
@@ -65,9 +67,12 @@ function PanelFrame({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{title}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{title}
+					</Typography>
+					<MetricInfo metric="trading_partners" label={title} />
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{subtitle}
 				</Typography>

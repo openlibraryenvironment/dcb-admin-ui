@@ -8,6 +8,7 @@ import {
 	type ThemeOptions,
 } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid-premium/themeAugmentation";
+import { SCROLL_PADDING_TOP } from "./stickyOffsets";
 import {
 	DEFAULT_FONT,
 	fontStack,
@@ -1314,12 +1315,14 @@ const buildTheme = (
 						// The text-size preference. Every size in `typography` is in `rem`
 						// so that this one declaration moves the whole scale together.
 						fontSize: rootFontSize(display.textSize),
-						// WCAG 2.2 2.4.11 Focus Not Obscured. The AppBar is position:fixed
-						// at 70px, and the browser scrolls a focused element to the top of
-						// the scrollport knowing nothing about what is painted over it.
-						// True whether the document or an inner box is the scroller, which
-						// this layout has changed before.
-						scrollPaddingTop: "70px",
+						// WCAG 2.2 2.4.11 Focus Not Obscured. The browser scrolls a focused
+						// element to the top of the scrollport knowing nothing about what
+						// is painted over it, and on this estate that is the fixed AppBar
+						// plus, on Insights, a sticky subject bar beneath it. One number,
+						// shared with the bar that has to sit at the same offset - see
+						// stickyOffsets. True whether the document or an inner box is the
+						// scroller, which this layout has changed before.
+						scrollPaddingTop: `${SCROLL_PADDING_TOP}px`,
 					},
 					...motionStyles,
 				},

@@ -86,6 +86,24 @@ export default [
 	},
 
 	{
+		// Build-time Node scripts. They never reach a browser and serve no UI, so the
+		// Node globals have to be declared and the i18n literal-string rule does not
+		// apply - a console message to a developer is not a user-facing string.
+		files: ["scripts/**/*.mjs"],
+		languageOptions: {
+			globals: {
+				process: "readonly",
+				console: "readonly",
+				Buffer: "readonly",
+				URL: "readonly",
+			},
+		},
+		rules: {
+			"i18next/no-literal-string": "off",
+		},
+	},
+
+	{
 		// The Cloudflare Worker that fronts the S3-hosted builds. It runs in the
 		// Workers runtime - not the browser, not Node - so its globals have to be
 		// declared here, and it serves no UI, so the i18n literal-string rule does
@@ -146,6 +164,23 @@ export default [
 						"CallExpression[callee.property.name='invalidateQueries'][arguments.length=0]",
 					message:
 						"A bare invalidateQueries() nukes the cache and re-fires every mounted query. Invalidate the narrowest stale key.",
+				},
+				// The Insights view belongs in the URL. The range, the plotted series and
+				// the scope were held in a Zustand store and in component state, so a link
+				// to "last quarter for these three libraries" opened on somebody else's
+				// default. These two catch the next piece of dashboard state reaching for
+				// the same place. insightsCostStore is deliberately NOT banned: it is the
+				// per-user default for a fresh visit, and the tile writes through to the URL.
+				{
+					selector:
+						"CallExpression[callee.name='useState'] > Literal[value=/^(7d|30d|90d|365d)$/]",
+					message:
+						"A time range is part of the view: put it in the URL (insightsSearch.ts), not in component state.",
+				},
+				{
+					selector: "ImportDeclaration[source.value=/insightsPlotStore/]",
+					message:
+						"insightsPlotStore was deleted: the range, the plotted series and the scope live in the URL now. See insightsSearch.ts.",
 				},
 				{
 					selector:

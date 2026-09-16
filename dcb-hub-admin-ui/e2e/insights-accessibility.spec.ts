@@ -1,22 +1,38 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import axe from "axe-core";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { enableInsights, mockInsights } from "./fixtures/insights-mocks";
+import { expectPaintedScheme } from "./fixtures/axe";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
+import libraryDetail from "./fixtures-data/library-detail.json";
+import groupDetail from "./fixtures-data/group-detail.json";
+
+/** The library the fixtures describe; its Host LMS code is what scopes the panels. */
+const LIBRARY = "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22";
+
+/** The group, whose two members scope the panels as a set. */
+const GROUP = "aa11bb22-3333-5444-9555-666677778888";
+
+const MOCKS = {
+	LoadConsortiumHeader: consortiumBasics,
+	LoadLibraries: libraries,
+	LoadLibrary: libraryDetail,
+	LoadGroup: groupDetail,
+};
 
 /**
  * The accessibility gate for Insights. WCAG 2.2 AA is the floor, and this is where it is
- * enforced rather than asserted: zero axe violations on the dashboard in BOTH colour
- * schemes, because a palette that passes in light routinely fails in dark - and this page
- * is almost entirely colour-bearing marks.
+ * enforced rather than asserted: zero axe violations in BOTH colour schemes, because a
+ * palette that passes in light routinely fails in dark - and this page is almost entirely
+ * colour-bearing marks.
  *
- * The whole page is scanned, not the fold: every panel below the first screen is mounted
- * by an IntersectionObserver, so the scan scrolls to the bottom first and waits for the
- * last section to arrive. A gate that only ever saw the KPI row would pass over twenty
- * unscanned charts and tables.
+ * ONE SCAN PER SUBJECT, not one per page. A subject that is not open does not render, so
+ * a scan of the default view would cover one sixth of the feature while reporting clean -
+ * which is the failure mode this suite exists to prevent, wearing a new shape.
  *
  * Automated rules catch roughly a third of WCAG failures. This is a floor, not a
  * certificate: keyboard completeness, focus order and announcement still need a human.
@@ -24,8 +40,56 @@ import libraries from "./fixtures-data/libraries.json";
 
 const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
-async function scanWholePage(page: Page) {
-	const results = await new AxeBuilder({ page }).withTags(WCAG).analyze();
+/**
+ * Outside the WCAG tag sets, asserted anyway because it caught something real: every KPI
+ * tile label rendered as an <h6> directly under the page <h1>, because MUI's subtitle2 is
+ * an <h6> element unless you say otherwise, and the accordion wrapped its summary in one
+ * more. A screen-reader user navigating by heading met an outline claiming each tile sat
+ * four levels deep inside nothing.
+ *
+ * Named one rule at a time rather than by enabling best-practice wholesale, so the gate
+ * still cannot fail on opinion.
+ */
+const EXTRA_RULES = ["heading-order"];
+
+/**
+ * The subject, and the heading that proves its last panel has mounted.
+ *
+ * Gaps is absent from this table because it needs a single library in scope, which the
+ * consortium view is not. It has its own scan, on the library route, below.
+ */
+const SUBJECTS = [
+	{ tab: "trends", lastPanel: "Requesting activity over time" },
+	{ tab: "service", lastPanel: "Peer benchmarking" },
+	{ tab: "demand", lastPanel: "Demand nothing could supply" },
+	{ tab: "partners", lastPanel: "Borrowing vs supplying" },
+	{ tab: "collection", lastPanel: "Clustering confidence" },
+] as const;
+
+/**
+ * The tag sets AND the extra rules, as one list of rule ids.
+ *
+ * NOT `.withTags(WCAG).withRules(EXTRA_RULES)`. Both of those set `runOnly`, so chaining
+ * them does not combine - the second silently replaces the first, and this gate spent its
+ * life asserting `heading-order` alone while reporting green on the whole WCAG ladder.
+ * Lighthouse caught the aria-hidden-focus failure this missed, which is the only reason
+ * anybody looked.
+ */
+const RULES = [
+	...new Set([
+		...axe.getRules(WCAG).map((rule) => rule.ruleId),
+		...EXTRA_RULES,
+	]),
+];
+
+async function scan(page: Page) {
+	// Guards the gate: a rule list that has lost the tag sets is exactly what this file
+	// looked like before, and it looked green.
+	expect(RULES).toContain("color-contrast");
+	expect(RULES).toContain("heading-order");
+	expect(RULES.length).toBeGreaterThan(50);
+
+	const results = await new AxeBuilder({ page }).withRules(RULES).analyze();
 
 	expect(
 		results.violations.map((v) => ({
@@ -37,29 +101,26 @@ async function scanWholePage(page: Page) {
 }
 
 /**
- * Mount every lazy panel, then wait for the last section on the page.
+ * Wheel to the bottom of the open subject and wait for its last panel.
  *
- * Collection analysis is deliberately last and deliberately lazy, so its heading arriving
- * is the signal that nothing is still an unrendered placeholder.
+ * Below-the-fold panels mount on an IntersectionObserver, so a scan that did not scroll
+ * would pass over unrendered placeholders. Waiting on a NAMED heading rather than a count
+ * is what makes this deterministic: the panel either mounted or the test says which one
+ * did not.
  */
-async function revealEveryPanel(page: Page) {
+async function revealSubject(page: Page, lastPanel: string) {
 	await expect(
 		page.getByRole("heading", { level: 2, name: "Overview" }),
 	).toBeVisible();
 
-	for (let i = 0; i < 12; i++) {
-		await page.mouse.wheel(0, 2000);
+	const target = page.getByRole("heading", { name: lastPanel });
+
+	for (let i = 0; i < 14 && !(await target.isVisible()); i++) {
+		await page.mouse.wheel(0, 1400);
+		await expect(page.locator("body")).toBeVisible();
 	}
 
-	await expect(
-		page.getByRole("heading", { level: 2, name: "Collection analysis" }),
-	).toBeVisible();
-	await expect(
-		page.getByRole("heading", { level: 3, name: "Clustering confidence" }),
-	).toBeVisible();
-	await expect(
-		page.getByRole("heading", { level: 3, name: "Trading partners" }),
-	).toBeVisible();
+	await expect(target).toBeVisible();
 }
 
 for (const scheme of ["light", "dark"] as const) {
@@ -70,41 +131,62 @@ for (const scheme of ["light", "dark"] as const) {
 			await enableInsights(page);
 			await seedAuth(page);
 			await mockInsights(page);
-			await mockGraphQL(page, {
-				LoadConsortiumHeader: consortiumBasics,
-				LoadLibraries: libraries,
-			});
+			await mockGraphQL(page, MOCKS);
 		});
 
-		test("consortium insights has no violations", async ({ page }) => {
-			await page.goto("/consortium/insights");
-			await revealEveryPanel(page);
-
-			// Guards the gate itself. useThemeStore seeds its mode from
-			// prefers-color-scheme, so if the emulated scheme never reached the app a
-			// "passing" dark run would just be a second light run. Asserting the media
-			// query alone would not prove that either - the theme has to have followed
-			// it - so this reads the painted background and checks it is on the right
-			// side of mid-grey.
-			const painted = await page.evaluate(() => {
-				const [r, g, b] = getComputedStyle(document.body)
-					.backgroundColor.match(/\d+/g)!
-					.map(Number);
-				return {
-					prefersDark: window.matchMedia("(prefers-color-scheme: dark)")
-						.matches,
-					luminance: (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255,
-				};
+		for (const { tab, lastPanel } of SUBJECTS) {
+			test(`${tab} has no violations`, async ({ page }) => {
+				await page.goto(`/consortium/insights?tab=${tab}`);
+				await revealSubject(page, lastPanel);
+				await scan(page);
 			});
+		}
 
-			expect(painted.prefersDark).toBe(scheme === "dark");
-			if (scheme === "dark") {
-				expect(painted.luminance).toBeLessThan(0.5);
-			} else {
-				expect(painted.luminance).toBeGreaterThan(0.5);
-			}
+		test("gaps has no violations", async ({ page }) => {
+			// The sixth subject, and the only one the consortium view cannot show: it
+			// answers "what does THIS library not hold", so it is scanned where it
+			// renders rather than left to the five above.
+			await page.goto(`/libraries/${LIBRARY}/insights?tab=gaps`);
+			await revealSubject(page, "Consortial lifeline");
+			await scan(page);
+		});
 
-			await scanWholePage(page);
+		test("the duration trends have no violations", async ({ page }) => {
+			// Behind a flag that is off everywhere today, so the default scans above do
+			// not reach this panel at all - a chart with its own toggle group, which is
+			// where focus order and unlabelled controls go wrong.
+			await enableInsights(page, { trends: true });
+			await page.goto("/consortium/insights?tab=trends");
+			await revealSubject(page, "How durations are moving");
+			await scan(page);
+		});
+
+		test("a group has no violations", async ({ page }) => {
+			// The group route is the only place the subject bar sits under a TAB bar.
+			// Two navigation strips stacked is where focus order and duplicated
+			// accessible names go wrong, and neither of the other two routes has it.
+			await page.goto(`/groups/${GROUP}/insights?tab=partners`);
+			await revealSubject(page, "Borrowing vs supplying");
+			await scan(page);
+		});
+
+		test("the emulated scheme actually reached the theme", async ({ page }) => {
+			await page.goto("/consortium/insights");
+
+			// After the app has painted, not after navigation: the theme is applied by
+			// React, so reading `body` on the bare document measures the transparent
+			// default and reports both schemes as dark.
+			await expect(
+				page.getByRole("heading", { level: 2, name: "Overview" }),
+			).toBeVisible();
+
+			expect(
+				await page.evaluate(
+					() => window.matchMedia("(prefers-color-scheme: dark)").matches,
+				),
+			).toBe(scheme === "dark");
+
+			await expectPaintedScheme(page, scheme);
 		});
 	});
 }
@@ -114,45 +196,59 @@ test.describe("Insights - structure", () => {
 		await enableInsights(page);
 		await seedAuth(page);
 		await mockInsights(page);
-		await mockGraphQL(page, {
-			LoadConsortiumHeader: consortiumBasics,
-			LoadLibraries: libraries,
-		});
+		await mockGraphQL(page, MOCKS);
 	});
 
-	test("is one h1, then sections, then panels - in that order", async ({
+	test("is one h1, then the subject's own sections, then its panels", async ({
 		page,
 	}) => {
-		await page.goto("/consortium/insights");
-		await revealEveryPanel(page);
+		await page.goto("/consortium/insights?tab=partners");
 
-		// A screen-reader user navigates this page by heading. Twenty sibling cards with
-		// no sections between them is a list, not an outline.
+		// A screen-reader user navigates this page by heading. The open subject's
+		// sections are the outline; the ones that are not open must not be in it, or the
+		// outline promises content that is not on the page.
 		await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
 
-		const sections = await page
-			.getByRole("heading", { level: 2 })
-			.allTextContents();
+		expect(
+			await page.getByRole("heading", { level: 2 }).allTextContents(),
+		).toEqual(["Overview", "Trading partners"]);
+	});
 
-		expect(sections).toEqual([
-			"Overview",
-			"Service performance",
-			"Demand",
-			"Trading partners",
-			"Collection analysis",
-		]);
+	test("the subjects are links, and the open one says so", async ({ page }) => {
+		await page.goto("/consortium/insights?tab=demand");
 
-		// Every section is a landmark named by its own heading, so it can be jumped to.
+		const nav = page.getByRole("navigation", { name: "Insights subjects" });
+
+		// Links, not tabs. The library page already owns a tablist, and a second one
+		// inside the first gives a keyboard user two sets of arrow keys - see
+		// docs/accessibility.md.
+		await expect(nav.getByRole("link")).toHaveCount(5);
+		await expect(nav.getByRole("link", { name: "Demand" })).toHaveAttribute(
+			"aria-current",
+			"page",
+		);
+
+		// Gaps needs one library in scope, so the consortium view does not offer it
+		// rather than offering it empty.
+		await expect(nav.getByRole("link", { name: "Gaps" })).toHaveCount(0);
+	});
+
+	test("a subject the scope cannot show falls back rather than blanking", async ({
+		page,
+	}) => {
+		// An old link to Gaps, opened at consortium scope.
+		await page.goto("/consortium/insights?tab=gaps");
+
 		await expect(
-			page.getByRole("region", { name: "Collection analysis" }),
+			page.getByRole("heading", { level: 2, name: "Trends" }),
 		).toBeVisible();
 	});
 
 	test("says how far the collection figures can be trusted", async ({
 		page,
 	}) => {
-		await page.goto("/consortium/insights");
-		await revealEveryPanel(page);
+		await page.goto("/consortium/insights?tab=collection");
+		await revealSubject(page, "Clustering confidence");
 
 		// The single-holder share is the honesty check on every other number in the
 		// section. The fixture is ~38% single-holder, which is a corpus that clusters,

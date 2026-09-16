@@ -1,22 +1,15 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import {
-	Card,
-	CardContent,
-	Typography,
-	Chip,
-	Skeleton,
-	Box,
-} from "@mui/material";
+import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
 import { LineChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette, inkOn } from "@hooks/useChartPalette";
-import {
-	useInsightsPlotStore,
-	MAX_PLOT_SERIES,
-} from "@hooks/insightsPlotStore";
+
+import PanelState from "./PanelState";
+import { MAX_PLOT_SERIES } from "@helpers/insightsSearch";
+import type { InsightsView } from "@hooks/useInsightsView";
 import {
 	timeSeriesQueryOptions,
 	StatsParams,
@@ -26,6 +19,8 @@ import {
 interface StatusFlowChartProps {
 	params: StatsParams;
 	interval: TimeSeriesInterval;
+	/** Which series are plotted is part of the view, so it travels in the URL. */
+	view: InsightsView;
 }
 
 const CHART_HEIGHT = 360;
@@ -33,16 +28,17 @@ const CHART_HEIGHT = 360;
 export default function StatusFlowChart({
 	params,
 	interval,
+	view,
 }: StatusFlowChartProps) {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 	const { colorForStatus } = useChartPalette();
 
 	// Atomic selectors - never destructure the whole store.
-	const selectedStatuses = useInsightsPlotStore((s) => s.selectedStatuses);
-	const toggleStatus = useInsightsPlotStore((s) => s.toggleStatus);
+	const selectedStatuses = view.series;
+	const toggleStatus = view.toggleSeries;
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		timeSeriesQueryOptions(client, params, interval),
 	);
 
@@ -125,34 +121,29 @@ export default function StatusFlowChart({
 					})}
 				</Box>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={CHART_HEIGHT} />
-				) : xAxisData.length === 0 || series.length === 0 ? (
-					<Box
-						sx={{
-							height: CHART_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<LineChartPro
-						height={CHART_HEIGHT}
-						xAxis={[
-							{
-								data: xAxisData,
-								scaleType: "time",
-								zoom: true,
-							},
-						]}
-						series={series}
-					/>
-				)}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={xAxisData.length === 0 || series.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={CHART_HEIGHT}
+				>
+					{() => (
+						<LineChartPro
+							height={CHART_HEIGHT}
+							xAxis={[
+								{
+									data: xAxisData,
+									scaleType: "time",
+									zoom: true,
+								},
+							]}
+							series={series}
+						/>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

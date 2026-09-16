@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Autocomplete, TextField, Chip } from "@mui/material";
@@ -20,9 +20,12 @@ export type ScopeOption = {
 export default function ScopeSelector({
 	value,
 	onChange,
+	onOptionsLoaded,
 }: {
 	value: ScopeOption[];
 	onChange: (selected: ScopeOption[]) => void;
+	/** Publishes the loaded list so a caller can resolve the ids a URL carries. */
+	onOptionsLoaded?: (options: ScopeOption[]) => void;
 }) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
@@ -76,6 +79,12 @@ export default function ScopeSelector({
 
 		return [...groupOptions, ...libraryOptions];
 	}, [data]);
+
+	// The list arrives asynchronously and the URL is read before it does, so the caller is
+	// told when there is something to resolve ids against.
+	useEffect(() => {
+		if (options.length > 0) onOptionsLoaded?.(options);
+	}, [options, onOptionsLoaded]);
 
 	return (
 		<Autocomplete<ScopeOption, true>
