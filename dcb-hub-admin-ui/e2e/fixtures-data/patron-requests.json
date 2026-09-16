@@ -1,7 +1,10 @@
 {
 	"patronRequests": {
-		"totalSize": 2,
-		"pageable": { "number": 0, "offset": 0 },
+		"totalSize": 4,
+		"pageable": {
+			"number": 0,
+			"offset": 0
+		},
 		"content": [
 			{
 				"id": "aa000000-1111-5111-9111-111111111111",
@@ -33,11 +36,15 @@
 				"pickupItemId": null,
 				"pickupItemStatus": null,
 				"suppliers": [],
-				"clusterRecord": { "title": "Alpha Title" },
+				"clusterRecord": {
+					"id": "99000000-1111-5111-9111-111111111111",
+					"title": "Alpha and the art of failure"
+				},
 				"requestingIdentity": {
 					"localBarcode": "111",
 					"canonicalPtype": "STANDARD"
-				}
+				},
+				"isTooLong": false
 			},
 			{
 				"id": "bb000000-2222-5222-9222-222222222222",
@@ -69,11 +76,95 @@
 				"pickupItemId": null,
 				"pickupItemStatus": null,
 				"suppliers": [],
-				"clusterRecord": { "title": "Beta Title" },
+				"clusterRecord": {
+					"id": "99000000-2222-5222-9222-222222222222",
+					"title": "Beta and the second failure"
+				},
 				"requestingIdentity": {
 					"localBarcode": "222",
 					"canonicalPtype": "STANDARD"
-				}
+				},
+				"isTooLong": false
+			},
+			{
+				"id": "cc000000-3333-5333-9333-333333333333",
+				"dateCreated": "2026-05-01T09:30:00Z",
+				"dateUpdated": "2026-05-01T10:00:00Z",
+				"patronHostlmsCode": "ALPHA-HOST",
+				"pickupLocationCode": "1f0c9b3a-1111-5111-9111-111111111111",
+				"description": "Gamma request",
+				"status": "PICKUP_TRANSIT",
+				"previousStatus": "CONFIRMED",
+				"nextExpectedStatus": "CANCELLED",
+				"errorMessage": null,
+				"nextScheduledPoll": null,
+				"outOfSequenceFlag": false,
+				"elapsedTimeInCurrentStatus": 3600,
+				"pollCountForCurrentStatus": 1,
+				"isManuallySelectedItem": false,
+				"requesterNote": null,
+				"activeWorkflow": "RET-STD",
+				"rawLocalRequestStatus": null,
+				"rawLocalItemStatus": null,
+				"localRequestId": null,
+				"localRequestStatus": null,
+				"localItemId": null,
+				"localItemStatus": null,
+				"localItemType": null,
+				"pickupRequestId": null,
+				"pickupRequestStatus": null,
+				"pickupItemId": null,
+				"pickupItemStatus": null,
+				"suppliers": [],
+				"clusterRecord": {
+					"id": "99000000-3333-5333-9333-333333333333",
+					"title": "Gamma stuck in transit"
+				},
+				"requestingIdentity": {
+					"localBarcode": "111",
+					"canonicalPtype": "STANDARD"
+				},
+				"isTooLong": true
+			},
+			{
+				"id": "dd000000-4444-5444-9444-444444444444",
+				"dateCreated": "2026-05-01T09:30:00Z",
+				"dateUpdated": "2026-05-01T10:00:00Z",
+				"patronHostlmsCode": "ALPHA-HOST",
+				"pickupLocationCode": "1f0c9b3a-1111-5111-9111-111111111111",
+				"description": "Delta request",
+				"status": "PICKUP_TRANSIT",
+				"previousStatus": "CONFIRMED",
+				"nextExpectedStatus": "CANCELLED",
+				"errorMessage": null,
+				"nextScheduledPoll": null,
+				"outOfSequenceFlag": false,
+				"elapsedTimeInCurrentStatus": 3600,
+				"pollCountForCurrentStatus": 1,
+				"isManuallySelectedItem": false,
+				"requesterNote": null,
+				"activeWorkflow": "RET-STD",
+				"rawLocalRequestStatus": null,
+				"rawLocalItemStatus": null,
+				"localRequestId": null,
+				"localRequestStatus": null,
+				"localItemId": null,
+				"localItemStatus": null,
+				"localItemType": null,
+				"pickupRequestId": null,
+				"pickupRequestStatus": null,
+				"pickupItemId": null,
+				"pickupItemStatus": null,
+				"suppliers": [],
+				"clusterRecord": {
+					"id": "99000000-4444-5444-9444-444444444444",
+					"title": "Delta still in transit"
+				},
+				"requestingIdentity": {
+					"localBarcode": "111",
+					"canonicalPtype": "STANDARD"
+				},
+				"isTooLong": false
 			}
 		]
 	}

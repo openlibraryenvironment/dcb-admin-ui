@@ -79,7 +79,9 @@ export const CleanupProgressDialog = ({
 								variant="determinate"
 								value={progress}
 								color={isCleaning ? "primary" : "success"}
-								aria-labelledby="progressOfCleanup"
+								// An aria-labelledby pointing at an id nothing renders leaves the bar
+								// with no accessible name (axe: aria-progressbar-name).
+								aria-label={t("patron_requests.cleanup_in_progress")}
 								sx={{ flexGrow: 1 }}
 							/>
 							{isCleaning && (
@@ -311,8 +313,11 @@ export const CleanupProgressDialog = ({
 				</Stack>
 			</DialogContent>
 			<DialogActions>
+				{/* Contained, not outlined: the warning token is an amber whose contrast as
+				    TEXT on this surface fails AA (axe: color-contrast). Contained pairs it with
+				    its contrastText, which is what Confirmation's own cautionary action uses. */}
 				{onOverride && refusedRows?.length > 0 && !isCleaning ? (
-					<Button onClick={onOverride} color="warning" variant="outlined">
+					<Button onClick={onOverride} color="warning" variant="contained">
 						{t("patron_requests.cleanup_override_action", {
 							count: refusedRows.length,
 						})}
