@@ -112,7 +112,7 @@ function DataChangeLogDetails() {
 							<RenderAttribute attribute={dataChangeLog.entityId} />
 						) : (
 							<Link
-								href={`/${calculateEntityLink(dataChangeLog.entityType)}/${dataChangeLog.entityId}`}
+								to={`/${calculateEntityLink(dataChangeLog.entityType)}/${dataChangeLog.entityId}`}
 								underline="hover"
 							>
 								<RenderAttribute attribute={dataChangeLog.entityId} />

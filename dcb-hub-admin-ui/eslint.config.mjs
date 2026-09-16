@@ -159,6 +159,27 @@ export default [
 					message:
 						"autocomplete=off breaks password managers and paste. WCAG 2.2 SC 3.3.8 (Accessible Authentication).",
 				},
+				// Mobius serves this app at /dcb-admin/ beside dcb-admin-for-libraries on one
+				// origin, and only the router adds the base: a root-relative href or a bare
+				// window.open leaves the app. docs/deployment.md, "Sharing one origin".
+				{
+					selector:
+						"JSXAttribute[name.name='href'] > Literal[value=/^\\/(?!\\/)/]",
+					message:
+						"A root-relative href leaves the app's base path. Navigate with `to` on a router link (`component={Link} to=…`, or `to` on @components/Link/Link).",
+				},
+				{
+					selector:
+						"JSXAttribute[name.name='href'] > JSXExpressionContainer > TemplateLiteral[quasis.0.value.raw=/^\\/(?!\\/)/]",
+					message:
+						"A root-relative href leaves the app's base path. Navigate with `to` on a router link (`component={Link} to=…`, or `to` on @components/Link/Link).",
+				},
+				{
+					selector:
+						"CallExpression[callee.object.name='window'][callee.property.name='open']:not([arguments.0.callee.name='appUrl']):not([arguments.0.value=/^https?:/])",
+					message:
+						"window.open resolves a path against the origin root, outside the deployment base. Pass appUrl(path).",
+				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",
 					message:
