@@ -133,6 +133,21 @@ export function BrandImageField({
 					>
 						{t("consortium.brand.upload")}
 					</Button>
+
+					{/* Removing an image was deleting a URL out of a text box, which is not
+					    an action anybody recognises as "go back to the default". It is one
+					    button, and it only exists when there is something to remove. */}
+					{value.trim() !== "" && !stagedFile && (
+						<Button
+							color="inherit"
+							size="small"
+							disabled={disabled}
+							onClick={() => onChange("")}
+						>
+							{t("consortium.brand.remove")}
+						</Button>
+					)}
+
 					<Typography variant="body2" color="text.secondary">
 						{t("consortium.brand.upload_formats")}
 					</Typography>

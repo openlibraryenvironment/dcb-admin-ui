@@ -39,13 +39,16 @@ module.exports = {
 			// is the hard kind to notice. --strictPort because without it vite does not
 			// fail on a taken port, it increments to the next free one - a neighbour's.
 			startServerCommand:
-				"npm run build && npm run preview -- --port 4193 --strictPort",
+				"npm run build && node scripts/preview-for-lighthouse.mjs",
 			// Match the PORT, not "Local:" — vite writes an ANSI reset between "Local"
 			// and its colon, so a /Local:/ pattern never matches and lhci silently waits
 			// out the full readiness timeout on every run.
 			startServerReadyPattern: "4193",
 			startServerReadyTimeout: 180000,
-			url: ["http://localhost:4193/login"],
+			url: [
+				"http://localhost:4193/login",
+				"http://localhost:4193/consortium/insights",
+			],
 			numberOfRuns: 3,
 			settings: {
 				// DESKTOP, because that is what this is. Lighthouse defaults to an emulated
@@ -90,90 +93,153 @@ module.exports = {
 			// and uncounted bytes do not appear in `total-byte-weight`. Under the default
 			// aggregation that single lucky run would become the number every assertion
 			// was checked against, and the budget would be measuring the cache.
-			aggregationMethod: "median",
 
-			assertions: {
-				// THE SHARP EDGE: 750,000 B, against 653,582 B measured on a clean build
-				// of this branch (2026-08-30, median of three). A cold run reports that
-				// figure to the byte every time; see the aggregation note above for why
-				// the median and not the minimum. This is the assertion that actually
-				// holds the line, because bytes do not vary with the runner's CPU the way
-				// every score-based threshold does.
-				//
-				// The ~14.8% of headroom is deliberate and is the same ratio symposia-ui
-				// uses: enough to absorb ordinary feature work, tight enough to trip on a
-				// heavyweight dependency.
-				//
-				// NEVER re-baseline this to make a build pass. A budget re-derived to sit
-				// just above whatever today's bundle happens to be is a budget that
-				// ratchets, and three of those in a row is how a bundle doubles.
-				// Exceeding it means cutting weight or bringing a written argument.
-				"total-byte-weight": ["error", { maxNumericValue: 750000 }],
+			// Two pages, two budgets. The sign-in page is the shell; the Insights dashboard
+			// is the heaviest authenticated route in the application and the one this
+			// section was added for. assertMatrix rather than one assertions block, because
+			// a single set would have to be loose enough for the heavier page and would then
+			// never say anything about the lighter one.
+			assertMatrix: [
+				{
+					matchingUrlPattern: ".*/login$",
+					// Per entry, not shared: lhci refuses aggregationMethod alongside
+					// assertMatrix, and the reason it is "median" is the same for both
+					// pages - see the note above.
+					aggregationMethod: "median",
+					assertions: {
+						// THE SHARP EDGE: 750,000 B, against 653,582 B measured on a clean build
+						// of this branch (2026-08-30, median of three). A cold run reports that
+						// figure to the byte every time; see the aggregation note above for why
+						// the median and not the minimum. This is the assertion that actually
+						// holds the line, because bytes do not vary with the runner's CPU the way
+						// every score-based threshold does.
+						//
+						// The ~14.8% of headroom is deliberate and is the same ratio symposia-ui
+						// uses: enough to absorb ordinary feature work, tight enough to trip on a
+						// heavyweight dependency.
+						//
+						// NEVER re-baseline this to make a build pass. A budget re-derived to sit
+						// just above whatever today's bundle happens to be is a budget that
+						// ratchets, and three of those in a row is how a bundle doubles.
+						// Exceeding it means cutting weight or bringing a written argument.
+						"total-byte-weight": ["error", { maxNumericValue: 750000 }],
 
-				// 0.002 today. The frontend doctrine names CLS explicitly - skeletons
-				// must match the dimensions of what replaces them - and it is the one
-				// metric a reviewer cannot see in a diff. A hard error.
-				"cumulative-layout-shift": ["error", { maxNumericValue: 0.05 }],
+						// 0.002 today. The frontend doctrine names CLS explicitly - skeletons
+						// must match the dimensions of what replaces them - and it is the one
+						// metric a reviewer cannot see in a diff. A hard error.
+						"cumulative-layout-shift": ["error", { maxNumericValue: 0.05 }],
 
-				// 0ms on desktop, across three runs. A WARNING, not an error, for the reason
-				// the file already gives below for LCP: its cause is the payload, and the
-				// payload has a hard gate above. Two hard gates on one cause means one of
-				// them is noise.
-				//
-				// It is also the assertion that failed CI while it was an error, at 511ms
-				// median over runs of 309 / 511 / 670 - a 2.2x spread on one machine in one
-				// pipeline. A number that swings by that much between consecutive runs is
-				// measuring the runner's contention, not this application, and a gate that
-				// fails on a busy afternoon is a gate somebody disables.
-				"total-blocking-time": ["warn", { maxNumericValue: 300 }],
+						// 0ms on desktop, across three runs. A WARNING, not an error, for the reason
+						// the file already gives below for LCP: its cause is the payload, and the
+						// payload has a hard gate above. Two hard gates on one cause means one of
+						// them is noise.
+						//
+						// It is also the assertion that failed CI while it was an error, at 511ms
+						// median over runs of 309 / 511 / 670 - a 2.2x spread on one machine in one
+						// pipeline. A number that swings by that much between consecutive runs is
+						// measuring the runner's contention, not this application, and a gate that
+						// fails on a busy afternoon is a gate somebody disables.
+						"total-blocking-time": ["warn", { maxNumericValue: 300 }],
 
-				// 1.00 today, and held there. Accessibility is ALSO gated by axe over far
-				// more of the application than Lighthouse ever loads - this is a second,
-				// cheaper net on the one page it does.
-				"categories:accessibility": ["error", { minScore: 1 }],
+						// 1.00 today, and held there. Accessibility is ALSO gated by axe over far
+						// more of the application than Lighthouse ever loads - this is a second,
+						// cheaper net on the one page it does.
+						"categories:accessibility": ["error", { minScore: 1 }],
 
-				// 0.93 today. The gap is `errors-in-console`: the sign-in page's OIDC
-				// client tries to reach the configured Keycloak, which does not exist in
-				// a preview server. Worth recording rather than papering over with a
-				// lower threshold, and worth fixing with a stub the way symposia-ui
-				// stubbed its /api/capabilities call.
-				"categories:best-practices": ["error", { minScore: 0.9 }],
+						// 0.93 today. The gap is `errors-in-console`: the sign-in page's OIDC
+						// client tries to reach the configured Keycloak, which does not exist in
+						// a preview server. Worth recording rather than papering over with a
+						// lower threshold, and worth fixing with a stub the way symposia-ui
+						// stubbed its /api/capabilities call.
+						"categories:best-practices": ["error", { minScore: 0.9 }],
 
-				// 0.93 on desktop, against 0.65 under the old phone emulation. A WARNING for
-				// the same reason as total-blocking-time: the score is derived from TBT and
-				// LCP, so it inherits their sensitivity to whatever else the runner is doing.
-				// CI measured 0.52 / 0.58 / 0.48 against a 0.60 floor on the same commit
-				// that scores 0.93 here.
-				//
-				// The threshold is RAISED to 0.85 rather than relaxed. As a warning it can
-				// be aspirational, and 0.60 under a desktop preset would be slack that never
-				// says anything.
-				"categories:performance": ["warn", { minScore: 0.85 }],
+						// 0.93 on desktop, against 0.65 under the old phone emulation. A WARNING for
+						// the same reason as total-blocking-time: the score is derived from TBT and
+						// LCP, so it inherits their sensitivity to whatever else the runner is doing.
+						// CI measured 0.52 / 0.58 / 0.48 against a 0.60 floor on the same commit
+						// that scores 0.93 here.
+						//
+						// The threshold is RAISED to 0.85 rather than relaxed. As a warning it can
+						// be aspirational, and 0.60 under a desktop preset would be slack that never
+						// says anything.
+						"categories:performance": ["warn", { minScore: 0.85 }],
 
-				// 1,567ms on desktop. It was ~6.83s under the phone emulation this file used
-				// to run, and most of that difference was the 4x CPU multiplier rather than
-				// anything about the application.
-				//
-				// The underlying cost is real and unchanged: nothing paints until ~659 KB
-				// across 122 requests has been fetched, parsed and executed, because the
-				// sign-in page boots the whole application - `routeTree.gen.ts` statically
-				// imports all 81 route definitions and those pull `schemas`, `axios`,
-				// `dayjs` and the bundled locale catalogue with them. Script evaluation is
-				// ~800ms unthrottled. A desktop staff console absorbs that; a phone would
-				// not, which is what the old number was really saying.
-				//
-				// Still a warning, because the cause is the payload and the payload has a
-				// hard gate above. Tightened from 8,000ms to 3,000ms: on desktop the old
-				// threshold was 5x the measured figure and could never have fired.
-				// Chunk-shaping was tried and does NOT fix it; see the note in
-				// vite.config.mts and WELCOME_EXPERIENCE_PLAN.md §8 for what would.
-				"largest-contentful-paint": ["warn", { maxNumericValue: 3000 }],
+						// 1,567ms on desktop. It was ~6.83s under the phone emulation this file used
+						// to run, and most of that difference was the 4x CPU multiplier rather than
+						// anything about the application.
+						//
+						// The underlying cost is real and unchanged: nothing paints until ~659 KB
+						// across 122 requests has been fetched, parsed and executed, because the
+						// sign-in page boots the whole application - `routeTree.gen.ts` statically
+						// imports all 81 route definitions and those pull `schemas`, `axios`,
+						// `dayjs` and the bundled locale catalogue with them. Script evaluation is
+						// ~800ms unthrottled. A desktop staff console absorbs that; a phone would
+						// not, which is what the old number was really saying.
+						//
+						// Still a warning, because the cause is the payload and the payload has a
+						// hard gate above. Tightened from 8,000ms to 3,000ms: on desktop the old
+						// threshold was 5x the measured figure and could never have fired.
+						// Chunk-shaping was tried and does NOT fix it; see the note in
+						// vite.config.mts and WELCOME_EXPERIENCE_PLAN.md §8 for what would.
+						"largest-contentful-paint": ["warn", { maxNumericValue: 3000 }],
 
-				// SEO is deliberately NOT asserted. This is an authenticated staff
-				// console that must never be indexed; a perfect SEO score would be a
-				// property nobody wants and asserting it would be a gate defending a
-				// non-goal.
-			},
+						// SEO is deliberately NOT asserted. This is an authenticated staff
+						// console that must never be indexed; a perfect SEO score would be a
+						// property nobody wants and asserting it would be a gate defending a
+						// non-goal.
+					},
+				},
+				{
+					matchingUrlPattern: ".*/consortium/insights$",
+					aggregationMethod: "median",
+					assertions: {
+						// 874,647 B measured on a clean build (2026-09-11, median of three,
+						// identical to the byte across all three). That is 225 KB more than
+						// the sign-in page: the route's own chunk, x-charts-pro and the
+						// pickers. The same ~14.8% headroom the sign-in budget uses.
+						//
+						// NEVER re-baseline this to make a build pass - the note above the
+						// sign-in figure applies here and applies harder, because this is
+						// the page most likely to grow a dependency.
+						"total-byte-weight": ["error", { maxNumericValue: 1000000 }],
+
+						// 0.0013 today, against a page of twenty panels that each swap a
+						// skeleton for content. That is the skeletons matching their
+						// replacements, which is the one thing a reviewer cannot see in a
+						// diff - so it is a hard error at the same threshold as the shell.
+						"cumulative-layout-shift": ["error", { maxNumericValue: 0.05 }],
+
+						// 163ms. A warning for the reason the sign-in page gives: the cause
+						// is the payload and the payload has a hard gate above.
+						"total-blocking-time": ["warn", { maxNumericValue: 400 }],
+
+						// 3,148ms. Above the shell's because this route renders charts after
+						// four API calls, and a warning for the same reason.
+						"largest-contentful-paint": ["warn", { maxNumericValue: 4500 }],
+
+						// 1.00, and held there. It was 0.99 when this budget was written:
+						// every KPI tile label rendered as an <h6> under the page <h1>,
+						// because MUI's subtitle2 is an <h6> element unless told otherwise.
+						// The axe gate scored the same page clean, which is why
+						// insights-accessibility.spec.ts now names heading-order explicitly.
+						"categories:accessibility": ["error", { minScore: 1 }],
+
+						// 0.96, against 1.00 on the sign-in page, and the whole gap is
+						// errors-in-console: MUI X logs a missing-licence error for
+						// x-charts-pro and x-date-pickers-pro, because the preview harness
+						// configures no key. The sign-in page renders neither component and
+						// so never sees it. Recorded rather than papered over - if this
+						// drops further, something else is logging.
+						"categories:best-practices": ["error", { minScore: 0.9 }],
+
+						// 0.67. A warning, and the number to improve rather than to relax:
+						// it is what twenty lazy panels behind a shell that statically
+						// imports 81 route definitions costs. Subjects (see
+						// INSIGHTS_IA_AND_UX_PLAN.md) should move it; this is the before.
+						"categories:performance": ["warn", { minScore: 0.6 }],
+					},
+				},
+			],
 		},
 
 		upload: {

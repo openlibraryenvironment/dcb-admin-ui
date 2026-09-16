@@ -20,6 +20,17 @@ const readFlag = (name: string): boolean => {
 };
 
 /**
+ * The guarded cleanup flow — dcb-service 9.0.0 and later.
+ *
+ * 9.0.0 refuses a cleanup that would delete the borrowing library's virtual records while
+ * the item is out, with a 409 carrying the offending status, and accepts force=true to
+ * override it. 8.71.0 has neither the refusal nor the override: it cleans up whatever it is
+ * asked to. So with this off, the UI's own status list stays the only gate.
+ */
+export const isGuardedCleanupEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_GUARDED_CLEANUP");
+
+/**
  * Insights depends on the /insights endpoints, first released in dcb-service 9.0.0.
  * Enable with VITE_FEATURE_INSIGHTS=true once the environment's dcb-service is new
  * enough; an older one answers 404 to all of them.
@@ -114,3 +125,19 @@ export const isAuditExplorerEnabled = (): boolean =>
  */
 export const isLocalHoldsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_LOCAL_HOLDS");
+
+/**
+ * Percentile trends — `/insights/trend`, on dcb-service branch `insights-improvements`
+ * and in NO release, not 8.71.0 and not the 9.0.0 tag.
+ *
+ * Separate from VITE_FEATURE_INSIGHTS for the reason every flag here is separate: the
+ * thresholds differ. A deployment on 9.0.0 has the Insights surface and answers 404 to
+ * this one endpoint, and a 404 rendered through the panel contract reads as "this panel
+ * could not be loaded" - a fault report for a server that is simply older.
+ *
+ * Unlike the branding flags this gates a RENDER, not a document: the three rate trends
+ * beside it come from `/insights/timeseries`, which every Insights deployment has, so the
+ * subject is useful with this off.
+ */
+export const isInsightsTrendsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_INSIGHTS_TRENDS");

@@ -1047,7 +1047,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 												{themeOptions(consortium.defaultThemeName).map(
 													(name) => (
 														<MenuItem key={name} value={name}>
-															{name}
+															{t(`theme.themes.${name}`, { defaultValue: name })}
 														</MenuItem>
 													),
 												)}

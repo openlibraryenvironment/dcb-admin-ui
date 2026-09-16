@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, Typography, Skeleton, Box } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
@@ -10,6 +10,10 @@ import {
 	StatsParams,
 } from "@helpers/statsApi";
 import { formatDuration } from "@helpers/insightsRange";
+
+import PanelState from "./PanelState";
+
+import MetricInfo from "./MetricInfo";
 
 const CHART_HEIGHT = 340;
 
@@ -24,7 +28,7 @@ export default function SupplierResponseSlaChart({
 	const client = useDcbRestClient();
 	const { categorical } = useChartPalette();
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		supplierResponseSlaQueryOptions(client, params),
 	);
 
@@ -33,50 +37,51 @@ export default function SupplierResponseSlaChart({
 	return (
 		<Card variant="outlined">
 			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom>
-					{t("insights.charts.supplier_response.title")}
-				</Typography>
+				<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+					<Typography variant="h6" component="h3">
+						{t("insights.charts.supplier_response.title")}
+					</Typography>
+					<MetricInfo
+						metric="supplier_response"
+						label={t("insights.charts.supplier_response.title")}
+					/>
+				</Box>
 				<Typography variant="body2" color="text.secondary" gutterBottom>
 					{t("insights.charts.supplier_response.subtitle")}
 				</Typography>
 
-				{isLoading ? (
-					<Skeleton variant="rounded" height={CHART_HEIGHT} />
-				) : rows.length === 0 ? (
-					<Box
-						sx={{
-							height: CHART_HEIGHT,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center",
-						}}
-					>
-						<Typography color="text.secondary">
-							{t("insights.no_data")}
-						</Typography>
-					</Box>
-				) : (
-					<BarChartPro
-						height={CHART_HEIGHT}
-						layout="horizontal"
-						yAxis={[
-							{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
-						]}
-						xAxis={[
-							{ label: t("insights.charts.supplier_response.axis_hours") },
-						]}
-						series={[
-							{
-								data: rows.map((r) => r.medianResponseSeconds / 3600),
-								label: t("insights.charts.supplier_response.series"),
-								color: categorical[1],
-								valueFormatter: (v) =>
-									v == null ? "—" : formatDuration(v * 3600),
-							},
-						]}
-						margin={{ left: 140 }}
-					/>
-				)}
+				<PanelState
+					isLoading={isLoading}
+					isError={isError}
+					error={error}
+					isEmpty={rows.length === 0}
+					onRetry={refetch}
+					isRetrying={isFetching}
+					height={CHART_HEIGHT}
+				>
+					{() => (
+						<BarChartPro
+							height={CHART_HEIGHT}
+							layout="horizontal"
+							yAxis={[
+								{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
+							]}
+							xAxis={[
+								{ label: t("insights.charts.supplier_response.axis_hours") },
+							]}
+							series={[
+								{
+									data: rows.map((r) => r.medianResponseSeconds / 3600),
+									label: t("insights.charts.supplier_response.series"),
+									color: categorical[1],
+									valueFormatter: (v) =>
+										v == null ? "—" : formatDuration(v * 3600),
+								},
+							]}
+							margin={{ left: 140 }}
+						/>
+					)}
+				</PanelState>
 			</CardContent>
 		</Card>
 	);

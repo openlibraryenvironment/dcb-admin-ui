@@ -48,7 +48,7 @@ export const LocationCell = ({ locationId, linkable }: LocationCellProps) => {
 	const location: Location = locationsList[0];
 
 	return location && linkable ? (
-		<Link href={`/locations/${locationId}`}>{location.name}</Link>
+		<Link to={`/locations/${locationId}`}>{location.name}</Link>
 	) : (
 		<Box component="span">{location?.name}</Box>
 	);

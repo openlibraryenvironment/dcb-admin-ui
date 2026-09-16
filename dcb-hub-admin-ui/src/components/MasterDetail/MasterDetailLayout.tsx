@@ -13,8 +13,12 @@ export default function MasterDetailLayout({
 	children,
 	width,
 }: MasterDetailLayoutProps) {
+	// MUI X renders the panel as role="none" inside the grid's rowgroup, so without a row and
+	// gridcell here every link in a panel is an invalid rowgroup child (axe
+	// aria-required-children). Children must not carry row or gridcell roles of their own.
 	return (
 		<Box
+			role="row"
 			sx={{
 				// Match the viewport width passed from the grid
 				width,
@@ -22,27 +26,29 @@ export default function MasterDetailLayout({
 				boxSizing: "border-box",
 			}}
 		>
-			<Grid
-				container
-				spacing={2}
-				// Force a 12-column grid across all standard breakpoints
-				// This allows child components using `size={{ xs: 4, sm: 4, md: 4 }}`
-				// to automatically wrap into 3 equal columns (12 / 4 = 3)
-				columns={12}
-				sx={{
-					// Apply standard padding. The top/bottom padding ensures
-					// breathing room, and the left padding indents the content
-					// past the expansion icon.
-					pl: 8,
-					pr: 2,
-					py: 2,
-				}}
-			>
-				{children}
-			</Grid>
-			{/* The divider spans the full width of the container */}
-			<Box sx={{ width: "100%", px: 2, pb: 1 }}>
-				<Divider aria-hidden="true" />
+			<Box role="gridcell">
+				<Grid
+					container
+					spacing={2}
+					// Force a 12-column grid across all standard breakpoints
+					// This allows child components using `size={{ xs: 4, sm: 4, md: 4 }}`
+					// to automatically wrap into 3 equal columns (12 / 4 = 3)
+					columns={12}
+					sx={{
+						// Apply standard padding. The top/bottom padding ensures
+						// breathing room, and the left padding indents the content
+						// past the expansion icon.
+						pl: 8,
+						pr: 2,
+						py: 2,
+					}}
+				>
+					{children}
+				</Grid>
+				{/* The divider spans the full width of the container */}
+				<Box sx={{ width: "100%", px: 2, pb: 1 }}>
+					<Divider aria-hidden="true" />
+				</Box>
 			</Box>
 		</Box>
 	);

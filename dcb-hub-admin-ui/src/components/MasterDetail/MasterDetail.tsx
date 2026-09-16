@@ -1,7 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "@tanstack/react-router";
-import ReactMarkdown from "react-markdown";
 import dayjs from "dayjs";
 
 import {
@@ -22,7 +21,6 @@ import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipb
 import { LocationCell } from "@components/LocationCell/LocationCell";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import {
-	StyledAccordionDetails,
 	StyledDataGridAccordion,
 	StyledDataGridAccordionSummary,
 } from "@components/StyledAccordion/StyledAccordion";
@@ -124,8 +122,8 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "cluster":
 			return (
 				<MasterDetailLayout width={width}>
-					<Grid container spacing={2} role="row">
-						<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Grid container spacing={2}>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("search.bib_record_id")}
@@ -142,7 +140,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("search.author")}
@@ -152,7 +150,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</Typography>
 							</Stack>
 						</Grid>
-						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 							<Stack direction="column">
 								<Typography variant="attributeTitle">
 									{t("search.identifiers")}
@@ -174,7 +172,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</List>
 							</Stack>
 						</Grid>
-						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 							<StyledDataGridAccordion elevation={0}>
 								<StyledDataGridAccordionSummary
 									expandIcon={<ExpandMore />}
@@ -188,7 +186,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								</AccordionDetails>
 							</StyledDataGridAccordion>
 						</Grid>
-						<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 							<StyledDataGridAccordion elevation={0}>
 								<StyledDataGridAccordionSummary
 									expandIcon={<ExpandMore />}
@@ -667,7 +665,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 					)}
 					{row?.status?.code !== "AVAILABLE" && (
 						<>
-							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 								<StyledDataGridAccordion elevation={0}>
 									<StyledDataGridAccordionSummary
 										expandIcon={<ExpandMore />}
@@ -682,7 +680,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									</AccordionDetails>
 								</StyledDataGridAccordion>
 							</Grid>
-							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
+							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 								<StyledDataGridAccordion elevation={0}>
 									<StyledDataGridAccordionSummary
 										expandIcon={<ExpandMore />}
@@ -704,24 +702,44 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "versionInfo":
 			return (
 				<MasterDetailLayout width={width}>
-					{row?.repository === "dcb-service" ? (
+					{row?.id === "dcb-service" ? (
 						<>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction="column">
 									<Typography variant="attributeTitle">
-										{t("environment.latest_version")}
+										{t("environment.commit")}
 									</Typography>
-									<RenderAttribute attribute={row?.latestData?.name} />
+									<RenderAttribute attribute={row?.commitId} />
 								</Stack>
 							</Grid>
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction="column">
 									<Typography variant="attributeTitle">
-										{t("environment.latest_version_github")}
+										{t("environment.commit_time")}
 									</Typography>
 									<RenderAttribute
-										attribute={`https://github.com/openlibraryenvironment/dcb-service/releases/tag/${row?.latestData?.name}`}
-										type="url"
+										attribute={
+											row?.commitTime
+												? dayjs(row.commitTime).format("YYYY-MM-DD HH:mm")
+												: undefined
+										}
+									/>
+								</Stack>
+							</Grid>
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction="column">
+									<Typography variant="attributeTitle">
+										{t("environment.closest_tag")}
+									</Typography>
+									<RenderAttribute
+										attribute={
+											row?.closestTag && row?.commitsSinceTag !== undefined
+												? t("environment.closest_tag_value", {
+														tag: row.closestTag,
+														count: row.commitsSinceTag,
+													})
+												: row?.closestTag
+										}
 									/>
 								</Stack>
 							</Grid>
@@ -738,52 +756,51 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Grid>
 						</>
 					) : (
-						<>
-							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction="column">
-									<Typography variant="attributeTitle">
-										{t("environment.latest_version_released")}
-									</Typography>
-									<RenderAttribute
-										attribute={dayjs(row?.latestData?.published_at).format(
-											"YYYY-MM-DD HH:mm",
-										)}
-									/>
-								</Stack>
-							</Grid>
-							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction="column">
-									<Typography variant="attributeTitle">
-										{t("environment.latest_version_github")}
-									</Typography>
-									<RenderAttribute
-										attribute={`https://github.com/openlibraryenvironment/dcb-admin-ui/releases/${row?.latestData?.name}`}
-										type="url"
-									/>
-								</Stack>
-							</Grid>
-							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-								<Stack direction="column">
-									<Typography variant="attributeTitle">
-										{t("search.author")}
-									</Typography>
-									<RenderAttribute attribute={row?.latestData?.author?.login} />
-								</Stack>
-							</Grid>
-							<Grid size={{ xs: 4, sm: 8, md: 12 }} role="gridcell">
-								<StyledDataGridAccordion>
-									<StyledDataGridAccordionSummary expandIcon={<ExpandMore />}>
-										<Typography>{t("openrs.dcb.release_notes")}</Typography>
-									</StyledDataGridAccordionSummary>
-									<StyledAccordionDetails>
-										<ReactMarkdown>
-											{row?.latestData?.body || "No release notes available."}
-										</ReactMarkdown>
-									</StyledAccordionDetails>
-								</StyledDataGridAccordion>
-							</Grid>
-						</>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction="column">
+								<Typography variant="attributeTitle">
+									{t("environment.release_date")}
+								</Typography>
+								<RenderAttribute
+									attribute={
+										row?.releaseDate
+											? dayjs(row.releaseDate).format("YYYY-MM-DD")
+											: undefined
+									}
+								/>
+							</Stack>
+						</Grid>
 					)}
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("environment.latest_version_released")}
+							</Typography>
+							<RenderAttribute
+								attribute={
+									row?.latestReleaseDate
+										? dayjs(row.latestReleaseDate).format("YYYY-MM-DD")
+										: undefined
+								}
+							/>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("environment.latest_release")}
+							</Typography>
+							<RenderAttribute attribute={row?.latestReleaseUrl} type="url" />
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("environment.releases")}
+							</Typography>
+							<RenderAttribute attribute={row?.releasesUrl} type="url" />
+						</Stack>
+					</Grid>
 				</MasterDetailLayout>
 			);
 		case "ClusterExplainer":
@@ -829,7 +846,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<RenderAttribute attribute={row?.eventType} />
 						</Stack>
 					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.bib_record_id")}
@@ -846,7 +863,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 						</Stack>
 					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }} role="gridcell">
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("search.bib_matched_against")}

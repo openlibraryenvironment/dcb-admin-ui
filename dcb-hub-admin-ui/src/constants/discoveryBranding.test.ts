@@ -8,9 +8,11 @@ import {
 	DISCOVERY_THEME_NAMES,
 	isValidLinkUrl,
 	isValidLogoUrl,
+	previewArrangement,
 	themeOptions,
 } from "./discoveryBranding";
 import application from "@/locales/en-GB/application.json";
+import { THEME_NAMES } from "../themes/openRS";
 
 /**
  * The brand logo URL becomes the `src` of an `<img>` in the chrome of every page of the
@@ -52,6 +54,14 @@ describe("isValidLogoUrl", () => {
 
 	it("rejects an http(s) URL with no host", () => {
 		expect(isValidLogoUrl("https://")).toBe(false);
+	});
+});
+
+describe("DISCOVERY_THEME_NAMES", () => {
+	it("offers every theme this console can be given, so one brand works in both apps", () => {
+		// S-13 and F-33: the console offered MOBIUS for staff while the patron app could
+		// only fall back to OpenRS blue for the same consortium.
+		expect([...DISCOVERY_THEME_NAMES]).toEqual(expect.arrayContaining([...THEME_NAMES]));
 	});
 });
 
@@ -263,5 +273,41 @@ describe("isValidLinkUrl", () => {
 
 		expect(isValidLogoUrl(asset)).toBe(true);
 		expect(isValidLinkUrl(asset)).toBe(false);
+	});
+});
+
+describe("previewArrangement", () => {
+	it("puts the consortium's name in the app bar, and sets no name in the lockup", () => {
+		const parts = previewArrangement(
+			{ patronWelcome: "  Search Missouri's shared collections.  " },
+			"WOLFCON 26",
+			"Your consortium",
+		);
+
+		expect(parts.appBarName).toBe("WOLFCON 26");
+		expect(parts.logo).toBeUndefined();
+		expect(parts.welcome).toBe("Search Missouri's shared collections.");
+	});
+
+	it("draws only the images the patron app would render", () => {
+		const parts = previewArrangement(
+			{
+				brandLogoUrl: "javascript:alert(1)",
+				brandHeaderIconUrl: "https://example.org/icon.png",
+				brandBackgroundImageUrl: "   ",
+			},
+			"MOBIUS",
+			"Your consortium",
+		);
+
+		expect(parts.logo).toBeUndefined();
+		expect(parts.headerIcon).toBe("https://example.org/icon.png");
+		expect(parts.background).toBeUndefined();
+	});
+
+	it("falls back to the placeholder for a consortium with no name yet", () => {
+		expect(previewArrangement({}, "  ", "Your consortium").appBarName).toBe(
+			"Your consortium",
+		);
 	});
 });

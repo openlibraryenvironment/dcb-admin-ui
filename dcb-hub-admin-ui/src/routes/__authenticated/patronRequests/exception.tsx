@@ -23,6 +23,8 @@ import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { queries } from "@constants/patronRequestGridQueries";
+import { composeQuery, drillSearchSchema } from "@helpers/drillSearch";
+import ReturnToInsights from "@components/Insights/ReturnToInsights";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
@@ -30,6 +32,9 @@ import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/exception",
 )({
+	// An Insights panel can arrive here with a composed filter and the view to
+	// return to - see helpers/drillSearch.
+	validateSearch: drillSearchSchema,
 	// Default-state prefetch: the loader has no access to the Zustand grid
 	// store (it's not a hook), so it can only prefetch the same defaults the
 	// component falls back to on first render - gridId
@@ -73,6 +78,14 @@ function Exception() {
 	const currentPath = Route.fullPath;
 
 	const gridId = "patronRequestsException";
+
+	// An Insights panel may have sent a filter. It composes with this tab's preset rather
+	// than replacing it, and it feeds the EXPORT as well as the grid - "export the
+	// evidence" is this page's export button, so the two must not disagree about what the
+	// evidence is.
+	const { q, from, fromLabel } = Route.useSearch();
+	const baseQuery = composeQuery(queries.exception, q);
+
 	const {
 		paginationModel: currentPagination,
 		sortModel: currentSort,
@@ -115,6 +128,7 @@ function Exception() {
 		queryKey: [
 			"patronRequests",
 			gridId,
+			baseQuery,
 			currentPagination,
 			currentSort,
 			currentFilter,
@@ -126,7 +140,7 @@ function Exception() {
 					filterModel: currentFilter,
 					sortModel: currentSort,
 					paginationModel: currentPagination,
-					baseQuery: queries.exception,
+					baseQuery,
 					defaultOrder: "dateCreated",
 					defaultPageSize: 20,
 				}),
@@ -178,6 +192,7 @@ function Exception() {
 
 	return (
 		<PageContainer title={t("nav.patronRequests.name")}>
+			<ReturnToInsights from={from} label={fromLabel} />
 			<Grid
 				container
 				spacing={{ xs: 2, md: 3 }}
@@ -219,7 +234,7 @@ function Exception() {
 						exportConfig={{
 							query: getPatronRequestsForExport,
 							coreType: "patronRequests",
-							baseQuery: queries.exception,
+							baseQuery,
 							quickFilterFields: ["status", "description"],
 							wizard: true,
 						}}

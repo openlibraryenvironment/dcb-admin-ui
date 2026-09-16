@@ -1,0 +1,25 @@
+# gitleaks configuration.
+#
+# The default rule set is kept in full; this file only adds allowlists. Disabling a rule
+# to silence one finding is how a scanner stops finding the next one.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """
+A canonical UUID is not a credential.
+
+gitleaks' generic-api-key rule fires on any high-entropy string assigned to an
+identifier containing "key" or "id", and this repository's fixtures carry record and
+host-LMS ids that are UUIDs by construction and are printed in the UI.
+
+Allowlisted by the SHAPE of the secret rather than by path. A path allowlist over the
+fixtures would also hide a real token pasted into one, which is a thing that actually
+happens; a string matching the RFC 4122 layout exactly cannot be an API key, wherever
+it appears.
+"""
+regexTarget = "secret"
+regexes = [
+  '''^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$''',
+]

@@ -2,7 +2,9 @@ import {
 	isAuditExplorerEnabled,
 	isConsortiumBrandingEnabled,
 	isConsortiumSupportUrlEnabled,
+	isGuardedCleanupEnabled,
 	isInsightsEnabled,
+	isInsightsTrendsEnabled,
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
@@ -144,6 +146,26 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
+		// `/insights/trend` is on dcb-service branch `insights-improvements` and in no
+		// release. A REST endpoint, not a schema change, so there is nothing to select or
+		// strip - and a SEPARATE row from `insights`, whose `since` is 9.0.0: a
+		// deployment on the release has the surface and 404s this one path.
+		id: "insights_trends",
+		flag: "VITE_FEATURE_INSIGHTS_TRENDS",
+		enabled: isInsightsTrendsEnabled,
+		since: null,
+		fields: {},
+	},
+	{
+		// The cleanup guard, its 409 and the force override are REST behaviour rather than
+		// schema, so there is nothing to select or strip.
+		id: "guarded_cleanup",
+		flag: "VITE_FEATURE_GUARDED_CLEANUP",
+		enabled: isGuardedCleanupEnabled,
+		since: "9.0.0",
+		fields: {},
+	},
+	{
 		// On dcb-service MAIN, and in no release: 8.71.0 does not have it and neither does
 		// the 9.0.0 tag. `since` stays null until a release ships it - see the test below,
 		// which will say so. Exactly why the flags are per capability rather than per
@@ -236,6 +258,32 @@ export const parseServiceVersion = (
 ): [number, number, number] | null => {
 	const match = /^\s*v?(\d+)\.(\d+)\.(\d+)/.exec(version ?? "");
 	return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+};
+
+/**
+ * dcb-service's own version from an `/info` payload, or null when it is not there.
+ *
+ * `git.build.version` is the Gradle project version: "8.71.0" on a release build,
+ * "9.1.0-SNAPSHOT" on a development one. `/info` has no top-level `version`.
+ */
+export const serviceVersionFrom = (info: unknown): string | null => {
+	const version = (info as { git?: { build?: { version?: unknown } } } | null)
+		?.git?.build?.version;
+	return typeof version === "string" && version !== "" ? version : null;
+};
+
+export type ReleaseStatus = "current" | "behind" | "ahead" | "unknown";
+
+/** Where a running version stands against the latest release. "v2.0.0" and "2.0.0" compare equal. */
+export const releaseStatus = (
+	running: string | null,
+	latest: string | undefined,
+): ReleaseStatus => {
+	const atLeastLatest = meetsServiceVersion(running, latest ?? "");
+	const latestAtLeastRunning = meetsServiceVersion(latest ?? "", running ?? "");
+	if (atLeastLatest === null || latestAtLeastRunning === null) return "unknown";
+	if (atLeastLatest && latestAtLeastRunning) return "current";
+	return atLeastLatest ? "ahead" : "behind";
 };
 
 /**

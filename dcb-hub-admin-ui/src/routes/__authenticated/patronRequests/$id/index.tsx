@@ -49,7 +49,11 @@ import { getLocation } from "@queries/getLocation";
 import { getPatronIdentities } from "@queries/getPatronIdentities";
 import { SourceRecord } from "@models/SourceRecord";
 import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
-import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
+import {
+	cleanupPatronRequest,
+	isCleanupEligible,
+} from "@helpers/cleanupPatronRequest";
+import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
 import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
@@ -79,6 +83,11 @@ function RouteComponent() {
 	const [updateErrorAlertVisibility, setErrorAlertVisibility] = useState(false);
 	const [cleanupErrorAlertVisibility, setCleanupErrorAlertVisibility] =
 		useState(false);
+	const [cleanupRefusal, setCleanupRefusal] = useState<{
+		status?: string;
+		detail?: string;
+	} | null>(null);
+	const [cleanupOverrideOpen, setCleanupOverrideOpen] = useState(false);
 	const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
 	const [rollbackSuccessAlertVisibility, setRollbackSuccessAlertVisibility] =
 		useState(false);
@@ -216,18 +225,39 @@ function RouteComponent() {
 		},
 	});
 
+	const guardedCleanup = isGuardedCleanupEnabled();
+
 	const cleanupMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/transition/cleanup`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
+		mutationFn: (override: boolean) =>
+			cleanupPatronRequest(
+				cfg.VITE_DCB_API_BASE,
+				auth.user?.access_token,
+				{ id, status: patronRequest?.status },
+				{ override, refreshFirst: guardedCleanup },
 			),
-		onSuccess: () => {
-			setCleanupSuccessAlertVisibility(true);
-			// Refresh the detail AND every patron request grid/tab count so the
-			// finalised status shows up on navigating back.
-			invalidatePatronRequestQueries(queryClient);
+		// The helper reports a refusal rather than throwing, so a 409 lands here, not in
+		// onError: it is the server declining, and the answer to it is the override.
+		onSuccess: (outcome) => {
+			if (outcome.kind === "cleaned") {
+				setCleanupSuccessAlertVisibility(true);
+				// Refresh the detail AND every patron request grid/tab count so the
+				// finalised status shows up on navigating back.
+				invalidatePatronRequestQueries(queryClient);
+				return;
+			}
+
+			if (outcome.kind === "refused") {
+				setCleanupRefusal({ status: outcome.status, detail: outcome.detail });
+				setCleanupOverrideOpen(true);
+				return;
+			}
+
+			if (outcome.kind === "forbidden") {
+				setCleanupRefusal({ detail: t("patron_request.cleanup_forbidden") });
+				return;
+			}
+
+			setCleanupErrorAlertVisibility(true);
 		},
 		onError: (error) => {
 			console.error("Error starting cleanup", error);
@@ -330,7 +360,7 @@ function RouteComponent() {
 		<RenderAttribute attribute={pickupLocation?.name} />
 	);
 	const canUpdate = !untrackedStatuses.includes(patronRequest?.status);
-	const canCleanup = cleanupStatuses.includes(patronRequest?.status);
+	const canCleanup = isCleanupEligible(patronRequest, guardedCleanup);
 
 	const pageActions: Action[] = [
 		{
@@ -354,7 +384,7 @@ function RouteComponent() {
 		pageActions.push({
 			key: "cleanup",
 			label: t("patron_request.cleanup"),
-			onClick: () => cleanupMutation.mutate(),
+			onClick: () => cleanupMutation.mutate(false),
 			disabled: cleanupMutation.isPending || !canCleanup,
 			tooltip: canCleanup
 				? t("patron_request.cleanup_info")
@@ -645,6 +675,32 @@ function RouteComponent() {
 								alertText={t("patron_request.rollback_unsuccessful")}
 								key="rollback-error-alert"
 								onCloseFunc={() => setRollbackErrorAlertVisibility(false)}
+							/>
+							<TimedAlert
+								open={cleanupRefusal !== null}
+								severityType="warning"
+								autoHideDuration={10000}
+								alertText={t("patron_request.cleanup_refused", {
+									detail: cleanupRefusal?.detail ?? "",
+								})}
+								key="cleanup-refused-alert"
+								onCloseFunc={() => setCleanupRefusal(null)}
+							/>
+							<Confirmation
+								open={cleanupOverrideOpen}
+								action="cleanupOverride"
+								customWarningText={t(
+									"patron_request.cleanup_override_warning",
+									{
+										status: cleanupRefusal?.status ?? patronRequest?.status,
+									},
+								)}
+								onClose={() => setCleanupOverrideOpen(false)}
+								onConfirm={() => {
+									setCleanupOverrideOpen(false);
+									setCleanupRefusal(null);
+									cleanupMutation.mutate(true);
+								}}
 							/>
 							<Confirmation
 								open={rollbackConfirmOpen}

@@ -116,6 +116,46 @@ is happening, and there is no single layout to match across 84 routes.
 
 ---
 
+## Detail panels are grid rows
+
+MUI X renders an expanded detail panel as `role="none"` directly inside the grid's
+`rowgroup`. `none` drops out of the accessibility tree, so everything focusable in a panel —
+every link `RenderAttribute` draws — becomes a child of the rowgroup, which may only own rows.
+axe reports it as `aria-required-children`, critical. It was found the first time the gate
+opened a panel (Service Status), and it applied to every master-detail grid in the app,
+because nothing had ever scanned one expanded.
+
+`MasterDetailLayout` now supplies the missing structure once: a `row` holding a single
+`gridcell` around the panel content. The rule that follows is that **nothing inside a panel
+may carry `row` or `gridcell` itself** — a gridcell inside that gridcell is its own violation.
+`MasterDetail` had ten such roles, placed by hand on individual `Grid`s; they are gone.
+
+### The toggles work inside the grid's keyboard model
+
+A data grid is **one** Tab stop; arrow keys move between cells inside it. That is the ARIA
+grid pattern and MUI X enforces it with a roving `tabIndex`, so a Tab stop per row is not the
+fix and would fight the grid. Before this, both toggles pinned `tabIndex={-1}`, and on Service
+Status, measured in Chromium:
+
+- Tab entered the grid on the "expand all" column header, where **Enter and Space did nothing** —
+  expand-all had no keyboard path at all.
+- ArrowDown reached a row's toggle cell and Space opened it, but Enter did nothing, and focus sat
+  on the cell rather than the button, so no name or expanded state was announced.
+- Labels were hardcoded "Open", "Close", "Expand All". axe passed all of it: it checks that a
+  button has a name, not that it can be operated or is translated.
+
+Now the row button carries a translated name that changes with its state, plus
+`aria-expanded`, and `DetailPanelToggle` handles Enter through the grid's `cellKeyDown` event.
+Space was already handled by the grid. Focus stays on the cell, as in MUI's own toggle. Giving
+the button the cell's roving `tabIndex` was tried and rejected: the cell and its button become
+two nested targets, and axe `target-size` failed the 50×52px cell at the 50×13px the button left
+of it. The header button also stays `tabIndex={-1}`, because the grid ignores keys from
+focusable header content, which would stop arrow navigation. `DetailPanelHeader` handles Enter
+and Space through the grid's `columnHeaderKeyDown` event. Proved by `e2e/service-status.spec.ts` › "operates the
+detail toggles from the keyboard"; every master-detail grid shares these two components.
+
+---
+
 ## Language
 
 **Two open defects, recorded here because neither is visible from the code and no gate can

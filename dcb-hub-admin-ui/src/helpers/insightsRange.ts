@@ -1,4 +1,4 @@
-import { RangePreset } from "@hooks/insightsPlotStore";
+import { RangePreset } from "@helpers/insightsSearch";
 import { TimeSeriesInterval } from "@helpers/statsApi";
 
 const DAYS: Record<RangePreset, number> = {
