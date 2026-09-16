@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
 	GridColDef,
@@ -11,140 +11,154 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 
+import { ServiceInfoGit, VersionRow } from "@models/VersionInfoTypes";
 import {
-	Release,
-	ServiceInfo,
-	Tag,
-	VersionData,
-} from "@models/VersionInfoTypes";
-import { LOCAL_VERSION_LINKS } from "@/homeData/homeConfig";
+	releaseStatus,
+	serviceVersionFrom,
+} from "@constants/serviceCapabilities";
+import {
+	LatestRelease,
+	latestReleaseQuery,
+} from "@/queryOptions/latestRelease";
+import { RELEASE_PAGE_LINKS } from "@/homeData/homeConfig";
 
-const VersionInfo: React.FC = () => {
-	const [loading, setLoading] = useState<boolean>(true);
-	const [versionData, setVersionData] = useState<VersionData[]>([]);
+type VersionInfoProps = {
+	/** dcb-service's `/info` payload, or null when it could not be fetched. */
+	serviceInfo: unknown;
+};
+
+type RunningRow = Omit<
+	VersionRow,
+	"latestVersion" | "releaseStatus" | "latestReleaseDate" | "latestReleaseUrl"
+>;
+
+type LatestReleaseState = { data?: LatestRelease; isPending: boolean };
+
+const serviceRow = (serviceInfo: unknown, unknownLabel: string): RunningRow => {
+	const git = (serviceInfo as { git?: ServiceInfoGit } | null)?.git;
+	const commitsSinceTag = Number.parseInt(
+		git?.closest?.tag?.commit?.count ?? "",
+		10,
+	);
+
+	return {
+		id: "dcb-service",
+		version: serviceVersionFrom(serviceInfo) ?? unknownLabel,
+		releasesUrl: RELEASE_PAGE_LINKS.SERVICE,
+		commitId: git?.commit?.id,
+		commitTime: git?.commit?.time,
+		closestTag: git?.closest?.tag?.name || undefined,
+		commitsSinceTag: Number.isNaN(commitsSinceTag)
+			? undefined
+			: commitsSinceTag,
+	};
+};
+
+export default function VersionInfo({ serviceInfo }: VersionInfoProps) {
 	const { t } = useTranslation();
 
-	// FIX: Migrated from legacy getConfig() to standard Vite environment variable string mappings
-	const appVersion = import.meta.env.VITE_APP_VERSION || "unknown";
+	const adminLatest = useQuery(latestReleaseQuery("dcb-admin-ui"));
+	const serviceLatest = useQuery(latestReleaseQuery("dcb-service"));
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				setLoading(true);
-
-				setVersionData([
-					{
-						id: 1,
-						repository: "dcb-service",
-						latestVersion: "Loading...",
-						currentVersion: "Loading...",
-						status: "loading",
-						detailType: "tag",
-					},
-					{
-						id: 2,
-						repository: "dcb-admin-ui",
-						latestVersion: "Loading...",
-						currentVersion: "Loading...",
-						status: "loading",
-						detailType: "release",
-					},
-				]);
-
-				const [serviceTags, serviceInfo, adminRelease] = await Promise.all([
-					axios.get<Tag[]>(
-						"https://api.github.com/repos/openlibraryenvironment/dcb-service/tags",
-					),
-					axios.get<ServiceInfo>(LOCAL_VERSION_LINKS.SERVICE_INFO),
-					axios.get<Release>(
-						"https://api.github.com/repos/openlibraryenvironment/dcb-admin-ui/releases/latest",
-					),
-				]);
-
-				const newVersionData: VersionData[] = [
-					{
-						id: 1,
-						repository: "dcb-service",
-						latestVersion: serviceTags.data[0]?.name || "Unknown",
-						currentVersion: serviceInfo.data?.git?.closest?.tag?.name
-							? serviceInfo.data?.git?.closest?.tag?.name
-							: serviceInfo.data?.git?.tags || "Unknown",
-						status:
-							serviceTags.data[0]?.name === serviceInfo.data?.app?.version
-								? "current"
-								: "outdated",
-						latestData: serviceTags.data[0],
-						currentData: serviceInfo?.data,
-						detailType: "tag",
-					},
-					{
-						id: 2,
-						repository: "dcb-admin-ui",
-						latestVersion: adminRelease.data?.tag_name || "Unknown",
-						currentVersion: appVersion,
-						status:
-							adminRelease.data?.tag_name === appVersion
-								? "current"
-								: "outdated",
-						latestData: adminRelease.data,
-						currentData: appVersion,
-						detailType: "release",
-					},
-				];
-
-				if (
-					!serviceTags.data ||
-					serviceTags.data.length === 0 ||
-					!serviceInfo.data?.git?.closest
-				) {
-					if (serviceInfo.data?.git?.branch === "main") {
-						newVersionData[0].currentVersion = serviceTags.data[0]?.name
-							? `${serviceTags.data[0].name}-Dev`
-							: `${adminRelease.data?.tag_name || "Unknown"}-Dev`;
-					}
-				}
-				setVersionData(newVersionData);
-			} catch (err) {
-				console.error("Error fetching version information:", err);
-			} finally {
-				setLoading(false);
+	const rows = useMemo<VersionRow[]>(() => {
+		const withLatest = (
+			row: RunningRow,
+			running: string | null,
+			latest: LatestReleaseState,
+		): VersionRow => {
+			if (!latest.data) {
+				const label = latest.isPending
+					? t("environment.checking")
+					: t("environment.cannot_check");
+				return {
+					...row,
+					latestVersion: label,
+					releaseStatus: latest.isPending
+						? label
+						: t("environment.release_status.unknown"),
+				};
 			}
+
+			return {
+				...row,
+				latestVersion: latest.data.tag,
+				releaseStatus: t(
+					`environment.release_status.${releaseStatus(running, latest.data.tag)}`,
+				),
+				latestReleaseDate: latest.data.publishedAt,
+				latestReleaseUrl: `${row.releasesUrl}/tag/${encodeURIComponent(latest.data.tag)}`,
+			};
 		};
 
-		fetchData();
-	}, [appVersion]);
-
-	const columns: GridColDef[] = [
-		{
-			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
-			headerName: t("ui.data_grid.master_detail"),
-			renderCell: (params) => (
-				<DetailPanelToggle id={params.id} value={params.value} />
+		return [
+			withLatest(
+				{
+					id: "dcb-admin-ui",
+					version: __APP_VERSION__,
+					releasesUrl: RELEASE_PAGE_LINKS.ADMIN_UI,
+					releaseDate: __APP_RELEASE_DATE__ || undefined,
+				},
+				__APP_VERSION__,
+				{ data: adminLatest.data, isPending: adminLatest.isPending },
 			),
-			renderHeader: () => <DetailPanelHeader />,
-		},
-		{ field: "repository", headerName: "Repository", flex: 1, sortable: false },
-		{
-			field: "latestVersion",
-			headerName: "Latest Version",
-			flex: 1,
-			sortable: false,
-		},
-		{
-			field: "currentVersion",
-			headerName: "Current Version",
-			flex: 1,
-			sortable: false,
-		},
-	];
+			withLatest(
+				serviceRow(serviceInfo, t("common.unknown")),
+				serviceVersionFrom(serviceInfo),
+				{ data: serviceLatest.data, isPending: serviceLatest.isPending },
+			),
+		];
+	}, [
+		serviceInfo,
+		t,
+		adminLatest.data,
+		adminLatest.isPending,
+		serviceLatest.data,
+		serviceLatest.isPending,
+	]);
+
+	const columns: GridColDef[] = useMemo(
+		() => [
+			{
+				...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+				headerName: t("ui.data_grid.master_detail"),
+				renderCell: (params) => <DetailPanelToggle id={params.id} />,
+				renderHeader: () => <DetailPanelHeader />,
+			},
+			{
+				field: "id",
+				headerName: t("environment.component"),
+				flex: 1,
+				sortable: false,
+			},
+			{
+				field: "version",
+				headerName: t("environment.your_version"),
+				flex: 1,
+				sortable: false,
+			},
+			{
+				field: "latestVersion",
+				headerName: t("environment.latest_version"),
+				flex: 1,
+				sortable: false,
+			},
+			{
+				field: "releaseStatus",
+				headerName: t("service.status"),
+				flex: 1,
+				sortable: false,
+			},
+		],
+		[t],
+	);
 
 	return (
 		<DataGrid
 			identifier="versionInfoGrid"
 			type="versionInfo"
 			columns={columns}
-			rows={versionData}
-			loading={loading}
+			rows={rows}
+			loading={false}
 			disableAggregation
 			disableRowGrouping
 			disablePivoting
@@ -161,11 +175,9 @@ const VersionInfo: React.FC = () => {
 			noResultsText={t("ui.data_grid.no_results")}
 			searchText=""
 			paginationModel={{ page: 0, pageSize: 20 }}
-			getDetailPanelContent={({ row }: any) => (
+			getDetailPanelContent={({ row }: { row: VersionRow }) => (
 				<MasterDetail row={row} type="versionInfo" />
 			)}
 		/>
 	);
-};
-
-export default VersionInfo;
+}

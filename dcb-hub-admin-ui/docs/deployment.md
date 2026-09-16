@@ -182,6 +182,14 @@ only by accident: this app sets `userStore` to `localStorage` explicitly, the ot
 none, and oidc-client-ts defaults it to `sessionStorage`. Harmonising that while sharing a
 client is the collision. Both subpaths also need to be in each client's Valid Redirect URIs.
 
+**Every internal link must go through the router.** TanStack Router adds the base to what it
+renders; nothing else does. A plain `href="/mappings/…"`, a raw MUI `Link` with a
+root-relative `href`, or `window.open("/patronRequests/…")` resolves against the origin root —
+outside this app — and on Mobius that sent users into DCB Admin for Libraries (reported against
+2.0). Navigate with `to` on a router link, and pass `appUrl(path)` to `window.open`. ESLint
+fails a root-relative string `href` and a `window.open` without `appUrl` in both repos; it
+cannot see a path held in a variable, so review those.
+
 **Everything else in web storage is namespaced by the base** — `dcb-admin:` here,
 `dcb-admin-for-libraries:` there, and the sign-out purge is prefix-scoped rather than a
 `storage.clear()` that would take the sibling's state with it. The colon is what keeps

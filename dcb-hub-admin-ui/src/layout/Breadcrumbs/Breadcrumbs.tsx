@@ -259,7 +259,7 @@ export default function Breadcrumbs({
 				<Link
 					sx={{ color: "primary.breadcrumbs", fontSize: "0.875rem" }}
 					underline="hover"
-					href="/"
+					to="/"
 					title={t("nav.home")}
 				>
 					{t("nav.home")}

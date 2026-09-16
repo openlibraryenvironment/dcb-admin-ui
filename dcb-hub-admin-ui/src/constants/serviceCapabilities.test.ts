@@ -8,6 +8,8 @@ import {
 	capabilityStatus,
 	meetsServiceVersion,
 	parseServiceVersion,
+	releaseStatus,
+	serviceVersionFrom,
 } from "@constants/serviceCapabilities";
 
 afterEach(() => {
@@ -37,6 +39,68 @@ describe("parseServiceVersion", () => {
 		for (const value of [null, undefined, "", "Unknown", "main", "9.0"]) {
 			expect(parseServiceVersion(value)).toBeNull();
 		}
+	});
+});
+
+describe("serviceVersionFrom", () => {
+	// A production /info from dcb-service 8.71.0, trimmed to the keys read here.
+	const production = {
+		git: {
+			build: { version: "8.71.0" },
+			branch: "HEAD",
+			tags: "v8.71.0",
+			closest: { tag: { name: "v8.71.0", commit: { count: "0" } } },
+		},
+		env: { code: "PROD" },
+	};
+
+	it("reads the build version a real deployment publishes", () => {
+		expect(serviceVersionFrom(production)).toBe("8.71.0");
+		expect(meetsServiceVersion(serviceVersionFrom(production), "8.71.0")).toBe(
+			true,
+		);
+	});
+
+	it("reads a development build", () => {
+		expect(
+			serviceVersionFrom({ git: { build: { version: "9.1.0-SNAPSHOT" } } }),
+		).toBe("9.1.0-SNAPSHOT");
+	});
+
+	it("does not read a top-level version, which /info never has", () => {
+		expect(serviceVersionFrom({ version: "8.71.0" })).toBeNull();
+	});
+
+	it("is null when the payload carries no build version", () => {
+		for (const value of [
+			null,
+			undefined,
+			{},
+			{ git: {} },
+			{ git: { build: { version: "" } } },
+		]) {
+			expect(serviceVersionFrom(value)).toBeNull();
+		}
+	});
+});
+
+describe("releaseStatus", () => {
+	it("treats a release tag and a bare version as the same release", () => {
+		expect(releaseStatus("2.0.0", "v2.0.0")).toBe("current");
+	});
+
+	it("reports a deployment behind the latest release", () => {
+		expect(releaseStatus("8.71.0", "v9.0.0")).toBe("behind");
+	});
+
+	it("reports a development build ahead of the latest release", () => {
+		expect(releaseStatus("9.1.0-SNAPSHOT", "v9.0.0")).toBe("ahead");
+	});
+
+	it("asserts nothing when either side cannot be read", () => {
+		expect(releaseStatus(null, "v9.0.0")).toBe("unknown");
+		expect(releaseStatus("9.0.0", undefined)).toBe("unknown");
+		expect(releaseStatus("Unknown", "v9.0.0")).toBe("unknown");
 	});
 });
 
