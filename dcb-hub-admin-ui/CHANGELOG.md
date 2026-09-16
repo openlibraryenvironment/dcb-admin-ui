@@ -1,3 +1,36 @@
+# [2.1.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v2.0.0...v2.1.0) (2026-09-16)
+
+
+### Bug Fixes
+
+* Ban links from jumping to domain root ([7f043a7](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7f043a73481e3903d4a0b81ca23bdd9c60e0a03a))
+* **ci:** publish to R2 from the release pipeline, not from a tag pipeline ([906d08e](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/906d08e39b0a12471bf156316a9013ef6c872ffb))
+* **export:** survive access token expiry and transient failures on large exports ([313fc40](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/313fc4065844b52f82f005f813fc9dbc514bec90))
+* Fix tests breaking on panel limits ([85a1adf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/85a1adf1e06d49a4925657f5ea9e01c6f5629759))
+* Incorrect versions were being reported in DCB Admin ([aca0416](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/aca0416f6259fdd0469bcf334cfc04223d068cbf))
+* **insights:** the disclosure heading sits with the panels, not above them ([15bc601](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/15bc60112c13b277adab8859debee84e383e1436))
+* **insights:** three accessibility defects the axe gate could not see ([2698783](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/269878342cb8058499ce7b506f049d0e03123dd4))
+* **mappings:** restore the numeric range mappings tabs for Sierra and Polaris ([48340c2](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/48340c2f2b529bbf42a26a49b3570f042429b79b))
+* **release:** bump package.json before committing it, and gate that they agree ([03891bf](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/03891bfc79742c1145ccdd8a5d34f187e0fa679c))
+* The expand button could not be reached by keyboard ([9fe05f6](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9fe05f6210b1ff706986ae23fe50a29c8ea2cf11))
+
+
+### Features
+
+* **cleanup:** check for updates before cleaning up, and offer the override the server allows ([fc5ce34](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/fc5ce345e197fc6c15b2e28ad7395397697921cd))
+* **consortium:** link to discovery's staff settings from the Branding tab ([7804613](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/7804613bceb491fd2583012fe90481d0c1c62b18))
+* **insights:** a group gets the dashboard, scoped to its members ([04e78b4](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/04e78b4539fd441a36303e452eef046c78418f3b))
+* **insights:** a panel that fails says so, and the view change is announced ([06d963c](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/06d963c1ff0fbf139f09a93863735c2354cf149b))
+* **insights:** every figure says where it came from ([9c04225](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/9c042256d26ed36f642ae14175eb8d5f3aa34dbf))
+* **insights:** five headline figures, and the transit legs finally named ([d71e28d](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/d71e28d132c9825c21354b3b70ffae86d51251b4))
+* **insights:** from a figure to the requests behind it, and back ([152e32f](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/152e32f3f656f10cf6610e9c8313160758da0df7))
+* **insights:** six subjects behind a sticky bar, one open at a time ([66ac86a](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/66ac86aff527934d90952c2fa339630fd9212cd3))
+* **insights:** the whole view lives in the URL ([af16ea3](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/af16ea3d51da46f30379a7c00871707141b297ee))
+* **insights:** trends, and the gate repair they forced ([b0db0e5](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/b0db0e5826245ff5e59dd252e34b5e85cf69fbc8))
+* **setup:** offer the console's own themes for the discovery app ([195cadb](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/195cadbca4da961ab1937b9aefb6c6aa867fc558))
+* **setup:** preview the gradient, and make removing a brand image an action ([6527896](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/6527896a2934bb7b4af41a610d7ca87c71fe4972))
+* **setup:** the preview shows the consortium's name where the discovery app now puts it ([67c1b28](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/commit/67c1b28659649241bc5088d56e072c1a80ec46fb))
+
 # [2.0.0](https://gitlab.com/knowledge-integration/libraries/dcb-admin-ui/compare/v1.58.1...v2.0.0) (2026-09-08)
 
 
