@@ -972,6 +972,7 @@
 			"LOANED": "Prestado",
 			"PICKUP_TRANSIT": "En tránsito para su recogida",
 			"RETURN_TRANSIT": "Transporte de devolución",
+			"AWAITING_RETURN_TO_SUPPLIER": "Esperando la devolución al proveedor",
 			"CANCELLED": "Cancelado",
 			"COMPLETED": "Completado",
 			"FINALISED": "Finalizado",

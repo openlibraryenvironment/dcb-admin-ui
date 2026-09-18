@@ -20,6 +20,9 @@ export enum DCBStatus {
 	LOANED, // Currently on loan
 	PICKUP_TRANSIT, // In transit to pickup location
 	RETURN_TRANSIT, // In transit back to owning location from lender
+	// Patron cancelled while the item was out. Records are held intact until the real item is back at
+	// the supplier, then the request cancels and finalises (DCB-2193)
+	AWAITING_RETURN_TO_SUPPLIER,
 	CANCELLED,
 	COMPLETED, // Everything is finished, regardless and ready to be finalised
 	FINALISED, // We've cleaned up everything and this is the end of the line
