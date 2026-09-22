@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
 	changedRowFields,
 	readDeleteOutcome,
+	stripUnsupportedKeys,
 } from "@helpers/actions/entityMutationLogic";
 import { ENTITY_REGISTRY } from "@constants/entityRegistry";
+import { LIBRARY_BRAND_FIELDS } from "@constants/serviceCapabilities";
 
 describe("changedRowFields", () => {
 	it("sends only what changed", () => {
@@ -109,5 +111,48 @@ describe("readDeleteOutcome", () => {
 		expect(readDeleteOutcome({ anything: 1 }, undefined)).toEqual({
 			success: true,
 		});
+	});
+});
+
+/**
+ * The half of R-19 that is about VARIABLES rather than selection sets.
+ *
+ * An input field dcb-service has not heard of fails the whole mutation, so a brand key
+ * sent to 8.71.0 does not lose the brand - it loses the save. Every details page's edit
+ * goes through this one filter.
+ */
+describe("stripUnsupportedKeys", () => {
+	it("drops the keys the deployment cannot accept and keeps the rest", () => {
+		const input = {
+			id: "library-1",
+			fullName: "Riverside",
+			brandLogoUrl: "https://example.invalid/logo.png",
+			defaultThemeName: "openRS",
+			reason: "Rebrand",
+		};
+
+		expect(
+			stripUnsupportedKeys(input, new Set(LIBRARY_BRAND_FIELDS)),
+		).toEqual({
+			id: "library-1",
+			fullName: "Riverside",
+			reason: "Rebrand",
+		});
+	});
+
+	it("drops a key whose value is an explicit clear, not just a missing one", () => {
+		// Blanking is how an administrator removes a mark, so `brandLogoUrl: ""` is a
+		// real value. It still cannot be SENT to a server without the column.
+		expect(
+			stripUnsupportedKeys(
+				{ id: "library-1", brandLogoUrl: "" },
+				new Set(["brandLogoUrl"]),
+			),
+		).toEqual({ id: "library-1" });
+	});
+
+	it("is a no-op when the deployment supports everything", () => {
+		const input = { id: "library-1", brandLogoUrl: "https://example.invalid" };
+		expect(stripUnsupportedKeys(input, new Set())).toEqual(input);
 	});
 });

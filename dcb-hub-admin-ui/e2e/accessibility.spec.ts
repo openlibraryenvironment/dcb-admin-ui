@@ -21,6 +21,7 @@ import libraryCount from "./fixtures-data/library-count.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
 import libraryUsers from "./fixtures-data/library-users.json";
 import libraryUserProvisioning from "./fixtures-data/library-user-provisioning.json";
+import hostLms from "./fixtures-data/host-lms.json";
 
 /**
  * The application-wide accessibility gate — W-1.
@@ -54,6 +55,14 @@ const MOCKS = {
 	LoadLibraryContacts: libraryDetail,
 	LoadLibraryUsers: libraryUsers,
 	LibraryUserProvisioningAvailable: libraryUserProvisioning,
+	LoadLibrary: libraryDetail,
+	LoadLibraryServiceInfo: libraryDetail,
+	LoadHostLms: hostLms,
+	// The profile page mounts the library's mappings grid. Unmocked it 404s against a
+	// preview with no API behind it and the global handler renders the 500 route, so the
+	// scan would measure an error page and pass for the wrong reason.
+	LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
+	LoadLocations: { locations: { totalSize: 0, content: [] } },
 };
 
 /**
@@ -192,6 +201,94 @@ for (const scheme of ["light", "dark"] as const) {
 				await page.getByRole("button", { name: "Actions" }).click();
 				await page.getByRole("menuitem", { name: "Edit" }).click();
 				await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+
+				await expectPaintedScheme(page, scheme);
+				await scanForViolations(page);
+			});
+		});
+	}
+}
+
+/**
+ * The surfaces that only exist once an administrator presses Edit, and the one form that
+ * is a route of its own.
+ *
+ * They are scanned separately from the route table because none of them is reachable by
+ * navigation alone: the Host LMS client config is a generated set of grouped inputs, the
+ * library brand is a select plus two text fields, and `/hostlmss/new` is an autocomplete
+ * over every library. Grouped inputs, selects and autocompletes are where label
+ * association and contrast fail, and none of them was covered by any existing route.
+ */
+const HOST_LMS_ID = "h1h1h1h1-1111-5111-9111-111111111111";
+const LIBRARY_ID = "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22";
+
+const ADMIN_EDIT_SURFACES = [
+	{
+		label: "Host LMS client configuration",
+		path: `/hostlmss/${HOST_LMS_ID}`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+			// The config lives on the second tab, which is the half with the generated
+			// inputs - scanning the general tab would miss every one of them.
+			await page.getByRole("tab", { name: /client config/i }).click();
+			await expect(page.getByLabel(/base url/i)).toBeVisible();
+		},
+	},
+	{
+		label: "library branding",
+		path: `/libraries/${LIBRARY_ID}/branding`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+		},
+	},
+	{
+		// Seven fields became editable here, and the seven that already were had no
+		// accessible name at all: the visible label is a sibling Typography, so an input
+		// without aria-labelledby is unnamed. Never scanned in edit mode before, which is
+		// why it went unnoticed.
+		label: "library profile",
+		path: `/libraries/${LIBRARY_ID}`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+			await expect(page.getByRole("textbox", { name: "Full name" })).toBeVisible();
+		},
+	},
+	{
+		label: "library service",
+		path: `/libraries/${LIBRARY_ID}/service`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+		},
+	},
+	{
+		label: "new Host LMS",
+		path: "/hostlmss/new",
+		open: async (page: Page) => {
+			await expect(page.getByLabel(/^library/i)).toBeVisible();
+		},
+	},
+] as const;
+
+for (const scheme of ["light", "dark"] as const) {
+	for (const surface of ADMIN_EDIT_SURFACES) {
+		test.describe(`WCAG 2.2 AA - ${surface.label}, ${scheme}`, () => {
+			test.use({ colorScheme: scheme });
+
+			test("has no violations", async ({ page }) => {
+				await useAllFeatures(page);
+				await seedAuth(page, { roles: ADMIN_ROLES });
+				await mockGraphQL(page, MOCKS);
+
+				await page.goto(surface.path);
+				await surface.open(page);
 
 				await expectPaintedScheme(page, scheme);
 				await scanForViolations(page);

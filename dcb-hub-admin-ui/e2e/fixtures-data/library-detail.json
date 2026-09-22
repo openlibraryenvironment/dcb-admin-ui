@@ -36,7 +36,13 @@
 				},
 				"secondHostLms": null,
 				"membership": [],
-				"contacts": []
+				"contacts": [],
+				"brandLogoUrl": "https://example.invalid/alpha-logo.png",
+				"brandLogoAlt": "Alpha Test Library",
+				"defaultThemeName": "openRS",
+				"targetLoanToBorrowRatio": "1:1",
+				"principalLabel": "Borrower number",
+				"secretLabel": "Password"
 			}
 		]
 	}

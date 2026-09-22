@@ -40,6 +40,7 @@ import { Route as _authenticatedPatronRequestsCompletedRouteImport } from './rou
 import { Route as _authenticatedPatronRequestsAllRouteImport } from './routes/__authenticated/patronRequests/all'
 import { Route as _authenticatedPatronRequestsActiveRouteImport } from './routes/__authenticated/patronRequests/active'
 import { Route as _authenticatedLocationsLocationIdRouteImport } from './routes/__authenticated/locations/$locationId'
+import { Route as _authenticatedHostlmssNewRouteImport } from './routes/__authenticated/hostlmss/new'
 import { Route as _authenticatedHostlmssHostlmsIdRouteImport } from './routes/__authenticated/hostlmss/$hostlmsId'
 import { Route as _authenticatedConsortiumOnboardingRouteImport } from './routes/__authenticated/consortium/onboarding'
 import { Route as _authenticatedConsortiumInsightsRouteImport } from './routes/__authenticated/consortium/insights'
@@ -72,6 +73,7 @@ import { Route as _authenticatedLibrariesLibraryIdSettingsRouteImport } from './
 import { Route as _authenticatedLibrariesLibraryIdServiceRouteImport } from './routes/__authenticated/libraries/$libraryId/service'
 import { Route as _authenticatedLibrariesLibraryIdInsightsRouteImport } from './routes/__authenticated/libraries/$libraryId/insights'
 import { Route as _authenticatedLibrariesLibraryIdContactsRouteImport } from './routes/__authenticated/libraries/$libraryId/contacts'
+import { Route as _authenticatedLibrariesLibraryIdBrandingRouteImport } from './routes/__authenticated/libraries/$libraryId/branding'
 import { Route as _authenticatedLibrariesLibraryIdAccountsRouteImport } from './routes/__authenticated/libraries/$libraryId/accounts'
 import { Route as _authenticatedGroupsGroupIdSettingsRouteImport } from './routes/__authenticated/groups/$groupId/settings'
 import { Route as _authenticatedGroupsGroupIdInsightsRouteImport } from './routes/__authenticated/groups/$groupId/insights'
@@ -267,6 +269,12 @@ const _authenticatedLocationsLocationIdRoute =
     path: '/locations/$locationId',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedHostlmssNewRoute =
+  _authenticatedHostlmssNewRouteImport.update({
+    id: '/hostlmss/new',
+    path: '/hostlmss/new',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedHostlmssHostlmsIdRoute =
   _authenticatedHostlmssHostlmsIdRouteImport.update({
     id: '/hostlmss/$hostlmsId',
@@ -458,6 +466,12 @@ const _authenticatedLibrariesLibraryIdContactsRoute =
     path: '/libraries/$libraryId/contacts',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedLibrariesLibraryIdBrandingRoute =
+  _authenticatedLibrariesLibraryIdBrandingRouteImport.update({
+    id: '/libraries/$libraryId/branding',
+    path: '/libraries/$libraryId/branding',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedLibrariesLibraryIdAccountsRoute =
   _authenticatedLibrariesLibraryIdAccountsRouteImport.update({
     id: '/libraries/$libraryId/accounts',
@@ -616,6 +630,7 @@ export interface FileRoutesByFullPath {
   '/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
   '/consortium/onboarding': typeof _authenticatedConsortiumOnboardingRoute
   '/hostlmss/$hostlmsId': typeof _authenticatedHostlmssHostlmsIdRoute
+  '/hostlmss/new': typeof _authenticatedHostlmssNewRoute
   '/locations/$locationId': typeof _authenticatedLocationsLocationIdRoute
   '/patronRequests/active': typeof _authenticatedPatronRequestsActiveRoute
   '/patronRequests/all': typeof _authenticatedPatronRequestsAllRoute
@@ -640,6 +655,7 @@ export interface FileRoutesByFullPath {
   '/groups/$groupId/insights': typeof _authenticatedGroupsGroupIdInsightsRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
+  '/libraries/$libraryId/branding': typeof _authenticatedLibrariesLibraryIdBrandingRoute
   '/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -701,6 +717,7 @@ export interface FileRoutesByTo {
   '/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
   '/consortium/onboarding': typeof _authenticatedConsortiumOnboardingRoute
   '/hostlmss/$hostlmsId': typeof _authenticatedHostlmssHostlmsIdRoute
+  '/hostlmss/new': typeof _authenticatedHostlmssNewRoute
   '/locations/$locationId': typeof _authenticatedLocationsLocationIdRoute
   '/patronRequests/active': typeof _authenticatedPatronRequestsActiveRoute
   '/patronRequests/all': typeof _authenticatedPatronRequestsAllRoute
@@ -725,6 +742,7 @@ export interface FileRoutesByTo {
   '/groups/$groupId/insights': typeof _authenticatedGroupsGroupIdInsightsRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
+  '/libraries/$libraryId/branding': typeof _authenticatedLibrariesLibraryIdBrandingRoute
   '/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -788,6 +806,7 @@ export interface FileRoutesById {
   '/__authenticated/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
   '/__authenticated/consortium/onboarding': typeof _authenticatedConsortiumOnboardingRoute
   '/__authenticated/hostlmss/$hostlmsId': typeof _authenticatedHostlmssHostlmsIdRoute
+  '/__authenticated/hostlmss/new': typeof _authenticatedHostlmssNewRoute
   '/__authenticated/locations/$locationId': typeof _authenticatedLocationsLocationIdRoute
   '/__authenticated/patronRequests/active': typeof _authenticatedPatronRequestsActiveRoute
   '/__authenticated/patronRequests/all': typeof _authenticatedPatronRequestsAllRoute
@@ -812,6 +831,7 @@ export interface FileRoutesById {
   '/__authenticated/groups/$groupId/insights': typeof _authenticatedGroupsGroupIdInsightsRoute
   '/__authenticated/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/__authenticated/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
+  '/__authenticated/libraries/$libraryId/branding': typeof _authenticatedLibrariesLibraryIdBrandingRoute
   '/__authenticated/libraries/$libraryId/contacts': typeof _authenticatedLibrariesLibraryIdContactsRoute
   '/__authenticated/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/__authenticated/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -875,6 +895,7 @@ export interface FileRouteTypes {
     | '/consortium/insights'
     | '/consortium/onboarding'
     | '/hostlmss/$hostlmsId'
+    | '/hostlmss/new'
     | '/locations/$locationId'
     | '/patronRequests/active'
     | '/patronRequests/all'
@@ -899,6 +920,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/insights'
     | '/groups/$groupId/settings'
     | '/libraries/$libraryId/accounts'
+    | '/libraries/$libraryId/branding'
     | '/libraries/$libraryId/contacts'
     | '/libraries/$libraryId/insights'
     | '/libraries/$libraryId/service'
@@ -960,6 +982,7 @@ export interface FileRouteTypes {
     | '/consortium/insights'
     | '/consortium/onboarding'
     | '/hostlmss/$hostlmsId'
+    | '/hostlmss/new'
     | '/locations/$locationId'
     | '/patronRequests/active'
     | '/patronRequests/all'
@@ -984,6 +1007,7 @@ export interface FileRouteTypes {
     | '/groups/$groupId/insights'
     | '/groups/$groupId/settings'
     | '/libraries/$libraryId/accounts'
+    | '/libraries/$libraryId/branding'
     | '/libraries/$libraryId/contacts'
     | '/libraries/$libraryId/insights'
     | '/libraries/$libraryId/service'
@@ -1046,6 +1070,7 @@ export interface FileRouteTypes {
     | '/__authenticated/consortium/insights'
     | '/__authenticated/consortium/onboarding'
     | '/__authenticated/hostlmss/$hostlmsId'
+    | '/__authenticated/hostlmss/new'
     | '/__authenticated/locations/$locationId'
     | '/__authenticated/patronRequests/active'
     | '/__authenticated/patronRequests/all'
@@ -1070,6 +1095,7 @@ export interface FileRouteTypes {
     | '/__authenticated/groups/$groupId/insights'
     | '/__authenticated/groups/$groupId/settings'
     | '/__authenticated/libraries/$libraryId/accounts'
+    | '/__authenticated/libraries/$libraryId/branding'
     | '/__authenticated/libraries/$libraryId/contacts'
     | '/__authenticated/libraries/$libraryId/insights'
     | '/__authenticated/libraries/$libraryId/service'
@@ -1342,6 +1368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedLocationsLocationIdRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/hostlmss/new': {
+      id: '/__authenticated/hostlmss/new'
+      path: '/hostlmss/new'
+      fullPath: '/hostlmss/new'
+      preLoaderRoute: typeof _authenticatedHostlmssNewRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/hostlmss/$hostlmsId': {
       id: '/__authenticated/hostlmss/$hostlmsId'
       path: '/hostlmss/$hostlmsId'
@@ -1566,6 +1599,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedLibrariesLibraryIdContactsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/libraries/$libraryId/branding': {
+      id: '/__authenticated/libraries/$libraryId/branding'
+      path: '/libraries/$libraryId/branding'
+      fullPath: '/libraries/$libraryId/branding'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdBrandingRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/libraries/$libraryId/accounts': {
       id: '/__authenticated/libraries/$libraryId/accounts'
       path: '/libraries/$libraryId/accounts'
@@ -1756,6 +1796,7 @@ interface _authenticatedRouteChildren {
   _authenticatedConsortiumInsightsRoute: typeof _authenticatedConsortiumInsightsRoute
   _authenticatedConsortiumOnboardingRoute: typeof _authenticatedConsortiumOnboardingRoute
   _authenticatedHostlmssHostlmsIdRoute: typeof _authenticatedHostlmssHostlmsIdRoute
+  _authenticatedHostlmssNewRoute: typeof _authenticatedHostlmssNewRoute
   _authenticatedLocationsLocationIdRoute: typeof _authenticatedLocationsLocationIdRoute
   _authenticatedPatronRequestsActiveRoute: typeof _authenticatedPatronRequestsActiveRoute
   _authenticatedPatronRequestsAllRoute: typeof _authenticatedPatronRequestsAllRoute
@@ -1780,6 +1821,7 @@ interface _authenticatedRouteChildren {
   _authenticatedGroupsGroupIdInsightsRoute: typeof _authenticatedGroupsGroupIdInsightsRoute
   _authenticatedGroupsGroupIdSettingsRoute: typeof _authenticatedGroupsGroupIdSettingsRoute
   _authenticatedLibrariesLibraryIdAccountsRoute: typeof _authenticatedLibrariesLibraryIdAccountsRoute
+  _authenticatedLibrariesLibraryIdBrandingRoute: typeof _authenticatedLibrariesLibraryIdBrandingRoute
   _authenticatedLibrariesLibraryIdContactsRoute: typeof _authenticatedLibrariesLibraryIdContactsRoute
   _authenticatedLibrariesLibraryIdInsightsRoute: typeof _authenticatedLibrariesLibraryIdInsightsRoute
   _authenticatedLibrariesLibraryIdServiceRoute: typeof _authenticatedLibrariesLibraryIdServiceRoute
@@ -1834,6 +1876,7 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedConsortiumOnboardingRoute:
     _authenticatedConsortiumOnboardingRoute,
   _authenticatedHostlmssHostlmsIdRoute: _authenticatedHostlmssHostlmsIdRoute,
+  _authenticatedHostlmssNewRoute: _authenticatedHostlmssNewRoute,
   _authenticatedLocationsLocationIdRoute:
     _authenticatedLocationsLocationIdRoute,
   _authenticatedPatronRequestsActiveRoute:
@@ -1867,6 +1910,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedGroupsGroupIdSettingsRoute,
   _authenticatedLibrariesLibraryIdAccountsRoute:
     _authenticatedLibrariesLibraryIdAccountsRoute,
+  _authenticatedLibrariesLibraryIdBrandingRoute:
+    _authenticatedLibrariesLibraryIdBrandingRoute,
   _authenticatedLibrariesLibraryIdContactsRoute:
     _authenticatedLibrariesLibraryIdContactsRoute,
   _authenticatedLibrariesLibraryIdInsightsRoute:

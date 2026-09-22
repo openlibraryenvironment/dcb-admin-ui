@@ -24,20 +24,18 @@ import {
  * A note in a CLAUDE.md saying "remember to flag v9-only fields" prevents none of it.
  * This does, on the next one as well as this one, in milliseconds and with no server.
  *
- * <h2>The two schemas</h2>
+ * <h2>The schemas</h2>
  *
- * <h2>The three schemas</h2>
+ * `schema.graphqls` is what the application targets - see that file's own header.
+ * `schema.v8.71.0.graphqls` is the oldest deployment we support, taken verbatim from that
+ * tag, which DCB Admin has to keep running against while v9 works its way to production.
  *
- * `schema.graphqls` is what the application targets: dcb-service main plus the
- * unreleased `auditIncidence` - see that file's own header. `schema.v8.71.0.graphqls` is
- * the release before 9.0.0, taken verbatim from that tag, which the next DCB Admin
- * release also has to run against while v9 works its way to production.
- *
- * `schema.v9.0.0.graphqls` is the middle case and it is the one that was missing. A
- * deployment on the 9.0.0 RELEASE has the brand columns and does not have `supportUrl` or
- * `maxLocalHolds`, which are on main only. Neither of the other two passes can catch a
- * field gated at the wrong threshold: all-flags-on validates against a schema that has
- * everything, and all-flags-off validates against one that has nothing.
+ * Between them sit the release schemas, one pass each. They are the cases neither end can
+ * catch: all-flags-on validates against a schema that has everything and all-flags-off
+ * against one that has nothing, so a field gated at the wrong THRESHOLD is invisible to
+ * both. 9.0.0 has the brand columns and not `maxLocalHolds`; 9.1.0 has `maxLocalHolds`
+ * and the provisioning API and not `supportUrl`. 9.0.0 is kept although nothing deploys
+ * it, because it is the release `consortium_branding` names.
  *
  * Both passes run the SAME documents, with the feature flags in the state that
  * deployment would have. The flags change the documents themselves - see
@@ -51,7 +49,6 @@ const schemaFrom = (file: string) =>
 	buildSchema(readFileSync(path.resolve(repoRoot, file), "utf8"));
 
 const CURRENT = schemaFrom("schema.graphqls");
-const RELEASE_9 = schemaFrom("schema.v9.0.0.graphqls");
 const LEGACY = schemaFrom("schema.v8.71.0.graphqls");
 
 /**
@@ -84,17 +81,30 @@ const flagsFor = (capabilities: readonly { flag: string }[]) =>
 const ALL_FLAGS_ON = flagsFor(SERVICE_CAPABILITIES);
 
 /**
- * The flags a deployment on the 9.0.0 RELEASE would have: every capability that release
+ * The flags a deployment on a given RELEASE would have: every capability that release
  * actually serves, and none that landed after it.
  *
- * `meetsServiceVersion("9.0.0", null)` is false, so a capability with no release - which
- * is what `since: null` means - is off here. That is the claim under test.
+ * `meetsServiceVersion(version, null)` is false, so a capability with no release - which
+ * is what `since: null` means - is off in every pass. That is the claim under test.
  */
-const RELEASE_9_CAPABILITIES = SERVICE_CAPABILITIES.filter(
-	(entry) => meetsServiceVersion("9.0.0", entry.since) === true,
-);
+const capabilitiesAt = (version: string) =>
+	SERVICE_CAPABILITIES.filter(
+		(entry) => meetsServiceVersion(version, entry.since) === true,
+	);
 
-const RELEASE_9_FLAGS = flagsFor(RELEASE_9_CAPABILITIES);
+/**
+ * One pass per release we hold a schema for. A list, not four copied blocks: adding the
+ * next release is a row here, and the "not vacuous" assertion below then covers it too.
+ */
+const RELEASE_PASSES = ["9.0.0", "9.1.0"].map((version) => {
+	const capabilities = capabilitiesAt(version);
+	return {
+		version,
+		schema: schemaFrom(`schema.v${version}.graphqls`),
+		capabilities,
+		flags: flagsFor(capabilities),
+	};
+});
 
 // Fragments are excluded: they are interpolated into the queries below, which is where
 // they get validated. A fragment definition on its own fails NoUnusedFragments.
@@ -184,15 +194,16 @@ describe("documents validate against the dcb-service they target", () => {
 		},
 	);
 
-	it.each(
-		files.filter((file) => {
-			const gate = FLAG_ONLY[shortName(file)];
-			return !gate || gate in RELEASE_9_FLAGS;
-		}),
-	)(
-		"%s is valid against dcb-service 9.0.0 (the release's flags)",
-		async (file) => {
-			vi.stubGlobal("window", { __APP_ENV__: RELEASE_9_FLAGS });
+	for (const { version, schema, capabilities, flags } of RELEASE_PASSES) {
+		it.each(
+			files.filter((file) => {
+				const gate = FLAG_ONLY[shortName(file)];
+				return !gate || gate in flags;
+			}),
+		)(`%s is valid against dcb-service ${version} (the release's flags)`, async (
+			file,
+		) => {
+			vi.stubGlobal("window", { __APP_ENV__: flags });
 
 			const documents = documentsFrom(
 				(await modules[file]()) as Record<string, unknown>,
@@ -201,21 +212,21 @@ describe("documents validate against the dcb-service they target", () => {
 			documents.forEach((document) =>
 				assertValid(
 					document,
-					RELEASE_9,
-					`${file} against schema.v9.0.0.graphqls`,
+					schema,
+					`${file} against schema.v${version}.graphqls`,
 				),
 			);
-		},
-	);
+		});
 
-	it("the 9.0.0 pass is not vacuous", () => {
-		// It would be if every capability were `since: null`, or if meetsServiceVersion
-		// started returning null for a release we hold a schema for.
-		expect(RELEASE_9_CAPABILITIES.length).toBeGreaterThan(0);
-		expect(RELEASE_9_CAPABILITIES.length).toBeLessThan(
-			SERVICE_CAPABILITIES.length,
-		);
-	});
+		it(`the ${version} pass is not vacuous`, () => {
+			// It would be if every capability were `since: null`, or if
+			// meetsServiceVersion started returning null for a release we hold a schema
+			// for. The upper bound is what stops a release pass silently becoming a
+			// second copy of the all-flags-on pass.
+			expect(capabilities.length).toBeGreaterThan(0);
+			expect(capabilities.length).toBeLessThan(SERVICE_CAPABILITIES.length);
+		});
+	}
 
 	it("every flag-only exclusion names a flag that exists", () => {
 		const declared = readFileSync(

@@ -1,0 +1,24 @@
+{
+	"hostLms": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "h1h1h1h1-1111-5111-9111-111111111111",
+				"code": "alpha-lms",
+				"name": "Alpha LMS",
+				"lmsClientClass": "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+				"itemSuppressionRulesetName": "alpha-items",
+				"suppressionRulesetName": "alpha-bibs",
+				"clientConfig": {
+					"base-url": "https://sierra.alpha.example",
+					"key": "alpha-key",
+					"secret": "alpha-secret",
+					"page-size": 100,
+					"ingest": true,
+					"default-agency-code": "alpha",
+					"alpha-bespoke-flag": "kept"
+				}
+			}
+		]
+	}
+}

@@ -51,6 +51,20 @@ export const CONSORTIUM_SUPPORT_FIELDS = ["supportUrl"] as const;
  */
 export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
 
+/**
+ * The per-library brand, added by the same 9.0.0 migration as the consortium's.
+ *
+ * Three fields, not six: a library has no landing hero to put a background behind and no
+ * patron welcome of its own, and `patronWebsite` is already the logo's link target, so
+ * there is no second URL. Read by dcb-admin-for-libraries' own library form - changing
+ * this list is a cross-repo change.
+ */
+export const LIBRARY_BRAND_FIELDS = [
+	"brandLogoUrl",
+	"brandLogoAlt",
+	"defaultThemeName",
+] as const;
+
 /** Their pre-migration equivalents, still present on dcb-service 8.71.0. */
 export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
 	"headerImageUrl",
@@ -76,9 +90,10 @@ export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
  *
  * <h2>Why there is no single "v9" flag</h2>
  *
- * Read the `since` column. Three of these arrived in 9.0.0; two are on dcb-service main
- * and in no release; one is in no dcb-service anywhere. One boolean would be a lie about
- * three of them, and turning it on at the v9 upgrade would break all three.
+ * Read the `since` column. It holds three different answers - 9.0.0, 9.1.0 and null -
+ * and one boolean cannot carry three thresholds. Switched on at the v9 upgrade it would
+ * be a lie about every row above 9.0.0, and each of those fails the whole operation
+ * rather than degrading a panel.
  */
 
 /** A GraphQL type name to the fields a capability adds to it. */
@@ -118,6 +133,10 @@ export interface ServiceCapability {
 
 export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 	{
+		// The library's brand is on this row rather than one of its own because the
+		// THRESHOLD is the same - V9_0_004 added both. A second row would mean a second
+		// flag, and two flags that can never sensibly differ are two chances to set one
+		// of them wrong. The rows below are separate because their thresholds differ.
 		id: "consortium_branding",
 		flag: "VITE_FEATURE_CONSORTIUM_BRANDING",
 		enabled: isConsortiumBrandingEnabled,
@@ -125,6 +144,8 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {
 			Consortium: CONSORTIUM_BRAND_FIELDS,
 			UpdateConsortiumInput: CONSORTIUM_BRAND_FIELDS,
+			Library: LIBRARY_BRAND_FIELDS,
+			UpdateLibraryInput: LIBRARY_BRAND_FIELDS,
 		},
 		// The pre-migration columns. Read, never written: the branding form is hidden
 		// before 9.0.0, so nothing sends these.
@@ -166,21 +187,18 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
-		// On dcb-service MAIN, and in no release: 8.71.0 does not have it and neither does
-		// the 9.0.0 tag. `since` stays null until a release ships it - see the test below,
-		// which will say so. Exactly why the flags are per capability rather than per
-		// release.
+		// Shipped in 9.1.0. It carried `since: null` while the work sat on main, and the
+		// claim outlived the release by six days because the 9.1.0 schema was not
+		// committed here - the test below can only compare against releases it holds.
 		id: "library_user_provisioning",
 		flag: "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 		enabled: isLibraryUserProvisioningEnabled,
-		since: null,
+		since: "9.1.0",
 		// Whole ROOT fields, so there is nothing here for the selection builder to do -
 		// the documents are gated at the route instead. They are listed anyway, and
 		// `Query`/`Mutation` are types like any other, because listing them is what makes
-		// `since: null` a CHECKED claim: serviceCapabilities.test.ts asserts these exist
-		// in the target schema and in none of the releases we hold. The day somebody
-		// commits the schema of the release that ships them, that test fails and says to
-		// set `since` - which is the whole reason this is a registry and not a comment.
+		// the `since` a CHECKED claim: serviceCapabilities.test.ts asserts these exist in
+		// 9.1.0 and in no release before it.
 		fields: {
 			Query: ["libraryUsers", "libraryUserProvisioningAvailable"],
 			Mutation: [
@@ -191,13 +209,13 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// On dcb-service MAIN as of 1eb37378c, and in no release - not 8.71.0, not the
-		// 9.0.0 tag. LibraryInput carries it too, but nothing in this app sends that field
-		// on a library create, so only the two types that are actually written appear here.
+		// Shipped in 9.1.0, by V9_0_007__agency_max_local_holds.sql. LibraryInput carries
+		// it too, but nothing in this app sends that field on a library create, so only
+		// the two types that are actually written appear here.
 		id: "local_holds",
 		flag: "VITE_FEATURE_LOCAL_HOLDS",
 		enabled: isLocalHoldsEnabled,
-		since: null,
+		since: "9.1.0",
 		fields: {
 			Agency: LOCAL_HOLDS_FIELDS,
 			UpdateAgencyInput: LOCAL_HOLDS_FIELDS,

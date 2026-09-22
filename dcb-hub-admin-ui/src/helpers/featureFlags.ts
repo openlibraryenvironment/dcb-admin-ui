@@ -82,15 +82,12 @@ export const isNcipOnboardingEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_NCIP_ONBOARDING");
 
 /**
- * DCB Admin for Libraries account provisioning — dcb-service AFTER 9.0.0.
+ * DCB Admin for Libraries account provisioning — dcb-service 9.1.0 and later.
  *
  * Note the threshold: libraryUsers, libraryUserProvisioningAvailable,
- * provisionLibraryUser, setLibraryUserEnabled and resendLibraryUserInvite are on
- * dcb-service MAIN (merged as 43c7be56d) and in NO RELEASE - not 8.71.0, not the 9.0.0
- * tag. So this is on in a development environment tracking main and off everywhere else,
- * which is why there is no single "dcb-service is v9" flag: it would be a lie about this
- * feature and about the audit explorer below, and turning it on at the v9 upgrade would
- * break both.
+ * provisionLibraryUser, setLibraryUserEnabled and resendLibraryUserInvite shipped in
+ * 9.1.0. They are in neither 8.71.0 nor the 9.0.0 tag, which is why this is not the same
+ * flag as the branding one below - 9.0.0 has the brand columns and none of these.
  *
  * Like the brand flag, this one gates a DOCUMENT: the fields are absent from 9.0.0's
  * schema too, so the query fails validation there as well.
@@ -113,10 +110,10 @@ export const isAuditExplorerEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_AUDIT_EXPLORER");
 
 /**
- * Per-agency maximum local holds — dcb-service main, and no release.
+ * Per-agency maximum local holds — dcb-service 9.1.0 and later.
  *
  * `maxLocalHolds` was added to Agency, UpdateAgencyInput and LibraryInput by
- * V9_0_007__agency_max_local_holds.sql, merged as 1eb37378c. It is in neither 8.71.0 nor
+ * V9_0_007__agency_max_local_holds.sql and shipped in 9.1.0. It is in neither 8.71.0 nor
  * the 9.0.0 tag, so selecting it against either is a validation error that fails the whole
  * operation - LoadLibraryBasics and UpdateAgency both, which is the library settings tab.
  *

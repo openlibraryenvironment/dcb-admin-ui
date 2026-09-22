@@ -36,7 +36,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ModeSelectionStep from "./steps/ModeSelectionStep";
 import HostLmsStep from "./steps/HostLmsStep";
 import HostLmsSelectStep from "./steps/HostLmsSelectStep";
-import HostLmsResultStep from "./steps/HostLmsResultStep";
+import HostLmsVerification from "@components/HostLmsVerification/HostLmsVerification";
 import { ProfileStep } from "./steps/ProfileStep";
 import ContactsStep from "./steps/ContactsStep";
 import GroupStep from "./steps/GroupStep";
@@ -302,7 +302,7 @@ export default function NewLibrary({
 	const { mutateAsync: updateLibrary, isPending: isLibraryUpdatePending } =
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
-				gqlClient.request<any>(updateLibraryMutation, variables),
+				gqlClient.request<any>(updateLibraryMutation(), variables),
 			onSuccess: invalidateLibraryCaches,
 		});
 
@@ -650,7 +650,7 @@ export default function NewLibrary({
 				return <HostLmsSelectStep />;
 			case "hostLmsResult":
 				return (
-					<HostLmsResultStep
+					<HostLmsVerification
 						result={hostLmsResult}
 						isVerifying={isHostLmsPending}
 					/>

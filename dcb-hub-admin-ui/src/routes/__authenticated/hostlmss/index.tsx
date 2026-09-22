@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useAuth } from "react-oidc-context";
+import { Add } from "@mui/icons-material";
 import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -56,6 +58,8 @@ export const Route = createFileRoute("/__authenticated/hostlmss/")({
 
 function HostLmss() {
 	const { t } = useTranslation();
+	const auth = useAuth();
+	const navigate = useNavigate();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 
@@ -148,8 +152,23 @@ function HostLmss() {
 		[customColumns, t],
 	);
 
+	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
+	const isAnAdmin =
+		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
+
 	return (
-		<PageContainer title={t("nav.hostlmss")}>
+		<PageContainer
+			title={t("nav.hostlmss")}
+			pageActions={[
+				{
+					key: "new",
+					onClick: () => navigate({ to: "/hostlmss/new" }),
+					disabled: !isAnAdmin,
+					label: t("hostlms.new_host_lms.title"),
+					startIcon: <Add />,
+				},
+			]}
+		>
 			<DataGrid
 				identifier={gridId}
 				type={"hostlmss"}

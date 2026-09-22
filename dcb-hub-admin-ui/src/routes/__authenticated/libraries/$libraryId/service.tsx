@@ -1,17 +1,23 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup";
+import { isEmpty } from "lodash";
 import {
+	Button,
 	Grid,
 	Stack,
+	TextField,
 	Typography,
 	Divider,
 	AccordionSummary,
 	useTheme,
 } from "@mui/material";
-import { Delete, ExpandMore } from "@mui/icons-material";
+import { Cancel, Delete, Edit, ExpandMore, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -21,6 +27,8 @@ import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import PrivateData from "@components/PrivateData/PrivateData";
 import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
+import Confirmation from "@components/Confirmation/Confirmation";
+import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 import {
 	StyledAccordion,
 	StyledAccordionDetails,
@@ -29,7 +37,10 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { getILS } from "@helpers/getILS";
+import { handleEdit } from "@helpers/actions/editAndDeleteActions";
+import { formatChangedFields } from "@helpers/formatChangedFields";
 
 import { getLibraryServiceInfo } from "@queries/getLibraryServiceInfo";
 import type { LoadLibraryServiceInfoQueryVariables } from "@generated/graphql";
@@ -53,6 +64,9 @@ function Service() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const libraryMutation = useEntityMutation("library");
+
+	const firstEditableFieldRef = useRef<HTMLInputElement | null>(null);
+	const [editMode, setEditMode] = useState(false);
 
 	const [expandedAccordions, setExpandedAccordions] = useState({
 		bib1: false,
@@ -81,6 +95,60 @@ function Service() {
 	});
 
 	const library = data?.libraries?.content?.[0];
+
+	/**
+	 * The two fields on this page that belong to the LIBRARY. Everything else here is
+	 * the Host LMS, which is edited on its own page - one mutation per form, so a save
+	 * cannot half-succeed across two records.
+	 */
+	const validationSchema = Yup.object().shape({
+		discoverySystem: Yup.string().trim().max(200),
+		patronWebsite: Yup.string().trim().max(200),
+	});
+
+	const {
+		control,
+		handleSubmit,
+		reset,
+		formState: { errors, isDirty },
+	} = useForm({
+		resolver: yupResolver(validationSchema),
+		mode: "onChange",
+		values: {
+			discoverySystem: library?.discoverySystem ?? "",
+			patronWebsite: library?.patronWebsite ?? "",
+		},
+	});
+
+	const {
+		showUnsavedChangesModal,
+		handleKeepEditing,
+		handleLeaveWithoutSaving,
+	} = useUnsavedChangesWarning(isDirty);
+
+	const onSubmit = (formData: Record<string, string>) => {
+		const changedFields = Object.keys(formData).reduce<Record<string, string>>(
+			(changed, key) => {
+				if (formData[key] !== (library?.[key] ?? "")) changed[key] = formData[key];
+				return changed;
+			},
+			{},
+		);
+
+		if (Object.keys(changedFields).length === 0) return setEditMode(false);
+
+		libraryMutation.requestFormEdit({
+			id: library.id,
+			name: library.fullName,
+			changedFields,
+			changeSummary: formatChangedFields(changedFields, library),
+			onSuccess: () => {
+				setEditMode(false);
+				reset(undefined, { keepValues: false });
+			},
+		});
+	};
+
 	const firstHostLms = library?.agency?.hostLms;
 	const secondHostLms = library?.secondHostLms;
 	const ils = getILS(firstHostLms?.lmsClientClass);
@@ -134,18 +202,53 @@ function Service() {
 			/>
 		);
 
+	const deleteAction = libraryMutation.buildDeleteAction({
+		id: libraryId,
+		name: library?.fullName,
+		redirect: "/libraries",
+		disabled: !isAnAdmin,
+		icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
+	});
+
+	const viewModeActions = [
+		{
+			key: "edit",
+			// eslint-disable-next-line react-hooks/refs -- handleEdit only reads the ref inside the returned click handler (via requestAnimationFrame), never during render
+			onClick: handleEdit(setEditMode, firstEditableFieldRef),
+			disabled: !isAnAdmin,
+			label: t("ui.data_grid.edit"),
+			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
+		},
+		deleteAction,
+	];
+
+	const editModeActions = [
+		<Button
+			key="save"
+			startIcon={<Save />}
+			onClick={handleSubmit(onSubmit)}
+			disabled={!isEmpty(errors) || !isDirty}
+		>
+			{t("ui.data_grid.save")}
+		</Button>,
+		<Button
+			key="cancel"
+			startIcon={<Cancel />}
+			onClick={() => {
+				setEditMode(false);
+				reset();
+			}}
+		>
+			{t("ui.data_grid.cancel")}
+		</Button>,
+		<MoreActionsMenu key="more" actions={[deleteAction]} />,
+	];
+
 	return (
 		<PageContainer
 			title={library.fullName}
-			pageActions={[
-				libraryMutation.buildDeleteAction({
-					id: libraryId,
-					name: library?.fullName,
-					redirect: "/libraries",
-					disabled: !isAnAdmin,
-					icon: <Delete htmlColor={theme.palette.primary.exclamationIcon} />,
-				}),
-			]}
+			pageActions={editMode ? editModeActions : viewModeActions}
+			mode={editMode ? "edit" : "view"}
 		>
 			<Grid
 				container
@@ -187,22 +290,77 @@ function Service() {
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.discoverySystem ? "error" : "primary.attributeTitle"
+							}
+							id="label-discovery-system"
+						>
 							{t("libraries.service.systems.discovery")}
 						</Typography>
-						<RenderAttribute attribute={library.discoverySystem} />
+						<Controller
+							name="discoverySystem"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										inputRef={firstEditableFieldRef}
+										fullWidth
+										error={!!errors.discoverySystem}
+										slotProps={{
+											htmlInput: {
+												"aria-labelledby": "label-discovery-system",
+											},
+										}}
+										helperText={errors.discoverySystem?.message as string}
+									/>
+								) : (
+									<RenderAttribute attribute={library.discoverySystem} />
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							color={errors.patronWebsite ? "error" : "primary.attributeTitle"}
+							id="label-patron-website"
+						>
 							{t("libraries.service.systems.patron_site")}
 						</Typography>
-						{library.patronWebsite ? (
-							<RenderAttribute attribute={library.patronWebsite} type="url" />
-						) : (
-							<Typography variant="attributeText">-</Typography>
-						)}
+						<Controller
+							name="patronWebsite"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.patronWebsite}
+										slotProps={{
+											htmlInput: {
+												"aria-labelledby": "label-patron-website",
+											},
+										}}
+										helperText={
+											(errors.patronWebsite?.message as string) ??
+											t("libraries.service.systems.patron_site_help")
+										}
+									/>
+								) : library.patronWebsite ? (
+									<RenderAttribute
+										attribute={library.patronWebsite}
+										type="url"
+									/>
+								) : (
+									<Typography variant="attributeText">-</Typography>
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -564,6 +722,14 @@ function Service() {
 				)}
 			</Grid>
 			<EntityMutationDialogs {...libraryMutation.dialogProps} />
+			{/* Not an entity mutation: this one guards navigation, not data. */}
+			<Confirmation
+				open={showUnsavedChangesModal}
+				onClose={handleKeepEditing}
+				onConfirm={handleLeaveWithoutSaving}
+				action="unsaved"
+				entityName={library.fullName}
+			/>
 		</PageContainer>
 	);
 }

@@ -103,7 +103,7 @@ export default function ExpeditedCheckout({
 		queryFn: async () =>
 			request(
 				cfg.VITE_DCB_API_BASE + "/graphql",
-				getLibrary,
+				getLibrary(),
 				{
 					query: "agencyCode:" + staffAgencyCode,
 					pageno: 0,

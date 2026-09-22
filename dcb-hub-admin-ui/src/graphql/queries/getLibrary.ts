@@ -1,8 +1,15 @@
 import { gql } from "graphql-request";
+
+import { capabilitySelection } from "@helpers/capabilityFields";
+
 // Library
 // This query fetches all information about a Library from DCB.
 // The main place this is used is the individual library page.
-export const getLibrary = gql`
+//
+// A FUNCTION, not a constant: the brand fields are absent from UpdateLibraryInput and
+// Library before dcb-service 9.0.0, and an undeclared field fails the whole operation.
+// See @helpers/capabilityFields for why the flag cannot be read at module scope.
+export const getLibrary = () => gql`
 	query LoadLibrary($query: String!) {
 		libraries(query: $query) {
 			content {
@@ -20,9 +27,11 @@ export const getLibrary = gql`
 				discoverySystem
 				type
 				backupDowntimeSchedule
+				targetLoanToBorrowRatio
 				hostLmsConfiguration
 				principalLabel
 				secretLabel
+				${capabilitySelection("consortium_branding", "Library")}
 				agency {
 					id
 					code

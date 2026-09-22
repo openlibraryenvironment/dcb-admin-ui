@@ -11,6 +11,7 @@ import { deleteReferenceValueMapping } from "@mutations/deleteReferenceValueMapp
 import { updateNumericRangeMapping } from "@mutations/updateNumericRangeMapping";
 import { deleteNumericRangeMapping } from "@mutations/deleteNumericRangeMapping";
 import { updateFunctionalSettingQuery } from "@mutations/updateFunctionalSetting";
+import { updateHostLmsMutation } from "@mutations/updateHostLms";
 
 /**
  * Extra identifiers a delete needs beyond the entity's own id. Contacts are
@@ -81,7 +82,8 @@ export type EntityKey =
 	| "libraryContact"
 	| "referenceValueMapping"
 	| "numericRangeMapping"
-	| "functionalSetting";
+	| "functionalSetting"
+	| "hostLms";
 
 /**
  * Does a cached query belong to this entity, and so need invalidating after it
@@ -206,6 +208,18 @@ export const ENTITY_REGISTRY: Record<EntityKey, EntityDefinition> = {
 		buildDeleteId: byId,
 		keyPrefixes: ["numericRangeMapping", "allNumericRange", "mappings"],
 		nameKey: "mappings.num_range_one",
+	},
+	// dcb-service has no deleteHostLms, so there is no deleteMutation and the page
+	// gets no delete button. Nor is the grid given processRowUpdate: a Host LMS is
+	// edited on its own page, where the client config's required keys can be asked
+	// for as a set and re-verified together.
+	hostLms: {
+		updateMutation: updateHostLmsMutation,
+		updateOperation: "updateHostLms",
+		buildUpdateId: byId,
+		buildDeleteId: byId,
+		keyPrefixes: ["hostLms", "hostlms", "LoadHostLms", "libraries", "library"],
+		nameKey: "hostlms.hostlms_one",
 	},
 	// Functional settings are created and toggled, never deleted - hence no
 	// deleteMutation, which is what makes the actions column drop the button.
