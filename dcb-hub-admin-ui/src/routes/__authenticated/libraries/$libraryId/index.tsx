@@ -117,6 +117,13 @@ function LibraryProfile() {
 			.max(32),
 		backupDowntimeSchedule: Yup.string().trim().max(200),
 		supportHours: Yup.string().trim().max(200),
+		// The column widths dcb-service's Library declares. Refused here rather than by
+		// Postgres, which answers a 200-character overrun with a 500.
+		address: Yup.string().trim().max(200),
+		type: Yup.string().trim().max(200),
+		targetLoanToBorrowRatio: Yup.string().trim().max(200),
+		principalLabel: Yup.string().trim().max(200),
+		secretLabel: Yup.string().trim().max(200),
 		latitude: Yup.number()
 			.nullable()
 			.transform((v, o) => (o === "" ? null : v))
@@ -143,6 +150,11 @@ function LibraryProfile() {
 			abbreviatedName: library?.abbreviatedName ?? "",
 			backupDowntimeSchedule: library?.backupDowntimeSchedule ?? "",
 			supportHours: library?.supportHours ?? "",
+			address: library?.address ?? "",
+			type: library?.type ?? "",
+			targetLoanToBorrowRatio: library?.targetLoanToBorrowRatio ?? "",
+			principalLabel: library?.principalLabel ?? "",
+			secretLabel: library?.secretLabel ?? "",
 			latitude: library?.latitude ?? null,
 			longitude: library?.longitude ?? null,
 		},
@@ -164,7 +176,14 @@ function LibraryProfile() {
 
 	const onSubmit = (formData: any) => {
 		const newChangedFields = Object.keys(formData).reduce((acc: any, key) => {
-			if (formData[key] !== library?.[key] && formData[key] !== undefined)
+			// `?? ""` on BOTH sides. Every text field is seeded with "" when the column
+			// is null, so comparing "" against null reported an untouched field as
+			// changed: it appeared in the confirmation summary as "-" to "-" and was
+			// sent on every save. Coordinates stay null-vs-null, which also compares
+			// equal.
+			const next = formData[key] ?? "";
+			const current = library?.[key] ?? "";
+			if (next !== current && formData[key] !== undefined)
 				acc[key] = formData[key];
 			return acc;
 		}, {});
@@ -286,6 +305,7 @@ function LibraryProfile() {
 						<Typography
 							variant="attributeTitle"
 							color={errors.fullName ? "error" : "primary.attributeTitle"}
+							id="label-full-name"
 						>
 							{t("libraries.name")}
 						</Typography>
@@ -299,6 +319,9 @@ function LibraryProfile() {
 										inputRef={firstEditableFieldRef}
 										fullWidth
 										error={!!errors.fullName}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-full-name" },
+										}}
 										helperText={errors.fullName?.message as string}
 									/>
 								) : (
@@ -313,6 +336,7 @@ function LibraryProfile() {
 						<Typography
 							variant="attributeTitle"
 							color={errors.shortName ? "error" : "primary.attributeTitle"}
+							id="label-short-name"
 						>
 							{t("libraries.short_name")}
 						</Typography>
@@ -325,6 +349,9 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.shortName}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-short-name" },
+										}}
 										helperText={errors.shortName?.message as string}
 									/>
 								) : (
@@ -341,6 +368,7 @@ function LibraryProfile() {
 							color={
 								errors.abbreviatedName ? "error" : "primary.attributeTitle"
 							}
+							id="label-abbreviated-name"
 						>
 							{t("libraries.abbreviated_name")}
 						</Typography>
@@ -353,6 +381,11 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.abbreviatedName}
+										slotProps={{
+											htmlInput: {
+												"aria-labelledby": "label-abbreviated-name",
+											},
+										}}
 										helperText={errors.abbreviatedName?.message as string}
 									/>
 								) : (
@@ -364,10 +397,32 @@ function LibraryProfile() {
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							color={errors.type ? "error" : "primary.attributeTitle"}
+							id="label-library-type"
+						>
 							{t("libraries.type")}
 						</Typography>
-						<RenderAttribute attribute={library.type} />
+						<Controller
+							name="type"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.type}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-library-type" },
+										}}
+										helperText={errors.type?.message as string}
+									/>
+								) : (
+									<RenderAttribute attribute={library.type} />
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -396,6 +451,7 @@ function LibraryProfile() {
 						<Typography
 							variant="attributeTitle"
 							color={errors.supportHours ? "error" : "primary.attributeTitle"}
+							id="label-support-hours"
 						>
 							{t("libraries.support_hours")}
 						</Typography>
@@ -408,6 +464,9 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.supportHours}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-support-hours" },
+										}}
 										helperText={errors.supportHours?.message as string}
 									/>
 								) : (
@@ -426,6 +485,7 @@ function LibraryProfile() {
 									? "error"
 									: "primary.attributeTitle"
 							}
+							id="label-backup-schedule"
 						>
 							{t("libraries.service.environments.backup_schedule")}
 						</Typography>
@@ -438,12 +498,54 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.backupDowntimeSchedule}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-backup-schedule" },
+										}}
 										helperText={
 											errors.backupDowntimeSchedule?.message as string
 										}
 									/>
 								) : (
 									<RenderAttribute attribute={library.backupDowntimeSchedule} />
+								)
+							}
+						/>
+					</Stack>
+				</Grid>
+				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Stack direction="column">
+						<Typography
+							variant="attributeTitle"
+							color={
+								errors.targetLoanToBorrowRatio
+									? "error"
+									: "primary.attributeTitle"
+							}
+							id="label-target-ratio"
+						>
+							{t("libraries.target_loan_to_borrow_ratio")}
+						</Typography>
+						<Controller
+							name="targetLoanToBorrowRatio"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.targetLoanToBorrowRatio}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-target-ratio" },
+										}}
+										helperText={
+											(errors.targetLoanToBorrowRatio?.message as string) ??
+											t("libraries.target_loan_to_borrow_ratio_help")
+										}
+									/>
+								) : (
+									<RenderAttribute
+										attribute={library.targetLoanToBorrowRatio}
+									/>
 								)
 							}
 						/>
@@ -469,20 +571,75 @@ function LibraryProfile() {
 						<RenderAttribute attribute={library.id} />
 					</Stack>
 				</Grid>
+				{/* This library's own words for its credentials on the patron sign-in
+				    screen - "Borrower number" rather than "Library card number". Blank
+				    means discovery uses its own default wording, never a blank label. */}
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
-							{t("libraries.secret_label")}
+						<Typography
+							variant="attributeTitle"
+							color={errors.principalLabel ? "error" : "primary.attributeTitle"}
+							id="label-principal-label"
+						>
+							{t("libraries.principal_label")}
 						</Typography>
-						<RenderAttribute attribute={library.secretLabel} />
+						<Controller
+							name="principalLabel"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.principalLabel}
+										slotProps={{
+											htmlInput: {
+												"aria-labelledby": "label-principal-label",
+											},
+										}}
+										helperText={
+											(errors.principalLabel?.message as string) ??
+											t("libraries.principal_label_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={library.principalLabel} />
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
-							{t("libraries.principal_label")}
+						<Typography
+							variant="attributeTitle"
+							color={errors.secretLabel ? "error" : "primary.attributeTitle"}
+							id="label-secret-label"
+						>
+							{t("libraries.secret_label")}
 						</Typography>
-						<RenderAttribute attribute={library.principalLabel} />
+						<Controller
+							name="secretLabel"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										error={!!errors.secretLabel}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-secret-label" },
+										}}
+										helperText={
+											(errors.secretLabel?.message as string) ??
+											t("libraries.secret_label_help")
+										}
+									/>
+								) : (
+									<RenderAttribute attribute={library.secretLabel} />
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 
@@ -498,10 +655,36 @@ function LibraryProfile() {
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							color={errors.address ? "error" : "primary.attributeTitle"}
+							id="label-library-address"
+						>
 							{t("libraries.primaryLocation.address")}
 						</Typography>
-						<AddressLink address={library.address} />
+						<Controller
+							name="address"
+							control={control}
+							render={({ field }) =>
+								editMode ? (
+									<TextField
+										{...field}
+										fullWidth
+										multiline
+										error={!!errors.address}
+										slotProps={{
+											htmlInput: {
+												"aria-labelledby": "label-library-address",
+											},
+										}}
+										helperText={errors.address?.message as string}
+									/>
+								) : (
+									// AddressLink, not RenderAttribute: it builds the map link.
+									<AddressLink address={library.address} />
+								)
+							}
+						/>
 					</Stack>
 				</Grid>
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -509,6 +692,7 @@ function LibraryProfile() {
 						<Typography
 							variant="attributeTitle"
 							color={errors.latitude ? "error" : "primary.attributeTitle"}
+							id="label-latitude"
 						>
 							{t("libraries.primaryLocation.latitude")}
 						</Typography>
@@ -521,6 +705,9 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.latitude}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-latitude" },
+										}}
 										helperText={errors.latitude?.message as string}
 									/>
 								) : (
@@ -535,6 +722,7 @@ function LibraryProfile() {
 						<Typography
 							variant="attributeTitle"
 							color={errors.longitude ? "error" : "primary.attributeTitle"}
+							id="label-longitude"
 						>
 							{t("libraries.primaryLocation.longitude")}
 						</Typography>
@@ -547,6 +735,9 @@ function LibraryProfile() {
 										{...field}
 										fullWidth
 										error={!!errors.longitude}
+										slotProps={{
+											htmlInput: { "aria-labelledby": "label-longitude" },
+										}}
 										helperText={errors.longitude?.message as string}
 									/>
 								) : (

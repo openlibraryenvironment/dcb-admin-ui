@@ -56,7 +56,13 @@ const MOCKS = {
 	LoadLibraryUsers: libraryUsers,
 	LibraryUserProvisioningAvailable: libraryUserProvisioning,
 	LoadLibrary: libraryDetail,
+	LoadLibraryServiceInfo: libraryDetail,
 	LoadHostLms: hostLms,
+	// The profile page mounts the library's mappings grid. Unmocked it 404s against a
+	// preview with no API behind it and the global handler renders the 500 route, so the
+	// scan would measure an error page and pass for the wrong reason.
+	LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
+	LoadLocations: { locations: { totalSize: 0, content: [] } },
 };
 
 /**
@@ -233,6 +239,29 @@ const ADMIN_EDIT_SURFACES = [
 	{
 		label: "library branding",
 		path: `/libraries/${LIBRARY_ID}/branding`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+		},
+	},
+	{
+		// Seven fields became editable here, and the seven that already were had no
+		// accessible name at all: the visible label is a sibling Typography, so an input
+		// without aria-labelledby is unnamed. Never scanned in edit mode before, which is
+		// why it went unnoticed.
+		label: "library profile",
+		path: `/libraries/${LIBRARY_ID}`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+			await expect(page.getByRole("textbox", { name: "Full name" })).toBeVisible();
+		},
+	},
+	{
+		label: "library service",
+		path: `/libraries/${LIBRARY_ID}/service`,
 		open: async (page: Page) => {
 			await page.getByRole("button", { name: "Actions" }).click();
 			await page.getByRole("menuitem", { name: "Edit" }).click();

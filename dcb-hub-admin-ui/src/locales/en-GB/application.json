@@ -1548,7 +1548,8 @@
 				"discovery": "Discovery system/PAC(s)",
 				"ils": "ILS",
 				"patron_site": "Patron website",
-				"title": "Systems"
+				"title": "Systems",
+				"patron_site_help": "The library's own website, for a patron who needs opening hours or the enquiry desk."
 			},
 			"environments": {
 				"api": "Host LMS API",
@@ -1628,7 +1629,11 @@
 			"theme": "Theme",
 			"theme_help": "A theme from the discovery application's registry. dcb-service refuses a name it does not know.",
 			"theme_inherit": "Use the consortium's theme"
-		}
+		},
+		"target_loan_to_borrow_ratio": "Target loan to borrow ratio",
+		"target_loan_to_borrow_ratio_help": "The balance of lending to borrowing this library is aiming for. Recorded for reporting; DCB does not enforce it.",
+		"principal_label_help": "This library's own word for the patron identifier on the discovery sign-in screen, such as “Borrower number”. Leave blank to use discovery's default wording.",
+		"secret_label_help": "This library's own word for the patron credential, such as “Password” or “PIN”. Leave blank to use discovery's default wording."
 	},
 	"locations": {
 		"alert_text": "Failed to fetch the locations, please refresh the page.",

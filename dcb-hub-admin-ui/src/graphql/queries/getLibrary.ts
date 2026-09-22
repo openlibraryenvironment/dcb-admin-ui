@@ -27,6 +27,7 @@ export const getLibrary = () => gql`
 				discoverySystem
 				type
 				backupDowntimeSchedule
+				targetLoanToBorrowRatio
 				hostLmsConfiguration
 				principalLabel
 				secretLabel

@@ -1463,6 +1463,7 @@ export type LoadLibraryQuery = {
 			discoverySystem: string | null;
 			type: string | null;
 			backupDowntimeSchedule: string | null;
+			targetLoanToBorrowRatio: string | null;
 			hostLmsConfiguration: string | null;
 			principalLabel: string | null;
 			secretLabel: string | null;
