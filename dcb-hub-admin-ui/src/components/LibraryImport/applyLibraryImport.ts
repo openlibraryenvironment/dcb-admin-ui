@@ -124,7 +124,7 @@ export async function applyLibraryImport(
 				await gqlClient.request<
 					UpdateLibraryMutation,
 					UpdateLibraryMutationVariables
-				>(updateLibraryMutation, {
+				>(updateLibraryMutation(), {
 					input: {
 						id: row.existingId,
 						fullName: text(values.fullName),

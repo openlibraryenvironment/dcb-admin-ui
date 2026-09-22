@@ -23,7 +23,7 @@ export const libraryQueryKey = (libraryId: string) =>
 	["library", libraryId] as const;
 
 export const fetchLibrary = (gqlClient: GraphQLClient, libraryId: string) =>
-	gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary, {
+	gqlClient.request<any, LoadLibraryQueryVariables>(getLibrary(), {
 		query: `id:${libraryId}`,
 	});
 

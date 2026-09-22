@@ -24,4 +24,9 @@ export interface Library {
 	contacts: Person[];
 	secretLabel: string;
 	principalLabel: string;
+	// Optional because dcb-service before 9.0.0 has no such columns and the document
+	// does not select them there - see the consortium_branding capability.
+	brandLogoUrl?: string | null;
+	brandLogoAlt?: string | null;
+	defaultThemeName?: string | null;
 }

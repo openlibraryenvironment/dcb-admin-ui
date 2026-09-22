@@ -204,8 +204,14 @@ describe("the matrix describes every flag, and only real ones", () => {
  * these tests either agree with you or fail.
  */
 
-/** Every release schema committed here, oldest first. */
-const SUPPORTED_RELEASES = ["8.71.0", "9.0.0"] as const;
+/**
+ * Every release schema committed here, oldest first.
+ *
+ * 9.0.0 is kept although nothing deploys it: `consortium_branding` carries
+ * `since: "9.0.0"`, and the "the release before it did not have these fields" half of
+ * these tests needs that release in the list to mean anything.
+ */
+const SUPPORTED_RELEASES = ["8.71.0", "9.0.0", "9.1.0"] as const;
 
 const schemaFile = (version: string) =>
 	path.resolve(process.cwd(), `schema.v${version}.graphqls`);

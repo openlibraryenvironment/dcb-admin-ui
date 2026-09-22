@@ -9,7 +9,9 @@ import { computeMutation } from "@helpers/computeMutation";
 import {
 	changedRowFields,
 	readDeleteOutcome,
+	stripUnsupportedKeys,
 } from "@helpers/actions/entityMutationLogic";
+import { unsupportedInputKeys } from "@helpers/capabilityFields";
 import {
 	ENTITY_REGISTRY,
 	entityOwnsQueryKey,
@@ -261,7 +263,14 @@ export function useEntityMutation(entity: EntityKey) {
 
 			try {
 				const response = await runUpdate({
-					input: { ...definition.buildUpdateId(id), ...input, ...audit },
+					// Stripped at the boundary, not at the call site: read
+					// stripUnsupportedKeys. The flags are read HERE rather than at module
+					// scope because window.__APP_ENV__ is assigned after an await in
+					// main.tsx.
+					input: stripUnsupportedKeys(
+						{ ...definition.buildUpdateId(id), ...input, ...audit },
+						unsupportedInputKeys(),
+					),
 				});
 				const updated = definition.updateOperation
 					? (response?.[definition.updateOperation] ?? response)

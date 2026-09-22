@@ -42,16 +42,16 @@ const deriveTestOperations = (
 	},
 ];
 
-type HostLmsResultStepProps = {
+type HostLmsVerificationProps = {
 	result: HostLmsVerificationResult | null;
 	/** The checks take up to 20 seconds, so the wait gets a shape of its own. */
 	isVerifying?: boolean;
 };
 
-export default function HostLmsResultStep({
+export default function HostLmsVerification({
 	result,
 	isVerifying = false,
-}: HostLmsResultStepProps) {
+}: HostLmsVerificationProps) {
 	const { t } = useTranslation();
 
 	if (isVerifying)

@@ -36,7 +36,10 @@
 				},
 				"secondHostLms": null,
 				"membership": [],
-				"contacts": []
+				"contacts": [],
+				"brandLogoUrl": "https://example.invalid/alpha-logo.png",
+				"brandLogoAlt": "Alpha Test Library",
+				"defaultThemeName": "openRS"
 			}
 		]
 	}

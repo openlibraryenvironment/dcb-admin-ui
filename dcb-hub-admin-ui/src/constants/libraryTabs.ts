@@ -22,4 +22,5 @@ export const TABS: ReadonlyArray<{ path: string; labelKey: string }> = [
 	{ path: "/bibs", labelKey: "nav.bibs" },
 	{ path: "/insights", labelKey: "nav.libraries.insights" },
 	{ path: "/accounts", labelKey: "nav.libraries.accounts" },
+	{ path: "/branding", labelKey: "nav.libraries.branding" },
 ];

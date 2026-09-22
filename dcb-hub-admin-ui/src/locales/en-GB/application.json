@@ -849,6 +849,33 @@
 			"av_loan_period_code_id_description": "Loan period applied to audiovisual virtual items, where it differs from the standard one.",
 			"policy_count_one": "{{count}} shelf location mapped",
 			"policy_count_other": "{{count}} shelf locations mapped"
+		},
+		"edit": {
+			"immutable_note": "The code and the client class cannot be changed. They identify this system to every mapping, location and record already pointing at it, so changing one is a new Host LMS rather than an edit.",
+			"no_profile": "There is no guided form for this client class, so the client configuration cannot be edited here.",
+			"config_preserved_title": "Some configuration is not shown here",
+			"config_preserved_body": "These keys have no guided field. They are kept exactly as they are when you save: {{keys}}",
+			"changed": {
+				"name": "Name",
+				"suppressionRulesetName": "Bib suppression ruleset",
+				"itemSuppressionRulesetName": "Item suppression ruleset",
+				"clientConfig": "Client configuration"
+			}
+		},
+		"new_host_lms": {
+			"title": "New Host LMS",
+			"submit": "Create Host LMS",
+			"explanation": "Records a library management system in DCB and tests the connection to it. Choose the library it belongs to: the library decides the agency the system answers for, which DCB needs before it can attribute a patron.",
+			"library": "Library",
+			"library_help": "The library this system belongs to. Its agency code is used as the default agency code below.",
+			"client_class_help": "The connector DCB talks to this system with. It cannot be changed afterwards, so a wrong choice means creating a new Host LMS.",
+			"audit_reason": "Host LMS created from the Host LMS page for {{library}}",
+			"created_title": "Host LMS created",
+			"created_body": "{{code}} has been created and its connection tested.",
+			"not_attached_title": "This library is not using the new system yet",
+			"not_attached_body": "DCB Admin cannot point an existing library at a different Host LMS: dcb-service's updateLibrary and updateAgency carry no Host LMS field, and secondHostLms can only be read. The record is created and verified here; making a library use it needs a dcb-service change. Nothing about the library has been altered.",
+			"go_to_record": "Go to the Host LMS",
+			"back_to_list": "Back to all Host LMS"
 		}
 	},
 	"insights": {
@@ -868,9 +895,15 @@
 				"title": "Is it getting better or worse?",
 				"subtitle": "The direction of the last third of the window against the third before it."
 			},
-			"volume": { "title": "Requests submitted" },
-			"fill_rate": { "title": "Fill rate" },
-			"error_rate": { "title": "Error rate" },
+			"volume": {
+				"title": "Requests submitted"
+			},
+			"fill_rate": {
+				"title": "Fill rate"
+			},
+			"error_rate": {
+				"title": "Error rate"
+			},
 			"up": "Up {{change}} on the preceding period",
 			"down": "Down {{change}} on the preceding period",
 			"flat": "No clear change",
@@ -1585,7 +1618,17 @@
 				"error": "The account could not be created. {{error}}"
 			}
 		},
-		"requires_consortium": "Set up your consortium first — a library has to belong to one."
+		"requires_consortium": "Set up your consortium first — a library has to belong to one.",
+		"brand": {
+			"explanation": "How this library appears to its own patrons in the discovery interface. The consortium's brand is used wherever these are left blank.",
+			"logo_url": "Logo URL",
+			"logo_url_help": "An absolute https:// address, or a path under this service's asset store. The library's patron website is the link target, so there is no separate link field. Leave blank to use the consortium's logo.",
+			"logo_alt": "Logo alternative text",
+			"logo_alt_help": "What a screen reader announces in place of the logo. Describe the library, not the image - \"Riverside Public Library\", not \"logo\".",
+			"theme": "Theme",
+			"theme_help": "A theme from the discovery application's registry. dcb-service refuses a name it does not know.",
+			"theme_inherit": "Use the consortium's theme"
+		}
 	},
 	"locations": {
 		"alert_text": "Failed to fetch the locations, please refresh the page.",
@@ -1850,7 +1893,8 @@
 			"settings": "Settings",
 			"insights": "Insights",
 			"name": "Libraries",
-			"accounts": "Accounts"
+			"accounts": "Accounts",
+			"branding": "Branding"
 		},
 		"locations": "Locations",
 		"login": "Login",

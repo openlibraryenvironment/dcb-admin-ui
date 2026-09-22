@@ -25,6 +25,7 @@ describe("library tab indices", () => {
 		[8, "/bibs"],
 		[9, "/insights"],
 		[10, "/accounts"],
+		[11, "/branding"],
 	];
 
 	it.each(EXPECTED)("index %i is %s", (index, path) => {
@@ -44,10 +45,10 @@ describe("library tab indices", () => {
 	});
 
 	it("conditionally hidden tabs sit at the end, so hiding one cannot shift an index", () => {
-		// Insights and Accounts are the two that can be hidden or empty. If either is
+		// Insights, Accounts and Branding are the three that can be hidden. If any is
 		// ever moved earlier, every index after it becomes wrong the moment it is
 		// filtered out.
-		const conditional = ["/insights", "/accounts"];
+		const conditional = ["/insights", "/accounts", "/branding"];
 		const positions = conditional.map((path) =>
 			TABS.findIndex((tab) => tab.path === path),
 		);

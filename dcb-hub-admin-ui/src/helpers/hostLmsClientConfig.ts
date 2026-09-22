@@ -1373,3 +1373,69 @@ export const clientConfigToFields = (
 
 	return { values, unmappedKeys };
 };
+
+/**
+ * The client config to SEND when editing an existing Host LMS.
+ *
+ * `updateHostLms` replaces `clientConfig` wholesale, so sending
+ * `buildClientConfig(...)` on its own would delete every key the guided form has no
+ * field for - and `clientConfigToFields` exists precisely because such keys are
+ * commonplace in configs written before the guided form did. Reachable in one click, and
+ * silent: the page would show the right answer and the ILS would stop authenticating.
+ *
+ * So: start from what is stored, remove only the paths the guided form OWNS (which is
+ * what makes clearing a field clear it), then overlay the form's answers.
+ */
+export const mergeClientConfigEdit = (
+	existing: Record<string, unknown> | null | undefined,
+	lmsClientClass: string | undefined | null,
+	values: any,
+): Record<string, unknown> => {
+	const merged = structuredClone(existing ?? {}) as Record<string, unknown>;
+
+	for (const configField of clientConfigFieldsFor(lmsClientClass)) {
+		deletePath(merged, configField.path);
+	}
+
+	const edited = buildClientConfig(lmsClientClass, values);
+	deepMerge(merged, edited);
+	return merged;
+};
+
+/** Removes a leaf, and any parent objects the removal leaves empty. */
+const deletePath = (target: any, path: string[]): void => {
+	const [head, ...rest] = path;
+	if (!target || typeof target !== "object" || !(head in target)) return;
+
+	if (rest.length === 0) {
+		delete target[head];
+		return;
+	}
+	deletePath(target[head], rest);
+	if (
+		target[head] &&
+		typeof target[head] === "object" &&
+		!Array.isArray(target[head]) &&
+		Object.keys(target[head]).length === 0
+	) {
+		delete target[head];
+	}
+};
+
+/** Object-by-object overlay. Arrays and scalars replace rather than combine. */
+const deepMerge = (target: any, source: Record<string, unknown>): void => {
+	for (const [key, value] of Object.entries(source)) {
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			if (
+				!target[key] ||
+				typeof target[key] !== "object" ||
+				Array.isArray(target[key])
+			) {
+				target[key] = {};
+			}
+			deepMerge(target[key], value as Record<string, unknown>);
+			continue;
+		}
+		target[key] = value;
+	}
+};

@@ -114,6 +114,13 @@ describe("entityOwnsQueryKey", () => {
 		],
 		numericRangeMapping: [["numericRangeMappings", {}], ["allNumericRange"]],
 		functionalSetting: [["LoadConsortiumFunctionalSettings"]],
+		// The grid's key root is the gridId "hostlmss", not "hostLms": the prefix
+		// predicate covers both, and an exact-key list would not have.
+		hostLms: [
+			["hostLms", "uuid"],
+			["hostlmss", {}, [], {}],
+			["library", "service", "uuid"],
+		],
 	};
 
 	it("matches every query key its entity is actually cached under", () => {

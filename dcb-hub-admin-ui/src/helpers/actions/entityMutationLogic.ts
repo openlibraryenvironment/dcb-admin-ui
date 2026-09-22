@@ -29,6 +29,26 @@ export const changedRowFields = (
  * nothing at all; treat an explicit `false` as failure, because that is the
  * server saying so.
  */
+/**
+ * Drop every key this deployment's dcb-service cannot accept — R-19.
+ *
+ * An undeclared input field is a GraphQL VALIDATION error, so one key too new for the
+ * server fails the whole mutation rather than being ignored. The consortium form has
+ * always stripped its own; doing it here instead means an entity gains a version-gated
+ * field by adding it to the capability registry, and not by remembering to filter it at
+ * every call site that writes one.
+ *
+ * `unsupported` is passed in rather than read from the registry so this stays a pure
+ * function: the flags live on `window`, which the test environment does not have.
+ */
+export const stripUnsupportedKeys = <T extends Record<string, unknown>>(
+	input: T,
+	unsupported: ReadonlySet<string>,
+): Partial<T> =>
+	Object.fromEntries(
+		Object.entries(input).filter(([key]) => !unsupported.has(key)),
+	) as Partial<T>;
+
 export const readDeleteOutcome = (
 	response: any,
 	operation: string | undefined,

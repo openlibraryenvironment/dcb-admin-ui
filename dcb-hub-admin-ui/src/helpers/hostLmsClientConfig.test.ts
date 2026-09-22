@@ -9,6 +9,7 @@ import {
 	hasSharedSystemConflict,
 	missingRecommendedClientConfig,
 	missingRequiredClientConfig,
+	mergeClientConfigEdit,
 } from "./hostLmsClientConfig";
 
 /**
@@ -597,6 +598,45 @@ describe("hostLmsClientConfig", () => {
 			});
 
 			expect(unmappedKeys).toEqual(["some-bespoke-flag"]);
+		});
+	});
+	describe("mergeClientConfigEdit", () => {
+		it("keeps keys the guided form has no field for", () => {
+			const stored = {
+				"base-url": "https://sierra.example.org",
+				key: "old-key",
+				secret: "old-secret",
+				"some-bespoke-flag": "keep me",
+				nested: { "also-bespoke": 7 },
+			};
+
+			const merged = mergeClientConfigEdit(stored, HOST_LMS_CLASSES.sierra, {
+				"base-url": "https://sierra.example.org",
+				key: "new-key",
+				secret: "new-secret",
+			});
+
+			expect(merged.key).toBe("new-key");
+			expect(merged["some-bespoke-flag"]).toBe("keep me");
+			expect(merged.nested).toEqual({ "also-bespoke": 7 });
+		});
+
+		it("clears a guided field the user emptied", () => {
+			const merged = mergeClientConfigEdit(
+				{ "base-url": "https://sierra.example.org", key: "k", secret: "s" },
+				HOST_LMS_CLASSES.sierra,
+				{ "base-url": "https://sierra.example.org", key: "", secret: "s" },
+			);
+
+			expect("key" in merged).toBe(false);
+			expect(merged.secret).toBe("s");
+		});
+
+		it("does not mutate the stored config it was given", () => {
+			const stored = { key: "old", "some-bespoke-flag": true };
+			mergeClientConfigEdit(stored, HOST_LMS_CLASSES.sierra, { key: "new" });
+
+			expect(stored.key).toBe("old");
 		});
 	});
 });

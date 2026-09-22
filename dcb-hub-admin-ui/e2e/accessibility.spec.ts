@@ -21,6 +21,7 @@ import libraryCount from "./fixtures-data/library-count.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
 import libraryUsers from "./fixtures-data/library-users.json";
 import libraryUserProvisioning from "./fixtures-data/library-user-provisioning.json";
+import hostLms from "./fixtures-data/host-lms.json";
 
 /**
  * The application-wide accessibility gate — W-1.
@@ -54,6 +55,8 @@ const MOCKS = {
 	LoadLibraryContacts: libraryDetail,
 	LoadLibraryUsers: libraryUsers,
 	LibraryUserProvisioningAvailable: libraryUserProvisioning,
+	LoadLibrary: libraryDetail,
+	LoadHostLms: hostLms,
 };
 
 /**
@@ -192,6 +195,71 @@ for (const scheme of ["light", "dark"] as const) {
 				await page.getByRole("button", { name: "Actions" }).click();
 				await page.getByRole("menuitem", { name: "Edit" }).click();
 				await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+
+				await expectPaintedScheme(page, scheme);
+				await scanForViolations(page);
+			});
+		});
+	}
+}
+
+/**
+ * The surfaces that only exist once an administrator presses Edit, and the one form that
+ * is a route of its own.
+ *
+ * They are scanned separately from the route table because none of them is reachable by
+ * navigation alone: the Host LMS client config is a generated set of grouped inputs, the
+ * library brand is a select plus two text fields, and `/hostlmss/new` is an autocomplete
+ * over every library. Grouped inputs, selects and autocompletes are where label
+ * association and contrast fail, and none of them was covered by any existing route.
+ */
+const HOST_LMS_ID = "h1h1h1h1-1111-5111-9111-111111111111";
+const LIBRARY_ID = "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22";
+
+const ADMIN_EDIT_SURFACES = [
+	{
+		label: "Host LMS client configuration",
+		path: `/hostlmss/${HOST_LMS_ID}`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+			// The config lives on the second tab, which is the half with the generated
+			// inputs - scanning the general tab would miss every one of them.
+			await page.getByRole("tab", { name: /client config/i }).click();
+			await expect(page.getByLabel(/base url/i)).toBeVisible();
+		},
+	},
+	{
+		label: "library branding",
+		path: `/libraries/${LIBRARY_ID}/branding`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+		},
+	},
+	{
+		label: "new Host LMS",
+		path: "/hostlmss/new",
+		open: async (page: Page) => {
+			await expect(page.getByLabel(/^library/i)).toBeVisible();
+		},
+	},
+] as const;
+
+for (const scheme of ["light", "dark"] as const) {
+	for (const surface of ADMIN_EDIT_SURFACES) {
+		test.describe(`WCAG 2.2 AA - ${surface.label}, ${scheme}`, () => {
+			test.use({ colorScheme: scheme });
+
+			test("has no violations", async ({ page }) => {
+				await useAllFeatures(page);
+				await seedAuth(page, { roles: ADMIN_ROLES });
+				await mockGraphQL(page, MOCKS);
+
+				await page.goto(surface.path);
+				await surface.open(page);
 
 				await expectPaintedScheme(page, scheme);
 				await scanForViolations(page);

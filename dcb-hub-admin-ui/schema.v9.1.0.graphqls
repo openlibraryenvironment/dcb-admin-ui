@@ -1,23 +1,3 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service `v11-presence-links`, which is
-# main (e82945731) plus §V-11.1's `supportUrl`. NOT yet on main: that branch is under
-# evaluation, and this file is ahead of main by exactly the six supportUrl lines until it
-# merges. Nothing here can reach a deployment before then — the capability row carries
-# `since: null` and its flag is off everywhere.
-#
-# Taken verbatim from that ref, plus ONE hand-written addition at the end of this file:
-# auditIncidence and its two types, which exist in no dcb-service branch at all. They are
-# here so the Audit Explorer's documents can be validated against something; the feature
-# has no backend, which is why VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its
-# capability row carries since: null.
-#
-# The provisioning API (libraryUsers, provisionLibraryUser, ...) and maxLocalHolds shipped
-# in 9.1.0, and schema.v9.1.0.graphqls is committed beside this file. `supportUrl`, on
-# Consortium, Library and their two update inputs, is on no dcb-service branch that has
-# merged - it is the six lines this file is ahead by, and its capability row says so with
-# `since: null`.
-#
-# Re-take this file whenever dcb-service main moves, and re-run codegen.
-#
 scalar JSON
 
 type Query {
@@ -53,8 +33,6 @@ type Query {
 		# Whether this deployment has an identity provider configured at all, so the UI can
 		# hide a tab that could only fail rather than render a form nobody can submit.
 		libraryUserProvisioningAvailable: Boolean!
-		# Hand-added: see this file's header. No dcb-service branch serves this.
-		auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
 }
 
 type Mutation {
@@ -153,7 +131,6 @@ input ConsortiumInput {
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
-	supportUrl: String
 	displayName: String!
 	reason: String!
 	changeCategory: String!
@@ -258,12 +235,7 @@ input LibraryInput {
 	contacts: [PersonInput]!
 	longitude: Float
 	latitude: Float
-	# V-11.1. Both are rendered as an href in the patron app's footer, so both must be
-	# an absolute http(s) URL naming a host. An explicit null or an empty string clears
-	# the field. patronWebsite answers opening hours and joining; supportUrl is where a
-	# patron reports that discovery itself is wrong.
 	patronWebsite: String
-	supportUrl: String
 	discoverySystem: String
 	hostLmsConfiguration: String
 	targetLoanToBorrowRatio: String
@@ -347,10 +319,7 @@ input UpdateConsortiumInput {
 	id: ID!
 	description: String
 	catalogueSearchUrl: String
-	# V-11.1. Rendered as an href in the patron app's footer: an absolute http(s) URL
-	# naming a host, and an explicit null or empty string clears the field.
 	websiteUrl: String
-	supportUrl: String
 	displayName: String
 	reason: String!
 	changeCategory: String!
@@ -405,7 +374,6 @@ input UpdateLibraryInput {
 	address: String
 	type: String
 	patronWebsite: String
-	supportUrl: String
 	discoverySystem: String
 	# Patron-facing brand (N-1.3). patronWebsite above is the logo's link target, so
 	# there is no second URL here. Explicit null or empty string clears the field.
@@ -730,7 +698,6 @@ type Library {
 	supportHours: String
 	discoverySystem: String
 	patronWebsite: String
-	supportUrl: String
 	hostLmsConfiguration: String
 	longitude: Float
 	latitude: Float
@@ -787,7 +754,6 @@ type Consortium {
 	description: String
 	catalogueSearchUrl: String
 	websiteUrl: String
-	supportUrl: String
 	displayName: String
 	contacts: [Person]
 	reason: String
@@ -1151,24 +1117,4 @@ type LibraryUser {
 	status: LibraryUserStatus!
 	dateCreated: String
 	lastEditedBy: String
-}
-
-
-# ---------------------------------------------------------------------------
-# HAND-WRITTEN, and in no dcb-service branch. See this file's header.
-# ---------------------------------------------------------------------------
-
-type AuditIncidenceBucket {
-  "ISO-8601 start of the interval (UTC)."
-  bucketStart: String!
-  count: Int!
-}
-
-type AuditIncidence {
-  "Echoed back so the client can label the axis: HOUR | DAY | WEEK."
-  interval: String!
-  "Total matching audits across the whole window (sum of bucket counts)."
-  totalSize: Int!
-  "Continuous, gap-filled, ascending by bucketStart."
-  buckets: [AuditIncidenceBucket!]!
 }

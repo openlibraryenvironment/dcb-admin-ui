@@ -55,7 +55,7 @@ export default function OperatingWelcome() {
 
 	const updateMutation = useMutation({
 		mutationFn: async (updatedRow: GridRowModel) => {
-			return gqlClient.request(updateLibraryMutation, {
+			return gqlClient.request(updateLibraryMutation(), {
 				input: updatedRow,
 			});
 		},

@@ -273,6 +273,19 @@ export type UpdateFunctionalSettingInput = {
 	reason?: string | null | undefined;
 };
 
+export type UpdateHostLmsInput = {
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	clientConfig?: Record<string, any> | null | undefined;
+	id: string | number;
+	ingestSourceClass?: string | null | undefined;
+	itemSuppressionRulesetName?: string | null | undefined;
+	lmsClientClass?: string | null | undefined;
+	name?: string | null | undefined;
+	reason?: string | null | undefined;
+	suppressionRulesetName?: string | null | undefined;
+};
+
 export type UpdateLibraryInput = {
 	abbreviatedName?: string | null | undefined;
 	address?: string | null | undefined;
@@ -349,6 +362,7 @@ export type PatronRequestFieldsFragment = {
 	description: string | null;
 	status: string | null;
 	previousStatus: string | null;
+	isTooLong: boolean | null;
 	nextExpectedStatus: string | null;
 	errorMessage: string | null;
 	outOfSequenceFlag: boolean | null;
@@ -616,7 +630,6 @@ export type UpdateAgencyMutation = {
 		isSupplyingAgency: boolean | null;
 		isBorrowingAgency: boolean | null;
 		maxConsortialLoans: number | null;
-		maxLocalHolds: number | null;
 	};
 };
 
@@ -658,6 +671,26 @@ export type UpdateFunctionalSettingMutation = {
 		enabled: boolean;
 		description: string | null;
 	};
+};
+
+export type UpdateHostLmsMutationVariables = Exact<{
+	input: UpdateHostLmsInput;
+}>;
+
+export type UpdateHostLmsMutation = {
+	updateHostLms: {
+		pingStatus: string | null;
+		ingestStatus: string | null;
+		warnings: Array<string | null> | null;
+		hostLms: {
+			id: string | null;
+			code: string | null;
+			name: string | null;
+			lmsClientClass: string | null;
+			suppressionRulesetName: string | null;
+			itemSuppressionRulesetName: string | null;
+		} | null;
+	} | null;
 };
 
 export type UpdateLibraryMutationVariables = Exact<{
@@ -1523,7 +1556,6 @@ export type LoadLibraryBasicsQuery = {
 				id: string | null;
 				code: string | null;
 				maxConsortialLoans: number | null;
-				maxLocalHolds: number | null;
 				isSupplyingAgency: boolean | null;
 				isBorrowingAgency: boolean | null;
 				hostLms: {
@@ -1898,6 +1930,7 @@ export type LoadPatronRequestQuery = {
 			nextScheduledPoll: string | null;
 			errorMessage: string | null;
 			previousStatus: string | null;
+			isTooLong: boolean | null;
 			pollCountForCurrentStatus: number | null;
 			currentStatusTimestamp: string | null;
 			nextExpectedStatus: string | null;
@@ -2029,6 +2062,7 @@ export type GetPatronRequestDashboardQuery = {
 			description: string | null;
 			status: string | null;
 			previousStatus: string | null;
+			isTooLong: boolean | null;
 			nextExpectedStatus: string | null;
 			errorMessage: string | null;
 			outOfSequenceFlag: boolean | null;
@@ -2173,6 +2207,7 @@ export type LoadPatronRequestsQuery = {
 			description: string | null;
 			status: string | null;
 			previousStatus: string | null;
+			isTooLong: boolean | null;
 			nextExpectedStatus: string | null;
 			errorMessage: string | null;
 			outOfSequenceFlag: boolean | null;
@@ -2247,6 +2282,7 @@ export type LoadPatronRequestsForExportQuery = {
 			description: string | null;
 			status: string | null;
 			previousStatus: string | null;
+			isTooLong: boolean | null;
 			nextExpectedStatus: string | null;
 			errorMessage: string | null;
 			outOfSequenceFlag: boolean | null;
