@@ -31,7 +31,11 @@ import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
-import { isLocalHoldsEnabled } from "@helpers/featureFlags";
+import {
+	isLocalHoldsEnabled,
+	isSettingsInheritanceEnabled,
+} from "@helpers/featureFlags";
+import FunctionalSettingInheritance from "@components/FunctionalSettingInheritance/FunctionalSettingInheritance";
 import { stripUnsupportedAgencyInput } from "@fragments/localHolds";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { formatChangedFields } from "@helpers/formatChangedFields";
@@ -406,6 +410,18 @@ function Settings() {
 					</Grid>
 				)}
 			</Grid>
+			{/* §V-22.6. Behind a flag that changes the DOCUMENT, not just what renders:
+			    resolvedFunctionalSettings is on no dcb-service release, and selecting it
+			    against one is a validation error that fails the whole operation. */}
+			{isSettingsInheritanceEnabled() && (
+				<FunctionalSettingInheritance
+					scopeType="LIBRARY"
+					scopeId={library.id}
+					scopeName={library.fullName}
+					canEdit={isAnAdmin}
+				/>
+			)}
+
 			<EntityMutationDialogs {...agencyMutation.dialogProps} />
 			<EntityMutationDialogs {...libraryMutation.dialogProps} />
 			<Confirmation

@@ -21,13 +21,17 @@ const consortium = (overrides: Record<string, unknown> = {}) => ({
 	...overrides,
 });
 
-// Every case below describes a deployment on dcb-service 9.0.0 or later, which is
-// where all six chapters exist. The discovery chapter writes the merged brand columns,
-// so on 8.71.0 it is not a chapter that fails - it is a chapter this flow does not ask.
-// That world has its own block at the foot of this file.
+// Every case below describes a deployment on dcb-service 9.0.0 or later that runs
+// Symposia, which is where all six chapters exist. The discovery chapter writes the merged
+// brand columns AND configures a discovery front end, so on 8.71.0, or without Symposia, it
+// is not a chapter that fails - it is a chapter this flow does not ask. Both worlds have
+// their own block at the foot of this file.
 beforeEach(() => {
 	vi.stubGlobal("window", {
-		__APP_ENV__: { VITE_FEATURE_CONSORTIUM_BRANDING: "true" },
+		__APP_ENV__: {
+			VITE_FEATURE_CONSORTIUM_BRANDING: "true",
+			VITE_FEATURE_SYMPOSIA: "true",
+		},
 	});
 });
 
@@ -308,6 +312,31 @@ describe("where /setup opens", () => {
 		});
 
 		expect(setupEntryPoint(state)).toEqual({ kind: "finish" });
+	});
+});
+
+describe("without Symposia", () => {
+	beforeEach(() => {
+		// New enough dcb-service, so the brand columns exist - but no discovery front end
+		// for them to reach.
+		vi.stubGlobal("window", {
+			__APP_ENV__: { VITE_FEATURE_CONSORTIUM_BRANDING: "true" },
+		});
+	});
+
+	it("does not ask the discovery chapter", () => {
+		expect(consortiumSetupSteps()).toEqual([
+			"appearance",
+			"consortium",
+			"howItWorks",
+			"contacts",
+			"libraries",
+		]);
+	});
+
+	it("numbers the remaining chapters without a gap", () => {
+		expect(stepNumber("libraries")).toBe(5);
+		expect(nextStep("contacts")).toBe("libraries");
 	});
 });
 

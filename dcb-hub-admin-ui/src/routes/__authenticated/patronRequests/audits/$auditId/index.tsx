@@ -46,7 +46,6 @@ function AuditDetails() {
 				query: `id:${auditId}`,
 			}),
 		enabled: !!auditId,
-		refetchInterval: 120000,
 	});
 
 	const audit: AuditItem = data?.audits?.content?.[0];

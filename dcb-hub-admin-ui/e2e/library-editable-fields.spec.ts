@@ -116,7 +116,9 @@ test.describe("Library profile - editable fields", () => {
 		// appear here as "-" to "-" and be sent with every save.
 		await expect(audit.getByRole("row")).toHaveCount(2);
 		await expect(audit.getByRole("textbox", { name: /reason/i })).toBeEnabled();
-		await audit.getByRole("textbox", { name: /reason/i }).fill("Patron wording");
+		await audit
+			.getByRole("textbox", { name: /reason/i })
+			.fill("Patron wording");
 		await audit.getByRole("button", { name: "Save changes" }).click();
 
 		await expect.poll(() => requests.length).toBeGreaterThan(0);
@@ -141,4 +143,47 @@ test.describe("Library service - editable fields", () => {
 			await expect(page.getByRole("textbox", { name })).toBeEditable();
 		});
 	}
+});
+
+test.describe("a background refetch while editing", () => {
+	test("does not overwrite what the user is typing", async ({ page }) => {
+		// The form is fed through react-hook-form's `values` prop, which re-syncs it when
+		// that object CHANGES - so a poll that lands mid-edit and brings back a record
+		// somebody else has moved replaces the half-typed field. hostlmss/$hostlmsId
+		// guarded against exactly this and said so; this page and its service tab did not.
+		let loads = 0;
+
+		await mockGraphQL(page, {
+			...MOCKS,
+			LoadLibrary: () => {
+				loads += 1;
+				if (loads === 1) return libraryDetail;
+
+				// An identical payload would prove nothing: `values` compares, and a
+				// no-op refetch leaves the form alone. The record has to have moved.
+				const moved = JSON.parse(JSON.stringify(libraryDetail));
+				moved.libraries.content[0].principalLabel = "Changed by somebody else";
+				return moved;
+			},
+		});
+
+		// A fake clock, because the interval is two minutes. Installed before goto so the
+		// app's timers are created against it.
+		await page.clock.install();
+		await page.goto(`/libraries/${LIBRARY_ID}`);
+		await expect(
+			page.getByRole("heading", { name: "Alpha Test Library" }),
+		).toBeVisible();
+
+		await startEditing(page);
+		const field = page.getByRole("textbox", { name: "Principal label" });
+		await field.fill("Library card number");
+
+		await page.clock.fastForward("03:00");
+
+		await expect(field).toHaveValue("Library card number");
+		// The poll itself is what must not happen, so assert that too: a pause that only
+		// discarded the answer would still cost the request.
+		expect(loads).toBe(1);
+	});
 });

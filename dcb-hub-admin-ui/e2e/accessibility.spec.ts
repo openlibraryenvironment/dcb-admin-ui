@@ -14,6 +14,10 @@ import {
 	useLegacyService,
 } from "./fixtures/legacy-service-mocks";
 import { mockLatestReleases } from "./fixtures/service-status-mocks";
+import {
+	patronRequestDetailMocks,
+	TRACKED_REQUEST,
+} from "./fixtures/patron-request-detail";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import consortium from "./fixtures-data/consortium.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -22,6 +26,8 @@ import libraryDetail from "./fixtures-data/library-detail.json";
 import libraryUsers from "./fixtures-data/library-users.json";
 import libraryUserProvisioning from "./fixtures-data/library-user-provisioning.json";
 import hostLms from "./fixtures-data/host-lms.json";
+import groupDetail from "./fixtures-data/group-region-detail.json";
+import resolvedSettings from "./fixtures-data/resolved-functional-settings.json";
 
 /**
  * The application-wide accessibility gate — W-1.
@@ -52,6 +58,7 @@ const MOCKS = {
 	LoadConsortium: consortium,
 	LoadLibraries: libraries,
 	LoadLibraryCount: libraryCount,
+	LoadAnnouncements: { announcements: [] },
 	LoadLibraryContacts: libraryDetail,
 	LoadLibraryUsers: libraryUsers,
 	LibraryUserProvisioningAvailable: libraryUserProvisioning,
@@ -63,6 +70,10 @@ const MOCKS = {
 	// scan would measure an error page and pass for the wrong reason.
 	LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
 	LoadLocations: { locations: { totalSize: 0, content: [] } },
+	LoadGroup: groupDetail,
+	LoadResolvedFunctionalSettings: resolvedSettings,
+	LoadSettingsBearingGroupType: { settingsBearingGroupType: "REGION" },
+	...patronRequestDetailMocks,
 };
 
 /**
@@ -92,6 +103,28 @@ const ROUTES: {
 		path: "/consortium",
 		ready: async (page) => {
 			await expect(page.getByRole("tab", { name: /profile/i })).toBeVisible();
+		},
+	},
+	{
+		// V-12's compose form, plus the confirmation dialog behind it. A form is where
+		// accessible names and error association fail, and the dialog is the widest-reaching
+		// control in the application — a modal that traps focus badly is worse here than
+		// almost anywhere.
+		path: "/consortium/announcements",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("textbox", { name: "Headline" }),
+			).toBeVisible();
+		},
+	},
+	{
+		// Six tabs, an audit grid and the Actions menu. It was scanned by nothing until
+		// 2026-09-24, and carried a critical aria-valid-attr-value the whole time: the
+		// tabs had no `value`, so the selected one's aria-controls named a panel id
+		// nothing rendered.
+		path: `/patronRequests/${TRACKED_REQUEST.id}`,
+		ready: async (page) => {
+			await expect(page.getByRole("button", { name: "Actions" })).toBeVisible();
 		},
 	},
 	{
@@ -256,7 +289,9 @@ const ADMIN_EDIT_SURFACES = [
 			await page.getByRole("button", { name: "Actions" }).click();
 			await page.getByRole("menuitem", { name: "Edit" }).click();
 			await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
-			await expect(page.getByRole("textbox", { name: "Full name" })).toBeVisible();
+			await expect(
+				page.getByRole("textbox", { name: "Full name" }),
+			).toBeVisible();
 		},
 	},
 	{
@@ -277,8 +312,42 @@ const ADMIN_EDIT_SURFACES = [
 	},
 ] as const;
 
+/**
+ * The V-22.6 inheritance panel, which the route table cannot reach: it is a grid of
+ * provenance chips and revert buttons on a group's settings tab, and no page this file
+ * already visits renders one. Its own spec scans it in one colour scheme; contrast fails
+ * in exactly one of the two, so it is scanned here in both.
+ */
+const GROUP_ID = "99999999-1111-5111-9111-111111111111";
+
+const SYMPOSIA_SURFACES = [
+	{
+		label: "group functional setting inheritance",
+		path: `/groups/${GROUP_ID}/settings`,
+		open: async (page: Page) => {
+			await expect(
+				page.getByRole("heading", { level: 2, name: /functional settings/i }),
+			).toBeVisible();
+		},
+	},
+	{
+		// V-22.2's select, on the library profile's edit mode. Scanning that page reported
+		// seven unlabelled fields until the inputs there were given accessible names; it
+		// is only scannable now because they were.
+		label: "library shelf classification",
+		path: `/libraries/${LIBRARY_ID}`,
+		open: async (page: Page) => {
+			await page.getByRole("button", { name: "Actions" }).click();
+			await page.getByRole("menuitem", { name: "Edit" }).click();
+			await expect(
+				page.getByRole("combobox", { name: "Shelf classification" }),
+			).toBeVisible();
+		},
+	},
+] as const;
+
 for (const scheme of ["light", "dark"] as const) {
-	for (const surface of ADMIN_EDIT_SURFACES) {
+	for (const surface of [...ADMIN_EDIT_SURFACES, ...SYMPOSIA_SURFACES]) {
 		test.describe(`WCAG 2.2 AA - ${surface.label}, ${scheme}`, () => {
 			test.use({ colorScheme: scheme });
 
@@ -360,8 +429,15 @@ test.describe("WCAG 2.2 AA - high contrast", () => {
 test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 	// Every route above that a legacy deployment still has. /accounts is gone, and its
 	// absence is asserted in legacy-service.spec.ts rather than scanned here.
+	// Routes that do not EXIST on 8.71.0 rather than merely looking different there. The
+	// accounts grid needs the provisioning API; announcements need a store this release has
+	// no table for, and their route's beforeLoad redirects to /consortium when the flag is
+	// off — so scanning them here would assert that a page renders which is deliberately
+	// unreachable.
 	const LEGACY_ROUTES = ROUTES.filter(
-		(route) => !route.path.includes("/accounts"),
+		(route) =>
+			!route.path.includes("/accounts") &&
+			!route.path.includes("/announcements"),
 	);
 
 	for (const scheme of ["light", "dark"] as const) {

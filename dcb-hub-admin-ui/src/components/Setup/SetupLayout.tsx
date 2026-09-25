@@ -58,8 +58,9 @@ function SetupLayoutInner({
 
 	const chapter = SETUP_CHAPTERS[step];
 	// The chapters this deployment actually asks. Not every one this flow knows about:
-	// the discovery chapter is absent before dcb-service 9.0.0, and announcing "Step 5
-	// of 6" over a rail showing five would be a worse answer than not asking at all.
+	// the discovery chapter is absent before dcb-service 9.0.0 and wherever Symposia is
+	// not run, and announcing "Step 5 of 6" over a rail showing five would be a worse
+	// answer than not asking at all.
 	const steps = consortiumSetupSteps();
 	const isFirstChapter = step === steps[0];
 	const announcement = t("setup.announcement", {

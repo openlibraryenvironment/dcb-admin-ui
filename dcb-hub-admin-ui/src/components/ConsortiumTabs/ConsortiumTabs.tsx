@@ -2,7 +2,10 @@ import { useTranslation } from "react-i18next";
 import { Tabs } from "@mui/material";
 
 import { TabLink } from "@components/TabLink/TabLink";
-import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
+import {
+	isAnnouncementsEnabled,
+	isConsortiumBrandingEnabled,
+} from "@helpers/featureFlags";
 
 /**
  * The Consortium tab bar, in one place - W-12.
@@ -39,6 +42,14 @@ const TABS: ReadonlyArray<ConsortiumTab> = [
 		labelKey: "nav.consortium.branding",
 		enabled: isConsortiumBrandingEnabled,
 	},
+	// V-12. Hidden until dcb-service can store one — the same reasoning as branding above,
+	// and the same division of labour: hiding the tab is UX, and the route's own guard is
+	// what answers a typed URL.
+	{
+		path: "/consortium/announcements",
+		labelKey: "nav.consortium.announcements",
+		enabled: isAnnouncementsEnabled,
+	},
 	// Setup stays reachable after it is finished: it is also how appearance, discovery
 	// branding and functional settings are revisited, and a flow that vanishes the moment
 	// it succeeds is a flow nobody can correct.
@@ -60,6 +71,7 @@ export type ConsortiumTabId =
 	| "onboarding"
 	| "contacts"
 	| "branding"
+	| "announcements"
 	| "setup";
 
 const PATH_BY_ID: Record<ConsortiumTabId, string> = {
@@ -69,6 +81,7 @@ const PATH_BY_ID: Record<ConsortiumTabId, string> = {
 	onboarding: "/consortium/onboarding",
 	contacts: "/consortium/contacts",
 	branding: "/consortium/branding",
+	announcements: "/consortium/announcements",
 	setup: "/setup",
 };
 

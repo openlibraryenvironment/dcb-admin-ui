@@ -58,6 +58,7 @@ import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { hostlmsParamsSchema } from "@schemas/routeParams/hostlmsParams";
 import type { LoadHostLmsQueryVariables } from "@generated/graphql";
 
+import { detailRefetchInterval } from "@constants/refetchIntervals";
 interface HostLmsFormFields {
 	name: string;
 	suppressionRulesetName: string;
@@ -119,7 +120,7 @@ function HostLMSDetails() {
 		enabled: !!hostlmsId,
 		// Paused in edit mode: a background refetch feeding `values` would
 		// overwrite half-typed credentials with what is still stored.
-		refetchInterval: editMode ? false : 120000,
+		refetchInterval: detailRefetchInterval(editMode),
 	});
 
 	const hostlms: HostLMS = data?.hostLms?.content?.[0];
@@ -135,7 +136,10 @@ function HostLMSDetails() {
 	 */
 	const { values: initialConfigFields, unmappedKeys } = useMemo(
 		() =>
-			clientConfigToFields(hostlms?.lmsClientClass, hostlms?.clientConfig ?? {}),
+			clientConfigToFields(
+				hostlms?.lmsClientClass,
+				hostlms?.clientConfig ?? {},
+			),
 		[hostlms?.lmsClientClass, hostlms?.clientConfig],
 	);
 
@@ -198,7 +202,9 @@ function HostLMSDetails() {
 		// Compared as JSON because the config is a free-form object: there is no
 		// field list to walk, and sending it unchanged would re-run the ping and
 		// ingest probes against the LMS for nothing.
-		if (JSON.stringify(nextConfig) !== JSON.stringify(hostlms.clientConfig ?? {}))
+		if (
+			JSON.stringify(nextConfig) !== JSON.stringify(hostlms.clientConfig ?? {})
+		)
 			changedFields.clientConfig = nextConfig;
 
 		if (Object.keys(changedFields).length === 0) {
@@ -374,12 +380,7 @@ function HostLMSDetails() {
 							</Grid>
 
 							<ConfigItem title={t("hostlms.code")} value={hostlms.code} />
-							{editableText(
-								"name",
-								t("hostlms.name"),
-								hostlms.name,
-								true,
-							)}
+							{editableText("name", t("hostlms.name"), hostlms.name, true)}
 							<ConfigItem title={t("hostlms.id")} value={hostlms.id} />
 							<ConfigItem
 								title={t("hostlms.lms_client")}

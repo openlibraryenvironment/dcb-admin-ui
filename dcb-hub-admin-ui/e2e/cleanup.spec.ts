@@ -4,7 +4,7 @@ import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { useLegacyService } from "./fixtures/legacy-service-mocks";
-import { scanForViolations } from "./fixtures/axe";
+import { scanForViolations, waitForDialogToSettle } from "./fixtures/axe";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
 import locations from "./fixtures-data/locations.json";
@@ -125,6 +125,11 @@ test.describe("Bulk clean up against dcb-service 9.0.0", () => {
 
 		// The dialog is a surface a user acts on, so it is held to the same floor.
 		// scanForViolations asserts internally, as the gate's own specs call it.
+		//
+		// Settled first. Mid-fade, axe composites the Paper against the backdrop and
+		// reported the Close button at 2.39:1 on #729eb9 - a pair that is nowhere in the
+		// theme, which is the tell. See waitForDialogToSettle.
+		await waitForDialogToSettle(page);
 		await scanForViolations(page);
 
 		await dialog.getByRole("button", { name: /Clean up anyway/ }).click();

@@ -3,8 +3,12 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import {
+	isAnnouncementsEnabled,
+	isConsortiumBrandingEnabled,
 	isInsightsEnabled,
 	isAuditExplorerEnabled,
+	isShelfBrowseEnabled,
+	isSymposiaEnabled,
 } from "@helpers/featureFlags";
 
 // A flag is only useful if the environment can actually set it. featureFlags.ts reads
@@ -115,5 +119,69 @@ describe("flags fail closed", () => {
 		});
 		expect(isInsightsEnabled()).toBe(true);
 		expect(isAuditExplorerEnabled()).toBe(true);
+	});
+});
+
+describe("the surfaces Symposia gates", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.unstubAllEnvs();
+	});
+
+	const withFlags = (flags: Record<string, string>) => {
+		for (const name of [
+			"VITE_FEATURE_SYMPOSIA",
+			"VITE_FEATURE_ANNOUNCEMENTS",
+			"VITE_FEATURE_SHELF_BROWSE",
+			"VITE_FEATURE_CONSORTIUM_BRANDING",
+		]) {
+			// Same reason as the block above: a developer's .env must not decide this.
+			vi.stubEnv(name, "");
+		}
+
+		vi.stubGlobal("window", { __APP_ENV__: flags });
+	};
+
+	// Announcements are read in the discovery front end, and a shelf classification exists
+	// to order a shelf browse there. A consortium running no discovery product has no use
+	// for either, however new its dcb-service is.
+	it("keeps them off with their own flag on but Symposia absent", () => {
+		withFlags({
+			VITE_FEATURE_ANNOUNCEMENTS: "true",
+			VITE_FEATURE_SHELF_BROWSE: "true",
+		});
+
+		expect(isSymposiaEnabled()).toBe(false);
+		expect(isAnnouncementsEnabled()).toBe(false);
+		expect(isShelfBrowseEnabled()).toBe(false);
+	});
+
+	// Each still needs its own flag: dcb-service declares neither field on any release, and
+	// asking for one it does not declare fails the whole operation rather than returning
+	// null. Symposia is a second condition, not a replacement.
+	it("keeps them off with Symposia on but their own flag absent", () => {
+		withFlags({ VITE_FEATURE_SYMPOSIA: "true" });
+
+		expect(isAnnouncementsEnabled()).toBe(false);
+		expect(isShelfBrowseEnabled()).toBe(false);
+	});
+
+	it("turns them on when both are set", () => {
+		withFlags({
+			VITE_FEATURE_SYMPOSIA: "true",
+			VITE_FEATURE_ANNOUNCEMENTS: "true",
+			VITE_FEATURE_SHELF_BROWSE: "true",
+		});
+
+		expect(isAnnouncementsEnabled()).toBe(true);
+		expect(isShelfBrowseEnabled()).toBe(true);
+	});
+
+	// Branding is NOT gated: the logo and header icon are what DCB Admin puts in its own
+	// app bar, so the capability stays on and only its patron-facing fields are hidden.
+	it("leaves consortium branding alone", () => {
+		withFlags({ VITE_FEATURE_CONSORTIUM_BRANDING: "true" });
+
+		expect(isConsortiumBrandingEnabled()).toBe(true);
 	});
 });

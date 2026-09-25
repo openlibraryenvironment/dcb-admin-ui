@@ -170,7 +170,9 @@
 		"description_generic": "Consortia that use OpenRS DCB can include any combination of public, academic and specialist libraries and collections. <paragraph/>DCB connects libraries across ILS, LMS and Discovery products to handle resource sharing at scale, whether they choose to use the same or a mix of commercial or open source interfaces and central indexes.<paragraph/>",
 		"brand": {
 			"section": "Patron-facing brand",
+			"section_chrome": "Consortium mark",
 			"section_help": "The mark, background and welcome your patrons see in discovery. The logo and header icon are the SAME images DCB Admin uses in its own app bar and landing card — set them once and both follow.",
+			"section_chrome_help": "The logo and header icon DCB Admin shows in its own app bar and browser tab.",
 			"logo_url": "Logo",
 			"logo_url_help": "The lockup shown above the search box. Upload one, or paste a full web address beginning http:// or https://. Leave blank to show the consortium's name on its own.",
 			"logo_url_invalid": "Upload an image, or enter a full web address beginning http:// or https://, or leave this blank.",
@@ -272,7 +274,8 @@
 				"virtual_patron_names_visible": "When enabled, virtual patron records will carry the real patron's name. Leave off to keep virtual patrons anonymous.",
 				"deny_library_mapping_edit": "When enabled, this prevents library staff from editing their mappings in DCB Admin for Libraries. Leave disabled if you want to manage mappings centrally.",
 				"select_unavailable": "Items that are currently on loan or otherwise unavailable are still offered when DCB resolves a request, rather than skipped."
-			}
+			},
+			"virtual_patron_names_polaris": "Virtual patron names (Polaris)"
 		},
 		"title": "Consortium",
 		"url": "Website URL",
@@ -347,7 +350,30 @@
 			"settings_legend": "Consortium functional settings",
 			"settings_changeable": "Every setting here can be changed later on the consortium's functional settings page."
 		},
-		"link_url_invalid": "Enter a full web address starting with https:// or http://"
+		"link_url_invalid": "Enter a full web address starting with https:// or http://",
+		"announcements": {
+			"title": "Tell every patron",
+			"scope_help": "For news that affects finding and requesting across the whole consortium: an outage, a system change, a source going live. Not events, newsletters or promotions — those belong on a library's own website. One notice shows at a time.",
+			"headline": "Headline",
+			"body": "What you want to say",
+			"body_help": "Plain text. Formatting and links are not shown.",
+			"expires": "Show until",
+			"expires_help": "Required. A notice with no end date is one nobody takes down, and a strip that is always there is one patrons stop reading.",
+			"urgent": "Urgent",
+			"urgent_help": "An urgent notice also shows to patrons whose own library has published something. A routine one steps aside for theirs.",
+			"dismissible": "Patrons can dismiss this",
+			"publish": "Publish to every library",
+			"confirm_title": "Publish to every patron of every member library?",
+			"confirm_body": "This will show to patrons of all {{libraries}} member libraries as soon as you publish. It is the widest-reaching thing you can do here.",
+			"confirm_publish": "Yes, publish it",
+			"cancel": "Cancel",
+			"current": "Published notices",
+			"none": "Nothing published.",
+			"expired": "Finished",
+			"until": "Shows until {{date}}",
+			"withdraw": "Take down",
+			"unavailable": "Announcements are not available on this deployment yet. They need a newer DCB service."
+		}
 	},
 	"data_change_log": {
 		"action": "Action",
@@ -1633,7 +1659,13 @@
 		"target_loan_to_borrow_ratio": "Target loan to borrow ratio",
 		"target_loan_to_borrow_ratio_help": "The balance of lending to borrowing this library is aiming for. Recorded for reporting; DCB does not enforce it.",
 		"principal_label_help": "This library's own word for the patron identifier on the discovery sign-in screen, such as “Borrower number”. Leave blank to use discovery's default wording.",
-		"secret_label_help": "This library's own word for the patron credential, such as “Password” or “PIN”. Leave blank to use discovery's default wording."
+		"secret_label_help": "This library's own word for the patron credential, such as “Password” or “PIN”. Leave blank to use discovery's default wording.",
+		"classification": {
+			"title": "Shelf classification",
+			"dewey": "Dewey Decimal",
+			"lcc": "Library of Congress",
+			"not_stated": "Not stated"
+		}
 	},
 	"locations": {
 		"alert_text": "Failed to fetch the locations, please refresh the page.",
@@ -1851,7 +1883,8 @@
 			"profile": "Profile",
 			"insights": "Insights",
 			"setup": "Setup",
-			"branding": "Branding"
+			"branding": "Branding",
+			"announcements": "Announcements"
 		},
 		"groups": {
 			"bibs": "Bib records",
@@ -2264,7 +2297,16 @@
 		"view": "View",
 		"virtual_item": "Virtual item",
 		"virtual_patron": "Virtual patron",
-		"title": "Patron request"
+		"title": "Patron request",
+		"check_in_progress": "Checking for updates",
+		"rollback_in_progress": "Rollback in progress",
+		"action_slow": "the library's system can be slow to answer",
+		"check_successful_changed": "Check complete. The status is now {{status}}.",
+		"check_successful_unchanged": "Check complete. The status is unchanged ({{status}}).",
+		"cleanup_successful_changed": "The clean up was successful. The status is now {{status}}.",
+		"cleanup_successful_unchanged": "The clean up was reported as successful, but the status is unchanged ({{status}}). Check the audit log before treating this request as closed.",
+		"rollback_successful_changed": "The rollback was successful. The status is now {{status}}.",
+		"rollback_successful_unchanged": "The rollback has been requested, but the status is still {{status}}. It may not have taken effect yet."
 	},
 	"patron_requests": {
 		"cleanup": "Force clean up",
@@ -3139,13 +3181,16 @@
 		"feature": {
 			"consortium_branding": "Consortium branding",
 			"consortium_support_url": "Consortium patron support link",
+			"announcements": "Patron announcements",
 			"ncip_onboarding": "DCB NCIP onboarding",
 			"insights": "Insights",
 			"insights_trends": "Insights duration trends",
 			"guarded_cleanup": "Guarded clean up",
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
-			"local_holds": "Maximum local holds per agency"
+			"local_holds": "Maximum local holds per agency",
+			"settings_inheritance": "Settings inheritance",
+			"shelf_browse": "Shelf browse"
 		},
 		"status": {
 			"ready": "On, and served by this dcb-service",
@@ -3158,5 +3203,45 @@
 			"available": "{{feature}} is now served by this dcb-service. Set {{flag}}=true to switch it on.",
 			"premature": "{{feature}} is switched on, but this dcb-service does not serve it. Set {{flag}}=false until the service is upgraded."
 		}
+	},
+	"settings_inheritance": {
+		"title": "Functional settings",
+		"introduction": "Each setting either follows the consortium, or has been set for this library on its own. Change a switch to set it here; revert to follow the consortium again.",
+		"source_header": "Where this comes from",
+		"actions_header": "Actions",
+		"set_here": "Set for this library",
+		"inherited_from": "Inherited from {{source}}",
+		"undecided": "Not set anywhere",
+		"revert": "Revert to inherited",
+		"toggle_label": "{{setting}} enabled",
+		"reason_single": "Set for {{scope}} in DCB Admin",
+		"reason_revert": "Reverted to inherited for {{scope}} in DCB Admin",
+		"announced_set": "{{setting}} is now {{state}} for this library",
+		"announced_reverted": "{{setting}} now follows the consortium again for this library",
+		"level": {
+			"LIBRARY": "this library",
+			"LIBRARY_GROUP": "its group",
+			"CONSORTIUM": "the consortium"
+		},
+		"bulk": {
+			"title": "Set for chosen libraries",
+			"introduction": "This writes an explicit value for each library you choose, so they keep it when the consortium changes. Reverting removes it, and those libraries follow the consortium again.",
+			"what": "What to do",
+			"enable": "Enable it for the chosen libraries",
+			"disable": "Disable it for the chosen libraries",
+			"inherit": "Revert them to following the consortium",
+			"libraries": "Libraries",
+			"libraries_help": "Choose one or more libraries.",
+			"too_many": "Choose no more than {{max}} libraries at a time.",
+			"reason": "Reason for this change",
+			"reason_help": "Recorded against every library you change, so this can be accounted for later.",
+			"apply_one": "Apply to 1 library",
+			"apply_other": "Apply to {{count}} libraries",
+			"applied": "Applied to {{changed}} of the {{asked}} libraries you chose."
+		},
+		"introduction_with_group": "Each setting follows the consortium, or its group, or has been set for this library on its own. Change a switch to set it here; revert to follow the wider setting again.",
+		"introduction_group": "Each setting either follows the consortium, or has been set for this group. A value set here applies to every library in the group that has not set its own.",
+		"group_not_settings_bearing": "Settings are carried by {{type}} groups on this deployment, so this group has none. A value set here would apply to no library.",
+		"no_group_level": "No group type carries settings on this deployment, so settings resolve from a library or from the consortium."
 	}
 }

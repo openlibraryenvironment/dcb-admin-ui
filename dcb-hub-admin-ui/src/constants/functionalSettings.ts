@@ -114,3 +114,30 @@ export const defaultFunctionalSettingSelection = (): Record<string, boolean> =>
 			setting.defaultEnabled,
 		]),
 	);
+
+/**
+ * A label for every functional setting, not only those `CONSORTIUM_FUNCTIONAL_SETTINGS`
+ * offers at creation: the inheritance display shows every setting, decided or not, so
+ * `VIRTUAL_PATRON_NAMES_POLARIS` appears here and not there.
+ */
+export const SETTING_LABEL_KEYS: Record<string, string> = {
+	OWN_LIBRARY_BORROWING: "consortium.settings.own_library_borrowing",
+	PICKUP_ANYWHERE: "consortium.settings.pickup_anywhere",
+	RE_RESOLUTION: "consortium.settings.re_resolution",
+	SELECT_UNAVAILABLE_ITEMS: "consortium.settings.select_unavailable",
+	TRIGGER_SUPPLIER_RENEWAL: "consortium.settings.trigger_supplier_renewal",
+	DENY_LIBRARY_MAPPING_EDIT: "consortium.settings.deny_library_mapping_edit",
+	VIRTUAL_PATRON_NAMES_VISIBLE: "consortium.settings.virtual_patron_names_visible",
+	VIRTUAL_PATRON_NAMES_POLARIS: "consortium.settings.virtual_patron_names_polaris",
+};
+
+/**
+ * The label key for a setting name, or null when there is none.
+ *
+ * Null rather than a key built by string manipulation: an unknown name means dcb-service has
+ * gained a setting this build has never heard of, and rendering `consortium.settings.thing`
+ * as a missing translation is worse than rendering the enum value, which is at least the
+ * thing an administrator can search the release notes for.
+ */
+export const settingLabelKey = (name: string): string | null =>
+	SETTING_LABEL_KEYS[name] ?? null;

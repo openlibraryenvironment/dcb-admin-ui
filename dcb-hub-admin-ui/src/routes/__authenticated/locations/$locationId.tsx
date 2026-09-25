@@ -37,6 +37,7 @@ import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Location } from "@models/Location";
 import type { LoadLocationQueryVariables } from "@generated/graphql";
 
+import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 interface LocationFormFields {
 	name: string;
 	printLabel?: string | null;
@@ -72,7 +73,7 @@ function LocationDetails() {
 				query: `id:${locationId}`,
 			}),
 		enabled: !!locationId,
-		refetchInterval: 120000,
+		refetchInterval: DETAIL_REFETCH_MS,
 	});
 
 	const location: Location = data?.locations?.content?.[0];

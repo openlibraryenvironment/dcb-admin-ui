@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
@@ -54,6 +54,13 @@ import {
 	isCleanupEligible,
 } from "@helpers/cleanupPatronRequest";
 import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
+import {
+	actionProgressMessage,
+	SLOW_ACTION_MS,
+	statusChange,
+	type StatusChange,
+} from "@helpers/actionProgress";
+import { staleTimeFromNextPoll } from "@helpers/patronRequestFreshness";
 import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
@@ -64,6 +71,7 @@ import type {
 	LoadPatronRequestQueryVariables,
 } from "@generated/graphql";
 
+import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
 });
@@ -126,6 +134,19 @@ function RouteComponent() {
 				{ query: `id:${id}` },
 			),
 		enabled: !!id,
+		// Both windows come from dcb-service's own schedule rather than from a number
+		// picked here - see @helpers/patronRequestFreshness.
+		staleTime: (query) =>
+			staleTimeFromNextPoll(
+				(
+					query.state.data as
+						| {
+								patronRequests?: { content?: { nextScheduledPoll?: string }[] };
+						  }
+						| undefined
+				)?.patronRequests?.content?.[0]?.nextScheduledPoll,
+			),
+		refetchInterval: DETAIL_REFETCH_MS,
 	});
 
 	const patronRequest = data?.patronRequests?.content?.[0];
@@ -208,6 +229,33 @@ function RouteComponent() {
 		libraryBasicsByAgencyCodeQuery(gqlClient, patronAgency?.code, "patron"),
 	);
 
+	// What the last action did to the status, once its refetch has settled.
+	//
+	// The alert opens as soon as the POST returns, because the user should not wait on a
+	// refetch to be told their action worked; this sharpens its wording a moment later.
+	// "Check complete" alone left the ordinary outcome - that nothing moved - looking
+	// identical to a status change the user then had to hunt for.
+	const [outcome, setOutcome] = useState<StatusChange>({ kind: "unknown" });
+
+	/** The status after a refetch, read from the cache rather than from this render. */
+	const statusFromCache = () => {
+		const fresh = queryClient.getQueryData(["patronRequest", id]) as
+			{ patronRequests?: { content?: { status?: string }[] } } | undefined;
+		return fresh?.patronRequests?.content?.[0]?.status;
+	};
+
+	const outcomeText = (
+		unknownKey: string,
+		changedKey: string,
+		unchangedKey: string,
+	) => {
+		if (outcome.kind === "changed")
+			return t(changedKey, { status: outcome.to });
+		if (outcome.kind === "unchanged")
+			return t(unchangedKey, { status: outcome.status });
+		return t(unknownKey);
+	};
+
 	const updateMutation = useMutation({
 		mutationFn: () =>
 			axios.post(
@@ -215,9 +263,14 @@ function RouteComponent() {
 				{},
 				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
 			),
-		onSuccess: () => {
+		// The status before the POST, captured here rather than read in onSuccess: by
+		// then the invalidation has already replaced it.
+		onMutate: () => ({ before: patronRequest?.status }),
+		onSuccess: async (_data, _variables, context) => {
+			setOutcome({ kind: "unknown" });
 			setUpdateSuccessAlertVisibility(true);
-			queryClient.invalidateQueries({ queryKey: ["patronRequest", id] });
+			await queryClient.invalidateQueries({ queryKey: ["patronRequest", id] });
+			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
 			console.error("Error starting update", error);
@@ -237,22 +290,25 @@ function RouteComponent() {
 			),
 		// The helper reports a refusal rather than throwing, so a 409 lands here, not in
 		// onError: it is the server declining, and the answer to it is the override.
-		onSuccess: (outcome) => {
-			if (outcome.kind === "cleaned") {
+		onMutate: () => ({ before: patronRequest?.status }),
+		onSuccess: async (result, _variables, context) => {
+			if (result.kind === "cleaned") {
+				setOutcome({ kind: "unknown" });
 				setCleanupSuccessAlertVisibility(true);
 				// Refresh the detail AND every patron request grid/tab count so the
 				// finalised status shows up on navigating back.
-				invalidatePatronRequestQueries(queryClient);
+				await invalidatePatronRequestQueries(queryClient);
+				setOutcome(statusChange(context?.before, statusFromCache()));
 				return;
 			}
 
-			if (outcome.kind === "refused") {
-				setCleanupRefusal({ status: outcome.status, detail: outcome.detail });
+			if (result.kind === "refused") {
+				setCleanupRefusal({ status: result.status, detail: result.detail });
 				setCleanupOverrideOpen(true);
 				return;
 			}
 
-			if (outcome.kind === "forbidden") {
+			if (result.kind === "forbidden") {
 				setCleanupRefusal({ detail: t("patron_request.cleanup_forbidden") });
 				return;
 			}
@@ -278,15 +334,61 @@ function RouteComponent() {
 				{},
 				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
 			),
-		onSuccess: () => {
+		onMutate: () => ({ before: patronRequest?.status }),
+		onSuccess: async (_data, _variables, context) => {
+			setOutcome({ kind: "unknown" });
 			setRollbackSuccessAlertVisibility(true);
-			invalidatePatronRequestQueries(queryClient);
+			await invalidatePatronRequestQueries(queryClient);
+			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
 			console.error("Error starting rollback", error);
 			setRollbackErrorAlertVisibility(true);
 		},
 	});
+
+	// The action in flight, and how long it has been. `submittedAt` rather than the
+	// action's name: it changes on every invocation, so a second run of the SAME action
+	// does not inherit the previous run's slow-path message and report a ten-second wait
+	// immediately.
+	const runningSubmittedAt = updateMutation.isPending
+		? updateMutation.submittedAt
+		: cleanupMutation.isPending
+			? cleanupMutation.submittedAt
+			: rollbackMutation.isPending
+				? rollbackMutation.submittedAt
+				: null;
+
+	const [slowSubmittedAt, setSlowSubmittedAt] = useState<number | null>(null);
+
+	useEffect(() => {
+		if (runningSubmittedAt === null) return;
+		const timer = setTimeout(
+			() => setSlowSubmittedAt(runningSubmittedAt),
+			SLOW_ACTION_MS,
+		);
+		return () => clearTimeout(timer);
+	}, [runningSubmittedAt]);
+
+	const actionProgress = actionProgressMessage(
+		[
+			{
+				running: updateMutation.isPending,
+				message: t("patron_request.check_in_progress"),
+			},
+			{
+				running: cleanupMutation.isPending,
+				message: t("patron_request.cleanup_in_progress"),
+			},
+			{
+				running: rollbackMutation.isPending,
+				message: t("patron_request.rollback_in_progress"),
+			},
+		],
+		runningSubmittedAt !== null && slowSubmittedAt === runningSubmittedAt
+			? t("patron_request.action_slow")
+			: null,
+	);
 
 	const bibClusterRecordUrl = cfg.VITE_DCB_SEARCH_BASE
 		? "/search/" + patronRequest?.bibClusterId + "/cluster"
@@ -406,7 +508,7 @@ function RouteComponent() {
 	return (
 		<PageContainer title={patronRequest?.clusterRecord?.title}>
 			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
-				<PageActionsMenu actions={pageActions} />
+				<PageActionsMenu actions={pageActions} pending={actionProgress} />
 			</Stack>
 			<TabContext value={activeTab}>
 				<TabList
@@ -418,12 +520,16 @@ function RouteComponent() {
 					{/** The tabs are a little frustrating with variants because they use functional variants.
 					 * So style variants like those we prefer to use everywhere else don't get a look in.
 					 */}
-					<Tab label={t("patron_request.general")} />
-					<Tab label={t("requesting.bib_record")} />
-					<Tab label={t("patron_request.supplying")} />
-					<Tab label={t("patron_request.borrowing")} />
-					<Tab label={t("patron_request.pickup")} />
-					<Tab label={t("audit_log.title")} />
+					{/* An explicit `value` on each tab, matching its TabPanel below. Without
+					    it TabContext derives the pair from the tab's index and the selected
+					    tab's aria-controls names a panel id nothing renders - axe
+					    aria-valid-attr-value, critical, on every visit to this page. */}
+					<Tab label={t("patron_request.general")} value={0} />
+					<Tab label={t("requesting.bib_record")} value={1} />
+					<Tab label={t("patron_request.supplying")} value={2} />
+					<Tab label={t("patron_request.borrowing")} value={3} />
+					<Tab label={t("patron_request.pickup")} value={4} />
+					<Tab label={t("audit_log.title")} value={5} />
 				</TabList>
 
 				<TabPanel value={0}>
@@ -571,10 +677,10 @@ function RouteComponent() {
 									spacing={0.5}
 								>
 									<RenderAttribute
-										attribute={patronRequest?.suppliers[0]?.localItemBarcode}
+										attribute={patronRequest?.suppliers?.[0]?.localItemBarcode}
 									/>
 									<CopyToClipboardButton
-										value={patronRequest?.suppliers[0]?.localItemBarcode}
+										value={patronRequest?.suppliers?.[0]?.localItemBarcode}
 										label={t("patron_request.item_barcode")}
 									/>
 								</Stack>
@@ -626,8 +732,16 @@ function RouteComponent() {
 								autoHideDuration={6000}
 								alertText={
 									updateSuccessAlertVisibility
-										? t("patron_request.check_successful")
-										: t("patron_request.cleanup_successful")
+										? outcomeText(
+												"patron_request.check_successful",
+												"patron_request.check_successful_changed",
+												"patron_request.check_successful_unchanged",
+											)
+										: outcomeText(
+												"patron_request.cleanup_successful",
+												"patron_request.cleanup_successful_changed",
+												"patron_request.cleanup_successful_unchanged",
+											)
 								}
 								key={
 									updateSuccessAlertVisibility
@@ -664,7 +778,11 @@ function RouteComponent() {
 								open={rollbackSuccessAlertVisibility}
 								severityType="success"
 								autoHideDuration={6000}
-								alertText={t("patron_request.rollback_successful")}
+								alertText={outcomeText(
+									"patron_request.rollback_successful",
+									"patron_request.rollback_successful_changed",
+									"patron_request.rollback_successful_unchanged",
+								)}
 								key="rollback-success-alert"
 								onCloseFunc={() => setRollbackSuccessAlertVisibility(false)}
 							/>
@@ -786,7 +904,7 @@ function RouteComponent() {
 									{t("patron_request.supplying_agency_code")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localAgency}
+									attribute={patronRequest?.suppliers?.[0]?.localAgency}
 								/>
 							</Stack>
 						</Grid>
@@ -1020,7 +1138,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={
-										patronRequest?.clusterRecord?.members[0]?.sourceRecordId
+										patronRequest?.clusterRecord?.members?.[0]?.sourceRecordId
 									}
 								/>
 							</Stack>
@@ -1032,7 +1150,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={
-										patronRequest?.clusterRecord?.members[0]?.sourceSystemId
+										patronRequest?.clusterRecord?.members?.[0]?.sourceSystemId
 									}
 								/>
 							</Stack>
@@ -1096,7 +1214,7 @@ function RouteComponent() {
 									{t("patron_request.supplying_agency_code")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localAgency}
+									attribute={patronRequest?.suppliers?.[0]?.localAgency}
 								/>
 							</Stack>
 						</Grid>
@@ -1106,7 +1224,7 @@ function RouteComponent() {
 									{t("hostlms.code")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.hostLmsCode}
+									attribute={patronRequest?.suppliers?.[0]?.hostLmsCode}
 								/>
 							</Stack>
 						</Grid>
@@ -1116,7 +1234,7 @@ function RouteComponent() {
 									{t("patron_request.active")}
 								</Typography>
 								<RenderAttribute
-									attribute={String(patronRequest?.suppliers[0]?.isActive)}
+									attribute={String(patronRequest?.suppliers?.[0]?.isActive)}
 								/>
 							</Stack>
 						</Grid>
@@ -1127,7 +1245,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={dayjs(
-										patronRequest?.suppliers[0]?.dateCreated,
+										patronRequest?.suppliers?.[0]?.dateCreated,
 									).format("YYYY-MM-DD HH:mm")}
 								/>
 							</Stack>
@@ -1139,7 +1257,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={dayjs(
-										patronRequest?.suppliers[0]?.dateUpdated,
+										patronRequest?.suppliers?.[0]?.dateUpdated,
 									).format("YYYY-MM-DD HH:mm")}
 								/>
 							</Stack>
@@ -1150,7 +1268,7 @@ function RouteComponent() {
 									{t("patron_request.local_request_status")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localStatus}
+									attribute={patronRequest?.suppliers?.[0]?.localStatus}
 								/>
 							</Stack>
 						</Grid>
@@ -1160,7 +1278,7 @@ function RouteComponent() {
 									{t("patron_request.local_request_status_raw")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.rawLocalStatus}
+									attribute={patronRequest?.suppliers?.[0]?.rawLocalStatus}
 								/>
 							</Stack>
 						</Grid>
@@ -1169,7 +1287,9 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.supplier_uuid")}
 								</Typography>
-								<RenderAttribute attribute={patronRequest?.suppliers[0]?.id} />
+								<RenderAttribute
+									attribute={patronRequest?.suppliers?.[0]?.id}
+								/>
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1178,7 +1298,7 @@ function RouteComponent() {
 									{t("patron_request.local_bib_id")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localBibId}
+									attribute={patronRequest?.suppliers?.[0]?.localBibId}
 								/>
 							</Stack>
 						</Grid>
@@ -1188,7 +1308,7 @@ function RouteComponent() {
 									{t("patron_request.local_supplier_id")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localId}
+									attribute={patronRequest?.suppliers?.[0]?.localId}
 								/>
 							</Stack>
 						</Grid>
@@ -1224,10 +1344,10 @@ function RouteComponent() {
 									spacing={0.5}
 								>
 									<RenderAttribute
-										attribute={patronRequest?.suppliers[0]?.localItemBarcode}
+										attribute={patronRequest?.suppliers?.[0]?.localItemBarcode}
 									/>
 									<CopyToClipboardButton
-										value={patronRequest?.suppliers[0]?.localItemBarcode}
+										value={patronRequest?.suppliers?.[0]?.localItemBarcode}
 										label={t("patron_request.local_item_barcode")}
 									/>
 								</Stack>
@@ -1239,7 +1359,9 @@ function RouteComponent() {
 									{t("patron_request.local_item_loc")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localItemLocationCode}
+									attribute={
+										patronRequest?.suppliers?.[0]?.localItemLocationCode
+									}
 								/>
 							</Stack>
 						</Grid>
@@ -1249,7 +1371,7 @@ function RouteComponent() {
 									{t("patron_request.local_item_status")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localItemStatus}
+									attribute={patronRequest?.suppliers?.[0]?.localItemStatus}
 								/>
 							</Stack>
 						</Grid>
@@ -1259,7 +1381,7 @@ function RouteComponent() {
 									{t("patron_request.local_item_status_raw")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.rawLocalItemStatus}
+									attribute={patronRequest?.suppliers?.[0]?.rawLocalItemStatus}
 								/>
 							</Stack>
 						</Grid>
@@ -1269,7 +1391,7 @@ function RouteComponent() {
 									{t("patron_request.renewal_count_supplier")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localRenewalCount?.toString()}
+									attribute={patronRequest?.suppliers?.[0]?.localRenewalCount?.toString()}
 								/>
 							</Stack>
 						</Grid>
@@ -1279,7 +1401,7 @@ function RouteComponent() {
 									{t("patron_request.local_item_type")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localItemType}
+									attribute={patronRequest?.suppliers?.[0]?.localItemType}
 								/>
 							</Stack>
 						</Grid>
@@ -1289,7 +1411,7 @@ function RouteComponent() {
 									{t("patron_request.supplier_ctype")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.canonicalItemType}
+									attribute={patronRequest?.suppliers?.[0]?.canonicalItemType}
 								/>
 							</Stack>
 						</Grid>
@@ -1299,7 +1421,7 @@ function RouteComponent() {
 									{t("patron_request.local_item_id")}
 								</Typography>
 								<RenderAttribute
-									attribute={patronRequest?.suppliers[0]?.localItemId}
+									attribute={patronRequest?.suppliers?.[0]?.localItemId}
 								/>
 							</Stack>
 						</Grid>
@@ -1361,7 +1483,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={
-										patronRequest?.suppliers[0]?.virtualPatron?.localId
+										patronRequest?.suppliers?.[0]?.virtualPatron?.localId
 									}
 								/>
 							</Stack>
@@ -1378,12 +1500,12 @@ function RouteComponent() {
 								>
 									<RenderAttribute
 										attribute={
-											patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
+											patronRequest?.suppliers?.[0]?.virtualPatron?.localBarcode
 										}
 									/>
 									<CopyToClipboardButton
 										value={
-											patronRequest?.suppliers[0]?.virtualPatron?.localBarcode
+											patronRequest?.suppliers?.[0]?.virtualPatron?.localBarcode
 										}
 										label={t("patron_request.local_barcode")}
 									/>
@@ -1397,7 +1519,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={
-										patronRequest?.suppliers[0]?.virtualPatron?.localPtype
+										patronRequest?.suppliers?.[0]?.virtualPatron?.localPtype
 									}
 								/>
 							</Stack>
@@ -1409,7 +1531,7 @@ function RouteComponent() {
 								</Typography>
 								<RenderAttribute
 									attribute={
-										patronRequest?.suppliers[0]?.virtualPatron?.canonicalPtype
+										patronRequest?.suppliers?.[0]?.virtualPatron?.canonicalPtype
 									}
 								/>
 							</Stack>

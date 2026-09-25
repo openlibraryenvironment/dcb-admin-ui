@@ -15,6 +15,7 @@ import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { agencyParamsSchema } from "@schemas/routeParams/agencyParams";
 import type { LoadAgencyQueryVariables } from "@generated/graphql";
 
+import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 export const Route = createFileRoute("/__authenticated/agencies/$agencyId")({
 	params: {
 		parse: (raw) => agencyParamsSchema.parse(raw),
@@ -53,7 +54,7 @@ function AgencyDetails() {
 				query: `id:${agencyId}`,
 			}),
 		enabled: !!agencyId,
-		refetchInterval: 120000,
+		refetchInterval: DETAIL_REFETCH_MS,
 	});
 
 	const agency: Agency = data?.agencies?.content?.[0];

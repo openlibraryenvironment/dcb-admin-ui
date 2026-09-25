@@ -1,14 +1,16 @@
 import { gql } from "graphql-request";
 
 import { capabilitySelection } from "@helpers/capabilityFields";
+import { classificationSchemeSelection } from "@fragments/shelfBrowse";
 
 // Library
 // This query fetches all information about a Library from DCB.
 // The main place this is used is the individual library page.
 //
-// A FUNCTION, not a constant: the brand fields are absent from UpdateLibraryInput and
-// Library before dcb-service 9.0.0, and an undeclared field fails the whole operation.
-// See @helpers/capabilityFields for why the flag cannot be read at module scope.
+// A FUNCTION, not a constant: window.__APP_ENV__ is assigned after an await in main.tsx,
+// so a document built at module scope reads every flag as off for the whole session. Two
+// capabilities gate fields here - the 9.0.0 brand columns and V-22.2's classification -
+// and an undeclared field fails the whole operation rather than returning null.
 export const getLibrary = () => gql`
 	query LoadLibrary($query: String!) {
 		libraries(query: $query) {
@@ -24,6 +26,7 @@ export const getLibrary = () => gql`
 				longitude
 				training
 				patronWebsite
+				${classificationSchemeSelection()}
 				discoverySystem
 				type
 				backupDowntimeSchedule

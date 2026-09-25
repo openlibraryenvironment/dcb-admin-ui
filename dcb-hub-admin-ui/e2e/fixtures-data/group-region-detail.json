@@ -1,0 +1,42 @@
+{
+	"libraryGroups": {
+		"content": [
+			{
+				"id": "99999999-1111-5111-9111-111111111111",
+				"code": "NORTH-EAST",
+				"name": "North East",
+				"type": "REGION",
+				"consortium": {
+					"id": "cccccccc-1111-5111-9111-111111111111",
+					"name": "MOBIUS"
+				},
+				"members": [
+					{
+						"id": "mmmmmmmm-1111-5111-9111-111111111111",
+						"library": {
+							"id": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+							"agencyCode": "alpha",
+							"agency": {
+								"authProfile": "BASIC/UNIQUE-ID+PIN",
+								"code": "alpha",
+								"id": "a1b2c3d4-1111-5111-9111-111111111111",
+								"isBorrowingAgency": true,
+								"isSupplyingAgency": true,
+								"hostLms": {
+									"lmsClientClass": null,
+									"code": "alpha-lms",
+									"id": "h1h1h1h1-1111-5111-9111-111111111111"
+								}
+							},
+							"shortName": "Alpha",
+							"fullName": "Alpha Test Library",
+							"abbreviatedName": "ALPHA",
+							"longitude": null,
+							"latitude": null
+						}
+					}
+				]
+			}
+		]
+	}
+}
