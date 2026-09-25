@@ -1,0 +1,44 @@
+{
+	"resolvedFunctionalSettings": [
+		{
+			"name": "OWN_LIBRARY_BORROWING",
+			"enabled": true,
+			"source": "CONSORTIUM",
+			"sourceId": "cccccccc-1111-5111-9111-111111111111",
+			"sourceName": "MOBIUS",
+			"inherited": true,
+			"lastEditedBy": "a consortium administrator",
+			"dateUpdated": "2026-08-01T09:00:00Z"
+		},
+		{
+			"name": "PICKUP_ANYWHERE",
+			"enabled": false,
+			"source": "LIBRARY",
+			"sourceId": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+			"sourceName": "Alpha Test Library",
+			"inherited": false,
+			"lastEditedBy": "a library administrator",
+			"dateUpdated": "2026-09-01T09:00:00Z"
+		},
+		{
+			"name": "RE_RESOLUTION",
+			"enabled": true,
+			"source": "LIBRARY_GROUP",
+			"sourceId": "99999999-1111-5111-9111-111111111111",
+			"sourceName": "North East",
+			"inherited": true,
+			"lastEditedBy": "a consortium administrator",
+			"dateUpdated": "2026-08-15T09:00:00Z"
+		},
+		{
+			"name": "SELECT_UNAVAILABLE_ITEMS",
+			"enabled": false,
+			"source": null,
+			"sourceId": null,
+			"sourceName": null,
+			"inherited": false,
+			"lastEditedBy": null,
+			"dateUpdated": null
+		}
+	]
+}

@@ -4,6 +4,7 @@ import path from "node:path";
 import { buildSchema, type GraphQLSchema } from "graphql";
 
 import {
+	DEPLOYMENT_FLAGS,
 	SERVICE_CAPABILITIES,
 	capabilityStatus,
 	meetsServiceVersion,
@@ -171,10 +172,15 @@ describe("the matrix describes every flag, and only real ones", () => {
 
 	it("lists every declared flag", () => {
 		// A flag added without a row here is a feature whose version threshold nobody
-		// can look up, which is the thing this panel exists to prevent.
-		expect(SERVICE_CAPABILITIES.map((entry) => entry.flag).sort()).toEqual(
-			declaredFlags.slice().sort(),
-		);
+		// can look up, which is the thing this panel exists to prevent. DEPLOYMENT_FLAGS
+		// is the accounted-for exception: it says what this consortium runs, not what
+		// its dcb-service serves, so it has no threshold to look up.
+		expect(
+			[
+				...SERVICE_CAPABILITIES.map((entry) => entry.flag),
+				...DEPLOYMENT_FLAGS,
+			].sort(),
+		).toEqual(declaredFlags.slice().sort());
 	});
 
 	it("gives every capability a translated label", () => {

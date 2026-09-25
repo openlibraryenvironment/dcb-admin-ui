@@ -41,7 +41,6 @@ function DataChangeLogDetails() {
 				},
 			),
 		enabled: !!dataChangeLogId,
-		refetchInterval: 120000,
 	});
 
 	const dataChangeLog = data?.dataChangeLog?.content?.[0];

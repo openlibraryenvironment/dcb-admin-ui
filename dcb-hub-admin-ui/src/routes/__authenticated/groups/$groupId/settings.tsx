@@ -21,13 +21,20 @@ import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { isSettingsInheritanceEnabled } from "@helpers/featureFlags";
+import { getSettingsBearingGroupType } from "@queries/getResolvedFunctionalSettings";
+import FunctionalSettingInheritance from "@components/FunctionalSettingInheritance/FunctionalSettingInheritance";
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { updateAgencyParticipationStatus } from "@mutations/updateAgencyParticipation";
 import { CONFIRMATION_TEXT_MAP } from "@helpers/getConfirmationText";
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
-import type { LoadGroupQueryVariables } from "@generated/graphql";
+import type {
+	LoadGroupQueryVariables,
+	LoadSettingsBearingGroupTypeQuery,
+} from "@generated/graphql";
 
+import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 export const Route = createFileRoute(
 	"/__authenticated/groups/$groupId/settings",
 )({
@@ -66,7 +73,25 @@ function GroupSettings() {
 			gqlClient.request<any, LoadGroupQueryVariables>(getLibraryGroupById, {
 				query: `id:${groupId}`,
 			}),
-		refetchInterval: 120000,
+		refetchInterval: DETAIL_REFETCH_MS,
+	});
+
+	/**
+	 * Which group type carries settings on this deployment — §V-22.6b.
+	 *
+	 * Exactly ONE type is settings-bearing, so most groups have no settings at all and
+	 * showing them an editable panel would invite an administrator to configure something
+	 * that resolves for nobody. Deployment configuration, so it is asked once per session.
+	 */
+	const settingsBearingType = useQuery({
+		queryKey: ["settingsBearingGroupType"],
+		queryFn: () =>
+			gqlClient.request<LoadSettingsBearingGroupTypeQuery>(
+				getSettingsBearingGroupType(),
+			),
+		staleTime: Infinity,
+		enabled: isSettingsInheritanceEnabled(),
+		select: (data) => data.settingsBearingGroupType ?? null,
 	});
 
 	const group: Group = data?.libraryGroups?.content?.[0];
@@ -279,6 +304,28 @@ function GroupSettings() {
 					</Button>
 				</Grid>
 			</Grid>
+			{/* §V-22.6. A group is a level of the settings chain, but only if its type is the
+			    one this deployment made settings-bearing — otherwise a value written here
+			    would resolve for no library at all. */}
+			{isSettingsInheritanceEnabled() &&
+				settingsBearingType.isSuccess &&
+				(settingsBearingType.data === group.type ? (
+					<FunctionalSettingInheritance
+						scopeType="LIBRARY_GROUP"
+						scopeId={group.id}
+						scopeName={group.name}
+						canEdit={isAnAdmin}
+					/>
+				) : (
+					<Typography color="text.secondary" sx={{ mt: 4 }}>
+						{settingsBearingType.data
+							? t("settings_inheritance.group_not_settings_bearing", {
+									type: settingsBearingType.data,
+								})
+							: t("settings_inheritance.no_group_level")}
+					</Typography>
+				))}
+
 			<Confirmation
 				open={showConfirmationBorrowing}
 				onClose={() => setConfirmationBorrowing(false)}

@@ -55,7 +55,10 @@ import {
 	isValidLinkUrl,
 	themeOptions,
 } from "@constants/discoveryBranding";
-import { isConsortiumSupportUrlEnabled } from "@helpers/featureFlags";
+import {
+	isConsortiumSupportUrlEnabled,
+	isSymposiaEnabled,
+} from "@helpers/featureFlags";
 import { discoveryStaffUrl } from "@helpers/discoveryStaffUrl";
 import { discoveryBrandFields } from "@schemas/discoveryBrandSchema";
 import {
@@ -799,11 +802,18 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 				    header_image_url and about_image_url INTO brandHeaderIconUrl and
 				    brandLogoUrl, so one mark now serves both DCB Admin and discovery. */}
 						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+							{/* Without Symposia the only fields left are the mark this console
+					    puts in its own app bar, so patron-facing wording would name a
+					    place these images never reach. */}
 							<Typography variant="h3" sx={{ mt: 2 }}>
-								{t("consortium.brand.section")}
+								{isSymposiaEnabled()
+									? t("consortium.brand.section")
+									: t("consortium.brand.section_chrome")}
 							</Typography>
 							<Typography variant="body1">
-								{t("consortium.brand.section_help")}
+								{isSymposiaEnabled()
+									? t("consortium.brand.section_help")
+									: t("consortium.brand.section_chrome_help")}
 							</Typography>
 							{/* Said once, in the section, rather than three times in three help
 					    texts. An administrator choosing between uploading and pasting a
@@ -915,45 +925,47 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 							</Stack>
 						</Grid>
 
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography
-									variant="attributeTitle"
-									color={
-										errors.brandBackgroundImageUrl && editMode
-											? "error"
-											: "primary.attributeTitle"
-									}
-								>
-									{t("consortium.brand.background_image_url")}
-								</Typography>
-								<Controller
-									name="brandBackgroundImageUrl"
-									control={control}
-									render={({ field }) =>
-										editMode ? (
-											<BrandImageField
-												value={field.value ?? ""}
-												onChange={field.onChange}
-												stagedFile={stagedImages[field.name] ?? null}
-												onStageFile={(file) => stageImage(field.name, file)}
-												label={t("consortium.brand.background_image_url")}
-												uploadsAvailable={brandUploadsAvailable}
-												error={!!errors.brandBackgroundImageUrl}
-												helperText={
-													errors.brandBackgroundImageUrl?.message ??
-													t("consortium.brand.background_image_url_help")
-												}
-											/>
-										) : (
-											<RenderAttribute
-												attribute={consortium.brandBackgroundImageUrl}
-											/>
-										)
-									}
-								/>
-							</Stack>
-						</Grid>
+						{isSymposiaEnabled() && (
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography
+										variant="attributeTitle"
+										color={
+											errors.brandBackgroundImageUrl && editMode
+												? "error"
+												: "primary.attributeTitle"
+										}
+									>
+										{t("consortium.brand.background_image_url")}
+									</Typography>
+									<Controller
+										name="brandBackgroundImageUrl"
+										control={control}
+										render={({ field }) =>
+											editMode ? (
+												<BrandImageField
+													value={field.value ?? ""}
+													onChange={field.onChange}
+													stagedFile={stagedImages[field.name] ?? null}
+													onStageFile={(file) => stageImage(field.name, file)}
+													label={t("consortium.brand.background_image_url")}
+													uploadsAvailable={brandUploadsAvailable}
+													error={!!errors.brandBackgroundImageUrl}
+													helperText={
+														errors.brandBackgroundImageUrl?.message ??
+														t("consortium.brand.background_image_url_help")
+													}
+												/>
+											) : (
+												<RenderAttribute
+													attribute={consortium.brandBackgroundImageUrl}
+												/>
+											)
+										}
+									/>
+								</Stack>
+							</Grid>
+						)}
 
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
@@ -995,114 +1007,120 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 							</Stack>
 						</Grid>
 
-						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
-							<Stack direction={"column"}>
-								<Typography
-									id={labelId("defaultThemeName")}
-									variant="attributeTitle"
-									color={
-										errors.defaultThemeName && editMode
-											? "error"
-											: "primary.attributeTitle"
-									}
-								>
-									{t("consortium.brand.theme")}
-								</Typography>
-								<Controller
-									name="defaultThemeName"
-									control={control}
-									render={({ field }) =>
-										editMode ? (
-											// A list, not a text field, and not a colour picker. A theme
-											// from the registry has been contrast-tested in every mode;
-											// a hex an administrator types has not, and nothing here
-											// could tell them it failed.
-											<TextField
-												{...field}
-												// `select`, not `htmlInput`. A TextField in select mode
-												// renders MUI's Select: the native input is hidden and
-												// the thing a screen reader meets is a div with
-												// role="combobox", so an aria-labelledby on the input
-												// names something nobody can reach. SelectDisplayProps
-												// is that div. The axe gate told the difference — the
-												// other five fields went green and this one did not.
-												slotProps={{
-													select: {
-														SelectDisplayProps: {
-															"aria-labelledby": labelId("defaultThemeName"),
+						{isSymposiaEnabled() && (
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography
+										id={labelId("defaultThemeName")}
+										variant="attributeTitle"
+										color={
+											errors.defaultThemeName && editMode
+												? "error"
+												: "primary.attributeTitle"
+										}
+									>
+										{t("consortium.brand.theme")}
+									</Typography>
+									<Controller
+										name="defaultThemeName"
+										control={control}
+										render={({ field }) =>
+											editMode ? (
+												// A list, not a text field, and not a colour picker. A theme
+												// from the registry has been contrast-tested in every mode;
+												// a hex an administrator types has not, and nothing here
+												// could tell them it failed.
+												<TextField
+													{...field}
+													// `select`, not `htmlInput`. A TextField in select mode
+													// renders MUI's Select: the native input is hidden and
+													// the thing a screen reader meets is a div with
+													// role="combobox", so an aria-labelledby on the input
+													// names something nobody can reach. SelectDisplayProps
+													// is that div. The axe gate told the difference — the
+													// other five fields went green and this one did not.
+													slotProps={{
+														select: {
+															SelectDisplayProps: {
+																"aria-labelledby": labelId("defaultThemeName"),
+															},
 														},
-													},
-												}}
-												select
-												fullWidth
-												error={!!errors.defaultThemeName}
-												helperText={
-													errors.defaultThemeName?.message ??
-													t("consortium.brand.theme_help")
-												}
-											>
-												<MenuItem value="">
-													{t("consortium.brand.theme_default")}
-												</MenuItem>
-												{themeOptions(consortium.defaultThemeName).map(
-													(name) => (
-														<MenuItem key={name} value={name}>
-															{t(`theme.themes.${name}`, { defaultValue: name })}
-														</MenuItem>
-													),
-												)}
-											</TextField>
-										) : (
-											<RenderAttribute
-												attribute={consortium.defaultThemeName}
-											/>
-										)
-									}
-								/>
-							</Stack>
-						</Grid>
+													}}
+													select
+													fullWidth
+													error={!!errors.defaultThemeName}
+													helperText={
+														errors.defaultThemeName?.message ??
+														t("consortium.brand.theme_help")
+													}
+												>
+													<MenuItem value="">
+														{t("consortium.brand.theme_default")}
+													</MenuItem>
+													{themeOptions(consortium.defaultThemeName).map(
+														(name) => (
+															<MenuItem key={name} value={name}>
+																{t(`theme.themes.${name}`, {
+																	defaultValue: name,
+																})}
+															</MenuItem>
+														),
+													)}
+												</TextField>
+											) : (
+												<RenderAttribute
+													attribute={consortium.defaultThemeName}
+												/>
+											)
+										}
+									/>
+								</Stack>
+							</Grid>
+						)}
 
-						<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-							<Stack direction={"column"}>
-								<Typography
-									id={labelId("patronWelcome")}
-									variant="attributeTitle"
-									color={
-										errors.patronWelcome && editMode
-											? "error"
-											: "primary.attributeTitle"
-									}
-								>
-									{t("consortium.brand.patron_welcome")}
-								</Typography>
-								<Controller
-									name="patronWelcome"
-									control={control}
-									render={({ field }) =>
-										editMode ? (
-											<TextField
-												{...field}
-												slotProps={{
-													htmlInput: {
-														"aria-labelledby": labelId("patronWelcome"),
-													},
-												}}
-												fullWidth
-												multiline
-												minRows={2}
-												error={!!errors.patronWelcome}
-												helperText={
-													errors.patronWelcome?.message ??
-													t("consortium.brand.patron_welcome_help")
-												}
-											/>
-										) : (
-											<RenderAttribute attribute={consortium.patronWelcome} />
-										)
-									}
-								/>
-							</Stack>
-						</Grid>
+						{isSymposiaEnabled() && (
+							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+								<Stack direction={"column"}>
+									<Typography
+										id={labelId("patronWelcome")}
+										variant="attributeTitle"
+										color={
+											errors.patronWelcome && editMode
+												? "error"
+												: "primary.attributeTitle"
+										}
+									>
+										{t("consortium.brand.patron_welcome")}
+									</Typography>
+									<Controller
+										name="patronWelcome"
+										control={control}
+										render={({ field }) =>
+											editMode ? (
+												<TextField
+													{...field}
+													slotProps={{
+														htmlInput: {
+															"aria-labelledby": labelId("patronWelcome"),
+														},
+													}}
+													fullWidth
+													multiline
+													minRows={2}
+													error={!!errors.patronWelcome}
+													helperText={
+														errors.patronWelcome?.message ??
+														t("consortium.brand.patron_welcome_help")
+													}
+												/>
+											) : (
+												<RenderAttribute attribute={consortium.patronWelcome} />
+											)
+										}
+									/>
+								</Stack>
+							</Grid>
+						)}
 					</>
 				)}
 			</Grid>

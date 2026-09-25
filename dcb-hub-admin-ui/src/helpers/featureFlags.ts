@@ -20,6 +20,20 @@ const readFlag = (name: string): boolean => {
 };
 
 /**
+ * Whether this deployment runs Symposia, the discovery product — VITE_FEATURE_SYMPOSIA.
+ *
+ * Not a dcb-service capability: it says what the CONSORTIUM runs, not what the server
+ * serves, so it has no version threshold and no row in @constants/serviceCapabilities.
+ * A deployment with no discovery front end has no use for the surfaces that configure one,
+ * and an administrator offered them has no way to tell they do nothing.
+ *
+ * It gates only what a patron would see through Symposia. A library's own `discoverySystem`
+ * is that library's OPAC and is unaffected, and so is the consortium's own chrome.
+ */
+export const isSymposiaEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_SYMPOSIA");
+
+/**
  * The guarded cleanup flow — dcb-service 9.0.0 and later.
  *
  * 9.0.0 refuses a cleanup that would delete the borrowing library's virtual records while
@@ -57,6 +71,17 @@ export const isInsightsEnabled = (): boolean =>
  */
 export const isConsortiumBrandingEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_CONSORTIUM_BRANDING");
+
+/**
+ * Patron announcements — V-12. On no dcb-service release: the store, the scoped read and
+ * the three mutations are on the `symposia` branch only, and asking a deployment without
+ * them for `announcements` is a validation error that fails the whole operation. So this
+ * changes the DOCUMENT, not only what renders.
+ *
+ * ANDed with Symposia, which is what displays them.
+ */
+export const isAnnouncementsEnabled = (): boolean =>
+	isSymposiaEnabled() && readFlag("VITE_FEATURE_ANNOUNCEMENTS");
 
 /**
  * The consortium's support link — dcb-service AFTER 9.0.0, V-11.1.
@@ -101,10 +126,10 @@ export const isLibraryUserProvisioningEnabled = (): boolean =>
  * Enable with VITE_FEATURE_AUDIT_EXPLORER=true once the environment's dcb-service
  * is new enough.
  *
- * `auditIncidence` is in no dcb-service anywhere - not 8.71.0, not the 9.0.0 tag, not
- * main, not any branch. It exists only as a hand-written block in this app's
- * schema.graphqls so its documents can be validated. Do not switch this on expecting it
- * to work - see SERVICE_CAPABILITIES in @constants/serviceCapabilities.
+ * `auditIncidence` is on dcb-service `feat/analytics`, which is unmerged, and in no
+ * release - not 8.71.0, not the 9.0.0 tag, not 9.1.0, not main. schema.graphqls carries
+ * it from that branch so its documents can be validated. Do not switch this on against a
+ * release expecting it to work - see SERVICE_CAPABILITIES in @constants/serviceCapabilities.
  */
 export const isAuditExplorerEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_AUDIT_EXPLORER");
@@ -138,3 +163,23 @@ export const isLocalHoldsEnabled = (): boolean =>
  */
 export const isInsightsTrendsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_INSIGHTS_TRENDS");
+
+/**
+ * Settings inheritance: `resolvedFunctionalSettings`, `settingsBearingGroupType` and the two
+ * scoped write mutations, on no dcb-service release yet. Gates the DOCUMENT, not only the
+ * render — an undeclared field fails the whole operation. Separate from
+ * VITE_FEATURE_ANNOUNCEMENTS: the two need not ship in the same release.
+ */
+export const isSettingsInheritanceEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_SETTINGS_INHERITANCE");
+
+/**
+ * Shelf browse: `Library.classificationScheme` and its input field, on no dcb-service release
+ * yet. Gates the DOCUMENT and the mutation VARIABLES of LoadLibraryBasics and UpdateLibrary,
+ * since an undeclared field fails the whole operation. Separate from
+ * VITE_FEATURE_SETTINGS_INHERITANCE: the two need not ship in the same release.
+ *
+ * The scheme exists to order a Symposia shelf browse, so this is off wherever Symposia is.
+ */
+export const isShelfBrowseEnabled = (): boolean =>
+	isSymposiaEnabled() && readFlag("VITE_FEATURE_SHELF_BROWSE");

@@ -92,6 +92,35 @@ async function expectNoHorizontalScroll(page: Page) {
 	expect(overflow.overshoot).toBeLessThanOrEqual(1);
 }
 
+/**
+ * Wait for an entering MUI dialog to reach full opacity before scanning it. Mid-fade, axe
+ * composites the Paper against the backdrop (~#e4e4e4) and reports secondary text at 4.19:1
+ * instead of the settled 5.74:1 — an intermittent contrast failure naming a colour pair that
+ * is nowhere in the theme. `toBeVisible` is true from the first frame, so it does not help.
+ */
+export async function waitForDialogToSettle(page: Page) {
+	// The whole ancestor chain, not just the Paper. MUI fades the Dialog's own wrapper
+	// rather than the Paper, so the Paper reports opacity 1 while everything inside it is
+	// still being composited at less than full opacity — which is why polling the Paper
+	// alone fixed nothing and the failure stayed intermittent.
+	await expect
+		.poll(async () =>
+			page.evaluate(() => {
+				const paper = document.querySelector(".MuiDialog-paper");
+				if (!paper) return null;
+
+				for (let node: Element | null = paper; node; node = node.parentElement) {
+					if (getComputedStyle(node).opacity !== "1") {
+						return "settling";
+					}
+				}
+
+				return "settled";
+			}),
+		)
+		.toBe("settled");
+}
+
 export async function scanForViolations(page: Page) {
 	await expectNoHorizontalScroll(page);
 	await tagLicenceWatermarks(page);

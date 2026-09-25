@@ -11,11 +11,13 @@ import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewFunctionalSetting from "@forms/NewFunctionalSetting/NewFunctionalSetting";
+import BulkSetFunctionalSetting from "@components/FunctionalSettingInheritance/BulkSetFunctionalSetting";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { getConsortiumFunctionalSettings } from "@queries/getConsortiumFunctionalSettings";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
+import { isSettingsInheritanceEnabled } from "@helpers/featureFlags";
 import type { LoadConsortiumFsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
@@ -35,6 +37,7 @@ function FunctionalSettings() {
 
 	const [showNewFunctionalSetting, setShowNewFunctionalSetting] =
 		useState(false);
+	const [showBulkSet, setShowBulkSet] = useState(false);
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const settingMutation = useEntityMutation("functionalSetting");
 
@@ -113,7 +116,7 @@ function FunctionalSettings() {
 						{t("consortium.settings.introduction")}
 					</Typography>
 
-					<Stack direction="row" sx={{ mb: 2 }}>
+					<Stack direction="row" spacing={2} sx={{ mb: 2 }}>
 						<Button
 							variant="contained"
 							onClick={() => setShowNewFunctionalSetting(true)}
@@ -121,6 +124,18 @@ function FunctionalSettings() {
 						>
 							{t("consortium.new_functional_setting.title")}
 						</Button>
+						{/* §V-22.6(2). This grid sets the consortium DEFAULT; the bulk action
+						    writes explicit overrides at library scope, which is a different
+						    thing and says so. */}
+						{isSettingsInheritanceEnabled() && (
+							<Button
+								variant="outlined"
+								onClick={() => setShowBulkSet(true)}
+								disabled={!isAnAdmin}
+							>
+								{t("settings_inheritance.bulk.title")}
+							</Button>
+						)}
 					</Stack>
 
 					<DataGrid
@@ -153,6 +168,13 @@ function FunctionalSettings() {
 			</Grid>
 
 			<EntityMutationDialogs {...settingMutation.dialogProps} />
+
+			{showBulkSet && (
+				<BulkSetFunctionalSetting
+					open={showBulkSet}
+					onClose={() => setShowBulkSet(false)}
+				/>
+			)}
 
 			{showNewFunctionalSetting && (
 				<NewFunctionalSetting

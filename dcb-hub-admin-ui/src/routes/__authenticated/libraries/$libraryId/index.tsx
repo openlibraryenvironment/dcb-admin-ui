@@ -10,7 +10,10 @@ import { isEmpty } from "lodash";
 import {
 	Button,
 	Divider,
+	FormControl,
 	Grid,
+	MenuItem,
+	Select,
 	Stack,
 	TextField,
 	Typography,
@@ -32,6 +35,12 @@ import LibrarySetupBanner from "@components/LibrarySetupBanner/LibrarySetupBanne
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
+import { isShelfBrowseEnabled } from "@helpers/featureFlags";
+import { stripUnsupportedLibraryInput } from "@fragments/shelfBrowse";
+import {
+	CLASSIFICATION_SCHEMES,
+	classificationSchemeLabelKey,
+} from "@constants/classificationSchemes";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
@@ -47,6 +56,7 @@ import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
 
+import { detailRefetchInterval } from "@constants/refetchIntervals";
 export const Route = createFileRoute("/__authenticated/libraries/$libraryId/")({
 	params: {
 		parse: (raw) => libraryParamsSchema.parse(raw),
@@ -91,7 +101,7 @@ function LibraryProfile() {
 		error,
 	} = useQuery({
 		...libraryQuery(gqlClient, libraryId),
-		refetchInterval: 120000,
+		refetchInterval: detailRefetchInterval(editMode),
 	});
 
 	const isConsortiumGroupMember = findConsortium(library?.membership) != null;
@@ -134,6 +144,17 @@ function LibraryProfile() {
 			.transform((v, o) => (o === "" ? null : v))
 			.min(-180)
 			.max(180),
+		// Always in the SCHEMA, only sometimes in the form. Yup ignores a rule for a field
+		// that is not present, and keeping it here means the resolver's inferred type stays
+		// one shape whichever way the flag falls - the same reason settings.tsx keeps
+		// maxLocalHolds in its schema.
+		//
+		// oneOf rather than a free string: the value picks which index field browse sorts
+		// on, and dcb-service refuses an unrecognised one. Catching it here means the
+		// administrator is told before the save rather than by a 400.
+		classificationScheme: Yup.string()
+			.oneOf(["", ...CLASSIFICATION_SCHEMES])
+			.nullable(),
 	});
 
 	const {
@@ -157,6 +178,13 @@ function LibraryProfile() {
 			secretLabel: library?.secretLabel ?? "",
 			latitude: library?.latitude ?? null,
 			longitude: library?.longitude ?? null,
+			// Undefined, not "", when the deployment cannot store it. onSubmit skips
+			// undefined values, so the field never reaches changedFields - and
+			// UpdateLibraryInput on a released dcb-service has no classificationScheme
+			// to receive it.
+			classificationScheme: isShelfBrowseEnabled()
+				? (library?.classificationScheme ?? "")
+				: undefined,
 		},
 	});
 
@@ -188,12 +216,16 @@ function LibraryProfile() {
 			return acc;
 		}, {});
 
-		if (Object.keys(newChangedFields).length === 0) return setEditMode(false);
+		// The form above already omits classificationScheme when the flag is off. This is
+		// the guard for the next person who adds a field without reading that.
+		const supported = stripUnsupportedLibraryInput(newChangedFields);
+
+		if (Object.keys(supported).length === 0) return setEditMode(false);
 		libraryMutation.requestFormEdit({
 			id: library.id,
 			name: library.fullName,
-			changedFields: newChangedFields,
-			changeSummary: formatChangedFields(newChangedFields, library),
+			changedFields: supported,
+			changeSummary: formatChangedFields(supported, library),
 			onSuccess: () => {
 				setEditMode(false);
 				reset();
@@ -446,6 +478,68 @@ function LibraryProfile() {
 						/>
 					</Stack>
 				</Grid>
+				{/* V-22.2. Which classification this library shelves by, which decides the
+				    order shelf browse walks. Behind a flag that changes the DOCUMENT: the
+				    field is on no dcb-service release, and selecting it against one fails
+				    the whole library query. */}
+				{isShelfBrowseEnabled() && (
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography
+								variant="attributeTitle"
+								id="label-classification-scheme"
+							>
+								{t("libraries.classification.title")}
+							</Typography>
+							<Controller
+								name="classificationScheme"
+								control={control}
+								render={({ field }) =>
+									editMode ? (
+										<FormControl fullWidth>
+											<Select
+												{...field}
+												value={field.value ?? ""}
+												displayEmpty
+												// The visible label is a sibling Typography rather than a
+												// bound <label>, so without this the control has no
+												// accessible name. labelId, not inputProps: the element
+												// carrying role="combobox" is the Select's display node,
+												// and inputProps reaches only the hidden native input.
+												labelId="label-classification-scheme"
+											>
+												{/* A real choice, not a placeholder: a library that has
+												    not stated a scheme is one shelf browse is not
+												    offered for. */}
+												<MenuItem value="">
+													{t("libraries.classification.not_stated")}
+												</MenuItem>
+												{CLASSIFICATION_SCHEMES.map((scheme) => (
+													<MenuItem key={scheme} value={scheme}>
+														{t(classificationSchemeLabelKey(scheme) ?? scheme)}
+													</MenuItem>
+												))}
+											</Select>
+										</FormControl>
+									) : (
+										<RenderAttribute
+											attribute={
+												library.classificationScheme
+													? t(
+															classificationSchemeLabelKey(
+																library.classificationScheme,
+															) ?? library.classificationScheme,
+														)
+													: null
+											}
+										/>
+									)
+								}
+							/>
+						</Stack>
+					</Grid>
+				)}
+
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography

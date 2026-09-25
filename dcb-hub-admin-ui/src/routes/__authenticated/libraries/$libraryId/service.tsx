@@ -45,6 +45,7 @@ import { formatChangedFields } from "@helpers/formatChangedFields";
 import { getLibraryServiceInfo } from "@queries/getLibraryServiceInfo";
 import type { LoadLibraryServiceInfoQueryVariables } from "@generated/graphql";
 
+import { detailRefetchInterval } from "@constants/refetchIntervals";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/service",
 )({
@@ -91,7 +92,7 @@ function Service() {
 				},
 			),
 		enabled: !!libraryId,
-		refetchInterval: 120000,
+		refetchInterval: detailRefetchInterval(editMode),
 	});
 
 	const library = data?.libraries?.content?.[0];
@@ -129,7 +130,8 @@ function Service() {
 	const onSubmit = (formData: Record<string, string>) => {
 		const changedFields = Object.keys(formData).reduce<Record<string, string>>(
 			(changed, key) => {
-				if (formData[key] !== (library?.[key] ?? "")) changed[key] = formData[key];
+				if (formData[key] !== (library?.[key] ?? ""))
+					changed[key] = formData[key];
 				return changed;
 			},
 			{},

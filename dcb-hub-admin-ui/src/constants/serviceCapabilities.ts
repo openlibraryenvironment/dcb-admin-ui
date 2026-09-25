@@ -1,5 +1,6 @@
 import {
 	isAuditExplorerEnabled,
+	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
@@ -8,6 +9,8 @@ import {
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
+	isSettingsInheritanceEnabled,
+	isShelfBrowseEnabled,
 } from "@helpers/featureFlags";
 
 /**
@@ -64,6 +67,14 @@ export const LIBRARY_BRAND_FIELDS = [
 	"brandLogoAlt",
 	"defaultThemeName",
 ] as const;
+
+/**
+ * Which classification a library shelves by, added by V9_0_011 — §V-22.2.
+ *
+ * One name, two types. Declared here so the selection builder, the variables filter and
+ * serviceCapabilities.test.ts all read the same list.
+ */
+export const CLASSIFICATION_SCHEME_FIELDS = ["classificationScheme"] as const;
 
 /** Their pre-migration equivalents, still present on dcb-service 8.71.0. */
 export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
@@ -131,6 +142,18 @@ export interface ServiceCapability {
 	fallback?: CapabilityFields;
 }
 
+/**
+ * Flags that are NOT dcb-service capabilities, and so have no `since` to check.
+ *
+ * VITE_FEATURE_SYMPOSIA says which PRODUCTS this consortium runs. Giving it a row here
+ * would make the Environment panel compare it against a dcb-service version and report a
+ * deployment running Symposia as having switched a feature on ahead of its server.
+ *
+ * Listed rather than omitted so serviceCapabilities.test.ts still accounts for every flag
+ * in featureFlags.ts: a flag in neither list is one nobody can look up.
+ */
+export const DEPLOYMENT_FLAGS = ["VITE_FEATURE_SYMPOSIA"] as const;
+
 export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 	{
 		// The library's brand is on this row rather than one of its own because the
@@ -167,10 +190,11 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
-		// `/insights/trend` is on dcb-service branch `insights-improvements` and in no
-		// release. A REST endpoint, not a schema change, so there is nothing to select or
-		// strip - and a SEPARATE row from `insights`, whose `since` is 9.0.0: a
-		// deployment on the release has the surface and 404s this one path.
+		// `/insights/trend` is on dcb-service main and in no release. A REST endpoint, not
+		// a schema change, so there is nothing to select or strip - and a SEPARATE row from
+		// `insights`, whose `since` is 9.0.0: a deployment on the release has the surface
+		// and 404s this one path. It is also NOT on the `symposia` branch, which forked
+		// before it merged.
 		id: "insights_trends",
 		flag: "VITE_FEATURE_INSIGHTS_TRENDS",
 		enabled: isInsightsTrendsEnabled,
@@ -222,7 +246,8 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// On dcb-service MAIN, and in no release: V9_0_008 landed after the 9.0.0 tag.
+		// On the dcb-service `symposia` branch and in no release: V9_0_008__support_url
+		// has not merged, and main's V9_0_008 is a different migration entirely.
 		// A SEPARATE row from consortium_branding, whose `since` is 9.0.0 — one flag over
 		// both would be a lie about one of them, and switching it on at the v9 upgrade
 		// would break the consortium form on every deployment running the release.
@@ -236,9 +261,63 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// `auditIncidence` is in no dcb-service anywhere - no release, not main, no branch.
-		// It is in schema.graphqls by hand - see that file's header - so this row is
-		// checked the same way as the one above.
+		// V-12. On the dcb-service `symposia` branch and in no release at all - not 8.71.0,
+		// not the 9.0.0 tag, not main. Query and Mutation are listed rather than left empty
+		// because listing them is what makes `since: null` a CHECKED claim: the test asserts
+		// they are in the target schema and in none of the releases we hold, and it fails the
+		// day somebody commits the schema of the release that ships them.
+		id: "announcements",
+		flag: "VITE_FEATURE_ANNOUNCEMENTS",
+		enabled: isAnnouncementsEnabled,
+		since: null,
+		fields: {
+			Query: ["announcements"],
+			Mutation: [
+				"createAnnouncement",
+				"updateAnnouncement",
+				"deleteAnnouncement",
+			],
+		},
+	},
+	{
+		// N-3 / V-22.6, on the `symposia` branch and no release. A SEPARATE row from
+		// announcements despite arriving on the same branch: they need not merge in the same
+		// release, and one flag over two capabilities is a lie about whichever lands second.
+		//
+		// Query and Mutation are listed rather than left empty because listing them is what
+		// makes `since: null` a CHECKED claim - the test asserts they are in the target
+		// schema and in none of the releases we hold, and it fails the day somebody commits
+		// the schema of the release that ships them.
+		id: "settings_inheritance",
+		flag: "VITE_FEATURE_SETTINGS_INHERITANCE",
+		enabled: isSettingsInheritanceEnabled,
+		since: null,
+		fields: {
+			Query: ["resolvedFunctionalSettings", "settingsBearingGroupType"],
+			Mutation: [
+				"setFunctionalSettingAtScopes",
+				"revertFunctionalSettingToInherited",
+			],
+		},
+	},
+	{
+		// V-22.2, on the `symposia` branch and no release. SEPARATE from
+		// settings_inheritance despite the same branch: they need not merge in the same
+		// release, and one flag over both would be a lie about whichever lands second.
+		id: "shelf_browse",
+		flag: "VITE_FEATURE_SHELF_BROWSE",
+		enabled: isShelfBrowseEnabled,
+		since: null,
+		fields: {
+			Library: CLASSIFICATION_SCHEME_FIELDS,
+			UpdateLibraryInput: CLASSIFICATION_SCHEME_FIELDS,
+		},
+	},
+	{
+		// `auditIncidence` is on dcb-service `feat/audit-incidence` and no release - not
+		// 8.71.0, not the 9.0.0 tag, not 9.1.0, not main, and not `symposia` either.
+		// schema.graphqls carries it from that branch, so this row is checked the same way
+		// as the one above.
 		id: "audit_explorer",
 		flag: "VITE_FEATURE_AUDIT_EXPLORER",
 		enabled: isAuditExplorerEnabled,

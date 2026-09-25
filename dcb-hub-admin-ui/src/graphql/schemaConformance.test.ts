@@ -4,6 +4,7 @@ import path from "node:path";
 import { buildSchema, parse, validate } from "graphql";
 
 import {
+	DEPLOYMENT_FLAGS,
 	SERVICE_CAPABILITIES,
 	meetsServiceVersion,
 } from "@constants/serviceCapabilities";
@@ -60,6 +61,17 @@ const LEGACY = schemaFrom("schema.v8.71.0.graphqls");
  * hole in the gate; this is a documented door.
  */
 const FLAG_ONLY: Record<string, string> = {
+	// V-12. dcb-service declares none of these on any release, so a deployment on 8.71.0 or
+	// the 9.0.0 tag must never see one — which is what the two narrower passes would
+	// otherwise, correctly, fail on.
+	"queries/getAnnouncements.ts": "VITE_FEATURE_ANNOUNCEMENTS",
+	"mutations/announcements.ts": "VITE_FEATURE_ANNOUNCEMENTS",
+	// N-3 / V-22.6. Same argument as the two above, and a SEPARATE flag: the scoped
+	// settings and the announcements land on the same branch but need not land in the
+	// same release.
+	"queries/getResolvedFunctionalSettings.ts":
+		"VITE_FEATURE_SETTINGS_INHERITANCE",
+	"mutations/functionalSettingScopes.ts": "VITE_FEATURE_SETTINGS_INHERITANCE",
 	"queries/getAuditIncidence.ts": "VITE_FEATURE_AUDIT_EXPLORER",
 	"queries/getLibraryUsers.ts": "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 	"mutations/provisionLibraryUser.ts": "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
@@ -78,7 +90,12 @@ const FLAG_ONLY: Record<string, string> = {
 const flagsFor = (capabilities: readonly { flag: string }[]) =>
 	Object.fromEntries(capabilities.map((entry) => [entry.flag, "true"]));
 
-const ALL_FLAGS_ON = flagsFor(SERVICE_CAPABILITIES);
+const ALL_FLAGS_ON = {
+	...flagsFor(SERVICE_CAPABILITIES),
+	// Symposia gates documents too (the shelf browse fragment), so "all flags on" has to
+	// include it or this pass stops exercising the widest document set.
+	...Object.fromEntries(DEPLOYMENT_FLAGS.map((flag) => [flag, "true"])),
+};
 
 /**
  * The flags a deployment on a given RELEASE would have: every capability that release

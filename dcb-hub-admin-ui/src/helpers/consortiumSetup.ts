@@ -21,7 +21,10 @@
  * the data, and re-asking forever is how a setup flow becomes something people click past.
  */
 
-import { isConsortiumBrandingEnabled } from "@helpers/featureFlags";
+import {
+	isConsortiumBrandingEnabled,
+	isSymposiaEnabled,
+} from "@helpers/featureFlags";
 
 export type ConsortiumSetupStepId =
 	| "appearance"
@@ -45,10 +48,11 @@ const ALL_CONSORTIUM_SETUP_STEPS: ConsortiumSetupStepId[] = [
  * The chapters this deployment actually asks — R-19.
  *
  * A FUNCTION, not a constant. The discovery chapter writes the six merged brand columns,
- * which dcb-service does not have before 9.0.0, so on an older deployment it is not a
- * chapter that fails - it is a chapter that cannot exist. The flag that decides is read
- * from window.__APP_ENV__, which is populated after this module evaluates, so the list
- * cannot be computed at module scope.
+ * which dcb-service does not have before 9.0.0, and it configures what patrons see in
+ * Symposia, which a consortium need not run at all. Either way it is not a chapter that
+ * fails - it is a chapter that cannot exist. Both flags are read from window.__APP_ENV__,
+ * which is populated after this module evaluates, so the list cannot be computed at
+ * module scope.
  *
  * Everything numbered, counted or navigated reads THIS, not the full list: the rail's
  * step numbers, "Step 3 of 6", next/previous, and the progress denominator. Filtering the
@@ -56,7 +60,7 @@ const ALL_CONSORTIUM_SETUP_STEPS: ConsortiumSetupStepId[] = [
  * above the words "Step 5 of 6", or a progress bar that can never reach 100%.
  */
 export const consortiumSetupSteps = (): ConsortiumSetupStepId[] =>
-	isConsortiumBrandingEnabled()
+	isConsortiumBrandingEnabled() && isSymposiaEnabled()
 		? ALL_CONSORTIUM_SETUP_STEPS
 		: ALL_CONSORTIUM_SETUP_STEPS.filter((id) => id !== "discovery");
 

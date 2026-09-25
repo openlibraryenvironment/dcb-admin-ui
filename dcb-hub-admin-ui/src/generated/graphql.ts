@@ -43,6 +43,20 @@ export type ConsortiumInput = {
 	websiteUrl?: string | null | undefined;
 };
 
+export type CreateAnnouncementInput = {
+	body: string;
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	dismissible?: boolean | null | undefined;
+	expiresAt: string;
+	headline: string;
+	reason?: string | null | undefined;
+	scopeId: string | number;
+	scopeType: string;
+	startsAt: string;
+	urgent?: boolean | null | undefined;
+};
+
 export type CreateHostLmsInput = {
 	changeCategory?: string | null | undefined;
 	changeReferenceUrl?: string | null | undefined;
@@ -214,6 +228,26 @@ export type ResendLibraryUserInviteInput = {
 	id: string | number;
 };
 
+export type RevertFunctionalSettingAtScopesInput = {
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	name: FunctionalSettingType;
+	reason: string;
+	scopeIds: Array<string | number>;
+	scopeType: string;
+};
+
+export type SetFunctionalSettingAtScopesInput = {
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	description?: string | null | undefined;
+	enabled: boolean;
+	name: FunctionalSettingType;
+	reason: string;
+	scopeIds: Array<string | number>;
+	scopeType: string;
+};
+
 export type SetLibraryUserEnabledInput = {
 	changeCategory?: string | null | undefined;
 	changeReferenceUrl?: string | null | undefined;
@@ -242,6 +276,19 @@ export type UpdateAgencyParticipationInput = {
 	isBorrowingAgency?: boolean | null | undefined;
 	isSupplyingAgency?: boolean | null | undefined;
 	reason?: string | null | undefined;
+};
+
+export type UpdateAnnouncementInput = {
+	body?: string | null | undefined;
+	changeCategory?: string | null | undefined;
+	changeReferenceUrl?: string | null | undefined;
+	dismissible?: boolean | null | undefined;
+	expiresAt?: string | null | undefined;
+	headline?: string | null | undefined;
+	id: string | number;
+	reason?: string | null | undefined;
+	startsAt?: string | null | undefined;
+	urgent?: boolean | null | undefined;
 };
 
 export type UpdateConsortiumInput = {
@@ -294,6 +341,7 @@ export type UpdateLibraryInput = {
 	brandLogoUrl?: string | null | undefined;
 	changeCategory?: string | null | undefined;
 	changeReferenceUrl?: string | null | undefined;
+	classificationScheme?: string | null | undefined;
 	defaultThemeName?: string | null | undefined;
 	discoverySystem?: string | null | undefined;
 	fullName?: string | null | undefined;
@@ -448,6 +496,40 @@ export type AddLibraryToGroupMutation = {
 	};
 };
 
+export type CreateAnnouncementMutationVariables = Exact<{
+	input: CreateAnnouncementInput;
+}>;
+
+export type CreateAnnouncementMutation = {
+	createAnnouncement: {
+		id: string | null;
+		headline: string | null;
+		urgent: boolean | null;
+		expiresAt: string | null;
+	};
+};
+
+export type UpdateAnnouncementMutationVariables = Exact<{
+	input: UpdateAnnouncementInput;
+}>;
+
+export type UpdateAnnouncementMutation = {
+	updateAnnouncement: {
+		id: string | null;
+		headline: string | null;
+		urgent: boolean | null;
+		expiresAt: string | null;
+	};
+};
+
+export type DeleteAnnouncementMutationVariables = Exact<{
+	input: DeleteEntityInput;
+}>;
+
+export type DeleteAnnouncementMutation = {
+	deleteAnnouncement: { success: boolean; message: string | null };
+};
+
 export type CreateConsortiumMutationVariables = Exact<{
 	input: ConsortiumInput;
 }>;
@@ -587,6 +669,32 @@ export type DeleteReferenceValueMappingMutationVariables = Exact<{
 
 export type DeleteReferenceValueMappingMutation = {
 	deleteReferenceValueMapping: { success: boolean; message: string | null };
+};
+
+export type SetFunctionalSettingAtScopesMutationVariables = Exact<{
+	input: SetFunctionalSettingAtScopesInput;
+}>;
+
+export type SetFunctionalSettingAtScopesMutation = {
+	setFunctionalSettingAtScopes: {
+		name: FunctionalSettingType;
+		scopeType: string;
+		changed: number;
+		scopeIds: Array<string>;
+	};
+};
+
+export type RevertFunctionalSettingToInheritedMutationVariables = Exact<{
+	input: RevertFunctionalSettingAtScopesInput;
+}>;
+
+export type RevertFunctionalSettingToInheritedMutation = {
+	revertFunctionalSettingToInherited: {
+		name: FunctionalSettingType;
+		scopeType: string;
+		changed: number;
+		scopeIds: Array<string>;
+	};
 };
 
 export type ProvisionLibraryUserMutationVariables = Exact<{
@@ -899,6 +1007,27 @@ export type LoadAlarmsQuery = {
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	};
+};
+
+export type LoadAnnouncementsQueryVariables = Exact<{
+	scopeType: string;
+	scopeId: string | number;
+}>;
+
+export type LoadAnnouncementsQuery = {
+	announcements: Array<{
+		id: string | null;
+		scopeType: string | null;
+		scopeId: string | null;
+		headline: string | null;
+		body: string | null;
+		urgent: boolean | null;
+		dismissible: boolean | null;
+		startsAt: string | null;
+		expiresAt: string | null;
+		lastEditedBy: string | null;
+		dateUpdated: string | null;
+	}>;
 };
 
 export type GetAuditByIdQueryVariables = Exact<{
@@ -2336,6 +2465,32 @@ export type LoadPatronRequestsForExportQuery = {
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	} | null;
+};
+
+export type LoadResolvedFunctionalSettingsQueryVariables = Exact<{
+	scopeType: string;
+	scopeId: string | number;
+}>;
+
+export type LoadResolvedFunctionalSettingsQuery = {
+	resolvedFunctionalSettings: Array<{
+		name: FunctionalSettingType;
+		enabled: boolean;
+		source: string | null;
+		sourceId: string | null;
+		sourceName: string | null;
+		inherited: boolean;
+		lastEditedBy: string | null;
+		dateUpdated: string | null;
+	}>;
+};
+
+export type LoadSettingsBearingGroupTypeQueryVariables = Exact<{
+	[key: string]: never;
+}>;
+
+export type LoadSettingsBearingGroupTypeQuery = {
+	settingsBearingGroupType: string | null;
 };
 
 export type LoadRolesQueryVariables = Exact<{

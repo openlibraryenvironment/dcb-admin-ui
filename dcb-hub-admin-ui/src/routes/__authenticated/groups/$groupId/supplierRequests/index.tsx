@@ -31,6 +31,7 @@ import type {
 	LoadPatronRequestsQueryVariables,
 } from "@generated/graphql";
 
+import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 export const Route = createFileRoute(
 	"/__authenticated/groups/$groupId/supplierRequests/",
 )({
@@ -72,7 +73,7 @@ function GroupSupplierRequests() {
 			gqlClient.request<any, LoadGroupQueryVariables>(getLibraryGroupById, {
 				query: `id:${groupId}`,
 			}),
-		refetchInterval: 120000,
+		refetchInterval: DETAIL_REFETCH_MS,
 	});
 
 	const group: Group = groupData?.libraryGroups?.content?.[0];

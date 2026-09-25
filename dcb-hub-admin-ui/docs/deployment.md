@@ -150,12 +150,38 @@ than computed.
 | `VITE_FEATURE_LOCAL_HOLDS`               | **dcb-service main** — no release yet | The per-agency maximum local holds field on a library's Settings tab                                                                          |
 | `VITE_FEATURE_CONSORTIUM_SUPPORT_URL`    | **no release serves this yet**        | The consortium's patron support link on the consortium form                                                                                   |
 | `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**        | Service Info → Audit Explorer                                                                                                                 |
+| `VITE_FEATURE_ANNOUNCEMENTS`             | **no release serves this yet**        | Consortium → Announcements, the notices patrons read in discovery. Also needs `VITE_FEATURE_SYMPOSIA`                                         |
+| `VITE_FEATURE_SETTINGS_INHERITANCE`      | **no release serves this yet**        | Where a functional setting was decided, the bulk set, and the revert to inherited                                                             |
+| `VITE_FEATURE_SHELF_BROWSE`              | **no release serves this yet**        | The classification a library shelves by, which orders discovery's shelf browse. Also needs `VITE_FEATURE_SYMPOSIA`                            |
 
 Note the last three rows. There is deliberately **no single "we are on v9 now" switch**:
 account provisioning and the local holds limit are on dcb-service `main` but in _no
 release_ — not 8.71.0, not the 9.0.0 tag — and the audit explorer has no backend anywhere.
 One boolean would be a lie about all three, and turning it on at the v9 upgrade would break
 all three.
+
+### Consortia that run Symposia
+
+`VITE_FEATURE_SYMPOSIA=true` says this consortium runs Symposia, the discovery product.
+Unlike every flag above it is not about a dcb-service version: it is about which products
+the consortium deploys, so it has no row in the table and none in the Environment page's
+capability panel.
+
+Unset, DCB Admin hides the surfaces that exist only to configure a discovery front end:
+
+- the setup wizard's **Discovery** chapter and its preview of the patron landing page,
+- **Consortium → Announcements**, which patrons read in discovery,
+- the **shelf classification** a library declares, which orders discovery's shelf browse,
+- the patron-facing half of **Consortium → Branding**: the landing background, the
+  discovery theme and the welcome message.
+
+The Branding tab itself stays, because the logo and header icon on it are the same images
+DCB Admin puts in its own app bar and browser tab. A library's own **discovery system**
+field is that library's OPAC and is unaffected.
+
+Announcements and shelf browse need their own flag as well as this one. They are separate
+questions: whether the consortium runs a discovery front end, and whether its dcb-service
+declares the fields the surface reads.
 
 ### Linking to discovery's staff settings
 

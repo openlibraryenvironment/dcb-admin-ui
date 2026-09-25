@@ -13,6 +13,7 @@
 				"longitude": null,
 				"training": false,
 				"patronWebsite": null,
+				"classificationScheme": "DEWEY",
 				"discoverySystem": null,
 				"type": "Public",
 				"backupDowntimeSchedule": null,

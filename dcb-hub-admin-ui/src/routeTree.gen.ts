@@ -48,6 +48,7 @@ import { Route as _authenticatedConsortiumFunctionalSettingsRouteImport } from '
 import { Route as _authenticatedConsortiumEnvironmentRouteImport } from './routes/__authenticated/consortium/environment'
 import { Route as _authenticatedConsortiumContactsRouteImport } from './routes/__authenticated/consortium/contacts'
 import { Route as _authenticatedConsortiumBrandingRouteImport } from './routes/__authenticated/consortium/branding'
+import { Route as _authenticatedConsortiumAnnouncementsRouteImport } from './routes/__authenticated/consortium/announcements'
 import { Route as _authenticatedBibsBibIdRouteImport } from './routes/__authenticated/bibs/$bibId'
 import { Route as _authenticatedAgenciesAgencyIdRouteImport } from './routes/__authenticated/agencies/$agencyId'
 import { Route as _authenticatedServiceInfoServiceStatusIndexRouteImport } from './routes/__authenticated/serviceInfo/serviceStatus/index'
@@ -315,6 +316,12 @@ const _authenticatedConsortiumBrandingRoute =
   _authenticatedConsortiumBrandingRouteImport.update({
     id: '/consortium/branding',
     path: '/consortium/branding',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumAnnouncementsRoute =
+  _authenticatedConsortiumAnnouncementsRouteImport.update({
+    id: '/consortium/announcements',
+    path: '/consortium/announcements',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedBibsBibIdRoute = _authenticatedBibsBibIdRouteImport.update({
@@ -623,6 +630,7 @@ export interface FileRoutesByFullPath {
   '/unauthorised': typeof _authenticatedUnauthorisedRoute
   '/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
+  '/consortium/announcements': typeof _authenticatedConsortiumAnnouncementsRoute
   '/consortium/branding': typeof _authenticatedConsortiumBrandingRoute
   '/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
   '/consortium/environment': typeof _authenticatedConsortiumEnvironmentRoute
@@ -710,6 +718,7 @@ export interface FileRoutesByTo {
   '/': typeof _authenticatedIndexRoute
   '/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
+  '/consortium/announcements': typeof _authenticatedConsortiumAnnouncementsRoute
   '/consortium/branding': typeof _authenticatedConsortiumBrandingRoute
   '/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
   '/consortium/environment': typeof _authenticatedConsortiumEnvironmentRoute
@@ -799,6 +808,7 @@ export interface FileRoutesById {
   '/__authenticated/': typeof _authenticatedIndexRoute
   '/__authenticated/agencies/$agencyId': typeof _authenticatedAgenciesAgencyIdRoute
   '/__authenticated/bibs/$bibId': typeof _authenticatedBibsBibIdRoute
+  '/__authenticated/consortium/announcements': typeof _authenticatedConsortiumAnnouncementsRoute
   '/__authenticated/consortium/branding': typeof _authenticatedConsortiumBrandingRoute
   '/__authenticated/consortium/contacts': typeof _authenticatedConsortiumContactsRoute
   '/__authenticated/consortium/environment': typeof _authenticatedConsortiumEnvironmentRoute
@@ -888,6 +898,7 @@ export interface FileRouteTypes {
     | '/unauthorised'
     | '/agencies/$agencyId'
     | '/bibs/$bibId'
+    | '/consortium/announcements'
     | '/consortium/branding'
     | '/consortium/contacts'
     | '/consortium/environment'
@@ -975,6 +986,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agencies/$agencyId'
     | '/bibs/$bibId'
+    | '/consortium/announcements'
     | '/consortium/branding'
     | '/consortium/contacts'
     | '/consortium/environment'
@@ -1063,6 +1075,7 @@ export interface FileRouteTypes {
     | '/__authenticated/'
     | '/__authenticated/agencies/$agencyId'
     | '/__authenticated/bibs/$bibId'
+    | '/__authenticated/consortium/announcements'
     | '/__authenticated/consortium/branding'
     | '/__authenticated/consortium/contacts'
     | '/__authenticated/consortium/environment'
@@ -1422,6 +1435,13 @@ declare module '@tanstack/react-router' {
       path: '/consortium/branding'
       fullPath: '/consortium/branding'
       preLoaderRoute: typeof _authenticatedConsortiumBrandingRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/consortium/announcements': {
+      id: '/__authenticated/consortium/announcements'
+      path: '/consortium/announcements'
+      fullPath: '/consortium/announcements'
+      preLoaderRoute: typeof _authenticatedConsortiumAnnouncementsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/bibs/$bibId': {
@@ -1789,6 +1809,7 @@ interface _authenticatedRouteChildren {
   _authenticatedIndexRoute: typeof _authenticatedIndexRoute
   _authenticatedAgenciesAgencyIdRoute: typeof _authenticatedAgenciesAgencyIdRoute
   _authenticatedBibsBibIdRoute: typeof _authenticatedBibsBibIdRoute
+  _authenticatedConsortiumAnnouncementsRoute: typeof _authenticatedConsortiumAnnouncementsRoute
   _authenticatedConsortiumBrandingRoute: typeof _authenticatedConsortiumBrandingRoute
   _authenticatedConsortiumContactsRoute: typeof _authenticatedConsortiumContactsRoute
   _authenticatedConsortiumEnvironmentRoute: typeof _authenticatedConsortiumEnvironmentRoute
@@ -1866,6 +1887,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedIndexRoute: _authenticatedIndexRoute,
   _authenticatedAgenciesAgencyIdRoute: _authenticatedAgenciesAgencyIdRoute,
   _authenticatedBibsBibIdRoute: _authenticatedBibsBibIdRoute,
+  _authenticatedConsortiumAnnouncementsRoute:
+    _authenticatedConsortiumAnnouncementsRoute,
   _authenticatedConsortiumBrandingRoute: _authenticatedConsortiumBrandingRoute,
   _authenticatedConsortiumContactsRoute: _authenticatedConsortiumContactsRoute,
   _authenticatedConsortiumEnvironmentRoute:
