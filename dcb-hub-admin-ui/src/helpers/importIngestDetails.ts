@@ -20,6 +20,8 @@ export interface ImportIngestDetails {
 export const importIngestDetailsKeys = {
 	all: ["importIngestDetails"] as const,
 	list: () => [...importIngestDetailsKeys.all, "list"] as const,
+	scoped: (hostLmsCodes: string[]) =>
+		[...importIngestDetailsKeys.all, "scoped", hostLmsCodes] as const,
 	detail: (hostLmsId: string) =>
 		[...importIngestDetailsKeys.all, "detail", hostLmsId] as const,
 };
@@ -42,6 +44,30 @@ export function allImportIngestDetailsQueryOptions(client: AxiosInstance) {
 			return data;
 		},
 		staleTime: ALL_STALE_MS,
+		retry: false as const,
+		throwOnError: false as const,
+	};
+}
+
+// dcb-service refuses a larger scope (HostLmsService.MAX_SCOPED_HOST_LMS).
+export const MAX_SCOPED_HOST_LMS = 50;
+
+/** The named Host LMS only, each counted when asked. */
+export function scopedImportIngestDetailsQueryOptions(
+	client: AxiosInstance,
+	hostLmsCodes: string[],
+) {
+	// Sorted so the same selection made in a different order shares one cache entry.
+	const codes = [...hostLmsCodes].sort();
+	return {
+		queryKey: importIngestDetailsKeys.scoped(codes),
+		queryFn: async (): Promise<ImportIngestDetails[]> => {
+			const { data } = await client.get("/hostlmss/importIngestDetails", {
+				params: { hostLmsCodes: codes.join(",") },
+			});
+			return data;
+		},
+		staleTime: ONE_STALE_MS,
 		retry: false as const,
 		throwOnError: false as const,
 	};

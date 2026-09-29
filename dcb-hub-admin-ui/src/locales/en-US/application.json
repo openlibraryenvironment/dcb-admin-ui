@@ -1,7 +1,6 @@
 {
 	"catalogMetricsByHostLms": {
 		"host_lms_title": "Catalog metrics: {{name}}",
-		"list_timeout": "Counting every Host LMS can take longer than one request is allowed. The count keeps running, so reload in a minute to read it. To check one Host LMS now, open it from the Host LMS list and select View catalog metrics.",
 		"name": "Catalog metrics by Host LMS",
 		"no_results": "No catalog metrics found. Try changing your search terms or filters.",
 		"view": "View catalog metrics"

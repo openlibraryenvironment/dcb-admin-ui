@@ -2,21 +2,25 @@ import { describe, expect, it } from "vitest";
 import type { AxiosInstance } from "axios";
 
 import {
+	MAX_SCOPED_HOST_LMS,
 	allImportIngestDetailsQueryOptions,
 	importIngestDetailsKeys,
 	importIngestDetailsQueryOptions,
 	processingStateCount,
+	scopedImportIngestDetailsQueryOptions,
 } from "@helpers/importIngestDetails";
 
 const recordingClient = (body: unknown = []) => {
 	let capturedUrl = "";
+	let capturedParams: Record<string, unknown> | undefined;
 	const client = {
-		get: async (url: string) => {
+		get: async (url: string, config?: { params?: Record<string, unknown> }) => {
 			capturedUrl = url;
+			capturedParams = config?.params;
 			return { data: body };
 		},
 	} as unknown as AxiosInstance;
-	return { client, url: () => capturedUrl };
+	return { client, url: () => capturedUrl, params: () => capturedParams };
 };
 
 describe("importIngestDetails wire contract", () => {
@@ -34,6 +38,33 @@ describe("importIngestDetails wire contract", () => {
 		await importIngestDetailsQueryOptions(client, "h1").queryFn();
 
 		expect(url()).toBe("/hostlmss/importIngestDetails/h1");
+	});
+
+	it("counts a selection by its Host LMS codes, as one comma-separated parameter", async () => {
+		const { client, url, params } = recordingClient();
+
+		await scopedImportIngestDetailsQueryOptions(client, ["B", "A"]).queryFn();
+
+		expect(url()).toBe("/hostlmss/importIngestDetails");
+		expect(params()).toEqual({ hostLmsCodes: "A,B" });
+	});
+
+	it("keys a selection by its codes, whatever order they were chosen in", () => {
+		const { client } = recordingClient();
+
+		expect(
+			scopedImportIngestDetailsQueryOptions(client, ["B", "A"]).queryKey,
+		).toEqual(
+			scopedImportIngestDetailsQueryOptions(client, ["A", "B"]).queryKey,
+		);
+		expect(
+			scopedImportIngestDetailsQueryOptions(client, ["A"]).queryKey,
+		).not.toEqual(importIngestDetailsKeys.list());
+	});
+
+	it("caps a selection where dcb-service does", () => {
+		// HostLmsService.MAX_SCOPED_HOST_LMS: a larger selection is refused with a 400.
+		expect(MAX_SCOPED_HOST_LMS).toBe(50);
 	});
 
 	it("never retries: a retry of the shared count joins the count already running", () => {

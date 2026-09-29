@@ -1,32 +1,66 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { GridColDef } from "@mui/x-data-grid-premium";
-import { Stack, Typography } from "@mui/material";
+import { Alert, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
+import { z } from "@schemas/zod";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
-import Loading from "@components/Loading/Loading";
-import Error from "@components/Error/Error";
+import ScopeSelector from "@components/Insights/ScopeSelector";
 
 import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { scopeSearchParam } from "@helpers/insightsSearch";
+import { scopeCodes, scopeId, selectedScope } from "@helpers/insightsScope";
+import { insightsScopeOptionsQuery } from "@/queryOptions/libraries";
 import {
+	MAX_SCOPED_HOST_LMS,
 	allImportIngestDetailsQueryOptions,
 	processingStateCount,
+	scopedImportIngestDetailsQueryOptions,
+	type ImportIngestDetails,
 } from "@helpers/importIngestDetails";
+
+// The same scope encoding as Insights, so a link to one reads the same on the other.
+const catalogMetricsSearchSchema = z.object({ scope: scopeSearchParam });
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/catalogMetricsByHostLms/",
 )({
+	validateSearch: catalogMetricsSearchSchema,
 	component: CatalogMetricsByHostLms,
 });
 
 function CatalogMetricsByHostLms() {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
+	const navigate = useNavigate({ from: Route.fullPath });
+	const { scope = [] } = Route.useSearch();
+
+	const gqlClient = useGraphQLClient();
+	const {
+		data: options = [],
+		isLoading: scopeLoading,
+		isError: scopeFailed,
+	} = useQuery(insightsScopeOptionsQuery(gqlClient));
+	const selected = useMemo(
+		() => selectedScope(options, scope),
+		[options, scope],
+	);
+	const codes = useMemo(() => scopeCodes(selected), [selected]);
+
+	// A failed list counts as resolved, as on Insights: the count is consortium-wide and
+	// the selector says why
+	const scoped = scope.length > 0 && !scopeFailed;
+	// Until the library list arrives a scoped URL resolves to no codes, and asking then
+	// would start the consortium-wide count the reader did not ask for.
+	const resolving = scoped && options.length === 0;
+	const nothingToCount = scoped && !resolving && codes.length === 0;
+	const tooMany = codes.length > MAX_SCOPED_HOST_LMS;
 
 	const gridId = "catalogMetricsByHostLms";
 
@@ -53,10 +87,21 @@ function CatalogMetricsByHostLms() {
 
 	const {
 		data: records,
-		isLoading,
+		isFetching,
 		isError,
 		refetch,
-	} = useQuery(allImportIngestDetailsQueryOptions(client));
+	} = useQuery<
+		ImportIngestDetails[],
+		Error,
+		ImportIngestDetails[],
+		readonly unknown[]
+	>({
+		...(scoped
+			? scopedImportIngestDetailsQueryOptions(client, codes)
+			: allImportIngestDetailsQueryOptions(client)),
+		enabled: !resolving && !nothingToCount && !tooMany,
+		placeholderData: keepPreviousData,
+	});
 
 	const countedAt = records?.[0]?.countedAt;
 
@@ -135,43 +180,6 @@ function CatalogMetricsByHostLms() {
 		[t],
 	);
 
-	if (isLoading) {
-		return (
-			// The SAME chrome as the loaded branch, titled with the generic label for
-			// this kind of record. Withholding the breadcrumbs and the title box and
-			// adding them when the data lands inserts 77px above the page and pushes it
-			// down; the specific name replaces this on one line, so the box does not
-			// change height. See docs/performance-budget.md, "Layout shift on every
-			// route".
-			<PageContainer title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
-				<Loading
-					title={t("ui.info.loading.document", {
-						document_type:
-							t("catalogMetricsByHostLms.name").charAt(0).toLowerCase() +
-							t("catalogMetricsByHostLms.name").slice(1),
-					})}
-					subtitle={t("ui.info.wait")}
-				/>
-			</PageContainer>
-		);
-	}
-
-	if (isError) {
-		return (
-			<PageContainer title={t("nav.serviceInfo.catalogMetricsByHostLms")}>
-				<Error
-					title={t("common.error_loading", {
-						page_title: t("nav.serviceInfo.catalogMetricsByHostLms"),
-					})}
-					message={t("ui.info.connection_issue")}
-					description={t("catalogMetricsByHostLms.list_timeout")}
-					action={t("ui.actions.try_again")}
-					onAction={() => void refetch()}
-				/>
-			</PageContainer>
-		);
-	}
-
 	return (
 		<PageContainer
 			title={t("nav.serviceInfo.catalogMetricsByHostLms")}
@@ -179,20 +187,65 @@ function CatalogMetricsByHostLms() {
 			subtitle={t("ui.reference.catalog_build")}
 		>
 			<Stack spacing={2}>
-				<Typography variant="attributeText">
-					{countedAt
+				<ScopeSelector
+					options={options}
+					value={selected}
+					onChange={(next) =>
+						navigate({
+							search: {
+								scope: next.length > 0 ? next.map(scopeId) : undefined,
+							},
+							replace: true,
+						})
+					}
+					loading={scopeLoading}
+					failed={scopeFailed}
+				/>
+				<Typography variant="attributeText" role="status">
+					{countedAt && !isFetching
 						? `${t("catalogMetricsByHostLms.counted_at", {
 								time: dayjs(countedAt).format("YYYY-MM-DD HH:mm:ss"),
 							})} `
 						: ""}
-					{t("catalogMetricsByHostLms.shared_count")}
+					{t(
+						scoped
+							? "catalogMetricsByHostLms.scoped_count"
+							: "catalogMetricsByHostLms.shared_count",
+					)}
 				</Typography>
+				{tooMany && (
+					<Alert severity="warning">
+						{t("catalogMetricsByHostLms.too_many", {
+							max: MAX_SCOPED_HOST_LMS,
+							count: codes.length,
+						})}
+					</Alert>
+				)}
+				{nothingToCount && (
+					<Alert severity="info">
+						{t("catalogMetricsByHostLms.no_host_lms")}
+					</Alert>
+				)}
+				{isError && (
+					<Alert
+						severity="error"
+						action={
+							<Button color="inherit" size="small" onClick={() => refetch()}>
+								{t("catalogMetricsByHostLms.retry")}
+							</Button>
+						}
+					>
+						{scoped
+							? t("ui.info.connection_issue")
+							: t("catalogMetricsByHostLms.list_timeout")}
+					</Alert>
+				)}
 				<DataGrid
 					identifier={gridId}
 					type={"catalogMetricsByHostLms"}
 					columns={columns}
-					rows={records ?? []}
-					loading={isLoading}
+					rows={tooMany || nothingToCount ? [] : (records ?? [])}
+					loading={isFetching || resolving}
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"

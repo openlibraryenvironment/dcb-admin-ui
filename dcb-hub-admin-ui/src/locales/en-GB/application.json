@@ -129,8 +129,9 @@
 		"harvested": "Harvested",
 		"host_lms_title": "Catalogue metrics: {{name}}",
 		"ingested": "Ingested",
-		"list_timeout": "Counting every Host LMS can take longer than one request is allowed. The count keeps running, so reload in a minute to read it. To check one Host LMS now, open it from the Host LMS list and select View catalogue metrics.",
+		"list_timeout": "Counting every Host LMS can take longer than one request is allowed. The count keeps running, so try again in a minute to read it, or choose libraries or a group above to count only those now.",
 		"name": "Catalogue metrics by Host LMS",
+		"no_host_lms": "None of the selected libraries has a Host LMS to count.",
 		"no_checkpoint": "No checkpoint recorded",
 		"no_results": "No catalogue metrics found. Try changing your search terms or filters.",
 		"open_host_lms": "Open the Host LMS record",
@@ -141,9 +142,12 @@
 		"processing_waiting_other": "{{formatted}} records are waiting to be ingested.",
 		"read_errors": "Some details could not be read",
 		"refresh": "Refresh counts",
+		"retry": "Try again",
+		"scoped_count": "Counted when asked, for the selected libraries only. Select a row for one Host LMS.",
 		"shared_count": "Counts for every Host LMS are shared for up to 5 minutes. Select a row for a count taken now.",
 		"source_system": "Source system name",
 		"source_system_id": "Source system UUID",
+		"too_many": "Choose fewer libraries: at most {{max}} Host LMSs can be counted at once, and this selection has {{count}}.",
 		"view": "View catalogue metrics"
 	},
 	"common": {

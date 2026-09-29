@@ -2,16 +2,47 @@ import { expect, test } from "./fixtures/test";
 
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { useAllFeatures } from "./fixtures/flags";
+import { mockGraphQL } from "./fixtures/graphql-mocks";
 import {
 	METRICS_HOST_LMS_ID,
 	UNKNOWN_HOST_LMS_ID,
 	mockCatalogMetrics,
+	scopeLibraries,
 } from "./fixtures/catalog-metrics-mocks";
+import consortiumBasics from "./fixtures-data/consortium-basics.json";
 
 test.describe("Catalog metrics per Host LMS", () => {
 	test.beforeEach(async ({ page }) => {
 		await useAllFeatures(page);
 		await seedAuth(page, { roles: ADMIN_ROLES });
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: scopeLibraries,
+		});
+	});
+
+	test("counts only a chosen group, and keeps the choice on reload", async ({
+		page,
+	}) => {
+		const scopedRequests: string[] = [];
+		await mockCatalogMetrics(page, () => 1200, scopedRequests);
+
+		await page.goto("/serviceInfo/catalogMetricsByHostLms");
+		await page.getByRole("combobox", { name: "Libraries" }).click();
+		await page.getByRole("option", { name: "North" }).click();
+
+		await expect(page.getByRole("status")).toContainText(
+			"for the selected libraries only",
+		);
+		await expect.poll(() => scopedRequests.at(-1)).toBe("alpha-lms,beta-lms");
+		await expect(page).toHaveURL(/scope=/);
+
+		const before = scopedRequests.length;
+		await page.reload();
+
+		await expect.poll(() => scopedRequests.length).toBeGreaterThan(before);
+		expect(scopedRequests.at(-1)).toBe("alpha-lms,beta-lms");
+		await expect(page.getByRole("button", { name: "North" })).toBeVisible();
 	});
 
 	test("opens one Host LMS from the shared list", async ({ page }) => {
