@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { GridColDef } from "@mui/x-data-grid-premium";
+import { Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -11,7 +13,10 @@ import Error from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
-import { ProcessState } from "@models/ProcessState";
+import {
+	allImportIngestDetailsQueryOptions,
+	processingStateCount,
+} from "@helpers/importIngestDetails";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/catalogMetricsByHostLms/",
@@ -50,14 +55,10 @@ function CatalogMetricsByHostLms() {
 		data: records,
 		isLoading,
 		isError,
-	} = useQuery({
-		queryKey: ["catalogMetricsByHostLms"],
-		queryFn: async () => {
-			const res = await client.get("/hostlmss/importIngestDetails");
-			return res.data;
-		},
-		staleTime: 1000 * 60 * 5, // Cache for 5 minutes since this is a heavy request
-	});
+		refetch,
+	} = useQuery(allImportIngestDetailsQueryOptions(client));
+
+	const countedAt = records?.[0]?.countedAt;
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -85,11 +86,8 @@ function CatalogMetricsByHostLms() {
 				flex: 0.5,
 				groupable: false,
 				type: "number",
-				valueGetter: (value, row) => {
-					const states: ProcessState[] = row?.processStates || [];
-					const state = states.find((s) => s.value === "PROCESSING_REQUIRED");
-					return state ? state.count : 0;
-				},
+				valueGetter: (value, row) =>
+					processingStateCount(row, "PROCESSING_REQUIRED"),
 			},
 			{
 				field: "failed",
@@ -97,11 +95,7 @@ function CatalogMetricsByHostLms() {
 				flex: 0.5,
 				groupable: false,
 				type: "number",
-				valueGetter: (value, row) => {
-					const states: ProcessState[] = row?.processStates || [];
-					const state = states.find((s) => s.value === "FAILURE");
-					return state ? state.count : 0;
-				},
+				valueGetter: (value, row) => processingStateCount(row, "FAILURE"),
 			},
 			{
 				field: "ingested",
@@ -109,11 +103,7 @@ function CatalogMetricsByHostLms() {
 				flex: 0.5,
 				groupable: false,
 				type: "number",
-				valueGetter: (value, row) => {
-					const states: ProcessState[] = row?.processStates || [];
-					const state = states.find((s) => s.value === "SUCCESS");
-					return state ? state.count : 0;
-				},
+				valueGetter: (value, row) => processingStateCount(row, "SUCCESS"),
 			},
 			{
 				field: "bibRecordCount",
@@ -174,9 +164,9 @@ function CatalogMetricsByHostLms() {
 						page_title: t("nav.serviceInfo.catalogMetricsByHostLms"),
 					})}
 					message={t("ui.info.connection_issue")}
-					description={t("ui.info.try_later")}
-					action={t("ui.actions.reload")}
-					// onClick={refetch}
+					description={t("catalogMetricsByHostLms.list_timeout")}
+					action={t("ui.actions.try_again")}
+					onAction={() => void refetch()}
 				/>
 			</PageContainer>
 		);
@@ -188,37 +178,47 @@ function CatalogMetricsByHostLms() {
 			docLink="https://openlibraryfoundation.atlassian.net/wiki/x/GgAnyg"
 			subtitle={t("ui.reference.catalog_build")}
 		>
-			<DataGrid
-				identifier={gridId}
-				type={"catalogMetricsByHostLms"}
-				columns={columns}
-				rows={records ?? []}
-				loading={isLoading}
-				paginationMode="client"
-				sortingMode="client"
-				filterMode="client"
-				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
-				disableAggregation={false}
-				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
-				listViewEnabled={false}
-				pivotingEnabled={false}
-				toolbarVisible
-				scrollbarVisible={false}
-				noResultsText={t("catalogMetricsByHostLms.no_results")}
-				searchText={t("ui.data_grid.search")}
-				rowModesModel={rowModesModel}
-				onRowModesModelChange={setRowModesModel}
-			/>
+			<Stack spacing={2}>
+				<Typography variant="attributeText">
+					{countedAt
+						? `${t("catalogMetricsByHostLms.counted_at", {
+								time: dayjs(countedAt).format("YYYY-MM-DD HH:mm:ss"),
+							})} `
+						: ""}
+					{t("catalogMetricsByHostLms.shared_count")}
+				</Typography>
+				<DataGrid
+					identifier={gridId}
+					type={"catalogMetricsByHostLms"}
+					columns={columns}
+					rows={records ?? []}
+					loading={isLoading}
+					paginationMode="client"
+					sortingMode="client"
+					filterMode="client"
+					pagination
+					paginationModel={paginationModel}
+					onPaginationModelChange={handlePaginationChange}
+					sortModel={sortModel}
+					onSortModelChange={handleSortChange}
+					filterModel={filterModel}
+					onFilterModelChange={handleFilterChange}
+					columnVisibilityModel={columnVisibilityModel}
+					onColumnVisibilityModelChange={handleColumnVisibilityChange}
+					disableAggregation={false}
+					disableHoverInteractions={false}
+					disableRowGrouping
+					disablePivoting
+					listViewEnabled={false}
+					pivotingEnabled={false}
+					toolbarVisible
+					scrollbarVisible={false}
+					noResultsText={t("catalogMetricsByHostLms.no_results")}
+					searchText={t("ui.data_grid.search")}
+					rowModesModel={rowModesModel}
+					onRowModesModelChange={setRowModesModel}
+				/>
+			</Stack>
 		</PageContainer>
 	);
 }

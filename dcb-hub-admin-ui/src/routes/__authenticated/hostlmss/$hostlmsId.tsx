@@ -23,6 +23,7 @@ import TabPanel from "@mui/lab/TabPanel";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
+import Link from "@components/Link/Link";
 import Loading from "@components/Loading/Loading";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -421,6 +422,18 @@ function HostLMSDetails() {
 										</Typography>
 										<HostLmsLastPing lastPing={hostlms.lastPing} />
 									</Stack>
+								</Grid>
+							)}
+
+							{!editMode && (
+								<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+									<Link
+										to="/serviceInfo/catalogMetricsByHostLms/$hostlmsId"
+										params={{ hostlmsId: hostlms.id }}
+										underline="hover"
+									>
+										{t("catalogMetricsByHostLms.view")}
+									</Link>
 								</Grid>
 							)}
 						</Grid>
