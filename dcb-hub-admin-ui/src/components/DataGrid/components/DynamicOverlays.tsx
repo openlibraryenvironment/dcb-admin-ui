@@ -1,4 +1,5 @@
-import { Box, Link, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import Link from "@components/Link/Link";
 import { styled } from "@mui/material/styles";
 
 type OverlayType = {
@@ -29,7 +30,7 @@ export function CustomNoDataOverlay({
 				) : null}
 
 				{noDataLink ? (
-					<Link href={noDataLink}> {noDataMessage} </Link>
+					<Link to={noDataLink}> {noDataMessage} </Link>
 				) : (
 					<Typography variant="body1"> {noDataMessage} </Typography>
 				)}

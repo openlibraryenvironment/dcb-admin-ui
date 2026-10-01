@@ -35,7 +35,7 @@ function RequestingHistory() {
 	const customColumns = useCustomColumns();
 	// Per-cluster id so grid UI state (page/sort/filter) is persisted separately
 	// per bib cluster. The row-click `type` is kept as the static
-	// `patronRequestsRecordHistory` below so it still matches specialRedirectionTypes.
+	// `patronRequestsRecordHistory` below so it still matches rowClickRedirects.
 	const gridId = `patronRequestsRecordHistory-${clusterId}`;
 
 	const {

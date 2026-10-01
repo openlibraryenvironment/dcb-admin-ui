@@ -26,6 +26,7 @@ import {
 } from "@hooks/useGridExport";
 import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
+import type { DataGridType } from "@constants/dataGrid/types";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Confirmation from "@components/Confirmation/Confirmation";
 import { RollbackResultDialog } from "./components/RollbackResultDialog";
@@ -46,7 +47,7 @@ declare module "@mui/x-data-grid-premium" {
 			exportMode: string,
 		) => Promise<void> | void;
 		allDataLoading?: boolean;
-		type?: string;
+		type?: DataGridType;
 		onCleanup?: () => void;
 		onRollback?: () => void;
 		selectionCount?: number;
@@ -69,7 +70,7 @@ interface CustomDataGridProps extends Omit<
 	toolbarVisible: boolean;
 	searchText: string;
 	styleOverrides?: SxProps<Theme>;
-	type: string;
+	type: DataGridType;
 	parentApiRef?: RefObject<GridApiPremium | null>;
 	onExport?: (fileType: string, exportMode: string) => Promise<void>;
 	isExporting?: boolean;
@@ -288,9 +289,9 @@ export default function DataGrid({
 						severity: "error",
 						text: t("ui.data_grid.edit_error", {
 							entity:
-								type === "ReferenceValueMapping"
+								type === "referenceValueMappings"
 									? t("mappings.ref_value_one").toLowerCase()
-									: type === "NumericRangeMapping"
+									: type === "numericRangeMappings"
 										? t("mappings.num_range_one").toLowerCase()
 										: type?.toLowerCase(),
 							name: name,

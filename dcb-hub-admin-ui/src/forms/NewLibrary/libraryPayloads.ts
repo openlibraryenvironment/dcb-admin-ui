@@ -274,3 +274,16 @@ export const shouldJoinGroup = (
 	groupId: string | undefined,
 	joinedGroupIds: string[],
 ): boolean => !!groupId && !joinedGroupIds.includes(groupId);
+
+/**
+ * The groups a library already belongs to, from its own record.
+ *
+ * The wizard tracked only the memberships it had written itself, so a RESUMED
+ * library read as belonging to nothing - and the group step, which infers from
+ * that list whether to announce consortium membership and whether to offer the
+ * consortium group in the picker, got both answers wrong.
+ */
+export const existingGroupIds = (library: any): string[] =>
+	((library?.membership ?? []) as any[])
+		.map((member) => member?.libraryGroup?.id)
+		.filter((id): id is string => typeof id === "string" && id.length > 0);

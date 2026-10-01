@@ -70,11 +70,39 @@ function versionMetaPlugin(version: string): Plugin {
 	};
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
 	// Wisdom from Ian: this is done to allow us to deploy the app to a folder rather than the root of a URI.
 	// This approach shold also work for deployment at root.
 	// const env = loadEnv(mode, process.cwd(), '');
 	const env = loadEnv(mode, process.cwd(), "");
+
+	// The dev-only /api proxy's target. Nothing in src/ reads VITE_ILL_API_BASE - it
+	// exists for this proxy and for the deployed inject_env.json - so an unset value
+	// is the normal case for anyone whose VITE_DCB_API_BASE points straight at a
+	// dcb-service.
+	const illApiBase = env.VITE_ILL_API_BASE?.trim();
+	// Nothing reaches the proxy when the API base is absolute, which is the usual local
+	// setup - so the warning is for the one configuration that needs it and would
+	// otherwise 502 with a stack trace naming the wrong path.
+	const apiBaseRoutesThroughProxy = !/^https?:\/\//i.test(
+		env.VITE_DCB_API_BASE?.trim() ?? "",
+	);
+	// Only when a server is actually being started. `build` loads this config too, and
+	// so does `vitest` - which resolves in SERVE mode, so `command` alone does not
+	// exclude it and a warning printed in front of every unit test run is noise nobody
+	// reads.
+	if (
+		!illApiBase &&
+		apiBaseRoutesThroughProxy &&
+		command === "serve" &&
+		!process.env.VITEST
+	) {
+		console.warn(
+			"[dcb-admin-ui] VITE_ILL_API_BASE is not set, so the dev /api proxy is off. " +
+				"Requests to /api/* will hit the SPA fallback. Set it, or point " +
+				"VITE_DCB_API_BASE at an absolute URL.",
+		);
+	}
 
 	// Build-time constants. `version` and `releaseDate` are baked at build time
 	// (they used to be exposed via Next's publicRuntimeConfig); they are NOT runtime
@@ -102,14 +130,27 @@ export default defineConfig(({ mode }) => {
 		],
 		server: {
 			historyApiFallback: true,
-			proxy: {
-				"/api": {
-					target: env.VITE_ILL_API_BASE,
-					changeOrigin: true,
-					secure: false,
-					rewrite: (path) => path.replace(/^\/api/, ""),
-				},
-			},
+			// Registered only when there is somewhere to proxy TO. http-proxy reads
+			// `target` per request, not at startup, so an unset VITE_ILL_API_BASE gave
+			// every /api/* call a 502 and this line in the dev log:
+			//
+			//   [vite] http proxy error: /info
+			//   Error: Must set target or forward
+			//
+			// which names the REWRITTEN path (/api/info minus the prefix), so it reads
+			// as a broken endpoint rather than a missing variable. Left unregistered,
+			// /api/* falls through to the SPA fallback and the one startup warning above
+			// is all there is to read.
+			proxy: illApiBase
+				? {
+						"/api": {
+							target: illApiBase,
+							changeOrigin: true,
+							secure: false,
+							rewrite: (path) => path.replace(/^\/api/, ""),
+						},
+					}
+				: undefined,
 		},
 		// Deliberately an absolute path (matching the VITE_PUBLIC_URL used for
 		// the router's basepath in src/main.tsx), not a relative "./" base.
@@ -190,6 +231,9 @@ export default defineConfig(({ mode }) => {
 		test: {
 			include: ["**/*.test.ts"],
 			exclude: ["node_modules", "dist", "coverage", "playwright", "**/*.d.ts"],
+			// Clears the feature flags `.env` would otherwise leak into every test.
+			// See vitest.setup.ts.
+			setupFiles: ["./vitest.setup.ts"],
 		},
 
 		resolve: {

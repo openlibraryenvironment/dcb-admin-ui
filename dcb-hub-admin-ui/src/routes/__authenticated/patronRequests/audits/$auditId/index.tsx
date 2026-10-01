@@ -94,7 +94,18 @@ function AuditDetails() {
 		if (targetId) router.navigate({ to: `/patronRequests/audits/${targetId}` });
 	};
 
-	const goBackLink = `/patronRequests/${patronRequestId}#auditlog`;
+	// Typed, with the fragment as `hash`: the router reads `to` as a pathname alone,
+	// so a hand-built "/patronRequests/<id>#auditlog" bound the id param to
+	// "<id>#auditlog" and scrolled nowhere.
+	const returnToRequest = () =>
+		router.navigate({
+			to: "/patronRequests/$id",
+			params: { id: patronRequestId },
+			hash: "auditlog",
+		});
+	// The error state returns to the request itself; there is no accordion to scroll
+	// to when the audit it belongs to could not be loaded.
+	const goBackLink = `/patronRequests/${patronRequestId}`;
 
 	if (isLoading) {
 		return (
@@ -146,10 +157,7 @@ function AuditDetails() {
 							width: "100%",
 						}}
 					>
-						<Button
-							variant="contained"
-							onClick={() => router.navigate({ to: goBackLink })}
-						>
+						<Button variant="contained" onClick={returnToRequest}>
 							{t("patron_request.return")}
 						</Button>
 

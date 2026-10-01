@@ -1445,7 +1445,8 @@
 			"other_group": "Other group",
 			"other_group_helper": "Optional. Consortium membership is already handled - this is for regional or project groups.",
 			"no_other_groups": "There are no other groups to add this library to.",
-			"consortium_group_added_generic": "This library has been added to your consortium group."
+			"consortium_group_added_generic": "This library has been added to your consortium group.",
+			"consortium_group_pending": "This library is not yet in your consortium group. Continue and it will be added."
 		},
 		"no_contact": "No primary contact set",
 		"none_found": "No libraries were found. Try changing your filters or search terms.",

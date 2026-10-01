@@ -24,9 +24,22 @@ interface GroupStepProps {
 	 * this step already loads.
 	 */
 	consortiumGroup?: { id: string } | null;
+	/**
+	 * Whether the library is actually in that group yet.
+	 *
+	 * This step used to infer the membership from the group merely EXISTING, so a
+	 * failed add was announced as a success on the very next screen and the group
+	 * was hidden from the picker - the user was told it was done and given no way
+	 * to do it. Resuming a library that was created before the wizard added
+	 * membership, or by the importer, hit that every time.
+	 */
+	isInConsortiumGroup?: boolean;
 }
 
-export default function GroupStep({ consortiumGroup }: GroupStepProps) {
+export default function GroupStep({
+	consortiumGroup,
+	isInConsortiumGroup = false,
+}: GroupStepProps) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const {
@@ -52,9 +65,11 @@ export default function GroupStep({ consortiumGroup }: GroupStepProps) {
 	const allGroups = groupsData?.libraryGroups?.content ?? [];
 
 	const groupOptions = allGroups
-		// Offering the consortium group would let the user re-add a membership
-		// the wizard has already created.
-		.filter((item: any) => item.id !== consortiumGroup?.id)
+		// Hidden only once the membership exists - re-adding it is pointless.
+		// While it does not, it is the one group the user most needs offered.
+		.filter(
+			(item: any) => !(isInConsortiumGroup && item.id === consortiumGroup?.id),
+		)
 		.map((item: any) => ({
 			label: item.name,
 			value: item.id,
@@ -68,15 +83,20 @@ export default function GroupStep({ consortiumGroup }: GroupStepProps) {
 
 	return (
 		<Stack spacing={3} sx={{ mt: 1 }}>
-			{consortiumGroup && (
-				<Alert severity="success">
-					{consortiumGroupName
-						? t("libraries.new.consortium_group_added", {
-								group: consortiumGroupName,
-							})
-						: t("libraries.new.consortium_group_added_generic")}
-				</Alert>
-			)}
+			{consortiumGroup &&
+				(isInConsortiumGroup ? (
+					<Alert severity="success">
+						{consortiumGroupName
+							? t("libraries.new.consortium_group_added", {
+									group: consortiumGroupName,
+								})
+							: t("libraries.new.consortium_group_added_generic")}
+					</Alert>
+				) : (
+					<Alert severity="info">
+						{t("libraries.new.consortium_group_pending")}
+					</Alert>
+				))}
 
 			<Typography>{t("libraries.new.group_explanation")}</Typography>
 

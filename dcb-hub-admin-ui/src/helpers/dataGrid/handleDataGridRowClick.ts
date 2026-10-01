@@ -4,17 +4,15 @@ import {
 	GridRowModes,
 	MuiEvent,
 } from "@mui/x-data-grid-premium";
-import {
-	nonClickableTypes,
-	specialRedirectionTypes,
-} from "@constants/dataGrid/types";
+import type { DataGridType } from "@constants/dataGrid/types";
+import { resolveRowClickPath } from "@helpers/dataGrid/resolveRowClickPath";
 import { appUrl } from "@helpers/appBase";
 
 interface RowClickConfig {
 	params: GridRowParams;
 	event: MuiEvent<React.MouseEvent<HTMLElement>>;
 	rowModesModel: GridRowModesModel;
-	type: string;
+	type: DataGridType;
 	navigate: (options: { to: string }) => void;
 }
 
@@ -34,37 +32,8 @@ export const handleDataGridRowClick = ({
 		return;
 	}
 
-	if (
-		nonClickableTypes.includes(type) &&
-		!specialRedirectionTypes.includes(type)
-	) {
-		return;
-	}
-
-	let targetPath = `/${type}/${params.row.id}`;
-	const rowId = params?.row?.id;
-
-	if (specialRedirectionTypes.includes(type)) {
-		if (type === "dataChangeLog") {
-			targetPath = `/serviceInfo/dataChangeLog/${rowId}`;
-		} else if (type == "welcomeLibraries") {
-			targetPath = `/libraries/${rowId}`;
-		} else if (type === "audits") {
-			targetPath = `/patronRequests/audits/${params.row.id}`;
-		} else if (type === "clusterMembers") {
-			// A cluster member's id IS its source bib id (see getClusters `members`).
-			targetPath = `/bibs/${rowId}`;
-		} else {
-			targetPath = `/patronRequests/${rowId}`;
-		}
-	}
-
-	// if (specialRedirectionTypes.includes(type)) {
-	// 	targetPath =
-	// 		type === "audits"
-	// 			? `/patronRequests/audits/${params.row.id}`
-	// 			: `/patronRequests/${params.row.id}`;
-	// }
+	const targetPath = resolveRowClickPath(type, params.row.id);
+	if (!targetPath) return;
 
 	const openInNewTab = event.ctrlKey || event.metaKey;
 

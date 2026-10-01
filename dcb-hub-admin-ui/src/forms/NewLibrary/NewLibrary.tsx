@@ -69,6 +69,7 @@ import {
 	buildLibraryInput,
 	buildLibraryUpdateInput,
 	EMPTY_LIBRARY_FORM,
+	existingGroupIds,
 	formValuesFromLibrary,
 	newContactsOf,
 	shouldCreateHostLms,
@@ -177,8 +178,17 @@ export default function NewLibrary({
 	/** What is happening right now, in words, while a mutation is in flight. */
 	const [busyMessage, setBusyMessage] = useState<string | null>(null);
 	const [showAbandonConfirmation, setShowAbandonConfirmation] = useState(false);
-	/** Group memberships this run has already written - see the group step. */
-	const [joinedGroupIds, setJoinedGroupIds] = useState<string[]>([]);
+	/**
+	 * Group memberships this library has - the ones it arrived with, plus the
+	 * ones this run has written. See the group step.
+	 *
+	 * Seeded from the resumed record because the group step reads it to decide
+	 * whether to tell the user the library is in the consortium group, and
+	 * "created five minutes ago in this dialog" is not the only way to be.
+	 */
+	const [joinedGroupIds, setJoinedGroupIds] = useState<string[]>(() =>
+		existingGroupIds(resumeLibrary),
+	);
 
 	const methods = useForm<NewLibraryFormValues>({
 		mode: "onTouched",
@@ -325,6 +335,53 @@ export default function NewLibrary({
 				gqlClient.request<any>(createLibraryContact, variables),
 			onSuccess: invalidateLibraryCaches,
 		});
+
+	/**
+	 * Puts the library in the consortium's own group, once, and says whether it
+	 * is in there afterwards.
+	 *
+	 * Runs on creation AND on resume: the group step hides this group from the
+	 * picker once the membership exists, so nothing else will do it.
+	 *
+	 * Failure is reported and swallowed - the library exists by this point, and
+	 * throwing would strand the user on a step that would re-run createLibrary
+	 * and collide on the agency code.
+	 */
+	const ensureConsortiumMembership = async (
+		libraryId: string | undefined,
+	): Promise<boolean> => {
+		const groupId = consortiumGroup?.id;
+		if (!groupId || !libraryId) return false;
+		if (joinedGroupIds.includes(groupId)) return true;
+
+		try {
+			setBusyMessage(
+				t("libraries.new.busy_adding_to_consortium", {
+					consortium: consortiumName || "",
+				}),
+			);
+			await gqlClient.request(addLibraryToGroup, {
+				input: { libraryGroup: groupId, library: libraryId },
+			});
+			setJoinedGroupIds((joined) => [...joined, groupId]);
+			queryClient.invalidateQueries({ queryKey: ["groups"] });
+			// `membership` is selected on the library and libraries documents, and
+			// the only invalidation of those ran before this row existed.
+			invalidateLibraryCaches();
+			return true;
+		} catch (groupError) {
+			console.error(
+				"Failed to add the new library to the consortium group:",
+				groupError,
+			);
+			setAlert({
+				open: true,
+				severity: "warning",
+				text: t("libraries.new.consortium_group_failed"),
+			});
+			return false;
+		}
+	};
 
 	const isBusy =
 		isHostLmsPending ||
@@ -507,64 +564,47 @@ export default function NewLibrary({
 					}),
 				});
 
-				// Membership of the consortium's own group is not a choice - every
-				// member library is in it, and leaving it to the group step meant
-				// a library could finish setup belonging to nothing. Done in its
-				// own try: the library exists by this point, so failing here must
-				// not strand the user on a step that would re-run createLibrary
-				// and collide on the agency code.
-				if (consortiumGroup?.id) {
-					try {
-						// Named by the consortium rather than by the group: only the
-						// group's id is safe to read from the consortium query, and
-						// asking for its name is what broke consortium detection
-						// across the whole app.
-						setBusyMessage(
-							t("libraries.new.busy_adding_to_consortium", {
-								consortium: consortiumName || "",
-							}),
-						);
-						await gqlClient.request(addLibraryToGroup, {
-							input: {
-								libraryGroup: consortiumGroup.id,
-								library: newLibraryId,
-							},
-						});
-						queryClient.invalidateQueries({ queryKey: ["groups"] });
-					} catch (groupError) {
-						console.error(
-							"Failed to add the new library to the consortium group:",
-							groupError,
-						);
-						setAlert({
-							open: true,
-							severity: "warning",
-							text: t("libraries.new.consortium_group_failed"),
-						});
-					}
-				}
+				await ensureConsortiumMembership(newLibraryId);
 			}
 
 			// Phase 3: Group Step. Remembering which groups have been joined keeps
 			// Back-then-Next from adding the same membership twice.
-			if (
-				stepId === "group" &&
-				shouldJoinGroup(formData.groupId, joinedGroupIds)
-			) {
-				setBusyMessage(t("libraries.new.busy_adding_to_group"));
-				await gqlClient.request(addLibraryToGroup, {
-					input: {
-						libraryGroup: formData.groupId,
-						library: formData.libraryId,
-					},
-				});
-				setJoinedGroupIds((joined) => [...joined, formData.groupId as string]);
-				queryClient.invalidateQueries({ queryKey: ["groups"] });
-				setAlert({
-					open: true,
-					severity: "success",
-					text: t("libraries.alert_text_success"),
-				});
+			if (stepId === "group") {
+				const libraryId = formData.libraryId || resumeLibrary?.id;
+				// The create path joined it at the contacts step and this no-ops.
+				// Resuming did not: see ensureConsortiumMembership.
+				const inConsortiumGroup = await ensureConsortiumMembership(libraryId);
+
+				// The state that call set is not visible to this closure, so the
+				// consortium group is excluded here rather than via joinedGroupIds.
+				// It is selectable in the picker until the library is in it, and
+				// the line above is what puts it there.
+				const isConsortiumGroup =
+					inConsortiumGroup && formData.groupId === consortiumGroup?.id;
+
+				if (
+					!isConsortiumGroup &&
+					shouldJoinGroup(formData.groupId, joinedGroupIds)
+				) {
+					setBusyMessage(t("libraries.new.busy_adding_to_group"));
+					await gqlClient.request(addLibraryToGroup, {
+						input: {
+							libraryGroup: formData.groupId,
+							library: libraryId,
+						},
+					});
+					setJoinedGroupIds((joined) => [
+						...joined,
+						formData.groupId as string,
+					]);
+					queryClient.invalidateQueries({ queryKey: ["groups"] });
+					invalidateLibraryCaches();
+					setAlert({
+						open: true,
+						severity: "success",
+						text: t("libraries.alert_text_success"),
+					});
+				}
 			}
 
 			goToStep(activeStepIndex + 1);
@@ -660,7 +700,14 @@ export default function NewLibrary({
 			case "contacts":
 				return <ContactsStep />;
 			case "group":
-				return <GroupStep consortiumGroup={consortiumGroup} />;
+				return (
+					<GroupStep
+						consortiumGroup={consortiumGroup}
+						isInConsortiumGroup={
+							!!consortiumGroup && joinedGroupIds.includes(consortiumGroup.id)
+						}
+					/>
+				);
 			case "refMappings":
 				return <RefValueMappingStep hostLmsCode={watchedHostLmsCode} />;
 			case "numMappings":
