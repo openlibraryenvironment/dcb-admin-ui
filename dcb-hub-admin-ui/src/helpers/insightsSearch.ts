@@ -46,10 +46,15 @@ export const scopeSearchParam = z
 	.optional()
 	.catch(undefined);
 
+/**
+ * A list param as a route receives it: the comma-separated string a typed or shared link
+ * carries, or the array the router hands back after a control wrote one - the router
+ * serialises a non-string value as JSON, so what a chip click writes is not what a typed
+ * link writes. Rejecting the array form silently reverted every selection to the default.
+ */
 const csv = <T>(parse: (value: string) => T | null) =>
-	z.string().transform((value) =>
-		value
-			.split(",")
+	z.union([z.string(), z.array(z.string())]).transform((value) =>
+		(Array.isArray(value) ? value : value.split(","))
 			.map((part) => part.trim())
 			.map(parse)
 			.filter((part): part is T => part !== null),

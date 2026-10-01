@@ -57,6 +57,16 @@ describe("the Insights view, in the URL", () => {
 		expect(view.scope).toEqual(["group:7f3a", "library:91c2"]);
 	});
 
+	it("reads back a series list the router wrote as an array", () => {
+		// Every chip click in the status picker writes an array, which the router
+		// serialises as JSON and hands back as an array - so a schema that accepted only
+		// the comma-separated string caught to undefined and reverted the reader's
+		// selection to DEFAULT_SERIES on the same render.
+		const view = parse({ series: ["LOANED", "lower_case", "ERROR"] });
+
+		expect(view.series).toEqual(["LOANED", "ERROR"]);
+	});
+
 	it("degrades a junk value rather than throwing at the reader", () => {
 		// Every one of these is something a truncated or hand-edited link produces.
 		const view = parse({

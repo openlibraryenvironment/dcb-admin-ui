@@ -35,7 +35,6 @@ export default function StatusFlowChart({
 	const client = useDcbRestClient();
 	const { colorForStatus } = useChartPalette();
 
-	// Atomic selectors - never destructure the whole store.
 	const selectedStatuses = view.series;
 	const toggleStatus = view.toggleSeries;
 

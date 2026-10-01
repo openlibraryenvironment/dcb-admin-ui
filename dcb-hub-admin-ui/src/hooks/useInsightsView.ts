@@ -50,7 +50,9 @@ export function useInsightsView(search: InsightsSearch, to: string) {
 					? view.series
 					: [...view.series, status];
 
-			update({ series: selected });
+			// Deselecting the last status is the default view, not an empty chart, so the
+			// key leaves the URL rather than carrying a list resolveSearch falls back from.
+			update({ series: selected.length > 0 ? selected : undefined });
 		},
 		setUnitCost: (unitCost: number | null) =>
 			update({ unitCost: unitCost ?? undefined }),
