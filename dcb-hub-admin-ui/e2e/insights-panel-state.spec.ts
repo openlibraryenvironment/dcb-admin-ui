@@ -133,8 +133,54 @@ test.describe("Insights panel states", () => {
 		// The first retry is 20 seconds out; nobody should have to wait for it in a test.
 		await page.clock.fastForward(21_000);
 
-		await expect(page.getByText("4,120,884")).toBeVisible();
+		await expect(page.getByText("4,120,884", { exact: true })).toBeVisible();
 		expect(timedOut).toBe(2);
+	});
+
+	test("a library chosen in the selector stays chosen, and survives a reload", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights");
+
+		await page.getByRole("combobox", { name: "Libraries" }).click();
+		await page.getByRole("option", { name: "Alpha Test Library" }).click();
+
+		const chip = page.getByRole("button", { name: "Alpha Test Library" });
+		await expect(chip).toBeVisible();
+		await expect(page).toHaveURL(/scope=/);
+
+		await page.reload();
+		await expect(chip).toBeVisible();
+	});
+
+	test("trading partners says it failed, rather than that there were no partners", async ({
+		page,
+	}) => {
+		let failNext = true;
+		await page.route("**/insights/top-partners**", async (route) => {
+			if (failNext) {
+				await route.fulfill({ status: 500, json: { message: "boom" } });
+				return;
+			}
+			await route.fallback();
+		});
+
+		await page.goto(
+			"/consortium/insights?tab=partners&scope=library:c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+		);
+
+		await reveal(page, "Trading partners");
+		const panel = cardFor(page, "Trading partners");
+
+		await expect(panel).toContainText("This panel could not be loaded.", {
+			timeout: 15_000,
+		});
+		await expect(panel).not.toContainText("No data for the selected period.");
+
+		failNext = false;
+		await panel.getByRole("button", { name: "Retry" }).click();
+
+		await expect(panel).not.toContainText("This panel could not be loaded.");
 	});
 
 	test("an empty panel still reads as empty, not as broken", async ({

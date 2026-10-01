@@ -48,6 +48,15 @@ describe("the Insights view, in the URL", () => {
 		expect(view.unitCost).toBe(17.5);
 	});
 
+	it("reads back a scope the router wrote as an array", () => {
+		// Setting the scope from the selector writes an array, which the router serialises
+		// as JSON and hands back as an array on reload - not the comma-separated string a
+		// typed link carries. Both must restore the same selection.
+		const view = parse({ scope: ["group:7f3a", "library:91c2", "../etc"] });
+
+		expect(view.scope).toEqual(["group:7f3a", "library:91c2"]);
+	});
+
 	it("degrades a junk value rather than throwing at the reader", () => {
 		// Every one of these is something a truncated or hand-edited link produces.
 		const view = parse({
