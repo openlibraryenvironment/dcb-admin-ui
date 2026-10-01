@@ -2537,8 +2537,8 @@
 		"source_type": "Source type",
 		"subject": "Subject",
 		"suppression": {
-			"decision_log": "Suppression decision log",
-			"raw_data_values": "Suppression raw data values"
+			"decision_log": "Item decision log",
+			"raw_data_values": "Item raw data values"
 		},
 		"suppressed": "Suppressed",
 		"title": "Title",
