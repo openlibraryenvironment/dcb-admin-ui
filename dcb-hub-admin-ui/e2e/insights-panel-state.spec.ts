@@ -96,6 +96,47 @@ test.describe("Insights panel states", () => {
 		await expect(panel.locator("svg").first()).toBeVisible();
 	});
 
+	test("a collection count that outlives the proxy says it is still counting, then answers", async ({
+		page,
+	}) => {
+		// dcb-service keeps the shared pass running when the proxy gives up, so a 504 here
+		// means "not yet", and the panel asks again on its own rather than reporting a fault.
+		let timedOut = 0;
+		await page.route("**/insights/collection-totals**", async (route) => {
+			if (timedOut++ === 0) {
+				await route.fulfill({ status: 504, body: "" });
+				return;
+			}
+			await route.fulfill({
+				json: {
+					distinctTitles: 4_120_884,
+					singlyHeldTitles: 1_902_311,
+					holdings: 7_884_002,
+					contributingSources: 42,
+				},
+			});
+		});
+		await page.clock.install();
+
+		await page.goto("/consortium/insights?tab=collection");
+
+		const computing = page.getByText("Counting across the whole catalogue.");
+		for (let i = 0; i < 14 && !(await computing.isVisible()); i++) {
+			await page.mouse.wheel(0, 600);
+			await expect(page.locator("body")).toBeVisible();
+		}
+		await expect(computing).toBeVisible();
+		await expect(
+			page.getByText("The collection figures could not be loaded."),
+		).toHaveCount(0);
+
+		// The first retry is 20 seconds out; nobody should have to wait for it in a test.
+		await page.clock.fastForward(21_000);
+
+		await expect(page.getByText("4,120,884")).toBeVisible();
+		expect(timedOut).toBe(2);
+	});
+
 	test("an empty panel still reads as empty, not as broken", async ({
 		page,
 	}) => {

@@ -13,25 +13,6 @@ import {
  * worth a test that does not need a rendered chart to run.
  */
 
-/**
- * dcb-service runs the catalogue-wide aggregates one at a time and answers 429 when a
- * caller has waited out its budget, rather than queueing a second pass over 20M rows.
- *
- * That is an expected answer - "ask again shortly" - not a failure, and it must not be
- * retried automatically: an automatic retry spends the next caller's budget as well. The
- * queries carry retry: false and the panels surface this with a manual retry instead.
- */
-const BUSY_STATUS = 429;
-
-export function isBusy(error: unknown): boolean {
-	return (
-		typeof error === "object" &&
-		error !== null &&
-		(error as { response?: { status?: number } }).response?.status ===
-			BUSY_STATUS
-	);
-}
-
 export interface ClusterQuality {
 	totalClusters: number;
 	/** Works held by exactly one source system, as a percentage of all works. */

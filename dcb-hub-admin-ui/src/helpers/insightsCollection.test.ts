@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
 	UNDER_CLUSTERED_PCT,
 	bucketedHolders,
-	isBusy,
 	clusterQuality,
 	formatMix,
 	isUnderClustered,
@@ -200,23 +199,5 @@ describe("rankedProfile", () => {
 		expect(
 			rankedProfile(rows, " , ", 1).map((r) => r.sourceSystemCode),
 		).toEqual(["BIG"]);
-	});
-});
-
-describe("isBusy", () => {
-	it("recognises the refusal that means the one permit is taken", () => {
-		expect(isBusy({ response: { status: 429 } })).toBe(true);
-	});
-
-	it("does not treat a real failure as a busy signal", () => {
-		// A 500 must not offer "try again shortly" - and must not be silently absorbed
-		// into the state that says the numbers are merely being recalculated.
-		expect(isBusy({ response: { status: 500 } })).toBe(false);
-	});
-
-	it("survives an error with no response at all", () => {
-		expect(isBusy(new Error("network down"))).toBe(false);
-		expect(isBusy(null)).toBe(false);
-		expect(isBusy(undefined)).toBe(false);
 	});
 });

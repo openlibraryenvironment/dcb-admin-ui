@@ -2,10 +2,12 @@ import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, Box, Button, Skeleton, Typography } from "@mui/material";
 
-import { isBusy } from "@helpers/insightsCollection";
+import { isStillComputing } from "@helpers/statsApi";
 
 interface PanelStateProps {
 	isLoading: boolean;
+	/** A retry is pending because the count is still running; see isStillComputing. */
+	isComputing?: boolean;
 	isError: boolean;
 	error?: unknown;
 	isEmpty: boolean;
@@ -33,6 +35,7 @@ interface PanelStateProps {
  */
 export default function PanelState({
 	isLoading,
+	isComputing = false,
 	isError,
 	error,
 	isEmpty,
@@ -58,14 +61,18 @@ export default function PanelState({
 		</Box>
 	);
 
+	if (isLoading && isComputing) {
+		return centred(
+			<Alert severity="info">{t("insights.collection.computing")}</Alert>,
+		);
+	}
+
 	if (isLoading) {
 		return <Skeleton variant="rounded" height={height} />;
 	}
 
 	if (isError) {
-		// A 429 from the catalogue aggregates means "the one permit is busy, ask again
-		// shortly" rather than "something broke", and says so - see isBusy.
-		const busy = isBusy(error);
+		const busy = isStillComputing(error);
 
 		return centred(
 			<Alert
