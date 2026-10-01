@@ -1,18 +1,20 @@
 import { useTranslation } from "react-i18next";
-import { Box, Link } from "@mui/material";
+import { useRouter } from "@tanstack/react-router";
+import { Box } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
+
+import Link from "@components/Link/Link";
 
 /**
  * The way back from a drill-down.
  *
- * Named for the panel, not "Back": the reader arrived here from one figure among thirty,
- * and a browser's back button is not a promise the page can make - they may have filtered,
- * paged or sorted since. The whole Insights view is a URL, so returning to the exact one
- * they left costs nothing.
+ * `from` is a router path in a search param, not a typed route, and still goes through a
+ * router link: a root-relative href resolves against the origin and leaves the app on a
+ * deployment serving several OpenRS apps under path prefixes. Checked to be internal
+ * where it is parsed - see drillSearch.
  *
- * A plain anchor rather than a router Link: `from` is a path carried in the URL, so it is
- * not one of the typed routes the router knows. It is checked to be internal where it is
- * parsed - see drillSearch.
+ * Split into path and search because the router treats `to` as a pathname: a query string
+ * inside it becomes part of the path and arrives as no search params at all.
  */
 export default function ReturnToInsights({
 	from,
@@ -22,13 +24,22 @@ export default function ReturnToInsights({
 	label?: string;
 }) {
 	const { t } = useTranslation();
+	const router = useRouter();
 
 	if (!from) return null;
+
+	const queryAt = from.indexOf("?");
+	const to = queryAt === -1 ? from : from.slice(0, queryAt);
+	const search =
+		queryAt === -1
+			? undefined
+			: router.options.parseSearch(from.slice(queryAt));
 
 	return (
 		<Box sx={{ mb: 2 }}>
 			<Link
-				href={from}
+				to={to}
+				search={search}
 				underline="hover"
 				sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
 			>

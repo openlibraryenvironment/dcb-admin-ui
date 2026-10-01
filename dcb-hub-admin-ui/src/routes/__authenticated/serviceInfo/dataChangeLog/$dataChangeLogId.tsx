@@ -14,7 +14,7 @@ import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getDataChangeLogById } from "@queries/getDataChangeLogById";
 import {
-	calculateEntityLink,
+	dataChangeLogEntityPath,
 	tableNameToEntityName,
 } from "@helpers/dataChangeLogHelperFunctions";
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
@@ -80,10 +80,11 @@ function DataChangeLogDetails() {
 		);
 	}
 
-	const isNonLinkableEntity =
-		dataChangeLog.entityType === "reference_value_mapping" ||
-		dataChangeLog.entityType === "numeric_range_mapping" ||
-		dataChangeLog.actionInfo === "DELETE";
+	const entityPath = dataChangeLogEntityPath(
+		dataChangeLog.entityType,
+		dataChangeLog.entityId,
+		{ deleted: dataChangeLog.actionInfo === "DELETE" },
+	);
 
 	return (
 		<PageContainer title={dataChangeLog.id}>
@@ -107,15 +108,12 @@ function DataChangeLogDetails() {
 						<Typography variant="attributeTitle">
 							{t("data_change_log.entity_id")}
 						</Typography>
-						{isNonLinkableEntity ? (
-							<RenderAttribute attribute={dataChangeLog.entityId} />
-						) : (
-							<Link
-								to={`/${calculateEntityLink(dataChangeLog.entityType)}/${dataChangeLog.entityId}`}
-								underline="hover"
-							>
+						{entityPath ? (
+							<Link to={entityPath} underline="hover">
 								<RenderAttribute attribute={dataChangeLog.entityId} />
 							</Link>
+						) : (
+							<RenderAttribute attribute={dataChangeLog.entityId} />
 						)}
 					</Stack>
 				</Grid>

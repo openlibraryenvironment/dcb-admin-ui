@@ -5,6 +5,8 @@ import { mockGraphQL } from "../e2e/fixtures/graphql-mocks";
 import { useAllFeatures } from "../e2e/fixtures/flags";
 import consortiumBasics from "../e2e/fixtures-data/consortium-basics.json";
 import consortium from "../e2e/fixtures-data/consortium.json";
+import libraries from "../e2e/fixtures-data/libraries.json";
+import patronRequests from "../e2e/fixtures-data/patron-requests.json";
 
 /**
  * The app mounted under a path prefix, which is how it ships: CI builds it with
@@ -27,6 +29,29 @@ const BASE = "/dcb-admin";
 const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,
 	LoadConsortium: consortium,
+	LoadLibraries: libraries,
+	LoadPatronRequests: patronRequests,
+	GetPatronRequestDashboard: patronRequests,
+};
+
+/**
+ * Every root-relative anchor the page rendered.
+ *
+ * Root-relative, because those are the ones that can escape: an "http" href is meant
+ * to leave and "#main-content" goes nowhere. This is the shape of the whole class of
+ * defect - a plain anchor, a raw MUI Link, or ListItemButton component="a" - so the
+ * check is "what did the page render", not "which component rendered it". An ESLint
+ * rule was measured for this first and rejected: it catches a literal or template
+ * href, and every remaining site in this app passes a VARIABLE, where most of them
+ * are legitimately external.
+ */
+const internalHrefs = async (page: import("@playwright/test").Page) => {
+	const hrefs = await page
+		.locator('a[href^="/"]')
+		.evaluateAll((anchors) =>
+			anchors.map((anchor) => anchor.getAttribute("href") ?? ""),
+		);
+	return hrefs.filter((href) => href !== "");
 };
 
 test.describe("navigation under a deployment base path", () => {
@@ -112,6 +137,58 @@ test.describe("navigation under a deployment base path", () => {
 
 		await links.first().click();
 		await expect(page).toHaveURL(new RegExp(`${BASE}/mappings/all`));
+	});
+
+	// Every page, not every component: the sidebar and tab checks above each cover one
+	// widget, and the escapes that reached production were elsewhere - the mappings
+	// list, a staff request's view link, and the Insights return link below.
+	for (const path of ["/", "/consortium", "/mappings", "/libraries"]) {
+		test(`every internal link on ${path} carries the base`, async ({
+			page,
+		}) => {
+			await page.goto(`${BASE}${path}`);
+			await expect(
+				page.getByRole("navigation").getByRole("link").first(),
+			).toBeVisible();
+
+			const hrefs = await internalHrefs(page);
+			expect(hrefs.length).toBeGreaterThan(0);
+			for (const href of hrefs) {
+				expect(href, `"${href}" on ${path} leaves the app`).toMatch(
+					new RegExp(`^${BASE}(/|$)`),
+				);
+				expect(
+					href.slice(BASE.length),
+					`"${href}" counts the base twice`,
+				).not.toContain(BASE);
+			}
+		});
+	}
+
+	test("the Insights return link stays inside the app", async ({ page }) => {
+		// A drill-down carries the view to return to as a search param, so the link is
+		// reachable without rendering Insights. It was a raw MUI anchor with
+		// href={from}: a root-relative href resolves against the ORIGIN, so under this
+		// base it left for whatever sits at /consortium/insights on the shared root.
+		await page.goto(
+			`${BASE}/patronRequests/all?from=%2Fconsortium%2Finsights%3Ftab%3Dservice%26range%3D90d&fromLabel=Why%20requests%20fail`,
+		);
+
+		const back = page.getByRole("link", {
+			name: "Back to insights: Why requests fail",
+		});
+		await expect(back).toBeVisible();
+		// The base, once, and the view they left intact - the router reads `to` as a
+		// pathname, so the query has to be handed over as search params or it is lost.
+		await expect(back).toHaveAttribute(
+			"href",
+			`${BASE}/consortium/insights?tab=service&range=90d`,
+		);
+
+		await back.click();
+		await expect(page).toHaveURL(
+			`${BASE}/consortium/insights?tab=service&range=90d`,
+		);
 	});
 
 	test("not found routes home to the app, not to the origin root", async ({

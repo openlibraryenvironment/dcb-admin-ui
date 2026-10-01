@@ -21,6 +21,7 @@ import ErrorComponent from "@components/Error/Error";
 import { Environment } from "@models/Environment";
 import { calculateDCBRAGStatus } from "@helpers/calculateDCBRAGStatus";
 import { calculateKeycloakRAGStatus } from "@helpers/calculateKeycloakRAGStatus";
+import { settledJsonBody } from "@helpers/settledJsonBody";
 
 import {
 	DCB_SERVICE_STATUS_LINKS,
@@ -138,12 +139,12 @@ export default function CombinedEnvironmentComponent() {
 
 			return {
 				environments,
-				serviceInfo:
-					dcbInfoRes.status === "fulfilled" ? dcbInfoRes.value.data : null,
+				// Narrowed rather than cast: a 200 carrying an HTML document is a
+				// fulfilled promise, and casting one to its response type crashed both
+				// pages that render this. See settledJsonBody.
+				serviceInfo: settledJsonBody(dcbInfoRes),
 				trackingConfig:
-					trackingConfigRes.status === "fulfilled"
-						? (trackingConfigRes.value.data as TrackingConfigurationData)
-						: null,
+					settledJsonBody<TrackingConfigurationData>(trackingConfigRes),
 			};
 		},
 		enabled: !!auth.user?.access_token,

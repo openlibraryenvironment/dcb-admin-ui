@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Box, Link, Typography } from "@mui/material";
 import { createLink } from "@tanstack/react-router";
 
+import { toRoutePath } from "@helpers/appBase";
 import type { Drill } from "@helpers/insightsDrill";
 
 /**
@@ -18,11 +19,17 @@ import type { Drill } from "@helpers/insightsDrill";
  */
 const RouterLink = createLink(Link);
 
-/** Where the reader is now, which is where a drill-down has to bring them back to. */
+/**
+ * Where the reader is now, which is where a drill-down has to bring them back to.
+ *
+ * A ROUTER path, not the browser's: window.location.pathname carries the deployment
+ * base, and the return link renders through a router link that adds the base itself.
+ * Handing over the browser path doubled it - see appBase's toRoutePath.
+ */
 const here = () =>
 	typeof window === "undefined"
 		? undefined
-		: `${window.location.pathname}${window.location.search}`;
+		: `${toRoutePath(window.location.pathname)}${window.location.search}`;
 
 export default function DrillLink({
 	drill,

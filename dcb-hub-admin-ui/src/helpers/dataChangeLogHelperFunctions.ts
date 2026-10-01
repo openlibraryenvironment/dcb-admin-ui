@@ -1,9 +1,17 @@
 import { capitalize } from "lodash";
 import { splitOnCapitals } from "./splitOnCapitals";
 
-export function calculateEntityLink(entityType: string) {
+/**
+ * DCB Admin's route segment for a data-change-log entity's own page, or undefined
+ * where that entity has no page to open.
+ *
+ * Undefined is an answer, not a gap: consortium, functional setting, both contact
+ * kinds, group membership, person and both mapping kinds are logged here and none
+ * has a detail route. Private, so a caller cannot interpolate it into a path and
+ * link to "/undefined/<entityId>".
+ */
+function calculateEntityLink(entityType: string): string | undefined {
 	// Basically a translator for table names to DCB Admin references.
-	// Primarily intended for translating table names to links.
 	switch (entityType) {
 		case "agency":
 			return "agencies";
@@ -17,13 +25,25 @@ export function calculateEntityLink(entityType: string) {
 			return "locations";
 		case "patron_request":
 			return "patronRequests";
-		case "reference_value_mapping":
-			return "mappings/allReferenceValue";
-		case "numeric_range_mapping":
-			return "mappings/allNumericRange";
 		case "bib_record":
 			return "bibs";
+		default:
+			return undefined;
 	}
+}
+
+/**
+ * The path to a logged entity's own page, or undefined when there is nothing to
+ * link to - either the entity kind has no page, or the record no longer exists.
+ */
+export function dataChangeLogEntityPath(
+	entityType: string,
+	entityId: string | null | undefined,
+	options: { deleted?: boolean } = {},
+): string | undefined {
+	if (options.deleted || !entityId) return undefined;
+	const segment = calculateEntityLink(entityType);
+	return segment ? `/${segment}/${entityId}` : undefined;
 }
 
 export function tableNameToEntityName(entityType: string) {

@@ -5,6 +5,7 @@ import {
 	buildContactInput,
 	buildLibraryInput,
 	buildLibraryUpdateInput,
+	existingGroupIds,
 	formValuesFromLibrary,
 	newContactsOf,
 	shouldCreateHostLms,
@@ -389,5 +390,36 @@ describe("formValuesFromLibrary", () => {
 				agency: { ...library.agency, isSupplyingAgency: false },
 			}).isSupplyingAgency,
 		).toBe(false);
+	});
+});
+
+describe("existingGroupIds", () => {
+	it("reads the groups a resumed library already belongs to", () => {
+		expect(
+			existingGroupIds({
+				membership: [
+					{ libraryGroup: { id: "consortium-group" } },
+					{ libraryGroup: { id: "regional-group" } },
+				],
+			}),
+		).toEqual(["consortium-group", "regional-group"]);
+	});
+
+	// The group step asks whether the library is in the consortium group and
+	// announces that it is. Answering from this run's writes alone made it
+	// announce a membership that did not exist on every resumed library, and
+	// hide the one group that would have fixed it from the picker.
+	it("is empty for a library with no memberships, and for no library at all", () => {
+		expect(existingGroupIds({ membership: [] })).toEqual([]);
+		expect(existingGroupIds(undefined)).toEqual([]);
+		expect(existingGroupIds({})).toEqual([]);
+	});
+
+	it("drops a membership whose group did not come back", () => {
+		expect(
+			existingGroupIds({
+				membership: [{ libraryGroup: null }, { libraryGroup: { id: "" } }],
+			}),
+		).toEqual([]);
 	});
 });

@@ -326,6 +326,22 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 	},
 ];
 
+/**
+ * Every feature flag the application reads.
+ *
+ * Derived from the registry plus the one flag that has no row in it, so the two cannot
+ * disagree. vitest.setup.ts neutralises this list before each test file: `readFlag` falls
+ * back to `import.meta.env`, so without that a developer who sets a flag in their own
+ * `.env` - which working against a 9.x dcb-service requires - turns every "all flags off"
+ * assertion into a failure that looks like a code regression.
+ */
+export const ALL_FEATURE_FLAGS: readonly string[] = [
+	...SERVICE_CAPABILITIES.map((entry) => entry.flag),
+	// Says what the consortium runs rather than what the server serves, so it has no
+	// version threshold and no capability row - see isSymposiaEnabled.
+	"VITE_FEATURE_SYMPOSIA",
+];
+
 const byId = new Map(SERVICE_CAPABILITIES.map((entry) => [entry.id, entry]));
 
 /**

@@ -1,25 +1,23 @@
 import { GridRenderCellParams } from "@mui/x-data-grid-premium";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { calculateEntityLink } from "@helpers/dataChangeLogHelperFunctions";
+import { dataChangeLogEntityPath } from "@helpers/dataChangeLogHelperFunctions";
 
 export const renderEntityIdCell = ({ row }: GridRenderCellParams) => {
-	const isNonLinkable =
-		["reference_value_mapping", "numeric_range_mapping", "person"].includes(
-			row?.entityType,
-		) ||
-		row?.actionInfo === "DELETE" ||
-		row?.changeCategory === "Membership ended";
+	const path = dataChangeLogEntityPath(row?.entityType, row?.entityId, {
+		// A deleted record and an ended membership both leave an id that no longer
+		// addresses anything, whatever kind of entity it was.
+		deleted:
+			row?.actionInfo === "DELETE" ||
+			row?.changeCategory === "Membership ended",
+	});
 
-	return isNonLinkable ? (
-		row.entityId
-	) : (
-		<Link
-			to={`/${calculateEntityLink(row.entityType)}/${row.entityId}`}
-			underline="hover"
-		>
+	return path ? (
+		<Link to={path} underline="hover">
 			{row.entityId}
 		</Link>
+	) : (
+		row.entityId
 	);
 };
 
