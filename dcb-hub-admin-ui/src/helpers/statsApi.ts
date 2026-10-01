@@ -120,8 +120,8 @@ export interface CollectionProfileStat {
 	uniqueTitleCount: number;
 }
 
-// One unordered pair, emitted once (left < right), so a consumer drawing a full matrix
-// mirrors it. Requested for one library, so the rows are that library against the others.
+// A selected library (left) and one other holder of its works (right). One row per
+// selected library and peer; never the full matrix.
 export interface CollectionOverlapStat {
 	leftSystemId: string;
 	leftSystemCode: string;
