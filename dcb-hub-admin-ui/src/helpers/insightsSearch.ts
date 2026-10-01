@@ -32,6 +32,20 @@ export const MAX_PLOT_SERIES = 8;
  */
 const scopePattern = /^(group|library):[A-Za-z0-9-]+$/;
 
+/**
+ * The scope as a route receives it: a comma-separated string from a typed or shared link, or
+ * the array the router writes back when a control sets it and then re-reads as JSON.
+ */
+export const scopeSearchParam = z
+	.union([z.string(), z.array(z.string())])
+	.transform((value) =>
+		(Array.isArray(value) ? value : value.split(","))
+			.map((part) => part.trim())
+			.filter((part) => scopePattern.test(part)),
+	)
+	.optional()
+	.catch(undefined);
+
 const csv = <T>(parse: (value: string) => T | null) =>
 	z.string().transform((value) =>
 		value
@@ -50,9 +64,7 @@ export const insightsSearchSchema = z.object({
 	// Only meaningful together, and only when the reader chose an explicit window.
 	from: z.string().date().optional().catch(undefined),
 	to: z.string().date().optional().catch(undefined),
-	scope: csv((part) => (scopePattern.test(part) ? part : null))
-		.optional()
-		.catch(undefined),
+	scope: scopeSearchParam,
 	series: csv((part) => (/^[A-Z_]+$/.test(part) ? part : null))
 		.optional()
 		.catch(undefined),

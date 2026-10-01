@@ -3,8 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Alert, Box } from "@mui/material";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
-import { collectionTotalsQueryOptions } from "@helpers/statsApi";
-import { isBusy } from "@helpers/insightsCollection";
+import {
+	collectionTotalsQueryOptions,
+	isStillComputing,
+} from "@helpers/statsApi";
 import KpiTile from "./KpiTile";
 
 /**
@@ -18,15 +20,19 @@ export default function CollectionTotalsTiles() {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 
-	const { data, isLoading, isError, error } = useQuery(
+	const { data, isLoading, isError, error, failureCount } = useQuery(
 		collectionTotalsQueryOptions(client),
 	);
 
+	if (isLoading && failureCount > 0) {
+		return <Alert severity="info">{t("insights.collection.computing")}</Alert>;
+	}
+
 	if (isError) {
 		return (
-			<Alert severity={isBusy(error) ? "info" : "warning"}>
+			<Alert severity={isStillComputing(error) ? "info" : "warning"}>
 				{t(
-					isBusy(error)
+					isStillComputing(error)
 						? "insights.collection.busy"
 						: "insights.collection.failed",
 				)}

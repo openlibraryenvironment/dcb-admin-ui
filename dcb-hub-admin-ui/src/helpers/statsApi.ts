@@ -120,8 +120,8 @@ export interface CollectionProfileStat {
 	uniqueTitleCount: number;
 }
 
-// One unordered pair, emitted once (left < right), so a consumer drawing a full matrix
-// mirrors it. Requested for one library, so the rows are that library against the others.
+// A selected library (left) and one other holder of its works (right). One row per
+// selected library and peer; never the full matrix.
 export interface CollectionOverlapStat {
 	leftSystemId: string;
 	leftSystemCode: string;
@@ -762,31 +762,37 @@ export function turnaroundQueryOptions(
 	};
 }
 
-// Requires libraryCode + acquiredSince (both NotNull on the endpoint) - library scope.
 // --- Collection analysis ------------------------------------------------------
-//
-// Four of these five are consortium-wide and take NO parameters at all - not even the
-// date window - because they aggregate the catalogue as ingested rather than the traffic
-// over it. Their query keys are therefore constant: changing the range picker must not
-// refetch them, and would show the same numbers if it did.
-//
-// dcb-service runs them one at a time behind CollectionAnalysisService, caches each for
-// 15 minutes, and answers 429 when a caller has waited out its budget rather than
-// queueing a second 20M-row aggregate. Two consequences for this client, both deliberate:
-//
-//   staleTime 15m - matched to the server's own cache, so a remount inside that window
-//   costs nothing. The global default is 5 minutes, which would ask three times as often
-//   for an answer that cannot have changed.
-//
-//   retry: false - a 429 here means "the one permit is busy", and retrying immediately is
-//   exactly the wrong response: it spends the next caller's budget too. The panel surfaces
-//   the refusal and offers a manual retry instead.
+// The four consortium-wide queries take no parameters, not even the date window: they count
+// the catalogue, not traffic over it, so their keys are constant and the range picker cannot
+// refetch them. staleTime matches dcb-service's 15-minute cache. They retry only while the
+// count is still running: dcb-service keeps a shared pass going when a caller leaves, so a
+// retry joins it, where any other failure would only repeat.
 const COLLECTION_ANALYSIS_STALE_MS = 15 * 60 * 1000;
+const STILL_COMPUTING_RETRIES = 3;
 
-const collectionAnalysisPolicy = {
+/**
+ * An answer that means "the count is still running", not "it failed": a 502 or 504 from the
+ * proxy in front of dcb-service, whose pass outlived the proxy and carries on, or the 429 a
+ * dcb-service from before shared computation gave when its single permit was taken.
+ */
+const STILL_COMPUTING_STATUSES = new Set([429, 502, 504]);
+
+export function isStillComputing(error: unknown): boolean {
+	const status =
+		typeof error === "object" && error !== null
+			? (error as { response?: { status?: number } }).response?.status
+			: undefined;
+	return status !== undefined && STILL_COMPUTING_STATUSES.has(status);
+}
+
+export const collectionAnalysisPolicy = {
 	...panelQuery,
 	staleTime: COLLECTION_ANALYSIS_STALE_MS,
-	retry: false as const,
+	retry: (failureCount: number, error: unknown) =>
+		isStillComputing(error) && failureCount < STILL_COMPUTING_RETRIES,
+	retryDelay: (failureCount: number) =>
+		Math.min(20_000 * 2 ** failureCount, 60_000),
 };
 
 export function collectionTotalsQueryOptions(client: AxiosInstance) {
@@ -856,6 +862,7 @@ export function collectionOverlapQueryOptions(
 	};
 }
 
+// Requires libraryCode + acquiredSince (both NotNull on the endpoint) - library scope.
 export function newAcquisitionsQueryOptions(
 	client: AxiosInstance,
 	params: StatsParams & { libraryCode: string; acquiredSince: string },

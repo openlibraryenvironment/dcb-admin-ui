@@ -3,24 +3,21 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, Typography } from "@mui/material";
 
+import type { collectionAnalysisPolicy } from "@helpers/statsApi";
 import PanelState from "./PanelState";
 
 /**
- * Shell for the five collection-analysis panels: the card, and a query that must not retry.
- *
- * `retry: false` in the options type is the load-bearing part. These aggregates answer 429
- * when the one permit is busy, and an automatic retry spends the next caller's budget.
- * PanelState reads that 429 and offers a manual retry instead.
+ * Shell for the five collection-analysis panels: the card, and a query that retries only
+ * while the count is still running. The options type takes that policy whole, so a panel
+ * cannot be given a query that retries a real failure.
  */
 
 interface CollectionPanelProps<T> {
 	titleKey: string;
 	subtitleKey: string;
-	queryOptions: {
+	queryOptions: typeof collectionAnalysisPolicy & {
 		queryKey: readonly unknown[];
 		queryFn: () => Promise<T>;
-		staleTime: number;
-		retry: false;
 	};
 	isEmpty: (data: T) => boolean;
 	children: (data: T) => ReactNode;
@@ -36,7 +33,7 @@ export default function CollectionPanel<T>({
 	minHeight = 320,
 }: CollectionPanelProps<T>) {
 	const { t } = useTranslation();
-	const { data, isLoading, isError, error, refetch, isFetching } =
+	const { data, isLoading, isError, error, refetch, isFetching, failureCount } =
 		useQuery(queryOptions);
 
 	return (
@@ -50,6 +47,7 @@ export default function CollectionPanel<T>({
 				</Typography>
 				<PanelState
 					isLoading={isLoading}
+					isComputing={failureCount > 0}
 					isError={isError}
 					error={error}
 					isEmpty={data === undefined || isEmpty(data)}

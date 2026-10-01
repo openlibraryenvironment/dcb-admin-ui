@@ -5,7 +5,6 @@ import {
 	Box,
 	Card,
 	CardContent,
-	Skeleton,
 	Table,
 	TableBody,
 	TableCell,
@@ -19,6 +18,7 @@ import {
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 import MetricInfo from "./MetricInfo";
+import PanelState from "./PanelState";
 import DrillLink from "./DrillLink";
 import { partnerDrill } from "@helpers/insightsDrill";
 import {
@@ -96,7 +96,7 @@ function ScopedPartners({
 	const [page, setPage] = useState(0);
 	const [size, setSize] = useState(PAGE_SIZES[0]);
 
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
 		...topPartnersQueryOptions(client, { ...params, libraryCode, page, size }),
 		// Otherwise a page change unmounts the table into a spinner and the layout jumps -
 		// a CLS failure as much as a UX one.
@@ -116,96 +116,102 @@ function ScopedPartners({
 			title={t("insights.charts.trading_partners.title")}
 			subtitle={t("insights.charts.trading_partners.subtitle")}
 		>
-			{isLoading ? (
-				<Skeleton variant="rounded" height={PANEL_MIN_HEIGHT} />
-			) : rows.length === 0 ? (
-				<Empty />
-			) : (
-				<>
-					<TableContainer sx={{ maxHeight: 420 }}>
-						<Table size="small" stickyHeader>
-							<TableHead>
-								<TableRow>
-									<TableCell>
-										{t("insights.charts.trading_partners.col_partner")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.trading_partners.col_borrowed")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.trading_partners.col_supplied")}
-									</TableCell>
-									<TableCell align="right">
-										{t("insights.charts.trading_partners.col_total")}
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{rows.map((row) => (
-									<TableRow key={row.partnerCode} hover>
+			<PanelState
+				isLoading={isLoading}
+				isError={isError}
+				error={error}
+				isEmpty={rows.length === 0}
+				onRetry={refetch}
+				isRetrying={isFetching}
+				height={PANEL_MIN_HEIGHT}
+			>
+				{() => (
+					<>
+						<TableContainer sx={{ maxHeight: 420 }}>
+							<Table size="small" stickyHeader>
+								<TableHead>
+									<TableRow>
 										<TableCell>
-											{row.partnerName ?? row.partnerCode}
-											{row.partnerName ? (
-												<Typography
-													variant="caption"
-													component="span"
-													color="text.secondary"
-													sx={{ ml: 1 }}
-												>
-													{row.partnerCode}
-												</Typography>
-											) : null}
+											{t("insights.charts.trading_partners.col_partner")}
 										</TableCell>
 										<TableCell align="right">
-											{own ? (
-												<DrillLink
-													drill={partnerDrill(own, row.partnerCode, params)}
-													panel={panel}
-												>
-													{row.borrowedFromCount.toLocaleString()}
-												</DrillLink>
-											) : (
-												row.borrowedFromCount.toLocaleString()
-											)}
+											{t("insights.charts.trading_partners.col_borrowed")}
 										</TableCell>
 										<TableCell align="right">
-											{own ? (
-												<DrillLink
-													drill={partnerDrill(row.partnerCode, own, params)}
-													panel={panel}
-												>
-													{row.suppliedToCount.toLocaleString()}
-												</DrillLink>
-											) : (
-												row.suppliedToCount.toLocaleString()
-											)}
+											{t("insights.charts.trading_partners.col_supplied")}
 										</TableCell>
 										<TableCell align="right">
-											{row.totalCount.toLocaleString()}
+											{t("insights.charts.trading_partners.col_total")}
 										</TableCell>
 									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</TableContainer>
-					<TablePagination
-						component="div"
-						// totalSize counts PARTNERS, not requests, so it drives this directly.
-						count={data?.totalSize ?? 0}
-						page={page}
-						onPageChange={(_e, next) => setPage(next)}
-						rowsPerPage={size}
-						rowsPerPageOptions={PAGE_SIZES}
-						onRowsPerPageChange={(e) => {
-							setSize(parseInt(e.target.value, 10));
-							setPage(0);
-						}}
-						labelRowsPerPage={t(
-							"insights.charts.trading_partners.rows_per_page",
-						)}
-					/>
-				</>
-			)}
+								</TableHead>
+								<TableBody>
+									{rows.map((row) => (
+										<TableRow key={row.partnerCode} hover>
+											<TableCell>
+												{row.partnerName ?? row.partnerCode}
+												{row.partnerName ? (
+													<Typography
+														variant="caption"
+														component="span"
+														color="text.secondary"
+														sx={{ ml: 1 }}
+													>
+														{row.partnerCode}
+													</Typography>
+												) : null}
+											</TableCell>
+											<TableCell align="right">
+												{own ? (
+													<DrillLink
+														drill={partnerDrill(own, row.partnerCode, params)}
+														panel={panel}
+													>
+														{row.borrowedFromCount.toLocaleString()}
+													</DrillLink>
+												) : (
+													row.borrowedFromCount.toLocaleString()
+												)}
+											</TableCell>
+											<TableCell align="right">
+												{own ? (
+													<DrillLink
+														drill={partnerDrill(row.partnerCode, own, params)}
+														panel={panel}
+													>
+														{row.suppliedToCount.toLocaleString()}
+													</DrillLink>
+												) : (
+													row.suppliedToCount.toLocaleString()
+												)}
+											</TableCell>
+											<TableCell align="right">
+												{row.totalCount.toLocaleString()}
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</TableContainer>
+						<TablePagination
+							component="div"
+							// totalSize counts PARTNERS, not requests, so it drives this directly.
+							count={data?.totalSize ?? 0}
+							page={page}
+							onPageChange={(_e, next) => setPage(next)}
+							rowsPerPage={size}
+							rowsPerPageOptions={PAGE_SIZES}
+							onRowsPerPageChange={(e) => {
+								setSize(parseInt(e.target.value, 10));
+								setPage(0);
+							}}
+							labelRowsPerPage={t(
+								"insights.charts.trading_partners.rows_per_page",
+							)}
+						/>
+					</>
+				)}
+			</PanelState>
 		</PanelFrame>
 	);
 }
@@ -214,7 +220,7 @@ function ConsortiumPartners({ params }: { params: StatsParams }) {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 
-	const { data, isLoading } = useQuery(
+	const { data, isLoading, isError, error, refetch, isFetching } = useQuery(
 		dashboardMetricsQueryOptions(client, params),
 	);
 
@@ -226,28 +232,34 @@ function ConsortiumPartners({ params }: { params: StatsParams }) {
 			title={t("insights.charts.trading_partners.title")}
 			subtitle={t("insights.charts.trading_partners.subtitle_consortium")}
 		>
-			{isLoading ? (
-				<Skeleton variant="rounded" height={PANEL_MIN_HEIGHT} />
-			) : suppliers.length === 0 && borrowers.length === 0 ? (
-				<Empty />
-			) : (
-				<Box
-					sx={{
-						display: "grid",
-						gap: 3,
-						gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-					}}
-				>
-					<PartnerList
-						headingKey="insights.charts.trading_partners.top_suppliers"
-						rows={suppliers}
-					/>
-					<PartnerList
-						headingKey="insights.charts.trading_partners.top_borrowers"
-						rows={borrowers}
-					/>
-				</Box>
-			)}
+			<PanelState
+				isLoading={isLoading}
+				isError={isError}
+				error={error}
+				isEmpty={suppliers.length === 0 && borrowers.length === 0}
+				onRetry={refetch}
+				isRetrying={isFetching}
+				height={PANEL_MIN_HEIGHT}
+			>
+				{() => (
+					<Box
+						sx={{
+							display: "grid",
+							gap: 3,
+							gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+						}}
+					>
+						<PartnerList
+							headingKey="insights.charts.trading_partners.top_suppliers"
+							rows={suppliers}
+						/>
+						<PartnerList
+							headingKey="insights.charts.trading_partners.top_borrowers"
+							rows={borrowers}
+						/>
+					</Box>
+				)}
+			</PanelState>
 		</PanelFrame>
 	);
 }
@@ -288,22 +300,5 @@ function PartnerList({
 				</TableBody>
 			</Table>
 		</TableContainer>
-	);
-}
-
-function Empty() {
-	const { t } = useTranslation();
-
-	return (
-		<Box
-			sx={{
-				minHeight: PANEL_MIN_HEIGHT,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-			}}
-		>
-			<Typography color="text.secondary">{t("insights.no_data")}</Typography>
-		</Box>
 	);
 }

@@ -1160,7 +1160,8 @@
 		"collection": {
 			"section_title": "Collection analysis",
 			"section_subtitle": "The catalogue as ingested, rather than the traffic over it. These figures count works held, not requests made, so the date range above does not apply to them.",
-			"busy": "The collection figures are being recalculated. Try again shortly.",
+			"busy": "The collection figures are still being counted. Try again in a minute.",
+			"computing": "Counting across the whole catalogue. The first count can take several minutes, and this panel will check again on its own.",
 			"failed": "The collection figures could not be loaded.",
 			"retry": "Retry",
 			"totals": {

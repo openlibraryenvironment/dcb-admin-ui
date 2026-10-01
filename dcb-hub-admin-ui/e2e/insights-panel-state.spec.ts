@@ -96,6 +96,115 @@ test.describe("Insights panel states", () => {
 		await expect(panel.locator("svg").first()).toBeVisible();
 	});
 
+	test("a collection count that outlives the proxy says it is still counting, then answers", async ({
+		page,
+	}) => {
+		// dcb-service keeps the shared pass running when the proxy gives up, so a 504 here
+		// means "not yet", and the panel asks again on its own rather than reporting a fault.
+		let timedOut = 0;
+		await page.route("**/insights/collection-totals**", async (route) => {
+			if (timedOut++ === 0) {
+				await route.fulfill({ status: 504, body: "" });
+				return;
+			}
+			await route.fulfill({
+				json: {
+					distinctTitles: 4_120_884,
+					singlyHeldTitles: 1_902_311,
+					holdings: 7_884_002,
+					contributingSources: 42,
+				},
+			});
+		});
+		await page.clock.install();
+
+		await page.goto("/consortium/insights?tab=collection");
+
+		const computing = page.getByText("Counting across the whole catalogue.");
+		for (let i = 0; i < 14 && !(await computing.isVisible()); i++) {
+			await page.mouse.wheel(0, 600);
+			await expect(page.locator("body")).toBeVisible();
+		}
+		await expect(computing).toBeVisible();
+		await expect(
+			page.getByText("The collection figures could not be loaded."),
+		).toHaveCount(0);
+
+		// The first retry is 20 seconds out; nobody should have to wait for it in a test.
+		await page.clock.fastForward(21_000);
+
+		await expect(page.getByText("4,120,884", { exact: true })).toBeVisible();
+		expect(timedOut).toBe(2);
+	});
+
+	test("a chosen date range shows as two labelled fields, and Clear returns to the preset", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights?from=2026-09-01&to=2026-09-15");
+
+		const from = page.getByRole("group", { name: "From" });
+		const to = page.getByRole("group", { name: "To" });
+		await expect(from.getByRole("spinbutton", { name: "Day" })).toHaveText(
+			"01",
+		);
+		await expect(to.getByRole("spinbutton", { name: "Day" })).toHaveText("15");
+
+		await from.click();
+		await page.getByRole("button", { name: "Clear" }).click();
+
+		await expect(page).not.toHaveURL(/from=/);
+		await expect(page.getByRole("button", { name: "30 days" })).toHaveAttribute(
+			"aria-pressed",
+			"true",
+		);
+	});
+
+	test("a library chosen in the selector stays chosen, and survives a reload", async ({
+		page,
+	}) => {
+		await page.goto("/consortium/insights");
+
+		await page.getByRole("combobox", { name: "Libraries" }).click();
+		await page.getByRole("option", { name: "Alpha Test Library" }).click();
+
+		const chip = page.getByRole("button", { name: "Alpha Test Library" });
+		await expect(chip).toBeVisible();
+		await expect(page).toHaveURL(/scope=/);
+
+		await page.reload();
+		await expect(chip).toBeVisible();
+	});
+
+	test("trading partners says it failed, rather than that there were no partners", async ({
+		page,
+	}) => {
+		let failNext = true;
+		await page.route("**/insights/top-partners**", async (route) => {
+			if (failNext) {
+				await route.fulfill({ status: 500, json: { message: "boom" } });
+				return;
+			}
+			await route.fallback();
+		});
+
+		await page.goto(
+			"/consortium/insights?tab=partners&scope=library:c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+		);
+
+		await reveal(page, "Trading partners");
+		const panel = cardFor(page, "Trading partners");
+
+		await expect(panel).toContainText("This panel could not be loaded.", {
+			timeout: 15_000,
+		});
+		await expect(panel).not.toContainText("No data for the selected period.");
+
+		failNext = false;
+		await panel.getByRole("button", { name: "Retry" }).click();
+
+		await expect(panel).not.toContainText("This panel could not be loaded.");
+	});
+
 	test("an empty panel still reads as empty, not as broken", async ({
 		page,
 	}) => {

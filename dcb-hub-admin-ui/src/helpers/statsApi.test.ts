@@ -216,14 +216,26 @@ describe("statsApi wire contract", () => {
 		);
 
 		it.each(consortiumWide)(
-			"does not retry %s on refusal",
+			"retries %s only while the count is still running",
 			(_path, factory) => {
 				const { client } = recordingClient();
+				const { retry, retryDelay, staleTime } = factory(client);
+				const status = (code: number) => ({ response: { status: code } });
 
-				// A 429 means the one permit is taken. Retrying spends the next caller's
-				// budget too, so the panel offers a manual retry instead.
-				expect(factory(client).retry).toBe(false);
-				expect(factory(client).staleTime).toBe(15 * 60 * 1000);
+				// The proxy gave up but the shared pass carries on: asking again joins it.
+				expect(retry(0, status(504))).toBe(true);
+				expect(retry(2, status(502))).toBe(true);
+				expect(retry(3, status(504))).toBe(false);
+
+				// A real failure: a retry would only repeat it.
+				expect(retry(0, status(500))).toBe(false);
+				expect(retry(0, status(403))).toBe(false);
+				expect(retry(0, new Error("Network Error"))).toBe(false);
+
+				expect([0, 1, 2, 3].map(retryDelay)).toEqual([
+					20_000, 40_000, 60_000, 60_000,
+				]);
+				expect(staleTime).toBe(15 * 60 * 1000);
 			},
 		);
 	});
