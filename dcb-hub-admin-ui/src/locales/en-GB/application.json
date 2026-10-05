@@ -534,6 +534,8 @@
 	"hostlms": {
 		"alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.",
 		"bibSuppressionRulesetName": "Bib suppression ruleset",
+		"ruleset_not_found": "No ruleset called {{name}} exists yet. Records are not suppressed by it until one is created with that name.",
+		"ruleset_default": "Leave blank to use {{name}}.",
 		"client_class": "Client class",
 		"client_config_json": "Client configuration (JSON)",
 		"client_config_json_helper": "Optional. Provide any additional configuration as JSON.",

@@ -1457,6 +1457,15 @@ export const HOST_LMS_PROFILES: HostLmsProfile[] = [
 	.map(withSharedFields)
 	.map(withAdapterDefaults);
 
+/**
+ * The bib suppression ruleset dcb-service applies when none is named: FOLIO's ingest
+ * source falls back to folio-default, which application.yml seeds.
+ */
+export const bibSuppressionDefault = (
+	lmsClientClass: string | undefined | null,
+): string | undefined =>
+	lmsClientClass === HOST_LMS_CLASSES.folio ? "folio-default" : undefined;
+
 export const getHostLmsProfile = (
 	lmsClientClass?: string | null,
 ): HostLmsProfile | undefined =>
