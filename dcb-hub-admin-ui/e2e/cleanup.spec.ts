@@ -138,6 +138,10 @@ test.describe("Bulk clean up against dcb-service 9.0.0", () => {
 			name: /Clean up while the item is out/,
 		});
 		await expect(confirmation).toBeVisible();
+		// Settled first, exactly as above. `toBeVisible` is true the moment the dialog
+		// is in the DOM, which is mid-fade - and this scan had no settle at all, so it
+		// failed on the submit button's contrast about one run in three.
+		await waitForDialogToSettle(page);
 		await scanForViolations(page);
 
 		await confirmation.getByRole("button", { name: /Clean up anyway/ }).click();
