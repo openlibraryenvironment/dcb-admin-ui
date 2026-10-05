@@ -101,6 +101,35 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).not.toContain("base-url");
 		});
 
+		it("demands everything HostLmsConfigValidator demands for Polaris", () => {
+			const missing = missingRequiredClientConfig(
+				HOST_LMS_CLASSES.polaris,
+				{},
+			).map((problem) => problem.name);
+
+			expect([...missing].sort()).toEqual(
+				[
+					"base-url",
+					"access-id",
+					"access-key",
+					"domain-id",
+					"logon-branch-id",
+					"logon-user-id",
+					"staff-username",
+					"staff-password",
+					"default-agency-code",
+					"services.organisation-id",
+					"item.ill-location-id",
+					"item.fine-code-id",
+					"item.history-action-id",
+					"item.shelving-scheme-id",
+					"item.loan-period-code-id",
+					"item.av-loan-period-code-id",
+					"item.renewal-limit",
+				].sort(),
+			);
+		});
+
 		it("demands Koha's OAuth pair and virtual item library", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.koha,

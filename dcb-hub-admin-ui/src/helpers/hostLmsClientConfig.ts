@@ -872,7 +872,7 @@ const POLARIS: HostLmsProfile = {
 					["services", "organisation-id"],
 					"hostlms.client_config.services_organisation_id",
 					"hostlms.config_fields.services_organisation_id_description",
-					"recommended",
+					"required",
 				),
 				field(
 					["services", "site-domain"],
@@ -928,13 +928,13 @@ const POLARIS: HostLmsProfile = {
 					["item", "ill-location-id"],
 					"hostlms.client_config.ill_location_id",
 					"hostlms.config_fields.ill_location_id_description",
-					"recommended",
+					"required",
 				),
 				field(
 					["item", "fine-code-id"],
 					"hostlms.client_config.fine",
 					"hostlms.config_fields.fine_code_id_description",
-					"optional",
+					"required",
 				),
 				// Text, not number. PolarisConfig.ItemConfig declares every one of
 				// these as `Object` and coerces String<->Integer on read, and real
@@ -944,31 +944,31 @@ const POLARIS: HostLmsProfile = {
 					["item", "renewal-limit"],
 					"hostlms.client_config.renewal_limit",
 					"hostlms.config_fields.renewal_limit_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "history-action-id"],
 					"hostlms.client_config.history_action_id",
 					"hostlms.config_fields.history_action_id_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "shelving-scheme-id"],
 					"hostlms.client_config.shelving_scheme_id",
 					"hostlms.config_fields.shelving_scheme_id_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "loan-period-code-id"],
 					"hostlms.client_config.loan_id",
 					"hostlms.config_fields.loan_period_code_id_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "av-loan-period-code-id"],
 					"hostlms.config_fields.av_loan_period_code_id",
 					"hostlms.config_fields.av_loan_period_code_id_description",
-					"optional",
+					"required",
 				),
 				{
 					path: ["item", "item-agency-resolution-method"],
