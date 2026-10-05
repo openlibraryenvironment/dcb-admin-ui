@@ -101,6 +101,7 @@ describe("hostLmsClientConfig", () => {
 				"base-url": "https://okapi.example.org",
 				apikey: "abc",
 				"default-agency-code": "EX",
+				"record-syntax": "oai_dc",
 			};
 
 			expect(
@@ -111,6 +112,19 @@ describe("hostLmsClientConfig", () => {
 					(problem) => problem.name,
 				),
 			).toContain("folio-tenant");
+		});
+
+		it("requires the FOLIO record syntax while the FOLIO harvests", () => {
+			const missing = (values: object) =>
+				missingRequiredClientConfig(HOST_LMS_CLASSES.folio, values).map(
+					(problem) => problem.name,
+				);
+
+			expect(missing({})).toContain("record-syntax");
+			expect(missing({ ingest: true })).toContain("record-syntax");
+			expect(missing({ ingest: false })).not.toContain("record-syntax");
+			// A default dcb-service supplies, so never required
+			expect(missing({})).not.toContain("metadata-prefix");
 		});
 
 		it("reports nested Polaris fields by their dotted path", () => {

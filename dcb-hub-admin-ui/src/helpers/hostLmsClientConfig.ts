@@ -167,6 +167,10 @@ const field = (
 const sharedSystemSet = (values: any): boolean =>
 	values?.["shared-system"] === true || values?.["shared-system"] === "true";
 
+/** dcb-service harvests unless `ingest` is explicitly false. */
+const ingestSwitchedOff = (values: any): boolean =>
+	values?.ingest === false || values?.ingest === "false";
+
 /**
  * `default-agency-code`, in the six profiles where it means "the agency to assume
  * when a patron's home location does not map".
@@ -654,18 +658,19 @@ const FOLIO: HostLmsProfile = {
 					"recommended",
 					"url",
 				),
-				field(
-					["record-syntax"],
-					"hostlms.config_fields.record_syntax",
-					"hostlms.config_fields.record_syntax_description",
-					"optional",
-					"text",
-					"marcxml",
-				),
+				{
+					path: ["record-syntax"],
+					labelKey: "hostlms.config_fields.record_syntax",
+					descriptionKey:
+						"hostlms.config_fields.folio_record_syntax_description",
+					requirement: "required",
+					type: "text",
+					requiredUnless: ingestSwitchedOff,
+				},
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
-					"hostlms.config_fields.metadata_prefix_description",
+					"hostlms.config_fields.folio_metadata_prefix_description",
 					"optional",
 					"text",
 					"marc21_withholdings",
