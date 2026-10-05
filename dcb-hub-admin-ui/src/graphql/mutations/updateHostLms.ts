@@ -1,4 +1,5 @@
 import { gql } from "graphql-request";
+import { hostLmsProbesSelection } from "@fragments/hostLmsProbes";
 
 /**
  * `clientConfig` is deliberately NOT in the selection set, although the input writes it.
@@ -12,7 +13,7 @@ import { gql } from "graphql-request";
  * LMS unreachable has to be visible at the moment it is made rather than at the next
  * ingest run.
  */
-export const updateHostLmsMutation = gql`
+export const updateHostLmsMutation = () => gql`
 	mutation UpdateHostLms($input: UpdateHostLmsInput!) {
 		updateHostLms(input: $input) {
 			hostLms {
@@ -25,6 +26,7 @@ export const updateHostLmsMutation = gql`
 			}
 			pingStatus
 			ingestStatus
+			${hostLmsProbesSelection()}
 			warnings
 		}
 	}

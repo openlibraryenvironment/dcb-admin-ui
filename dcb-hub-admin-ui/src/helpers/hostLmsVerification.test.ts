@@ -23,6 +23,18 @@ describe("hostLmsVerification", () => {
 			["Ping Failed: connection refused", "error"],
 			["Ingest Check Failed: boom", "error"],
 			["Skipped: Source does not support chunked retrieval.", "info"],
+			// dcb-service's HostLmsVerificationService
+			["OK", "success"],
+			["Missing: item.fine-code-id", "error"],
+			[
+				"Unsupported: lib1=BASIC/BARCODE+NAME. Supported: BASIC/BARCODE+PIN",
+				"error",
+			],
+			[
+				"Failed: client could not be built: Missing required config value",
+				"error",
+			],
+			["Not checked: no agency uses this Host LMS yet", "info"],
 			[undefined, "info"],
 		])("classifies %s as %s", (status, expected) => {
 			expect(classifyVerificationStatus(status)).toBe(expected);

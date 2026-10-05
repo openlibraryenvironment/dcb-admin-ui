@@ -18,6 +18,23 @@ type TestOperation = {
 	advice?: string;
 };
 
+// Absent, not failed, where the deployment's dcb-service does not run these checks
+const probe = (
+	key: string,
+	label: string,
+	status: string | null | undefined,
+): TestOperation[] =>
+	status == null
+		? []
+		: [
+				{
+					key,
+					label,
+					severity: classifyVerificationStatus(status),
+					detail: status,
+				},
+			];
+
 // Normalises the verification payload into a flat list of test operations.
 // Adding a future check (auth probe, holdings lookup, ...) is a single entry
 // here - the render loop and styling below stay untouched.
@@ -40,6 +57,16 @@ const deriveTestOperations = (
 			? t("hostlms.verification.ingest_timeout_advice")
 			: undefined,
 	},
+	...probe(
+		"configuration",
+		t("hostlms.verification.configuration"),
+		result.configurationStatus,
+	),
+	...probe(
+		"auth_profile",
+		t("hostlms.verification.auth_profile"),
+		result.authProfileStatus,
+	),
 ];
 
 type HostLmsVerificationProps = {

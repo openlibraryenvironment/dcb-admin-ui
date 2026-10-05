@@ -571,6 +571,8 @@
 			"subtitle": "Results of the connection and ingest checks for {{code}}.",
 			"ping": "Connection (ping)",
 			"ingest": "Record ingest",
+			"configuration": "Configuration",
+			"auth_profile": "Patron authentication profiles",
 			"warnings_title": "Configuration warnings",
 			"no_result": "No result was returned for this check.",
 			"empty": "No verification results are available.",
@@ -3153,6 +3155,7 @@
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
+			"host_lms_probes": "Configuration and authentication checks on Host LMS changes",
 			"settings_inheritance": "Settings inheritance",
 			"shelf_browse": "Shelf browse"
 		},

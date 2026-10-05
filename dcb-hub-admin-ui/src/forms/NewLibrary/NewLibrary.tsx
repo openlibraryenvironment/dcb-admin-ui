@@ -273,7 +273,7 @@ export default function NewLibrary({
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
 				gqlClient.request<any, CreateHostLmsMutationVariables>(
-					createHostLmsMutation,
+					createHostLmsMutation(),
 					variables,
 				),
 			onSuccess: () =>

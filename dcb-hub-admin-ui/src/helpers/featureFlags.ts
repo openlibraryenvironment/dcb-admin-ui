@@ -149,6 +149,14 @@ export const isLocalHoldsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_LOCAL_HOLDS");
 
 /**
+ * The configuration and auth profile checks on creating or updating a Host LMS, in no
+ * release yet. Two result fields, so this gates the mutation DOCUMENT: selecting them
+ * against an older dcb-service fails the whole create.
+ */
+export const isHostLmsProbesEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_HOST_LMS_PROBES");
+
+/**
  * Percentile trends — `/insights/trend`, in NO release, not 8.71.0 and not the 9.0.0
  * tag. Merged on main: InsightsController at bcfe8254e serves it, checked 2026-09-29.
  * So a 9.0.0 deployment has the Insights surface and 404s this one endpoint.

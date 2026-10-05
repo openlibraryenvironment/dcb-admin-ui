@@ -1233,6 +1233,8 @@ type CreateHostLmsResult {
 	hostLms: HostLms
 	pingStatus: String
 	ingestStatus: String
+	configurationStatus: String
+	authProfileStatus: String
 	warnings: [String]
 }
 
@@ -1240,6 +1242,8 @@ type UpdateHostLmsResult {
 	hostLms: HostLms
 	pingStatus: String
 	ingestStatus: String
+	configurationStatus: String
+	authProfileStatus: String
 	warnings: [String]
 }
 

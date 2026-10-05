@@ -8,8 +8,22 @@ export type HostLmsVerificationResult = {
 	hostLms?: { code?: string | null; name?: string | null } | null;
 	pingStatus?: string | null;
 	ingestStatus?: string | null;
+	// Only selected where VITE_FEATURE_HOST_LMS_PROBES is on, so absent otherwise
+	configurationStatus?: string | null;
+	authProfileStatus?: string | null;
 	warnings?: (string | null)[] | null;
 };
+
+/** The verification half of a create or update result. */
+export const verificationFrom = (
+	result?: HostLmsVerificationResult | null,
+): HostLmsVerificationResult => ({
+	pingStatus: result?.pingStatus,
+	ingestStatus: result?.ingestStatus,
+	configurationStatus: result?.configurationStatus,
+	authProfileStatus: result?.authProfileStatus,
+	warnings: result?.warnings ?? [],
+});
 
 export type VerificationSeverity = "success" | "error" | "info";
 
@@ -20,11 +34,17 @@ export const classifyVerificationStatus = (
 ): VerificationSeverity => {
 	if (!status) return "info";
 	const lower = status.toLowerCase();
-	if (lower.includes("failed") || lower.startsWith("status: error"))
+	if (
+		lower.includes("failed") ||
+		lower.startsWith("status: error") ||
+		lower.startsWith("missing") ||
+		lower.startsWith("unsupported")
+	)
 		return "error";
 	if (
 		lower.startsWith("skipped") ||
-		lower.startsWith("status: not implemented")
+		lower.startsWith("status: not implemented") ||
+		lower.startsWith("not checked")
 	)
 		return "info";
 	return "success";

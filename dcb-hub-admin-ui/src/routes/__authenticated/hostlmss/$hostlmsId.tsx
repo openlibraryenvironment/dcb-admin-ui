@@ -45,7 +45,10 @@ import {
 	mergeClientConfigEdit,
 	missingRequiredClientConfig,
 } from "@helpers/hostLmsClientConfig";
-import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
+import {
+	type HostLmsVerificationResult,
+	verificationFrom,
+} from "@helpers/hostLmsVerification";
 import { HostLMS } from "@models/HostLMS";
 import FolioConfig from "@components/HostLmsConfig/FolioConfig";
 import SierraConfig from "@components/HostLmsConfig/SierraConfig";
@@ -226,11 +229,7 @@ function HostLMSDetails() {
 				setEditMode(false);
 				// The update re-probes the system, so a credential change that broke the
 				// connection is reported here rather than at the next ingest run.
-				setVerification({
-					pingStatus: result?.pingStatus,
-					ingestStatus: result?.ingestStatus,
-					warnings: result?.warnings ?? [],
-				});
+				setVerification(verificationFrom(result));
 				reset(undefined, { keepValues: false });
 			},
 		});

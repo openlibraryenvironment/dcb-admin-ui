@@ -4,6 +4,7 @@ import {
 	isConsortiumBrandingEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
+	isHostLmsProbesEnabled,
 	isInsightsEnabled,
 	isInsightsTrendsEnabled,
 	isLibraryUserProvisioningEnabled,
@@ -53,6 +54,12 @@ export const CONSORTIUM_SUPPORT_FIELDS = ["supportUrl"] as const;
  * serviceCapabilities.test.ts all read the same list.
  */
 export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
+
+/** The two verification checks that read only what dcb-service holds. */
+export const HOST_LMS_PROBE_FIELDS = [
+	"configurationStatus",
+	"authProfileStatus",
+] as const;
 
 /**
  * The per-library brand, added by the same 9.0.0 migration as the consortium's.
@@ -256,6 +263,16 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {
 			Consortium: CONSORTIUM_SUPPORT_FIELDS,
 			UpdateConsortiumInput: CONSORTIUM_SUPPORT_FIELDS,
+		},
+	},
+	{
+		id: "host_lms_probes",
+		flag: "VITE_FEATURE_HOST_LMS_PROBES",
+		enabled: isHostLmsProbesEnabled,
+		since: null,
+		fields: {
+			CreateHostLmsResult: HOST_LMS_PROBE_FIELDS,
+			UpdateHostLmsResult: HOST_LMS_PROBE_FIELDS,
 		},
 	},
 	{
