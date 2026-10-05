@@ -280,9 +280,14 @@ export default function DataGrid({
 				onProcessRowUpdateError={(error: any) => {
 					console.error("Error updating row:", error);
 
-					// Whatever is throwing the error must include the row name for us to grab it here
-
-					const name = error?.rowName || t("ui.data_grid.this_item");
+					// `rowName` is how a caller ASKS for this alert, and the only caller
+					// that does is OperatingWelcome - it owns its own mutation, has no
+					// alert of its own, and throws `{ message, rowName }` for exactly
+					// this. Every other grid goes through useEntityMutation, which has
+					// already shown the failure WITH the server's reason in it. Two open
+					// Snackbars anchor to the same corner, so announcing here as well
+					// covered that reason with this generic line.
+					if (!error?.rowName) return;
 
 					setAlert({
 						open: true,
@@ -294,7 +299,7 @@ export default function DataGrid({
 									: type === "numericRangeMappings"
 										? t("mappings.num_range_one").toLowerCase()
 										: type?.toLowerCase(),
-							name: name,
+							name: error.rowName,
 						}),
 					});
 				}}

@@ -1,5 +1,7 @@
 import { GridRowModel } from "@mui/x-data-grid-premium";
 
+import { describeGraphQLError } from "@helpers/graphQLErrors";
+
 /**
  * The decisions `useEntityMutation` makes that are not about React. Kept out of
  * the hook so they can be tested directly - the project's Vitest setup has no
@@ -21,15 +23,6 @@ export const changedRowFields = (
 	}, {});
 
 /**
- * Did a delete actually happen?
- *
- * The mutations return `{ success, message }`, and a `success: false` with a
- * 200 response is the server declining - not an error the request layer will
- * throw for. Treat a missing field as success, because some deletes return
- * nothing at all; treat an explicit `false` as failure, because that is the
- * server saying so.
- */
-/**
  * Drop every key this deployment's dcb-service cannot accept — R-19.
  *
  * An undeclared input field is a GraphQL VALIDATION error, so one key too new for the
@@ -49,6 +42,31 @@ export const stripUnsupportedKeys = <T extends Record<string, unknown>>(
 		Object.entries(input).filter(([key]) => !unsupported.has(key)),
 	) as Partial<T>;
 
+/**
+ * What to tell the user when a mutation fails: what they were doing, then the server's
+ * reason under it. TimedAlert renders errors `pre-line`, so the newline survives.
+ *
+ * The EMPTY fallback is how describeGraphQLError is asked whether it has anything
+ * usable - a network failure or a ClientError whose message is the serialised exchange
+ * yields "", and nothing is appended.
+ */
+export const mutationFailureText = (
+	error: unknown,
+	summary: string,
+): string => {
+	const detail = describeGraphQLError(error, "");
+	return detail && detail !== summary ? `${summary}\n${detail}` : summary;
+};
+
+/**
+ * Did a delete actually happen?
+ *
+ * The mutations return `{ success, message }`, and a `success: false` with a
+ * 200 response is the server declining - not an error the request layer will
+ * throw for. Treat a missing field as success, because some deletes return
+ * nothing at all; treat an explicit `false` as failure, because that is the
+ * server saying so.
+ */
 export const readDeleteOutcome = (
 	response: any,
 	operation: string | undefined,
