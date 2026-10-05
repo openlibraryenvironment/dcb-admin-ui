@@ -252,6 +252,32 @@ test.describe("Settings inheritance", () => {
 	});
 });
 
+test.describe("Settings inheritance for a library with a long name", () => {
+	let sent: Sent[] = [];
+
+	test.beforeEach(async ({ page }) => {
+		sent = [];
+		await useAllFeatures(page);
+		await seedAuth(page);
+
+		const longNamed = structuredClone(libraryDetail);
+		longNamed.libraries.content[0].fullName = "A".repeat(150);
+		await mockDcbService(page, sent, {
+			LoadLibrary: longNamed,
+			LoadLibraryBasics: longNamed,
+		});
+	});
+
+	test("sends a reason the server will accept", async ({ page }) => {
+		await openSettingsTab(page);
+
+		await switchIn(page, INHERITED_FROM_CONSORTIUM).click();
+
+		await expect.poll(() => sent.length).toBe(1);
+		expect(sent[0].variables.input.reason.length).toBeLessThanOrEqual(100);
+	});
+});
+
 test.describe("Settings inheritance where a group level exists", () => {
 	test("names the group level in the explanation", async ({ page }) => {
 		await useAllFeatures(page);
