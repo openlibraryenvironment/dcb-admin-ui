@@ -16,7 +16,9 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 
+import i18n from "@/i18n";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { createLibraryGroup } from "@mutations/createLibraryGroup";
 import type { CreateLibraryGroupMutationVariables } from "@generated/graphql";
@@ -25,6 +27,8 @@ interface FormData {
 	name: string;
 	code: string;
 	type: string;
+	/** Required, and prefilled - see defaultCreationReason. */
+	reason: string;
 }
 
 type NewGroupType = {
@@ -42,6 +46,12 @@ const validationSchema = Yup.object().shape({
 	type: Yup.string()
 		.required("Group type is required")
 		.max(32, "Group type must be at most 32 characters"),
+	// `i18n.t` rather than a `t` from the hook, because this schema is module scope.
+	// The messages above predate it and are still hardcoded English.
+	reason: Yup.string()
+		.trim()
+		.max(100)
+		.required(i18n.t("data_change_log.reason_required")),
 });
 
 export default function NewGroup({ show, onClose }: NewGroupType) {
@@ -69,6 +79,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 			name: "",
 			code: "",
 			type: "",
+			reason: defaultCreationReason("groups.groups_one"),
 		},
 		resolver: yupResolver(validationSchema),
 		mode: "onChange",
@@ -83,6 +94,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 						name: values.name,
 						code: values.code,
 						type: values.type,
+						reason: values.reason,
 					},
 				},
 			);
@@ -203,6 +215,24 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 									required
 									error={!!errors.type}
 									helperText={errors.type?.message}
+								/>
+							)}
+						/>
+						{/* LibraryGroupInput has always accepted a reason and this form
+						    never sent one, so the data change log recorded a new group
+						    with no account of why it was created. */}
+						<Controller
+							name="reason"
+							control={control}
+							render={({ field }) => (
+								<TextField
+									{...field}
+									label={t("data_change_log.reason_addition")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.reason}
+									helperText={errors.reason?.message}
 								/>
 							)}
 						/>

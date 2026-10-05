@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { addFunctionalSettingMutation } from "@mutations/addFunctionalSetting";
 import type {
@@ -48,7 +49,8 @@ interface NewFunctionalSettingFormData {
 	// null until the user picks one; yup's .required() enforces it on submit.
 	name: FunctionalSettingType | null;
 	enabled: boolean;
-	reason?: string;
+	/** Required, and prefilled - see defaultCreationReason. */
+	reason: string;
 	changeCategory?: string;
 	changeReferenceUrl?: string;
 }
@@ -81,6 +83,7 @@ export default function NewFunctionalSetting({
 	});
 
 	const validationSchema = Yup.object().shape({
+		reason: Yup.string().trim().required(t("data_change_log.reason_required")),
 		description: Yup.string()
 			.trim()
 			.required(
@@ -111,7 +114,7 @@ export default function NewFunctionalSetting({
 			description: "",
 			name: null,
 			enabled: false,
-			reason: "",
+			reason: defaultCreationReason("consortium.settings.one"),
 			changeCategory: "",
 			changeReferenceUrl: "",
 		},

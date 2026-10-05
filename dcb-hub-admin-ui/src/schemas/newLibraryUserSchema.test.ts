@@ -15,6 +15,8 @@ const valid = {
 	firstName: "Ada",
 	lastName: "Lovelace",
 	role: "LIBRARY_ADMIN" as const,
+	// Required, and the form prefills it - see defaultCreationReason.
+	reason: "Adding new account",
 };
 
 describe("provisioning a library account", () => {
@@ -34,7 +36,9 @@ describe("provisioning a library account", () => {
 	it("refuses a role that would be an escalation", async () => {
 		// Not the control — the server refuses this four separate ways — but the person
 		// filling the form should be told before they submit.
-		await expect(schema.validate({ ...valid, role: "ADMIN" })).rejects.toThrow();
+		await expect(
+			schema.validate({ ...valid, role: "ADMIN" }),
+		).rejects.toThrow();
 
 		await expect(
 			schema.validate({ ...valid, role: "CONSORTIUM_ADMIN" }),
@@ -60,6 +64,16 @@ describe("provisioning a library account", () => {
 	it("treats whitespace-only entries as absent", async () => {
 		await expect(
 			schema.validate({ ...valid, firstName: "   " }),
+		).rejects.toThrow();
+	});
+
+	it("requires a reason, which the data change log records", async () => {
+		// Creates used to record no reason at all, so the log could say why an account
+		// was disabled but not why it existed. The form prefills one, so this only
+		// fires when somebody clears the field.
+		await expect(schema.validate({ ...valid, reason: "" })).rejects.toThrow();
+		await expect(
+			schema.validate({ ...valid, reason: "   " }),
 		).rejects.toThrow();
 	});
 });
