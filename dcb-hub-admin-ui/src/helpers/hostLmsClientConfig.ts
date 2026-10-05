@@ -496,29 +496,41 @@ const ALMA: HostLmsProfile = {
 				"hostlms.config_fields.alma_resource_sharing_group_description",
 			required: false,
 			fields: [
-				// Creation succeeds without these three, but AlmaClientConfig declares
-				// them required, so the first real request will fail instead.
 				field(
 					["sharing-library-code"],
 					"hostlms.config_fields.sharing_library_code",
 					"hostlms.config_fields.alma_sharing_library_code_description",
-					"recommended",
-					"text",
-					"RES_SHARE",
+					"required",
+				),
+				field(
+					["sharing-circ-desk-code"],
+					"hostlms.config_fields.sharing_circ_desk_code",
+					"hostlms.config_fields.alma_sharing_circ_desk_code_description",
+					"optional",
+				),
+				field(
+					["alternative-sharing-library-code"],
+					"hostlms.config_fields.alternative_sharing_library_code",
+					"hostlms.config_fields.alma_alternative_sharing_library_code_description",
+					"optional",
+				),
+				field(
+					["request-cancellation-reason"],
+					"hostlms.config_fields.request_cancellation_reason",
+					"hostlms.config_fields.alma_request_cancellation_reason_description",
+					"required",
 				),
 				field(
 					["virtual-item-library-code"],
 					"hostlms.config_fields.virtual_item_library_code",
 					"hostlms.config_fields.alma_virtual_item_library_code_description",
-					"recommended",
+					"required",
 				),
 				field(
 					["virtual-item-location-code"],
 					"hostlms.config_fields.virtual_item_location_code",
 					"hostlms.config_fields.alma_virtual_item_location_code_description",
-					"recommended",
-					"text",
-					"OUT_RS_REQ",
+					"required",
 				),
 				// The support guide asks every Alma site for this up front, because
 				// checkouts have to happen somewhere.
@@ -544,9 +556,17 @@ const ALMA: HostLmsProfile = {
 					ALMA_ITEM_POLICY_DOCS,
 				),
 				field(
-					["shelf-location"],
-					"hostlms.config_fields.shelf_location",
-					"hostlms.config_fields.alma_shelf_location_description",
+					["no-renew-item-policy"],
+					"hostlms.config_fields.no_renew_item_policy",
+					"hostlms.config_fields.alma_no_renew_item_policy_description",
+					"optional",
+					"text",
+					"DCB_NO_RENEW",
+				),
+				field(
+					["virtual-patron-barcode-prefix"],
+					"hostlms.config_fields.virtual_patron_barcode_prefix",
+					"hostlms.config_fields.alma_virtual_patron_barcode_prefix_description",
 					"optional",
 				),
 				field(

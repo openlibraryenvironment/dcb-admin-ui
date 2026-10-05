@@ -50,6 +50,27 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).toContain("apikey");
 		});
 
+		it("demands everything HostLmsConfigValidator demands for Alma", () => {
+			const missing = missingRequiredClientConfig(
+				HOST_LMS_CLASSES.alma,
+				{},
+			).map((problem) => problem.name);
+
+			expect([...missing].sort()).toEqual(
+				[
+					"alma-url",
+					"apikey",
+					"base-url",
+					"default-agency-code",
+					"institution-code",
+					"request-cancellation-reason",
+					"sharing-library-code",
+					"virtual-item-library-code",
+					"virtual-item-location-code",
+				].sort(),
+			);
+		});
+
 		// Alma's sections are headings, not nested objects like Polaris' `papi`.
 		// If one is ever marked required, buildClientConfig would start writing an
 		// empty `almaConnection: {}` into the config dcb-service stores.
@@ -721,9 +742,7 @@ describe("hostLmsClientConfig", () => {
 
 	describe("adapter defaults", () => {
 		// Keys the snapshot lists and the guided form has no field for yet
-		const NOT_YET_IN_THE_FORM = [
-			"org.olf.dcb.core.interaction.alma.AlmaHostLmsClient no-renew-item-policy",
-		];
+		const NOT_YET_IN_THE_FORM: string[] = [];
 
 		it("gives every field dcb-service defaults its default, from the snapshot", () => {
 			const unmatched: string[] = [];
@@ -919,6 +938,24 @@ describe("hostLmsClientConfig", () => {
 
 			expect("key" in merged).toBe(false);
 			expect(merged.secret).toBe("s");
+		});
+
+		// dcb-service stopped reading Alma's `shelf-location`, and the form no longer
+		// offers it. A record that still has it must keep it on edit, not lose it.
+		it("keeps a stored Alma shelf-location the form no longer offers", () => {
+			const stored = {
+				"alma-url": "https://api-eu.hosted.exlibrisgroup.com",
+				"shelf-location": "STACKS",
+			};
+
+			expect(
+				clientConfigToFields(HOST_LMS_CLASSES.alma, stored).unmappedKeys,
+			).toEqual(["shelf-location"]);
+			expect(
+				mergeClientConfigEdit(stored, HOST_LMS_CLASSES.alma, {
+					"alma-url": "https://api-eu.hosted.exlibrisgroup.com",
+				})["shelf-location"],
+			).toBe("STACKS");
 		});
 
 		it("does not mutate the stored config it was given", () => {

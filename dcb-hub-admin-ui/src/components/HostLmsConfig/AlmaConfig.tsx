@@ -25,8 +25,8 @@ export default function AlmaConfig({ config }: { config: any }) {
 				value={config?.["item-policy"]}
 			/>
 			<ConfigItem
-				title={t("hostlms.client_config.shelf_location", "Shelf Location")}
-				value={config?.["shelf-location"]}
+				title={t("hostlms.client_config.request_cancellation_reason")}
+				value={config?.["request-cancellation-reason"]}
 			/>
 			<ConfigItem
 				title={t("hostlms.client_config.pickup_circ_desk", "Pickup Circ Desk")}
