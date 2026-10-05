@@ -74,7 +74,11 @@ export const standardRefValueMappingColumns: GridColDef[] = [
 		minWidth: 50,
 		flex: 0.5,
 		filterOperators: standardFilters,
-		editable: true,
+		// NOT editable: UpdateReferenceValueMappingInput takes toValue and nothing
+		// else, on every dcb-service from 8.71.0 to the target schema. Row editing
+		// sends every changed field together, so offering this one failed the whole
+		// mutation and took the toValue edit beside it down as well.
+		editable: false,
 		sortable: true,
 		valueGetter: (value: string, row: { toCategory: string }) =>
 			row?.toCategory,
