@@ -93,6 +93,10 @@ async function seedFeatures(page: Page, env: Record<string, string>) {
 	// before any app script runs both sets the flags and spares the run a fetch of
 	// inject_env.json that the preview server does not answer.
 	await page.addInitScript((seeded) => {
-		window.__APP_ENV__ = seeded;
+		// A fixture seeds the subset a spec cares about, while the application's own
+		// type names every key a deployment can supply - so the cast is the
+		// difference between the two, not a looseness. Narrowing the app's type to
+		// make this assign would weaken the contract the app relies on.
+		window.__APP_ENV__ = seeded as NonNullable<typeof window.__APP_ENV__>;
 	}, env);
 }
