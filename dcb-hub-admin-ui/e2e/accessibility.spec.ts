@@ -28,6 +28,12 @@ import libraryUserProvisioning from "./fixtures-data/library-user-provisioning.j
 import hostLms from "./fixtures-data/host-lms.json";
 import groupDetail from "./fixtures-data/group-region-detail.json";
 import resolvedSettings from "./fixtures-data/resolved-functional-settings.json";
+import patronRequests from "./fixtures-data/patron-requests.json";
+import mappings from "./fixtures-data/mappings.json";
+import locations from "./fixtures-data/locations.json";
+import groups from "./fixtures-data/groups.json";
+import agencies from "./fixtures-data/agencies.json";
+import dataChangeLog from "./fixtures-data/data-change-log.json";
 
 /**
  * The application-wide accessibility gate — W-1.
@@ -65,15 +71,26 @@ const MOCKS = {
 	LoadLibrary: libraryDetail,
 	LoadLibraryServiceInfo: libraryDetail,
 	LoadHostLms: hostLms,
-	// The profile page mounts the library's mappings grid. Unmocked it 404s against a
-	// preview with no API behind it and the global handler renders the 500 route, so the
-	// scan would measure an error page and pass for the wrong reason.
-	LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
-	LoadLocations: { locations: { totalSize: 0, content: [] } },
+	LoadLocations: locations,
 	LoadGroup: groupDetail,
 	LoadResolvedFunctionalSettings: resolvedSettings,
 	LoadSettingsBearingGroupType: { settingsBearingGroupType: "REGION" },
 	...patronRequestDetailMocks,
+	// Every grid the route table reaches. An unmocked operation 404s against a
+	// preview with no API behind it, the global handler renders the 500 route, and
+	// the scan then measures an error page and passes for the wrong reason.
+	LoadPatronRequests: patronRequests,
+	LoadMappings: mappings,
+	LoadNumericRangeMappings: {
+		numericRangeMappings: { totalSize: 0, content: [] },
+	},
+	LoadGroups: groups,
+	LoadAgencies: agencies,
+	LoadDataChangeLog: dataChangeLog,
+	LoadAlarms: { alarms: { totalSize: 0, content: [] } },
+	LoadAudits: { audits: { totalSize: 0, content: [] } },
+	LoadBibs: { sourceBibs: { totalSize: 0, content: [] } },
+	LoadPatronRequestTotals: { patronRequests: { totalSize: 0 } },
 };
 
 /**
@@ -153,6 +170,107 @@ const ROUTES: {
 			await expect(
 				page.getByRole("row").filter({ hasText: "dcb-admin-ui" }),
 			).toContainText("Up to date");
+		},
+	},
+	{
+		// The busiest grid in the application, and the one every shift starts on.
+		path: "/patronRequests/all",
+		ready: async (page) => {
+			await expect(page.getByText("ALPHA-HOST").first()).toBeVisible();
+		},
+	},
+	{
+		// A nav list, and the route whose ListItems rendered as nested <nav>
+		// landmarks. axe's `list` rule could not see it, because the parent was not a
+		// <ul> either - so this scans the structure that replaced it.
+		path: "/mappings",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("navigation", { name: /^mappings$/i }),
+			).toBeVisible();
+		},
+	},
+	{
+		// An editable grid: row edit mode, a save/cancel action pair per row and the
+		// export menu's format choice. Dense row actions are where target size fails.
+		path: "/mappings/allReferenceValue",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item")).toBeVisible();
+		},
+	},
+	{
+		path: "/locations",
+		ready: async (page) => {
+			await expect(page.getByText("Alpha Main Desk")).toBeVisible();
+		},
+	},
+	{
+		path: "/hostlmss",
+		ready: async (page) => {
+			await expect(page.getByText("Alpha LMS")).toBeVisible();
+		},
+	},
+	{
+		path: "/groups",
+		ready: async (page) => {
+			await expect(page.getByText("Northern Region")).toBeVisible();
+		},
+	},
+	{
+		path: "/agencies",
+		ready: async (page) => {
+			await expect(page.getByText("Alpha Test Agency")).toBeVisible();
+		},
+	},
+	{
+		// The library detail page in VIEW mode and its tab strip - ten tabs, and the
+		// widest navigation surface in the product after the sidebar. The edit-mode
+		// scan of the same path is below, in its own block: pressing Edit replaces
+		// the page with a form, and neither covers the other.
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+		ready: async (page) => {
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("navigation", { name: /service information/i }),
+			).toBeVisible();
+		},
+	},
+	{
+		// Fed by /sql, which returns whatever columns the named query selects and
+		// never an id - so until that was fixed this route threw before it painted.
+		// Its own behaviour is covered by e2e/request-errors.spec.ts; this is the
+		// accessibility half.
+		path: "/serviceInfo/requestErrors",
+		setup: async (page) => {
+			await page.route("**/sql?*", (route) =>
+				route.fulfill({
+					json: {
+						hits: [
+							{
+								description: "Read timeout, DCB-1450",
+								namedSql: "errors/readTimeout",
+								total: "12",
+								mostRecent: "2026-09-30",
+								earliest: "2026-08-01",
+							},
+						],
+					},
+				}),
+			);
+		},
+		ready: async (page) => {
+			await expect(page.getByText("Read timeout, DCB-1450")).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo/dataChangeLog",
+		ready: async (page) => {
+			await expect(page.getByText("Corrected the agency code")).toBeVisible();
 		},
 	},
 	{
