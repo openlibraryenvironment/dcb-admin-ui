@@ -140,6 +140,31 @@ asserts that the title follows a navigation rather than being set once on load.
 
 ---
 
+## 320px finds what a desktop hides
+
+The `narrow` Playwright project scans `accessibility.spec.ts` at 320px (WCAG 1.4.10
+Reflow). Expanding the route table from 9 routes to 21 put eleven more pages in front
+of it, and two defects fell out that no desktop scan could see. Both were already in
+the application; neither is on a route anybody had scanned.
+
+**A scrollable region with no tab stop** (`scrollable-region-focusable`, serious). MUI's
+Alert gives its message slot `overflow: auto`, so an alert that fits on a desktop scrolls
+at 320px - and a keyboard-only user cannot read past the first line. Fixed as a `MuiAlert`
+default (`slotProps.message.tabIndex = 0`), the same shape as the `MuiTableContainer`
+default above and accepting the same trade: a tab stop on a message that is not
+currently overflowing.
+
+**A target under 24x24** (`target-size`, serious, WCAG 2.5.8). The Request Errors
+overview renders a Jira ticket link in a cell. An inline anchor's box is its line
+height, about 20px, and that column narrows until the box is the whole target.
+`display: inline-flex` with `minHeight: 24` gives it a box of its own; the row is 52px,
+so nothing moves.
+
+The general point: **a route added to the table is measured in five variants** - light,
+dark, high contrast, the 8.71.0 surface and 320px - and the narrow one is where the
+cheap desktop assumptions surface.
+
+---
 ## Reaching a detail page
 
 Every detail page in this application is reached through a grid row, and the grid

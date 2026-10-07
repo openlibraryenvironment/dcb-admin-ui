@@ -1117,6 +1117,18 @@ const components: ThemeOptions["components"] = {
 		},
 	},
 	MuiAlert: {
+		// MUI's Alert message scrolls when its content does not fit, and a scrollable
+		// region with no tab stop is axe `scrollable-region-focusable`, serious - a
+		// keyboard-only user cannot read past the first line. It surfaced at 320px,
+		// where an alert that fits on a desktop does not.
+		//
+		// A theme default for the same reason MuiTableContainer has one: so the next
+		// alert is covered without anybody knowing the rule exists. The cost is a tab
+		// stop on a message that is not currently overflowing, which is the trade
+		// already accepted for the twelve table containers. docs/accessibility.md.
+		defaultProps: {
+			slotProps: { message: { tabIndex: 0 } },
+		},
 		styleOverrides: {
 			root: {
 				variants: [

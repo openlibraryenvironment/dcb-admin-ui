@@ -84,6 +84,11 @@ verify_quality:
 # the WCAG 2.2 AA gate: zero axe violations in light, dark AND high contrast. High
 # contrast has no media query behind it and is only reachable by seeding the stored
 # preference - see e2e/fixtures/theme.ts.
+#
+# It also carries e2e/i18n-missing.spec.ts, the missing-translation gate. That shares
+# this job rather than taking one of its own because it needs the same build and the
+# same browser: a second job would cost a whole extra `tsc && vite build` for one spec.
+# The build arms the collector through playwright.config.ts. See docs/i18n.md.
 verify_e2e:
   stage: verify
   image:
