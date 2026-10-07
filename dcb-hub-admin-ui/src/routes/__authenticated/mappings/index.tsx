@@ -1,6 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import PageContainer from "@layout/PageContainer/PageContainer";
-import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import {
+	Box,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemText,
+} from "@mui/material";
 //localisation
 import { useTranslation } from "react-i18next";
 
@@ -13,23 +19,26 @@ function MappingsRouteComponent() {
 
 	return (
 		<PageContainer title={t("nav.mappings.name")}>
-			{/* page-title is the id PageContainer gives the <h1>. The previous values -
-			    "mappings-title" and "service-information" - were defined nowhere in the
-			    application, so this landmark had no accessible name and the reference was
-			    dangling: axe aria-valid-attr-value, serious. Two navigation landmarks on
-			    the page (this and the sidebar) and only one of them named. */}
-			<List component="nav" aria-labelledby="page-title">
-				<ListItem disablePadding>
-					<ListItemButton component={Link} to="/mappings/allNumericRange">
-						<ListItemText primary={t("nav.mappings.allNumericRange")} />
-					</ListItemButton>
-				</ListItem>
-				<ListItem disablePadding>
-					<ListItemButton component={Link} to="/mappings/allReferenceValue">
-						<ListItemText primary={t("nav.mappings.allReferenceValue")} />
-					</ListItemButton>
-				</ListItem>
-			</List>
+			{/* The landmark and the list are separate elements, as Sidebar.tsx already
+			    documents: rendering the List itself as <nav> replaces the <ul>, which
+			    leaves every <li> with no list to belong to - axe `listitem`, serious,
+			    and a screen reader that no longer announces how many destinations there
+			    are. `aria-labelledby` names it from the id PageContainer gives the <h1>;
+			    the previous ids were defined nowhere, so the reference dangled. */}
+			<Box component="nav" aria-labelledby="page-title">
+				<List>
+					<ListItem disablePadding>
+						<ListItemButton component={Link} to="/mappings/allNumericRange">
+							<ListItemText primary={t("nav.mappings.allNumericRange")} />
+						</ListItemButton>
+					</ListItem>
+					<ListItem disablePadding>
+						<ListItemButton component={Link} to="/mappings/allReferenceValue">
+							<ListItemText primary={t("nav.mappings.allReferenceValue")} />
+						</ListItemButton>
+					</ListItem>
+				</List>
+			</Box>
 		</PageContainer>
 	);
 }
