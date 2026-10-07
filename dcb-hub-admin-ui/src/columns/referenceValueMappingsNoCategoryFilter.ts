@@ -14,13 +14,18 @@ export const referenceValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 		editable: false,
 	},
 	{
+		// Filterable because the server can filter on it: processGridFilterModel
+		// builds a field-agnostic `field:value` Lucene clause, and Upload.tsx
+		// already queries `fromContext:` directly. Without it the consortium-wide
+		// mappings grid could not be narrowed to one library at all - so there was
+		// no way to export one library's mappings from it.
 		field: "fromContext",
 		headerName: "From context",
 		minWidth: 50,
 		flex: 0.5,
-		filterable: false,
 		sortable: false,
 		editable: false,
+		filterOperators: standardFilters,
 	},
 	{
 		field: "fromValue",
@@ -32,13 +37,18 @@ export const referenceValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 		editable: false,
 	},
 	{
+		// Filterable because the server can filter on it: processGridFilterModel
+		// builds a field-agnostic `field:value` Lucene clause, and Upload.tsx
+		// already queries `fromContext:` directly. Without it the consortium-wide
+		// mappings grid could not be narrowed to one library at all - so there was
+		// no way to export one library's mappings from it.
 		field: "toContext",
 		headerName: "To context",
 		minWidth: 50,
 		flex: 0.5,
-		filterable: false,
 		sortable: false,
 		editable: false,
+		filterOperators: standardFilters,
 	},
 	{
 		field: "toValue",
