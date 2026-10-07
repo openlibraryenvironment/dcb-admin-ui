@@ -11,6 +11,7 @@ import Error from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { withRowIndexIds } from "@helpers/dataGrid/withRowIndexIds";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/",
@@ -148,7 +149,7 @@ function RequestErrors() {
 				identifier={gridId}
 				type={"requestErrors"}
 				columns={columns}
-				rows={records?.hits ?? []}
+				rows={withRowIndexIds(records?.hits)}
 				loading={isLoading}
 				paginationMode="client"
 				sortingMode="client"
