@@ -115,8 +115,18 @@ verify_lighthouse:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
-    # No separate build step: lighthouserc.js's startServerCommand builds, because the
-    # budget must not audit whatever an earlier job happened to leave in dist/.
+    # BYTES FIRST. The chunk budget is deterministic, covers every chunk including the
+    # ones no audited page fetches, and fails in seconds - so it runs before three
+    # Lighthouse passes rather than after them. VITE_PUBLIC_URL is pinned so the chunk
+    # names match the budget regardless of what .env says.
+    #
+    # It exists because Lighthouse measures PAGES: its total-byte-weight saw 750 KB of
+    # the 1,650 KB this application actually ships, and the heaviest chunk in the
+    # artefact was outside every gate here. See docs/performance-budget.md.
+    - VITE_PUBLIC_URL=/ npm run build
+    - npm run budget
+    # No separate build step for Lighthouse: lighthouserc.js's startServerCommand builds,
+    # because the audit must not measure whatever an earlier job left in dist/.
     - npm run lighthouse
   artifacts:
     when: always
