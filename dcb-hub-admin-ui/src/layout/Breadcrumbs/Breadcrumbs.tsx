@@ -7,7 +7,10 @@ import { truncate } from "lodash";
 
 import Link from "@components/Link/Link";
 import { getSpecialRedirects } from "@helpers/breadcrumbs/getSpecialRedirects";
-import { getBreadcrumbKey } from "@helpers/breadcrumbs/getBreadcrumbKey";
+import {
+	getBreadcrumbKey,
+	isTranslationKey,
+} from "@helpers/breadcrumbs/getBreadcrumbKey";
 
 type BreadcrumbType = {
 	href: string;
@@ -45,6 +48,11 @@ export default function Breadcrumbs({
 		});
 	}, [location.pathname, getKey]);
 
+	// A crumb is either a translation key or the record's own name - see
+	// isTranslationKey. Translating the second asks i18next for a key named after
+	// the library, which it reports missing on every page load.
+	const label = (key: string) => (isTranslationKey(key) ? t(key) : key);
+
 	const mapBreadcrumbs = () => {
 		return breadcrumbs.map((breadcrumb, index) => {
 			const isUUIDInSearchPage =
@@ -57,7 +65,7 @@ export default function Breadcrumbs({
 						? titleAttribute
 							? truncate(titleAttribute, { length: 36 })
 							: breadcrumb.key
-						: t(breadcrumb.key);
+						: label(breadcrumb.key);
 				return (
 					<Typography
 						sx={{ color: "inherit", fontSize: "0.875rem" }}
@@ -84,9 +92,9 @@ export default function Breadcrumbs({
 					<Typography
 						sx={{ color: "inherit", fontSize: "0.875rem" }}
 						key={breadcrumb.href}
-						title={String(t(breadcrumb.key))}
+						title={String(label(breadcrumb.key))}
 					>
-						{t(breadcrumb.key)}
+						{label(breadcrumb.key)}
 					</Typography>
 				);
 			}
@@ -97,9 +105,9 @@ export default function Breadcrumbs({
 					underline="hover"
 					key={breadcrumb.href}
 					href={destination}
-					title={t(breadcrumb.key)}
+					title={label(breadcrumb.key)}
 				>
-					{t(breadcrumb.key)}
+					{label(breadcrumb.key)}
 				</Link>
 			);
 		});

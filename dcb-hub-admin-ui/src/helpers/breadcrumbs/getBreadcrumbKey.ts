@@ -10,6 +10,18 @@ import { formatBreadcrumbTitles } from "@helpers/formatBreadcrumbTitles";
  *
  * Pure: the path prefix and the page's own title are all it reads.
  */
+/**
+ * Whether a breadcrumb's value is a translation key or a title taken from the
+ * record.
+ *
+ * getBreadcrumbKey returns both: `nav.libraries.settings` for a fixed label, and a
+ * library or group name where the crumb IS the record. Passing the second through
+ * `t()` asks i18next for a key called "Alpha Test Library", which it reports missing
+ * on every page load - so the caller has to know which it has.
+ */
+export const isTranslationKey = (value: string): boolean =>
+	value.includes(".") && !value.includes(" ");
+
 export function getBreadcrumbKey(
 	pathArray: string[],
 	titleAttribute?: string,
@@ -125,9 +137,19 @@ export function getBreadcrumbKey(
 						if (pathArray[1].length == 36 && pathArray.length == 2) {
 							return titleAttribute ?? pathArray[1];
 						}
+						// Every tab under a library. One missing case does not fail quietly: the
+						// fallback returns "nav." + the joined path, so the breadcrumb renders
+						// `nav.libraries.<uuid>.accounts` as literal text. accounts, branding and
+						// insights were missing, and e2e/i18n-missing.spec.ts is what found them.
 						switch (pathArray[2]) {
+							case "accounts":
+								return "nav.libraries.accounts";
 							case "bibs":
 								return "nav.libraries.bibs";
+							case "branding":
+								return "nav.libraries.branding";
+							case "insights":
+								return "nav.libraries.insights";
 							case "contacts":
 								return "nav.libraries.contacts";
 							case "locations":

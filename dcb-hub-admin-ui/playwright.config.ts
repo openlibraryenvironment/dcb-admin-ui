@@ -116,6 +116,12 @@ export default defineConfig({
 			VITE_DCB_API_BASE: process.env.VITE_DCB_API_BASE || "",
 			VITE_DCB_SEARCH_BASE: process.env.VITE_DCB_SEARCH_BASE || "",
 			VITE_MUI_X_LICENSE_KEY: process.env.VITE_MUI_X_LICENSE_KEY || "",
+			// Arms the missing-translation collector in this build, so
+			// e2e/i18n-missing.spec.ts measures something. It only records to a page
+			// variable - i18next calls missingKeyHandler instead of the backend's own
+			// saveMissing, so nothing is posted. A build-time switch, deliberately: it
+			// cannot be turned on against a deployed artefact. docs/i18n.md.
+			VITE_I18N_REPORT_MISSING: "true",
 		},
 		// 600s, not 120s. The command is `npm run build && npm run preview`, and a cold
 		// `tsc && vite build` on this estate uses most of two minutes - so under any extra
