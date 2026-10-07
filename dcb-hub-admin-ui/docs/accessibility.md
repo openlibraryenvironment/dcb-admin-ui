@@ -116,6 +116,46 @@ is happening, and there is no single layout to match across 84 routes.
 
 ---
 
+## Reaching a detail page
+
+Every detail page in this application is reached through a grid row, and the grid
+navigated on `onRowClick` alone. **`rowClick` is a pointer event and MUI X never raises it
+for a keypress**, so a keyboard user could arrow to a row, press Enter and reach nothing.
+WCAG 2.1.1, Level A, across the seventeen grid types that route - which is every entity
+list in the product: libraries, patron requests, Host LMS, locations, agencies, groups,
+bibs, audits and the data change log.
+
+The axe gate scans `/libraries` and `/patronRequests/all` and passed both throughout. No
+automated rule can tell that a pointer handler has no keyboard equivalent, which is why
+this one survived a gate that was green. `e2e/grid-keyboard.spec.ts` walks the journey
+instead, and all three of its assertions were seen failing first.
+
+Two things changed, and they do different jobs:
+
+- **`onCellKeyDown` on the grid** routes on Enter. It is the keyboard counterpart of
+  `onRowClick`, resolving through the same `resolveRowClickPath`, with the same
+  edit-mode guard, and it skips the detail-panel toggle field because that cell's Enter
+  belongs to `DetailPanelToggle` (below). This is the mechanism that makes the journey
+  work, and it is the same `cellKeyDown` event the toggles already use.
+- **The leading visible cell is a link** (`withRowLink`). That is the semantics: assistive
+  technology announces "link", the row gains a visible focus ring, and ctrl/cmd-click
+  opens a new tab natively. It stops propagation so `onRowClick` does not navigate twice.
+
+`noLinkStyle` and `color: inherit`, so no grid changes appearance: the affordance a
+keyboard user needs is the focus ring, not a second underline in fifty grids. The link's
+accessible name is the cell's own text, read in row and column context, which is what WCAG
+2.4.4 means by "in context" - on `/libraries` that is the abbreviated name under its own
+column header.
+
+**Mirroring the cell's roving `tabIndex` onto the link was tried and rejected**, for the
+same reason it was rejected for the detail toggles below: `GridCell` focuses a child only
+if it matches `[tabindex="0"]`, so `params.tabIndex` makes every unfocused row's link
+`tabindex="-1"` and tabbing then reaches none of them. Measured both ways. The link carries
+no explicit `tabIndex`, and Enter is handled by `onCellKeyDown`, which is a public prop and
+rests on none of MUI's focus internals.
+
+---
+
 ## Detail panels are grid rows
 
 MUI X renders an expanded detail panel as `role="none"` directly inside the grid's
