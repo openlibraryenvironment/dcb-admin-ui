@@ -74,7 +74,15 @@ verify_quality:
     - npm ci
     - npm run lint -- --max-warnings=0
     - npx tsc --noEmit
-    - npx vitest run
+    # --coverage rather than a bare run: it costs about three seconds on top of the
+    # suite and puts the figure in every pipeline log. There is NO threshold - see
+    # docs/testing.md, "Coverage is a figure, not a gate". Nothing here fails on it.
+    - npx vitest run --coverage
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/coverage/
+    expire_in: 1 week
 
 # Separate from verify_quality so a failing accessibility gate is legible as such in the
 # pipeline rather than as "the verify job went red". It needs the Playwright image; the

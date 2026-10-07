@@ -186,6 +186,81 @@ forever.
 early so `core.hooksPath` is never set, and the runner copied to `.husky/_/h` exits 0.
 Verified against husky's own runner: the hook blocks a commit, and `HUSKY=0` skips it.
 
+## A component test opts into a DOM
+
+Vitest runs in the `node` environment by default, and all but five of the unit tests
+want that: they are pure logic over helpers, constants and column definitions, and they
+run in about eight seconds.
+
+A test that renders a component needs a DOM, so it **opts in per file**:
+
+```ts
+// @vitest-environment jsdom
+```
+
+Setting `environment: "jsdom"` globally was rejected. It would change the environment
+under 1,486 existing tests that were written and verified against `node`, for no benefit
+to any of them - a large blast radius to buy nothing.
+
+Three things follow from the opt-in:
+
+- **jest-dom's matchers are registered globally** in `vitest.setup.ts`. The import only
+  calls `expect.extend`, so it is harmless in `node`; a matcher nobody uses costs
+  nothing. `types/testing-library.d.ts` is the matching reference for `tsc`, without
+  which the component tests type-check red while passing.
+- **Unmounting is explicit.** React Testing Library registers its own cleanup only when
+  vitest's globals are on, and this repository imports `describe`/`it`/`expect`
+  explicitly. So a component test calls `afterEach(cleanup)` itself.
+- **MUI 9's `MenuItem` throws without a `MenuListContext`** - "MenuItems must be placed
+  within Menu or MenuList". `GridToolbarExportContainer` supplies one through its
+  `baseMenuList` slot, so a bare `MenuItem` is not a configuration the application ever
+  renders; the test wraps in `MenuList` to match.
+
+### What a DOM test is for, and what it is not
+
+Playwright already asserts roles and accessible names in a real browser across 528
+tests, which is stronger evidence than jsdom. The DOM tests exist for contracts that are
+invisible in a diff and too small to justify a browser - the first of them pins which
+export menu items close the menu, which `GridToolbarExportContainer` decides by cloning
+children with a `hideMenu` callback rather than by wrapping their `onClick`.
+
+**One of those five assertions was deleted for being unfalsifiable.** "Choosing a format
+does not close the menu" can never fail, because `FormatMenuItem` does not destructure
+`hideMenu` - the compiler holds that, not a test. A test that cannot fail is not a test,
+and the fact now lives as a comment on the component.
+
+---
+
+## Coverage is a figure, not a gate
+
+```bash
+npm run coverage
+```
+
+Measured on 2026-10-07, over `src/**/*.{ts,tsx}`:
+
+|            |                            |
+| ---------- | -------------------------: |
+| Statements | **23.85%** (1,890 / 7,922) |
+| Branches   |     17.56% (1,152 / 6,557) |
+| Functions  |       19.94% (528 / 2,647) |
+| Lines      |     23.43% (1,726 / 7,364) |
+
+**There is deliberately no threshold.** A number picked before anything was measured is
+a number that gets lowered under pressure - the same ratchet the performance budget
+warns about. Whether any of this becomes a gate is a decision to take against the
+figure, not before it.
+
+### `all: true` is load-bearing
+
+Without it v8 reports only files a test actually loaded, so a module no test imports is
+absent from the denominator rather than counted as 0%. The same run read **84.77%** of
+statements that way, over 2,273 statements in a `src/` of about 90,000 lines - "coverage
+of the code we already cover". The honest figure is a third of that. If this number ever
+jumps without tests being written, check that `all` is still set.
+
+---
+
 ## What the gates do not reach
 
 **Everything they measure is `vite preview` or a mocked page.** Nothing renders the

@@ -57,7 +57,10 @@ interface ExportMenuItemProps {
 	hideMenu?: () => void;
 }
 
-function FormatMenuItem({
+// Takes no `hideMenu` ON PURPOSE: choosing a format must leave the menu open so a
+// scope can follow in the same opening. Not destructuring it is what enforces that -
+// a test asserting it was not called could never fail.
+export function FormatMenuItem({
 	label,
 	selected,
 	selectedLabel,
@@ -84,7 +87,7 @@ function FormatMenuItem({
 	);
 }
 
-function ScopeMenuItem({
+export function ScopeMenuItem({
 	hideMenu,
 	label,
 	icon,
