@@ -70,7 +70,7 @@ export default function SetupFooter({
 					variant="outlined"
 					startIcon={<Close />}
 					disabled={busy}
-					sx={{ mr: { sm: "auto" } }}
+					sx={{ marginInlineEnd: { sm: "auto" } }}
 				>
 					{t("setup.actions.finish_later")}
 				</CustomLinkButton>

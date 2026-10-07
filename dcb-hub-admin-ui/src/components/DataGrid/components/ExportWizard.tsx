@@ -224,7 +224,7 @@ export default function ExportWizard({
 								<Box
 									id={FILTER_SUMMARY_ID}
 									component="ul"
-									sx={{ m: 0, mb: 1, pl: 4, listStyle: "none" }}
+									sx={{ m: 0, mb: 1, paddingInlineStart: 4, listStyle: "none" }}
 								>
 									{filterSummary.map((line, index) => (
 										<Typography
@@ -242,7 +242,7 @@ export default function ExportWizard({
 									id={FILTER_SUMMARY_ID}
 									variant="body2"
 									color="text.secondary"
-									sx={{ mb: 1, pl: 4 }}
+									sx={{ mb: 1, paddingInlineStart: 4 }}
 								>
 									{t("ui.data_grid.export.no_filters")}
 								</Typography>

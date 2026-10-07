@@ -200,7 +200,7 @@ export default function Sidebar({
 							}}
 						>
 							<ListItemIcon
-								sx={{ minWidth: 0, mr: 3, justifyContent: "center" }}
+								sx={{ minWidth: 0, marginInlineEnd: 3, justifyContent: "center" }}
 							>
 								{SidebarIcon(index, selected === index)}
 							</ListItemIcon>

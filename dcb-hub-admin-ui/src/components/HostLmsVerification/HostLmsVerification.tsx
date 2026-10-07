@@ -101,7 +101,7 @@ export default function HostLmsVerification({
 			{warnings.length > 0 && (
 				<Alert severity="warning">
 					<AlertTitle>{t("hostlms.verification.warnings_title")}</AlertTitle>
-					<Stack component="ul" spacing={0.5} sx={{ m: 0, pl: 2 }}>
+					<Stack component="ul" spacing={0.5} sx={{ m: 0, paddingInlineStart: 2 }}>
 						{warnings.map((warning, index) => (
 							<li key={index}>{warning}</li>
 						))}

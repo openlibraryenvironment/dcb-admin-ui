@@ -76,7 +76,7 @@ export default function CompletionStep({
 			)}
 
 			<Typography>{t("libraries.new.done_next_steps")}</Typography>
-			<Stack component="ul" spacing={0.5} sx={{ m: 0, pl: 3 }}>
+			<Stack component="ul" spacing={0.5} sx={{ m: 0, paddingInlineStart: 3 }}>
 				<li>{t("libraries.new.done_next_mappings")}</li>
 				<li>{t("libraries.new.done_next_locations")}</li>
 				<li>{t("libraries.new.done_next_onboarding")}</li>

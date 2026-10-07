@@ -272,7 +272,7 @@ function ReadinessPanel({
 							label={check.status}
 							color={check.status === "PASS" ? "success" : "warning"}
 							size="small"
-							sx={{ mr: 2, mt: 0.5 }}
+							sx={{ marginInlineEnd: 2, mt: 0.5 }}
 						/>
 						<ListItemText
 							primary={check.code}

@@ -38,7 +38,7 @@ function Profile() {
 
 	return (
 		<PageContainer title={t("nav.profile")} hideTitleBox={true}>
-			<Typography variant="h2" sx={{ pl: 2 }}>
+			<Typography variant="h2" sx={{ paddingInlineStart: 2 }}>
 				{t("nav.profile")}
 			</Typography>
 			<List className="list-profile">

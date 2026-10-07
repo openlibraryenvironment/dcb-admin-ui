@@ -75,7 +75,7 @@ export default function ThemeControls() {
 	const resetDisplay = useThemeStore((s) => s.resetDisplay);
 
 	return (
-		<Stack direction="column" spacing={3} sx={{ pl: 2, pt: 1 }}>
+		<Stack direction="column" spacing={3} sx={{ paddingInlineStart: 2, pt: 1 }}>
 			<FormControl>
 				<FormLabel id="theme-name-label" sx={{ mb: 1 }}>
 					{t("theme.theme_label")}

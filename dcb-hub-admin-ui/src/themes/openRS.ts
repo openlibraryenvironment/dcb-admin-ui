@@ -787,8 +787,8 @@ const components: ThemeOptions["components"] = {
 				props: { variant: "styled" },
 				style: {
 					borderBottom: "0px",
-					borderLeft: "0px",
-					borderRight: "0px",
+					borderInlineStart: "0px",
+					borderInlineEnd: "0px",
 					"&::before": { display: "none" },
 				},
 			},
@@ -807,8 +807,8 @@ const components: ThemeOptions["components"] = {
 				props: { variant: "sub" },
 				style: {
 					borderBottom: "0px",
-					borderLeft: "0px",
-					borderRight: "0px",
+					borderInlineStart: "0px",
+					borderInlineEnd: "0px",
 					marginTop: "16px",
 					"&::before": { display: "none" },
 				},
@@ -829,7 +829,7 @@ const components: ThemeOptions["components"] = {
 								minHeight: "auto",
 							},
 							"& .MuiAccordionSummary-content": {
-								marginLeft: theme.spacing(1),
+								marginInlineStart: theme.spacing(1),
 							},
 						}),
 					},

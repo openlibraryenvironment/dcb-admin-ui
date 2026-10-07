@@ -31,7 +31,7 @@ interface RollbackResultDialogProps {
 }
 
 const RequestIdList = ({ rows }: { rows: any[] }) => (
-	<List dense disablePadding sx={{ pl: 4 }}>
+	<List dense disablePadding sx={{ paddingInlineStart: 4 }}>
 		{rows.map((row) => (
 			<ListItem key={row.id} disablePadding>
 				<Link

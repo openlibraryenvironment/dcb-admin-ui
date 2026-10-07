@@ -94,8 +94,8 @@ function Logout() {
 							mb: 2,
 							maxWidth: "1400px",
 							margin: "auto",
-							paddingLeft: "16px",
-							paddingRight: "16px",
+							paddingInlineStart: "16px",
+							paddingInlineEnd: "16px",
 						}}
 					>
 						<Alert

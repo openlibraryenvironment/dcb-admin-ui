@@ -155,7 +155,7 @@ function ScopedPartners({
 														variant="caption"
 														component="span"
 														color="text.secondary"
-														sx={{ ml: 1 }}
+														sx={{ marginInlineStart: 1 }}
 													>
 														{row.partnerCode}
 													</Typography>

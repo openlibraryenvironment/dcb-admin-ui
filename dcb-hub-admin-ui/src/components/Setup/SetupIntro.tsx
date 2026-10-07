@@ -36,7 +36,7 @@ export default function SetupIntro() {
 			</Typography>
 			{/* A real list, so it is announced as three items rather than as one run-on
 			    sentence, and so the reader can skip it in one keystroke. */}
-			<Box component="ul" sx={{ m: 0, pl: 3 }}>
+			<Box component="ul" sx={{ m: 0, paddingInlineStart: 3 }}>
 				<Typography component="li" variant="body2">
 					{t("setup.intro.needs_consortium")}
 				</Typography>
