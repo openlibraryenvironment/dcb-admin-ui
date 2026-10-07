@@ -14,12 +14,12 @@ function MappingsRouteComponent() {
 	return (
 		<PageContainer title={t("nav.mappings.name")}>
 			<List component="nav" aria-labelledby="mappings-title">
-				<ListItem component="nav" disablePadding>
+				<ListItem disablePadding>
 					<ListItemButton component={Link} to="/mappings/allNumericRange">
 						<ListItemText primary={t("nav.mappings.allNumericRange")} />
 					</ListItemButton>
 				</ListItem>
-				<ListItem component="nav" disablePadding>
+				<ListItem disablePadding>
 					<ListItemButton component={Link} to="/mappings/allReferenceValue">
 						<ListItemText primary={t("nav.mappings.allReferenceValue")} />
 					</ListItemButton>

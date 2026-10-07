@@ -229,7 +229,10 @@ export default defineConfig(({ mode, command }) => {
 		},
 
 		test: {
-			include: ["**/*.test.ts"],
+			// .tsx as well as .ts. With only "**/*.test.ts" a component test named
+			// *.test.tsx was not collected and did not error: a green run that ran
+			// nothing. There are none yet, which is why nobody had noticed.
+			include: ["**/*.test.{ts,tsx}"],
 			exclude: ["node_modules", "dist", "coverage", "playwright", "**/*.d.ts"],
 			// Clears the feature flags `.env` would otherwise leak into every test.
 			// See vitest.setup.ts.
