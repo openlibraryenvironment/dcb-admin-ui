@@ -783,7 +783,7 @@
 			"record_syntax": "Record syntax",
 			"metadata_prefix": "Metadata prefix",
 			"metadata_prefix_description": "OAI-PMH metadata prefix used for harvesting.",
-			"folio_record_syntax_description": "Sent as recordSyntax on every harvest request. Required unless harvesting is turned off. Ask your FOLIO administrator for the value your edge-oai-pmh expects.",
+			"folio_record_syntax_description": "Sent as recordSyntax on every harvest request. Leave blank to use oai_dc, which every FOLIO on production uses; set it only for a FOLIO whose edge-oai-pmh expects something else.",
 			"folio_metadata_prefix_description": "The OAI-PMH metadata format DCB harvests. Leave blank to use marc21_withholdings, MARC with holdings.",
 			"polaris_base_url_description": "The root URL of the Polaris system.",
 			"base_url_application_services": "Application services URL",

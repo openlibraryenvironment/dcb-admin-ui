@@ -167,10 +167,6 @@ const field = (
 const sharedSystemSet = (values: any): boolean =>
 	values?.["shared-system"] === true || values?.["shared-system"] === "true";
 
-/** dcb-service harvests unless `ingest` is explicitly false. */
-const ingestSwitchedOff = (values: any): boolean =>
-	values?.ingest === false || values?.ingest === "false";
-
 /**
  * `default-agency-code`, in the six profiles where it means "the agency to assume
  * when a patron's home location does not map".
@@ -658,15 +654,15 @@ const FOLIO: HostLmsProfile = {
 					"recommended",
 					"url",
 				),
-				{
-					path: ["record-syntax"],
-					labelKey: "hostlms.config_fields.record_syntax",
-					descriptionKey:
-						"hostlms.config_fields.folio_record_syntax_description",
-					requirement: "required",
-					type: "text",
-					requiredUnless: ingestSwitchedOff,
-				},
+				// FolioOaiPmhIngestSource2.DEFAULT_RECORD_SYNTAX applies when this is blank
+				field(
+					["record-syntax"],
+					"hostlms.config_fields.record_syntax",
+					"hostlms.config_fields.folio_record_syntax_description",
+					"optional",
+					"text",
+					"oai_dc",
+				),
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",

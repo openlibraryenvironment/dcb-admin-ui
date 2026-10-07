@@ -114,17 +114,14 @@ describe("hostLmsClientConfig", () => {
 			).toContain("folio-tenant");
 		});
 
-		it("requires the FOLIO record syntax while the FOLIO harvests", () => {
-			const missing = (values: object) =>
-				missingRequiredClientConfig(HOST_LMS_CLASSES.folio, values).map(
-					(problem) => problem.name,
-				);
+		it("never requires the FOLIO harvest settings dcb-service defaults", () => {
+			const missing = missingRequiredClientConfig(
+				HOST_LMS_CLASSES.folio,
+				{},
+			).map((problem) => problem.name);
 
-			expect(missing({})).toContain("record-syntax");
-			expect(missing({ ingest: true })).toContain("record-syntax");
-			expect(missing({ ingest: false })).not.toContain("record-syntax");
-			// A default dcb-service supplies, so never required
-			expect(missing({})).not.toContain("metadata-prefix");
+			expect(missing).not.toContain("record-syntax");
+			expect(missing).not.toContain("metadata-prefix");
 		});
 
 		it("reports nested Polaris fields by their dotted path", () => {
