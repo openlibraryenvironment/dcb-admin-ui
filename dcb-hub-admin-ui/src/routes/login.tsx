@@ -16,6 +16,7 @@ import LoginLayout from "@layout/LoginLayout/LoginLayout";
 import Link from "@components/Link/Link";
 import LandingCard from "@components/LandingCard/LandingCard";
 import { postLoginRedirectKey, toInternalPath } from "@helpers/appBase";
+import { useDocumentTitle } from "@hooks/useDocumentTitle";
 import {
 	assertOidcAuthorityReachable,
 	isOidcAuthorityUnavailableError,
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
 	const { t } = useTranslation();
+	useDocumentTitle(t("nav.login"));
 	const auth = useAuth();
 	const { cfg } = Route.useRouteContext();
 	const authority = cfg?.VITE_KEYCLOAK_URL as string | undefined;

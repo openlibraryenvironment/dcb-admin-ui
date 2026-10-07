@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren } from "react";
 import { useAuth } from "react-oidc-context";
 import { Stack, Typography, Box, Button } from "@mui/material";
 import { BookOutlined } from "@mui/icons-material";
@@ -7,6 +7,7 @@ import Breadcrumbs from "../Breadcrumbs/Breadcrumbs";
 import PageActionsMenu from "@components/PageActionsMenu/PageActionsMenu";
 import Link from "@components/Link/Link";
 import { adminOrConsortiumAdmin } from "@constants/roles";
+import { useDocumentTitle } from "@hooks/useDocumentTitle";
 
 interface PageContainerProps {
 	title?: string;
@@ -36,13 +37,7 @@ export default function PageContainer({
 		adminOrConsortiumAdmin.includes(role),
 	);
 
-	useEffect(() => {
-		const baseAppTitle = "DCB Admin";
-		document.title = title ? `${baseAppTitle} | ${title} ` : baseAppTitle;
-		return () => {
-			document.title = baseAppTitle;
-		};
-	}, [title]);
+	useDocumentTitle(title);
 
 	const renderTitle = () => {
 		if (!link || !title)

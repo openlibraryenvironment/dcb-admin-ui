@@ -116,6 +116,30 @@ is happening, and there is no single layout to match across 84 routes.
 
 ---
 
+## Every route is titled
+
+`index.html` sets one title and `PageContainer` was the only thing that changed it, so
+the four routes that do not render it - `login`, `logout`, `maintenance` and
+`networkError` - all read "DCB Admin". Browser history, tab switching and a screen
+reader's page announcement were identical on each. **WCAG 2.4.2, Level A**, which the
+VPAT claims; `/login` is also the page Lighthouse audits and the first page every user
+sees.
+
+`useDocumentTitle` is the one definition, used by `PageContainer` and by those four
+routes directly. They reuse strings that already existed, so nothing here added
+translation debt.
+
+**Page name first, then a middot, then the app.** A tab strip and a screen reader's page
+announcement both truncate from the right, so "DCB Admin | Libraries" told the reader the
+same thing on all 85 routes. `dcb-admin-for-libraries` titles "Mappings · DCB Admin for
+Libraries" and this now matches it. The old format also carried a trailing space, and a
+blank title produced "DCB Admin | " with a dangling separator.
+
+Proved by `e2e/page-titles.spec.ts`, which covers the three reachable untitled routes and
+asserts that the title follows a navigation rather than being set once on load.
+
+---
+
 ## Reaching a detail page
 
 Every detail page in this application is reached through a grid row, and the grid

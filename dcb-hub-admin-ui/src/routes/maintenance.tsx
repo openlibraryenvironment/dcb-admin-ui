@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import LoginLayout from "@layout/LoginLayout/LoginLayout";
 import ErrorComponent from "@components/Error/Error";
+import { useDocumentTitle } from "@hooks/useDocumentTitle";
 
 export const Route = createFileRoute("/maintenance")({
 	component: MaintenancePage,
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/maintenance")({
 
 function MaintenancePage() {
 	const { t } = useTranslation();
+	useDocumentTitle(t("ui.error.503.name"));
 
 	return (
 		<LoginLayout pageName={t("ui.error.503.page_title")}>
