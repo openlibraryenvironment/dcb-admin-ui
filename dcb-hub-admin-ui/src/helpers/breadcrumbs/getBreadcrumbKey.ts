@@ -53,6 +53,8 @@ export function getBreadcrumbKey(
 					return "nav.groups.settings";
 				case "insights":
 					return "nav.groups.insights";
+				case "announcements":
+					return "nav.groups.announcements";
 			}
 		}
 	}

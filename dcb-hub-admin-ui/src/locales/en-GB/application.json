@@ -566,7 +566,13 @@
 		},
 		"supply_count": "{{count}} libraries enabled for supplying.",
 		"name_max": "Group name must be at most 32 characters",
-		"code_max": "Group code must be at most 5 characters"
+		"code_max": "Group code must be at most 5 characters",
+		"announcements": {
+			"scope_help": "For news that affects the libraries in this group: a van delay, a regional closure, a change to how items reach them. Patrons of every library in the group see it. One notice shows at a time.",
+			"publish": "Publish to this group",
+			"confirm_title": "Publish to every patron of this group's libraries?",
+			"confirm_body": "This will show to patrons of the {{libraries}} libraries in {{group}} as soon as you publish."
+		}
 	},
 	"header": {
 		"language_switcher_title": "Language",
@@ -2097,7 +2103,8 @@
 			"profile": "Profile",
 			"patronRequests": "Patron requests",
 			"settings": "Settings",
-			"supplierRequests": "Supplier requests"
+			"supplierRequests": "Supplier requests",
+			"announcements": "Announcements"
 		},
 		"home": "Home",
 		"hostlmss": "Host LMSs",

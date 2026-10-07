@@ -18,6 +18,7 @@ describe("group tab indices", () => {
 		[2, "/supplierRequests"],
 		[3, "/settings"],
 		[4, "/insights"],
+		[5, "/announcements"],
 	];
 
 	it.each(EXPECTED)("index %i is %s", (index, path) => {
@@ -34,7 +35,10 @@ describe("group tab indices", () => {
 		}
 	});
 
-	it("the conditionally hidden tab sits last, so hiding it cannot shift an index", () => {
-		expect(TABS[TABS.length - 1]?.path).toBe("/insights");
+	it("the conditionally hidden tabs sit last, so hiding them cannot shift an index", () => {
+		expect(TABS.slice(-2).map((tab) => tab.path)).toEqual([
+			"/insights",
+			"/announcements",
+		]);
 	});
 });
