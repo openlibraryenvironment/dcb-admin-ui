@@ -323,6 +323,9 @@ export default function DataGrid({
 					toolbar: {
 						showQuickFilter: false,
 						handleExport, // three-scope server export (or legacy onExport)
+						// Suppresses MUI's OWN Excel menu item, not the api method behind it:
+						// ExportToolbar offers Excel itself and calls exportDataAsExcel
+						// directly, so without this the menu would carry two of them.
 						excelOptions: { disableToolbarButton: true },
 						allDataLoading: exportConfig
 							? exportProgress.isExporting
