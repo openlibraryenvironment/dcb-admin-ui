@@ -5,6 +5,7 @@ import {
 	GridColDef,
 	GridColumnVisibilityModel,
 	GridEventListener,
+	GridValidRowModel,
 	GridRowModes,
 	GRID_DETAIL_PANEL_TOGGLE_FIELD,
 	GridExpandLessIcon,
@@ -61,6 +62,16 @@ declare module "@mui/x-data-grid-premium" {
 	}
 }
 const IMMUTABLE_FALLBACK_MODES = {};
+/**
+ * One empty array for every grid that has no rows yet.
+ *
+ * `rows={data?.thing?.content ?? []}` is a NEW array on every render, and MUI treats a
+ * new rows identity as new rows: it re-runs its rows pipeline and remounts selection
+ * state. routes/libraries/index.tsx found that and declared its own module-scope
+ * constant; 33 other grids kept the inline literal. Normalised here so no caller has to
+ * remember - the same reason IMMUTABLE_FALLBACK_MODES above exists.
+ */
+const EMPTY_ROWS: readonly GridValidRowModel[] = [];
 interface CustomDataGridProps extends Omit<
 	DataGridPremiumProps,
 	"sx" | "checkboxSelection"
@@ -127,6 +138,9 @@ export default function DataGrid({
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
+	// See EMPTY_ROWS. `rows` is typed as required by MUI, so the length check also
+	// covers a caller that passes undefined through an `any`-typed path.
+	const stableRows = rows?.length ? rows : EMPTY_ROWS;
 	const navigate = useNavigate();
 	// Two things every grid needs, enforced here rather than per column
 	// definition so a new grid cannot quietly ship without them.
@@ -280,7 +294,7 @@ export default function DataGrid({
 			<DataGridPremium
 				{...rest}
 				columns={columns}
-				rows={rows}
+				rows={stableRows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
 				loading={loading}

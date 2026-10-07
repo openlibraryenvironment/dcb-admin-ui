@@ -13,7 +13,12 @@ function MappingsRouteComponent() {
 
 	return (
 		<PageContainer title={t("nav.mappings.name")}>
-			<List component="nav" aria-labelledby="mappings-title">
+			{/* page-title is the id PageContainer gives the <h1>. The previous values -
+			    "mappings-title" and "service-information" - were defined nowhere in the
+			    application, so this landmark had no accessible name and the reference was
+			    dangling: axe aria-valid-attr-value, serious. Two navigation landmarks on
+			    the page (this and the sidebar) and only one of them named. */}
+			<List component="nav" aria-labelledby="page-title">
 				<ListItem disablePadding>
 					<ListItemButton component={Link} to="/mappings/allNumericRange">
 						<ListItemText primary={t("nav.mappings.allNumericRange")} />
