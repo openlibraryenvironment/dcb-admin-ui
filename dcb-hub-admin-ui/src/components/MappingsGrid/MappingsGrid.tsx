@@ -15,6 +15,7 @@ import { useEntityMutation } from "@hooks/useEntityMutation";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import type { EntityKey } from "@constants/entityRegistry";
+import { MAPPING_IMPORT_COLUMNS } from "@constants/mappingImportContract";
 
 type MappingDataKey = "referenceValueMappings" | "numericRangeMappings";
 
@@ -143,6 +144,7 @@ export default function MappingsGrid({
 					coreType: dataKey,
 					baseQuery,
 					wizard: true,
+					roundTrip: MAPPING_IMPORT_COLUMNS[dataKey],
 				}}
 				disableAggregation
 				disableRowGrouping

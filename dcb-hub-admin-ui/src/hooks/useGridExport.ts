@@ -25,6 +25,7 @@ import {
 	buildServerGridQueryVars,
 	generateFilterDescription,
 } from "@helpers/dataGrid/utilities";
+import type { MappingImportColumn } from "@constants/mappingImportContract";
 
 export interface GridExportConfig {
 	/** GraphQL document that returns the full (paged) dataset for this grid. */
@@ -41,10 +42,27 @@ export interface GridExportConfig {
 	quickFilterFields?: string[];
 	/** Enables the column/scope/format wizard for this grid. */
 	wizard?: boolean;
+	/**
+	 * Where this grid's export exists to be edited and uploaded again, the import
+	 * contract it has to round-trip through - see mappingImportContract.ts.
+	 *
+	 * Set it and the toolbar's CSV and TSV exports write the IMPORTER's header
+	 * names in the importer's order, not the grid's display names. Excel is
+	 * deliberately left on display names: the importer accepts only .csv and .tsv,
+	 * so an .xlsx can never go back in and is read by a person instead. An explicit
+	 * column choice from the wizard always wins.
+	 */
+	roundTrip?: readonly MappingImportColumn[];
 }
 
 export type ExportMode = "current" | "filtered" | "all" | "selected" | "print";
-export type ExportFormat = "csv" | "tsv";
+/**
+ * `excel` reaches MUI X Premium's own exporter and so covers the on-screen page
+ * only. The server-fetched scopes stay delimited text: building a workbook from
+ * our own paged fetch would mean importing exceljs directly, and the only copy in
+ * the tree is @mui/x-internal-exceljs-fork - an internal package, not an API.
+ */
+export type ExportFormat = "csv" | "tsv" | "excel";
 
 export interface RunExportOptions {
 	mode: ExportMode;
@@ -79,7 +97,12 @@ const triggerDownload = (
 	// the browser assembles the file without the tab first holding a second,
 	// contiguous copy of it.
 	const blob = new Blob(parts, {
-		type: `text/${format};charset=utf-8;`,
+		// text/tsv is not a registered media type, and the OS file association
+		// follows this rather than the extension on some desktops.
+		type:
+			format === "csv"
+				? "text/csv;charset=utf-8;"
+				: "text/tab-separated-values;charset=utf-8;",
 	});
 	const link = document.createElement("a");
 	if (link.download === undefined) return;
@@ -167,6 +190,14 @@ export const useGridExport = ({
 	}: RunExportOptions) => {
 		if (!apiRef?.current) return;
 		const delimiter = format === "csv" ? "," : "\t";
+		const contract = config.roundTrip;
+		// The wizard passes an explicit column choice, and that is the user's; a
+		// grid with an import contract otherwise exports THAT, because the file
+		// exists to go back in. Excel cannot be re-imported, so it keeps the grid's
+		// own headers - see GridExportConfig.roundTrip.
+		const useContract = Boolean(
+			contract && format !== "excel" && !(fields && fields.length > 0),
+		);
 
 		// Default file name: grid id plus a slug of any active filters. A wizard
 		// name (if given) wins, sanitised of characters illegal in file names.
@@ -182,8 +213,28 @@ export const useGridExport = ({
 			? fileName.trim().replace(/[\\/:*?"<>|]+/g, "_")
 			: defaultFileName;
 
-		// On-screen rows: let MUI serialise using the grid's own value getters.
-		if (mode === "current") {
+		if (mode === "print") {
+			apiRef.current.exportDataAsPrint();
+			return;
+		}
+
+		// MUI X Premium's own workbook, which is what makes the exceljs chunk this
+		// application already ships earn its place. Its headers are the grid's, for
+		// the reason GridExportConfig.roundTrip gives.
+		if (format === "excel") {
+			await apiRef.current.exportDataAsExcel({
+				fileName: baseFileName,
+				fields,
+			});
+			return;
+		}
+
+		// On-screen rows, and MUI serialises them with the grid's own value getters
+		// - except on a round-trip grid, where the header row has to be the
+		// importer's and MUI's exporter writes `headerName`. There the rows come
+		// off the api and through the same serialiser as every other scope, so all
+		// three delimited exports of a mappings grid are one shape.
+		if (mode === "current" && !useContract) {
 			apiRef.current.exportDataAsCsv({
 				delimiter,
 				fileName: baseFileName,
@@ -192,22 +243,23 @@ export const useGridExport = ({
 			});
 			return;
 		}
-		if (mode === "print") {
-			apiRef.current.exportDataAsPrint();
-			return;
-		}
 
 		const exportColumns = getExportColumns(columns);
 		const headerMap = getExportHeaderMap(columns);
-		const chosenFields =
-			fields && fields.length > 0
+		const chosenFields = useContract
+			? contract!.map((column) => column.field)
+			: fields && fields.length > 0
 				? fields
 				: exportColumns.map((col) => col.field);
-		const chosenHeaders = chosenFields.map(
-			(field) => headerMap[field] ?? field,
-		);
+		const chosenHeaders = useContract
+			? contract!.map((column) => column.header)
+			: chosenFields.map((field) => headerMap[field] ?? field);
 		const colLookup = new Map(columns.map((c) => [c.field, c]));
-		const valueLabelMaps = getValueLabelMaps(columns);
+		const valueLabelMaps = useContract
+			? // A round-trip file carries the codes the importer matches on, not the
+				// labels a reader prefers: 'Lending library' is not a Host LMS code.
+				{}
+			: getValueLabelMaps(columns);
 
 		// Resolve each cell exactly as the grid does, so a server-fetched export
 		// matches the on-screen values for nested/derived columns.
@@ -265,8 +317,13 @@ export const useGridExport = ({
 		try {
 			let rowCount: number;
 
-			if (mode === "selected") {
-				const rows = Array.from(apiRef.current.getSelectedRows().values());
+			if (mode === "selected" || mode === "current") {
+				// getSortedRows() is the page the grid holds: these grids paginate on the
+				// server, so what is loaded IS what is on screen.
+				const rows =
+					mode === "current"
+						? apiRef.current.getSortedRows()
+						: Array.from(apiRef.current.getSelectedRows().values());
 				appendPage(rows);
 				rowCount = rows.length;
 			} else {

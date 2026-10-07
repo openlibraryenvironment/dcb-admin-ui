@@ -1,0 +1,34 @@
+{
+	"referenceValueMappings": {
+		"totalSize": 2,
+		"content": [
+			{
+				"id": "6f2b9c41-0d3e-4a7b-8c15-2e9d4f7a1b33",
+				"fromCategory": "ItemType",
+				"fromContext": "DCB",
+				"fromValue": "loanable-item",
+				"toCategory": "ItemType",
+				"toContext": "MVU",
+				"toValue": "1",
+				"reciprocal": true,
+				"label": null,
+				"lastImported": "2026-09-30T10:14:00Z",
+				"deleted": false
+			},
+			{
+				"id": "a81d5e32-7b64-4f90-9ad2-3c6e8b1f4d57",
+				"fromCategory": "patronType",
+				"fromContext": "MVU",
+				"fromValue": "undergrad",
+				"toCategory": "patronType",
+				"toContext": "DCB",
+				"toValue": "standard",
+				"reciprocal": true,
+				"label": null,
+				"lastImported": "2026-09-30T10:14:00Z",
+				"deleted": false
+			}
+		],
+		"pageable": { "number": 0, "offset": 0 }
+	}
+}
