@@ -35,6 +35,6 @@ gone; nothing here should count rows to decide whether the chart is trustworthy.
 ## Where the rest lives
 
 The server-side design — the query→predicate translation, why the obvious single
-`date_trunc` + `GROUP BY` is not buildable against `QueryService`, and the indexing in
-`V8_72_002__audit_incidence_indexes.sql` — belongs to **dcb-service**, and is documented
+`date_trunc` + `GROUP BY` is not buildable against `QueryService`, and the indexes its
+audit incidence migration adds — belongs to **dcb-service**, and is documented
 there. It is not a frontend concern and the full write-up no longer lives in this repo.
