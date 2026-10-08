@@ -5,6 +5,7 @@ import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import mappings from "./fixtures-data/mappings.json";
+import hostLms from "./fixtures-data/host-lms.json";
 
 /**
  * The mappings export, as a librarian uses it: download the file and read it.
@@ -17,6 +18,10 @@ import mappings from "./fixtures-data/mappings.json";
 const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,
 	LoadMappings: mappings,
+	// The route fetches these for the new-mapping form. Unmocked it 404s and the page is
+	// replaced by GlobalError about two seconds in, so these three tests passed only by
+	// finishing first.
+	LoadHostLmsCodes: hostLms,
 };
 
 const readDownload = async (page: Page, open: () => Promise<void>) => {

@@ -53,6 +53,11 @@ export const MOCKS = {
 	LoadLibrary: libraryDetail,
 	LoadLibraryServiceInfo: libraryDetail,
 	LoadHostLms: hostLms,
+	// A DIFFERENT operation from LoadHostLms, and unmocked it 404s: the consortium-wide
+	// mappings route fetches it for the new-mapping form's context list, and the global
+	// throwOnError sends any non-401/503 failure to GlobalError - so the page died about
+	// two seconds after load and only fast specs finished before it did.
+	LoadHostLmsCodes: hostLms,
 	LoadLocations: locations,
 	LoadGroup: groupDetail,
 	LoadResolvedFunctionalSettings: resolvedSettings,

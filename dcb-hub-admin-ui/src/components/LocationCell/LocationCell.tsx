@@ -7,6 +7,7 @@ import { Location } from "@models/Location";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import type { LoadLocationForPrGridQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 interface LocationCellProps {
 	locationId: string;
@@ -18,6 +19,7 @@ export const LocationCell = ({ locationId, linkable }: LocationCellProps) => {
 	const gqlClient = useGraphQLClient();
 
 	const { data, isLoading, isError } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["locationForGrid", locationId],
 		queryFn: async () => {
 			return gqlClient.request<any, LoadLocationForPrGridQueryVariables>(

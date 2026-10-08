@@ -35,6 +35,7 @@ import type {
 } from "@generated/graphql";
 
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 export const Route = createFileRoute(
 	"/__authenticated/groups/$groupId/settings",
 )({
@@ -84,6 +85,7 @@ function GroupSettings() {
 	 * that resolves for nobody. Deployment configuration, so it is asked once per session.
 	 */
 	const settingsBearingType = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["settingsBearingGroupType"],
 		queryFn: () =>
 			gqlClient.request<LoadSettingsBearingGroupTypeQuery>(

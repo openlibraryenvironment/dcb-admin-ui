@@ -25,13 +25,11 @@ interface SearchQueryBuilderProps {
 
 export const SearchQueryBuilder = ({ onSearch }: SearchQueryBuilderProps) => {
 	const { t } = useTranslation();
-	const {
-		criteria,
-		addCriterion,
-		removeCriterion,
-		updateCriterion,
-		setCriteria,
-	} = useSearchStore();
+	const criteria = useSearchStore((s) => s.criteria);
+	const addCriterion = useSearchStore((s) => s.addCriterion);
+	const removeCriterion = useSearchStore((s) => s.removeCriterion);
+	const updateCriterion = useSearchStore((s) => s.updateCriterion);
+	const setCriteria = useSearchStore((s) => s.setCriteria);
 
 	// Check if the current search is an exclusive UUID search
 	const isUuidSearch =

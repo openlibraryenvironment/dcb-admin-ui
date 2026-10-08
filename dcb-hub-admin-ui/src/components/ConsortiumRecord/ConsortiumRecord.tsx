@@ -197,14 +197,14 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 		title: null,
 	});
 
-	const {
-		setHeaderImageURL,
-		setDisplayName,
-		setAboutImageURL,
-		setCatalogueSearchURL,
-		setWebsiteURL,
-		setDescription,
-	} = useConsortiumInfoStore();
+	const setHeaderImageURL = useConsortiumInfoStore((s) => s.setHeaderImageURL);
+	const setDisplayName = useConsortiumInfoStore((s) => s.setDisplayName);
+	const setAboutImageURL = useConsortiumInfoStore((s) => s.setAboutImageURL);
+	const setCatalogueSearchURL = useConsortiumInfoStore(
+		(s) => s.setCatalogueSearchURL,
+	);
+	const setWebsiteURL = useConsortiumInfoStore((s) => s.setWebsiteURL);
+	const setDescription = useConsortiumInfoStore((s) => s.setDescription);
 
 	// R-17b. A deployment with dcb.branding.assets.store=none has no upload route at all,
 	// so the button would 404. The URL field stays either way - pointing at a CDN the

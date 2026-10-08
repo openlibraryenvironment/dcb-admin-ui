@@ -29,6 +29,7 @@ import {
 	RELEASE_PAGE_LINKS,
 } from "../../homeData/homeConfig";
 import VersionInfo from "./VersionInfo";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 // A bare inline link is 17px tall and overflows a narrow cell into its neighbour's target.
 // Filling the cell with vertical padding keeps it at least 24px tall (WCAG 2.5.8).
@@ -47,6 +48,7 @@ export default function CombinedEnvironmentComponent() {
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const { data, isLoading, isError } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["environmentHealth"],
 		queryFn: async () => {
 			const headers = { Authorization: `Bearer ${auth.user?.access_token}` };

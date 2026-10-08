@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import axios from "axios";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 export type ReleaseRepo = "dcb-service" | "dcb-admin-ui";
 
@@ -32,5 +33,5 @@ export const latestReleaseQuery = (repo: ReleaseRepo) =>
 		gcTime: SIX_HOURS,
 		retry: false,
 		refetchOnWindowFocus: false,
-		throwOnError: false,
+		...nonCriticalQuery,
 	});

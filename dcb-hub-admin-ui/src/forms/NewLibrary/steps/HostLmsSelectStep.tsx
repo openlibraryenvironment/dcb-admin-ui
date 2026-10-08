@@ -14,6 +14,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getHostLmsSelection } from "@queries/getHostLmsSelection";
 import { getILS } from "@helpers/getILS";
 import type { LoadHostLmsSelectionQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 /**
  * Picks the existing Host LMS a new library belongs to.
@@ -34,6 +35,7 @@ export default function HostLmsSelectStep() {
 	} = useFormContext();
 
 	const { data, isLoading, isError } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["hostLmsSelection"],
 		queryFn: () =>
 			gqlClient.request<any, LoadHostLmsSelectionQueryVariables>(

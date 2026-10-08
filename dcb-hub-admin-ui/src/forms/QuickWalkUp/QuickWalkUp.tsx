@@ -40,6 +40,7 @@ import {
 import { PatronLookupResponse } from "@models/PatronLookupResponse";
 import { getRequestError } from "@helpers/getRequestError";
 import { QuickWalkUpFormData } from "@models/QuickWalkUpFormData";
+import { lmsFanOutQuery } from "@helpers/queryPolicy";
 
 export default function QuickWalkUpRequest({
 	onClose,
@@ -131,7 +132,7 @@ export default function QuickWalkUpRequest({
 		: "";
 	const { data: pickupLocations, isLoading: pickupLocationsLoading } =
 		useQuery<LocationsQueryData>({
-			queryKey: ["locations", locationQuery, headers, cfg.VITE_DCB_API_BASE],
+			queryKey: ["locations", locationQuery, cfg.VITE_DCB_API_BASE],
 			queryFn: () =>
 				request(
 					`${cfg.VITE_DCB_API_BASE}/graphql`,
@@ -164,7 +165,6 @@ export default function QuickWalkUpRequest({
 		queryKey: [
 			"patronRequestEssentials",
 			patronRequestId,
-			headers,
 			cfg.VITE_DCB_API_BASE,
 		],
 		queryFn: () =>
@@ -192,12 +192,8 @@ export default function QuickWalkUpRequest({
 	);
 
 	const { data: availabilityData } = useQuery({
-		queryKey: [
-			"availability",
-			resolvedBibClusterId,
-			headers,
-			cfg.VITE_DCB_API_BASE,
-		],
+		...lmsFanOutQuery,
+		queryKey: ["availability", resolvedBibClusterId, cfg.VITE_DCB_API_BASE],
 		queryFn: async () => {
 			const response = await axios.get(
 				`${cfg.VITE_DCB_API_BASE}/items/availability`,

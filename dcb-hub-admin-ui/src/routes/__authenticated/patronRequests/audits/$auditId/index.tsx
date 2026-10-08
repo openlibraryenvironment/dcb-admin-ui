@@ -22,6 +22,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAuditById } from "@queries/getAuditById";
 import { getAuditsByPatronRequest } from "@queries/getAuditByPatronRequest";
 import { AuditItem } from "@models/AuditItem";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	GetAuditByIdQueryVariables,
 	GetAuditsByPatronRequestQueryVariables,
@@ -55,6 +56,7 @@ function AuditDetails() {
 
 	// Fetch specifically the single NEXT (newer) audit entry
 	const { data: nextAuditData, isLoading: nextLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["audit", "next", patronRequestId, auditDate],
 		queryFn: () =>
 			gqlClient.request<any, GetAuditsByPatronRequestQueryVariables>(
@@ -72,6 +74,7 @@ function AuditDetails() {
 
 	// Fetch specifically the single PREVIOUS (older) audit entry
 	const { data: prevAuditData, isLoading: prevLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["audit", "prev", patronRequestId, auditDate],
 		queryFn: () =>
 			gqlClient.request<any, GetAuditsByPatronRequestQueryVariables>(

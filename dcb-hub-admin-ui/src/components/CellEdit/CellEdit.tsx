@@ -16,6 +16,7 @@ import {
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getRoles } from "@queries/getRoles";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 interface RoleOption {
 	name: string;
@@ -60,6 +61,7 @@ export const CellEdit = (params: GridRenderEditCellParams) => {
 
 	// Modernized role lookup using TanStack Query instead of Apollo GraphQL
 	const { data: optionsData, isLoading: autocompleteLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["availableGridRoles"],
 		queryFn: async () => {
 			const response = await gqlClient.request<{

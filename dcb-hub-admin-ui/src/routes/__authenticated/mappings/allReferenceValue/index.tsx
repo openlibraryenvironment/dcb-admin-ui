@@ -22,6 +22,7 @@ import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions
 
 import { getMappings } from "@queries/getMappings";
 import { getHostLmsCodes } from "@queries/getHostLmsCodes";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadHostLmsCodesQueryVariables,
 	LoadMappingsQueryVariables,
@@ -76,6 +77,7 @@ function ReferenceValueMappingsRoute() {
 				pagesize: 1000,
 			}),
 		staleTime: 1000 * 60 * 5,
+		...nonCriticalQuery,
 	});
 	const hostLmsCodes: string[] = useMemo(
 		() =>

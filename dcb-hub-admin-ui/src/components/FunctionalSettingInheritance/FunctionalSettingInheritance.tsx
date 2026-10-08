@@ -28,6 +28,7 @@ import {
 } from "@mutations/functionalSettingScopes";
 import { settingLabelKey } from "@constants/functionalSettings";
 import { canRevert, provenanceOf } from "@helpers/settingProvenance";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadResolvedFunctionalSettingsQuery,
 	LoadSettingsBearingGroupTypeQuery,
@@ -97,9 +98,12 @@ export default function FunctionalSettingInheritance({
 	 * does not exist.
 	 */
 	const groupType = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["settingsBearingGroupType"],
 		queryFn: () =>
-			client.request<LoadSettingsBearingGroupTypeQuery>(getSettingsBearingGroupType()),
+			client.request<LoadSettingsBearingGroupTypeQuery>(
+				getSettingsBearingGroupType(),
+			),
 		staleTime: Infinity,
 		// Only the library view needs it: it is what decides whether the chain this library
 		// sits in has a group level to describe. A group already knows it is one.
@@ -107,7 +111,8 @@ export default function FunctionalSettingInheritance({
 		select: (data) => data.settingsBearingGroupType ?? null,
 	});
 
-	const rows: ResolvedSetting[] = settings.data?.resolvedFunctionalSettings ?? [];
+	const rows: ResolvedSetting[] =
+		settings.data?.resolvedFunctionalSettings ?? [];
 
 	const afterWrite = (message: string) => {
 		setAnnouncement(message);
@@ -225,7 +230,9 @@ export default function FunctionalSettingInheritance({
 								<TableCell>{t("consortium.settings.name")}</TableCell>
 								<TableCell>{t("consortium.settings.enabled_header")}</TableCell>
 								<TableCell>{t("settings_inheritance.source_header")}</TableCell>
-								<TableCell>{t("settings_inheritance.actions_header")}</TableCell>
+								<TableCell>
+									{t("settings_inheritance.actions_header")}
+								</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>

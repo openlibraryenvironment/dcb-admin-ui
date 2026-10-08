@@ -26,7 +26,7 @@ interface ConsortiumStageRow {
 
 export default function ConsortiumDetails() {
 	const { t } = useTranslation();
-	const { displayName } = useConsortiumInfoStore();
+	const displayName = useConsortiumInfoStore((s) => s.displayName);
 
 	// FIX: Replaced raw JSX multi-dimensional layouts with typed objects for consistent state mapping
 	const rows: ConsortiumStageRow[] = [

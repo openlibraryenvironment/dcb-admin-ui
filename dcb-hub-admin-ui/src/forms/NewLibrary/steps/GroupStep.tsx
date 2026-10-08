@@ -12,6 +12,7 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getGroupsSelection } from "@queries/getGroupsSelection";
 import type { LoadGroupsSelectionQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 interface GroupStepProps {
 	/**
@@ -48,6 +49,7 @@ export default function GroupStep({
 	} = useFormContext();
 
 	const { data: groupsData, isLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["groupsSelection"],
 		queryFn: () =>
 			gqlClient.request<any, LoadGroupsSelectionQueryVariables>(

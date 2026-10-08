@@ -1,4 +1,5 @@
 import { AxiosInstance } from "axios";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 // --- Response types (mirror org.olf.dcb.core.api.serde.*) -------------------
 
@@ -319,15 +320,9 @@ export interface Paged<T> {
 	totalSize: number;
 }
 
-/**
- * Every Insights panel handles its own failure.
- *
- * The app's query client throws to the route error boundary on anything that is not a 401
- * or a 503, which for a dashboard of twenty independent panels means one broken endpoint
- * takes out the whole page. A panel is the right place to report a panel: PanelState shows
- * the failure and offers a retry, and the nineteen that worked stay on screen.
- */
-export const panelQuery = { throwOnError: false as const };
+/** The Insights spelling of nonCriticalQuery: PanelState renders the failure and
+ * offers a retry, so the panels that worked stay on screen. */
+export const panelQuery = nonCriticalQuery;
 
 // --- TanStack Query options factories ---------------------------------------
 // Shared by route loaders (queryClient.ensureQueryData) and components (useQuery)
