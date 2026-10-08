@@ -637,7 +637,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : pickupLocationDataError ? (
 									t("patron_request.error_pickup")
@@ -917,7 +917,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
 									<RenderAttribute
@@ -939,7 +939,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
 									<RenderAttribute
@@ -1743,7 +1743,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : pickupLocationDataError ? (
 									t("patron_request.error_pickup")
@@ -1812,7 +1812,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
 									<Stack
@@ -1850,7 +1850,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
 									<RenderAttribute
@@ -1872,7 +1872,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
-										sx={{ marginLeft: "10px" }}
+										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
 									<RenderAttribute

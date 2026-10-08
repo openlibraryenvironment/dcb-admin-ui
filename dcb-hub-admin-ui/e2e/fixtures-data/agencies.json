@@ -1,0 +1,15 @@
+{
+	"agencies": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "4c9f6b23-8d17-4a50-9e38-1b7c5d2a6f44",
+				"code": "alpha",
+				"name": "Alpha Test Agency",
+				"latitude": 53.8008,
+				"longitude": -1.5491
+			}
+		],
+		"pageable": { "number": 0, "offset": 0 }
+	}
+}

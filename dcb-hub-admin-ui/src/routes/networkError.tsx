@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Box } from "@mui/material";
 
 import ErrorComponent from "@components/Error/Error";
+import { useDocumentTitle } from "@hooks/useDocumentTitle";
 
 export const Route = createFileRoute("/networkError")({
 	component: NetworkError,
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/networkError")({
 
 function NetworkError() {
 	const { t } = useTranslation();
+	useDocumentTitle(t("ui.error.network_error"));
 
 	return (
 		// This route renders no layout at all, so it carries its own main landmark

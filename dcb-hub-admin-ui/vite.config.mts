@@ -229,11 +229,38 @@ export default defineConfig(({ mode, command }) => {
 		},
 
 		test: {
-			include: ["**/*.test.ts"],
+			// .tsx as well as .ts. With only "**/*.test.ts" a component test named
+			// *.test.tsx was not collected and did not error: a green run that ran
+			// nothing. There are none yet, which is why nobody had noticed.
+			include: ["**/*.test.{ts,tsx}"],
 			exclude: ["node_modules", "dist", "coverage", "playwright", "**/*.d.ts"],
 			// Clears the feature flags `.env` would otherwise leak into every test.
 			// See vitest.setup.ts.
 			setupFiles: ["./vitest.setup.ts"],
+			// NO THRESHOLD, deliberately. A figure picked before anything was measured is
+			// a figure that gets lowered under pressure - the same ratchet the performance
+			// budget warns about. This reports; whether any of it becomes a gate is a
+			// decision to take against the number, not before it. docs/testing.md.
+			coverage: {
+				provider: "v8",
+				// WITHOUT THIS THE NUMBER IS A LIE. v8 only reports files a test actually
+				// loaded, so a module no test imports is absent rather than 0% - and the
+				// summary becomes "coverage of the code we already cover". It read 84.77%
+				// of statements that way, over 2,273 statements in a src/ of ~90,000 lines.
+				all: true,
+				include: ["src/**/*.{ts,tsx}"],
+				reporter: ["text-summary", "json-summary", "html"],
+				reportsDirectory: "./coverage",
+				// Generated or unreachable from a unit test: a route tree the plugin writes,
+				// codegen output, type-only files, and the entry point that mounts the app.
+				exclude: [
+					"src/routeTree.gen.ts",
+					"src/generated/**",
+					"src/**/*.d.ts",
+					"src/main.tsx",
+					"**/*.test.{ts,tsx}",
+				],
+			},
 		},
 
 		resolve: {

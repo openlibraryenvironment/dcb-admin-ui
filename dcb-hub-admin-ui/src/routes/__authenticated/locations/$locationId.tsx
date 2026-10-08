@@ -6,7 +6,6 @@ import { useAuth } from "react-oidc-context";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { isEmpty } from "lodash";
 
 import {
 	Button,
@@ -37,7 +36,7 @@ import { formatChangedFields } from "@helpers/formatChangedFields";
 import { Location } from "@models/Location";
 import type { LoadLocationQueryVariables } from "@generated/graphql";
 
-import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
+import { detailRefetchInterval } from "@constants/refetchIntervals";
 interface LocationFormFields {
 	name: string;
 	printLabel?: string | null;
@@ -73,7 +72,10 @@ function LocationDetails() {
 				query: `id:${locationId}`,
 			}),
 		enabled: !!locationId,
-		refetchInterval: DETAIL_REFETCH_MS,
+		// Paused while editing: this form is fed through react-hook-form's `values`
+		// prop, so a poll that lands mid-edit on a record somebody else has moved
+		// replaces the half-typed field.
+		refetchInterval: detailRefetchInterval(editMode),
 	});
 
 	const location: Location = data?.locations?.content?.[0];
@@ -143,7 +145,7 @@ function LocationDetails() {
 		control,
 		handleSubmit,
 		reset,
-		formState: { errors, isDirty },
+		formState: { errors, isDirty, dirtyFields },
 	} = useForm<LocationFormFields>({
 		// @hookform/resolvers@5 tightened the Resolver generics: yup infers
 		// unset fields as `string | null | undefined`, which no longer unifies
@@ -167,6 +169,19 @@ function LocationDetails() {
 		},
 	});
 
+	/**
+	 * The errors that can actually block this save.
+	 *
+	 * `onSubmit` sends only the fields that CHANGED, so an error on a field the user
+	 * has not touched cannot reach the server - and gating Save on it meant a FOLIO or
+	 * Polaris location that arrived without the localId those ILSs require could never
+	 * have its name corrected either. The error still renders against the field, which
+	 * is how the administrator learns the record needs one.
+	 */
+	const blockingErrors = Object.keys(errors).filter(
+		(field) => field in dirtyFields,
+	);
+
 	const {
 		showUnsavedChangesModal,
 		handleKeepEditing,
@@ -176,10 +191,14 @@ function LocationDetails() {
 	const onSubmit = (formData: LocationFormFields) => {
 		const newChangedFields = Object.keys(formData).reduce((acc, key) => {
 			const field = key as keyof LocationFormFields;
-			if (
-				formData[field] !== location[field] &&
-				formData[field] !== undefined
-			) {
+			// `?? ""` on BOTH sides, as on the library profile. printLabel and localId
+			// are seeded with "" when the column is null, so comparing "" against null
+			// reported an untouched field as changed and wrote an empty string over
+			// the null on every save. `??` leaves 0 and null-vs-null alone, so the
+			// coordinates still compare correctly.
+			const next = formData[field] ?? "";
+			const current = location[field] ?? "";
+			if (next !== current && formData[field] !== undefined) {
 				(acc[field] as any) = formData[field];
 			}
 			return acc;
@@ -279,7 +298,7 @@ function LocationDetails() {
 			key="save"
 			startIcon={<Save />}
 			onClick={handleSubmit(onSubmit)}
-			disabled={!isEmpty(errors) || !isDirty}
+			disabled={blockingErrors.length > 0 || !isDirty}
 			ref={saveButtonRef}
 		>
 			{t("ui.data_grid.save")}

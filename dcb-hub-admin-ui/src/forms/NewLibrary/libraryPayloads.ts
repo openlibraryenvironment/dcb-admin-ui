@@ -1,4 +1,7 @@
 import type { DefaultValues } from "react-hook-form";
+
+import i18n from "@/i18n";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
 import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
 import type {
@@ -70,7 +73,7 @@ export const EMPTY_LIBRARY_FORM: LibraryFormDefaults = {
 	discoverySystem: "",
 	backupDowntimeSchedule: "",
 	authProfile: "",
-	reason: "Adding a new library",
+	reason: defaultCreationReason("libraries.library"),
 	changeReferenceUrl: "",
 	libraryId: "",
 	contacts: [{ ...EMPTY_CONTACT }],
@@ -124,7 +127,7 @@ export const formValuesFromLibrary = (library: any): LibraryFormDefaults => {
 		authProfile: library?.agency?.authProfile ?? "",
 		// The change log records why the record moved; "because it was
 		// incomplete" is the honest default and the user can still edit it.
-		reason: "Completing library setup",
+		reason: i18n.t("data_change_log.reason_completing_setup"),
 		changeReferenceUrl: "",
 		libraryId: library?.id ?? "",
 		// A library with no contacts fails the schema's minimum, and an empty

@@ -4,6 +4,7 @@ import path from "node:path";
 import { buildSchema, type GraphQLSchema } from "graphql";
 
 import {
+	ALL_FEATURE_FLAGS,
 	DEPLOYMENT_FLAGS,
 	SERVICE_CAPABILITIES,
 	capabilityStatus,
@@ -399,4 +400,37 @@ describe("every unreleased capability really is unreleased", () => {
 			}
 		}
 	});
+});
+
+/**
+ * The e2e flag fixtures know every flag the application reads.
+ *
+ * A flag in neither fixture is not untested, it is WRONG: `readFlag` is
+ * `injected ?? import.meta.env[name]`, so a key absent from the seeded config reads
+ * whatever the e2e bundle baked from the developer's `.env`. CI sets no flags at all,
+ * so such a spec fails locally and passes in the pipeline.
+ *
+ * Read as text, not imported: the fixture pulls in `@playwright/test`.
+ */
+describe("e2e flag fixtures cover every flag", () => {
+	const fixture = readFileSync(
+		path.resolve(process.cwd(), "e2e/fixtures/flags.ts"),
+		"utf8",
+	);
+
+	it("finds the fixture", () => {
+		expect(fixture).toContain("VITE_FEATURE_");
+	});
+
+	it.each([...ALL_FEATURE_FLAGS])(
+		"%s is seeded by the e2e fixtures",
+		(flag) => {
+			expect(
+				fixture.includes(flag),
+				`${flag} is missing from e2e/fixtures/flags.ts, so every spec reads it from ` +
+					`whatever the e2e bundle baked rather than from the world the spec asked ` +
+					`for.`,
+			).toBe(true);
+		},
+	);
 });

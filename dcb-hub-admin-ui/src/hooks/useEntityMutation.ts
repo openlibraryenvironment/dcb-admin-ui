@@ -8,10 +8,12 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { computeMutation } from "@helpers/computeMutation";
 import {
 	changedRowFields,
+	mutationFailureText,
 	readDeleteOutcome,
 	stripUnsupportedKeys,
 } from "@helpers/actions/entityMutationLogic";
 import { unsupportedInputKeys } from "@helpers/capabilityFields";
+import { graphQLErrorsIn } from "@helpers/graphQLErrors";
 import {
 	ENTITY_REGISTRY,
 	entityOwnsQueryKey,
@@ -160,14 +162,20 @@ export function useEntityMutation(entity: EntityKey) {
 		[t, entityName],
 	);
 
-	const fail = useCallback(
-		(messageKey: string, name: string) =>
+	const failWith = useCallback(
+		(error: unknown, summary: string) =>
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t(messageKey, { entity: entityName, name }),
+				text: mutationFailureText(error, summary),
 				title: t("ui.data_grid.error"),
 			}),
+		[t],
+	);
+
+	const failText = useCallback(
+		(messageKey: string, name: string) =>
+			t(messageKey, { entity: entityName, name }),
 		[t, entityName],
 	);
 
@@ -221,11 +229,40 @@ export function useEntityMutation(entity: EntityKey) {
 					const response = await runDelete({
 						input: { ...definition.buildDeleteId(id, { ownerId }), ...audit },
 					});
+
+					// A 200 carrying `errors` alongside a null payload does not throw -
+					// graphql-request only throws when `data` is absent. readDeleteOutcome
+					// reads a missing field as success, deliberately, so without this a
+					// rejected delete reported one that happened.
+					const problems = graphQLErrorsIn(response);
+					if (problems.length > 0) {
+						setPending(null);
+						failWith(
+							{ response: { errors: problems } },
+							failText("ui.data_grid.delete_error", name),
+						);
+						return;
+					}
+
 					const { success, message } = readDeleteOutcome(
 						response,
 						definition.deleteOperation,
 					);
-					if (!success) throw new Error(message ?? "Delete refused");
+					// `success: false` is the server DECLINING, with a reason written for a
+					// human ("3 patron requests reference this location"). Nothing failed
+					// and nothing will change on a retry, so its message is the whole text
+					// rather than a detail line under "please reload the page and try
+					// again".
+					if (!success) {
+						setPending(null);
+						setAlert({
+							open: true,
+							severity: "error",
+							text: message ?? failText("ui.data_grid.delete_error", name),
+							title: t("ui.data_grid.error"),
+						});
+						return;
+					}
 
 					// Invalidate BEFORE navigating: the destination list reads from the
 					// same cache, so navigating first shows the deleted record until
@@ -241,7 +278,7 @@ export function useEntityMutation(entity: EntityKey) {
 				} catch (error) {
 					console.error(`Error deleting ${entity} ${name}:`, error);
 					setPending(null);
-					fail("ui.data_grid.delete_error", name);
+					failWith(error, failText("ui.data_grid.delete_error", name));
 				}
 				return;
 			}
@@ -272,6 +309,14 @@ export function useEntityMutation(entity: EntityKey) {
 						unsupportedInputKeys(),
 					),
 				});
+				// Same non-throwing failure as the delete path: a 200 with `errors` and a
+				// null payload resolves normally, and reading the operation field off it
+				// would hand the grid a null row as the persisted one.
+				const problems = graphQLErrorsIn(response);
+				if (problems.length > 0) {
+					throw { response: { errors: problems } };
+				}
+
 				const updated = definition.updateOperation
 					? (response?.[definition.updateOperation] ?? response)
 					: response;
@@ -300,16 +345,11 @@ export function useEntityMutation(entity: EntityKey) {
 				if (isGridEdit) pending.reject(error);
 				const errorText = !isGridEdit ? pending.errorText : undefined;
 				setPending(null);
-				if (errorText) {
-					setAlert({
-						open: true,
-						severity: "error",
-						text: errorText,
-						title: t("ui.data_grid.error"),
-					});
-				} else {
-					fail("ui.data_grid.edit_error", name);
-				}
+				// A caller's errorText says what the user was trying to do; failWith adds
+				// the server's reason beneath it. It is the summary now rather than the
+				// whole message, because "Could not enable pickup" on its own left the
+				// administrator with nothing to act on.
+				failWith(error, errorText ?? failText("ui.data_grid.edit_error", name));
 			}
 		},
 		[
@@ -320,7 +360,8 @@ export function useEntityMutation(entity: EntityKey) {
 			invalidate,
 			router,
 			succeed,
-			fail,
+			failWith,
+			failText,
 			entity,
 			t,
 		],

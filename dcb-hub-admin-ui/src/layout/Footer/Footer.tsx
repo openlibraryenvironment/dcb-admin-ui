@@ -33,8 +33,8 @@ export default function Footer() {
 					justifyContent: "space-between",
 					maxWidth: "1400px",
 					margin: "auto",
-					paddingLeft: "24px",
-					paddingRight: "24px",
+					paddingInlineStart: "24px",
+					paddingInlineEnd: "24px",
 				}}
 			>
 				<Typography

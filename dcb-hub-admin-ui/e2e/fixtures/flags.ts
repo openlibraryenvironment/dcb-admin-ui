@@ -20,6 +20,10 @@ const ALL_FEATURES: Record<string, string> = {
 	VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
 	VITE_DISCOVERY_URL: "https://discovery.e2e.invalid/",
 	VITE_FEATURE_INSIGHTS: "true",
+	// On dcb-service main and in no release, which is what "tracking main" means here.
+	// Its absence was the second thing the coverage gate in serviceCapabilities.test.ts
+	// found, after VITE_FEATURE_GUARDED_CLEANUP's absence from the legacy world.
+	VITE_FEATURE_INSIGHTS_TRENDS: "true",
 	VITE_FEATURE_AUDIT_EXPLORER: "true",
 	VITE_FEATURE_CONSORTIUM_BRANDING: "true",
 	VITE_FEATURE_CONSORTIUM_SUPPORT_URL: "true",
@@ -35,22 +39,50 @@ const ALL_FEATURES: Record<string, string> = {
 	VITE_FEATURE_SYMPOSIA: "true",
 };
 
+/**
+ * Every feature flag this fixture knows about.
+ *
+ * Derived from the set above rather than listed again, so the "everything on" and
+ * "everything off" worlds can never disagree about which flags exist - which is exactly
+ * how the legacy fixture came to leave VITE_FEATURE_GUARDED_CLEANUP out.
+ */
+export const FEATURE_FLAG_KEYS: readonly string[] = Object.keys(
+	ALL_FEATURES,
+).filter((key) => key.startsWith("VITE_FEATURE_"));
+
+/**
+ * Every feature flag pinned OFF, for the 8.71.0 world.
+ *
+ * Pinned to "", never left absent. `readFlag` is `injected ?? import.meta.env[name]`,
+ * so a key missing from `window.__APP_ENV__` falls through to whatever the BUNDLE
+ * baked - and an e2e build on a developer machine bakes that developer's `.env`, which
+ * has to enable the 9.x flags for local work against a 9.x dcb-service. "" does not
+ * fall through, and reads as off.
+ */
+export const featuresOff = (): Record<string, string> =>
+	Object.fromEntries(FEATURE_FLAG_KEYS.map((key) => [key, ""]));
+
 /** Everything on, i.e. a deployment tracking dcb-service main and running Symposia. */
 export async function useAllFeatures(page: Page) {
 	await seedFeatures(page, ALL_FEATURES);
 }
 
 /**
- * The same deployment with named flags removed, for a spec about what their absence does.
+ * The same deployment with named flags off, for a spec about what their absence does.
  *
- * Removed, not set to "false": envsubst renders an unset variable as the empty string, so
- * absent is the shape a deployment that has never set it actually has.
+ * Set to "", not deleted. The key used to be removed, on the reasoning that envsubst
+ * renders an unset variable as the empty string so absent is the real shape of a deployment
+ * that never set it. That is true of the deployment and false of this test: `readFlag`
+ * is `injected ?? import.meta.env[name]`, so a removed key reads the value the bundle
+ * baked instead. It passed only because `.env` happens to carry
+ * VITE_FEATURE_SYMPOSIA=false; a developer who turns it on would have seen
+ * symposia-disabled.spec.ts fail with nothing wrong in the diff.
  */
 export async function useAllFeaturesExcept(page: Page, flags: string[]) {
 	const env = { ...ALL_FEATURES };
 	for (const flag of flags) {
 		if (!(flag in env)) throw new Error(`${flag} is not in ALL_FEATURES`);
-		delete env[flag];
+		env[flag] = "";
 	}
 
 	await seedFeatures(page, env);
@@ -61,6 +93,10 @@ async function seedFeatures(page: Page, env: Record<string, string>) {
 	// before any app script runs both sets the flags and spares the run a fetch of
 	// inject_env.json that the preview server does not answer.
 	await page.addInitScript((seeded) => {
-		window.__APP_ENV__ = seeded;
+		// A fixture seeds the subset a spec cares about, while the application's own
+		// type names every key a deployment can supply - so the cast is the
+		// difference between the two, not a looseness. Narrowing the app's type to
+		// make this assign would weaken the contract the app relies on.
+		window.__APP_ENV__ = seeded as NonNullable<typeof window.__APP_ENV__>;
 	}, env);
 }

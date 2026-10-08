@@ -1,0 +1,35 @@
+{
+	"_why": "Per-chunk gzipped budgets, checked by scripts/check-bundle-budget.mjs after a build. Lighthouse audits pages and so counts only what /login and /consortium/insights fetch; this reaches every chunk, including the ones no audited page touches. Numbers are what each chunk measured when the budget was added, plus 2% rounded up - enough that an ordinary edit does not fail the build, not enough to absorb a new dependency. Never raise one to make a build pass: docs/performance-budget.md.",
+	"nameChunksAboveBytes": 15000,
+	"totalBytes": 1685000,
+	"chunks": {
+		"exceljs.min.js": 281900,
+		"DataGrid.js": 218100,
+		"BarChartPro.js": 110000,
+		"application.js": 78700,
+		"createMultiInputRangeField.js": 68400,
+		"i18n.js": 50800,
+		"Stack.js": 43500,
+		"Link.js": 36300,
+		"lib.js": 35400,
+		"useInsightsView.js": 29100,
+		"rasterizeHTML.js": 27400,
+		"useThemeStore.css": 22200,
+		"react.js": 18800,
+		"main.js": 18500,
+		"schemas.js": 18400,
+		"axios.js": 19000,
+		"Match.js": 16000
+	},
+	"_notes": {
+		"totalBytes": "1,652,603 bytes gzipped across 384 chunks, measured 2026-10-07 on a VITE_PUBLIC_URL=/ build. For comparison on the same date: dcb-admin-for-libraries budgets 1,252,000 and the discovery UI 1,040,000. This application ships MUI X Premium's grid, charts AND pickers where those ship one grid, which is most of the difference - and is the number to aim at rather than to declare.",
+		"exceljs.min.js": "MUI X Premium's Excel export, a direct dependency of @mui/x-data-grid-premium, and 17% of everything this application ships. It was dead weight until the export menu began offering Excel (docs/mappings-export.md); it leaves entirely on DataGridPro, which is worth measuring against what Premium features the grids actually use. Both sibling repos record the same chunk and the same question.",
+		"DataGrid.js": "The Premium grid itself, on fifty mount sites.",
+		"BarChartPro.js": "x-charts-pro, reached only from Insights. Raised from 107500 to 110000 on 2026-10-08, re-derived from 107753 measured: +253 gzipped, 0.24%, for MUI X 9.13.0 -> 9.15.0. Two minor releases of a dependency this repository does not control and cannot bump alone - MUI X is pinned in lockstep with dcb-admin-for-libraries - so this is upstream drift rather than anything the application added. The previous number was measured+2% and two minors ate it. Still a candidate for React.lazy on the chart panels, which would move the chunk off the Insights critical path rather than shrink it.",
+		"rasterizeHTML.js": "Pulled in by the grid's print export. Not obviously load-bearing - worth checking whether print is reachable at all.",
+		"i18n.js": "The translation catalogue. i18n-unused reports 952 of 2,638 keys unused, ~34.5 KB, so this chunk is carrying about a third more than it needs to.",
+		"Stack.js": "@mui/material, named after whichever module anchors the chunk. A rename shows up here as one chunk unbudgeted and another no longer built, which is noisy but not wrong.",
+		"useThemeStore.css": "The application's stylesheet, including the @font-face rules. The name is the bundler's, derived from the module that anchors the chunk.",
+		"axios.js": "Raised from 17200 to 19000 on 2026-10-08, re-derived from 18591 measured: +1391 gzipped for axios 1.18.1 -> 1.20.0. That bump closes twelve advisories, and the four that matter in a browser are header injection via inherited headers and the prototype-pollution gadgets in the fetch adapter and toFormData - on the client that carries the bearer token to dcb-service. 1.4 KB for that is not a trade worth arguing about. The Node-adapter advisories in the same release (HTTP/2, NO_PROXY, createConnection) are not reachable from a browser and are not the reason."
+	}
+}

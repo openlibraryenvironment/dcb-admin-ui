@@ -1,0 +1,23 @@
+{
+	"dataChangeLog": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "9d2a5f81-3c64-4b09-8e75-6a1f3b8c4d90",
+				"entityId": "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+				"entityType": "library",
+				"actionInfo": "Updated",
+				"lastEditedBy": "ada@alpha.example",
+				"timestampLogged": "2026-09-30T10:14:00Z",
+				"reason": "Corrected the agency code",
+				"changeReferenceUrl": "https://example.invalid/ticket/1",
+				"changeCategory": "Data correction",
+				"changes": "{\"agencyCode\":\"alpha\"}"
+			}
+		],
+		"pageable": {
+			"number": 0,
+			"offset": 0
+		}
+	}
+}

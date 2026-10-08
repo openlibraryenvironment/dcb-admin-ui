@@ -103,15 +103,30 @@ export async function waitForDialogToSettle(page: Page) {
 	// rather than the Paper, so the Paper reports opacity 1 while everything inside it is
 	// still being composited at less than full opacity — which is why polling the Paper
 	// alone fixed nothing and the failure stayed intermittent.
+	//
+	// EVERY paper, not the first one. A confirmation opened over a dialog that is still
+	// mounted gives two, and `querySelector` returns whichever is first in the DOM - so
+	// this reported "settled" off the older, already-opaque dialog while the new one was
+	// mid-fade. That is the residual flake in cleanup.spec.ts's override journey: axe
+	// composited the confirmation's submit button against the backdrop and failed it on
+	// contrast, in roughly one run in three.
 	await expect
 		.poll(async () =>
 			page.evaluate(() => {
-				const paper = document.querySelector(".MuiDialog-paper");
-				if (!paper) return null;
+				const papers = Array.from(
+					document.querySelectorAll(".MuiDialog-paper"),
+				);
+				if (papers.length === 0) return null;
 
-				for (let node: Element | null = paper; node; node = node.parentElement) {
-					if (getComputedStyle(node).opacity !== "1") {
-						return "settling";
+				for (const paper of papers) {
+					for (
+						let node: Element | null = paper;
+						node;
+						node = node.parentElement
+					) {
+						if (getComputedStyle(node).opacity !== "1") {
+							return "settling";
+						}
 					}
 				}
 

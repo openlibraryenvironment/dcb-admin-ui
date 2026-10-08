@@ -48,7 +48,13 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	reporter: "html",
+	// html for a person, junit for CI - which otherwise had no machine-readable result
+	// at all, so a failure count had to be read out of a job log.
+	reporter: [
+		["html", { open: "never" }],
+		["junit", { outputFile: "test-results/junit.xml" }],
+		["list"],
+	],
 
 	/*
 	 * FOUR, not the default's 16 on this machine. All of them drive their own Chromium
@@ -110,7 +116,20 @@ export default defineConfig({
 			VITE_DCB_API_BASE: process.env.VITE_DCB_API_BASE || "",
 			VITE_DCB_SEARCH_BASE: process.env.VITE_DCB_SEARCH_BASE || "",
 			VITE_MUI_X_LICENSE_KEY: process.env.VITE_MUI_X_LICENSE_KEY || "",
+			// Arms the missing-translation collector in this build, so
+			// e2e/i18n-missing.spec.ts measures something. It only records to a page
+			// variable - i18next calls missingKeyHandler instead of the backend's own
+			// saveMissing, so nothing is posted. A build-time switch, deliberately: it
+			// cannot be turned on against a deployed artefact. docs/i18n.md.
+			VITE_I18N_REPORT_MISSING: "true",
 		},
-		timeout: 120_000,
+		// 600s, not 120s. The command is `npm run build && npm run preview`, and a cold
+		// `tsc && vite build` on this estate uses most of two minutes - so under any extra
+		// load the preview never started and EVERY spec failed against a dead port with
+		// "element(s) not found". 120 of 153 specs failing is a convincing impression of a
+		// broken application; `netstat` is the tell, with nothing LISTENING and only
+		// SYN_SENT. docs/testing.md. The timeout is not the thing being tested, so there is
+		// nothing to be gained by keeping it tight.
+		timeout: 600_000,
 	},
 });

@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
 	changedRowFields,
+	mutationFailureText,
 	readDeleteOutcome,
 	stripUnsupportedKeys,
 } from "@helpers/actions/entityMutationLogic";
 import { ENTITY_REGISTRY } from "@constants/entityRegistry";
 import { LIBRARY_BRAND_FIELDS } from "@constants/serviceCapabilities";
+
+/** Written once here so the expectations read as lines rather than as escapes. */
+const NEWLINE = "\n";
 
 describe("changedRowFields", () => {
 	it("sends only what changed", () => {
@@ -131,9 +135,7 @@ describe("stripUnsupportedKeys", () => {
 			reason: "Rebrand",
 		};
 
-		expect(
-			stripUnsupportedKeys(input, new Set(LIBRARY_BRAND_FIELDS)),
-		).toEqual({
+		expect(stripUnsupportedKeys(input, new Set(LIBRARY_BRAND_FIELDS))).toEqual({
 			id: "library-1",
 			fullName: "Riverside",
 			reason: "Rebrand",
@@ -154,5 +156,61 @@ describe("stripUnsupportedKeys", () => {
 	it("is a no-op when the deployment supports everything", () => {
 		const input = { id: "library-1", brandLogoUrl: "https://example.invalid" };
 		expect(stripUnsupportedKeys(input, new Set())).toEqual(input);
+	});
+});
+
+describe("mutationFailureText", () => {
+	const clientError = (...messages: string[]) => ({
+		// What graphql-request throws: the useful part is on `response.errors`, and
+		// `message` is the whole exchange serialised.
+		message: 'GraphQL Error: {"response":{"errors":[...]},"request":{...}}',
+		response: { errors: messages.map((message) => ({ message })) },
+	});
+
+	it("puts the server's reason under what the user was doing", () => {
+		expect(
+			mutationFailureText(
+				clientError(
+					"Field 'toCategory' is not defined by type UpdateReferenceValueMappingInput",
+				),
+				"The edit could not be completed.",
+			),
+		).toBe(
+			"The edit could not be completed." +
+				NEWLINE +
+				"Field 'toCategory' is not defined by type UpdateReferenceValueMappingInput",
+		);
+	});
+
+	it("keeps every reason when the server sent several", () => {
+		expect(mutationFailureText(clientError("one", "two"), "Summary")).toBe(
+			["Summary", "one", "two"].join(NEWLINE),
+		);
+	});
+
+	it("never shows a serialised exchange as the reason", () => {
+		// The whole point of describeGraphQLError: a ClientError with no parsed
+		// errors array must not have its JSON `message` shown to an administrator.
+		expect(
+			mutationFailureText(
+				{ message: 'GraphQL Error: {"response":{"status":500}}' },
+				"Summary",
+			),
+		).toBe("Summary");
+	});
+
+	it("shows a network failure's own message, which is readable", () => {
+		expect(mutationFailureText(new Error("Failed to fetch"), "Summary")).toBe(
+			"Summary" + NEWLINE + "Failed to fetch",
+		);
+	});
+
+	it("falls back to the summary alone when there is nothing to add", () => {
+		expect(mutationFailureText(undefined, "Summary")).toBe("Summary");
+		expect(mutationFailureText("boom", "Summary")).toBe("Summary");
+	});
+
+	it("does not repeat itself when the reason IS the summary", () => {
+		expect(mutationFailureText(new Error("Same"), "Same")).toBe("Same");
 	});
 });

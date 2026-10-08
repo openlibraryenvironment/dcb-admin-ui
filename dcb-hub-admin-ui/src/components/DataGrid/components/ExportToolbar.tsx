@@ -1,5 +1,6 @@
 import { generateFilterDescription } from "@helpers/dataGrid/utilities";
 import {
+	Check,
 	ChecklistRounded,
 	CleaningServicesRounded,
 	FileDownloadOutlined,
@@ -16,6 +17,7 @@ import {
 	ListItemText,
 	Menu,
 	MenuItem,
+	ListSubheader,
 	Tooltip,
 } from "@mui/material";
 import {
@@ -30,7 +32,7 @@ import {
 	useGridApiContext,
 	useGridSelector,
 } from "@mui/x-data-grid-premium";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 interface ExportToolbarProps {
@@ -43,6 +45,72 @@ interface ExportToolbarProps {
 	wizardEnabled?: boolean;
 	onOpenWizard?: () => void;
 	disableToolbarFilter?: boolean;
+}
+
+/**
+ * GridToolbarExportContainer clones every direct child with a `hideMenu` callback
+ * and does NOT wrap its onClick, so an item that does not call it leaves the menu
+ * open after downloading. These two types exist to make that decision explicit:
+ * choosing a format keeps the menu open, choosing a scope closes it.
+ */
+interface ExportMenuItemProps {
+	hideMenu?: () => void;
+}
+
+// Takes no `hideMenu` ON PURPOSE: choosing a format must leave the menu open so a
+// scope can follow in the same opening. Not destructuring it is what enforces that -
+// a test asserting it was not called could never fail.
+export function FormatMenuItem({
+	label,
+	selected,
+	selectedLabel,
+	onSelect,
+}: ExportMenuItemProps & {
+	label: string;
+	selected: boolean;
+	selectedLabel: string;
+	onSelect: () => void;
+}) {
+	return (
+		<MenuItem
+			onClick={onSelect}
+			selected={selected}
+			// The tick is painted, so it has to be in the accessible name too: a
+			// reader who cannot see it was told "CSV" either way. WCAG 1.3.1.
+			aria-label={selected ? selectedLabel : label}
+		>
+			<ListItemIcon>
+				{selected ? <Check fontSize="small" /> : null}
+			</ListItemIcon>
+			<ListItemText>{label}</ListItemText>
+		</MenuItem>
+	);
+}
+
+export function ScopeMenuItem({
+	hideMenu,
+	label,
+	icon,
+	disabled,
+	onRun,
+}: ExportMenuItemProps & {
+	label: string;
+	icon: ReactNode;
+	disabled?: boolean;
+	onRun: () => void;
+}) {
+	return (
+		<MenuItem
+			disabled={disabled}
+			onClick={() => {
+				onRun();
+				hideMenu?.();
+			}}
+		>
+			<ListItemIcon>{icon}</ListItemIcon>
+			<ListItemText>{label}</ListItemText>
+		</MenuItem>
+	);
 }
 
 export default function ExportToolbar({
@@ -68,9 +136,19 @@ export default function ExportToolbar({
 	};
 	const handleMenuClose = () => setAnchorEl(null);
 
-	// Every server grid exports TSV in three scopes: current (on-screen page),
-	// filtered (all rows matching the applied filters), and all (the whole
-	// dataset within the grid's base query).
+	/**
+	 * The format the three scope exports below use.
+	 *
+	 * It is STATE and it is shown, because the menu previously hardcoded "tsv" at
+	 * every call site: CSV survived only inside the export wizard, which defaults to
+	 * TSV as well, so a reader who wanted a CSV had no way to see that one existed.
+	 * Libraries reported exports "coming out as TSV" and could not say why.
+	 *
+	 * TSV stays the default, so nobody's saved workflow changes; what changes is that
+	 * the choice is visible and reachable in one click.
+	 */
+	const [format, setFormat] = useState<"csv" | "tsv">("tsv");
+
 	const onExportClick = (fileType: string, exportMode: string) => {
 		if (handleExport) {
 			handleExport(fileType, exportMode);
@@ -125,56 +203,73 @@ export default function ExportToolbar({
 			) : null}
 			{handleExport ? (
 				<GridToolbarExportContainer>
-					<MenuItem
-						onClick={() => onExportClick("tsv", "current")}
+					<ListSubheader>{t("ui.data_grid.export.format_group")}</ListSubheader>
+					<FormatMenuItem
+						label={t("ui.data_grid.export.format_csv")}
+						selected={format === "csv"}
+						selectedLabel={t("ui.data_grid.export.format_selected", {
+							format: t("ui.data_grid.export.format_csv"),
+						})}
+						onSelect={() => setFormat("csv")}
+					/>
+					<FormatMenuItem
+						label={t("ui.data_grid.export.format_tsv")}
+						selected={format === "tsv"}
+						selectedLabel={t("ui.data_grid.export.format_selected", {
+							format: t("ui.data_grid.export.format_tsv"),
+						})}
+						onSelect={() => setFormat("tsv")}
+					/>
+					<Divider />
+					<ListSubheader>{t("ui.data_grid.export.rows_group")}</ListSubheader>
+					<ScopeMenuItem
+						label={t("ui.data_grid.export.current")}
+						icon={<FileDownloadOutlined />}
 						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<FileDownloadOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export.current")}</ListItemText>
-					</MenuItem>
-					<MenuItem
-						onClick={() => onExportClick("tsv", "filtered")}
+						onRun={() => onExportClick(format, "current")}
+					/>
+					<ScopeMenuItem
+						label={t("ui.data_grid.export.filtered")}
+						icon={<FileDownloadOutlined />}
 						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<FileDownloadOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export.filtered")}</ListItemText>
-					</MenuItem>
-					<MenuItem
-						onClick={() => onExportClick("tsv", "all")}
-						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							{allDataLoading ? (
+						onRun={() => onExportClick(format, "filtered")}
+					/>
+					<ScopeMenuItem
+						label={t("ui.data_grid.export.all")}
+						icon={
+							allDataLoading ? (
 								<CircularProgress size={20} />
 							) : (
 								<FileDownloadOutlined />
-							)}
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.export.all")}</ListItemText>
-					</MenuItem>
+							)
+						}
+						disabled={allDataLoading}
+						onRun={() => onExportClick(format, "all")}
+					/>
+					<Divider />
+					{/* MUI X Premium's own workbook, and its exporter only sees the rows the
+					    grid holds - so the label says so rather than silently exporting one
+					    page of a dataset the reader asked for all of. docs/mappings-export.md */}
+					<ScopeMenuItem
+						label={t("ui.data_grid.export.excel")}
+						icon={<FileDownloadOutlined />}
+						onRun={() => onExportClick("excel", "current")}
+					/>
 					{wizardEnabled ? <Divider /> : null}
 					{wizardEnabled ? (
-						<MenuItem onClick={onOpenWizard}>
-							<ListItemIcon>
-								<TuneRounded />
-							</ListItemIcon>
-							<ListItemText>{t("ui.data_grid.export.wizard")}</ListItemText>
-						</MenuItem>
+						<ScopeMenuItem
+							label={t("ui.data_grid.export.wizard")}
+							icon={<TuneRounded />}
+							onRun={() => onOpenWizard?.()}
+						/>
 					) : null}
 					<Divider />
-					<MenuItem
-						onClick={() => onExportClick("tsv", "print")}
+					<ScopeMenuItem
+						label={t("ui.data_grid.print_current_page")}
+						icon={<PrintOutlined />}
 						disabled={allDataLoading}
-					>
-						<ListItemIcon>
-							<PrintOutlined />
-						</ListItemIcon>
-						<ListItemText>{t("ui.data_grid.print_current_page")}</ListItemText>
-					</MenuItem>
+						onRun={() => onExportClick(format, "print")}
+					/>
 				</GridToolbarExportContainer>
 			) : null}
 			{/* The Actions button appears only when the user actually has an action

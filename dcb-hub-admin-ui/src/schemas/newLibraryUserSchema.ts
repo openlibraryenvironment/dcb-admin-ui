@@ -17,7 +17,10 @@ import * as Yup from "yup";
  */
 
 /** The two roles this form may ask for. Matches the server's `ProvisionableRole` enum. */
-export const PROVISIONABLE_ROLES = ["LIBRARY_ADMIN", "LIBRARY_READ_ONLY"] as const;
+export const PROVISIONABLE_ROLES = [
+	"LIBRARY_ADMIN",
+	"LIBRARY_READ_ONLY",
+] as const;
 
 export type ProvisionableRole = (typeof PROVISIONABLE_ROLES)[number];
 
@@ -26,7 +29,8 @@ export interface NewLibraryUserFormData {
 	firstName: string;
 	lastName: string;
 	role: ProvisionableRole;
-	reason?: string;
+	/** Required, and prefilled - see defaultCreationReason. */
+	reason: string;
 	changeCategory?: string;
 	changeReferenceUrl?: string;
 }
@@ -76,7 +80,10 @@ export function buildNewLibraryUserSchema(t: Translate) {
 					field: t("libraries.accounts.role"),
 				}),
 			),
-		reason: Yup.string().trim().max(255).optional(),
+		reason: Yup.string()
+			.trim()
+			.max(255)
+			.required(t("data_change_log.reason_required")),
 		changeCategory: Yup.string().trim().max(100).optional(),
 		changeReferenceUrl: Yup.string().trim().max(200).optional(),
 	});

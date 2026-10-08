@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Button, Stack } from "@mui/material";
-import { GridRowModesModel, GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
@@ -14,6 +14,7 @@ import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutat
 import NewContact from "@forms/NewContact/NewContact";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useGridState } from "@hooks/useGridState";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { getConsortiumContacts } from "@queries/getConsortiumContacts";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
@@ -34,8 +35,19 @@ function Contacts() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const [showNewContact, setShowNewContact] = useState(false);
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const contactMutation = useEntityMutation("consortiumContact");
+
+	// The last grid in the app still holding row modes in a bare useState. That is why
+	// its paginationModel was an inline literal with no change handler: page 2 was
+	// unreachable, so a consortium with more than twenty contacts could not see them.
+	const {
+		paginationModel,
+		rowModesModel,
+		setRowModesModel,
+		onPaginationModelChange: handlePaginationChange,
+	} = useGridState("consortiumContacts", {
+		pagination: { page: 0, pageSize: 20 },
+	});
 
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadConsortiumContacts"],
@@ -111,7 +123,14 @@ function Contacts() {
 				canEdit: isAnAdmin,
 			}),
 		],
-		[rowModesModel, isAnAdmin, t, consortiumId, contactMutation],
+		[
+			rowModesModel,
+			setRowModesModel,
+			isAnAdmin,
+			t,
+			consortiumId,
+			contactMutation,
+		],
 	);
 
 	return (
@@ -158,7 +177,8 @@ function Contacts() {
 						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
-						paginationModel={{ page: 0, pageSize: 20 }}
+						paginationModel={paginationModel}
+						onPaginationModelChange={handlePaginationChange}
 						scrollbarVisible={false}
 						noResultsText={t("consortium.contacts.no_contacts")}
 						searchText=""

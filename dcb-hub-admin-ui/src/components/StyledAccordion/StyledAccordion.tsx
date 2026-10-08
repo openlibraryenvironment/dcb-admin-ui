@@ -9,8 +9,8 @@ import { styled } from "@mui/material/styles";
 // Define custom styles using styled()
 const StyledAccordion = styled(Accordion)(() => ({
 	borderBottom: "0px",
-	borderLeft: "0px",
-	borderRight: "0px",
+	borderInlineStart: "0px",
+	borderInlineEnd: "0px",
 	"&::before": {
 		display: "none",
 	},
@@ -36,7 +36,7 @@ const StyledDataGridAccordionSummary = styled(AccordionSummary)(
 			minHeight: "auto",
 		},
 		"& .MuiAccordionSummary-content": {
-			marginLeft: theme.spacing(1),
+			marginInlineStart: theme.spacing(1),
 		},
 	}),
 );

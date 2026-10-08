@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { provisionLibraryUser } from "@mutations/provisionLibraryUser";
 import {
@@ -74,6 +75,7 @@ export default function NewLibraryUser({
 			firstName: "",
 			lastName: "",
 			role: "LIBRARY_READ_ONLY",
+			reason: defaultCreationReason("libraries.accounts.one"),
 		},
 		// The narrower of the two roles by default. An account that can read but not
 		// change is the safer thing to create by accident.

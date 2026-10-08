@@ -215,6 +215,17 @@ export default [
 					message:
 						"window.open resolves a path against the origin root, outside the deployment base. Pass appUrl(path).",
 				},
+				// Physical CSS properties do not flip for a right-to-left language without
+				// emotion's stylis-plugin-rtl, which this application does not use. The 50
+				// call sites that existed were converted; this stops the next one, so the cost
+				// of supporting Arabic or Hebrew stays an icon-and-grid audit rather than a
+				// sweep of every `sx` in the tree. docs/right-to-left.md.
+				{
+					selector:
+						"Property[key.name=/^(marginLeft|marginRight|paddingLeft|paddingRight|borderLeft|borderRight|ml|mr|pl|pr)$/]",
+					message:
+						"Use the logical property: marginInlineStart/End, paddingInlineStart/End, borderInlineStart/End. A physical one does not flip in a right-to-left locale. docs/right-to-left.md.",
+				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",
 					message:

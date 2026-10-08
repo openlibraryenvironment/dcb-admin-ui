@@ -9,16 +9,19 @@ import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
+import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewLocation from "@forms/NewLocation/NewLocation";
 import Import from "@components/Import/Import";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
+import { useEntityMutation } from "@hooks/useEntityMutation";
 import useCode from "@hooks/useCode";
 
 import { getLocations } from "@queries/getLocations";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { defaultLocationColumns } from "@columns/locationColumns";
 import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
@@ -41,6 +44,8 @@ function LocationsRouteComponent() {
 	const isMinLibraryAdmin = isAnAdmin;
 
 	const gridId = "locations";
+
+	const locationMutation = useEntityMutation("location");
 
 	const {
 		paginationModel,
@@ -110,8 +115,29 @@ function LocationsRouteComponent() {
 	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
 
 	const columns: GridColDef[] = useMemo(
-		() => [...customColumns, ...defaultLocationColumns],
-		[customColumns],
+		() => [
+			...customColumns,
+			...defaultLocationColumns,
+			buildRowEditActionsColumn({
+				t,
+				rowModesModel,
+				setRowModesModel,
+				onDelete: (id, row) =>
+					locationMutation.requestDelete({
+						id: id as string,
+						name: row.name,
+					}),
+				canEdit: isAnAdmin,
+			}),
+		],
+		[
+			customColumns,
+			rowModesModel,
+			setRowModesModel,
+			isAnAdmin,
+			t,
+			locationMutation,
+		],
 	);
 
 	return (
@@ -171,6 +197,7 @@ function LocationsRouteComponent() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
+				processRowUpdate={locationMutation.requestGridEdit}
 				rowSelection
 				exportConfig={{
 					query: getLocations,
@@ -213,6 +240,8 @@ function LocationsRouteComponent() {
 			{showImport && (
 				<Import show={showImport} onClose={closeImport} type="Locations" />
 			)}
+
+			<EntityMutationDialogs {...locationMutation.dialogProps} />
 		</PageContainer>
 	);
 }

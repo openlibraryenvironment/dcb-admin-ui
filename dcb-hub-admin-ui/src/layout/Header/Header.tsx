@@ -212,7 +212,7 @@ export default function Header({
 								aria-controls="main-sidebar-nav"
 								onClick={onMenuClick}
 								sx={{
-									mr: 2,
+									marginInlineEnd: 2,
 									color: "primary.headerText",
 									":hover": { backgroundColor: "primary.headerHover" },
 									":active": { backgroundColor: "primary.headerActive" },
@@ -238,7 +238,7 @@ export default function Header({
 							color: "primary.headerText",
 							fontWeight: "bold",
 							flexGrow: 1,
-							pl: 2,
+							paddingInlineStart: 2,
 						}}
 					>
 						{pageTitle}

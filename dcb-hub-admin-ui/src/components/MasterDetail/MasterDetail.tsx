@@ -155,11 +155,11 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								<Typography variant="attributeTitle">
 									{t("search.identifiers")}
 								</Typography>
-								<List sx={{ pl: 0, ml: 0 }} dense disablePadding>
+								<List sx={{ paddingInlineStart: 0, marginInlineStart: 0 }} dense disablePadding>
 									{row?.canonicalMetadata?.identifiers?.map(
 										(id: { namespace: string; value: string }) => (
 											<ListItem
-												sx={{ pl: 0 }}
+												sx={{ paddingInlineStart: 0 }}
 												key={`${id.namespace}-${id.value}`}
 												disablePadding
 											>

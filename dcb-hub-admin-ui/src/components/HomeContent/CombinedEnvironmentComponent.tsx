@@ -305,7 +305,7 @@ export default function CombinedEnvironmentComponent() {
 										>
 											<Typography
 												component="span"
-												sx={{ fontWeight: "bold", mr: 1 }}
+												sx={{ fontWeight: "bold", marginInlineEnd: 1 }}
 											>
 												{t("requesting.global_limit")}
 											</Typography>
@@ -323,7 +323,7 @@ export default function CombinedEnvironmentComponent() {
 										>
 											<Typography
 												component="span"
-												sx={{ fontWeight: "bold", mr: 1 }}
+												sx={{ fontWeight: "bold", marginInlineEnd: 1 }}
 											>
 												{t("requesting.global_tracking")}
 											</Typography>
@@ -351,7 +351,7 @@ export default function CombinedEnvironmentComponent() {
 												>
 													<Typography
 														component="span"
-														sx={{ fontWeight: "bold", mr: 1 }}
+														sx={{ fontWeight: "bold", marginInlineEnd: 1 }}
 													>
 														{key}:
 													</Typography>

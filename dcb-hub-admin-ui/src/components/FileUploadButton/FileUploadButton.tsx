@@ -52,7 +52,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						<CircularProgress
 							color="inherit"
 							size={13}
-							sx={{ marginLeft: "10px" }}
+							sx={{ marginInlineStart: "10px" }}
 						/>
 					) : null}
 					{buttonText}

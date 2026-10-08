@@ -105,10 +105,3 @@ export const rowClickRedirects: Partial<
 	refusedCleanupRequests: (id) => `/patronRequests/${id}`,
 	skippedCleanupRequests: (id) => `/patronRequests/${id}`,
 };
-
-// Types of data grid where we show the actions menu to the user.
-export const actionsTypes: readonly DataGridType[] = [
-	"locations",
-	"referenceValueMappings",
-	"numericRangeMappings",
-];

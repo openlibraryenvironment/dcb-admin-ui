@@ -27,6 +27,7 @@ import {
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import { mappingsCategoryConverter } from "@helpers/mappingsCategoryConverter";
 import {
 	canonicalItemTypes,
@@ -43,7 +44,8 @@ interface NewMappingFormData {
 	fromValue: string;
 	fromContext: string;
 	fromCategory: string;
-	reason?: string;
+	/** Required, and prefilled - see defaultCreationReason. */
+	reason: string;
 	changeCategory?: string;
 	changeReferenceUrl?: string;
 }
@@ -112,6 +114,7 @@ export default function NewMapping({
 	}
 
 	const validationSchema = Yup.object().shape({
+		reason: Yup.string().trim().required(t("data_change_log.reason_required")),
 		fromCategory: Yup.string()
 			.required(
 				t("ui.validation.required", { field: t("mappings.new.from_category") }),
@@ -248,7 +251,7 @@ export default function NewMapping({
 			fromValue: "",
 			fromCategory: category,
 			fromContext: category === "Location" ? hostLmsCode : "",
-			reason: "",
+			reason: defaultCreationReason("mappings.ref_value_one"),
 			changeCategory: "",
 			changeReferenceUrl: "",
 		},

@@ -418,7 +418,9 @@
 		"table_name": "Database table name",
 		"timestamp": "Timestamp",
 		"user": "User",
-		"summary_table_aria": "Summary of the changes to be made"
+		"summary_table_aria": "Summary of the changes to be made",
+		"reason_default": "Adding new {{entity}}",
+		"reason_completing_setup": "Completing library setup"
 	},
 	"environment": {
 		"your": "Your $t(app.dcb) environment",
@@ -1645,7 +1647,8 @@
 				"success": "The account was created and an invitation sent for {{library}}.",
 				"error_title": "Account not created",
 				"error": "The account could not be created. {{error}}"
-			}
+			},
+			"one": "Account"
 		},
 		"requires_consortium": "Set up your consortium first — a library has to belong to one.",
 		"brand": {
@@ -1725,7 +1728,11 @@
 			"title_no_library": "Add new location",
 			"helper_text": "Manually add a single pickup location to the system.",
 			"pickup_anywhere_disable": "Disable pickup anywhere",
-			"pickup_anywhere_enable": "Enable pickup anywhere"
+			"pickup_anywhere_enable": "Enable pickup anywhere",
+			"library": "Library",
+			"library_helper": "The location is created against this library's agency.",
+			"host_lms": "Host LMS",
+			"host_lms_helper": "This library runs two Host LMS systems. Choose the one that holds this location."
 		},
 		"no_results": "No locations were found. Try changing your search terms or filters.",
 		"no_rows": "No locations available. If you're expecting data to be here, please refresh the page.",
@@ -2746,6 +2753,12 @@
 				"current": "Current page",
 				"filtered": "Filtered results",
 				"all": "All (whole dataset)",
+				"format_group": "Format",
+				"format_csv": "CSV (comma separated)",
+				"format_tsv": "TSV (tab separated)",
+				"format_selected": "{{format}}, selected",
+				"rows_group": "Rows",
+				"excel": "Excel (current page)",
 				"wizard": "Export wizard (choose columns)…",
 				"wizard_title": "Export data",
 				"columns": "Columns to include",

@@ -14,13 +14,18 @@ export const referenceValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 		editable: false,
 	},
 	{
+		// Filterable because the server can filter on it: processGridFilterModel
+		// builds a field-agnostic `field:value` Lucene clause, and Upload.tsx
+		// already queries `fromContext:` directly. Without it the consortium-wide
+		// mappings grid could not be narrowed to one library at all - so there was
+		// no way to export one library's mappings from it.
 		field: "fromContext",
 		headerName: "From context",
 		minWidth: 50,
 		flex: 0.5,
-		filterable: false,
 		sortable: false,
 		editable: false,
+		filterOperators: standardFilters,
 	},
 	{
 		field: "fromValue",
@@ -32,13 +37,18 @@ export const referenceValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 		editable: false,
 	},
 	{
+		// Filterable because the server can filter on it: processGridFilterModel
+		// builds a field-agnostic `field:value` Lucene clause, and Upload.tsx
+		// already queries `fromContext:` directly. Without it the consortium-wide
+		// mappings grid could not be narrowed to one library at all - so there was
+		// no way to export one library's mappings from it.
 		field: "toContext",
 		headerName: "To context",
 		minWidth: 50,
 		flex: 0.5,
-		filterable: false,
 		sortable: false,
 		editable: false,
+		filterOperators: standardFilters,
 	},
 	{
 		field: "toValue",
@@ -72,7 +82,11 @@ export const referenceValueMappingColumnsNoCategoryFilter: GridColDef[] = [
 		minWidth: 50,
 		flex: 0.5,
 		filterOperators: standardFilters,
-		editable: true,
+		// NOT editable: UpdateReferenceValueMappingInput takes toValue and nothing
+		// else, on every dcb-service from 8.71.0 to the target schema. Row editing
+		// sends every changed field together, so offering this one failed the whole
+		// mutation and took the toValue edit beside it down as well.
+		editable: false,
 		sortable: true,
 		valueGetter: (value: string, row: { toCategory: string }) =>
 			row?.toCategory,

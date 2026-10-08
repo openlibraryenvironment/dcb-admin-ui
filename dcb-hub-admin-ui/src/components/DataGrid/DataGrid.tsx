@@ -5,6 +5,9 @@ import {
 	GridColDef,
 	GridColumnVisibilityModel,
 	GridEventListener,
+	GridValidRowModel,
+	GridRowModes,
+	GRID_DETAIL_PANEL_TOGGLE_FIELD,
 	GridExpandLessIcon,
 	GridExpandMoreIcon,
 	GridRowSelectionModel,
@@ -14,6 +17,8 @@ import { RefObject, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
+import { withRowLink } from "@helpers/dataGrid/withRowLink";
+import { resolveRowClickPath } from "@helpers/dataGrid/resolveRowClickPath";
 import { SxProps, Theme } from "@mui/material";
 import ExportToolbar from "./components/ExportToolbar";
 import ExportWizard from "./components/ExportWizard";
@@ -57,6 +62,16 @@ declare module "@mui/x-data-grid-premium" {
 	}
 }
 const IMMUTABLE_FALLBACK_MODES = {};
+/**
+ * One empty array for every grid that has no rows yet.
+ *
+ * `rows={data?.thing?.content ?? []}` is a NEW array on every render, and MUI treats a
+ * new rows identity as new rows: it re-runs its rows pipeline and remounts selection
+ * state. routes/libraries/index.tsx found that and declared its own module-scope
+ * constant; 33 other grids kept the inline literal. Normalised here so no caller has to
+ * remember - the same reason IMMUTABLE_FALLBACK_MODES above exists.
+ */
+const EMPTY_ROWS: readonly GridValidRowModel[] = [];
 interface CustomDataGridProps extends Omit<
 	DataGridPremiumProps,
 	"sx" | "checkboxSelection"
@@ -123,17 +138,26 @@ export default function DataGrid({
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
+	// See EMPTY_ROWS. `rows` is typed as required by MUI, so the length check also
+	// covers a caller that passes undefined through an `any`-typed path.
+	const stableRows = rows?.length ? rows : EMPTY_ROWS;
 	const navigate = useNavigate();
-	// A server-filtered grid can only offer the operators buildFilterQuery knows
-	// how to turn into Lucene. Enforced here rather than per column definition,
-	// so a new column cannot quietly ship a filter the backend never answers.
-	const columns = useMemo(
-		() =>
+	// Two things every grid needs, enforced here rather than per column
+	// definition so a new grid cannot quietly ship without them.
+	//
+	// 1. A server-filtered grid can only offer the operators buildFilterQuery
+	//    knows how to turn into Lucene.
+	// 2. A routing grid's leading cell is the row's LINK. onRowClick is a
+	//    pointer event and MUI X does not raise it for Enter, so without this
+	//    every detail page in the application is mouse-only - WCAG 2.1.1,
+	//    Level A. The axe gate cannot see it; e2e/grid-keyboard.spec.ts can.
+	const columns = useMemo(() => {
+		const constrained =
 			rest.filterMode === "server"
 				? constrainToServerOperators(rest.columns as GridColDef[])
-				: rest.columns,
-		[rest.columns, rest.filterMode],
-	);
+				: (rest.columns as GridColDef[]);
+		return withRowLink(constrained, type);
+	}, [rest.columns, rest.filterMode, type]);
 	const [alert, setAlert] = useState<any>({
 		open: false,
 		severity: "success",
@@ -226,6 +250,36 @@ export default function DataGrid({
 			navigate,
 		});
 	};
+
+	/**
+	 * Enter on the focused cell, which is the keyboard counterpart of the row
+	 * click above.
+	 *
+	 * MUI X raises cellKeyDown for a keypress and NEVER rowClick, so the pointer
+	 * path and the keyboard path did not agree: a keyboard user could reach a row
+	 * and not open it. WCAG 2.1.1, Level A.
+	 *
+	 * A public prop, deliberately, rather than anything resting on how GridCell
+	 * moves focus into a cell's children - see the note in withRowLink.tsx.
+	 */
+	const handleCellKeyDown: GridEventListener<"cellKeyDown"> = (
+		params,
+		event,
+	) => {
+		if (event.key !== "Enter") return;
+		// A modifier means something else: ctrl/cmd is open-in-new-tab, which the
+		// anchor already does, and shift/alt are not ours.
+		if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey)
+			return;
+		// The detail-panel toggle owns Enter on its own cell and expands the row.
+		if (params.field === GRID_DETAIL_PANEL_TOGGLE_FIELD) return;
+		// Mid-edit Enter commits the row; it must not also navigate away from it.
+		if (rowModesModel?.[params.id]?.mode === GridRowModes.Edit) return;
+
+		const target = resolveRowClickPath(type, String(params.id));
+		if (!target) return;
+		navigate({ to: target });
+	};
 	const handleSelectionChange = useCallback(
 		(newSelection: GridRowSelectionModel, details: any) => {
 			setSelectionModel(newSelection);
@@ -240,11 +294,14 @@ export default function DataGrid({
 			<DataGridPremium
 				{...rest}
 				columns={columns}
-				rows={rows}
+				rows={stableRows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
 				loading={loading}
-				pageSizeOptions={[5, 10, 15, 20, 25, 50, 100, 200]}
+				// 100 is the ceiling: the scale constants cap a single UI interaction at
+				// 100 rows, always paged. 200 was above it, and a page size is sticky -
+				// one choice becomes every later request for that grid.
+				pageSizeOptions={[5, 10, 15, 20, 25, 50, 100]}
 				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}
@@ -260,6 +317,7 @@ export default function DataGrid({
 				rowSelectionModel={selectionModel}
 				onRowSelectionModelChange={handleSelectionChange}
 				onRowClick={handleRowClick}
+				onCellKeyDown={handleCellKeyDown}
 				onCellDoubleClick={(params, event) => {
 					event.defaultMuiPrevented = true;
 				}}
@@ -280,9 +338,14 @@ export default function DataGrid({
 				onProcessRowUpdateError={(error: any) => {
 					console.error("Error updating row:", error);
 
-					// Whatever is throwing the error must include the row name for us to grab it here
-
-					const name = error?.rowName || t("ui.data_grid.this_item");
+					// `rowName` is how a caller ASKS for this alert, and the only caller
+					// that does is OperatingWelcome - it owns its own mutation, has no
+					// alert of its own, and throws `{ message, rowName }` for exactly
+					// this. Every other grid goes through useEntityMutation, which has
+					// already shown the failure WITH the server's reason in it. Two open
+					// Snackbars anchor to the same corner, so announcing here as well
+					// covered that reason with this generic line.
+					if (!error?.rowName) return;
 
 					setAlert({
 						open: true,
@@ -294,7 +357,7 @@ export default function DataGrid({
 									: type === "numericRangeMappings"
 										? t("mappings.num_range_one").toLowerCase()
 										: type?.toLowerCase(),
-							name: name,
+							name: error.rowName,
 						}),
 					});
 				}}
@@ -318,6 +381,9 @@ export default function DataGrid({
 					toolbar: {
 						showQuickFilter: false,
 						handleExport, // three-scope server export (or legacy onExport)
+						// Suppresses MUI's OWN Excel menu item, not the api method behind it:
+						// ExportToolbar offers Excel itself and calls exportDataAsExcel
+						// directly, so without this the menu would carry two of them.
 						excelOptions: { disableToolbarButton: true },
 						allDataLoading: exportConfig
 							? exportProgress.isExporting

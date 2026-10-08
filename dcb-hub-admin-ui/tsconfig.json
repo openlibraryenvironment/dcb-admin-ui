@@ -36,5 +36,9 @@
 		"noEmit": true,
 		"jsx": "react-jsx"
 	},
-	"include": ["src", "src/vite-env.d.ts", "types/**/*.d.ts"]
+	// e2e is type-checked too. It was not, so `tsc --noEmit` passed over 40 spec
+	// files and a spec with a missing import was only caught by a five-minute
+	// Playwright run - which is how it was found. Two errors existed when this was
+	// added, both real.
+	"include": ["src", "src/vite-env.d.ts", "types/**/*.d.ts", "e2e"]
 }

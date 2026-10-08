@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+	Autocomplete,
 	Box,
 	Button,
 	Dialog,
@@ -22,8 +23,15 @@ import {
 
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { getILS } from "@helpers/getILS";
 import { getLocalId } from "@helpers/getLocalId";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import { createLocation } from "@mutations/createLocation";
+import { entityOwnsQueryKey } from "@constants/entityRegistry";
+import {
+	locationLibraryOptionsQuery,
+	type LocationLibraryOption,
+} from "@/queryOptions/libraries";
 import type { CreateLocationMutationVariables } from "@generated/graphql";
 
 interface NewLocationFormData {
@@ -36,18 +44,35 @@ interface NewLocationFormData {
 	printLabel?: string;
 	localId?: string;
 	deliveryStops?: string;
-	reason?: string;
+	/** Required, and prefilled - see defaultCreationReason. */
+	reason: string;
 	changeReferenceUrl?: string;
 	changeCategory?: string;
+}
+
+/**
+ * Where a new location goes: the agency and Host LMS that own it, and the ILS whose
+ * rules its localId must satisfy.
+ *
+ * A library's own Locations tab knows all three and passes them. The consortium-wide
+ * locations page knows none of them, so it asks here - it cannot simply leave them
+ * empty, because `agencyCode: ""` satisfies `String!` and is then an agency code the
+ * server cannot resolve, which fails the create with no indication of why.
+ */
+interface LocationScope {
+	agencyCode: string;
+	hostLmsCode: string;
+	ils: string;
 }
 
 type NewLocationFormType = {
 	show: boolean;
 	onClose: () => void;
-	hostLmsCode: string;
-	ils: string;
-	agencyCode: string;
-	libraryName: string;
+	/** Omit (or pass empty) to have the dialog ask for a library. */
+	hostLmsCode?: string;
+	ils?: string;
+	agencyCode?: string;
+	libraryName?: string;
 	type: string;
 	onCreated?: () => void;
 };
@@ -60,11 +85,11 @@ interface ServerError {
 export default function NewLocation({
 	show,
 	onClose,
-	hostLmsCode,
-	agencyCode,
-	libraryName,
+	hostLmsCode = "",
+	agencyCode = "",
+	libraryName = "",
 	type,
-	ils,
+	ils = "",
 	onCreated,
 }: NewLocationFormType) {
 	const { t } = useTranslation();
@@ -76,6 +101,35 @@ export default function NewLocation({
 		severity: "success",
 		text: "",
 	});
+
+	// Both codes, not either: the mutation needs both, and a caller that has one
+	// without the other has not scoped this dialog.
+	const scopedByCaller = !!agencyCode && !!hostLmsCode;
+
+	const [library, setLibrary] = useState<LocationLibraryOption | null>(null);
+	const [chosenHostLmsCode, setChosenHostLmsCode] = useState("");
+
+	const { data: libraryOptions = [], isLoading: librariesLoading } = useQuery({
+		...locationLibraryOptionsQuery(gqlClient),
+		enabled: show && !scopedByCaller,
+	});
+
+	const hostLmsChoices = library?.hostLms ?? [];
+	const hostLms =
+		hostLmsChoices.length === 1
+			? hostLmsChoices[0]
+			: hostLmsChoices.find((option) => option.code === chosenHostLmsCode);
+
+	const scope: LocationScope = scopedByCaller
+		? { agencyCode, hostLmsCode, ils }
+		: {
+				agencyCode: library?.agencyCode ?? "",
+				hostLmsCode: hostLms?.code ?? "",
+				ils: hostLms ? getILS(hostLms.lmsClientClass) : "",
+			};
+
+	/** The library this location will belong to, however the dialog came to know it. */
+	const scopeName = libraryName || library?.label || "";
 
 	const validationSchema = Yup.object().shape({
 		code: Yup.string()
@@ -140,7 +194,10 @@ export default function NewLocation({
 			)
 			.min(-180)
 			.max(180),
-		reason: Yup.string().max(100),
+		reason: Yup.string()
+			.trim()
+			.max(100)
+			.required(t("data_change_log.reason_required")),
 		changeCategory: Yup.string().max(200),
 		changeReferenceUrl: Yup.string().url(t("ui.data_grid.edit_url")).max(200),
 		isPickup: Yup.boolean().required(),
@@ -194,13 +251,14 @@ export default function NewLocation({
 		setError,
 		getValues,
 		setValue,
+		clearErrors,
 	} = useForm<NewLocationFormData>({
 		defaultValues: {
 			code: "",
 			name: "",
 			printLabel: "",
 			deliveryStops: "",
-			reason: "",
+			reason: defaultCreationReason("locations.location_one"),
 			localId: "",
 			changeCategory: "Location creation",
 			changeReferenceUrl: "",
@@ -211,8 +269,21 @@ export default function NewLocation({
 		},
 		resolver: yupResolver(validationSchema) as any,
 		mode: "onChange",
-		context: { ils },
+		context: { ils: scope.ils },
 	});
+
+	/**
+	 * A localId identifies this location within ONE Host LMS, so one typed for the
+	 * previous system is not a value for this one.
+	 *
+	 * Cleared, not re-validated: react-hook-form reads `context` from `_options`, which
+	 * in a change handler still holds the ILS of the render that called it, so
+	 * `trigger` would check the new value against the old system's rules.
+	 */
+	const clearLocalIdForNewHostLms = () => {
+		setValue("localId", "", { shouldDirty: false });
+		clearErrors("localId");
+	};
 
 	const { mutateAsync: createNewLocation, isPending } = useMutation({
 		mutationFn: (variables: { input: any }) =>
@@ -220,22 +291,30 @@ export default function NewLocation({
 				createLocation,
 				variables,
 			),
-		// The locations grid keys on ["locations", gridId, pagination, sort, filter], and
-		// TanStack matches key prefixes, so this refreshes every locations grid and
-		// nothing else. The previous bare invalidateQueries() also re-fired libraries,
-		// patron requests, host LMS and insights on every location created.
-		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["locations"] }),
+		// The registry decides which cached queries a location appears in, exactly as it
+		// does for an edit or a delete. A literal ["locations"] key missed the library
+		// tab's grid entirely - it keys on `libraryLocations-${libraryId}`, and TanStack
+		// matches an array PREFIX - so a location created there never appeared.
+		onSuccess: () =>
+			queryClient.invalidateQueries({
+				predicate: (query) => entityOwnsQueryKey("location", query.queryKey),
+			}),
 	});
 
 	const onSubmit = async (data: NewLocationFormData) => {
 		try {
 			await createNewLocation({
-				input: { ...data, agencyCode, hostLmsCode, type },
+				input: {
+					...data,
+					agencyCode: scope.agencyCode,
+					hostLmsCode: scope.hostLmsCode,
+					type,
+				},
 			});
 			setAlert({
 				open: true,
 				severity: "success",
-				text: t("locations.new.success", { name: libraryName }),
+				text: t("locations.new.success", { name: scopeName }),
 			});
 			onCreated?.();
 			setTimeout(() => {
@@ -253,7 +332,7 @@ export default function NewLocation({
 				setAlert({
 					open: true,
 					severity: "error",
-					text: t("locations.new.error.generic", { name: libraryName }),
+					text: t("locations.new.error.generic", { name: scopeName }),
 				});
 			}
 		}
@@ -265,8 +344,8 @@ export default function NewLocation({
 				<DialogTitle variant="modalTitle">
 					{/* Opened from the consortium-wide locations page there is no library,
 					    and the interpolated title degraded to "Add new location for". */}
-					{libraryName
-						? t("locations.new.title", { name: libraryName })
+					{scopeName
+						? t("locations.new.title", { name: scopeName })
 						: t("locations.new.title_no_library")}
 				</DialogTitle>
 				<Divider aria-hidden="true" />
@@ -276,6 +355,66 @@ export default function NewLocation({
 						onSubmit={handleSubmit(onSubmit)}
 						sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
 					>
+						{/* Only when the caller could not say. A library's own Locations tab
+						    already knows its agency and Host LMS, and asking again there
+						    would let an administrator file a location under a library whose
+						    page they are not on. */}
+						{!scopedByCaller && (
+							<Autocomplete
+								options={libraryOptions}
+								loading={librariesLoading}
+								value={library}
+								onChange={(_event, selected) => {
+									setLibrary(selected);
+									// A code from the previous library is not a choice about
+									// this one.
+									setChosenHostLmsCode("");
+									clearLocalIdForNewHostLms();
+								}}
+								getOptionLabel={(option) => option.label}
+								isOptionEqualToValue={(option, current) =>
+									option.id === current.id
+								}
+								renderInput={(inputParams) => (
+									<TextField
+										{...inputParams}
+										label={t("locations.new.library")}
+										required
+										helperText={t("locations.new.library_helper")}
+									/>
+								)}
+							/>
+						)}
+
+						{/* One Host LMS needs no question; two do, and which one holds the
+						    location decides whether its localId is required and in what
+						    shape. */}
+						{!scopedByCaller && hostLmsChoices.length > 1 && (
+							<FormControl fullWidth required>
+								<InputLabel id="new-location-host-lms-label">
+									{t("locations.new.host_lms")}
+								</InputLabel>
+								<Select
+									labelId="new-location-host-lms-label"
+									label={t("locations.new.host_lms")}
+									value={chosenHostLmsCode}
+									onChange={(event) => {
+										setChosenHostLmsCode(event.target.value);
+										clearLocalIdForNewHostLms();
+									}}
+								>
+									{hostLmsChoices.map((option) => (
+										<MenuItem key={option.code} value={option.code}>
+											{option.code} ({getILS(option.lmsClientClass)})
+										</MenuItem>
+									))}
+								</Select>
+								<FormHelperText>
+									{t("locations.new.host_lms_helper")}
+								</FormHelperText>
+							</FormControl>
+						)}
+
 						<Controller
 							name="name"
 							control={control}
@@ -341,8 +480,13 @@ export default function NewLocation({
 							render={({ field }) => (
 								<TextField
 									{...field}
-									label={t(getLocalId(ils))}
-									required={ils !== "Sierra"}
+									label={t(getLocalId(scope.ils))}
+									// The two ILSs whose localId the schema above actually
+									// requires. `!== "Sierra"` marked it required for Alma,
+									// Koha and an unrecognised client class as well, where
+									// nothing enforces it - an asterisk promising a rule that
+									// does not exist.
+									required={scope.ils === "FOLIO" || scope.ils === "Polaris"}
 									error={!!errors.localId}
 									helperText={errors.localId?.message}
 								/>
@@ -441,7 +585,13 @@ export default function NewLocation({
 					<Box sx={{ flex: 1 }} />
 					<Button
 						variant="contained"
-						disabled={!isValid || !isDirty || isPending}
+						disabled={
+							!isValid ||
+							!isDirty ||
+							isPending ||
+							!scope.agencyCode ||
+							!scope.hostLmsCode
+						}
 						onClick={handleSubmit(onSubmit)}
 					>
 						{isPending ? t("ui.actions.submitting") : t("locations.new.button")}

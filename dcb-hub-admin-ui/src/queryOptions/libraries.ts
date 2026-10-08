@@ -91,3 +91,60 @@ export const borrowingLibraryOptionsQuery = (gqlClient: GraphQLClient) =>
 				.filter((library: any) => library.agency?.isBorrowingAgency === true)
 				.map(toLibraryOption),
 	});
+
+/** One of a library's Host LMS systems, and the client class that names its ILS. */
+export interface LocationHostLmsOption {
+	code: string;
+	lmsClientClass: string;
+}
+
+export interface LocationLibraryOption {
+	label: string;
+	id: string;
+	agencyCode: string;
+	/**
+	 * One entry, or two for a library running a second Host LMS. A location belongs
+	 * to exactly one of them, and which one decides whether its localId is required
+	 * and in what shape - so a library with two has to be asked about.
+	 */
+	hostLms: LocationHostLmsOption[];
+}
+
+/**
+ * The library picker for creating a location away from a library's own page.
+ *
+ * A second select over the one cached query rather than an option on toLibraryOption,
+ * which carries no client CLASS - the thing getILS needs to decide a localId's rules.
+ *
+ * Libraries with no agency, or no Host LMS on it, are dropped: a location is created
+ * against both codes, so one missing either can only produce a refused request.
+ */
+export const locationLibraryOptionsQuery = (gqlClient: GraphQLClient) =>
+	queryOptions({
+		...allLibrariesQuery(gqlClient),
+		select: (data: any): LocationLibraryOption[] =>
+			(data?.libraries?.content ?? [])
+				.filter(
+					(library: any) =>
+						!!library.agencyCode && !!library.agency?.hostLms?.code,
+				)
+				.map((library: any) => ({
+					label: library.fullName,
+					id: library.id,
+					agencyCode: library.agencyCode,
+					hostLms: [
+						{
+							code: library.agency.hostLms.code,
+							lmsClientClass: library.agency.hostLms.lmsClientClass,
+						},
+						...(library.secondHostLms?.code
+							? [
+									{
+										code: library.secondHostLms.code,
+										lmsClientClass: library.secondHostLms.lmsClientClass,
+									},
+								]
+							: []),
+					],
+				})),
+	});

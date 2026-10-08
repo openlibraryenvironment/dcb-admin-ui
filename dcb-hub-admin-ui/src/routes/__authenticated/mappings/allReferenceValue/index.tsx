@@ -8,6 +8,7 @@ import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
+import { MAPPING_IMPORT_COLUMNS } from "@constants/mappingImportContract";
 import Import from "@components/Import/Import";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import NewMapping from "@forms/NewMapping/NewMapping";
@@ -178,6 +179,7 @@ function ReferenceValueMappingsRoute() {
 				exportConfig={{
 					query: getMappings,
 					coreType: "referenceValueMappings",
+					roundTrip: MAPPING_IMPORT_COLUMNS.referenceValueMappings,
 					baseQuery: "(fromContext: * AND NOT deleted:true)",
 					wizard: true,
 				}}

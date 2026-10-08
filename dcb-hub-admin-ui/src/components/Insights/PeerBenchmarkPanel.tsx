@@ -146,7 +146,7 @@ export default function PeerBenchmarkPanel({
 															variant="caption"
 															component="span"
 															color="text.secondary"
-															sx={{ ml: 1 }}
+															sx={{ marginInlineStart: 1 }}
 														>
 															{row.libraryCode}
 														</Typography>
@@ -155,7 +155,7 @@ export default function PeerBenchmarkPanel({
 														<Typography
 															variant="caption"
 															component="span"
-															sx={{ ml: 1 }}
+															sx={{ marginInlineStart: 1 }}
 														>
 															{t("insights.charts.peer_benchmark.your_library")}
 														</Typography>

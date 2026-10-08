@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { createConsortiumContact } from "@mutations/createConsortiumContact";
 import { createLibraryContact } from "@mutations/createLibraryContact";
@@ -33,7 +34,8 @@ interface NewContactFormData {
 	email: string;
 	role: string;
 	isPrimaryContact?: boolean;
-	reason?: string;
+	/** Required, and prefilled - see defaultCreationReason. */
+	reason: string;
 	changeCategory?: string;
 	changeReferenceUrl?: string;
 }
@@ -68,6 +70,7 @@ export default function NewContact({
 	});
 
 	const validationSchema = Yup.object().shape({
+		reason: Yup.string().trim().required(t("data_change_log.reason_required")),
 		firstName: Yup.string()
 			.trim()
 			.required(
@@ -115,7 +118,7 @@ export default function NewContact({
 			lastName: "",
 			email: "",
 			role: "",
-			reason: "",
+			reason: defaultCreationReason("libraries.contacts.one"),
 			changeCategory: "",
 			isPrimaryContact: false,
 			changeReferenceUrl: "",

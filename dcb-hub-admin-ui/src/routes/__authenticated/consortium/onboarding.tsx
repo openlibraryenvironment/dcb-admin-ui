@@ -139,7 +139,7 @@ const mappingBreakdown = (t: TFunction, mappings: LibraryMappingsState) => (
 		    an oversight. */}
 		{!mappings.categories.find((category) => category.id === "numericRange")
 			?.applicable && (
-			<Typography variant="body2" sx={{ pl: 2.5 }}>
+			<Typography variant="body2" sx={{ paddingInlineStart: 2.5 }}>
 				{t("consortium.onboarding_numeric_not_required")}
 			</Typography>
 		)}

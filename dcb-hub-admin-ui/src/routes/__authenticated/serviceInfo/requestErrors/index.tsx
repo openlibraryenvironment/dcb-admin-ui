@@ -11,6 +11,7 @@ import Error from "@components/Error/Error";
 
 import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { withRowIndexIds } from "@helpers/dataGrid/withRowIndexIds";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/",
@@ -91,6 +92,15 @@ function RequestErrors() {
 								href={`https://openlibraryfoundation.atlassian.net/browse/${ticketId}`}
 								target="_blank"
 								rel="noopener noreferrer"
+								// An inline anchor's box is its line height, ~20px, and at 320px this
+								// column narrows until that is the whole target: axe target-size,
+								// serious, WCAG 2.5.8. inline-flex gives it a box of its own; the row
+								// is 52px so 24 fits without changing the layout.
+								sx={{
+									display: "inline-flex",
+									alignItems: "center",
+									minHeight: 24,
+								}}
 							>
 								{ticketId}
 							</Link>
@@ -148,7 +158,7 @@ function RequestErrors() {
 				identifier={gridId}
 				type={"requestErrors"}
 				columns={columns}
-				rows={records?.hits ?? []}
+				rows={withRowIndexIds(records?.hits)}
 				loading={isLoading}
 				paginationMode="client"
 				sortingMode="client"

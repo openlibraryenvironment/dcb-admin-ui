@@ -38,8 +38,8 @@ export default function MasterDetailLayout({
 						// Apply standard padding. The top/bottom padding ensures
 						// breathing room, and the left padding indents the content
 						// past the expansion icon.
-						pl: 8,
-						pr: 2,
+						paddingInlineStart: 8,
+						paddingInlineEnd: 2,
 						py: 2,
 					}}
 				>

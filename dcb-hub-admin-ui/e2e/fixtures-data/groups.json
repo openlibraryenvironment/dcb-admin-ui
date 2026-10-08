@@ -1,0 +1,18 @@
+{
+	"libraryGroups": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "7f3c2a18-5b9d-4e61-ae02-9c4d8b7f1a55",
+				"code": "REGION-N",
+				"name": "Northern Region",
+				"type": "REGION",
+				"consortium": {
+					"id": "2b8e1d47-9a35-4c70-bf16-5e3a7c9d0f22",
+					"name": "E2E Test Consortium"
+				}
+			}
+		],
+		"pageable": { "number": 0, "offset": 0 }
+	}
+}

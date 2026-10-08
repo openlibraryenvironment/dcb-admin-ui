@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 
+import { featuresOff } from "./flags";
+
 /**
  * Route-level mocks for the Insights REST surface, plus the runtime config that turns the
  * feature on.
@@ -325,15 +327,21 @@ export async function enableInsights(
 ) {
 	const trends = options.trends === true;
 
-	await page.addInitScript((trendsOn: boolean) => {
-		window.__APP_ENV__ = {
-			VITE_MUI_X_LICENSE_KEY: "",
-			VITE_KEYCLOAK_URL: "https://e2e-fake-keycloak.invalid/realms/dcb",
-			VITE_KEYCLOAK_ID: "dcb-admin-e2e",
-			VITE_DCB_API_BASE: "http://localhost:4173/api",
-			VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
-			VITE_FEATURE_INSIGHTS: "true",
-			VITE_FEATURE_INSIGHTS_TRENDS: trendsOn ? "true" : "false",
-		};
-	}, trends);
+	// Every flag pinned, then the two this fixture is about. The spread matters: a flag
+	// left out of a seeded config is not "off", it is whatever the e2e BUNDLE baked, and
+	// a build on a developer machine bakes that developer's `.env`. See featuresOff.
+	const env = {
+		VITE_MUI_X_LICENSE_KEY: "",
+		VITE_KEYCLOAK_URL: "https://e2e-fake-keycloak.invalid/realms/dcb",
+		VITE_KEYCLOAK_ID: "dcb-admin-e2e",
+		VITE_DCB_API_BASE: "http://localhost:4173/api",
+		VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
+		...featuresOff(),
+		VITE_FEATURE_INSIGHTS: "true",
+		VITE_FEATURE_INSIGHTS_TRENDS: trends ? "true" : "false",
+	};
+
+	await page.addInitScript((seeded) => {
+		window.__APP_ENV__ = seeded;
+	}, env);
 }

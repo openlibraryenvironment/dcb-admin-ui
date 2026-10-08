@@ -8,6 +8,7 @@ import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
+import { MAPPING_IMPORT_COLUMNS } from "@constants/mappingImportContract";
 import Import from "@components/Import/Import";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
@@ -146,6 +147,7 @@ function NumericRangeMappingsRoute() {
 				exportConfig={{
 					query: getNumericRangeMappings,
 					coreType: "numericRangeMappings",
+					roundTrip: MAPPING_IMPORT_COLUMNS.numericRangeMappings,
 					baseQuery: "(domain: * AND NOT deleted:true)",
 					wizard: true,
 				}}

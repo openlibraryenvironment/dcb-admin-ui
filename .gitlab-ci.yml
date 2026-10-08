@@ -74,7 +74,15 @@ verify_quality:
     - npm ci
     - npm run lint -- --max-warnings=0
     - npx tsc --noEmit
-    - npx vitest run
+    # --coverage rather than a bare run: it costs about three seconds on top of the
+    # suite and puts the figure in every pipeline log. There is NO threshold - see
+    # docs/testing.md, "Coverage is a figure, not a gate". Nothing here fails on it.
+    - npx vitest run --coverage
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/coverage/
+    expire_in: 1 week
 
 # Separate from verify_quality so a failing accessibility gate is legible as such in the
 # pipeline rather than as "the verify job went red". It needs the Playwright image; the
@@ -84,6 +92,11 @@ verify_quality:
 # the WCAG 2.2 AA gate: zero axe violations in light, dark AND high contrast. High
 # contrast has no media query behind it and is only reachable by seeding the stored
 # preference - see e2e/fixtures/theme.ts.
+#
+# It also carries e2e/i18n-missing.spec.ts, the missing-translation gate. That shares
+# this job rather than taking one of its own because it needs the same build and the
+# same browser: a second job would cost a whole extra `tsc && vite build` for one spec.
+# The build arms the collector through playwright.config.ts. See docs/i18n.md.
 verify_e2e:
   stage: verify
   image:
@@ -115,8 +128,18 @@ verify_lighthouse:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
-    # No separate build step: lighthouserc.js's startServerCommand builds, because the
-    # budget must not audit whatever an earlier job happened to leave in dist/.
+    # BYTES FIRST. The chunk budget is deterministic, covers every chunk including the
+    # ones no audited page fetches, and fails in seconds - so it runs before three
+    # Lighthouse passes rather than after them. VITE_PUBLIC_URL is pinned so the chunk
+    # names match the budget regardless of what .env says.
+    #
+    # It exists because Lighthouse measures PAGES: its total-byte-weight saw 750 KB of
+    # the 1,650 KB this application actually ships, and the heaviest chunk in the
+    # artefact was outside every gate here. See docs/performance-budget.md.
+    - VITE_PUBLIC_URL=/ npm run build
+    - npm run budget
+    # No separate build step for Lighthouse: lighthouserc.js's startServerCommand builds,
+    # because the audit must not measure whatever an earlier job left in dist/.
     - npm run lighthouse
   artifacts:
     when: always

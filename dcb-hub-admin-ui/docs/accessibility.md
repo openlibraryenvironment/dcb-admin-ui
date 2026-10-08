@@ -116,6 +116,119 @@ is happening, and there is no single layout to match across 84 routes.
 
 ---
 
+## Every route is titled
+
+`index.html` sets one title and `PageContainer` was the only thing that changed it, so
+the four routes that do not render it - `login`, `logout`, `maintenance` and
+`networkError` - all read "DCB Admin". Browser history, tab switching and a screen
+reader's page announcement were identical on each. **WCAG 2.4.2, Level A**, which the
+VPAT claims; `/login` is also the page Lighthouse audits and the first page every user
+sees.
+
+`useDocumentTitle` is the one definition, used by `PageContainer` and by those four
+routes directly. They reuse strings that already existed, so nothing here added
+translation debt.
+
+**Page name first, then a middot, then the app.** A tab strip and a screen reader's page
+announcement both truncate from the right, so "DCB Admin | Libraries" told the reader the
+same thing on all 85 routes. `dcb-admin-for-libraries` titles "Mappings · DCB Admin for
+Libraries" and this now matches it. The old format also carried a trailing space, and a
+blank title produced "DCB Admin | " with a dangling separator.
+
+Proved by `e2e/page-titles.spec.ts`, which covers the three reachable untitled routes and
+asserts that the title follows a navigation rather than being set once on load.
+
+---
+
+## A live region selector is not yours alone
+
+The application declares ten `aria-live` regions. **Dependencies declare their own**, and
+MUI X 9.15.0 started rendering an empty `role="status" aria-live="polite"` node inside
+every chart surface. On the Insights dashboard that took `[aria-live="polite"]` from one
+match to five, and broke three tests that had reasonably assumed the page had one.
+
+The empty regions are harmless to a screen reader - an empty live region announces
+nothing, and the axe gate stayed green. The damage was entirely to the tests.
+
+So **an assertion about an announcement names the region it means.** The Insights
+announcement carries `data-tid="insights-announcement"`, and the gate that has to keep
+working - "the view change is announced once, not once per panel" - counts that id. A
+per-panel regression still trips it, which a bare attribute selector could no longer
+distinguish from a chart's own node.
+
+One bare selector survives, in `bulk-functional-settings.spec.ts`: that page renders no
+chart, so `getByRole("status")` is still unique there. Left alone deliberately rather
+than changed while passing - but it is the next one to break if a chart ever lands on
+that page.
+
+---
+
+## 320px finds what a desktop hides
+
+The `narrow` Playwright project scans `accessibility.spec.ts` at 320px (WCAG 1.4.10
+Reflow). Expanding the route table from 9 routes to 21 put eleven more pages in front
+of it, and two defects fell out that no desktop scan could see. Both were already in
+the application; neither is on a route anybody had scanned.
+
+**A scrollable region with no tab stop** (`scrollable-region-focusable`, serious). MUI's
+Alert gives its message slot `overflow: auto`, so an alert that fits on a desktop scrolls
+at 320px - and a keyboard-only user cannot read past the first line. Fixed as a `MuiAlert`
+default (`slotProps.message.tabIndex = 0`), the same shape as the `MuiTableContainer`
+default above and accepting the same trade: a tab stop on a message that is not
+currently overflowing.
+
+**A target under 24x24** (`target-size`, serious, WCAG 2.5.8). The Request Errors
+overview renders a Jira ticket link in a cell. An inline anchor's box is its line
+height, about 20px, and that column narrows until the box is the whole target.
+`display: inline-flex` with `minHeight: 24` gives it a box of its own; the row is 52px,
+so nothing moves.
+
+The general point: **a route added to the table is measured in five variants** - light,
+dark, high contrast, the 8.71.0 surface and 320px - and the narrow one is where the
+cheap desktop assumptions surface.
+
+---
+
+## Reaching a detail page
+
+Every detail page in this application is reached through a grid row, and the grid
+navigated on `onRowClick` alone. **`rowClick` is a pointer event and MUI X never raises it
+for a keypress**, so a keyboard user could arrow to a row, press Enter and reach nothing.
+WCAG 2.1.1, Level A, across the seventeen grid types that route - which is every entity
+list in the product: libraries, patron requests, Host LMS, locations, agencies, groups,
+bibs, audits and the data change log.
+
+The axe gate scans `/libraries` and `/patronRequests/all` and passed both throughout. No
+automated rule can tell that a pointer handler has no keyboard equivalent, which is why
+this one survived a gate that was green. `e2e/grid-keyboard.spec.ts` walks the journey
+instead, and all three of its assertions were seen failing first.
+
+Two things changed, and they do different jobs:
+
+- **`onCellKeyDown` on the grid** routes on Enter. It is the keyboard counterpart of
+  `onRowClick`, resolving through the same `resolveRowClickPath`, with the same
+  edit-mode guard, and it skips the detail-panel toggle field because that cell's Enter
+  belongs to `DetailPanelToggle` (below). This is the mechanism that makes the journey
+  work, and it is the same `cellKeyDown` event the toggles already use.
+- **The leading visible cell is a link** (`withRowLink`). That is the semantics: assistive
+  technology announces "link", the row gains a visible focus ring, and ctrl/cmd-click
+  opens a new tab natively. It stops propagation so `onRowClick` does not navigate twice.
+
+`noLinkStyle` and `color: inherit`, so no grid changes appearance: the affordance a
+keyboard user needs is the focus ring, not a second underline in fifty grids. The link's
+accessible name is the cell's own text, read in row and column context, which is what WCAG
+2.4.4 means by "in context" - on `/libraries` that is the abbreviated name under its own
+column header.
+
+**Mirroring the cell's roving `tabIndex` onto the link was tried and rejected**, for the
+same reason it was rejected for the detail toggles below: `GridCell` focuses a child only
+if it matches `[tabindex="0"]`, so `params.tabIndex` makes every unfocused row's link
+`tabindex="-1"` and tabbing then reaches none of them. Measured both ways. The link carries
+no explicit `tabIndex`, and Enter is handled by `onCellKeyDown`, which is a public prop and
+rests on none of MUI's focus internals.
+
+---
+
 ## Detail panels are grid rows
 
 MUI X renders an expanded detail panel as `role="none"` directly inside the grid's

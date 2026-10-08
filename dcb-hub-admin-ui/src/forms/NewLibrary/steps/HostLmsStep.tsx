@@ -189,14 +189,14 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 								value="guided"
 								aria-label={t("hostlms.config_fields.mode_guided")}
 							>
-								<ListAlt fontSize="small" sx={{ mr: 1 }} />
+								<ListAlt fontSize="small" sx={{ marginInlineEnd: 1 }} />
 								{t("hostlms.config_fields.mode_guided")}
 							</ToggleButton>
 							<ToggleButton
 								value="json"
 								aria-label={t("hostlms.config_fields.mode_json")}
 							>
-								<Code fontSize="small" sx={{ mr: 1 }} />
+								<Code fontSize="small" sx={{ marginInlineEnd: 1 }} />
 								{t("hostlms.config_fields.mode_json")}
 							</ToggleButton>
 						</ToggleButtonGroup>

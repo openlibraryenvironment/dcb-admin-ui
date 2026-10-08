@@ -51,7 +51,7 @@ const MoreActionsMenu: React.FC<MoreActionsMenuProps> = ({
 						}}
 						disabled={disabled}
 					>
-						{startIcon && <span style={{ marginRight: 8 }}>{startIcon}</span>}
+						{startIcon && <span style={{ marginInlineEnd: 8 }}>{startIcon}</span>}
 						{label}
 					</MenuItem>
 				))}

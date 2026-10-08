@@ -1,5 +1,7 @@
 import type { Page } from "@playwright/test";
 
+import { featuresOff } from "./flags";
+
 /**
  * A deployment running dcb-service 8.71.0 — R-19.
  *
@@ -17,28 +19,30 @@ import type { Page } from "@playwright/test";
 
 const API_BASE = "http://localhost:4173/api";
 
-/** The runtime config an 8.71.0 environment renders: every feature flag off. */
+/**
+ * The runtime config an 8.71.0 environment renders: every feature flag off.
+ *
+ * From `featuresOff()`, never a list of its own: a flag this config omits is not off,
+ * it is whatever the e2e bundle baked from the developer's `.env`. See featuresOff.
+ */
 export async function useLegacyService(page: Page) {
-	await page.addInitScript(() => {
-		// getStandaloneConfig() short-circuits on window.__APP_ENV__, so seeding it
-		// before any app script runs both sets the flags and spares the run a fetch of
-		// inject_env.json that the preview server does not answer.
-		window.__APP_ENV__ = {
-			VITE_MUI_X_LICENSE_KEY: "",
-			VITE_KEYCLOAK_URL: "https://e2e-fake-keycloak.invalid/realms/dcb",
-			VITE_KEYCLOAK_ID: "dcb-admin-e2e",
-			VITE_DCB_API_BASE: "http://localhost:4173/api",
-			VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
-			// envsubst renders an unset variable as the empty string, which readFlag
-			// reads as false. This is what an environment that has never heard of the
-			// flags actually looks like.
-			VITE_FEATURE_INSIGHTS: "",
-			VITE_FEATURE_AUDIT_EXPLORER: "",
-			VITE_FEATURE_CONSORTIUM_BRANDING: "",
-			VITE_FEATURE_NCIP_ONBOARDING: "",
-			VITE_FEATURE_LIBRARY_USER_PROVISIONING: "",
-		};
-	});
+	const env = {
+		VITE_MUI_X_LICENSE_KEY: "",
+		VITE_KEYCLOAK_URL: "https://e2e-fake-keycloak.invalid/realms/dcb",
+		VITE_KEYCLOAK_ID: "dcb-admin-e2e",
+		VITE_DCB_API_BASE: API_BASE,
+		VITE_DCB_SEARCH_BASE: "http://localhost:4173/search",
+		...featuresOff(),
+	};
+
+	// getStandaloneConfig() short-circuits on window.__APP_ENV__, so seeding it
+	// before any app script runs both sets the flags and spares the run a fetch of
+	// inject_env.json that the preview server does not answer. The config is passed
+	// as an ARGUMENT: addInitScript serialises the function, so a closure over an
+	// imported featuresOff() would not survive into the page.
+	await page.addInitScript((seeded) => {
+		window.__APP_ENV__ = seeded;
+	}, env);
 
 	// `/info` from 8.71.0, in the shape a production 8.71.0 answers: the version under
 	// git.build and nothing at the top level, and no dcb.branding block at all - that

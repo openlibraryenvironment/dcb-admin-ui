@@ -127,7 +127,7 @@ export default function PageActionsMenu({
 							}}
 							disabled={disabled || Boolean(pending)}
 						>
-							{startIcon && <span style={{ marginRight: 8 }}>{startIcon}</span>}
+							{startIcon && <span style={{ marginInlineEnd: 8 }}>{startIcon}</span>}
 							{label}
 						</MenuItem>
 					);

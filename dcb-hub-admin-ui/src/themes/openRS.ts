@@ -787,8 +787,8 @@ const components: ThemeOptions["components"] = {
 				props: { variant: "styled" },
 				style: {
 					borderBottom: "0px",
-					borderLeft: "0px",
-					borderRight: "0px",
+					borderInlineStart: "0px",
+					borderInlineEnd: "0px",
 					"&::before": { display: "none" },
 				},
 			},
@@ -807,8 +807,8 @@ const components: ThemeOptions["components"] = {
 				props: { variant: "sub" },
 				style: {
 					borderBottom: "0px",
-					borderLeft: "0px",
-					borderRight: "0px",
+					borderInlineStart: "0px",
+					borderInlineEnd: "0px",
 					marginTop: "16px",
 					"&::before": { display: "none" },
 				},
@@ -829,7 +829,7 @@ const components: ThemeOptions["components"] = {
 								minHeight: "auto",
 							},
 							"& .MuiAccordionSummary-content": {
-								marginLeft: theme.spacing(1),
+								marginInlineStart: theme.spacing(1),
 							},
 						}),
 					},
@@ -1117,6 +1117,18 @@ const components: ThemeOptions["components"] = {
 		},
 	},
 	MuiAlert: {
+		// MUI's Alert message scrolls when its content does not fit, and a scrollable
+		// region with no tab stop is axe `scrollable-region-focusable`, serious - a
+		// keyboard-only user cannot read past the first line. It surfaced at 320px,
+		// where an alert that fits on a desktop does not.
+		//
+		// A theme default for the same reason MuiTableContainer has one: so the next
+		// alert is covered without anybody knowing the rule exists. The cost is a tab
+		// stop on a message that is not currently overflowing, which is the trade
+		// already accepted for the twelve table containers. docs/accessibility.md.
+		defaultProps: {
+			slotProps: { message: { tabIndex: 0 } },
+		},
 		styleOverrides: {
 			root: {
 				variants: [

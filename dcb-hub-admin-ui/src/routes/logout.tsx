@@ -16,6 +16,7 @@ import Link from "@components/Link/Link";
 import Alert from "@components/Alert/Alert";
 import LandingCard from "@components/LandingCard/LandingCard";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
+import { useDocumentTitle } from "@hooks/useDocumentTitle";
 import {
 	clearAppStorage,
 	postLoginRedirectKey,
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/logout")({
 
 function Logout() {
 	const { t } = useTranslation();
+	useDocumentTitle(t("nav.logout"));
 	const auth = useAuth();
 	// Atomic selector: destructuring the store subscribed this page to every
 	// consortium field when it renders one of them.
@@ -92,8 +94,8 @@ function Logout() {
 							mb: 2,
 							maxWidth: "1400px",
 							margin: "auto",
-							paddingLeft: "16px",
-							paddingRight: "16px",
+							paddingInlineStart: "16px",
+							paddingInlineEnd: "16px",
 						}}
 					>
 						<Alert
