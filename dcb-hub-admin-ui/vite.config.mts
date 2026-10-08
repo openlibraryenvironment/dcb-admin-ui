@@ -229,11 +229,11 @@ export default defineConfig(({ mode, command }) => {
 		},
 
 		test: {
-			// .tsx as well as .ts. With only "**/*.test.ts" a component test named
-			// *.test.tsx was not collected and did not error: a green run that ran
-			// nothing. There are none yet, which is why nobody had noticed.
-			include: ["**/*.test.{ts,tsx}"],
-			exclude: ["node_modules", "dist", "coverage", "playwright", "**/*.d.ts"],
+			// src/ only, and .tsx as well as .ts. All 84 unit tests live under src/, and
+			// `**/*` walked a NESTED node_modules - which `exclude: ["node_modules"]` does
+			// not match - so a test file inside a restored npm cache was collected and
+			// failed. `.ts` alone had silently collected no *.test.tsx at all.
+			include: ["src/**/*.test.{ts,tsx}"],
 			// Clears the feature flags `.env` would otherwise leak into every test.
 			// See vitest.setup.ts.
 			setupFiles: ["./vitest.setup.ts"],
