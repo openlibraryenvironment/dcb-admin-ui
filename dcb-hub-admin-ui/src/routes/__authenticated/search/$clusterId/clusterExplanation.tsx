@@ -143,7 +143,7 @@ function ClusterExplanation() {
 				title={t("search.items_error_title")}
 				message={t("ui.info.connection_issue")}
 				action={t("ui.actions.reload")}
-				reload
+				onAction={() => location.reload()}
 			/>
 		);
 

@@ -215,7 +215,7 @@ export default function CombinedEnvironmentComponent() {
 				})}
 				action={t("ui.actions.reload")}
 				message={t("ui.error.something_wrong")}
-				reload
+				onAction={() => location.reload()}
 			/>
 		);
 	}

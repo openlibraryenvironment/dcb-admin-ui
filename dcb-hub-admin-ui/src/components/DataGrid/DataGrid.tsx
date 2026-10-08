@@ -19,7 +19,8 @@ import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
 import { withRowLink } from "@helpers/dataGrid/withRowLink";
 import { resolveRowClickPath } from "@helpers/dataGrid/resolveRowClickPath";
-import { SxProps, Theme } from "@mui/material";
+import { Box, SxProps, Theme } from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 import ExportToolbar from "./components/ExportToolbar";
 import ExportWizard from "./components/ExportWizard";
 import { ExportProgressDialog } from "./components/ExportProgressDialog";
@@ -289,8 +290,28 @@ export default function DataGrid({
 		},
 		[onRowSelectionModelChange],
 	);
+	/**
+	 * The result count, for a reader who cannot see the footer.
+	 *
+	 * MUI X announces nothing when the rows change - no aria-live anywhere in
+	 * @mui/x-data-grid - so a filter that cut 400 rows to 3, or any page change,
+	 * happened silently. WCAG 4.1.3. Client-paginated grids have no `rowCount`, so
+	 * fall back to the rows actually rendered.
+	 */
+	const announcedCount =
+		paginationMode === "server" ? knownRowCount : stableRows.length;
+
 	return (
 		<div style={{ display: "flex", flexDirection: "column" }}>
+			<Box aria-live="polite" aria-atomic="true" sx={visuallyHidden}>
+				{loading
+					? t("ui.data_grid.results_loading")
+					: announcedCount === undefined
+						? ""
+						: t("ui.data_grid.results_announcement", {
+								count: announcedCount,
+							})}
+			</Box>
 			<DataGridPremium
 				{...rest}
 				columns={columns}
