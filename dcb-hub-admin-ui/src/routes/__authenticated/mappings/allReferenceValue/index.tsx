@@ -76,6 +76,10 @@ function ReferenceValueMappingsRoute() {
 				pagesize: 1000,
 			}),
 		staleTime: 1000 * 60 * 5,
+		// The global default throws every non-401/503 failure to GlobalError. This query
+		// only fills a dropdown in the new-mapping form, so that policy let one failed
+		// request destroy a page that renders fine without it.
+		throwOnError: false,
 	});
 	const hostLmsCodes: string[] = useMemo(
 		() =>
