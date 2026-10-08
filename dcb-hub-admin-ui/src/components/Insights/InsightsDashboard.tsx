@@ -333,6 +333,12 @@ export default function InsightsDashboard({
 					key={announcement}
 					aria-live="polite"
 					aria-atomic="true"
+					// Named, because `[aria-live="polite"]` is not ours alone. MUI X 9.15.0
+					// renders an empty role="status" live region inside every chart surface,
+					// so a bare attribute selector matches five elements on this page. The
+					// gate that has to stay meaningful is "announced once, not once per
+					// panel", and it counts THIS id - a per-panel regression still trips it.
+					data-tid="insights-announcement"
 					sx={visuallyHidden}
 				>
 					{announcement}

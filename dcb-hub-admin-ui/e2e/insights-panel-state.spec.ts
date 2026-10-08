@@ -308,7 +308,7 @@ test.describe("Insights panel states", () => {
 			"/consortium/insights?range=90d&series=LOANED&unitCost=17.5",
 		);
 
-		const live = page.locator('[aria-live="polite"]');
+		const live = page.locator('[data-tid="insights-announcement"]');
 		await expect(live).toHaveText("Showing 90 days for the whole consortium.");
 
 		await page.reload();
@@ -332,7 +332,7 @@ test.describe("Insights panel states", () => {
 			"/consortium/insights?range=forever&from=last%20tuesday&series=%3Cscript%3E",
 		);
 
-		const live = page.locator('[aria-live="polite"]');
+		const live = page.locator('[data-tid="insights-announcement"]');
 		await expect(live).toHaveText("Showing 30 days for the whole consortium.");
 		await expect(
 			page.getByRole("heading", { level: 1, name: "Consortium insights" }),
@@ -344,7 +344,7 @@ test.describe("Insights panel states", () => {
 	}) => {
 		await page.goto("/consortium/insights");
 
-		const live = page.locator('[aria-live="polite"]');
+		const live = page.locator('[data-tid="insights-announcement"]');
 		await expect(live).toHaveCount(1);
 		await expect(live).toHaveText("Showing 30 days for the whole consortium.");
 

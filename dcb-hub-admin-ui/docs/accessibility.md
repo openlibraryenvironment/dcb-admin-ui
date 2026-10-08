@@ -140,6 +140,29 @@ asserts that the title follows a navigation rather than being set once on load.
 
 ---
 
+## A live region selector is not yours alone
+
+The application declares ten `aria-live` regions. **Dependencies declare their own**, and
+MUI X 9.15.0 started rendering an empty `role="status" aria-live="polite"` node inside
+every chart surface. On the Insights dashboard that took `[aria-live="polite"]` from one
+match to five, and broke three tests that had reasonably assumed the page had one.
+
+The empty regions are harmless to a screen reader - an empty live region announces
+nothing, and the axe gate stayed green. The damage was entirely to the tests.
+
+So **an assertion about an announcement names the region it means.** The Insights
+announcement carries `data-tid="insights-announcement"`, and the gate that has to keep
+working - "the view change is announced once, not once per panel" - counts that id. A
+per-panel regression still trips it, which a bare attribute selector could no longer
+distinguish from a chart's own node.
+
+One bare selector survives, in `bulk-functional-settings.spec.ts`: that page renders no
+chart, so `getByRole("status")` is still unique there. Left alone deliberately rather
+than changed while passing - but it is the next one to break if a chart ever lands on
+that page.
+
+---
+
 ## 320px finds what a desktop hides
 
 The `narrow` Playwright project scans `accessibility.spec.ts` at 320px (WCAG 1.4.10
@@ -165,6 +188,7 @@ dark, high contrast, the 8.71.0 surface and 320px - and the narrow one is where 
 cheap desktop assumptions surface.
 
 ---
+
 ## Reaching a detail page
 
 Every detail page in this application is reached through a grid row, and the grid
