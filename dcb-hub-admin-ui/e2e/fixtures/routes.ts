@@ -279,4 +279,59 @@ export const ROUTES: ScannedRoute[] = [
 			await expect(page.getByText("ada@alpha.example")).toBeVisible();
 		},
 	},
+
+	/*
+	 * The seven per-library mapping pages. Four of them rendered a 500 for every
+	 * visit - `library.agency?.hostLms?.code` in a template string ABOVE the
+	 * isLoading guard, so the first render threw before the library query had even
+	 * been started - and no gate looked at them, because this list did not.
+	 */
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/all",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/itemType",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/location",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/patronType",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/numericRangeMappings/all",
+		ready: async (page) => {
+			// LoadNumericRangeMappings is mocked empty, so the grid's own empty state is
+			// what "this page has finished" looks like here.
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/numericRangeMappings/itemType",
+		ready: async (page) => {
+			// LoadNumericRangeMappings is mocked empty, so the grid's own empty state is
+			// what "this page has finished" looks like here.
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/numericRangeMappings/patronType",
+		ready: async (page) => {
+			// LoadNumericRangeMappings is mocked empty, so the grid's own empty state is
+			// what "this page has finished" looks like here.
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
 ];

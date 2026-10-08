@@ -105,7 +105,7 @@ function AllNumericMappings() {
 							mb: 2,
 						}}
 					>
-						{t("libraries.config.data.mappings.all_num_range", {
+						{t("libraries.config.data.mappings.item_type_num_range", {
 							hostLms: library.agency?.hostLms?.code,
 						})}
 					</Typography>
@@ -132,7 +132,7 @@ function AllNumericMappings() {
 									mb: 2,
 								}}
 							>
-								{t("libraries.config.data.mappings.all_num_range", {
+								{t("libraries.config.data.mappings.item_type_num_range", {
 									hostLms: library.secondHostLms.code,
 								})}
 							</Typography>

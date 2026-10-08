@@ -56,8 +56,8 @@ function LocationMappings() {
 		error,
 	} = useQuery(libraryQuery(gqlClient, libraryId));
 
-	const locationPrimaryQuery = `(toContext:"${library.agency?.hostLms?.code}" OR fromContext:"${library.agency?.hostLms?.code}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`;
-	const locationSecondaryQuery = `(toContext:"${library.secondHostLms?.code}" OR fromContext:"${library.secondHostLms?.code}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`;
+	const locationPrimaryQuery = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:"${library?.agency?.hostLms?.code}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`;
+	const locationSecondaryQuery = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:"${library?.secondHostLms?.code}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`;
 	if (isLoading)
 		return (
 			<Loading

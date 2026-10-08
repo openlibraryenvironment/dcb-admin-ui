@@ -36,6 +36,7 @@ import {
 } from "@constants/mappingsImportConstants";
 import { createReferenceValueMapping } from "@mutations/createReferenceValueMapping";
 import type { CreateReferenceValueMappingMutationVariables } from "@generated/graphql";
+import { entityOwnsQueryKey } from "@constants/entityRegistry";
 
 interface NewMappingFormData {
 	toValue: string;
@@ -265,16 +266,15 @@ export default function NewMapping({
 				createReferenceValueMapping,
 				variables,
 			),
-		// A new mapping can land in any of the mappings grids and this form does not know
-		// which is mounted, so match on the grid id rather than name one key. Every grid
-		// id passed to MappingsGrid carries "Mappings" (allMappings*, numMappings*,
-		// refMappings*), so this refreshes all of them and leaves every other query
-		// alone — the previous bare invalidateQueries() re-fired the entire cache.
+		// This form only creates reference value mappings (CreateReferenceValueMapping),
+		// so the registry names the caches it lands in - the same predicate the edit and
+		// delete path uses. It previously matched any key containing "Mappings", which
+		// was a match on the GRID IDS and therefore also refreshed numeric range grids a
+		// reference value mapping can never appear in.
 		onSuccess: () =>
 			queryClient.invalidateQueries({
 				predicate: (query) =>
-					typeof query.queryKey[0] === "string" &&
-					query.queryKey[0].includes("Mappings"),
+					entityOwnsQueryKey("referenceValueMapping", query.queryKey),
 			}),
 	});
 
