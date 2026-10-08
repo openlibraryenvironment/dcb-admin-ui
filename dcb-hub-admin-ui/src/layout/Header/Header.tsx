@@ -30,6 +30,7 @@ import { getConsortiumBasics } from "@queries/getConsortiumBasics";
 import { readConsortiumBrand } from "@helpers/consortiumBrand";
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
 import type { LoadConsortiumHeaderQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -60,18 +61,20 @@ export default function Header({
 	const { type } = useDCBServiceInfo();
 	const queryClient = useQueryClient();
 
-	const {
-		headerImageURL,
-		displayName,
-		setDisplayName,
-		setAboutImageURL,
-		setDescription,
-		setCatalogueSearchURL,
-		setWebsiteURL,
-		resetConsortiumStore,
-		setName,
-		setHeaderImageURL,
-	} = useConsortiumInfoStore();
+	const headerImageURL = useConsortiumInfoStore((s) => s.headerImageURL);
+	const displayName = useConsortiumInfoStore((s) => s.displayName);
+	const setDisplayName = useConsortiumInfoStore((s) => s.setDisplayName);
+	const setAboutImageURL = useConsortiumInfoStore((s) => s.setAboutImageURL);
+	const setDescription = useConsortiumInfoStore((s) => s.setDescription);
+	const setCatalogueSearchURL = useConsortiumInfoStore(
+		(s) => s.setCatalogueSearchURL,
+	);
+	const setWebsiteURL = useConsortiumInfoStore((s) => s.setWebsiteURL);
+	const resetConsortiumStore = useConsortiumInfoStore(
+		(s) => s.resetConsortiumStore,
+	);
+	const setName = useConsortiumInfoStore((s) => s.setName);
+	const setHeaderImageURL = useConsortiumInfoStore((s) => s.setHeaderImageURL);
 
 	const handleAuthClick = async () => {
 		if (auth.isAuthenticated) {
@@ -115,7 +118,7 @@ export default function Header({
 	const { data: headerContentData, isSuccess: headerLoaded } = useQuery({
 		queryKey: ["consortiaKeyInfo"],
 		enabled: auth.isAuthenticated,
-		throwOnError: false,
+		...nonCriticalQuery,
 		queryFn: () =>
 			gqlClient.request<any, LoadConsortiumHeaderQueryVariables>(
 				getConsortiumBasics(),

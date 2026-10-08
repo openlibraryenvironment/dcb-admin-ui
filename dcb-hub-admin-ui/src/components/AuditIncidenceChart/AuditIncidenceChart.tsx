@@ -20,6 +20,7 @@ import { useChartPalette } from "@hooks/useChartPalette";
 import { getAuditIncidence } from "@queries/getAuditIncidence";
 import { rangeToParams } from "@helpers/insightsRange";
 import type { RangePreset } from "@helpers/insightsSearch";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadAuditIncidenceQuery,
 	LoadAuditIncidenceQueryVariables,
@@ -80,6 +81,7 @@ export default function AuditIncidenceChart({ query }: { query: string }) {
 	const { startDate, endDate } = useMemo(() => rangeToParams(range), [range]);
 
 	const { data, isLoading, isError } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["auditIncidence", query, interval, startDate, endDate],
 		queryFn: () =>
 			gqlClient.request<

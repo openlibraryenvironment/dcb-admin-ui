@@ -37,6 +37,7 @@ import { StatusStepConnector } from "../../components/StatusStepConnector/Status
 import request from "graphql-request";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { getLibrary } from "@queries/getLibrary";
+import { lmsFanOutQuery } from "@helpers/queryPolicy";
 import {
 	LibrariesQueryData,
 	PatronRequestQueryData,
@@ -99,7 +100,7 @@ export default function ExpeditedCheckout({
 		// isError: errorFetchingStaffLibrary,
 		// isLoading: staffLibraryLoading,
 	} = useQuery<LibrariesQueryData>({
-		queryKey: ["libraryInfo", staffAgencyCode, headers, cfg.VITE_DCB_API_BASE],
+		queryKey: ["libraryInfo", staffAgencyCode, cfg.VITE_DCB_API_BASE],
 		queryFn: async () =>
 			request(
 				cfg.VITE_DCB_API_BASE + "/graphql",
@@ -133,7 +134,6 @@ export default function ExpeditedCheckout({
 		queryKey: [
 			"patronRequestEssentials",
 			patronRequestId,
-			headers,
 			cfg.VITE_DCB_API_BASE,
 		],
 		queryFn: () =>
@@ -239,7 +239,7 @@ export default function ExpeditedCheckout({
 
 	const { data: pickupLocations, isLoading: pickupLocationsLoading } = useQuery(
 		{
-			queryKey: ["locations", locationQuery, headers, cfg.VITE_DCB_API_BASE],
+			queryKey: ["locations", locationQuery, cfg.VITE_DCB_API_BASE],
 			queryFn: () =>
 				request(
 					`${cfg.VITE_DCB_API_BASE}/graphql`,
@@ -272,12 +272,8 @@ export default function ExpeditedCheckout({
 		isLoading: itemsLoading,
 		isError: itemsError,
 	} = useQuery<any>({
-		queryKey: [
-			"itemAvailability",
-			bibClusterId,
-			headers,
-			cfg.VITE_DCB_API_BASE,
-		],
+		...lmsFanOutQuery,
+		queryKey: ["itemAvailability", bibClusterId, cfg.VITE_DCB_API_BASE],
 		queryFn: () =>
 			axios.get(`${cfg.VITE_DCB_API_BASE}/items/availability`, {
 				headers,

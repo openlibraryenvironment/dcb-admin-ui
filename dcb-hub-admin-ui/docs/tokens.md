@@ -49,6 +49,31 @@ The last one is the important one: a stolen token is bounded by its lifetime and
 what the IdP granted it, and no authority in this application comes from anything the
 client stores. Hiding a button is UX, not security, and nothing here relies on it.
 
+## Where the token must NOT also end up
+
+The store is the decision above; a second copy is not. One place it had quietly become a
+second copy was the TanStack Query cache:
+
+```ts
+queryKey: ["itemAvailability", bibClusterId, headers, cfg.VITE_DCB_API_BASE];
+//                                           ^ { Authorization: `Bearer ${access_token}` }
+```
+
+Nine keys across `ExpeditedCheckout`, `QuickWalkUp` and `StaffRequest` carried the bearer
+token that way. A query key is not a private detail: it is held in the cache for the life
+of the entry, it is what the Query devtools display, and it is serialised by anything that
+dumps cache state. It is also a **high-cardinality** key, which the scale rules ban
+outright — the token changes on every silent renewal, so each renewal created a fresh
+cache entry and left the old one to be collected.
+
+Two of those nine were `GET /items/availability`, which fans out to one request per Host
+LMS. So a token renewal was a guaranteed cache miss on a fan-out to every member library
+system, and `handleServiceErrors` refetches active queries straight after a renewal.
+
+The token is not part of the identity of the data. It belongs in the request the `queryFn`
+makes, where the closure already has the current value, and nowhere else. Removing it from
+the keys changes no behaviour a user can see.
+
 ## What would change the decision
 
 Any of these, and this file should be rewritten rather than appended to:

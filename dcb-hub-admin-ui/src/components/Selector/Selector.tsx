@@ -6,6 +6,7 @@ import useCode from "@hooks/useCode";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getHostLms } from "@queries/getHostLms";
 import type { LoadHostLmsQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 type SelectorType = {
 	optionsType: string;
@@ -22,6 +23,7 @@ export default function Selector({ optionsType }: SelectorType) {
 
 	// Modernized Host LMS Lookup with automatic complete pagination
 	const { data: options = [], isLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["hostLmsDropdownOptions"],
 		queryFn: async () => {
 			const variables = {

@@ -25,6 +25,7 @@ import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { Bib } from "@models/Bib";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadAgencyQueryVariables,
 	LoadBibMainDetailsQueryVariables,
@@ -65,6 +66,7 @@ function SourceBibDetails() {
 	const sourceSystemUrl = sourceSystemId ? `/hostlmss/${sourceSystemId}` : "";
 
 	const { data: agencyData } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["agency", "byHostLms", sourceSystemId],
 		queryFn: () =>
 			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {
@@ -82,6 +84,7 @@ function SourceBibDetails() {
 	const bibLibrary: Library = data;
 
 	const { data: sourceRecordData, isLoading: sourceRecordLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["bibSourceRecord", bibId],
 		queryFn: () =>
 			gqlClient.request<any, LoadBibSourceRecordQueryVariables>(

@@ -106,7 +106,11 @@ function OutOfSequence() {
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery(allLibrariesQuery(gqlClient));
 
-	const { data: gridData, isLoading: gridLoading } = useQuery({
+	const {
+		data: gridData,
+		isLoading: gridLoading,
+		isFetching,
+	} = useQuery({
 		queryKey: [
 			"patronRequests",
 			gridId,
@@ -126,6 +130,7 @@ function OutOfSequence() {
 					defaultPageSize: 20,
 				}),
 			),
+		placeholderData: (previousData) => previousData,
 	});
 
 	// Counts are derived directly from the query data rather than pushed into
@@ -224,7 +229,7 @@ function OutOfSequence() {
 							<MasterDetail row={row} type="patronRequests" />
 						)}
 						identifier={gridId}
-						loading={gridLoading}
+						loading={gridLoading || isFetching}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
 						onFilterModelChange={onFilterModelChange}

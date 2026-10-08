@@ -98,7 +98,7 @@ function Libraries() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 	const auth = useAuth();
-	const { displayName } = useConsortiumInfoStore();
+	const displayName = useConsortiumInfoStore((s) => s.displayName);
 
 	const apiRef = useGridApiRef();
 	const [selectedLibraryIds, setSelectedLibraryIds] = useState<GridRowId[]>([]);
@@ -246,7 +246,8 @@ function Libraries() {
 			? [
 					{
 						key: "newConsortium",
-						onClick: () => navigate({ to: "/setup/$step", params: { step: "consortium" } }),
+						onClick: () =>
+							navigate({ to: "/setup/$step", params: { step: "consortium" } }),
 						disabled: !isAnAdmin,
 						label: t("consortium.new.title"),
 					},
@@ -376,7 +377,6 @@ function Libraries() {
 					}}
 				/>
 			)}
-
 
 			{groupModalLibraries !== null && (
 				<AddLibraryToGroup

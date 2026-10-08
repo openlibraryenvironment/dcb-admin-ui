@@ -24,6 +24,7 @@ import {
 	setLibraryUserEnabled,
 } from "@mutations/provisionLibraryUser";
 import { isLibraryUserProvisioningEnabled } from "@helpers/featureFlags";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/accounts",
@@ -95,6 +96,7 @@ function LibraryAccounts() {
 	const [showNewUser, setShowNewUser] = useState(false);
 
 	const { data: availability } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["libraryUserProvisioningAvailable"],
 		queryFn: () =>
 			gqlClient.request<{ libraryUserProvisioningAvailable: boolean }>(

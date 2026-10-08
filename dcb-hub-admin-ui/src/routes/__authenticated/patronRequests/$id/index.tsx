@@ -72,6 +72,7 @@ import type {
 } from "@generated/graphql";
 
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
 });
@@ -168,6 +169,7 @@ function RouteComponent() {
 		isError: patronIdentitiesError,
 		isLoading: patronIdentitiesLoading,
 	} = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["patronIdentities", patronRequest?.pickupPatronId],
 		queryFn: async () =>
 			gqlClient.request<any, LoadPatronIdentitiesQueryVariables>(
@@ -188,6 +190,7 @@ function RouteComponent() {
 		isError: pickupLocationDataError,
 		isLoading: pickupLocationDataLoading,
 	} = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["location", patronRequest?.pickupLocationCode],
 		queryFn: async () =>
 			gqlClient.request<any, LoadLocationQueryVariables>(getLocation, {
@@ -206,6 +209,7 @@ function RouteComponent() {
 	);
 
 	const { data: patronLmsData, isLoading: patronLmsLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["hostLms", patronRequest?.patronHostlmsCode],
 		queryFn: async () =>
 			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
@@ -216,6 +220,7 @@ function RouteComponent() {
 	const patronHostLms = patronLmsData?.hostLms?.content?.[0];
 
 	const { data: patronAgencyData, isLoading: patronAgencyLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["agency", patronHostLms?.id],
 		queryFn: async () =>
 			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {

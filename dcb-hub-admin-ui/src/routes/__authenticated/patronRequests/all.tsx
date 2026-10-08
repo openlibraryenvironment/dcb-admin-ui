@@ -104,7 +104,11 @@ function All() {
 
 	// Ideally, this would know to fetch the full query for whichever tab is on screen (all active etc)
 	// but also know NOT to fetch it for the others
-	const { data: dashboardData, isLoading: gridLoading } = useQuery({
+	const {
+		data: dashboardData,
+		isLoading: gridLoading,
+		isFetching,
+	} = useQuery({
 		queryKey: [
 			"patronRequestsDashboard",
 			gridId,
@@ -137,6 +141,7 @@ function All() {
 				},
 			);
 		},
+		placeholderData: (previousData) => previousData,
 	});
 
 	// Deriving layout metrics reactively from server output safely
@@ -254,7 +259,7 @@ function All() {
 							<MasterDetail row={row} type="patronRequests" />
 						)}
 						identifier={gridId}
-						loading={gridLoading}
+						loading={gridLoading || isFetching}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
 						onFilterModelChange={onFilterModelChange}

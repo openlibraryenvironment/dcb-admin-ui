@@ -3,6 +3,7 @@ import { GraphQLClient } from "graphql-request";
 
 import { getConsortiumBasics } from "@queries/getConsortiumBasics";
 import type { LoadConsortiumHeaderQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 /**
  * The one query that answers "is there a consortium yet". Very important for config
@@ -22,7 +23,7 @@ export const consortiumBasicsQuery = (
 	queryOptions({
 		queryKey: CONSORTIUM_BASICS_QUERY_KEY,
 		enabled,
-		throwOnError: false,
+		...nonCriticalQuery,
 		queryFn: () =>
 			gqlClient.request<any, LoadConsortiumHeaderQueryVariables>(
 				getConsortiumBasics(),

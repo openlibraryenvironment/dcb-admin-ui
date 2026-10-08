@@ -26,6 +26,7 @@ import { getGroupsSelection } from "@queries/getGroupsSelection";
 import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import type { LoadGroupsSelectionQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 interface AddLibraryType {
 	show: boolean;
@@ -82,6 +83,7 @@ export default function AddLibraryToGroup({
 	});
 
 	const { data: groupsData, isLoading: isGroupsLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["groupsSelection"],
 		queryFn: () =>
 			gqlClient.request<any, LoadGroupsSelectionQueryVariables>(

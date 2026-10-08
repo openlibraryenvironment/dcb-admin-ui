@@ -37,6 +37,7 @@ import { PatronValidationStep } from "@forms/ExpeditedCheckout/steps/PatronValid
 import { useRouter } from "@tanstack/react-router";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { StatusStepConnector } from "@components/StatusStepConnector/StatusStepConnector";
+import { lmsFanOutQuery } from "@helpers/queryPolicy";
 import {
 	getStepColors,
 	getStepLabelFontWeight,
@@ -200,7 +201,6 @@ export default function StaffRequest({
 			"pickupLocations",
 			selectedLibrary?.agencyId,
 			isPickupAnywhere,
-			headers,
 			cfg.VITE_DCB_API_BASE,
 		],
 		queryFn: () => {
@@ -231,12 +231,8 @@ export default function StaffRequest({
 		isError: itemsError,
 		refetch: fetchItems,
 	} = useQuery<any>({
-		queryKey: [
-			"itemAvailability",
-			bibClusterId,
-			headers,
-			cfg.VITE_DCB_API_BASE,
-		],
+		...lmsFanOutQuery,
+		queryKey: ["itemAvailability", bibClusterId, cfg.VITE_DCB_API_BASE],
 		queryFn: () =>
 			axios.get(`${cfg.VITE_DCB_API_BASE}/items/availability`, {
 				headers,

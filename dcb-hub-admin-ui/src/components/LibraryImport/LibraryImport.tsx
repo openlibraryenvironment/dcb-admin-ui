@@ -43,6 +43,7 @@ import {
 import { applyLibraryImport, type ImportOutcome } from "./applyLibraryImport";
 import { LIBRARY_COUNT_QUERY_KEY } from "@/queryOptions/setup";
 import { fileSizeConvertor } from "@helpers/fileSizeConverter";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadHostLmsCodesQueryVariables,
 	LoadLibrariesQueryVariables,
@@ -106,6 +107,7 @@ export default function LibraryImport({
 	// while the dialog is open rather than per row - a per-row lookup over 500 rows is
 	// exactly the fan-out this feature exists to avoid.
 	const { data: hostLmsData } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["LoadHostLmsCodes", "libraryImport"],
 		enabled: show,
 		staleTime: 5 * 60 * 1000,
@@ -117,6 +119,7 @@ export default function LibraryImport({
 	});
 
 	const { data: librariesData } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["LoadLibraries", "libraryImport"],
 		enabled: show,
 		staleTime: 60 * 1000,

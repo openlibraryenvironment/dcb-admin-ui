@@ -22,6 +22,7 @@ import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions
 
 import { getMappings } from "@queries/getMappings";
 import { getHostLmsCodes } from "@queries/getHostLmsCodes";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadHostLmsCodesQueryVariables,
 	LoadMappingsQueryVariables,
@@ -76,10 +77,7 @@ function ReferenceValueMappingsRoute() {
 				pagesize: 1000,
 			}),
 		staleTime: 1000 * 60 * 5,
-		// The global default throws every non-401/503 failure to GlobalError. This query
-		// only fills a dropdown in the new-mapping form, so that policy let one failed
-		// request destroy a page that renders fine without it.
-		throwOnError: false,
+		...nonCriticalQuery,
 	});
 	const hostLmsCodes: string[] = useMemo(
 		() =>

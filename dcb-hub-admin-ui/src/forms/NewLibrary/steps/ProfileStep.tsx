@@ -17,6 +17,7 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 type AgencyOption = { label: string; value: string; inputValue?: string };
 
@@ -56,6 +57,7 @@ export function ProfileStep() {
 	} = useFormContext();
 
 	const { data: agenciesData, isLoading: agenciesLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: ["agenciesSelection"],
 		queryFn: () =>
 			gqlClient.request<any, LoadAgenciesQueryVariables>(getAgencies, {

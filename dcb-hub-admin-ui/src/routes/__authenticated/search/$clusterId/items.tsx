@@ -23,6 +23,7 @@ import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { itemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
+import { lmsFanOutQuery } from "@helpers/queryPolicy";
 import {
 	GridActionsCellItem,
 	GridColDef,
@@ -76,6 +77,7 @@ function ItemsPageComponent() {
 	});
 
 	const { data, isLoading } = useQuery({
+		...lmsFanOutQuery,
 		queryKey: ["clusterItems", clusterId],
 		queryFn: async () => {
 			// Fetch Standard and No-Filter concurrently

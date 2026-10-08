@@ -3,6 +3,7 @@ import { GraphQLClient } from "graphql-request";
 
 import { getLibrary } from "@queries/getLibrary";
 import { getLibraryBasics } from "@queries/getLibraryBasics";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import type {
 	LoadLibraryQueryVariables,
 	LoadLibraryBasicsQueryVariables,
@@ -49,6 +50,7 @@ export const libraryBasicsByAgencyCodeQuery = (
 	scope: string,
 ) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: ["library", scope, agencyCode],
 		queryFn: () =>
 			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(
@@ -66,6 +68,7 @@ export const libraryBasicsQuery = (
 	scope: string,
 ) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: ["library", scope, libraryId],
 		queryFn: () =>
 			gqlClient.request<any, LoadLibraryBasicsQueryVariables>(

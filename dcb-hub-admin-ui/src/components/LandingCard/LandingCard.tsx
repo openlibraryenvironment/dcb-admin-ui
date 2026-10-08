@@ -25,13 +25,13 @@ import fallbackAbout from "@assets/brand/fallback-about.png";
 export default function LandingCard() {
 	const { t } = useTranslation();
 
-	const {
-		displayName,
-		aboutImageURL,
-		catalogueSearchURL,
-		websiteURL,
-		description,
-	} = useConsortiumInfoStore();
+	const displayName = useConsortiumInfoStore((s) => s.displayName);
+	const aboutImageURL = useConsortiumInfoStore((s) => s.aboutImageURL);
+	const catalogueSearchURL = useConsortiumInfoStore(
+		(s) => s.catalogueSearchURL,
+	);
+	const websiteURL = useConsortiumInfoStore((s) => s.websiteURL);
+	const description = useConsortiumInfoStore((s) => s.description);
 
 	return (
 		<Stack
