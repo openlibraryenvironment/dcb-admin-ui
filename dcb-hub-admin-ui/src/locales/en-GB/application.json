@@ -1406,7 +1406,7 @@
 		"library_id": "Library UUID",
 		"library_management_system": "Library management system(s)",
 		"name": "Full name",
-		"max_consortial_loans": "Max consortial loans",
+		"max_consortial_loans": "Maximum active requests per patron",
 		"max_local_holds": "Max local holds",
 		"max_local_holds_help": "The maximum number of holds a patron may have in your library system, including holds placed outside DCB. Leave blank if you do not want DCB to check this. DCB cannot read this limit from your library system, so it must be kept in step with it.",
 		"new_contact": {
@@ -1464,7 +1464,7 @@
 			"section_participation": "Consortial participation",
 			"borrowing_helper": "The library can place requests with other members. Turn off for a supply-only library.",
 			"supplying_helper": "Other members can request items from this library. Turn off for a borrow-only library.",
-			"max_consortial_loans_helper": "The most consortial loans this library can have out at once. Leave blank for no limit.",
+			"max_consortial_loans_helper": "Requests one patron can have in progress or on loan through DCB at once. Failed and finished requests do not count. Leave blank for no limit.",
 			"busy_adding_to_consortium": "Adding the library to the {{consortium}} consortium group…",
 			"consortium_group_added": "This library has been added to {{group}}, your consortium's group.",
 			"consortium_group_failed": "The library was created, but could not be added to your consortium group. Add it from the groups page.",
