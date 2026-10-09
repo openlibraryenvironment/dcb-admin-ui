@@ -4,6 +4,10 @@ ext:
     run:
       -
         dir: 'dcb-hub-admin-ui'
+        command: "npm ci"
+        shell: true
+      -
+        dir: 'dcb-hub-admin-ui'
         command: "npx typedoc --entryPointStrategy Expand src --out ./typedocs"
         shell: true
 
