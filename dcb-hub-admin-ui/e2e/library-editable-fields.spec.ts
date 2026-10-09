@@ -5,6 +5,7 @@ import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
+import resolvedSettings from "./fixtures-data/resolved-functional-settings.json";
 
 /**
  * Every field `UpdateLibraryInput` accepts and this application intends to edit is
@@ -144,6 +145,31 @@ test.describe("Library service - editable fields", () => {
 			await expect(page.getByRole("textbox", { name })).toBeEditable();
 		});
 	}
+});
+
+test.describe("Library settings - editable fields", () => {
+	test("the active request limit is named and explained while editing", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			...MOCKS,
+			LoadLibraryBasics: libraryDetail,
+			LoadResolvedFunctionalSettings: resolvedSettings,
+			LoadSettingsBearingGroupType: { settingsBearingGroupType: null },
+		});
+		await page.goto(`/libraries/${LIBRARY_ID}/settings`);
+		await expect(
+			page.getByRole("heading", { name: "Alpha Test Library" }),
+		).toBeVisible();
+
+		await startEditing(page);
+
+		const limit = page.getByRole("spinbutton", {
+			name: "Maximum active requests per patron",
+		});
+		await expect(limit).toBeEditable();
+		await expect(limit).toHaveAccessibleDescription(/in progress or on loan/);
+	});
 });
 
 test.describe("a background refetch while editing", () => {
