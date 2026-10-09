@@ -4,6 +4,7 @@ import { GraphQLClient } from "graphql-request";
 import { getPatronRequestTotals } from "@queries/getPatronRequestTotals";
 import { queries } from "@constants/patronRequestGridQueries";
 import type { LoadPatronRequestTotalsQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 /** The four buckets the patron-request tab bar counts. */
 export type PatronRequestBucket =
@@ -34,6 +35,7 @@ export const patronRequestTotalQuery = (
 	bucket: PatronRequestBucket,
 ) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: ["patronRequestTotals", bucket],
 		queryFn: () =>
 			gqlClient.request<any, LoadPatronRequestTotalsQueryVariables>(

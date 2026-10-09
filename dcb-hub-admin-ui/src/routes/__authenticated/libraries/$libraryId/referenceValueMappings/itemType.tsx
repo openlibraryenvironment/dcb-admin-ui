@@ -28,10 +28,10 @@ import type {} from "@generated/graphql";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/referenceValueMappings/itemType",
 )({
-	component: LocationMappings,
+	component: ItemTypeMappings,
 });
 
-function LocationMappings() {
+function ItemTypeMappings() {
 	const { t } = useTranslation();
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
@@ -56,8 +56,8 @@ function LocationMappings() {
 		error,
 	} = useQuery(libraryQuery(gqlClient, libraryId));
 
-	const itemTypePrimaryQuery = `(toContext:"${library.agency?.hostLms?.code}" OR fromContext:"${library.agency?.hostLms?.code}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`;
-	const itemTypeSecondaryQuery = `(toContext:"${library.secondHostLms?.code}" OR fromContext:"${library.secondHostLms?.code}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`;
+	const itemTypePrimaryQuery = `(toContext:"${library?.agency?.hostLms?.code}" OR fromContext:"${library?.agency?.hostLms?.code}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`;
+	const itemTypeSecondaryQuery = `(toContext:"${library?.secondHostLms?.code}" OR fromContext:"${library?.secondHostLms?.code}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`;
 	if (isLoading)
 		return (
 			<Loading
@@ -114,7 +114,7 @@ function LocationMappings() {
 							fontWeight: "bold",
 						}}
 					>
-						{t("libraries.config.data.mappings.location", {
+						{t("libraries.config.data.mappings.item_type_ref_value", {
 							hostLms: library.agency?.hostLms?.code,
 						})}
 					</Typography>
@@ -159,7 +159,7 @@ function LocationMappings() {
 									mt: 4,
 								}}
 							>
-								{t("libraries.config.data.mappings.location", {
+								{t("libraries.config.data.mappings.item_type_ref_value", {
 									hostLms: library.secondHostLms.code,
 								})}
 							</Typography>

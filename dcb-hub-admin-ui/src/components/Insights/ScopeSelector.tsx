@@ -4,9 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Autocomplete, TextField, Chip } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { getLibraries } from "@queries/getLibraries";
-import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { allLibrariesQuery } from "@/queryOptions/libraries";
 
 export type ScopeOption = {
 	kind: "group" | "library";
@@ -31,18 +30,13 @@ export default function ScopeSelector({
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 
+	// The same document and the same variables as allLibrariesQuery, which is already
+	// cached for every library dropdown - so this was a second fetch of the same 1,000
+	// libraries under a key of its own, and "insights-scope-libraries" had to be added to
+	// the library entity's keyPrefixes to make invalidation reach it.
 	const { data } = useQuery({
+		...allLibrariesQuery(gqlClient),
 		...nonCriticalQuery,
-		queryKey: ["insights-scope-libraries"],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibrariesQueryVariables>(getLibraries, {
-				pageno: 0,
-				pagesize: 1000,
-				order: "fullName",
-				orderBy: "ASC",
-				query: "",
-			}),
-		staleTime: 5 * 60 * 1000,
 	});
 
 	const options = useMemo<ScopeOption[]>(() => {

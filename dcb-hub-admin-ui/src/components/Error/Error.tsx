@@ -8,7 +8,16 @@ interface ErrorProps {
 	description?: string;
 	action: string;
 	goBack?: string;
-	reload?: boolean;
+	/**
+	 * What the primary button does, when navigating to `goBack` is not it.
+	 *
+	 * Replaces a `reload?: boolean` that hardcoded location.reload() - a full
+	 * document load, which is the wrong recovery for a failed query and the only
+	 * one the shared component offered.
+	 */
+	onAction?: () => void;
+	/** A second, lower-emphasis button. The route error boundary needs both. */
+	secondary?: { label: string; onClick: () => void };
 }
 export default function Error({
 	title,
@@ -16,7 +25,8 @@ export default function Error({
 	description,
 	action,
 	goBack,
-	reload,
+	onAction,
+	secondary,
 }: ErrorProps) {
 	const actionLink = goBack ? goBack : "/";
 	const router = useRouter();
@@ -25,11 +35,12 @@ export default function Error({
 	const handleReturn = () => {
 		router.navigate({ to: actionLink });
 	};
-	const handleReload = () => {
-		location.reload();
-	};
 	return (
 		<Box
+			// A route replacing its content with an error page is a status change, and it
+			// was silent. Assertive rather than polite: the thing the user asked for did
+			// not happen. WCAG 4.1.3.
+			role="alert"
 			sx={{
 				display: "flex",
 				alignItems: "center",
@@ -59,11 +70,16 @@ export default function Error({
 				<Typography variant="attributeText">{description}</Typography>
 				<Button
 					variant="contained"
-					onClick={reload ? handleReload : handleReturn}
+					onClick={onAction ?? handleReturn}
 					size="large"
 				>
 					{action}
 				</Button>
+				{secondary ? (
+					<Button variant="text" onClick={secondary.onClick} size="large">
+						{secondary.label}
+					</Button>
+				) : null}
 			</Stack>
 		</Box>
 	);

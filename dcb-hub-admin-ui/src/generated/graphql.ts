@@ -1746,6 +1746,30 @@ export type LoadLibraryCountQueryVariables = Exact<{
 
 export type LoadLibraryCountQuery = { libraries: { totalSize: number | null } };
 
+export type LoadLibraryDirectoryQueryVariables = Exact<{
+	pageno: number;
+	pagesize: number;
+	order: string;
+	query: string;
+	orderBy: string;
+}>;
+
+export type LoadLibraryDirectoryQuery = {
+	libraries: {
+		totalSize: number | null;
+		content: Array<{
+			id: string;
+			fullName: string | null;
+			agencyCode: string | null;
+			agency: {
+				code: string | null;
+				hostLms: { code: string | null } | null;
+			} | null;
+			secondHostLms: { code: string | null } | null;
+		} | null> | null;
+	};
+};
+
 export type LoadGroupsQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;

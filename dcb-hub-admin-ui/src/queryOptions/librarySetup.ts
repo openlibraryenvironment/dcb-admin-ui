@@ -4,6 +4,7 @@ import { GraphQLClient } from "graphql-request";
 import { getMappings } from "@queries/getMappings";
 import { getLocations } from "@queries/getLocations";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import {
 	requiresNumericRangeMappings,
 	type LibrarySetupCounts,
@@ -112,6 +113,7 @@ export const librarySetupCountsQuery = (
 	library: any,
 ) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: ["library", "setupCounts", library?.id],
 		queryFn: () => fetchLibrarySetupCounts(gqlClient, library),
 		enabled: !!library?.id,

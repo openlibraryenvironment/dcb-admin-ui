@@ -23,6 +23,8 @@ import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { createConsortiumContact } from "@mutations/createConsortiumContact";
 import { createLibraryContact } from "@mutations/createLibraryContact";
+import { entityOwnsQueryKey } from "@constants/entityRegistry";
+import { contactEntity } from "@helpers/contactEntity";
 import type {
 	CreateConsortiumContactMutation,
 	CreateLibraryContactMutation,
@@ -144,11 +146,16 @@ export default function NewContact({
 		},
 		onSuccess: (responseData) => {
 			if (responseData) {
-				const queryKeyToInvalidate =
-					entity === "Consortium"
-						? "getConsortiaContacts"
-						: "getLibraryContacts";
-				queryClient.invalidateQueries({ queryKey: [queryKeyToInvalidate] });
+				// The registry decides which cached queries a contact appears in, as it does
+				// for an edit or a delete. The keys here were "getConsortiaContacts" and
+				// "getLibraryContacts" - the names of the GraphQL DOCUMENTS, not of any
+				// query key - so nothing was cached under either and a new contact never
+				// appeared until a reload. The grids key on ["LoadConsortiumContacts"] and
+				// ["library", "contacts", libraryId].
+				queryClient.invalidateQueries({
+					predicate: (query) =>
+						entityOwnsQueryKey(contactEntity(entity), query.queryKey),
+				});
 
 				setAlert({
 					open: true,

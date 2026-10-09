@@ -121,7 +121,7 @@ function RequestingHistory() {
 				title={t("ui.error.cannot_retrieve_record")}
 				message={t("ui.info.connection_issue")}
 				action={t("ui.actions.reload")}
-				reload
+				onAction={() => location.reload()}
 			/>
 		);
 	}

@@ -46,8 +46,8 @@ function AllNumericMappings() {
 		error,
 	} = useQuery(libraryQuery(gqlClient, libraryId));
 
-	const numericRangePatronTypePrimaryQuery = `context:"${library.agency?.hostLms?.code}" AND domain:"patronType" AND NOT deleted:true`;
-	const numericRangePatronTypeSecondaryQuery = `context:"${library.secondHostLms?.code}" AND domain:"patronType" AND NOT deleted:true`;
+	const numericRangePatronTypePrimaryQuery = `context:"${library?.agency?.hostLms?.code}" AND domain:"patronType" AND NOT deleted:true`;
+	const numericRangePatronTypeSecondaryQuery = `context:"${library?.secondHostLms?.code}" AND domain:"patronType" AND NOT deleted:true`;
 
 	if (isLoading)
 		return (
@@ -104,7 +104,7 @@ function AllNumericMappings() {
 							mb: 2,
 						}}
 					>
-						{t("libraries.config.data.mappings.all_num_range", {
+						{t("libraries.config.data.mappings.patron_type_num_range", {
 							hostLms: library.agency?.hostLms?.code,
 						})}
 					</Typography>
@@ -130,7 +130,7 @@ function AllNumericMappings() {
 									mb: 2,
 								}}
 							>
-								{t("libraries.config.data.mappings.all_num_range", {
+								{t("libraries.config.data.mappings.patron_type_num_range", {
 									hostLms: library.secondHostLms.code,
 								})}
 							</Typography>

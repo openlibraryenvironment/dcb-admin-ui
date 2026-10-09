@@ -22,7 +22,6 @@ import {
 	Typography,
 } from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import Error from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -43,8 +42,6 @@ import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { getPatronRequest } from "@queries/getPatronRequest";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
-import { getAgency } from "@queries/getAgency";
-import { getHostLms } from "@queries/getHostLms";
 import { getLocation } from "@queries/getLocation";
 import { getPatronIdentities } from "@queries/getPatronIdentities";
 import { SourceRecord } from "@models/SourceRecord";
@@ -64,8 +61,6 @@ import { staleTimeFromNextPoll } from "@helpers/patronRequestFreshness";
 import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
-	LoadAgencyQueryVariables,
-	LoadHostLmsQueryVariables,
 	LoadLocationQueryVariables,
 	LoadPatronIdentitiesQueryVariables,
 	LoadPatronRequestQueryVariables,
@@ -73,6 +68,7 @@ import type {
 
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
 });
@@ -102,7 +98,6 @@ function RouteComponent() {
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [activeTab, setActiveTab] = useState(0);
 
 	const auditGridId = `audit-log-${id}`;
@@ -208,30 +203,17 @@ function RouteComponent() {
 		),
 	);
 
-	const { data: patronLmsData, isLoading: patronLmsLoading } = useQuery({
-		...nonCriticalQuery,
-		queryKey: ["hostLms", patronRequest?.patronHostlmsCode],
-		queryFn: async () =>
-			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
-				query: `code:${patronRequest?.patronHostlmsCode}`,
-			}),
-		enabled: !!patronRequest?.patronHostlmsCode,
-	});
-	const patronHostLms = patronLmsData?.hostLms?.content?.[0];
-
-	const { data: patronAgencyData, isLoading: patronAgencyLoading } = useQuery({
-		...nonCriticalQuery,
-		queryKey: ["agency", patronHostLms?.id],
-		queryFn: async () =>
-			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {
-				query: `hostLms:${patronHostLms?.id}`,
-			}),
-		enabled: !!patronHostLms?.id,
-	});
-	const patronAgency = patronAgencyData?.agencies?.content?.[0];
+	// The patron's library, from its Host LMS code. Two requests used to stand between
+	// those: code -> hostLms.id -> agency.code, each waiting on the one before it, and
+	// neither rendered anything. The directory is one cached list that both hops were
+	// walking the server to reconstruct.
+	const { data: patronAgencyCode, isLoading: patronAgencyCodeLoading } =
+		useQuery(
+			agencyCodeForHostLmsQuery(gqlClient, patronRequest?.patronHostlmsCode),
+		);
 
 	const { data: patronLibrary, isLoading: patronLibraryLoading } = useQuery(
-		libraryBasicsByAgencyCodeQuery(gqlClient, patronAgency?.code, "patron"),
+		libraryBasicsByAgencyCodeQuery(gqlClient, patronAgencyCode, "patron"),
 	);
 
 	// What the last action did to the status, once its refetch has settled.
@@ -544,7 +526,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.general")}
 							</Typography>
 						</Grid>
@@ -573,9 +555,9 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : patronLibraryLoading ||
-						  patronLmsLoading ||
-						  patronAgencyLoading ? (
-							<CircularProgress size="1rem" />
+						  patronAgencyCodeLoading ||
+						  patronAgencyCodeLoading ? (
+							<CircularProgress size="1rem" aria-label={t("common.loading")} />
 						) : null}
 						{supplierLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -604,7 +586,7 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : supplierLibraryLoading ? (
-							<CircularProgress size="1rem" />
+							<CircularProgress size="1rem" aria-label={t("common.loading")} />
 						) : null}
 						{pickupLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -631,7 +613,7 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : pickupLibraryLoading ? (
-							<CircularProgress size="1rem" />
+							<CircularProgress size="1rem" aria-label={t("common.loading")} />
 						) : null}
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
@@ -642,6 +624,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : pickupLocationDataError ? (
@@ -922,6 +905,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -944,6 +928,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1060,7 +1045,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("requesting.bib_record")}
 							</Typography>
 						</Grid>
@@ -1209,7 +1194,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.supplying")}
 							</Typography>
 						</Grid>
@@ -1550,7 +1535,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.borrowing")}
 							</Typography>
 						</Grid>
@@ -1735,7 +1720,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.pickup")}
 							</Typography>
 						</Grid>
@@ -1748,6 +1733,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : pickupLocationDataError ? (
@@ -1817,6 +1803,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1855,6 +1842,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1877,6 +1865,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1951,7 +1940,7 @@ function RouteComponent() {
 				</TabPanel>
 
 				<TabPanel value={5}>
-					<Typography id="auditlog" variant="accordionSummary">
+					<Typography id="auditlog" variant="accordionSummary" component="h2">
 						{t("audit_log.title")}
 					</Typography>
 					<DataGrid
@@ -2009,9 +1998,7 @@ function RouteComponent() {
 						paginationModel={currentPagination}
 						onPaginationModelChange={handleAuditPaginationChange}
 						pivotingEnabled={false}
-						onRowModesModelChange={setRowModesModel}
 						toolbarVisible
-						rowModesModel={rowModesModel}
 						searchText="Search by audit"
 						scrollbarVisible={false}
 						sortingMode="client"

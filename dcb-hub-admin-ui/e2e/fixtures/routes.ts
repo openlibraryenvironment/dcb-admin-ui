@@ -44,7 +44,11 @@ export interface ScannedRoute {
 export const MOCKS = {
 	LoadConsortiumHeader: consortiumBasics,
 	LoadConsortium: consortium,
+	// The consortium contacts grid. Its own operation, and unmocked it 404s.
+	LoadConsortiumContacts: consortium,
 	LoadLibraries: libraries,
+	// The light code-to-library projection, a different operation from LoadLibraries.
+	LoadLibraryDirectory: libraries,
 	LoadLibraryCount: libraryCount,
 	LoadAnnouncements: { announcements: [] },
 	LoadLibraryContacts: libraryDetail,
@@ -148,9 +152,12 @@ export const ROUTES: ScannedRoute[] = [
 		},
 	},
 	{
+		// Level 1, and it used to be level 2: this page hides PageContainer's title box
+		// and headed itself with an h2, so it had no top-level heading at all. This
+		// predicate was asserting the defect.
 		path: "/profile",
 		ready: async (page) => {
-			await expect(page.getByRole("heading", { level: 2 })).toBeVisible();
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 		},
 	},
 	{
@@ -277,6 +284,267 @@ export const ROUTES: ScannedRoute[] = [
 		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/accounts",
 		ready: async (page) => {
 			await expect(page.getByText("ada@alpha.example")).toBeVisible();
+		},
+	},
+
+	/*
+	 * The seven per-library mapping pages. Four of them rendered a 500 for every
+	 * visit - `library.agency?.hostLms?.code` in a template string ABOVE the
+	 * isLoading guard, so the first render threw before the library query had even
+	 * been started - and no gate looked at them, because this list did not.
+	 */
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/all",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/itemType",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/location",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/referenceValueMappings/patronType",
+		ready: async (page) => {
+			await expect(page.getByText("loanable-item").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/numericRangeMappings/all",
+		ready: async (page) => {
+			// LoadNumericRangeMappings is mocked empty, so the grid's own empty state is
+			// what "this page has finished" looks like here.
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/numericRangeMappings/itemType",
+		ready: async (page) => {
+			// LoadNumericRangeMappings is mocked empty, so the grid's own empty state is
+			// what "this page has finished" looks like here.
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/numericRangeMappings/patronType",
+		ready: async (page) => {
+			// LoadNumericRangeMappings is mocked empty, so the grid's own empty state is
+			// what "this page has finished" looks like here.
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	/*
+	 * The rest of the application. 47 of 86 navigable routes had no axe scan at all,
+	 * which is also why four of them could be a 500 on every visit without anything
+	 * going red. These are the ones that render against the shared mocks; what is
+	 * still missing is listed in docs/accessibility.md.
+	 */
+	{
+		path: "/unauthorised",
+		ready: async (page) => {
+			await expect(page.getByText("401 Unauthorised").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/maintenance",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Maintenance in progress").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/networkError",
+		ready: async (page) => {
+			await expect(page.getByText("Network error").first()).toBeVisible();
+		},
+	},
+	{
+		// LoadBibs is mocked empty, so the grid's own empty state is this page finished.
+		path: "/bibs",
+		ready: async (page) => {
+			await expect(page.getByText("No results").first()).toBeVisible();
+		},
+	},
+	{
+		// The shared index before a search term: its own empty state, not a spinner.
+		path: "/search",
+		ready: async (page) => {
+			await expect(page.getByText("No data available").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/mappings/allNumericRange",
+		ready: async (page) => {
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/patronRequests/active",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/patronRequests/completed",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/patronRequests/exception",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/patronRequests/outOfSequence",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/consortium/contacts",
+		ready: async (page) => {
+			await expect(
+				page.getByText("contact@example.invalid").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		// The DCB health check is a real timeout in e2e, so the Keycloak row is the
+		// marker: it resolves from seeded config rather than from the network.
+		path: "/consortium/environment",
+		ready: async (page) => {
+			await expect(page.getByText("Keycloak").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/consortium/onboarding",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Consortium at a glance").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo/alarms",
+		ready: async (page) => {
+			await expect(page.getByText("No results").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo/auditExplorer",
+		ready: async (page) => {
+			await expect(page.getByText("Common signals").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo/requestErrors/requests",
+		ready: async (page) => {
+			await expect(page.getByText("No results found").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/groups/99999999-1111-5111-9111-111111111111",
+		ready: async (page) => {
+			await expect(page.getByText("NORTH-EAST").first()).toBeVisible();
+		},
+	},
+	{
+		// Both group request grids block on allLocationsQuery, which is why they were
+		// a 500 until it stopped throwing.
+		//
+		// The GRID rather than a cell: at the 320px viewport the narrow project uses,
+		// the Title column is hidden, so no row text is dependable. One spinner covers
+		// all four of this route's queries, so the grid existing IS its data arriving.
+		path: "/groups/99999999-1111-5111-9111-111111111111/patronRequests",
+		ready: async (page) => {
+			await expect(page.getByRole("grid")).toBeVisible();
+		},
+	},
+	{
+		path: "/groups/99999999-1111-5111-9111-111111111111/supplierRequests",
+		ready: async (page) => {
+			await expect(page.getByRole("grid")).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/contacts",
+		ready: async (page) => {
+			await expect(
+				page.getByText("No contacts found for this library").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/locations",
+		ready: async (page) => {
+			await expect(page.getByText("Alpha Main Desk").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/patronRequests/active",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/patronRequests/all",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/patronRequests/completed",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/patronRequests/exception",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/patronRequests/outOfSequence",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/supplierRequests/all",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
 		},
 	},
 ];

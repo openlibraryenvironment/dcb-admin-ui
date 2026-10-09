@@ -57,7 +57,9 @@ const CASES: DegradedCase[] = [
 		content: (page) => page.getByRole("button", { name: "Actions" }),
 	},
 	{
-		name: "a patron request survives its Host LMS lookup",
+		// Was LoadHostLms, which this page no longer fetches: the directory replaced the
+		// code -> hostLms -> agency walk. The directory is the non-critical query now.
+		name: "a patron request survives its library directory lookup",
 		path: `/patronRequests/${TRACKED_REQUEST.id}`,
 		mocks: {
 			LoadConsortiumHeader: consortiumBasics,
@@ -70,7 +72,7 @@ const CASES: DegradedCase[] = [
 			LoadLibraryBasics: { libraries: empty },
 			LoadAgency: { agencies: empty },
 		},
-		auxiliary: "LoadHostLms",
+		auxiliary: "LoadLibraryDirectory",
 		content: (page) => page.getByRole("button", { name: "Actions" }),
 	},
 	{

@@ -157,9 +157,7 @@ function SupplierRequestsAll() {
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Tabs value={0} sx={{ mb: 2 }}>
-						<Tab
-							label={t("libraries.patronRequests.all", { number: "" }).trim()}
-						/>
+						<Tab label={t("libraries.patronRequests.all_no_count")} />
 					</Tabs>
 
 					<Typography

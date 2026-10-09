@@ -469,7 +469,8 @@
 		"related_ticket": "Related ticket",
 		"supplier": "Supplier",
 		"total": "Total",
-		"view_audit": "View audit {{audit}}"
+		"view_audit": "View audit {{audit}}",
+		"requests_fallback_title": "Requests with this error"
 	},
 	"functional_settings": {},
 	"groups": {
@@ -1562,7 +1563,8 @@
 			"out_of_sequence": "Out of sequence requests ({{number}})",
 			"out_of_sequence_short": "Out of sequence ({{number}})",
 			"supplier": "Supplier requests for {{library}}",
-			"title": "Patron requests for {{library}}"
+			"title": "Patron requests for {{library}}",
+			"all_no_count": "All requests"
 		},
 		"primaryLocation": {
 			"address": "Address",
@@ -2668,7 +2670,8 @@
 			"back": "Back",
 			"close": "Close",
 			"show_value": "Show {{field}}",
-			"hide_value": "Hide {{field}}"
+			"hide_value": "Hide {{field}}",
+			"try_again": "Try again"
 		},
 		"confirmation": {
 			"admin_required_borrowing": "You must have a role of CONSORTIUM_ADMIN or greater to toggle a library's borrowing status.",
@@ -2835,7 +2838,10 @@
 			"value": "Value",
 			"view_items": "View items",
 			"warning": "Warning",
-			"this_item": "this item"
+			"this_item": "this item",
+			"results_announcement_one": "{{count}} result",
+			"results_announcement_other": "{{count}} results",
+			"results_loading": "Loading results"
 		},
 		"error": {
 			"401": {
@@ -2854,7 +2860,8 @@
 				"name": "500 Server error",
 				"summary": "This doesn't seem to be working at the moment",
 				"description": "$t(ui.info.try_later)",
-				"action": "$t(ui.actions.go_back)"
+				"action": "$t(ui.actions.go_back)",
+				"retry_hint": "Trying again reloads just this page's data."
 			},
 			"503": {
 				"name": "Maintenance in progress",

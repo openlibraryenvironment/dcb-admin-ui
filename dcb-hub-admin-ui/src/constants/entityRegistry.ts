@@ -130,7 +130,6 @@ export const ENTITY_REGISTRY: Record<EntityKey, EntityDefinition> = {
 			"libraries",
 			"allLibrariesDictionary",
 			"LoadLibraries",
-			"insights-scope-libraries",
 		],
 		nameKey: "libraries.library",
 	},

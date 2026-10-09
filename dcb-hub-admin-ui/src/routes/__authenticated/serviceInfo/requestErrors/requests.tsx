@@ -121,6 +121,11 @@ function Requests() {
 		[t],
 	);
 
+	// `description` is a search param, so a hand-typed or truncated URL reaches this
+	// route without one - and PageContainer then rendered no h1 and set the document
+	// title to a bare "DCB Admin".
+	const pageTitle = description || t("error_overview.requests_fallback_title");
+
 	const match = description?.match(/(DCB-\d+)/);
 	const ticketId = match ? match[0] : null;
 	const linkUrl = ticketId
@@ -129,20 +134,20 @@ function Requests() {
 
 	if (isError) {
 		return (
-			<PageContainer title={description} link={linkUrl}>
+			<PageContainer title={pageTitle} link={linkUrl}>
 				<ErrorComponent
 					title={t("error_overview.error_loading")}
 					message={t("ui.info.connection_issue")}
 					description={t("ui.info.reload")}
 					action={t("ui.actions.reload")}
-					reload
+					onAction={() => location.reload()}
 				/>
 			</PageContainer>
 		);
 	}
 
 	return (
-		<PageContainer title={description} link={linkUrl}>
+		<PageContainer title={pageTitle} link={linkUrl}>
 			<DataGrid
 				identifier={gridId}
 				type={"errorOverviewPatronRequests"}

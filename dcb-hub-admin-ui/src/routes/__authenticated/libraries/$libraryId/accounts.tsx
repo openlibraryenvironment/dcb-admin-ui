@@ -48,7 +48,7 @@ export const Route = createFileRoute(
 				title={i18n.t("ui.error.unable_to_load_page")}
 				message={error.message}
 				action={i18n.t("ui.actions.reload")}
-				reload={true}
+				onAction={() => location.reload()}
 			/>
 		</PageContainer>
 	),

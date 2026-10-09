@@ -14,6 +14,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
+import { mappingsGridQueryKey } from "@helpers/dataGrid/mappingsGridQueryKey";
 import type { EntityKey } from "@constants/entityRegistry";
 import { MAPPING_IMPORT_COLUMNS } from "@constants/mappingImportContract";
 
@@ -50,7 +51,8 @@ export default function MappingsGrid({
 }: MappingsGridProps) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
-	const mappingMutation = useEntityMutation(ENTITY_FOR_DATA_KEY[dataKey]);
+	const entity = ENTITY_FOR_DATA_KEY[dataKey];
+	const mappingMutation = useEntityMutation(entity);
 
 	const {
 		paginationModel,
@@ -71,14 +73,15 @@ export default function MappingsGrid({
 		isLoading,
 		isFetching,
 	} = useQuery({
-		queryKey: [
+		queryKey: mappingsGridQueryKey(
+			entity,
 			gridId,
 			hostLmsCode,
 			baseQuery,
 			paginationModel,
 			sortModel,
 			filterModel,
-		],
+		),
 		queryFn: async () => {
 			return gqlClient.request<any>(
 				getQuery,

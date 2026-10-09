@@ -286,7 +286,10 @@ test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 	const LEGACY_ROUTES = ROUTES.filter(
 		(route) =>
 			!route.path.includes("/accounts") &&
-			!route.path.includes("/announcements"),
+			!route.path.includes("/announcements") &&
+			// Its beforeLoad redirects to /serviceInfo while isAuditExplorerEnabled() is
+			// false, and this world seeds no flags - so there is no page here to scan.
+			!route.path.includes("/auditExplorer"),
 	);
 
 	for (const scheme of ["light", "dark"] as const) {

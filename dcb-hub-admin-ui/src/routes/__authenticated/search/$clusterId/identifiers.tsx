@@ -141,7 +141,7 @@ function Identifiers() {
 			<ErrorComponent
 				title={t("ui.error.cannot_retrieve_record")}
 				action={t("ui.actions.reload")}
-				reload
+				onAction={() => location.reload()}
 				message={t("ui.error.invalid_UUID")}
 			/>
 		);

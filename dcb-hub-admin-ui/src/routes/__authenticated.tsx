@@ -25,7 +25,7 @@ export const Route = createFileRoute("/__authenticated")({
 				title={i18n.t("ui.error.something_wrong")}
 				message={error.message}
 				action={i18n.t("ui.actions.reload")}
-				reload={true}
+				onAction={() => location.reload()}
 			/>
 		</StructuralLayout>
 	),

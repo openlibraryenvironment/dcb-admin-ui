@@ -57,7 +57,11 @@ function Unauthorised() {
 
 	if (wrongApplication) {
 		return (
-			<PageContainer hideTitleBox={true} hideBreadcrumbs={true}>
+			<PageContainer
+				title={t("ui.error.401.name")}
+				hideTitleBox={true}
+				hideBreadcrumbs={true}
+			>
 				<Stack spacing={3} sx={{ maxWidth: 720 }}>
 					<Typography variant="h1" component="h1">
 						{t("loginout.wrong_app.title")}
@@ -92,7 +96,11 @@ function Unauthorised() {
 	}
 
 	return (
-		<PageContainer hideTitleBox={true} hideBreadcrumbs={true}>
+		<PageContainer
+			title={t("ui.error.401.name")}
+			hideTitleBox={true}
+			hideBreadcrumbs={true}
+		>
 			<ErrorComponent
 				title={t("ui.error.401.name")}
 				message={t("ui.error.401.summary")}
