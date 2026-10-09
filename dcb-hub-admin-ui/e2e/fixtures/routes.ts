@@ -150,9 +150,12 @@ export const ROUTES: ScannedRoute[] = [
 		},
 	},
 	{
+		// Level 1, and it used to be level 2: this page hides PageContainer's title box
+		// and headed itself with an h2, so it had no top-level heading at all. This
+		// predicate was asserting the defect.
 		path: "/profile",
 		ready: async (page) => {
-			await expect(page.getByRole("heading", { level: 2 })).toBeVisible();
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 		},
 	},
 	{

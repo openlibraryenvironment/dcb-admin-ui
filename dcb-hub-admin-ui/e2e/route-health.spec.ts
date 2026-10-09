@@ -38,5 +38,14 @@ for (const route of ROUTES) {
 
 		await expect(page.getByText(CRASH_HEADING)).toHaveCount(0);
 		expect(crashes, `GlobalError was reached: ${crashes[0] ?? ""}`).toEqual([]);
+
+		// Exactly one h1, and a document title that names the page. Neither is an axe
+		// rule: axe checks heading ORDER, not that a page has a top-level heading at
+		// all, and it has nothing to say about <title>. A sweep of all 54 routes found
+		// /profile heading its content with an h2, /serviceInfo/requestErrors/requests
+		// with neither when its `description` search param is absent, and
+		// /unauthorised passing PageContainer no title.
+		await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+		await expect(page).not.toHaveTitle("DCB Admin");
 	});
 }

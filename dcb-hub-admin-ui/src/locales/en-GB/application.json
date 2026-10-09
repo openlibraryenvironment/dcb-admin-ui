@@ -469,7 +469,8 @@
 		"related_ticket": "Related ticket",
 		"supplier": "Supplier",
 		"total": "Total",
-		"view_audit": "View audit {{audit}}"
+		"view_audit": "View audit {{audit}}",
+		"requests_fallback_title": "Requests with this error"
 	},
 	"functional_settings": {},
 	"groups": {
