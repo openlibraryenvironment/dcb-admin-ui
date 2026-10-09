@@ -47,6 +47,8 @@ export const MOCKS = {
 	// The consortium contacts grid. Its own operation, and unmocked it 404s.
 	LoadConsortiumContacts: consortium,
 	LoadLibraries: libraries,
+	// The light code-to-library projection, a different operation from LoadLibraries.
+	LoadLibraryDirectory: libraries,
 	LoadLibraryCount: libraryCount,
 	LoadAnnouncements: { announcements: [] },
 	LoadLibraryContacts: libraryDetail,

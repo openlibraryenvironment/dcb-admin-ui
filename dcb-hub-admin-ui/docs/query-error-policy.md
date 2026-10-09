@@ -99,6 +99,52 @@ the route is for, and they were in the same breath.
 totals without them. Both are needed: the tab bar shows unfiltered counts, and the filter
 indicator compares the two.
 
+## Resolving a code to a library
+
+A `PatronRequest` carries codes, not names. `/patronRequests/$id` turned the patron's
+Host LMS code into a library through two requests that rendered nothing:
+
+```
+LoadPatronRequest  ->  LoadHostLms (code -> hostLms.id)
+                   ->  LoadAgency  (hostLms.id -> agency.code)
+                   ->  LoadLibraryBasics (agency.code -> the library)
+```
+
+Each waited on the one before it. **It could not be one request.** `Library` exposes no
+flat field for a Host LMS code — `agency` and `secondHostLms` are relations — and the
+`libraries` fetcher evaluates its Lucene string with a flat `root.get(fieldName)`, no
+dotted-path traversal and no join. So the server cannot be asked "the library whose
+agency's Host LMS code is X", one library at a time, at all.
+
+`libraryDirectoryQuery` is the client-side join instead: one cached list of
+`id, fullName, agencyCode, agency.hostLms.code, secondHostLms.code`, and
+`agencyCodeForHostLmsQuery` is a `select` over it. Measured on the detail page, requests
+by wave:
+
+```
+before   1: LoadConsortiumHeader, LoadPatronRequest
+         2: LoadLocation, LoadHostLms
+         3: LoadAgency
+         4: LoadLibraryBasics
+after    1: LoadConsortiumHeader, LoadPatronRequest, LoadLibraryDirectory
+         2: LoadLocation, LoadLibraryBasics
+```
+
+**Why not reuse `allLibrariesQuery`,** which is already cached for every dropdown and
+holds the same fields. Because `getLibraries` selects `clientConfig` — a `JSON` scalar,
+so it cannot be sub-selected — for both of a library's Host LMS, and the libraries grid
+has a (default-hidden) column reading `clientConfig.ingest`, so it cannot simply be
+dropped. A page that wants three library names should not pull every member library's
+Host LMS configuration to get them. That is the one reason this earns a second key for
+the same list, against the rule the rest of that file records.
+
+**Bound.** One request at `pagesize: 1000`, against a scale constant of hundreds of
+member libraries, cached for thirty minutes. It truncates past 1,000 exactly as
+`allLibrariesQuery` does; a truncated directory shows a code where a name would be.
+
+**This is a workaround.** The fix is upstream: relations on the `PatronRequest` type, or
+a `libraries` filter that can traverse one. Then the directory and its cache go away.
+
 ## Gate
 
 `e2e/degraded-data.spec.ts` mocks only a route's primary operations and asserts the page's

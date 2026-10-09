@@ -42,8 +42,6 @@ import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { getPatronRequest } from "@queries/getPatronRequest";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
-import { getAgency } from "@queries/getAgency";
-import { getHostLms } from "@queries/getHostLms";
 import { getLocation } from "@queries/getLocation";
 import { getPatronIdentities } from "@queries/getPatronIdentities";
 import { SourceRecord } from "@models/SourceRecord";
@@ -63,8 +61,6 @@ import { staleTimeFromNextPoll } from "@helpers/patronRequestFreshness";
 import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
-	LoadAgencyQueryVariables,
-	LoadHostLmsQueryVariables,
 	LoadLocationQueryVariables,
 	LoadPatronIdentitiesQueryVariables,
 	LoadPatronRequestQueryVariables,
@@ -72,6 +68,7 @@ import type {
 
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
 });
@@ -206,30 +203,17 @@ function RouteComponent() {
 		),
 	);
 
-	const { data: patronLmsData, isLoading: patronLmsLoading } = useQuery({
-		...nonCriticalQuery,
-		queryKey: ["hostLms", patronRequest?.patronHostlmsCode],
-		queryFn: async () =>
-			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
-				query: `code:${patronRequest?.patronHostlmsCode}`,
-			}),
-		enabled: !!patronRequest?.patronHostlmsCode,
-	});
-	const patronHostLms = patronLmsData?.hostLms?.content?.[0];
-
-	const { data: patronAgencyData, isLoading: patronAgencyLoading } = useQuery({
-		...nonCriticalQuery,
-		queryKey: ["agency", patronHostLms?.id],
-		queryFn: async () =>
-			gqlClient.request<any, LoadAgencyQueryVariables>(getAgency, {
-				query: `hostLms:${patronHostLms?.id}`,
-			}),
-		enabled: !!patronHostLms?.id,
-	});
-	const patronAgency = patronAgencyData?.agencies?.content?.[0];
+	// The patron's library, from its Host LMS code. Two requests used to stand between
+	// those: code -> hostLms.id -> agency.code, each waiting on the one before it, and
+	// neither rendered anything. The directory is one cached list that both hops were
+	// walking the server to reconstruct.
+	const { data: patronAgencyCode, isLoading: patronAgencyCodeLoading } =
+		useQuery(
+			agencyCodeForHostLmsQuery(gqlClient, patronRequest?.patronHostlmsCode),
+		);
 
 	const { data: patronLibrary, isLoading: patronLibraryLoading } = useQuery(
-		libraryBasicsByAgencyCodeQuery(gqlClient, patronAgency?.code, "patron"),
+		libraryBasicsByAgencyCodeQuery(gqlClient, patronAgencyCode, "patron"),
 	);
 
 	// What the last action did to the status, once its refetch has settled.
@@ -571,9 +555,9 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : patronLibraryLoading ||
-						  patronLmsLoading ||
-						  patronAgencyLoading ? (
-							<CircularProgress size="1rem" />
+						  patronAgencyCodeLoading ||
+						  patronAgencyCodeLoading ? (
+							<CircularProgress size="1rem" aria-label={t("common.loading")} />
 						) : null}
 						{supplierLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -602,7 +586,7 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : supplierLibraryLoading ? (
-							<CircularProgress size="1rem" />
+							<CircularProgress size="1rem" aria-label={t("common.loading")} />
 						) : null}
 						{pickupLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -629,7 +613,7 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : pickupLibraryLoading ? (
-							<CircularProgress size="1rem" />
+							<CircularProgress size="1rem" aria-label={t("common.loading")} />
 						) : null}
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
@@ -640,6 +624,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : pickupLocationDataError ? (
@@ -920,6 +905,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -942,6 +928,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1746,6 +1733,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : pickupLocationDataError ? (
@@ -1815,6 +1803,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1853,6 +1842,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (
@@ -1875,6 +1865,7 @@ function RouteComponent() {
 									<CircularProgress
 										color="inherit"
 										size={13}
+										aria-label={t("common.loading")}
 										sx={{ marginInlineStart: "10px" }}
 									/>
 								) : (

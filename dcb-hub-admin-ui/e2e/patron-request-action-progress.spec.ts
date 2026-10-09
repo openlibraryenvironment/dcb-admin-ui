@@ -5,6 +5,7 @@ import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { scanForViolations } from "./fixtures/axe";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
+import libraries from "./fixtures-data/libraries.json";
 import {
 	patronRequestDetailMocks,
 	TRACKED_REQUEST,
@@ -31,6 +32,7 @@ const mockDetailWithStatus = (page: Page, status: () => string) =>
 		LoadConsortium: consortiumBasics,
 		LoadConsortiumHeader: consortiumBasics,
 		LoadHostLms: { hostLms: { totalSize: 0, content: [] } },
+		LoadLibraryDirectory: libraries,
 		...patronRequestDetailMocks,
 		LoadPatronRequest: () => ({
 			patronRequests: {
@@ -45,6 +47,7 @@ const mockAll = (page: Page) =>
 		LoadConsortium: consortiumBasics,
 		LoadConsortiumHeader: consortiumBasics,
 		LoadHostLms: { hostLms: { totalSize: 0, content: [] } },
+		LoadLibraryDirectory: libraries,
 		...patronRequestDetailMocks,
 	});
 

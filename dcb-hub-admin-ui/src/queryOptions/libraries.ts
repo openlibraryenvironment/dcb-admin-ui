@@ -2,8 +2,12 @@ import { queryOptions } from "@tanstack/react-query";
 import { GraphQLClient } from "graphql-request";
 
 import { getLibraries } from "@queries/getLibraries";
+import { getLibraryDirectory } from "@queries/getLibraryDirectory";
 import { findConsortium } from "@helpers/findConsortium";
-import type { LoadLibrariesQueryVariables } from "@generated/graphql";
+import type {
+	LoadLibrariesQueryVariables,
+	LoadLibraryDirectoryQueryVariables,
+} from "@generated/graphql";
 import type { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 
@@ -149,4 +153,69 @@ export const locationLibraryOptionsQuery = (gqlClient: GraphQLClient) =>
 							: []),
 					],
 				})),
+	});
+
+/**
+ * Codes to a library, for the pages that have a code and need a name.
+ *
+ * A SECOND projection of the same list, which the block above deliberately collapsed to
+ * one - so the reason it earns its own key: `getLibraries` carries `clientConfig`, a JSON
+ * scalar that cannot be sub-selected, for both of a library's Host LMS. A page that wants
+ * three library names should not pull every member's Host LMS configuration to get them.
+ *
+ * `Library` exposes no flat field for a Host LMS code - `agency` and `secondHostLms` are
+ * relations, and the `libraries` fetcher's Lucene builder does a flat `root.get(fieldName)`
+ * with no traversal - so this mapping cannot be asked of the server one library at a time.
+ * docs/query-error-policy.md, "Resolving a code to a library".
+ */
+const DIRECTORY_VARIABLES: LoadLibraryDirectoryQueryVariables = {
+	query: "",
+	pageno: 0,
+	pagesize: 1000,
+	order: "fullName",
+	orderBy: "ASC",
+};
+
+export const libraryDirectoryQueryKey = ["libraries", "directory"] as const;
+
+export const libraryDirectoryQuery = (gqlClient: GraphQLClient) =>
+	queryOptions({
+		...nonCriticalQuery,
+		queryKey: libraryDirectoryQueryKey,
+		queryFn: () =>
+			gqlClient.request<any, LoadLibraryDirectoryQueryVariables>(
+				getLibraryDirectory,
+				DIRECTORY_VARIABLES,
+			),
+		// One request at the project's scale constant of hundreds of member libraries,
+		// and half an hour, because a library's agency code does not move. Truncates
+		// past 1,000 exactly as allLibrariesQuery does, and a truncated directory shows
+		// a code where a name would be rather than anything worse.
+		staleTime: 1000 * 60 * 30,
+	});
+
+/**
+ * The agency code of the library whose Host LMS - either of them - carries this code.
+ *
+ * A select over the directory, so three of these on one page share one cache entry and
+ * cost no requests between them.
+ */
+export const agencyCodeForHostLmsQuery = (
+	gqlClient: GraphQLClient,
+	hostLmsCode: string | undefined,
+) =>
+	queryOptions({
+		...libraryDirectoryQuery(gqlClient),
+		// The guard is load-bearing. Without it an undefined code - every render before
+		// the patron request resolves - matches the first library that runs no second
+		// Host LMS, because `secondHostLms?.code` is undefined too, and the page shows
+		// a different library's name. libraryDirectory.test.ts.
+		select: (data: any): string | undefined =>
+			hostLmsCode
+				? (data?.libraries?.content ?? []).find(
+						(library: any) =>
+							library?.agency?.hostLms?.code === hostLmsCode ||
+							library?.secondHostLms?.code === hostLmsCode,
+					)?.agencyCode
+				: undefined,
 	});
