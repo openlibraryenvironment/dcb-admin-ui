@@ -544,7 +544,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.general")}
 							</Typography>
 						</Grid>
@@ -1060,7 +1060,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("requesting.bib_record")}
 							</Typography>
 						</Grid>
@@ -1209,7 +1209,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.supplying")}
 							</Typography>
 						</Grid>
@@ -1550,7 +1550,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.borrowing")}
 							</Typography>
 						</Grid>
@@ -1735,7 +1735,7 @@ function RouteComponent() {
 						columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 					>
 						<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-							<Typography variant="accordionSummary">
+							<Typography variant="accordionSummary" component="h2">
 								{t("patron_request.pickup")}
 							</Typography>
 						</Grid>
@@ -1951,7 +1951,7 @@ function RouteComponent() {
 				</TabPanel>
 
 				<TabPanel value={5}>
-					<Typography id="auditlog" variant="accordionSummary">
+					<Typography id="auditlog" variant="accordionSummary" component="h2">
 						{t("audit_log.title")}
 					</Typography>
 					<DataGrid
