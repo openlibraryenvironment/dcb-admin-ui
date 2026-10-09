@@ -195,7 +195,15 @@ function OutOfSequence() {
 					isFilterApplied={isFilterApplied}
 				/>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+				<Grid
+					size={{ xs: 4, sm: 8, md: 12 }}
+					// The five tabs above all advertise aria-controls for a panel named after
+					// their own path, and only all.tsx rendered one - so on this page the
+					// reference dangled. axe reports that as aria-valid-attr-value, critical.
+					role="tabpanel"
+					id={`patron-tabpanel-${currentPath.replace(/\//g, "-")}`}
+					aria-labelledby={`patron-tab-${currentPath.replace(/\//g, "-")}`}
+				>
 					<Typography
 						variant="h3"
 						sx={{
