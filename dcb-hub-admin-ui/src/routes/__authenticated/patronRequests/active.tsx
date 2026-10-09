@@ -20,10 +20,9 @@ import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { allLocationsQuery } from "@/queryOptions/locations";
-import { patronRequestTotalQuery } from "@/queryOptions/patronRequestTotals";
+import { patronRequestDashboardQuery } from "@/queryOptions/patronRequestDashboard";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/active")({
@@ -90,53 +89,34 @@ function Active() {
 		allLocationsQuery(gqlClient),
 	);
 
-	const { data: exceptionTotal = 0, isLoading: exceptionLoading } = useQuery(
-		patronRequestTotalQuery(gqlClient, "exception"),
-	);
-	const { data: outOfSequenceTotal = 0, isLoading: outOfSequenceLoading } =
-		useQuery(patronRequestTotalQuery(gqlClient, "outOfSequence"));
-	const { data: inProgressTotal = 0, isLoading: inProgressLoading } = useQuery(
-		patronRequestTotalQuery(gqlClient, "inProgress"),
-	);
-	const { data: finishedTotal = 0, isLoading: finishedLoading } = useQuery(
-		patronRequestTotalQuery(gqlClient, "finished"),
-	);
-
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery(allLibrariesQuery(gqlClient));
 
+	// Rows and all four tab counts in ONE request. Four separate
+	// LoadPatronRequestTotals used to go out beside this one.
 	const {
-		data: gridData,
+		data: dashboard,
 		isLoading: gridLoading,
 		isFetching,
-	} = useQuery({
-		queryKey: [
-			"patronRequests",
+	} = useQuery(
+		patronRequestDashboardQuery(gqlClient, {
 			gridId,
-			currentPagination,
-			currentSort,
-			currentFilter,
-		],
-		queryFn: () =>
-			gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
-				buildServerGridQueryVars({
-					filterModel: currentFilter,
-					sortModel: currentSort,
-					paginationModel: currentPagination,
-					baseQuery: queries.inProgress,
-					defaultOrder: "dateCreated",
-					defaultPageSize: 20,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
+			baseQuery: queries.inProgress,
+			paginationModel: currentPagination,
+			sortModel: currentSort,
+			filterModel: currentFilter,
+		}),
+	);
+
+	const exceptionTotal = dashboard?.counts.exception ?? 0;
+	const outOfSequenceTotal = dashboard?.counts.outOfSequence ?? 0;
+	const inProgressTotal = dashboard?.counts.inProgress ?? 0;
+	const finishedTotal = dashboard?.counts.finished ?? 0;
 
 	// Counts are derived directly from the query data rather than pushed into
 	// state via effects. The in-progress tab reflects the (possibly filtered)
 	// grid total, and the filter indicator compares it to the unfiltered total.
-	const gridTotalSize = gridData?.patronRequests?.totalSize as
-		number | undefined;
+	const gridTotalSize = dashboard?.totalSize;
 	const inProgressCount = gridTotalSize ?? inProgressTotal;
 	const isFilterApplied =
 		gridTotalSize != null ? gridTotalSize < inProgressTotal : false;
@@ -183,10 +163,10 @@ function Active() {
 					currentPath={currentPath}
 					totalSizes={totalSizes}
 					loading={{
-						exception: exceptionLoading,
-						outOfSequence: outOfSequenceLoading,
-						inProgress: inProgressLoading,
-						finished: finishedLoading,
+						exception: gridLoading,
+						outOfSequence: gridLoading,
+						inProgress: gridLoading,
+						finished: gridLoading,
 					}}
 					isFilterApplied={isFilterApplied}
 				/>
@@ -244,9 +224,9 @@ function Active() {
 						paginationMode="server"
 						paginationModel={currentPagination}
 						pivotingEnabled={false}
-						rowCount={gridData?.patronRequests?.totalSize ?? 0}
+						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
-						rows={gridData?.patronRequests?.content ?? []}
+						rows={dashboard?.rows ?? []}
 						scrollbarVisible={true}
 						sortModel={currentSort}
 						sortingMode="server"

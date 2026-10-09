@@ -76,6 +76,29 @@ fan-outs. `lmsFanOutQuery` keeps the default's attempt budget for a 5xx or a net
 failure and allows exactly one attempt for a 4xx. It is applied at all four
 `/items/availability` call sites, and `src/helpers/queryPolicy.test.ts` pins both halves.
 
+## One request per list page
+
+The five patron request tabs each need one page of rows plus all four tab counts.
+`/patronRequests/all` always had them in one aliased operation,
+`GetPatronRequestDashboard`; the other four fetched their rows and then four separate
+`LoadPatronRequestTotals`, so a cold visit to `/patronRequests/active` cost five requests
+where one does. `patronRequestDashboardQuery` in `src/queryOptions/` is that one request,
+and all five routes use it.
+
+Its `allQuery` variable is the ROWS the page lists, not the "all" bucket — the document
+was written for the one caller that happened to list everything. The factory's `select`
+normalises the response to `{ rows, totalSize, counts }` so no route reads the alias and
+nobody has to know.
+
+**The trade.** Four requests became one, and with it the independent failure those four
+had: the counts carried `nonCriticalQuery`, so a failing count used to leave the rows on
+screen. Now a failure takes the page, which is the right answer anyway — the rows are what
+the route is for, and they were in the same breath.
+
+`totalSize` is the row total WITH the user's filters applied; `counts` are the bucket
+totals without them. Both are needed: the tab bar shows unfiltered counts, and the filter
+indicator compares the two.
+
 ## Gate
 
 `e2e/degraded-data.spec.ts` mocks only a route's primary operations and asserts the page's

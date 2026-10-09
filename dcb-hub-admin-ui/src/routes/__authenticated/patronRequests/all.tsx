@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Typography, Grid } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
+import type { GridSortModel } from "@mui/x-data-grid-premium";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -18,14 +19,12 @@ import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { useGridState } from "@hooks/useGridState";
 import DataGrid from "@components/DataGrid/DataGrid";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
-import { getPatronRequestDashboard } from "@queries/getPatronRequestDashboard";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { queries } from "@constants/patronRequestGridQueries";
 import { composeQuery, drillSearchSchema } from "@helpers/drillSearch";
 import ReturnToInsights from "@components/Insights/ReturnToInsights";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import type { GetPatronRequestDashboardQueryVariables } from "@generated/graphql";
+import { patronRequestDashboardQuery } from "@/queryOptions/patronRequestDashboard";
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	// An Insights panel can arrive here with a composed filter and the view to
@@ -41,32 +40,21 @@ export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 		if (!auth?.isAuthenticated) return;
 		const gridId = "patronRequestsAll";
 		const currentPagination = { page: 0, pageSize: 20 };
-		const currentSort = [{ field: "dateCreated", sort: "desc" }];
+		const currentSort: GridSortModel = [{ field: "dateCreated", sort: "desc" }];
 		const currentFilter = { items: [] };
-		return queryClient.ensureQueryData({
-			queryKey: [
-				"patronRequestsDashboard",
+		// Through the same factory as the component, which is the only way the two keys
+		// are guaranteed equal. Hand-built here, they were not: this key had five
+		// elements and the component's had six, so the prefetch was fetched and never
+		// read. The comment above it claimed they matched exactly.
+		return queryClient.ensureQueryData(
+			patronRequestDashboardQuery(createGraphQLClient(cfg, auth), {
 				gridId,
-				currentPagination,
-				currentSort,
-				currentFilter,
-			],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<
-					any,
-					GetPatronRequestDashboardQueryVariables
-				>(getPatronRequestDashboard, {
-					allQuery: queries.all,
-					activeQuery: queries.inProgress,
-					exceptionQuery: queries.exception,
-					outOfSequenceQuery: queries.outOfSequence,
-					finishedQuery: queries.finished,
-					pageno: currentPagination.page,
-					pagesize: currentPagination.pageSize,
-					order: currentSort[0]?.field ?? "dateCreated",
-					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-				}),
-		});
+				baseQuery: queries.all,
+				paginationModel: currentPagination,
+				sortModel: currentSort,
+				filterModel: currentFilter,
+			}),
+		);
 	},
 	component: All,
 });
@@ -102,63 +90,36 @@ function All() {
 		columnVisibility: defaultPatronRequestColumnVisibility,
 	});
 
-	// Ideally, this would know to fetch the full query for whichever tab is on screen (all active etc)
-	// but also know NOT to fetch it for the others
+	// Rows and all four tab counts in ONE request, which this route always did -
+	// the other four tabs now share the same factory instead of fetching their
+	// counts separately.
 	const {
-		data: dashboardData,
+		data: dashboard,
 		isLoading: gridLoading,
 		isFetching,
-	} = useQuery({
-		queryKey: [
-			"patronRequestsDashboard",
+	} = useQuery(
+		patronRequestDashboardQuery(gqlClient, {
 			gridId,
 			baseQuery,
-			currentPagination,
-			currentSort,
-			currentFilter,
-		],
-		queryFn: () => {
-			const gridVars = buildServerGridQueryVars({
-				filterModel: currentFilter,
-				sortModel: currentSort,
-				paginationModel: currentPagination,
-				baseQuery,
-				defaultOrder: "dateCreated",
-				defaultPageSize: 20,
-			});
-			return gqlClient.request<any, GetPatronRequestDashboardQueryVariables>(
-				getPatronRequestDashboard,
-				{
-					allQuery: gridVars.query,
-					activeQuery: queries.inProgress,
-					exceptionQuery: queries.exception,
-					outOfSequenceQuery: queries.outOfSequence,
-					finishedQuery: queries.finished,
-					pageno: gridVars.pageno,
-					pagesize: gridVars.pagesize,
-					order: gridVars.order,
-					orderBy: gridVars.orderBy,
-				},
-			);
-		},
-		placeholderData: (previousData) => previousData,
-	});
+			paginationModel: currentPagination,
+			sortModel: currentSort,
+			filterModel: currentFilter,
+		}),
+	);
 
 	// Deriving layout metrics reactively from server output safely
-	const totalSizes = useMemo(() => {
-		const all = dashboardData?.allRequests?.totalSize ?? 0;
-		const exception = dashboardData?.exceptionRequests?.totalSize ?? 0;
-		const outOfSequence = dashboardData?.outOfSequenceRequests?.totalSize ?? 0;
-		const inProgress = dashboardData?.activeRequests?.totalSize ?? 0;
-		const finished = dashboardData?.finishedRequests?.totalSize ?? 0;
-		return {
-			exception,
-			outOfSequence,
-			inProgress,
-			finished,
-			all,
-		};
-	}, [dashboardData]);
+	const totalSizes = useMemo(
+		() => ({
+			exception: dashboard?.counts.exception ?? 0,
+			outOfSequence: dashboard?.counts.outOfSequence ?? 0,
+			inProgress: dashboard?.counts.inProgress ?? 0,
+			finished: dashboard?.counts.finished ?? 0,
+			// The true total, because this route's rows ARE the "all" bucket. The other
+			// four tabs cannot read it this way and sum the four buckets instead.
+			all: dashboard?.totalSize ?? 0,
+		}),
+		[dashboard],
+	);
 
 	// Pagination, sorting and filtering currently broken
 
@@ -270,9 +231,9 @@ function All() {
 						paginationMode="server"
 						paginationModel={currentPagination}
 						pivotingEnabled={false}
-						rowCount={dashboardData?.allRequests?.totalSize ?? 0}
+						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
-						rows={dashboardData?.allRequests?.content ?? []}
+						rows={dashboard?.rows ?? []}
 						scrollbarVisible={true}
 						sortModel={currentSort}
 						sortingMode="server"

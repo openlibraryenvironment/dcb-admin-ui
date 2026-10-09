@@ -18,7 +18,7 @@ import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestCo
 import { allLocationsQuery } from "@/queryOptions/locations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
-import { patronRequestTotalQuery } from "@/queryOptions/patronRequestTotals";
+import { patronRequestDashboardQuery } from "@/queryOptions/patronRequestDashboard";
 import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
@@ -26,7 +26,6 @@ import { queries } from "@constants/patronRequestGridQueries";
 import { composeQuery, drillSearchSchema } from "@helpers/drillSearch";
 import ReturnToInsights from "@components/Insights/ReturnToInsights";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
@@ -110,54 +109,35 @@ function Exception() {
 		allLocationsQuery(gqlClient),
 	);
 
-	const { data: exceptionTotal = 0, isLoading: exceptionLoading } = useQuery(
-		patronRequestTotalQuery(gqlClient, "exception"),
-	);
-	const { data: outOfSequenceTotal = 0, isLoading: outOfSequenceLoading } =
-		useQuery(patronRequestTotalQuery(gqlClient, "outOfSequence"));
-	const { data: inProgressTotal = 0, isLoading: inProgressLoading } = useQuery(
-		patronRequestTotalQuery(gqlClient, "inProgress"),
-	);
-	const { data: finishedTotal = 0, isLoading: finishedLoading } = useQuery(
-		patronRequestTotalQuery(gqlClient, "finished"),
-	);
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery(allLibrariesQuery(gqlClient));
 
+	// Rows and all four tab counts in ONE request. Four separate
+	// LoadPatronRequestTotals used to go out beside this one.
 	const {
-		data: gridData,
+		data: dashboard,
 		isLoading: gridLoading,
 		isFetching,
-	} = useQuery({
-		queryKey: [
-			"patronRequests",
+	} = useQuery(
+		patronRequestDashboardQuery(gqlClient, {
 			gridId,
-			baseQuery,
-			currentPagination,
-			currentSort,
-			currentFilter,
-		],
-		queryFn: () =>
-			gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
-				buildServerGridQueryVars({
-					filterModel: currentFilter,
-					sortModel: currentSort,
-					paginationModel: currentPagination,
-					baseQuery,
-					defaultOrder: "dateCreated",
-					defaultPageSize: 20,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
+			baseQuery: baseQuery,
+			paginationModel: currentPagination,
+			sortModel: currentSort,
+			filterModel: currentFilter,
+		}),
+	);
+
+	const exceptionTotal = dashboard?.counts.exception ?? 0;
+	const outOfSequenceTotal = dashboard?.counts.outOfSequence ?? 0;
+	const inProgressTotal = dashboard?.counts.inProgress ?? 0;
+	const finishedTotal = dashboard?.counts.finished ?? 0;
 
 	// Counts are derived directly from the query data rather than pushed into
 	// state via effects. The exception tab reflects the (possibly filtered) grid
 	// total, and the filter indicator compares it to the unfiltered total.
 	const unfilteredExceptionCount = exceptionTotal;
-	const gridTotalSize = gridData?.patronRequests?.totalSize as
-		number | undefined;
+	const gridTotalSize = dashboard?.totalSize;
 	const exceptionCount = gridTotalSize ?? unfilteredExceptionCount ?? 0;
 	const isFilterApplied =
 		gridTotalSize != null && unfilteredExceptionCount != null
@@ -207,10 +187,10 @@ function Exception() {
 					currentPath={currentPath}
 					totalSizes={totalSizes}
 					loading={{
-						exception: exceptionLoading,
-						outOfSequence: outOfSequenceLoading,
-						inProgress: inProgressLoading,
-						finished: finishedLoading,
+						exception: gridLoading,
+						outOfSequence: gridLoading,
+						inProgress: gridLoading,
+						finished: gridLoading,
 					}}
 					isFilterApplied={isFilterApplied}
 				/>
@@ -268,9 +248,9 @@ function Exception() {
 						paginationMode="server"
 						paginationModel={currentPagination}
 						pivotingEnabled={false}
-						rowCount={gridData?.patronRequests?.totalSize ?? 0}
+						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
-						rows={gridData?.patronRequests?.content ?? []}
+						rows={dashboard?.rows ?? []}
 						scrollbarVisible={true}
 						sortModel={currentSort}
 						sortingMode="server"
