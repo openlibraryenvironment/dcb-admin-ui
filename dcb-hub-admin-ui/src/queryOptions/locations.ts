@@ -3,6 +3,7 @@ import { GraphQLClient } from "graphql-request";
 
 import { getLocationForPatronRequestGrid } from "@queries/getLocationForPatronRequestGrid";
 import type { LoadLocationForPrGridQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 const PAGE_SIZE = 100;
 
@@ -58,6 +59,7 @@ export const fetchAllLocations = async (gqlClient: GraphQLClient) => {
 
 export const allLocationsQuery = (gqlClient: GraphQLClient) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: allLocationsQueryKey,
 		queryFn: () => fetchAllLocations(gqlClient),
 		staleTime: 1000 * 60 * 30,

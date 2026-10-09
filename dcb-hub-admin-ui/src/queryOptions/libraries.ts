@@ -5,6 +5,7 @@ import { getLibraries } from "@queries/getLibraries";
 import { findConsortium } from "@helpers/findConsortium";
 import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 import type { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 export interface LibraryAutocompleteOption extends PatronRequestAutocompleteOption {
 	/** Library UUID. `value` is the agency code, which is what forms submit. */
@@ -30,6 +31,7 @@ export const allLibrariesQueryKey = ["libraries", "all"] as const;
 
 export const allLibrariesQuery = (gqlClient: GraphQLClient) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: allLibrariesQueryKey,
 		queryFn: () =>
 			gqlClient.request<any, LoadLibrariesQueryVariables>(

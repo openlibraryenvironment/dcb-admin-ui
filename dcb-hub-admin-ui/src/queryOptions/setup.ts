@@ -3,6 +3,7 @@ import { GraphQLClient } from "graphql-request";
 
 import { getLibraryCount } from "@queries/getLibraryCount";
 import type { LoadLibrariesQueryVariables } from "@generated/graphql";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 
 /**
  * The library count that feeds the setup progress rail — W-5.
@@ -24,6 +25,7 @@ const LIBRARY_COUNT_VARIABLES: LoadLibrariesQueryVariables = {
 
 export const libraryCountQuery = (gqlClient: GraphQLClient, enabled = true) =>
 	queryOptions({
+		...nonCriticalQuery,
 		queryKey: LIBRARY_COUNT_QUERY_KEY,
 		enabled,
 		/**
