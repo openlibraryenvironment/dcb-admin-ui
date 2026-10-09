@@ -22,7 +22,6 @@ import {
 	Typography,
 } from "@mui/material";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
 import Error from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -102,7 +101,6 @@ function RouteComponent() {
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
-	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const [activeTab, setActiveTab] = useState(0);
 
 	const auditGridId = `audit-log-${id}`;
@@ -2009,9 +2007,7 @@ function RouteComponent() {
 						paginationModel={currentPagination}
 						onPaginationModelChange={handleAuditPaginationChange}
 						pivotingEnabled={false}
-						onRowModesModelChange={setRowModesModel}
 						toolbarVisible
-						rowModesModel={rowModesModel}
 						searchText="Search by audit"
 						scrollbarVisible={false}
 						sortingMode="client"
