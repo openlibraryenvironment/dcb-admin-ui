@@ -3,6 +3,7 @@ import { DateTimeRangePicker } from "@mui/x-date-pickers-pro/DateTimeRangePicker
 import dayjs, { Dayjs } from "dayjs";
 import { MultiInputDateTimeRangeField } from "@mui/x-date-pickers-pro/MultiInputDateTimeRangeField";
 import { DateTimePicker } from "@mui/x-date-pickers-pro";
+import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 // For date time ranges
 export function DateRangeFilterInput(props: GridFilterInputValueProps) {
@@ -23,22 +24,24 @@ export function DateRangeFilterInput(props: GridFilterInputValueProps) {
 	// Hardcoding `standard` here rendered an underline field against three
 	// outlined ones, at a different height - the misaligned row users saw.
 	return (
-		<DateTimeRangePicker
-			value={[startDate, endDate]}
-			onChange={handleChange}
-			inputRef={focusElementRef}
-			slots={{ field: MultiInputDateTimeRangeField }}
-			// localeText={{
-			//     start: t("ui.data_grid.filters.from"),
-			//     end: t("ui.data_grid.filters.to"),
-			// }}
-			slotProps={{
-				// The field renders as a row Stack that fills the value cell, so
-				// fullWidth inputs split it evenly rather than overflowing it.
-				textField: { size: "small", fullWidth: true },
-				actionBar: { actions: ["clear", "nextOrAccept"] }, // can we add custom actions. today applies to both - maybe it's better to keep it separate?
-			}}
-		/>
+		<DateLocalization>
+			<DateTimeRangePicker
+				value={[startDate, endDate]}
+				onChange={handleChange}
+				inputRef={focusElementRef}
+				slots={{ field: MultiInputDateTimeRangeField }}
+				// localeText={{
+				//     start: t("ui.data_grid.filters.from"),
+				//     end: t("ui.data_grid.filters.to"),
+				// }}
+				slotProps={{
+					// The field renders as a row Stack that fills the value cell, so
+					// fullWidth inputs split it evenly rather than overflowing it.
+					textField: { size: "small", fullWidth: true },
+					actionBar: { actions: ["clear", "nextOrAccept"] }, // can we add custom actions. today applies to both - maybe it's better to keep it separate?
+				}}
+			/>
+		</DateLocalization>
 	);
 }
 
@@ -53,18 +56,20 @@ export function SingleDateFilterInput(props: GridFilterInputValueProps) {
 	};
 
 	return (
-		<DateTimePicker
-			value={value}
-			onChange={handleChange}
-			inputRef={focusElementRef}
-			slotProps={{
-				// No helperText: it is rendered below the input, so it made this
-				// field taller than the rest of the filter row and pushed the
-				// panel's height around.
-				textField: { size: "small", fullWidth: true },
-				actionBar: { actions: ["clear", "today"] },
-			}}
-		/>
+		<DateLocalization>
+			<DateTimePicker
+				value={value}
+				onChange={handleChange}
+				inputRef={focusElementRef}
+				slotProps={{
+					// No helperText: it is rendered below the input, so it made this
+					// field taller than the rest of the filter row and pushed the
+					// panel's height around.
+					textField: { size: "small", fullWidth: true },
+					actionBar: { actions: ["clear", "today"] },
+				}}
+			/>
+		</DateLocalization>
 	);
 }
 

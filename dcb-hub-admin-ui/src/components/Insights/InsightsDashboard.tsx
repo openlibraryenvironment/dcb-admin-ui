@@ -81,6 +81,7 @@ import { clusterDrill, errorDrill } from "@helpers/insightsDrill";
 import DurationTrendPanel from "./DurationTrendPanel";
 import { resolveSubject, Subject } from "@helpers/insightsSubjects";
 import { isInsightsTrendsEnabled } from "@helpers/featureFlags";
+import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
 
@@ -286,36 +287,38 @@ export default function InsightsDashboard({
 							</ToggleButton>
 						))}
 					</ToggleButtonGroup>
-					<DateRangePicker
-						value={
-							customRange
-								? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
-								: [null, null]
-						}
-						onChange={(value) => {
-							const [start, end] = value;
-							if (start && end) {
-								setCustomRange({
-									startDate: start.startOf("day").toISOString(),
-									endDate: end.endOf("day").toISOString(),
-								});
-							} else if (!start && !end) {
-								setCustomRange(null);
+					<DateLocalization>
+						<DateRangePicker
+							value={
+								customRange
+									? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
+									: [null, null]
 							}
-						}}
-						disableFuture
-						// Two labelled inputs and the same actions as the data grid's date
-						// filter, rather than one combined field with neither.
-						slots={{ field: MultiInputDateRangeField }}
-						slotProps={{
-							textField: { size: "small" },
-							actionBar: { actions: ["clear", "nextOrAccept"] },
-						}}
-						localeText={{
-							start: t("insights.range.from"),
-							end: t("insights.range.to"),
-						}}
-					/>
+							onChange={(value) => {
+								const [start, end] = value;
+								if (start && end) {
+									setCustomRange({
+										startDate: start.startOf("day").toISOString(),
+										endDate: end.endOf("day").toISOString(),
+									});
+								} else if (!start && !end) {
+									setCustomRange(null);
+								}
+							}}
+							disableFuture
+							// Two labelled inputs and the same actions as the data grid's date
+							// filter, rather than one combined field with neither.
+							slots={{ field: MultiInputDateRangeField }}
+							slotProps={{
+								textField: { size: "small" },
+								actionBar: { actions: ["clear", "nextOrAccept"] },
+							}}
+							localeText={{
+								start: t("insights.range.from"),
+								end: t("insights.range.to"),
+							}}
+						/>
+					</DateLocalization>
 				</Stack>
 
 				<SubjectBar

@@ -21,6 +21,7 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { newAcquisitionsQueryOptions, StatsParams } from "@helpers/statsApi";
 
 import PanelState from "./PanelState";
+import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 const PANEL_MIN_HEIGHT = 280;
 
@@ -65,13 +66,15 @@ export default function NewAcquisitionsPanel({
 							{t("insights.charts.new_acquisitions.subtitle")}
 						</Typography>
 					</Box>
-					<DatePicker
-						label={t("insights.charts.new_acquisitions.acquired_since")}
-						value={acquiredSince}
-						onChange={(value) => value && setAcquiredSince(value)}
-						slotProps={{ textField: { size: "small" } }}
-						disableFuture
-					/>
+					<DateLocalization>
+						<DatePicker
+							label={t("insights.charts.new_acquisitions.acquired_since")}
+							value={acquiredSince}
+							onChange={(value) => value && setAcquiredSince(value)}
+							slotProps={{ textField: { size: "small" } }}
+							disableFuture
+						/>
+					</DateLocalization>
 				</Stack>
 
 				<PanelState
