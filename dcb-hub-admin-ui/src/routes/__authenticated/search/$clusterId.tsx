@@ -69,6 +69,12 @@ function ClusterLayout() {
 		{
 			key: "placeRequest",
 			onClick: () => setShowRequestModal(true),
+			// Unreachable today, and kept deliberately: canAccessDcbAdmin admits exactly
+			// ADMIN and CONSORTIUM_ADMIN, so every account that can render this page
+			// passes this check too. It becomes live again the moment the role model
+			// widens - a consortium viewer who may read a cluster but not request from
+			// it. Do not read it as evidence of a restriction that exists now; the
+			// control that does exist is dcb-service's @Secured.
 			disabled: !isAnAdmin,
 			label: t("requesting.place_title"),
 		},

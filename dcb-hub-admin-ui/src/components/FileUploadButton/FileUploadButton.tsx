@@ -96,7 +96,7 @@ const FileUploadButton = forwardRef<HTMLInputElement, FileUploadButtonProps>(
 						</Tooltip>
 						<img
 							src={previewUrl}
-							alt="Preview"
+							alt={String(t("ui.a11y.image_preview"))}
 							style={{
 								width: "100%",
 								height: "100%",

@@ -185,7 +185,7 @@ function AuthenticatedLayout() {
 	if (auth.error) {
 		content = (
 			<Error
-				title="Authentication Error"
+				title={t("ui.error.auth_error_title")}
 				message={t("ui.error.auth_error", { details: auth.error.message })}
 				action={t("ui.error.return_to_login")}
 				goBack={"/login"}

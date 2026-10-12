@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryFunction } from "@tanstack/react-query";
 
 import PanelState from "./PanelState";
 
@@ -42,7 +42,10 @@ interface TableStatPanelProps<T> {
 	subtitleKey: string;
 	queryOptions: {
 		queryKey: readonly unknown[];
-		queryFn: () => Promise<T[]>;
+		// TanStack's own type, not `() => Promise<T[]>`. The hand-written signature took
+		// no arguments, so a queryFn that reads the context - which is where the
+		// AbortSignal comes from - did not satisfy it.
+		queryFn: QueryFunction<T[], readonly unknown[]>;
 	};
 	columns: StatColumn<T>[];
 	getRowKey: (row: T) => string;

@@ -55,7 +55,14 @@ export default function QuickWalkUpRequest({
 	const navigate = useNavigate();
 	const { cfg } = useRouter().options.context;
 	const gqlClient = useGraphQLClient();
-	const staffAgencyCode = String(auth.user?.profile?.code);
+	// Guarded, as StaffRequest does it. `String(undefined)` is the five-character
+	// string "undefined", not empty - so a token with no `code` claim left this
+	// truthy: the item picker rendered ENABLED and could never match an item
+	// (`item.agency.code === "undefined"`), and the library lookup went out as
+	// `agencyCode:undefined`. Empty is the honest value, and it disables the picker.
+	const staffAgencyCode = auth.user?.profile?.code
+		? String(auth.user?.profile?.code)
+		: "";
 
 	const headers = useMemo(
 		() => ({ Authorization: `Bearer ${auth.user?.access_token}` }),
@@ -194,12 +201,16 @@ export default function QuickWalkUpRequest({
 	const { data: availabilityData } = useQuery({
 		...lmsFanOutQuery,
 		queryKey: ["availability", resolvedBibClusterId, cfg.VITE_DCB_API_BASE],
-		queryFn: async () => {
+		// `signal`, because this is the member-LMS fan-out: dcb-service turns one call
+		// into one request per Host LMS to systems we do not own. Abandoning the form
+		// otherwise leaves it running against every member library.
+		queryFn: async ({ signal }) => {
 			const response = await axios.get(
 				`${cfg.VITE_DCB_API_BASE}/items/availability`,
 				{
 					headers,
 					params: { clusteredBibId: resolvedBibClusterId },
+					signal,
 				},
 			);
 			return response.data;

@@ -5,6 +5,7 @@ import {
 	TRACKED_REQUEST,
 } from "./patron-request-detail";
 import { mockLatestReleases } from "./service-status-mocks";
+import { overrideGraphQL } from "./graphql-mocks";
 import consortiumBasics from "../fixtures-data/consortium-basics.json";
 import consortium from "../fixtures-data/consortium.json";
 import libraries from "../fixtures-data/libraries.json";
@@ -21,6 +22,11 @@ import locations from "../fixtures-data/locations.json";
 import groups from "../fixtures-data/groups.json";
 import agencies from "../fixtures-data/agencies.json";
 import dataChangeLog from "../fixtures-data/data-change-log.json";
+import clusterRecord from "../fixtures-data/cluster-record.json";
+import catalogMetrics from "../fixtures-data/catalog-metrics.json";
+import audit from "../fixtures-data/audit.json";
+import bibDetail from "../fixtures-data/bib-detail.json";
+import { CLUSTER_ID, mockClusterRest } from "./cluster-mocks";
 
 /**
  * The routes a user cannot avoid, and the mocks they need.
@@ -88,10 +94,30 @@ export const MOCKS = {
 	LoadGroups: groups,
 	LoadAgencies: agencies,
 	LoadDataChangeLog: dataChangeLog,
+	// The detail route's own operation, over the same shape as the list's. Absent from
+	// here rather than unfixturable, which is why that route was unscanned.
+	GetDataChangeLogById: dataChangeLog,
 	LoadAlarms: { alarms: { totalSize: 0, content: [] } },
 	LoadAudits: { audits: { totalSize: 0, content: [] } },
 	LoadBibs: { sourceBibs: { totalSize: 0, content: [] } },
 	LoadPatronRequestTotals: { patronRequests: { totalSize: 0 } },
+	// Unmocked, both 404'd quietly on every gate run and the scans measured their fallbacks.
+	// docs/testing.md, "An unmocked operation is not a neutral default"
+	// The cluster layout reads the title-only projection and its tabs read the full
+	// record; two operations over the same data, so one fixture answers both.
+	ClusterRecords: clusterRecord,
+	ClusterRecordsTitleOnly: clusterRecord,
+	LoadLocationForPRGrid: locations,
+	LoadAuditIncidence: {
+		auditIncidence: {
+			interval: "DAY",
+			totalSize: 12,
+			buckets: [
+				{ bucketStart: "2026-09-29T00:00:00Z", count: 7 },
+				{ bucketStart: "2026-09-30T00:00:00Z", count: 5 },
+			],
+		},
+	},
 };
 
 /**
@@ -541,6 +567,205 @@ export const ROUTES: ScannedRoute[] = [
 	},
 	{
 		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/supplierRequests/all",
+		ready: async (page) => {
+			await expect(
+				page.getByText("Alpha and the art of failure").first(),
+			).toBeVisible();
+		},
+	},
+
+	/*
+	 * The agency and location detail routes. Both were blocked from this list, not by a
+	 * defect but by the shared MOCKS answering LoadAgency and LoadLocation EMPTY - which
+	 * the patron request detail page needs them to do. `overrideGraphQL` answers those
+	 * two differently for these routes only.
+	 */
+	/*
+	 * Two routes that needed no new record data to join this list - one REST response
+	 * and one override of a mock that is empty on purpose elsewhere.
+	 *
+	 * They were reported as fixture-blocked when they were not. A detail route cannot be
+	 * scanned without a record, but a GRID route can be scanned over its own empty state,
+	 * which nine entries in this list already do - and the library bibs grid needed only
+	 * the library basics that the patron request detail page deliberately empties.
+	 */
+	{
+		/*
+		 * The one admin surface that ran no axe at all: its own spec drives the
+		 * invitation flow and never scans. Readiness is a real timeout against a
+		 * preview, so the checks are mocked here exactly as they are there.
+		 */
+		path: "/serviceInfo/dcbNcipOnboarding",
+		setup: async (page) => {
+			await page.route("**/api/v1/dcb-profile-ncip2/readiness", (route) =>
+				route.fulfill({
+					json: {
+						ready: false,
+						profile: "DCB-NCIP2.02+",
+						profileVersion: 1,
+						dcbBaseUrl: "https://dcb.example",
+						checks: [
+							{
+								code: "PEER_AUTH_ENABLED",
+								status: "FAIL",
+								message: "Enable dcb.peer-auth.enabled.",
+								remediation: "Enable dcb.peer-auth.enabled.",
+							},
+						],
+					},
+				}),
+			);
+		},
+		ready: async (page) => {
+			await expect(page.getByText("PEER_AUTH_ENABLED")).toBeVisible();
+		},
+	},
+	{
+		// Its own two operations, plus LoadAgency - which the shared set empties for the
+		// patron request detail page - so the source library resolves to a name.
+		path: "/bibs/bb220000-2222-5222-9222-bbbbbbbbbbbb",
+		setup: (page) =>
+			overrideGraphQL(page, {
+				LoadBibMainDetails: bibDetail,
+				LoadBibSourceRecord: bibDetail,
+				LoadAgency: agencies,
+			}),
+		ready: async (page) => {
+			await expect(page.getByText("Lovelace, Ada").first()).toBeVisible();
+		},
+	},
+	{
+		// GetAuditsByPatronRequest stays empty from the shared set: that is the
+		// previous/next strip, and having neither is a state the page has to handle.
+		path: "/patronRequests/audits/a0d17e42-6b58-4f91-8c23-5e7a9d4b1c60",
+		setup: (page) => overrideGraphQL(page, { GetAuditById: audit }),
+		ready: async (page) => {
+			await expect(
+				page.getByText("Virtual checkout failed at the supplying agency"),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo/catalogMetricsByHostLms",
+		setup: async (page) => {
+			// A FLAT array: the grid does rows={records ?? []}, not a paged envelope.
+			await page.route("**/hostlmss/importIngestDetails", (route) =>
+				route.fulfill({ json: catalogMetrics }),
+			);
+		},
+		ready: async (page) => {
+			await expect(page.getByText("alpha-lms").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/bibs",
+		// LoadLibraryBasics is empty in the shared set for the patron request detail
+		// page; this page needs it to title itself and render its tabs.
+		setup: (page) =>
+			overrideGraphQL(page, { LoadLibraryBasics: libraryDetail }),
+		ready: async (page) => {
+			// LoadBibs is mocked empty, so the grid's own empty state is this page
+			// finished - the same standard /bibs and /serviceInfo/alarms are held to.
+			// This grid has its OWN empty string, not the shared ui.data_grid one.
+			await expect(
+				page.getByText("No bib records found").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/serviceInfo/dataChangeLog/9d2a5f81-3c64-4b09-8e75-6a1f3b8c4d90",
+		ready: async (page) => {
+			await expect(page.getByText("Corrected the agency code")).toBeVisible();
+		},
+	},
+	{
+		path: "/agencies/4c9f6b23-8d17-4a50-9e38-1b7c5d2a6f44",
+		setup: (page) => overrideGraphQL(page, { LoadAgency: agencies }),
+		ready: async (page) => {
+			await expect(page.getByText("Alpha Test Agency").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/locations/1f0c9b3a-1111-5111-9111-111111111111",
+		setup: (page) => overrideGraphQL(page, { LoadLocation: locations }),
+		ready: async (page) => {
+			// The location's own name. The loading branch now titles the page
+			// "Locations" generically, so the specific name is what says the query
+			// answered.
+			await expect(page.getByText("Alpha Main Desk").first()).toBeVisible();
+		},
+	},
+
+	/*
+	 * Two detail routes whose loading branch used to render a bare spinner where the
+	 * loaded page renders breadcrumbs and a title box. Both already had their data in
+	 * the shared MOCKS, so nothing but this list was missing - which is why neither was
+	 * measured.
+	 */
+	{
+		path: "/hostlmss/h1h1h1h1-1111-5111-9111-111111111111",
+		ready: async (page) => {
+			await expect(page.getByText("alpha-lms").first()).toBeVisible();
+		},
+	},
+	{
+		path: "/groups/99999999-1111-5111-9111-111111111111/settings",
+		ready: async (page) => {
+			// The circulation section, which only renders once the group has arrived.
+			// Not a `grid`: this page lays out with MUI Grid and has no DataGrid.
+			await expect(page.getByText("Circulation").first()).toBeVisible();
+		},
+	},
+
+	/*
+	 * The cluster surface: a layout and its five tabs, none of which any spec opened.
+	 *
+	 * It is reached from the shared index, it is where a member record is actually
+	 * inspected, and `items` is the live fan-out - dcb-service turns one
+	 * /items/availability call into one request per Host LMS to systems we do not own,
+	 * and this tab fires two of them concurrently. That makes it the route whose cost
+	 * matters most and the one nothing was measuring.
+	 *
+	 * Each predicate names something only its own tab renders. The cluster title is not
+	 * usable for that: it is in the h1 on all five.
+	 */
+	{
+		path: `/search/${CLUSTER_ID}/cluster`,
+		setup: mockClusterRest,
+		ready: async (page) => {
+			await expect(page.getByText("Date created").first()).toBeVisible();
+		},
+	},
+	{
+		path: `/search/${CLUSTER_ID}/clusterExplanation`,
+		setup: mockClusterRest,
+		ready: async (page) => {
+			// The parsed event type, so the audit log has been fetched AND interpreted -
+			// an empty grid would pass a scan without proving either.
+			await expect(
+				page.getByText("Match - high confidence").first(),
+			).toBeVisible();
+		},
+	},
+	{
+		path: `/search/${CLUSTER_ID}/items`,
+		setup: mockClusterRest,
+		ready: async (page) => {
+			// A status code from the availability response, via the column's valueGetter.
+			await expect(page.getByText("AVAILABLE").first()).toBeVisible();
+		},
+	},
+	{
+		path: `/search/${CLUSTER_ID}/identifiers`,
+		setup: mockClusterRest,
+		ready: async (page) => {
+			// The author column, which only this tab has.
+			await expect(page.getByText("Lovelace, Ada").first()).toBeVisible();
+		},
+	},
+	{
+		path: `/search/${CLUSTER_ID}/requestingHistory`,
+		setup: mockClusterRest,
 		ready: async (page) => {
 			await expect(
 				page.getByText("Alpha and the art of failure").first(),

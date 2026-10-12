@@ -8,7 +8,7 @@ import {
 	Link,
 } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { z } from "zod";
+import { z } from "@schemas/zod";
 import { validate } from "uuid";
 import { isEqual } from "lodash";
 import { GridColDef } from "@mui/x-data-grid-premium";
@@ -21,6 +21,7 @@ import { SearchQueryBuilder } from "@components/SearchQueryBuilder/SearchQueryBu
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
 import { useGridState } from "@hooks/useGridState";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { useSearchStore } from "@hooks/useSearchStore";
 import {
 	buildQueryFromCriteria,
@@ -81,8 +82,18 @@ function SearchPage() {
 	}, [q, setCriteria]);
 
 	const { data, isLoading, isFetching, isError } = useQuery({
+		/*
+		 * The one place a route's PRIMARY data is deliberately not thrown to the
+		 * boundary - see docs/query-error-policy.md, "A failure the user caused".
+		 *
+		 * The shared index rejects a malformed query with a 4xx, and the control that
+		 * produced it is the SearchQueryBuilder on this page. Replacing the page with
+		 * GlobalError takes that builder away, and with it the query the user has to
+		 * edit to recover; the `isError` branch below keeps both on screen.
+		 */
+		...nonCriticalQuery,
 		queryKey: ["search", q, paginationModel.page, paginationModel.pageSize],
-		queryFn: async () => {
+		queryFn: async ({ signal }) => {
 			if (!auth.user?.access_token || !q)
 				return { instances: [], totalRecords: 0 };
 
@@ -95,8 +106,12 @@ function SearchPage() {
 				? `${baseUrl}/public/opac-inventory/instances/${q}`
 				: `${baseUrl}/search/instances?query=${encodeURIComponent(q)}&offset=${paginationModel.page * paginationModel.pageSize}&limit=${paginationModel.pageSize}`;
 
+			// `signal`, so paging through the shared index cancels the request the user
+			// has already moved past. TanStack discards the response either way; the
+			// search service does not stop computing it without this.
 			const response = await fetch(requestURL, {
 				headers: { Authorization: `Bearer ${auth.user.access_token}` },
+				signal,
 			});
 
 			if (!response.ok) {
@@ -188,6 +203,8 @@ function SearchPage() {
 					message={t("search.shared_index_unavailable_message")}
 					action={t("ui.actions.go_back")}
 					goBack="/"
+					// Same reason as below: PageContainer already titled this page.
+					headingLevel="h2"
 				/>
 			</PageContainer>
 		);
@@ -221,6 +238,8 @@ function SearchPage() {
 					description={t("ui.info.reload")}
 					action={t("ui.actions.reload")}
 					onAction={() => location.reload()}
+					// This page keeps its own h1, so the failure is a section under it.
+					headingLevel="h2"
 				/>
 			) : (
 				<DataGrid

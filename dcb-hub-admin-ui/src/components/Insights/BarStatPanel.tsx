@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryFunction } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
 
@@ -17,7 +17,10 @@ interface BarStatPanelProps<T> {
 	// A statsApi *QueryOptions(...) result. Built by the parent with the rest client.
 	queryOptions: {
 		queryKey: readonly unknown[];
-		queryFn: () => Promise<T[]>;
+		// TanStack's own type, not `() => Promise<T[]>`. The hand-written signature took
+		// no arguments, so a queryFn that reads the context - which is where the
+		// AbortSignal comes from - did not satisfy it.
+		queryFn: QueryFunction<T[], readonly unknown[]>;
 	};
 	getLabel: (row: T) => string;
 	/** Set by callers whose figure has a registry entry; see insightsMetrics. */

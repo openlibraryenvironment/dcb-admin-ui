@@ -1,4 +1,8 @@
 // @vitest-environment jsdom
+/* eslint-disable no-restricted-syntax -- a `label` here is the INPUT to an assertion
+   about accessible names, not a string any user reads, so the hardcoded-accessible-name
+   rule does not apply. Routing it through t() would assert the translator, not the
+   component. */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { MenuList } from "@mui/material";

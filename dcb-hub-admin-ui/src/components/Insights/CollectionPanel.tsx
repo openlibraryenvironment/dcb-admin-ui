@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryFunction } from "@tanstack/react-query";
 import { Card, CardContent, Typography } from "@mui/material";
 
 import type { collectionAnalysisPolicy } from "@helpers/statsApi";
@@ -17,7 +17,10 @@ interface CollectionPanelProps<T> {
 	subtitleKey: string;
 	queryOptions: typeof collectionAnalysisPolicy & {
 		queryKey: readonly unknown[];
-		queryFn: () => Promise<T>;
+		// TanStack's own type, not `() => Promise<T>`. The hand-written signature took
+		// no arguments, so a queryFn that reads the context - which is where the
+		// AbortSignal comes from - did not satisfy it.
+		queryFn: QueryFunction<T, readonly unknown[]>;
 	};
 	isEmpty: (data: T) => boolean;
 	children: (data: T) => ReactNode;

@@ -178,7 +178,19 @@ export default function FunctionalSettingInheritance({
 
 	/** The sentence for one row. The RULE behind it is in `provenanceOf`, and tested there. */
 	function provenance(row: ResolvedSetting): string {
-		return t(`settings_inheritance.${provenanceOf(row)}`, {
+		const kind = provenanceOf(row);
+
+		// "Not set anywhere" interpolates nothing, and an undecided row has no source by
+		// definition - so computing one asked i18next for
+		// `settings_inheritance.level.null` on every render of such a row. The sentence
+		// came out right; the lookup did not, and it is exactly what the
+		// missing-translation gate is for. Found by e2e/i18n-missing.spec.ts the moment
+		// /groups/$groupId/settings joined ROUTES.
+		if (kind === "undecided") {
+			return t("settings_inheritance.undecided");
+		}
+
+		return t(`settings_inheritance.${kind}`, {
 			source: row.sourceName ?? t(`settings_inheritance.level.${row.source}`),
 		});
 	}

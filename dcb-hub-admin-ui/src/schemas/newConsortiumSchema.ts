@@ -1,5 +1,5 @@
 import i18n from "@/i18n";
-import { z } from "zod";
+import { z } from "@schemas/zod";
 
 /**
  * A consortium cannot exist without a library group of type "Consortium" -

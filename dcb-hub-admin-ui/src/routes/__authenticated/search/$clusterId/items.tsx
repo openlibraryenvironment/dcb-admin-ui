@@ -79,14 +79,22 @@ function ItemsPageComponent() {
 	const { data, isLoading } = useQuery({
 		...lmsFanOutQuery,
 		queryKey: ["clusterItems", clusterId],
-		queryFn: async () => {
-			// Fetch Standard and No-Filter concurrently
+		queryFn: async ({ signal }) => {
+			// Fetch Standard and No-Filter concurrently.
+			//
+			// `signal` on both: dcb-service turns ONE of these into one request per Host
+			// LMS to systems we do not own, and this fires two. Leaving a cluster before
+			// they land otherwise leaves both fan-outs running to completion against
+			// every member library, which is the amplification doctrine treats as a
+			// security bug rather than a performance one.
 			const [standardRes, noFilterRes] = await Promise.all([
 				client.get<any>("/items/availability", {
 					params: { clusteredBibId: clusterId },
+					signal,
 				}),
 				client.get<any>("/items/availability", {
 					params: { clusteredBibId: clusterId, filters: "none" },
+					signal,
 				}),
 			]);
 

@@ -164,7 +164,12 @@ function Exception() {
 
 	if (supplyingLibrariesLoading) {
 		return (
-			<PageContainer hideBreadcrumbs>
+			// The SAME chrome as the loaded branch below, not a bare spinner. These five
+			// routes' title and breadcrumbs are static translations, available on the
+			// first render - so withholding them only to add them when the data lands
+			// inserts 77px above the grid and pushes it down. Measured at 768x1024:
+			// 0.069 of layout shift against a 0.05 budget, 0.004 with this.
+			<PageContainer title={t("nav.patronRequests.name")}>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("nav.patronRequests.name").toLowerCase(),

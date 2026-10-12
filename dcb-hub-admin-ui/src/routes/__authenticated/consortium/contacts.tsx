@@ -94,7 +94,7 @@ function Contacts() {
 				renderCell: (params: any) => (
 					<RenderAttribute
 						attribute={`mailto:${params.value ?? ""}`}
-						title="email"
+						title={t("libraries.contacts.email")}
 						type="url"
 					/>
 				),

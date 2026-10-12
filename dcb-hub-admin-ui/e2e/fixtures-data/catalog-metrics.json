@@ -1,0 +1,26 @@
+[
+	{
+		"id": "h1h1h1h1-1111-5111-9111-111111111111",
+		"name": "alpha-lms",
+		"ingestEnabled": true,
+		"sourceRecordCount": 1240331,
+		"awaiting": 412,
+		"failed": 7,
+		"ingested": 1239912,
+		"bibRecordCount": 1239912,
+		"difference": 0,
+		"checkPointId": "2026-09-30T14:00:00Z"
+	},
+	{
+		"id": "h2h2h2h2-2222-5222-9222-222222222222",
+		"name": "beta-lms",
+		"ingestEnabled": false,
+		"sourceRecordCount": 88104,
+		"awaiting": 0,
+		"failed": 1203,
+		"ingested": 86901,
+		"bibRecordCount": 86901,
+		"difference": 1203,
+		"checkPointId": "2026-08-14T09:12:00Z"
+	}
+]

@@ -1,0 +1,22 @@
+{
+	"ingest": {
+		"bb220000-2222-5222-9222-bbbbbbbbbbbb": [
+			{
+				"id": "ff660000-6666-5666-9666-ffffffffffff",
+				"processType": "BIB_INGEST",
+				"processId": "11770000-7777-5777-9777-111111111111",
+				"subjectId": "bb220000-2222-5222-9222-bbbbbbbbbbbb",
+				"message": "High confidence match with Bib [bb220000-2222-5222-9222-bbbbbbbbbbbb] on [ISBN] = [9780000000001]",
+				"timestamp": "2026-09-30T14:00:00Z"
+			},
+			{
+				"id": "22880000-8888-5888-9888-222222222222",
+				"processType": "BIB_INGEST",
+				"processId": "11770000-7777-5777-9777-111111111111",
+				"subjectId": "bb220000-2222-5222-9222-bbbbbbbbbbbb",
+				"message": "No existing cluster found, creating one",
+				"timestamp": "2026-09-30T13:59:00Z"
+			}
+		]
+	}
+}

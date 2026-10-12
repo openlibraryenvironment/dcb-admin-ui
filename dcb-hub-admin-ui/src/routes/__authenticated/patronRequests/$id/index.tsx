@@ -1999,7 +1999,7 @@ function RouteComponent() {
 						onPaginationModelChange={handleAuditPaginationChange}
 						pivotingEnabled={false}
 						toolbarVisible
-						searchText="Search by audit"
+						searchText={t("ui.data_grid.search_by_audit")}
 						scrollbarVisible={false}
 						sortingMode="client"
 						sortModel={currentSort}

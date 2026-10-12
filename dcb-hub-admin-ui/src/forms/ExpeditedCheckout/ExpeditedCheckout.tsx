@@ -38,6 +38,7 @@ import request from "graphql-request";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { getLibrary } from "@queries/getLibrary";
 import { lmsFanOutQuery } from "@helpers/queryPolicy";
+import { requestErrorSummary } from "@helpers/safeErrorLog";
 import {
 	LibrariesQueryData,
 	PatronRequestQueryData,
@@ -53,7 +54,14 @@ export default function ExpeditedCheckout({
 }: PatronRequestFormType) {
 	const { t } = useTranslation();
 	const auth = useAuth();
-	const staffAgencyCode = String(auth.user?.profile?.code);
+	// Guarded, as StaffRequest does it. `String(undefined)` is the five-character
+	// string "undefined", not empty - so a token with no `code` claim left this
+	// truthy: the item picker rendered ENABLED and could never match an item
+	// (`item.agency.code === "undefined"`), and the library lookup went out as
+	// `agencyCode:undefined`. Empty is the honest value, and it disables the picker.
+	const staffAgencyCode = auth.user?.profile?.code
+		? String(auth.user?.profile?.code)
+		: "";
 	// Also the ID of the library of the item.
 	const { cfg } = useRouter().options.context;
 	const gqlClient = useGraphQLClient();
@@ -274,10 +282,14 @@ export default function ExpeditedCheckout({
 	} = useQuery<any>({
 		...lmsFanOutQuery,
 		queryKey: ["itemAvailability", bibClusterId, cfg.VITE_DCB_API_BASE],
-		queryFn: () =>
+		// `signal`, because this is the member-LMS fan-out: dcb-service turns one call
+		// into one request per Host LMS to systems we do not own. Abandoning the form
+		// otherwise leaves it running against every member library.
+		queryFn: ({ signal }) =>
 			axios.get(`${cfg.VITE_DCB_API_BASE}/items/availability`, {
 				headers,
 				params: { clusteredBibId: bibClusterId },
+				signal,
 			}),
 		enabled: (activeStep === 1 || checkoutCompleted) && !!bibClusterId,
 		select: (response) => response.data,
@@ -382,7 +394,7 @@ export default function ExpeditedCheckout({
 			}
 		},
 		onError: (error) => {
-			console.error("Error validating patron:", error);
+			console.error("Patron lookup failed:", requestErrorSummary(error));
 			setAlert({
 				open: true,
 				severity: "error",
@@ -445,7 +457,10 @@ export default function ExpeditedCheckout({
 			setActiveStep(2);
 		},
 		onError: (error: any) => {
-			console.error("Error submitting patron request:", error.response?.data);
+			console.error(
+				"Patron request submission failed:",
+				requestErrorSummary(error),
+			);
 			setAlert({
 				open: true,
 				severity: "error",

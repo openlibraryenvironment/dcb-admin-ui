@@ -1,7 +1,13 @@
 services:
   dcb-admin:
     build:
-      context: .
+      # Both paths are relative to this file, and the application - with its
+      # package.json and its docker/ directory - is one level down. `context: .`
+      # with a root-relative dockerfile named a path that does not exist, so
+      # `docker compose build` failed on a file-not-found. The container gate
+      # builds the image directly (playwright.container.config.ts) and so never
+      # exercised this; compose is the by-hand path.
+      context: ./dcb-hub-admin-ui
       dockerfile: docker/production/Dockerfile
     image: dcb-admin:local
     ports:

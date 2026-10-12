@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@schemas/zod";
 
 // .min(1) rather than .uuid(): schema.graphqls only declares `id: ID!`
 // (opaque GraphQL ID), not confirmed to always be a UUID - a stricter check

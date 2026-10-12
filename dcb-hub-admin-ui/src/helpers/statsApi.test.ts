@@ -37,14 +37,23 @@ describe("statsApi wire contract", () => {
 		client: AxiosInstance;
 		url: () => string;
 		params: () => Record<string, unknown> | undefined;
+		signal: () => AbortSignal | undefined;
 	} => {
 		let capturedUrl = "";
 		let capturedParams: Record<string, unknown> | undefined;
+		let capturedSignal: AbortSignal | undefined;
 
 		const get = vi.fn(
-			async (url: string, config?: { params?: Record<string, unknown> }) => {
+			async (
+				url: string,
+				config?: {
+					params?: Record<string, unknown>;
+					signal?: AbortSignal;
+				},
+			) => {
 				capturedUrl = url;
 				capturedParams = config?.params;
+				capturedSignal = config?.signal;
 				return { data: body };
 			},
 		);
@@ -53,8 +62,19 @@ describe("statsApi wire contract", () => {
 			client: { get } as unknown as AxiosInstance,
 			url: () => capturedUrl,
 			params: () => capturedParams,
+			signal: () => capturedSignal,
 		};
 	};
+
+	/**
+	 * The slice of TanStack's QueryFunctionContext these factories read.
+	 *
+	 * Called with no argument at all before the signal was threaded through, which is
+	 * exactly why `queryFn()` has to be given one now - destructuring `{ signal }` off
+	 * `undefined` throws.
+	 */
+	const context = (signal: AbortSignal) =>
+		({ signal, queryKey: [], client: undefined, meta: undefined }) as never;
 
 	// Every factory that takes only (client, params), called through one code path so a new
 	// endpoint added on the old base is caught without anybody remembering to list it here.
@@ -63,7 +83,10 @@ describe("statsApi wire contract", () => {
 			name.endsWith("QueryOptions") &&
 			typeof value === "function" &&
 			(value as (...a: unknown[]) => unknown).length === 2,
-	) as [string, (c: AxiosInstance, p: object) => { queryFn: () => unknown }][];
+	) as [
+		string,
+		(c: AxiosInstance, p: object) => { queryFn: (ctx: never) => unknown },
+	][];
 
 	it("has factories to check", () => {
 		// Guards the filter above: a rename that made it match nothing would leave the sweep
@@ -79,17 +102,42 @@ describe("statsApi wire contract", () => {
 			await factory(client, {
 				libraryCode: "LIB_A",
 				acquiredSince: "2026-01-01T00:00:00Z",
-			}).queryFn();
+			}).queryFn(context(new AbortController().signal));
 
 			expect(url()).toMatch(/^\/insights\//);
 			expect(url()).not.toContain("/patrons/requests/stats");
 		},
 	);
 
+	/*
+	 * Every Insights request is cancellable.
+	 *
+	 * The dashboard re-keys all of its panels on one change of range or scope, so a user
+	 * dragging a date picker fires wave after wave of aggregate queries over a 20-million
+	 * record corpus. TanStack discards the results of the waves it no longer wants; without
+	 * the signal the SERVER still computes every one of them.
+	 *
+	 * Asserted over the same swept list as the base-path check, so an endpoint added later
+	 * is covered without anybody remembering this test exists.
+	 */
+	it.each(uniformFactories)(
+		"%s passes the AbortSignal to axios",
+		async (_name, factory) => {
+			const { client, signal } = recordingClient();
+			const controller = new AbortController();
+
+			await factory(client, {}).queryFn(context(controller.signal));
+
+			expect(signal()).toBe(controller.signal);
+		},
+	);
+
 	it("calls the endpoints that take a third argument under /insights too", async () => {
 		const { client, url } = recordingClient();
 
-		await timeSeriesQueryOptions(client, {}, "day").queryFn();
+		await timeSeriesQueryOptions(client, {}, "day").queryFn(
+			context(new AbortController().signal),
+		);
 
 		expect(url()).toBe("/insights/timeseries");
 	});
@@ -99,7 +147,7 @@ describe("statsApi wire contract", () => {
 
 		await dashboardMetricsQueryOptions(client, {
 			libraryCode: "LIB_A",
-		}).queryFn();
+		}).queryFn(context(new AbortController().signal));
 
 		expect(params()).toEqual({ [LIBRARY_CODE_PARAM]: "LIB_A" });
 		expect(params()).not.toHaveProperty("libraryCode");
@@ -114,7 +162,7 @@ describe("statsApi wire contract", () => {
 		await turnaroundQueryOptions(client, {
 			libraryCodes: "LIB_A,LIB_B",
 			targetStatus: "LOANED",
-		}).queryFn();
+		}).queryFn(context(new AbortController().signal));
 
 		expect(params()).toEqual({
 			libraryCodes: "LIB_A,LIB_B",
@@ -127,7 +175,7 @@ describe("statsApi wire contract", () => {
 
 		await peerBenchmarksQueryOptions(client, {
 			startDate: "2026-01-01T00:00:00Z",
-		}).queryFn();
+		}).queryFn(context(new AbortController().signal));
 
 		expect(params()).toEqual({ startDate: "2026-01-01T00:00:00Z" });
 	});
@@ -138,7 +186,7 @@ describe("statsApi wire contract", () => {
 		await dashboardMetricsQueryOptions(client, {
 			libraryCode: "LIB_A",
 			startDate: undefined,
-		}).queryFn();
+		}).queryFn(context(new AbortController().signal));
 
 		expect(params()).toEqual({ [LIBRARY_CODE_PARAM]: "LIB_A" });
 	});
@@ -151,7 +199,7 @@ describe("statsApi wire contract", () => {
 				libraryCode: "LIB_A",
 				page: 2,
 				size: 25,
-			}).queryFn();
+			}).queryFn(context(new AbortController().signal));
 
 			expect(params()).toEqual({
 				[LIBRARY_CODE_PARAM]: "LIB_A",
@@ -171,7 +219,7 @@ describe("statsApi wire contract", () => {
 
 			const page = await topPartnersQueryOptions(client, {
 				libraryCode: "LIB_A",
-			}).queryFn();
+			}).queryFn(context(new AbortController().signal));
 
 			expect(page.totalSize).toBe(37);
 			expect(page.content).toHaveLength(1);
@@ -194,7 +242,7 @@ describe("statsApi wire contract", () => {
 			async (path, factory) => {
 				const { client, url, params } = recordingClient();
 
-				await factory(client).queryFn();
+				await factory(client).queryFn(context(new AbortController().signal));
 
 				expect(url()).toBe(`/insights/${path}`);
 				// No date window: these count works held, not requests made. Sending the range

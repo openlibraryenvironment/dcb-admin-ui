@@ -1,0 +1,53 @@
+{
+	"itemList": [
+		{
+			"id": "33990000-9999-5999-9999-333333333333",
+			"agencyCode": "alpha",
+			"status": {
+				"code": "AVAILABLE"
+			},
+			"isRequestable": true,
+			"isSuppressed": false,
+			"holdCount": 0,
+			"dueDate": null,
+			"availabilityDate": "2026-09-30T00:00:00Z",
+			"canonicalItemType": "loanable-item",
+			"barcode": "30000000000001",
+			"localItemType": "Book",
+			"location": {
+				"code": "ALPHAMAIN",
+				"name": "Alpha Main Desk"
+			},
+			"hostLmsCode": "alpha-lms",
+			"agency": {
+				"code": "alpha",
+				"name": "Alpha Test Agency"
+			}
+		},
+		{
+			"id": "44aa0000-aaaa-5aaa-9aaa-444444444444",
+			"agencyCode": "beta",
+			"status": {
+				"code": "CHECKED_OUT"
+			},
+			"isRequestable": false,
+			"isSuppressed": false,
+			"holdCount": 2,
+			"dueDate": "2026-11-01T00:00:00Z",
+			"availabilityDate": "2026-11-01T00:00:00Z",
+			"canonicalItemType": "loanable-item",
+			"barcode": "30000000000002",
+			"localItemType": "Book",
+			"location": {
+				"code": "BETAMAIN",
+				"name": "Beta Main Desk"
+			},
+			"hostLmsCode": "beta-lms",
+			"agency": {
+				"code": "beta",
+				"name": "Beta Test Agency"
+			}
+		}
+	],
+	"errors": []
+}

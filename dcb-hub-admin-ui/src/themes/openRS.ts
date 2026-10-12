@@ -1079,6 +1079,34 @@ const components: ThemeOptions["components"] = {
 				"&:focus": { outline: "none" },
 				":focus-visible": { outline: "2px solid" },
 			},
+			/*
+			 * A column header WRAPS rather than truncating.
+			 *
+			 * MUI X ships `white-space: nowrap; text-overflow: ellipsis` on this slot, and
+			 * supplies the full text only through a tooltip wired to `onMouseOver` -
+			 * verified in the installed 9.15.0, where `tooltip` is state set by that
+			 * handler alone and there is no `onFocus`. The Tooltip also wraps the inner
+			 * title div, which is not focusable; the focusable element is the
+			 * `columnheader` cell around it.
+			 *
+			 * So a mouse user can read a truncated header and a keyboard-only or touch
+			 * user cannot. Measured on /patronRequests/all at 768x1024: "Supplying
+			 * library" rendered 97px of 107, with no `title` attribute on the title or
+			 * the cell, and keyboard navigation across the header row opened no tooltip.
+			 *
+			 * Not an accessible-NAME defect - the full text is in the DOM, so a screen
+			 * reader gets it either way. This is the sighted keyboard and touch case.
+			 *
+			 * Wrapping rather than setting `description` on 200 column definitions: that
+			 * only moves the same tooltip from hover-computed to always-present, and it
+			 * still opens on hover alone.
+			 */
+			columnHeaderTitle: {
+				whiteSpace: "normal",
+				overflow: "visible",
+				textOverflow: "clip",
+				lineHeight: 1.25,
+			},
 		},
 	},
 	/**

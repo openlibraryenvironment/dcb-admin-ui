@@ -58,6 +58,7 @@ import { Route as _authenticatedServiceInfoDataChangeLogIndexRouteImport } from 
 import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/index'
 import { Route as _authenticatedServiceInfoAuditExplorerIndexRouteImport } from './routes/__authenticated/serviceInfo/auditExplorer/index'
 import { Route as _authenticatedServiceInfoAlarmsIndexRouteImport } from './routes/__authenticated/serviceInfo/alarms/index'
+import { Route as _authenticatedSearchClusterIdIndexRouteImport } from './routes/__authenticated/search/$clusterId/index'
 import { Route as _authenticatedPatronRequestsIdIndexRouteImport } from './routes/__authenticated/patronRequests/$id/index'
 import { Route as _authenticatedMappingsAllReferenceValueIndexRouteImport } from './routes/__authenticated/mappings/allReferenceValue/index'
 import { Route as _authenticatedMappingsAllNumericRangeIndexRouteImport } from './routes/__authenticated/mappings/allNumericRange/index'
@@ -377,6 +378,12 @@ const _authenticatedServiceInfoAlarmsIndexRoute =
     path: '/serviceInfo/alarms/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedSearchClusterIdIndexRoute =
+  _authenticatedSearchClusterIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
 const _authenticatedPatronRequestsIdIndexRoute =
   _authenticatedPatronRequestsIdIndexRouteImport.update({
     id: '/patronRequests/$id/',
@@ -680,6 +687,7 @@ export interface FileRoutesByFullPath {
   '/mappings/allNumericRange/': typeof _authenticatedMappingsAllNumericRangeIndexRoute
   '/mappings/allReferenceValue/': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/patronRequests/$id/': typeof _authenticatedPatronRequestsIdIndexRoute
+  '/search/$clusterId/': typeof _authenticatedSearchClusterIdIndexRoute
   '/serviceInfo/alarms/': typeof _authenticatedServiceInfoAlarmsIndexRoute
   '/serviceInfo/auditExplorer/': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/serviceInfo/catalogMetricsByHostLms/': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
@@ -733,7 +741,6 @@ export interface FileRoutesByTo {
   '/patronRequests/completed': typeof _authenticatedPatronRequestsCompletedRoute
   '/patronRequests/exception': typeof _authenticatedPatronRequestsExceptionRoute
   '/patronRequests/outOfSequence': typeof _authenticatedPatronRequestsOutOfSequenceRoute
-  '/search/$clusterId': typeof _authenticatedSearchClusterIdRouteWithChildren
   '/setup/$step': typeof _authenticatedSetupStepRoute
   '/setup/done': typeof _authenticatedSetupDoneRoute
   '/agencies': typeof _authenticatedAgenciesIndexRoute
@@ -768,6 +775,7 @@ export interface FileRoutesByTo {
   '/mappings/allNumericRange': typeof _authenticatedMappingsAllNumericRangeIndexRoute
   '/mappings/allReferenceValue': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/patronRequests/$id': typeof _authenticatedPatronRequestsIdIndexRoute
+  '/search/$clusterId': typeof _authenticatedSearchClusterIdIndexRoute
   '/serviceInfo/alarms': typeof _authenticatedServiceInfoAlarmsIndexRoute
   '/serviceInfo/auditExplorer': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/serviceInfo/catalogMetricsByHostLms': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
@@ -858,6 +866,7 @@ export interface FileRoutesById {
   '/__authenticated/mappings/allNumericRange/': typeof _authenticatedMappingsAllNumericRangeIndexRoute
   '/__authenticated/mappings/allReferenceValue/': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/__authenticated/patronRequests/$id/': typeof _authenticatedPatronRequestsIdIndexRoute
+  '/__authenticated/search/$clusterId/': typeof _authenticatedSearchClusterIdIndexRoute
   '/__authenticated/serviceInfo/alarms/': typeof _authenticatedServiceInfoAlarmsIndexRoute
   '/__authenticated/serviceInfo/auditExplorer/': typeof _authenticatedServiceInfoAuditExplorerIndexRoute
   '/__authenticated/serviceInfo/catalogMetricsByHostLms/': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute
@@ -948,6 +957,7 @@ export interface FileRouteTypes {
     | '/mappings/allNumericRange/'
     | '/mappings/allReferenceValue/'
     | '/patronRequests/$id/'
+    | '/search/$clusterId/'
     | '/serviceInfo/alarms/'
     | '/serviceInfo/auditExplorer/'
     | '/serviceInfo/catalogMetricsByHostLms/'
@@ -1001,7 +1011,6 @@ export interface FileRouteTypes {
     | '/patronRequests/completed'
     | '/patronRequests/exception'
     | '/patronRequests/outOfSequence'
-    | '/search/$clusterId'
     | '/setup/$step'
     | '/setup/done'
     | '/agencies'
@@ -1036,6 +1045,7 @@ export interface FileRouteTypes {
     | '/mappings/allNumericRange'
     | '/mappings/allReferenceValue'
     | '/patronRequests/$id'
+    | '/search/$clusterId'
     | '/serviceInfo/alarms'
     | '/serviceInfo/auditExplorer'
     | '/serviceInfo/catalogMetricsByHostLms'
@@ -1125,6 +1135,7 @@ export interface FileRouteTypes {
     | '/__authenticated/mappings/allNumericRange/'
     | '/__authenticated/mappings/allReferenceValue/'
     | '/__authenticated/patronRequests/$id/'
+    | '/__authenticated/search/$clusterId/'
     | '/__authenticated/serviceInfo/alarms/'
     | '/__authenticated/serviceInfo/auditExplorer/'
     | '/__authenticated/serviceInfo/catalogMetricsByHostLms/'
@@ -1507,6 +1518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedServiceInfoAlarmsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/search/$clusterId/': {
+      id: '/__authenticated/search/$clusterId/'
+      path: '/'
+      fullPath: '/search/$clusterId/'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdIndexRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
     '/__authenticated/patronRequests/$id/': {
       id: '/__authenticated/patronRequests/$id/'
       path: '/patronRequests/$id'
@@ -1782,6 +1800,7 @@ interface _authenticatedSearchClusterIdRouteChildren {
   _authenticatedSearchClusterIdIdentifiersRoute: typeof _authenticatedSearchClusterIdIdentifiersRoute
   _authenticatedSearchClusterIdItemsRoute: typeof _authenticatedSearchClusterIdItemsRoute
   _authenticatedSearchClusterIdRequestingHistoryRoute: typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  _authenticatedSearchClusterIdIndexRoute: typeof _authenticatedSearchClusterIdIndexRoute
 }
 
 const _authenticatedSearchClusterIdRouteChildren: _authenticatedSearchClusterIdRouteChildren =
@@ -1796,6 +1815,8 @@ const _authenticatedSearchClusterIdRouteChildren: _authenticatedSearchClusterIdR
       _authenticatedSearchClusterIdItemsRoute,
     _authenticatedSearchClusterIdRequestingHistoryRoute:
       _authenticatedSearchClusterIdRequestingHistoryRoute,
+    _authenticatedSearchClusterIdIndexRoute:
+      _authenticatedSearchClusterIdIndexRoute,
   }
 
 const _authenticatedSearchClusterIdRouteWithChildren =

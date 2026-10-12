@@ -77,7 +77,11 @@ function GroupDetails() {
 
 	if (isLoading) {
 		return (
-			<PageContainer hideBreadcrumbs>
+			// The same chrome as the loaded branch, titled with the generic group label
+			// rather than nothing. The specific name replaces it on one line, so the
+			// title box does not change height - whereas withholding the box and adding
+			// it on arrival pushes everything below it down by 77px.
+			<PageContainer title={t("groups.groups_one")}>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("groups.groups_one"),
