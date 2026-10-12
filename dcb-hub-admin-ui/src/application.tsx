@@ -44,7 +44,7 @@ declare global {
 			VITE_DCB_ADMIN_FOR_LIBRARIES_URL?: string;
 			/** Where symposia-ui is mounted, for the Branding tab's link to its staff pages. */
 			VITE_DISCOVERY_URL?: string;
-			/** en-US or en-GB; see helpers/locale.ts. Unset means en-US. */
+			/** en-US or en-GB; see helpers/locale.ts. Unset means en-GB. */
 			VITE_LOCALE?: string;
 			[key: string]: string | undefined;
 		};

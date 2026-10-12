@@ -13,23 +13,23 @@ const deployedWith = (locale?: string) =>
 describe("the deployment's locale", () => {
 	afterEach(() => vi.unstubAllGlobals());
 
-	it("is en-US when VITE_LOCALE is unset, as every deployment was before it existed", () => {
+	it("is en-GB when VITE_LOCALE is unset, as the interface text always was", () => {
 		deployedWith(undefined);
-		expect(deploymentLocale()).toBe("en-US");
+		expect(deploymentLocale()).toBe("en-GB");
 		deployedWith("");
 		expect(deploymentLocale()).toBe(DEFAULT_LOCALE);
 	});
 
 	it("is whatever VITE_LOCALE names, when it names a supported locale", () => {
-		deployedWith("en-GB");
-		expect(deploymentLocale()).toBe("en-GB");
+		deployedWith("en-US");
+		expect(deploymentLocale()).toBe("en-US");
 	});
 
 	it("falls back, and says so, when VITE_LOCALE names anything else", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 		deployedWith("fr-FR");
 
-		expect(deploymentLocale()).toBe("en-US");
+		expect(deploymentLocale()).toBe("en-GB");
 		expect(warn).toHaveBeenCalledWith(expect.stringContaining("fr-FR"));
 	});
 });

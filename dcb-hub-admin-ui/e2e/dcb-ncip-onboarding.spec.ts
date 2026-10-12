@@ -125,7 +125,7 @@ test("reviews, issues and forgets a one-time invitation", async ({ page }) => {
 	await page.getByLabel("Expected ORS symbol").fill("tech-demo-001");
 	await page.getByRole("button", { name: "Review invitation" }).click();
 	await expect(
-		page.getByText(/authorizes one matching ORS Appliance/),
+		page.getByText(/authorises one matching ORS Appliance/),
 	).toBeVisible();
 	await page.getByRole("button", { name: "Issue invitation" }).click();
 

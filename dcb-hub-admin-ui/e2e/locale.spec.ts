@@ -34,20 +34,10 @@ async function expectDateOrder(page: Page, order: string[]) {
 	}
 }
 
-test("a deployment that sets nothing reads American English, month first", async ({
+test("a deployment that sets nothing reads British English, day first", async ({
 	page,
 }) => {
 	await openAs(page, {});
-	await page.goto(RANGE);
-
-	await expectDateOrder(page, ["Month", "Day", "Year"]);
-	await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
-});
-
-test("an en-GB deployment reads British English, day first", async ({
-	page,
-}) => {
-	await openAs(page, { VITE_LOCALE: "en-GB" });
 	await page.goto(RANGE);
 
 	await expectDateOrder(page, ["Day", "Month", "Year"]);
@@ -59,10 +49,25 @@ test("an en-GB deployment reads British English, day first", async ({
 	).toBeVisible();
 });
 
+test("an en-US deployment reads American English, month first", async ({
+	page,
+}) => {
+	await openAs(page, { VITE_LOCALE: "en-US" });
+	await page.goto(RANGE);
+
+	await expectDateOrder(page, ["Month", "Day", "Year"]);
+	await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
+
+	await page.goto("/serviceInfo");
+	await expect(
+		page.getByRole("link", { name: /Catalog metrics/ }).first(),
+	).toBeVisible();
+});
+
 test("a user can choose the other English, and keeps it across a reload", async ({
 	page,
 }) => {
-	await openAs(page, { VITE_LOCALE: "en-GB" });
+	await openAs(page, {});
 	await page.goto("/settings");
 
 	await page.getByRole("combobox", { name: "Language" }).click();

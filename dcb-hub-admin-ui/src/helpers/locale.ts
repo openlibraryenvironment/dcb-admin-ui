@@ -10,8 +10,8 @@ import "dayjs/locale/en-gb";
 export const SUPPORTED_LOCALES = ["en-US", "en-GB"] as const;
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
 
-/** What a deployment that sets nothing gets: what every deployment showed before VITE_LOCALE. */
-export const DEFAULT_LOCALE: AppLocale = "en-US";
+/** What a deployment that sets nothing gets: British, as the interface text always was. */
+export const DEFAULT_LOCALE: AppLocale = "en-GB";
 
 export const isAppLocale = (value: unknown): value is AppLocale =>
 	typeof value === "string" &&
