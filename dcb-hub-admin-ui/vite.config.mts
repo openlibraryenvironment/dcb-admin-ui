@@ -222,7 +222,16 @@ export default defineConfig(({ mode, command }) => {
 						chunk.facadeModuleId?.endsWith("/src/ki-bootstrap.ts")
 							? "ki-bootstrap.js"
 							: "assets/[name]-[hash].js",
-					chunkFileNames: "assets/[name]-[hash].js",
+					// A locale overlay is a module called "application", like the app shell,
+					// and the budget names chunks without their hash.
+					chunkFileNames: (chunk) => {
+						const locale = chunk.facadeModuleId?.match(
+							/[\\/]locales[\\/]([A-Za-z]+)-([A-Za-z]+)[\\/]application\.json$/,
+						);
+						return locale
+							? `assets/locale_${locale[1]}_${locale[2]}-[hash].js`
+							: "assets/[name]-[hash].js";
+					},
 					assetFileNames: "assets/[name]-[hash][extname]",
 				},
 			},

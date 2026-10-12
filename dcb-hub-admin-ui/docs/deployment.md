@@ -145,9 +145,13 @@ Each user can override it under Settings, Profile or the setup flow's Appearance
 that browser and cleared at sign-out, like the appearance settings beside it. Spanish is a
 partial translation; its missing strings, and its dates, follow the deployment's locale.
 
-The two English translations are `src/locales/en-US/application.json` and
-`src/locales/en-GB/application.json`. They carry the same keys, which
-`src/locales/localeParity.test.ts` enforces; a new string goes into both.
+`src/locales/en-GB/application.json` is the whole catalogue, and every new string goes
+there. `src/locales/en-US/application.json` holds only the strings American English writes
+differently, and falls back to en-GB for the rest; it is fetched only when en-US is in use,
+so a British deployment downloads nothing extra. A new en-GB string needs an en-US entry
+only if it uses a British form the overlay already converts — catalogue, colour, organise,
+tick, whilst and the rest — and `src/locales/localeParity.test.ts` fails, naming it, if
+one is missing.
 
 ## 2a. Feature flags: which dcb-service this deployment is talking to
 

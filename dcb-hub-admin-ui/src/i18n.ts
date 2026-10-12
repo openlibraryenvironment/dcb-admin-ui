@@ -1,13 +1,12 @@
-import i18n from "i18next";
+import i18n, {
+	type BackendModule,
+	type ReadCallback,
+	type Services,
+} from "i18next";
 import { initReactI18next } from "react-i18next";
-import HttpBackend from "i18next-http-backend";
+import HttpBackend, { type HttpBackendOptions } from "i18next-http-backend";
 import enGB from "./locales/en-GB/application.json";
-import enUS from "./locales/en-US/application.json";
-import {
-	DEFAULT_LOCALE,
-	deploymentLocale,
-	resolveLanguage,
-} from "@helpers/locale";
+import { deploymentLocale, resolveLanguage } from "@helpers/locale";
 import { useLocaleStore } from "@hooks/useLocaleStore";
 import {
 	armMissingKeyReporting,
@@ -22,20 +21,50 @@ const bundleBase =
 
 if (isMissingKeyReportingEnabled()) armMissingKeyReporting();
 
+/**
+ * en-GB is the whole catalogue. en-US holds only the strings whose spelling or wording
+ * differs, built as a chunk of its own and fetched when it is used; every other key
+ * falls through to en-GB. Other languages come from public/locales.
+ */
+const OVERLAYS: Record<string, () => Promise<{ default: object }>> = {
+	"en-US": () => import("./locales/en-US/application.json"),
+};
+
+class LocaleBackend implements BackendModule<HttpBackendOptions> {
+	static type = "backend" as const;
+	type = "backend" as const;
+	private readonly http = new HttpBackend();
+
+	init(services: Services, options: HttpBackendOptions) {
+		this.http.init(services, options);
+	}
+
+	read(language: string, namespace: string, callback: ReadCallback) {
+		const overlay = OVERLAYS[language];
+		if (!overlay) return this.http.read(language, namespace, callback);
+		overlay().then(
+			(module) => callback(null, module.default),
+			(error: Error) => callback(error, false),
+		);
+	}
+}
+
 i18n
-	.use(HttpBackend) // fetch over the network for MISSING languages
+	.use(LocaleBackend)
 	.use(initReactI18next)
 	.init({
-		resources: {
-			"en-GB": { application: enGB },
-			"en-US": { application: enUS },
+		resources: { "en-GB": { application: enGB } },
+		// The best answer before the runtime config arrives, so an overlay a stored choice
+		// needs is already loading; applyLanguage settles it once the config is known.
+		lng: resolveLanguage(useLocaleStore.getState().choice, deploymentLocale()),
+		fallbackLng: (code) => {
+			if (code === "en-GB") return [];
+			if (code === "en-US") return ["en-GB"];
+			// A partial translation falls back to the deployment's English
+			return deploymentLocale() === "en-US" ? ["en-US", "en-GB"] : ["en-GB"];
 		},
-		lng: DEFAULT_LOCALE,
-		// A partial translation falls back to the deployment's English, not a fixed one.
-		fallbackLng: (code) =>
-			code.startsWith("en") ? [DEFAULT_LOCALE] : [deploymentLocale()],
 		load: "currentOnly",
-		partialBundledLanguages: true, // the rest are only partially bundled
+		partialBundledLanguages: true, // en-GB is bundled; the rest load on demand
 
 		backend: {
 			// Base-relative: a root-absolute "/locales/..." escapes the app's base
