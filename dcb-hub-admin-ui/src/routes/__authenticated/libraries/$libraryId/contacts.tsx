@@ -99,7 +99,7 @@ function LibraryContacts() {
 				renderCell: (params: GridRenderCellParams) => (
 					<RenderAttribute
 						attribute={`mailto:${params.value ?? ""}`}
-						title="email"
+						title={t("libraries.contacts.email")}
 						type="url"
 					/>
 				),

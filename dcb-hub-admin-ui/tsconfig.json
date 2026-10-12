@@ -36,9 +36,21 @@
 		"noEmit": true,
 		"jsx": "react-jsx"
 	},
-	// e2e is type-checked too. It was not, so `tsc --noEmit` passed over 40 spec
-	// files and a spec with a missing import was only caught by a five-minute
-	// Playwright run - which is how it was found. Two errors existed when this was
-	// added, both real.
-	"include": ["src", "src/vite-env.d.ts", "types/**/*.d.ts", "e2e"]
+	// EVERY e2e directory, not just e2e/. It was none of them, so `tsc --noEmit` passed
+	// over 40 spec files and a spec with a missing import was only caught by a
+	// five-minute Playwright run - which is how it was found. Two errors existed when
+	// e2e/ was added, both real.
+	//
+	// The other three were still missing, so the base-path, bootloader and container
+	// suites were unchecked for the same reason by the same omission - a new spec in any
+	// of them type-checked clean because nothing read it.
+	"include": [
+		"src",
+		"src/vite-env.d.ts",
+		"types/**/*.d.ts",
+		"e2e",
+		"e2e-base-path",
+		"e2e-ki-bootstrap",
+		"e2e-container"
+	]
 }

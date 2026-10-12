@@ -96,8 +96,17 @@ function Login() {
 							width: "fit-content",
 						}}
 					>
+						{/*
+						 * The page's h1. `loginHeader` is a custom variant, so Typography
+						 * rendered it as a <span> and /login had NO top-level heading at
+						 * all - its only headings were the "About" sections, starting at
+						 * h2. It is not in ROUTES (it needs its own auth state), so
+						 * route-health's one-h1 assertion never reached it; the container
+						 * gate is what found it.
+						 */}
 						<Typography
 							variant="loginHeader"
+							component="h1"
 							sx={{
 								color: "primary.loginText",
 							}}

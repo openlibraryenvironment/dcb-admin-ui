@@ -249,7 +249,11 @@ export default defineConfig(({ mode, command }) => {
 				// of statements that way, over 2,273 statements in a src/ of ~90,000 lines.
 				all: true,
 				include: ["src/**/*.{ts,tsx}"],
-				reporter: ["text-summary", "json-summary", "html"],
+				// cobertura is the one GitLab reads: artifacts:reports:coverage_report in
+				// .gitlab-ci.yml turns it into per-line annotations on the merge request
+				// diff. The other three are for a person - a job log, a dashboard and a
+				// local browser - and none of them can reach a reviewer.
+				reporter: ["text-summary", "json-summary", "html", "cobertura"],
 				reportsDirectory: "./coverage",
 				// Generated or unreachable from a unit test: a route tree the plugin writes,
 				// codegen output, type-only files, and the entry point that mounts the app.

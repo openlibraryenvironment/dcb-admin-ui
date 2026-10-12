@@ -161,7 +161,7 @@ export default function AddLibraryToGroup({
 					{t("libraries.add_to_group")}
 				</DialogTitle>
 				<IconButton
-					aria-label="close"
+					aria-label={String(t("ui.actions.close"))}
 					onClick={onClose}
 					sx={{
 						position: "absolute",

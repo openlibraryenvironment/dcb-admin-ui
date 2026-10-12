@@ -44,6 +44,18 @@ await mockGraphQL(page, {
 
 Any operation not listed falls through to `route.continue()` (a real network request against the fake `.invalid` API base), so an unmocked query fails loudly and visibly rather than hanging silently.
 
+### An unmocked operation is not a neutral default
+
+It fails loudly only when the page depends on it. An operation wrapped in
+`nonCriticalQuery` fails quietly: the page renders, and the gate measures a state no
+user reaches. `LoadLocationForPRGrid` (the pickup-location lookup every patron request
+grid fires per page) and `LoadAuditIncidence` (the audit explorer's incidence chart)
+were unmocked, so both returned 404 on every gate run: seven patron request routes, two
+group request routes and `/serviceInfo/auditExplorer`. The axe scan, the
+missing-translation scan and route-health all measured a pickup-location column showing
+its fallback and a chart that never rendered. `LoadHostLmsCodes` 404'd the same way and
+did take its page down. Both are now in `MOCKS` in `e2e/fixtures/routes.ts`.
+
 ## What's covered
 
 - `auth.spec.ts` — unauthenticated redirect to `/login` (with the intended destination preserved via `?redirect=`), seeded-auth session landing on the authenticated home page.
@@ -82,15 +94,134 @@ guard, and knowing which ones have earned their keep is how you decide what to t
 
 ## Running them
 
+All of them, in one command:
+
+```bash
+npm run gates                        # every gate below, in order, with a summary table
+npm run gates -- --skip=lighthouse   # ... without the slow, CPU-bound one
+npm run gates -- --only=types,lint,unit
+npm run gates -- --bail              # stop at the first failure
+```
+
+It exits 0 only if every gate it ran passed, 1 if any failed, and **2 without running
+anything** if a port is still held — see below. Individually:
+
 ```bash
 npx tsc --noEmit                     # types
 npm run lint -- --max-warnings=0     # a warning is broken code
 npx vitest run                       # NOT `npm run test`, which is watch mode
-npx playwright test                  # both viewport projects
+npm audit --omit=dev --audit-level=high
+npm run build && npm run budget      # the per-chunk byte budget
+npx playwright test                  # both viewport projects, port 4173
 npm run e2e:base-path                # the app mounted at /dcb-admin, port 4203
-npm run e2e:ki-bootstrap             # the bootloader artefact
-npm run lighthouse                   # the payload budget
+npm run e2e:ki-bootstrap             # the bootloader artefact, port 4183
+npm run e2e:container                # the production image in a browser, port 4213
+npm run lighthouse                   # the payload budget, port 4193
 ```
+
+### The requesting journeys
+
+`StaffRequest`, `ExpeditedCheckout`, `QuickWalkUp` and `CombinedRequestingModal` are the
+only write path into patron requests from this application, and the only place a patron
+barcode is handled. They had no test of any kind until `e2e/requesting.spec.ts` and
+`e2e/requesting-checkout.spec.ts`.
+
+All three forms share `PatronValidationStep`, and each arrives at it differently:
+
+| Form               | Entry                                                                                                                     | Steps                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Staff request      | the cluster type picker, first option                                                                                     | patron, request           |
+| Expedited checkout | the cluster type picker, second option                                                                                    | patron, request, checkout |
+| Quick walk-up      | NOT in the picker - it has no cluster context, so it arrives with `initialRequestType` set, from `/search` or an item row | patron, item, checkout    |
+
+**Writing the first of these found a defect.** `PatronValidationStep` disables its Validate
+button on `!agencyCode`, and `StaffRequest` passed `auth.user.profile.code` - the staff
+member's own agency - where its two siblings pass the watched form field. The button stayed
+disabled for any account whose token carries no `code`, whatever affiliated institution was
+picked, and a consortium administrator is not affiliated with one.
+
+#### Asserting that a barcode is NOT logged
+
+The obvious two ways both pass against a leaking form, which is worse than having no test:
+
+- `message.text()` renders an object argument as `JSHandle@error`, so a text assertion
+  cannot see a barcode inside the object - and inside the object is exactly where it was.
+- `arg.jsonValue()` on an `Error` returns nothing useful, because Error own properties are
+  not enumerable; resolving it is also asynchronous, so the assertion can run first.
+
+Wrapping `console.error` in an `addInitScript` and serializing its arguments in the page
+sees what was actually passed. Verified failing against the leaking form, and the failure
+output carried both `patronPrinciple` and the Bearer token. `axios` defines
+`AxiosError.prototype.toJSON`, and the `config` it returns carries `data` - the request
+body.
+
+Each redaction test also asserts that something WAS logged, so it cannot pass by the
+failure path never running.
+
+### Valid YAML is not a valid pipeline
+
+`.gitlab-ci.yml` parsing cleanly says nothing about whether GitLab will accept it. Several
+constraints are checked when the pipeline is CREATED, so the file loads, `yaml.safe_load`
+is happy, and the first push fails.
+
+That happened on `expose_as`, which accepts only letters, digits, hyphens, underscores and
+spaces:
+
+```
+jobs:verify_e2e:artifacts expose as can contain only letters, digits, '-', '_' and spaces
+```
+
+All five values added with the CI reporting work carried parentheses and one a comma.
+Checking that the YAML parsed had been mistaken for checking that the config was valid -
+the same substitution of a proxy for the thing itself that `docs/accessibility.md` records
+under "Knowing what is covered".
+
+`src/helpers/gitlabCiConfig.test.ts` now checks the charset, the 128-character limit, and
+that `expose_as` only appears on a job that also keeps `artifacts:paths` - GitLab rejects
+it otherwise, for a different reason with a different message. It reads the raw text rather
+than parsing, so it needs no YAML dependency.
+
+**It is not a substitute for a real lint.** `glab ci lint`, or the project
+`/ci/lint` API endpoint, validates the whole schema and would have caught this without
+anybody enumerating the rule. Neither is wired up here; that is the gate still missing for
+CI configuration, and this test covers only the one rule that has actually bitten.
+
+### The container gate
+
+`npm run e2e:container` builds `docker/production/Dockerfile` and drives the running
+image. It is the only gate that ships the Content Security Policy and nginx's real
+headers, so it is the only one that can see a CSP violation - which is neither a failed
+request nor an exception - or a missing `content-encoding`.
+
+It needs a Docker daemon. It removes its own container by name before starting, because
+Playwright's teardown has been observed leaving one up, and a leftover container holds
+4213 - at which point `reuseExistingServer` serves an image built from older code.
+
+**Three defects on its first run, all of them invisible to every other gate:**
+
+| Found                                          | Why nothing else could see it                                                                                                                                                                                       |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The production image could not be built at all | `.dockerignore` excluded `e2e/`, which two `src/` unit tests import fixture JSON from, and `npm run build` is `tsc && vite build`. Nothing built the image                                                          |
+| `script-src <- eval` on every page load        | Zod 4 feature-detects its JIT with `Function("")`. It catches the refusal and falls back, so nothing breaks - but the browser still reports a violation. `z.config({ jitless: true })` is Zod's own switch for this |
+| `/login` had no `h1`                           | It is not in `ROUTES` (it needs its own auth state), so route-health's one-h1 assertion never reached it                                                                                                            |
+
+### Why `npm run gates` is sequential, and checks the ports first
+
+**Every Playwright config's `webServer` builds, and all four builds write the same
+`dist/`.** Two suites at once means one's build replaces the directory the other is
+serving, which is a failure that reports numbers rather than an error. They also each
+drive four Chromiums against one preview, and `workers: 4` is calibrated for exactly
+that — see below.
+
+And `reuseExistingServer` is on whenever `CI` is not set, so a preview left running by an
+earlier run is not replaced, it is **used**: every result after that measures its frozen
+`dist/` rather than your tree. The runner binds each port it will need before it starts
+anything and refuses if one is held, because that failure otherwise looks like a passing
+suite.
+
+Exit codes, never output: Playwright's reporter writes ANSI escapes, and a `grep -c
+failed` over it has already reported a suite with 25 failures as green once during this
+project.
 
 Read the **exit code**, not a grep of the output. Playwright's reporter writes ANSI escapes,
 and a `grep -c failed` over it has already reported a suite with 25 failures as green once
@@ -136,7 +267,22 @@ still holds the port, and the result reads as a catastrophic regression.
 | `components/tabsAreLinks.test.ts`                                      | navigating tabs are anchors, across all six bars                                                                                  | Source-level; the e2e suite proves three of the six                                                                |
 | `e2e-base-path/navigation.spec.ts`                                     | the app mounted at `/dcb-admin`, which is how it ships and the one configuration every other spec does not run                    | Verified failing against a root build and against a root-absolute `inject_env.json` fetch                          |
 | the co-hosting block in the same file                                  | storage namespaced by the base rather than as `root`; `inject_env.json` fetched under the base                                    | Verified failing against a root-absolute fetch — the sibling app's config sits at the origin root                  |
+| `e2e/layout-shift.spec.ts`                                             | CLS on every route at 768x1024, at 0.10; see `docs/performance-budget.md`, "Layout shift on every route"                          | **Yes.** 21 route/viewport pairs over 0.05 on its first sweep, the worst at 0.3412                                 |
+| `verify_supply_chain` (CI)                                             | `npm audit --omit=dev --audit-level=high`; see "The supply-chain gate" below                                                      | Started green: 0 findings on 2026-10-09                                                                            |
 | `npm run lighthouse`                                                   | the payload budget, 750,000 B                                                                                                     | Yes — but see the caveat below                                                                                     |
+
+## The supply-chain gate
+
+A production dependency with a known high-severity advisory is a shipped defect, and
+nothing was looking for one. `verify_supply_chain` runs `npm audit --omit=dev
+--audit-level=high`. On 2026-10-09 that reported 0 vulnerabilities, so the job started
+green rather than being switched off in its first week.
+
+It audits **production dependencies only, at high severity and above**, deliberately.
+The full audit over dev dependencies is dominated by transitive findings in build
+tooling that never reaches a browser, and a gate that fires mostly on those is a gate
+everybody routes around. Renovate (`renovate.json`) handles the ordinary upgrade
+stream; this is the floor under it.
 
 ## Guards on the guards
 

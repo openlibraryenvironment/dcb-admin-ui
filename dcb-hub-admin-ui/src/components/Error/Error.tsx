@@ -18,6 +18,19 @@ interface ErrorProps {
 	onAction?: () => void;
 	/** A second, lower-emphasis button. The route error boundary needs both. */
 	secondary?: { label: string; onClick: () => void };
+	/**
+	 * The element for the title, defaulting to the page's h1.
+	 *
+	 * Right for the error ROUTES - /404, /500, /unauthorised, /maintenance,
+	 * /networkError - where this component IS the page and its title is the only
+	 * heading. Wrong when it is rendered INSIDE a page that already has one: two h1s,
+	 * which route-health asserts against. /search is the first such caller, and it keeps
+	 * its own title deliberately (docs/query-error-policy.md, "A failure the user
+	 * caused").
+	 *
+	 * The default keeps all 53 existing call sites exactly as they were.
+	 */
+	headingLevel?: "h1" | "h2";
 }
 export default function Error({
 	title,
@@ -27,6 +40,7 @@ export default function Error({
 	goBack,
 	onAction,
 	secondary,
+	headingLevel = "h1",
 }: ErrorProps) {
 	const actionLink = goBack ? goBack : "/";
 	const router = useRouter();
@@ -63,7 +77,9 @@ export default function Error({
 					sx={{ fontSize: 200 }}
 					htmlColor={theme.palette.primary.exclamationIcon}
 				/>
-				<Typography variant="h1">{title}</Typography>
+				<Typography variant="h1" component={headingLevel}>
+					{title}
+				</Typography>
 				<Typography variant="componentSubheading" sx={{ fontWeight: "bold" }}>
 					{message}
 				</Typography>

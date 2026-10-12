@@ -11,6 +11,10 @@ variables:
   # See docs/testing.md, "Hooks are not the CI gates".
   HUSKY: "0"
 
+  # See the `cache:` block below: without this npm writes to $HOME/.npm and the cache
+  # entry covers a directory npm never touches.
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
 default:
   image:
     name: node:22.23.1-bullseye
@@ -27,10 +31,22 @@ stages:
   - container
   - deploy
 
+# Keyed on the LOCKFILE, not the branch. A per-branch key cannot be hit by the first
+# pipeline on a new branch, which is most of them; a lockfile key is shared by every
+# branch whose dependencies match, which is nearly all of them.
+#
+# `node_modules/` is NOT cached. Every job here runs `npm ci`, and `npm ci` deletes
+# node_modules before installing - so caching it uploaded and downloaded a directory
+# that was then thrown away, once per job, six times per pipeline.
+#
+# `.npm` IS the cache that helps, and it was not being used either: npm writes to
+# $HOME/.npm, so a cache entry at $CI_PROJECT_DIR/.npm was saved empty and restored
+# empty. npm_config_cache points npm at the path the cache actually covers.
 cache:
-  key: ${CI_COMMIT_REF_SLUG}
+  key:
+    files:
+      - dcb-hub-admin-ui/package-lock.json
   paths:
-    - dcb-hub-admin-ui/node_modules/
     - .npm
 
 # On main this artefact is the deployment. On the release branch it is only a gate:
@@ -77,12 +93,31 @@ verify_quality:
     # --coverage rather than a bare run: it costs about three seconds on top of the
     # suite and puts the figure in every pipeline log. There is NO threshold - see
     # docs/testing.md, "Coverage is a figure, not a gate". Nothing here fails on it.
-    - npx vitest run --coverage
+    - npx vitest run --coverage --reporter=default --reporter=junit --outputFile=test-results/vitest-junit.xml
+  interruptible: true
+  timeout: 20m
   artifacts:
     when: always
     paths:
       - dcb-hub-admin-ui/coverage/
+      - dcb-hub-admin-ui/test-results/
+    # junit, so 1,542 unit tests arrive as a Tests tab and a merge request widget
+    # rather than as the last page of a job log. Before this the pipeline had NO
+    # machine-readable result of any kind: a failure count had to be read by eye, and
+    # "which test" needed the log scrolled.
+    #
+    # coverage_report, so the figure annotates the lines the merge request changed.
+    # There is still no threshold - see docs/testing.md, "Coverage is a figure, not a
+    # gate" - but a figure nobody is shown is not even that.
+    reports:
+      junit: dcb-hub-admin-ui/test-results/vitest-junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: dcb-hub-admin-ui/coverage/cobertura-coverage.xml
     expire_in: 1 week
+  # The one line vitest's text-summary prints that GitLab can turn into the job's
+  # coverage percentage, which is what draws the trend on the pipeline page.
+  coverage: '/^\s*Lines\s*:\s*([\d.]+)%/'
 
 # Separate from verify_quality so a failing accessibility gate is legible as such in the
 # pipeline rather than as "the verify job went red". It needs the Playwright image; the
@@ -107,11 +142,22 @@ verify_e2e:
     - cd dcb-hub-admin-ui
     - npm ci
     - npx playwright test
+  interruptible: true
+  timeout: 40m
   artifacts:
-    when: on_failure
+    # `always`, not `on_failure`. playwright.config.ts already writes a junit file and
+    # nothing ever collected it, so the 528-test suite reported its result only as a
+    # red job. A report that exists on a green run is also how a newly-skipped test
+    # gets noticed.
+    when: always
     paths:
       - dcb-hub-admin-ui/playwright-report/
       - dcb-hub-admin-ui/test-results/
+    reports:
+      junit: dcb-hub-admin-ui/test-results/junit.xml
+    # A direct link to the HTML report from the merge request, instead of "download
+    # the artifact, unzip it, find index.html".
+    expose_as: "Playwright report - e2e axe and i18n"
     expire_in: 1 week
 
 # The performance budget - W-2. Its own job because it needs a production build and three
@@ -141,10 +187,13 @@ verify_lighthouse:
     # No separate build step for Lighthouse: lighthouserc.js's startServerCommand builds,
     # because the audit must not measure whatever an earlier job left in dist/.
     - npm run lighthouse
+  interruptible: true
+  timeout: 30m
   artifacts:
     when: always
     paths:
       - dcb-hub-admin-ui/.lighthouseci/
+    expose_as: "Lighthouse run - payload budget"
     expire_in: 1 week
 
 # The base path is baked in by Vite, so the shipped configuration - mounted at
@@ -165,11 +214,16 @@ verify_base_path:
     - cd dcb-hub-admin-ui
     - npm ci
     - npm run e2e:base-path
+  interruptible: true
+  timeout: 30m
   artifacts:
-    when: on_failure
+    when: always
     paths:
       - dcb-hub-admin-ui/playwright-report/
       - dcb-hub-admin-ui/test-results/
+    reports:
+      junit: dcb-hub-admin-ui/test-results/junit-base-path.xml
+    expose_as: "Playwright report - base path"
     expire_in: 1 week
 
 verify_ki_bootstrap:
@@ -182,6 +236,96 @@ verify_ki_bootstrap:
     - cd dcb-hub-admin-ui
     - npm ci
     - npm run e2e:ki-bootstrap
+  interruptible: true
+  timeout: 30m
+  # This job had NO artifacts and no report. A failure in the bootloader gate left
+  # nothing behind to look at - no trace, no screenshot, no list of which of its four
+  # tests went red - which is the gate the workspace notes record reporting "1 of 4"
+  # against a build it should not have been measuring.
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/test-results/
+    reports:
+      junit: dcb-hub-admin-ui/test-results/junit-ki-bootstrap.xml
+    expose_as: "Playwright report - bootloader"
+    expire_in: 1 week
+
+# Production dependencies at high severity and above only: the full audit is dominated by
+# build tooling that never reaches a browser. docs/testing.md, "The supply-chain gate".
+# The artefact that actually ships, driven in a browser - W-6.
+#
+# Every other verify job measures `vite preview` or a mocked page. docs/testing.md
+# records two production defects that lived in that gap (1,576 KB served uncompressed
+# against a 665 KB budget; the CSP blocking 40 font loads a session), and this job found
+# three more on its first run: the image could not be BUILT at all, because
+# .dockerignore excluded a directory two src/ unit tests import fixtures from and
+# `npm run build` is `tsc && vite build`; Zod's JIT probe raised a CSP violation on
+# every page load; and /login had no h1.
+#
+# Needs a Docker daemon, which the Playwright image does not have - so this uses docker
+# with a mounted socket on the on-prem runner rather than the browser image, and installs
+# browsers itself.
+verify_container:
+  stage: verify
+  interruptible: true
+  timeout: 40m
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    # Matched to the dind service above, so client and daemon are the same major.
+    DOCKER_CLI_VERSION: "27.3.1"
+  script:
+    # THE CLIENT, not the daemon. The Playwright image ships no docker binary at all -
+    # the dind service above provides a daemon and nothing to talk to it with, so the
+    # job died on "docker: command not found" before reaching the daemon question. The
+    # static client only, ~30 MB, rather than apt's docker.io which pulls a second
+    # daemon we do not want.
+    - |
+      if ! command -v docker >/dev/null 2>&1; then
+        curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_CLI_VERSION}.tgz"           | tar xz --strip-components=1 -C /usr/local/bin docker/docker
+      fi
+    - docker --version
+    # Fail HERE, with a sentence, if the daemon is not reachable. Otherwise the first
+    # symptom is a playwright webServer timeout 15 minutes later, which reads as the
+    # application being broken.
+    - |
+      if ! docker info >/dev/null 2>&1; then
+        echo "No Docker daemon on \$DOCKER_HOST=$DOCKER_HOST."
+        echo "This job needs the docker:dind service, which needs a runner that permits"
+        echo "privileged containers. See docs/testing.md, 'The container gate'."
+        exit 1
+      fi
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm run e2e:container
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/test-results/
+    reports:
+      junit: dcb-hub-admin-ui/test-results/junit-container.xml
+    expose_as: "Playwright report - container"
+    expire_in: 1 week
+
+verify_supply_chain:
+  stage: verify
+  interruptible: true
+  timeout: 10m
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - npm audit --omit=dev --audit-level=high
 
 # Every secret this repository has ever committed stays readable in its history: deleting
 # the line does not un-leak it, only rotation does. The baseline holds the 21 findings that
@@ -195,6 +339,8 @@ verify_secrets:
     # GitLab clones 20 commits deep by default, so without this the scan would cover a
     # sliding window and quietly report clean on a repository it never read.
     GIT_DEPTH: "0"
+  interruptible: true
+  timeout: 15m
   script:
     # --redact so a finding does not print the secret into a job log that is readable by
     # everyone who can see the pipeline.

@@ -62,6 +62,62 @@ and why reshaping chunks moves the weight around without removing any — the
 experiment and its numbers are recorded in `vite.config.mts`. This budget stops it
 growing; it does not fix it.
 
+## Layout shift on every route
+
+Lighthouse asserts CLS at 0.05, but only on its two pages. The other 52 routes had no
+CLS gate, and a sweep of them at tablet width found 21 route/viewport pairs over that
+budget, the worst at **0.3412**, seven times it. Both causes were invisible at the
+1280px viewport the rest of the e2e suite runs at, which is why nothing had reported
+them:
+
+- **The page shell constrained its own height rather than its content row.** The shell
+  is a flex column of {header, row, footer}. Constrain the shell to a viewport and flex
+  gives the row `viewport - footer`, which puts the footer's top above the fold on a page
+  whose content has not arrived, and moves it below when the content does. The minimum
+  height now sits on the row (`PAGE_ROW_MIN_HEIGHT` in `src/constants/layout.ts`).
+  Measured on `/libraries/$libraryId` at 768x1024, footer top over time:
+
+  | `minHeight` on               | Footer top      | CLS    |
+  | ---------------------------- | --------------- | ------ |
+  | the shell (`100vh`)          | 752px -> 2112px | 0.3412 |
+  | the shell (`100vh` + header) | 822px -> 2112px | 0.2794 |
+  | the row                      | 1094px, no move | 0.0147 |
+
+  A 272px-tall element fully in view moving a full viewport is 0.266 of the first figure,
+  and the same shift was the largest contributor on `/patronRequests/$id` and
+  `/libraries/$libraryId/accounts`. It is `vh` and not `dvh`: on mobile `vh` is the
+  large viewport, so the footer sits further down still, while `dvh` changes as the URL
+  bar hides and would shift the page on scroll.
+
+- **A route whose loading branch rendered different chrome from its loaded branch**
+  inserted 77px of breadcrumbs and title above the page when the data landed.
+
+`e2e/layout-shift.spec.ts` now asserts CLS on every route the suite can render.
+
+### Why 0.10 and not 0.05
+
+0.05 is the budget, and this is not a re-baseline of it: the gate did not exist, so
+there was no number to ratchet. 0.10 catches the class of defect above without firing
+on contention. Measured after the fixes, 54 routes x 2 viewports, twice, at the suite's
+4 workers:
+
+| Measure               | Value                                                        |
+| --------------------- | ------------------------------------------------------------ |
+| worst route           | 0.0749 (`/libraries/$libraryId`, its attribute grid growing) |
+| routes over 0.05      | 7                                                            |
+| routes over 0.08      | 0                                                            |
+| run-to-run delta, max | 0.0187                                                       |
+
+So 0.10 sits above the worst route plus the worst observed noise, and below everything
+the sweep found. **The seven routes between 0.05 and 0.0749 are open work:** each is
+content growing in its own place, and wants a skeleton matching the incoming content.
+
+### Why 768x1024
+
+The suite's default is 1280x800 and the `narrow` project is 320px. At both, the footer
+sits below the fold for a different reason and the defect does not appear. A tablet is
+also the one form factor a library desk actually uses that nothing here was measuring.
+
 ## Running them
 
 ```bash

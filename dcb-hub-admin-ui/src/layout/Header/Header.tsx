@@ -31,6 +31,7 @@ import { readConsortiumBrand } from "@helpers/consortiumBrand";
 import fallbackHeaderSrc from "@assets/brand/fallback-header.png";
 import type { LoadConsortiumHeaderQueryVariables } from "@generated/graphql";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { HEADER_HEIGHT } from "@constants/layout";
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -191,7 +192,7 @@ export default function Header({
 		<Box>
 			<AppBar
 				position="fixed"
-				sx={{ backgroundColor: "primary.header", maxHeight: "70px" }}
+				sx={{ backgroundColor: "primary.header", maxHeight: HEADER_HEIGHT }}
 			>
 				<Toolbar
 					disableGutters
@@ -200,7 +201,7 @@ export default function Header({
 						alignSelf: "center",
 						width: "100%",
 						padding: 0,
-						maxHeight: "70px",
+						maxHeight: HEADER_HEIGHT,
 						px: iconsVisible ? "24px" : "16px",
 					}}
 				>
@@ -259,7 +260,7 @@ export default function Header({
 							<IconButton
 								size="large"
 								data-tid="profile-button"
-								aria-label="account of current user"
+								aria-label={String(t("nav.profile"))}
 								onClick={() => navigate({ to: "/profile" })}
 								sx={{
 									color: "primary.headerText",
@@ -272,7 +273,6 @@ export default function Header({
 
 							<Button
 								data-tid="login-button"
-								aria-label={auth.isAuthenticated ? "Logout" : "Login"}
 								onClick={handleAuthClick}
 								sx={{
 									color: "primary.headerText",

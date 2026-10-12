@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "@schemas/zod";
 
 import { SUBJECTS } from "@helpers/insightsSubjects";
 

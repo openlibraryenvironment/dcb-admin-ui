@@ -73,7 +73,7 @@ export default function Import({
 				})}
 			</DialogTitle>
 			<IconButton
-				aria-label="close"
+				aria-label={String(t("ui.actions.close"))}
 				onClick={handleCloseImport}
 				sx={{
 					position: "absolute",

@@ -216,6 +216,35 @@ for (const scheme of ["light", "dark"] as const) {
 }
 
 /**
+ * The SIGNED-OUT shell, which no other scan reaches.
+ *
+ * /login cannot be in the route table: every entry there is seeded with a session, and
+ * this page only exists without one. So it was the one page a user meets BEFORE anything
+ * else that nothing ran axe over - and it is also the page whose own h1 was missing until
+ * the container gate found it.
+ *
+ * No seedAuth, deliberately. LoadConsortiumHeader still answers, because the header
+ * renders its consortium name on the signed-out screens too.
+ */
+for (const scheme of ["light", "dark"] as const) {
+	test.describe(`WCAG 2.2 AA - the sign-in page, ${scheme}`, () => {
+		test.use({ colorScheme: scheme });
+
+		test("has no violations", async ({ page }) => {
+			await useAllFeatures(page);
+			await mockGraphQL(page, MOCKS);
+
+			await page.goto("/login");
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+			await expectPaintedScheme(page, scheme);
+			await scanForViolations(page);
+			await scanForLandmarks(page);
+		});
+	});
+}
+
+/**
  * The version grid with dcb-service's detail panel open. The route table scans the grid as
  * it first renders; the panel's attributes and release links do not exist until a row is
  * expanded.
@@ -289,7 +318,11 @@ test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 			!route.path.includes("/announcements") &&
 			// Its beforeLoad redirects to /serviceInfo while isAuditExplorerEnabled() is
 			// false, and this world seeds no flags - so there is no page here to scan.
-			!route.path.includes("/auditExplorer"),
+			!route.path.includes("/auditExplorer") &&
+			// Same shape, and the note above already says NCIP onboarding is absent on
+			// 8.71.0: its beforeLoad redirects to /serviceInfo unless
+			// isNcipOnboardingEnabled(), which no flag turns on in this world.
+			!route.path.includes("/dcbNcipOnboarding"),
 	);
 
 	for (const scheme of ["light", "dark"] as const) {

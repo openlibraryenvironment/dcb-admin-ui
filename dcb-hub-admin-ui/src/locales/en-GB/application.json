@@ -2637,7 +2637,9 @@
 	"ui": {
 		"a11y": {
 			"empty": "Empty field",
-			"is_breadcrumb": "This is a breadcrumb trail"
+			"is_breadcrumb": "This is a breadcrumb trail",
+			"image_preview": "Preview of the image you selected",
+			"openrs_logo": "OpenRS logo"
 		},
 		"copy": {
 			"copy": "Copy to clipboard",
@@ -2841,7 +2843,8 @@
 			"this_item": "this item",
 			"results_announcement_one": "{{count}} result",
 			"results_announcement_other": "{{count}} results",
-			"results_loading": "Loading results"
+			"results_loading": "Loading results",
+			"search_by_audit": "Search by audit"
 		},
 		"error": {
 			"401": {
@@ -2887,7 +2890,8 @@
 			"unable_to_load_page": "Sorry, we were unable to load this page",
 			"general": "Something went wrong. Please try again.",
 			"title": "Error",
-			"update_failed": "The changes could not be saved."
+			"update_failed": "The changes could not be saved.",
+			"auth_error_title": "Authentication error"
 		},
 		"file": {
 			"no_file_selected": "No file selected"

@@ -29,6 +29,7 @@ import {
 
 import Link from "@components/Link/Link";
 import { isInsightsEnabled } from "@helpers/featureFlags";
+import { HEADER_HEIGHT } from "@constants/layout";
 
 const drawerWidth = 240;
 
@@ -200,7 +201,11 @@ export default function Sidebar({
 							}}
 						>
 							<ListItemIcon
-								sx={{ minWidth: 0, marginInlineEnd: 3, justifyContent: "center" }}
+								sx={{
+									minWidth: 0,
+									marginInlineEnd: 3,
+									justifyContent: "center",
+								}}
 							>
 								{SidebarIcon(index, selected === index)}
 							</ListItemIcon>
@@ -234,8 +239,8 @@ export default function Sidebar({
 						boxSizing: "border-box",
 						backgroundColor: "primary.sidebar",
 						border: 0,
-						// Clear the fixed 70px Header and scroll if items overflow.
-						pt: "70px",
+						// Clear the fixed Header and scroll if items overflow.
+						pt: HEADER_HEIGHT,
 						overflowY: "auto",
 					},
 				}}

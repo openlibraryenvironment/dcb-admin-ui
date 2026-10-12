@@ -286,3 +286,33 @@ The Spanish catalogue is **1,326 of 2,349 strings — 56%**. The remainder falls
 and renders inside a page declared as one language, unmarked: **WCAG 3.1.2, Level AA**.
 Either finish it or withdraw the option for now; a half-translated console reads as an
 unfinished product to exactly the buyers bilingual capability is meant to reassure.
+
+## Knowing what is covered
+
+`e2e/route-coverage.spec.ts` asserts that every navigable route is either walked by
+`ROUTES`, declared in `COVERED_ELSEWHERE` naming the spec that scans it, or declared in
+`NOT_SCANNED` with a reason. It fails on route 87 the day somebody adds one.
+
+**It replaced three hand-rolled greps, each of which reported a confident wrong answer.**
+Keeping the record, because the failure mode is the interesting part and it was the same
+one every time - a proxy measurement reported as the thing it stood for:
+
+| Version | What it did                                                                | What it missed                                                                              |
+| ------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1       | matched `goto("…")` string literals                                        | routes declared as a `path:` property, so two already-scanned pages were reported uncovered |
+| 2       | mapped concrete fixture ids back to parameter names through a lookup table | the ids added that same hour - two false gaps                                               |
+| 3       | grepped the spec directory for `scanForViolations`                         | `insights-accessibility.spec.ts`, which builds its own `AxeBuilder` - five false gaps       |
+
+Two design choices follow from that, and both are load-bearing:
+
+- **Patterns, not ids.** A route pattern becomes a regex (`/libraries/$libraryId/bibs` to
+  `^/libraries/[^/]+/bibs$`) and declared paths are tested against it. There is no id
+  table to maintain, so version 2's failure cannot recur.
+- **Declared, not inferred.** Coverage outside `ROUTES` is a map entry, not something the
+  gate goes looking for. A declaration cannot be missed by a regex that did not anticipate
+  it, which is version 1 and version 3.
+
+Three of its four assertions guard the gate rather than the application: a named spec must
+exist AND run axe, an exclusion must name a route that still exists, and no route may be
+claimed by two of the three lists - because whichever is read first would win silently.
+Each was verified failing on exactly that defect.

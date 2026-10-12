@@ -85,3 +85,22 @@ describe("the secondary button", () => {
 		expect(onAction).not.toHaveBeenCalled();
 	});
 });
+
+describe("the title's heading level", () => {
+	it("is the page's h1 by default, which the error routes depend on", () => {
+		render(<ErrorPanel {...props} />);
+		expect(
+			screen.getByRole("heading", { level: 1, name: props.title }),
+		).toBeInTheDocument();
+	});
+
+	it("drops to h2 when the page already has an h1", () => {
+		// /search renders this INSIDE its own titled PageContainer, so an h1 here would
+		// be the page's second - which route-health asserts against.
+		render(<ErrorPanel {...props} headingLevel="h2" />);
+		expect(
+			screen.getByRole("heading", { level: 2, name: props.title }),
+		).toBeInTheDocument();
+		expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+	});
+});

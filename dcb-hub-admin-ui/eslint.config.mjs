@@ -133,6 +133,21 @@ export default [
 				"error",
 				{ "ts-ignore": "allow-with-description" }, // ts-ignore is only allowed with a justification
 			],
+			// Zod has to be reached through the configured instance, or its JIT probe
+			// calls Function("") and our CSP refuses it - one securitypolicyviolation per
+			// page load. See src/schemas/zod.ts; the container gate is what catches it.
+			"no-restricted-imports": [
+				"error",
+				{
+					paths: [
+						{
+							name: "zod",
+							message:
+								'Import { z } from "@schemas/zod" - the instance with jitless set. A bare "zod" import constructs schemas whose JIT probe violates our CSP. See src/schemas/zod.ts.',
+						},
+					],
+				},
+			],
 			"no-duplicate-imports": 2,
 			"no-self-compare": 2,
 			"no-constant-binary-expression": 2,
@@ -254,6 +269,27 @@ export default [
 						"CallExpression[callee.property.name='request'][typeArguments.params.length=1][typeArguments.params.0.type='TSAnyKeyword']:has(Property > Identifier[name='input'])",
 					message:
 						"Type the GraphQL variables: request<TMutation, TMutationVariables>(...). `any` here hides a missing required input field until runtime - see ContactsChapter.",
+				},
+				// eslint-plugin-i18next reads JSX text only, never an attribute, so accessible names
+				// need these. Three selectors, not one descendant match, which would also flag the
+				// key in String(t("...")). docs/i18n.md, "Accessible names are prose too"
+				{
+					selector:
+						"JSXAttribute[name.name=/^(aria-label|aria-description|aria-roledescription|aria-valuetext|aria-placeholder|alt|placeholder|title|label|noResultsText|searchText)$/] > Literal[value=/\S/][value!=/^[A-Z0-9 _-]+$/]",
+					message:
+						"An accessible name is a user-facing string: pass t(\"...\"). eslint-plugin-i18next runs in jsx-text-only mode, so it reads JSX TEXT and never an attribute - which is how aria-label=\"account of current user\", alt=\"OpenRS Logo\" and three aria-label=\"close\" shipped untranslated. alt=\"\" for a decorative image is still allowed.",
+				},
+				{
+					selector:
+						"JSXAttribute[name.name=/^(aria-label|aria-description|aria-roledescription|aria-valuetext|aria-placeholder|alt|placeholder|title|label|noResultsText|searchText)$/] > JSXExpressionContainer > Literal[value=/\S/][value!=/^[A-Z0-9 _-]+$/]",
+					message:
+						"An accessible name is a user-facing string: pass t(\"...\"). eslint-plugin-i18next runs in jsx-text-only mode, so it reads JSX TEXT and never an attribute - which is how aria-label=\"account of current user\", alt=\"OpenRS Logo\" and three aria-label=\"close\" shipped untranslated. alt=\"\" for a decorative image is still allowed.",
+				},
+				{
+					selector:
+						"JSXAttribute[name.name=/^(aria-label|aria-description|aria-roledescription|aria-valuetext|aria-placeholder|alt|placeholder|title|label|noResultsText|searchText)$/] > JSXExpressionContainer > ConditionalExpression > Literal[value=/\S/][value!=/^[A-Z0-9 _-]+$/]",
+					message:
+						"An accessible name is a user-facing string: pass t(\"...\"). eslint-plugin-i18next runs in jsx-text-only mode, so it reads JSX TEXT and never an attribute - which is how aria-label=\"account of current user\", alt=\"OpenRS Logo\" and three aria-label=\"close\" shipped untranslated. alt=\"\" for a decorative image is still allowed.",
 				},
 			],
 		},

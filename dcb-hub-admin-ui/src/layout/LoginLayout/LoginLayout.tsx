@@ -4,6 +4,7 @@ import { Box, Paper, Stack } from "@mui/material";
 import Footer from "@layout/Footer/Footer";
 import Header from "@layout/Header/Header";
 import LinkedFooter from "@layout/LinkedFooter/LinkedFooter";
+import { HEADER_HEIGHT, PAGE_ROW_MIN_HEIGHT } from "@constants/layout";
 
 interface LoginLayoutProps {
 	children?: ReactNode;
@@ -33,7 +34,7 @@ export default function LoginLayout({
 					 * full-width coloured band and caps its own inner content to 1400px —
 					 * matching the fixed Header's Toolbar. Do NOT cap width here, or the
 					 * bands get clipped and no longer align with the header bar.
-					 * `mt` clears the 70px fixed AppBar.
+					 * `mt` clears the fixed AppBar.
 					 */}
 					{/*
 					 * The main landmark for the signed-out shell. PageContainer carries it
@@ -50,10 +51,15 @@ export default function LoginLayout({
 							display: "flex",
 							flexDirection: "column",
 							width: "100%",
+							// On the main region, not the Box around it - see
+							// PAGE_ROW_MIN_HEIGHT. Constraining the shell gave this
+							// region `viewport - footer`, so the footer painted at 752px
+							// of a 1024px viewport on /login, /logout and /maintenance.
+							minHeight: PAGE_ROW_MIN_HEIGHT,
 							outline: "none",
 						}}
 					>
-						<Stack spacing={2} sx={{ width: "100%", mt: "70px" }}>
+						<Stack spacing={2} sx={{ width: "100%", mt: HEADER_HEIGHT }}>
 							<Box sx={{ flex: "1 0 auto" }}>{children}</Box>
 						</Stack>
 					</Box>

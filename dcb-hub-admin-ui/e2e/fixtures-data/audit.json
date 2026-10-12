@@ -1,0 +1,22 @@
+{
+	"audits": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "a0d17e42-6b58-4f91-8c23-5e7a9d4b1c60",
+				"auditDate": "2026-09-30T13:42:11Z",
+				"briefDescription": "Virtual checkout failed at the supplying agency",
+				"fromStatus": "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+				"toStatus": "ERROR",
+				"auditData": {
+					"patronRequestId": "cc000000-3333-5333-9333-333333333333",
+					"localRequestId": "b1234567",
+					"description": "NCIP CheckOutItem returned Problem: Item Not Available"
+				},
+				"patronRequest": {
+					"id": "cc000000-3333-5333-9333-333333333333"
+				}
+			}
+		]
+	}
+}

@@ -26,7 +26,7 @@ Consortium-facing administration UI for DCB. React 19, TanStack Router + Query, 
 
 **Releases run from the `release` branch, not `main`.** `semantic-release` is configured with `"branches": ["release"]` and commits `package.json`, `CHANGELOG.md` and `release-info.json` back with `[skip ci]`. Merging to `main` releases nothing, and conventional-commit format is not optional because commit messages *are* the release notes.
 
-**Preview ports are a workspace allocation, not a preference:** 4173 e2e, 4183 bootloader, 4193 Lighthouse, 4203 base-path. Always `--strictPort` — without it vite silently increments onto a neighbouring repo's port and the gate measures somebody else's app.
+**Preview ports are a workspace allocation, not a preference:** 4173 e2e, 4183 bootloader, 4193 Lighthouse, 4203 base-path, 4213 container. Always `--strictPort` — without it vite silently increments onto a neighbouring repo's port and the gate measures somebody else's app.
 
 **Two ways a green e2e suite is not a green e2e suite,** both met here on 2026-09-08:
 

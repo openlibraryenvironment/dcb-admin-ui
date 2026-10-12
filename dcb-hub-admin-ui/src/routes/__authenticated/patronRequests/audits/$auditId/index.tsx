@@ -112,7 +112,13 @@ function AuditDetails() {
 
 	if (isLoading) {
 		return (
-			<PageContainer hideBreadcrumbs>
+			// The SAME chrome as the loaded branch, titled with the generic label for
+			// this kind of record. Withholding the breadcrumbs and the title box and
+			// adding them when the data lands inserts 77px above the page and pushes it
+			// down; the specific name replaces this on one line, so the box does not
+			// change height. See docs/performance-budget.md, "Layout shift on every
+			// route".
+			<PageContainer title={t("audit_log.audit")}>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("audit_log.audit").toLowerCase(),
@@ -280,6 +286,18 @@ function AuditDetails() {
 					</Typography>
 					<Box
 						component="pre"
+						/*
+						 * A scrollable region a keyboard user can actually scroll - WCAG
+						 * 2.1.1, and the same fix MuiTableContainer carries as a theme
+						 * default. `overflowX: auto` on a JSON block that is wider than a
+						 * 320px viewport makes this the only way to read the right-hand
+						 * side of it without a pointer.
+						 *
+						 * Found by axe (`scrollable-region-focusable`, serious) the moment
+						 * this route joined ROUTES - in all five scanned worlds, at the
+						 * narrow viewport only.
+						 */
+						tabIndex={0}
 						sx={{
 							overflowX: "auto",
 							padding: "1rem",

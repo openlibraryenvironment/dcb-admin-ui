@@ -7,7 +7,20 @@ coverage
 .env
 .env.*
 cypress
+# The SPECS are not app code and do not belong in the build context - but two unit tests
+# under src/ import fixture JSON from e2e/fixtures-data, and `npm run build` is
+# `tsc && vite build`, so excluding the whole directory made `tsc` fail inside the image:
+#
+#   src/helpers/insightsGroupScope.test.ts(5,25): error TS2307: Cannot find module
+#   '../../e2e/fixtures-data/group-detail.json'
+#
+# The production image could not be built at all, and nothing noticed, because no gate
+# built it. e2e-container/container.spec.ts is the gate that now does.
 e2e
+!e2e/fixtures-data
+e2e-base-path
+e2e-ki-bootstrap
+e2e-container
 playwright-report
 test-results
 *.md

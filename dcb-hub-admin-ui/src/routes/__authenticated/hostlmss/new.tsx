@@ -280,13 +280,16 @@ function NewHostLms() {
 					component="form"
 					onSubmit={handleSubmit(onSubmit)}
 				>
-					<Alert severity="info">
-						{t("hostlms.new_host_lms.explanation")}
-					</Alert>
+					<Alert severity="info">{t("hostlms.new_host_lms.explanation")}</Alert>
 
 					<Controller
 						name="library"
 						control={control}
+						rules={{
+							required: t("ui.validation.required", {
+								field: t("hostlms.new_host_lms.library").toLowerCase(),
+							}),
+						}}
 						render={({ field }) => (
 							<Autocomplete
 								options={libraryOptions}
@@ -301,7 +304,11 @@ function NewHostLms() {
 										{...params}
 										required
 										label={t("hostlms.new_host_lms.library")}
-										helperText={t("hostlms.new_host_lms.library_help")}
+										error={!!errors.library}
+										helperText={
+											errors.library?.message ??
+											t("hostlms.new_host_lms.library_help")
+										}
 									/>
 								)}
 							/>
@@ -311,6 +318,11 @@ function NewHostLms() {
 					<Controller
 						name="code"
 						control={control}
+						rules={{
+							required: t("ui.validation.required", {
+								field: t("hostlms.code").toLowerCase(),
+							}),
+						}}
 						render={({ field }) => (
 							<TextField
 								{...field}
@@ -333,13 +345,22 @@ function NewHostLms() {
 					<Controller
 						name="lmsClientClass"
 						control={control}
+						rules={{
+							required: t("ui.validation.required", {
+								field: t("hostlms.client_class").toLowerCase(),
+							}),
+						}}
 						render={({ field }) => (
 							<TextField
 								{...field}
 								select
 								required
 								label={t("hostlms.client_class")}
-								helperText={t("hostlms.new_host_lms.client_class_help")}
+								error={!!errors.lmsClientClass}
+								helperText={
+									errors.lmsClientClass?.message ??
+									t("hostlms.new_host_lms.client_class_help")
+								}
 							>
 								{HOST_LMS_PROFILES.map((profile) => (
 									<MenuItem

@@ -66,6 +66,32 @@ patron request is primary and the pickup library's name is not. On `/locations/$
 the location is primary. If the page is still worth showing with the data missing, the
 query is non-critical.
 
+## A failure the user caused
+
+The rule above asks what the route is named for, and answers two cases: a route's subject,
+and a label beside it. `/search` is a third.
+
+The shared index rejects a malformed query with a 4xx, and the control that produced that
+query — the `SearchQueryBuilder` — is on the page. So the failure is **caused by user
+input, and the means of recovery is in the same view**. Replacing the page with
+`GlobalError` takes the builder away along with the text the user has to edit, and offers
+them a reload that will fail the same way.
+
+By the "what is the route named for" test alone, `/search` is named for its results and the
+throwing default is right. That test was written for the two cases above, where a failure
+is the backend's news and the user can do nothing about it. It does not distinguish the
+case where they can.
+
+So the search query spreads `nonCriticalQuery` even though its data IS the route's subject,
+and the `isError` branch renders the failure around a builder that still holds the query.
+
+**The narrowness matters.** This is not licence to make every primary query non-critical.
+The two conditions together are the test: the user's own input caused the failure, and the
+control that produced it is still on screen. A patron request that will not load meets
+neither — there is nothing on `/patronRequests/$id` for the reader to correct.
+
+Gate: `e2e/search-errors.spec.ts`.
+
 ## Retrying a fan-out
 
 Separate policy, same file. `GET /items/availability` becomes one request per Host LMS to
@@ -144,6 +170,21 @@ member libraries, cached for thirty minutes. It truncates past 1,000 exactly as
 
 **This is a workaround.** The fix is upstream: relations on the `PatronRequest` type, or
 a `libraries` filter that can traverse one. Then the directory and its cache go away.
+
+## What a failed request may log
+
+`console.error("...", error)` on an axios failure prints the whole `AxiosError`, and
+`error.config.data` is the serialised **request body**. The three staff requesting forms
+post `{ patronPrinciple, agencyCode }` to `/patron/auth/lookup`, where `patronPrinciple`
+is the patron's barcode. So every failed lookup wrote a patron's barcode into the
+browser console, which gets screenshotted into support tickets and scraped by
+error-reporting agents.
+
+`requestErrorSummary` in `src/helpers/safeErrorLog.ts` returns the method, the path
+without its query string, and the status, and nothing else: enough to find the request
+in a server log, with no identifier in it. The response body is excluded too:
+dcb-service's `failedChecks` carry a `description` written for a human, and what a
+member LMS puts in one is not ours to predict.
 
 ## Gate
 

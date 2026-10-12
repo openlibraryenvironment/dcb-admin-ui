@@ -38,6 +38,7 @@ import { useRouter } from "@tanstack/react-router";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { StatusStepConnector } from "@components/StatusStepConnector/StatusStepConnector";
 import { lmsFanOutQuery } from "@helpers/queryPolicy";
+import { requestErrorSummary } from "@helpers/safeErrorLog";
 import {
 	getStepColors,
 	getStepLabelFontWeight,
@@ -233,10 +234,14 @@ export default function StaffRequest({
 	} = useQuery<any>({
 		...lmsFanOutQuery,
 		queryKey: ["itemAvailability", bibClusterId, cfg.VITE_DCB_API_BASE],
-		queryFn: () =>
+		// `signal`, because this is the member-LMS fan-out: dcb-service turns one call
+		// into one request per Host LMS to systems we do not own. Abandoning the form
+		// otherwise leaves it running against every member library.
+		queryFn: ({ signal }) =>
 			axios.get(`${cfg.VITE_DCB_API_BASE}/items/availability`, {
 				headers,
 				params: { clusteredBibId: bibClusterId },
+				signal,
 			}),
 		enabled: false,
 		select: (response) => response.data,
@@ -360,7 +365,7 @@ export default function StaffRequest({
 			}
 		},
 		onError: (error) => {
-			console.error("Error validating patron:", error);
+			console.error("Patron lookup failed:", requestErrorSummary(error));
 			setAlert({
 				open: true,
 				severity: "error",
@@ -397,7 +402,10 @@ export default function StaffRequest({
 			}, 6000);
 		},
 		onError: (error: any) => {
-			console.error("Error submitting patron request:", error.response?.data);
+			console.error(
+				"Patron request submission failed:",
+				requestErrorSummary(error),
+			);
 			setAlert({
 				open: true,
 				severity: "error",
@@ -489,7 +497,16 @@ export default function StaffRequest({
 						handleClose={handleClose}
 						validatePatron={validatePatron}
 						patronBarcode={patronBarcode}
-						agencyCode={agencyCode}
+						// The FORM's field, not `agencyCode` - which is the signed-in
+						// staff member's own agency from their token. PatronValidationStep
+						// disables its Validate button on `!agencyCode`, and its two other
+						// callers (ExpeditedCheckout, QuickWalkUp) both pass the watched
+						// field. Passing the token claim here meant the button stayed
+						// disabled for any account whose token carries no `code` - a
+						// consortium administrator is not affiliated with one agency - no
+						// matter which affiliated institution they picked. validatePatron
+						// already prefers `selectedLibrary?.value`, which is this field.
+						agencyCode={patronAgencyCode}
 						libraryOptions={libraryOptions}
 						librariesLoading={librariesDataLoading}
 						t={t}

@@ -253,7 +253,13 @@ function LocationDetails() {
 
 	if (isLoading)
 		return (
-			<PageContainer hideBreadcrumbs>
+			// The SAME chrome as the loaded branch, titled with the generic label for
+			// this kind of record. Withholding the breadcrumbs and the title box and
+			// adding them when the data lands inserts 77px above the page and pushes it
+			// down; the specific name replaces this on one line, so the box does not
+			// change height. See docs/performance-budget.md, "Layout shift on every
+			// route".
+			<PageContainer title={t("nav.locations")}>
 				<Loading
 					title={t("ui.info.loading.document", {
 						document_type: t("locations.location_one"),

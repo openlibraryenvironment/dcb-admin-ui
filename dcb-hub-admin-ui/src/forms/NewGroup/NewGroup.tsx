@@ -150,7 +150,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 				</DialogTitle>
 				<IconButton
 					data-tid="new-group-close"
-					aria-label="close"
+					aria-label={String(t("ui.actions.close"))}
 					onClick={onClose}
 					sx={{
 						position: "absolute",

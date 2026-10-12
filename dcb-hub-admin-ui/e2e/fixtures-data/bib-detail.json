@@ -1,0 +1,47 @@
+{
+	"sourceBibs": {
+		"totalSize": 1,
+		"content": [
+			{
+				"id": "bb220000-2222-5222-9222-bbbbbbbbbbbb",
+				"dateCreated": "2026-08-01T09:15:00Z",
+				"dateUpdated": "2026-09-30T14:02:00Z",
+				"title": "Alpha and the art of clustering",
+				"author": "Lovelace, Ada",
+				"canonicalMetadata": {
+					"title": "Alpha and the art of clustering",
+					"author": { "name": "Lovelace, Ada" },
+					"identifiers": [
+						{ "namespace": "ISBN", "value": "9780000000001" },
+						{ "namespace": "OCLC", "value": "ocn123456789" }
+					]
+				},
+				"processVersion": 3,
+				"metadataScore": 87,
+				"placeOfPublication": "Leeds",
+				"publisher": "Open Library Press",
+				"dateOfPublication": "2025",
+				"edition": "2nd ed.",
+				"isLargePrint": false,
+				"clusterReason": "High confidence match",
+				"typeOfRecord": "a",
+				"contributesTo": {
+					"id": "aa110000-1111-5111-9111-aaaaaaaaaaaa",
+					"title": "Alpha and the art of clustering"
+				},
+				"sourceSystemId": "h1h1h1h1-1111-5111-9111-111111111111",
+				"sourceRecordId": "b1234567",
+				"sourceRecord": {
+					"id": "dd440000-4444-5444-9444-dddddddddddd",
+					"hostLmsId": "h1h1h1h1-1111-5111-9111-111111111111",
+					"remoteId": "b1234567",
+					"lastFetched": "2026-09-30T13:58:00Z",
+					"lastProcessed": "2026-09-30T14:00:00Z",
+					"processingState": "SUCCESS",
+					"processingInformation": "Processed without error",
+					"sourceRecordData": { "leader": "01234nam a2200265 a 4500" }
+				}
+			}
+		]
+	}
+}

@@ -23,7 +23,14 @@ export default defineConfig({
 	// Four for the same reason as the main suite: several Chromiums against one preview.
 	workers: 4,
 	expect: { timeout: 10_000 },
-	reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "html",
+	// junit alongside the html one, and under its OWN file name: the base-path and
+	// bootloader suites write into the same test-results/ as the main suite, so a
+	// shared name would have one gate's results overwrite another's.
+	reporter: [
+		["html", { open: "never" }],
+		["junit", { outputFile: "test-results/junit-base-path.xml" }],
+		["list"],
+	],
 
 	use: {
 		// The bare origin, NOT origin + BASE_PATH: every spec writes the base into the

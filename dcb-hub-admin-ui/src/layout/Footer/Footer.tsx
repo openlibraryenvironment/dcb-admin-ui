@@ -67,7 +67,7 @@ export default function Footer() {
 						<Box
 							component="img"
 							src={OpenRsLogo}
-							alt="OpenRS Logo"
+							alt={String(t("ui.a11y.openrs_logo"))}
 							sx={{ width: OpenRsLogoWidth, height: OpenRsLogoHeight }}
 						/>
 					</Link>
