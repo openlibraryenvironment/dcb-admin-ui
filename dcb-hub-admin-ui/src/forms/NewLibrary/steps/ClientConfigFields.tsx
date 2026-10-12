@@ -2,25 +2,41 @@ import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
 import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
 	Alert,
 	AlertTitle,
+	Button,
 	Checkbox,
+	FormControl,
 	FormControlLabel,
+	FormGroup,
 	FormHelperText,
+	FormLabel,
 	IconButton,
 	InputAdornment,
 	Link,
+	MenuItem,
 	Stack,
 	TextField,
 	Typography,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+	Add,
+	Delete,
+	ExpandMore,
+	Visibility,
+	VisibilityOff,
+} from "@mui/icons-material";
 
 import {
 	type ClientConfigField,
+	type ClientConfigOption,
 	type ClientConfigGroup,
 	fieldName,
 	getHostLmsProfile,
+	isAdvancedField,
 	missingRecommendedClientConfig,
 } from "@helpers/hostLmsClientConfig";
 
@@ -126,10 +142,17 @@ const ConfigFieldControl = ({
 	const error = errorAt(errors, configField.path);
 	// "Recommended" is not the same as optional: creation succeeds, then the
 	// first real request fails. Say which one this is.
-	const description =
+	const explanation =
 		configField.requirement === "recommended"
 			? `${t("hostlms.config_fields.recommended")} - ${t(configField.descriptionKey)}`
 			: t(configField.descriptionKey);
+	const description =
+		configField.defaultValue !== undefined && configField.type !== "boolean"
+			? `${explanation} ${t("hostlms.config_fields.leave_blank_for_default", {
+					value: configField.defaultValue,
+				})}`
+			: explanation;
+	const placeholder = configField.defaultValue ?? configField.placeholder;
 	// Where the value's real definition is the vendor's, link to it rather than
 	// paraphrasing a code table into one line and getting it wrong.
 	const helperText: ReactNode = configField.docs ? (
@@ -192,6 +215,26 @@ const ConfigFieldControl = ({
 		);
 	}
 
+	if (configField.type === "jsonObject" && configField.valueOptions) {
+		return (
+			<Controller
+				name={`clientConfigFields.${name}`}
+				control={control}
+				render={({ field }) => (
+					<KeyedChoiceRows
+						inputId={inputId}
+						label={label}
+						helperText={helperText}
+						value={field.value}
+						onChange={field.onChange}
+						valueOptions={configField.valueOptions ?? []}
+						disabled={disabled}
+					/>
+				)}
+			/>
+		);
+	}
+
 	// A free-form object whose keys are the site's own local values, so there is
 	// no form to build - it is edited as JSON and validated as it is typed.
 	if (configField.type === "jsonObject") {
@@ -226,7 +269,7 @@ const ConfigFieldControl = ({
 						disabled={disabled}
 						error={!!fieldState.error}
 						helperText={fieldState.error?.message ?? helperText}
-						placeholder={configField.placeholder}
+						placeholder={placeholder}
 						slotProps={{
 							htmlInput: {
 								spellCheck: false,
@@ -235,6 +278,104 @@ const ConfigFieldControl = ({
 						}}
 					/>
 				)}
+			/>
+		);
+	}
+
+	if (configField.type === "select") {
+		return (
+			<Controller
+				name={`clientConfigFields.${name}`}
+				control={control}
+				render={({ field }) => {
+					const value = field.value ?? "";
+					const known = configField.options?.some(
+						(option) => option.value === value,
+					);
+
+					return (
+						<TextField
+							{...field}
+							value={value}
+							id={inputId}
+							select
+							label={label}
+							fullWidth
+							disabled={disabled}
+							required={configField.requirement === "required"}
+							error={!!error}
+							helperText={error ?? helperText}
+						>
+							{configField.requirement !== "required" && (
+								<MenuItem value="">
+									{t("hostlms.config_fields.use_default")}
+								</MenuItem>
+							)}
+							{configField.options?.map((option) => (
+								<MenuItem key={option.value} value={option.value}>
+									{t(option.labelKey)}
+								</MenuItem>
+							))}
+							{/* A stored value outside the set, shown so it can be corrected */}
+							{value !== "" && !known && (
+								<MenuItem value={value}>{value}</MenuItem>
+							)}
+						</TextField>
+					);
+				}}
+			/>
+		);
+	}
+
+	if (configField.type === "stringList" && configField.options) {
+		return (
+			<Controller
+				name={`clientConfigFields.${name}`}
+				control={control}
+				render={({ field }) => {
+					const chosen: string[] = Array.isArray(field.value)
+						? field.value
+						: String(field.value ?? "")
+								.split(",")
+								.map((entry) => entry.trim())
+								.filter((entry) => entry !== "");
+
+					return (
+						<FormControl component="fieldset" disabled={disabled}>
+							<FormLabel component="legend">{label}</FormLabel>
+							<FormGroup>
+								{configField.options?.map((option) => (
+									<FormControlLabel
+										key={option.value}
+										label={t(option.labelKey)}
+										control={
+											<Checkbox
+												checked={chosen.includes(option.value)}
+												onChange={(event) =>
+													field.onChange(
+														event.target.checked
+															? [...chosen, option.value]
+															: chosen.filter(
+																	(value) => value !== option.value,
+																),
+													)
+												}
+												slotProps={{
+													input: {
+														"aria-describedby": `${inputId}-helper-text`,
+													},
+												}}
+											/>
+										}
+									/>
+								))}
+							</FormGroup>
+							<FormHelperText id={`${inputId}-helper-text`}>
+								{helperText}
+							</FormHelperText>
+						</FormControl>
+					);
+				}}
 			/>
 		);
 	}
@@ -271,8 +412,12 @@ const ConfigFieldControl = ({
 							helperText
 						))
 					}
-					placeholder={configField.placeholder}
-					type={configField.type === "url" ? "url" : "text"}
+					placeholder={placeholder}
+					type={
+						configField.type === "url" || configField.type === "email"
+							? configField.type
+							: "text"
+					}
 					slotProps={
 						configField.type === "number"
 							? { htmlInput: { inputMode: "numeric" } }
@@ -280,6 +425,161 @@ const ConfigFieldControl = ({
 					}
 				/>
 			)}
+		/>
+	);
+};
+
+const asEntries = (value: unknown): [string, string][] => {
+	let object: unknown = value;
+	if (typeof value === "string") {
+		try {
+			object = value.trim() ? JSON.parse(value) : {};
+		} catch {
+			object = {};
+		}
+	}
+	return object && typeof object === "object" && !Array.isArray(object)
+		? Object.entries(object as Record<string, unknown>).map(([key, choice]) => [
+				key,
+				String(choice),
+			])
+		: [];
+};
+
+/**
+ * A map from the site's own names to one of a closed set, edited as rows. A row with no
+ * name yet is kept on screen but not written, so the stored object never has a "" key.
+ */
+const KeyedChoiceRows = ({
+	inputId,
+	label,
+	helperText,
+	value,
+	onChange,
+	valueOptions,
+	disabled,
+}: {
+	inputId: string;
+	label: string;
+	helperText: ReactNode;
+	value: unknown;
+	onChange: (value: Record<string, string>) => void;
+	valueOptions: readonly ClientConfigOption[];
+	disabled: boolean;
+}) => {
+	const { t } = useTranslation();
+	const [rows, setRows] = useState<[string, string][]>(() => asEntries(value));
+
+	const update = (next: [string, string][]) => {
+		setRows(next);
+		onChange(
+			Object.fromEntries(
+				next
+					.filter(([key]) => key.trim() !== "")
+					.map(([key, choice]) => [key.trim(), choice]),
+			),
+		);
+	};
+
+	return (
+		<FormControl component="fieldset" disabled={disabled}>
+			<FormLabel component="legend">{label}</FormLabel>
+			<FormHelperText id={`${inputId}-helper-text`}>
+				{helperText}
+			</FormHelperText>
+			<Stack spacing={1} sx={{ mt: 1 }}>
+				{rows.map(([key, choice], index) => (
+					<Stack
+						key={index}
+						direction={{ xs: "column", sm: "row" }}
+						spacing={1}
+					>
+						<TextField
+							id={`${inputId}-key-${index}`}
+							label={t("hostlms.config_fields.shelf_location")}
+							value={key}
+							onChange={(event) =>
+								update(
+									rows.map((row, at) =>
+										at === index ? [event.target.value, row[1]] : row,
+									),
+								)
+							}
+							fullWidth
+						/>
+						<TextField
+							id={`${inputId}-value-${index}`}
+							select
+							label={t("hostlms.config_fields.loan_policy")}
+							value={choice}
+							onChange={(event) =>
+								update(
+									rows.map((row, at) =>
+										at === index ? [row[0], event.target.value] : row,
+									),
+								)
+							}
+							fullWidth
+						>
+							{valueOptions.map((option) => (
+								<MenuItem key={option.value} value={option.value}>
+									{t(option.labelKey)}
+								</MenuItem>
+							))}
+						</TextField>
+						<IconButton
+							onClick={() => update(rows.filter((_row, at) => at !== index))}
+							aria-label={t("hostlms.config_fields.remove_shelf_location", {
+								location: key || index + 1,
+							})}
+						>
+							<Delete />
+						</IconButton>
+					</Stack>
+				))}
+				<Button
+					startIcon={<Add />}
+					onClick={() => setRows([...rows, ["", valueOptions[0]?.value ?? ""]])}
+					sx={{ alignSelf: "flex-start" }}
+				>
+					{t("hostlms.config_fields.add_shelf_location")}
+				</Button>
+			</Stack>
+		</FormControl>
+	);
+};
+
+const hasConditions = (group: ClientConfigGroup): boolean =>
+	!!group.shownWhen ||
+	group.fields.some((configField) => !!configField.shownWhen);
+
+/**
+ * A group whose fields depend on another answer (SIP2 or NCIP, JWT or not). Only these
+ * subscribe to the values, so typing elsewhere does not re-render every group.
+ */
+const ConditionalGroup = ({
+	group,
+	disabled,
+}: {
+	group: ClientConfigGroup;
+	disabled: boolean;
+}) => {
+	const { control } = useFormContext();
+	const values = useWatch({ control, name: "clientConfigFields" }) ?? {};
+
+	if (group.shownWhen && !group.shownWhen(values)) return null;
+
+	return (
+		<ConfigGroup
+			group={{
+				...group,
+				shownWhen: undefined,
+				fields: group.fields.filter(
+					(configField) =>
+						!configField.shownWhen || configField.shownWhen(values),
+				),
+			}}
+			disabled={disabled}
 		/>
 	);
 };
@@ -292,6 +592,10 @@ const ConfigGroup = ({
 	disabled: boolean;
 }) => {
 	const { t } = useTranslation();
+	const basic = group.fields.filter(
+		(configField) => !isAdvancedField(configField),
+	);
+	const advanced = group.fields.filter(isAdvancedField);
 
 	return (
 		<Stack spacing={2}>
@@ -307,15 +611,91 @@ const ConfigGroup = ({
 					)}
 				</Stack>
 			)}
-			{group.fields.map((configField) => (
+			{basic.map((configField) => (
 				<ConfigFieldControl
 					key={fieldName(configField)}
 					configField={configField}
 					disabled={disabled}
 				/>
 			))}
+			{advanced.length > 0 && (
+				<AdvancedFields
+					groupId={group.id}
+					fields={advanced}
+					disabled={disabled}
+				/>
+			)}
 		</Stack>
 	);
+};
+
+/**
+ * The settings the adapter defaults, out of the way. Opens itself when any of them already
+ * has a value or an error, so nothing set is hidden and no message points at a closed panel.
+ */
+const AdvancedFields = ({
+	groupId,
+	fields,
+	disabled,
+}: {
+	groupId: string;
+	fields: ClientConfigField[];
+	disabled: boolean;
+}) => {
+	const { t } = useTranslation();
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext();
+	const values = useWatch({ control, name: "clientConfigFields" });
+	const [opened, setOpened] = useState(false);
+
+	const needsAttention = fields.some(
+		(configField) =>
+			!!errorAt(errors, configField.path) ||
+			readFieldValue(values, configField.path) !== "",
+	);
+	const summaryId = `client-config-advanced-${groupId || "main"}`;
+
+	return (
+		<Accordion
+			expanded={opened || needsAttention}
+			onChange={(_event, expanded) => setOpened(expanded)}
+			disableGutters
+			variant="outlined"
+		>
+			<AccordionSummary
+				expandIcon={<ExpandMore />}
+				id={`${summaryId}-summary`}
+				aria-controls={`${summaryId}-details`}
+			>
+				<Typography>
+					{t("hostlms.config_fields.advanced_settings", {
+						count: fields.length,
+					})}
+				</Typography>
+			</AccordionSummary>
+			<AccordionDetails id={`${summaryId}-details`}>
+				<Stack spacing={2}>
+					{fields.map((configField) => (
+						<ConfigFieldControl
+							key={fieldName(configField)}
+							configField={configField}
+							disabled={disabled}
+						/>
+					))}
+				</Stack>
+			</AccordionDetails>
+		</Accordion>
+	);
+};
+
+const readFieldValue = (values: any, path: string[]): string => {
+	const value = path.reduce(
+		(current, segment) => (current == null ? undefined : current[segment]),
+		values,
+	);
+	return value == null ? "" : String(value).trim();
 };
 
 /**
@@ -361,9 +741,13 @@ export default function ClientConfigFields({
 
 	return (
 		<Stack spacing={3}>
-			{profile.groups.map((group) => (
-				<ConfigGroup key={group.id} group={group} disabled={disabled} />
-			))}
+			{profile.groups.map((group) =>
+				hasConditions(group) ? (
+					<ConditionalGroup key={group.id} group={group} disabled={disabled} />
+				) : (
+					<ConfigGroup key={group.id} group={group} disabled={disabled} />
+				),
+			)}
 		</Stack>
 	);
 }
