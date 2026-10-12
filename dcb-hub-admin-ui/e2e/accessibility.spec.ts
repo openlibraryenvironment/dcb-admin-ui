@@ -159,6 +159,22 @@ const ADMIN_EDIT_SURFACES = [
 			await expect(page.getByLabel(/^library/i)).toBeVisible();
 		},
 	},
+	{
+		// The defaulted settings sit in a collapsed section per group; scanned open, where
+		// its inputs and their "leave blank" text are
+		label: "new Host LMS, advanced settings open",
+		path: "/hostlmss/new",
+		open: async (page: Page) => {
+			await page.getByRole("combobox", { name: "Client class" }).click();
+			await page.getByRole("option", { name: "Polaris" }).click();
+			const advanced = page.getByRole("button", { name: /advanced settings/i });
+			await expect(advanced.first()).toBeVisible();
+			for (const section of await advanced.all()) await section.click();
+			await expect(
+				page.getByText("Leave blank to use v1.").first(),
+			).toBeVisible();
+		},
+	},
 ] as const;
 
 /**

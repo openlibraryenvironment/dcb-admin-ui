@@ -12,6 +12,8 @@
  * been generating.
  */
 
+import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
+
 export const HOST_LMS_CLASSES = {
 	alma: "org.olf.dcb.core.interaction.alma.AlmaHostLmsClient",
 	polaris: "org.olf.dcb.core.interaction.polaris.PolarisLmsClient",
@@ -37,6 +39,7 @@ export type ClientConfigRequirement = "required" | "recommended" | "optional";
 export type ClientConfigFieldType =
 	| "text"
 	| "url"
+	| "email"
 	| "secret"
 	| "number"
 	| "boolean"
@@ -47,7 +50,14 @@ export type ClientConfigFieldType =
 	 * text because the keys are the site's own local values - there is no fixed
 	 * set of them to build a form from.
 	 */
-	| "jsonObject";
+	| "jsonObject"
+	/** One of `options`, where dcb-service reads a closed set. */
+	| "select";
+
+export interface ClientConfigOption {
+	value: string;
+	labelKey: string;
+}
 
 /**
  * A link appended to a field's helper text, for the values whose real
@@ -74,6 +84,25 @@ export interface ClientConfigField {
 	placeholder?: string;
 	docs?: ClientConfigDocs;
 	/**
+	 * What the adapter uses when the key is absent. Shown, never written: a field left
+	 * blank produces no key, so the default stays the adapter's.
+	 */
+	defaultValue?: string;
+	/** Behind the Advanced section. Implied by `defaultValue` unless set. */
+	advanced?: boolean;
+	/**
+	 * The closed set dcb-service reads. A `select` offers one; a `stringList` with options
+	 * is a set of checkboxes.
+	 */
+	options?: readonly ClientConfigOption[];
+	/**
+	 * For a `jsonObject` whose values come from a closed set: edited as rows of a free key
+	 * and one of these values, instead of as JSON.
+	 */
+	valueOptions?: readonly ClientConfigOption[];
+	/** Hidden while this is false: the setting means nothing in that configuration. */
+	shownWhen?: (values: any) => boolean;
+	/**
 	 * Suspends `required` while this holds. `default-agency-code` is the only case:
 	 * dcb-service rejects it outright on a shared system, so demanding it
 	 * unconditionally made a shared Host LMS impossible to submit - the form would not
@@ -85,6 +114,7 @@ export interface ClientConfigField {
 export interface ClientConfigGroup {
 	/** "" for the top-level fields, otherwise the nested object's key. */
 	id: string;
+	shownWhen?: (values: any) => boolean;
 	labelKey?: string;
 	descriptionKey?: string;
 	/**
@@ -159,6 +189,28 @@ const defaultAgencyCode = (): ClientConfigField => ({
 	requiredUnless: sharedSystemSet,
 });
 
+/** Foundation speaks NCIP unless told otherwise, as FoundationClient does. */
+const isSip2 = (values: any): boolean =>
+	String(values?.["base-protocol"] ?? "").toUpperCase() === "SIP2";
+
+/** NcipPeerAuthProfile requires issuer, JWKS URL and audience only in this mode. */
+const isJwtRequired = (values: any): boolean =>
+	String(values?.["ncip-peer-auth-mode"] ?? "").toUpperCase() ===
+	"JWT_REQUIRED";
+
+/** Ex Libris' regional API gateways: an Alma institution is served from exactly one. */
+const ALMA_GATEWAYS: readonly ClientConfigOption[] = [
+	["na", "https://api-na.hosted.exlibrisgroup.com"],
+	["eu", "https://api-eu.hosted.exlibrisgroup.com"],
+	["ap", "https://api-ap.hosted.exlibrisgroup.com"],
+	["aps", "https://api-aps.hosted.exlibrisgroup.com"],
+	["ca", "https://api-ca.hosted.exlibrisgroup.com"],
+	["cn", "https://api-cn.hosted.exlibrisgroup.com.cn"],
+].map(([region, value]) => ({
+	value,
+	labelKey: `hostlms.config_fields.alma_gateway_${region}`,
+}));
+
 /** Ex Libris' own developer documentation, linked from the Alma fields. */
 const ALMA_API_DOCS: ClientConfigDocs = {
 	url: "https://developers.exlibrisgroup.com/alma/apis/",
@@ -176,6 +228,27 @@ const ALMA_ITEM_POLICY_DOCS: ClientConfigDocs = {
  * is read from the client config regardless of ILS, so it belongs here and not
  * in one profile that happens to have an example of it.
  */
+// Sierra, Polaris and Koha set it on every virtual patron they create
+const VIRTUAL_PATRON_EMAIL: ClientConfigField = {
+	...field(
+		["virtual-patron-email"],
+		"hostlms.config_fields.virtual_patron_email",
+		"hostlms.config_fields.virtual_patron_email_description",
+		"optional",
+		"email",
+	),
+	advanced: true,
+};
+
+// Koha and Polaris both read it; dcb-service refuses more than 16
+const ITEM_ENRICHMENT_CONCURRENCY = field(
+	["item-enrichment-concurrency"],
+	"hostlms.config_fields.item_enrichment_concurrency",
+	"hostlms.config_fields.item_enrichment_concurrency_description",
+	"optional",
+	"number",
+);
+
 const SHARED_FIELDS: ClientConfigField[] = [
 	field(
 		["ingest"],
@@ -184,19 +257,62 @@ const SHARED_FIELDS: ClientConfigField[] = [
 		"optional",
 		"boolean",
 	),
-	field(
-		["roles"],
-		"hostlms.client_config.roles",
-		"hostlms.config_fields.roles_description",
-		"optional",
-		"stringList",
-		"CATALOGUE, CIRCULATION",
-	),
+	{
+		...field(
+			["roles"],
+			"hostlms.client_config.roles",
+			"hostlms.config_fields.roles_description",
+			"optional",
+			"stringList",
+		),
+		// HostLmsRepository.findParentsByIds joins on these two in SQL, so a typo there
+		// silently broke parent and child catalogue resolution
+		options: [
+			{ value: "CATALOGUE", labelKey: "hostlms.config_fields.role_catalogue" },
+			{
+				value: "CIRCULATION",
+				labelKey: "hostlms.config_fields.role_circulation",
+			},
+		],
+	},
 	// Any ILS can host more than one participating library - one Koha with sixty
 	// members, one Sierra shared by a participant and a non-participant - so this
 	// is not a per-profile concern. Setting it disables the two shortcuts that
 	// silently attribute a co-tenant's patrons or holdings to the wrong library:
 	// `default-agency-code` and the `Location: *` wildcard mapping.
+	// Two institutions on one regional gateway, or one server under two codes, are one
+	// system to DCB without this. Registration sets it; a hand-built Host LMS could not
+	{
+		...field(
+			["base-url-qualifier"],
+			"hostlms.config_fields.base_url_qualifier",
+			"hostlms.config_fields.base_url_qualifier_description",
+			"optional",
+		),
+		advanced: true,
+	},
+	// Only slows polling: dcb-service refuses anything outside 1 to 10
+	{
+		...field(
+			["polling-multiplier"],
+			"hostlms.config_fields.polling_multiplier",
+			"hostlms.config_fields.polling_multiplier_description",
+			"optional",
+			"number",
+		),
+		advanced: true,
+	},
+	// dcb-service refuses more than 8; blank uses the job's per-source setting
+	{
+		...field(
+			["availability-concurrency"],
+			"hostlms.config_fields.availability_concurrency",
+			"hostlms.config_fields.availability_concurrency_description",
+			"optional",
+			"number",
+		),
+		advanced: true,
+	},
 	field(
 		["shared-system"],
 		"hostlms.config_fields.shared_system",
@@ -284,6 +400,21 @@ const SIERRA: HostLmsProfile = {
 					"optional",
 					"number",
 				),
+				{
+					...field(
+						["api-version"],
+						"hostlms.config_fields.sierra_api_version",
+						"hostlms.config_fields.sierra_api_version_description",
+						"optional",
+						"select",
+					),
+					// HostLmsSierraApiClient.API_VERSIONS
+					options: ["v4", "v5", "v6"].map((value) => ({
+						value,
+						labelKey: `hostlms.config_fields.sierra_api_version_${value}`,
+					})),
+				},
+				VIRTUAL_PATRON_EMAIL,
 				field(
 					["get-hold-delay"],
 					"hostlms.config_fields.get_hold_delay",
@@ -324,15 +455,18 @@ const ALMA: HostLmsProfile = {
 			descriptionKey: "hostlms.config_fields.alma_connection_group_description",
 			required: false,
 			fields: [
-				field(
-					["alma-url"],
-					"hostlms.config_fields.alma_url",
-					"hostlms.config_fields.alma_url_description",
-					"required",
-					"url",
-					"https://api-na.hosted.exlibrisgroup.com",
-					ALMA_API_DOCS,
-				),
+				{
+					...field(
+						["alma-url"],
+						"hostlms.config_fields.alma_url",
+						"hostlms.config_fields.alma_url_description",
+						"required",
+						"select",
+						undefined,
+						ALMA_API_DOCS,
+					),
+					options: ALMA_GATEWAYS,
+				},
 				field(
 					["base-url"],
 					"hostlms.config_fields.alma_base_url",
@@ -610,18 +744,87 @@ const POLARIS: HostLmsProfile = {
 				// dcb-service warns when this is absent and falls back to defaults.
 				// The keys are the site's own shelf location names, so there is no
 				// fixed set of inputs to offer - it is edited as an object.
-				field(
-					["shelfLocationPolicyMap"],
-					"hostlms.config_fields.shelf_location_policy_map",
-					"hostlms.config_fields.shelf_location_policy_map_description",
-					"recommended",
-					"jsonObject",
-					'{"Reference Desk": "REFERENCE", "Interlibrary Loan": "NO_LEND"}',
-				),
+				{
+					...field(
+						["shelfLocationPolicyMap"],
+						"hostlms.config_fields.shelf_location_policy_map",
+						"hostlms.config_fields.shelf_location_policy_map_description",
+						"recommended",
+						"jsonObject",
+					),
+					// DerivedLoanPolicy, which HostLmsConfigValidator checks every value against
+					valueOptions: [
+						"GENERAL",
+						"SHORT_LOAN",
+						"REFERENCE_ONLY",
+						"LOCAL_ONLY",
+						"NO_LEND",
+					].map((value) => ({
+						value,
+						labelKey: `hostlms.config_fields.loan_policy_${value.toLowerCase()}`,
+					})),
+				},
 				field(
 					["use-new-bib-chunk-ingest"],
 					"hostlms.config_fields.use_new_bib_chunk_ingest",
 					"hostlms.config_fields.use_new_bib_chunk_ingest_description",
+					"optional",
+					"boolean",
+				),
+				// Read by PolarisConfig and absent from this table until now
+				{
+					...field(
+						["virtual-patron-branch-id"],
+						"hostlms.config_fields.virtual_patron_branch_id",
+						"hostlms.config_fields.virtual_patron_branch_id_description",
+						"optional",
+						"number",
+					),
+					advanced: true,
+				},
+				{
+					...field(
+						["borrower-lending-flow"],
+						"hostlms.config_fields.borrower_lending_flow",
+						"hostlms.config_fields.borrower_lending_flow_description",
+						"optional",
+						"select",
+					),
+					options: [
+						{
+							value: "ILL",
+							labelKey: "hostlms.config_fields.borrower_lending_flow_ill",
+						},
+					],
+					advanced: true,
+				},
+				ITEM_ENRICHMENT_CONCURRENCY,
+				VIRTUAL_PATRON_EMAIL,
+				field(
+					["hold-fetching-delay"],
+					"hostlms.config_fields.hold_fetching_delay",
+					"hostlms.config_fields.hold_fetching_delay_description",
+					"optional",
+					"number",
+				),
+				field(
+					["hold-fetching-max-retry"],
+					"hostlms.config_fields.hold_fetching_max_retry",
+					"hostlms.config_fields.hold_fetching_max_retry_description",
+					"optional",
+					"number",
+				),
+				field(
+					["harvest-watermark-overlap-minutes"],
+					"hostlms.config_fields.harvest_watermark_overlap_minutes",
+					"hostlms.config_fields.harvest_watermark_overlap_minutes_description",
+					"optional",
+					"number",
+				),
+				field(
+					["enableDoubleDelete"],
+					"hostlms.config_fields.enable_double_delete",
+					"hostlms.config_fields.enable_double_delete_description",
 					"optional",
 					"boolean",
 				),
@@ -767,6 +970,26 @@ const POLARIS: HostLmsProfile = {
 					"hostlms.config_fields.av_loan_period_code_id_description",
 					"optional",
 				),
+				{
+					path: ["item", "item-agency-resolution-method"],
+					labelKey: "hostlms.config_fields.item_agency_resolution_method",
+					descriptionKey:
+						"hostlms.config_fields.item_agency_resolution_method_description",
+					requirement: "optional",
+					type: "select",
+					// PolarisConfig.ITEM_AGENCY_RESOLUTION_METHODS, which the validator enforces
+					options: [
+						{
+							value: "Legacy",
+							labelKey: "hostlms.config_fields.item_agency_resolution_legacy",
+						},
+						{
+							value: "LocationId",
+							labelKey:
+								"hostlms.config_fields.item_agency_resolution_location_id",
+						},
+					],
+				},
 				field(
 					["item", "av-renewal-limit"],
 					"hostlms.config_fields.renewal_limit_av",
@@ -843,6 +1066,26 @@ const KOHA: HostLmsProfile = {
 					"hostlms.config_fields.virtual_item_library_code",
 					"hostlms.config_fields.virtual_item_library_code_description",
 					"required",
+				),
+				field(
+					["no-renew-collection-code"],
+					"hostlms.config_fields.no_renew_collection_code",
+					"hostlms.config_fields.no_renew_collection_code_description",
+					"optional",
+				),
+				ITEM_ENRICHMENT_CONCURRENCY,
+				VIRTUAL_PATRON_EMAIL,
+				field(
+					["do-not-renew-note"],
+					"hostlms.config_fields.do_not_renew_note",
+					"hostlms.config_fields.do_not_renew_note_description",
+					"optional",
+				),
+				field(
+					["virtual-patron-category"],
+					"hostlms.config_fields.virtual_patron_category",
+					"hostlms.config_fields.virtual_patron_category_description",
+					"optional",
 				),
 				// No virtual-item-location-code. KohaHostLmsClient.createItem sets
 				// home_library_id and holding_library_id and nothing else - a shelving
@@ -921,25 +1164,32 @@ const FOUNDATION: HostLmsProfile = {
 			id: "",
 			required: true,
 			fields: [
-				field(
-					["base-protocol"],
-					"hostlms.config_fields.base_protocol",
-					"hostlms.config_fields.base_protocol_description",
-					"recommended",
-					"text",
-					"NCIP",
-				),
+				{
+					...field(
+						["base-protocol"],
+						"hostlms.config_fields.base_protocol",
+						"hostlms.config_fields.base_protocol_description",
+						"optional",
+						"select",
+					),
+					options: [
+						{ value: "NCIP", labelKey: "hostlms.config_fields.protocol_ncip" },
+						{ value: "SIP2", labelKey: "hostlms.config_fields.protocol_sip2" },
+					],
+				},
 				defaultAgencyCode(),
-				// Required for the NCIP branch, which is the default - but a SIP2
-				// host legitimately has no endpoint, so it cannot be a hard
-				// requirement of the form.
-				field(
-					["ncip-endpoint-url"],
-					"hostlms.config_fields.ncip_endpoint_url",
-					"hostlms.config_fields.foundation_ncip_endpoint_url_description",
-					"recommended",
-					"url",
-				),
+				// Required on the NCIP branch, which is the default, and meaningless on SIP2
+				{
+					...field(
+						["ncip-endpoint-url"],
+						"hostlms.config_fields.ncip_endpoint_url",
+						"hostlms.config_fields.foundation_ncip_endpoint_url_description",
+						"required",
+						"url",
+					),
+					requiredUnless: isSip2,
+					shownWhen: (values: any) => !isSip2(values),
+				},
 			],
 		},
 		{
@@ -949,21 +1199,28 @@ const FOUNDATION: HostLmsProfile = {
 			// Only meaningful on the SIP2 branch, so the group must not be forced
 			// into existence on an NCIP host.
 			required: false,
+			shownWhen: isSip2,
 			fields: [
-				field(
-					["sip2", "host"],
-					"hostlms.config_fields.sip2_host",
-					"hostlms.config_fields.sip2_host_description",
-					"optional",
-				),
-				field(
-					["sip2", "port"],
-					"hostlms.config_fields.sip2_port",
-					"hostlms.config_fields.sip2_port_description",
-					"optional",
-					"number",
-					"6001",
-				),
+				{
+					...field(
+						["sip2", "host"],
+						"hostlms.config_fields.sip2_host",
+						"hostlms.config_fields.sip2_host_description",
+						"required",
+					),
+					requiredUnless: (values: any) => !isSip2(values),
+				},
+				{
+					...field(
+						["sip2", "port"],
+						"hostlms.config_fields.sip2_port",
+						"hostlms.config_fields.sip2_port_description",
+						"required",
+						"number",
+						"6001",
+					),
+					requiredUnless: (values: any) => !isSip2(values),
+				},
 				field(
 					["sip2", "login"],
 					"hostlms.config_fields.sip2_login",
@@ -1044,20 +1301,24 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					"recommended",
 				),
 				// ORSApplianceOaiPmhIngestSource throws on construction without one
-				// of these two, which surfaces as a harvest that never runs.
-				field(
-					["oai-endpoint-url"],
-					"hostlms.config_fields.oai_endpoint_url",
-					"hostlms.config_fields.oai_endpoint_url_description",
-					"recommended",
-					"url",
-				),
+				// of these two, which surfaces as a harvest that never runs. The URL,
+				// when set, wins; the tenant ID builds the standard path otherwise
 				field(
 					["tenant-id"],
 					"hostlms.config_fields.tenant_id",
 					"hostlms.config_fields.tenant_id_description",
-					"optional",
+					"recommended",
 				),
+				{
+					...field(
+						["oai-endpoint-url"],
+						"hostlms.config_fields.oai_endpoint_url",
+						"hostlms.config_fields.oai_endpoint_url_description",
+						"optional",
+						"url",
+					),
+					advanced: true,
+				},
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
@@ -1076,33 +1337,42 @@ const ORS_APPLIANCE: HostLmsProfile = {
 			// to give the form a heading, so nothing has to be forced into the JSON.
 			required: false,
 			fields: [
-				field(
-					["ncip-peer-auth-mode"],
-					"hostlms.config_fields.ncip_peer_auth_mode",
-					"hostlms.config_fields.ncip_peer_auth_mode_description",
-					"recommended",
-					"text",
-					"JWT_REQUIRED",
-				),
-				field(
-					["ncip-peer-issuer"],
-					"hostlms.config_fields.ncip_peer_issuer",
-					"hostlms.config_fields.ncip_peer_issuer_description",
-					"optional",
-				),
-				field(
-					["ncip-peer-jwks-url"],
-					"hostlms.config_fields.ncip_peer_jwks_url",
-					"hostlms.config_fields.ncip_peer_jwks_url_description",
-					"optional",
-					"url",
-				),
-				field(
-					["ncip-peer-audience"],
-					"hostlms.config_fields.ncip_peer_audience",
-					"hostlms.config_fields.ncip_peer_audience_description",
-					"optional",
-				),
+				{
+					...field(
+						["ncip-peer-auth-mode"],
+						"hostlms.config_fields.ncip_peer_auth_mode",
+						"hostlms.config_fields.ncip_peer_auth_mode_description",
+						"recommended",
+						"select",
+					),
+					options: [
+						{
+							value: "JWT_REQUIRED",
+							labelKey: "hostlms.config_fields.ncip_peer_jwt_required",
+						},
+						{
+							value: "INSECURE",
+							labelKey: "hostlms.config_fields.ncip_peer_insecure",
+						},
+					],
+				},
+				...(
+					[
+						["ncip-peer-issuer", "ncip_peer_issuer", "text"],
+						["ncip-peer-jwks-url", "ncip_peer_jwks_url", "url"],
+						["ncip-peer-audience", "ncip_peer_audience", "text"],
+					] as const
+				).map(([key, label, type]) => ({
+					...field(
+						[key],
+						`hostlms.config_fields.${label}`,
+						`hostlms.config_fields.${label}_description`,
+						"required",
+						type,
+					),
+					requiredUnless: (values: any) => !isJwtRequired(values),
+					shownWhen: isJwtRequired,
+				})),
 			],
 		},
 	],
@@ -1127,6 +1397,33 @@ const withSharedFields = (profile: HostLmsProfile): HostLmsProfile => ({
  * Exactly the classes `HostLmsConfigValidator` accepts, in picker order.
  * Adding one here without adding it there produces a 400 the user cannot act on.
  */
+/**
+ * Each field the adapter defaults is given that default, from the copy of dcb-service's
+ * docs/host-lms-defaults.json at the root of this app. A required field takes none: the
+ * server will not accept it blank, so there is nothing to leave blank.
+ */
+const withAdapterDefaults = (profile: HostLmsProfile): HostLmsProfile => {
+	const defaults: Record<string, string> =
+		(ADAPTER_DEFAULTS as Record<string, Record<string, string>>)[
+			profile.lmsClientClass
+		] ?? {};
+
+	return {
+		...profile,
+		groups: profile.groups.map((group) => ({
+			...group,
+			fields: group.fields.map((configField) => {
+				const defaultValue = defaults[configField.path.join(".")];
+
+				return defaultValue === undefined ||
+					configField.requirement === "required"
+					? configField
+					: { ...configField, defaultValue };
+			}),
+		})),
+	};
+};
+
 export const HOST_LMS_PROFILES: HostLmsProfile[] = [
 	ALMA,
 	POLARIS,
@@ -1135,7 +1432,9 @@ export const HOST_LMS_PROFILES: HostLmsProfile[] = [
 	SIERRA,
 	FOUNDATION,
 	ORS_APPLIANCE,
-].map(withSharedFields);
+]
+	.map(withSharedFields)
+	.map(withAdapterDefaults);
 
 export const getHostLmsProfile = (
 	lmsClientClass?: string | null,
@@ -1298,7 +1597,13 @@ export const hasSharedSystemConflict = (
 	sharedSystemSet(values) &&
 	!isBlank(readPath(values, ["default-agency-code"]));
 
-/** Recommended fields left blank. Surfaced as a warning, never a block. */
+export const isAdvancedField = (configField: ClientConfigField): boolean =>
+	configField.advanced ?? configField.defaultValue !== undefined;
+
+/**
+ * Recommended fields left blank. Surfaced as a warning, never a block. A field with a
+ * default is not a gap: the adapter supplies the value.
+ */
 export const missingRecommendedClientConfig = (
 	lmsClientClass: string | undefined | null,
 	values: any,
@@ -1307,6 +1612,7 @@ export const missingRecommendedClientConfig = (
 		.filter(
 			(configField) =>
 				configField.requirement === "recommended" &&
+				configField.defaultValue === undefined &&
 				isBlank(readPath(values, configField.path)),
 		)
 		.map((configField) => ({

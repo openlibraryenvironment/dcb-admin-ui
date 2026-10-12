@@ -7,10 +7,12 @@ import {
 	clientConfigToFields,
 	getHostLmsProfile,
 	hasSharedSystemConflict,
+	isAdvancedField,
 	missingRecommendedClientConfig,
 	missingRequiredClientConfig,
 	mergeClientConfigEdit,
 } from "./hostLmsClientConfig";
+import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
 
 /**
  * These assertions are the frontend half of a contract that lives in
@@ -184,16 +186,77 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).not.toContain("ncip-agency-id");
 		});
 
-		it("does not force a protocol branch on the Foundation connector", () => {
-			// base-protocol decides whether NCIP or SIP2 keys apply, and the form
-			// cannot know which before the user picks - the backend validates the
-			// branch the config selects.
+		// Mirrors HostLmsConfigValidator.validateFoundation, branch by branch
+		it("requires the NCIP endpoint on a Foundation host that speaks NCIP, the default", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.foundation,
 				{},
 			).map((problem) => problem.name);
 
-			expect(missing).toEqual(["default-agency-code"]);
+			expect(missing.sort()).toEqual([
+				"default-agency-code",
+				"ncip-endpoint-url",
+			]);
+		});
+
+		it("requires the socket, not the endpoint, on a Foundation host that speaks SIP2", () => {
+			const missing = missingRequiredClientConfig(HOST_LMS_CLASSES.foundation, {
+				"base-protocol": "SIP2",
+			}).map((problem) => problem.name);
+
+			expect(missing.sort()).toEqual([
+				"default-agency-code",
+				"sip2.host",
+				"sip2.port",
+			]);
+		});
+
+		it("requires the JWT settings only when the appliance requires signed requests", () => {
+			const missing = (values: object) =>
+				missingRequiredClientConfig(HOST_LMS_CLASSES.orsAppliance, values).map(
+					(problem) => problem.name,
+				);
+
+			expect(missing({})).not.toContain("ncip-peer-issuer");
+			expect(missing({ "ncip-peer-auth-mode": "JWT_REQUIRED" })).toEqual(
+				expect.arrayContaining([
+					"ncip-peer-issuer",
+					"ncip-peer-jwks-url",
+					"ncip-peer-audience",
+				]),
+			);
+		});
+
+		it("offers exactly Ex Libris' six regional gateways for Alma", () => {
+			const almaUrl = clientConfigFieldsFor(HOST_LMS_CLASSES.alma).find(
+				(configField) => configField.path.join(".") === "alma-url",
+			);
+
+			expect(almaUrl?.type).toBe("select");
+			expect(almaUrl?.options?.map((option) => option.value)).toEqual([
+				"https://api-na.hosted.exlibrisgroup.com",
+				"https://api-eu.hosted.exlibrisgroup.com",
+				"https://api-ap.hosted.exlibrisgroup.com",
+				"https://api-aps.hosted.exlibrisgroup.com",
+				"https://api-ca.hosted.exlibrisgroup.com",
+				"https://api-cn.hosted.exlibrisgroup.com.cn",
+			]);
+		});
+
+		// HostLmsRepository.findParentsByIds matches these two strings in SQL
+		it("offers exactly the two roles the parent and child resolution reads", () => {
+			const roles = clientConfigFieldsFor(HOST_LMS_CLASSES.sierra).find(
+				(configField) => configField.path.join(".") === "roles",
+			);
+
+			expect(roles?.options?.map((option) => option.value)).toEqual([
+				"CATALOGUE",
+				"CIRCULATION",
+			]);
+			expect(
+				buildClientConfig(HOST_LMS_CLASSES.sierra, { roles: ["CIRCULATION"] })
+					.roles,
+			).toEqual(["CIRCULATION"]);
 		});
 
 		it("points the OpenRS appliance at the concrete client class", () => {
@@ -600,6 +663,201 @@ describe("hostLmsClientConfig", () => {
 			expect(unmappedKeys).toEqual(["some-bespoke-flag"]);
 		});
 	});
+	describe("isAdvancedField", () => {
+		const base = {
+			path: ["page-size"],
+			labelKey: "label",
+			descriptionKey: "description",
+			requirement: "optional" as const,
+			type: "number" as const,
+		};
+
+		it("puts a field the adapter defaults behind Advanced", () => {
+			expect(isAdvancedField({ ...base, defaultValue: "1000" })).toBe(true);
+		});
+
+		it("leaves a field with no default in the main form", () => {
+			expect(isAdvancedField(base)).toBe(false);
+		});
+
+		it("lets a field say otherwise either way", () => {
+			expect(
+				isAdvancedField({ ...base, defaultValue: "1000", advanced: false }),
+			).toBe(false);
+			expect(isAdvancedField({ ...base, advanced: true })).toBe(true);
+		});
+	});
+
+	describe("adapter defaults", () => {
+		// Keys the snapshot lists and the guided form has no field for yet
+		const NOT_YET_IN_THE_FORM = [
+			"org.olf.dcb.core.interaction.alma.AlmaHostLmsClient no-renew-item-policy",
+		];
+
+		it("gives every field dcb-service defaults its default, from the snapshot", () => {
+			const unmatched: string[] = [];
+
+			for (const [lmsClientClass, defaults] of Object.entries(
+				ADAPTER_DEFAULTS as Record<string, Record<string, string>>,
+			)) {
+				for (const [key, value] of Object.entries(defaults)) {
+					const configField = clientConfigFieldsFor(lmsClientClass).find(
+						(candidate) => candidate.path.join(".") === key,
+					);
+
+					if (!configField) {
+						unmatched.push(`${lmsClientClass} ${key}`);
+					} else if (configField.requirement !== "required") {
+						expect(configField.defaultValue, key).toBe(value);
+					}
+				}
+			}
+
+			expect(unmatched).toEqual(NOT_YET_IN_THE_FORM);
+		});
+
+		it("does not default a field the server still requires", () => {
+			const pageSize = clientConfigFieldsFor(HOST_LMS_CLASSES.sierra).find(
+				(configField) => configField.path.join(".") === "page-size",
+			);
+
+			expect(pageSize?.requirement).toBe("required");
+			expect(pageSize?.defaultValue).toBeUndefined();
+		});
+
+		it("stops calling a defaulted Polaris value a gap", () => {
+			const gaps = missingRecommendedClientConfig(
+				HOST_LMS_CLASSES.polaris,
+				{},
+			).map((problem) => problem.name);
+
+			expect(gaps).not.toContain("services.workstation-id");
+			expect(gaps).not.toContain("services.site-domain");
+			expect(gaps).not.toContain("papi.papi-version");
+		});
+	});
+
+	describe("settings added under Advanced", () => {
+		// ORSApplianceOaiPmhIngestSource uses the endpoint URL when set, and builds the
+		// path from the tenant ID otherwise
+		it("asks for the appliance tenant, with the endpoint URL as the override", () => {
+			const fields = clientConfigFieldsFor(HOST_LMS_CLASSES.orsAppliance);
+			const byPath = (path: string) =>
+				fields.find((configField) => configField.path.join(".") === path);
+
+			expect(isAdvancedField(byPath("tenant-id")!)).toBe(false);
+			expect(isAdvancedField(byPath("oai-endpoint-url")!)).toBe(true);
+		});
+
+		it("offers availability concurrency and the polling multiplier on every adapter", () => {
+			for (const lmsClass of Object.values(HOST_LMS_CLASSES)) {
+				expect(
+					clientConfigFieldsFor(lmsClass).map((configField) =>
+						configField.path.join("."),
+					),
+					lmsClass,
+				).toContain("availability-concurrency");
+				expect(
+					clientConfigFieldsFor(lmsClass).map((configField) =>
+						configField.path.join("."),
+					),
+					lmsClass,
+				).toContain("polling-multiplier");
+			}
+		});
+
+		it("offers the virtual patron mailbox on every adapter that sets it", () => {
+			for (const lmsClass of [
+				HOST_LMS_CLASSES.sierra,
+				HOST_LMS_CLASSES.polaris,
+				HOST_LMS_CLASSES.koha,
+			]) {
+				const mailbox = clientConfigFieldsFor(lmsClass).find(
+					(configField) =>
+						configField.path.join(".") === "virtual-patron-email",
+				);
+				expect(mailbox?.type, lmsClass).toBe("email");
+			}
+		});
+
+		it("offers every Polaris key PolarisConfig reads that the form could not set", () => {
+			const paths = clientConfigFieldsFor(HOST_LMS_CLASSES.polaris).map(
+				(configField) => configField.path.join("."),
+			);
+
+			for (const key of [
+				"virtual-patron-branch-id",
+				"borrower-lending-flow",
+				"hold-fetching-delay",
+				"hold-fetching-max-retry",
+				"harvest-watermark-overlap-minutes",
+				"enableDoubleDelete",
+				"base-url-qualifier",
+			]) {
+				expect(paths, key).toContain(key);
+			}
+		});
+
+		// HostLmsConfigValidator rejects any other value, including UNKNOWN, which is
+		// what the adapter assigns, never what a site configures
+		it("maps shelf locations to the loan policies the validator accepts", () => {
+			const policyMap = clientConfigFieldsFor(HOST_LMS_CLASSES.polaris).find(
+				(configField) =>
+					configField.path.join(".") === "shelfLocationPolicyMap",
+			);
+
+			expect(policyMap?.valueOptions?.map((option) => option.value)).toEqual([
+				"GENERAL",
+				"SHORT_LOAN",
+				"REFERENCE_ONLY",
+				"LOCAL_ONLY",
+				"NO_LEND",
+			]);
+			expect(
+				buildClientConfig(HOST_LMS_CLASSES.polaris, {
+					shelfLocationPolicyMap: { Reference: "REFERENCE_ONLY" },
+				}).shelfLocationPolicyMap,
+			).toEqual({ Reference: "REFERENCE_ONLY" });
+		});
+	});
+
+	describe("select fields", () => {
+		it("offers the Polaris item agency methods PolarisConfig implements", () => {
+			const select = clientConfigFieldsFor(HOST_LMS_CLASSES.polaris).find(
+				(configField) =>
+					configField.path.join(".") === "item.item-agency-resolution-method",
+			);
+
+			expect(select?.type).toBe("select");
+			expect(select?.options?.map((option) => option.value)).toEqual([
+				"Legacy",
+				"LocationId",
+			]);
+		});
+
+		it("writes the chosen value into the nested item object", () => {
+			const config = buildClientConfig(HOST_LMS_CLASSES.polaris, {
+				item: { "item-agency-resolution-method": "LocationId" },
+			});
+
+			expect(config.item).toEqual({
+				"item-agency-resolution-method": "LocationId",
+			});
+		});
+
+		it("hydrates a stored value back into the select", () => {
+			const { values, unmappedKeys } = clientConfigToFields(
+				HOST_LMS_CLASSES.polaris,
+				{ item: { "item-agency-resolution-method": "Legacy" } },
+			);
+
+			expect(values).toMatchObject({
+				item: { "item-agency-resolution-method": "Legacy" },
+			});
+			expect(unmappedKeys).toEqual([]);
+		});
+	});
+
 	describe("mergeClientConfigEdit", () => {
 		it("keeps keys the guided form has no field for", () => {
 			const stored = {
