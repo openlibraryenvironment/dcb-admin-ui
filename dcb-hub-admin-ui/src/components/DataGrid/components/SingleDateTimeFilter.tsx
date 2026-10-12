@@ -1,6 +1,5 @@
 import { GridFilterInputValueProps } from "@mui/x-data-grid-premium";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers-pro";
-import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
+import { DateTimePicker } from "@mui/x-date-pickers-pro";
 // import { useTranslation } from "react-i18next";
 
 import dayjs, { Dayjs } from "dayjs";
@@ -16,18 +15,16 @@ export default function SingleDateTimeFilter(props: GridFilterInputValueProps) {
 	};
 
 	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
-			<DateTimePicker
-				value={value}
-				onChange={handleChange}
-				inputRef={focusElementRef}
-				slotProps={{
-					// Variant is left to the theme default (outlined) so this lines up
-					// with the panel's column/operator selects.
-					textField: { size: "small", fullWidth: true },
-					actionBar: { actions: ["clear", "today"] }, // the data grid MIGHT auto translate this but check
-				}}
-			/>
-		</LocalizationProvider>
+		<DateTimePicker
+			value={value}
+			onChange={handleChange}
+			inputRef={focusElementRef}
+			slotProps={{
+				// Variant is left to the theme default (outlined) so this lines up
+				// with the panel's column/operator selects.
+				textField: { size: "small", fullWidth: true },
+				actionBar: { actions: ["clear", "today"] }, // the data grid MIGHT auto translate this but check
+			}}
+		/>
 	);
 }

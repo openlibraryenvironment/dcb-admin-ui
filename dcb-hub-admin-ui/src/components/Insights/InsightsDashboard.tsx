@@ -11,8 +11,6 @@ import {
 	ToggleButtonGroup,
 	Typography,
 } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateRangePicker } from "@mui/x-date-pickers-pro";
 import { MultiInputDateRangeField } from "@mui/x-date-pickers-pro/MultiInputDateRangeField";
 import dayjs from "dayjs";
@@ -288,38 +286,36 @@ export default function InsightsDashboard({
 							</ToggleButton>
 						))}
 					</ToggleButtonGroup>
-					<LocalizationProvider dateAdapter={AdapterDayjs}>
-						<DateRangePicker
-							value={
-								customRange
-									? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
-									: [null, null]
+					<DateRangePicker
+						value={
+							customRange
+								? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
+								: [null, null]
+						}
+						onChange={(value) => {
+							const [start, end] = value;
+							if (start && end) {
+								setCustomRange({
+									startDate: start.startOf("day").toISOString(),
+									endDate: end.endOf("day").toISOString(),
+								});
+							} else if (!start && !end) {
+								setCustomRange(null);
 							}
-							onChange={(value) => {
-								const [start, end] = value;
-								if (start && end) {
-									setCustomRange({
-										startDate: start.startOf("day").toISOString(),
-										endDate: end.endOf("day").toISOString(),
-									});
-								} else if (!start && !end) {
-									setCustomRange(null);
-								}
-							}}
-							disableFuture
-							// Two labelled inputs and the same actions as the data grid's date
-							// filter, rather than one combined field with neither.
-							slots={{ field: MultiInputDateRangeField }}
-							slotProps={{
-								textField: { size: "small" },
-								actionBar: { actions: ["clear", "nextOrAccept"] },
-							}}
-							localeText={{
-								start: t("insights.range.from"),
-								end: t("insights.range.to"),
-							}}
-						/>
-					</LocalizationProvider>
+						}}
+						disableFuture
+						// Two labelled inputs and the same actions as the data grid's date
+						// filter, rather than one combined field with neither.
+						slots={{ field: MultiInputDateRangeField }}
+						slotProps={{
+							textField: { size: "small" },
+							actionBar: { actions: ["clear", "nextOrAccept"] },
+						}}
+						localeText={{
+							start: t("insights.range.from"),
+							end: t("insights.range.to"),
+						}}
+					/>
 				</Stack>
 
 				<SubjectBar

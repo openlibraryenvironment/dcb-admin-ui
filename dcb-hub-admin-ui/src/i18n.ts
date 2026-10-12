@@ -1,7 +1,14 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpBackend from "i18next-http-backend";
-import en from "./locales/en-GB/application.json";
+import enGB from "./locales/en-GB/application.json";
+import enUS from "./locales/en-US/application.json";
+import {
+	DEFAULT_LOCALE,
+	deploymentLocale,
+	resolveLanguage,
+} from "@helpers/locale";
+import { useLocaleStore } from "@hooks/useLocaleStore";
 import {
 	armMissingKeyReporting,
 	isMissingKeyReportingEnabled,
@@ -20,10 +27,13 @@ i18n
 	.use(initReactI18next)
 	.init({
 		resources: {
-			"en-GB": { application: en },
+			"en-GB": { application: enGB },
+			"en-US": { application: enUS },
 		},
-		lng: "en-GB",
-		fallbackLng: "en-GB",
+		lng: DEFAULT_LOCALE,
+		// A partial translation falls back to the deployment's English, not a fixed one.
+		fallbackLng: (code) =>
+			code.startsWith("en") ? [DEFAULT_LOCALE] : [deploymentLocale()],
 		load: "currentOnly",
 		partialBundledLanguages: true, // the rest are only partially bundled
 
@@ -46,5 +56,21 @@ i18n
 			recordMissingKey(languages?.[0] ?? "unknown", namespace, key);
 		},
 	});
+
+/**
+ * Puts the user's choice, or the deployment's locale, into effect: the translations and the
+ * page's `lang`, which screen readers pronounce by. Called once the runtime config is
+ * known, and again whenever the choice changes.
+ */
+export function applyLanguage(): Promise<unknown> {
+	const language = resolveLanguage(
+		useLocaleStore.getState().choice,
+		deploymentLocale(),
+	);
+	document.documentElement.lang = language;
+	return i18n.language === language
+		? Promise.resolve()
+		: i18n.changeLanguage(language);
+}
 
 export default i18n;

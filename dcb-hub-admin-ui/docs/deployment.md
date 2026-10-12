@@ -118,9 +118,32 @@ The application requires the following environment variables to function properl
 
                             |
 
+| `VITE_LOCALE` | No | `en-US` or `en-GB`. Defaults to `en-US`. Read at container start, so a deployment changes it without a rebuild. See "Locale" below. |
 | `VITE_PUBLIC_URL` | No | Standalone base path. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** The standalone entry uses it for assets, routing, translations and storage. The bootloader entry always routes at `/` and resolves assets from its own bundle URL. |
 
 ---
+
+### Locale
+
+`VITE_LOCALE` sets two things at once for everyone using the deployment: which English the
+interface is written in, and how dates are written and picked.
+
+| `VITE_LOCALE`     | Text                                           | Dates      | Calendar weeks start |
+| ----------------- | ---------------------------------------------- | ---------- | -------------------- |
+| `en-US` (default) | American English (catalog, color, canceled)    | 09/15/2026 | Sunday               |
+| `en-GB`           | British English (catalogue, colour, cancelled) | 15/09/2026 | Monday               |
+
+Unset means `en-US`, which is what every deployment showed before the setting existed. Any
+other value is ignored with a console warning, and `en-US` is used.
+
+Each user can override it under Settings, Profile or the setup flow's Appearance chapter
+("Language"): the deployment's locale, either English, or Spanish. The choice is stored in
+that browser and cleared at sign-out, like the appearance settings beside it. Spanish is a
+partial translation; its missing strings, and its dates, follow the deployment's locale.
+
+The two English translations are `src/locales/en-US/application.json` and
+`src/locales/en-GB/application.json`. They carry the same keys, which
+`src/locales/localeParity.test.ts` enforces; a new string goes into both.
 
 ## 2a. Feature flags: which dcb-service this deployment is talking to
 

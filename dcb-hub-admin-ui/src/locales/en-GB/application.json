@@ -125,8 +125,8 @@
 		"harvest_enabled": "Harvest enabled",
 		"harvested": "Harvested",
 		"ingested": "Ingested",
-		"name": "Catalog metrics by Host LMS",
-		"no_results": "No catalog metrics found. Try changing your search terms or filters.",
+		"name": "Catalogue metrics by Host LMS",
+		"no_results": "No catalogue metrics found. Try changing your search terms or filters.",
 		"source_system": "Source system name",
 		"source_system_id": "Source system UUID"
 	},
@@ -220,7 +220,7 @@
 		"onboarding": "Onboarding your consortium",
 		"remove_image": "Remove image",
 		"search": "Search {{consortium}}",
-		"search_url": "DCB catalog search URL",
+		"search_url": "DCB catalogue search URL",
 		"select_image": "Select image",
 		"settings": {
 			"enable": "Enable {{setting}}",
@@ -466,6 +466,7 @@
 	},
 	"header": {
 		"language_switcher_title": "Language",
+		"language_deployment_default": "Consortium default: {{language}}",
 		"consortium_icon": "The icon of the {{consortium}} consortium."
 	},
 	"theme": {
@@ -2043,7 +2044,7 @@
 				"name": "Alarms"
 			},
 			"auditExplorer": "Audit explorer",
-			"catalogMetricsByHostLms": "Catalog metrics by host LMS",
+			"catalogMetricsByHostLms": "Catalogue metrics by host LMS",
 			"dataChangeLog": "Data change log",
 			"dcbNcipOnboarding": "DCB NCIP Onboarding",
 			"name": "Service info",
@@ -2111,7 +2112,7 @@
 			"token": "Invitation token"
 		},
 		"review": {
-			"warning": "Issuing this invitation authorizes one matching ORS Appliance to become an active DCB member when it redeems the token."
+			"warning": "Issuing this invitation authorises one matching ORS Appliance to become an active DCB member when it redeems the token."
 		},
 		"steps": {
 			"invitation": "Invitation",
@@ -2191,9 +2192,9 @@
 			"operate_dcb": {
 				"name": "Operate DCB",
 				"action": "Authorise who can manage your live DCB services",
-				"status_operators_zero": "There are no library services administrators authorised to operate DCB services",
-				"status_operators_one": "There are {{count}} library services administrators authorised to operate DCB services.",
-				"status_operators_other": "There is {{count}} library services administrators authorised to operate DCB services."
+				"status_operators_zero": "There are no library services administrators authorised to operate DCB services.",
+				"status_operators_one": "There is {{count}} library services administrator authorised to operate DCB services.",
+				"status_operators_other": "There are {{count}} library services administrators authorised to operate DCB services."
 			},
 			"manage_support": {
 				"name": "Manage support",
@@ -2867,7 +2868,7 @@
 			"write": "Write"
 		},
 		"reference": {
-			"catalog_build": "Reference: Catalog build"
+			"catalog_build": "Reference: Catalogue build"
 		},
 		"unsaved_changes": {
 			"body": "If you leave this page your changes will be discarded.",

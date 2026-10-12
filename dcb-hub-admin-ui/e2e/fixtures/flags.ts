@@ -88,6 +88,14 @@ export async function useAllFeaturesExcept(page: Page, flags: string[]) {
 	await seedFeatures(page, env);
 }
 
+/** Everything on, plus deployment settings that are not flags, e.g. `{ VITE_LOCALE: "en-GB" }`. */
+export async function seedDeployment(
+	page: Page,
+	settings: Record<string, string>,
+) {
+	await seedFeatures(page, { ...ALL_FEATURES, ...settings });
+}
+
 async function seedFeatures(page: Page, env: Record<string, string>) {
 	// getStandaloneConfig() short-circuits on window.__APP_ENV__, so seeding it
 	// before any app script runs both sets the flags and spares the run a fetch of
