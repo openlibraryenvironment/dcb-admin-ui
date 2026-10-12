@@ -27,21 +27,12 @@
 	},
 	"app": {
 		"name": "DCB Admin",
-		"component": {
-			"service": "dcb-service",
-			"locate": "dcb-locate",
-			"admin": "dcb-admin-ui",
-			"devops": "dcb-devops",
-			"keycloak": "dcb-keycloak-extensions"
-		},
 		"dcb": "DCB",
 		"dcb_full": "Préstamo directo entre consorcios",
 		"guest_user": "Invitado",
 		"released": "Publicado",
 		"service": {
-			"dcb": "Servicio DCB",
-			"discovery": "Descubrimiento de DCB",
-			"keycloak": "Keycloak"
+			"discovery": "Descubrimiento de DCB"
 		},
 		"title": "{{consortium_name}} {{environment}} | $t(app.name)",
 		"version": "Versión"
@@ -60,13 +51,11 @@
 	},
 	"bibRecords": {
 		"bibs_one": "registro bibliográfico",
-		"bib_records": "registros bibliográficos",
 		"contributor_uuid": "UUID del colaborador",
 		"edition": "Edición",
 		"large_print": "¿Letra grande?",
 		"metadata_score": "Puntuación de metadatos",
 		"no_results": "No se han encontrado registros bibliográficos. Intenta cambiar los términos de búsqueda o los filtros.",
-		"no_rows": "No hay registros bibliográficos disponibles. Si esperas que haya datos aquí, actualiza la página.",
 		"process_version": "Versión del proceso",
 		"record_created": "Registro creado",
 		"record_updated": "Registro actualizado",
@@ -99,17 +88,10 @@
 		"error_loading": "Se ha producido un error al cargar {{page_title}}. Por favor, <linkComponent>actualiza</linkComponent> la página.",
 		"filter_applied": "Se han aplicado filtros",
 		"loading": "Cargando...",
-		"mappings": {
-			"last_imported": "Última importación"
-		},
-		"missing": "Falta",
 		"na": "N/A",
-		"placeholder_text": "Nota: esta página contiene datos provisionales.",
-		"placeholder_tip": "Precaución: datos de ejemplo de marcador de posición",
 		"unknown": "Desconocido",
 		"upload": "Subir",
-		"upload_title": "Subir {{entityName}}",
-		"uploading": "Cargando"
+		"upload_title": "Subir {{entityName}}"
 	},
 	"consortium": {
 		"about": "Acerca de {{consorcio}}",
@@ -187,42 +169,20 @@
 		"action": "Acción",
 		"category": "Cambiar categoría",
 		"category_required": "Selecciona una categoría antes de continuar.",
-		"categories": {
-			"additional_information": "Información adicional proporcionada",
-			"changing_status": "Estado modificado",
-			"details_changed": "Se han modificado los detalles",
-			"error_correction": "Corrección de error",
-			"initial_setup": "Configuración inicial",
-			"mappings_replacement": "Sustitución de asignaciones",
-			"membership_ended": "Afiliación finalizada",
-			"new_contact": "Nuevo contacto",
-			"new_member": "Nuevo miembro",
-			"other": "Otro"
-		},
-		"changes": "Cambios",
-		"characters_remaining": "{{caracteres}} caracteres restantes",
 		"deleted_value": "Valor eliminado",
 		"entity_id": "UUID de la entidad",
 		"entity_type": "Tipo de entidad",
 		"field_label": "Etiqueta del campo",
-		"field_name": "Nombre del campo",
 		"id": "UUID del registro de cambios de datos",
-		"last_edited_by": "Última edición por",
 		"loading_details": "Detalles del cambio de datos",
-		"max_length_exceeded": "Los valores no deben superar los 200 caracteres. Introduce un valor más corto.",
-		"max_length_reached": "Se ha alcanzado la longitud máxima de {{maxLength}} caracteres",
-		"new_data": "Datos nuevos",
 		"new_value": "Nuevo valor",
 		"no_eligible_changes": "No hay cambios válidos que mostrar. Esto puede ocurrir cuando se actualiza una entidad justo antes de su eliminación.",
 		"no_results": "No se han encontrado entradas en el registro de cambios de datos. Intenta modificar los términos de búsqueda o los filtros.",
-		"no_rows": "No hay entradas disponibles en el registro de cambios de datos. Si esperas que haya datos aquí, actualiza la página.",
-		"old_data": "Datos antiguos",
 		"old_value": "Valor anterior",
 		"reason": "Motivo del cambio",
 		"reason_addition": "Motivo de la adición",
 		"reason_required": "Indica el motivo de este cambio.",
 		"reference_url": "URL de referencia del cambio",
-		"ref_url_helper": "La URL del ticket en el que se describe el cambio solicitado, si procede.",
 		"table_name": "Nombre de la tabla de la base de datos",
 		"timestamp": "Marca de tiempo",
 		"user": "Usuario"
@@ -255,7 +215,6 @@
 		"named_sql": "SQL con nombre",
 		"requester": "Solicitante",
 		"request_id": "ID de la solicitud",
-		"request_url": "URL de la solicitud",
 		"related_ticket": "Ticket relacionado",
 		"supplier": "Proveedor",
 		"total": "Total",
@@ -852,9 +811,7 @@
 		"who": {
 			"ebsco": "EBSCO",
 			"involved": "Quiénes participan",
-			"kint": "K-Int",
 			"kint_full": "Integración del conocimiento",
-			"olf": "OLF",
 			"olf_full": "Fundación Open Library"
 		}
 	},
@@ -995,23 +952,13 @@
 		"title": "Solicitud de usuario"
 	},
 	"patron_requests": {
-		"cleanup": "Forzar limpieza",
 		"cleanup_complete": "Limpieza completada",
-		"cleanup_disabled": "La limpieza solo está disponible para solicitudes que no se encuentren en estado terminal o de ERROR.",
-		"cleanup_info": "Omitir la circulación limpiar y finalizar la solicitud",
 		"cleanup_in_progress": "Limpieza en curso",
-		"cleanup_successful": "La operación de limpieza se ha realizado con éxito y la solicitud del usuario se ha completado.",
-		"cleanup_unsuccessful": "La operación de limpieza ha fallado y la solicitud del usuario sigue en estado ERROR. Inténtalo de nuevo más tarde.",
-		"excluded_from_tracking": "¿Excluido del seguimiento?",
 		"pickup_location_name": "Nombre del punto de recogida",
 		"pr_one": "Solicitud del usuario",
-		"loading_msg": "Cargando solicitudes...",
-		"alert_text": "No se han podido recuperar las solicitudes, por favor, actualiza la página.",
 		"no_results": "No se han encontrado solicitudes de usuarios. Intenta cambiar los términos de búsqueda o los filtros.",
-		"no_rows": "No hay solicitudes de usuarios disponibles. Si esperas que haya datos aquí, actualiza la página.",
 		"search_placeholder_error_message": "Buscar por mensaje de error",
-		"search_placeholder_status": "Buscar por estado de la solicitud",
-		"source_record_error": "El registro bibliográfico de esta solicitud del usuario tiene, de forma inesperada, varios registros de origen. Por favor, revísalos a continuación. "
+		"search_placeholder_status": "Buscar por estado de la solicitud"
 	},
 	"profile": {
 		"details": "Tus datos",
@@ -1023,29 +970,12 @@
 		"roles": "Roles: "
 	},
 	"requesting": {
-		"available_at": "Ejemplares disponibles en {{total}} instituciones",
-		"available_for_walk_up": "Disponible para solicitud presencial",
-		"available_for_walk_up_description": "Disponible para solicitud presencial: al menos un ejemplar de este registro está disponible en tu biblioteca.",
-		"available_for_staff_request": "Disponible para solicitud por parte del personal",
-		"available_for_staff_request_description": "Disponible para solicitud por parte del personal: al menos un ejemplar de este registro está disponible en su consorcio.",
-		"available_to_request": "{{number}} artículos disponibles en {{total}} institución(es)",
-		"barcode": "Código de barras",
 		"bib_record": "Registro bibliográfico",
 		"bib_record_id": "UUID del registro bibliográfico",
-		"call_no": "Número de referencia",
-		"cannot_request_no_items": "No hay ejemplares disponibles para solicitar de este registro.",
-		"context": "Contexto",
 		"contributors": "Colaboradores",
-		"cluster": "Registro del clúster",
-		"cluster_title": "Detalles del clúster para {{record}}",
-		"cluster_tooltip": "Ver registro del clúster",
-		"cluster_id": "UUID del clúster",
-		"cluster_deleted": "¿Se ha eliminado el clúster?",
 		"configuration": "Solicitando la configuración",
-		"contributor": "Colaborador(es): {{contributors}}",
 		"date_available": "Fecha de disponibilidad",
 		"date_due": "Fecha de vencimiento",
-		"description": "Descripción",
 		"expedited_checkout": {
 			"actions": {
 				"place": "Pago rápido"
@@ -1054,13 +984,9 @@
 			"return": "Devolución",
 			"create_request": "Crear solicitud",
 			"creating_request": "Creando solicitud...",
-			"description": "Bienvenido al servicio de préstamos presenciales de DCB. Indica el código de barras y la biblioteca del usuario para el que deseas realizar la solicitud. <párrafo>Siempre que los datos del usuario sean válidos y el artículo exista y esté disponible en tu biblioteca, DCB prestará este artículo al usuario especificado de forma inmediata.</párrafo>",
 			"feedback": {
-				"current_status": "Estado actual: {{status}}",
 				"in_progress": "Tu solicitud de préstamo en la sede se ha enviado correctamente y DCB está intentando tramitarla.",
-				"in_progress_explanation": "Tu solicitud de préstamo en la biblioteca se ha enviado correctamente y DCB está intentando tramitarla.",
-				"success": "Tu solicitud de préstamo en la sede se ha tramitado correctamente y puedes realizar su seguimiento en DCB Admin <linkComponent> aquí </linkComponent>.",
-				"time_elapsed": "Tiempo transcurrido: {{time}}"
+				"in_progress_explanation": "Tu solicitud de préstamo en la biblioteca se ha enviado correctamente y DCB está intentando tramitarla."
 			},
 			"request_title": "Solicitud de préstamo presencial",
 			"steps": {
@@ -1082,40 +1008,20 @@
 			"title_on_site": "Préstamo de un artículo",
 			"view_request": "Solicitud de visualización"
 		},
-		"format": "Formato: {{formats}}",
-		"format_title": "Formato(s)",
 		"global": "Configuración global de solicitudes",
 		"global_limit": "Límite global de solicitudes activas: ",
 		"global_tracking": "Intervalo de seguimiento global: ",
-		"history": "Historial de solicitudes",
 		"hold_count": "Recuento de retenciones",
-		"identifiers": "Identificadores",
-		"isbn_title": "Identificadores ISBN",
-		"isbn": "Identificador(es) ISBN: {{isbn}}",
-		"issn": "Identificador(es) ISSN: {{issn}}",
 		"items": "Elementos",
 		"items_error_title": "No se han podido cargar los elementos asociados",
 		"item_id": "ID del elemento",
 		"items_not_found": "No se han encontrado elementos",
 		"items_search": "Buscar artículos",
 		"items_title": "Artículos disponibles para el grupo {{cluster}}",
-		"languages": "Idioma(s)",
 		"live_availability_no_items": "No se han encontrado artículos para este registro",
-		"live_availability_unavailable": "No hay información disponible sobre la disponibilidad del artículo",
-		"local_item_type_code": "Código de tipo de artículo local",
-		"local_item_type_name": "Nombre del tipo de artículo local",
-		"no_data": "No hay datos disponibles. Introduce un término de búsqueda o modifica tu búsqueda actual.",
-		"no_history": "Sus usuarios no han realizado ninguna solicitud de OpenRS para este registro.",
-		"not_available_for_staff_request": "No disponible para solicitudes del personal",
-		"not_available_for_staff_request_description": "No disponible para solicitudes del personal: actualmente no hay ningún ejemplar disponible para este registro en su consorcio.",
-		"not_available_for_walk_up": "No disponible para solicitudes presenciales",
-		"not_available_for_walk_up_description": "No disponible para solicitudes presenciales: actualmente no hay ningún ejemplar disponible para este registro en su biblioteca.",
-		"notes": "Notas",
 		"options": "Opciones de solicitud",
-		"physical_descriptions": "Descripciones físicas",
 		"publication_date": "Fecha de publicación",
 		"publication_place": "Lugar de publicación",
-		"publication_year": "Año de publicación",
 		"publisher": "Editor",
 		"place_description": "Has elegido solicitar {{title}}. Selecciona una de las opciones de solicitud que aparecen a continuación.",
 		"place_title": "Realizar una solicitud",
@@ -1124,59 +1030,30 @@
 			"actions": {
 				"place": "Servicio rápido en ventanilla"
 			},
-			"option_description": "Préstamo de un artículo a un usuario que se encuentra en el mostrador con el artículo en la mano.",
 			"steps": {
 				"request_creation": "Escanear artículo"
 			}
 		},
-		"record_created": "Registro creado",
-		"record_information": "Información del registro",
-		"record_updated": "Registro actualizado",
 		"requestable": "Solicitable",
 		"selected_bib_uuid": "UUID de la referencia seleccionada",
-		"series": "Serie",
-		"shared_index_unavailable_title": "El índice compartido no está configurado en este sistema",
-		"shared_index_unavailable_message": "Establezca una variable de entorno DCB_SEARCH_BASE válida para esta implementación.",
-		"source_system_code": "Código del sistema de origen",
-		"subjects": "Temas",
 		"supplier_type": "Tipo de proveedor",
 		"suppressed": "Omitido",
-		"titles_found": "{{number}} títulos encontrados",
-		"volume_parsed": "Declaración de volumen analizada",
-		"volume_raw": "Declaración de volumen sin procesar",
-		"search_types": {
-			"cql": "CQL",
-			"default": "Predeterminado",
-			"query_builder": "Generador de consultas",
-			"locate": "Localizar"
-		},
 		"shared_index": {
-			"cluster": "Clúster",
-			"cluster_details": "Detalles del clúster",
-			"error_connecting": "Se ha producido un error al conectarse al servicio de búsqueda. Inténtalo de nuevo más tarde.",
-			"error_connecting_title": "No se ha podido conectar a dcb-locate",
-			"items": "Elementos",
 			"items_for_cluster": "{{number}} elemento(s) asociados a este registro.",
 			"items_not_shown": "{{number}} elemento(s) que no se pueden mostrar",
 			"items_not_shown_helper_item": "Los elementos sin tipo de elemento suelen deberse a que falta una asignación de tipo de elemento o a que está mal configurada. Revisa las asignaciones de tipos de elemento de esta biblioteca.",
 			"items_not_shown_helper_location": "Los elementos sin un valor de «Agencia» suelen deberse a que falta una asignación de ubicación, a que está mal configurada o a que falta una agencia. Revisa las asignaciones de ubicación de esta biblioteca y la configuración de la agencia.",
 			"items_not_shown_long": "{{number}} elemento(s) que no se pueden mostrar. Es posible que falten asignaciones o que haya otros problemas de configuración.",
-			"items_not_shown_resolution": "Si los elementos que aparecen a continuación pertenecen a su biblioteca y deberían estar disponibles para los usuarios, revise las asignaciones en la sección «Asignaciones». Es posible que haya asignaciones incorrectas o que falten algunas, lo que impide que DCB muestre los elementos que aparecen a continuación",
-			"items_unavailable": "No hay elementos disponibles para este clúster",
-			"return": "Volver al índice compartido",
-			"title": "Índice compartido",
-			"title_details": "Detalles del título de {{title}}"
+			"items_not_shown_resolution": "Si los elementos que aparecen a continuación pertenecen a su biblioteca y deberían estar disponibles para los usuarios, revise las asignaciones en la sección «Asignaciones». Es posible que haya asignaciones incorrectas o que falten algunas, lo que impide que DCB muestre los elementos que aparecen a continuación"
 		},
 		"staff_request": {
 			"actions": {
 				"place": "Realizar una solicitud de personal"
 			},
 			"option_description": "Realiza una solicitud de este registro en nombre de un usuario; el DCB selecciona y proporciona un ejemplar disponible.",
-			"new": "Nueva solicitud",
 			"patron": {
 				"affiliated": "Institución afiliada",
 				"barcode": "Código de barras del usuario",
-				"description": "Indica el código de barras y la biblioteca del usuario para el que deseas realizar una solicitud de personal.",
 				"error": {
 					"no_brackets": "Por favor, elimina cualquier paréntesis del código de barras.",
 					"request": {
@@ -1186,8 +1063,6 @@
 					"validation_failure": "No hemos podido validar este usuario. Corrige el código de barras y/o la institución a la que pertenece e inténtalo de nuevo.",
 					"validate_first": "Debe validar a un usuario antes de intentar realizar una solicitud de personal en su nombre."
 				},
-				"item_agency_code": "Agencia del artículo",
-				"item_host_lms": "LMS de alojamiento del artículo",
 				"item_library": "Biblioteca del elemento",
 				"item_local_id": "ID local del elemento",
 				"item_select": "Código de barras del artículo: {{barcode}}, Ubicación: {{name}}, Signatura: {{callNo}}",
@@ -1310,8 +1185,6 @@
 			"cancel": "Cancelar",
 			"close_alert": "Cerrar alerta",
 			"continue": "Continuar",
-			"contact_sysadmin": "Póngase en contacto con su administrador del sistema",
-			"explain_clustering": "Explicar la agrupación en clústeres de este registro",
 			"go_home": "Ir a la página $t(nav.home)",
 			"go_back": "Volver",
 			"go_back_message": "Volver a la página anterior",
@@ -1324,19 +1197,11 @@
 			"save_changes": "Guardar cambios",
 			"submit": "Enviar",
 			"submitting": "Enviando",
-			"toggle_on": "Activar el modo de incorporación",
-			"validate": "Validar",
-			"view_error_details": "Ver detalles del error",
 			"yes": "Sí"
 		},
 		"confirmation": {
-			"admin_required_borrowing": "Debe tener un rol de CONSORTIUM_ADMIN o superior para cambiar el estado de préstamo de una biblioteca.",
 			"admin_required_supplying": "Debes tener un rol de CONSORTIUM_ADMIN o superior para activar o desactivar el estado de suministro de una biblioteca.",
-			"disable_borrowing": "Desactivar el préstamo para los usuarios",
-			"disable_supplying": "Desactivar el suministro",
 			"edit_title": "Editar {{entityName}}",
-			"enable_borrowing": "Habilitar el préstamo para usuarios",
-			"enable_supplying": "Habilitar el suministro",
 			"header_enable_borrowing": "Habilitar el préstamo para los usuarios de {{library}}",
 			"header_enable_supplying": "Habilitar el préstamo para {{library}}",
 			"header_disable_borrowing": "Desactivar el préstamo para los usuarios de {{library}}",
@@ -1345,30 +1210,17 @@
 			"para1_enable_supplying": "Los registros del catálogo de <bold>{{library}}</bold> podrán ser <bold>localizados</bold> y <bold>solicitados</bold> por los usuarios de otras bibliotecas del consorcio.",
 			"para1_disable_borrowing": "<bold>Los usuarios de {{library}}</bold> ya no podrán realizar solicitudes de préstamo en otras bibliotecas del consorcio.",
 			"para1_disable_supplying": "Los registros del catálogo de <bold>{{library}}</bold> <bold>no serán localizables</bold> ni <bold>solicitables</bold> por los usuarios de otras bibliotecas del consorcio.",
-			"reason": "Motivo del cambio",
 			"select_enable_borrowing": "Selecciona «Habilitar préstamo» para continuar.",
 			"select_enable_supplying": "Seleccione «Habilitar cesión» para continuar.",
 			"select_disable_borrowing": "Selecciona «Desactivar el préstamo» para continuar.",
 			"select_disable_supplying": "Selecciona «Desactivar el suministro» para continuar.",
-			"session_warning": "Su sesión está a punto de caducar",
-			"alert": {
-				"borrowing_disabled": "Los usuarios de {{library}} ya <bold>no pueden</bold> realizar solicitudes de préstamo en otras bibliotecas del consorcio",
-				"borrowing_disabled_fail": "<bold>No se ha podido desactivar</bold> el servicio de préstamo para los usuarios de {{library}}",
-				"borrowing_enabled": "Los usuarios de {{library}} ya <bold>pueden</bold> realizar solicitudes de préstamo en otras bibliotecas del consorcio",
-				"borrowing_enabled_fail": "No se ha podido <bold>activar</bold> el estado de préstamo para los usuarios de {{library}}",
-				"supplying_disabled": "{{library}} ya <bold>no puede</bold> actuar como biblioteca proveedora",
-				"supplying_disabled_fail": "<bold>No se ha podido desactivar</bold> el estado de suministro de {{library}}",
-				"supplying_enabled": "{{library}} ya está <bold>habilitada</bold> para actuar como biblioteca proveedora",
-				"supplying_enabled_fail": "El estado de suministro de {{library}} <bold>no se ha podido activar</bold>"
-			}
+			"session_warning": "Su sesión está a punto de caducar"
 		},
 		"data_grid": {
 			"actions": "Acciones",
 			"cancel": "Cancelar",
-			"checkbox_selection": "Selección de casillas de verificación",
 			"close": "Cerrar",
 			"collapse": "Ocultar",
-			"confirm_changes": "Confirmar cambios",
 			"complete": "{{percentage}} completado",
 			"delete": "Eliminar",
 			"delete_body": "Para eliminar esta {{entidad}}, facilite los siguientes datos.",
@@ -1383,9 +1235,7 @@
 			"delete_tooltip": "Información sobre herramientas para determinar si la operación de eliminación está disponible para el usuario actual.",
 			"deleted": "Eliminado",
 			"delete_restricted": "Debes tener el rol ADMIN o CONSORTIUM_ADMIN para eliminar entidades. Ponte en contacto con el administrador del sistema.",
-			"download_current_page": "Descargar la página actual como CSV",
 			"edit": "Editar",
-			"editable_cell": "Haz clic para editar",
 			"edit_float": "Introduce un número decimal",
 			"edit_error": "No se ha podido completar la operación de edición de {{entity}} {{name}}. Inténtalo de nuevo.",
 			"edit_int": "Introduce un número entero",
@@ -1395,13 +1245,8 @@
 			"edit_summary": "Editar {{entity}}",
 			"edit_url": "Introduce una URL válida",
 			"edit_url_required": "Se requiere una URL válida.",
-			"export_all": "Exportar todo",
-			"export_all_csv": "Exportar todo como CSV",
-			"export_all_tsv": "Exportar todo como TSV",
-			"export_current": "Exportar la página actual",
 			"export_failed": "Se ha producido un error al exportar la tabla de datos. Inténtalo de nuevo.",
 			"export_success": "Se han exportado correctamente {{count}} registros de la tabla de datos.",
-			"export_filtered": "Exportación filtrada",
 			"export_modal_title": "Exportando datos",
 			"exporting_records": "Exportando {{count}} registros de la tabla de datos.",
 			"export": {
@@ -1452,10 +1297,8 @@
 			"find_column": "Buscar columna",
 			"master_detail": "Detalle maestro",
 			"message": "Mensaje",
-			"more": "Más",
 			"no_results": "No hay resultados",
 			"print_current_page": "Imprimir la página actual",
-			"open": "Abrir",
 			"save": "Guardar",
 			"search": "Buscar",
 			"skipped_count": "No cumple los requisitos: ",
@@ -1503,25 +1346,15 @@
 			"cannot_find_record": "No se ha podido encontrar el registro",
 			"search_failed": "La búsqueda no se ha realizado correctamente",
 			"something_wrong": "Ha ocurrido un error",
-			"summary": "Lo sentimos, no tienes acceso a esta página",
-			"too_long_load": "El registro tarda demasiado en cargarse",
-			"invalid_UUID": "Es posible que el registro se haya eliminado o que el identificador sea incorrecto",
-			"consortium_not_found": "No se ha podido encontrar el consorcio",
-			"consortium_not_present": "No existe ningún consorcio en esta instancia de DCB.",
-			"consortium_advice": "Configure su consorcio e inténtelo de nuevo."
-		},
-		"file": {
-			"no_file_selected": "No se ha seleccionado ningún archivo"
+			"invalid_UUID": "Es posible que el registro se haya eliminado o que el identificador sea incorrecto"
 		},
 		"info": {
-			"contact": "contacto",
 			"connection_issue": "Puede que haya un problema de conexión",
 			"correct_as_of": "Estado correcto a fecha de",
 			"date_created": "Fecha de creación",
 			"date_updated": "Fecha de actualización",
 			"description": "Descripción: {{description}}",
 			"field": "Campo",
-			"filter_applied": "Se han aplicado filtros",
 			"general": "General",
 			"loading": {
 				"document": "Cargando {{document_type}}"
@@ -1549,7 +1382,6 @@
 		},
 		"unsaved_changes": {
 			"body": "Si sales de esta página, tus cambios se perderán.",
-			"keep_editing": "Seguir editando",
 			"leave_without_saving": "Salir sin guardar",
 			"header": "Tienes cambios sin guardar"
 		},
@@ -1566,16 +1398,13 @@
 			"max_length": "Este campo tiene una longitud máxima de {{length}} caracteres",
 			"min_value": "Este valor debe ser mayor que {{min}}",
 			"number": "Introduce un número válido.",
-			"required": "Introduce el {{field}}.",
-			"case_sensitive": "{{field}} distingue entre mayúsculas y minúsculas"
+			"required": "Introduce el {{field}}."
 		},
 		"visibility": {
 			"showHidden": "Mostrar contenido oculto para {{field}}",
 			"hideShown": "Ocultar el contenido mostrado para {{field}}"
 		},
 		"link": {
-			"bib_tip": "Enlace a la página del registro bibliográfico en DCB Admin",
-			"discovery_tip": "Enlace a $t(app.service.discovery)",
 			"host_lms_tip": "Enlace a la página «Host LMS» en DCB Admin"
 		}
 	},
