@@ -1470,6 +1470,7 @@
 			"agency_will_be_created": "No agency matches “{{code}}”, so a new agency will be created with this code when the library is saved.",
 			"latitude_helper": "Decimal degrees between -90 and 90.",
 			"longitude_helper": "Decimal degrees between -180 and 180.",
+			"coordinates_from_agency": "Taken from agency {{code}}. DCB uses the agency's location for every library that shares it.",
 			"step_done": "Finish",
 			"busy_saving_profile": "Saving the library profile…",
 			"busy_saving_contacts": "Saving the library contacts…",

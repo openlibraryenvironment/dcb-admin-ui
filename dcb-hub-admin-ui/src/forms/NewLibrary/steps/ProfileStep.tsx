@@ -53,6 +53,7 @@ export function ProfileStep() {
 	const gqlClient = useGraphQLClient();
 	const {
 		control,
+		setValue,
 		formState: { errors },
 	} = useFormContext();
 
@@ -70,6 +71,27 @@ export function ProfileStep() {
 		staleTime: 1000 * 60 * 5, // Just in case somebody is constantly going back and forth
 	});
 
+	// dcb-service replaces a new library's coordinates with its agency's whenever the agency
+	// has them, so for such an agency they are shown, not asked for
+	const coordinatesOf = (code: string | undefined) => {
+		const agency = agenciesData?.agencies?.content?.find(
+			(item: any) => item.code === code,
+		);
+		return agency?.latitude != null && agency?.longitude != null
+			? {
+					latitude: String(agency.latitude),
+					longitude: String(agency.longitude),
+				}
+			: null;
+	};
+	const adoptAgencyCoordinates = (code: string | undefined) => {
+		const coordinates = coordinatesOf(code);
+		if (coordinates) {
+			setValue("latitude", coordinates.latitude, { shouldValidate: true });
+			setValue("longitude", coordinates.longitude, { shouldValidate: true });
+		}
+	};
+
 	const agencyOptions: AgencyOption[] =
 		agenciesData?.agencies?.content?.map((item: any) => ({
 			label: item.name,
@@ -81,6 +103,7 @@ export function ProfileStep() {
 	// saving this library also creates an agency. That is a consequential,
 	// irreversible-ish side effect, so it is stated on the step rather than left
 	// to be inferred from a dropdown entry the user may never have opened.
+	const agencyCoordinates = coordinatesOf(agencyCode);
 	const isNewAgency =
 		!!agencyCode &&
 		!agencyOptions.some((option) => option.value === agencyCode) &&
@@ -195,12 +218,14 @@ export function ProfileStep() {
 								if (typeof newValue === "string") {
 									// User pressed enter on a raw string
 									field.onChange(newValue);
+									adoptAgencyCoordinates(newValue);
 								} else if (newValue?.inputValue) {
 									// User selected the dynamically generated "Add" option
 									field.onChange(newValue.inputValue);
 								} else {
 									// User selected an existing agency option
 									field.onChange(newValue?.value || "");
+									adoptAgencyCoordinates(newValue?.value);
 								}
 							}}
 							onInputChange={(_, inputValue, changeReason) => {
@@ -208,7 +233,10 @@ export function ProfileStep() {
 								// way to name a new agency; without this the typed code was
 								// only committed when the user happened to select the "Add"
 								// entry, and was otherwise silently discarded on blur.
-								if (changeReason === "input") field.onChange(inputValue);
+								if (changeReason === "input") {
+									field.onChange(inputValue);
+									adoptAgencyCoordinates(inputValue);
+								}
 							}}
 							onBlur={field.onBlur} // Ensures RHF validation triggers when tabbing away
 							value={
@@ -312,11 +340,19 @@ export function ProfileStep() {
 								error={!!errors.latitude}
 								helperText={
 									(errors.latitude?.message as string) ??
-									t("libraries.new.latitude_helper")
+									(agencyCoordinates
+										? t("libraries.new.coordinates_from_agency", {
+												code: agencyCode,
+											})
+										: t("libraries.new.latitude_helper"))
 								}
 								placeholder="53.4808"
 								slotProps={{
-									htmlInput: { inputMode: "decimal", autoComplete: "off" },
+									htmlInput: {
+										inputMode: "decimal",
+										autoComplete: "off",
+										readOnly: !!agencyCoordinates,
+									},
 								}}
 							/>
 						)}
@@ -336,11 +372,19 @@ export function ProfileStep() {
 								error={!!errors.longitude}
 								helperText={
 									(errors.longitude?.message as string) ??
-									t("libraries.new.longitude_helper")
+									(agencyCoordinates
+										? t("libraries.new.coordinates_from_agency", {
+												code: agencyCode,
+											})
+										: t("libraries.new.longitude_helper"))
 								}
 								placeholder="-2.2426"
 								slotProps={{
-									htmlInput: { inputMode: "decimal", autoComplete: "off" },
+									htmlInput: {
+										inputMode: "decimal",
+										autoComplete: "off",
+										readOnly: !!agencyCoordinates,
+									},
 								}}
 							/>
 						)}
