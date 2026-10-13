@@ -103,6 +103,11 @@ export interface ClientConfigField {
 	/** Hidden while this is false: the setting means nothing in that configuration. */
 	shownWhen?: (values: any) => boolean;
 	/**
+	 * Another field this one fills in as it is typed, until the user changes that one: the
+	 * target follows while it is empty or still equal to what the previous value gave.
+	 */
+	derives?: { path: string[]; from: (value: string) => string };
+	/**
 	 * Suspends `required` while this holds. `default-agency-code` is the only case:
 	 * dcb-service rejects it outright on a shared system, so demanding it
 	 * unconditionally made a shared Host LMS impossible to submit - the form would not
@@ -210,6 +215,15 @@ const ALMA_GATEWAYS: readonly ClientConfigOption[] = [
 	value,
 	labelKey: `hostlms.config_fields.alma_gateway_${region}`,
 }));
+
+/** The scheme, host and port of a URL, or "" while it is not one yet. */
+export const originOf = (value: string): string => {
+	try {
+		return new URL(value.trim()).origin;
+	} catch {
+		return "";
+	}
+};
 
 /** Ex Libris' own developer documentation, linked from the Alma fields. */
 const ALMA_API_DOCS: ClientConfigDocs = {
@@ -1339,6 +1353,8 @@ const ORS_APPLIANCE: HostLmsProfile = {
 						"url",
 					),
 					advanced: true,
+					// What DcbProfileRegistrationService writes for an appliance it registers
+					derives: { path: ["base-url"], from: originOf },
 				},
 				field(
 					["metadata-prefix"],

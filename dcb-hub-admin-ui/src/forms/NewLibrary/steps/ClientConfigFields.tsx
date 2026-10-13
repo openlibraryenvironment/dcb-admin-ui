@@ -133,6 +133,8 @@ const ConfigFieldControl = ({
 	const { t } = useTranslation();
 	const {
 		control,
+		getValues,
+		setValue,
 		formState: { errors },
 	} = useFormContext();
 
@@ -383,6 +385,7 @@ const ConfigFieldControl = ({
 	// Stored as an array, typed as a comma-separated list. Arrays only reach
 	// this input when hydrated from the JSON editor.
 	const isList = configField.type === "stringList";
+	const derives = configField.derives;
 
 	return (
 		<Controller
@@ -391,6 +394,19 @@ const ConfigFieldControl = ({
 			render={({ field }) => (
 				<TextField
 					{...field}
+					onChange={(event) => {
+						if (derives) {
+							const target = `clientConfigFields.${derives.path.join(".")}`;
+							const current = getValues(target) ?? "";
+							if (
+								current === "" ||
+								current === derives.from(field.value ?? "")
+							) {
+								setValue(target, derives.from(event.target.value));
+							}
+						}
+						field.onChange(event);
+					}}
 					value={
 						isList && Array.isArray(field.value)
 							? field.value.join(", ")

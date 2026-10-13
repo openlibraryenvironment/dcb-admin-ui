@@ -232,6 +232,45 @@ test.describe("New Library wizard", () => {
 		).toBeEditable();
 	});
 
+	test("fills the short and abbreviated names from the full name", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await dialog.getByRole("button", { name: /next/i }).click();
+
+		await dialog.getByLabel(/full name/i).fill("Denver Public Library");
+
+		await expect(dialog.getByLabel(/short name/i)).toHaveValue(
+			"Denver Public Library",
+		);
+		await expect(dialog.getByLabel(/abbreviated name/i)).toHaveValue("DPL");
+
+		await dialog.getByLabel(/abbreviated name/i).fill("DENPL");
+		await dialog.getByLabel(/full name/i).fill("Denver Public Libraries");
+
+		await expect(dialog.getByLabel(/abbreviated name/i)).toHaveValue("DENPL");
+	});
+
 	// Cancelling part-way through does NOT discard silently: requestClose() in
 	// NewLibrary.tsx asks first, because everything typed since the last successful
 	// mutation is lost on close and the whole point of this wizard is that it is long.

@@ -26,6 +26,7 @@ import {
 	LIBRARY_TYPE_OPTIONS,
 } from "@constants/libraryTypes";
 import { isLocalHoldsEnabled } from "@helpers/featureFlags";
+import { namesFollowingFullName } from "@helpers/derivedNames";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
@@ -65,6 +66,7 @@ export function ProfileStep() {
 	const gqlClient = useGraphQLClient();
 	const {
 		control,
+		getValues,
 		setValue,
 		formState: { errors },
 	} = useFormContext();
@@ -132,6 +134,20 @@ export function ProfileStep() {
 					render={({ field }) => (
 						<TextField
 							{...field}
+							onChange={(event) => {
+								const updates = namesFollowingFullName(
+									field.value ?? "",
+									event.target.value,
+									{
+										shortName: getValues("shortName"),
+										abbreviatedName: getValues("abbreviatedName"),
+									},
+								);
+								field.onChange(event);
+								for (const [name, value] of Object.entries(updates)) {
+									setValue(name, value);
+								}
+							}}
 							id="library-full-name"
 							label={t("libraries.name")}
 							variant="outlined"
