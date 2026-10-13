@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 
 import {
 	agencyCodeFromHostLms,
@@ -253,6 +253,46 @@ describe("agencyCodeFromHostLms", () => {
 		expect(
 			agencyCodeFromHostLms("", { "shared-system": true }),
 		).toBeUndefined();
+	});
+});
+
+describe("maxLocalHolds", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	const withLocalHolds = (on: boolean) =>
+		vi.stubGlobal("window", {
+			__APP_ENV__: { VITE_FEATURE_LOCAL_HOLDS: String(on) },
+		});
+
+	it("is sent as a number on create and on the agency update", () => {
+		withLocalHolds(true);
+
+		expect(
+			buildLibraryInput(values({ maxLocalHolds: "5" })).maxLocalHolds,
+		).toBe(5);
+		expect(
+			buildAgencyUpdateInput(values({ maxLocalHolds: "5" })).maxLocalHolds,
+		).toBe(5);
+	});
+
+	it("is sent as null when left blank, meaning DCB does not check it", () => {
+		withLocalHolds(true);
+
+		expect(
+			buildLibraryInput(values({ maxLocalHolds: "" })).maxLocalHolds,
+		).toBeNull();
+	});
+
+	// An older dcb-service rejects the field outright, null or not
+	it("is not sent at all where the deployment cannot store it", () => {
+		withLocalHolds(false);
+
+		expect(
+			"maxLocalHolds" in buildLibraryInput(values({ maxLocalHolds: "5" })),
+		).toBe(false);
+		expect("maxLocalHolds" in buildAgencyUpdateInput(values())).toBe(false);
 	});
 });
 

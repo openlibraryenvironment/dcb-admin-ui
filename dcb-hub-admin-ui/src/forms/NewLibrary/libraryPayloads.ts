@@ -1,3 +1,4 @@
+import { isLocalHoldsEnabled } from "@helpers/featureFlags";
 import type { DefaultValues } from "react-hook-form";
 
 import i18n from "@/i18n";
@@ -68,6 +69,7 @@ export const EMPTY_LIBRARY_FORM: LibraryFormDefaults = {
 	isBorrowingAgency: true,
 	isSupplyingAgency: true,
 	maxConsortialLoans: "",
+	maxLocalHolds: "",
 	supportHours: "",
 	patronWebsite: "",
 	hostLmsConfiguration: "",
@@ -120,6 +122,10 @@ export const formValuesFromLibrary = (library: any): LibraryFormDefaults => {
 			library?.agency?.maxConsortialLoans == null
 				? ""
 				: String(library.agency.maxConsortialLoans),
+		maxLocalHolds:
+			library?.agency?.maxLocalHolds == null
+				? ""
+				: String(library.agency.maxLocalHolds),
 		supportHours: library?.supportHours ?? "",
 		patronWebsite: library?.patronWebsite ?? "",
 		hostLmsConfiguration: library?.hostLmsConfiguration ?? "",
@@ -145,6 +151,15 @@ export const formValuesFromLibrary = (library: any): LibraryFormDefaults => {
 const loanCap = (value: string | undefined): number | null =>
 	value && value.trim() !== "" ? Number(value) : null;
 
+/**
+ * Absent, not null, where the deployment's dcb-service predates the field: 8.71.0 and
+ * 9.0.0 reject an unknown input field even when it is null.
+ */
+const localHoldsInput = (formData: NewLibraryFormValues) =>
+	isLocalHoldsEnabled()
+		? { maxLocalHolds: loanCap(formData.maxLocalHolds) }
+		: {};
+
 const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	agencyCode: formData.agencyCode,
 	fullName: formData.fullName,
@@ -164,6 +179,7 @@ const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	isBorrowingAgency: formData.isBorrowingAgency,
 	isSupplyingAgency: formData.isSupplyingAgency,
 	maxConsortialLoans: loanCap(formData.maxConsortialLoans),
+	...localHoldsInput(formData),
 	reason: formData.reason,
 	changeCategory: "New member",
 	// Was rendered but never sent, so the audit trail lost its reference URL.
@@ -231,6 +247,7 @@ export const buildAgencyUpdateInput = (formData: NewLibraryFormValues) =>
 		latitude: Number(formData.latitude),
 		longitude: Number(formData.longitude),
 		maxConsortialLoans: loanCap(formData.maxConsortialLoans),
+		...localHoldsInput(formData),
 		reason: formData.reason,
 		changeReferenceUrl: formData.changeReferenceUrl,
 	}) satisfies UpdateAgencyInput;

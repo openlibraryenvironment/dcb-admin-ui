@@ -25,6 +25,7 @@ import {
 	isUnlistedLibraryType,
 	LIBRARY_TYPE_OPTIONS,
 } from "@constants/libraryTypes";
+import { isLocalHoldsEnabled } from "@helpers/featureFlags";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
@@ -526,6 +527,30 @@ export function ProfileStep() {
 						/>
 					)}
 				/>
+				{isLocalHoldsEnabled() && (
+					<Controller
+						name="maxLocalHolds"
+						control={control}
+						render={({ field }) => (
+							<TextField
+								{...field}
+								value={field.value ?? ""}
+								id="library-max-local-holds"
+								label={t("libraries.max_local_holds")}
+								variant="outlined"
+								fullWidth
+								error={!!errors.maxLocalHolds}
+								helperText={
+									(errors.maxLocalHolds?.message as string) ??
+									t("libraries.max_local_holds_help")
+								}
+								slotProps={{
+									htmlInput: { inputMode: "numeric", autoComplete: "off" },
+								}}
+							/>
+						)}
+					/>
+				)}
 			</Section>
 
 			<Section title={t("libraries.new.section_service")}>

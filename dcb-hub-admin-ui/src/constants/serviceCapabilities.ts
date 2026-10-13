@@ -233,9 +233,7 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// Shipped in 9.1.0, by V9_0_007__agency_max_local_holds.sql. LibraryInput carries
-		// it too, but nothing in this app sends that field on a library create, so only
-		// the two types that are actually written appear here.
+		// Shipped in 9.1.0, by V9_0_007__agency_max_local_holds.sql.
 		id: "local_holds",
 		flag: "VITE_FEATURE_LOCAL_HOLDS",
 		enabled: isLocalHoldsEnabled,
@@ -243,6 +241,7 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {
 			Agency: LOCAL_HOLDS_FIELDS,
 			UpdateAgencyInput: LOCAL_HOLDS_FIELDS,
+			LibraryInput: LOCAL_HOLDS_FIELDS,
 		},
 	},
 	{

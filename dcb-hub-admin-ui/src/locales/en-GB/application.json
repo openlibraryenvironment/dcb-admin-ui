@@ -2890,7 +2890,8 @@
 			"required": "Enter the {{field}}.",
 			"not_a_number": "Enter the {{field}} as a number.",
 			"out_of_range": "Enter the {{field}} as a number between {{min}} and {{max}}.",
-			"non_negative_integer": "Enter the {{field}} as a whole number of 0 or more, or leave it blank."
+			"non_negative_integer": "Enter the {{field}} as a whole number of 0 or more, or leave it blank.",
+			"positive_integer": "Enter the {{field}} as a whole number of 1 or more, or leave it blank."
 		},
 		"visibility": {
 			"showHidden": "Show hidden content for {{field}}",

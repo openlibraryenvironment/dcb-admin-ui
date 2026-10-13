@@ -123,6 +123,8 @@ const STEP_SCHEMA_FIELDS: Record<string, (keyof NewLibraryFormValues)[]> = {
 		"latitude",
 		"longitude",
 		"authProfile",
+		"maxConsortialLoans",
+		"maxLocalHolds",
 	],
 	contacts: ["contacts"],
 	group: ["groupId"],

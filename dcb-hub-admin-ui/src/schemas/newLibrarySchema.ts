@@ -171,6 +171,22 @@ export const newLibrarySchema = z
 				},
 			)
 			.optional(),
+		// Text, as the loan cap is. Empty means DCB does not check the limit; dcb-service
+		// refuses 0, which would block every request from the agency
+		maxLocalHolds: z
+			.string()
+			.trim()
+			.refine(
+				(value) =>
+					value === "" ||
+					(Number.isInteger(Number(value)) && Number(value) >= 1),
+				{
+					message: i18n.t("ui.validation.positive_integer", {
+						field: i18n.t("libraries.max_local_holds"),
+					}),
+				},
+			)
+			.optional(),
 		supportHours: z.string().optional(),
 		patronWebsite: z.string().optional(),
 		// Checked against the chosen ILS below; blank resolves to its default
