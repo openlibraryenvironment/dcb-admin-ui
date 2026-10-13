@@ -4,6 +4,7 @@ import { Stack, Typography, Button, Box, Alert } from "@mui/material";
 import { UploadFile, CheckCircle } from "@mui/icons-material";
 
 import Import from "@components/Import/Import";
+import MapAllTypes from "./MapAllTypes";
 
 interface RefValueMappingStepProps {
 	hostLmsCode: string;
@@ -69,6 +70,10 @@ export default function RefValueMappingStep({
 					{t("mappings.new_library")}
 				</Typography>
 			</Box>
+			<MapAllTypes
+				hostLmsCode={hostLmsCode}
+				onCreated={(count) => setImportedCount((prev) => (prev ?? 0) + count)}
+			/>
 			{showImport && (
 				<Import
 					show={showImport}
