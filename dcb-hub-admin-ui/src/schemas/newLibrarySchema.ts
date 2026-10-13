@@ -6,6 +6,10 @@ import {
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
 } from "@helpers/hostLmsClientConfig";
+import {
+	isUnsupportedAuthProfile,
+	resolveAuthProfile,
+} from "@constants/authProfiles";
 
 /**
  * Coordinates are typed as text, not as numbers.
@@ -169,12 +173,8 @@ export const newLibrarySchema = z
 			.optional(),
 		supportHours: z.string().optional(),
 		patronWebsite: z.string().optional(),
-		authProfile: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.config.patronAuth.auth_profile"),
-			}),
-		),
+		// Checked against the chosen ILS below; blank resolves to its default
+		authProfile: z.string(),
 		hostLmsConfiguration: z.string().optional(),
 		discoverySystem: z.string().optional(),
 		backupDowntimeSchedule: z.string().optional(),
@@ -226,6 +226,27 @@ export const newLibrarySchema = z
 	 * same contract stated before the round trip instead of after it.
 	 */
 	.superRefine((values, ctx) => {
+		if (isUnsupportedAuthProfile(values.lmsClientClass, values.authProfile)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["authProfile"],
+				message: i18n.t(
+					"libraries.config.patronAuth.auth_profile_unsupported",
+					{
+						profile: values.authProfile,
+					},
+				),
+			});
+		} else if (!resolveAuthProfile(values.lmsClientClass, values.authProfile)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["authProfile"],
+				message: i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.config.patronAuth.auth_profile"),
+				}),
+			});
+		}
+
 		// Attaching to an existing Host LMS neither sends a client config nor is
 		// constrained by what dcb-service can create.
 		if (!values.isCreatingHostLms) return;

@@ -34,7 +34,10 @@ const reachMappingStep = async (page: Page) => {
 	await dialog.getByLabel("Type").fill("Public");
 	await dialog.getByLabel(/latitude/i).fill("51.5");
 	await dialog.getByLabel(/longitude/i).fill("-0.12");
-	await dialog.getByLabel(/authentication profile/i).fill("BASIC/BARCODE+PIN");
+	await dialog
+		.getByRole("combobox", { name: /authentication profile/i })
+		.click();
+	await page.getByRole("option", { name: "Barcode and PIN" }).click();
 	await dialog.getByRole("button", { name: /next/i }).click();
 
 	await dialog.getByLabel("First name").fill("Ada");

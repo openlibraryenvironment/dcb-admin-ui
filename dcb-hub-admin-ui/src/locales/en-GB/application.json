@@ -1563,6 +1563,15 @@
 			},
 			"patronAuth": {
 				"auth_profile": "Authentication profile",
+				"auth_profile_helper": "How patrons of this library sign in. The choices are the ones this library's ILS supports.",
+				"auth_profile_unsupported": "{{profile}} is not supported by this library's ILS. Choose one of the listed profiles.",
+				"profiles": {
+					"barcode_pin": "Barcode and PIN",
+					"barcode_password": "Barcode and password",
+					"barcode_name": "Barcode and name",
+					"unique_id_pin": "Unique ID and PIN",
+					"unique_id_name": "Unique ID and name"
+				},
 				"saml": "SAML based SSO?",
 				"test_patron_code": "Test patron home library location code",
 				"test_patron_type_id": "Test patron type ID",

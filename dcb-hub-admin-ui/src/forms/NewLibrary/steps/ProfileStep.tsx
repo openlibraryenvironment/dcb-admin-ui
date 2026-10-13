@@ -8,12 +8,19 @@ import {
 	createFilterOptions,
 	Divider,
 	FormControlLabel,
+	MenuItem,
 	Stack,
 	Switch,
 	TextField,
 	Typography,
 } from "@mui/material";
 
+import {
+	authProfileOptions,
+	isAuthProfileFixed,
+	isUnsupportedAuthProfile,
+	resolveAuthProfile,
+} from "@constants/authProfiles";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
@@ -99,6 +106,8 @@ export function ProfileStep() {
 		})) || [];
 
 	const agencyCode = useWatch({ control, name: "agencyCode" });
+	const lmsClientClass = useWatch({ control, name: "lmsClientClass" });
+	const authProfileChoices = authProfileOptions(lmsClientClass);
 	// Whether the code in the box is one that already exists decides whether
 	// saving this library also creates an agency. That is a consequential,
 	// irreversible-ish side effect, so it is stated on the step rather than left
@@ -282,22 +291,51 @@ export function ProfileStep() {
 						{t("libraries.new.agency_will_be_created", { code: agencyCode })}
 					</Alert>
 				)}
-				<Controller
-					name={"authProfile"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-auth-profile"
-							label={t("libraries.config.patronAuth.auth_profile")}
-							variant="outlined"
-							fullWidth
-							required
-							error={!!errors.authProfile}
-							helperText={errors.authProfile?.message as string}
-						/>
-					)}
-				/>
+				{!isAuthProfileFixed(lmsClientClass) && (
+					<Controller
+						name={"authProfile"}
+						control={control}
+						render={({ field }) =>
+							authProfileChoices ? (
+								<TextField
+									{...field}
+									value={resolveAuthProfile(lmsClientClass, field.value)}
+									id="library-auth-profile"
+									select
+									label={t("libraries.config.patronAuth.auth_profile")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.authProfile}
+									helperText={
+										(errors.authProfile?.message as string) ??
+										t("libraries.config.patronAuth.auth_profile_helper")
+									}
+								>
+									{authProfileChoices.map((option) => (
+										<MenuItem key={option.value} value={option.value}>
+											{t(option.labelKey)}
+										</MenuItem>
+									))}
+									{isUnsupportedAuthProfile(lmsClientClass, field.value) && (
+										<MenuItem value={field.value}>{field.value}</MenuItem>
+									)}
+								</TextField>
+							) : (
+								<TextField
+									{...field}
+									id="library-auth-profile"
+									label={t("libraries.config.patronAuth.auth_profile")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.authProfile}
+									helperText={errors.authProfile?.message as string}
+								/>
+							)
+						}
+					/>
+				)}
 			</Section>
 
 			<Section title={t("libraries.new.section_location")}>

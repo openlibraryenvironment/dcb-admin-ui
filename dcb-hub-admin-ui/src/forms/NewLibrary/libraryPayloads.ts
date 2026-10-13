@@ -3,6 +3,7 @@ import type { DefaultValues } from "react-hook-form";
 import i18n from "@/i18n";
 import { defaultCreationReason } from "@helpers/auditDefaults";
 import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
+import { resolveAuthProfile } from "@constants/authProfiles";
 import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
 import type {
 	CreateLibraryContactInput,
@@ -167,7 +168,10 @@ const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	changeCategory: "New member",
 	// Was rendered but never sent, so the audit trail lost its reference URL.
 	changeReferenceUrl: formData.changeReferenceUrl,
-	authProfile: formData.authProfile,
+	authProfile: resolveAuthProfile(
+		formData.lmsClientClass,
+		formData.authProfile,
+	),
 });
 
 /**
