@@ -20,6 +20,10 @@ const BUDGET = JSON.parse(readFileSync("bundle-budget.json", "utf8"));
 // number beside it rather than silently.
 const NAME_ABOVE = BUDGET.nameChunksAboveBytes;
 
+// Chunks whose size no one chooses by the byte - each with its reason in the file. Still
+// counted in the total, and still required to exist.
+const UNBOUNDED = BUDGET.unbounded ?? {};
+
 /** "RequestsGrid-CMPomE8g.js" -> "RequestsGrid.js": the content hash is not identity. */
 function withoutHash(file) {
 	return file.replace(/-[A-Za-z0-9_-]{8,}(\.[a-z]+)$/, "$1");
@@ -38,6 +42,7 @@ const problems = [];
 const total = measured.reduce((sum, chunk) => sum + chunk.gz, 0);
 
 for (const chunk of measured) {
+	if (chunk.name in UNBOUNDED) continue;
 	const budget = BUDGET.chunks[chunk.name];
 
 	if (budget === undefined) {
@@ -67,6 +72,15 @@ for (const name of Object.keys(BUDGET.chunks)) {
 	}
 }
 
+for (const name of Object.keys(UNBOUNDED)) {
+	if (name in BUDGET.chunks) {
+		problems.push(`${name} is both budgeted and unbounded in bundle-budget.json. Keep one.`);
+	}
+	if (!measured.some((chunk) => chunk.name === name)) {
+		problems.push(`${name} is unbounded but no longer built. Remove it from bundle-budget.json.`);
+	}
+}
+
 if (total > BUDGET.totalBytes) {
 	problems.push(
 		`Everything in dist/assets is ${total} bytes gzipped, over the total budget of ` +
@@ -77,7 +91,12 @@ if (total > BUDGET.totalBytes) {
 const widest = Math.max(...measured.map((chunk) => chunk.name.length));
 for (const chunk of measured.filter((c) => c.gz > NAME_ABOVE)) {
 	const budget = BUDGET.chunks[chunk.name];
-	const room = budget === undefined ? "unbudgeted" : `${budget - chunk.gz} to spare`;
+	const room =
+		chunk.name in UNBOUNDED
+			? "unbounded"
+			: budget === undefined
+				? "unbudgeted"
+				: `${budget - chunk.gz} to spare`;
 	console.log(`  ${chunk.name.padEnd(widest)}  ${String(chunk.gz).padStart(7)} gz   ${room}`);
 }
 console.log(`  ${"TOTAL".padEnd(widest)}  ${String(total).padStart(7)} gz   ${BUDGET.totalBytes - total} to spare`);

@@ -62,6 +62,30 @@ and why reshaping chunks moves the weight around without removing any — the
 experiment and its numbers are recorded in `vite.config.mts`. This budget stops it
 growing; it does not fix it.
 
+### `i18n.js` has no number of its own
+
+About 46 KB of `i18n.js`'s 50 KB is `src/locales/en-GB/application.json`, imported
+statically by `src/i18n.ts`. A number on that chunk caps how many strings the application
+has, and ordinary feature work breaks it: the catalogue grew from 31.4 KB on 2026-08-12 to
+47.8 KB on 2026-10-12, about 7.5 KB a month, and a budget set on 2026-10-07 failed five
+days later on new Host LMS strings. Nobody decides whether a label is worth its bytes, so
+the only responses were to stop writing interface text or to raise the number — and a
+number raised whenever it fails measures nothing.
+
+So it is listed under `unbounded` in `bundle-budget.json`: still counted in the total, and
+still required to exist, but with no limit of its own. What a limit would have protected
+is covered where it is measured properly:
+
+- **What users download** — Lighthouse's `total-byte-weight` on `/login`, which is
+  deterministic and counts the catalogue with everything else that page loads.
+- **Accidental bulk** — a second catalogue, or an asset inlined into the chunk — the total.
+- **Strings that reach users as raw keys** — not a size problem at all. See
+  `docs/i18n.md`.
+
+If `/login` nears its byte budget, loading each area's strings with its routes is the
+measured option: the shell needs about 6 KB of the 46, and `hostlms`, `insights` and
+`setup` are about 19 KB that every page loads today.
+
 ## Layout shift on every route
 
 Lighthouse asserts CLS at 0.05, but only on its two pages. The other 52 routes had no
