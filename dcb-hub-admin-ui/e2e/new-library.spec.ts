@@ -125,6 +125,44 @@ test.describe("New Library wizard", () => {
 		);
 	});
 
+	test("leaves the service details to the library's own pages", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await expect(dialog.getByLabel(/full name/i)).toBeVisible();
+
+		// Counted once, not retried: toHaveCount(0) passes as soon as any render lacks it
+		for (const label of [
+			/support office hours/i,
+			/downtime schedule/i,
+			/patron website/i,
+			/discovery system/i,
+		]) {
+			expect(await dialog.getByLabel(label).count(), String(label)).toBe(0);
+		}
+	});
+
 	// Cancelling part-way through does NOT discard silently: requestClose() in
 	// NewLibrary.tsx asks first, because everything typed since the last successful
 	// mutation is lost on close and the whole point of this wizard is that it is long.

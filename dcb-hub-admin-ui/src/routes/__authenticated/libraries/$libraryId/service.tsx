@@ -341,6 +341,7 @@ function Service() {
 								editMode ? (
 									<TextField
 										{...field}
+										type="url"
 										fullWidth
 										error={!!errors.patronWebsite}
 										slotProps={{

@@ -477,68 +477,9 @@ export function ProfileStep() {
 			</Section>
 
 			<Section title={t("libraries.new.section_service")}>
-				<Controller
-					name="supportHours"
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-support-hours"
-							label={t("libraries.support_hours")}
-							variant="outlined"
-							fullWidth
-							error={!!errors.supportHours}
-							helperText={errors.supportHours?.message as string}
-						/>
-					)}
-				/>
-				<Controller
-					name="backupDowntimeSchedule"
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-backup-schedule"
-							label={t("libraries.service.environments.backup_schedule")}
-							variant="outlined"
-							fullWidth
-							multiline
-							rows={2}
-							error={!!errors.backupDowntimeSchedule}
-							helperText={errors.backupDowntimeSchedule?.message as string}
-						/>
-					)}
-				/>
-				<Controller
-					name={"patronWebsite"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-patron-website"
-							label={t("libraries.service.systems.patron_site")}
-							variant="outlined"
-							fullWidth
-							error={!!errors.patronWebsite}
-							helperText={errors.patronWebsite?.message as string}
-						/>
-					)}
-				/>
-				<Controller
-					name={"discoverySystem"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-discovery-system"
-							label={t("libraries.service.systems.discovery")}
-							variant="outlined"
-							fullWidth
-							error={!!errors.discoverySystem}
-							helperText={errors.discoverySystem?.message as string}
-						/>
-					)}
-				/>
+				{/* Support hours, backup schedule, patron website and discovery system are
+				    edited on the library's own pages once it exists. This one is not
+				    editable there: UpdateLibraryInput does not declare it. */}
 				<Controller
 					name={"hostLmsConfiguration"}
 					control={control}
