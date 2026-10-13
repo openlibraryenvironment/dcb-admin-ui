@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Controller, useFormContext } from "react-hook-form";
+import { CONSORTIUM_NAMES, valuesFollowing } from "@helpers/derivedNames";
 import { Alert, Stack, TextField, Typography } from "@mui/material";
 
 import type { NewConsortiumFormValues } from "@schemas/newConsortiumSchema";
@@ -37,6 +38,8 @@ export default function ConsortiumDetailsFields({
 	const { t } = useTranslation();
 	const {
 		control,
+		getValues,
+		setValue,
 		formState: { errors },
 	} = useFormContext<NewConsortiumFormValues>();
 
@@ -52,6 +55,22 @@ export default function ConsortiumDetailsFields({
 				render={({ field }) => (
 					<TextField
 						{...field}
+						onChange={(event) => {
+							const updates = valuesFollowing(
+								CONSORTIUM_NAMES,
+								field.value ?? "",
+								event.target.value,
+								{
+									displayName: getValues("displayName"),
+									groupName: getValues("groupName"),
+									groupCode: getValues("groupCode"),
+								},
+							);
+							field.onChange(event);
+							for (const [name, value] of Object.entries(updates)) {
+								setValue(name as keyof typeof CONSORTIUM_NAMES, value);
+							}
+						}}
 						id="consortium-name"
 						label={t("consortium.name")}
 						required

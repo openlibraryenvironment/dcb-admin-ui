@@ -10,31 +10,39 @@ export const abbreviationOf = (fullName: string): string =>
 		.map((word) => word[0].toUpperCase())
 		.join("");
 
-export const DERIVED_NAMES = {
-	shortName: (fullName: string) => fullName.trim(),
-	abbreviatedName: abbreviationOf,
-} as const;
+type Derivations<K extends string> = Record<K, (source: string) => string>;
 
 /**
- * The names to update when the full name changes: each one still empty or still equal to
- * what the old full name gave. One the user has changed is left alone.
+ * The values to update when their source changes: each one still empty or still equal to
+ * what the old source gave. One the user has changed is left alone.
  */
-export const namesFollowingFullName = (
-	previousFullName: string,
-	nextFullName: string,
-	current: Record<keyof typeof DERIVED_NAMES, string | undefined>,
-): Partial<Record<keyof typeof DERIVED_NAMES, string>> => {
-	const updates: Partial<Record<keyof typeof DERIVED_NAMES, string>> = {};
+export const valuesFollowing = <K extends string>(
+	derivations: Derivations<K>,
+	previousSource: string,
+	nextSource: string,
+	current: Partial<Record<K, string | undefined>>,
+): Partial<Record<K, string>> => {
+	const updates: Partial<Record<K, string>> = {};
 
-	for (const [name, derive] of Object.entries(DERIVED_NAMES) as [
-		keyof typeof DERIVED_NAMES,
-		(fullName: string) => string,
-	][]) {
+	for (const name of Object.keys(derivations) as K[]) {
+		const derive = derivations[name];
 		const value = current[name] ?? "";
-		if (value === "" || value === derive(previousFullName)) {
-			updates[name] = derive(nextFullName);
+		if (value === "" || value === derive(previousSource)) {
+			updates[name] = derive(nextSource);
 		}
 	}
 
 	return updates;
+};
+
+export const LIBRARY_NAMES = {
+	shortName: (fullName: string) => fullName.trim(),
+	abbreviatedName: abbreviationOf,
+};
+
+/** groupCode is at most five characters, which dcb-service and the form both enforce. */
+export const CONSORTIUM_NAMES = {
+	displayName: (name: string) => name.trim(),
+	groupName: (name: string) => name.trim(),
+	groupCode: (name: string) => abbreviationOf(name).slice(0, 5),
 };

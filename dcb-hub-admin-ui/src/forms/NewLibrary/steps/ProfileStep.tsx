@@ -26,7 +26,7 @@ import {
 	LIBRARY_TYPE_OPTIONS,
 } from "@constants/libraryTypes";
 import { isLocalHoldsEnabled } from "@helpers/featureFlags";
-import { namesFollowingFullName } from "@helpers/derivedNames";
+import { LIBRARY_NAMES, valuesFollowing } from "@helpers/derivedNames";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
@@ -135,7 +135,8 @@ export function ProfileStep() {
 						<TextField
 							{...field}
 							onChange={(event) => {
-								const updates = namesFollowingFullName(
+								const updates = valuesFollowing(
+									LIBRARY_NAMES,
 									field.value ?? "",
 									event.target.value,
 									{

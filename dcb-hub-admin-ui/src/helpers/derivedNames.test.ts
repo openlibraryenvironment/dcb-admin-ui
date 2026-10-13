@@ -1,6 +1,17 @@
 import { describe, it, expect } from "vitest";
 
-import { abbreviationOf, namesFollowingFullName } from "./derivedNames";
+import {
+	abbreviationOf,
+	CONSORTIUM_NAMES,
+	LIBRARY_NAMES,
+	valuesFollowing,
+} from "./derivedNames";
+
+const namesFollowingFullName = (
+	previous: string,
+	next: string,
+	current: Record<string, string>,
+) => valuesFollowing(LIBRARY_NAMES, previous, next, current);
 
 describe("derivedNames", () => {
 	it("abbreviates by the words that carry the name", () => {
@@ -38,5 +49,20 @@ describe("derivedNames", () => {
 				},
 			),
 		).toEqual({});
+	});
+
+	it("derives a consortium's display name, group name and a group code of at most five", () => {
+		expect(
+			valuesFollowing(
+				CONSORTIUM_NAMES,
+				"",
+				"Colorado Alliance of Research Libraries Network",
+				{},
+			),
+		).toEqual({
+			displayName: "Colorado Alliance of Research Libraries Network",
+			groupName: "Colorado Alliance of Research Libraries Network",
+			groupCode: "CARLN",
+		});
 	});
 });
