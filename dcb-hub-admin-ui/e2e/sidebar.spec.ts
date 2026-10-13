@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";

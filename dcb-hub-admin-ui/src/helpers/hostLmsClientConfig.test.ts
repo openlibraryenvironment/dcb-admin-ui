@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import {
 	HOST_LMS_CLASSES,
+	HOST_LMS_PROFILES,
 	buildClientConfig,
 	clientConfigFieldsFor,
 	clientConfigToFields,
@@ -13,6 +14,7 @@ import {
 	mergeClientConfigEdit,
 } from "./hostLmsClientConfig";
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
+import application from "@/locales/en-GB/application.json";
 
 /**
  * These assertions are the frontend half of a contract that lives in
@@ -896,5 +898,34 @@ describe("hostLmsClientConfig", () => {
 
 			expect(stored.key).toBe("old");
 		});
+	});
+});
+
+// A label the catalogue lacks renders as its key. Any property ending in "Key", so a
+// key-bearing property added later is covered without this test being edited.
+describe("every key a profile names is in the en-GB catalogue", () => {
+	const keysIn = (node: unknown, out: string[] = []): string[] => {
+		if (Array.isArray(node)) node.forEach((item) => keysIn(item, out));
+		else if (node && typeof node === "object")
+			for (const [name, value] of Object.entries(node))
+				if (name.endsWith("Key") && typeof value === "string") out.push(value);
+				else keysIn(value, out);
+		return out;
+	};
+	const resolve = (key: string) =>
+		key
+			.split(".")
+			.reduce<unknown>(
+				(node, part) => (node as Record<string, unknown> | undefined)?.[part],
+				application,
+			);
+
+	it.each(
+		HOST_LMS_PROFILES.map((profile) => [profile.lmsClientClass, profile]),
+	)("%s", (_, profile) => {
+		const missing = [...new Set(keysIn(profile))].filter(
+			(key) => typeof resolve(key) !== "string",
+		);
+		expect(missing).toEqual([]);
 	});
 });

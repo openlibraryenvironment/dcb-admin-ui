@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { seedAuth } from "./fixtures/auth";
 import { useAllFeatures } from "./fixtures/flags";
@@ -99,12 +100,18 @@ test.describe("Bulk functional settings", () => {
 
 		// A bulk write with no reason would leave the change log unable to answer "which
 		// twelve libraries, and why" — which is the question this action creates.
-		await expect(page.getByRole("button", { name: /^Apply to/ })).toBeDisabled();
+		await expect(
+			page.getByRole("button", { name: /^Apply to/ }),
+		).toBeDisabled();
 
 		await chooseAlpha(page);
-		await expect(page.getByRole("button", { name: /^Apply to/ })).toBeDisabled();
+		await expect(
+			page.getByRole("button", { name: /^Apply to/ }),
+		).toBeDisabled();
 
-		await page.getByRole("textbox", { name: "Reason for this change" }).fill("Pilot");
+		await page
+			.getByRole("textbox", { name: "Reason for this change" })
+			.fill("Pilot");
 		await expect(page.getByRole("button", { name: /^Apply to/ })).toBeEnabled();
 	});
 
@@ -153,10 +160,14 @@ test.describe("Bulk functional settings", () => {
 	}) => {
 		await openDialog(page);
 		await chooseAlpha(page);
-		await page.getByRole("textbox", { name: "Reason for this change" }).fill("Pilot");
+		await page
+			.getByRole("textbox", { name: "Reason for this change" })
+			.fill("Pilot");
 		await page.getByRole("button", { name: /^Apply to/ }).click();
 
-		await expect(page.getByRole("status")).toContainText("Applied to 1 of the 1");
+		await expect(page.getByRole("status")).toContainText(
+			"Applied to 1 of the 1",
+		);
 	});
 
 	test("has no axe violations while the dialog is open", async ({ page }) => {

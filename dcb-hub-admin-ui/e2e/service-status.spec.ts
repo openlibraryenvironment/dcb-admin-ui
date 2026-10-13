@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 
 import pkg from "../package.json";
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";

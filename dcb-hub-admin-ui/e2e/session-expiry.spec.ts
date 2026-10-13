@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 import { seedAuth, getAuthStorageKey } from "./fixtures/auth";
 import { E2E_KEYCLOAK_URL } from "./fixtures/keycloak";
 

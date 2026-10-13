@@ -271,7 +271,7 @@ export default function NewLibraryUser({
 					</Box>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={onClose}>{t("ui.action.cancel")}</Button>
+					<Button onClick={onClose}>{t("ui.actions.cancel")}</Button>
 					<Button
 						type="submit"
 						form="new-library-user-form"

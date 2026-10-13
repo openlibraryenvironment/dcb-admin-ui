@@ -1,4 +1,5 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import { type Locator, type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";

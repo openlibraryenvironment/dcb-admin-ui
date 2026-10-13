@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { getBreadcrumbKey, isTranslationKey } from "./getBreadcrumbKey";
+import { SETUP_CHAPTERS } from "@components/Setup/setupChapters";
 
 /**
  * The fallback is `"nav." + pathArray.join(".")`, so a path this function does not
@@ -63,5 +64,13 @@ describe("a key is told apart from a title", () => {
 		expect(getBreadcrumbKey(["libraries", LIBRARY], "Alpha Test Library")).toBe(
 			"Alpha Test Library",
 		);
+	});
+});
+
+// The route tree has `/setup/$step`, so the route walk fills it with an id and never
+// reaches these; the Setup tab renders them on its way in.
+describe("every setup chapter has a breadcrumb key", () => {
+	it.each(Object.entries(SETUP_CHAPTERS))("%s", (id, chapter) => {
+		expect(getBreadcrumbKey(["setup", id])).toBe(chapter.labelKey);
 	});
 });

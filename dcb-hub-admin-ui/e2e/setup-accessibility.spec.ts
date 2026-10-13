@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { scanForViolations } from "./fixtures/axe";
 import { seedAuth, READ_ONLY_ROLES } from "./fixtures/auth";
