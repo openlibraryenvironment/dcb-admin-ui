@@ -1,4 +1,5 @@
 import { useState } from "react";
+import RulesetNameField from "@components/RulesetNameField/RulesetNameField";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
@@ -30,6 +31,7 @@ import {
 	buildClientConfig,
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
+	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
 import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
 import {
@@ -391,25 +393,16 @@ function NewHostLms() {
 						<Alert severity="info">{t("hostlms.select_type_first")}</Alert>
 					)}
 
-					<Controller
+					<RulesetNameField
 						name="suppressionRulesetName"
-						control={control}
-						render={({ field }) => (
-							<TextField
-								{...field}
-								label={t("hostlms.bibSuppressionRulesetName")}
-							/>
-						)}
+						id="new-host-lms-bib-suppression"
+						label={t("hostlms.bibSuppressionRulesetName")}
+						defaultName={bibSuppressionDefault(lmsClientClass)}
 					/>
-					<Controller
+					<RulesetNameField
 						name="itemSuppressionRulesetName"
-						control={control}
-						render={({ field }) => (
-							<TextField
-								{...field}
-								label={t("hostlms.itemSuppressionRulesetName")}
-							/>
-						)}
+						id="new-host-lms-item-suppression"
+						label={t("hostlms.itemSuppressionRulesetName")}
 					/>
 
 					{requiredGaps.length > 0 && lmsClientClass && (

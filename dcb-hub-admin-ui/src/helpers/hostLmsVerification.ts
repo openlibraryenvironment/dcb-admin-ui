@@ -1,7 +1,9 @@
 // Mirror of CreateHostLmsDataFetcher.CreateHostLmsResult (dcb-service). The
 // status fields are human-readable diagnostic strings the backend builds, e.g.
-// "Status: OK", "Ping Failed: ...", "Success: Retrieved chunk with N records.",
-// "Skipped: ...", "Ingest Check Failed: ...".
+// "Status: OK (version)", "Status: ERROR (version) - detail",
+// "Status: Not implemented", "Ping Failed: ...",
+// "Success: Retrieved chunk with N records.", "Skipped: ...",
+// "Ingest Check Failed: ...".
 export type HostLmsVerificationResult = {
 	hostLms?: { code?: string | null; name?: string | null } | null;
 	pingStatus?: string | null;
@@ -18,8 +20,13 @@ export const classifyVerificationStatus = (
 ): VerificationSeverity => {
 	if (!status) return "info";
 	const lower = status.toLowerCase();
-	if (lower.includes("failed")) return "error";
-	if (lower.startsWith("skipped")) return "info";
+	if (lower.includes("failed") || lower.startsWith("status: error"))
+		return "error";
+	if (
+		lower.startsWith("skipped") ||
+		lower.startsWith("status: not implemented")
+	)
+		return "info";
 	return "success";
 };
 

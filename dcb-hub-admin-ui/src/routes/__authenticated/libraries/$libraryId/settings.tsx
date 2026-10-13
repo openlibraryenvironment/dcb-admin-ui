@@ -342,7 +342,10 @@ function Settings() {
 
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
-						<Typography variant="attributeTitle">
+						<Typography
+							variant="attributeTitle"
+							id="label-max-consortial-loans"
+						>
 							{t("libraries.max_consortial_loans")}
 						</Typography>
 						<Controller
@@ -352,11 +355,20 @@ function Settings() {
 								editMode ? (
 									<TextField
 										{...field}
+										id="library-max-consortial-loans"
 										inputRef={firstEditableFieldRef}
 										type="number"
 										fullWidth
 										error={!!errors.maxConsortialLoans}
-										helperText={errors.maxConsortialLoans?.message as string}
+										slotProps={{
+											htmlInput: {
+												"aria-labelledby": "label-max-consortial-loans",
+											},
+										}}
+										helperText={
+											(errors.maxConsortialLoans?.message as string) ??
+											t("libraries.new.max_consortial_loans_helper")
+										}
 									/>
 								) : (
 									<RenderAttribute

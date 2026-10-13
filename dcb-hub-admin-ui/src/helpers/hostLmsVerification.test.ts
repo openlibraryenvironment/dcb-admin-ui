@@ -9,6 +9,16 @@ describe("hostLmsVerification", () => {
 	describe("classifyVerificationStatus", () => {
 		it.each([
 			["Status: OK", "success"],
+			["Status: OK (Alma API v1 (PRODUCTION, Example University))", "success"],
+			[
+				"Status: ERROR (Alma API v1) - The API key was refused for Users (read and write): Forbidden",
+				"error",
+			],
+			[
+				"Status: ERROR (POLARIS (version unknown)) - Polaris did not accept the Application Services staff login: HTTP 500",
+				"error",
+			],
+			["Status: Not implemented", "info"],
 			["Success: Retrieved chunk with 12 records.", "success"],
 			["Ping Failed: connection refused", "error"],
 			["Ingest Check Failed: boom", "error"],

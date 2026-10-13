@@ -37,7 +37,7 @@ export const CONSORTIUM_BRAND_CHROME_FIELDS = [
 ] as const;
 
 /**
- * The consortium's support link, added by V9_0_008__support_url.sql — V-11.1.
+ * The consortium's support link, added by a dcb-service migration in no release yet.
  *
  * `websiteUrl` is deliberately NOT here. It has been on Consortium since 6.2.0, so it
  * needs no gate; only the column that arrived after the 9.0.0 tag does. Discovery renders
@@ -69,7 +69,7 @@ export const LIBRARY_BRAND_FIELDS = [
 ] as const;
 
 /**
- * Which classification a library shelves by, added by V9_0_011 — §V-22.2.
+ * Which classification a library shelves by, added by a dcb-service migration in no release yet.
  *
  * One name, two types. Declared here so the selection builder, the variables filter and
  * serviceCapabilities.test.ts all read the same list.
@@ -246,8 +246,7 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// On the dcb-service `symposia` branch and in no release: V9_0_008__support_url
-		// has not merged, and main's V9_0_008 is a different migration entirely.
+		// In no dcb-service release: the support_url migration is on an unmerged branch.
 		// A SEPARATE row from consortium_branding, whose `since` is 9.0.0 — one flag over
 		// both would be a lie about one of them, and switching it on at the v9 upgrade
 		// would break the consortium form on every deployment running the release.

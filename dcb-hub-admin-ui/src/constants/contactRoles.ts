@@ -21,6 +21,7 @@ export const CONTACT_ROLE_OPTIONS = [
 		value: "OPERATIONS_CONTACT",
 		labelKey: "libraries.contacts.roles.operations",
 	},
+	{ value: "SPONSOR", labelKey: "libraries.contacts.roles.sponsor" },
 	{
 		value: "SIGN_OFF_AUTHORITY",
 		labelKey: "libraries.contacts.roles.sign_off",

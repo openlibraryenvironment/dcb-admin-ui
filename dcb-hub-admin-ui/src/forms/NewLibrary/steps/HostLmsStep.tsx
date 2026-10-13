@@ -1,4 +1,5 @@
 import { useState } from "react";
+import RulesetNameField from "@components/RulesetNameField/RulesetNameField";
 import { useTranslation } from "react-i18next";
 import { useFormContext, Controller, useWatch } from "react-hook-form";
 import {
@@ -21,6 +22,7 @@ import {
 	buildClientConfig,
 	clientConfigToFields,
 	getHostLmsProfile,
+	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
 
 /**
@@ -258,31 +260,18 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 					)}
 
 					<Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-						<Controller
+						<RulesetNameField
 							name="suppressionRulesetName"
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									id="host-lms-bib-suppression"
-									fullWidth
-									disabled={busy}
-									label={t("hostlms.bibSuppressionRulesetName")}
-								/>
-							)}
+							id="host-lms-bib-suppression"
+							disabled={busy}
+							label={t("hostlms.bibSuppressionRulesetName")}
+							defaultName={bibSuppressionDefault(lmsClientClass)}
 						/>
-						<Controller
+						<RulesetNameField
 							name="itemSuppressionRulesetName"
-							control={control}
-							render={({ field }) => (
-								<TextField
-									{...field}
-									id="host-lms-item-suppression"
-									fullWidth
-									disabled={busy}
-									label={t("hostlms.itemSuppressionRulesetName")}
-								/>
-							)}
+							id="host-lms-item-suppression"
+							disabled={busy}
+							label={t("hostlms.itemSuppressionRulesetName")}
 						/>
 					</Stack>
 

@@ -666,9 +666,9 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 							</Stack>
 						</Grid>
 
-						{/* V-11.1. Behind its own flag, not the branding one: support_url
-						    arrived in V9_0_008, after the 9.0.0 tag, and the brand columns
-						    arrived in it. The flag is not a render switch — it also keeps
+						{/* Behind its own flag, not the branding one: support_url is in no
+						    dcb-service release yet, and the brand columns arrived in
+						    9.0.0. The flag is not a render switch — it also keeps
 						    the field out of the document and out of the mutation
 						    variables, without which the whole consortium form stops
 						    saving on a deployment that cannot accept it. */}

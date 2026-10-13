@@ -496,29 +496,41 @@ const ALMA: HostLmsProfile = {
 				"hostlms.config_fields.alma_resource_sharing_group_description",
 			required: false,
 			fields: [
-				// Creation succeeds without these three, but AlmaClientConfig declares
-				// them required, so the first real request will fail instead.
 				field(
 					["sharing-library-code"],
 					"hostlms.config_fields.sharing_library_code",
 					"hostlms.config_fields.alma_sharing_library_code_description",
-					"recommended",
-					"text",
-					"RES_SHARE",
+					"required",
+				),
+				field(
+					["sharing-circ-desk-code"],
+					"hostlms.config_fields.sharing_circ_desk_code",
+					"hostlms.config_fields.alma_sharing_circ_desk_code_description",
+					"optional",
+				),
+				field(
+					["alternative-sharing-library-code"],
+					"hostlms.config_fields.alternative_sharing_library_code",
+					"hostlms.config_fields.alma_alternative_sharing_library_code_description",
+					"optional",
+				),
+				field(
+					["request-cancellation-reason"],
+					"hostlms.config_fields.request_cancellation_reason",
+					"hostlms.config_fields.alma_request_cancellation_reason_description",
+					"required",
 				),
 				field(
 					["virtual-item-library-code"],
 					"hostlms.config_fields.virtual_item_library_code",
 					"hostlms.config_fields.alma_virtual_item_library_code_description",
-					"recommended",
+					"required",
 				),
 				field(
 					["virtual-item-location-code"],
 					"hostlms.config_fields.virtual_item_location_code",
 					"hostlms.config_fields.alma_virtual_item_location_code_description",
-					"recommended",
-					"text",
-					"OUT_RS_REQ",
+					"required",
 				),
 				// The support guide asks every Alma site for this up front, because
 				// checkouts have to happen somewhere.
@@ -544,9 +556,17 @@ const ALMA: HostLmsProfile = {
 					ALMA_ITEM_POLICY_DOCS,
 				),
 				field(
-					["shelf-location"],
-					"hostlms.config_fields.shelf_location",
-					"hostlms.config_fields.alma_shelf_location_description",
+					["no-renew-item-policy"],
+					"hostlms.config_fields.no_renew_item_policy",
+					"hostlms.config_fields.alma_no_renew_item_policy_description",
+					"optional",
+					"text",
+					"DCB_NO_RENEW",
+				),
+				field(
+					["virtual-patron-barcode-prefix"],
+					"hostlms.config_fields.virtual_patron_barcode_prefix",
+					"hostlms.config_fields.alma_virtual_patron_barcode_prefix_description",
 					"optional",
 				),
 				field(
@@ -634,18 +654,19 @@ const FOLIO: HostLmsProfile = {
 					"recommended",
 					"url",
 				),
+				// FolioOaiPmhIngestSource2.DEFAULT_RECORD_SYNTAX applies when this is blank
 				field(
 					["record-syntax"],
 					"hostlms.config_fields.record_syntax",
-					"hostlms.config_fields.record_syntax_description",
+					"hostlms.config_fields.folio_record_syntax_description",
 					"optional",
 					"text",
-					"marcxml",
+					"oai_dc",
 				),
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
-					"hostlms.config_fields.metadata_prefix_description",
+					"hostlms.config_fields.folio_metadata_prefix_description",
 					"optional",
 					"text",
 					"marc21_withholdings",
@@ -872,7 +893,7 @@ const POLARIS: HostLmsProfile = {
 					["services", "organisation-id"],
 					"hostlms.client_config.services_organisation_id",
 					"hostlms.config_fields.services_organisation_id_description",
-					"recommended",
+					"required",
 				),
 				field(
 					["services", "site-domain"],
@@ -928,13 +949,13 @@ const POLARIS: HostLmsProfile = {
 					["item", "ill-location-id"],
 					"hostlms.client_config.ill_location_id",
 					"hostlms.config_fields.ill_location_id_description",
-					"recommended",
+					"required",
 				),
 				field(
 					["item", "fine-code-id"],
 					"hostlms.client_config.fine",
 					"hostlms.config_fields.fine_code_id_description",
-					"optional",
+					"required",
 				),
 				// Text, not number. PolarisConfig.ItemConfig declares every one of
 				// these as `Object` and coerces String<->Integer on read, and real
@@ -944,31 +965,31 @@ const POLARIS: HostLmsProfile = {
 					["item", "renewal-limit"],
 					"hostlms.client_config.renewal_limit",
 					"hostlms.config_fields.renewal_limit_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "history-action-id"],
 					"hostlms.client_config.history_action_id",
 					"hostlms.config_fields.history_action_id_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "shelving-scheme-id"],
 					"hostlms.client_config.shelving_scheme_id",
 					"hostlms.config_fields.shelving_scheme_id_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "loan-period-code-id"],
 					"hostlms.client_config.loan_id",
 					"hostlms.config_fields.loan_period_code_id_description",
-					"optional",
+					"required",
 				),
 				field(
 					["item", "av-loan-period-code-id"],
 					"hostlms.config_fields.av_loan_period_code_id",
 					"hostlms.config_fields.av_loan_period_code_id_description",
-					"optional",
+					"required",
 				),
 				{
 					path: ["item", "item-agency-resolution-method"],
@@ -1435,6 +1456,15 @@ export const HOST_LMS_PROFILES: HostLmsProfile[] = [
 ]
 	.map(withSharedFields)
 	.map(withAdapterDefaults);
+
+/**
+ * The bib suppression ruleset dcb-service applies when none is named: FOLIO's ingest
+ * source falls back to folio-default, which application.yml seeds.
+ */
+export const bibSuppressionDefault = (
+	lmsClientClass: string | undefined | null,
+): string | undefined =>
+	lmsClientClass === HOST_LMS_CLASSES.folio ? "folio-default" : undefined;
 
 export const getHostLmsProfile = (
 	lmsClientClass?: string | null,

@@ -87,8 +87,8 @@ describe("themeOptions", () => {
 
 describe("brand field limits", () => {
 	it("matches the column widths in dcb-service's brand migrations", () => {
-		// V9_0_001 / V9_0_002, plus V6_2_0_021 and V9_0_008 for the two link
-		// columns. A value the database would truncate must be refused here, with a
+		// V9_0_001 / V9_0_002, plus V6_2_0_021 and the unreleased support_url migration
+		// for the two link columns. A value the database would truncate must be refused here, with a
 		// message, rather than arriving mangled.
 		expect(BRAND_LIMITS).toEqual({
 			linkUrl: 200,

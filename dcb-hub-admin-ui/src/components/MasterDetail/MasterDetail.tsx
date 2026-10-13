@@ -26,6 +26,7 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 
 import { formatDuration } from "@helpers/formatDuration";
+import { showItemDiagnostics } from "@helpers/itemDiagnostics";
 import MasterDetailLayout from "./MasterDetailLayout";
 
 type MasterDetailType = {
@@ -663,7 +664,7 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Stack>
 						</Grid>
 					)}
-					{row?.status?.code !== "AVAILABLE" && (
+					{showItemDiagnostics(row) && (
 						<>
 							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 								<StyledDataGridAccordion elevation={0}>

@@ -361,7 +361,7 @@
 		"library_id": "UUID de la biblioteca",
 		"library_management_system": "Sistema(s) de gestión de la biblioteca",
 		"name": "Nombre completo",
-		"max_consortial_loans": "Número máximo de préstamos consorciados",
+		"max_consortial_loans": "Número máximo de solicitudes activas por usuario",
 		"new_contact": {
 			"error": "Se ha producido un error al crear el nuevo contacto para la biblioteca {{library}}.",
 			"success": "Se ha creado correctamente un nuevo contacto para {{library}}"

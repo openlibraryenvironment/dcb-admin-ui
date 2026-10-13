@@ -14,20 +14,15 @@ async function startEditing(page: Page) {
 }
 
 /**
- * Administering the consortium's presence links — §V-11.1.
+ * The consortium's half of the discovery footer's website and support links. Two rules:
  *
- * The discovery app's footer renders a website and a support link for each level of the
- * brand chain (§V-11.2). This is where the consortium's half is typed in, and the field
- * carries two rules that are easy to get wrong in opposite directions:
+ *  - The field is behind its OWN flag, not the branding one: `support_url` is in no
+ *    dcb-service release yet, and selecting it on 9.0.0 fails LoadConsortium whole.
+ *  - dcb-service refuses a URL that is not absolute http(s), so a bad value is reported
+ *    under the box rather than as an unattributed 400.
  *
- *  - It is behind its OWN flag, not the branding one. `support_url` arrived in V9_0_008,
- *    after the 9.0.0 tag; the brand columns arrived in it. Selecting it on a 9.0.0
- *    deployment fails LoadConsortium whole.
- *  - dcb-service now refuses a URL that is not absolute http(s) on write, so a bad value
- *    has to be reported under the box rather than as an unattributed 400.
- *
- * The document shape is gated in schemaConformance.test.ts. What is only provable here is
- * that the field renders, is reachable and named, and refuses what the server refuses.
+ * schemaConformance.test.ts gates the document shape; this proves the field renders, is
+ * reachable and named, and refuses what the server refuses.
  */
 
 const MOCKS = {

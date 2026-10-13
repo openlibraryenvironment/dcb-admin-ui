@@ -1,13 +1,11 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service `symposia` at c2b037f2e, the last
-# commit on that branch to touch its schema.graphqls: everything Symposia needs from
-# dcb-service, on one branch. Four capabilities, all four unmerged - §V-11.1's
-# `supportUrl` (V9_0_008__support_url), §N-3's scoped functional settings
-# (V9_0_009__functional_setting_scope), §V-12's announcements (V9_0_010__announcement)
-# and §V-22.2's `classificationScheme` (V9_0_011__library_classification_scheme).
+# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service at c2b037f2e, the last commit on its
+# discovery integration branch to touch its schema.graphqls: everything the discovery UI
+# needs from dcb-service, on one branch. Four capabilities, all four unmerged and in no
+# dcb-service release - `supportUrl`, scoped functional settings, announcements and
+# `classificationScheme`.
 #
 # NOT on dcb-service main, and no longer a superset of it: main has moved on since the
-# 2026-09-09 merge into symposia, and its V9_0_008, 009 and 010 are three DIFFERENT
-# migrations. Merging symposia renumbers all four of the above.
+# 2026-09-09 merge into that branch, and its migrations are numbered when they merge.
 #
 # That branch exists so these three applications can be developed and tested against one
 # contract before it merges; nothing here reaches a deployment before it does, because
