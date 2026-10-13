@@ -163,6 +163,40 @@ test.describe("New Library wizard", () => {
 		}
 	});
 
+	test("offers the Host LMS's default agency on the Profile step", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await expect(dialog.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
+			"Verification",
+		);
+		await dialog.getByRole("button", { name: /next/i }).click();
+
+		await expect(dialog.getByRole("combobox", { name: /agency/i })).toHaveValue(
+			"TESTAGENCY",
+		);
+	});
+
 	// Cancelling part-way through does NOT discard silently: requestClose() in
 	// NewLibrary.tsx asks first, because everything typed since the last successful
 	// mutation is lost on close and the whole point of this wizard is that it is long.

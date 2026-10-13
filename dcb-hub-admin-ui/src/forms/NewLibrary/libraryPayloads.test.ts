@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import {
+	agencyCodeFromHostLms,
 	buildAgencyUpdateInput,
 	buildContactInput,
 	buildLibraryInput,
@@ -232,6 +233,26 @@ describe("buildLibraryInput", () => {
 
 		expect(input.reason).toBe("Adding a new library");
 		expect(input.changeCategory).toBe("New member");
+	});
+});
+
+describe("agencyCodeFromHostLms", () => {
+	it("offers the default agency the Host LMS step was given", () => {
+		expect(agencyCodeFromHostLms("", { "default-agency-code": " LIB1 " })).toBe(
+			"LIB1",
+		);
+	});
+
+	it("never replaces a code the user entered", () => {
+		expect(
+			agencyCodeFromHostLms("MINE", { "default-agency-code": "LIB1" }),
+		).toBeUndefined();
+	});
+
+	it("offers nothing for a shared system, which has no default agency", () => {
+		expect(
+			agencyCodeFromHostLms("", { "shared-system": true }),
+		).toBeUndefined();
 	});
 });
 

@@ -278,6 +278,23 @@ export const shouldCreateHostLms = (
 export const shouldCreateLibrary = (libraryId: string | undefined): boolean =>
 	!libraryId;
 
+/**
+ * The agency code the Host LMS step already answered, offered on the Profile step instead of
+ * asked a second time. Never overwrites a code the user has entered.
+ */
+export const agencyCodeFromHostLms = (
+	currentAgencyCode: string | undefined,
+	clientConfig: Record<string, unknown>,
+): string | undefined => {
+	if (currentAgencyCode?.trim()) return undefined;
+
+	const defaultAgencyCode = clientConfig["default-agency-code"];
+
+	return typeof defaultAgencyCode === "string" && defaultAgencyCode.trim()
+		? defaultAgencyCode.trim()
+		: undefined;
+};
+
 export const shouldJoinGroup = (
 	groupId: string | undefined,
 	joinedGroupIds: string[],
