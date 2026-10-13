@@ -225,6 +225,14 @@ describe("buildLibraryInput", () => {
 	it("sends no loan cap as null here too", () => {
 		expect(buildLibraryInput(values()).maxConsortialLoans).toBeNull();
 	});
+
+	// Nobody is asked for these: the change log records what the wizard says
+	it("records the creation in the change log without asking", () => {
+		const input = buildLibraryInput(values());
+
+		expect(input.reason).toBe("Adding a new library");
+		expect(input.changeCategory).toBe("New member");
+	});
 });
 
 describe("buildContactInput", () => {

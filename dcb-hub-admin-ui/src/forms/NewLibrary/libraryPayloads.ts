@@ -164,6 +164,7 @@ const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	isSupplyingAgency: formData.isSupplyingAgency,
 	maxConsortialLoans: loanCap(formData.maxConsortialLoans),
 	reason: formData.reason,
+	changeCategory: "New member",
 	// Was rendered but never sent, so the audit trail lost its reference URL.
 	changeReferenceUrl: formData.changeReferenceUrl,
 	authProfile: formData.authProfile,

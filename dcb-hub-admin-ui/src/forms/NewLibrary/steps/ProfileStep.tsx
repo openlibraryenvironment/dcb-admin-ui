@@ -516,23 +516,6 @@ export function ProfileStep() {
 
 			<Section title={t("libraries.new.section_change_record")}>
 				<Controller
-					name={"reason"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-reason"
-							label={t("data_change_log.reason_addition")}
-							variant="outlined"
-							fullWidth
-							required
-							error={!!errors.reason}
-							helperText={errors.reason?.message as string}
-						/>
-					)}
-				/>
-
-				<Controller
 					name={"changeReferenceUrl"}
 					control={control}
 					render={({ field }) => (

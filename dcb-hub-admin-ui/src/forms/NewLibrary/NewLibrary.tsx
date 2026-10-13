@@ -122,7 +122,6 @@ const STEP_SCHEMA_FIELDS: Record<string, (keyof NewLibraryFormValues)[]> = {
 		"latitude",
 		"longitude",
 		"authProfile",
-		"reason",
 	],
 	contacts: ["contacts"],
 	group: ["groupId"],

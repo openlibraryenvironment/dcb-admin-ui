@@ -178,14 +178,8 @@ export const newLibrarySchema = z
 		hostLmsConfiguration: z.string().optional(),
 		discoverySystem: z.string().optional(),
 		backupDowntimeSchedule: z.string().optional(),
-		// Marked required in the UI and recorded in the data change log, so validate
-		// it rather than letting an empty reason through.
-		reason: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("data_change_log.reason"),
-			}),
-		),
+		// Not asked for: set by the wizard, and recorded by dcb-service in the change log
+		reason: z.string(),
 		// Was rendered on the profile step but absent from both this schema and the
 		// mutation payload, so whatever the user typed was silently discarded.
 		changeReferenceUrl: z.string().optional(),
