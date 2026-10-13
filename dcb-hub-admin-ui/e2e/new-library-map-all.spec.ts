@@ -31,7 +31,8 @@ const reachMappingStep = async (page: Page) => {
 		.getByRole("combobox", { name: /associated agency/i })
 		.fill("MAPALL");
 	await dialog.getByLabel("Address").fill("1 Library Street");
-	await dialog.getByLabel("Type").fill("Public");
+	await dialog.getByRole("combobox", { name: "Type" }).click();
+	await page.getByRole("option", { name: "Public" }).click();
 	await dialog.getByLabel(/latitude/i).fill("51.5");
 	await dialog.getByLabel(/longitude/i).fill("-0.12");
 	await dialog

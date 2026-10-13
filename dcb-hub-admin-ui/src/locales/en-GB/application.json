@@ -1519,6 +1519,15 @@
 		},
 		"secret_label": "Secret label",
 		"support_hours": "Support office hours",
+		"types": {
+			"academic": "Academic",
+			"public": "Public",
+			"special": "Special",
+			"national": "National",
+			"school": "School",
+			"health": "Health",
+			"other": "Other"
+		},
 		"suppression_ruleset_bib": "Bib suppression ruleset for the {{lms}} library management system",
 		"suppression_ruleset_item": "Item suppression ruleset for {{lms}} library management system",
 		"type": "Type",

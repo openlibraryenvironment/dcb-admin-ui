@@ -21,6 +21,10 @@ import {
 	isUnsupportedAuthProfile,
 	resolveAuthProfile,
 } from "@constants/authProfiles";
+import {
+	isUnlistedLibraryType,
+	LIBRARY_TYPE_OPTIONS,
+} from "@constants/libraryTypes";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
@@ -178,13 +182,23 @@ export function ProfileStep() {
 						<TextField
 							{...field}
 							id="library-type"
+							select
 							label={t("libraries.type")}
 							variant="outlined"
 							fullWidth
 							required
 							error={!!errors.type}
 							helperText={errors.type?.message as string}
-						/>
+						>
+							{LIBRARY_TYPE_OPTIONS.map((option) => (
+								<MenuItem key={option.value} value={option.value}>
+									{t(option.labelKey)}
+								</MenuItem>
+							))}
+							{isUnlistedLibraryType(field.value) && (
+								<MenuItem value={field.value}>{field.value}</MenuItem>
+							)}
+						</TextField>
 					)}
 				/>
 			</Section>

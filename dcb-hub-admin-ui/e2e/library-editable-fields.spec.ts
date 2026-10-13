@@ -73,7 +73,6 @@ test.beforeEach(async ({ page }) => {
 
 test.describe("Library profile - editable fields", () => {
 	const PROFILE_FIELDS = [
-		"Type",
 		"Address",
 		"Target loan to borrow ratio",
 		"Principal label",
@@ -93,6 +92,44 @@ test.describe("Library profile - editable fields", () => {
 			await expect(page.getByRole("textbox", { name })).toBeEditable();
 		});
 	}
+
+	test("Type is chosen from a list, and the choice is saved", async ({
+		page,
+	}) => {
+		const requests = await captureUpdateLibrary(page);
+
+		await page.goto(`/libraries/${LIBRARY_ID}`);
+		await expect(
+			page.getByRole("heading", { name: "Alpha Test Library" }),
+		).toBeVisible();
+		await startEditing(page);
+
+		const type = page.getByRole("combobox", { name: "Type" });
+		await expect(type).toHaveText("Public");
+		await type.click();
+		await expect(page.getByRole("option")).toHaveText([
+			"Academic",
+			"Public",
+			"Special",
+			"National",
+			"School",
+			"Health",
+			"Other",
+		]);
+		await page.getByRole("option", { name: "Academic" }).click();
+		await page.getByRole("button", { name: "Save" }).click();
+
+		const audit = page.getByRole("dialog");
+		await expect(audit).toBeVisible();
+		await audit.getByRole("textbox", { name: /reason/i }).fill("Reclassified");
+		await audit.getByRole("button", { name: "Save changes" }).click();
+
+		await expect.poll(() => requests.length).toBeGreaterThan(0);
+		expect(requests[0].input).toMatchObject({
+			id: LIBRARY_ID,
+			type: "Academic",
+		});
+	});
 
 	test("saving sends the changed field to updateLibrary", async ({ page }) => {
 		const requests = await captureUpdateLibrary(page);

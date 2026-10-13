@@ -19,6 +19,10 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
+import {
+	isUnlistedLibraryType,
+	LIBRARY_TYPE_OPTIONS,
+} from "@constants/libraryTypes";
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -443,13 +447,29 @@ function LibraryProfile() {
 								editMode ? (
 									<TextField
 										{...field}
+										select
 										fullWidth
 										error={!!errors.type}
+										// The combobox div, not the hidden native input, is what a
+										// screen reader meets in select mode
 										slotProps={{
-											htmlInput: { "aria-labelledby": "label-library-type" },
+											select: {
+												SelectDisplayProps: {
+													"aria-labelledby": "label-library-type",
+												},
+											},
 										}}
 										helperText={errors.type?.message as string}
-									/>
+									>
+										{LIBRARY_TYPE_OPTIONS.map((option) => (
+											<MenuItem key={option.value} value={option.value}>
+												{t(option.labelKey)}
+											</MenuItem>
+										))}
+										{isUnlistedLibraryType(field.value) && (
+											<MenuItem value={field.value}>{field.value}</MenuItem>
+										)}
+									</TextField>
 								) : (
 									<RenderAttribute attribute={library.type} />
 								)
