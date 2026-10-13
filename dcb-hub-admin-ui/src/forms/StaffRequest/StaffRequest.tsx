@@ -63,15 +63,18 @@ export default function StaffRequest({
 		? String(auth.user?.profile?.code)
 		: "";
 
+	// A key and its values, not translated text: <Trans> translates once, so the
+	// success message's <linkComponent> renders as a link.
 	const [alert, setAlert] = useState<{
 		open: boolean;
 		severity: "success" | "error";
-		text: string | null;
+		messageKey: string | null;
+		values?: Record<string, string | undefined>;
 		patronRequestLink?: string;
 	}>({
 		open: false,
 		severity: "success",
-		text: null,
+		messageKey: null,
 		patronRequestLink: "",
 	});
 
@@ -342,7 +345,7 @@ export default function StaffRequest({
 					{ headers },
 				)
 				.then((res) => res.data),
-		onSuccess: (data) => {
+		onSuccess: (data, variables) => {
 			if (data.status === "VALID") {
 				setPatronData(data);
 				setActiveStep(1);
@@ -350,16 +353,21 @@ export default function StaffRequest({
 				setAlert({
 					open: true,
 					severity: "success",
-					text: t("requesting.staff_request.patron.success.lookup", {
-						barcode: patronBarcode,
-						library: agencyCode,
-					}),
+					messageKey: "requesting.staff_request.patron.success.lookup",
+					values: {
+						barcode: variables.patronBarcode,
+						library:
+							libraryOptions.find(
+								(option) => option.value === variables.agencyCode,
+							)?.label ?? variables.agencyCode,
+					},
 				});
 			} else {
 				setAlert({
 					open: true,
 					severity: "error",
-					text: t("requesting.staff_request.patron.error.validation_failure"),
+					messageKey:
+						"requesting.staff_request.patron.error.validation_failure",
 				});
 				setStepError(0); // Set error on step 0
 			}
@@ -369,7 +377,7 @@ export default function StaffRequest({
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("requesting.staff_request.patron.error.validation_failure"),
+				messageKey: "requesting.staff_request.patron.error.validation_failure",
 			});
 			setStepError(0); // Set error on step 0
 		},
@@ -392,9 +400,9 @@ export default function StaffRequest({
 			setAlert({
 				open: true,
 				severity: "success",
-				text: isReadOnly
-					? t("requesting.staff_request.patron.success.request_requesting_only")
-					: t("requesting.staff_request.patron.success.request"),
+				messageKey: isReadOnly
+					? "requesting.staff_request.patron.success.request_requesting_only"
+					: "requesting.staff_request.patron.success.request",
 				patronRequestLink,
 			});
 			setTimeout(() => {
@@ -409,10 +417,11 @@ export default function StaffRequest({
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t(getRequestError(error.response?.data?.failedChecks), {
+				messageKey: getRequestError(error.response?.data?.failedChecks),
+				values: {
 					code: error?.response?.data?.failedChecks[0].code,
 					description: error?.response?.data?.failedChecks[0].description,
-				}),
+				},
 			});
 			setStepError(1); // Set error on step 1
 		},
@@ -430,7 +439,7 @@ export default function StaffRequest({
 			setAlert({
 				open: true,
 				severity: "error",
-				text: t("requesting.staff_request.patron.error.validate_first"),
+				messageKey: "requesting.staff_request.patron.error.validate_first",
 			});
 			return;
 		}
@@ -597,19 +606,22 @@ export default function StaffRequest({
 				autoHideDuration={6000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
 				alertText={
-					<Trans
-						i18nKey={alert.text || ""}
-						components={{
-							linkComponent: (
-								<Link
-									key="patron-request-link"
-									href={alert.patronRequestLink ?? ""}
-									target="_blank"
-									rel="noopener noreferrer"
-								/>
-							),
-						}}
-					/>
+					alert.messageKey && (
+						<Trans
+							i18nKey={alert.messageKey}
+							values={alert.values}
+							components={{
+								linkComponent: (
+									<Link
+										key="patron-request-link"
+										href={alert.patronRequestLink ?? ""}
+										target="_blank"
+										rel="noopener noreferrer"
+									/>
+								),
+							}}
+						/>
+					)
 				}
 				key="staff-request-alert"
 			/>

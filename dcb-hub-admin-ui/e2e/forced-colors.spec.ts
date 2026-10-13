@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { scanForViolations } from "./fixtures/axe";
 import { seedAuth } from "./fixtures/auth";

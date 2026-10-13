@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 import { DATA_GRID_TYPES } from "@constants/dataGrid/types";
 import { resolveRowClickPath } from "@helpers/dataGrid/resolveRowClickPath";
 import { dataChangeLogEntityPath } from "@helpers/dataChangeLogHelperFunctions";
-import { getBreadcrumbKey } from "@helpers/breadcrumbs/getBreadcrumbKey";
+import {
+	getBreadcrumbKey,
+	isTranslationKey,
+} from "@helpers/breadcrumbs/getBreadcrumbKey";
+import application from "@/locales/en-GB/application.json";
 import { getSpecialRedirects } from "@helpers/breadcrumbs/getSpecialRedirects";
 import { TABS as LIBRARY_TABS } from "@constants/libraryTabs";
 import { TABS as GROUP_TABS } from "@constants/groupTabs";
@@ -213,6 +217,27 @@ describe("breadcrumb trails", () => {
 					'", which ' +
 					why,
 			).toBe(true);
+		}
+	});
+
+	// Every crumb, the current page's included. The fallback is "nav." + the joined path,
+	// so a route this function has no case for renders a raw key - with the id in it,
+	// below a record. e2e only sees the routes a spec happens to open.
+	it.each(CONCRETE_ROUTES)("%s: every crumb has a label", (pathname) => {
+		const segments = pathname.split("/").filter(Boolean);
+		for (let end = 1; end <= segments.length; end++) {
+			const key = getBreadcrumbKey(segments.slice(0, end), TITLE);
+			if (!isTranslationKey(key)) continue; // the record's title, or its id
+			const label = key
+				.split(".")
+				.reduce<unknown>(
+					(node, part) => (node as Record<string, unknown> | undefined)?.[part],
+					application,
+				);
+			expect(
+				typeof label,
+				`on "${pathname}" the crumb for "/${segments.slice(0, end).join("/")}" is "${key}", which the en-GB catalogue does not carry`,
+			).toBe("string");
 		}
 	});
 

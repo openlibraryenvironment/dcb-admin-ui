@@ -992,7 +992,7 @@ const POLARIS: HostLmsProfile = {
 				},
 				field(
 					["item", "av-renewal-limit"],
-					"hostlms.config_fields.renewal_limit_av",
+					"hostlms.client_config.renewal_limit_av",
 					"hostlms.config_fields.renewal_limit_av_description",
 					"optional",
 				),

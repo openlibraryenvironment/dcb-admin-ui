@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { seedAuth } from "./fixtures/auth";
 import { useAllFeatures } from "./fixtures/flags";
@@ -61,9 +62,7 @@ test.describe("Shelf classification", () => {
 		await page.getByRole("button", { name: "Actions" }).click();
 		await page.getByRole("menuitem", { name: "Edit" }).click();
 
-		await page
-			.getByRole("combobox", { name: "Shelf classification" })
-			.click();
+		await page.getByRole("combobox", { name: "Shelf classification" }).click();
 
 		const options = page.getByRole("option");
 		await expect(options).toHaveText([

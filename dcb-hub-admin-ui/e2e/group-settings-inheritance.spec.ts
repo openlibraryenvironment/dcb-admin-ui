@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { seedAuth } from "./fixtures/auth";
 import { useAllFeatures } from "./fixtures/flags";
@@ -49,16 +50,22 @@ test.describe("Group settings inheritance", () => {
 
 		await page.goto(`/groups/${GROUP_ID}/settings`);
 
-		await expect(page.getByRole("heading", { level: 2, name: PANEL })).toBeVisible();
+		await expect(
+			page.getByRole("heading", { level: 2, name: PANEL }),
+		).toBeVisible();
 
 		// The copy must describe THIS chain. A group inherits from the consortium and from
 		// nothing else, so the library sentence — which can mention a group — would name a
 		// level above this one that does not exist.
-		await expect(page.getByText("applies to every library in the group")).toBeVisible();
+		await expect(
+			page.getByText("applies to every library in the group"),
+		).toBeVisible();
 		await expect(page.getByText("or its group")).toHaveCount(0);
 	});
 
-	test("a group of another type is told it carries no settings", async ({ page }) => {
+	test("a group of another type is told it carries no settings", async ({
+		page,
+	}) => {
 		// This deployment carries settings on CONSORTIUM_REGION groups; the fixture group is
 		// a REGION. An editable panel here would invite an administrator to configure
 		// something that resolves for nobody.
@@ -68,20 +75,26 @@ test.describe("Group settings inheritance", () => {
 
 		await page.goto(`/groups/${GROUP_ID}/settings`);
 
-		await expect(page.getByRole("heading", { level: 2, name: PANEL })).toHaveCount(0);
+		await expect(
+			page.getByRole("heading", { level: 2, name: PANEL }),
+		).toHaveCount(0);
 		await expect(
 			page.getByText("Settings are carried by CONSORTIUM_REGION groups"),
 		).toBeVisible();
 	});
 
-	test("a deployment with no settings-bearing type says so", async ({ page }) => {
+	test("a deployment with no settings-bearing type says so", async ({
+		page,
+	}) => {
 		await useAllFeatures(page);
 		await seedAuth(page);
 		await mockDcbService(page, null);
 
 		await page.goto(`/groups/${GROUP_ID}/settings`);
 
-		await expect(page.getByRole("heading", { level: 2, name: PANEL })).toHaveCount(0);
+		await expect(
+			page.getByRole("heading", { level: 2, name: PANEL }),
+		).toHaveCount(0);
 		await expect(
 			page.getByText("No group type carries settings on this deployment"),
 		).toBeVisible();

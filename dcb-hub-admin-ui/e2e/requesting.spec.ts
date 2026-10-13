@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -120,7 +121,7 @@ test("a valid patron advances to request creation", async ({ page }) => {
 
 	await expect(
 		page.getByText(
-			`The patron ${PATRON_BARCODE} has been successfully validated`,
+			`The patron ${PATRON_BARCODE} has been successfully validated for Alpha Test Library.`,
 		),
 	).toBeVisible();
 	await expect(

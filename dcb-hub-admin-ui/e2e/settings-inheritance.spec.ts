@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { test, expect } from "./fixtures/test";
 
 import { seedAuth } from "./fixtures/auth";
 import { useAllFeatures } from "./fixtures/flags";
@@ -167,8 +168,12 @@ test.describe("Settings inheritance", () => {
 
 		// Both read as off. They are not the same thing: one is a decision an administrator
 		// can go and look at, the other is one still to be taken.
-		await expect(rowFor(page, DECIDED_NOWHERE)).toContainText("Not set anywhere");
-		await expect(rowFor(page, DECIDED_NOWHERE)).not.toContainText("Inherited from");
+		await expect(rowFor(page, DECIDED_NOWHERE)).toContainText(
+			"Not set anywhere",
+		);
+		await expect(rowFor(page, DECIDED_NOWHERE)).not.toContainText(
+			"Inherited from",
+		);
 	});
 
 	test("offers the revert only where there is an override to remove", async ({
@@ -240,7 +245,9 @@ test.describe("Settings inheritance", () => {
 		await page.keyboard.press("Enter");
 
 		await expect
-			.poll(() => sent.filter((s) => s.operationName.startsWith("Revert")).length)
+			.poll(
+				() => sent.filter((s) => s.operationName.startsWith("Revert")).length,
+			)
 			.toBe(1);
 	});
 });

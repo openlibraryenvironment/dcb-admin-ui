@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 
 import { ADMIN_ROLES, READ_ONLY_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -95,9 +95,9 @@ test.describe("Consortium-only access", () => {
 
 		// The generic refusal must NOT also be on screen - two explanations is worse
 		// than one, and they contradict each other.
-		await expect(page.getByText(/contact your system administrator/i)).toHaveCount(
-			0,
-		);
+		await expect(
+			page.getByText(/contact your system administrator/i),
+		).toHaveCount(0);
 	});
 
 	test("says the same to a read-only library account", async ({ page }) => {

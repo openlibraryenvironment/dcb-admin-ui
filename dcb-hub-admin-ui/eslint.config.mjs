@@ -17,6 +17,17 @@ const compat = new FlatCompat({
 	recommendedConfig: js.configs.recommended,
 });
 
+// Zod has to be reached through the configured instance, or its JIT probe calls
+// Function("") and our CSP refuses it - one securitypolicyviolation per page load. See
+// src/schemas/zod.ts; the container gate is what catches it. A constant because flat
+// config replaces a rule's options per block instead of merging them, so the e2e block
+// below has to restate it.
+const ZOD_IMPORT = {
+	name: "zod",
+	message:
+		'Import { z } from "@schemas/zod" - the instance with jitless set. A bare "zod" import constructs schemas whose JIT probe violates our CSP. See src/schemas/zod.ts.',
+};
+
 export default [
 	{
 		// Flat config no longer reads .eslintignore - these paths are either
@@ -133,19 +144,10 @@ export default [
 				"error",
 				{ "ts-ignore": "allow-with-description" }, // ts-ignore is only allowed with a justification
 			],
-			// Zod has to be reached through the configured instance, or its JIT probe
-			// calls Function("") and our CSP refuses it - one securitypolicyviolation per
-			// page load. See src/schemas/zod.ts; the container gate is what catches it.
 			"no-restricted-imports": [
 				"error",
 				{
-					paths: [
-						{
-							name: "zod",
-							message:
-								'Import { z } from "@schemas/zod" - the instance with jitless set. A bare "zod" import constructs schemas whose JIT probe violates our CSP. See src/schemas/zod.ts.',
-						},
-					],
+					paths: [ZOD_IMPORT],
 				},
 			],
 			"no-duplicate-imports": 2,
@@ -290,6 +292,28 @@ export default [
 						"JSXAttribute[name.name=/^(aria-label|aria-description|aria-roledescription|aria-valuetext|aria-placeholder|alt|placeholder|title|label|noResultsText|searchText)$/] > JSXExpressionContainer > ConditionalExpression > Literal[value=/\S/][value!=/^[A-Z0-9 _-]+$/]",
 					message:
 						"An accessible name is a user-facing string: pass t(\"...\"). eslint-plugin-i18next runs in jsx-text-only mode, so it reads JSX TEXT and never an attribute - which is how aria-label=\"account of current user\", alt=\"OpenRS Logo\" and three aria-label=\"close\" shipped untranslated. alt=\"\" for a decorative image is still allowed.",
+				},
+			],
+		},
+	},
+	{
+		// Every spec takes `test` from e2e/fixtures/test.ts, whose auto fixture fails a test
+		// that rendered a missing translation key. Last, so it wins for e2e/.
+		files: ["e2e/**/*.ts"],
+		ignores: ["e2e/fixtures/test.ts"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					paths: [
+						ZOD_IMPORT,
+						{
+							name: "@playwright/test",
+							importNames: ["test"],
+							message:
+								'Import { test, expect } from "./fixtures/test". Its auto fixture fails a test that rendered a missing translation key; a bare @playwright/test import skips that check. docs/i18n.md.',
+						},
+					],
 				},
 			],
 		},

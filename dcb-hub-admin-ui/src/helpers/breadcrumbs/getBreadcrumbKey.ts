@@ -1,27 +1,33 @@
 import { formatBreadcrumbTitles } from "@helpers/formatBreadcrumbTitles";
+import type { ConsortiumSetupStepId } from "@helpers/consortiumSetup";
+import { SETUP_CHAPTERS } from "@components/Setup/setupChapters";
+
+// Pages with no `nav.` key, labelled with their own title. A page that hides its crumbs
+// still needs these: the location moves before the page being left unmounts.
+const PAGE_TITLES: Record<string, string> = {
+	"404": "ui.error.404.name",
+	"500": "ui.error.500.name",
+	maintenance: "ui.error.503.name",
+	networkError: "ui.error.network_error",
+	unauthorised: "ui.error.401.name",
+	"hostlmss.new": "hostlms.new",
+	setup: "setup.page_title",
+	"setup.done": "setup.done.page_title",
+};
 
 /**
- * The translation key (or literal title) a breadcrumb shows for a path prefix.
- *
- * Extracted from the Breadcrumbs component so breadcrumbTrail.test.ts can walk
- * every route in the tree and check that each crumb it produces addresses a real
- * page. It did not: "/patronRequests/audits" matched /patronRequests/$id with the
- * id "audits" and opened that page's "cannot find record" state.
- *
- * Pure: the path prefix and the page's own title are all it reads.
- */
-/**
  * Whether a breadcrumb's value is a translation key or a title taken from the
- * record.
- *
- * getBreadcrumbKey returns both: `nav.libraries.settings` for a fixed label, and a
- * library or group name where the crumb IS the record. Passing the second through
- * `t()` asks i18next for a key called "Alpha Test Library", which it reports missing
- * on every page load - so the caller has to know which it has.
+ * record. Passing a record's name through `t()` asks i18next for a key called
+ * "Alpha Test Library", which it reports missing on every page load.
  */
 export const isTranslationKey = (value: string): boolean =>
 	value.includes(".") && !value.includes(" ");
 
+/**
+ * The translation key (or literal title) a breadcrumb shows for a path prefix. Pure,
+ * so navigationTargets.test.ts can check every route's crumbs link somewhere real and
+ * carry a label.
+ */
 export function getBreadcrumbKey(
 	pathArray: string[],
 	titleAttribute?: string,
@@ -45,6 +51,8 @@ export function getBreadcrumbKey(
 					return "nav.groups.supplierRequests";
 				case "settings":
 					return "nav.groups.settings";
+				case "insights":
+					return "nav.groups.insights";
 			}
 		}
 	}
@@ -88,6 +96,10 @@ export function getBreadcrumbKey(
 	// This function formulates the correct translation key from the pathArray.
 	// For nested keys (like circulation status mappings) we just need to use .join
 	const nestedKey = pathArray.join(".");
+	if (nestedKey in PAGE_TITLES) return PAGE_TITLES[nestedKey];
+	if (pathArray[0] === "setup" && pathArray[1] in SETUP_CHAPTERS) {
+		return SETUP_CHAPTERS[pathArray[1] as ConsortiumSetupStepId].labelKey;
+	}
 	// However top-level keys need to be addressed differently as in some cases they have the same name as the objects
 	// i.e 'mappings' must become 'mappings.name' so it references a specific key and not the object.
 	const topLevelKey = pathArray[0];
