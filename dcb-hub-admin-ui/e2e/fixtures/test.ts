@@ -1,7 +1,13 @@
 import { test as base, expect } from "@playwright/test";
+import { E2E_KEYCLOAK_URL } from "./keycloak";
 
 /** What the application's missingKeyHandler records - src/helpers/i18nMissingKeys.ts. */
 type MissingKey = { language: string; namespace: string; key: string };
+const PIXEL_PNG = Buffer.from(
+	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+	"base64",
+);
+
 type WithCollector = Window & {
 	__I18N_MISSING__?: MissingKey[];
 	__e2eMissingKey?: (entry: MissingKey) => Promise<void>;
@@ -12,7 +18,45 @@ type WithCollector = Window & {
  * not carry. e2e/i18n-missing.spec.ts covers each route's first render; this covers the
  * dialogs, errors and validation a journey reaches. docs/i18n.md.
  */
-export const test = base.extend<{ missingTranslations: void }>({
+export const test = base.extend<{
+	missingTranslations: void;
+	unresolvedHosts: void;
+}>({
+	// Every test fails if a request it made went to DNS for a host that cannot resolve:
+	// whether that fails fast or stalls is this machine's network, not the application.
+	unresolvedHosts: [
+		async ({ context }, use) => {
+			// The environment pages check Keycloak's health on load
+			await context.route(
+				`${new URL(E2E_KEYCLOAK_URL).origin}/health`,
+				(route) =>
+					route.fulfill({
+						json: { status: "UP", checks: [{ name: "e2e", status: "UP" }] },
+					}),
+			);
+			// Fixture brand images (header icons, logos) are placeholders on .invalid hosts
+			await context.route(
+				(url) =>
+					url.hostname.endsWith(".invalid") &&
+					/\.(png|jpe?g|gif|svg|webp)$/i.test(url.pathname),
+				(route) => route.fulfill({ contentType: "image/png", body: PIXEL_PNG }),
+			);
+			const unresolved: string[] = [];
+			context.on("requestfailed", (request) => {
+				if (request.failure()?.errorText === "net::ERR_NAME_NOT_RESOLVED")
+					unresolved.push(request.url());
+			});
+
+			await use();
+
+			expect(
+				unresolved,
+				"A request went to DNS for a host that cannot resolve. Mock it in e2e/fixtures.",
+			).toEqual([]);
+		},
+		{ auto: true },
+	],
+
 	missingTranslations: [
 		async ({ context }, use) => {
 			const recorded: MissingKey[] = [];

@@ -454,8 +454,7 @@ export const ROUTES: ScannedRoute[] = [
 		},
 	},
 	{
-		// The DCB health check is a real timeout in e2e, so the Keycloak row is the
-		// marker: it resolves from seeded config rather than from the network.
+		// The environment grid's rows appear once every health request has settled
 		path: "/consortium/environment",
 		ready: async (page) => {
 			await expect(page.getByText("Keycloak").first()).toBeVisible();
