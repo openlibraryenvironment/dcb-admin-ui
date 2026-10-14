@@ -138,11 +138,14 @@ verify_e2e:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
     pull_policy: if-not-present
   script:
+    - echo "runner=$CI_RUNNER_DESCRIPTION cpus=$(nproc) cpu.max=$(cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo n/a) mem_mb=$(awk '/^MemTotal/{print int($2/1024)}' /proc/meminfo)"
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
     - npx playwright test
   interruptible: true
+  # One browser suite at a time on this runner: docs/testing.md, "Parallelism".
+  resource_group: browser-suites
   timeout: 40m
   artifacts:
     # `always`, not `on_failure`. playwright.config.ts already writes a junit file and
@@ -188,6 +191,7 @@ verify_lighthouse:
     # because the audit must not measure whatever an earlier job left in dist/.
     - npm run lighthouse
   interruptible: true
+  resource_group: browser-suites
   timeout: 30m
   artifacts:
     when: always
@@ -215,6 +219,7 @@ verify_base_path:
     - npm ci
     - npm run e2e:base-path
   interruptible: true
+  resource_group: browser-suites
   timeout: 30m
   artifacts:
     when: always
@@ -237,6 +242,7 @@ verify_ki_bootstrap:
     - npm ci
     - npm run e2e:ki-bootstrap
   interruptible: true
+  resource_group: browser-suites
   timeout: 30m
   # This job had NO artifacts and no report. A failure in the bootloader gate left
   # nothing behind to look at - no trace, no screenshot, no list of which of its four
@@ -270,6 +276,7 @@ verify_ki_bootstrap:
 verify_container:
   stage: verify
   interruptible: true
+  resource_group: browser-suites
   timeout: 40m
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble

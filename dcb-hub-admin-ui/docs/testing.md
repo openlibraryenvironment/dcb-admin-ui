@@ -246,6 +246,17 @@ Twelve seconds, for the difference between a suite that is evidence and one that
 already hides this, which is why it went unnoticed there, and a retry that masks contention
 masks a real regression just as readily.
 
+**In CI, the browser suites take turns.** `verify_e2e`, `verify_lighthouse`,
+`verify_base_path`, `verify_ki_bootstrap` and `verify_container` share
+`resource_group: browser-suites`, so GitLab runs one at a time. Each builds the application
+and drives Chromium on the same `ki-onprem` runner, and `workers: 4` was measured on a
+32-thread workstation, not there. Run together they produced the failure above as
+retries: on 14 Oct 2026, `verify_e2e` reported three tests flaky on routes that are ready
+in 0.5-1.0s locally, one of them timing out on `/serviceInfo/auditExplorer`'s static text,
+which needs no network at all. Lighthouse's CPU-bound timings get a quiet machine for the
+same reason. `verify_e2e` prints the runner's CPU count, cgroup CPU limit and memory first;
+read those before changing `workers` for CI.
+
 If a run fails en masse with `ERR_CONNECTION_REFUSED` on 4173, look for an orphaned preview
 server before reading a single assertion: `--strictPort` correctly refuses to start when one
 still holds the port, and the result reads as a catastrophic regression.
