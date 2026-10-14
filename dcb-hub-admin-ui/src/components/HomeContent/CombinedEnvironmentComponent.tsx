@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useTranslation, Trans } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "react-oidc-context";
-import axios from "axios";
 import {
 	Typography,
 	Box,
@@ -19,9 +18,6 @@ import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
 import { Environment } from "@models/Environment";
-import { calculateDCBRAGStatus } from "@helpers/calculateDCBRAGStatus";
-import { calculateKeycloakRAGStatus } from "@helpers/calculateKeycloakRAGStatus";
-import { settledJsonBody } from "@helpers/settledJsonBody";
 
 import {
 	DCB_SERVICE_STATUS_LINKS,
@@ -29,17 +25,11 @@ import {
 	RELEASE_PAGE_LINKS,
 } from "../../homeData/homeConfig";
 import VersionInfo from "./VersionInfo";
-import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { environmentHealthQuery } from "@/queryOptions/environmentHealth";
 
 // A bare inline link is 17px tall and overflows a narrow cell into its neighbour's target.
 // Filling the cell with vertical padding keeps it at least 24px tall (WCAG 2.5.8).
 const CELL_LINK_SX = { display: "block", py: 0.5 } as const;
-
-interface TrackingConfigurationData {
-	trackingIntervals: Record<string, string>;
-	globalActiveRequestLimit: number;
-	globalTrackingInterval: string;
-}
 
 export default function CombinedEnvironmentComponent() {
 	const { t } = useTranslation();
@@ -47,110 +37,38 @@ export default function CombinedEnvironmentComponent() {
 
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const { data, isLoading, isError } = useQuery({
-		...nonCriticalQuery,
-		queryKey: ["environmentHealth"],
-		queryFn: async () => {
-			const headers = { Authorization: `Bearer ${auth.user?.access_token}` };
+	const { data, isLoading, isError } = useQuery(
+		environmentHealthQuery(auth.user?.access_token),
+	);
 
-			// Helper to fetch DCB Health with timeout and liveness fallback
-			const fetchDcbHealth = async () => {
-				const healthTimeout = new Promise<never>((_, reject) =>
-					setTimeout(() => reject(new Error("Timeout")), 10000),
-				);
-				try {
-					const res = (await Promise.race([
-						axios.get(LOCAL_VERSION_LINKS.SERVICE_HEALTH),
-						healthTimeout,
-					])) as any;
-					return {
-						status: calculateDCBRAGStatus(res.data),
-						link: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
-					};
-				} catch (err: any) {
-					console.warn("Falling back to liveness endpoint:", err.message);
-					try {
-						const livenessEndpoint = LOCAL_VERSION_LINKS.SERVICE_HEALTH.replace(
-							"/health",
-							"/health/liveness",
-						);
-						const livenessRes = await axios.get(livenessEndpoint);
-						if (livenessRes.status === 200) {
-							return { status: "Up", link: livenessEndpoint };
-						}
-						return {
-							status: calculateDCBRAGStatus(err.response?.data),
-							link: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
-						};
-					} catch {
-						return {
-							status: calculateDCBRAGStatus(err.response?.data),
-							link: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
-						};
-					}
-				}
-			};
-
-			// Fetch all necessary data concurrently
-			const [dcbInfoRes, dcbHealthRes, keycloakHealthRes, trackingConfigRes] =
-				await Promise.allSettled([
-					axios.get(LOCAL_VERSION_LINKS.SERVICE_INFO),
-					fetchDcbHealth(),
-					axios.get(LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH),
-					axios.get(LOCAL_VERSION_LINKS.TRACKING, { headers }),
-				]);
-
-			const dcbEnvDescription =
-				dcbInfoRes.status === "fulfilled"
-					? dcbInfoRes.value.data?.env?.description
-					: t("common.unknown");
-			const dcbHealth =
-				dcbHealthRes.status === "fulfilled"
-					? dcbHealthRes.value
-					: {
-							status: t("common.unknown"),
-							link: LOCAL_VERSION_LINKS.SERVICE_HEALTH,
-						};
-			const keycloakHealthData =
-				keycloakHealthRes.status === "fulfilled"
-					? keycloakHealthRes.value.data
-					: (keycloakHealthRes as any).reason?.response?.data;
-
-			const environments = [
-				{
-					id: 1,
-					serviceName: "DCB Service",
-					environment: dcbEnvDescription || t("common.loading"),
-					address: LOCAL_VERSION_LINKS.SERVICE,
-					healthStatus: dcbHealth.status,
-					healthLink: dcbHealth.link,
-					environmentType: Environment.DCB,
-				},
-				{
-					id: 2,
-					serviceName: "Keycloak",
-					environment: t("common.na"),
-					address: LOCAL_VERSION_LINKS.KEYCLOAK,
-					healthStatus:
-						calculateKeycloakRAGStatus(keycloakHealthData) ||
-						t("common.unknown"),
-					healthLink: LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH,
-					environmentType: Environment.Keycloak,
-				},
-			];
-
-			return {
-				environments,
-				// Narrowed rather than cast: a 200 carrying an HTML document is a
-				// fulfilled promise, and casting one to its response type crashed both
-				// pages that render this. See settledJsonBody.
-				serviceInfo: settledJsonBody(dcbInfoRes),
-				trackingConfig:
-					settledJsonBody<TrackingConfigurationData>(trackingConfigRes),
-			};
-		},
-		enabled: !!auth.user?.access_token,
-	});
+	// Built here rather than in the query, so the labels follow a change of language
+	const environments = useMemo(() => {
+		if (!data) return [];
+		const description = data.serviceInfoReached
+			? (data.serviceInfo as { env?: { description?: string } } | null)?.env
+					?.description
+			: t("common.unknown");
+		return [
+			{
+				id: 1,
+				serviceName: "DCB Service",
+				environment: description || t("common.loading"),
+				address: LOCAL_VERSION_LINKS.SERVICE,
+				healthStatus: data.dcbHealth.status,
+				healthLink: data.dcbHealth.link,
+				environmentType: Environment.DCB,
+			},
+			{
+				id: 2,
+				serviceName: "Keycloak",
+				environment: t("common.na"),
+				address: LOCAL_VERSION_LINKS.KEYCLOAK,
+				healthStatus: data.keycloakStatus,
+				healthLink: LOCAL_VERSION_LINKS.KEYCLOAK_HEALTH,
+				environmentType: Environment.Keycloak,
+			},
+		];
+	}, [data, t]);
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -234,7 +152,7 @@ export default function CombinedEnvironmentComponent() {
 				type="environmentInfo"
 				data-tid="environment-health-grid"
 				columns={columns}
-				rows={data?.environments ?? []}
+				rows={environments}
 				loading={false}
 				paginationMode="client"
 				rowModesModel={rowModesModel}
