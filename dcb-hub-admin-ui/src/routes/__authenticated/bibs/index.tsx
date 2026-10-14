@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -10,7 +11,7 @@ import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getBibs } from "@queries/getBibs";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { standardBibColumns } from "@columns/bibColumns";
+import { getStandardBibColumns } from "@columns/bibColumns";
 import { bibColumnVisibility } from "@columns/columnVisibility/bibColumnVisbility";
 import type { LoadBibsQueryVariables } from "@generated/graphql";
 
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/__authenticated/bibs/")({
 
 function BibsRouteComponent() {
 	const { t } = useTranslation();
+	const columns = useMemo(() => getStandardBibColumns(t), [t]);
 	const gqlClient = useGraphQLClient();
 
 	const gridId = "sourceBibs";
@@ -75,7 +77,7 @@ function BibsRouteComponent() {
 			<DataGrid
 				identifier={gridId}
 				type={"bibs"}
-				columns={standardBibColumns}
+				columns={columns}
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				rows={gridData?.sourceBibs?.content ?? []}

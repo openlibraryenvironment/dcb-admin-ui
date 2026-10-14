@@ -32,10 +32,10 @@ export enum DCBStatus {
 
 const statusKeys = Object.keys(DCBStatus).filter((key) => isNaN(Number(key)));
 
-export const dcbStatusValueOptions = statusKeys.map((key) => {
-	const translationKey = `patron_request.statuses.${key}`;
-	return {
-		value: key, // The value to filter by (e.g., "SUBMITTED_TO_DCB")
-		label: i18n.t(translationKey), // The translated label (e.g., "Submitted to DCB")
-	};
-});
+// A function, which the grid calls when it shows the options, so a label is in the
+// language in use then rather than the one this module loaded in.
+export const dcbStatusValueOptions = () =>
+	statusKeys.map((key) => ({
+		value: key,
+		label: i18n.t(`patron_request.statuses.${key}`),
+	}));

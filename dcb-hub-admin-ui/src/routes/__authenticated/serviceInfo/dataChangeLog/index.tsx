@@ -13,7 +13,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { getDataChangeLog } from "@queries/getDataChangeLog";
-import { dataChangeLogColumns } from "@columns/dataChangeLogColumns";
+import { getDataChangeLogColumns } from "@columns/dataChangeLogColumns";
 import type { LoadDataChangeLogQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
@@ -71,8 +71,8 @@ function DataChangeLogsGrid() {
 	});
 
 	const columns: GridColDef[] = useMemo(
-		() => [...customColumns, ...dataChangeLogColumns],
-		[customColumns],
+		() => [...customColumns, ...getDataChangeLogColumns(t)],
+		[customColumns, t],
 	);
 
 	return (

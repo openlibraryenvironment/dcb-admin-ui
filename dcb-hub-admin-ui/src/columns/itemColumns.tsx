@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import i18n from "@/i18n";
+import type { TFunction } from "i18next";
 import {
 	GridColDef,
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
@@ -7,16 +7,16 @@ import {
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHeader/DetailPanelHeader";
 
-export const itemColumns: GridColDef[] = [
+export const getItemColumns = (t: TFunction): GridColDef[] => [
 	{
 		...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
-		headerName: i18n.t("ui.data_grid.master_detail"),
+		headerName: t("ui.data_grid.master_detail"),
 		renderCell: (params) => <DetailPanelToggle id={params.id} />,
 		renderHeader: () => <DetailPanelHeader />,
 	},
 	{
 		field: "agencyCode",
-		headerName: i18n.t("agencies.code"),
+		headerName: t("agencies.code"),
 		flex: 0.3,
 		editable: false,
 		filterable: true,
@@ -26,7 +26,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "id",
-		headerName: i18n.t("requesting.item_id"),
+		headerName: t("requesting.item_id"),
 		minWidth: 50,
 		flex: 0.3,
 		editable: false,
@@ -35,7 +35,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "status",
-		headerName: i18n.t("ui.common.status"),
+		headerName: t("ui.common.status"),
 		minWidth: 100,
 		editable: false,
 		filterable: true,
@@ -46,7 +46,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "isRequestable",
-		headerName: i18n.t("requesting.requestable"),
+		headerName: t("requesting.requestable"),
 		minWidth: 50,
 		type: "boolean",
 		editable: false,
@@ -56,7 +56,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "isSuppressed",
-		headerName: i18n.t("requesting.suppressed"),
+		headerName: t("requesting.suppressed"),
 		minWidth: 50,
 		type: "boolean",
 		editable: false,
@@ -66,7 +66,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "holdCount",
-		headerName: i18n.t("requesting.hold_count"),
+		headerName: t("requesting.hold_count"),
 		minWidth: 50,
 		type: "number",
 		editable: false,
@@ -76,7 +76,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "dueDate",
-		headerName: i18n.t("requesting.date_due"),
+		headerName: t("requesting.date_due"),
 		minWidth: 100,
 		flex: 0.4,
 		editable: false,
@@ -89,7 +89,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "availabilityDate",
-		headerName: i18n.t("requesting.date_available"),
+		headerName: t("requesting.date_available"),
 		minWidth: 100,
 		flex: 0.4,
 		editable: false,
@@ -102,7 +102,7 @@ export const itemColumns: GridColDef[] = [
 	},
 	{
 		field: "canonicalItemType",
-		headerName: i18n.t("requesting.supplier_type"),
+		headerName: t("requesting.supplier_type"),
 		minWidth: 100,
 		editable: false,
 		filterable: true,

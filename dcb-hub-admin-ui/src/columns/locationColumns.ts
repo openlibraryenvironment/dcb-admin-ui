@@ -3,9 +3,9 @@ import { GridColDef } from "@mui/x-data-grid-premium";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
 import { equalsOnly } from "@filters/equalsOnly";
 import { standardFilters } from "@filters/standardFilters";
-import i18n from "@/i18n";
+import type { TFunction } from "i18next";
 
-export const defaultLocationColumns: GridColDef[] = [
+export const getDefaultLocationColumns = (t: TFunction): GridColDef[] => [
 	{
 		field: "agencyCode",
 		headerName: "Agency code",
@@ -51,39 +51,39 @@ export const defaultLocationColumns: GridColDef[] = [
 	},
 	{
 		field: "isPickup",
-		headerName: i18n.t("locations.new.pickup_status"),
+		headerName: t("locations.new.pickup_status"),
 		minWidth: 50,
 		flex: 0.4,
 		filterOperators: equalsOnly,
 		valueFormatter: (value: boolean) => {
 			if (value === true) {
-				return i18n.t("consortium.settings.enabled");
+				return t("consortium.settings.enabled");
 			} else if (value === false) {
-				return i18n.t("consortium.settings.disabled");
+				return t("consortium.settings.disabled");
 			} else {
-				return i18n.t("locations.new.pickup_not_set");
+				return t("locations.new.pickup_not_set");
 			}
 		},
 	},
 	{
 		field: "isEnabledForPickupAnywhere",
-		headerName: i18n.t("locations.new.pickup_anywhere_status"),
+		headerName: t("locations.new.pickup_anywhere_status"),
 		minWidth: 50,
 		flex: 0.4,
 		filterOperators: equalsOnly,
 		valueFormatter: (value: boolean) => {
 			if (value === true) {
-				return i18n.t("consortium.settings.enabled");
+				return t("consortium.settings.enabled");
 			} else if (value === false) {
-				return i18n.t("consortium.settings.disabled");
+				return t("consortium.settings.disabled");
 			} else {
-				return i18n.t("locations.new.pickup_not_set");
+				return t("locations.new.pickup_not_set");
 			}
 		},
 	},
 	{
 		field: "localId",
-		headerName: i18n.t("locations.local_id"),
+		headerName: t("locations.local_id"),
 		minWidth: 50,
 		flex: 0.8,
 		filterOperators: equalsOnly,

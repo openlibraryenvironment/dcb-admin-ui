@@ -46,12 +46,12 @@ const validationSchema = Yup.object().shape({
 	type: Yup.string()
 		.required("Group type is required")
 		.max(32, "Group type must be at most 32 characters"),
-	// `i18n.t` rather than a `t` from the hook, because this schema is module scope.
+	// A function, so it is translated when validation runs, not when this module loads.
 	// The messages above predate it and are still hardcoded English.
 	reason: Yup.string()
 		.trim()
 		.max(100)
-		.required(i18n.t("data_change_log.reason_required")),
+		.required(() => i18n.t("data_change_log.reason_required")),
 });
 
 export default function NewGroup({ show, onClose }: NewGroupType) {
