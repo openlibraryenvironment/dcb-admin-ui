@@ -6,6 +6,10 @@ import {
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
 } from "@helpers/hostLmsClientConfig";
+import {
+	isUnsupportedAuthProfile,
+	resolveAuthProfile,
+} from "@constants/authProfiles";
 
 /**
  * Coordinates are typed as text, not as numbers.
@@ -167,25 +171,31 @@ export const newLibrarySchema = z
 				},
 			)
 			.optional(),
+		// Text, as the loan cap is. Empty means DCB does not check the limit; dcb-service
+		// refuses 0, which would block every request from the agency
+		maxLocalHolds: z
+			.string()
+			.trim()
+			.refine(
+				(value) =>
+					value === "" ||
+					(Number.isInteger(Number(value)) && Number(value) >= 1),
+				{
+					message: i18n.t("ui.validation.positive_integer", {
+						field: i18n.t("libraries.max_local_holds"),
+					}),
+				},
+			)
+			.optional(),
 		supportHours: z.string().optional(),
 		patronWebsite: z.string().optional(),
-		authProfile: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.config.patronAuth.auth_profile"),
-			}),
-		),
+		// Checked against the chosen ILS below; blank resolves to its default
+		authProfile: z.string(),
 		hostLmsConfiguration: z.string().optional(),
 		discoverySystem: z.string().optional(),
 		backupDowntimeSchedule: z.string().optional(),
-		// Marked required in the UI and recorded in the data change log, so validate
-		// it rather than letting an empty reason through.
-		reason: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("data_change_log.reason"),
-			}),
-		),
+		// Not asked for: set by the wizard, and recorded by dcb-service in the change log
+		reason: z.string(),
 		// Was rendered on the profile step but absent from both this schema and the
 		// mutation payload, so whatever the user typed was silently discarded.
 		changeReferenceUrl: z.string().optional(),
@@ -232,6 +242,27 @@ export const newLibrarySchema = z
 	 * same contract stated before the round trip instead of after it.
 	 */
 	.superRefine((values, ctx) => {
+		if (isUnsupportedAuthProfile(values.lmsClientClass, values.authProfile)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["authProfile"],
+				message: i18n.t(
+					"libraries.config.patronAuth.auth_profile_unsupported",
+					{
+						profile: values.authProfile,
+					},
+				),
+			});
+		} else if (!resolveAuthProfile(values.lmsClientClass, values.authProfile)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["authProfile"],
+				message: i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.config.patronAuth.auth_profile"),
+				}),
+			});
+		}
+
 		// Attaching to an existing Host LMS neither sends a client config nor is
 		// constrained by what dcb-service can create.
 		if (!values.isCreatingHostLms) return;

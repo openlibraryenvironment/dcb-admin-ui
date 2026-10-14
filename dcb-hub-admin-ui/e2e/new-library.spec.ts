@@ -2,6 +2,7 @@ import { Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { useAllFeatures } from "./fixtures/flags";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
 
@@ -123,6 +124,151 @@ test.describe("New Library wizard", () => {
 		await expect(dialog.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
 			"Verification",
 		);
+	});
+
+	test("leaves the service details to the library's own pages", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await expect(dialog.getByLabel(/full name/i)).toBeVisible();
+
+		// Counted once, not retried: toHaveCount(0) passes as soon as any render lacks it
+		for (const label of [
+			/support office hours/i,
+			/downtime schedule/i,
+			/patron website/i,
+			/discovery system/i,
+		]) {
+			expect(await dialog.getByLabel(label).count(), String(label)).toBe(0);
+		}
+	});
+
+	test("offers the Host LMS's default agency on the Profile step", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await expect(dialog.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
+			"Verification",
+		);
+		await dialog.getByRole("button", { name: /next/i }).click();
+
+		await expect(dialog.getByRole("combobox", { name: /agency/i })).toHaveValue(
+			"TESTAGENCY",
+		);
+	});
+
+	test("asks for the local holds limit with the loan cap", async ({ page }) => {
+		// The field is behind VITE_FEATURE_LOCAL_HOLDS; unseeded, it reads whatever .env baked in.
+		// beforeEach has already loaded the page, and the seed applies from the next load.
+		await useAllFeatures(page);
+		await page.reload();
+		await expect(page.getByText("Alpha Test Library")).toBeVisible();
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await dialog.getByRole("button", { name: /next/i }).click();
+
+		await expect(
+			dialog.getByRole("textbox", { name: /max local holds/i }),
+		).toBeEditable();
+	});
+
+	test("fills the short and abbreviated names from the full name", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+		await dialog.getByRole("button", { name: /next/i }).click();
+
+		await dialog.getByLabel(/full name/i).fill("Denver Public Library");
+
+		await expect(dialog.getByLabel(/short name/i)).toHaveValue(
+			"Denver Public Library",
+		);
+		await expect(dialog.getByLabel(/abbreviated name/i)).toHaveValue("DPL");
+
+		await dialog.getByLabel(/abbreviated name/i).fill("DENPL");
+		await dialog.getByLabel(/full name/i).fill("Denver Public Libraries");
+
+		await expect(dialog.getByLabel(/abbreviated name/i)).toHaveValue("DENPL");
 	});
 
 	// Cancelling part-way through does NOT discard silently: requestClose() in

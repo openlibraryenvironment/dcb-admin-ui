@@ -64,6 +64,7 @@ import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { updateAgencyQuery } from "@mutations/updateAgency";
 import { createLibraryContact } from "@mutations/createLibraryContact";
 import {
+	agencyCodeFromHostLms,
 	buildAgencyUpdateInput,
 	buildContactInput,
 	buildLibraryInput,
@@ -122,7 +123,8 @@ const STEP_SCHEMA_FIELDS: Record<string, (keyof NewLibraryFormValues)[]> = {
 		"latitude",
 		"longitude",
 		"authProfile",
-		"reason",
+		"maxConsortialLoans",
+		"maxLocalHolds",
 	],
 	contacts: ["contacts"],
 	group: ["groupId"],
@@ -453,12 +455,13 @@ export default function NewLibrary({
 				setBusyMessage(
 					t("hostlms.busy_creating", { code: formData.hostLmsCode }),
 				);
+				const clientConfig = resolveClientConfig(formData);
 				const result = await createHostLms({
 					input: {
 						code: formData.hostLmsCode,
 						name: formData.hostLmsName,
 						lmsClientClass: formData.lmsClientClass,
-						clientConfig: resolveClientConfig(formData),
+						clientConfig,
 						suppressionRulesetName: formData.suppressionRulesetName,
 						itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
 					},
@@ -470,6 +473,11 @@ export default function NewLibrary({
 					throw new Error(t("hostlms.error.no_data_returned"));
 				}
 				methods.setValue("hostLmsCode", hostLmsData.hostLms.code);
+				const agencyCode = agencyCodeFromHostLms(
+					formData.agencyCode,
+					clientConfig,
+				);
+				if (agencyCode) methods.setValue("agencyCode", agencyCode);
 				setHostLmsResult(hostLmsData); // Surface ping/ingest/warnings on a dedicated verification step
 			}
 

@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 
 import {
+	agencyCodeFromHostLms,
 	buildAgencyUpdateInput,
 	buildContactInput,
 	buildLibraryInput,
@@ -224,6 +225,74 @@ describe("buildLibraryInput", () => {
 
 	it("sends no loan cap as null here too", () => {
 		expect(buildLibraryInput(values()).maxConsortialLoans).toBeNull();
+	});
+
+	// Nobody is asked for these: the change log records what the wizard says
+	it("records the creation in the change log without asking", () => {
+		const input = buildLibraryInput(values());
+
+		expect(input.reason).toBe("Adding a new library");
+		expect(input.changeCategory).toBe("New member");
+	});
+});
+
+describe("agencyCodeFromHostLms", () => {
+	it("offers the default agency the Host LMS step was given", () => {
+		expect(agencyCodeFromHostLms("", { "default-agency-code": " LIB1 " })).toBe(
+			"LIB1",
+		);
+	});
+
+	it("never replaces a code the user entered", () => {
+		expect(
+			agencyCodeFromHostLms("MINE", { "default-agency-code": "LIB1" }),
+		).toBeUndefined();
+	});
+
+	it("offers nothing for a shared system, which has no default agency", () => {
+		expect(
+			agencyCodeFromHostLms("", { "shared-system": true }),
+		).toBeUndefined();
+	});
+});
+
+describe("maxLocalHolds", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	const withLocalHolds = (on: boolean) =>
+		vi.stubGlobal("window", {
+			__APP_ENV__: { VITE_FEATURE_LOCAL_HOLDS: String(on) },
+		});
+
+	it("is sent as a number on create and on the agency update", () => {
+		withLocalHolds(true);
+
+		expect(
+			buildLibraryInput(values({ maxLocalHolds: "5" })).maxLocalHolds,
+		).toBe(5);
+		expect(
+			buildAgencyUpdateInput(values({ maxLocalHolds: "5" })).maxLocalHolds,
+		).toBe(5);
+	});
+
+	it("is sent as null when left blank, meaning DCB does not check it", () => {
+		withLocalHolds(true);
+
+		expect(
+			buildLibraryInput(values({ maxLocalHolds: "" })).maxLocalHolds,
+		).toBeNull();
+	});
+
+	// An older dcb-service rejects the field outright, null or not
+	it("is not sent at all where the deployment cannot store it", () => {
+		withLocalHolds(false);
+
+		expect(
+			"maxLocalHolds" in buildLibraryInput(values({ maxLocalHolds: "5" })),
+		).toBe(false);
+		expect("maxLocalHolds" in buildAgencyUpdateInput(values())).toBe(false);
 	});
 });
 

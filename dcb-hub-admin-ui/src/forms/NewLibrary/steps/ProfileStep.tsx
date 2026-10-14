@@ -8,12 +8,25 @@ import {
 	createFilterOptions,
 	Divider,
 	FormControlLabel,
+	MenuItem,
 	Stack,
 	Switch,
 	TextField,
 	Typography,
 } from "@mui/material";
 
+import {
+	authProfileOptions,
+	isAuthProfileFixed,
+	isUnsupportedAuthProfile,
+	resolveAuthProfile,
+} from "@constants/authProfiles";
+import {
+	isUnlistedLibraryType,
+	LIBRARY_TYPE_OPTIONS,
+} from "@constants/libraryTypes";
+import { isLocalHoldsEnabled } from "@helpers/featureFlags";
+import { LIBRARY_NAMES, valuesFollowing } from "@helpers/derivedNames";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getAgencies } from "@queries/getAgencies";
 import type { LoadAgenciesQueryVariables } from "@generated/graphql";
@@ -53,6 +66,8 @@ export function ProfileStep() {
 	const gqlClient = useGraphQLClient();
 	const {
 		control,
+		getValues,
+		setValue,
 		formState: { errors },
 	} = useFormContext();
 
@@ -70,6 +85,27 @@ export function ProfileStep() {
 		staleTime: 1000 * 60 * 5, // Just in case somebody is constantly going back and forth
 	});
 
+	// dcb-service replaces a new library's coordinates with its agency's whenever the agency
+	// has them, so for such an agency they are shown, not asked for
+	const coordinatesOf = (code: string | undefined) => {
+		const agency = agenciesData?.agencies?.content?.find(
+			(item: any) => item.code === code,
+		);
+		return agency?.latitude != null && agency?.longitude != null
+			? {
+					latitude: String(agency.latitude),
+					longitude: String(agency.longitude),
+				}
+			: null;
+	};
+	const adoptAgencyCoordinates = (code: string | undefined) => {
+		const coordinates = coordinatesOf(code);
+		if (coordinates) {
+			setValue("latitude", coordinates.latitude, { shouldValidate: true });
+			setValue("longitude", coordinates.longitude, { shouldValidate: true });
+		}
+	};
+
 	const agencyOptions: AgencyOption[] =
 		agenciesData?.agencies?.content?.map((item: any) => ({
 			label: item.name,
@@ -77,10 +113,13 @@ export function ProfileStep() {
 		})) || [];
 
 	const agencyCode = useWatch({ control, name: "agencyCode" });
+	const lmsClientClass = useWatch({ control, name: "lmsClientClass" });
+	const authProfileChoices = authProfileOptions(lmsClientClass);
 	// Whether the code in the box is one that already exists decides whether
 	// saving this library also creates an agency. That is a consequential,
 	// irreversible-ish side effect, so it is stated on the step rather than left
 	// to be inferred from a dropdown entry the user may never have opened.
+	const agencyCoordinates = coordinatesOf(agencyCode);
 	const isNewAgency =
 		!!agencyCode &&
 		!agencyOptions.some((option) => option.value === agencyCode) &&
@@ -95,6 +134,21 @@ export function ProfileStep() {
 					render={({ field }) => (
 						<TextField
 							{...field}
+							onChange={(event) => {
+								const updates = valuesFollowing(
+									LIBRARY_NAMES,
+									field.value ?? "",
+									event.target.value,
+									{
+										shortName: getValues("shortName"),
+										abbreviatedName: getValues("abbreviatedName"),
+									},
+								);
+								field.onChange(event);
+								for (const [name, value] of Object.entries(updates)) {
+									setValue(name, value);
+								}
+							}}
 							id="library-full-name"
 							label={t("libraries.name")}
 							variant="outlined"
@@ -146,13 +200,23 @@ export function ProfileStep() {
 						<TextField
 							{...field}
 							id="library-type"
+							select
 							label={t("libraries.type")}
 							variant="outlined"
 							fullWidth
 							required
 							error={!!errors.type}
 							helperText={errors.type?.message as string}
-						/>
+						>
+							{LIBRARY_TYPE_OPTIONS.map((option) => (
+								<MenuItem key={option.value} value={option.value}>
+									{t(option.labelKey)}
+								</MenuItem>
+							))}
+							{isUnlistedLibraryType(field.value) && (
+								<MenuItem value={field.value}>{field.value}</MenuItem>
+							)}
+						</TextField>
 					)}
 				/>
 			</Section>
@@ -195,12 +259,14 @@ export function ProfileStep() {
 								if (typeof newValue === "string") {
 									// User pressed enter on a raw string
 									field.onChange(newValue);
+									adoptAgencyCoordinates(newValue);
 								} else if (newValue?.inputValue) {
 									// User selected the dynamically generated "Add" option
 									field.onChange(newValue.inputValue);
 								} else {
 									// User selected an existing agency option
 									field.onChange(newValue?.value || "");
+									adoptAgencyCoordinates(newValue?.value);
 								}
 							}}
 							onInputChange={(_, inputValue, changeReason) => {
@@ -208,7 +274,10 @@ export function ProfileStep() {
 								// way to name a new agency; without this the typed code was
 								// only committed when the user happened to select the "Add"
 								// entry, and was otherwise silently discarded on blur.
-								if (changeReason === "input") field.onChange(inputValue);
+								if (changeReason === "input") {
+									field.onChange(inputValue);
+									adoptAgencyCoordinates(inputValue);
+								}
 							}}
 							onBlur={field.onBlur} // Ensures RHF validation triggers when tabbing away
 							value={
@@ -254,22 +323,51 @@ export function ProfileStep() {
 						{t("libraries.new.agency_will_be_created", { code: agencyCode })}
 					</Alert>
 				)}
-				<Controller
-					name={"authProfile"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-auth-profile"
-							label={t("libraries.config.patronAuth.auth_profile")}
-							variant="outlined"
-							fullWidth
-							required
-							error={!!errors.authProfile}
-							helperText={errors.authProfile?.message as string}
-						/>
-					)}
-				/>
+				{!isAuthProfileFixed(lmsClientClass) && (
+					<Controller
+						name={"authProfile"}
+						control={control}
+						render={({ field }) =>
+							authProfileChoices ? (
+								<TextField
+									{...field}
+									value={resolveAuthProfile(lmsClientClass, field.value)}
+									id="library-auth-profile"
+									select
+									label={t("libraries.config.patronAuth.auth_profile")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.authProfile}
+									helperText={
+										(errors.authProfile?.message as string) ??
+										t("libraries.config.patronAuth.auth_profile_helper")
+									}
+								>
+									{authProfileChoices.map((option) => (
+										<MenuItem key={option.value} value={option.value}>
+											{t(option.labelKey)}
+										</MenuItem>
+									))}
+									{isUnsupportedAuthProfile(lmsClientClass, field.value) && (
+										<MenuItem value={field.value}>{field.value}</MenuItem>
+									)}
+								</TextField>
+							) : (
+								<TextField
+									{...field}
+									id="library-auth-profile"
+									label={t("libraries.config.patronAuth.auth_profile")}
+									variant="outlined"
+									fullWidth
+									required
+									error={!!errors.authProfile}
+									helperText={errors.authProfile?.message as string}
+								/>
+							)
+						}
+					/>
+				)}
 			</Section>
 
 			<Section title={t("libraries.new.section_location")}>
@@ -312,11 +410,19 @@ export function ProfileStep() {
 								error={!!errors.latitude}
 								helperText={
 									(errors.latitude?.message as string) ??
-									t("libraries.new.latitude_helper")
+									(agencyCoordinates
+										? t("libraries.new.coordinates_from_agency", {
+												code: agencyCode,
+											})
+										: t("libraries.new.latitude_helper"))
 								}
 								placeholder="53.4808"
 								slotProps={{
-									htmlInput: { inputMode: "decimal", autoComplete: "off" },
+									htmlInput: {
+										inputMode: "decimal",
+										autoComplete: "off",
+										readOnly: !!agencyCoordinates,
+									},
 								}}
 							/>
 						)}
@@ -336,11 +442,19 @@ export function ProfileStep() {
 								error={!!errors.longitude}
 								helperText={
 									(errors.longitude?.message as string) ??
-									t("libraries.new.longitude_helper")
+									(agencyCoordinates
+										? t("libraries.new.coordinates_from_agency", {
+												code: agencyCode,
+											})
+										: t("libraries.new.longitude_helper"))
 								}
 								placeholder="-2.2426"
 								slotProps={{
-									htmlInput: { inputMode: "decimal", autoComplete: "off" },
+									htmlInput: {
+										inputMode: "decimal",
+										autoComplete: "off",
+										readOnly: !!agencyCoordinates,
+									},
 								}}
 							/>
 						)}
@@ -430,71 +544,36 @@ export function ProfileStep() {
 						/>
 					)}
 				/>
+				{isLocalHoldsEnabled() && (
+					<Controller
+						name="maxLocalHolds"
+						control={control}
+						render={({ field }) => (
+							<TextField
+								{...field}
+								value={field.value ?? ""}
+								id="library-max-local-holds"
+								label={t("libraries.max_local_holds")}
+								variant="outlined"
+								fullWidth
+								error={!!errors.maxLocalHolds}
+								helperText={
+									(errors.maxLocalHolds?.message as string) ??
+									t("libraries.max_local_holds_help")
+								}
+								slotProps={{
+									htmlInput: { inputMode: "numeric", autoComplete: "off" },
+								}}
+							/>
+						)}
+					/>
+				)}
 			</Section>
 
 			<Section title={t("libraries.new.section_service")}>
-				<Controller
-					name="supportHours"
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-support-hours"
-							label={t("libraries.support_hours")}
-							variant="outlined"
-							fullWidth
-							error={!!errors.supportHours}
-							helperText={errors.supportHours?.message as string}
-						/>
-					)}
-				/>
-				<Controller
-					name="backupDowntimeSchedule"
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-backup-schedule"
-							label={t("libraries.service.environments.backup_schedule")}
-							variant="outlined"
-							fullWidth
-							multiline
-							rows={2}
-							error={!!errors.backupDowntimeSchedule}
-							helperText={errors.backupDowntimeSchedule?.message as string}
-						/>
-					)}
-				/>
-				<Controller
-					name={"patronWebsite"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-patron-website"
-							label={t("libraries.service.systems.patron_site")}
-							variant="outlined"
-							fullWidth
-							error={!!errors.patronWebsite}
-							helperText={errors.patronWebsite?.message as string}
-						/>
-					)}
-				/>
-				<Controller
-					name={"discoverySystem"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-discovery-system"
-							label={t("libraries.service.systems.discovery")}
-							variant="outlined"
-							fullWidth
-							error={!!errors.discoverySystem}
-							helperText={errors.discoverySystem?.message as string}
-						/>
-					)}
-				/>
+				{/* Support hours, backup schedule, patron website and discovery system are
+				    edited on the library's own pages once it exists. This one is not
+				    editable there: UpdateLibraryInput does not declare it. */}
 				<Controller
 					name={"hostLmsConfiguration"}
 					control={control}
@@ -515,23 +594,6 @@ export function ProfileStep() {
 			</Section>
 
 			<Section title={t("libraries.new.section_change_record")}>
-				<Controller
-					name={"reason"}
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							id="library-reason"
-							label={t("data_change_log.reason_addition")}
-							variant="outlined"
-							fullWidth
-							required
-							error={!!errors.reason}
-							helperText={errors.reason?.message as string}
-						/>
-					)}
-				/>
-
 				<Controller
 					name={"changeReferenceUrl"}
 					control={control}

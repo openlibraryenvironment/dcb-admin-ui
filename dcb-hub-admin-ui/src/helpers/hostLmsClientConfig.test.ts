@@ -12,6 +12,7 @@ import {
 	missingRecommendedClientConfig,
 	missingRequiredClientConfig,
 	mergeClientConfigEdit,
+	originOf,
 } from "./hostLmsClientConfig";
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
 import application from "@/locales/en-GB/application.json";
@@ -916,6 +917,18 @@ describe("hostLmsClientConfig", () => {
 				item: { "item-agency-resolution-method": "Legacy" },
 			});
 			expect(unmappedKeys).toEqual([]);
+		});
+	});
+
+	describe("originOf", () => {
+		it("keeps the scheme, host and port of a URL", () => {
+			expect(
+				originOf("https://appliance.example.org:8443/oai/request?x=1"),
+			).toBe("https://appliance.example.org:8443");
+		});
+
+		it("gives nothing while the text is not a URL yet", () => {
+			expect(originOf("https://")).toBe("");
 		});
 	});
 
