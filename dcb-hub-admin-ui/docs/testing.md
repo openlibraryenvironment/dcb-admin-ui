@@ -197,6 +197,12 @@ It needs a Docker daemon. It removes its own container by name before starting, 
 Playwright's teardown has been observed leaving one up, and a leftover container holds
 4213 - at which point `reuseExistingServer` serves an image built from older code.
 
+In CI, `verify_container` gets its daemon from a `docker:27-dind` service, which only runs
+on a runner that permits privileged containers. Its script can start before dind is
+listening - one run checked 4 seconds in and found nothing - so the job retries
+`docker info` for about a minute before it fails, and then prints the daemon's own error:
+an unreachable host, a refused connection and a missing privilege read differently there.
+
 **Three defects on its first run, all of them invisible to every other gate:**
 
 | Found                                          | Why nothing else could see it                                                                                                                                                                                       |
