@@ -189,9 +189,16 @@ CI configuration, and this test covers only the one rule that has actually bitte
 ### The container gate
 
 `npm run e2e:container` builds `docker/production/Dockerfile` and drives the running
-image. It is the only gate that ships the Content Security Policy and nginx's real
-headers, so it is the only one that can see a CSP violation - which is neither a failed
-request nor an exception - or a missing `content-encoding`.
+image. It is the only gate that serves nginx's real headers, so it is the only one that
+can see a missing `content-encoding`, a header that does not reach a location, or an
+asset cached for the wrong length of time.
+
+**The Content Security Policy itself is applied in every e2e test.** The shared fixture
+(`e2e/fixtures/test.ts`) serves the application's documents with the policy read from
+`docker/production/security-headers.conf`, and fails any test whose page reports a
+violation - which is neither a failed request nor an exception, so nothing else sees
+one. `e2e/content-security-policy.spec.ts` proves the collector fires. So a change to the
+application that breaks the policy fails on every merge request, with no Docker.
 
 It needs a Docker daemon. It removes its own container by name before starting, because
 Playwright's teardown has been observed leaving one up, and a leftover container holds

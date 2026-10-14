@@ -49,3 +49,11 @@ for (const route of ROUTES) {
 		await expect(page).not.toHaveTitle("DCB Admin");
 	});
 }
+
+// Not in ROUTES, whose every entry signs in first
+test("/login renders one h1 and names itself, signed out", async ({ page }) => {
+	await page.goto("/login");
+
+	await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+	await expect(page).not.toHaveTitle("DCB Admin");
+});
