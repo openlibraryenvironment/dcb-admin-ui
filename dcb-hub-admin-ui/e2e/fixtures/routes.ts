@@ -475,9 +475,16 @@ export const ROUTES: ScannedRoute[] = [
 		},
 	},
 	{
+		// One marker per query: the grid's empty state replaces its loading overlay once
+		// LoadAudits answers, and only the chart's with-data branch has a legend
 		path: "/serviceInfo/auditExplorer",
 		ready: async (page) => {
-			await expect(page.getByText("Common signals").first()).toBeVisible();
+			await expect(
+				page.getByText("Try changing your filters or search terms."),
+			).toBeVisible();
+			await expect(
+				page.getByRole("list").getByText("Events", { exact: true }),
+			).toBeVisible();
 		},
 	},
 	{
