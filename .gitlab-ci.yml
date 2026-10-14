@@ -277,6 +277,19 @@ verify_container:
   stage: verify
   interruptible: true
   resource_group: browser-suites
+  # Only the image's own files can break what only this job checks. The policy it ships
+  # is applied in every e2e test: docs/testing.md, "The container gate".
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        paths: &container_gate_paths
+          - dcb-hub-admin-ui/docker/**/*
+          - dcb-hub-admin-ui/.dockerignore
+          - dcb-hub-admin-ui/e2e-container/**/*
+          - dcb-hub-admin-ui/playwright.container.config.ts
+    - changes:
+        paths: *container_gate_paths
+        compare_to: refs/heads/main
   timeout: 40m
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble

@@ -200,6 +200,11 @@ violation - which is neither a failed request nor an exception, so nothing else 
 one. `e2e/content-security-policy.spec.ts` proves the collector fires. So a change to the
 application that breaks the policy fails on every merge request, with no Docker.
 
+**In CI it runs only when what it alone guards changes:** `docker/**`, `.dockerignore`,
+`e2e-container/**` or its Playwright config - on `main` against the previous push, and
+elsewhere against `main`. Every pipeline paid for an image build that most changes cannot
+affect, and the deployments this pipeline publishes are the static bundle, not the image.
+
 It needs a Docker daemon. It removes its own container by name before starting, because
 Playwright's teardown has been observed leaving one up, and a leftover container holds
 4213 - at which point `reuseExistingServer` serves an image built from older code.
