@@ -2498,7 +2498,8 @@
 					"no_brackets": "Please remove any brackets from the barcode.",
 					"request": {
 						"duplicate": "A request already exists for this patron at this library within the time window of 900 seconds.",
-						"generic": "Error: {{code}}. More info: {{description}}"
+						"generic": "Error: {{code}}. More info: {{description}}",
+						"supplier_cannot_supply": "The library that holds this copy can't supply it because of a problem with its DCB setup. {{description}} Choose another copy, or ask that library's DCB administrator to correct it."
 					},
 					"validation_failure": "We were unable to validate this patron. Please correct the barcode and/or affiliated institution, and try again.",
 					"validate_first": "You must validate a patron before attempting to make a staff request on their behalf."

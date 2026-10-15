@@ -419,8 +419,8 @@ export default function StaffRequest({
 				severity: "error",
 				messageKey: getRequestError(error.response?.data?.failedChecks),
 				values: {
-					code: error?.response?.data?.failedChecks[0].code,
-					description: error?.response?.data?.failedChecks[0].description,
+					code: error?.response?.data?.failedChecks?.[0]?.code,
+					description: error?.response?.data?.failedChecks?.[0]?.description,
 				},
 			});
 			setStepError(1); // Set error on step 1
