@@ -9,7 +9,7 @@ import {
 	TableBody,
 	Typography,
 } from "@mui/material";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import {
 	fieldNameToLabel,
 	gridFieldNameToLabel,

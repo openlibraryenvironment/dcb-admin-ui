@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 
 import {
 	Box,

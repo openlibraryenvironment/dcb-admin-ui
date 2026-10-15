@@ -6,7 +6,7 @@ import { useAuth } from "react-oidc-context";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import {
 	Button,
 	Grid,

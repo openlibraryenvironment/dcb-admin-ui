@@ -1,6 +1,6 @@
 import { useTranslation, Trans } from "react-i18next"; // Swapped next-i18next for react-i18next
 import ReactMarkdown from "react-markdown";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import {
 	CardContent,
 	CardMedia,

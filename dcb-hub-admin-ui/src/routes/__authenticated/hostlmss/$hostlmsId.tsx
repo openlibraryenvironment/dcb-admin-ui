@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { FormProvider, useForm, Controller, useWatch } from "react-hook-form";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import {
 	Alert,
 	AlertTitle,

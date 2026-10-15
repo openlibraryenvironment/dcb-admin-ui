@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Breadcrumbs as MUIBreadcrumbs, Typography } from "@mui/material";
 import { ArrowForwardIos } from "@mui/icons-material";
 import { useLocation } from "@tanstack/react-router"; // TanStack Hook
-import { truncate } from "lodash";
+import truncate from "lodash/truncate";
 
 import Link from "@components/Link/Link";
 import { getSpecialRedirects } from "@helpers/breadcrumbs/getSpecialRedirects";

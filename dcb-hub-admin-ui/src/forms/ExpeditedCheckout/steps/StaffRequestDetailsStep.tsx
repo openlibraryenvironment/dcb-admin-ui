@@ -14,7 +14,7 @@ import {
 import { PatronRequestAutocompleteOption } from "@models/PatronRequestAutocompleteOption";
 import { StaffRequestFormData } from "@models/StaffRequestFormData";
 import { TFunction } from "i18next";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import {
 	Control,
 	Controller,

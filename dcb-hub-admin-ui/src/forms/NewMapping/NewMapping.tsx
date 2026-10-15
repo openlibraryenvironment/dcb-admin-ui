@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Box,
