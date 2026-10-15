@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
+import dayjs from "dayjs";
 import {
 	rangeToParams,
+	customRangeToParams,
 	intervalForRange,
 	formatDuration,
 } from "@helpers/insightsRange";
@@ -29,6 +31,37 @@ describe("rangeToParams", () => {
 		expect(end.getMinutes()).toBe(0);
 		expect(end.getSeconds()).toBe(0);
 		expect(end.getMilliseconds()).toBe(0);
+	});
+});
+
+describe("customRangeToParams", () => {
+	it("covers the whole of both days the reader picked, in their own zone", () => {
+		// The window the endpoints are asked for has to START at the beginning of the
+		// first day and END at the end of the last, or a range chosen as "1st to 15th"
+		// silently excludes everything that happened on the 15th.
+		const { startDate, endDate } = customRangeToParams({
+			startDate: "2026-09-01",
+			endDate: "2026-09-15",
+		});
+
+		expect(dayjs(startDate).isSame(dayjs("2026-09-01").startOf("day"))).toBe(
+			true,
+		);
+		expect(dayjs(endDate).isSame(dayjs("2026-09-15").endOf("day"))).toBe(true);
+	});
+
+	it("states the window as the instant every /insights/* parameter binds", () => {
+		// A plain date is what the URL carries and what the search schema accepts; it is
+		// NOT what the controller takes - every date parameter there is a java.time
+		// Instant, which `2026-09-01` does not parse as.
+		const { startDate, endDate } = customRangeToParams({
+			startDate: "2026-09-01",
+			endDate: "2026-09-15",
+		});
+
+		for (const value of [startDate, endDate]) {
+			expect(value).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+		}
 	});
 });
 

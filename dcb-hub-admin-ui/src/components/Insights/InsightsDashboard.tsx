@@ -39,6 +39,7 @@ import {
 } from "@helpers/statsApi";
 import {
 	rangeToParams,
+	customRangeToParams,
 	intervalForRange,
 	intervalForSpan,
 	formatDuration,
@@ -84,6 +85,19 @@ import { isInsightsTrendsEnabled } from "@helpers/featureFlags";
 import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
+
+/**
+ * One end of the window, as the picker reports it: null is cleared, a valid date is
+ * chosen, and an invalid one is an end mid-entry - where the end ALREADY chosen has to
+ * stay, or the field wipes the digits entered so far. See docs/insights-view-state.md.
+ */
+function chosenDate(
+	picked: dayjs.Dayjs | null,
+	current: string | null,
+): string | null {
+	if (picked === null) return null;
+	return picked.isValid() ? picked.format("YYYY-MM-DD") : current;
+}
 
 function fillRate(successful: number, failed: number): number | null {
 	const total = successful + failed;
@@ -157,13 +171,28 @@ export default function InsightsDashboard({
 	// which is what an old link to Gaps does once the reader widens to the consortium.
 	const subject = resolveSubject(view.tab, scopedCodes);
 
-	const { range: rangePreset, custom: customRange } = view;
+	const { range: rangePreset, custom: customRange, customEnds } = view;
 	const setRangePreset = view.setRange;
 	const setCustomRange = view.setCustomRange;
 
+	// Referentially stable, which this control requires rather than prefers: the field
+	// compares `value` with `!==` and re-derives its sections when it differs, so a fresh
+	// array each render wipes what has been typed - docs/insights-view-state.md.
+	const pickerValue = useMemo<[dayjs.Dayjs | null, dayjs.Dayjs | null]>(
+		() => [
+			customEnds.startDate ? dayjs(customEnds.startDate) : null,
+			customEnds.endDate ? dayjs(customEnds.endDate) : null,
+		],
+		[customEnds.startDate, customEnds.endDate],
+	);
+
 	const { params, interval } = useMemo(() => {
-		// An explicit custom window wins over the preset.
-		const current = customRange ?? rangeToParams(rangePreset);
+		// An explicit custom window wins over the preset. The URL states it as two plain
+		// dates and every `/insights/*` date parameter binds an Instant, so it is
+		// converted here rather than stored converted - see customRangeToParams.
+		const current = customRange
+			? customRangeToParams(customRange)
+			: rangeToParams(rangePreset);
 		return {
 			params: { libraryCode, ...current } as StatsParams,
 			interval: customRange
@@ -289,21 +318,16 @@ export default function InsightsDashboard({
 					</ToggleButtonGroup>
 					<DateLocalization>
 						<DateRangePicker
-							value={
-								customRange
-									? [dayjs(customRange.startDate), dayjs(customRange.endDate)]
-									: [null, null]
-							}
+							// Each end as chosen, not the resolved window: the picker reports
+							// one end at a time, and a control that cannot hold half a range
+							// cannot be used to enter a whole one.
+							value={pickerValue}
 							onChange={(value) => {
 								const [start, end] = value;
-								if (start && end) {
-									setCustomRange({
-										startDate: start.startOf("day").toISOString(),
-										endDate: end.endOf("day").toISOString(),
-									});
-								} else if (!start && !end) {
-									setCustomRange(null);
-								}
+								setCustomRange({
+									startDate: chosenDate(start, customEnds.startDate),
+									endDate: chosenDate(end, customEnds.endDate),
+								});
 							}}
 							disableFuture
 							// Two labelled inputs and the same actions as the data grid's date

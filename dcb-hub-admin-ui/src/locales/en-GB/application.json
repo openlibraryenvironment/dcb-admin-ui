@@ -1004,7 +1004,8 @@
 			"label": "Libraries",
 			"placeholder": "All libraries — pick libraries or a group",
 			"groups": "Groups",
-			"libraries": "Libraries"
+			"libraries": "Libraries",
+			"failed": "The library list could not be loaded, so the figures below cover the whole consortium."
 		},
 		"range": {
 			"label": "Time range",

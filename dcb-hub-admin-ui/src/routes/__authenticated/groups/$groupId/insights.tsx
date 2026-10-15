@@ -19,7 +19,7 @@ import { groupParamsSchema } from "@schemas/routeParams/groupParams";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 import { groupCodesOf, groupOf } from "@helpers/insightsGroupScope";
 
-import { insightsSearchSchema } from "@helpers/insightsSearch";
+import { DEFAULT_RANGE, insightsSearchSchema } from "@helpers/insightsSearch";
 import { useInsightsView } from "@hooks/useInsightsView";
 import {
 	dashboardQueryOptions,
@@ -27,9 +27,6 @@ import {
 	StatsParams,
 } from "@helpers/statsApi";
 import type { LoadGroupQueryVariables } from "@generated/graphql";
-
-// Must mirror insightsPlotStore's default preset so the prefetched keys match.
-const DEFAULT_PRESET = "30d" as const;
 
 // The same cache entry the group's other pages read, so arriving from the profile tab
 // costs no round trip.
@@ -78,7 +75,7 @@ export const Route = createFileRoute(
 		const client = createRestClient(cfg, auth);
 		const params: StatsParams = {
 			libraryCode,
-			...rangeToParams(DEFAULT_PRESET),
+			...rangeToParams(DEFAULT_RANGE),
 		};
 
 		// Above-the-fold only: the combined KPI call plus the trend spine. Everything
@@ -86,11 +83,7 @@ export const Route = createFileRoute(
 		return Promise.all([
 			queryClient.ensureQueryData(dashboardQueryOptions(client, params)),
 			queryClient.ensureQueryData(
-				timeSeriesQueryOptions(
-					client,
-					params,
-					intervalForRange(DEFAULT_PRESET),
-				),
+				timeSeriesQueryOptions(client, params, intervalForRange(DEFAULT_RANGE)),
 			),
 		]);
 	},

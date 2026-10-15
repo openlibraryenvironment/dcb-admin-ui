@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 import { RangePreset } from "@helpers/insightsSearch";
 import { TimeSeriesInterval } from "@helpers/statsApi";
 
@@ -21,6 +23,24 @@ export function rangeToParams(preset: RangePreset): {
 	end.setMinutes(0, 0, 0);
 	const start = new Date(end.getTime() - DAYS[preset] * 24 * 60 * 60 * 1000);
 	return { startDate: start.toISOString(), endDate: end.toISOString() };
+}
+
+/**
+ * A reader's own window, as the endpoints bind it.
+ *
+ * The URL carries a plain `YYYY-MM-DD` - what the search schema's `z.string().date()`
+ * accepts, and what somebody reading a shared link can read - while every `/insights/*`
+ * date parameter binds a `java.time.Instant`. Local midnight to local end of day, because
+ * the day the reader picked is the day in their own zone and not in UTC.
+ */
+export function customRangeToParams(custom: {
+	startDate: string;
+	endDate: string;
+}): { startDate: string; endDate: string } {
+	return {
+		startDate: dayjs(custom.startDate).startOf("day").toISOString(),
+		endDate: dayjs(custom.endDate).endOf("day").toISOString(),
+	};
 }
 
 // Coarser buckets for longer windows keep the flow chart legible.
