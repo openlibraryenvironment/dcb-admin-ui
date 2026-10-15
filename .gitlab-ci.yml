@@ -138,11 +138,14 @@ verify_e2e:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
     pull_policy: if-not-present
   script:
+    - echo "runner=$CI_RUNNER_DESCRIPTION cpus=$(nproc) cpu.max=$(cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo n/a) mem_mb=$(awk '/^MemTotal/{print int($2/1024)}' /proc/meminfo)"
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
     - npx playwright test
   interruptible: true
+  # One browser suite at a time on this runner: docs/testing.md, "Parallelism".
+  resource_group: browser-suites
   timeout: 40m
   artifacts:
     # `always`, not `on_failure`. playwright.config.ts already writes a junit file and
@@ -188,6 +191,7 @@ verify_lighthouse:
     # because the audit must not measure whatever an earlier job left in dist/.
     - npm run lighthouse
   interruptible: true
+  resource_group: browser-suites
   timeout: 30m
   artifacts:
     when: always
@@ -215,6 +219,7 @@ verify_base_path:
     - npm ci
     - npm run e2e:base-path
   interruptible: true
+  resource_group: browser-suites
   timeout: 30m
   artifacts:
     when: always
@@ -237,6 +242,7 @@ verify_ki_bootstrap:
     - npm ci
     - npm run e2e:ki-bootstrap
   interruptible: true
+  resource_group: browser-suites
   timeout: 30m
   # This job had NO artifacts and no report. A failure in the bootloader gate left
   # nothing behind to look at - no trace, no screenshot, no list of which of its four
@@ -270,6 +276,20 @@ verify_ki_bootstrap:
 verify_container:
   stage: verify
   interruptible: true
+  resource_group: browser-suites
+  # Only the image's own files can break what only this job checks. The policy it ships
+  # is applied in every e2e test: docs/testing.md, "The container gate".
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        paths: &container_gate_paths
+          - dcb-hub-admin-ui/docker/**/*
+          - dcb-hub-admin-ui/.dockerignore
+          - dcb-hub-admin-ui/e2e-container/**/*
+          - dcb-hub-admin-ui/playwright.container.config.ts
+    - changes:
+        paths: *container_gate_paths
+        compare_to: refs/heads/main
   timeout: 40m
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -295,10 +315,16 @@ verify_container:
     - docker --version
     # Fail HERE, with a sentence, if the daemon is not reachable. Otherwise the first
     # symptom is a playwright webServer timeout 15 minutes later, which reads as the
-    # application being broken.
+    # application being broken. This script can start before dind is listening, so retry
+    # for about a minute, then show the daemon's own error.
     - |
+      for attempt in $(seq 1 30); do
+        docker info >/dev/null 2>&1 && break
+        sleep 2
+      done
       if ! docker info >/dev/null 2>&1; then
-        echo "No Docker daemon on \$DOCKER_HOST=$DOCKER_HOST."
+        echo "No Docker daemon on \$DOCKER_HOST=$DOCKER_HOST after a minute of retries. docker info says:"
+        docker info 2>&1 | tail -n 5
         echo "This job needs the docker:dind service, which needs a runner that permits"
         echo "privileged containers. See docs/testing.md, 'The container gate'."
         exit 1

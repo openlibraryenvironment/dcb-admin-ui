@@ -6,8 +6,8 @@ import { seedAuth } from "../e2e/fixtures/auth";
  * What only the container can be asked.
  *
  * See playwright.container.config.ts for why this gate exists. Everything here is a
- * property of nginx and of the policy it ships, so none of it is observable against
- * `vite preview`.
+ * property of nginx and of the policy it ships. The policy's effect on the application is
+ * also checked in every e2e test; here it is checked as nginx actually sends it.
  */
 
 /** Every violation the page reports, in the order the browser raised them. */

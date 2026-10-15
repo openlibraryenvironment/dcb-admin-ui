@@ -189,13 +189,31 @@ CI configuration, and this test covers only the one rule that has actually bitte
 ### The container gate
 
 `npm run e2e:container` builds `docker/production/Dockerfile` and drives the running
-image. It is the only gate that ships the Content Security Policy and nginx's real
-headers, so it is the only one that can see a CSP violation - which is neither a failed
-request nor an exception - or a missing `content-encoding`.
+image. It is the only gate that serves nginx's real headers, so it is the only one that
+can see a missing `content-encoding`, a header that does not reach a location, or an
+asset cached for the wrong length of time.
+
+**The Content Security Policy itself is applied in every e2e test.** The shared fixture
+(`e2e/fixtures/test.ts`) serves the application's documents with the policy read from
+`docker/production/security-headers.conf`, and fails any test whose page reports a
+violation - which is neither a failed request nor an exception, so nothing else sees
+one. `e2e/content-security-policy.spec.ts` proves the collector fires. So a change to the
+application that breaks the policy fails on every merge request, with no Docker.
+
+**In CI it runs only when what it alone guards changes:** `docker/**`, `.dockerignore`,
+`e2e-container/**` or its Playwright config - on `main` against the previous push, and
+elsewhere against `main`. Every pipeline paid for an image build that most changes cannot
+affect, and the deployments this pipeline publishes are the static bundle, not the image.
 
 It needs a Docker daemon. It removes its own container by name before starting, because
 Playwright's teardown has been observed leaving one up, and a leftover container holds
 4213 - at which point `reuseExistingServer` serves an image built from older code.
+
+In CI, `verify_container` gets its daemon from a `docker:27-dind` service, which only runs
+on a runner that permits privileged containers. Its script can start before dind is
+listening - one run checked 4 seconds in and found nothing - so the job retries
+`docker info` for about a minute before it fails, and then prints the daemon's own error:
+an unreachable host, a refused connection and a missing privilege read differently there.
 
 **Three defects on its first run, all of them invisible to every other gate:**
 
@@ -245,6 +263,17 @@ Twelve seconds, for the difference between a suite that is evidence and one that
 `expect.timeout` is 10s for the same reason. **Neither is a retry** — `retries: 2` in CI
 already hides this, which is why it went unnoticed there, and a retry that masks contention
 masks a real regression just as readily.
+
+**In CI, the browser suites take turns.** `verify_e2e`, `verify_lighthouse`,
+`verify_base_path`, `verify_ki_bootstrap` and `verify_container` share
+`resource_group: browser-suites`, so GitLab runs one at a time. Each builds the application
+and drives Chromium on the same `ki-onprem` runner, and `workers: 4` was measured on a
+32-thread workstation, not there. Run together they produced the failure above as
+retries: on 14 Oct 2026, `verify_e2e` reported three tests flaky on routes that are ready
+in 0.5-1.0s locally, one of them timing out on `/serviceInfo/auditExplorer`'s static text,
+which needs no network at all. Lighthouse's CPU-bound timings get a quiet machine for the
+same reason. `verify_e2e` prints the runner's CPU count, cgroup CPU limit and memory first;
+read those before changing `workers` for CI.
 
 If a run fails en masse with `ERR_CONNECTION_REFUSED` on 4173, look for an orphaned preview
 server before reading a single assertion: `--strictPort` correctly refuses to start when one
