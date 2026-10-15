@@ -25,15 +25,15 @@ such chunks: measured on 2026-10-07 it shipped **1,650 KB gzipped across 382 chu
 of which the Lighthouse budget covered 750 KB. The heaviest single thing in the
 artefact sat outside every gate in the repository:
 
-| Chunk                           | gzipped | What it is                    |
-| ------------------------------- | ------: | ----------------------------- |
-| `exceljs.min.js`                |  276 KB | MUI X Premium's Excel export  |
-| `DataGrid.js`                   |  213 KB | the Premium grid              |
-| `BarChartPro.js`                |  105 KB | `x-charts-pro`, Insights only |
-| `application.js`                |   77 KB | the app shell                 |
-| `createMultiInputRangeField.js` |   67 KB | `x-date-pickers-pro`          |
-| `i18n.js`                       |   50 KB | the translation catalogue     |
-| `rasterizeHTML.js`              |   27 KB | the grid's print export       |
+| Chunk                 | gzipped | What it is                    |
+| --------------------- | ------: | ----------------------------- |
+| `exceljs.min.js`      |  276 KB | MUI X Premium's Excel export  |
+| `DataGrid.js`         |  213 KB | the Premium grid              |
+| `BarChartPro.js`      |  105 KB | `x-charts-pro`, Insights only |
+| `application.js`      |   77 KB | the app shell                 |
+| `DateLocalization.js` |   67 KB | `x-date-pickers-pro`          |
+| `i18n.js`             |   50 KB | the translation catalogue     |
+| `rasterizeHTML.js`    |   27 KB | the grid's print export       |
 
 The budget names every chunk above 15,000 bytes, so new weight arrives with a number
 beside it rather than silently. A chunk over its number, an unbudgeted chunk above

@@ -4,14 +4,22 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { useTranslation } from "react-i18next";
 
-// Supported UI languages. `label` is intentionally the endonym and is NOT translated.
-// `code` must match a resource i18next can actually resolve: "en-GB" is bundled in
-// i18n.ts, "es" is fetched from /locales/es/application.json. A bare "en" resolves to
-// neither and only rendered by falling through to fallbackLng, after a wasted 404.
-const LANGUAGES = [
-	{ code: "en-GB", label: "English" },
-	{ code: "es", label: "Español" },
-];
+import { useLocaleStore } from "@hooks/useLocaleStore";
+import {
+	deploymentLocale,
+	isLanguageChoice,
+	LANGUAGE_CHOICES,
+	type LanguageChoice,
+} from "@helpers/locale";
+
+// Endonyms, deliberately NOT translated: a reader looks for their own language in its own
+// name. Each code is a resource i18next can resolve - en-GB and en-US are bundled in
+// i18n.ts, es is fetched from /locales/es/application.json.
+const ENDONYMS: Record<Exclude<LanguageChoice, "deployment">, string> = {
+	"en-US": "English (United States)",
+	"en-GB": "English (United Kingdom)",
+	es: "Español",
+};
 
 interface LanguageSwitcherProps {
 	/** Determines styling. Use "header" for dark navbars, or "default" for standard page backgrounds. */
@@ -21,18 +29,20 @@ interface LanguageSwitcherProps {
 export default function LanguageSwitcher({
 	variant = "default",
 }: LanguageSwitcherProps) {
-	const { t, i18n } = useTranslation();
-
-	// Match on the base subtag so any regional variant ("en-US", "es-MX") still
-	// selects the right entry, but always hand the Select a full supported code.
-	const base = (i18n.resolvedLanguage ?? i18n.language ?? "en").split("-")[0];
-	const current =
-		LANGUAGES.find((l) => l.code.split("-")[0] === base)?.code ??
-		LANGUAGES[0].code;
+	const { t } = useTranslation();
+	const choice = useLocaleStore((s) => s.choice);
+	const setChoice = useLocaleStore((s) => s.setChoice);
 
 	const handleChange = (event: SelectChangeEvent) => {
-		i18n.changeLanguage(event.target.value);
+		if (isLanguageChoice(event.target.value)) setChoice(event.target.value);
 	};
+
+	const nameOf = (option: LanguageChoice) =>
+		option === "deployment"
+			? t("header.language_deployment_default", {
+					language: ENDONYMS[deploymentLocale()],
+				})
+			: ENDONYMS[option];
 
 	const label = String(t("header.language_switcher_title"));
 
@@ -69,13 +79,17 @@ export default function LanguageSwitcher({
 			<Select
 				labelId="language-select-menu-label"
 				id="language-select-menu"
-				value={current}
+				value={choice}
 				label={label}
 				onChange={handleChange}
 			>
-				{LANGUAGES.map((lng) => (
-					<MenuItem key={lng.code} value={lng.code}>
-						{lng.label}
+				{LANGUAGE_CHOICES.map((option) => (
+					<MenuItem
+						key={option}
+						value={option}
+						lang={option === "deployment" ? undefined : option}
+					>
+						{nameOf(option)}
 					</MenuItem>
 				))}
 			</Select>

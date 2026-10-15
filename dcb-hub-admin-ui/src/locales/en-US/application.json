@@ -1,0 +1,186 @@
+{
+	"catalogMetricsByHostLms": {
+		"name": "Catalog metrics by Host LMS",
+		"no_results": "No catalog metrics found. Try changing your search terms or filters."
+	},
+	"consortium": {
+		"brand": {
+			"theme_help": "Chosen from the themes the discovery app ships. Every one has been checked for color contrast in light, dark and high-contrast modes."
+		},
+		"search_url": "DCB catalog search URL",
+		"settings": {
+			"explainer": {
+				"re_resolution": "When enabled, re-resolution will be active for this consortium. This means that if the chosen supplier cannot fulfill a request, OpenRS DCB automatically looks for another supplier instead of failing the request."
+			}
+		}
+	},
+	"hostlms": {
+		"verification": {
+			"ingest_timeout_advice": "DCB stops waiting after 20 seconds. For a large catalog the harvest often succeeds shortly afterwards, so check the library's Bib records page once setup is finished before treating this as a failure."
+		},
+		"client_config": {
+			"papi_org_id": "PAPI organization ID",
+			"services_organisation_id": "Organization ID"
+		},
+		"config_fields": {
+			"papi_org_id_description": "PAPI organization identifier.",
+			"services_organisation_id_description": "Organization identifier used by application services.",
+			"role_catalogue": "Catalog: this system supplies the bibliographic records",
+			"koha_harvesting_group_description": "DCB harvests bib records from Koha's OPAC over OAI-PMH. In Koha, set the OAI-PMH system preference to Enable and give OAI-PMH:archiveID a value. Leave the OAI set blank to harvest the whole catalog.",
+			"roles_description": "Which DCB roles this system fulfills, e.g. CATALOGUE, CIRCULATION. Leave blank for the defaults."
+		}
+	},
+	"insights": {
+		"group": {
+			"subtitle": "Requesting activity, fulfillment and value across this group's libraries."
+		},
+		"consortium": {
+			"subtitle": "Requesting activity, fulfillment and value across the whole consortium."
+		},
+		"library": {
+			"subtitle": "Requesting activity, fulfillment and value for this library."
+		},
+		"kpi": {
+			"cost_avoidance": {
+				"basis": "Based on {{count}} successful fulfillments"
+			},
+			"time_to_finalise": {
+				"title": "Time to finalize"
+			}
+		},
+		"collection": {
+			"section_subtitle": "The catalog as ingested, rather than the traffic over it. These figures count works held, not requests made, so the date range above does not apply to them.",
+			"computing": "Counting across the whole catalog. The first count can take several minutes, and this panel will check again on its own.",
+			"profile": {
+				"subtitle": "Works contributed to the shared catalog, and how many of them nobody else holds."
+			},
+			"format_mix": {
+				"title": "Format mix of the catalog",
+				"chart_label": "Catalog format mix across {{count}} formats, largest is {{top}}."
+			}
+		},
+		"durations": {
+			"to_finalise": "Time to finalize"
+		},
+		"method": {
+			"transit_dwell_trend": {
+				"not": "It measures the status, not the courier: an item scanned late at the receiving end is indistinguishable from one that traveled slowly. A system that does not report the return leg contributes nothing to it rather than contributing a zero."
+			},
+			"requests_fulfilled": {
+				"how": "The successful and failed counts from the borrower fulfillment query, added together. Successful means the request reached loaned, completed or finalized."
+			},
+			"items_supplied": {
+				"not": "Local fulfillment is excluded: an item this library supplied to its own patron is not network traffic."
+			},
+			"turnaround_to_finalise": {
+				"how": "Median and 95th percentile from request creation to the first audit entry reaching finalized.",
+				"not": "Finalization trails the patron's experience by a long way - the item has usually been back on the shelf for some time - so this is an operations figure, not a service one."
+			},
+			"supplier_reliability": {
+				"how": "Per supplier, requests that reached loaned, completed or finalized against those that errored, were canceled, or found no selectable item."
+			},
+			"trading_partners": {
+				"how": "Requests grouped by the partner at the other end, excluding errored requests and local fulfillment, because a failed request is not traffic and a local loan is not a partnership."
+			},
+			"peer_benchmarks": {
+				"not": "It is deliberately not pseudonymized: members are named, because a benchmark nobody can act on is decoration."
+			},
+			"cost_avoidance": {
+				"what": "What these fulfillments would have cost through traditional interlibrary loan.",
+				"how": "Successful fulfillments in the window multiplied by a unit cost you supply. No cost is shipped with the product."
+			}
+		}
+	},
+	"libraries": {
+		"service": {
+			"systems": {
+				"patron_site_help": "The library's own website, for a patron who needs opening hours or the reference desk."
+			},
+			"environments": {
+				"polaris_org_id": "Polaris staff account: Organization ID"
+			}
+		}
+	},
+	"locations": {
+		"import": {
+			"error": {
+				"generic": "An error occurred while importing locations. Please try again."
+			}
+		}
+	},
+	"nav": {
+		"serviceInfo": {
+			"catalogMetricsByHostLms": "Catalog metrics by host LMS"
+		}
+	},
+	"dcb_ncip_onboarding": {
+		"policy": {
+			"ingest": "Catalog ingest"
+		},
+		"review": {
+			"warning": "Issuing this invitation authorizes one matching ORS Appliance to become an active DCB member when it redeems the token."
+		},
+		"validation": {
+			"INGEST_REQUIRES_SUPPLYING": "Catalog ingest requires supplying."
+		}
+	},
+	"onboarding": {
+		"stage": {
+			"operate_dcb": {
+				"action": "Authorize who can manage your live DCB services",
+				"status_operators_zero": "There are no library services administrators authorized to operate DCB services.",
+				"status_operators_one": "There is {{count}} library services administrator authorized to operate DCB services.",
+				"status_operators_other": "There are {{count}} library services administrators authorized to operate DCB services."
+			},
+			"manage_support": {
+				"action": "Maintain current authorized support contacts so we can deal with any help you need",
+				"status_support_zero": "We have no support contacts authorized to raise or handle support inquiries.",
+				"status_support_one": "We have {{count}} support contact authorized to raise or handle support inquiries.",
+				"status_support_other": "We have {{count}} support contacts authorized to raise or handle support inquiries."
+			}
+		}
+	},
+	"openrs": {
+		"dcb": {
+			"description": "$t(app.dcb) is an $t(openrs.name) product that enables libraries to deliver direct consortial borrowing services to their patrons across a range of LMS and discovery systems. <paragraph/> Developed by <linkComponent>$t(openrs.who.kint_full)</linkComponent>, $t(app.dcb) helps consortia fulfill patrons borrowing requests across their membership faster and cheaper than traditional resource sharing methods.<paragraph/>"
+		}
+	},
+	"patron_request": {
+		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalized.",
+		"statuses": {
+			"CANCELLED": "Canceled",
+			"FINALISED": "Finalized"
+		}
+	},
+	"requesting": {
+		"staff_request": {
+			"patron": {
+				"selection": {
+					"automatic_context": "DCB will automatically select an item to fulfill this request.",
+					"manual_context": "DCB will use the criteria provided to select an item to fulfill this request"
+				}
+			}
+		}
+	},
+	"ui": {
+		"confirmation": {
+			"para1_enable_supplying": "Catalog records for <bold>{{library}}</bold> will become <bold>discoverable</bold> and <bold>requestable</bold> by patrons of other consortium libraries.",
+			"para1_disable_supplying": "Catalog records for <bold>{{library}}</bold> will <bold>not be discoverable</bold> or <bold>requestable</bold> by patrons of other consortium libraries."
+		},
+		"reference": {
+			"catalog_build": "Reference: Catalog build"
+		}
+	},
+	"setup": {
+		"chapters": {
+			"consortium": {
+				"subtitle": "This is the organization everything else belongs to: its name, when it launched, and where people can find it."
+			}
+		},
+		"import": {
+			"unknown_headers": "Columns we do not recognize, and have ignored: {{headers}}. Everything else in the file has been read normally.",
+			"table_caption": "Every row in your file, and what would happen to it. Rows matching a library that already exists are not checked - check one only if you mean to overwrite it.",
+			"will_update": "A library with this agency code already exists. Check to overwrite it."
+		}
+	}
+}

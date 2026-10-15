@@ -14,14 +14,14 @@ import {
 	TableHead,
 	TableRow,
 } from "@mui/material";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { newAcquisitionsQueryOptions, StatsParams } from "@helpers/statsApi";
 
 import PanelState from "./PanelState";
+import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 const PANEL_MIN_HEIGHT = 280;
 
@@ -66,7 +66,7 @@ export default function NewAcquisitionsPanel({
 							{t("insights.charts.new_acquisitions.subtitle")}
 						</Typography>
 					</Box>
-					<LocalizationProvider dateAdapter={AdapterDayjs}>
+					<DateLocalization>
 						<DatePicker
 							label={t("insights.charts.new_acquisitions.acquired_since")}
 							value={acquiredSince}
@@ -74,7 +74,7 @@ export default function NewAcquisitionsPanel({
 							slotProps={{ textField: { size: "small" } }}
 							disableFuture
 						/>
-					</LocalizationProvider>
+					</DateLocalization>
 				</Stack>
 
 				<PanelState

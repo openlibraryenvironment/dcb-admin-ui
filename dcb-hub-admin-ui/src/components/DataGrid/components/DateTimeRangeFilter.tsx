@@ -1,10 +1,9 @@
 import { GridFilterInputValueProps } from "@mui/x-data-grid-premium";
 import { DateTimeRangePicker } from "@mui/x-date-pickers-pro/DateTimeRangePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers-pro/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { MultiInputDateTimeRangeField } from "@mui/x-date-pickers-pro/MultiInputDateTimeRangeField";
 import { DateTimePicker } from "@mui/x-date-pickers-pro";
+import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 // For date time ranges
 export function DateRangeFilterInput(props: GridFilterInputValueProps) {
@@ -20,14 +19,12 @@ export function DateRangeFilterInput(props: GridFilterInputValueProps) {
 		applyValue({ ...item, value: newValue });
 	};
 
-	// See if we can lift the provider up to app.tsx
-
 	// `variant` is left to the theme default (outlined), which is what the
 	// panel's own column/operator selects and MUI's stock value input use.
 	// Hardcoding `standard` here rendered an underline field against three
 	// outlined ones, at a different height - the misaligned row users saw.
 	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
+		<DateLocalization>
 			<DateTimeRangePicker
 				value={[startDate, endDate]}
 				onChange={handleChange}
@@ -44,7 +41,7 @@ export function DateRangeFilterInput(props: GridFilterInputValueProps) {
 					actionBar: { actions: ["clear", "nextOrAccept"] }, // can we add custom actions. today applies to both - maybe it's better to keep it separate?
 				}}
 			/>
-		</LocalizationProvider>
+		</DateLocalization>
 	);
 }
 
@@ -59,7 +56,7 @@ export function SingleDateFilterInput(props: GridFilterInputValueProps) {
 	};
 
 	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
+		<DateLocalization>
 			<DateTimePicker
 				value={value}
 				onChange={handleChange}
@@ -72,7 +69,7 @@ export function SingleDateFilterInput(props: GridFilterInputValueProps) {
 					actionBar: { actions: ["clear", "today"] },
 				}}
 			/>
-		</LocalizationProvider>
+		</DateLocalization>
 	);
 }
 

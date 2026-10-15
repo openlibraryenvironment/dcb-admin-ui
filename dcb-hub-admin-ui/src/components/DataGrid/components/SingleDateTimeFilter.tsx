@@ -1,9 +1,9 @@
 import { GridFilterInputValueProps } from "@mui/x-data-grid-premium";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers-pro";
-import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
+import { DateTimePicker } from "@mui/x-date-pickers-pro";
 // import { useTranslation } from "react-i18next";
 
 import dayjs, { Dayjs } from "dayjs";
+import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 // For the "on or after" and "on or before" filters where a single value is the only one required.
 export default function SingleDateTimeFilter(props: GridFilterInputValueProps) {
@@ -16,7 +16,7 @@ export default function SingleDateTimeFilter(props: GridFilterInputValueProps) {
 	};
 
 	return (
-		<LocalizationProvider dateAdapter={AdapterDayjs}>
+		<DateLocalization>
 			<DateTimePicker
 				value={value}
 				onChange={handleChange}
@@ -28,6 +28,6 @@ export default function SingleDateTimeFilter(props: GridFilterInputValueProps) {
 					actionBar: { actions: ["clear", "today"] }, // the data grid MIGHT auto translate this but check
 				}}
 			/>
-		</LocalizationProvider>
+		</DateLocalization>
 	);
 }

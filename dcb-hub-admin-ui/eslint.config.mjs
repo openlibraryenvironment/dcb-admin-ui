@@ -28,6 +28,26 @@ const ZOD_IMPORT = {
 		'Import { z } from "@schemas/zod" - the instance with jitless set. A bare "zod" import constructs schemas whose JIT probe violates our CSP. See src/schemas/zod.ts.',
 };
 
+// A picker with a provider of its own reads the default date order, not the deployment's.
+const DATE_PROVIDER_MESSAGE =
+	"Wrap the picker in <DateLocalization> (@components/DateLocalization/DateLocalization), which sets the deployment's or the user's date order and first weekday.";
+const DATE_PROVIDER_IMPORTS = [
+	{
+		name: "@mui/x-date-pickers/LocalizationProvider",
+		message: DATE_PROVIDER_MESSAGE,
+	},
+	{
+		name: "@mui/x-date-pickers",
+		importNames: ["LocalizationProvider"],
+		message: DATE_PROVIDER_MESSAGE,
+	},
+	{
+		name: "@mui/x-date-pickers-pro",
+		importNames: ["LocalizationProvider"],
+		message: DATE_PROVIDER_MESSAGE,
+	},
+];
+
 export default [
 	{
 		// Flat config no longer reads .eslintignore - these paths are either
@@ -147,7 +167,7 @@ export default [
 			"no-restricted-imports": [
 				"error",
 				{
-					paths: [ZOD_IMPORT],
+					paths: [ZOD_IMPORT, ...DATE_PROVIDER_IMPORTS],
 				},
 			],
 			"no-duplicate-imports": 2,

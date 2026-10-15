@@ -118,9 +118,40 @@ The application requires the following environment variables to function properl
 
                             |
 
+| `VITE_LOCALE` | No | `en-GB` or `en-US`. Defaults to `en-GB`. Read at container start, so a deployment changes it without a rebuild. See "Locale" below. |
 | `VITE_PUBLIC_URL` | No | Standalone base path. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** The standalone entry uses it for assets, routing, translations and storage. The bootloader entry always routes at `/` and resolves assets from its own bundle URL. |
 
 ---
+
+### Locale
+
+`VITE_LOCALE` sets two things at once for everyone using the deployment: which English the
+interface is written in, and how dates are written and picked.
+
+| `VITE_LOCALE`     | Text                                           | Dates      | Calendar weeks start |
+| ----------------- | ---------------------------------------------- | ---------- | -------------------- |
+| `en-US`           | American English (catalog, color, canceled)    | 09/15/2026 | Sunday               |
+| `en-GB` (default) | British English (catalogue, colour, cancelled) | 15/09/2026 | Monday               |
+
+Unset means `en-GB`, the British English the interface has always been written in. Any
+other value is ignored with a console warning, and `en-GB` is used.
+
+**Upgrading:** before this setting the date pickers ran month first whatever the text said.
+A deployment that sets nothing now gets day-first pickers; one that wants month first sets
+`en-US`, which also switches the text to American spelling.
+
+Each user can override it under Settings, Profile or the setup flow's Appearance chapter
+("Language"): the deployment's locale, either English, or Spanish. The choice is stored in
+that browser and cleared at sign-out, like the appearance settings beside it. Spanish is a
+partial translation; its missing strings, and its dates, follow the deployment's locale.
+
+`src/locales/en-GB/application.json` is the whole catalogue, and every new string goes
+there. `src/locales/en-US/application.json` holds only the strings American English writes
+differently, and falls back to en-GB for the rest; it is fetched only when en-US is in use,
+so a British deployment downloads nothing extra. A new en-GB string needs an en-US entry
+only if it uses a British form the overlay already converts — catalogue, colour, organise,
+tick, whilst and the rest — and `src/locales/localeParity.test.ts` fails, naming it, if
+one is missing.
 
 ## 2a. Feature flags: which dcb-service this deployment is talking to
 

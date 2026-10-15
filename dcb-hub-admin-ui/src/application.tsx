@@ -6,7 +6,8 @@ import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import { LicenseInfo } from "@mui/x-license";
 
-import "./i18n";
+import { applyLanguage } from "./i18n";
+import { useLocaleStore } from "@hooks/useLocaleStore";
 import { routeTree } from "./routeTree.gen";
 import App from "@components/App/App";
 import { GlobalError, NotFound } from "@components/GlobalErrors/GlobalErrors";
@@ -43,6 +44,8 @@ declare global {
 			VITE_DCB_ADMIN_FOR_LIBRARIES_URL?: string;
 			/** Where symposia-ui is mounted, for the Branding tab's link to its staff pages. */
 			VITE_DISCOVERY_URL?: string;
+			/** en-US or en-GB; see helpers/locale.ts. Unset means en-GB. */
+			VITE_LOCALE?: string;
 			[key: string]: string | undefined;
 		};
 		__DCB_BUNDLE_BASE_URL__?: string;
@@ -77,6 +80,7 @@ export async function getStandaloneConfig() {
 					.VITE_DCB_ADMIN_FOR_LIBRARIES_URL as string | undefined,
 				VITE_DISCOVERY_URL: import.meta.env.VITE_DISCOVERY_URL as
 					string | undefined,
+				VITE_LOCALE: import.meta.env.VITE_LOCALE as string | undefined,
 			};
 		}
 
@@ -212,6 +216,10 @@ export async function mountDcbAdmin(
 	// modules fell back to import.meta.env, which .dockerignore leaves undefined in
 	// the build.
 	window.__APP_ENV__ = cfg as Window["__APP_ENV__"];
+
+	// Before the first render, so nobody sees the default language and then another.
+	await applyLanguage();
+	useLocaleStore.subscribe(() => void applyLanguage());
 
 	if (cfg.VITE_MUI_X_LICENSE_KEY) {
 		LicenseInfo.setLicenseKey(cfg.VITE_MUI_X_LICENSE_KEY);
