@@ -3,9 +3,12 @@ type FailedChecks = {
 	description: string;
 };
 export function getRequestError(failedChecks: FailedChecks[]): string {
-	if (failedChecks?.[0]?.code == "DUPLICATE_REQUEST_ATTEMPT") {
-		return "requesting.staff_request.patron.error.request.duplicate";
-	} else {
-		return "requesting.staff_request.patron.error.request.generic";
+	switch (failedChecks?.[0]?.code) {
+		case "DUPLICATE_REQUEST_ATTEMPT":
+			return "requesting.staff_request.patron.error.request.duplicate";
+		case "PREFLIGHT_CHECKS_TIMED_OUT":
+			return "requesting.staff_request.patron.error.request.timed_out";
+		default:
+			return "requesting.staff_request.patron.error.request.generic";
 	}
 }
