@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 
 export const getErrorMessageKey = (message: string, type: string): string => {
 	if (!message || isEmpty(message)) {

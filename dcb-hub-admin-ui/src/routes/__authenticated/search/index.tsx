@@ -10,7 +10,7 @@ import {
 import { useAuth } from "react-oidc-context";
 import { z } from "@schemas/zod";
 import { validate } from "uuid";
-import { isEqual } from "lodash";
+import isEqual from "lodash/isEqual";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import { Box } from "@mui/material";
 

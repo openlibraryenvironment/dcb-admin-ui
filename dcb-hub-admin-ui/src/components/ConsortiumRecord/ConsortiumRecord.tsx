@@ -6,7 +6,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 
 import {
 	Alert,

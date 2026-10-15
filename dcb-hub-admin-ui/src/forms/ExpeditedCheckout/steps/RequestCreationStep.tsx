@@ -9,7 +9,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { TFunction } from "i18next";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import {
 	Control,
 	Controller,
