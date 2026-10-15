@@ -21,7 +21,7 @@ import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequ
 
 import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
-import { itemColumns } from "@columns/itemColumns";
+import { getItemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
 import { lmsFanOutQuery } from "@helpers/queryPolicy";
 import {
@@ -112,6 +112,7 @@ function ItemsPageComponent() {
 	// Base item columns + a row action that skips straight to a pre-filled Quick
 	// walk-up, but only for items that can actually be walked up (available,
 	// requestable, not suppressed).
+	const itemColumns = useMemo(() => getItemColumns(t), [t]);
 	const itemColumnsWithWalkUp: GridColDef[] = useMemo(
 		() => [
 			...itemColumns,
@@ -152,7 +153,7 @@ function ItemsPageComponent() {
 				},
 			},
 		],
-		[t],
+		[itemColumns, t],
 	);
 
 	const itemsNotShown = useMemo(() => {

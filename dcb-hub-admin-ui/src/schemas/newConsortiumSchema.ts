@@ -11,50 +11,58 @@ export const newConsortiumSchema = z.object({
 	name: z
 		.string()
 		.trim()
-		.min(
-			1,
-			i18n.t("ui.validation.required", { field: i18n.t("consortium.name") }),
-		)
+		.min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", { field: i18n.t("consortium.name") }),
+		})
 		.max(200),
 	displayName: z
 		.string()
 		.trim()
-		.min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("consortium.display_name"),
-			}),
-		)
+		.min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("consortium.display_name"),
+				}),
+		})
 		.max(200),
 	// LibraryGroupInput caps these; NewGroup enforces the same numbers.
 	groupName: z
 		.string()
 		.trim()
-		.min(1, i18n.t("ui.validation.required", { field: i18n.t("groups.name") }))
-		.max(32, i18n.t("groups.name_max")),
+		.min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", { field: i18n.t("groups.name") }),
+		})
+		.max(32, { error: () => i18n.t("groups.name_max") }),
 	groupCode: z
 		.string()
 		.trim()
-		.min(1, i18n.t("ui.validation.required", { field: i18n.t("groups.code") }))
-		.max(5, i18n.t("groups.code_max")),
+		.min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", { field: i18n.t("groups.code") }),
+		})
+		.max(5, { error: () => i18n.t("groups.code_max") }),
 	// Parsed server-side with ISO_LOCAL_DATE, so anything else is a 500 waiting
 	// to happen.
 	dateOfLaunch: z
 		.string()
 		.trim()
-		.regex(/^\d{4}-\d{2}-\d{2}$/, i18n.t("consortium.date_of_launch_format")),
+		.regex(/^\d{4}-\d{2}-\d{2}$/, {
+			error: () => i18n.t("consortium.date_of_launch_format"),
+		}),
 	websiteUrl: z.string().trim().max(200).optional(),
 	catalogueSearchUrl: z.string().trim().max(200).optional(),
 	description: z.string().trim().max(400).optional(),
 	reason: z
 		.string()
 		.trim()
-		.min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("data_change_log.reason"),
-			}),
-		),
+		.min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("data_change_log.reason"),
+				}),
+		}),
 	changeReferenceUrl: z.string().trim().optional(),
 	/**
 	 * Which consortium-wide functional settings to switch on, keyed by the
@@ -74,32 +82,34 @@ export const newConsortiumSchema = z.object({
 				firstName: z
 					.string()
 					.trim()
-					.min(
-						1,
-						i18n.t("ui.validation.required", {
-							field: i18n.t("libraries.contacts.first_name"),
-						}),
-					),
+					.min(1, {
+						error: () =>
+							i18n.t("ui.validation.required", {
+								field: i18n.t("libraries.contacts.first_name"),
+							}),
+					}),
 				lastName: z
 					.string()
 					.trim()
-					.min(
-						1,
-						i18n.t("ui.validation.required", {
-							field: i18n.t("libraries.contacts.last_name"),
-						}),
-					),
-				email: z.email(i18n.t("ui.data_grid.validation.email")),
-				role: z.string().min(
-					1,
-					i18n.t("ui.validation.required", {
-						field: i18n.t("libraries.contacts.role"),
+					.min(1, {
+						error: () =>
+							i18n.t("ui.validation.required", {
+								field: i18n.t("libraries.contacts.last_name"),
+							}),
 					}),
-				),
+				email: z.email({
+					error: () => i18n.t("ui.data_grid.validation.email"),
+				}),
+				role: z.string().min(1, {
+					error: () =>
+						i18n.t("ui.validation.required", {
+							field: i18n.t("libraries.contacts.role"),
+						}),
+				}),
 				isPrimaryContact: z.boolean(),
 			}),
 		)
-		.min(1, i18n.t("consortium.contacts.minimum")),
+		.min(1, { error: () => i18n.t("consortium.contacts.minimum") }),
 });
 
 export type NewConsortiumFormValues = z.infer<typeof newConsortiumSchema>;

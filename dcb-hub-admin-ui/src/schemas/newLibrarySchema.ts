@@ -21,13 +21,17 @@ import {
  * the field impossible to correct by typing. Keep the string, validate the
  * string, convert once at the mutation boundary.
  */
-const coordinate = (fieldLabel: string, limit: number) =>
+const coordinate = (labelKey: string, limit: number) =>
 	z
 		.string()
 		.trim()
-		.min(1, i18n.t("ui.validation.required", { field: fieldLabel }))
+		.min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", { field: i18n.t(labelKey) }),
+		})
 		.refine((value) => Number.isFinite(Number(value)), {
-			message: i18n.t("ui.validation.not_a_number", { field: fieldLabel }),
+			error: () =>
+				i18n.t("ui.validation.not_a_number", { field: i18n.t(labelKey) }),
 		})
 		.refine(
 			(value) => {
@@ -35,34 +39,35 @@ const coordinate = (fieldLabel: string, limit: number) =>
 				return !Number.isFinite(parsed) || Math.abs(parsed) <= limit;
 			},
 			{
-				message: i18n.t("ui.validation.out_of_range", {
-					field: fieldLabel,
-					min: -limit,
-					max: limit,
-				}),
+				error: () =>
+					i18n.t("ui.validation.out_of_range", {
+						field: i18n.t(labelKey),
+						min: -limit,
+						max: limit,
+					}),
 			},
 		);
 
 export const newLibrarySchema = z
 	.object({
-		hostLmsCode: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("hostlms.code"),
-			}),
-		),
-		hostLmsName: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("hostlms.name"),
-			}),
-		),
-		lmsClientClass: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.service.systems.ils"),
-			}),
-		),
+		hostLmsCode: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("hostlms.code"),
+				}),
+		}),
+		hostLmsName: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("hostlms.name"),
+				}),
+		}),
+		lmsClientClass: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.service.systems.ils"),
+				}),
+		}),
 		/**
 		 * Whether this run of the wizard is creating a Host LMS or attaching the
 		 * library to one that already exists. Everything below about client
@@ -96,53 +101,53 @@ export const newLibrarySchema = z
 						return false;
 					}
 				},
-				{ message: i18n.t("libraries.new.invalid_json_client_config") },
+				{ error: () => i18n.t("libraries.new.invalid_json_client_config") },
 			),
 		suppressionRulesetName: z.string().optional(),
 		itemSuppressionRulesetName: z.string().optional(),
-		agencyCode: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.new.agency"),
-			}),
-		),
-		fullName: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.name"),
-			}),
-		),
+		agencyCode: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.new.agency"),
+				}),
+		}),
+		fullName: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.name"),
+				}),
+		}),
 		// The four below are `String!` in LibraryInput. They were optional here, so
 		// the wizard sent "" and GraphQL's non-null check passed on an empty string -
 		// the `!` protected nothing and the user was never asked.
-		shortName: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.short_name"),
-			}),
-		),
-		abbreviatedName: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.abbreviated_name"),
-			}),
-		),
-		address: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.primaryLocation.address"),
-			}),
-		),
-		type: z.string().min(
-			1,
-			i18n.t("ui.validation.required", {
-				field: i18n.t("libraries.type"),
-			}),
-		),
+		shortName: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.short_name"),
+				}),
+		}),
+		abbreviatedName: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.abbreviated_name"),
+				}),
+		}),
+		address: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.primaryLocation.address"),
+				}),
+		}),
+		type: z.string().min(1, {
+			error: () =>
+				i18n.t("ui.validation.required", {
+					field: i18n.t("libraries.type"),
+				}),
+		}),
 		// Nullable in LibraryInput, but a library with no coordinates cannot be
 		// placed on a map or used for distance-based supplier selection.
-		latitude: coordinate(i18n.t("libraries.primaryLocation.latitude"), 90),
-		longitude: coordinate(i18n.t("libraries.primaryLocation.longitude"), 180),
+		latitude: coordinate("libraries.primaryLocation.latitude", 90),
+		longitude: coordinate("libraries.primaryLocation.longitude", 180),
 		/**
 		 * Whether the library participates in each direction from the moment it
 		 * is created. Both were only settable afterwards, on the library settings
@@ -165,9 +170,10 @@ export const newLibrarySchema = z
 					value === "" ||
 					(Number.isInteger(Number(value)) && Number(value) >= 0),
 				{
-					message: i18n.t("ui.validation.non_negative_integer", {
-						field: i18n.t("libraries.max_consortial_loans"),
-					}),
+					error: () =>
+						i18n.t("ui.validation.non_negative_integer", {
+							field: i18n.t("libraries.max_consortial_loans"),
+						}),
 				},
 			)
 			.optional(),
@@ -181,9 +187,10 @@ export const newLibrarySchema = z
 					value === "" ||
 					(Number.isInteger(Number(value)) && Number(value) >= 1),
 				{
-					message: i18n.t("ui.validation.positive_integer", {
-						field: i18n.t("libraries.max_local_holds"),
-					}),
+					error: () =>
+						i18n.t("ui.validation.positive_integer", {
+							field: i18n.t("libraries.max_local_holds"),
+						}),
 				},
 			)
 			.optional(),
@@ -210,29 +217,31 @@ export const newLibrarySchema = z
 					 * resume path has to create.
 					 */
 					id: z.string().optional(),
-					firstName: z.string().min(
-						1,
-						i18n.t("ui.validation.required", {
-							field: i18n.t("libraries.contacts.first_name"),
-						}),
-					),
-					lastName: z.string().min(
-						1,
-						i18n.t("ui.validation.required", {
-							field: i18n.t("libraries.contacts.last_name"),
-						}),
-					),
-					email: z.email(i18n.t("ui.data_grid.validation.email")),
-					role: z.string().min(
-						1,
-						i18n.t("ui.validation.required", {
-							field: i18n.t("libraries.contacts.role"),
-						}),
-					),
+					firstName: z.string().min(1, {
+						error: () =>
+							i18n.t("ui.validation.required", {
+								field: i18n.t("libraries.contacts.first_name"),
+							}),
+					}),
+					lastName: z.string().min(1, {
+						error: () =>
+							i18n.t("ui.validation.required", {
+								field: i18n.t("libraries.contacts.last_name"),
+							}),
+					}),
+					email: z.email({
+						error: () => i18n.t("ui.data_grid.validation.email"),
+					}),
+					role: z.string().min(1, {
+						error: () =>
+							i18n.t("ui.validation.required", {
+								field: i18n.t("libraries.contacts.role"),
+							}),
+					}),
 					isPrimaryContact: z.boolean(),
 				}),
 			)
-			.min(1, i18n.t("libraries.contacts.minimum")),
+			.min(1, { error: () => i18n.t("libraries.contacts.minimum") }),
 		groupId: z.string().optional(),
 	})
 	/**

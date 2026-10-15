@@ -209,7 +209,7 @@ export const standardSupplierRequestColumns: GridColDef[] = [
 		sortable: true,
 		filterable: true,
 		type: "singleSelect",
-		valueOptions: getDcbWorkflowOptions(i18n.t),
+		valueOptions: () => getDcbWorkflowOptions(i18n.t),
 		filterOperators: isOnly,
 	},
 	{

@@ -22,7 +22,7 @@ import useCode from "@hooks/useCode";
 import { getLocations } from "@queries/getLocations";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
-import { defaultLocationColumns } from "@columns/locationColumns";
+import { getDefaultLocationColumns } from "@columns/locationColumns";
 import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/locations/")({
@@ -117,7 +117,7 @@ function LocationsRouteComponent() {
 	const columns: GridColDef[] = useMemo(
 		() => [
 			...customColumns,
-			...defaultLocationColumns,
+			...getDefaultLocationColumns(t),
 			buildRowEditActionsColumn({
 				t,
 				rowModesModel,
