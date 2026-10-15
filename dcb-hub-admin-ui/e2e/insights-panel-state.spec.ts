@@ -160,6 +160,80 @@ test.describe("Insights panel states", () => {
 		);
 	});
 
+	test("a range chosen in the calendar reaches the URL, and the endpoints get the whole of both days", async ({
+		page,
+	}) => {
+		// The picker reports the two ends in SEPARATE onChange calls. A parent that only
+		// accepted a complete pair therefore discarded the first click, and because the
+		// value handed back was a fresh array, the field re-derived its sections from the
+		// emptied value and wiped what was already there - so no range could be entered at
+		// all, by calendar or by keyboard.
+		const windows: { start: string | null; end: string | null }[] = [];
+		page.on("request", (request) => {
+			const url = new URL(request.url());
+			if (!url.pathname.endsWith("/insights/dashboard")) return;
+			windows.push({
+				start: url.searchParams.get("startDate"),
+				end: url.searchParams.get("endDate"),
+			});
+		});
+
+		await page.goto("/consortium/insights");
+
+		// The multi-input field opens the calendar on focus; it has no adornment button.
+		await page.getByRole("group", { name: "From" }).click();
+		await expect(page.getByRole("button", { name: "Clear" })).toBeVisible();
+		// `disableFuture` is on, so step back to a month that is entirely in the past.
+		await page.getByRole("button", { name: /Previous month/ }).click();
+
+		const day = (name: string) =>
+			page
+				.getByRole("gridcell", { name, exact: true })
+				.and(page.locator("button:not([disabled])"))
+				.first();
+
+		// The day numbers rather than literal dates: this suite runs on whatever today is.
+		await day("10").click();
+		// The first end alone is kept - that is the whole bug - and it reads as chosen.
+		await expect(page).toHaveURL(/from=\d{4}-\d{2}-10(&|$)/);
+		await expect(day("10")).toHaveAttribute("aria-selected", "true");
+
+		await day("20").click();
+		await expect(page).toHaveURL(/to=\d{4}-\d{2}-20(&|$)/);
+
+		// The URL says the days; the endpoints bind an Instant. Midnight of the first to
+		// the end of the last, in the reader's own zone - a window that stopped at the
+		// start of the 20th would drop that whole day.
+		await expect(() => {
+			const last = windows.at(-1);
+			expect(last?.start).toMatch(
+				/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+			);
+			const days =
+				(Date.parse(last!.end!) - Date.parse(last!.start!)) / 86_400_000;
+			expect(days).toBeGreaterThan(10.9);
+			expect(days).toBeLessThan(11.1);
+		}).toPass();
+	});
+
+	test("the date fields read in the reader's order, not the adapter's default", async ({
+		page,
+	}) => {
+		// AdapterDayjs takes its keyboardDate format from dayjs's localized `L` token and
+		// dayjs defaults to `en`, so without a locale these fields read MM/DD/YYYY on a
+		// page whose every other date is "1 Sep 2026" - and 09/01/2026 is a different day
+		// to a British reader than to the control.
+		await page.goto("/consortium/insights");
+
+		const sections = page
+			.getByRole("group", { name: "From" })
+			.getByRole("spinbutton");
+
+		await expect(sections.nth(0)).toHaveAccessibleName("Day");
+		await expect(sections.nth(1)).toHaveAccessibleName("Month");
+		await expect(sections.nth(2)).toHaveAccessibleName("Year");
+	});
+
 	test("a library chosen in the selector stays chosen, and survives a reload", async ({
 		page,
 	}) => {
@@ -174,6 +248,41 @@ test.describe("Insights panel states", () => {
 
 		await page.reload();
 		await expect(chip).toBeVisible();
+	});
+
+	test("a scoped link asks for that library's figures, and only those", async ({
+		page,
+	}) => {
+		// What a shared or bookmarked scoped link used to do: the URL names a library by
+		// id, the endpoints take Host LMS codes, and the list that maps one to the other
+		// was fetched by the selector AFTER the first render - so the dashboard asked for
+		// the whole consortium, showed those figures, and then corrected itself. Two calls,
+		// the wasted one being the most expensive query the service runs, and a reader who
+		// glanced at the header saw somebody else's numbers.
+		const windows: (string | null)[] = [];
+		page.on("request", (request) => {
+			const url = new URL(request.url());
+			if (!url.pathname.endsWith("/insights/dashboard")) return;
+			windows.push(url.searchParams.get("requestedLibraryCode"));
+		});
+
+		await page.goto(
+			"/consortium/insights?scope=library:c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+		);
+
+		// The chip is the selection restored from the URL, so the page has settled.
+		await expect(
+			page.getByRole("button", { name: "Alpha Test Library" }),
+		).toBeVisible();
+		await expect(page.locator('[data-tid="insights-announcement"]')).toHaveText(
+			"Showing 30 days for 1 library.",
+		);
+
+		// Every call for the header figures carried the library. Asserted as "no call was
+		// unscoped" rather than as a count, because what matters is that the consortium
+		// was never asked - a cache hit more or less is not the defect.
+		expect(windows.length).toBeGreaterThan(0);
+		expect(windows.filter((code) => code !== "alpha-lms")).toEqual([]);
 	});
 
 	test("trading partners says it failed, rather than that there were no partners", async ({

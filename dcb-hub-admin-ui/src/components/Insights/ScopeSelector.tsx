@@ -1,86 +1,31 @@
-import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
 import { Autocomplete, TextField, Chip } from "@mui/material";
 
-import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { nonCriticalQuery } from "@helpers/queryPolicy";
-import { allLibrariesQuery } from "@/queryOptions/libraries";
+import type { ScopeOption } from "@helpers/insightsScope";
 
-export type ScopeOption = {
-	kind: "group" | "library";
-	id: string;
-	label: string;
-	codes: string[]; // Host LMS codes this option resolves to
-};
-
-// Lets a consortium admin scope the whole dashboard to any set of libraries, or to a
-// library group (e.g. "all Polaris libraries") which expands to its members' Host LMS
-// codes. Emits the resolved, de-duplicated code list; empty = whole consortium.
+/**
+ * Narrows the whole dashboard to any set of libraries, or to a library group (e.g. "all
+ * Polaris libraries") which expands to its members' Host LMS codes.
+ *
+ * It does not fetch. The page it sits on needs the same list to resolve the scope a URL
+ * carries BEFORE the first query goes out, so the list is loaded there and the options
+ * arrive as a prop - see insightsScopeOptionsQuery.
+ */
 export default function ScopeSelector({
+	options,
 	value,
 	onChange,
-	onOptionsLoaded,
+	loading = false,
+	failed = false,
 }: {
+	options: ScopeOption[];
 	value: ScopeOption[];
 	onChange: (selected: ScopeOption[]) => void;
-	/** Publishes the loaded list so a caller can resolve the ids a URL carries. */
-	onOptionsLoaded?: (options: ScopeOption[]) => void;
+	loading?: boolean;
+	/** Says so, rather than offering an empty list that reads as "no libraries". */
+	failed?: boolean;
 }) {
 	const { t } = useTranslation();
-	const gqlClient = useGraphQLClient();
-
-	// The same document and the same variables as allLibrariesQuery, which is already
-	// cached for every library dropdown - so this was a second fetch of the same 1,000
-	// libraries under a key of its own, and "insights-scope-libraries" had to be added to
-	// the library entity's keyPrefixes to make invalidation reach it.
-	const { data } = useQuery({
-		...allLibrariesQuery(gqlClient),
-		...nonCriticalQuery,
-	});
-
-	const options = useMemo<ScopeOption[]>(() => {
-		const libs = data?.libraries?.content ?? [];
-
-		const libraryOptions: ScopeOption[] = libs
-			.filter((l: any) => l.agency?.hostLms?.code)
-			.map((l: any) => ({
-				kind: "library" as const,
-				id: l.id,
-				label: l.fullName,
-				codes: [l.agency.hostLms.code],
-			}));
-
-		// Derive groups from library membership, collecting each group's member codes.
-		const groupMap = new Map<string, { label: string; codes: Set<string> }>();
-		for (const l of libs) {
-			const code = l.agency?.hostLms?.code;
-			for (const m of l.membership ?? []) {
-				const g = m.libraryGroup;
-				if (!g) continue;
-				if (!groupMap.has(g.id)) {
-					groupMap.set(g.id, { label: g.name, codes: new Set() });
-				}
-				if (code) groupMap.get(g.id)!.codes.add(code);
-			}
-		}
-		const groupOptions: ScopeOption[] = Array.from(groupMap.entries()).map(
-			([id, g]) => ({
-				kind: "group" as const,
-				id,
-				label: g.label,
-				codes: Array.from(g.codes),
-			}),
-		);
-
-		return [...groupOptions, ...libraryOptions];
-	}, [data]);
-
-	// The list arrives asynchronously and the URL is read before it does, so the caller is
-	// told when there is something to resolve ids against.
-	useEffect(() => {
-		if (options.length > 0) onOptionsLoaded?.(options);
-	}, [options, onOptionsLoaded]);
 
 	return (
 		<Autocomplete<ScopeOption, true>
@@ -88,6 +33,8 @@ export default function ScopeSelector({
 			options={options}
 			value={value}
 			onChange={(_e, selected) => onChange(selected)}
+			loading={loading}
+			disabled={failed}
 			getOptionLabel={(o) => o.label}
 			isOptionEqualToValue={(a, b) => a.kind === b.kind && a.id === b.id}
 			groupBy={(o) =>
@@ -115,6 +62,8 @@ export default function ScopeSelector({
 					size="small"
 					label={t("insights.scope.label")}
 					placeholder={t("insights.scope.placeholder")}
+					error={failed}
+					helperText={failed ? t("insights.scope.failed") : undefined}
 				/>
 			)}
 			sx={{ minWidth: 320, maxWidth: 640 }}

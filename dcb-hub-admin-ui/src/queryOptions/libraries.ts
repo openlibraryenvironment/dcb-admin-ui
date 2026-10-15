@@ -4,6 +4,7 @@ import { GraphQLClient } from "graphql-request";
 import { getLibraries } from "@queries/getLibraries";
 import { getLibraryDirectory } from "@queries/getLibraryDirectory";
 import { findConsortium } from "@helpers/findConsortium";
+import { scopeOptionsFrom, type ScopeOption } from "@helpers/insightsScope";
 import type {
 	LoadLibrariesQueryVariables,
 	LoadLibraryDirectoryQueryVariables,
@@ -218,4 +219,18 @@ export const agencyCodeForHostLmsQuery = (
 							library?.secondHostLms?.code === hostLmsCode,
 					)?.agencyCode
 				: undefined,
+	});
+
+/**
+ * The scopes the Insights dashboard can be narrowed to.
+ *
+ * On `allLibrariesQuery`'s key so the route's loader and the selector are ONE cache
+ * entry, and `throwOnError: false` because a failed list costs the scope control and not
+ * the twenty panels that work. Both decisions: docs/insights-view-state.md.
+ */
+export const insightsScopeOptionsQuery = (gqlClient: GraphQLClient) =>
+	queryOptions({
+		...allLibrariesQuery(gqlClient),
+		select: (data: any): ScopeOption[] => scopeOptionsFrom(data),
+		throwOnError: false,
 	});

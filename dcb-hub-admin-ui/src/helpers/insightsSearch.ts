@@ -93,6 +93,18 @@ export function resolveSearch(search: InsightsSearch) {
 		// An explicit window wins over a preset, and clearing it falls back to one.
 		range: search.range ?? DEFAULT_RANGE,
 		custom,
+		/**
+		 * The two ends as chosen, which may be half a window.
+		 *
+		 * `custom` stays null until both are in, because half a window is not a window to
+		 * query - but the CONTROL has to hold one end while the reader picks the other.
+		 * The picker reports the ends ONE AT A TIME, so a parent that only accepted a
+		 * complete pair discarded every first click and first typed date.
+		 */
+		customEnds: {
+			startDate: search.from ?? null,
+			endDate: search.to ?? null,
+		},
 		scope: search.scope ?? [],
 		series:
 			search.series && search.series.length > 0

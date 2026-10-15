@@ -35,12 +35,14 @@ export function useInsightsView(search: InsightsSearch, to: string) {
 		/** A preset and an explicit window are alternatives, so choosing one clears the other. */
 		setRange: (range: RangePreset) =>
 			update({ range, from: undefined, to: undefined }),
-		setCustomRange: (range: { startDate: string; endDate: string } | null) =>
-			update(
-				range
-					? { from: range.startDate, to: range.endDate }
-					: { from: undefined, to: undefined },
-			),
+		/** Either end may be null while the reader is still choosing the other. */
+		setCustomRange: (
+			range: { startDate: string | null; endDate: string | null } | null,
+		) =>
+			update({
+				from: range?.startDate ?? undefined,
+				to: range?.endDate ?? undefined,
+			}),
 		setScope: (scope: string[]) =>
 			update({ scope: scope.length > 0 ? scope : undefined }),
 		toggleSeries: (status: string) => {

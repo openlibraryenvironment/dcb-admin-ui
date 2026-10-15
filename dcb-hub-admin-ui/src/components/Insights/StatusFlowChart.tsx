@@ -138,13 +138,11 @@ export default function StatusFlowChart({
 							// different need from the numbers, and this is where a reader looks for it.
 							showToolbar
 							slots={{ toolbar: ChartExportToolbar }}
-							xAxis={[
-								{
-									data: xAxisData,
-									scaleType: "time",
-									zoom: true,
-								},
-							]}
+							// No `zoom`. The gestures it enables - wheel, pinch, drag-to-pan -
+							// have no keyboard or single-pointer equivalent and no reset, and
+							// the window is already the reader's to choose in the range control
+							// above, which unlike a zoom state travels in the URL.
+							xAxis={[{ data: xAxisData, scaleType: "time" }]}
 							series={series}
 						/>
 					)}

@@ -21,16 +21,13 @@ import {
 import { libraryParamsSchema } from "@schemas/routeParams/libraryParams";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 
-import { insightsSearchSchema } from "@helpers/insightsSearch";
+import { DEFAULT_RANGE, insightsSearchSchema } from "@helpers/insightsSearch";
 import { useInsightsView } from "@hooks/useInsightsView";
 import {
 	dashboardQueryOptions,
 	timeSeriesQueryOptions,
 	StatsParams,
 } from "@helpers/statsApi";
-
-// Must mirror insightsPlotStore's default preset so the prefetched keys match.
-const DEFAULT_PRESET = "30d" as const;
 
 // The stats endpoints filter on a Host LMS code (patron_hostlms_code), which for a
 // library is Library.agency.hostLms.code - resolved from the library record here.
@@ -81,9 +78,9 @@ export const Route = createFileRoute(
 		const client = createRestClient(cfg, auth);
 		const params: StatsParams = {
 			libraryCode,
-			...rangeToParams(DEFAULT_PRESET),
+			...rangeToParams(DEFAULT_RANGE),
 		};
-		const interval = intervalForRange(DEFAULT_PRESET);
+		const interval = intervalForRange(DEFAULT_RANGE);
 
 		// Above-the-fold only: combined KPI call + trend. The rest are lazy panels.
 		return Promise.all([

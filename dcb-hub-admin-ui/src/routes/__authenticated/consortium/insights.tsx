@@ -1,27 +1,41 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Box } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
+import Loading from "@components/Loading/Loading";
 import InsightsDashboard from "@components/Insights/InsightsDashboard";
-import ScopeSelector, { ScopeOption } from "@components/Insights/ScopeSelector";
-import { scopeId } from "@helpers/insightsScope";
+import ScopeSelector from "@components/Insights/ScopeSelector";
+import {
+	scopeCodes,
+	scopeId,
+	scopeOptionsFrom,
+	selectedScope,
+} from "@helpers/insightsScope";
 import { createRestClient } from "@helpers/createRestClient";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { isInsightsEnabled } from "@helpers/featureFlags";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 
-import { insightsSearchSchema } from "@helpers/insightsSearch";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import {
+	allLibrariesQuery,
+	insightsScopeOptionsQuery,
+} from "@/queryOptions/libraries";
+
+import {
+	DEFAULT_RANGE,
+	insightsSearchSchema,
+	resolveSearch,
+} from "@helpers/insightsSearch";
 import { useInsightsView } from "@hooks/useInsightsView";
 import {
 	dashboardQueryOptions,
 	timeSeriesQueryOptions,
 	StatsParams,
 } from "@helpers/statsApi";
-
-// Must mirror insightsPlotStore's default preset so the prefetched keys match the
-// component's first render.
-const DEFAULT_PRESET = "30d" as const;
 
 export const Route = createFileRoute("/__authenticated/consortium/insights")({
 	validateSearch: insightsSearchSchema,
@@ -33,13 +47,42 @@ export const Route = createFileRoute("/__authenticated/consortium/insights")({
 			throw redirect({ to: "/consortium" });
 		}
 	},
-	loader: ({ context: { queryClient, cfg, auth } }) => {
+	loader: async ({ context: { queryClient, cfg, auth }, location }) => {
 		// Skip prefetch for unauthenticated visitors (see consortium/index loader).
 		if (!auth?.isAuthenticated) return;
 
+		// A fast path and NOT the guarantee - the guard above means this does not run
+		// until OIDC has restored the session, so the component gates on the same list.
+		// `location.search` rather than `loaderDeps`, which would re-run the loader on
+		// every selection change. docs/insights-view-state.md.
+		const scope = resolveSearch(
+			insightsSearchSchema.parse(location.search),
+		).scope;
+
+		let libraryCode: string | undefined;
+		if (scope.length > 0) {
+			try {
+				const libraries = await queryClient.ensureQueryData(
+					allLibrariesQuery(createGraphQLClient(cfg, auth)),
+				);
+				// ensureQueryData returns the raw response - a `select` is a view for
+				// components only - so the options are derived here.
+				libraryCode = scopeCodes(
+					selectedScope(scopeOptionsFrom(libraries), scope),
+				);
+			} catch {
+				// A library list that fails is not a reason to show nothing: the dashboard
+				// falls back to the whole consortium and the selector says why.
+				libraryCode = undefined;
+			}
+		}
+
 		const client = createRestClient(cfg, auth);
-		const params: StatsParams = { ...rangeToParams(DEFAULT_PRESET) };
-		const interval = intervalForRange(DEFAULT_PRESET);
+		const params: StatsParams = {
+			libraryCode,
+			...rangeToParams(DEFAULT_RANGE),
+		};
+		const interval = intervalForRange(DEFAULT_RANGE);
 
 		// Only the above-the-fold data: the combined KPI call + the trend chart. Every
 		// other panel is lazy (fetches when scrolled into view), so we don't prefetch them.
@@ -56,23 +99,28 @@ export const Route = createFileRoute("/__authenticated/consortium/insights")({
 function ConsortiumInsightsPage() {
 	const { t } = useTranslation();
 	const view = useInsightsView(Route.useSearch(), "/consortium/insights");
+	const gqlClient = useGraphQLClient();
 
 	// The URL carries the SELECTION - group:<id>, library:<id> - and the codes are resolved
-	// from it once the library list arrives. Storing codes instead would restore the
-	// figures and lose the chips, and a group that gained a member would quietly mean
-	// something different on reload.
-	const [options, setOptions] = useState<ScopeOption[]>([]);
+	// from it, on the key the loader above resolved it on. Storing codes instead would
+	// restore the figures and lose the chips.
+	const {
+		data: options = [],
+		isLoading: scopeLoading,
+		isError: scopeFailed,
+	} = useQuery(insightsScopeOptionsQuery(gqlClient));
+
 	const selected = useMemo(
-		() => options.filter((option) => view.scope.includes(scopeId(option))),
+		() => selectedScope(options, view.scope),
 		[options, view.scope],
 	);
+	const libraryCode = useMemo(() => scopeCodes(selected), [selected]);
 
-	// Union of the selected libraries' / groups' Host LMS codes -> CSV. Empty = whole consortium.
-	const libraryCode = useMemo(() => {
-		const codes = new Set<string>();
-		selected.forEach((option) => option.codes.forEach((c) => codes.add(c)));
-		return codes.size ? Array.from(codes).join(",") : undefined;
-	}, [selected]);
+	// A link that names a library has no question to ask until the codes are known, so the
+	// dashboard is not mounted until then. A failed list counts as resolved - the figures
+	// are consortium-wide and the selector says so - docs/insights-view-state.md.
+	const scopeUnresolved =
+		view.scope.length > 0 && options.length === 0 && !scopeFailed;
 
 	return (
 		<PageContainer
@@ -81,16 +129,27 @@ function ConsortiumInsightsPage() {
 		>
 			<Box sx={{ mb: 3 }}>
 				<ScopeSelector
+					options={options}
 					value={selected}
 					onChange={(next) => view.setScope(next.map(scopeId))}
-					onOptionsLoaded={setOptions}
+					loading={scopeLoading}
+					failed={scopeFailed}
 				/>
 			</Box>
-			<InsightsDashboard
-				libraryCode={libraryCode}
-				view={view}
-				subjectBarTo="/consortium/insights"
-			/>
+			{scopeUnresolved ? (
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("insights.consortium.title"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
+			) : (
+				<InsightsDashboard
+					libraryCode={libraryCode}
+					view={view}
+					subjectBarTo="/consortium/insights"
+				/>
+			)}
 		</PageContainer>
 	);
 }

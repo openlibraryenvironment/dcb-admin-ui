@@ -86,6 +86,17 @@ describe("the Insights view, in the URL", () => {
 		expect(view.unitCost).toBeNull();
 	});
 
+	it("keeps one end while the reader is still choosing the other", () => {
+		// `custom` stays null - half a window is not a window to query - but the control
+		// has to show the end that IS chosen. The picker reports the ends one at a time,
+		// so dropping a lone end made a range impossible to enter: the first click was
+		// discarded and the field then wiped itself from the emptied value.
+		const half = parse({ from: "2026-08-01" });
+
+		expect(half.custom).toBeNull();
+		expect(half.customEnds).toEqual({ startDate: "2026-08-01", endDate: null });
+	});
+
 	it("needs both ends of an explicit window, or neither", () => {
 		// Half a window is not a window, and reading it as one would silently move the
 		// other end to a default the reader never chose.
