@@ -178,3 +178,11 @@ export const isSettingsInheritanceEnabled = (): boolean =>
  */
 export const isShelfBrowseEnabled = (): boolean =>
 	isSymposiaEnabled() && readFlag("VITE_FEATURE_SHELF_BROWSE");
+
+/**
+ * The consortium's request tag list: `requestTags` and the create, update and delete
+ * mutations, on no dcb-service release yet. Gates the route that sends them, since an
+ * undeclared field fails the whole operation.
+ */
+export const isRequestTagsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_REQUEST_TAGS");

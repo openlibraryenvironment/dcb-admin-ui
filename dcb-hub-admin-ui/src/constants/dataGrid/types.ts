@@ -36,6 +36,7 @@ export const DATA_GRID_TYPES = [
 	"referenceValueMappings",
 	"refusedCleanupRequests",
 	"requestErrors",
+	"requestTag",
 	"searchInstances",
 	"skippedCleanupRequests",
 	"successCleanupRequests",
@@ -69,6 +70,8 @@ export const nonClickableTypes: readonly DataGridType[] = [
 	"consortiumDetails",
 	// Library accounts are created and edited through dialogs; there is no user page.
 	"libraryUser",
+	// Request tags are edited through dialogs; there is no tag page.
+	"requestTag",
 	// Ingest metrics per source system. Informational, and the row id is a source
 	// system id rather than a Host LMS id, so it addresses no page in this app.
 	"catalogMetricsByHostLms",

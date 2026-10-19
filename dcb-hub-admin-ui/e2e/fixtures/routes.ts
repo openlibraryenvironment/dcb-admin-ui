@@ -57,6 +57,23 @@ export const MOCKS = {
 	LoadLibraryDirectory: libraries,
 	LoadLibraryCount: libraryCount,
 	LoadAnnouncements: { announcements: [] },
+	// One active tag and one retired, so both status chips are measured.
+	LoadRequestTags: {
+		requestTags: [
+			{
+				code: "DAMAGED",
+				label: "Damaged",
+				description: "The item arrived or was returned damaged",
+				active: true,
+			},
+			{
+				code: "SLOW_TO_SHIP",
+				label: "Slow to ship",
+				description: null,
+				active: false,
+			},
+		],
+	},
 	LoadLibraryContacts: libraryDetail,
 	LoadLibraryUsers: libraryUsers,
 	LibraryUserProvisioningAvailable: libraryUserProvisioning,
@@ -153,6 +170,14 @@ export const ROUTES: ScannedRoute[] = [
 		ready: async (page) => {
 			await expect(
 				page.getByRole("textbox", { name: "Headline" }),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/consortium/requestTags",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("button", { name: "Restore Slow to ship" }),
 			).toBeVisible();
 		},
 	},

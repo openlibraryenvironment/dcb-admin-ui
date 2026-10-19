@@ -12,7 +12,7 @@
 # every capability row that depends on it carries `since: null` and its flag is off
 # everywhere.
 #
-# Taken verbatim from that ref, plus ONE addition at the end of this file: auditIncidence
+# Taken verbatim from that ref, plus two additions at the end of this file. The first is auditIncidence
 # and its two types, from dcb-service `feat/audit-incidence` (fdde88c01), which is the
 # branch scheduled to merge them - MERGE_PLAN.md item 17. The identical block is also on
 # `feat/analytics` and `audit-explorer`, so name the scheduled branch rather than whichever
@@ -20,7 +20,12 @@
 # validated against something; no release serves them, which is why
 # VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its capability row carries since: null.
 #
-# Re-take this file whenever either branch moves, and re-run codegen.
+# The second is the request tag list - `requestTags`, `createRequestTag`, `updateRequestTag`,
+# `deleteRequestTag`, RequestTag and RequestTagInput - from dcb-service
+# `feat/patron-request-notes` (897305e1b), which is unmerged. No release serves it, which is
+# why VITE_FEATURE_REQUEST_TAGS is off everywhere and its capability row carries since: null.
+#
+# Re-take this file whenever any of these branches moves, and re-run codegen.
 #
 scalar JSON
 
@@ -59,6 +64,8 @@ type Query {
 		libraryUserProvisioningAvailable: Boolean!
 		# From dcb-service `feat/analytics`; see this file's header. No RELEASE serves it.
 		auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
+		# From dcb-service `feat/patron-request-notes`; see this file's header. No RELEASE serves it.
+		requestTags: [RequestTag]
 		# V-12. Everything at one scope, live or not - the admin list. A patron reads the LIVE
 		# ones from /discovery/announcements, which is anonymous and has no query language.
 		announcements(scopeType: String!, scopeId: ID!): [Announcement!]!
@@ -90,6 +97,10 @@ type Mutation {
 		createAnnouncement(input: CreateAnnouncementInput): Announcement!
 		updateAnnouncement(input: UpdateAnnouncementInput): Announcement!
 		deleteAnnouncement(input: DeleteEntityInput): DeleteEntityPayload!
+		# From dcb-service `feat/patron-request-notes`; see this file's header. No RELEASE serves them.
+		createRequestTag(input: RequestTagInput!): RequestTag!
+		updateRequestTag(input: RequestTagInput!): RequestTag!
+		deleteRequestTag(code: String!): DeleteEntityPayload!
 		# N-3 / V-22.6. One setting, explicitly, at one or many LIBRARY or LIBRARY_GROUP
 		# scopes. The same mutation for one scope and for forty: a separate single-scope
 		# one would be a second copy of the same rules that would eventually disagree.
@@ -1324,4 +1335,23 @@ type AuditIncidence {
   totalSize: Int!
   "Continuous, gap-filled, ascending by bucketStart."
   buckets: [AuditIncidenceBucket!]!
+}
+
+
+# ---------------------------------------------------------------------------
+# From dcb-service `feat/patron-request-notes`, which is unmerged. See this file's header.
+# ---------------------------------------------------------------------------
+
+type RequestTag {
+	code: String
+	label: String
+	description: String
+	active: Boolean
+}
+
+input RequestTagInput {
+	code: String!
+	label: String!
+	description: String
+	active: Boolean
 }

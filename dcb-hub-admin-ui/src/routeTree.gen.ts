@@ -42,6 +42,7 @@ import { Route as _authenticatedPatronRequestsActiveRouteImport } from './routes
 import { Route as _authenticatedLocationsLocationIdRouteImport } from './routes/__authenticated/locations/$locationId'
 import { Route as _authenticatedHostlmssNewRouteImport } from './routes/__authenticated/hostlmss/new'
 import { Route as _authenticatedHostlmssHostlmsIdRouteImport } from './routes/__authenticated/hostlmss/$hostlmsId'
+import { Route as _authenticatedConsortiumRequestTagsRouteImport } from './routes/__authenticated/consortium/requestTags'
 import { Route as _authenticatedConsortiumOnboardingRouteImport } from './routes/__authenticated/consortium/onboarding'
 import { Route as _authenticatedConsortiumInsightsRouteImport } from './routes/__authenticated/consortium/insights'
 import { Route as _authenticatedConsortiumFunctionalSettingsRouteImport } from './routes/__authenticated/consortium/functionalSettings'
@@ -281,6 +282,12 @@ const _authenticatedHostlmssHostlmsIdRoute =
   _authenticatedHostlmssHostlmsIdRouteImport.update({
     id: '/hostlmss/$hostlmsId',
     path: '/hostlmss/$hostlmsId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumRequestTagsRoute =
+  _authenticatedConsortiumRequestTagsRouteImport.update({
+    id: '/consortium/requestTags',
+    path: '/consortium/requestTags',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedConsortiumOnboardingRoute =
@@ -644,6 +651,7 @@ export interface FileRoutesByFullPath {
   '/consortium/functionalSettings': typeof _authenticatedConsortiumFunctionalSettingsRoute
   '/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
   '/consortium/onboarding': typeof _authenticatedConsortiumOnboardingRoute
+  '/consortium/requestTags': typeof _authenticatedConsortiumRequestTagsRoute
   '/hostlmss/$hostlmsId': typeof _authenticatedHostlmssHostlmsIdRoute
   '/hostlmss/new': typeof _authenticatedHostlmssNewRoute
   '/locations/$locationId': typeof _authenticatedLocationsLocationIdRoute
@@ -733,6 +741,7 @@ export interface FileRoutesByTo {
   '/consortium/functionalSettings': typeof _authenticatedConsortiumFunctionalSettingsRoute
   '/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
   '/consortium/onboarding': typeof _authenticatedConsortiumOnboardingRoute
+  '/consortium/requestTags': typeof _authenticatedConsortiumRequestTagsRoute
   '/hostlmss/$hostlmsId': typeof _authenticatedHostlmssHostlmsIdRoute
   '/hostlmss/new': typeof _authenticatedHostlmssNewRoute
   '/locations/$locationId': typeof _authenticatedLocationsLocationIdRoute
@@ -823,6 +832,7 @@ export interface FileRoutesById {
   '/__authenticated/consortium/functionalSettings': typeof _authenticatedConsortiumFunctionalSettingsRoute
   '/__authenticated/consortium/insights': typeof _authenticatedConsortiumInsightsRoute
   '/__authenticated/consortium/onboarding': typeof _authenticatedConsortiumOnboardingRoute
+  '/__authenticated/consortium/requestTags': typeof _authenticatedConsortiumRequestTagsRoute
   '/__authenticated/hostlmss/$hostlmsId': typeof _authenticatedHostlmssHostlmsIdRoute
   '/__authenticated/hostlmss/new': typeof _authenticatedHostlmssNewRoute
   '/__authenticated/locations/$locationId': typeof _authenticatedLocationsLocationIdRoute
@@ -914,6 +924,7 @@ export interface FileRouteTypes {
     | '/consortium/functionalSettings'
     | '/consortium/insights'
     | '/consortium/onboarding'
+    | '/consortium/requestTags'
     | '/hostlmss/$hostlmsId'
     | '/hostlmss/new'
     | '/locations/$locationId'
@@ -1003,6 +1014,7 @@ export interface FileRouteTypes {
     | '/consortium/functionalSettings'
     | '/consortium/insights'
     | '/consortium/onboarding'
+    | '/consortium/requestTags'
     | '/hostlmss/$hostlmsId'
     | '/hostlmss/new'
     | '/locations/$locationId'
@@ -1092,6 +1104,7 @@ export interface FileRouteTypes {
     | '/__authenticated/consortium/functionalSettings'
     | '/__authenticated/consortium/insights'
     | '/__authenticated/consortium/onboarding'
+    | '/__authenticated/consortium/requestTags'
     | '/__authenticated/hostlmss/$hostlmsId'
     | '/__authenticated/hostlmss/new'
     | '/__authenticated/locations/$locationId'
@@ -1404,6 +1417,13 @@ declare module '@tanstack/react-router' {
       path: '/hostlmss/$hostlmsId'
       fullPath: '/hostlmss/$hostlmsId'
       preLoaderRoute: typeof _authenticatedHostlmssHostlmsIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/consortium/requestTags': {
+      id: '/__authenticated/consortium/requestTags'
+      path: '/consortium/requestTags'
+      fullPath: '/consortium/requestTags'
+      preLoaderRoute: typeof _authenticatedConsortiumRequestTagsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/consortium/onboarding': {
@@ -1837,6 +1857,7 @@ interface _authenticatedRouteChildren {
   _authenticatedConsortiumFunctionalSettingsRoute: typeof _authenticatedConsortiumFunctionalSettingsRoute
   _authenticatedConsortiumInsightsRoute: typeof _authenticatedConsortiumInsightsRoute
   _authenticatedConsortiumOnboardingRoute: typeof _authenticatedConsortiumOnboardingRoute
+  _authenticatedConsortiumRequestTagsRoute: typeof _authenticatedConsortiumRequestTagsRoute
   _authenticatedHostlmssHostlmsIdRoute: typeof _authenticatedHostlmssHostlmsIdRoute
   _authenticatedHostlmssNewRoute: typeof _authenticatedHostlmssNewRoute
   _authenticatedLocationsLocationIdRoute: typeof _authenticatedLocationsLocationIdRoute
@@ -1919,6 +1940,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedConsortiumInsightsRoute: _authenticatedConsortiumInsightsRoute,
   _authenticatedConsortiumOnboardingRoute:
     _authenticatedConsortiumOnboardingRoute,
+  _authenticatedConsortiumRequestTagsRoute:
+    _authenticatedConsortiumRequestTagsRoute,
   _authenticatedHostlmssHostlmsIdRoute: _authenticatedHostlmssHostlmsIdRoute,
   _authenticatedHostlmssNewRoute: _authenticatedHostlmssNewRoute,
   _authenticatedLocationsLocationIdRoute:

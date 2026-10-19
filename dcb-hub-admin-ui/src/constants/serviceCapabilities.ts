@@ -9,6 +9,7 @@ import {
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
+	isRequestTagsEnabled,
 	isSettingsInheritanceEnabled,
 	isShelfBrowseEnabled,
 } from "@helpers/featureFlags";
@@ -309,6 +310,17 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {
 			Library: CLASSIFICATION_SCHEME_FIELDS,
 			UpdateLibraryInput: CLASSIFICATION_SCHEME_FIELDS,
+		},
+	},
+	{
+		// On dcb-service `feat/patron-request-notes` and in no release.
+		id: "request_tags",
+		flag: "VITE_FEATURE_REQUEST_TAGS",
+		enabled: isRequestTagsEnabled,
+		since: null,
+		fields: {
+			Query: ["requestTags"],
+			Mutation: ["createRequestTag", "updateRequestTag", "deleteRequestTag"],
 		},
 	},
 	{

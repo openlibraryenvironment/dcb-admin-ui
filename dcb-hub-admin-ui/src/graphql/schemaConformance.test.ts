@@ -75,6 +75,8 @@ const FLAG_ONLY: Record<string, string> = {
 	"queries/getAuditIncidence.ts": "VITE_FEATURE_AUDIT_EXPLORER",
 	"queries/getLibraryUsers.ts": "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 	"mutations/provisionLibraryUser.ts": "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
+	"queries/getRequestTags.ts": "VITE_FEATURE_REQUEST_TAGS",
+	"mutations/requestTags.ts": "VITE_FEATURE_REQUEST_TAGS",
 };
 
 /**

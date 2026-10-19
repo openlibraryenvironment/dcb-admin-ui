@@ -332,6 +332,46 @@
 			"settings_legend": "Consortium functional settings",
 			"settings_changeable": "Every setting here can be changed later on the consortium's functional settings page."
 		},
+		"request_tags": {
+			"explanation": "Libraries put these tags on patron requests, so everyone involved can see at a glance that an item arrived damaged or that the patron has been contacted. Retire a tag to stop it being used: it stays on the requests that have it. Only a tag that no request carries can be deleted.",
+			"add": "Add a tag",
+			"edit": "Edit",
+			"edit_named": "Edit {{label}}",
+			"save": "Save",
+			"label": "Label",
+			"label_help": "What staff see on a request, such as “Damaged”.",
+			"code": "Code",
+			"code_help": "Capital letters, digits and underscores, starting with a letter, such as DAMAGED.",
+			"code_fixed": "The code cannot change, because the requests that carry this tag refer to it.",
+			"description": "Description",
+			"description_help": "Optional. When staff should use this tag.",
+			"status": "Status",
+			"active": "Active",
+			"retired_status": "Retired",
+			"actions": "Actions",
+			"retire": "Retire",
+			"retire_named": "Retire {{label}}",
+			"restore": "Restore",
+			"restore_named": "Restore {{label}}",
+			"delete": "Delete",
+			"delete_named": "Delete {{label}}",
+			"delete_title": "Delete {{label}}?",
+			"delete_body": "This removes the tag from the list for good. A tag that any request carries cannot be deleted: retire it instead, so it stays on those requests but cannot be used again.",
+			"delete_failed": "The tag could not be deleted.",
+			"save_failed": "The tag could not be saved.",
+			"count": "{{count}} tag of a possible {{max}}.",
+			"count_other": "{{count}} tags of a possible {{max}}.",
+			"full": "The list holds at most {{max}} tags. Delete one that no request carries to make room.",
+			"none": "No tags yet.",
+			"added": "{{label}} added.",
+			"saved": "{{label}} saved.",
+			"retired": "{{label}} retired. It stays on the requests that have it.",
+			"restored": "{{label}} can be used again.",
+			"deleted": "{{label}} deleted.",
+			"validation": {
+				"code": "Use 2 to 32 capital letters, digits or underscores, starting with a letter."
+			}
+		},
 		"link_url_invalid": "Enter a full web address starting with https:// or http://",
 		"announcements": {
 			"title": "Tell every patron",
@@ -1963,7 +2003,8 @@
 			"insights": "Insights",
 			"setup": "Setup",
 			"branding": "Branding",
-			"announcements": "Announcements"
+			"announcements": "Announcements",
+			"requestTags": "Request tags"
 		},
 		"groups": {
 			"bibs": "Bib records",
@@ -3154,7 +3195,8 @@
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
 			"settings_inheritance": "Settings inheritance",
-			"shelf_browse": "Shelf browse"
+			"shelf_browse": "Shelf browse",
+			"request_tags": "Request tags"
 		},
 		"status": {
 			"ready": "On, and served by this dcb-service",

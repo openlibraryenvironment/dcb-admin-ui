@@ -224,6 +224,13 @@ export type ProvisionableRole = "LIBRARY_ADMIN" | "LIBRARY_READ_ONLY";
 export type RenewalStatus =
 	"ALLOWED" | "DISALLOWED" | "UNKNOWN" | "UNSUPPORTED";
 
+export type RequestTagInput = {
+	active?: boolean | null | undefined;
+	code: string;
+	description?: string | null | undefined;
+	label: string;
+};
+
 export type ResendLibraryUserInviteInput = {
 	id: string | number;
 };
@@ -724,6 +731,40 @@ export type ResendLibraryUserInviteMutationVariables = Exact<{
 
 export type ResendLibraryUserInviteMutation = {
 	resendLibraryUserInvite: { id: string; status: LibraryUserStatus };
+};
+
+export type CreateRequestTagMutationVariables = Exact<{
+	input: RequestTagInput;
+}>;
+
+export type CreateRequestTagMutation = {
+	createRequestTag: {
+		code: string | null;
+		label: string | null;
+		description: string | null;
+		active: boolean | null;
+	};
+};
+
+export type UpdateRequestTagMutationVariables = Exact<{
+	input: RequestTagInput;
+}>;
+
+export type UpdateRequestTagMutation = {
+	updateRequestTag: {
+		code: string | null;
+		label: string | null;
+		description: string | null;
+		active: boolean | null;
+	};
+};
+
+export type DeleteRequestTagMutationVariables = Exact<{
+	code: string;
+}>;
+
+export type DeleteRequestTagMutation = {
+	deleteRequestTag: { success: boolean; message: string | null };
 };
 
 export type UpdateAgencyMutationVariables = Exact<{
@@ -2489,6 +2530,17 @@ export type LoadPatronRequestsForExportQuery = {
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	} | null;
+};
+
+export type LoadRequestTagsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type LoadRequestTagsQuery = {
+	requestTags: Array<{
+		code: string | null;
+		label: string | null;
+		description: string | null;
+		active: boolean | null;
+	} | null> | null;
 };
 
 export type LoadResolvedFunctionalSettingsQueryVariables = Exact<{

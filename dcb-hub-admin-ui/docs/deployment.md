@@ -183,6 +183,7 @@ than computed.
 | `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**        | Service Info → Audit Explorer                                                                                                                 |
 | `VITE_FEATURE_ANNOUNCEMENTS`             | **no release serves this yet**        | Consortium → Announcements, the notices patrons read in discovery. Also needs `VITE_FEATURE_SYMPOSIA`                                         |
 | `VITE_FEATURE_SETTINGS_INHERITANCE`      | **no release serves this yet**        | Where a functional setting was decided, the bulk set, and the revert to inherited                                                             |
+| `VITE_FEATURE_REQUEST_TAGS`              | **no release serves this yet**        | Consortium → Request tags: the tags libraries put on patron requests - add, rename, retire, and delete one no request carries |
 | `VITE_FEATURE_SHELF_BROWSE`              | **no release serves this yet**        | The classification a library shelves by, which orders discovery's shelf browse. Also needs `VITE_FEATURE_SYMPOSIA`                            |
 
 Note the last three rows. There is deliberately **no single "we are on v9 now" switch**:
