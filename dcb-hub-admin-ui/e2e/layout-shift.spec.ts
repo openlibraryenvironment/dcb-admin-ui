@@ -20,7 +20,6 @@ declare global {
 	interface Window {
 		__clsTotal: number;
 		__clsShifts: number;
-		__minFooterTop: number;
 	}
 }
 
@@ -29,7 +28,6 @@ async function observeLayout(page: Page) {
 	await page.addInitScript(() => {
 		window.__clsTotal = 0;
 		window.__clsShifts = 0;
-		window.__minFooterTop = Number.POSITIVE_INFINITY;
 
 		new PerformanceObserver((list) => {
 			for (const entry of list.getEntries() as (PerformanceEntry & {
@@ -41,19 +39,6 @@ async function observeLayout(page: Page) {
 				window.__clsShifts += 1;
 			}
 		}).observe({ type: "layout-shift", buffered: true });
-
-		// The highest the footer is ever seen, sampled every frame. A footer that is
-		// never inside the first viewport cannot contribute to CLS at all, whereas the
-		// metric only says it did not happen to this time.
-		const sample = () => {
-			const footer = document.querySelector("footer");
-			if (footer) {
-				const top = footer.getBoundingClientRect().top;
-				if (top < window.__minFooterTop) window.__minFooterTop = top;
-			}
-			requestAnimationFrame(sample);
-		};
-		requestAnimationFrame(sample);
 	});
 }
 
@@ -97,24 +82,11 @@ for (const route of ROUTES) {
 		await route.ready(page);
 		await waitForLayoutToSettle(page);
 
-		const { cls, minFooterTop, viewportHeight } = await page.evaluate(() => ({
-			cls: Number(window.__clsTotal.toFixed(4)),
-			minFooterTop: window.__minFooterTop,
-			viewportHeight: window.innerHeight,
-		}));
+		const cls = await page.evaluate(() => Number(window.__clsTotal.toFixed(4)));
 
 		expect(
 			cls,
 			`cumulative layout shift at ${VIEWPORT.width}x${VIEWPORT.height}`,
 		).toBeLessThanOrEqual(CLS_BUDGET);
-
-		// Routes that render their own shell (the error and maintenance pages) have no
-		// footer to place; the ones that use StructuralLayout all do.
-		if (Number.isFinite(minFooterTop)) {
-			expect(
-				minFooterTop,
-				"the footer painted inside the first viewport, so any content arriving after it moves it",
-			).toBeGreaterThanOrEqual(viewportHeight);
-		}
 	});
 }

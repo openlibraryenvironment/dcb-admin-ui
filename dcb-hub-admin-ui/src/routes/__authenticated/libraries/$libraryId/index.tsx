@@ -30,7 +30,7 @@ import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
 import DataGrid from "@components/DataGrid/DataGrid";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import AddressLink from "@components/Address/AddressLink";
-import Loading from "@components/Loading/Loading";
+import PageLoading from "@components/Loading/PageLoading";
 import Error from "@components/Error/Error";
 import Confirmation from "@components/Confirmation/Confirmation";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
@@ -239,7 +239,7 @@ function LibraryProfile() {
 
 	if (isLoading)
 		return (
-			<Loading
+			<PageLoading
 				title={t("ui.info.loading.document", {
 					document_type: t("libraries.library"),
 				})}

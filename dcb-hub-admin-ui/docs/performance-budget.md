@@ -94,12 +94,10 @@ budget, the worst at **0.3412**, seven times it. Both causes were invisible at t
 1280px viewport the rest of the e2e suite runs at, which is why nothing had reported
 them:
 
-- **The page shell constrained its own height rather than its content row.** The shell
-  is a flex column of {header, row, footer}. Constrain the shell to a viewport and flex
-  gives the row `viewport - footer`, which puts the footer's top above the fold on a page
-  whose content has not arrived, and moves it below when the content does. The minimum
-  height now sits on the row (`PAGE_ROW_MIN_HEIGHT` in `src/constants/layout.ts`).
-  Measured on `/libraries/$libraryId` at 768x1024, footer top over time:
+- **A footer in view when a page's content arrives moves when it does.** The shell is a
+  flex column of {header, row, footer}. With a minimum height on the shell, a short
+  loading state puts the footer inside the first viewport, and a long page arriving
+  moves it a full viewport down. Measured on `/libraries/$libraryId` at 768x1024:
 
   | `minHeight` on               | Footer top      | CLS    |
   | ---------------------------- | --------------- | ------ |
@@ -107,11 +105,38 @@ them:
   | the shell (`100vh` + header) | 822px -> 2112px | 0.2794 |
   | the row                      | 1094px, no move | 0.0147 |
 
-  A 272px-tall element fully in view moving a full viewport is 0.266 of the first figure,
-  and the same shift was the largest contributor on `/patronRequests/$id` and
-  `/libraries/$libraryId/accounts`. It is `vh` and not `dvh`: on mobile `vh` is the
-  large viewport, so the footer sits further down still, while `dvh` changes as the URL
-  bar hides and would shift the page on scroll.
+  A 272px-tall element fully in view moving a full viewport is 0.266 of the first figure.
+
+  The first fix put `100vh` on the row, which kept the footer below the fold on **every**
+  page. That left 417-697px of empty page under a short grid, the gap growing with the
+  viewport, to protect four routes: with the shell holding the minimum instead, 65 of 69
+  routes stayed under budget. So the shell holds it again, and the four hold the
+  viewport themselves:
+
+  | Route                    | How                                         |
+  | ------------------------ | ------------------------------------------- |
+  | `/libraries/$libraryId`  | `PageLoading` while the record loads        |
+  | `/patronRequests/$id`    | `PageLoading` while the record loads        |
+  | `/bibs/$bibId`           | `PageLoading` while the record loads        |
+  | `/consortium/onboarding` | `VIEWPORT_BELOW_HEADER` on its body, always |
+
+  A reservation is only right where the loaded page is longer than the viewport.
+  Putting it on every `Loading` instead was measured at 15 routes over budget: a short
+  page's footer rises into view when its data lands, which is the same shift upwards.
+  Onboarding holds it after loading too, because its height arrives with a fan-out over
+  every library and lands either side of the fold, so the footer must stay below it
+  either way. `e2e/footer-position.spec.ts` holds the other side: a short page's footer
+  sits at the foot of the viewport. The signed-out shell (`LoginLayout`: `/login`,
+  `/logout`, `/maintenance`) works the same way, and that spec measures its CLS too,
+  since `/login` and `/logout` are not in `ROUTES`.
+
+- **A section that renders nothing while loading pushes down what is below it.**
+  `OnboardingStats` returned `null` until the data landed, then appeared above the grid
+  and moved it 151px. It now renders its heading and three placeholder tiles in the
+  same typography. `/consortium/onboarding` at 768x1024 went from 0.069 to 0.020.
+
+  It is `vh` and not `dvh`: `dvh` changes as a mobile URL bar hides and would shift the
+  page on scroll.
 
 - **A route whose loading branch rendered different chrome from its loaded branch**
   inserted 77px of breadcrumbs and title above the page when the data landed.
