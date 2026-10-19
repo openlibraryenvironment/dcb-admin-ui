@@ -8,6 +8,7 @@ import { getILS } from "@helpers/getILS";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 import { useGridState } from "@hooks/useGridState";
+import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
 import { getLibraries } from "@queries/getLibraries";
@@ -32,7 +33,7 @@ export default function OperatingWelcome() {
 		onFilterModelChange: handleFilterChange,
 		onColumnVisibilityModelChange: handleVisibilityChange,
 	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 200 },
+		pagination: { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE },
 		sort: [{ field: "fullName", sort: "asc" }],
 		columnVisibility: defaultWelcomeLibraryColumnVisibility,
 	});
@@ -47,7 +48,7 @@ export default function OperatingWelcome() {
 					sortModel,
 					paginationModel,
 					defaultOrder: "fullName",
-					defaultPageSize: 200,
+					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
 				}),
 			),
 		placeholderData: (previousData) => previousData,
