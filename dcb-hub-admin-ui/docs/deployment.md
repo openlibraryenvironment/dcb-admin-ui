@@ -184,6 +184,7 @@ than computed.
 | `VITE_FEATURE_ANNOUNCEMENTS`             | **no release serves this yet**        | Consortium → Announcements, the notices patrons read in discovery. Also needs `VITE_FEATURE_SYMPOSIA`                                         |
 | `VITE_FEATURE_SETTINGS_INHERITANCE`      | **no release serves this yet**        | Where a functional setting was decided, the bulk set, and the revert to inherited                                                             |
 | `VITE_FEATURE_SHELF_BROWSE`              | **no release serves this yet**        | The classification a library shelves by, which orders discovery's shelf browse. Also needs `VITE_FEATURE_SYMPOSIA`                            |
+| `VITE_FEATURE_CONFIRM_ITEM_RETURNED`     | **no release serves this yet**        | "Confirm item is back" on a request waiting for its item to return to the supplying library                                                   |
 
 Note the last three rows. There is deliberately **no single "we are on v9 now" switch**:
 account provisioning and the local holds limit are on dcb-service `main` but in _no

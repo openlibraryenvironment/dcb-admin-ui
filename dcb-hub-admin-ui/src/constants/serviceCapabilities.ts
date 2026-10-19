@@ -2,6 +2,7 @@ import {
 	isAuditExplorerEnabled,
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
+	isConfirmItemReturnedEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
 	isInsightsEnabled,
@@ -208,6 +209,14 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_GUARDED_CLEANUP",
 		enabled: isGuardedCleanupEnabled,
 		since: "9.0.0",
+		fields: {},
+	},
+	{
+		// A REST route, so nothing to select or strip. In no release yet.
+		id: "confirm_item_returned",
+		flag: "VITE_FEATURE_CONFIRM_ITEM_RETURNED",
+		enabled: isConfirmItemReturnedEnabled,
+		since: null,
 		fields: {},
 	},
 	{

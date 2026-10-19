@@ -147,6 +147,7 @@
 	},
 	"patron_request": {
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalized.",
+		"confirm_returned_body": "Do this once the item is back on the supplying library's shelf: the library has not reported it. The request is then released as if it had. A canceled request finishes as canceled, and a returned loan completes.",
 		"statuses": {
 			"CANCELLED": "Canceled",
 			"FINALISED": "Finalized"
