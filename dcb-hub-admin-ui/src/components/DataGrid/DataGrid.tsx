@@ -321,6 +321,9 @@ export default function DataGrid({
 				paginationMode={paginationMode}
 				loading={loading}
 				pageSizeOptions={PAGE_SIZE_OPTIONS}
+				// Nothing to page through yet. Shown, the bar moves when the grid resizes to the
+				// rows that land; added with them, it is not a layout shift at all.
+				hideFooter={rest.hideFooter || (loading && stableRows.length === 0)}
 				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}

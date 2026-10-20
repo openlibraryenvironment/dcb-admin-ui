@@ -135,6 +135,13 @@ them:
   and moved it 151px. It now renders its heading and three placeholder tiles in the
   same typography. `/consortium/onboarding` at 768x1024 went from 0.069 to 0.020.
 
+- **A grid's pagination bar moved when its first rows landed.** An empty grid holds a
+  400px minimum while it loads, then resizes to its rows, and the bar at its foot went
+  with it, on 22 of the 69 routes. Each was under budget, but a control that moves under
+  the pointer is a mis-click. `DataGrid` now hides the bar until there are rows to page
+  through, so it is added rather than moved, and `layout-shift.spec.ts` fails if a bar is
+  ever a shift source.
+
   It is `vh` and not `dvh`: `dvh` changes as a mobile URL bar hides and would shift the
   page on scroll.
 

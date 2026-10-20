@@ -20,6 +20,7 @@ declare global {
 	interface Window {
 		__clsTotal: number;
 		__clsShifts: number;
+		__gridBarShifts: number;
 	}
 }
 
@@ -28,15 +29,26 @@ async function observeLayout(page: Page) {
 	await page.addInitScript(() => {
 		window.__clsTotal = 0;
 		window.__clsShifts = 0;
+		window.__gridBarShifts = 0;
 
 		new PerformanceObserver((list) => {
 			for (const entry of list.getEntries() as (PerformanceEntry & {
 				value: number;
 				hadRecentInput: boolean;
+				sources: { node?: Node | null }[];
 			})[]) {
 				if (entry.hadRecentInput) continue;
 				window.__clsTotal += entry.value;
 				window.__clsShifts += 1;
+				// Under budget is not the same as still: a pagination bar that moves under
+				// the pointer is a mis-click, whatever the page's total.
+				for (const source of entry.sources) {
+					if (
+						source.node instanceof Element &&
+						source.node.classList.contains("MuiDataGrid-footerContainer")
+					)
+						window.__gridBarShifts += 1;
+				}
 			}
 		}).observe({ type: "layout-shift", buffered: true });
 	});
@@ -82,11 +94,15 @@ for (const route of ROUTES) {
 		await route.ready(page);
 		await waitForLayoutToSettle(page);
 
-		const cls = await page.evaluate(() => Number(window.__clsTotal.toFixed(4)));
+		const { cls, gridBarShifts } = await page.evaluate(() => ({
+			cls: Number(window.__clsTotal.toFixed(4)),
+			gridBarShifts: window.__gridBarShifts,
+		}));
 
 		expect(
 			cls,
 			`cumulative layout shift at ${VIEWPORT.width}x${VIEWPORT.height}`,
 		).toBeLessThanOrEqual(CLS_BUDGET);
+		expect(gridBarShifts, "a grid's pagination bar moved").toBe(0);
 	});
 }
