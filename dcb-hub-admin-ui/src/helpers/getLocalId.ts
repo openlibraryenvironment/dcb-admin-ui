@@ -6,6 +6,8 @@ export function getLocalId(ils: string): string {
 			return "locations.new.polaris_org";
 		case "Sierra":
 			return "locations.new.sierra";
+		case "Koha":
+			return "locations.new.koha";
 		default:
 			return "locations.local_id";
 	}
