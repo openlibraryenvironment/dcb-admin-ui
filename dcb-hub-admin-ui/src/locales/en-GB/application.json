@@ -941,6 +941,35 @@
 			"not_attached_body": "DCB Admin cannot point an existing library at a different Host LMS: dcb-service's updateLibrary and updateAgency carry no Host LMS field, and secondHostLms can only be read. The record is created and verified here; making a library use it needs a dcb-service change. Nothing about the library has been altered.",
 			"go_to_record": "Go to the Host LMS",
 			"back_to_list": "Back to all Host LMS"
+		},
+		"last_ping": {
+			"title": "Last connection check",
+			"column": "Last check",
+			"never": "DCB has not checked this Host LMS yet. It checks every Host LMS once a day, and whenever one is saved.",
+			"never_short": "Not checked",
+			"not_recorded": "Not recorded",
+			"never_ok": "Not since DCB started keeping a record",
+			"checked_at": "Checked",
+			"last_ok_at": "Last worked",
+			"version": "System version",
+			"duration": "Response time",
+			"duration_value": "{{ms}} ms",
+			"state": {
+				"ok": "Working",
+				"refused": "Refused DCB's credentials",
+				"misconfigured": "Cannot be used with its configuration",
+				"unreachable": "Could not be reached",
+				"failing": "Answered with an error",
+				"unknown": "Failed for an unrecognised reason"
+			},
+			"advice": {
+				"ok": "DCB reached this system and its credentials were accepted.",
+				"refused": "The system rejected DCB's API key or login. Correct the credentials on the Client config tab and save, which checks again. While the supplier preflight is on, DCB does not choose this library to supply.",
+				"misconfigured": "DCB could not build a connection from this configuration. Correct it on the Client config tab and save, which checks again. While the supplier preflight is on, DCB does not choose this library to supply.",
+				"unreachable": "DCB could not connect: the system may be down, or its address or firewall may have changed. DCB still sends requests here.",
+				"failing": "The system answered, but with an error. Check the system's own status, then save this Host LMS to check again.",
+				"unknown": "Look in the DCB log for this Host LMS around the time shown."
+			}
 		}
 	},
 	"insights": {
@@ -3155,7 +3184,7 @@
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
-			"host_lms_probes": "Configuration and authentication checks on Host LMS changes",
+			"host_lms_probes": "Host LMS checks: configuration, authentication and the last connection",
 			"settings_inheritance": "Settings inheritance",
 			"shelf_browse": "Shelf browse"
 		},

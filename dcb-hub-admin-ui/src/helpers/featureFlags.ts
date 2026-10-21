@@ -149,9 +149,10 @@ export const isLocalHoldsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_LOCAL_HOLDS");
 
 /**
- * The configuration and auth profile checks on creating or updating a Host LMS, in no
- * release yet. Two result fields, so this gates the mutation DOCUMENT: selecting them
- * against an older dcb-service fails the whole create.
+ * The configuration and auth profile checks on creating or updating a Host LMS, and the
+ * last connectivity check kept on each Host LMS: on dcb-service main, in no release yet.
+ * These gate the mutation and query DOCUMENTS: selecting them against an older dcb-service
+ * fails the whole operation.
  */
 export const isHostLmsProbesEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_HOST_LMS_PROBES");

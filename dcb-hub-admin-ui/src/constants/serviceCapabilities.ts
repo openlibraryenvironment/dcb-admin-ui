@@ -55,6 +55,9 @@ export const CONSORTIUM_SUPPORT_FIELDS = ["supportUrl"] as const;
  */
 export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
 
+/** The result of dcb-service's last connectivity check, kept on the Host LMS. */
+export const HOST_LMS_LAST_PING_FIELDS = ["lastPing"] as const;
+
 /** The two verification checks that read only what dcb-service holds. */
 export const HOST_LMS_PROBE_FIELDS = [
 	"configurationStatus",
@@ -270,9 +273,12 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_HOST_LMS_PROBES",
 		enabled: isHostLmsProbesEnabled,
 		since: null,
+		// One row for the stored last check and the two probes: they arrive in the same
+		// dcb-service release, so two flags could only ever be set wrongly apart.
 		fields: {
 			CreateHostLmsResult: HOST_LMS_PROBE_FIELDS,
 			UpdateHostLmsResult: HOST_LMS_PROBE_FIELDS,
+			HostLms: HOST_LMS_LAST_PING_FIELDS,
 		},
 	},
 	{

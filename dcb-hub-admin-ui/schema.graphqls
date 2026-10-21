@@ -20,6 +20,10 @@
 # validated against something; no release serves them, which is why
 # VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its capability row carries since: null.
 #
+# Also added by hand, from dcb-service main (in no release yet, so `host_lms_probes` carries
+# since: null): `configurationStatus` and `authProfileStatus` on the two Host LMS mutation
+# results, and `lastPing` on HostLms.
+#
 # Re-take this file whenever either branch moves, and re-run codegen.
 #
 scalar JSON
@@ -656,6 +660,8 @@ type HostLms {
 	suppressionRulesetName: String
 	itemSuppressionRulesetName: String
   clientConfig: JSON
+  "The result of the last connectivity check: status, failure category, version, facts, checkedAt, lastOkAt"
+  lastPing: JSON
 }
 
 """
