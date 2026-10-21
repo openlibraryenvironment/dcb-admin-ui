@@ -23,7 +23,14 @@
 		"expires": "Expires",
 		"id": "Alarm UUID",
 		"last_seen": "Last seen",
-		"repeat_count": "Repeat count"
+		"repeat_count": "Repeat count",
+		"detail": {
+			"reason": "What happened",
+			"how_to_fix": "How to fix it",
+			"from": "Before",
+			"to": "After",
+			"none": "No details"
+		}
 	},
 	"app": {
 		"name": "DCB Admin",
@@ -432,7 +439,22 @@
 		"your_version": "Your version",
 		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
 		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information.",
-		"versions": "Versions"
+		"versions": "Versions",
+		"scheduled_work": {
+			"title": "Scheduled work",
+			"enabled": "Scheduled work is switched on: {{value}}",
+			"tracking": "Tracking runs every {{interval}}.",
+			"tracking_last_run_one": "Tracking runs every {{interval}}. Its last run checked {{count}} request in {{seconds}} seconds.",
+			"tracking_last_run_other": "Tracking runs every {{interval}}. Its last run checked {{count}} requests in {{seconds}} seconds.",
+			"harvest": "Harvesting checks for work every {{interval}}.",
+			"nodes_caption": "The DCB instances running now, from dcb-service's service information",
+			"node": "Instance",
+			"runs_scheduled_work": "Runs scheduled work",
+			"started": "Started",
+			"last_heartbeat": "Last heartbeat",
+			"yes": "Yes",
+			"no": "No"
+		}
 	},
 	"error_overview": {
 		"audit_url": "Audit URL",
@@ -2955,6 +2977,11 @@
 		},
 		"common": {
 			"status": "Status"
+		},
+		"support_reference": {
+			"label": "Reference for support:",
+			"copy": "Copy the reference",
+			"copied": "Copied"
 		}
 	},
 	"welcome": {
@@ -3204,7 +3231,7 @@
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
-			"host_lms_probes": "Host LMS checks: configuration, authentication and the last connection",
+			"host_lms_probes": "Host LMS checks, the last connection check and ingest counts for chosen libraries",
 			"settings_inheritance": "Settings inheritance",
 			"shelf_browse": "Shelf browse"
 		},

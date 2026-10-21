@@ -16,6 +16,7 @@ import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { scopeSearchParam } from "@helpers/insightsSearch";
 import { scopeCodes, scopeId, selectedScope } from "@helpers/insightsScope";
+import { isHostLmsProbesEnabled } from "@helpers/featureFlags";
 import { insightsScopeOptionsQuery } from "@/queryOptions/libraries";
 import {
 	MAX_SCOPED_HOST_LMS,
@@ -40,13 +41,16 @@ function CatalogMetricsByHostLms() {
 	const client = useDcbRestClient();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const { scope = [] } = Route.useSearch();
+	// An older dcb-service ignores hostLmsCodes and counts the whole consortium, which
+	// would be shown as the selection's count
+	const canScope = isHostLmsProbesEnabled();
 
 	const gqlClient = useGraphQLClient();
 	const {
 		data: options = [],
 		isLoading: scopeLoading,
 		isError: scopeFailed,
-	} = useQuery(insightsScopeOptionsQuery(gqlClient));
+	} = useQuery({ ...insightsScopeOptionsQuery(gqlClient), enabled: canScope });
 	const selected = useMemo(
 		() => selectedScope(options, scope),
 		[options, scope],
@@ -55,7 +59,7 @@ function CatalogMetricsByHostLms() {
 
 	// A failed list counts as resolved, as on Insights: the count is consortium-wide and
 	// the selector says why
-	const scoped = scope.length > 0 && !scopeFailed;
+	const scoped = canScope && scope.length > 0 && !scopeFailed;
 	// Until the library list arrives a scoped URL resolves to no codes, and asking then
 	// would start the consortium-wide count the reader did not ask for.
 	const resolving = scoped && options.length === 0;
@@ -187,20 +191,22 @@ function CatalogMetricsByHostLms() {
 			subtitle={t("ui.reference.catalog_build")}
 		>
 			<Stack spacing={2}>
-				<ScopeSelector
-					options={options}
-					value={selected}
-					onChange={(next) =>
-						navigate({
-							search: {
-								scope: next.length > 0 ? next.map(scopeId) : undefined,
-							},
-							replace: true,
-						})
-					}
-					loading={scopeLoading}
-					failed={scopeFailed}
-				/>
+				{canScope && (
+					<ScopeSelector
+						options={options}
+						value={selected}
+						onChange={(next) =>
+							navigate({
+								search: {
+									scope: next.length > 0 ? next.map(scopeId) : undefined,
+								},
+								replace: true,
+							})
+						}
+						loading={scopeLoading}
+						failed={scopeFailed}
+					/>
+				)}
 				<Typography variant="attributeText" role="status">
 					{countedAt && !isFetching
 						? `${t("catalogMetricsByHostLms.counted_at", {

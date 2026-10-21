@@ -273,7 +273,8 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_HOST_LMS_PROBES",
 		enabled: isHostLmsProbesEnabled,
 		since: null,
-		// One row for the stored last check and the two probes: they arrive in the same
+		// One row for the stored last check, the two probes and the hostLmsCodes parameter on
+		// /hostlmss/importIngestDetails (REST, so nothing below): they arrive in the same
 		// dcb-service release, so two flags could only ever be set wrongly apart.
 		fields: {
 			CreateHostLmsResult: HOST_LMS_PROBE_FIELDS,

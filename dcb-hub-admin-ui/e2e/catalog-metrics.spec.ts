@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures/test";
 
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
-import { useAllFeatures } from "./fixtures/flags";
+import { useAllFeatures, useAllFeaturesExcept } from "./fixtures/flags";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import {
 	METRICS_HOST_LMS_ID,
@@ -102,5 +102,31 @@ test.describe("Catalog metrics per Host LMS", () => {
 		);
 
 		await expect(page.getByText("Unable to find the record")).toBeVisible();
+	});
+});
+
+// A dcb-service before the hostLmsCodes parameter ignores it and counts every Host LMS
+test.describe("Catalog metrics on an older dcb-service", () => {
+	test("offers no choice of libraries and asks only for the shared count", async ({
+		page,
+	}) => {
+		await useAllFeaturesExcept(page, ["VITE_FEATURE_HOST_LMS_PROBES"]);
+		await seedAuth(page, { roles: ADMIN_ROLES });
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: scopeLibraries,
+		});
+		const scopedRequests: string[] = [];
+		await mockCatalogMetrics(page, () => 1200, scopedRequests);
+
+		await page.goto("/serviceInfo/catalogMetricsByHostLms");
+
+		await expect(page.getByRole("status")).toContainText(
+			"Counts for every Host LMS are shared",
+		);
+		await expect(page.getByRole("combobox", { name: "Libraries" })).toHaveCount(
+			0,
+		);
+		expect(scopedRequests).toEqual([]);
 	});
 });

@@ -7,6 +7,8 @@ import {
 import { capitalize } from "@mui/material/utils";
 import { forwardRef } from "react";
 
+import RequestReference from "@components/RequestReference/RequestReference";
+
 import {
 	alertRole,
 	resolveAutoHideDuration,
@@ -47,6 +49,7 @@ export default function TimedAlert(props: any) {
 			>
 				<AlertTitle>{props.alertTitle ?? capitalize(severity)}</AlertTitle>
 				{props.alertText}
+				{props.reference && <RequestReference reference={props.reference} />}
 			</SnackbarAlert>
 		</Snackbar>
 	);
