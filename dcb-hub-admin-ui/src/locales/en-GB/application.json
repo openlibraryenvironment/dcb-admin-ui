@@ -21,6 +21,7 @@
 		"created": "Alarm raised",
 		"details": "Details",
 		"expires": "Expires",
+		"for_host_lms": "Showing the alarms for Host LMS {{code}}. <showAll>Show all alarms</showAll>",
 		"id": "Alarm UUID",
 		"last_seen": "Last seen",
 		"repeat_count": "Repeat count",
@@ -454,6 +455,24 @@
 			"last_heartbeat": "Last heartbeat",
 			"yes": "Yes",
 			"no": "No"
+		},
+		"configuration": {
+			"title": "Configuration",
+			"settings_caption": "Settings reported by dcb-service. A setting left unset shows dcb-service's default",
+			"setting": "Setting",
+			"value": "Value",
+			"search_backend": "Search index",
+			"placement_check_timeout": "Time limit on the checks before a request is placed",
+			"seconds_one": "{{count}} second",
+			"seconds_other": "{{count}} seconds",
+			"staff_client_ids": "Sign-in clients whose requests count as placed by staff",
+			"duplicate_request_check": "Duplicate request check",
+			"brand_asset_store": "Where brand images are stored",
+			"ingest_caption": "Whether DCB ingests records from each Host LMS, as dcb-service reports it",
+			"ingest_source": "Host LMS",
+			"ingest_enabled": "Ingest",
+			"on": "On",
+			"off": "Off"
 		}
 	},
 	"error_overview": {
@@ -692,6 +711,7 @@
 		"select_type_first": "Choose the LMS type to see the configuration this system needs.",
 		"ping_warning_title": "OpenRS DCB will connect to this system on creation",
 		"unsupported_title": "This system type cannot be created here yet",
+		"view_alarms": "View this Host LMS's alarms",
 		"unsupported_body": "DCB cannot yet validate {{ils}} configuration when creating a Host LMS, so it would be rejected. Choose another type, or ask your system administrator to add this Host LMS directly.",
 		"unsupported_for_creation": "{{ils}} Host LMS systems cannot be created from this workflow yet.",
 		"config_fields": {

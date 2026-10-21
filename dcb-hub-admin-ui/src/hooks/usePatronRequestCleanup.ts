@@ -1,6 +1,4 @@
 import { RefObject, useState } from "react";
-import { useAuth } from "react-oidc-context";
-import { useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	GridApiPremium,
@@ -12,6 +10,7 @@ import {
 } from "@helpers/cleanupPatronRequest";
 import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 interface UsePatronRequestCleanupProps {
 	apiRef: RefObject<GridApiPremium | null>;
@@ -42,7 +41,7 @@ const INITIAL_STATE: CleanupState = {
 
 /**
  * Bulk clean up for the patron request grids. Standardised with usePatronRequestRollback:
- * same shape, same self-resolved auth and API base, same patron-request cache invalidation.
+ * same shape, same self-resolved REST client, same patron-request cache invalidation.
  *
  * Where dcb-service guards cleanup (9.0.0 and later) every request is checked for updates
  * first and the server decides; whatever it refuses is collected so it can be overridden in
@@ -53,9 +52,7 @@ export const usePatronRequestCleanup = ({
 	apiRef,
 	onSuccess,
 }: UsePatronRequestCleanupProps) => {
-	const auth = useAuth();
-	const { cfg } = useRouter().options.context as { cfg: any };
-	const dcbApiBase = cfg?.VITE_DCB_API_BASE;
+	const restClient = useDcbRestClient();
 	const queryClient = useQueryClient();
 	const guarded = isGuardedCleanupEnabled();
 
@@ -92,12 +89,10 @@ export const usePatronRequestCleanup = ({
 
 			await Promise.all(
 				batch.map(async (row) => {
-					const outcome = await cleanupPatronRequest(
-						dcbApiBase,
-						auth.user?.access_token,
-						row,
-						{ override, refreshFirst: guarded },
-					);
+					const outcome = await cleanupPatronRequest(restClient, row, {
+						override,
+						refreshFirst: guarded,
+					});
 
 					if (outcome.kind === "cleaned") {
 						batchSuccess.push(row);

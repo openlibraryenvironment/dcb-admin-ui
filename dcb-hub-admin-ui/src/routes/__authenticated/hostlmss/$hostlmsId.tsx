@@ -427,13 +427,24 @@ function HostLMSDetails() {
 
 							{!editMode && (
 								<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-									<Link
-										to="/serviceInfo/catalogMetricsByHostLms/$hostlmsId"
-										params={{ hostlmsId: hostlms.id }}
-										underline="hover"
-									>
-										{t("catalogMetricsByHostLms.view")}
-									</Link>
+									<Stack spacing={1}>
+										<Link
+											to="/serviceInfo/catalogMetricsByHostLms/$hostlmsId"
+											params={{ hostlmsId: hostlms.id }}
+											underline="hover"
+										>
+											{t("catalogMetricsByHostLms.view")}
+										</Link>
+										{hostlms.code && (
+											<Link
+												to="/serviceInfo/alarms"
+												search={{ hostLms: hostlms.code }}
+												underline="hover"
+											>
+												{t("hostlms.view_alarms")}
+											</Link>
+										)}
+									</Stack>
 								</Grid>
 							)}
 						</Grid>

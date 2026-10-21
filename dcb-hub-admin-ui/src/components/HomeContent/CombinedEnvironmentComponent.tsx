@@ -26,6 +26,7 @@ import {
 } from "../../homeData/homeConfig";
 import VersionInfo from "./VersionInfo";
 import ScheduledWork from "./ScheduledWork";
+import ServiceConfiguration from "./ServiceConfiguration";
 import { environmentHealthQuery } from "@/queryOptions/environmentHealth";
 
 // A bare inline link is 17px tall and overflows a narrow cell into its neighbour's target.
@@ -194,6 +195,7 @@ export default function CombinedEnvironmentComponent() {
 
 			<VersionInfo serviceInfo={data?.serviceInfo ?? null} />
 			<ScheduledWork serviceInfo={data?.serviceInfo ?? null} />
+			<ServiceConfiguration serviceInfo={data?.serviceInfo ?? null} />
 
 			<Typography variant="homePageText" sx={{ mb: 2 }}>
 				<Trans

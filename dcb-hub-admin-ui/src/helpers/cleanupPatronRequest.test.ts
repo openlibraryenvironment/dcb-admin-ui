@@ -1,21 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import axios from "axios";
+import { AxiosHeaders, AxiosInstance } from "axios";
 import {
 	cleanupPatronRequest,
 	isCleanupEligible,
 } from "@helpers/cleanupPatronRequest";
 
-vi.mock("axios", () => ({
+vi.mock("axios", async (importOriginal) => ({
+	...(await importOriginal<typeof import("axios")>()),
 	default: {
-		post: vi.fn(),
-		isAxiosError: (error: any) => Boolean(error?.isAxiosError),
+		isAxiosError: (error: { isAxiosError?: boolean } | null) =>
+			Boolean(error?.isAxiosError),
 	},
 }));
 
-const post = axios.post as unknown as ReturnType<typeof vi.fn>;
+const post = vi.fn();
+const client = { post } as unknown as AxiosInstance;
 
 const httpError = (status: number, data?: unknown) => ({
 	isAxiosError: true,
+	config: { headers: new AxiosHeaders({ "X-Request-Id": "adm-0123456789ab" }) },
 	response: { status, data },
 });
 
@@ -67,8 +70,7 @@ describe("cleaning up one request", () => {
 
 	it("checks for updates first, then cleans up", async () => {
 		const outcome = await cleanupPatronRequest(
-			"/api",
-			"token",
+			client,
 			{
 				id: "pr-1",
 				status: "PICKUP_TRANSIT",
@@ -78,15 +80,14 @@ describe("cleaning up one request", () => {
 
 		expect(outcome).toEqual({ kind: "cleaned" });
 		expect(urls()).toEqual([
-			"/api/patrons/requests/pr-1/update",
-			"/api/patrons/requests/pr-1/transition/cleanup",
+			"/patrons/requests/pr-1/update",
+			"/patrons/requests/pr-1/transition/cleanup",
 		]);
 	});
 
 	it("does not poll a status dcb-service will not track", async () => {
 		await cleanupPatronRequest(
-			"/api",
-			"token",
+			client,
 			{
 				id: "pr-1",
 				status: "ERROR",
@@ -94,22 +95,21 @@ describe("cleaning up one request", () => {
 			{ refreshFirst: true },
 		);
 
-		expect(urls()).toEqual(["/api/patrons/requests/pr-1/transition/cleanup"]);
+		expect(urls()).toEqual(["/patrons/requests/pr-1/transition/cleanup"]);
 	});
 
 	it("does not refresh when it is not asked to", async () => {
-		await cleanupPatronRequest("/api", "token", {
+		await cleanupPatronRequest(client, {
 			id: "pr-1",
 			status: "PICKUP_TRANSIT",
 		});
 
-		expect(urls()).toEqual(["/api/patrons/requests/pr-1/transition/cleanup"]);
+		expect(urls()).toEqual(["/patrons/requests/pr-1/transition/cleanup"]);
 	});
 
 	it("overriding sends force and skips the second poll", async () => {
 		await cleanupPatronRequest(
-			"/api",
-			"token",
+			client,
 			{
 				id: "pr-1",
 				status: "PICKUP_TRANSIT",
@@ -117,7 +117,7 @@ describe("cleaning up one request", () => {
 			{ override: true, refreshFirst: true },
 		);
 
-		expect(urls()).toEqual(["/api/patrons/requests/pr-1/transition/cleanup"]);
+		expect(urls()).toEqual(["/patrons/requests/pr-1/transition/cleanup"]);
 		expect(post.mock.calls[0][2]).toMatchObject({ params: { force: true } });
 	});
 
@@ -132,7 +132,7 @@ describe("cleaning up one request", () => {
 		);
 
 		expect(
-			await cleanupPatronRequest("/api", "token", {
+			await cleanupPatronRequest(client, {
 				id: "pr-1",
 				status: "ERROR",
 			}),
@@ -146,7 +146,7 @@ describe("cleaning up one request", () => {
 	it("distinguishes forbidden, missing and broken", async () => {
 		post.mockRejectedValueOnce(httpError(403));
 		expect(
-			await cleanupPatronRequest("/api", "token", {
+			await cleanupPatronRequest(client, {
 				id: "pr-1",
 				status: "ERROR",
 			}),
@@ -154,7 +154,7 @@ describe("cleaning up one request", () => {
 
 		post.mockRejectedValueOnce(httpError(404));
 		expect(
-			await cleanupPatronRequest("/api", "token", {
+			await cleanupPatronRequest(client, {
 				id: "pr-1",
 				status: "ERROR",
 			}),
@@ -162,10 +162,14 @@ describe("cleaning up one request", () => {
 
 		post.mockRejectedValueOnce(httpError(500, { detail: "Cleanup failed" }));
 		expect(
-			await cleanupPatronRequest("/api", "token", {
+			await cleanupPatronRequest(client, {
 				id: "pr-1",
 				status: "ERROR",
 			}),
-		).toEqual({ kind: "failed", detail: "Cleanup failed" });
+		).toEqual({
+			kind: "failed",
+			detail: "Cleanup failed",
+			reference: "adm-0123456789ab",
+		});
 	});
 });

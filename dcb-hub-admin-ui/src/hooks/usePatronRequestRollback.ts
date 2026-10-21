@@ -1,7 +1,4 @@
 import { RefObject, useState } from "react";
-import axios from "axios";
-import { useAuth } from "react-oidc-context";
-import { useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	GridApiPremium,
@@ -9,6 +6,7 @@ import {
 } from "@mui/x-data-grid-premium";
 import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 interface UsePatronRequestRollbackProps {
 	apiRef: RefObject<GridApiPremium | null>;
@@ -52,9 +50,7 @@ export const usePatronRequestRollback = ({
 	apiRef,
 	onSuccess,
 }: UsePatronRequestRollbackProps) => {
-	const auth = useAuth();
-	const { cfg } = useRouter().options.context as { cfg: any };
-	const dcbApiBase = cfg?.VITE_DCB_API_BASE;
+	const restClient = useDcbRestClient();
 	const queryClient = useQueryClient();
 
 	const [confirmOpen, setConfirmOpen] = useState(false);
@@ -121,15 +117,7 @@ export const usePatronRequestRollback = ({
 			await Promise.all(
 				batch.map(async (row) => {
 					try {
-						await axios.post(
-							`${dcbApiBase}/patrons/requests/${row.id}/rollback`,
-							{},
-							{
-								headers: {
-									Authorization: `Bearer ${auth.user?.access_token}`,
-								},
-							},
-						);
+						await restClient.post(`/patrons/requests/${row.id}/rollback`, {});
 						batchSuccess.push(row);
 					} catch (error) {
 						console.error(`Failed to roll back request ${row.id}`, error);

@@ -5,6 +5,13 @@ import { useAllFeatures } from "./fixtures/flags";
 import { scanForViolations } from "./fixtures/axe";
 import { mockLatestReleases } from "./fixtures/service-status-mocks";
 import { MOCKS } from "./fixtures/routes";
+import consortiumBasics from "./fixtures-data/consortium-basics.json";
+import libraries from "./fixtures-data/libraries.json";
+import hostLms from "./fixtures-data/host-lms.json";
+import {
+	patronRequestDetailMocks,
+	TRACKED_REQUEST,
+} from "./fixtures/patron-request-detail";
 
 test.describe("A reference for support on a failed call", () => {
 	test("names the reference the failed call was sent with", async ({
@@ -35,6 +42,70 @@ test.describe("A reference for support on a failed call", () => {
 		await expect(
 			page.getByRole("button", { name: "Copy the reference" }),
 		).toBeVisible();
+	});
+
+	test("names the reference a failed patron request action was sent with", async ({
+		page,
+	}) => {
+		await useAllFeatures(page);
+		await seedAuth(page);
+		await mockGraphQL(page, {
+			LoadConsortium: consortiumBasics,
+			LoadConsortiumHeader: consortiumBasics,
+			LoadHostLms: { hostLms: { totalSize: 0, content: [] } },
+			LoadLibraryDirectory: libraries,
+			...patronRequestDetailMocks,
+		});
+
+		const sent: string[] = [];
+		await page.route("**/patrons/requests/*/update", (route) => {
+			if (route.request().method() !== "POST") return route.fallback();
+			const reference = route.request().headers()["x-request-id"];
+			if (reference) sent.push(reference);
+			return route.fulfill({ status: 500, json: {} });
+		});
+
+		await page.goto(`/patronRequests/${TRACKED_REQUEST.id}`);
+		await page.getByRole("button", { name: "Actions" }).click();
+		await page.getByRole("menuitem", { name: "Check for updates" }).click();
+
+		await expect(page.getByText("Reference for support:")).toBeVisible();
+		expect(sent).toHaveLength(1);
+		await expect(page.getByText(sent[0], { exact: true })).toBeVisible();
+	});
+});
+
+test.describe("A Host LMS's alarms", () => {
+	test("opens the alarms raised for that Host LMS, and only those", async ({
+		page,
+	}) => {
+		await useAllFeatures(page);
+		await seedAuth(page, { roles: ADMIN_ROLES });
+		const queries: string[] = [];
+		await mockGraphQL(page, {
+			...MOCKS,
+			LoadAlarms: (variables: { query?: string }) => {
+				queries.push(variables.query ?? "");
+				return { alarms: { totalSize: 0, content: [] } };
+			},
+		});
+		const host = hostLms.hostLms.content[0];
+
+		await page.goto(`/hostlmss/${host.id}`);
+		await page
+			.getByRole("link", { name: "View this Host LMS's alarms" })
+			.click();
+
+		await expect(page).toHaveURL(/\/serviceInfo\/alarms\?hostLms=/);
+		await expect(
+			page.getByText(`Showing the alarms for Host LMS ${host.code}`),
+		).toBeVisible();
+		await expect.poll(() => queries.at(-1)).toBe(`code:ILS.${host.code}.*`);
+		await scanForViolations(page);
+
+		await page.getByRole("link", { name: "Show all alarms" }).click();
+		await expect(page).toHaveURL(/\/serviceInfo\/alarms$/);
+		await expect.poll(() => queries.at(-1)).toBe("");
 	});
 });
 
@@ -88,7 +159,7 @@ for (const scheme of ["light", "dark"] as const) {
 	test.describe(`Scheduled work on Service Status, ${scheme}`, () => {
 		test.use({ colorScheme: scheme });
 
-		test("shows each DCB instance and the last tracking run", async ({
+		test("shows each DCB instance, the last tracking run and the configuration", async ({
 			page,
 		}) => {
 			await useAllFeatures(page);
@@ -120,7 +191,23 @@ for (const scheme of ["light", "dark"] as const) {
 						},
 						tracking: { interval: "5m" },
 						harvest: { interval: "1m" },
-						dcb: { "sheduled-tasks": { enabled: true } },
+						dcb: {
+							"sheduled-tasks": { enabled: true },
+							index: {
+								backend: { distribution: "opensearch", version: "2.19.1" },
+							},
+							requests: {
+								"preflight-checks": {
+									timeout: "PT55S",
+									"duplicate-requests": { enabled: "" },
+								},
+								"staff-client-ids": "dcb-admin,dcb-admin-for-libraries",
+							},
+							branding: { assets: { store: "" } },
+							ingest: {
+								sources: { "Alpha-College": { enabled: false } },
+							},
+						},
 					},
 				}),
 			);
@@ -136,6 +223,18 @@ for (const scheme of ["light", "dark"] as const) {
 			await expect(
 				page.getByRole("row").filter({ hasText: "sleepy_driscoll" }),
 			).toContainText("Yes");
+			await expect(
+				page.getByRole("row").filter({ hasText: "Search index" }),
+			).toContainText("opensearch 2.19.1");
+			await expect(
+				page.getByRole("row").filter({ hasText: "Duplicate request check" }),
+			).toContainText("Off");
+			await expect(
+				page.getByRole("row").filter({ hasText: "Where brand images" }),
+			).toContainText("database");
+			await expect(
+				page.getByRole("row").filter({ hasText: "Alpha-College" }),
+			).toContainText("Off");
 
 			await scanForViolations(page);
 		});

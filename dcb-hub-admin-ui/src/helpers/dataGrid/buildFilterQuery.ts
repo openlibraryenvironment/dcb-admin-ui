@@ -22,7 +22,7 @@ const escapeLuceneTerm = (value: string): string =>
 
 // Question marks replace spaces in search terms - see Lucene docs
 // https://lucene.apache.org/core/9_9_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
-const toLuceneTerm = (value: any) =>
+export const toLuceneTerm = (value: any) =>
 	escapeLuceneTerm(String(value)).replaceAll(" ", "?");
 
 /**

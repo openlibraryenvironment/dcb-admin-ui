@@ -21,6 +21,7 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { createConsortiumContact } from "@mutations/createConsortiumContact";
 import { createLibraryContact } from "@mutations/createLibraryContact";
 import { entityOwnsQueryKey } from "@constants/entityRegistry";
@@ -65,6 +66,7 @@ export default function NewContact({
 		open: boolean;
 		severity: "success" | "error";
 		text: string | null;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -177,6 +179,7 @@ export default function NewContact({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text:
 					entity === "Consortium"
 						? t("consortium.new_contact.error", { consortium: name })
@@ -357,6 +360,7 @@ export default function NewContact({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				autoHideDuration={6000}
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}
