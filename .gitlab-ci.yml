@@ -449,6 +449,67 @@ build_released_bundle:
       - dcb-hub-admin-ui/dist/
     expire_in: 1 hour
 
+# The production image, pushed to Harbor beside symposia-service's and ors-discovery-spa's:
+# main -> :main-<sha> and :next, a release -> :<version> and :latest. The first of each pair is
+# immutable. dcb-hub-admin-ui/docs/deployment.md, "Images".
+.publish_image:
+  stage: container
+  # No npm cache: restored, it sits in the build context and is copied into the build stage.
+  cache: {}
+  image:
+    name: moby/buildkit:v0.33.1-rootless
+    entrypoint: [""]
+    pull_policy: if-not-present
+  variables:
+    # Rootless buildkit in an unprivileged runner cannot use the default process sandbox.
+    BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+    CONTAINER_REGISTRY: harbor.k-int.com
+    CONTAINER_IMAGE: harbor.k-int.com/knowledgeintegration/dcb-admin-ui
+  before_script:
+    # Inherited protected group variables, so only a protected branch (main, release) has them
+    - test -n "$HARBOR_USERNAME" && test -n "$HARBOR_PASSWORD"
+    - mkdir -p ~/.docker
+    # A docker config rather than a flag, so the password never appears in a process list.
+    - |
+      AUTH="$(printf '%s' "$HARBOR_USERNAME:$HARBOR_PASSWORD" | base64 | tr -d '\n')"
+      printf '{"auths":{"%s":{"auth":"%s"}}}' "$CONTAINER_REGISTRY" "$AUTH" > ~/.docker/config.json
+  script:
+    - echo "publishing ${CONTAINER_IMAGE}:${PRIMARY} (and :${MOVING})"
+    - buildctl-daemonless.sh build
+      --frontend dockerfile.v0
+      --local context=dcb-hub-admin-ui
+      --local dockerfile=dcb-hub-admin-ui/docker/production
+      --output "type=image,\"name=${CONTAINER_IMAGE}:${PRIMARY},${CONTAINER_IMAGE}:${MOVING}\",push=true"
+
+publish_image_next:
+  extends: .publish_image
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
+  variables:
+    PRIMARY: main-$CI_COMMIT_SHORT_SHA
+    MOVING: next
+
+publish_image_release:
+  extends: .publish_image
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "release"'
+      when: on_success
+    - when: never
+  # No `dependencies`: $RELEASE_VERSION arrives as the release job's dotenv report.
+  needs:
+    - release
+  script:
+    - test -n "$RELEASE_VERSION"
+    - export PRIMARY="${RELEASE_VERSION#v}" MOVING=latest
+    # The image's build reads __APP_VERSION__ from package.json, which on this commit still
+    # names the previous release: the same reason build_released_bundle exists.
+    - |
+      sed -i "1,/\"version\":/ s/\"version\": \"[^\"]*\"/\"version\": \"${PRIMARY}\"/" dcb-hub-admin-ui/package.json
+      grep -qF "\"version\": \"${PRIMARY}\"" dcb-hub-admin-ui/package.json
+    - !reference [.publish_image, script]
+
 # Copy the dist build up to s3 where we can point cloudflare as a distribution service
 deploy_tag_to_s3:
   stage: deploy

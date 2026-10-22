@@ -505,7 +505,7 @@ Using "staging" as an example environment.
 
 **Deployment Steps:**
 
-1. Build the image using `docker build -f docker/production/Dockerfile -t dcb-admin-ui .`.
+1. Pull a published image (below), or build one using `docker build -f docker/production/Dockerfile -t dcb-admin-ui .`.
 2. Run the container, passing in your environment variables via the `-e` flag.
 3. Map the port correctly, keeping in mind the application runs on port `80` inside the container.
 
@@ -532,6 +532,23 @@ The four feature flags above are the dcb-service **9.0.0** set (see Section 2a);
 discovery front end. Against 8.71.0, leave them all out. Switching them on later is a changed `-e` and a container restart:
 `docker-entrypoint.sh` re-renders `inject_env.json` on every start, so the bundle never has
 to be rebuilt.
+
+#### Images
+
+CI pushes this Dockerfile's image to `harbor.k-int.com/knowledgeintegration/dcb-admin-ui`, the K-Int Harbor registry that symposia-service and ors-discovery-spa publish to:
+
+| Pipeline                           | Tags                                 |                         |
+| ---------------------------------- | ------------------------------------ | ----------------------- |
+| a commit on `main`                 | `main-<short sha>`, `next`           | `publish_image_next`    |
+| a release, on the `release` branch | `<version>` (e.g. `2.3.0`), `latest` | `publish_image_release` |
+
+`main-<sha>` and `<version>` never move; pin one of those. `next` and `latest` move with each push.
+
+A release image reports the version it was released as. The release pipeline runs on the commit _before_ semantic-release's version bump, so `publish_image_release` writes the released version into `package.json` before building, as `build_released_bundle` does for the bundle (see "The version the artefact reports"). A `main` image reports the last release, as the `main` bundle does.
+
+The jobs sign in with `HARBOR_USERNAME` and `HARBOR_PASSWORD`, the protected group variables the other projects in `knowledge-integration/libraries` inherit, and fail before building if either is missing. Protected variables reach only protected branches, so `main` and `release` must both be protected for the jobs to publish.
+
+An image needs no build arguments: the licence key and every other setting are read from the container's environment when it starts (`docker-entrypoint.sh`), so one image serves every deployment.
 
 ## 4. Security Note: PKCE vs. Traditional Client Secrets
 
