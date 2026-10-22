@@ -1059,7 +1059,8 @@
 					"request": {
 						"duplicate": "Ya existe una solicitud para este usuario en esta biblioteca dentro del intervalo de tiempo de 900 segundos.",
 						"generic": "Error: {{code}}. Más información: {{description}}",
-						"supplier_cannot_supply": "La biblioteca que tiene este ejemplar no puede suministrarlo por un problema en su configuración de DCB. {{description}} Elige otro ejemplar o pide al administrador de DCB de esa biblioteca que lo corrija."
+						"supplier_cannot_supply": "La biblioteca que tiene este ejemplar no puede suministrarlo por un problema en su configuración de DCB. {{description}} Elige otro ejemplar o pide al administrador de DCB de esa biblioteca que lo corrija.",
+						"timed_out": "DCB no pudo terminar de comprobar esta solicitud a tiempo, porque el sistema de una biblioteca tardó en responder. No se ha solicitado nada. Vuelve a intentarlo en unos minutos; si sigue ocurriendo, revisa el Host LMS de esa biblioteca."
 					},
 					"validation_failure": "No hemos podido validar este usuario. Corrige el código de barras y/o la institución a la que pertenece e inténtalo de nuevo.",
 					"validate_first": "Debe validar a un usuario antes de intentar realizar una solicitud de personal en su nombre."

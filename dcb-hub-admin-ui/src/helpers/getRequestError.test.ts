@@ -43,6 +43,12 @@ describe("getRequestError", () => {
 		).toBe(generic);
 	});
 
+	it("explains a request refused because a library system was too slow to check it", () => {
+		const key = getRequestError(refusal("PREFLIGHT_CHECKS_TIMED_OUT"));
+		expect(key).toBe("requesting.staff_request.patron.error.request.timed_out");
+		expect(typeof lookup(enGB as Tree, key)).toBe("string");
+	});
+
 	it("names a key every locale translates, carrying the description", () => {
 		const key = getRequestError(refusal("SUPPLIER_CANNOT_SUPPLY"));
 		for (const locale of [enGB, es] as Tree[]) {
