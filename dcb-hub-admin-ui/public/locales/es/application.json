@@ -1058,7 +1058,8 @@
 					"no_brackets": "Por favor, elimina cualquier paréntesis del código de barras.",
 					"request": {
 						"duplicate": "Ya existe una solicitud para este usuario en esta biblioteca dentro del intervalo de tiempo de 900 segundos.",
-						"generic": "Error: {{code}}. Más información: {{description}}"
+						"generic": "Error: {{code}}. Más información: {{description}}",
+						"supplier_cannot_supply": "La biblioteca que tiene este ejemplar no puede suministrarlo por un problema en su configuración de DCB. {{description}} Elige otro ejemplar o pide al administrador de DCB de esa biblioteca que lo corrija."
 					},
 					"validation_failure": "No hemos podido validar este usuario. Corrige el código de barras y/o la institución a la que pertenece e inténtalo de nuevo.",
 					"validate_first": "Debe validar a un usuario antes de intentar realizar una solicitud de personal en su nombre."
