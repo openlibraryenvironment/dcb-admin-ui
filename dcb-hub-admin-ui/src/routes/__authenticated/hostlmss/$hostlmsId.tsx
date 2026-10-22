@@ -23,11 +23,13 @@ import TabPanel from "@mui/lab/TabPanel";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
+import Link from "@components/Link/Link";
 import Loading from "@components/Loading/Loading";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import HostLmsVerification from "@components/HostLmsVerification/HostLmsVerification";
+import HostLmsLastPing from "@components/HostLmsLastPing/HostLmsLastPing";
 import ClientConfigFields, {
 	RecommendedConfigGaps,
 } from "@forms/NewLibrary/steps/ClientConfigFields";
@@ -45,7 +47,10 @@ import {
 	mergeClientConfigEdit,
 	missingRequiredClientConfig,
 } from "@helpers/hostLmsClientConfig";
-import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
+import {
+	type HostLmsVerificationResult,
+	verificationFrom,
+} from "@helpers/hostLmsVerification";
 import { HostLMS } from "@models/HostLMS";
 import FolioConfig from "@components/HostLmsConfig/FolioConfig";
 import SierraConfig from "@components/HostLmsConfig/SierraConfig";
@@ -55,6 +60,7 @@ import KohaConfig from "@components/HostLmsConfig/KohaConfig";
 import FoundationConfig from "@components/HostLmsConfig/FoundationConfig";
 import OrsApplianceConfig from "@components/HostLmsConfig/OrsApplianceConfig";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { isHostLmsProbesEnabled } from "@helpers/featureFlags";
 import { hostlmsParamsSchema } from "@schemas/routeParams/hostlmsParams";
 import type { LoadHostLmsQueryVariables } from "@generated/graphql";
 
@@ -83,7 +89,7 @@ export const Route = createFileRoute("/__authenticated/hostlmss/$hostlmsId")({
 			queryKey: ["hostLms", hostlmsId],
 			queryFn: () =>
 				createGraphQLClient(cfg, auth).request<any, LoadHostLmsQueryVariables>(
-					getHostLms,
+					getHostLms(),
 					{
 						query: `id:${hostlmsId}`,
 					},
@@ -114,7 +120,7 @@ function HostLMSDetails() {
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["hostLms", hostlmsId],
 		queryFn: () =>
-			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
+			gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms(), {
 				query: `id:${hostlmsId}`,
 			}),
 		enabled: !!hostlmsId,
@@ -226,11 +232,7 @@ function HostLMSDetails() {
 				setEditMode(false);
 				// The update re-probes the system, so a credential change that broke the
 				// connection is reported here rather than at the next ingest run.
-				setVerification({
-					pingStatus: result?.pingStatus,
-					ingestStatus: result?.ingestStatus,
-					warnings: result?.warnings ?? [],
-				});
+				setVerification(verificationFrom(result));
 				reset(undefined, { keepValues: false });
 			},
 		});
@@ -409,6 +411,40 @@ function HostLMSDetails() {
 									<Alert severity="info">
 										{t("hostlms.edit.immutable_note")}
 									</Alert>
+								</Grid>
+							)}
+
+							{isHostLmsProbesEnabled() && (
+								<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+									<Stack spacing={1}>
+										<Typography variant="accordionSummary">
+											{t("hostlms.last_ping.title")}
+										</Typography>
+										<HostLmsLastPing lastPing={hostlms.lastPing} />
+									</Stack>
+								</Grid>
+							)}
+
+							{!editMode && (
+								<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+									<Stack spacing={1}>
+										<Link
+											to="/serviceInfo/catalogMetricsByHostLms/$hostlmsId"
+											params={{ hostlmsId: hostlms.id }}
+											underline="hover"
+										>
+											{t("catalogMetricsByHostLms.view")}
+										</Link>
+										{hostlms.code && (
+											<Link
+												to="/serviceInfo/alarms"
+												search={{ hostLms: hostlms.code }}
+												underline="hover"
+											>
+												{t("hostlms.view_alarms")}
+											</Link>
+										)}
+									</Stack>
 								</Grid>
 							)}
 						</Grid>

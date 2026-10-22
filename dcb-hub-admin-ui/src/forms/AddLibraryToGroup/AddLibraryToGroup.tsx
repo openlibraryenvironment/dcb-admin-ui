@@ -20,6 +20,7 @@ import {
 import { Close } from "@mui/icons-material";
 
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
 import { getGroupsSelection } from "@queries/getGroupsSelection";
@@ -43,7 +44,12 @@ export default function AddLibraryToGroup({
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 
-	const [alert, setAlert] = useState({
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: string;
+		text: string;
+		reference?: string | null;
+	}>({
 		open: false,
 		severity: "success",
 		text: "",
@@ -148,6 +154,7 @@ export default function AddLibraryToGroup({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("libraries.error_adding_to_group"),
 			});
 			console.error(error);
@@ -281,6 +288,7 @@ export default function AddLibraryToGroup({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				alertText={alert.text}
 				autoHideDuration={3000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

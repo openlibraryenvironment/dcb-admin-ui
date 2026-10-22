@@ -17,6 +17,14 @@
 					"ingest": true,
 					"default-agency-code": "alpha",
 					"alpha-bespoke-flag": "kept"
+				},
+				"lastPing": {
+					"status": "ERROR",
+					"checkedAt": "2026-10-21T08:30:00Z",
+					"failure": "REFUSED",
+					"versionInfo": "Sierra 6.2",
+					"pingMillis": 412,
+					"lastOkAt": "2026-10-20T08:30:00Z"
 				}
 			}
 		]

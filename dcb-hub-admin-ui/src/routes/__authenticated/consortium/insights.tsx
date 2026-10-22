@@ -9,7 +9,7 @@ import Loading from "@components/Loading/Loading";
 import InsightsDashboard from "@components/Insights/InsightsDashboard";
 import ScopeSelector from "@components/Insights/ScopeSelector";
 import {
-	scopeCodes,
+	scopeLibraryCode,
 	scopeId,
 	scopeOptionsFrom,
 	selectedScope,
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/__authenticated/consortium/insights")({
 				);
 				// ensureQueryData returns the raw response - a `select` is a view for
 				// components only - so the options are derived here.
-				libraryCode = scopeCodes(
+				libraryCode = scopeLibraryCode(
 					selectedScope(scopeOptionsFrom(libraries), scope),
 				);
 			} catch {
@@ -114,7 +114,7 @@ function ConsortiumInsightsPage() {
 		() => selectedScope(options, view.scope),
 		[options, view.scope],
 	);
-	const libraryCode = useMemo(() => scopeCodes(selected), [selected]);
+	const libraryCode = useMemo(() => scopeLibraryCode(selected), [selected]);
 
 	// A link that names a library has no question to ask until the codes are known, so the
 	// dashboard is not mounted until then. A failed list counts as resolved - the figures

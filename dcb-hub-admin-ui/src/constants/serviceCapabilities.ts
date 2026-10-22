@@ -5,6 +5,7 @@ import {
 	isConfirmItemReturnedEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
+	isHostLmsProbesEnabled,
 	isInsightsEnabled,
 	isInsightsTrendsEnabled,
 	isLibraryUserProvisioningEnabled,
@@ -54,6 +55,15 @@ export const CONSORTIUM_SUPPORT_FIELDS = ["supportUrl"] as const;
  * serviceCapabilities.test.ts all read the same list.
  */
 export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
+
+/** The result of dcb-service's last connectivity check, kept on the Host LMS. */
+export const HOST_LMS_LAST_PING_FIELDS = ["lastPing"] as const;
+
+/** The two verification checks that read only what dcb-service holds. */
+export const HOST_LMS_PROBE_FIELDS = [
+	"configurationStatus",
+	"authProfileStatus",
+] as const;
 
 /**
  * The per-library brand, added by the same 9.0.0 migration as the consortium's.
@@ -262,6 +272,21 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {
 			Consortium: CONSORTIUM_SUPPORT_FIELDS,
 			UpdateConsortiumInput: CONSORTIUM_SUPPORT_FIELDS,
+		},
+	},
+	{
+		id: "host_lms_probes",
+		flag: "VITE_FEATURE_HOST_LMS_PROBES",
+		enabled: isHostLmsProbesEnabled,
+		since: "9.2.0",
+		// First released in 9.2.0. One row for the stored last check, the two probes and the
+		// hostLmsCodes parameter on /hostlmss/importIngestDetails (REST, so nothing below):
+		// they arrive in the same dcb-service release, so two flags could only ever be set
+		// wrongly apart.
+		fields: {
+			CreateHostLmsResult: HOST_LMS_PROBE_FIELDS,
+			UpdateHostLmsResult: HOST_LMS_PROBE_FIELDS,
+			HostLms: HOST_LMS_LAST_PING_FIELDS,
 		},
 	},
 	{

@@ -12,6 +12,8 @@ import {
 import Link from "@components/Link/Link";
 import { Trans, useTranslation } from "react-i18next";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { getLocations } from "@queries/getLocations";
 import {
 	borrowingLibraryOptionsQuery,
@@ -50,6 +52,7 @@ export default function StaffRequest({
 }: PatronRequestFormType) {
 	const { t } = useTranslation();
 	const auth = useAuth();
+	const restClient = useDcbRestClient();
 	const headers = useMemo(
 		() => ({
 			Authorization: `Bearer ${auth.user?.access_token}`,
@@ -71,6 +74,7 @@ export default function StaffRequest({
 		messageKey: string | null;
 		values?: Record<string, string | undefined>;
 		patronRequestLink?: string;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -335,15 +339,11 @@ export default function StaffRequest({
 		{ patronBarcode: string; agencyCode: string }
 	>({
 		mutationFn: (variables) =>
-			axios
-				.post(
-					`${cfg.VITE_DCB_API_BASE}/patron/auth/lookup`,
-					{
-						patronPrinciple: variables.patronBarcode,
-						agencyCode: variables.agencyCode,
-					},
-					{ headers },
-				)
+			restClient
+				.post("/patron/auth/lookup", {
+					patronPrinciple: variables.patronBarcode,
+					agencyCode: variables.agencyCode,
+				})
 				.then((res) => res.data),
 		onSuccess: (data, variables) => {
 			if (data.status === "VALID") {
@@ -377,6 +377,7 @@ export default function StaffRequest({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				messageKey: "requesting.staff_request.patron.error.validation_failure",
 			});
 			setStepError(0); // Set error on step 0
@@ -389,10 +390,8 @@ export default function StaffRequest({
 		any
 	>({
 		mutationFn: (payload) =>
-			axios
-				.post(`${cfg.VITE_DCB_API_BASE}/patrons/requests/place`, payload, {
-					headers,
-				})
+			restClient
+				.post("/patrons/requests/place", payload)
 				.then((res) => res.data),
 		onSuccess: (data) => {
 			const patronRequestLink = `/patronRequests/${data.id}`;
@@ -417,6 +416,7 @@ export default function StaffRequest({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				messageKey: getRequestError(error.response?.data?.failedChecks),
 				values: {
 					code: error?.response?.data?.failedChecks?.[0]?.code,
@@ -602,6 +602,7 @@ export default function StaffRequest({
 			{/* </Dialog> */}
 			<TimedAlert
 				severityType={alert.severity}
+				reference={alert.reference}
 				open={alert.open}
 				autoHideDuration={6000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

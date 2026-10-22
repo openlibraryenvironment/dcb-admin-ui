@@ -21,9 +21,17 @@
 		"created": "Alarm raised",
 		"details": "Details",
 		"expires": "Expires",
+		"for_host_lms": "Showing the alarms for Host LMS {{code}}. <showAll>Show all alarms</showAll>",
 		"id": "Alarm UUID",
 		"last_seen": "Last seen",
-		"repeat_count": "Repeat count"
+		"repeat_count": "Repeat count",
+		"detail": {
+			"reason": "What happened",
+			"how_to_fix": "How to fix it",
+			"from": "Before",
+			"to": "After",
+			"none": "No details"
+		}
 	},
 	"app": {
 		"name": "DCB Admin",
@@ -118,17 +126,37 @@
 	"catalogMetricsByHostLms": {
 		"await": "Awaiting ingest",
 		"change_filter": "Try changing your filters or search terms.",
+		"checkpoint": "Harvest checkpoint",
+		"checkpoint_help": "Where the next harvest resumes. Its fields depend on the type of Host LMS.",
 		"checkpoint_id": "Checkpoint UUID",
 		"count": "Bib record count",
+		"counted_at": "Counted at {{time}}",
 		"difference": "Source/bib difference",
 		"failed": "Ingest failed",
 		"harvest_enabled": "Harvest enabled",
 		"harvested": "Harvested",
+		"host_lms_title": "Catalogue metrics: {{name}}",
 		"ingested": "Ingested",
+		"list_timeout": "Counting every Host LMS can take longer than one request is allowed. The count keeps running, so try again in a minute to read it, or choose libraries or a group above to count only those now.",
 		"name": "Catalogue metrics by Host LMS",
+		"no_host_lms": "None of the selected libraries has a Host LMS to count.",
+		"no_checkpoint": "No checkpoint recorded",
 		"no_results": "No catalogue metrics found. Try changing your search terms or filters.",
+		"open_host_lms": "Open the Host LMS record",
+		"processing_complete": "No records are waiting to be ingested.",
+		"processing_failed_one": "{{formatted}} record failed to ingest.",
+		"processing_failed_other": "{{formatted}} records failed to ingest.",
+		"processing_waiting_one": "{{formatted}} record is waiting to be ingested.",
+		"processing_waiting_other": "{{formatted}} records are waiting to be ingested.",
+		"read_errors": "Some details could not be read",
+		"refresh": "Refresh counts",
+		"retry": "Try again",
+		"scoped_count": "Counted when asked, for the selected libraries only. Select a row for one Host LMS.",
+		"shared_count": "Counts for every Host LMS are shared for up to 5 minutes. Select a row for a count taken now.",
 		"source_system": "Source system name",
-		"source_system_id": "Source system UUID"
+		"source_system_id": "Source system UUID",
+		"too_many": "Choose fewer libraries: at most {{max}} Host LMSs can be counted at once, and this selection has {{count}}.",
+		"view": "View catalogue metrics"
 	},
 	"common": {
 		"about": "About",
@@ -412,7 +440,40 @@
 		"your_version": "Your version",
 		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
 		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information.",
-		"versions": "Versions"
+		"versions": "Versions",
+		"scheduled_work": {
+			"title": "Scheduled work",
+			"enabled": "Scheduled work is switched on: {{value}}",
+			"tracking": "Tracking runs every {{interval}}.",
+			"tracking_last_run_one": "Tracking runs every {{interval}}. Its last run checked {{count}} request in {{seconds}} seconds.",
+			"tracking_last_run_other": "Tracking runs every {{interval}}. Its last run checked {{count}} requests in {{seconds}} seconds.",
+			"harvest": "Harvesting checks for work every {{interval}}.",
+			"nodes_caption": "The DCB instances running now, from dcb-service's service information",
+			"node": "Instance",
+			"runs_scheduled_work": "Runs scheduled work",
+			"started": "Started",
+			"last_heartbeat": "Last heartbeat",
+			"yes": "Yes",
+			"no": "No"
+		},
+		"configuration": {
+			"title": "Configuration",
+			"settings_caption": "Settings reported by dcb-service. A setting left unset shows dcb-service's default",
+			"setting": "Setting",
+			"value": "Value",
+			"search_backend": "Search index",
+			"placement_check_timeout": "Time limit on the checks before a request is placed",
+			"seconds_one": "{{count}} second",
+			"seconds_other": "{{count}} seconds",
+			"staff_client_ids": "Sign-in clients whose requests count as placed by staff",
+			"duplicate_request_check": "Duplicate request check",
+			"brand_asset_store": "Where brand images are stored",
+			"ingest_caption": "Whether DCB ingests records from each Host LMS, as dcb-service reports it",
+			"ingest_source": "Host LMS",
+			"ingest_enabled": "Ingest",
+			"on": "On",
+			"off": "Off"
+		}
 	},
 	"error_overview": {
 		"audit_url": "Audit URL",
@@ -571,6 +632,8 @@
 			"subtitle": "Results of the connection and ingest checks for {{code}}.",
 			"ping": "Connection (ping)",
 			"ingest": "Record ingest",
+			"configuration": "Configuration",
+			"auth_profile": "Patron authentication profiles",
 			"warnings_title": "Configuration warnings",
 			"no_result": "No result was returned for this check.",
 			"empty": "No verification results are available.",
@@ -646,6 +709,7 @@
 		"select_type_first": "Choose the LMS type to see the configuration this system needs.",
 		"ping_warning_title": "OpenRS DCB will connect to this system on creation",
 		"unsupported_title": "This system type cannot be created here yet",
+		"view_alarms": "View this Host LMS's alarms",
 		"unsupported_body": "DCB cannot yet validate {{ils}} configuration when creating a Host LMS, so it would be rejected. Choose another type, or ask your system administrator to add this Host LMS directly.",
 		"unsupported_for_creation": "{{ils}} Host LMS systems cannot be created from this workflow yet.",
 		"config_fields": {
@@ -923,6 +987,35 @@
 			"not_attached_body": "DCB Admin cannot point an existing library at a different Host LMS: dcb-service's updateLibrary and updateAgency carry no Host LMS field, and secondHostLms can only be read. The record is created and verified here; making a library use it needs a dcb-service change. Nothing about the library has been altered.",
 			"go_to_record": "Go to the Host LMS",
 			"back_to_list": "Back to all Host LMS"
+		},
+		"last_ping": {
+			"title": "Last connection check",
+			"column": "Last check",
+			"never": "DCB has not checked this Host LMS yet. It checks every Host LMS once a day, and whenever one is saved.",
+			"never_short": "Not checked",
+			"not_recorded": "Not recorded",
+			"never_ok": "Not since DCB started keeping a record",
+			"checked_at": "Checked",
+			"last_ok_at": "Last worked",
+			"version": "System version",
+			"duration": "Response time",
+			"duration_value": "{{ms}} ms",
+			"state": {
+				"ok": "Working",
+				"refused": "Refused DCB's credentials",
+				"misconfigured": "Cannot be used with its configuration",
+				"unreachable": "Could not be reached",
+				"failing": "Answered with an error",
+				"unknown": "Failed for an unrecognised reason"
+			},
+			"advice": {
+				"ok": "DCB reached this system and its credentials were accepted.",
+				"refused": "The system rejected DCB's API key or login. Correct the credentials on the Client config tab and save, which checks again. While the supplier preflight is on, DCB does not choose this library to supply.",
+				"misconfigured": "DCB could not build a connection from this configuration. Correct it on the Client config tab and save, which checks again. While the supplier preflight is on, DCB does not choose this library to supply.",
+				"unreachable": "DCB could not connect: the system may be down, or its address or firewall may have changed. DCB still sends requests here.",
+				"failing": "The system answered, but with an error. Check the system's own status, then save this Host LMS to check again.",
+				"unknown": "Look in the DCB log for this Host LMS around the time shown."
+			}
 		}
 	},
 	"insights": {
@@ -2905,6 +2998,11 @@
 		},
 		"common": {
 			"status": "Status"
+		},
+		"support_reference": {
+			"label": "Reference for support:",
+			"copy": "Copy the reference",
+			"copied": "Copied"
 		}
 	},
 	"welcome": {
@@ -3154,6 +3252,7 @@
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
+			"host_lms_probes": "Host LMS checks, the last connection check and ingest counts for chosen libraries",
 			"settings_inheritance": "Settings inheritance",
 			"shelf_browse": "Shelf browse"
 		},

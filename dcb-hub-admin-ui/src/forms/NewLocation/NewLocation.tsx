@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getILS } from "@helpers/getILS";
 import { getLocalId } from "@helpers/getLocalId";
@@ -97,7 +98,12 @@ export default function NewLocation({
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 
-	const [alert, setAlert] = useState({
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: string;
+		text: string;
+		reference?: string | null;
+	}>({
 		open: false,
 		severity: "success",
 		text: "",
@@ -302,6 +308,7 @@ export default function NewLocation({
 				setAlert({
 					open: true,
 					severity: "error",
+					reference: requestReferenceOf(error),
 					text: t("locations.new.error.generic", { name: scopeName }),
 				});
 			}
@@ -572,6 +579,7 @@ export default function NewLocation({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				alertText={alert.text}
 				autoHideDuration={6000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

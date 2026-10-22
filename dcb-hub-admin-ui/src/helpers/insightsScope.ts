@@ -68,16 +68,20 @@ export const selectedScope = (options: ScopeOption[], scope: string[]) =>
 	options.filter((option) => scope.includes(scopeId(option)));
 
 /**
- * The `libraryCode` parameter for a set of chosen scopes: the union of their Host LMS
- * codes as the CSV the endpoints take, and undefined for the whole consortium.
+ * The Host LMS codes a selection resolves to, each once: two libraries on one Host LMS, or a
+ * library inside a selected group, contribute a single code.
+ */
+export const scopeCodes = (selected: ScopeOption[]) =>
+	Array.from(new Set(selected.flatMap((option) => option.codes)));
+
+/**
+ * The `libraryCode` parameter for a set of chosen scopes: their codes as the CSV the
+ * endpoints take, and undefined for the whole consortium.
  *
  * Undefined rather than an empty string because that is the difference between "every
  * library" and "no library", and `cleanParams` drops the parameter entirely.
  */
-export function scopeCodes(selected: ScopeOption[]): string | undefined {
-	const codes = new Set<string>();
-	for (const option of selected) {
-		for (const code of option.codes) codes.add(code);
-	}
-	return codes.size > 0 ? Array.from(codes).join(",") : undefined;
+export function scopeLibraryCode(selected: ScopeOption[]): string | undefined {
+	const codes = scopeCodes(selected);
+	return codes.length > 0 ? codes.join(",") : undefined;
 }

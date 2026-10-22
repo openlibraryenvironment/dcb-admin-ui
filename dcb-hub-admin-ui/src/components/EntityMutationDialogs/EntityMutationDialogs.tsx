@@ -33,6 +33,7 @@ export default function EntityMutationDialogs({
 				severityType={alert.severity}
 				alertText={alert.text}
 				alertTitle={alert.title}
+				reference={alert.reference}
 				onCloseFunc={onAlertClose}
 			/>
 		</>

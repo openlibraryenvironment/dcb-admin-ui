@@ -14,6 +14,7 @@ import {
 } from "@helpers/actions/entityMutationLogic";
 import { unsupportedInputKeys } from "@helpers/capabilityFields";
 import { graphQLErrorsIn } from "@helpers/graphQLErrors";
+import { requestReferenceOf } from "@helpers/requestReference";
 import {
 	ENTITY_REGISTRY,
 	entityOwnsQueryKey,
@@ -79,6 +80,8 @@ export interface AlertState {
 	severity: "success" | "error";
 	text: string | null;
 	title: string | null;
+	/** The reference the failed call was sent with, to quote to support. */
+	reference?: string | null;
 }
 
 /**
@@ -169,6 +172,7 @@ export function useEntityMutation(entity: EntityKey) {
 				severity: "error",
 				text: mutationFailureText(error, summary),
 				title: t("ui.data_grid.error"),
+				reference: requestReferenceOf(error),
 			}),
 		[t],
 	);

@@ -4,7 +4,6 @@ import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import axios from "axios";
 import dayjs from "dayjs";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -40,6 +39,8 @@ import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequest
 import { getILS } from "@helpers/getILS";
 import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { getPatronRequest } from "@queries/getPatronRequest";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { getLocation } from "@queries/getLocation";
@@ -87,6 +88,7 @@ function RouteComponent() {
 	const auth = useAuth();
 	const queryClient = useQueryClient();
 	const gqlClient = useGraphQLClient();
+	const restClient = useDcbRestClient();
 
 	const [updateSuccessAlertVisibility, setUpdateSuccessAlertVisibility] =
 		useState(false);
@@ -259,12 +261,7 @@ function RouteComponent() {
 	};
 
 	const updateMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/update`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
-			),
+		mutationFn: () => restClient.post(`/patrons/requests/${id}/update`, {}),
 		// The status before the POST, captured here rather than read in onSuccess: by
 		// then the invalidation has already replaced it.
 		onMutate: () => ({ before: patronRequest?.status }),
@@ -285,8 +282,7 @@ function RouteComponent() {
 	const cleanupMutation = useMutation({
 		mutationFn: (override: boolean) =>
 			cleanupPatronRequest(
-				cfg.VITE_DCB_API_BASE,
-				auth.user?.access_token,
+				restClient,
 				{ id, status: patronRequest?.status },
 				{ override, refreshFirst: guardedCleanup },
 			),
@@ -330,12 +326,7 @@ function RouteComponent() {
 	const canRollback = rollbackStatuses.includes(patronRequest?.status);
 
 	const rollbackMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/rollback`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
-			),
+		mutationFn: () => restClient.post(`/patrons/requests/${id}/rollback`, {}),
 		onMutate: () => ({ before: patronRequest?.status }),
 		onSuccess: async (_data, _variables, context) => {
 			setOutcome({ kind: "unknown" });
@@ -823,6 +814,13 @@ function RouteComponent() {
 										? () => setErrorAlertVisibility(false)
 										: () => setCleanupErrorAlertVisibility(false)
 								}
+								reference={
+									updateErrorAlertVisibility
+										? requestReferenceOf(updateMutation.error)
+										: cleanupMutation.data?.kind === "failed"
+											? cleanupMutation.data.reference
+											: requestReferenceOf(cleanupMutation.error)
+								}
 							/>
 							<TimedAlert
 								open={rollbackSuccessAlertVisibility}
@@ -843,6 +841,7 @@ function RouteComponent() {
 								alertText={t("patron_request.rollback_unsuccessful")}
 								key="rollback-error-alert"
 								onCloseFunc={() => setRollbackErrorAlertVisibility(false)}
+								reference={requestReferenceOf(rollbackMutation.error)}
 							/>
 							<TimedAlert
 								open={cleanupRefusal !== null}

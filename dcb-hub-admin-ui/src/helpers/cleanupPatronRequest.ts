@@ -1,6 +1,7 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { cleanupStatuses } from "@constants/statuses/cleanupStatuses";
 import { untrackedStatuses } from "@constants/statuses/untrackedStatuses";
+import { requestReferenceOf } from "@helpers/requestReference";
 
 /** The physical item is with the patron, or on its way to or from them. */
 export const itemOutStatuses = [
@@ -57,7 +58,7 @@ export type CleanupOutcome =
 	| { kind: "refused"; status?: string; detail?: string }
 	| { kind: "forbidden" }
 	| { kind: "notFound" }
-	| { kind: "failed"; detail?: string };
+	| { kind: "failed"; detail?: string; reference: string | null };
 
 interface CleanupOptions {
 	override?: boolean;
@@ -72,13 +73,11 @@ interface CleanupOptions {
  * that has just refreshed the request, so it does not poll the host systems twice.
  */
 export const cleanupPatronRequest = async (
-	apiBase: string,
-	accessToken: string | undefined,
+	client: AxiosInstance,
 	request: CleanableRequest,
 	{ override = false, refreshFirst = false }: CleanupOptions = {},
 ): Promise<CleanupOutcome> => {
-	const headers = { Authorization: `Bearer ${accessToken}` };
-	const base = `${apiBase}/patrons/requests/${request.id}`;
+	const base = `/patrons/requests/${request.id}`;
 
 	try {
 		if (
@@ -86,18 +85,19 @@ export const cleanupPatronRequest = async (
 			!override &&
 			!untrackedStatuses.includes(String(request.status))
 		) {
-			await axios.post(`${base}/update`, {}, { headers });
+			await client.post(`${base}/update`, {});
 		}
 
-		await axios.post(
+		await client.post(
 			`${base}/transition/cleanup`,
 			{},
-			{ headers, params: override ? { force: true } : undefined },
+			{ params: override ? { force: true } : undefined },
 		);
 
 		return { kind: "cleaned" };
 	} catch (error) {
-		if (!axios.isAxiosError(error)) return { kind: "failed" };
+		if (!axios.isAxiosError(error))
+			return { kind: "failed", reference: requestReferenceOf(error) };
 
 		const body = error.response?.data as
 			| {
@@ -119,7 +119,11 @@ export const cleanupPatronRequest = async (
 			case 404:
 				return { kind: "notFound" };
 			default:
-				return { kind: "failed", detail: body?.detail };
+				return {
+					kind: "failed",
+					detail: body?.detail,
+					reference: requestReferenceOf(error),
+				};
 		}
 	}
 };

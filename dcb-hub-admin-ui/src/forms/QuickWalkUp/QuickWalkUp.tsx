@@ -22,6 +22,8 @@ import { borrowingLibraryOptionsQuery } from "@/queryOptions/libraries";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getPatronRequestEssentials } from "@queries/getPatronRequestEssentials";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { StatusStepConnector } from "@components/StatusStepConnector/StatusStepConnector";
 import { PatronValidationStep } from "@forms/ExpeditedCheckout/steps/PatronValidationStep";
@@ -64,6 +66,7 @@ export default function QuickWalkUpRequest({
 		? String(auth.user?.profile?.code)
 		: "";
 
+	const restClient = useDcbRestClient();
 	const headers = useMemo(
 		() => ({ Authorization: `Bearer ${auth.user?.access_token}` }),
 		[auth.user?.access_token],
@@ -73,6 +76,7 @@ export default function QuickWalkUpRequest({
 		open: boolean;
 		severity: "success" | "error";
 		text: string;
+		reference?: string | null;
 	}>({ open: false, severity: "success", text: "" });
 	const [activeStep, setActiveStep] = useState(0);
 	const [patronValidated, setPatronValidated] = useState(false);
@@ -251,11 +255,7 @@ export default function QuickWalkUpRequest({
 		{ patronPrinciple: string; agencyCode: string }
 	>({
 		mutationFn: (payload) =>
-			axios
-				.post(`${cfg.VITE_DCB_API_BASE}/patron/auth/lookup`, payload, {
-					headers,
-				})
-				.then((res) => res.data),
+			restClient.post("/patron/auth/lookup", payload).then((res) => res.data),
 		onSuccess: (data) => {
 			if (data.status === "VALID") {
 				setPatronData(data);
@@ -271,10 +271,11 @@ export default function QuickWalkUpRequest({
 				setStepError(0);
 			}
 		},
-		onError: () => {
+		onError: (error) => {
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("requesting.staff_request.patron.error.validation_failure"),
 			});
 			setStepError(0);
@@ -305,10 +306,9 @@ export default function QuickWalkUpRequest({
 				patronHostLmsCode: patronData.systemCode,
 			};
 
-			const response = await axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/place/walkup`,
+			const response = await restClient.post(
+				"/patrons/requests/place/walkup",
 				payload,
-				{ headers },
 			);
 			return response.data;
 		},
@@ -328,6 +328,7 @@ export default function QuickWalkUpRequest({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t(getRequestError(error.response?.data?.failedChecks), {
 					code: error?.response?.data?.failedChecks?.[0]?.code,
 					description: error?.response?.data?.failedChecks?.[0]?.description,
@@ -478,6 +479,7 @@ export default function QuickWalkUpRequest({
 
 			<TimedAlert
 				severityType={alert.severity}
+				reference={alert.reference}
 				open={alert.open}
 				autoHideDuration={6000}
 				onCloseFunc={handleAlertClose}

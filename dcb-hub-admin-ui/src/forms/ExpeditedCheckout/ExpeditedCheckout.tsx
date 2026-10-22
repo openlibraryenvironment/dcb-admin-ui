@@ -28,6 +28,8 @@ import { PlaceRequestResponse } from "@models/PlaceRequestResponse";
 import { PatronLookupResponse } from "@models/PatronLookupResponse";
 import { OnSiteBorrowingFormData } from "@models/OnSiteBorrowingFormData";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { PatronValidationStep } from "./steps/PatronValidationStep";
 import { RequestCreationStep } from "./steps/RequestCreationStep";
@@ -67,6 +69,7 @@ export default function ExpeditedCheckout({
 	const gqlClient = useGraphQLClient();
 
 	const navigate = useNavigate();
+	const restClient = useDcbRestClient();
 	const headers = useMemo(
 		() => ({
 			Authorization: `Bearer ${auth.user?.access_token}`,
@@ -79,6 +82,7 @@ export default function ExpeditedCheckout({
 		severity: "success" | "error";
 		text: string;
 		patronRequestLink?: string;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -373,11 +377,7 @@ export default function ExpeditedCheckout({
 		{ patronPrinciple: string; agencyCode: string }
 	>({
 		mutationFn: (payload) =>
-			axios
-				.post(`${cfg.VITE_DCB_API_BASE}/patron/auth/lookup`, payload, {
-					headers,
-				})
-				.then((res) => res.data),
+			restClient.post("/patron/auth/lookup", payload).then((res) => res.data),
 		onSuccess: (data) => {
 			if (data.status === "VALID") {
 				setPatronData(data);
@@ -398,6 +398,7 @@ export default function ExpeditedCheckout({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("requesting.staff_request.patron.error.validation_failure"),
 			});
 			setStepError(0);
@@ -438,10 +439,9 @@ export default function ExpeditedCheckout({
 				isExpeditedRequest: true,
 			};
 
-			const response = await axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/place/expeditedCheckout`,
+			const response = await restClient.post(
+				"/patrons/requests/place/expeditedCheckout",
 				payload,
-				{ headers },
 			);
 			return response.data;
 		},
@@ -464,6 +464,7 @@ export default function ExpeditedCheckout({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t(getRequestError(error.response?.data?.failedChecks), {
 					code: error?.response?.data?.failedChecks?.[0]?.code,
 					description: error?.response?.data?.failedChecks?.[0]?.description,
@@ -655,6 +656,7 @@ export default function ExpeditedCheckout({
 			</DialogContent>
 			<TimedAlert
 				severityType={alert.severity}
+				reference={alert.reference}
 				open={alert.open}
 				autoHideDuration={6000}
 				onCloseFunc={handleAlertClose}

@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { defaultCreationReason } from "@helpers/auditDefaults";
@@ -84,7 +85,12 @@ export default function NewMapping({
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
 
-	const [alert, setAlert] = useState({
+	const [alert, setAlert] = useState<{
+		open: boolean;
+		severity: string;
+		text: string;
+		reference?: string | null;
+	}>({
 		open: false,
 		severity: "success",
 		text: "",
@@ -332,6 +338,7 @@ export default function NewMapping({
 				setAlert({
 					open: true,
 					severity: "error",
+					reference: requestReferenceOf(error),
 					text: t("mappings.new.error.generic", { library: libraryName }),
 				});
 			}
@@ -587,6 +594,7 @@ export default function NewMapping({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				alertText={alert.text}
 				autoHideDuration={6000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

@@ -18,6 +18,8 @@ import { getHostLms } from "@queries/getHostLms";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { isHostLmsProbesEnabled } from "@helpers/featureFlags";
+import { lastPingView } from "@helpers/hostLmsLastPing";
 import type { LoadHostLmsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/hostlmss/")({
@@ -42,7 +44,7 @@ export const Route = createFileRoute("/__authenticated/hostlmss/")({
 			],
 			queryFn: () =>
 				createGraphQLClient(cfg, auth).request<any, LoadHostLmsQueryVariables>(
-					getHostLms,
+					getHostLms(),
 					{
 						pageno: currentPagination.page,
 						pagesize: currentPagination.pageSize,
@@ -90,7 +92,7 @@ function HostLmss() {
 		queryKey: [gridId, paginationModel, sortModel, filterModel],
 		queryFn: () =>
 			gqlClient.request<any, LoadHostLmsQueryVariables>(
-				getHostLms,
+				getHostLms(),
 				buildServerGridQueryVars({
 					filterModel,
 					sortModel,
@@ -141,6 +143,25 @@ function HostLmss() {
 				sortable: false,
 				valueGetter: (val: any, row: any) => row?.clientConfig?.ingest,
 			},
+			...(isHostLmsProbesEnabled()
+				? [
+						{
+							field: "lastPing",
+							headerName: t("hostlms.last_ping.column"),
+							minWidth: 120,
+							flex: 0.75,
+							filterable: false,
+							sortable: false,
+							// Words, not a coloured mark: the state must read the same without colour
+							valueGetter: (val: unknown) => {
+								const view = lastPingView(val);
+								return view
+									? t(`hostlms.last_ping.state.${view.state}`)
+									: t("hostlms.last_ping.never_short");
+							},
+						} satisfies GridColDef,
+					]
+				: []),
 			{
 				field: "id",
 				headerName: t("hostlms.id", "Host LMS UUID"),
@@ -189,7 +210,7 @@ function HostLmss() {
 				columnVisibilityModel={columnVisibilityModel}
 				onColumnVisibilityModelChange={handleColumnVisibilityChange}
 				exportConfig={{
-					query: getHostLms,
+					query: getHostLms(),
 					coreType: "hostLms",
 				}}
 				disableAggregation
