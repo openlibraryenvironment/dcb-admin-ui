@@ -815,20 +815,19 @@ describe("hostLmsClientConfig", () => {
 			expect(isAdvancedField(byPath("oai-endpoint-url")!)).toBe(true);
 		});
 
-		it("offers availability concurrency and the polling multiplier on every adapter", () => {
+		it("offers no setting dcb-service 9.2.0 does not read", () => {
+			// Each is read only on an unmerged dcb-service branch
 			for (const lmsClass of Object.values(HOST_LMS_CLASSES)) {
-				expect(
-					clientConfigFieldsFor(lmsClass).map((configField) =>
-						configField.path.join("."),
-					),
-					lmsClass,
-				).toContain("availability-concurrency");
-				expect(
-					clientConfigFieldsFor(lmsClass).map((configField) =>
-						configField.path.join("."),
-					),
-					lmsClass,
-				).toContain("polling-multiplier");
+				const paths = clientConfigFieldsFor(lmsClass).map((configField) =>
+					configField.path.join("."),
+				);
+				for (const unread of [
+					"availability-concurrency",
+					"polling-multiplier",
+					"item-enrichment-concurrency",
+				]) {
+					expect(paths, `${lmsClass} offers ${unread}`).not.toContain(unread);
+				}
 			}
 		});
 

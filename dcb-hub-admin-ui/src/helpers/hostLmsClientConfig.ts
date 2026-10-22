@@ -253,15 +253,6 @@ const VIRTUAL_PATRON_EMAIL: ClientConfigField = {
 	advanced: true,
 };
 
-// Koha and Polaris both read it; dcb-service refuses more than 16
-const ITEM_ENRICHMENT_CONCURRENCY = field(
-	["item-enrichment-concurrency"],
-	"hostlms.config_fields.item_enrichment_concurrency",
-	"hostlms.config_fields.item_enrichment_concurrency_description",
-	"optional",
-	"number",
-);
-
 const SHARED_FIELDS: ClientConfigField[] = [
 	field(
 		["ingest"],
@@ -301,28 +292,6 @@ const SHARED_FIELDS: ClientConfigField[] = [
 			"hostlms.config_fields.base_url_qualifier",
 			"hostlms.config_fields.base_url_qualifier_description",
 			"optional",
-		),
-		advanced: true,
-	},
-	// Only slows polling: dcb-service refuses anything outside 1 to 10
-	{
-		...field(
-			["polling-multiplier"],
-			"hostlms.config_fields.polling_multiplier",
-			"hostlms.config_fields.polling_multiplier_description",
-			"optional",
-			"number",
-		),
-		advanced: true,
-	},
-	// dcb-service refuses more than 8; blank uses the job's per-source setting
-	{
-		...field(
-			["availability-concurrency"],
-			"hostlms.config_fields.availability_concurrency",
-			"hostlms.config_fields.availability_concurrency_description",
-			"optional",
-			"number",
 		),
 		advanced: true,
 	},
@@ -803,7 +772,6 @@ const POLARIS: HostLmsProfile = {
 					],
 					advanced: true,
 				},
-				ITEM_ENRICHMENT_CONCURRENCY,
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["hold-fetching-delay"],
@@ -1078,7 +1046,6 @@ const KOHA: HostLmsProfile = {
 					"hostlms.config_fields.no_renew_collection_code_description",
 					"optional",
 				),
-				ITEM_ENRICHMENT_CONCURRENCY,
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["do-not-renew-note"],
