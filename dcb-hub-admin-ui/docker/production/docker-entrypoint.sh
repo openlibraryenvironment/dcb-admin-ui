@@ -4,14 +4,14 @@ set -eu
 # Runs automatically on container start (nginx's official image executes
 # every script under /docker-entrypoint.d/ before nginx launches). Renders
 # inject_env.json from container env vars so one built image can be deployed
-# against any environment - see docs/deployment-docker.md.
+# against any environment - see docs/deployment.md.
 
 # VITE_PUBLIC_URL is deliberately absent: the base path is baked into the bundle
 # by Vite at build time and cannot be changed at runtime. Injecting it here too
 # gave the asset base and the router basepath two independent sources that could
 # disagree - which mounted the router where its own assets did not resolve.
 # This image serves the app at "/"; subpath hosting is done by the Cloudflare
-# worker in front of S3 (see docs/worker.js), not here.
+# worker in front of S3 (docs/deployment.md, Section 3), not here.
 # VITE_DCB_ADMIN_FOR_LIBRARIES_URL is where DCB Admin for Libraries is mounted, so
 # a library account that reaches this application is handed a link rather than only
 # told which application it wants. Optional: unset renders empty and the page drops
