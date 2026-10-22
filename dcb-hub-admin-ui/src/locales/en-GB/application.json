@@ -3137,7 +3137,6 @@
 		"subtitle": "DCB Admin runs against more than one dcb-service release. These features are switched on per environment once its dcb-service is new enough. This deployment reports version {{version}}.",
 		"version_unknown": "unknown",
 		"needs_version": "dcb-service {{version}} or later",
-		"needs_unreleased": "Not in any dcb-service release yet",
 		"flag_on": "on",
 		"flag_off": "off",
 		"column": {

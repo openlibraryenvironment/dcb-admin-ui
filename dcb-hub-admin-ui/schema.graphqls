@@ -1,26 +1,16 @@
-# THE NEWEST SCHEMA THIS APP TARGETS - dcb-service at c2b037f2e, the last commit on its
-# discovery integration branch to touch its schema.graphqls: everything the discovery UI
-# needs from dcb-service, on one branch. Four capabilities, all four unmerged and in no
-# dcb-service release - `supportUrl`, scoped functional settings, announcements and
-# `classificationScheme`.
+# THE NEWEST SCHEMA THIS APP TARGETS: dcb-service v9.2.0 verbatim (005b49a7e,
+# dcb/src/main/resources/schema.graphqls), then two capabilities that are in NO dcb-service
+# release, as `extend type` blocks at the end of this file so the boundary is visible:
 #
-# NOT on dcb-service main, and no longer a superset of it: main has moved on since the
-# 2026-09-09 merge into that branch, and its migrations are numbered when they merge.
+# - auditIncidence and its two types, from dcb-service `feat/audit-incidence`. Behind
+#   VITE_FEATURE_AUDIT_EXPLORER, `since: null`.
+# - scoped functional settings, from the discovery integration branch. Behind
+#   VITE_FEATURE_SETTINGS_INHERITANCE, `since: null`.
 #
-# That branch exists so these three applications can be developed and tested against one
-# contract before it merges; nothing here reaches a deployment before it does, because
-# every capability row that depends on it carries `since: null` and its flag is off
-# everywhere.
-#
-# Taken verbatim from that ref, plus ONE addition at the end of this file: auditIncidence
-# and its two types, from dcb-service `feat/audit-incidence` (fdde88c01), which is the
-# branch scheduled to merge them - MERGE_PLAN.md item 17. The identical block is also on
-# `feat/analytics` and `audit-explorer`, so name the scheduled branch rather than whichever
-# one a grep lands in first. They are here so the Audit Explorer's documents can be
-# validated against something; no release serves them, which is why
-# VITE_FEATURE_AUDIT_EXPLORER is off everywhere and its capability row carries since: null.
-#
-# Re-take this file whenever either branch moves, and re-run codegen.
+# They are here so those documents can be validated against something; no server has
+# them, both flags are off everywhere, and serviceCapabilities.test.ts proves their fields
+# are in no release schema committed beside this one. Re-take this file from the next
+# release tag the same way, keeping the blocks below until a release carries them.
 #
 scalar JSON
 
@@ -54,23 +44,13 @@ type Query {
 		# a library's staff list is tens of rows, and a roster across 500 libraries is a
 		# different query with different scale properties that nothing has asked for.
 		libraryUsers(libraryId: ID!): [LibraryUser!]!
+		requestTags: [RequestTag]
 		# Whether this deployment has an identity provider configured at all, so the UI can
 		# hide a tab that could only fail rather than render a form nobody can submit.
 		libraryUserProvisioningAvailable: Boolean!
-		# From dcb-service `feat/analytics`; see this file's header. No RELEASE serves it.
-		auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
-		# V-12. Everything at one scope, live or not - the admin list. A patron reads the LIVE
+		# Everything at one scope, live or not - the admin list. A patron reads the LIVE
 		# ones from /discovery/announcements, which is anonymous and has no query language.
 		announcements(scopeType: String!, scopeId: ID!): [Announcement!]!
-		# N-3 / V-22.6. Every functional setting as it resolves for one scope, with the
-		# level that decided it. The provenance is the point: a control that shows a value
-		# without saying whether this scope chose it or is following its parent makes a
-		# bulk-set a one-way door.
-		resolvedFunctionalSettings(scopeType: String!, scopeId: ID!): [ResolvedFunctionalSetting!]!
-		# V-22.6b. Which LibraryGroup.type carries settings on this deployment, so the admin
-		# UI can name the group level. Null means there is none and the chain is library
-		# then consortium.
-		settingsBearingGroupType: String
 }
 
 type Mutation {
@@ -84,20 +64,12 @@ type Mutation {
 		updateConsortium(input: UpdateConsortiumInput): Consortium!
 		updateFunctionalSetting(input: UpdateFunctionalSettingInput): FunctionalSetting!
 		createFunctionalSetting(input: FunctionalSettingInput): FunctionalSetting!
-		# V-12. A consortium announcement reaches every patron of every member library, so
+		# A consortium announcement reaches every patron of every member library, so
 		# consortium scope needs CONSORTIUM_ADMIN; a library administrator may publish for a
 		# library they actually administer, and the scope of an existing one cannot be edited.
 		createAnnouncement(input: CreateAnnouncementInput): Announcement!
 		updateAnnouncement(input: UpdateAnnouncementInput): Announcement!
 		deleteAnnouncement(input: DeleteEntityInput): DeleteEntityPayload!
-		# N-3 / V-22.6. One setting, explicitly, at one or many LIBRARY or LIBRARY_GROUP
-		# scopes. The same mutation for one scope and for forty: a separate single-scope
-		# one would be a second copy of the same rules that would eventually disagree.
-		setFunctionalSettingAtScopes(input: SetFunctionalSettingAtScopesInput): FunctionalSettingScopeChange!
-		# The half that stops a bulk-set being a one-way door. Removes the explicit rows so
-		# those scopes inherit again - NOT the same as writing the parent's value into them,
-		# which would make a scope that chose and a scope that never chose indistinguishable.
-		revertFunctionalSettingToInherited(input: RevertFunctionalSettingAtScopesInput): FunctionalSettingScopeChange!
 		createLibrary(input: LibraryInput): Library!
 		deleteLibrary(input: DeleteEntityInput): DeleteEntityPayload!
 		updateLibrary(input: UpdateLibraryInput): Library!
@@ -123,6 +95,14 @@ type Mutation {
 		provisionLibraryUser(input: ProvisionLibraryUserInput): LibraryUser!
 		setLibraryUserEnabled(input: SetLibraryUserEnabledInput): LibraryUser!
 		resendLibraryUserInvite(input: ResendLibraryUserInviteInput): LibraryUser!
+		# agencyCode is needed only when the caller holds several agencies involved in the request
+		addPatronRequestNote(patronRequestId: ID!, body: String!, agencyCode: String): PatronRequestNote!
+		retractPatronRequestNote(id: ID!): PatronRequestNote!
+		tagPatronRequest(patronRequestId: ID!, tagCode: String!, agencyCode: String): [PatronRequestTag]!
+		untagPatronRequest(patronRequestId: ID!, tagCode: String!, agencyCode: String): [PatronRequestTag]!
+		createRequestTag(input: RequestTagInput!): RequestTag!
+		updateRequestTag(input: RequestTagInput!): RequestTag!
+		deleteRequestTag(code: String!): DeleteEntityPayload!
 
 }
 
@@ -288,7 +268,7 @@ input LibraryInput {
 	contacts: [PersonInput]!
 	longitude: Float
 	latitude: Float
-	# V-11.1. Both are rendered as an href in the patron app's footer, so both must be
+	# Both are rendered as an href in the patron app's footer, so both must be
 	# an absolute http(s) URL naming a host. An explicit null or an empty string clears
 	# the field. patronWebsite answers opening hours and joining; supportUrl is where a
 	# patron reports that discovery itself is wrong.
@@ -337,7 +317,7 @@ input DeleteConsortiumContactInput {
 	changeCategory: String
 }
 
-# V-12. Something a library or consortium needs to tell its patrons.
+# Something a library or consortium needs to tell its patrons.
 #
 # headline and body are PLAIN TEXT and there is deliberately no markup field: operator-
 # authored markup rendered into every patron's page is stored XSS with an admin form
@@ -362,7 +342,7 @@ type Announcement {
 }
 
 input CreateAnnouncementInput {
-	# CONSORTIUM | LIBRARY_GROUP | LIBRARY
+	# CONSORTIUM | LIBRARY_GROUP | LIBRARY. A group notice reaches the patrons of its member libraries.
 	scopeType: String!
 	scopeId: ID!
 	headline: String!
@@ -390,65 +370,6 @@ input UpdateAnnouncementInput {
 	startsAt: String
 	expiresAt: String
 	reason: String
-	changeCategory: String
-	changeReferenceUrl: String
-}
-
-# N-3 / V-22.6. One functional setting as it resolves for one scope.
-type ResolvedFunctionalSetting {
-	name: FunctionalSettingType!
-	# The effective value. False when `source` is null, matching the behaviour every
-	# existing caller depends on: a setting nobody has configured is off.
-	enabled: Boolean!
-	# LIBRARY | LIBRARY_GROUP | CONSORTIUM, or null when NO level has a row. Null is a
-	# distinct answer from consortium-and-false: "nobody has said" and "the consortium said
-	# no" lead an administrator to do different things.
-	source: String
-	sourceId: ID
-	# The consortium, group or library name, so the UI can say where a value came from
-	# without a second query.
-	sourceName: String
-	# True when the deciding row sits at a level broader than the one asked about.
-	inherited: Boolean!
-	description: String
-	lastEditedBy: String
-	dateUpdated: String
-}
-
-# What one scoped write did. A summary rather than the resulting values: a bulk-set may name
-# five hundred libraries, and `changed` is what actually moved, which a revert makes
-# different from what was asked for.
-type FunctionalSettingScopeChange {
-	name: FunctionalSettingType!
-	scopeType: String!
-	changed: Int!
-	scopeIds: [ID!]!
-}
-
-input SetFunctionalSettingAtScopesInput {
-	# LIBRARY | LIBRARY_GROUP. CONSORTIUM is refused: while the legacy functional_setting
-	# tables exist the consortium level has exactly one writer, the consortium functional
-	# settings page, and ConsortiumFunctionalSettingMirror projects it onto the scope row.
-	scopeType: String!
-	# At most 500 - the member-library scale constant, so "every library in the consortium"
-	# fits in one call and nothing larger does.
-	scopeIds: [ID!]!
-	name: FunctionalSettingType!
-	enabled: Boolean!
-	description: String
-	reason: String!
-	changeCategory: String
-	changeReferenceUrl: String
-}
-
-input RevertFunctionalSettingAtScopesInput {
-	scopeType: String!
-	scopeIds: [ID!]!
-	name: FunctionalSettingType!
-	# Stamped on each row before it is removed. The audit trigger writes the row a statement
-	# fired for, so without it the log would record the reason the value was last SET as
-	# though that were why it was withdrawn.
-	reason: String!
 	changeCategory: String
 	changeReferenceUrl: String
 }
@@ -493,7 +414,7 @@ input UpdateConsortiumInput {
 	id: ID!
 	description: String
 	catalogueSearchUrl: String
-	# V-11.1. Rendered as an href in the patron app's footer: an absolute http(s) URL
+	# Rendered as an href in the patron app's footer: an absolute http(s) URL
 	# naming a host, and an explicit null or empty string clears the field.
 	websiteUrl: String
 	supportUrl: String
@@ -552,7 +473,7 @@ input UpdateLibraryInput {
 	type: String
 	patronWebsite: String
 	supportUrl: String
-	# V-22.2. DEWEY | LCC. Explicit null or empty clears it, withdrawing the library from
+	# DEWEY | LCC. Explicit null or empty clears it, withdrawing the library from
 	# shelf browse; an unrecognised value is REFUSED rather than ignored, or the form would
 	# show a value the server did not store.
 	classificationScheme: String
@@ -656,6 +577,8 @@ type HostLms {
 	suppressionRulesetName: String
 	itemSuppressionRulesetName: String
   clientConfig: JSON
+  "The result of the last connectivity check: status, failure category, version, facts, checkedAt, lastOkAt"
+  lastPing: JSON
 }
 
 """
@@ -762,11 +685,57 @@ type PatronRequest {
   pickupBibId: String
   pickupItemBarcode: String
 	isExpeditedCheckout: Boolean
+	"True when staff placed the request, false when a patron did, null when DCB cannot tell"
+	placedByStaff: Boolean
 	localHoldingId: String
 	pickupHoldingId: String
 	isTooLong: Boolean
 	protocol: String
 	renewalStatus: RenewalStatus
+	# Newest first, at most 50 per page
+	notes(pageno: Int, pagesize: Int): PatronRequestNotePage
+	tags: [PatronRequestTag]
+	involvedAgencyCodes: [String]
+}
+
+type PatronRequestNote {
+	id: ID
+	patronRequestId: ID
+	# LIBRARY or CONSORTIUM; agencyCode and libraryName are null for the consortium
+	authorKind: String
+	agencyCode: String
+	libraryName: String
+	body: String
+	dateCreated: String
+	retracted: Boolean
+	retractedBy: String
+}
+
+type PatronRequestNotePage {
+	content: [PatronRequestNote]
+	totalSize: Int
+	pageable: Pageable
+}
+
+type PatronRequestTag {
+	code: String
+	label: String
+	agencyCodes: [String]
+	consortium: Boolean
+}
+
+type RequestTag {
+	code: String
+	label: String
+	description: String
+	active: Boolean
+}
+
+input RequestTagInput {
+	code: String!
+	label: String!
+	description: String
+	active: Boolean
 }
 
 type PatronRequestAudit {
@@ -881,7 +850,7 @@ type Library {
 	discoverySystem: String
 	patronWebsite: String
 	supportUrl: String
-	# V-22.2. DEWEY | LCC, or null for a library that has not stated one - which is a
+	# DEWEY | LCC, or null for a library that has not stated one - which is a
 	# library shelf browse is NOT offered for, rather than one defaulted to Dewey.
 	classificationScheme: String
 	hostLmsConfiguration: String
@@ -1233,6 +1202,10 @@ type CreateHostLmsResult {
 	hostLms: HostLms
 	pingStatus: String
 	ingestStatus: String
+	"OK; Missing: the mandatory settings the stored config lacks; or Failed: why no client could be built. Makes no call to the Host LMS."
+	configurationStatus: String
+	"OK; Unsupported: each agency whose auth profile this Host LMS cannot authenticate with, (none) where it has no profile; Not checked: why; or Failed: why."
+	authProfileStatus: String
 	warnings: [String]
 }
 
@@ -1240,6 +1213,10 @@ type UpdateHostLmsResult {
 	hostLms: HostLms
 	pingStatus: String
 	ingestStatus: String
+	"OK; Missing: the mandatory settings the stored config lacks; or Failed: why no client could be built. Makes no call to the Host LMS."
+	configurationStatus: String
+	"OK; Unsupported: each agency whose auth profile this Host LMS cannot authenticate with, (none) where it has no profile; Not checked: why; or Failed: why."
+	authProfileStatus: String
 	warnings: [String]
 }
 
@@ -1306,15 +1283,17 @@ type LibraryUser {
 	lastEditedBy: String
 }
 
+# ---- In no dcb-service release (see the header) ----
 
-# ---------------------------------------------------------------------------
-# From dcb-service `feat/analytics`, which is unmerged. See this file's header.
-# ---------------------------------------------------------------------------
+extend type Query {
+    auditIncidence(query: String, interval: String, start: String, end: String): AuditIncidence!
+    resolvedFunctionalSettings(scopeType: String!, scopeId: ID!): [ResolvedFunctionalSetting!]!
+    settingsBearingGroupType: String
+}
 
-type AuditIncidenceBucket {
-  "ISO-8601 start of the interval (UTC)."
-  bucketStart: String!
-  count: Int!
+extend type Mutation {
+    setFunctionalSettingAtScopes(input: SetFunctionalSettingAtScopesInput): FunctionalSettingScopeChange!
+    revertFunctionalSettingToInherited(input: RevertFunctionalSettingAtScopesInput): FunctionalSettingScopeChange!
 }
 
 type AuditIncidence {
@@ -1324,4 +1303,65 @@ type AuditIncidence {
   totalSize: Int!
   "Continuous, gap-filled, ascending by bucketStart."
   buckets: [AuditIncidenceBucket!]!
+}
+
+type AuditIncidenceBucket {
+  "ISO-8601 start of the interval (UTC)."
+  bucketStart: String!
+  count: Int!
+}
+
+type ResolvedFunctionalSetting {
+	name: FunctionalSettingType!
+	# The effective value. False when `source` is null, matching the behaviour every
+	# existing caller depends on: a setting nobody has configured is off.
+	enabled: Boolean!
+	# LIBRARY | LIBRARY_GROUP | CONSORTIUM, or null when NO level has a row. Null is a
+	# distinct answer from consortium-and-false: "nobody has said" and "the consortium said
+	# no" lead an administrator to do different things.
+	source: String
+	sourceId: ID
+	# The consortium, group or library name, so the UI can say where a value came from
+	# without a second query.
+	sourceName: String
+	# True when the deciding row sits at a level broader than the one asked about.
+	inherited: Boolean!
+	description: String
+	lastEditedBy: String
+	dateUpdated: String
+}
+
+type FunctionalSettingScopeChange {
+	name: FunctionalSettingType!
+	scopeType: String!
+	changed: Int!
+	scopeIds: [ID!]!
+}
+
+input SetFunctionalSettingAtScopesInput {
+	# LIBRARY | LIBRARY_GROUP. CONSORTIUM is refused: while the legacy functional_setting
+	# tables exist the consortium level has exactly one writer, the consortium functional
+	# settings page, and ConsortiumFunctionalSettingMirror projects it onto the scope row.
+	scopeType: String!
+	# At most 500 - the member-library scale constant, so "every library in the consortium"
+	# fits in one call and nothing larger does.
+	scopeIds: [ID!]!
+	name: FunctionalSettingType!
+	enabled: Boolean!
+	description: String
+	reason: String!
+	changeCategory: String
+	changeReferenceUrl: String
+}
+
+input RevertFunctionalSettingAtScopesInput {
+	scopeType: String!
+	scopeIds: [ID!]!
+	name: FunctionalSettingType!
+	# Stamped on each row before it is removed. The audit trigger writes the row a statement
+	# fired for, so without it the log would record the reason the value was last SET as
+	# though that were why it was withdrawn.
+	reason: String!
+	changeCategory: String
+	changeReferenceUrl: String
 }
