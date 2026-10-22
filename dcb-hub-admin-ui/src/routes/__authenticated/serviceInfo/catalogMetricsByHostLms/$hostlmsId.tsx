@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import ErrorComponent from "@components/Error/Error";
 import Link from "@components/Link/Link";
-import Loading from "@components/Loading/Loading";
+import PageLoading from "@components/Loading/PageLoading";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
@@ -54,7 +54,7 @@ function CatalogMetricsForHostLms() {
 	if (isLoading) {
 		return (
 			<PageContainer hideBreadcrumbs>
-				<Loading
+				<PageLoading
 					title={t("ui.info.loading.document", {
 						document_type:
 							t("catalogMetricsByHostLms.name").charAt(0).toLowerCase() +
