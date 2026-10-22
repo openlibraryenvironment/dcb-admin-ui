@@ -17,27 +17,62 @@ warnings, and the file says why against each one.
 above today's bundle ratchets, and three of those in a row is how a bundle doubles.
 Exceeding it means cutting weight or bringing a written argument.
 
+| Page                   | Measured (2026-10-22) |   Limit |
+| ---------------------- | --------------------: | ------: |
+| `/login`               |    550,617 B, 98 reqs | 635,000 |
+| `/consortium/insights` |   792,296 B, 138 reqs | 910,000 |
+
+Both carry ~15% headroom, the ratio `symposia-ui` uses: enough to absorb ordinary
+feature work, tight enough to trip on a heavyweight dependency.
+
 ## The chunk budget measures the artefact
 
 `bundle-budget.json`, checked by `scripts/check-bundle-budget.mjs` after a build.
 Lighthouse cannot see a chunk no audited page fetches, and this application is mostly
-such chunks: measured on 2026-10-07 it shipped **1,650 KB gzipped across 382 chunks**,
-of which the Lighthouse budget covered 750 KB. The heaviest single thing in the
-artefact sat outside every gate in the repository:
+such chunks: measured on 2026-10-22 it shipped **1,566 KB gzipped across 326 chunks**,
+of which the Lighthouse budget on `/login` covered 551 KB. The heaviest single thing in
+the artefact sat outside every gate in the repository until this budget existed:
 
 | Chunk                 | gzipped | What it is                    |
 | --------------------- | ------: | ----------------------------- |
 | `exceljs.min.js`      |  276 KB | MUI X Premium's Excel export  |
-| `DataGrid.js`         |  213 KB | the Premium grid              |
-| `BarChartPro.js`      |  105 KB | `x-charts-pro`, Insights only |
-| `application.js`      |   77 KB | the app shell                 |
-| `DateLocalization.js` |   67 KB | `x-date-pickers-pro`          |
-| `i18n.js`             |   50 KB | the translation catalogue     |
+| `DataGrid.js`         |  215 KB | the Premium grid              |
+| `BarChartPro.js`      |  108 KB | `x-charts-pro`, Insights only |
+| `application.js`      |  106 KB | the app shell                 |
+| `DateLocalization.js` |   68 KB | `x-date-pickers-pro`          |
+| `i18n.js`             |   51 KB | the translation catalogue     |
 | `rasterizeHTML.js`    |   27 KB | the grid's print export       |
 
 The budget names every chunk above 15,000 bytes, so new weight arrives with a number
 beside it rather than silently. A chunk over its number, an unbudgeted chunk above
 the threshold, or a budgeted chunk that is no longer built all fail the gate.
+
+### When the bundler regroups chunks
+
+A bundler upgrade can fail this gate without adding a byte, because chunk names are
+what the budget keys on and the bundler chooses them. vite 8.1.3 -> 8.3.5 (rolldown
+1.1.4 -> 1.2.15) did exactly that on 2026-10-22. Built from identical source, one
+build with each bundler:
+
+| Measure                                  |      rolldown 1.1.4 |     rolldown 1.2.15 |
+| ---------------------------------------- | ------------------: | ------------------: |
+| total, gzipped                           |         1,663,514 B |         1,565,634 B |
+| `application.js` static closure          | 458 KB / 131 chunks |  362 KB / 66 chunks |
+| `/login` total-byte-weight               | 663,180 B, 163 reqs |  550,617 B, 98 reqs |
+| `/consortium/insights` total-byte-weight | 905,816 B, 203 reqs | 792,296 B, 138 reqs |
+
+`application.js` went from 77 KB to 106 KB because `Match.js`, `useThemeStore.js` and
+eleven smaller chunks, all already in its static closure, were merged into it. `main.js`
+became `request.js` and `useThemeStore.css` became `application.css` with the same
+contents. Most route chunks shrank by about 4.5 KB each.
+
+So the renamed chunks kept their approved numbers, `application.js` was re-derived, and
+everything that measures what users download was **lowered** to bank the saving: the
+total from 1,685,000 to 1,597,000, `/login` from 750,000 to 635,000 and Insights from
+1,000,000 to 910,000. Left where they were, those three limits would have admitted
+88 KB, 199 KB and 208 KB of new weight without a word. The check that distinguishes a
+regroup from new weight is the one above: build the same commit with each bundler and
+compare the totals and the static closure of the shell.
 
 ### What this is telling us to do
 
@@ -57,10 +92,12 @@ to aim at rather than to declare.
 
 `routeTree.gen.ts` statically imports all 85 route definitions, and those pull
 `schemas`, `axios`, `dayjs` and the bundled locale catalogue with them. That is why
-nothing paints on `/login` until a large graph has been fetched, parsed and executed,
-and why reshaping chunks moves the weight around without removing any — the
-experiment and its numbers are recorded in `vite.config.mts`. This budget stops it
-growing; it does not fix it.
+nothing paints on `/login` until a large graph has been fetched, parsed and executed:
+about 800 ms of script evaluation unthrottled, which a desktop staff console absorbs
+and a phone would not. Hand-written `codeSplitting` groups move the weight around
+without removing any; the experiment and its numbers are recorded in `vite.config.mts`.
+The bundler's own deduplication did remove some (see above), but the graph is still
+eager. This budget stops it growing; it does not fix it.
 
 ### `i18n.js` has no number of its own
 
