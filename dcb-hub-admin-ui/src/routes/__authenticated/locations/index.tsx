@@ -14,6 +14,7 @@ import NewLocation from "@forms/NewLocation/NewLocation";
 import Import from "@components/Import/Import";
 
 import { useGridState } from "@hooks/useGridState";
+import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useEntityMutation } from "@hooks/useEntityMutation";
@@ -59,7 +60,7 @@ function LocationsRouteComponent() {
 		onFilterModelChange: handleFilterChange,
 		onColumnVisibilityModelChange: handleColumnVisibilityChange,
 	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 200 },
+		pagination: { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE },
 		sort: [{ field: "lastImported", sort: "desc" }],
 		columnVisibility: {
 			id: false,
@@ -94,7 +95,7 @@ function LocationsRouteComponent() {
 					sortModel,
 					paginationModel,
 					defaultOrder: "lastImported",
-					defaultPageSize: 200,
+					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
 				}),
 			),
 		placeholderData: (previousData) => previousData,

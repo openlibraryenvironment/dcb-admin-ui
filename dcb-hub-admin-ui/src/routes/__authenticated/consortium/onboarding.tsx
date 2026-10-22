@@ -49,6 +49,7 @@ import type {
 } from "@generated/graphql";
 import { useGridState } from "@hooks/useGridState";
 import { errorForLog } from "@helpers/safeErrorLog";
+import { VIEWPORT_BELOW_HEADER } from "@constants/layout";
 
 export const Route = createFileRoute("/__authenticated/consortium/onboarding")({
 	component: Onboarding,
@@ -808,7 +809,12 @@ function Onboarding() {
 					<ConsortiumTabs current="onboarding" />
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+				<Grid
+					size={{ xs: 4, sm: 8, md: 12 }}
+					// Held after loading too: the page's height arrives with a fan-out over every
+					// library and lands either side of the fold, so the footer stays below it.
+					sx={{ minHeight: VIEWPORT_BELOW_HEADER }}
+				>
 					<Typography variant="h2" sx={{ mb: 2 }}>
 						{t("consortium.onboarding")}
 					</Typography>

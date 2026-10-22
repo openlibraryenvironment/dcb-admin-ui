@@ -33,6 +33,7 @@ import {
 import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import type { DataGridType } from "@constants/dataGrid/types";
+import { PAGE_SIZE_OPTIONS } from "@constants/pagination";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Confirmation from "@components/Confirmation/Confirmation";
 import { RollbackResultDialog } from "./components/RollbackResultDialog";
@@ -320,10 +321,10 @@ export default function DataGrid({
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
 				loading={loading}
-				// 100 is the ceiling: the scale constants cap a single UI interaction at
-				// 100 rows, always paged. 200 was above it, and a page size is sticky -
-				// one choice becomes every later request for that grid.
-				pageSizeOptions={[5, 10, 15, 20, 25, 50, 100]}
+				pageSizeOptions={PAGE_SIZE_OPTIONS}
+				// Nothing to page through yet. Shown, the bar moves when the grid resizes to the
+				// rows that land; added with them, it is not a layout shift at all.
+				hideFooter={rest.hideFooter || (loading && stableRows.length === 0)}
 				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}

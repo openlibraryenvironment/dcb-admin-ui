@@ -1,9 +1,9 @@
-import { defineConfig, loadEnv, type Plugin } from "vite";
+/// <reference types="vitest/config" />
+import { defineConfig, loadEnv, type Plugin, type UserConfig } from "vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
-import { readFileSync } from "fs";
-/// <reference types="vitest/config" />
+import path from "node:path";
+import { readFileSync } from "node:fs";
 
 function kiBootstrapCssPlugin(): Plugin {
 	return {
@@ -70,7 +70,7 @@ function versionMetaPlugin(version: string): Plugin {
 	};
 }
 
-export default defineConfig(({ mode, command }) => {
+export default defineConfig(({ mode, command }): UserConfig => {
 	// Wisdom from Ian: this is done to allow us to deploy the app to a folder rather than the root of a URI.
 	// This approach shold also work for deployment at root.
 	// const env = loadEnv(mode, process.cwd(), '');
@@ -108,10 +108,13 @@ export default defineConfig(({ mode, command }) => {
 	// (they used to be exposed via Next's publicRuntimeConfig); they are NOT runtime
 	// env, so they belong in `define`, not in the injected `cfg`/inject_env.json.
 	const pkg = JSON.parse(
-		readFileSync(path.resolve(__dirname, "package.json"), "utf-8"),
+		readFileSync(path.resolve(import.meta.dirname, "package.json"), "utf-8"),
 	);
 	const releaseInfo = JSON.parse(
-		readFileSync(path.resolve(__dirname, "release-info.json"), "utf-8"),
+		readFileSync(
+			path.resolve(import.meta.dirname, "release-info.json"),
+			"utf-8",
+		),
 	);
 
 	return {
@@ -129,7 +132,6 @@ export default defineConfig(({ mode, command }) => {
 			versionMetaPlugin(pkg.version),
 		],
 		server: {
-			historyApiFallback: true,
 			// Registered only when there is somewhere to proxy TO. http-proxy reads
 			// `target` per request, not at startup, so an unset VITE_ILL_API_BASE gave
 			// every /api/* call a 502 and this line in the dev log:
@@ -182,12 +184,12 @@ export default defineConfig(({ mode, command }) => {
 			// For scripts/check-bundle-budget.mjs, which reads what every page loads first
 			// from it. Only then: deploy copies dist/ outside assets/ as it stands
 			manifest: process.env.BUNDLE_BUDGET === "1",
-			rollupOptions: {
+			rolldownOptions: {
 				preserveEntrySignatures: "strict",
 				input: {
-					index: path.resolve(__dirname, "index.html"),
+					index: path.resolve(import.meta.dirname, "index.html"),
 					"ki-bootstrap": path.resolve(
-						__dirname,
+						import.meta.dirname,
 						"src/ki-bootstrap.ts",
 					),
 				},
@@ -255,11 +257,11 @@ export default defineConfig(({ mode, command }) => {
 			// decision to take against the number, not before it. docs/testing.md.
 			coverage: {
 				provider: "v8",
-				// WITHOUT THIS THE NUMBER IS A LIE. v8 only reports files a test actually
-				// loaded, so a module no test imports is absent rather than 0% - and the
-				// summary becomes "coverage of the code we already cover". It read 84.77%
+				// WITHOUT THIS THE NUMBER IS A LIE. With no `include`, v8 reports only files
+				// a test loaded, so a module no test imports is absent rather than 0% - and
+				// the summary becomes "coverage of the code we already cover". It read 84.77%
 				// of statements that way, over 2,273 statements in a src/ of ~90,000 lines.
-				all: true,
+				// Vitest 4 removed `all`; this glob is what reports untested files now.
 				include: ["src/**/*.{ts,tsx}"],
 				// cobertura is the one GitLab reads: artifacts:reports:coverage_report in
 				// .gitlab-ci.yml turns it into per-line annotations on the merge request
@@ -280,26 +282,9 @@ export default defineConfig(({ mode, command }) => {
 		},
 
 		resolve: {
-			alias: {
-				"@assets": path.resolve(__dirname, "src/assets"),
-				"@columns": path.resolve(__dirname, "src/columns"),
-				"@components": path.resolve(__dirname, "src/components"),
-				"@constants": path.resolve(__dirname, "src/constants"),
-				"@filters": path.resolve(__dirname, "src/filters"),
-				"@forms": path.resolve(__dirname, "src/forms"),
-				"@fragments": path.resolve(__dirname, "src/graphql/fragments"),
-				"@generated": path.resolve(__dirname, "src/generated"),
-				"@helpers": path.resolve(__dirname, "src/helpers"),
-				"@hooks": path.resolve(__dirname, "src/hooks"),
-				"@layout": path.resolve(__dirname, "src/layout"),
-				"@queries": path.resolve(__dirname, "src/graphql/queries"),
-				"@models": path.resolve(__dirname, "src/models"),
-				"@mutations": path.resolve(__dirname, "src/graphql/mutations"),
-				"@schemas": path.resolve(__dirname, "src/schemas"),
-				"@themes": path.resolve(__dirname, "src/themes"),
-				"@types": path.resolve(__dirname, "src/types"),
-				"@": path.resolve(__dirname, "src"),
-			},
+			// The aliases are tsconfig.json's `paths`, so the type-checker and the
+			// bundler cannot disagree about where `@hooks/...` lives.
+			tsconfigPaths: true,
 		},
 	};
 });

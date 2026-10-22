@@ -1,8 +1,8 @@
 {
 	"_why": "Gzipped budgets checked by scripts/check-bundle-budget.mjs after a BUNDLE_BUDGET=1 build. What FAILS: what every page loads first (the entry, the app shell it boots and their static imports), and each named chunk outside it. The total of everything emitted is printed and is not a budget: it grew with every feature, including routes nobody had opened, and in its two weeks as a gate it never caught anything the first load or a chunk number did not. Numbers are what they measured when set, plus 2% rounded up. Never raise one to make a build pass: docs/performance-budget.md.",
 	"firstLoad": {
-		"budget": 450600,
-		"_note": "441692 measured on 2026-10-22 on final-checks, plus 2%. main measured 431749 the same way the same day; the 9943 between them is the support reference sent with every request and shown with every failure, the Host LMS checks, and each route's preload list naming the chunks those added. The translation catalogue is unbounded and not counted here."
+		"budget": 344800,
+		"_note": "Lowered from 450,600 on 2026-10-22, re-derived from 337995 measured, plus 2%: vite 8.1.3 -> 8.3.5 (rolldown 1.1.4 -> 1.2.15) took the same first load from 441,692 across 140 files to 337995 across 73, and slack that size would admit a new dependency unnoticed. main measured 431,749 on rolldown 1.1.4 the same day; the difference was the support reference sent with every request and shown with every failure, the Host LMS checks, and each route's preload list naming the chunks those added. The translation catalogue is unbounded and not counted here."
 	},
 	"nameChunksAboveBytes": 15000,
 	"chunks": {

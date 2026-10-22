@@ -25,7 +25,7 @@ import Error from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import DataGrid from "@components/DataGrid/DataGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import Loading from "@components/Loading/Loading";
+import PageLoading from "@components/Loading/PageLoading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -430,7 +430,7 @@ function RouteComponent() {
 
 	if (patronRequestLoading) {
 		return (
-			<Loading
+			<PageLoading
 				title={t("ui.info.loading.document", {
 					document_type: t("patron_request.title").toLowerCase(),
 				})}
