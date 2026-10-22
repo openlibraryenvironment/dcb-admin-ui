@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import { Box, Paper, Skeleton, Stack, Typography } from "@mui/material";
 
 import { getILS } from "@helpers/getILS";
 
@@ -41,9 +41,9 @@ const StatTile = ({
 	label,
 	caption,
 }: {
-	value: number | string;
-	label: string;
-	caption?: string;
+	value: ReactNode;
+	label: ReactNode;
+	caption?: ReactNode;
 }) => (
 	<Paper
 		variant="outlined"
@@ -96,9 +96,7 @@ export default function OnboardingStats({
 		};
 	}, [libraries]);
 
-	// An empty row is more honest than tiles full of zeroes that are about to
-	// change; the grid's own loading state already says work is in progress.
-	if (loading || stats.total === 0) return null;
+	if (!loading && stats.total === 0) return null;
 
 	return (
 		<Box component="section" aria-labelledby="onboarding-stats-heading">
@@ -114,30 +112,48 @@ export default function OnboardingStats({
 				direction="row"
 				spacing={2}
 				sx={{ flexWrap: "wrap", rowGap: 2, mb: 3 }}
+				aria-hidden={loading || undefined}
 			>
-				<StatTile
-					value={stats.total}
-					label={t("consortium.onboarding_stats_libraries")}
-				/>
-				<StatTile
-					value={stats.complete}
-					label={t("consortium.onboarding_stats_complete")}
-					caption={t("consortium.onboarding_stats_outstanding", {
-						count: stats.outstanding,
-					})}
-				/>
-				{stats.ils.map((entry) => (
-					<StatTile
-						key={entry.name}
-						value={entry.count}
-						label={
-							entry.name === "UNKNOWN"
-								? t("consortium.onboarding_stats_unknown_ils")
-								: entry.name
-						}
-						caption={t("consortium.onboarding_stats_ils_caption")}
-					/>
-				))}
+				{loading ? (
+					// Placeholders, not zeroes, and not nothing: rendering nothing inserted this
+					// section above the grid when the data landed and pushed the grid 151px down.
+					// Three is the fewest tiles a consortium with libraries shows. Each carries a
+					// caption line because a row is as tall as its tallest tile.
+					Array.from({ length: 3 }, (_, index) => (
+						<StatTile
+							key={index}
+							value={<Skeleton width="40%" />}
+							label={<Skeleton width="70%" />}
+							caption={<Skeleton width="60%" />}
+						/>
+					))
+				) : (
+					<>
+						<StatTile
+							value={stats.total}
+							label={t("consortium.onboarding_stats_libraries")}
+						/>
+						<StatTile
+							value={stats.complete}
+							label={t("consortium.onboarding_stats_complete")}
+							caption={t("consortium.onboarding_stats_outstanding", {
+								count: stats.outstanding,
+							})}
+						/>
+						{stats.ils.map((entry) => (
+							<StatTile
+								key={entry.name}
+								value={entry.count}
+								label={
+									entry.name === "UNKNOWN"
+										? t("consortium.onboarding_stats_unknown_ils")
+										: entry.name
+								}
+								caption={t("consortium.onboarding_stats_ils_caption")}
+							/>
+						))}
+					</>
+				)}
 			</Stack>
 		</Box>
 	);

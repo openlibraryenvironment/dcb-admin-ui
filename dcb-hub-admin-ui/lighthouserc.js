@@ -107,22 +107,15 @@ module.exports = {
 					// pages - see the note above.
 					aggregationMethod: "median",
 					assertions: {
-						// THE SHARP EDGE: 750,000 B, against 653,582 B measured on a clean build
-						// of this branch (2026-08-30, median of three). A cold run reports that
-						// figure to the byte every time; see the aggregation note above for why
-						// the median and not the minimum. This is the assertion that actually
-						// holds the line, because bytes do not vary with the runner's CPU the way
-						// every score-based threshold does.
+						// THE SHARP EDGE: 550,617 B measured on a clean build (2026-10-22, median
+						// of three), plus ~15% headroom - the ratio symposia-ui uses. Bytes hold
+						// the line because a cold run reports them to the byte, where every score
+						// below swings with the runner's CPU.
 						//
-						// The ~14.8% of headroom is deliberate and is the same ratio symposia-ui
-						// uses: enough to absorb ordinary feature work, tight enough to trip on a
-						// heavyweight dependency.
-						//
-						// NEVER re-baseline this to make a build pass. A budget re-derived to sit
-						// just above whatever today's bundle happens to be is a budget that
-						// ratchets, and three of those in a row is how a bundle doubles.
-						// Exceeding it means cutting weight or bringing a written argument.
-						"total-byte-weight": ["error", { maxNumericValue: 750000 }],
+						// NEVER re-baseline this to make a build pass: exceeding it means cutting
+						// weight or bringing a written argument. Why it was last LOWERED is in
+						// docs/performance-budget.md.
+						"total-byte-weight": ["error", { maxNumericValue: 635000 }],
 
 						// 0.002 today. The frontend doctrine names CLS explicitly - skeletons
 						// must match the dimensions of what replaces them - and it is the one
@@ -164,23 +157,15 @@ module.exports = {
 						// says anything.
 						"categories:performance": ["warn", { minScore: 0.85 }],
 
-						// 1,567ms on desktop. It was ~6.83s under the phone emulation this file used
-						// to run, and most of that difference was the 4x CPU multiplier rather than
-						// anything about the application.
+						// 1,567ms on desktop, against ~6.83s under the phone emulation this file
+						// used to run; most of that difference was the 4x CPU multiplier.
 						//
-						// The underlying cost is real and unchanged: nothing paints until ~659 KB
-						// across 122 requests has been fetched, parsed and executed, because the
-						// sign-in page boots the whole application - `routeTree.gen.ts` statically
-						// imports all 81 route definitions and those pull `schemas`, `axios`,
-						// `dayjs` and the bundled locale catalogue with them. Script evaluation is
-						// ~800ms unthrottled. A desktop staff console absorbs that; a phone would
-						// not, which is what the old number was really saying.
-						//
-						// Still a warning, because the cause is the payload and the payload has a
-						// hard gate above. Tightened from 8,000ms to 3,000ms: on desktop the old
-						// threshold was 5x the measured figure and could never have fired.
-						// Chunk-shaping was tried and does NOT fix it; see the note in
-						// vite.config.mts and WELCOME_EXPERIENCE_PLAN.md §8 for what would.
+						// The cost underneath is real: nothing paints until ~551 KB across 98
+						// requests has been fetched and executed, because `routeTree.gen.ts`
+						// statically imports every route definition. A warning, because the cause
+						// is the payload and the payload has a hard gate above; 3,000ms because
+						// 8,000ms was 5x the measured figure and could never fire. What would move
+						// it: "The eager route graph" in docs/performance-budget.md.
 						"largest-contentful-paint": ["warn", { maxNumericValue: 3000 }],
 
 						// SEO is deliberately NOT asserted. This is an authenticated staff
@@ -193,15 +178,16 @@ module.exports = {
 					matchingUrlPattern: ".*/consortium/insights$",
 					aggregationMethod: "median",
 					assertions: {
-						// 874,647 B measured on a clean build (2026-09-11, median of three,
-						// identical to the byte across all three). That is 225 KB more than
+						// 792,296 B measured on a clean build (2026-10-22, median of three,
+						// identical to the byte across all three). That is 242 KB more than
 						// the sign-in page: the route's own chunk, x-charts-pro and the
-						// pickers. The same ~14.8% headroom the sign-in budget uses.
+						// pickers. The same ~15% headroom the sign-in budget uses; lowered
+						// from 1,000,000 with it.
 						//
 						// NEVER re-baseline this to make a build pass - the note above the
 						// sign-in figure applies here and applies harder, because this is
 						// the page most likely to grow a dependency.
-						"total-byte-weight": ["error", { maxNumericValue: 1000000 }],
+						"total-byte-weight": ["error", { maxNumericValue: 910000 }],
 
 						// 0.0013 today, against a page of twenty panels that each swap a
 						// skeleton for content. That is the skeletons matching their

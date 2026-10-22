@@ -26,6 +26,7 @@ import NewLibrary from "@forms/NewLibrary/NewLibrary";
 import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 
 import { useGridState } from "@hooks/useGridState";
+import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
@@ -51,7 +52,7 @@ import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 // the cache entry lines up on a fresh (unauthenticated-store) render.
 const DEFAULT_PAGINATION_MODEL: GridPaginationModel = {
 	page: 0,
-	pageSize: 200,
+	pageSize: MAX_DEFAULT_PAGE_SIZE,
 };
 const DEFAULT_SORT_MODEL: GridSortModel = [
 	{ field: "abbreviatedName", sort: "asc" },
@@ -154,7 +155,7 @@ function Libraries() {
 					sortModel,
 					paginationModel,
 					defaultOrder: "abbreviatedName",
-					defaultPageSize: 200,
+					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
 				}),
 			),
 		placeholderData: (previousData) => previousData,

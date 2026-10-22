@@ -9,6 +9,7 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
+import PageLoading from "@components/Loading/PageLoading";
 import Error from "@components/Error/Error";
 import {
 	StyledAccordion,
@@ -109,7 +110,7 @@ function SourceBibDetails() {
 			// change height. See docs/performance-budget.md, "Layout shift on every
 			// route".
 			<PageContainer title={t("nav.bibs")}>
-				<Loading
+				<PageLoading
 					title={t("ui.info.loading.document", {
 						document_type: t("bibRecords.bibs_one").toLowerCase(),
 					})}
