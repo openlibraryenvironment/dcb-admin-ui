@@ -10,6 +10,7 @@ import DataGrid from "@components/DataGrid/DataGrid";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import { useGridState } from "@hooks/useGridState";
+import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
@@ -64,7 +65,7 @@ export default function MappingsGrid({
 		onSortModelChange,
 		onFilterModelChange,
 	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 200 },
+		pagination: { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE },
 		sort: [{ field: "lastImported", sort: "asc" }],
 	});
 
@@ -91,7 +92,7 @@ export default function MappingsGrid({
 					paginationModel,
 					baseQuery,
 					defaultOrder: "lastImported",
-					defaultPageSize: 200,
+					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
 				}),
 			);
 		},

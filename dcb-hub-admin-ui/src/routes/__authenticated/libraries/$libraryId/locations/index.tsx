@@ -25,6 +25,7 @@ import Import from "@components/Import/Import";
 import NewLocation from "@forms/NewLocation/NewLocation";
 
 import { useGridState } from "@hooks/useGridState";
+import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
@@ -77,7 +78,7 @@ function LibraryLocations() {
 		onFilterModelChange: handleFilterChange,
 		onColumnVisibilityModelChange: handleColumnVisibilityChange,
 	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 200 },
+		pagination: { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE },
 		sort: [{ field: "lastImported", sort: "desc" }],
 		columnVisibility: {
 			id: false,
@@ -131,7 +132,7 @@ function LibraryLocations() {
 					paginationModel,
 					baseQuery: presetQueryVariables,
 					defaultOrder: "lastImported",
-					defaultPageSize: 200,
+					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
 				}),
 			);
 		},

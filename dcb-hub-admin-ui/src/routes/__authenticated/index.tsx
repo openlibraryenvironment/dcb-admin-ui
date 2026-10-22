@@ -12,13 +12,14 @@ import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { getLibraries } from "@queries/getLibraries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import i18n from "@/i18n";
+import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 // Default-state prefetch: mirrors OperatingWelcome's own useGridState defaults
-// (pageSize 200, sort fullName ASC, no filter) AND its literal "LoadLibraries"
+// (MAX_DEFAULT_PAGE_SIZE, sort fullName ASC, no filter) AND its literal "LoadLibraries"
 // query key, so the cache entry lines up on a fresh render and the welcome
 // grid paints with its rows/count already populated instead of flashing.
-const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 200 };
+const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE };
 const DEFAULT_SORT_MODEL = [{ field: "fullName", sort: "asc" }];
 const DEFAULT_FILTER_MODEL = { items: [] };
 
