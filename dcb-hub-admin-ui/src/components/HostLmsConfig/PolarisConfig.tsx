@@ -42,19 +42,6 @@ export default function PolarisConfig({ config }: { config: any }) {
 				title={t("hostlms.client_config.page_size")}
 				value={config?.["page-size"]}
 			/>
-			<ConfigItem
-				title={t("hostlms.config_fields.staff_ui")}
-				value={config?.["staff-ui"]}
-				type="url"
-			/>
-			<ConfigItem
-				title={t("hostlms.config_fields.use_new_bib_chunk_ingest")}
-				value={
-					config?.["use-new-bib-chunk-ingest"] === undefined
-						? undefined
-						: String(config["use-new-bib-chunk-ingest"])
-				}
-			/>
 			{/* A map of the site's own shelf locations to lending policies. Shown
 			    as a count with the detail in the tooltip - the full map can run to
 			    dozens of entries and would swamp the panel. */}
