@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	useSearch,
+} from "@tanstack/react-router";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
@@ -39,8 +43,12 @@ export const Route = createFileRoute(
 function CatalogMetricsByHostLms() {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
-	const navigate = useNavigate({ from: Route.fullPath });
-	const { scope = [] } = Route.useSearch();
+	const navigate = useNavigate({
+		from: "/serviceInfo/catalogMetricsByHostLms/",
+	});
+	const { scope = [] } = useSearch({
+		from: "/__authenticated/serviceInfo/catalogMetricsByHostLms/",
+	});
 	// An older dcb-service ignores hostLmsCodes and counts the whole consortium, which
 	// would be shown as the selection's count
 	const canScope = isHostLmsProbesEnabled();

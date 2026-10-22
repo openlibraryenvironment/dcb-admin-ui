@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { GridColDef } from "@mui/x-data-grid-premium";
 import { Alert } from "@mui/material";
@@ -33,7 +33,9 @@ function AlarmsRouteComponent() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
-	const { hostLms } = Route.useSearch();
+	const { hostLms } = useSearch({
+		from: "/__authenticated/serviceInfo/alarms/",
+	});
 	const baseQuery = hostLms ? hostLmsAlarmsQuery(hostLms) : "";
 
 	const gridId = "alarms";

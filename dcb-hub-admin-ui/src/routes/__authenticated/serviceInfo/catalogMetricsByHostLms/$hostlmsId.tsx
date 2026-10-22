@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import {
 	Alert,
 	AlertTitle,
@@ -38,7 +38,9 @@ export const Route = createFileRoute(
 
 function CatalogMetricsForHostLms() {
 	const { t } = useTranslation();
-	const { hostlmsId } = Route.useParams();
+	const { hostlmsId } = useParams({
+		from: "/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId",
+	});
 	const client = useDcbRestClient();
 
 	const {
