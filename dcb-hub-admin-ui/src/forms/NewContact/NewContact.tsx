@@ -30,6 +30,7 @@ import type {
 	CreateConsortiumContactMutation,
 	CreateLibraryContactMutation,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface NewContactFormData {
 	firstName: string;
@@ -175,7 +176,7 @@ export default function NewContact({
 			}
 		},
 		onError: (error) => {
-			console.error("Error creating new contact:", error);
+			console.error("Error creating new contact:", errorForLog(error));
 			setAlert({
 				open: true,
 				severity: "error",

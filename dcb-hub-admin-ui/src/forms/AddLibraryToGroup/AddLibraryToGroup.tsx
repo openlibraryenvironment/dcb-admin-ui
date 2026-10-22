@@ -28,6 +28,7 @@ import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import type { LoadGroupsSelectionQueryVariables } from "@generated/graphql";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface AddLibraryType {
 	show: boolean;
@@ -157,7 +158,7 @@ export default function AddLibraryToGroup({
 				reference: requestReferenceOf(error),
 				text: t("libraries.error_adding_to_group"),
 			});
-			console.error(error);
+			console.error(errorForLog(error));
 		}
 	};
 

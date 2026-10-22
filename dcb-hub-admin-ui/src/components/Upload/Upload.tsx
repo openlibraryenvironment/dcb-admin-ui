@@ -23,6 +23,7 @@ import type {
 	CheckExistingMappingsQueryVariables,
 	CheckExistingNumericRangeMappingsQueryVariables,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 const ALLOWED_FILE_TYPES = {
 	"text/csv": [".csv"],
@@ -180,7 +181,7 @@ export default function FileUpload({
 				setConfirmOpen(true);
 			}
 		} catch (error) {
-			console.error("Error checking existing entities:", error);
+			console.error("Error checking existing entities:", errorForLog(error));
 			setErrorReference(requestReferenceOf(error));
 			setErrorDisplayed(true);
 		}

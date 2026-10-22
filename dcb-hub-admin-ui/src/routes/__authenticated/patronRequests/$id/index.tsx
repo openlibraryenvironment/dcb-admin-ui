@@ -77,6 +77,7 @@ import type {
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
+import { errorForLog } from "@helpers/safeErrorLog";
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
 });
@@ -101,6 +102,7 @@ function RouteComponent() {
 		status?: string;
 		detail?: string;
 	} | null>(null);
+	const [cleanupConfirmOpen, setCleanupConfirmOpen] = useState(false);
 	const [cleanupOverrideOpen, setCleanupOverrideOpen] = useState(false);
 	const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
 	const [confirmReturnOpen, setConfirmReturnOpen] = useState(false);
@@ -272,7 +274,7 @@ function RouteComponent() {
 			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
-			console.error("Error starting update", error);
+			console.error("Error starting update", errorForLog(error));
 			setErrorAlertVisibility(true);
 		},
 	});
@@ -314,7 +316,7 @@ function RouteComponent() {
 			setCleanupErrorAlertVisibility(true);
 		},
 		onError: (error) => {
-			console.error("Error starting cleanup", error);
+			console.error("Error starting cleanup", errorForLog(error));
 			setCleanupErrorAlertVisibility(true);
 		},
 	});
@@ -335,7 +337,7 @@ function RouteComponent() {
 			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
-			console.error("Error starting rollback", error);
+			console.error("Error starting rollback", errorForLog(error));
 			setRollbackErrorAlertVisibility(true);
 		},
 	});
@@ -364,7 +366,7 @@ function RouteComponent() {
 			);
 		},
 		onError: (error) => {
-			console.error("Error confirming the item is back", error);
+			console.error("Error confirming the item is back", errorForLog(error));
 			setConfirmReturnError(t("patron_request.confirm_returned_unsuccessful"));
 		},
 	});
@@ -514,7 +516,7 @@ function RouteComponent() {
 		pageActions.push({
 			key: "cleanup",
 			label: t("patron_request.cleanup"),
-			onClick: () => cleanupMutation.mutate(false),
+			onClick: () => setCleanupConfirmOpen(true),
 			disabled: cleanupMutation.isPending || !canCleanup,
 			tooltip: canCleanup
 				? t("patron_request.cleanup_info")
@@ -852,6 +854,15 @@ function RouteComponent() {
 								})}
 								key="cleanup-refused-alert"
 								onCloseFunc={() => setCleanupRefusal(null)}
+							/>
+							<Confirmation
+								open={cleanupConfirmOpen}
+								action="cleanup"
+								onClose={() => setCleanupConfirmOpen(false)}
+								onConfirm={() => {
+									setCleanupConfirmOpen(false);
+									cleanupMutation.mutate(false);
+								}}
 							/>
 							<Confirmation
 								open={cleanupOverrideOpen}

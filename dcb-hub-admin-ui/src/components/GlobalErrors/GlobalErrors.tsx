@@ -6,6 +6,7 @@ import Error from "@components/Error/Error";
 import RequestReference from "@components/RequestReference/RequestReference";
 import { requestReferenceOf } from "@helpers/requestReference";
 import { capitaliseFirstCharacter } from "@helpers/capitaliseFirstCharacter";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 export function NotFound() {
 	const { t } = useTranslation();
@@ -26,7 +27,7 @@ export function GlobalError({ error, reset }: ErrorComponentProps) {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	console.error("Global crash caught by TanStack:", error);
+	console.error("Global crash caught by TanStack:", errorForLog(error));
 
 	/**
 	 * Recover the page rather than leave it.

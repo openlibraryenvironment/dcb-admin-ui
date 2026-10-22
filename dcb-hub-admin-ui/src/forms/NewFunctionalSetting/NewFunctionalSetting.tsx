@@ -30,6 +30,7 @@ import type {
 	AddFunctionalSettingMutationVariables,
 	FunctionalSettingType,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 // Typed against the schema enum rather than left as a bare string[], so that a value
 // added, removed or renamed in schema.graphqls fails the build here instead of being
@@ -159,7 +160,10 @@ export default function NewFunctionalSetting({
 			}
 		},
 		onError: (error) => {
-			console.error("Error creating new functional setting:", error);
+			console.error(
+				"Error creating new functional setting:",
+				errorForLog(error),
+			);
 			setAlert({
 				open: true,
 				severity: "error",

@@ -58,6 +58,11 @@ export const usePatronRequestCleanup = ({
 
 	const [cleanupState, setCleanupState] = useState<CleanupState>(INITIAL_STATE);
 	const [overrideConfirmOpen, setOverrideConfirmOpen] = useState(false);
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [pending, setPending] = useState<{ eligible: any[]; skipped: any[] }>({
+		eligible: [],
+		skipped: [],
+	});
 
 	const runCleanup = async (
 		rows: any[],
@@ -127,10 +132,10 @@ export const usePatronRequestCleanup = ({
 		}
 	};
 
-	const handleCleanup = async () => {
-		if (apiRef == null) {
-			return;
-		}
+	// Asks first, having worked out what is eligible, so the dialog can say exactly what
+	// will and will not be cleaned up
+	const requestCleanup = () => {
+		if (apiRef == null) return;
 
 		const selectedRows = Array.from(
 			gridRowSelectionIdsSelector(apiRef).values(),
@@ -149,7 +154,15 @@ export const usePatronRequestCleanup = ({
 			}
 		});
 
-		await runCleanup(eligible, false, skipped);
+		setPending({ eligible, skipped });
+		setConfirmOpen(true);
+	};
+
+	const cancelConfirm = () => setConfirmOpen(false);
+
+	const confirmAndRun = async () => {
+		setConfirmOpen(false);
+		await runCleanup(pending.eligible, false, pending.skipped);
 	};
 
 	const requestOverride = () => setOverrideConfirmOpen(true);
@@ -174,7 +187,13 @@ export const usePatronRequestCleanup = ({
 
 	return {
 		cleanupState,
-		handleCleanup,
+		confirmOpen,
+		eligibleCount: pending.eligible.length,
+		skippedCount: pending.skipped.length,
+		selectedCount: pending.eligible.length + pending.skipped.length,
+		requestCleanup,
+		cancelConfirm,
+		confirmAndRun,
 		handleCloseCleanup,
 		overrideAvailable: guarded && cleanupState.refusedRows.length > 0,
 		refusedCount: cleanupState.refusedRows.length,

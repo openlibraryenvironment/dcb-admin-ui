@@ -41,6 +41,7 @@ import { usePatronRequestRollback } from "@hooks/usePatronRequestRollback";
 import { usePatronRequestCleanup } from "@hooks/usePatronRequestCleanup";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
+import { errorForLog } from "@helpers/safeErrorLog";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority
@@ -357,7 +358,7 @@ export default function DataGrid({
 					"filterOperator<=": t("ui.data_grid.filters.less_than_inclusive"),
 				}}
 				onProcessRowUpdateError={(error: any) => {
-					console.error("Error updating row:", error);
+					console.error("Error updating row:", errorForLog(error));
 
 					// `rowName` is how a caller ASKS for this alert, and the only caller
 					// that does is OperatingWelcome - it owns its own mutation, has no
@@ -410,7 +411,7 @@ export default function DataGrid({
 							? exportProgress.isExporting
 							: isExporting,
 						type: type, // Pass type to determine menu options
-						onCleanup: cleanupAvailable ? cleanup.handleCleanup : undefined, // admin-only bulk cleanup
+						onCleanup: cleanupAvailable ? cleanup.requestCleanup : undefined, // admin-only bulk cleanup
 						onRollback: rollbackAvailable
 							? rollback.requestRollback
 							: undefined, // ADMIN-only bulk rollback for patron request grids
@@ -538,6 +539,17 @@ export default function DataGrid({
 						customWarningText={rollbackSummary}
 						onClose={rollback.cancelConfirm}
 						onConfirm={rollback.confirmAndRun}
+					/>
+					<Confirmation
+						open={cleanup.confirmOpen}
+						action="cleanup"
+						customWarningText={t("patron_requests.cleanup_summary", {
+							eligible: cleanup.eligibleCount,
+							selected: cleanup.selectedCount,
+							skipped: cleanup.skippedCount,
+						})}
+						onClose={cleanup.cancelConfirm}
+						onConfirm={cleanup.confirmAndRun}
 					/>
 					<Confirmation
 						open={cleanup.overrideConfirmOpen}

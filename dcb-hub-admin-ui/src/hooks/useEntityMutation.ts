@@ -20,6 +20,7 @@ import {
 	entityOwnsQueryKey,
 	type EntityKey,
 } from "@constants/entityRegistry";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface AuditFields {
 	reason: string;
@@ -280,7 +281,10 @@ export function useEntityMutation(entity: EntityKey) {
 					}
 					succeed("ui.data_grid.delete_success", "ui.data_grid.deleted", name);
 				} catch (error) {
-					console.error(`Error deleting ${entity} ${name}:`, error);
+					console.error(
+						`Error deleting ${entity} ${name}:`,
+						errorForLog(error),
+					);
 					setPending(null);
 					failWith(error, failText("ui.data_grid.delete_error", name));
 				}
@@ -345,7 +349,7 @@ export function useEntityMutation(entity: EntityKey) {
 					succeed("ui.data_grid.edit_success", "ui.data_grid.updated", name);
 				}
 			} catch (error) {
-				console.error(`Error updating ${entity} ${name}:`, error);
+				console.error(`Error updating ${entity} ${name}:`, errorForLog(error));
 				if (isGridEdit) pending.reject(error);
 				const errorText = !isGridEdit ? pending.errorText : undefined;
 				setPending(null);

@@ -90,9 +90,19 @@ const selectRow = async (page: Page, description: string) => {
 	).toBeVisible();
 };
 
-const openCleanup = async (page: Page) => {
+const startCleanup = async (page: Page) => {
 	await page.getByRole("button", { name: /^Actions/ }).click();
 	await page.getByRole("menuitem", { name: /Force clean up selected/ }).click();
+	return page.getByRole("dialog", { name: "Clean up?" });
+};
+
+/** Asks first, then runs: what every case below does unless it is testing the asking. */
+const openCleanup = async (page: Page) => {
+	await (
+		await startCleanup(page)
+	)
+		.getByRole("button", { name: "Clean up", exact: true })
+		.click();
 };
 
 test.describe("Bulk clean up against dcb-service 9.0.0", () => {
@@ -152,6 +162,26 @@ test.describe("Bulk clean up against dcb-service 9.0.0", () => {
 			.poll(() => calls.filter((call) => call.includes("force=true")).length)
 			.toBe(1);
 		expect(calls.filter((call) => call.includes("/update"))).toHaveLength(1);
+	});
+
+	test("asks first, says how many will be cleaned up, and Cancel sends nothing", async ({
+		page,
+	}) => {
+		const calls: string[] = [];
+		await recordCleanupCalls(page, calls);
+
+		await page.goto("/patronRequests/all");
+		await selectRow(page, DELTA);
+		const confirmation = await startCleanup(page);
+		await expect(confirmation).toContainText(
+			"1 of 1 selected request(s) can be cleaned up",
+		);
+		await waitForDialogToSettle(page);
+		await scanForViolations(page);
+
+		await confirmation.getByRole("button", { name: "Cancel" }).click();
+		await expect(confirmation).toHaveCount(0);
+		expect(calls).toEqual([]);
 	});
 
 	test("offers clean up for a request whose item is still out", async ({

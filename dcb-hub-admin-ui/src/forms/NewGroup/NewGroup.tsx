@@ -23,6 +23,7 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { requestReferenceOf } from "@helpers/requestReference";
 import { createLibraryGroup } from "@mutations/createLibraryGroup";
 import type { CreateLibraryGroupMutationVariables } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface FormData {
 	name: string;
@@ -121,7 +122,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 			}
 		},
 		onError: (error) => {
-			console.error("Error creating new group:", error);
+			console.error("Error creating new group:", errorForLog(error));
 			setAlert({
 				open: true,
 				severity: "error",

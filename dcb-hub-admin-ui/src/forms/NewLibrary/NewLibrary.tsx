@@ -82,6 +82,7 @@ import type {
 	CreateHostLmsMutationVariables,
 	CreateLibraryMutationVariables,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 type NewLibraryType = {
 	show: boolean;
@@ -619,7 +620,7 @@ export default function NewLibrary({
 
 			goToStep(activeStepIndex + 1);
 		} catch (error: any) {
-			console.error("Validation or mutation failed:", error);
+			console.error("Validation or mutation failed:", errorForLog(error));
 			// `error.message` on a graphql-request ClientError is the whole
 			// exchange serialised - the errors array, the status, the headers and
 			// the request document. Showing it put a JSON dump in front of the

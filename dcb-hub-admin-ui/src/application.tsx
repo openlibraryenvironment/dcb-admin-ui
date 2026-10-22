@@ -24,6 +24,7 @@ import {
 	toInternalPath,
 	toRoutePath,
 } from "@helpers/appBase";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 // The @font-face rules moved to `src/themes/fonts.ts`, which is the registry the picker
 // and the theme both read. Two places declaring the same faces is how one of them ends up
@@ -86,7 +87,10 @@ export async function getStandaloneConfig() {
 
 		return await response.json();
 	} catch (err) {
-		console.warn("Could not load config, falling back to Vite defaults:", err);
+		console.warn(
+			"Could not load config, falling back to Vite defaults:",
+			errorForLog(err),
+		);
 		return {};
 	}
 }
@@ -298,7 +302,7 @@ export async function mountDcbAdmin(
 	// observed a failed renewal. Spreading an untyped object into <AuthProvider>
 	// meant TypeScript never flagged it either.
 	userManager.events.addSilentRenewError((error: Error) => {
-		console.warn("Silent renew failed", error);
+		console.warn("Silent renew failed", errorForLog(error));
 		// Don't sign the user out on the strength of one failed renewal - a network
 		// blip or a Keycloak restart hits this too. The access token is still valid
 		// until it expires; if the session really is gone the next 401 ends it.

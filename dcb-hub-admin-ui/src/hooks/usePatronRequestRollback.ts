@@ -7,6 +7,7 @@ import {
 import { rollbackStatuses } from "@constants/statuses/rollbackStatuses";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface UsePatronRequestRollbackProps {
 	apiRef: RefObject<GridApiPremium | null>;
@@ -120,7 +121,10 @@ export const usePatronRequestRollback = ({
 						await restClient.post(`/patrons/requests/${row.id}/rollback`, {});
 						batchSuccess.push(row);
 					} catch (error) {
-						console.error(`Failed to roll back request ${row.id}`, error);
+						console.error(
+							`Failed to roll back request ${row.id}`,
+							errorForLog(error),
+						);
 						batchError.push(row);
 					}
 				}),
