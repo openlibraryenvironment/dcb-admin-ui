@@ -410,7 +410,7 @@ function LibraryLocations() {
 					hostLmsCode={newLocation.hostLmsCode}
 					agencyCode={newLocation.agencyCode}
 					libraryName={newLocation.libraryName}
-					type="Pickup"
+					type="PICKUP"
 					ils={newLocation.ils}
 				/>
 			)}
