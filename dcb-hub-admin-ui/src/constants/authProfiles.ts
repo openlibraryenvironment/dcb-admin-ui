@@ -25,12 +25,21 @@ const UNIQUE_ID_NAME = {
 	value: "BASIC/UNIQUE-ID+NAME",
 	labelKey: "libraries.config.patronAuth.profiles.unique_id_name",
 };
+/**
+ * dcb-service's AuthProfiles.SAML: patrons sign in at the library's own identity provider,
+ * so no adapter checks the profile. 8.71.0 stores it unread; MOBIUS's FOLIO libraries use it.
+ */
+const SIGN_IN_AT_INSTITUTION = {
+	value: "saml",
+	labelKey: "libraries.config.patronAuth.profiles.saml",
+};
 
 /**
  * The profiles each adapter's patronAuth accepts in dcb-service: SierraLmsClient and
  * PolarisLmsClient AUTH_PROFILES, AlmaHostLmsClient PASSWORD_ and PIN_AUTH_PROFILE,
  * ConsortialFolioClientConstants.AUTH_PROFILE_BASIC_BARCODE_PIN. Anything else is refused
- * as UnsupportedAuthProfileException. The first is the default.
+ * as UnsupportedAuthProfileException, except `saml`, which every adapter leaves alone.
+ * The first is the default.
  */
 const AUTH_PROFILES_BY_ILS: Record<string, readonly AuthProfileOption[]> = {
 	[HOST_LMS_CLASSES.sierra]: [
@@ -38,10 +47,19 @@ const AUTH_PROFILES_BY_ILS: Record<string, readonly AuthProfileOption[]> = {
 		BARCODE_NAME,
 		UNIQUE_ID_PIN,
 		UNIQUE_ID_NAME,
+		SIGN_IN_AT_INSTITUTION,
 	],
-	[HOST_LMS_CLASSES.polaris]: [BARCODE_PIN, BARCODE_PASSWORD],
-	[HOST_LMS_CLASSES.alma]: [BARCODE_PASSWORD, BARCODE_PIN],
-	[HOST_LMS_CLASSES.folio]: [BARCODE_PIN],
+	[HOST_LMS_CLASSES.polaris]: [
+		BARCODE_PIN,
+		BARCODE_PASSWORD,
+		SIGN_IN_AT_INSTITUTION,
+	],
+	[HOST_LMS_CLASSES.alma]: [
+		BARCODE_PASSWORD,
+		BARCODE_PIN,
+		SIGN_IN_AT_INSTITUTION,
+	],
+	[HOST_LMS_CLASSES.folio]: [BARCODE_PIN, SIGN_IN_AT_INSTITUTION],
 };
 
 /** KohaHostLmsClient ignores the profile: Koha checks a cardnumber and password. */

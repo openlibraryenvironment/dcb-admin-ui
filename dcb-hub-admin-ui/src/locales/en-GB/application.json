@@ -1581,7 +1581,8 @@
 					"barcode_password": "Barcode and password",
 					"barcode_name": "Barcode and name",
 					"unique_id_pin": "Unique ID and PIN",
-					"unique_id_name": "Unique ID and name"
+					"unique_id_name": "Unique ID and name",
+					"saml": "Sign in at the institution"
 				},
 				"saml": "SAML based SSO?",
 				"test_patron_code": "Test patron home library location code",

@@ -69,7 +69,7 @@ test.describe("New Library wizard: authentication profile", () => {
 		await expect(page.getByText("Alpha Test Library")).toBeVisible();
 	});
 
-	test("offers the four profiles Sierra accepts, barcode and PIN first", async ({
+	test("offers the profiles Sierra accepts, barcode and PIN first", async ({
 		page,
 	}) => {
 		const dialog = await openProfileStepFor(page, /SIERRA1/);
@@ -85,10 +85,11 @@ test.describe("New Library wizard: authentication profile", () => {
 			"Barcode and name",
 			"Unique ID and PIN",
 			"Unique ID and name",
+			"Sign in at the institution",
 		]);
 	});
 
-	test("offers only the two profiles Polaris accepts", async ({ page }) => {
+	test("offers only the profiles Polaris accepts", async ({ page }) => {
 		const dialog = await openProfileStepFor(page, /POL1/);
 
 		await dialog
@@ -97,6 +98,7 @@ test.describe("New Library wizard: authentication profile", () => {
 		await expect(page.getByRole("option")).toHaveText([
 			"Barcode and PIN",
 			"Barcode and password",
+			"Sign in at the institution",
 		]);
 	});
 
