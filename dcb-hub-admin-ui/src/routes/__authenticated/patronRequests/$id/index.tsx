@@ -50,7 +50,14 @@ import {
 	cleanupPatronRequest,
 	isCleanupEligible,
 } from "@helpers/cleanupPatronRequest";
-import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
+import {
+	isConfirmItemReturnedEnabled,
+	isGuardedCleanupEnabled,
+} from "@helpers/featureFlags";
+import {
+	confirmItemReturned,
+	isConfirmReturnEligible,
+} from "@helpers/confirmItemReturned";
 import {
 	actionProgressMessage,
 	SLOW_ACTION_MS,
@@ -94,6 +101,14 @@ function RouteComponent() {
 	} | null>(null);
 	const [cleanupOverrideOpen, setCleanupOverrideOpen] = useState(false);
 	const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
+	const [confirmReturnOpen, setConfirmReturnOpen] = useState(false);
+	const [
+		confirmReturnSuccessAlertVisibility,
+		setConfirmReturnSuccessAlertVisibility,
+	] = useState(false);
+	const [confirmReturnError, setConfirmReturnError] = useState<string | null>(
+		null,
+	);
 	const [rollbackSuccessAlertVisibility, setRollbackSuccessAlertVisibility] =
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
@@ -334,6 +349,35 @@ function RouteComponent() {
 		},
 	});
 
+	const confirmReturnMutation = useMutation({
+		mutationFn: () =>
+			confirmItemReturned(cfg.VITE_DCB_API_BASE, auth.user?.access_token, id),
+		onMutate: () => ({ before: patronRequest?.status }),
+		onSuccess: async (result, _variables, context) => {
+			if (result.kind === "confirmed") {
+				setOutcome({ kind: "unknown" });
+				setConfirmReturnSuccessAlertVisibility(true);
+				await invalidatePatronRequestQueries(queryClient);
+				setOutcome(statusChange(context?.before, statusFromCache()));
+				return;
+			}
+
+			setConfirmReturnError(
+				result.kind === "refused"
+					? t("patron_request.confirm_returned_refused", {
+							detail: result.detail ?? "",
+						})
+					: result.kind === "forbidden"
+						? t("patron_request.confirm_returned_forbidden")
+						: t("patron_request.confirm_returned_unsuccessful"),
+			);
+		},
+		onError: (error) => {
+			console.error("Error confirming the item is back", error);
+			setConfirmReturnError(t("patron_request.confirm_returned_unsuccessful"));
+		},
+	});
+
 	// The action in flight, and how long it has been. `submittedAt` rather than the
 	// action's name: it changes on every invocation, so a second run of the SAME action
 	// does not inherit the previous run's slow-path message and report a ten-second wait
@@ -344,7 +388,9 @@ function RouteComponent() {
 			? cleanupMutation.submittedAt
 			: rollbackMutation.isPending
 				? rollbackMutation.submittedAt
-				: null;
+				: confirmReturnMutation.isPending
+					? confirmReturnMutation.submittedAt
+					: null;
 
 	const [slowSubmittedAt, setSlowSubmittedAt] = useState<number | null>(null);
 
@@ -370,6 +416,10 @@ function RouteComponent() {
 			{
 				running: rollbackMutation.isPending,
 				message: t("patron_request.rollback_in_progress"),
+			},
+			{
+				running: confirmReturnMutation.isPending,
+				message: t("patron_request.confirm_returned_in_progress"),
 			},
 		],
 		runningSubmittedAt !== null && slowSubmittedAt === runningSubmittedAt
@@ -478,6 +528,18 @@ function RouteComponent() {
 			tooltip: canCleanup
 				? t("patron_request.cleanup_info")
 				: t("patron_request.cleanup_disabled"),
+		});
+	}
+	const canConfirmReturn = isConfirmReturnEligible(patronRequest?.status);
+	if (isConfirmItemReturnedEnabled() && isConsortiumStaff(roles)) {
+		pageActions.push({
+			key: "confirm-returned",
+			label: t("patron_request.confirm_returned"),
+			onClick: () => setConfirmReturnOpen(true),
+			disabled: confirmReturnMutation.isPending || !canConfirmReturn,
+			tooltip: canConfirmReturn
+				? t("patron_request.confirm_returned_info")
+				: t("patron_request.confirm_returned_disabled"),
 		});
 	}
 	if (isAdmin) {
@@ -815,6 +877,37 @@ function RouteComponent() {
 								onConfirm={() => {
 									setRollbackConfirmOpen(false);
 									rollbackMutation.mutate();
+								}}
+							/>
+							<TimedAlert
+								open={confirmReturnSuccessAlertVisibility}
+								severityType="success"
+								autoHideDuration={6000}
+								alertText={outcomeText(
+									"patron_request.confirm_returned_successful",
+									"patron_request.confirm_returned_successful_changed",
+									"patron_request.confirm_returned_successful_unchanged",
+								)}
+								key="confirm-returned-success-alert"
+								onCloseFunc={() =>
+									setConfirmReturnSuccessAlertVisibility(false)
+								}
+							/>
+							<TimedAlert
+								open={confirmReturnError !== null}
+								severityType="error"
+								autoHideDuration={10000}
+								alertText={confirmReturnError ?? ""}
+								key="confirm-returned-error-alert"
+								onCloseFunc={() => setConfirmReturnError(null)}
+							/>
+							<Confirmation
+								open={confirmReturnOpen}
+								action="confirmReturned"
+								onClose={() => setConfirmReturnOpen(false)}
+								onConfirm={() => {
+									setConfirmReturnOpen(false);
+									confirmReturnMutation.mutate();
 								}}
 							/>
 						</Grid>

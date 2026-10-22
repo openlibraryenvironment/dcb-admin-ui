@@ -181,6 +181,7 @@ than computed.
 | `VITE_FEATURE_CONSORTIUM_SUPPORT_URL`    | **9.2.0** or later          | The consortium's patron support link on the consortium form                                                                                   |
 | `VITE_FEATURE_ANNOUNCEMENTS`             | **9.2.0** or later          | Consortium → Announcements, the notices patrons read in discovery. Also needs `VITE_FEATURE_SYMPOSIA`                                         |
 | `VITE_FEATURE_SHELF_BROWSE`              | **9.2.0** or later          | The classification a library shelves by, which orders discovery's shelf browse. Also needs `VITE_FEATURE_SYMPOSIA`                            |
+| `VITE_FEATURE_CONFIRM_ITEM_RETURNED`     | **9.2.0** or later          | "Confirm item is back" on a request waiting for its item to return to the supplying library                                                   |
 | `VITE_FEATURE_AUDIT_EXPLORER`            | **no release** — do not set | Service Info → Audit Explorer                                                                                                                 |
 | `VITE_FEATURE_SETTINGS_INHERITANCE`      | **no release** — do not set | Where a functional setting was decided, the bulk set, and the revert to inherited                                                             |
 
