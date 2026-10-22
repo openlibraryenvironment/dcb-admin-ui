@@ -25,6 +25,7 @@ import TimedAlert from "@components/TimedAlert/TimedAlert";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getILS } from "@helpers/getILS";
 import { getLocalId } from "@helpers/getLocalId";
+import { locationLocalIdSchema } from "@schemas/locationLocalIdSchema";
 import { defaultCreationReason } from "@helpers/auditDefaults";
 import { createLocation } from "@mutations/createLocation";
 import { entityOwnsQueryKey } from "@constants/entityRegistry";
@@ -138,46 +139,7 @@ export default function NewLocation({
 		name: Yup.string()
 			.required(t("ui.validation.required", { field: t("locations.name") }))
 			.max(255),
-		localId: Yup.string()
-			.max(64)
-			.when("$ils", {
-				is: "FOLIO",
-				then: (schema) =>
-					schema
-						.required(
-							t("ui.validation.required", { field: t("locations.local_id") }),
-						)
-						.matches(
-							/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-							t("ui.validation.locations.local_id_folio"),
-						),
-			})
-			.when("$ils", {
-				is: "Polaris",
-				then: (schema) =>
-					schema
-						.required(
-							t("ui.validation.required", { field: t("locations.local_id") }),
-						)
-						.matches(/^\d+$/, t("ui.validation.locations.local_id_polaris"))
-						.test(
-							"non-negative",
-							t("ui.validation.locations.local_id_polaris"),
-							(val) => !val || parseInt(val) >= 0,
-						),
-			})
-			.when("$ils", {
-				is: "Sierra",
-				then: (schema) =>
-					schema
-						.nullable()
-						.optional()
-						.test(
-							"non-negative-if-provided",
-							t("ui.validation.locations.local_id_sierra"),
-							(val) => !val || (/^\d+$/.test(val) && parseInt(val) >= 0),
-						),
-			}),
+		localId: locationLocalIdSchema(),
 		deliveryStops: Yup.string().max(128),
 		printLabel: Yup.string().max(128),
 		latitude: Yup.number()
@@ -222,6 +184,14 @@ export default function NewLocation({
 		)
 			return {
 				message: t("ui.validation.locations.local_id_polaris"),
+				field: "localId",
+			};
+		if (
+			message.match(/localId is required for Koha systems/) ||
+			message.match(/localId must be at most \d+ characters for Koha systems/)
+		)
+			return {
+				message: t("ui.validation.locations.local_id_koha"),
 				field: "localId",
 			};
 		if (message.match(/must be a non-negative integer for Sierra systems/))
@@ -481,12 +451,13 @@ export default function NewLocation({
 								<TextField
 									{...field}
 									label={t(getLocalId(scope.ils))}
-									// The two ILSs whose localId the schema above actually
-									// requires. `!== "Sierra"` marked it required for Alma,
-									// Koha and an unrecognised client class as well, where
-									// nothing enforces it - an asterisk promising a rule that
-									// does not exist.
-									required={scope.ils === "FOLIO" || scope.ils === "Polaris"}
+									// Only the ILSs whose localId the schema requires: an
+									// asterisk must promise a rule that exists
+									required={
+										scope.ils === "FOLIO" ||
+										scope.ils === "Polaris" ||
+										scope.ils === "Koha"
+									}
 									error={!!errors.localId}
 									helperText={errors.localId?.message}
 								/>
