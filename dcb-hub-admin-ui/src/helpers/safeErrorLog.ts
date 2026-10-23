@@ -54,3 +54,20 @@ export function requestErrorSummary(error: unknown): string {
 	const where = [method, path].filter(Boolean).join(" ");
 	return where ? `${where} -> ${outcome}` : `request failed: ${outcome}`;
 }
+
+const isRequestError = (error: unknown): boolean =>
+	typeof error === "object" &&
+	error !== null &&
+	("config" in error || "response" in error || "request" in error);
+
+/**
+ * What may be logged about anything thrown. A failed request is its summary: an AxiosError
+ * carries the bearer token in `config.headers` and a GraphQL ClientError the variables.
+ * Anything else is its stack, which a crash needs.
+ */
+export function errorForLog(error: unknown): string {
+	if (isRequestError(error)) return requestErrorSummary(error);
+	if (error instanceof Error)
+		return error.stack ?? `${error.name}: ${error.message}`;
+	return String(error);
+}

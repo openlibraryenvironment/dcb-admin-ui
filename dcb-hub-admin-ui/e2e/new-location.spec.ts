@@ -128,6 +128,7 @@ test.describe("New location from the consortium-wide locations page", () => {
 			code: "NEW-DESK",
 			agencyCode: BETA.agencyCode,
 			hostLmsCode: BETA.agency.hostLms.code,
+			type: "PICKUP",
 		});
 	});
 

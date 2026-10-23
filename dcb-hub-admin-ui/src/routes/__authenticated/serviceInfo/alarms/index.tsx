@@ -1,18 +1,22 @@
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { GridColDef } from "@mui/x-data-grid-premium";
+import { Alert } from "@mui/material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
+import Link from "@components/Link/Link";
 
 import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { hostLmsAlarmsQuery } from "@helpers/hostLmsAlarms";
+import { alarmsSearchSchema } from "@schemas/routeSearch/alarmsSearch";
 
 import { getAlarms } from "@queries/getAlarms";
 import { standardFilters } from "@filters/standardFilters";
@@ -20,6 +24,8 @@ import { equalsOnly } from "@filters/equalsOnly";
 import type { LoadAlarmsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/alarms/")({
+	validateSearch: (search: Record<string, unknown>) =>
+		alarmsSearchSchema.parse(search),
 	component: AlarmsRouteComponent,
 });
 
@@ -27,6 +33,10 @@ function AlarmsRouteComponent() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
+	const { hostLms } = useSearch({
+		from: "/__authenticated/serviceInfo/alarms/",
+	});
+	const baseQuery = hostLms ? hostLmsAlarmsQuery(hostLms) : "";
 
 	const gridId = "alarms";
 
@@ -52,7 +62,7 @@ function AlarmsRouteComponent() {
 		isLoading,
 		isFetching,
 	} = useQuery({
-		queryKey: [gridId, paginationModel, sortModel, filterModel],
+		queryKey: [gridId, baseQuery, paginationModel, sortModel, filterModel],
 		queryFn: () =>
 			gqlClient.request<any, LoadAlarmsQueryVariables>(
 				getAlarms,
@@ -60,6 +70,7 @@ function AlarmsRouteComponent() {
 					filterModel,
 					sortModel,
 					paginationModel,
+					baseQuery,
 					defaultOrder: "created",
 					defaultPageSize: 20,
 				}),
@@ -125,6 +136,17 @@ function AlarmsRouteComponent() {
 
 	return (
 		<PageContainer title={t("nav.serviceInfo.alarms.name")}>
+			{hostLms && (
+				<Alert severity="info" sx={{ mb: 2 }}>
+					<Trans
+						i18nKey="alarms.for_host_lms"
+						values={{ code: hostLms }}
+						components={{
+							showAll: <Link to="/serviceInfo/alarms" search={{}} />,
+						}}
+					/>
+				</Alert>
+			)}
 			<DataGrid
 				identifier={gridId}
 				type={"alarms"}
@@ -150,6 +172,7 @@ function AlarmsRouteComponent() {
 				exportConfig={{
 					query: getAlarms,
 					coreType: "alarms",
+					baseQuery,
 				}}
 				disableAggregation
 				disableHoverInteractions={false}

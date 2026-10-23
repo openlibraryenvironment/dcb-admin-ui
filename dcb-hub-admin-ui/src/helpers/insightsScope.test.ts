@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import {
 	scopeCodes,
+	scopeLibraryCode,
 	scopeId,
 	scopeOptionsFrom,
 	selectedScope,
@@ -94,18 +95,42 @@ describe("selectedScope", () => {
 	});
 });
 
-describe("scopeCodes", () => {
+describe("scopeLibraryCode", () => {
 	it("is the union of the chosen scopes, with each code named once", () => {
 		const options = scopeOptionsFrom(data);
 		// The group already covers alpha-lms, and so does the library beside it.
 		const selected = selectedScope(options, ["group:g1", "library:l1"]);
 
-		expect(scopeCodes(selected)).toBe("alpha-lms,beta-lms");
+		expect(scopeLibraryCode(selected)).toBe("alpha-lms,beta-lms");
 	});
 
 	it("is undefined for the whole consortium, not an empty string", () => {
 		// `cleanParams` drops an undefined parameter; an empty string would be sent, and
 		// "every library" and "no library" are not the same question.
-		expect(scopeCodes([])).toBeUndefined();
+		expect(scopeLibraryCode([])).toBeUndefined();
+	});
+});
+
+describe("scopeCodes", () => {
+	it("counts a Host LMS once however many selected options reach it", () => {
+		expect(
+			scopeCodes([
+				{ kind: "group", id: "g1", label: "North", codes: ["A", "B"] },
+				{ kind: "library", id: "l1", label: "Alpha", codes: ["A"] },
+				{ kind: "library", id: "l2", label: "Gamma", codes: ["C"] },
+			]),
+		).toEqual(["A", "B", "C"]);
+	});
+
+	it("resolves no selection to no codes", () => {
+		expect(scopeCodes([])).toEqual([]);
+	});
+});
+
+describe("scopeId", () => {
+	it("names the option, not the codes it resolves to", () => {
+		expect(
+			scopeId({ kind: "group", id: "g1", label: "North", codes: ["A"] }),
+		).toBe("group:g1");
 	});
 });

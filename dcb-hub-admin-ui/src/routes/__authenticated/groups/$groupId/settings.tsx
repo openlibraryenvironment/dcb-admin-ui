@@ -19,6 +19,7 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { isSettingsInheritanceEnabled } from "@helpers/featureFlags";
@@ -61,6 +62,7 @@ function GroupSettings() {
 		severity: "success" | "error" | "warning";
 		text: string | null;
 		title: string | null;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -160,7 +162,10 @@ function GroupSettings() {
 
 		const results = await Promise.allSettled(updates);
 		const successCount = results.filter((r) => r.status === "fulfilled").length;
-		const failCount = results.filter((r) => r.status === "rejected").length;
+		const failures = results.filter(
+			(r): r is PromiseRejectedResult => r.status === "rejected",
+		);
+		const failCount = failures.length;
 
 		setIsUpdating(false);
 		if (type === "borrowing") setConfirmationBorrowing(false);
@@ -179,6 +184,7 @@ function GroupSettings() {
 				open: true,
 				severity: "warning",
 				title: t("ui.data_grid.warning"),
+				reference: requestReferenceOf(failures[0]?.reason),
 				text: t("groups.settings.bulk_update_partial", {
 					success: successCount,
 					total: group.members.length,
@@ -401,6 +407,7 @@ function GroupSettings() {
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				alertText={alert.text}
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

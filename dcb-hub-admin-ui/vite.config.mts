@@ -181,6 +181,9 @@ export default defineConfig(({ mode, command }): UserConfig => {
 			],
 		},
 		build: {
+			// For scripts/check-bundle-budget.mjs, which reads what every page loads first
+			// from it. Only then: deploy copies dist/ outside assets/ as it stands
+			manifest: process.env.BUNDLE_BUDGET === "1",
 			rolldownOptions: {
 				preserveEntrySignatures: "strict",
 				input: {

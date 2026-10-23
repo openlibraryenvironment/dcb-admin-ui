@@ -46,7 +46,7 @@ export async function mockPatronLookup(
 /** The placement endpoints, all three of them. */
 export async function mockPlaceRequest(
 	page: Page,
-	outcome: "created" | "duplicate" | "rejected",
+	outcome: "created" | "duplicate" | "supplier_cannot_supply" | "rejected",
 ) {
 	await page.route("**/patrons/requests/place**", (route) => {
 		if (outcome === "created") {
@@ -56,22 +56,28 @@ export async function mockPlaceRequest(
 		}
 		return route.fulfill({
 			status: 400,
-			json: {
-				failedChecks: [
-					outcome === "duplicate"
-						? {
-								code: "DUPLICATE_REQUEST_ATTEMPT",
-								description: "A request already exists",
-							}
-						: {
-								code: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY",
-								description: "Nothing available to supply",
-							},
-				],
-			},
+			json: { failedChecks: [FAILED_CHECKS[outcome]] },
 		});
 	});
 }
+
+export const SUPPLIER_CANNOT_SUPPLY_DESCRIPTION =
+	"At its last check (2026-10-15T09:00:00Z) Host LMS ALTOONA refused DCB's credentials. To fix: Correct the credentials for Host LMS ALTOONA in DCB Admin, then save it so DCB checks again";
+
+const FAILED_CHECKS = {
+	duplicate: {
+		code: "DUPLICATE_REQUEST_ATTEMPT",
+		description: "A request already exists",
+	},
+	supplier_cannot_supply: {
+		code: "SUPPLIER_CANNOT_SUPPLY",
+		description: SUPPLIER_CANNOT_SUPPLY_DESCRIPTION,
+	},
+	rejected: {
+		code: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY",
+		description: "Nothing available to supply",
+	},
+};
 
 /** The live availability fan-out the request-details step reads. */
 export async function mockAvailability(page: Page) {

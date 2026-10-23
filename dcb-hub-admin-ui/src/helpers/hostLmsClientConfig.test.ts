@@ -97,7 +97,7 @@ describe("hostLmsClientConfig", () => {
 			]);
 		});
 
-		it("treats FOLIO's folio-tenant as a warning, not a blocker", () => {
+		it("accepts a FOLIO config with only what FOLIO requires", () => {
 			const config = {
 				"base-url": "https://okapi.example.org",
 				apikey: "abc",
@@ -109,10 +109,8 @@ describe("hostLmsClientConfig", () => {
 				missingRequiredClientConfig(HOST_LMS_CLASSES.folio, config),
 			).toEqual([]);
 			expect(
-				missingRecommendedClientConfig(HOST_LMS_CLASSES.folio, config).map(
-					(problem) => problem.name,
-				),
-			).toContain("folio-tenant");
+				missingRecommendedClientConfig(HOST_LMS_CLASSES.folio, config),
+			).toEqual([]);
 		});
 
 		it("never requires the FOLIO harvest settings dcb-service defaults", () => {
@@ -615,13 +613,17 @@ describe("hostLmsClientConfig", () => {
 			"use-new-bib-chunk-ingest": true,
 		};
 
-		it("has a field for every key in it", () => {
+		// Two keys in it are read by nothing in dcb-service. They get no field, are named
+		// as unmapped, and mergeClientConfigEdit keeps them on edit.
+		const UNREAD_KEYS = ["staff-ui", "use-new-bib-chunk-ingest"];
+
+		it("has a field for every key dcb-service reads", () => {
 			const { unmappedKeys } = clientConfigToFields(
 				HOST_LMS_CLASSES.polaris,
 				REAL_POLARIS_CONFIG,
 			);
 
-			expect(unmappedKeys).toEqual([]);
+			expect(unmappedKeys).toEqual(UNREAD_KEYS);
 		});
 
 		/**
@@ -651,9 +653,12 @@ describe("hostLmsClientConfig", () => {
 
 			expect(asText(rebuilt)).toEqual(
 				asText({
-					...REAL_POLARIS_CONFIG,
-					// The one deliberate loss: a blank value is dropped rather than
-					// stored as "".
+					...Object.fromEntries(
+						Object.entries(REAL_POLARIS_CONFIG).filter(
+							([key]) => !UNREAD_KEYS.includes(key),
+						),
+					),
+					// A blank value is dropped rather than stored as "".
 					item: Object.fromEntries(
 						Object.entries(REAL_POLARIS_CONFIG.item).filter(
 							([key]) => key !== "barcode-prefix",
@@ -675,7 +680,6 @@ describe("hostLmsClientConfig", () => {
 			// services values, these are not coerced on read.
 			expect(rebuilt["page-size"]).toBe(100);
 			expect(rebuilt.ingest).toBe(true);
-			expect(rebuilt["use-new-bib-chunk-ingest"]).toBe(true);
 			expect(rebuilt.roles).toEqual(["CATALOGUE", "CIRCULATION"]);
 			expect(rebuilt.contextHierarchy).toEqual([
 				"SLOUC",
@@ -811,20 +815,19 @@ describe("hostLmsClientConfig", () => {
 			expect(isAdvancedField(byPath("oai-endpoint-url")!)).toBe(true);
 		});
 
-		it("offers availability concurrency and the polling multiplier on every adapter", () => {
+		it("offers no setting dcb-service 9.2.0 does not read", () => {
+			// Each is read only on an unmerged dcb-service branch
 			for (const lmsClass of Object.values(HOST_LMS_CLASSES)) {
-				expect(
-					clientConfigFieldsFor(lmsClass).map((configField) =>
-						configField.path.join("."),
-					),
-					lmsClass,
-				).toContain("availability-concurrency");
-				expect(
-					clientConfigFieldsFor(lmsClass).map((configField) =>
-						configField.path.join("."),
-					),
-					lmsClass,
-				).toContain("polling-multiplier");
+				const paths = clientConfigFieldsFor(lmsClass).map((configField) =>
+					configField.path.join("."),
+				);
+				for (const unread of [
+					"availability-concurrency",
+					"polling-multiplier",
+					"item-enrichment-concurrency",
+				]) {
+					expect(paths, `${lmsClass} offers ${unread}`).not.toContain(unread);
+				}
 			}
 		});
 
@@ -930,6 +933,31 @@ describe("hostLmsClientConfig", () => {
 		it("gives nothing while the text is not a URL yet", () => {
 			expect(originOf("https://")).toBe("");
 		});
+	});
+
+	describe("keys nothing in dcb-service reads", () => {
+		it.each([
+			[HOST_LMS_CLASSES.folio, "folio-tenant"],
+			[HOST_LMS_CLASSES.folio, "user-base-url"],
+			[HOST_LMS_CLASSES.polaris, "staff-ui"],
+			[HOST_LMS_CLASSES.polaris, "use-new-bib-chunk-ingest"],
+		])(
+			"are not offered, and a stored %s %s is kept on edit",
+			(lmsClientClass, key) => {
+				const paths = clientConfigFieldsFor(lmsClientClass).map((configField) =>
+					configField.path.join("."),
+				);
+				expect(paths).not.toContain(key);
+
+				const stored = { [key]: "kept" };
+				expect(
+					clientConfigToFields(lmsClientClass, stored).unmappedKeys,
+				).toEqual([key]);
+				expect(mergeClientConfigEdit(stored, lmsClientClass, {})[key]).toBe(
+					"kept",
+				);
+			},
+		);
 	});
 
 	describe("mergeClientConfigEdit", () => {

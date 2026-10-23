@@ -29,10 +29,9 @@ export const HOST_LMS_CLASSES = {
 
 /**
  * `required` is enforced before the mutation is sent, because dcb-service will
- * reject it otherwise. `recommended` is not - either the backend only warns
- * (FOLIO's `folio-tenant`) or the client needs it at run time but creation
- * succeeds without it (Alma's virtual item codes). Saying "you will hit this
- * later" is more use than either blocking or staying silent.
+ * reject it otherwise. `recommended` is not - either the backend only warns,
+ * or the client needs it at run time but creation succeeds without it. Saying
+ * "you will hit this later" is more use than either blocking or staying silent.
  */
 export type ClientConfigRequirement = "required" | "recommended" | "optional";
 
@@ -254,15 +253,6 @@ const VIRTUAL_PATRON_EMAIL: ClientConfigField = {
 	advanced: true,
 };
 
-// Koha and Polaris both read it; dcb-service refuses more than 16
-const ITEM_ENRICHMENT_CONCURRENCY = field(
-	["item-enrichment-concurrency"],
-	"hostlms.config_fields.item_enrichment_concurrency",
-	"hostlms.config_fields.item_enrichment_concurrency_description",
-	"optional",
-	"number",
-);
-
 const SHARED_FIELDS: ClientConfigField[] = [
 	field(
 		["ingest"],
@@ -302,28 +292,6 @@ const SHARED_FIELDS: ClientConfigField[] = [
 			"hostlms.config_fields.base_url_qualifier",
 			"hostlms.config_fields.base_url_qualifier_description",
 			"optional",
-		),
-		advanced: true,
-	},
-	// Only slows polling: dcb-service refuses anything outside 1 to 10
-	{
-		...field(
-			["polling-multiplier"],
-			"hostlms.config_fields.polling_multiplier",
-			"hostlms.config_fields.polling_multiplier_description",
-			"optional",
-			"number",
-		),
-		advanced: true,
-	},
-	// dcb-service refuses more than 8; blank uses the job's per-source setting
-	{
-		...field(
-			["availability-concurrency"],
-			"hostlms.config_fields.availability_concurrency",
-			"hostlms.config_fields.availability_concurrency_description",
-			"optional",
-			"number",
 		),
 		advanced: true,
 	},
@@ -653,21 +621,6 @@ const FOLIO: HostLmsProfile = {
 					"secret",
 				),
 				defaultAgencyCode(),
-				// dcb-service returns these two as creation warnings rather than
-				// errors, so they are asked for but never block.
-				field(
-					["folio-tenant"],
-					"hostlms.config_fields.folio_tenant",
-					"hostlms.config_fields.folio_tenant_description",
-					"recommended",
-				),
-				field(
-					["user-base-url"],
-					"hostlms.config_fields.user_base_url",
-					"hostlms.config_fields.user_base_url_description",
-					"recommended",
-					"url",
-				),
 				// FolioOaiPmhIngestSource2.DEFAULT_RECORD_SYNTAX applies when this is blank
 				field(
 					["record-syntax"],
@@ -768,13 +721,6 @@ const POLARIS: HostLmsProfile = {
 					"number",
 					"100",
 				),
-				field(
-					["staff-ui"],
-					"hostlms.config_fields.staff_ui",
-					"hostlms.config_fields.staff_ui_description",
-					"optional",
-					"url",
-				),
 				// contextHierarchy is in SHARED_FIELDS - every ILS reads it, not just this one.
 				// dcb-service warns when this is absent and falls back to defaults.
 				// The keys are the site's own shelf location names, so there is no
@@ -799,13 +745,6 @@ const POLARIS: HostLmsProfile = {
 						labelKey: `hostlms.config_fields.loan_policy_${value.toLowerCase()}`,
 					})),
 				},
-				field(
-					["use-new-bib-chunk-ingest"],
-					"hostlms.config_fields.use_new_bib_chunk_ingest",
-					"hostlms.config_fields.use_new_bib_chunk_ingest_description",
-					"optional",
-					"boolean",
-				),
 				// Read by PolarisConfig and absent from this table until now
 				{
 					...field(
@@ -833,7 +772,6 @@ const POLARIS: HostLmsProfile = {
 					],
 					advanced: true,
 				},
-				ITEM_ENRICHMENT_CONCURRENCY,
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["hold-fetching-delay"],
@@ -1108,7 +1046,6 @@ const KOHA: HostLmsProfile = {
 					"hostlms.config_fields.no_renew_collection_code_description",
 					"optional",
 				),
-				ITEM_ENRICHMENT_CONCURRENCY,
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["do-not-renew-note"],

@@ -5,6 +5,7 @@ import axios from "axios";
 import { storageKey } from "@helpers/appBase";
 import { brandAssetStoreFrom } from "@constants/discoveryBranding";
 import { serviceVersionFrom } from "@constants/serviceCapabilities";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface VersionInfo {
 	version: string | null;
@@ -75,7 +76,10 @@ const useDCBVersionStore = create<VersionInfo>()(
 						loading: false,
 					});
 				} catch (error: any) {
-					console.error("Failed to fetch DCB service info:", error);
+					console.error(
+						"Failed to fetch DCB service info:",
+						errorForLog(error),
+					);
 					set({
 						error: error.message || "Failed to fetch version info",
 						loading: false,

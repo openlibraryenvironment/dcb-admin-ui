@@ -66,6 +66,7 @@ import { Route as _authenticatedLibrariesLibraryIdIndexRouteImport } from './rou
 import { Route as _authenticatedGroupsGroupIdIndexRouteImport } from './routes/__authenticated/groups/$groupId/index'
 import { Route as _authenticatedServiceInfoRequestErrorsRequestsRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/requests'
 import { Route as _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
+import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
 import { Route as _authenticatedSearchClusterIdRequestingHistoryRouteImport } from './routes/__authenticated/search/$clusterId/requestingHistory'
 import { Route as _authenticatedSearchClusterIdItemsRouteImport } from './routes/__authenticated/search/$clusterId/items'
 import { Route as _authenticatedSearchClusterIdIdentifiersRouteImport } from './routes/__authenticated/search/$clusterId/identifiers'
@@ -426,6 +427,12 @@ const _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute =
     path: '/serviceInfo/dataChangeLog/$dataChangeLogId',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute =
+  _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRouteImport.update({
+    id: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId',
+    path: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedSearchClusterIdRequestingHistoryRoute =
   _authenticatedSearchClusterIdRequestingHistoryRouteImport.update({
     id: '/requestingHistory',
@@ -680,6 +687,7 @@ export interface FileRoutesByFullPath {
   '/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
   '/search/$clusterId/items': typeof _authenticatedSearchClusterIdItemsRoute
   '/search/$clusterId/requestingHistory': typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  '/serviceInfo/catalogMetricsByHostLms/$hostlmsId': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   '/serviceInfo/dataChangeLog/$dataChangeLogId': typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   '/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/groups/$groupId/': typeof _authenticatedGroupsGroupIdIndexRoute
@@ -768,6 +776,7 @@ export interface FileRoutesByTo {
   '/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
   '/search/$clusterId/items': typeof _authenticatedSearchClusterIdItemsRoute
   '/search/$clusterId/requestingHistory': typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  '/serviceInfo/catalogMetricsByHostLms/$hostlmsId': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   '/serviceInfo/dataChangeLog/$dataChangeLogId': typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   '/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/groups/$groupId': typeof _authenticatedGroupsGroupIdIndexRoute
@@ -859,6 +868,7 @@ export interface FileRoutesById {
   '/__authenticated/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
   '/__authenticated/search/$clusterId/items': typeof _authenticatedSearchClusterIdItemsRoute
   '/__authenticated/search/$clusterId/requestingHistory': typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId': typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   '/__authenticated/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/__authenticated/groups/$groupId/': typeof _authenticatedGroupsGroupIdIndexRoute
@@ -950,6 +960,7 @@ export interface FileRouteTypes {
     | '/search/$clusterId/identifiers'
     | '/search/$clusterId/items'
     | '/search/$clusterId/requestingHistory'
+    | '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
     | '/serviceInfo/dataChangeLog/$dataChangeLogId'
     | '/serviceInfo/requestErrors/requests'
     | '/groups/$groupId/'
@@ -1038,6 +1049,7 @@ export interface FileRouteTypes {
     | '/search/$clusterId/identifiers'
     | '/search/$clusterId/items'
     | '/search/$clusterId/requestingHistory'
+    | '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
     | '/serviceInfo/dataChangeLog/$dataChangeLogId'
     | '/serviceInfo/requestErrors/requests'
     | '/groups/$groupId'
@@ -1128,6 +1140,7 @@ export interface FileRouteTypes {
     | '/__authenticated/search/$clusterId/identifiers'
     | '/__authenticated/search/$clusterId/items'
     | '/__authenticated/search/$clusterId/requestingHistory'
+    | '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
     | '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
     | '/__authenticated/serviceInfo/requestErrors/requests'
     | '/__authenticated/groups/$groupId/'
@@ -1574,6 +1587,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId': {
+      id: '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+      path: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+      fullPath: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+      preLoaderRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/search/$clusterId/requestingHistory': {
       id: '/__authenticated/search/$clusterId/requestingHistory'
       path: '/requestingHistory'
@@ -1868,6 +1888,7 @@ interface _authenticatedRouteChildren {
   _authenticatedLibrariesLibraryIdInsightsRoute: typeof _authenticatedLibrariesLibraryIdInsightsRoute
   _authenticatedLibrariesLibraryIdServiceRoute: typeof _authenticatedLibrariesLibraryIdServiceRoute
   _authenticatedLibrariesLibraryIdSettingsRoute: typeof _authenticatedLibrariesLibraryIdSettingsRoute
+  _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute: typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   _authenticatedServiceInfoRequestErrorsRequestsRoute: typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   _authenticatedGroupsGroupIdIndexRoute: typeof _authenticatedGroupsGroupIdIndexRoute
@@ -1964,6 +1985,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedLibrariesLibraryIdServiceRoute,
   _authenticatedLibrariesLibraryIdSettingsRoute:
     _authenticatedLibrariesLibraryIdSettingsRoute,
+  _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute:
+    _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute,
   _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute:
     _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute,
   _authenticatedServiceInfoRequestErrorsRequestsRoute:

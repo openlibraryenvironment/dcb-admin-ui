@@ -233,7 +233,7 @@ function LocationsRouteComponent() {
 					hostLmsCode={newLocation.hostLmsCode}
 					agencyCode={newLocation.agencyCode}
 					libraryName={newLocation.libraryName}
-					type="Pickup"
+					type="PICKUP"
 					ils={newLocation.ils}
 				/>
 			)}

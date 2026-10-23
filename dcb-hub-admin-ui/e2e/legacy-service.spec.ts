@@ -197,5 +197,13 @@ test.describe("dcb-service 8.71.0", () => {
 		await expect(
 			table.getByRole("row", { name: /consortium branding/i }),
 		).toContainText(/not available/i);
+		// Nothing in no release is named to staff
+		await expect(
+			table.getByRole("row", { name: /audit explorer/i }),
+		).toHaveCount(0);
+		await expect(
+			table.getByRole("row", { name: /settings inheritance/i }),
+		).toHaveCount(0);
+		await expect(table).not.toContainText(/not in any/i);
 	});
 });

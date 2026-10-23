@@ -47,6 +47,21 @@ describe("authProfiles", () => {
 		).toBe(false);
 	});
 
+	it("offers sign-in at the institution on every ILS with a list, never as the default", () => {
+		for (const ils of [
+			HOST_LMS_CLASSES.sierra,
+			HOST_LMS_CLASSES.polaris,
+			HOST_LMS_CLASSES.alma,
+			HOST_LMS_CLASSES.folio,
+		]) {
+			expect(authProfileOptions(ils)?.map((option) => option.value)).toContain(
+				"saml",
+			);
+			expect(resolveAuthProfile(ils, "")).not.toBe("saml");
+			expect(isUnsupportedAuthProfile(ils, "saml")).toBe(false);
+		}
+	});
+
 	it("leaves a system with no known vocabulary to free text", () => {
 		expect(authProfileOptions(HOST_LMS_CLASSES.orsAppliance)).toBeUndefined();
 		expect(

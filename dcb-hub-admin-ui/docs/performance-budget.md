@@ -25,9 +25,35 @@ Exceeding it means cutting weight or bringing a written argument.
 Both carry ~15% headroom, the ratio `symposia-ui` uses: enough to absorb ordinary
 feature work, tight enough to trip on a heavyweight dependency.
 
-## The chunk budget measures the artefact
+## The bundle budget measures what every page loads, and the chunks around it
 
-`bundle-budget.json`, checked by `scripts/check-bundle-budget.mjs` after a build.
+`bundle-budget.json`, checked by `scripts/check-bundle-budget.mjs` after a
+`BUNDLE_BUDGET=1` build, which writes the Vite manifest the check reads. Two things fail it:
+
+- **What every page loads first**: the entry, the app shell it boots (`main.tsx` imports
+  `application.tsx`), and everything they import statically. That is what a user pays on
+  every visit before any route code. It is a sum of files, so a bundler regrouping them
+  cannot fail it, and a feature that stays in its own route never touches it.
+- **A named chunk outside the first load** over its number, or one above 15,000 bytes with
+  no number. That is how a heavy new dependency, or an accidental split of a shared chunk,
+  arrives with a number beside it.
+
+**The total of everything emitted is printed, and is not a budget.** It was one from
+2026-10-07 to 2026-10-22, and in that time it failed only on ordinary feature work, and
+never on anything the checks above did not also catch. Every feature adds bytes to it,
+including routes a user may never open, so with a 2% margin it failed about once a
+release and could not say where the weight was. dcb-admin-for-libraries reached the same
+conclusion first and reports its total the same way.
+
+The first-load figure was first measured on 2026-10-22 when this replaced the total, on
+rolldown 1.1.4: `main` 431,749 bytes gzipped across 132 files, `final-checks` 441,692
+across 140. On rolldown 1.2.15 the same branch measures 337,995 across 73. Of what
+that branch first added, 2.6 KB was route modules pulled into every page because their
+components read `Route.useSearch()` or `Route.useParams()` (see "The eager route graph"
+below). Loading the support reference's copy button lazily was tried and measured
+worse: the bundler split MUI's popper, button and portal into separate shared chunks,
+and the first load grew by a further 3.8 KB.
+
 Lighthouse cannot see a chunk no audited page fetches, and this application is mostly
 such chunks: measured on 2026-10-22 it shipped **1,566 KB gzipped across 326 chunks**,
 of which the Lighthouse budget on `/login` covered 551 KB. The heaviest single thing in
@@ -43,9 +69,10 @@ the artefact sat outside every gate in the repository until this budget existed:
 | `i18n.js`             |   51 KB | the translation catalogue     |
 | `rasterizeHTML.js`    |   27 KB | the grid's print export       |
 
-The budget names every chunk above 15,000 bytes, so new weight arrives with a number
-beside it rather than silently. A chunk over its number, an unbudgeted chunk above
-the threshold, or a budgeted chunk that is no longer built all fail the gate.
+Outside the first load, the budget names every chunk above 15,000 bytes, so new weight
+arrives with a number beside it rather than silently. A chunk over its number, an
+unbudgeted chunk above the threshold, a budgeted chunk that is no longer built, or one
+that has moved into the first load all fail the gate.
 
 ### When the bundler regroups chunks
 
@@ -66,13 +93,17 @@ eleven smaller chunks, all already in its static closure, were merged into it. `
 became `request.js` and `useThemeStore.css` became `application.css` with the same
 contents. Most route chunks shrank by about 4.5 KB each.
 
-So the renamed chunks kept their approved numbers, `application.js` was re-derived, and
-everything that measures what users download was **lowered** to bank the saving: the
-total from 1,685,000 to 1,597,000, `/login` from 750,000 to 635,000 and Insights from
-1,000,000 to 910,000. Left where they were, those three limits would have admitted
-88 KB, 199 KB and 208 KB of new weight without a word. The check that distinguishes a
-regroup from new weight is the one above: build the same commit with each bundler and
-compare the totals and the static closure of the shell.
+Everything that measures what users download was **lowered** to bank the saving:
+`/login` from 750,000 to 635,000 and Insights from 1,000,000 to 910,000, and the first-load
+budget from 450,600 to 344,800, re-derived from 337,995 measured. Left where they
+were, those limits would have admitted 85 KB, 199 KB and 208 KB of new weight without a
+word.
+
+The per-chunk numbers that failed on this regroup were the shell's, and the first-load
+sum has replaced them, so a regroup inside the first load no longer fails anything; a
+named chunk outside it still can. The check that distinguishes a regroup from new weight
+is the one above: build the same commit with each bundler and compare the first load and
+the total.
 
 ### What this is telling us to do
 
@@ -97,7 +128,13 @@ about 800 ms of script evaluation unthrottled, which a desktop staff console abs
 and a phone would not. Hand-written `codeSplitting` groups move the weight around
 without removing any; the experiment and its numbers are recorded in `vite.config.mts`.
 The bundler's own deduplication did remove some (see above), but the graph is still
-eager. This budget stops it growing; it does not fix it.
+eager. The first-load budget stops it growing; it does not fix it.
+
+A route's options stay in that graph while its component is split out, so a component
+that reads `Route.useSearch()`, `Route.useParams()` or `Route.fullPath` ties the two back
+together, and the route gets a chunk of its own in the first load, about 2 KB each. Read
+them by route id instead: `useSearch({ from: "/__authenticated/…/" })`,
+`useParams({ from: … })`, `useNavigate({ from: "/…/" })`.
 
 ### `i18n.js` has no number of its own
 
@@ -109,13 +146,12 @@ days later on new Host LMS strings. Nobody decides whether a label is worth its 
 the only responses were to stop writing interface text or to raise the number — and a
 number raised whenever it fails measures nothing.
 
-So it is listed under `unbounded` in `bundle-budget.json`: still counted in the total, and
-still required to exist, but with no limit of its own. What a limit would have protected
-is covered where it is measured properly:
+So it is listed under `unbounded` in `bundle-budget.json`: required to exist, with no
+limit of its own, and left out of the first load's sum for the same reason. What a limit
+would have protected is covered where it is measured properly:
 
 - **What users download** — Lighthouse's `total-byte-weight` on `/login`, which is
   deterministic and counts the catalogue with everything else that page loads.
-- **Accidental bulk** — a second catalogue, or an asset inlined into the chunk — the total.
 - **Strings that reach users as raw keys** — not a size problem at all. See
   `docs/i18n.md`.
 
@@ -214,10 +250,11 @@ also the one form factor a library desk actually uses that nothing here was meas
 ## Running them
 
 ```bash
-npm run build          # tsc && vite build
-npm run budget         # the chunk budget, over dist/assets
+BUNDLE_BUDGET=1 VITE_PUBLIC_URL=/ npm run build   # tsc && vite build, with the manifest
+npm run budget         # the first load and the named chunks, over dist/
 npm run lighthouse     # builds again on port 4193, then audits
 ```
 
-In CI both live in `verify_lighthouse`, bytes first: the chunk budget is deterministic
-and fails in seconds, so it runs before the three Lighthouse passes.
+In CI both live in `verify_lighthouse`, bytes first: the bundle budget is deterministic
+and fails in seconds, so it runs before the three Lighthouse passes. A deployment build
+leaves `BUNDLE_BUDGET` unset, so no manifest ships.

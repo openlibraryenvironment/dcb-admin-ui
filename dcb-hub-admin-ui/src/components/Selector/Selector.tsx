@@ -36,7 +36,7 @@ export default function Selector({ optionsType }: SelectorType) {
 
 			// Fetch page 0
 			const firstPage = await gqlClient.request<any, LoadHostLmsQueryVariables>(
-				getHostLms,
+				getHostLms(),
 				variables,
 			);
 			let allHostLms = [...(firstPage?.hostLms?.content || [])];
@@ -49,7 +49,7 @@ export default function Selector({ optionsType }: SelectorType) {
 
 				for (let i = 1; i < totalPages; i++) {
 					promises.push(
-						gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms, {
+						gqlClient.request<any, LoadHostLmsQueryVariables>(getHostLms(), {
 							...variables,
 							pageno: i,
 						}),

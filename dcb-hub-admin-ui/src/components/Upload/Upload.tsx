@@ -7,6 +7,7 @@ import useCode from "@hooks/useCode";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import Confirmation from "../Confirmation/Confirmation";
 
 import { checkExistingMappings } from "@queries/checkExistingMappings";
@@ -22,6 +23,7 @@ import type {
 	CheckExistingMappingsQueryVariables,
 	CheckExistingNumericRangeMappingsQueryVariables,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 const ALLOWED_FILE_TYPES = {
 	"text/csv": [".csv"],
@@ -66,6 +68,7 @@ export default function FileUpload({
 	const [isValidationErrorDisplayed, setValidationErrorDisplayed] =
 		useState(false);
 	const [validationErrorMessage, setValidationErrorMessage] = useState("");
+	const [errorReference, setErrorReference] = useState<string | null>(null);
 
 	const [isSuccess, setSuccess] = useState(false);
 	const [successCount, setSuccessCount] = useState(0);
@@ -178,7 +181,8 @@ export default function FileUpload({
 				setConfirmOpen(true);
 			}
 		} catch (error) {
-			console.error("Error checking existing entities:", error);
+			console.error("Error checking existing entities:", errorForLog(error));
+			setErrorReference(requestReferenceOf(error));
 			setErrorDisplayed(true);
 		}
 	};
@@ -233,6 +237,7 @@ export default function FileUpload({
 				const match = error.response.data.match(/line (\d+)/i);
 				if (match) setLineNumber(match[1]);
 			}
+			setErrorReference(requestReferenceOf(error));
 			setErrorDisplayed(true);
 		}
 	};
@@ -364,6 +369,7 @@ export default function FileUpload({
 				}
 				key={"upload-error"}
 				onCloseFunc={() => setErrorDisplayed(false)}
+				reference={errorReference}
 			/>
 			<TimedAlert
 				severityType="error"

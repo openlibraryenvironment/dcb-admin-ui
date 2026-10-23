@@ -27,6 +27,7 @@ import {
 import { Close } from "@mui/icons-material";
 
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import Confirmation from "@components/Confirmation/Confirmation";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
@@ -81,6 +82,7 @@ import type {
 	CreateHostLmsMutationVariables,
 	CreateLibraryMutationVariables,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 type NewLibraryType = {
 	show: boolean;
@@ -174,6 +176,7 @@ export default function NewLibrary({
 		// created - the wizard carries on, but the user has to know.
 		severity: "success" | "error" | "warning";
 		text: string;
+		reference?: string | null;
 	}>({ open: false, severity: "success", text: "" });
 	const [hostLmsResult, setHostLmsResult] =
 		useState<HostLmsVerificationResult | null>(null);
@@ -273,7 +276,7 @@ export default function NewLibrary({
 		useMutation({
 			mutationFn: (variables: { input: any }) =>
 				gqlClient.request<any, CreateHostLmsMutationVariables>(
-					createHostLmsMutation,
+					createHostLmsMutation(),
 					variables,
 				),
 			onSuccess: () =>
@@ -617,7 +620,7 @@ export default function NewLibrary({
 
 			goToStep(activeStepIndex + 1);
 		} catch (error: any) {
-			console.error("Validation or mutation failed:", error);
+			console.error("Validation or mutation failed:", errorForLog(error));
 			// `error.message` on a graphql-request ClientError is the whole
 			// exchange serialised - the errors array, the status, the headers and
 			// the request document. Showing it put a JSON dump in front of the
@@ -626,6 +629,7 @@ export default function NewLibrary({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: describeGraphQLError(error, t("ui.error.general")),
 			});
 		} finally {
@@ -884,6 +888,7 @@ export default function NewLibrary({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				alertText={alert.text}
 				autoHideDuration={6000}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

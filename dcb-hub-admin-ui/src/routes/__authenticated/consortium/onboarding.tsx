@@ -48,6 +48,7 @@ import type {
 	LoadPatronRequestsQueryVariables,
 } from "@generated/graphql";
 import { useGridState } from "@hooks/useGridState";
+import { errorForLog } from "@helpers/safeErrorLog";
 import { VIEWPORT_BELOW_HEADER } from "@constants/layout";
 
 export const Route = createFileRoute("/__authenticated/consortium/onboarding")({
@@ -325,7 +326,11 @@ function Onboarding() {
 							: null,
 					};
 				} catch (e) {
-					console.error("Failed fetching counts for", lib.fullName, e);
+					console.error(
+						"Failed fetching counts for",
+						lib.fullName,
+						errorForLog(e),
+					);
 					return lib;
 				}
 			});

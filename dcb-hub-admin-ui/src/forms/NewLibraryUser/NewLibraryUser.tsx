@@ -19,6 +19,7 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { provisionLibraryUser } from "@mutations/provisionLibraryUser";
 import {
 	buildNewLibraryUserSchema,
@@ -61,6 +62,7 @@ export default function NewLibraryUser({
 		open: boolean;
 		severity: "success" | "error";
 		text: string | null;
+		reference?: string | null;
 	}>({ open: false, severity: "success", text: null });
 
 	const {
@@ -123,6 +125,7 @@ export default function NewLibraryUser({
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("libraries.accounts.new.error", { error: error.message }),
 			});
 		},
@@ -286,6 +289,7 @@ export default function NewLibraryUser({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				autoHideDuration={5000}
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

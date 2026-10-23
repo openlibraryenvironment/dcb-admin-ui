@@ -1,5 +1,7 @@
 import { GraphQLClient } from "graphql-request";
 
+import { fetchWithRequestReference } from "@helpers/requestReference";
+
 export function resolveGraphQLEndpoint(
 	apiBase: string,
 	origin = globalThis.location?.origin,
@@ -16,6 +18,7 @@ export function createGraphQLClient(cfg: any, auth: any) {
 	const token = auth?.user?.access_token;
 
 	return new GraphQLClient(endpoint, {
+		fetch: fetchWithRequestReference(),
 		headers: {
 			...(token && { Authorization: `Bearer ${token}` }),
 		},

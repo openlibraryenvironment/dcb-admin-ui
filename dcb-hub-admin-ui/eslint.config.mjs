@@ -263,6 +263,14 @@ export default [
 					message:
 						"Use the logical property: marginInlineStart/End, paddingInlineStart/End, borderInlineStart/End. A physical one does not flip in a right-to-left locale. docs/right-to-left.md.",
 				},
+				// An AxiosError carries the bearer token in config.headers, and a GraphQL
+				// ClientError the request variables. src/helpers/safeErrorLog.ts
+				{
+					selector:
+						"CallExpression[callee.object.name='console'] > Identifier[name=/^(e|err|error|reason)$/]",
+					message:
+						"Do not log a raw error: an AxiosError carries the bearer token, a GraphQL error the request's variables. Log errorForLog(error) from @helpers/safeErrorLog.",
+				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",
 					message:

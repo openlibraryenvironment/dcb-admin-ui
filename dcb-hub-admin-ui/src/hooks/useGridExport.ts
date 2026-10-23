@@ -26,6 +26,7 @@ import {
 	generateFilterDescription,
 } from "@helpers/dataGrid/utilities";
 import type { MappingImportColumn } from "@constants/mappingImportContract";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 export interface GridExportConfig {
 	/** GraphQL document that returns the full (paged) dataset for this grid. */
@@ -369,7 +370,7 @@ export const useGridExport = ({
 		} catch (error) {
 			// A cancelled export is the outcome the user asked for, not a failure.
 			if (isAbortError(error)) return;
-			console.error("Grid export failed", error);
+			console.error("Grid export failed", errorForLog(error));
 			onError(t("ui.data_grid.export_failed"));
 		} finally {
 			abortRef.current = null;

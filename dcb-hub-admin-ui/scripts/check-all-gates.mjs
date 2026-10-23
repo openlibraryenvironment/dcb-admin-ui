@@ -64,7 +64,7 @@ const GATES = [
 		// prefix: POSIX inline assignment is a parse error under cmd.exe, so that form
 		// only ever ran on Linux.
 		cmd: "npm run build",
-		env: { VITE_PUBLIC_URL: "/" },
+		env: { VITE_PUBLIC_URL: "/", BUNDLE_BUDGET: "1" },
 		then: { label: "Bundle budget", cmd: "npm run budget" },
 	},
 	{

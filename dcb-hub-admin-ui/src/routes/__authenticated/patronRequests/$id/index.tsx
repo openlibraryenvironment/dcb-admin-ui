@@ -4,7 +4,6 @@ import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import axios from "axios";
 import dayjs from "dayjs";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -40,6 +39,8 @@ import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequest
 import { getILS } from "@helpers/getILS";
 import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { getPatronRequest } from "@queries/getPatronRequest";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { getLocation } from "@queries/getLocation";
@@ -50,7 +51,14 @@ import {
 	cleanupPatronRequest,
 	isCleanupEligible,
 } from "@helpers/cleanupPatronRequest";
-import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
+import {
+	isConfirmItemReturnedEnabled,
+	isGuardedCleanupEnabled,
+} from "@helpers/featureFlags";
+import {
+	confirmItemReturned,
+	isConfirmReturnEligible,
+} from "@helpers/confirmItemReturned";
 import {
 	actionProgressMessage,
 	SLOW_ACTION_MS,
@@ -69,6 +77,7 @@ import type {
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
+import { errorForLog } from "@helpers/safeErrorLog";
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	component: RouteComponent,
 });
@@ -80,6 +89,7 @@ function RouteComponent() {
 	const auth = useAuth();
 	const queryClient = useQueryClient();
 	const gqlClient = useGraphQLClient();
+	const restClient = useDcbRestClient();
 
 	const [updateSuccessAlertVisibility, setUpdateSuccessAlertVisibility] =
 		useState(false);
@@ -92,8 +102,17 @@ function RouteComponent() {
 		status?: string;
 		detail?: string;
 	} | null>(null);
+	const [cleanupConfirmOpen, setCleanupConfirmOpen] = useState(false);
 	const [cleanupOverrideOpen, setCleanupOverrideOpen] = useState(false);
 	const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
+	const [confirmReturnOpen, setConfirmReturnOpen] = useState(false);
+	const [
+		confirmReturnSuccessAlertVisibility,
+		setConfirmReturnSuccessAlertVisibility,
+	] = useState(false);
+	const [confirmReturnError, setConfirmReturnError] = useState<string | null>(
+		null,
+	);
 	const [rollbackSuccessAlertVisibility, setRollbackSuccessAlertVisibility] =
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
@@ -244,12 +263,7 @@ function RouteComponent() {
 	};
 
 	const updateMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/update`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
-			),
+		mutationFn: () => restClient.post(`/patrons/requests/${id}/update`, {}),
 		// The status before the POST, captured here rather than read in onSuccess: by
 		// then the invalidation has already replaced it.
 		onMutate: () => ({ before: patronRequest?.status }),
@@ -260,7 +274,7 @@ function RouteComponent() {
 			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
-			console.error("Error starting update", error);
+			console.error("Error starting update", errorForLog(error));
 			setErrorAlertVisibility(true);
 		},
 	});
@@ -270,8 +284,7 @@ function RouteComponent() {
 	const cleanupMutation = useMutation({
 		mutationFn: (override: boolean) =>
 			cleanupPatronRequest(
-				cfg.VITE_DCB_API_BASE,
-				auth.user?.access_token,
+				restClient,
 				{ id, status: patronRequest?.status },
 				{ override, refreshFirst: guardedCleanup },
 			),
@@ -303,7 +316,7 @@ function RouteComponent() {
 			setCleanupErrorAlertVisibility(true);
 		},
 		onError: (error) => {
-			console.error("Error starting cleanup", error);
+			console.error("Error starting cleanup", errorForLog(error));
 			setCleanupErrorAlertVisibility(true);
 		},
 	});
@@ -315,12 +328,7 @@ function RouteComponent() {
 	const canRollback = rollbackStatuses.includes(patronRequest?.status);
 
 	const rollbackMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/rollback`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
-			),
+		mutationFn: () => restClient.post(`/patrons/requests/${id}/rollback`, {}),
 		onMutate: () => ({ before: patronRequest?.status }),
 		onSuccess: async (_data, _variables, context) => {
 			setOutcome({ kind: "unknown" });
@@ -329,8 +337,37 @@ function RouteComponent() {
 			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
-			console.error("Error starting rollback", error);
+			console.error("Error starting rollback", errorForLog(error));
 			setRollbackErrorAlertVisibility(true);
+		},
+	});
+
+	const confirmReturnMutation = useMutation({
+		mutationFn: () =>
+			confirmItemReturned(cfg.VITE_DCB_API_BASE, auth.user?.access_token, id),
+		onMutate: () => ({ before: patronRequest?.status }),
+		onSuccess: async (result, _variables, context) => {
+			if (result.kind === "confirmed") {
+				setOutcome({ kind: "unknown" });
+				setConfirmReturnSuccessAlertVisibility(true);
+				await invalidatePatronRequestQueries(queryClient);
+				setOutcome(statusChange(context?.before, statusFromCache()));
+				return;
+			}
+
+			setConfirmReturnError(
+				result.kind === "refused"
+					? t("patron_request.confirm_returned_refused", {
+							detail: result.detail ?? "",
+						})
+					: result.kind === "forbidden"
+						? t("patron_request.confirm_returned_forbidden")
+						: t("patron_request.confirm_returned_unsuccessful"),
+			);
+		},
+		onError: (error) => {
+			console.error("Error confirming the item is back", errorForLog(error));
+			setConfirmReturnError(t("patron_request.confirm_returned_unsuccessful"));
 		},
 	});
 
@@ -344,7 +381,9 @@ function RouteComponent() {
 			? cleanupMutation.submittedAt
 			: rollbackMutation.isPending
 				? rollbackMutation.submittedAt
-				: null;
+				: confirmReturnMutation.isPending
+					? confirmReturnMutation.submittedAt
+					: null;
 
 	const [slowSubmittedAt, setSlowSubmittedAt] = useState<number | null>(null);
 
@@ -370,6 +409,10 @@ function RouteComponent() {
 			{
 				running: rollbackMutation.isPending,
 				message: t("patron_request.rollback_in_progress"),
+			},
+			{
+				running: confirmReturnMutation.isPending,
+				message: t("patron_request.confirm_returned_in_progress"),
 			},
 		],
 		runningSubmittedAt !== null && slowSubmittedAt === runningSubmittedAt
@@ -473,11 +516,23 @@ function RouteComponent() {
 		pageActions.push({
 			key: "cleanup",
 			label: t("patron_request.cleanup"),
-			onClick: () => cleanupMutation.mutate(false),
+			onClick: () => setCleanupConfirmOpen(true),
 			disabled: cleanupMutation.isPending || !canCleanup,
 			tooltip: canCleanup
 				? t("patron_request.cleanup_info")
 				: t("patron_request.cleanup_disabled"),
+		});
+	}
+	const canConfirmReturn = isConfirmReturnEligible(patronRequest?.status);
+	if (isConfirmItemReturnedEnabled() && isConsortiumStaff(roles)) {
+		pageActions.push({
+			key: "confirm-returned",
+			label: t("patron_request.confirm_returned"),
+			onClick: () => setConfirmReturnOpen(true),
+			disabled: confirmReturnMutation.isPending || !canConfirmReturn,
+			tooltip: canConfirmReturn
+				? t("patron_request.confirm_returned_info")
+				: t("patron_request.confirm_returned_disabled"),
 		});
 	}
 	if (isAdmin) {
@@ -761,6 +816,13 @@ function RouteComponent() {
 										? () => setErrorAlertVisibility(false)
 										: () => setCleanupErrorAlertVisibility(false)
 								}
+								reference={
+									updateErrorAlertVisibility
+										? requestReferenceOf(updateMutation.error)
+										: cleanupMutation.data?.kind === "failed"
+											? cleanupMutation.data.reference
+											: requestReferenceOf(cleanupMutation.error)
+								}
 							/>
 							<TimedAlert
 								open={rollbackSuccessAlertVisibility}
@@ -781,6 +843,7 @@ function RouteComponent() {
 								alertText={t("patron_request.rollback_unsuccessful")}
 								key="rollback-error-alert"
 								onCloseFunc={() => setRollbackErrorAlertVisibility(false)}
+								reference={requestReferenceOf(rollbackMutation.error)}
 							/>
 							<TimedAlert
 								open={cleanupRefusal !== null}
@@ -791,6 +854,15 @@ function RouteComponent() {
 								})}
 								key="cleanup-refused-alert"
 								onCloseFunc={() => setCleanupRefusal(null)}
+							/>
+							<Confirmation
+								open={cleanupConfirmOpen}
+								action="cleanup"
+								onClose={() => setCleanupConfirmOpen(false)}
+								onConfirm={() => {
+									setCleanupConfirmOpen(false);
+									cleanupMutation.mutate(false);
+								}}
 							/>
 							<Confirmation
 								open={cleanupOverrideOpen}
@@ -815,6 +887,37 @@ function RouteComponent() {
 								onConfirm={() => {
 									setRollbackConfirmOpen(false);
 									rollbackMutation.mutate();
+								}}
+							/>
+							<TimedAlert
+								open={confirmReturnSuccessAlertVisibility}
+								severityType="success"
+								autoHideDuration={6000}
+								alertText={outcomeText(
+									"patron_request.confirm_returned_successful",
+									"patron_request.confirm_returned_successful_changed",
+									"patron_request.confirm_returned_successful_unchanged",
+								)}
+								key="confirm-returned-success-alert"
+								onCloseFunc={() =>
+									setConfirmReturnSuccessAlertVisibility(false)
+								}
+							/>
+							<TimedAlert
+								open={confirmReturnError !== null}
+								severityType="error"
+								autoHideDuration={10000}
+								alertText={confirmReturnError ?? ""}
+								key="confirm-returned-error-alert"
+								onCloseFunc={() => setConfirmReturnError(null)}
+							/>
+							<Confirmation
+								open={confirmReturnOpen}
+								action="confirmReturned"
+								onClose={() => setConfirmReturnOpen(false)}
+								onConfirm={() => {
+									setConfirmReturnOpen(false);
+									confirmReturnMutation.mutate();
 								}}
 							/>
 						</Grid>

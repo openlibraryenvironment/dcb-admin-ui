@@ -8,6 +8,7 @@ import { MOCKS } from "./fixtures/routes";
 import { CLUSTER_ID, mockClusterRest } from "./fixtures/cluster-mocks";
 import {
 	PATRON_BARCODE,
+	SUPPLIER_CANNOT_SUPPLY_DESCRIPTION,
 	mockAvailability,
 	mockPatronLookup,
 	mockPlaceRequest,
@@ -129,10 +130,8 @@ test("a valid patron advances to request creation", async ({ page }) => {
 	).toBeVisible();
 });
 
-test("a rejected placement shows the mapped failed check", async ({ page }) => {
-	await arrive(page);
-	await mockPatronLookup(page, "valid");
-	await mockPlaceRequest(page, "duplicate");
+/** Validate the patron, pick a pickup location and submit a staff request. */
+async function submitStaffRequest(page: Page) {
 	await openRequestingModal(page);
 	await continueToStaffRequest(page);
 	await fillPatronStep(page);
@@ -147,14 +146,34 @@ test("a rejected placement shows the mapped failed check", async ({ page }) => {
 		.getByRole("combobox", { name: /pickup location/i })
 		.fill("Alpha Main Desk");
 	await page.getByRole("option", { name: /Alpha Main Desk/ }).click();
+	await page.getByRole("button", { name: "Submit", exact: true }).click();
+}
+
+test("a rejected placement shows the mapped failed check", async ({ page }) => {
+	await arrive(page);
+	await mockPatronLookup(page, "valid");
+	await mockPlaceRequest(page, "duplicate");
 
 	// getRequestError maps DUPLICATE_REQUEST_ATTEMPT to its own message rather than the
 	// generic "Error: {{code}}", and that mapping is the thing worth pinning: every other
 	// code falls through to the generic one.
-	await page.getByRole("button", { name: "Submit", exact: true }).click();
+	await submitStaffRequest(page);
 	await expect(
 		page.getByText(/A request already exists for this patron/),
 	).toBeVisible();
+});
+
+test("a supplier that cannot supply shows its own message with the remedy", async ({
+	page,
+}) => {
+	await arrive(page);
+	await mockPatronLookup(page, "valid");
+	await mockPlaceRequest(page, "supplier_cannot_supply");
+
+	await submitStaffRequest(page);
+	const alert = page.getByText(/can't supply it because of a problem/);
+	await expect(alert).toBeVisible();
+	await expect(alert).toContainText(SUPPLIER_CANNOT_SUPPLY_DESCRIPTION);
 });
 
 /*
