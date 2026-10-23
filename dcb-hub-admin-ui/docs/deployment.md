@@ -499,9 +499,13 @@ Using "staging" as an example environment.
 
 ### Option C: Docker (Self-Hosted / Portable)
 
-**Architecture:** Similar to Cloudflare, this uses a runtime-config approach. The provided Dockerfile builds the app and serves it via an Nginx alpine container (`nginx:stable-alpine`). An entrypoint script uses `envsubst` to dynamically inject the container's environment variables into the app when the container boots.
+**Architecture:** Similar to Cloudflare, this uses a runtime-config approach. The provided Dockerfile builds the app and serves it via an Nginx alpine container (`nginx:1.30.6-alpine3.24`). An entrypoint script uses `envsubst` to dynamically inject the container's environment variables into the app when the container boots.
 
-**Security Note**: The Dockerfile deliberately uses floating minor-version tags (e.g., node:22-alpine, nginx:stable-alpine) rather than pinned patch versions. This ensures that every time the image is rebuilt, it automatically picks up the latest base-OS security patches.
+**Security Note**: The image the container runs on is pinned to an exact release of nginx's stable line, `nginx:1.30.6-alpine3.24`. A rebuild therefore ships the image that was tested, and the container gate's result describes what is deployed. A new release is a deliberate bump, which Renovate proposes under `renovate.json`'s defaults.
+
+It used to be the floating `nginx:stable-alpine`, chosen so that a rebuild picked up base-image patches by itself. The cost was that the image which shipped could differ from the one tested, and a builder's cached copy could stay unpatched for weeks. A local build on 2026-10-22 used a month-old cached `nginx:stable-alpine` that carried three critical nginx advisories, all fixed in 1.30.6.
+
+The build stages still use the floating `node:22-alpine`. They build the bundle and are not part of the image that ships.
 
 **Deployment Steps:**
 
@@ -658,7 +662,7 @@ borrow that header.
 
 ## Compression
 
-`nginx:stable-alpine` ships gzip commented out in its http block, and the image replaces only
+The nginx alpine image ships gzip commented out in its http block, and the image replaces only
 `conf.d/default.conf`, so the container served everything uncompressed. Measured on one
 build:
 
