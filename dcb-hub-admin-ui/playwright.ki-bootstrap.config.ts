@@ -9,9 +9,10 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
+	outputDir: "test-results/ki-bootstrap",
 	reporter: [
-		["html", { open: "never" }],
-		["junit", { outputFile: "test-results/junit-ki-bootstrap.xml" }],
+		["html", { open: "never", outputFolder: "playwright-report/ki-bootstrap" }],
+		["junit", { outputFile: "reports/ki-bootstrap-junit.xml" }],
 		["list"],
 	],
 
@@ -28,21 +29,13 @@ export default defineConfig({
 	],
 
 	webServer: {
-		// Base path goes to the BUILD only, via vite's --base flag, so the built
-		// artifact carries the /dcb-admin/ asset base the standalone-entry test needs
-		// - while `vite preview` stays at "/" and keeps serving ki-bootstrap.js at the
-		// root the health-check URL below expects.
-		//
-		// It must NOT be a "VITE_PUBLIC_URL=... npm run build" prefix (POSIX inline
-		// assignment is a parse error under cmd.exe, so that form only ran on Linux
-		// CI) and must NOT be a webServer.env var (that would reach `vite preview`
-		// too, moving the bundle under /dcb-admin/ where the health check never finds
-		// it). npm appends args after "--" to the last command in the chained build
-		// script (`tsc && vite build`), so --base lands on `vite build`; a CLI --base
-		// overrides the config base on every platform. "&&" is fine in cmd.exe and sh
-		// alike - the standalone config chains the same way.
-		command:
-			"npm run build -- --base=/dcb-admin/ && npm run preview -- --port 4183 --strictPort",
+		// --base goes to the build only: dist carries the /dcb-admin/ asset base the
+		// standalone-entry test needs, and `vite preview` stays at "/", serving
+		// ki-bootstrap.js where the health check looks. Not a "VITE_PUBLIC_URL=..." prefix,
+		// a parse error under cmd.exe, nor webServer.env, which would reach the preview too.
+		// npm appends args after "--" to the last command of `tsc && vite build`.
+		// USE_EXISTING_BUILD serves the build verify_base_path's base-path suite has just made.
+		command: `${process.env.USE_EXISTING_BUILD ? "" : "npm run build -- --base=/dcb-admin/ && "}npm run preview -- --port 4183 --strictPort`,
 		url: "http://localhost:4183/ki-bootstrap.js",
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000,

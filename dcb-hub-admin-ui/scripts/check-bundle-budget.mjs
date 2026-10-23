@@ -1,7 +1,7 @@
 // Gzipped bundle budgets over dist/, run after a BUNDLE_BUDGET=1 build. What every page
 // loads first FAILS when over; the total is reported. docs/performance-budget.md says what
 // each check is for and why the total is not one.
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { join } from "node:path";
 
@@ -121,6 +121,21 @@ for (const name of Object.keys(UNBOUNDED)) {
 		problems.push(`${name} is unbounded but no longer built. Remove it from bundle-budget.json.`);
 	}
 }
+
+// For the release report, before any exit, so a failed budget is reported too. `routes` is
+// empty: here the first load is the one route-level number
+mkdirSync("reports", { recursive: true });
+writeFileSync(
+	join("reports", "bundle-budget.json"),
+	JSON.stringify({
+		firstLoad: { size: firstLoad, budget: BUDGET.firstLoad.budget },
+		routes: [],
+		onDemand: Object.entries(BUDGET.chunks).map(([name, budget]) => {
+			const built = measured.filter((chunk) => chunk.name === name);
+			return { name, size: built.length ? Math.max(...built.map((chunk) => chunk.gz)) : null, budget };
+		}),
+	}),
+);
 
 const widest = Math.max(20, ...measured.map((chunk) => chunk.name.length));
 const line = (label, size, note) =>

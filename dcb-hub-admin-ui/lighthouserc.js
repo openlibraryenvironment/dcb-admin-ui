@@ -23,23 +23,10 @@ process.env.CHROME_PATH = process.env.CHROME_PATH || chromium.executablePath();
 module.exports = {
 	ci: {
 		collect: {
-			// BUILDS FIRST, deliberately, and on a port of its own.
-			//
-			// `npm run e2e:ki-bootstrap` rebuilds dist with `--base=/dcb-admin/` and
-			// previews it on 4174. Serving that artefact from the root makes every script
-			// tag a 404, so nothing executes, nothing paints, and Lighthouse fails the
-			// whole run with `NO_FCP` - a message that reads as "your application does
-			// not render" and sent this investigation down a blind alley for two runs.
-			// Building here makes the budget independent of whatever last touched dist.
-			//
-			// 4193, not 4175. The workspace allocates ports as 41<gate><repo> and 4175 is
-			// symposia-ui's e2e port; with Playwright's reuseExistingServer on whenever CI
-			// is unset, a preview that repo left running would be measured here instead of
-			// this application. That failure reports a number rather than an error, which
-			// is the hard kind to notice. --strictPort because without it vite does not
-			// fail on a taken port, it increments to the next free one - a neighbour's.
-			startServerCommand:
-				"npm run build && node scripts/preview-for-lighthouse.mjs",
+			// Builds first, because dist may hold the base-path suites' /dcb-admin/ build, which
+			// the preview refuses. USE_EXISTING_BUILD: verify_lighthouse has just built this tree.
+			// Port 4193: docs/testing.md, "Preview ports".
+			startServerCommand: `${process.env.USE_EXISTING_BUILD ? "" : "npm run build && "}node scripts/preview-for-lighthouse.mjs`,
 			// Match the PORT, not "Local:" — vite writes an ANSI reset between "Local"
 			// and its colon, so a /Local:/ pattern never matches and lhci silently waits
 			// out the full readiness timeout on every run.

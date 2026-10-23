@@ -6,6 +6,7 @@ import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { MOCKS } from "./fixtures/routes";
 import { expectPaintedScheme, scanForViolations } from "./fixtures/axe";
+import { covers } from "./fixtures/coverage";
 
 /**
  * A validation error is announced, not just coloured - W-11.
@@ -76,32 +77,46 @@ test.describe("the library branding form", () => {
 		await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
 	}
 
-	test("a rejected logo URL is announced on the field", async ({ page }) => {
-		await edit(page);
+	test(
+		"a rejected logo URL is announced on the field",
+		covers("A rejected logo address is identified on its field, in text.", [
+			"3.3.1",
+		]),
+		async ({ page }) => {
+			await edit(page);
 
-		const logoUrl = page.getByRole("textbox", { name: /logo url/i });
-		await logoUrl.fill("not a url at all");
-		await logoUrl.blur();
+			const logoUrl = page.getByRole("textbox", { name: /logo url/i });
+			await logoUrl.fill("not a url at all");
+			await logoUrl.blur();
 
-		await expectErrorAnnounced(page, logoUrl, /web address|upload an image/i);
-	});
+			await expectErrorAnnounced(page, logoUrl, /web address|upload an image/i);
+		},
+	);
 
 	for (const scheme of ["light", "dark"] as const) {
 		test.describe(`showing an error, ${scheme}`, () => {
 			test.use({ colorScheme: scheme });
 
-			test("has no accessibility violations", async ({ page }) => {
-				await edit(page);
+			test(
+				"has no accessibility violations",
+				covers(
+					`Every check axe can automate passes on the library branding form showing an error, in ${scheme} mode.`,
+					[],
+					{ page: "library branding form, with an error", view: scheme },
+				),
+				async ({ page }) => {
+					await edit(page);
 
-				const logoUrl = page.getByRole("textbox", { name: /logo url/i });
-				await logoUrl.fill("not a url at all");
-				await logoUrl.blur();
-				// The error has to be on screen, or this is the pristine scan again.
-				await expect(logoUrl).toHaveAttribute("aria-invalid", "true");
+					const logoUrl = page.getByRole("textbox", { name: /logo url/i });
+					await logoUrl.fill("not a url at all");
+					await logoUrl.blur();
+					// The error has to be on screen, or this is the pristine scan again.
+					await expect(logoUrl).toHaveAttribute("aria-invalid", "true");
 
-				await expectPaintedScheme(page, scheme);
-				await scanForViolations(page);
-			});
+					await expectPaintedScheme(page, scheme);
+					await scanForViolations(page);
+				},
+			);
 		});
 	}
 });
@@ -109,36 +124,50 @@ test.describe("the library branding form", () => {
 test.describe("the new Host LMS form", () => {
 	const PATH = "/hostlmss/new";
 
-	test("a missing code is announced on the field", async ({ page }) => {
-		await arrive(page, PATH);
-		await expect(page.getByLabel(/^library/i)).toBeVisible();
+	test(
+		"a missing code is announced on the field",
+		covers("A missing Host LMS code is identified on its field, in text.", [
+			"3.3.1",
+		]),
+		async ({ page }) => {
+			await arrive(page, PATH);
+			await expect(page.getByLabel(/^library/i)).toBeVisible();
 
-		// Touch and clear the required field, which is how a user meets this error.
-		const code = page.getByRole("textbox", { name: /host lms code/i });
-		await code.fill("x");
-		await code.fill("");
-		await code.blur();
+			// Touch and clear the required field, which is how a user meets this error.
+			const code = page.getByRole("textbox", { name: /host lms code/i });
+			await code.fill("x");
+			await code.fill("");
+			await code.blur();
 
-		await expectErrorAnnounced(page, code, /required|enter/i);
-	});
+			await expectErrorAnnounced(page, code, /required|enter/i);
+		},
+	);
 
 	for (const scheme of ["light", "dark"] as const) {
 		test.describe(`showing an error, ${scheme}`, () => {
 			test.use({ colorScheme: scheme });
 
-			test("has no accessibility violations", async ({ page }) => {
-				await arrive(page, PATH);
-				await expect(page.getByLabel(/^library/i)).toBeVisible();
+			test(
+				"has no accessibility violations",
+				covers(
+					`Every check axe can automate passes on the new Host LMS form showing an error, in ${scheme} mode.`,
+					[],
+					{ page: "new Host LMS form, with an error", view: scheme },
+				),
+				async ({ page }) => {
+					await arrive(page, PATH);
+					await expect(page.getByLabel(/^library/i)).toBeVisible();
 
-				const code = page.getByRole("textbox", { name: /host lms code/i });
-				await code.fill("x");
-				await code.fill("");
-				await code.blur();
-				await expect(code).toHaveAttribute("aria-invalid", "true");
+					const code = page.getByRole("textbox", { name: /host lms code/i });
+					await code.fill("x");
+					await code.fill("");
+					await code.blur();
+					await expect(code).toHaveAttribute("aria-invalid", "true");
 
-				await expectPaintedScheme(page, scheme);
-				await scanForViolations(page);
-			});
+					await expectPaintedScheme(page, scheme);
+					await scanForViolations(page);
+				},
+			);
 		});
 	}
 });

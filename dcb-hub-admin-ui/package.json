@@ -2,6 +2,7 @@
 	"name": "dcb-admin-ui",
 	"version": "2.1.0",
 	"private": true,
+	"license": "FSL-1.1-ALv2",
 	"scripts": {
 		"codegen": "graphql-codegen --config codegen.ts",
 		"coverage": "vitest run --coverage",
@@ -15,6 +16,8 @@
 		"prepare": "cd .. && husky dcb-hub-admin-ui/.husky",
 		"build:vite": "vite build",
 		"budget": "node scripts/check-bundle-budget.mjs",
+		"ci:lint": "node scripts/ci-lint.mjs",
+		"report": "node scripts/release-report.ts",
 		"gates": "node scripts/check-all-gates.mjs",
 		"e2e": "playwright test",
 		"e2e:base-path": "playwright test --config playwright.base-path.config.ts",

@@ -1,6 +1,7 @@
 import { test, expect } from "./fixtures/test";
 
 import { scanForViolations } from "./fixtures/axe";
+import { covers } from "./fixtures/coverage";
 import { seedAuth, READ_ONLY_ROLES } from "./fixtures/auth";
 import { seedTheme } from "./fixtures/theme";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -69,18 +70,34 @@ for (const scheme of ["light", "dark"] as const) {
 		});
 
 		for (const chapter of CHAPTERS) {
-			test(`${chapter} has no violations`, async ({ page }) => {
-				await page.goto(`/setup/${chapter}`);
-				await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-				await scanForViolations(page);
-			});
+			test(
+				`${chapter} has no violations`,
+				covers(
+					`Every check axe can automate passes on the setup ${chapter} step, in ${scheme} mode.`,
+					[],
+					{ page: `setup: ${chapter}`, view: scheme },
+				),
+				async ({ page }) => {
+					await page.goto(`/setup/${chapter}`);
+					await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+					await scanForViolations(page);
+				},
+			);
 		}
 
-		test("the finish screen has no violations", async ({ page }) => {
-			await page.goto("/setup/done");
-			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-			await scanForViolations(page);
-		});
+		test(
+			"the finish screen has no violations",
+			covers(
+				`Every check axe can automate passes on the setup finish screen, in ${scheme} mode.`,
+				[],
+				{ page: "setup: finish screen", view: scheme },
+			),
+			async ({ page }) => {
+				await page.goto("/setup/done");
+				await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+				await scanForViolations(page);
+			},
+		);
 	});
 }
 
@@ -93,11 +110,19 @@ test.describe("Setup - WCAG 2.2 AA - high contrast", () => {
 	});
 
 	for (const chapter of CHAPTERS) {
-		test(`${chapter} has no violations`, async ({ page }) => {
-			await page.goto(`/setup/${chapter}`);
-			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-			await scanForViolations(page);
-		});
+		test(
+			`${chapter} has no violations`,
+			covers(
+				`Every check axe can automate passes on the setup ${chapter} step, in high contrast.`,
+				[],
+				{ page: `setup: ${chapter}`, view: "high contrast" },
+			),
+			async ({ page }) => {
+				await page.goto(`/setup/${chapter}`);
+				await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+				await scanForViolations(page);
+			},
+		);
 	}
 });
 
@@ -108,40 +133,50 @@ test.describe("Setup - structure and behaviour", () => {
 		await mockGraphQL(page, MOCKS);
 	});
 
-	test("is exactly one h1, and it is the question being asked", async ({
-		page,
-	}) => {
-		await page.goto("/setup/appearance");
+	test(
+		"is exactly one h1, and it is the question being asked",
+		covers(
+			"Each setup step has exactly one main heading, and it is the question being asked.",
+			["1.3.1", "2.4.6"],
+		),
+		async ({ page }) => {
+			await page.goto("/setup/appearance");
 
-		await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
-		await expect(page.getByRole("heading", { level: 1 })).toContainText(
-			/how should dcb admin look/i,
-		);
-	});
+			await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+			await expect(page.getByRole("heading", { level: 1 })).toContainText(
+				/how should dcb admin look/i,
+			);
+		},
+	);
 
-	test("the progress rail is a named navigation of real links", async ({
-		page,
-	}) => {
-		await page.goto("/setup/consortium");
+	test(
+		"the progress rail is a named navigation of real links",
+		covers(
+			"The setup progress list is a named navigation made of real links.",
+			["1.3.1", "4.1.2"],
+		),
+		async ({ page }) => {
+			await page.goto("/setup/consortium");
 
-		const rail = page.getByRole("navigation", { name: /setup progress/i });
-		await expect(rail).toBeVisible();
+			const rail = page.getByRole("navigation", { name: /setup progress/i });
+			await expect(rail).toBeVisible();
 
-		// Links, not buttons: openable in a new tab, announced as links, and present
-		// in a screen reader's link list. A Stepper would give none of that.
-		await expect(
-			rail.getByRole("link", { name: /your consortium/i }),
-		).toBeVisible();
+			// Links, not buttons: openable in a new tab, announced as links, and present
+			// in a screen reader's link list. A Stepper would give none of that.
+			await expect(
+				rail.getByRole("link", { name: /your consortium/i }),
+			).toBeVisible();
 
-		// The chapter being shown is marked, not just coloured. See SetupRail for why
-		// this is "page" and not the more precise "step".
-		await expect(
-			rail.getByRole("link", { name: /your consortium/i }),
-		).toHaveAttribute("aria-current", "page");
+			// The chapter being shown is marked, not just coloured. See SetupRail for why
+			// this is "page" and not the more precise "step".
+			await expect(
+				rail.getByRole("link", { name: /your consortium/i }),
+			).toHaveAttribute("aria-current", "page");
 
-		// And only that one. Two current items is the same as none.
-		await expect(rail.locator("[aria-current]")).toHaveCount(1);
-	});
+			// And only that one. Two current items is the same as none.
+			await expect(rail.locator("[aria-current]")).toHaveCount(1);
+		},
+	);
 
 	test("offers a way out of the flow", async ({ page }) => {
 		// Setup is not one sitting and it is not compulsory. A flow whose only exit is the
@@ -268,30 +303,40 @@ test.describe("Setup - structure and behaviour", () => {
 		await expect(rail).not.toContainText(/optional/i);
 	});
 
-	test("moves focus to the heading when the chapter changes", async ({
-		page,
-	}) => {
-		// Without this a keyboard user presses Continue and is still standing on a
-		// button that no longer exists, above content they cannot see.
-		await page.goto("/setup/appearance");
-		await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+	test(
+		"moves focus to the heading when the chapter changes",
+		covers("Moving to another setup step puts keyboard focus on its heading.", [
+			"2.4.3",
+		]),
+		async ({ page }) => {
+			// Without this a keyboard user presses Continue and is still standing on a
+			// button that no longer exists, above content they cannot see.
+			await page.goto("/setup/appearance");
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-		await page
-			.getByRole("navigation", { name: /setup progress/i })
-			.getByRole("link", { name: /discovery branding/i })
-			.click();
+			await page
+				.getByRole("navigation", { name: /setup progress/i })
+				.getByRole("link", { name: /discovery branding/i })
+				.click();
 
-		await expect(page).toHaveURL(/\/setup\/discovery$/);
-		const focused = page.locator(":focus");
-		await expect(focused).toHaveRole("heading");
-	});
+			await expect(page).toHaveURL(/\/setup\/discovery$/);
+			const focused = page.locator(":focus");
+			await expect(focused).toHaveRole("heading");
+		},
+	);
 
-	test("announces which step the user is now on", async ({ page }) => {
-		await page.goto("/setup/contacts");
+	test(
+		"announces which step the user is now on",
+		covers("A screen reader is told which setup step the user is now on.", [
+			"4.1.3",
+		]),
+		async ({ page }) => {
+			await page.goto("/setup/contacts");
 
-		// "Step 4 of 6" exists only as a position in the rail, i.e. only visually.
-		await expect(page.getByText(/step 4 of 6/i).first()).toBeAttached();
-	});
+			// "Step 4 of 6" exists only as a position in the rail, i.e. only visually.
+			await expect(page.getByText(/step 4 of 6/i).first()).toBeAttached();
+		},
+	);
 
 	test("the URL is the state: a chapter survives a reload", async ({
 		page,

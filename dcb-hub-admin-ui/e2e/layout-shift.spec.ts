@@ -1,5 +1,6 @@
 import { type Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
+import { proves } from "./fixtures/coverage";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -77,32 +78,36 @@ async function waitForLayoutToSettle(page: Page) {
 }
 
 for (const route of ROUTES) {
-	test(`${route.path} does not shift its layout on a tablet`, async ({
-		page,
-	}) => {
-		await page.setViewportSize(VIEWPORT);
-		await observeLayout(page);
+	test(
+		`${route.path} does not shift its layout on a tablet`,
+		proves(`${route.path} does not move about as it loads, on a tablet.`, [
+			"PERF-02",
+		]),
+		async ({ page }) => {
+			await page.setViewportSize(VIEWPORT);
+			await observeLayout(page);
 
-		await seedAuth(page);
-		await useAllFeatures(page);
-		await mockGraphQL(page, MOCKS);
-		await route.setup?.(page);
-		await page.goto(route.path);
+			await seedAuth(page);
+			await useAllFeatures(page);
+			await mockGraphQL(page, MOCKS);
+			await route.setup?.(page);
+			await page.goto(route.path);
 
-		// The route's own "my data has arrived" marker. A CLS reading taken before the
-		// content lands is a reading of a spinner, which is always zero.
-		await route.ready(page);
-		await waitForLayoutToSettle(page);
+			// The route's own "my data has arrived" marker. A CLS reading taken before the
+			// content lands is a reading of a spinner, which is always zero.
+			await route.ready(page);
+			await waitForLayoutToSettle(page);
 
-		const { cls, gridBarShifts } = await page.evaluate(() => ({
-			cls: Number(window.__clsTotal.toFixed(4)),
-			gridBarShifts: window.__gridBarShifts,
-		}));
+			const { cls, gridBarShifts } = await page.evaluate(() => ({
+				cls: Number(window.__clsTotal.toFixed(4)),
+				gridBarShifts: window.__gridBarShifts,
+			}));
 
-		expect(
-			cls,
-			`cumulative layout shift at ${VIEWPORT.width}x${VIEWPORT.height}`,
-		).toBeLessThanOrEqual(CLS_BUDGET);
-		expect(gridBarShifts, "a grid's pagination bar moved").toBe(0);
-	});
+			expect(
+				cls,
+				`cumulative layout shift at ${VIEWPORT.width}x${VIEWPORT.height}`,
+			).toBeLessThanOrEqual(CLS_BUDGET);
+			expect(gridBarShifts, "a grid's pagination bar moved").toBe(0);
+		},
+	);
 }

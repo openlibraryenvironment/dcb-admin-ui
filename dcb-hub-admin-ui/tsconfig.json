@@ -34,6 +34,7 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
+		"allowImportingTsExtensions": true,
 		"jsx": "react-jsx"
 	},
 	// EVERY e2e directory, not just e2e/. It was none of them, so `tsc --noEmit` passed

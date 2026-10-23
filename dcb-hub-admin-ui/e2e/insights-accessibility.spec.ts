@@ -6,7 +6,8 @@ import axe from "axe-core";
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { enableInsights, mockInsights } from "./fixtures/insights-mocks";
-import { expectPaintedScheme } from "./fixtures/axe";
+import { attachRuleOutcomes, expectPaintedScheme } from "./fixtures/axe";
+import { covers } from "./fixtures/coverage";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
@@ -98,6 +99,7 @@ async function scan(page: Page) {
 	expect(RULES.length).toBeGreaterThan(50);
 
 	const results = await new AxeBuilder({ page }).withRules(RULES).analyze();
+	await attachRuleOutcomes(results);
 
 	expect(
 		results.violations.map((v) => ({
@@ -143,59 +145,98 @@ for (const scheme of ["light", "dark"] as const) {
 		});
 
 		for (const { tab, lastPanel } of SUBJECTS) {
-			test(`${tab} has no violations`, async ({ page }) => {
-				await page.goto(`/consortium/insights?tab=${tab}`);
-				await revealSubject(page, lastPanel);
-				await scan(page);
-			});
+			test(
+				`${tab} has no violations`,
+				covers(
+					`Every check axe can automate passes on the Insights ${tab} subject, in ${scheme} mode.`,
+					[],
+					{ page: `Insights: ${tab}`, view: scheme },
+				),
+				async ({ page }) => {
+					await page.goto(`/consortium/insights?tab=${tab}`);
+					await revealSubject(page, lastPanel);
+					await scan(page);
+				},
+			);
 		}
 
-		test("gaps has no violations", async ({ page }) => {
-			// The sixth subject, and the only one the consortium view cannot show: it
-			// answers "what does THIS library not hold", so it is scanned where it
-			// renders rather than left to the five above.
-			await page.goto(`/libraries/${LIBRARY}/insights?tab=gaps`);
-			await revealSubject(page, "Consortial lifeline");
-			await scan(page);
-		});
+		test(
+			"gaps has no violations",
+			covers(
+				`Every check axe can automate passes on a library's Insights gaps subject, in ${scheme} mode.`,
+				[],
+				{ page: "Insights: gaps, for one library", view: scheme },
+			),
+			async ({ page }) => {
+				// The sixth subject, and the only one the consortium view cannot show: it
+				// answers "what does THIS library not hold", so it is scanned where it
+				// renders rather than left to the five above.
+				await page.goto(`/libraries/${LIBRARY}/insights?tab=gaps`);
+				await revealSubject(page, "Consortial lifeline");
+				await scan(page);
+			},
+		);
 
-		test("the duration trends have no violations", async ({ page }) => {
-			// Behind a flag that is off everywhere today, so the default scans above do
-			// not reach this panel at all - a chart with its own toggle group, which is
-			// where focus order and unlabelled controls go wrong.
-			await enableInsights(page, { trends: true });
-			await page.goto("/consortium/insights?tab=trends");
-			await revealSubject(page, "How durations are moving");
-			await scan(page);
-		});
+		test(
+			"the duration trends have no violations",
+			covers(
+				`Every check axe can automate passes on the Insights duration trends, in ${scheme} mode.`,
+				[],
+				{ page: "Insights: duration trends", view: scheme },
+			),
+			async ({ page }) => {
+				// Behind a flag that is off everywhere today, so the default scans above do
+				// not reach this panel at all - a chart with its own toggle group, which is
+				// where focus order and unlabelled controls go wrong.
+				await enableInsights(page, { trends: true });
+				await page.goto("/consortium/insights?tab=trends");
+				await revealSubject(page, "How durations are moving");
+				await scan(page);
+			},
+		);
 
-		test("a group has no violations", async ({ page }) => {
-			// The group route is the only place the subject bar sits under a TAB bar.
-			// Two navigation strips stacked is where focus order and duplicated
-			// accessible names go wrong, and neither of the other two routes has it.
-			await page.goto(`/groups/${GROUP}/insights?tab=partners`);
-			await revealSubject(page, "Borrowing vs supplying");
-			await scan(page);
-		});
+		test(
+			"a group has no violations",
+			covers(
+				`Every check axe can automate passes on a group's Insights, in ${scheme} mode.`,
+				[],
+				{ page: "Insights: a group", view: scheme },
+			),
+			async ({ page }) => {
+				// The group route is the only place the subject bar sits under a TAB bar.
+				// Two navigation strips stacked is where focus order and duplicated
+				// accessible names go wrong, and neither of the other two routes has it.
+				await page.goto(`/groups/${GROUP}/insights?tab=partners`);
+				await revealSubject(page, "Borrowing vs supplying");
+				await scan(page);
+			},
+		);
 
-		test("the emulated scheme actually reached the theme", async ({ page }) => {
-			await page.goto("/consortium/insights");
+		test(
+			"the emulated scheme actually reached the theme",
+			covers(
+				"The colour scheme under test reached the Insights theme, so its scans measure it.",
+				[],
+			),
+			async ({ page }) => {
+				await page.goto("/consortium/insights");
 
-			// After the app has painted, not after navigation: the theme is applied by
-			// React, so reading `body` on the bare document measures the transparent
-			// default and reports both schemes as dark.
-			await expect(
-				page.getByRole("heading", { level: 2, name: "Overview" }),
-			).toBeVisible();
+				// After the app has painted, not after navigation: the theme is applied by
+				// React, so reading `body` on the bare document measures the transparent
+				// default and reports both schemes as dark.
+				await expect(
+					page.getByRole("heading", { level: 2, name: "Overview" }),
+				).toBeVisible();
 
-			expect(
-				await page.evaluate(
-					() => window.matchMedia("(prefers-color-scheme: dark)").matches,
-				),
-			).toBe(scheme === "dark");
+				expect(
+					await page.evaluate(
+						() => window.matchMedia("(prefers-color-scheme: dark)").matches,
+					),
+				).toBe(scheme === "dark");
 
-			await expectPaintedScheme(page, scheme);
-		});
+				await expectPaintedScheme(page, scheme);
+			},
+		);
 	});
 }
 
@@ -207,39 +248,51 @@ test.describe("Insights - structure", () => {
 		await mockGraphQL(page, MOCKS);
 	});
 
-	test("is one h1, then the subject's own sections, then its panels", async ({
-		page,
-	}) => {
-		await page.goto("/consortium/insights?tab=partners");
+	test(
+		"is one h1, then the subject's own sections, then its panels",
+		covers(
+			"Insights has one main heading, then each subject's sections, then its panels.",
+			["1.3.1", "2.4.6"],
+		),
+		async ({ page }) => {
+			await page.goto("/consortium/insights?tab=partners");
 
-		// A screen-reader user navigates this page by heading. The open subject's
-		// sections are the outline; the ones that are not open must not be in it, or the
-		// outline promises content that is not on the page.
-		await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+			// A screen-reader user navigates this page by heading. The open subject's
+			// sections are the outline; the ones that are not open must not be in it, or the
+			// outline promises content that is not on the page.
+			await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
 
-		expect(
-			await page.getByRole("heading", { level: 2 }).allTextContents(),
-		).toEqual(["Overview", "Trading partners"]);
-	});
+			expect(
+				await page.getByRole("heading", { level: 2 }).allTextContents(),
+			).toEqual(["Overview", "Trading partners"]);
+		},
+	);
 
-	test("the subjects are links, and the open one says so", async ({ page }) => {
-		await page.goto("/consortium/insights?tab=demand");
+	test(
+		"the subjects are links, and the open one says so",
+		covers(
+			"The Insights subjects are real links, and the open one is announced as current.",
+			["4.1.2"],
+		),
+		async ({ page }) => {
+			await page.goto("/consortium/insights?tab=demand");
 
-		const nav = page.getByRole("navigation", { name: "Insights subjects" });
+			const nav = page.getByRole("navigation", { name: "Insights subjects" });
 
-		// Links, not tabs. The library page already owns a tablist, and a second one
-		// inside the first gives a keyboard user two sets of arrow keys - see
-		// docs/accessibility.md.
-		await expect(nav.getByRole("link")).toHaveCount(5);
-		await expect(nav.getByRole("link", { name: "Demand" })).toHaveAttribute(
-			"aria-current",
-			"page",
-		);
+			// Links, not tabs. The library page already owns a tablist, and a second one
+			// inside the first gives a keyboard user two sets of arrow keys - see
+			// docs/accessibility.md.
+			await expect(nav.getByRole("link")).toHaveCount(5);
+			await expect(nav.getByRole("link", { name: "Demand" })).toHaveAttribute(
+				"aria-current",
+				"page",
+			);
 
-		// Gaps needs one library in scope, so the consortium view does not offer it
-		// rather than offering it empty.
-		await expect(nav.getByRole("link", { name: "Gaps" })).toHaveCount(0);
-	});
+			// Gaps needs one library in scope, so the consortium view does not offer it
+			// rather than offering it empty.
+			await expect(nav.getByRole("link", { name: "Gaps" })).toHaveCount(0);
+		},
+	);
 
 	test("a subject the scope cannot show falls back rather than blanking", async ({
 		page,

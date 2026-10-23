@@ -119,6 +119,253 @@ npm run e2e:container                # the production image in a browser, port 4
 npm run lighthouse                   # the payload budget, port 4193
 ```
 
+### Preview ports
+
+Several OpenRS front ends are developed side by side, and Playwright's
+`reuseExistingServer`, on whenever `CI` is unset, does not start a server when something
+already answers on its port: it uses that one. While every repo bound vite's default 4173,
+a preview one repo left running served another repo's tests, and one suite ran against a
+different application and redirected to its identity provider. So every gate has a port
+of its own, `41<gate><repo>`:
+
+| Repo                      | e2e  | bootloader | Lighthouse | base-path | container |
+| ------------------------- | ---- | ---------- | ---------- | --------- | --------- |
+| this one                  | 4173 | 4183       | 4193       | 4203      | 4213      |
+| `dcb-admin-for-libraries` | 4174 | 4184       | 4194       | 4204      | -         |
+| the discovery UI          | 4175 | 4185       | 4195       | -         | -         |
+
+Every vite preview passes `--strictPort`. Without it vite does not fail on a taken port, it
+moves to the next free one, which is a neighbour's, and the gate measures another
+application: a failure that reports a number rather than an error. Lighthouse's own
+preview, `scripts/preview-for-lighthouse.mjs`, fails on a taken port by itself.
+
+## Where the pipeline runs
+
+Every job runs on the `ki-onprem` runner and nothing else. The tag is set once, in
+`default:`, and no job names another or opts out of the defaults.
+`src/helpers/gitlabCiConfig.test.ts` fails if a job names any other runner, an empty tag
+list, or `inherit:`, so a new job cannot quietly reach a different runner.
+
+What the repository cannot enforce is which runners may take a job tagged `ki-onprem`. Keep
+instance runners turned off for this project, in Settings > CI/CD > Runners, and register
+the tag on no other runner.
+
+`ki-onprem` bind-mounts the host's Docker socket into every container, so a `docker:dind`
+service started with its defaults fails with "device or resource busy" and its daemon exits.
+`verify_container` therefore gives dind a socket of its own, as `symposia-service` does.
+
+The runner needs to reach:
+
+- gitlab.com, for the API calls in `verify_ci_config` and `report`;
+- the npm registry;
+- Docker Hub, `mcr.microsoft.com` and `registry.gitlab.com` for job images, and Docker Hub
+  for the image's base;
+- `download.docker.com`, for the Docker client in `verify_container`;
+- `harbor.k-int.com`, and the S3 and R2 buckets the deploys write to.
+
+## What each pipeline runs
+
+There is one pipeline per event. A push to a branch with an open merge request runs the
+merge request's pipeline, not a second one beside it. Each job says which pipelines it
+joins through the rule sets at the top of `.gitlab-ci.yml`:
+
+- `quick` is every pipeline but a schedule.
+- `gate` is a merge request, and `main` and `release` once a merge lands.
+- `app` is `gate`, except that a merge request has to change something the app is built
+  or tested from.
+
+| Pipeline                                          | Runs                                                                                                                   |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| A typical merge request, changing `src/`          | `verify_quality`, `verify_secrets`, `verify_supply_chain`, `verify_e2e`, `verify_lighthouse`, `verify_base_path`       |
+| A merge request changing only docs or Markdown    | `verify_quality`, `verify_secrets`, `verify_supply_chain`                                                              |
+| ...that also changes the image's files            | adds `verify_container`                                                                                                |
+| ...that also changes `.gitlab-ci.yml`             | adds `verify_ci_config`                                                                                                |
+| A push to a branch with no merge request          | `verify_quality`, `verify_secrets`                                                                                     |
+| `main`                                            | the merge request's checks, then `build`, the `:next` image and the dev deploys                                        |
+| `release`                                         | every check including `verify_container`, then the release, the versioned bundle, the image and the production deploys |
+| The nightly schedule                              | `verify_supply_chain` and `nightly_flake_hunt`, below                                                                  |
+| Run by hand with `ON_DEMAND_REPORT` set to `true` | every check, including `verify_container` and `verify_ci_config`, then the release report. Nothing ships               |
+
+Nothing that ships runs unless every check before it passed, and nothing ships from a
+scheduled pipeline.
+
+`src/helpers/ciChangePaths.test.ts` keeps the `app` path list whole. Every tracked file is
+either on it or on a short list of files that cannot change what a browser gate tests:
+docs, Markdown, the local hooks, and a few root files. A file on neither fails the test, so
+a new kind of file cannot quietly skip the browser gates.
+
+## Nightly
+
+A scheduled pipeline on `main` runs two jobs and nothing else:
+
+- **`verify_supply_chain`**, because an advisory can land against code nobody has
+  changed. On a merge request it only sees advisories that exist when someone pushes.
+- **`nightly_flake_hunt`**, the whole browser suite three times over with no retries. A
+  test that passes only sometimes fails here, where the merge gate's `retries: 2` would
+  have retried it into a pass. `FLAKE_REPEAT` sets the count. The job itself always
+  succeeds, so the release report can fetch its results, and `nightly_flake_verdict`
+  fails the pipeline when it found failures.
+
+Nothing ships from a schedule, and the release report does not run. Every job that deploys
+or publishes says `$CI_PIPELINE_SOURCE != "schedule"`. The config lint and the container
+gate exclude schedules too, because GitLab treats `changes` as true in a pipeline no push
+created.
+
+**The schedule itself is set in GitLab, not in this file:** CI/CD > Schedules, target
+branch `main`, once a night. A failed scheduled pipeline emails the schedule's owner, so
+make the owner someone who will read it.
+
+## The release report
+
+`reports/release-report.html` says what every check in a pipeline found, for a reader who
+does not read code. In order:
+
+1. **A verdict**, and under it **Needs attention**: each thing a reader should act on, in a
+   sentence. That covers a failed check, a statement due for review, and a VPAT or manual
+   evaluation older than six months or naming an older version than the build. It also
+   covers a missing licence declaration, a base image whose tag moves, an offered language
+   that is incompletely translated, and tests that passed only on retry or failed in the
+   last nightly flake hunt.
+2. **Requirements**, with each one's Secure by Design principles and EN 301 549 clause.
+3. **Compatibility**: the dcb-service schemas this build is checked against, and which
+   release and environment variable each feature needs.
+4. **What changed**: the conventional commits since the last release tag, and this
+   build's figures against the last release's report.
+5. **Accessibility**, page by page and criterion by criterion, with each criterion's
+   EN 301 549 clause, the gaps the VPAT states, and how current it is.
+6. **Security**: the headers the image sends, npm's advisory counts, the secret scan, the
+   licences of what ships and of the product, and the image's base, digest and tags.
+   Software bills of materials (SBOMs) are left out until the organisation's SBOM policy
+   is agreed, and the report says so.
+7. **Privacy**: the privacy tests, and the names of what the browser stores after a
+   patron is validated. Names only: no value is ever recorded.
+8. **Browser support**, then **languages**, with how complete each translation is.
+9. **Speed**, then **test reliability**, then **every check** and any failed test.
+
+The `report` job builds it after the verify stage, whether or not the checks passed, and
+every merge request links to it as **Release report**. Job artifacts expire, so
+`.releaserc.json` also attaches it to each GitLab Release, where it stays.
+
+It reads what the checks leave in `reports/`:
+
+- how each job ended, in `reports/status/`, written by `.records_status`;
+- Playwright's JSON report and the JUnit files;
+- `reports/bundle-budget.json`, written by `npm run budget`;
+- `reports/npm-audit.json` and `reports/licences.json`, written by `verify_supply_chain`.
+  The licence check, `scripts/check-licences.mjs`, is a gate there: a production library
+  under a licence not on its allow-list fails it;
+- `reports/image.json`, the base image's digest, written by `verify_container`;
+- `gitleaks.sarif`, from `verify_secrets`;
+- `.lighthouseci/`.
+
+The `report` job also fetches two files with its job token, and goes on without either:
+the last release's `release-report.json`, for the figures to compare with, and the last
+nightly flake hunt's JUnit file. GitLab returns artifacts only from a job that succeeded,
+so `nightly_flake_hunt` always succeeds and leaves a marker when tests failed.
+`nightly_flake_verdict` then fails the nightly pipeline.
+
+The rest it reads from the repository, through `scripts/report-facts.ts`. That covers the
+capability registry, `docs/DCB_Admin_VPAT.md`, the security headers, the Dockerfile,
+`LICENSE` and the locale files, plus the git history for what changed.
+`src/helpers/reportFacts.test.ts` holds each reader to its source. The capability reader
+is checked against the registry itself, so a change of format there fails a test rather
+than the report.
+
+To make one locally, run `npm run gates` and then `npm run report`. Without the status
+files a local run reports every check as not run, but the accessibility, speed and test
+sections are complete.
+
+What it says comes from beside the checks themselves, so it changes when they do:
+
+- **Each accessibility test** says what it checks, and which WCAG success criteria it is
+  evidence for, through `covers()` in `e2e/fixtures/coverage.ts`. A page scan also names
+  its page and its view: light, dark or high contrast. Phone width comes from the
+  `narrow` project, which runs the same suite at 320px.
+  `src/helpers/e2eCoverage.test.ts` fails when an accessibility test does not
+  say what it covers, names a criterion WCAG does not have, or places a scan in a view the
+  report has no column for.
+- **Each axe scan** attaches every rule's outcome and the criteria the rule tests
+  (`attachRuleOutcomes` in `e2e/fixtures/axe.ts`). That is how a criterion is reported as
+  checked automatically. Rules axe could not decide are left out, because this gate
+  asserts on violations alone.
+- **Each pipeline check** is explained in `scripts/gates.json`.
+  `src/helpers/gateCatalogue.test.ts` fails when a `verify_*` job has no entry.
+- **A criterion nothing automated checks** is reported as assessed by hand, with the
+  conformance `docs/DCB_Admin_VPAT.md` states for it. The report reads that from the
+  VPAT's tables, so each row must open with its criterion in bold and give its
+  conformance in the next cell.
+
+The report shows evidence beside the VPAT's claim and never merges the two. Where they
+disagree, the VPAT is out of date: update it, citing the test, as for 2.3.3 in October 2026.
+
+### The report on demand
+
+Every release pipeline makes the report and attaches it to the release. To make one at any
+other time, for a bid, a customer or a PO review, run a pipeline by hand:
+
+1. In GitLab, open Build > Pipelines and choose **Run pipeline**.
+2. Choose the branch, or a release tag such as `v2.2.0`.
+3. Set `ON_DEMAND_REPORT` to `true`. The form offers it with its description.
+4. When the pipeline finishes, the `report` job's **Release report** artifact is the page.
+   It expires after a month like any artifact, so press **Keep** on the job to keep it.
+
+Such a run includes every check, including the container gate and the config lint, and
+nothing that builds a release, publishes an image or deploys.
+`src/helpers/onDemandReport.test.ts` fails if a job that ships does not exclude it. On a
+tag the report names the version. A tag made before this change carries the older pipeline
+file, so it cannot be reported on this way.
+
+Set the variable only on a pipeline you run by hand. Set as a project variable, it would
+turn every pipeline into a report run, and nothing would ship.
+
+`e2e/release-report.spec.ts` holds the report to WCAG 2.2 AA in both colour schemes,
+because it is offered as accessibility evidence.
+
+### The requirement catalogue
+
+The report opens with **Requirements**: what this application is required to do, and the
+evidence this pipeline produced for each. A tender question is answered from it, so it is
+written for a buyer to read. The catalogue is `scripts/requirements.json`. Each entry has an
+ID made of its area and a number (`PRIV-01`), the area, one sentence, and its evidence:
+
+- `checks`: pipeline checks, by job name in `scripts/gates.json`;
+- `e2e`: browser tests tagged through `proves()` in `e2e/fixtures/coverage.ts`, the way
+  `covers()` tags accessibility tests;
+- `unit`: unit tests, by file and `describe` block, read from the Vitest JUnit file;
+- `accessibility`: the WCAG 2.2 AA section, which keeps its own criterion-by-criterion
+  structure;
+- `statement`: something assessed by hand, with the date it was last reviewed. After
+  12 months the report says it is due for review;
+- `standards`: reserved for the clause numbers of other standards a requirement answers.
+
+A requirement **passes only when all of its automated evidence ran and passed**. If some ran
+and passed and the rest did not run, as on a docs-only merge request, it is "partly run".
+With no automated evidence, it is "assessed by hand", and never a pass.
+
+`reports/release-report.json` holds the same results as data, and each GitLab Release
+carries it beside the page. Anything that reads the results, such as a tender matrix or a
+dashboard, should read that file, not the HTML.
+
+Two tests keep the catalogue honest. `src/helpers/requirementsCatalogue.test.ts` fails when:
+
+- a requirement has no evidence;
+- it names a check the pipeline does not have;
+- a check is claimed by no requirement;
+- a unit-test reference matches no `describe` block;
+- a statement is undated or dated in the future.
+
+`src/helpers/e2eCoverage.test.ts` fails when a browser test names a requirement that does
+not say browser tests evidence it, or when such a requirement has no tagged test.
+
+**This file is public.** Only `main` and `release` are mirrored to GitHub, and this file is on
+both. So it holds requirements any buyer could be told, written without a customer's name.
+A tender's own numbered requirements, and how they map onto these, are kept outside this
+repository.
+
+To add a requirement, give it the next number in its area. Then point it at evidence that
+already exists, or add that evidence in the same change. Evidence should be specific: a
+blanket tag on a broad test proves nothing in particular.
+
 ### The requesting journeys
 
 `StaffRequest`, `ExpeditedCheckout`, `QuickWalkUp` and `CombinedRequestingModal` are the
@@ -181,10 +428,44 @@ that `expose_as` only appears on a job that also keeps `artifacts:paths` - GitLa
 it otherwise, for a different reason with a different message. It reads the raw text rather
 than parsing, so it needs no YAML dependency.
 
-**It is not a substitute for a real lint.** `glab ci lint`, or the project
-`/ci/lint` API endpoint, validates the whole schema and would have caught this without
-anybody enumerating the rule. Neither is wired up here; that is the gate still missing for
-CI configuration, and this test covers only the one rule that has actually bitten.
+**It is not a substitute for a real lint,** which is the next section. This test runs on
+every pipeline and needs no token; the lint runs only when the config changes.
+
+### The pipeline config lint
+
+`verify_ci_config` sends `.gitlab-ci.yml` to GitLab's lint endpoint
+(`POST /projects/:id/ci/lint`) and asks it to simulate the pipeline a push to `main`, and a
+push to `release`, would create. It prints the jobs each would run, stage by stage, and
+fails if either is invalid. It runs only when `.gitlab-ci.yml` or `scripts/ci-lint.mjs`
+changes.
+
+The simulation is the point. A merge request pipeline proves the config for a merge
+request and nothing else. GitLab checks `needs`, `dependencies` and stages only for the
+jobs a pipeline contains, so a mistake in a job that exists only on `release` is first seen
+on release day, when the pipeline that should cut the release fails to be created.
+
+Locally:
+
+```bash
+GITLAB_CI_LINT_TOKEN=<a personal access token> npm run ci:lint
+```
+
+**The token is a decision, recorded here.** `CI_JOB_TOKEN` cannot call this endpoint: it is
+not in GitLab's list of endpoints a job token may use. So the job reads
+`GITLAB_CI_LINT_TOKEN`, a project variable holding a project access token.
+
+- **Scope `read_api` if GitLab accepts it, otherwise `api`.** GitLab's docs do not say
+  which scope the endpoint needs, and it is a POST that changes nothing.
+- **The lowest role that works.** The docs do not state one either. Try Reporter, then
+  Developer. Nothing in this job writes, so anything higher is unused authority.
+- **Masked, and not protected.** A merge request pipeline from an unprotected branch never
+  receives a protected variable, and the merge request is where this check is wanted. The
+  cost is that any job on any branch can read it, which means anyone who can push a
+  branch. Those people already hold Developer access to this project.
+- **It expires.** Project access tokens last at most a year. When it lapses the job fails
+  and says GitLab refused the token: rotate it, do not disable the job.
+- **No token, no pass.** Unset, the job fails and says what is missing. A lint that passes
+  because it could not run is the false green the rest of this document is about.
 
 ### The container gate
 
@@ -200,10 +481,15 @@ violation - which is neither a failed request nor an exception, so nothing else 
 one. `e2e/content-security-policy.spec.ts` proves the collector fires. So a change to the
 application that breaks the policy fails on every merge request, with no Docker.
 
-**In CI it runs only when what it alone guards changes:** `docker/**`, `.dockerignore`,
-`e2e-container/**` or its Playwright config - on `main` against the previous push, and
-elsewhere against `main`. Every pipeline paid for an image build that most changes cannot
-affect, and the deployments this pipeline publishes are the static bundle, not the image.
+**In CI it runs on every release, and otherwise only when what it alone guards changes:**
+`docker/**`, `.dockerignore`, `e2e-container/**` or its Playwright config, and the files that
+decide whether `npm run build` passes inside the image: `tsconfig.json`, `package.json`, the
+lockfile and `vite.config.mts`. On 2026-10-23 a `tsconfig.json` change had left the image
+unable to build, because the configs it added import a fixture the build context excludes. A merge request
+compares against its target branch, and `main` against the previous push. Nothing else
+can change the headers, compression or caching it checks, so every other pipeline would
+pay for an image build it cannot use. The release publishes the image to Harbor, so the
+release pipeline always tests the image it ships.
 
 It needs a Docker daemon. It removes its own container by name before starting, because
 Playwright's teardown has been observed leaving one up, and a leftover container holds
@@ -222,6 +508,22 @@ an unreachable host, a refused connection and a missing privilege read different
 | The production image could not be built at all | `.dockerignore` excluded `e2e/`, which two `src/` unit tests import fixture JSON from, and `npm run build` is `tsc && vite build`. Nothing built the image                                                          |
 | `script-src <- eval` on every page load        | Zod 4 feature-detects its JIT with `Function("")`. It catches the refusal and falls back, so nothing breaks - but the browser still reports a violation. `z.config({ jitless: true })` is Zod's own switch for this |
 | `/login` had no `h1`                           | It is not in `ROUTES` (it needs its own auth state), so route-health's one-h1 assertion never reached it                                                                                                            |
+
+### One build per browser job
+
+Each browser job builds the application once. `verify_lighthouse` makes the byte budget's
+build, checks it, then runs Lighthouse against it with `USE_EXISTING_BUILD=1`. The flag
+only adds `dist/.vite/manifest.json`, which no page fetches. `verify_base_path` runs the
+base-path suite, which builds under `/dcb-admin/`, then the bootloader suite against that
+build with `USE_EXISTING_BUILD=1`. Both reach the router base through
+`import.meta.env.BASE_URL`, so the two builds they used to make were the same build.
+
+The two suites in one job keep separate folders, `test-results/<suite>` and
+`playwright-report/<suite>`, because Playwright empties its output folder when a run
+starts. Their JUnit files are in `reports/`, which Playwright never empties.
+
+Locally, `npm run gates` still runs each suite with its own build: without the flag, every
+config builds first.
 
 ### Why `npm run gates` is sequential, and checks the ports first
 
@@ -265,9 +567,8 @@ already hides this, which is why it went unnoticed there, and a retry that masks
 masks a real regression just as readily.
 
 **In CI, the browser suites take turns.** `verify_e2e`, `verify_lighthouse`,
-`verify_base_path`, `verify_ki_bootstrap` and `verify_container` share
-`resource_group: browser-suites`, so GitLab runs one at a time. Each builds the application
-and drives Chromium on the same `ki-onprem` runner, and `workers: 4` was measured on a
+`verify_base_path` and `verify_container` share `resource_group: browser-suites`, so GitLab
+runs one at a time. Each builds the application once and drives Chromium on the same `ki-onprem` runner, and `workers: 4` was measured on a
 32-thread workstation, not there. Run together they produced the failure above as
 retries: on 14 Oct 2026, `verify_e2e` reported three tests flaky on routes that are ready
 in 0.5-1.0s locally, one of them timing out on `/serviceInfo/auditExplorer`'s static text,
@@ -438,16 +739,16 @@ jumps without tests being written, check that `all` is still set.
 
 ## What the gates do not reach
 
-**Everything they measure is `vite preview` or a mocked page.** Nothing renders the
-container, and two real defects lived in exactly that gap:
+**Before the container gate, everything they measured was `vite preview` or a mocked
+page.** Two real defects lived in exactly that gap:
 
 - the image served **1,576 KB uncompressed** where the budget approved 665 KB, because the
   budget audits a preview server that compresses and Cloudflare compresses at the edge;
 - the Content Security Policy blocked **40 font loads per session**, which the config test
   and `curl` both missed — a CSP failure is not a failed request and not an exception.
 
-Both were found by building the image and driving it in a browser. **A CI step that does
-that, and fails on any `securitypolicyviolation`, is the highest-value gate still missing.**
+Both were found by building the image and driving it in a browser, which `verify_container`
+now does.
 
 Also not covered: real Keycloak flows (silent renewal, session expiry, logout) are mocked
 throughout, and the CSP's `frame-ancestors 'self'` was reasoned from the code rather than

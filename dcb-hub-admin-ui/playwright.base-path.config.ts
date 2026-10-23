@@ -26,9 +26,12 @@ export default defineConfig({
 	// junit alongside the html one, and under its OWN file name: the base-path and
 	// bootloader suites write into the same test-results/ as the main suite, so a
 	// shared name would have one gate's results overwrite another's.
+	// Folders of its own: verify_base_path runs the bootloader suite after this one, and
+	// Playwright empties its output folder when a run starts
+	outputDir: "test-results/base-path",
 	reporter: [
-		["html", { open: "never" }],
-		["junit", { outputFile: "test-results/junit-base-path.xml" }],
+		["html", { open: "never", outputFolder: "playwright-report/base-path" }],
+		["junit", { outputFile: "reports/base-path-junit.xml" }],
 		["list"],
 	],
 
@@ -43,7 +46,7 @@ export default defineConfig({
 	projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 
 	webServer: {
-		command: "npm run build && npm run preview -- --port 4203 --strictPort",
+		command: `${process.env.USE_EXISTING_BUILD ? "" : "npm run build && "}npm run preview -- --port 4203 --strictPort`,
 		url: `http://localhost:4203${BASE_PATH}`,
 		reuseExistingServer: !process.env.CI,
 		env: {

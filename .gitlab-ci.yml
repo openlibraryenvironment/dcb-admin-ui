@@ -15,6 +15,12 @@ variables:
   # entry covers a directory npm never touches.
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
 
+  # Set to "true" when running a pipeline by hand: docs/testing.md, "The report on demand"
+  ON_DEMAND_REPORT:
+    value: "false"
+    options: ["false", "true"]
+    description: "true runs every check and the release report on the chosen branch or tag, and ships nothing."
+
 default:
   image:
     name: node:22.23.1-bullseye
@@ -25,11 +31,67 @@ default:
 
 stages:
   - verify
+  - report
   - build
   - release
   - rebuild
   - container
   - deploy
+
+# One pipeline per event. A merge request is checked in its own pipeline, so a push to its
+# branch does not start a second; main and release run on every push, as merges land there.
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    # First, so a branch with an open merge request, or a tag, can be reported on by hand
+    - if: $ON_DEMAND_REPORT == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_COMMIT_BRANCH !~ /^(main|release)$/
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+# Which pipelines a job joins. GitLab adds a job to a merge request pipeline only when its
+# rules say so, so every job takes one of these, or rules of its own that say why.
+.rules:
+  # Every pipeline but a schedule: cheap enough to tell any push what it broke
+  quick:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: on_success
+  # The merge gate: a merge request, and main and release once a merge lands
+  gate:
+    - if: $ON_DEMAND_REPORT == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE != "schedule" && $CI_COMMIT_BRANCH =~ /^(main|release)$/
+  # The gate, but a merge request that changes nothing the app is built or tested from
+  # skips it. src/helpers/ciChangePaths.test.ts keeps this list whole.
+  app:
+    - if: $ON_DEMAND_REPORT == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths: &app_paths
+          - dcb-hub-admin-ui/src/**/*
+          - dcb-hub-admin-ui/e2e*/**/*
+          - dcb-hub-admin-ui/public/**/*
+          - dcb-hub-admin-ui/scripts/**/*
+          - dcb-hub-admin-ui/docker/**/*
+          - dcb-hub-admin-ui/types/**/*
+          - "dcb-hub-admin-ui/*.{json,ts,js,cjs,mjs,mts,html,graphqls}"
+          - "dcb-hub-admin-ui/.*"
+          - ".*"
+    - if: $CI_PIPELINE_SOURCE != "schedule" && $CI_COMMIT_BRANCH =~ /^(main|release)$/
+  # A scheduled pipeline, set up in CI/CD > Schedules: docs/testing.md, "Nightly"
+  nightly:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+# How each check ended, for the report job: kept whether the check passed or not. The
+# after_script starts at the repository root, not in the application's directory.
+.records_status:
+  after_script:
+    - mkdir -p dcb-hub-admin-ui/reports/status
+    - |
+      echo "{\"job\":\"$CI_JOB_NAME\",\"status\":\"$CI_JOB_STATUS\"}" > "dcb-hub-admin-ui/reports/status/$CI_JOB_NAME.json"
 
 # Keyed on the LOCKFILE, not the branch. A per-branch key cannot be hit by the first
 # pipeline on a new branch, which is most of them; a lockfile key is shared by every
@@ -49,11 +111,104 @@ cache:
   paths:
     - .npm
 
-# On main this artefact is the deployment. On the release branch it is only a gate:
-# it is built before semantic-release bumps the version, so build_released_bundle
-# supersedes it there.
+# The browser suite several times over with no retries, so a test that passes only
+# sometimes fails here, where the merge gate's `retries: 2` would have retried it into a
+# pass. docs/testing.md, "Nightly".
+nightly_flake_hunt:
+  stage: verify
+  rules: !reference [.rules, nightly]
+  image:
+    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    pull_policy: if-not-present
+  resource_group: browser-suites
+  timeout: 3h
+  variables:
+    FLAKE_REPEAT: "3"
+  script:
+    - export NPM_TOKEN="$NPMJS_TOKEN"
+    - cd dcb-hub-admin-ui
+    - npm ci
+    - mkdir -p reports
+    # Succeeds either way, because GitLab hands the report job only a successful job's
+    # artifacts; nightly_flake_verdict fails the pipeline instead
+    - npx playwright test --repeat-each="$FLAKE_REPEAT" --retries=0 || touch reports/flake-hunt-failed
+  artifacts:
+    when: always
+    expose_as: "Flake hunt report"
+    paths:
+      - dcb-hub-admin-ui/playwright-report/
+      - dcb-hub-admin-ui/reports/
+    reports:
+      junit: dcb-hub-admin-ui/reports/e2e-junit.xml
+    expire_in: 2 weeks
+
+# The flake hunt's verdict, so a failed hunt still fails the nightly pipeline and emails its owner
+nightly_flake_verdict:
+  stage: report
+  rules: !reference [.rules, nightly]
+  needs: [nightly_flake_hunt]
+  cache: {}
+  script:
+    - |
+      if [ -e dcb-hub-admin-ui/reports/flake-hunt-failed ]; then
+        echo "The flake hunt failed. Its report, nightly_flake_hunt's artifact, names the tests."
+        exit 1
+      fi
+
+# Every check's result in plain language, for people who do not read code: docs/testing.md,
+# "The release report". `when: always`, so a failed pipeline is explained too.
+report:
+  stage: report
+  interruptible: true
+  timeout: 10m
+  cache: {}
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - when: always
+  # Optional: each joins only some pipelines. A push with no merge request runs the quick two
+  needs:
+    - job: verify_quality
+    - job: verify_secrets
+    - job: verify_supply_chain
+      optional: true
+    - job: verify_e2e
+      optional: true
+    - job: verify_lighthouse
+      optional: true
+    - job: verify_base_path
+      optional: true
+    - job: verify_container
+      optional: true
+    - job: verify_ci_config
+      optional: true
+  variables:
+    # The whole history and its tags, for what changed since the last release
+    GIT_DEPTH: "0"
+  script:
+    # Node's own TypeScript, so no install
+    - cd dcb-hub-admin-ui
+    - mkdir -p reports
+    # The last release's figures and the last nightly flake hunt. A first release has neither,
+    # and the report says so
+    - |
+      api="$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts"
+      curl -sf --header "JOB-TOKEN: $CI_JOB_TOKEN" "$api/release/raw/dcb-hub-admin-ui/reports/release-report.json?job=report" -o reports/previous-report.json || rm -f reports/previous-report.json
+      curl -sf --header "JOB-TOKEN: $CI_JOB_TOKEN" "$api/main/raw/dcb-hub-admin-ui/reports/e2e-junit.xml?job=nightly_flake_hunt" -o reports/nightly-junit.xml || rm -f reports/nightly-junit.xml
+    - node scripts/release-report.ts
+  artifacts:
+    when: always
+    expose_as: "Release report"
+    paths:
+      - dcb-hub-admin-ui/reports/release-report.html
+      - dcb-hub-admin-ui/reports/release-report.json
+    expire_in: 1 month
+
+# The bundle main deploys. Release builds its own after the version bump: build_released_bundle.
 build:
   stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - git config --global user.name "ianibbo"
@@ -72,7 +227,7 @@ build:
       - dcb-hub-admin-ui/dist/
     expire_in: 1 hour
 
-# W-3. Until this job existed the verify stage ran `e2e:ki-bootstrap` and nothing else:
+# Until this job existed the verify stage ran `e2e:ki-bootstrap` and nothing else:
 # no lint, no type-check, no unit tests, no Playwright suite. Every quality rule the repo
 # carries was therefore enforced by whoever remembered to run it locally, which is another
 # way of saying it was not enforced. A rule that is not gated is not a rule.
@@ -83,7 +238,9 @@ build:
 # `npx vitest run`, never `npm run test` - that script is bare `vitest`, i.e. watch mode,
 # which in CI is a job that never finishes.
 verify_quality:
+  extends: .records_status
   stage: verify
+  rules: !reference [.rules, quick]
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
@@ -93,14 +250,14 @@ verify_quality:
     # --coverage rather than a bare run: it costs about three seconds on top of the
     # suite and puts the figure in every pipeline log. There is NO threshold - see
     # docs/testing.md, "Coverage is a figure, not a gate". Nothing here fails on it.
-    - npx vitest run --coverage --reporter=default --reporter=junit --outputFile=test-results/vitest-junit.xml
+    - npx vitest run --coverage --reporter=default --reporter=junit --outputFile=reports/unit-junit.xml
   interruptible: true
   timeout: 20m
   artifacts:
     when: always
     paths:
       - dcb-hub-admin-ui/coverage/
-      - dcb-hub-admin-ui/test-results/
+      - dcb-hub-admin-ui/reports/
     # junit, so 1,542 unit tests arrive as a Tests tab and a merge request widget
     # rather than as the last page of a job log. Before this the pipeline had NO
     # machine-readable result of any kind: a failure count had to be read by eye, and
@@ -110,7 +267,7 @@ verify_quality:
     # There is still no threshold - see docs/testing.md, "Coverage is a figure, not a
     # gate" - but a figure nobody is shown is not even that.
     reports:
-      junit: dcb-hub-admin-ui/test-results/vitest-junit.xml
+      junit: dcb-hub-admin-ui/reports/unit-junit.xml
       coverage_report:
         coverage_format: cobertura
         path: dcb-hub-admin-ui/coverage/cobertura-coverage.xml
@@ -133,7 +290,9 @@ verify_quality:
 # same browser: a second job would cost a whole extra `tsc && vite build` for one spec.
 # The build arms the collector through playwright.config.ts. See docs/i18n.md.
 verify_e2e:
+  extends: .records_status
   stage: verify
+  rules: !reference [.rules, app]
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
     pull_policy: if-not-present
@@ -156,20 +315,23 @@ verify_e2e:
     paths:
       - dcb-hub-admin-ui/playwright-report/
       - dcb-hub-admin-ui/test-results/
+      - dcb-hub-admin-ui/reports/
     reports:
-      junit: dcb-hub-admin-ui/test-results/junit.xml
+      junit: dcb-hub-admin-ui/reports/e2e-junit.xml
     # A direct link to the HTML report from the merge request, instead of "download
     # the artifact, unzip it, find index.html".
     expose_as: "Playwright report - e2e axe and i18n"
     expire_in: 1 week
 
-# The performance budget - W-2. Its own job because it needs a production build and three
+# The performance budget. Its own job because it needs a production build and three
 # Lighthouse runs, and because a red budget is a specific conversation ("cut weight or
 # bring an argument"), not a generic test failure.
 #
 # NEVER re-baseline lighthouserc.js to make this pass. See the file.
 verify_lighthouse:
+  extends: .records_status
   stage: verify
+  rules: !reference [.rules, app]
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
     pull_policy: if-not-present
@@ -183,9 +345,8 @@ verify_lighthouse:
     # What each check is for: docs/performance-budget.md.
     - VITE_PUBLIC_URL=/ BUNDLE_BUDGET=1 npm run build
     - npm run budget
-    # No separate build step for Lighthouse: lighthouserc.js's startServerCommand builds,
-    # because the audit must not measure whatever an earlier job left in dist/.
-    - npm run lighthouse
+    # The build above, not a second one: the manifest it adds is never fetched by a page
+    - USE_EXISTING_BUILD=1 npm run lighthouse
   interruptible: true
   resource_group: browser-suites
   timeout: 30m
@@ -193,19 +354,21 @@ verify_lighthouse:
     when: always
     paths:
       - dcb-hub-admin-ui/.lighthouseci/
+      - dcb-hub-admin-ui/reports/
     expose_as: "Lighthouse run - payload budget"
     expire_in: 1 week
 
-# The base path is baked in by Vite, so the shipped configuration - mounted at
-# /dcb-admin so one origin can host dcb-admin-for-libraries beside it - is the one
-# configuration verify_e2e does not run: that suite pins the base to "/". A base
-# counted twice, by Vite AND by the router, reaches production looking green.
+# The app as it ships, mounted at /dcb-admin, which verify_e2e does not run: that suite pins
+# the base to "/". Also the co-hosting assertions: storage namespaced by the base, and
+# inject_env.json fetched under it rather than at the origin root, where a sibling app's sits.
 #
-# It also carries the co-hosting assertions: storage namespaced by the base rather
-# than as "root", and inject_env.json fetched under the base rather than at the
-# origin root, where a sibling app's config sits.
+# Then the bootloader suite against the same build, served from the root. One build, one
+# install and one turn in the browser queue for both. `|| failed=1` so the second suite
+# runs even when the first fails.
 verify_base_path:
+  extends: .records_status
   stage: verify
+  rules: !reference [.rules, app]
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
     pull_policy: if-not-present
@@ -213,79 +376,53 @@ verify_base_path:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
-    - npm run e2e:base-path
+    - npm run e2e:base-path || failed=1
+    - USE_EXISTING_BUILD=1 npm run e2e:ki-bootstrap || failed=1
+    - test -z "$failed"
   interruptible: true
   resource_group: browser-suites
-  timeout: 30m
+  timeout: 40m
   artifacts:
     when: always
     paths:
       - dcb-hub-admin-ui/playwright-report/
       - dcb-hub-admin-ui/test-results/
+      - dcb-hub-admin-ui/reports/
     reports:
-      junit: dcb-hub-admin-ui/test-results/junit-base-path.xml
-    expose_as: "Playwright report - base path"
+      junit:
+        - dcb-hub-admin-ui/reports/base-path-junit.xml
+        - dcb-hub-admin-ui/reports/ki-bootstrap-junit.xml
+    expose_as: "Playwright reports - base path and bootloader"
     expire_in: 1 week
 
-verify_ki_bootstrap:
-  stage: verify
-  image:
-    name: mcr.microsoft.com/playwright:v1.61.1-noble
-    pull_policy: if-not-present
-  script:
-    - export NPM_TOKEN="$NPMJS_TOKEN"
-    - cd dcb-hub-admin-ui
-    - npm ci
-    - npm run e2e:ki-bootstrap
-  interruptible: true
-  resource_group: browser-suites
-  timeout: 30m
-  # This job had NO artifacts and no report. A failure in the bootloader gate left
-  # nothing behind to look at - no trace, no screenshot, no list of which of its four
-  # tests went red - which is the gate the workspace notes record reporting "1 of 4"
-  # against a build it should not have been measuring.
-  artifacts:
-    when: always
-    paths:
-      - dcb-hub-admin-ui/playwright-report/
-      - dcb-hub-admin-ui/test-results/
-    reports:
-      junit: dcb-hub-admin-ui/test-results/junit-ki-bootstrap.xml
-    expose_as: "Playwright report - bootloader"
-    expire_in: 1 week
-
-# Production dependencies at high severity and above only: the full audit is dominated by
-# build tooling that never reaches a browser. docs/testing.md, "The supply-chain gate".
-# The artefact that actually ships, driven in a browser - W-6.
-#
-# Every other verify job measures `vite preview` or a mocked page. docs/testing.md
-# records two production defects that lived in that gap (1,576 KB served uncompressed
-# against a 665 KB budget; the CSP blocking 40 font loads a session), and this job found
-# three more on its first run: the image could not be BUILT at all, because
-# .dockerignore excluded a directory two src/ unit tests import fixtures from and
-# `npm run build` is `tsc && vite build`; Zod's JIT probe raised a CSP violation on
-# every page load; and /login had no h1.
-#
-# Needs a Docker daemon, which the Playwright image does not have - so this uses docker
-# with a mounted socket on the on-prem runner rather than the browser image, and installs
-# browsers itself.
+# The image that ships, driven in a browser. What only it can catch: docs/testing.md,
+# "The container gate". The Playwright image has no Docker, so the job installs the
+# docker CLI and drives the dind service.
 verify_container:
+  extends: .records_status
   stage: verify
   interruptible: true
   resource_group: browser-suites
-  # Only the image's own files can break what only this job checks. The policy it ships
-  # is applied in every e2e test: docs/testing.md, "The container gate".
+  # Only the image's own files can break what only this job checks; the policy it ships is
+  # applied in every e2e test: docs/testing.md, "The container gate". Always on release,
+  # which publishes the image. A merge request's `changes` are against its target branch.
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_BRANCH == "release" || $ON_DEMAND_REPORT == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"
       changes:
-        paths: &container_gate_paths
+        paths:
           - dcb-hub-admin-ui/docker/**/*
           - dcb-hub-admin-ui/.dockerignore
           - dcb-hub-admin-ui/e2e-container/**/*
           - dcb-hub-admin-ui/playwright.container.config.ts
-    - changes:
-        paths: *container_gate_paths
-        compare_to: refs/heads/main
+          # What decides whether `npm run build` passes inside the image: a tsconfig change
+          # once broke it with nothing in docker/ touched
+          - dcb-hub-admin-ui/tsconfig.json
+          - dcb-hub-admin-ui/package.json
+          - dcb-hub-admin-ui/package-lock.json
+          - dcb-hub-admin-ui/vite.config.mts
   timeout: 40m
   image:
     name: mcr.microsoft.com/playwright:v1.61.1-noble
@@ -293,6 +430,9 @@ verify_container:
   services:
     - name: docker:27-dind
       alias: docker
+      # The ki-onprem runner bind-mounts the host's docker.sock into every container, so dind's
+      # default socket fails "device or resource busy" and the daemon exits; as in symposia-service
+      command: ["dockerd", "--host=unix:///var/run/dind.sock", "--host=tcp://0.0.0.0:2375", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
@@ -329,31 +469,56 @@ verify_container:
     - cd dcb-hub-admin-ui
     - npm ci
     - npm run e2e:container
+    # The base image's digest, for the release report: a fact, so a failure here fails nothing
+    - |
+      BASE="$(awk '/^FROM/ { image = $2 } END { print image }' docker/production/Dockerfile)"
+      docker pull -q "$BASE" > /dev/null && printf '{"image":"%s","digest":"%s"}' "$BASE" "$(docker image inspect --format '{{index .RepoDigests 0}}' "$BASE")" > reports/image.json || true
   artifacts:
     when: always
     paths:
       - dcb-hub-admin-ui/playwright-report/
       - dcb-hub-admin-ui/test-results/
+      - dcb-hub-admin-ui/reports/
     reports:
       junit: dcb-hub-admin-ui/test-results/junit-container.xml
     expose_as: "Playwright report - container"
     expire_in: 1 week
 
+# Production dependencies at high severity and above only: the full audit is dominated by
+# build tooling that never reaches a browser. docs/testing.md, "The supply-chain gate".
 verify_supply_chain:
+  extends: .records_status
   stage: verify
+  # Nightly too: an advisory can land against code nobody has changed
+  rules:
+    - !reference [.rules, gate]
+    - !reference [.rules, nightly]
   interruptible: true
   timeout: 10m
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
-    - npm audit --omit=dev --audit-level=high
+    - mkdir -p reports
+    # The counts the release report shows, whatever the gate below decides
+    - npm audit --omit=dev --json > reports/npm-audit.json || true
+    # Both gates run, so the report has both results when the first fails
+    - npm audit --omit=dev --audit-level=high || failed=1
+    - node scripts/check-licences.mjs || failed=1
+    - test -z "$failed"
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/reports/
+    expire_in: 1 week
 
 # Every secret this repository has ever committed stays readable in its history: deleting
 # the line does not un-leak it, only rotation does. The baseline holds the 21 findings that
 # predate this job, so the pipeline goes red on a NEW secret rather than on the backlog.
 verify_secrets:
+  extends: .records_status
   stage: verify
+  rules: !reference [.rules, quick]
   image:
     name: zricethezav/gitleaks:v8.30.1
     entrypoint: [""]
@@ -371,14 +536,43 @@ verify_secrets:
     when: always
     paths:
       - gitleaks.sarif
+      - dcb-hub-admin-ui/reports/
     expire_in: 1 month
+
+# GitLab's own lint of this file, and a simulated push to main and to release: a merge
+# request pipeline never creates either. docs/testing.md, "The pipeline config lint".
+verify_ci_config:
+  extends: .records_status
+  stage: verify
+  interruptible: true
+  timeout: 5m
+  cache: []
+  # `changes` is always true in a scheduled pipeline, hence the first rule
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $ON_DEMAND_REPORT == "true"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"
+      changes:
+        paths:
+          - .gitlab-ci.yml
+          - dcb-hub-admin-ui/scripts/ci-lint.mjs
+  script:
+    # Node's own fetch, so no install
+    - cd dcb-hub-admin-ui
+    - node scripts/ci-lint.mjs
+  artifacts:
+    when: always
+    paths:
+      - dcb-hub-admin-ui/reports/
+    expire_in: 1 week
 
 release:
   stage: release
-  # This rule ensures the job ONLY runs on the 'release' branch
+  # on_success: it was `always`, which cut a release whatever the checks said
   rules:
-    - if: '$CI_COMMIT_BRANCH == "release"'
-      when: always
+    - if: '$CI_COMMIT_BRANCH == "release" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
+      when: on_success
     - when: never
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
@@ -406,9 +600,8 @@ release:
   artifacts:
     reports:
       dotenv: deploy.env
-  # This job depends on the build job completing successfully
-  dependencies:
-    - build
+  # The report, which .releaserc.json attaches to the GitLab Release. It never reads dist/
+  dependencies: [report]
 
 # Builds the bundle AFTER semantic-release has decided the version. vite bakes
 # __APP_VERSION__ from package.json at build time, so the `build` stage - which runs
@@ -417,7 +610,7 @@ release:
 build_released_bundle:
   stage: rebuild
   rules:
-    - if: '$CI_COMMIT_BRANCH == "release"'
+    - if: '$CI_COMMIT_BRANCH == "release" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
       when: on_success
     - when: never
   # No `dependencies`: setting it would override `needs` as the list of jobs whose
@@ -480,7 +673,7 @@ build_released_bundle:
 publish_image_next:
   extends: .publish_image
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
       when: on_success
     - when: never
   variables:
@@ -490,7 +683,7 @@ publish_image_next:
 publish_image_release:
   extends: .publish_image
   rules:
-    - if: '$CI_COMMIT_BRANCH == "release"'
+    - if: '$CI_COMMIT_BRANCH == "release" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
       when: on_success
     - when: never
   # No `dependencies`: $RELEASE_VERSION arrives as the release job's dotenv report.
@@ -510,7 +703,7 @@ publish_image_release:
 deploy_tag_to_s3:
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "release"'
+    - if: '$CI_COMMIT_BRANCH == "release" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
       when: on_success
     - when: never
   tags:
@@ -589,7 +782,7 @@ deploy_tag_to_s3:
 deploy_release_to_r2:
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "release"'
+    - if: '$CI_COMMIT_BRANCH == "release" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
       when: on_success
     - when: never
   tags:
@@ -621,8 +814,8 @@ deploy_release_to_r2:
 deploy_dev_to_s3:
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
-      when: always
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
+      when: on_success
     - when: never
   tags:
     - ki-onprem
@@ -655,7 +848,7 @@ deploy_dev_to_s3:
 deploy_dev_to_r2:
   stage: deploy
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE != "schedule" && $ON_DEMAND_REPORT != "true"'
       when: on_success
     - when: never
   tags:
