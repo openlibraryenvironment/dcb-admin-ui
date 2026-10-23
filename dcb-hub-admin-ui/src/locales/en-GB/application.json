@@ -334,6 +334,9 @@
 		"onboarding_stats_outstanding_other": "{{count}} still outstanding",
 		"onboarding_stats_ils_caption": "libraries in this consortium.",
 		"onboarding_stats_unknown_ils": "Other or unknown",
+		"onboarding_stats_first_request": "Median days to first request",
+		"onboarding_stats_first_request_caption_one": "From the library being created, across {{count}} library. {{waiting}} not yet used.",
+		"onboarding_stats_first_request_caption_other": "From the library being created, across {{count}} libraries. {{waiting}} not yet used.",
 		"new": {
 			"title": "Create a consortium",
 			"required_title": "No consortium has been set up yet",
