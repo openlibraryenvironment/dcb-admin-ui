@@ -105,6 +105,26 @@ named chunk outside it still can. The check that distinguishes a regroup from ne
 is the one above: build the same commit with each bundler and compare the first load and
 the total.
 
+### When a feature costs every page
+
+A number is raised only by the measured cost of a named feature that has to be where it
+is, after anything that did not have to be there has moved. It is never re-derived from
+today's build, because that spends the headroom too.
+
+On 2026-10-23 per-deployment Insights pages and panels (`VITE_INSIGHTS_PAGES`,
+`VITE_INSIGHTS_PANELS`) put the first load 785 over and `useInsightsView.js` 134 over.
+Most of the first-load cost was not needed there: `featureFlags.ts`, which every page
+loads, imported the whole panel vocabulary. Moving it out, to `insightsPanelFlags.ts`,
+recovered 562. What remained is the page check the sidebar makes on every page:
+
+| Measure (gzipped, LF checkout) | Before the feature | With it, split | Raised by | Budget            |
+| ------------------------------ | -----------------: | -------------: | --------: | ----------------- |
+| First load                     |            344,627 |        345,023 |      +396 | 344,800 → 345,196 |
+| `useInsightsView.js`           |             28,887 |         29,688 |      +801 | 29,100 → 29,901   |
+
+Both keep the headroom they had: 173 and 213. Measure on a fresh checkout. A working
+copy holding CRLF files builds a few hundred bytes heavier than CI does.
+
 ### What this is telling us to do
 
 `exceljs` and `rasterizeHTML` are 303 KB gzipped — 18% of the artefact — and both come
