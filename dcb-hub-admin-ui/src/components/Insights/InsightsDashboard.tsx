@@ -81,7 +81,23 @@ import { InsightsExportProvider } from "./ExportContext";
 import { clusterDrill, errorDrill } from "@helpers/insightsDrill";
 import DurationTrendPanel from "./DurationTrendPanel";
 import { resolveSubject, Subject } from "@helpers/insightsSubjects";
-import { isInsightsTrendsEnabled } from "@helpers/featureFlags";
+import {
+	isInsightsPanelShown as shown,
+	isInsightsSectionShown,
+} from "@helpers/featureFlags";
+import type {
+	InsightsPanel,
+	InsightsSection,
+} from "@helpers/insightsSelection";
+import PanelRow, { PanelGrid } from "./PanelRow";
+
+// Lazily mounted as one, so one is enough to mount it
+const GAPS_TOGETHER: readonly InsightsPanel[] = [
+	"gaps.unmetLocal",
+	"gaps.acquisitionOpportunities",
+	"gaps.consortialLifeline",
+	"gaps.newAcquisitions",
+];
 import DateLocalization from "@components/DateLocalization/DateLocalization";
 
 const RANGE_PRESETS: RangePreset[] = ["7d", "30d", "90d", "365d"];
@@ -116,14 +132,14 @@ function fillRate(successful: number, failed: number): number | null {
 function Section({
 	id,
 	titleKey,
-	subject,
+	section,
 	current,
 	children,
 }: {
 	id: string;
 	titleKey: string;
-	/** Which subject this section belongs to; omitted means always shown. */
-	subject?: Subject;
+	/** The subject this section is, or the overview above every subject. */
+	section: InsightsSection;
 	current: Subject;
 	children: ReactNode;
 }) {
@@ -134,7 +150,8 @@ function Section({
 	// must not mount its panels, or the cost the subjects exist to make opt-in is paid
 	// anyway - and the panels below the fold would fetch on an IntersectionObserver that
 	// a hidden element never fires.
-	if (subject && subject !== current) return null;
+	if (section !== "overview" && section !== current) return null;
+	if (!isInsightsSectionShown(section)) return null;
 
 	return (
 		<Box component="section" aria-labelledby={id}>
@@ -369,6 +386,7 @@ export default function InsightsDashboard({
 
 				<Section
 					id="insights-overview-heading"
+					section="overview"
 					current={subject}
 					titleKey="insights.sections.overview"
 				>
@@ -377,260 +395,265 @@ export default function InsightsDashboard({
 				    of the twelve carried no direction at all. The rest are still here,
 				    under a disclosure, until subjects give them somewhere better to live -
 				    INSIGHTS_IA_AND_UX_PLAN.md section 3. */}
-					<Box
-						sx={{
-							display: "grid",
-							gap: 2,
-							gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-						}}
-					>
-						<KpiTile
-							title={t("insights.kpi.resolved.title")}
-							metric="requests_fulfilled"
-							value={resolved.toLocaleString()}
-							subtitle={t("insights.kpi.resolved.subtitle")}
-							loading={loading}
-						/>
-						<KpiTile
-							title={t("insights.kpi.fill_rate.title")}
-							metric="fill_rate"
-							value={currentRate != null ? `${currentRate.toFixed(1)}%` : "—"}
-							deltaPct={rateDelta}
-							higherIsBetter
-							subtitle={t("insights.kpi.vs_prior")}
-							loading={loading}
-						/>
-						<KpiTile
-							title={t("insights.kpi.time_to_loan.title")}
-							metric="turnaround_to_loan"
-							value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
-							subtitle={t("insights.kpi.time_to_loan.subtitle", {
-								p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
-							})}
-							loading={loading}
-						/>
-						<KpiTile
-							title={t("insights.kpi.error_rate.title")}
-							metric="error_rate"
-							value={
-								currentErrRate == null ? (
-									"—"
-								) : (
-									// The one headline figure with an exact answer waiting: the
-									// requests it counted, on the exception tab.
-									<DrillLink
-										drill={errorDrill(params)}
-										panel={t("insights.kpi.error_rate.title")}
-										subject={t("insights.kpi.error_rate.title")}
-									>
-										{`${currentErrRate.toFixed(1)}%`}
-									</DrillLink>
-								)
-							}
-							deltaPct={errDelta}
-							higherIsBetter={false}
-							subtitle={t("insights.kpi.vs_prior")}
-							loading={loading}
-						/>
-						<KpiTile
-							title={t("insights.headline.active_systems")}
-							metric="libraries_active"
-							value={`${activeSystems(netFlow.data)}`}
-							subtitle={t("insights.headline.active_systems_sub")}
-							loading={netFlow.isLoading}
-						/>
-					</Box>
+					{shown("overview.headline") && (
+						<Box
+							sx={{
+								display: "grid",
+								gap: 2,
+								gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+							}}
+						>
+							<KpiTile
+								title={t("insights.kpi.resolved.title")}
+								metric="requests_fulfilled"
+								value={resolved.toLocaleString()}
+								subtitle={t("insights.kpi.resolved.subtitle")}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.fill_rate.title")}
+								metric="fill_rate"
+								value={currentRate != null ? `${currentRate.toFixed(1)}%` : "—"}
+								deltaPct={rateDelta}
+								higherIsBetter
+								subtitle={t("insights.kpi.vs_prior")}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.time_to_loan.title")}
+								metric="turnaround_to_loan"
+								value={formatDuration(d?.turnaroundToLoaned?.p50Seconds)}
+								subtitle={t("insights.kpi.time_to_loan.subtitle", {
+									p95: formatDuration(d?.turnaroundToLoaned?.p95Seconds),
+								})}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.kpi.error_rate.title")}
+								metric="error_rate"
+								value={
+									currentErrRate == null ? (
+										"—"
+									) : (
+										// The one headline figure with an exact answer waiting: the
+										// requests it counted, on the exception tab.
+										<DrillLink
+											drill={errorDrill(params)}
+											panel={t("insights.kpi.error_rate.title")}
+											subject={t("insights.kpi.error_rate.title")}
+										>
+											{`${currentErrRate.toFixed(1)}%`}
+										</DrillLink>
+									)
+								}
+								deltaPct={errDelta}
+								higherIsBetter={false}
+								subtitle={t("insights.kpi.vs_prior")}
+								loading={loading}
+							/>
+							<KpiTile
+								title={t("insights.headline.active_systems")}
+								metric="libraries_active"
+								value={`${activeSystems(netFlow.data)}`}
+								subtitle={t("insights.headline.active_systems_sub")}
+								loading={netFlow.isLoading}
+							/>
+						</Box>
+					)}
 
 					{/* h3 because this sits INSIDE the Overview section, alongside the panels,
 				    and the sections are the h2s. MUI's default is h3 already; saying it
 				    explicitly is what stops the next reader "fixing" it to h2 and skipping
 				    a level in the app where the sections do not exist. */}
-					<Accordion
-						variant="outlined"
-						disableGutters
-						slots={{ heading: "h3" }}
-					>
-						<AccordionSummary expandIcon={<ExpandMore />}>
-							<Typography variant="body2">
-								{t("insights.headline.more")}
-							</Typography>
-						</AccordionSummary>
-						<AccordionDetails>
-							<Box
-								sx={{
-									display: "grid",
-									gap: 2,
-									gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-								}}
-							>
-								<KpiTile
-									title={t("insights.kpi.supply_rate.title")}
-									value={supplyRate != null ? `${supplyRate.toFixed(1)}%` : "—"}
-									subtitle={t("insights.kpi.supply_rate.subtitle")}
-									loading={supplierFill.isLoading}
-								/>
-								<KpiTile
-									title={t("insights.kpi.time_to_finalise.title")}
-									metric="turnaround_to_finalise"
-									value={formatDuration(toFinalised.data?.p50Seconds)}
-									subtitle={t("insights.kpi.time_to_finalise.subtitle", {
-										p95: formatDuration(toFinalised.data?.p95Seconds),
-									})}
-									loading={toFinalised.isLoading}
-								/>
-								<KpiTile
-									title={t("insights.kpi.checkout_rate.title")}
-									metric="checkout_rate"
-									value={
-										checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"
-									}
-									subtitle={
-										d
-											? t("insights.kpi.checkout_rate.subtitle", {
-													reached: d.checkoutRate.reachedCount,
-													total: d.checkoutRate.totalCount,
-												})
-											: undefined
-									}
-									loading={loading}
-								/>
-								<KpiTile
-									title={t("insights.kpi.total_borrows.title")}
-									value={totalBorrows.toLocaleString()}
-									subtitle={t("insights.kpi.total_borrows.subtitle")}
-									loading={loading}
-								/>
-								<KpiTile
-									title={t("insights.kpi.total_lends.title")}
-									value={totalLends.toLocaleString()}
-									subtitle={t("insights.kpi.total_lends.subtitle")}
-									loading={loading}
-								/>
-								<KpiTile
-									title={t("insights.kpi.rescued.title")}
-									value={(d?.savedByReResolution ?? 0).toLocaleString()}
-									subtitle={t("insights.kpi.rescued.subtitle")}
-									loading={loading}
-								/>
-								<KpiTile
-									title={t("insights.kpi.unique_titles.title")}
-									value={(
-										d?.collectionSummary.uniqueTitlesRequested ?? 0
-									).toLocaleString()}
-									subtitle={t("insights.kpi.unique_titles.subtitle", {
-										total: d?.collectionSummary.totalRequests ?? 0,
-									})}
-									loading={loading}
-								/>
-								{/* An assumption multiplied by a count, not a measurement. Beside
+					{shown("overview.moreFigures") && (
+						<Accordion
+							variant="outlined"
+							disableGutters
+							slots={{ heading: "h3" }}
+						>
+							<AccordionSummary expandIcon={<ExpandMore />}>
+								<Typography variant="body2">
+									{t("insights.headline.more")}
+								</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<Box
+									sx={{
+										display: "grid",
+										gap: 2,
+										gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+									}}
+								>
+									<KpiTile
+										title={t("insights.kpi.supply_rate.title")}
+										value={
+											supplyRate != null ? `${supplyRate.toFixed(1)}%` : "—"
+										}
+										subtitle={t("insights.kpi.supply_rate.subtitle")}
+										loading={supplierFill.isLoading}
+									/>
+									<KpiTile
+										title={t("insights.kpi.time_to_finalise.title")}
+										metric="turnaround_to_finalise"
+										value={formatDuration(toFinalised.data?.p50Seconds)}
+										subtitle={t("insights.kpi.time_to_finalise.subtitle", {
+											p95: formatDuration(toFinalised.data?.p95Seconds),
+										})}
+										loading={toFinalised.isLoading}
+									/>
+									<KpiTile
+										title={t("insights.kpi.checkout_rate.title")}
+										metric="checkout_rate"
+										value={
+											checkoutRate != null ? `${checkoutRate.toFixed(1)}%` : "—"
+										}
+										subtitle={
+											d
+												? t("insights.kpi.checkout_rate.subtitle", {
+														reached: d.checkoutRate.reachedCount,
+														total: d.checkoutRate.totalCount,
+													})
+												: undefined
+										}
+										loading={loading}
+									/>
+									<KpiTile
+										title={t("insights.kpi.total_borrows.title")}
+										value={totalBorrows.toLocaleString()}
+										subtitle={t("insights.kpi.total_borrows.subtitle")}
+										loading={loading}
+									/>
+									<KpiTile
+										title={t("insights.kpi.total_lends.title")}
+										value={totalLends.toLocaleString()}
+										subtitle={t("insights.kpi.total_lends.subtitle")}
+										loading={loading}
+									/>
+									<KpiTile
+										title={t("insights.kpi.rescued.title")}
+										value={(d?.savedByReResolution ?? 0).toLocaleString()}
+										subtitle={t("insights.kpi.rescued.subtitle")}
+										loading={loading}
+									/>
+									<KpiTile
+										title={t("insights.kpi.unique_titles.title")}
+										value={(
+											d?.collectionSummary.uniqueTitlesRequested ?? 0
+										).toLocaleString()}
+										subtitle={t("insights.kpi.unique_titles.subtitle", {
+											total: d?.collectionSummary.totalRequests ?? 0,
+										})}
+										loading={loading}
+									/>
+									{/* An assumption multiplied by a count, not a measurement. Beside
 							    four measured figures it borrowed a confidence it has not
 							    earned; here it keeps its arithmetic on its own face. */}
-								<CostAvoidanceTile
-									fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
-									unitCost={view.unitCost}
-									onUnitCostChange={view.setUnitCost}
-									loading={loading}
-								/>
-							</Box>
-						</AccordionDetails>
-					</Accordion>
+									<CostAvoidanceTile
+										fulfilled={d?.fulfillmentCurrent.successfulCount ?? 0}
+										unitCost={view.unitCost}
+										onUnitCostChange={view.setUnitCost}
+										loading={loading}
+									/>
+								</Box>
+							</AccordionDetails>
+						</Accordion>
+					)}
 				</Section>
 
 				<Section
 					id="insights-trends-heading"
-					subject="trends"
+					section="trends"
 					current={subject}
 					titleKey="insights.sections.trends"
 				>
 					{/* Direction first: it answers the question the subject is named for, and
 				    it reads the series the spine below already fetched. */}
-					<TrendStrip params={params} interval={interval} />
+					{shown("trends.trendStrip") && (
+						<TrendStrip params={params} interval={interval} />
+					)}
 
-					{/* The three durations over time. Behind its own flag: /insights/trend is
-				    on no dcb-service release, and a 404 through the panel contract reads
-				    as a fault rather than as a server that is older. */}
-					{isInsightsTrendsEnabled() ? (
-						<LazyPanel minHeight={360}>
+					{/* The three durations over time. Behind its own flag as well:
+				    /insights/trend is on no dcb-service release, and a 404 through the
+				    panel contract reads as a fault rather than as a server that is older. */}
+					<PanelRow minHeight={360}>
+						{shown("trends.durationTrend") && (
 							<DurationTrendPanel params={params} interval={interval} />
-						</LazyPanel>
-					) : null}
+						)}
+					</PanelRow>
 
 					{/* Trend spine + plot-builder */}
-					<StatusFlowChart params={params} interval={interval} view={view} />
+					{shown("trends.statusFlow") && (
+						<StatusFlowChart params={params} interval={interval} view={view} />
+					)}
 				</Section>
 
 				<Section
 					id="insights-performance-heading"
-					subject="service"
+					section="service"
 					current={subject}
 					titleKey="insights.sections.performance"
 				>
 					{/* First, because every other panel here is a breakdown of one of these. */}
-					<DurationsPanel
-						params={params}
-						toLoaned={d?.turnaroundToLoaned}
-						toFinalised={toFinalised.data}
-						loading={loading}
-					/>
+					{shown("service.durations") && (
+						<DurationsPanel
+							params={params}
+							toLoaned={d?.turnaroundToLoaned}
+							toFinalised={toFinalised.data}
+							loading={loading}
+						/>
+					)}
 
 					{/* Peer benchmarking - this library vs the consortium median */}
-					<LazyPanel minHeight={320}>
-						<PeerBenchmarkPanel
-							params={{ startDate: params.startDate, endDate: params.endDate }}
-							libraryCode={libraryCode}
-						/>
-					</LazyPanel>
+					<PanelRow minHeight={320}>
+						{shown("service.peerBenchmark") && (
+							<PeerBenchmarkPanel
+								params={{
+									startDate: params.startDate,
+									endDate: params.endDate,
+								}}
+								libraryCode={libraryCode}
+							/>
+						)}
+					</PanelRow>
 
 					{/* Operational breakdowns */}
-					<LazyPanel minHeight={360}>
-						<Box
-							sx={{
-								display: "grid",
-								gap: 3,
-								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-							}}
-						>
+					<PanelRow minHeight={360}>
+						{shown("service.failures") && (
 							<FailureTaxonomyChart params={params} />
+						)}
+						{shown("service.supplierReliability") && (
 							<SupplierReliabilityChart params={params} />
-						</Box>
-					</LazyPanel>
+						)}
+					</PanelRow>
 
 					{/* Bottleneck + lender responsiveness */}
-					<LazyPanel minHeight={360}>
-						<Box
-							sx={{
-								display: "grid",
-								gap: 3,
-								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-							}}
-						>
+					<PanelRow minHeight={360}>
+						{shown("service.timeInStatus") && (
 							<TimeInStatusChart params={params} />
+						)}
+						{shown("service.supplierResponse") && (
 							<SupplierResponseSlaChart params={params} />
-						</Box>
-					</LazyPanel>
+						)}
+					</PanelRow>
 				</Section>
 
 				<Section
 					id="insights-demand-heading"
-					subject="demand"
+					section="demand"
 					current={subject}
 					titleKey="insights.sections.demand"
 				>
 					{/* Demand pattern (staffing) */}
-					<LazyPanel minHeight={320}>
-						<DemandHeatmapChart params={params} />
-					</LazyPanel>
+					<PanelRow minHeight={320}>
+						{shown("demand.heatmap") && <DemandHeatmapChart params={params} />}
+					</PanelRow>
 
 					{/* What is being asked for: by collection dimension, and by title */}
-					<LazyPanel minHeight={360}>
-						<Box
-							sx={{
-								display: "grid",
-								gap: 3,
-								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-							}}
-						>
+					<PanelRow minHeight={360}>
+						{shown("demand.dimensions") && (
 							<CollectionDimensionPanel params={params} />
+						)}
+						{shown("demand.topTitles") && (
 							<TableStatPanel<RequestedTitleStat>
 								titleKey="insights.charts.top_titles.title"
 								subtitleKey="insights.charts.top_titles.subtitle"
@@ -660,18 +683,12 @@ export default function InsightsDashboard({
 									},
 								]}
 							/>
-						</Box>
-					</LazyPanel>
+						)}
+					</PanelRow>
 
 					{/* Demand breakdowns: pickup location + patron group */}
-					<LazyPanel minHeight={360}>
-						<Box
-							sx={{
-								display: "grid",
-								gap: 3,
-								gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-							}}
-						>
+					<PanelRow minHeight={360}>
+						{shown("demand.byPickupLocation") && (
 							<BarStatPanel<PickupLocationDemandStat>
 								titleKey="insights.charts.demand_by_pickup.title"
 								subtitleKey="insights.charts.demand_by_pickup.subtitle"
@@ -685,6 +702,8 @@ export default function InsightsDashboard({
 								color={categorical[0]}
 								horizontal
 							/>
+						)}
+						{shown("demand.byPatronGroup") && (
 							<BarStatPanel<PatronGroupDemandStat>
 								titleKey="insights.charts.demand_by_patron_group.title"
 								subtitleKey="insights.charts.demand_by_patron_group.subtitle"
@@ -695,166 +714,181 @@ export default function InsightsDashboard({
 								color={categorical[0]}
 								horizontal
 							/>
-						</Box>
-					</LazyPanel>
+						)}
+					</PanelRow>
 
 					{/* Demand nothing could satisfy - the acquisition signal the failure
 				    taxonomy cannot give, because these requests never had a supplier. */}
-					<LazyPanel minHeight={320}>
-						<TableStatPanel<UnfillableDemandStat>
-							titleKey="insights.charts.unfillable_demand.title"
-							subtitleKey="insights.charts.unfillable_demand.subtitle"
-							queryOptions={unfillableDemandQueryOptions(client, params)}
-							metric="unfillable_demand"
-							getRowKey={(r) => r.clusterId}
-							columns={[
-								{
-									headerKey: "insights.charts.top_titles.col_title",
-									text: (r) => r.title,
-									cell: (r) => (
-										<DrillLink
-											drill={clusterDrill(r.clusterId, params)}
-											panel={t("insights.charts.unfillable_demand.title")}
-										>
-											{r.title ?? "—"}
-										</DrillLink>
-									),
-								},
-								{
-									headerKey: "insights.charts.rare_gem.col_author",
-									text: (r) => r.author,
-									cell: (r) => r.author ?? "—",
-								},
-								{
-									headerKey: "insights.charts.top_titles.col_requests",
-									align: "right",
-									text: (r) => r.requestCount,
-									cell: (r) => r.requestCount,
-								},
-							]}
-						/>
-					</LazyPanel>
+					<PanelRow minHeight={320}>
+						{shown("demand.unfillable") && (
+							<TableStatPanel<UnfillableDemandStat>
+								titleKey="insights.charts.unfillable_demand.title"
+								subtitleKey="insights.charts.unfillable_demand.subtitle"
+								queryOptions={unfillableDemandQueryOptions(client, params)}
+								metric="unfillable_demand"
+								getRowKey={(r) => r.clusterId}
+								columns={[
+									{
+										headerKey: "insights.charts.top_titles.col_title",
+										text: (r) => r.title,
+										cell: (r) => (
+											<DrillLink
+												drill={clusterDrill(r.clusterId, params)}
+												panel={t("insights.charts.unfillable_demand.title")}
+											>
+												{r.title ?? "—"}
+											</DrillLink>
+										),
+									},
+									{
+										headerKey: "insights.charts.rare_gem.col_author",
+										text: (r) => r.author,
+										cell: (r) => r.author ?? "—",
+									},
+									{
+										headerKey: "insights.charts.top_titles.col_requests",
+										align: "right",
+										text: (r) => r.requestCount,
+										cell: (r) => r.requestCount,
+									},
+								]}
+							/>
+						)}
+					</PanelRow>
 				</Section>
 
 				<Section
 					id="insights-partners-heading"
-					subject="partners"
+					section="partners"
 					current={subject}
 					titleKey="insights.sections.partners"
 				>
-					<LazyPanel minHeight={360}>
-						<TradingPartnersPanel params={params} libraryCode={libraryCode} />
-					</LazyPanel>
+					<PanelRow minHeight={360}>
+						{shown("partners.tradingPartners") && (
+							<TradingPartnersPanel params={params} libraryCode={libraryCode} />
+						)}
+					</PanelRow>
 
 					{/* Reciprocity / value */}
-					<LazyPanel minHeight={360}>
-						<NetFlowChart params={params} />
-					</LazyPanel>
+					<PanelRow minHeight={360}>
+						{shown("partners.netFlow") && <NetFlowChart params={params} />}
+					</PanelRow>
 				</Section>
 
 				{/* Collection gaps + supply value - library scope only. */}
 				{libraryCode && (
 					<Section
 						id="insights-gaps-heading"
-						subject="gaps"
+						section="gaps"
 						current={subject}
 						titleKey="insights.sections.gaps"
 					>
-						<LazyPanel minHeight={400}>
-							<Stack spacing={3}>
-								<Box
-									sx={{
-										display: "grid",
-										gap: 3,
-										gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-									}}
-								>
-									<TableStatPanel<TopClusterStat>
-										titleKey="insights.charts.unmet_local.title"
-										subtitleKey="insights.charts.unmet_local.subtitle"
-										queryOptions={unmetLocalDemandQueryOptions(client, {
-											...params,
-											libraryCode,
-										})}
-										getRowKey={(r) => r.clusterId}
-										columns={[
-											{
-												headerKey: "insights.charts.top_titles.col_title",
-												text: (r) => r.title,
-												cell: (r) => r.title ?? "—",
-											},
-											{
-												headerKey: "insights.charts.top_titles.col_requests",
-												align: "right",
-												text: (r) => r.requestCount,
-												cell: (r) => r.requestCount,
-											},
-										]}
-									/>
-									<TableStatPanel<TopClusterStat>
-										titleKey="insights.charts.acquisition_opportunities.title"
-										subtitleKey="insights.charts.acquisition_opportunities.subtitle"
-										queryOptions={acquisitionOpportunitiesQueryOptions(client, {
-											...params,
-											libraryCode,
-										})}
-										getRowKey={(r) => r.clusterId}
-										columns={[
-											{
-												headerKey: "insights.charts.top_titles.col_title",
-												text: (r) => r.title,
-												cell: (r) => r.title ?? "—",
-											},
-											{
-												headerKey: "insights.charts.top_titles.col_requests",
-												align: "right",
-												text: (r) => r.requestCount,
-												cell: (r) => r.requestCount,
-											},
-										]}
-									/>
-								</Box>
+						{GAPS_TOGETHER.some(shown) && (
+							<LazyPanel minHeight={400}>
+								<Stack spacing={3}>
+									<PanelGrid>
+										{shown("gaps.unmetLocal") && (
+											<TableStatPanel<TopClusterStat>
+												titleKey="insights.charts.unmet_local.title"
+												subtitleKey="insights.charts.unmet_local.subtitle"
+												queryOptions={unmetLocalDemandQueryOptions(client, {
+													...params,
+													libraryCode,
+												})}
+												getRowKey={(r) => r.clusterId}
+												columns={[
+													{
+														headerKey: "insights.charts.top_titles.col_title",
+														text: (r) => r.title,
+														cell: (r) => r.title ?? "—",
+													},
+													{
+														headerKey:
+															"insights.charts.top_titles.col_requests",
+														align: "right",
+														text: (r) => r.requestCount,
+														cell: (r) => r.requestCount,
+													},
+												]}
+											/>
+										)}
+										{shown("gaps.acquisitionOpportunities") && (
+											<TableStatPanel<TopClusterStat>
+												titleKey="insights.charts.acquisition_opportunities.title"
+												subtitleKey="insights.charts.acquisition_opportunities.subtitle"
+												queryOptions={acquisitionOpportunitiesQueryOptions(
+													client,
+													{
+														...params,
+														libraryCode,
+													},
+												)}
+												getRowKey={(r) => r.clusterId}
+												columns={[
+													{
+														headerKey: "insights.charts.top_titles.col_title",
+														text: (r) => r.title,
+														cell: (r) => r.title ?? "—",
+													},
+													{
+														headerKey:
+															"insights.charts.top_titles.col_requests",
+														align: "right",
+														text: (r) => r.requestCount,
+														cell: (r) => r.requestCount,
+													},
+												]}
+											/>
+										)}
+									</PanelGrid>
 
-								<TableStatPanel<ConsortialLifelineStat>
-									titleKey="insights.charts.consortial_lifeline.title"
-									subtitleKey="insights.charts.consortial_lifeline.subtitle"
-									queryOptions={consortialLifelineQueryOptions(client, {
-										...params,
-										libraryCode,
-									})}
-									getRowKey={(r) => r.clusterId}
-									columns={[
-										{
-											headerKey: "insights.charts.top_titles.col_title",
-											text: (r) => r.title,
-											cell: (r) => r.title ?? "—",
-										},
-										{
-											headerKey: "insights.charts.rare_gem.col_author",
-											text: (r) => r.author,
-											cell: (r) => r.author ?? "—",
-										},
-										{
-											headerKey:
-												"insights.charts.consortial_lifeline.col_supplied",
-											align: "right",
-											text: (r) => r.supplyCount,
-											cell: (r) => r.supplyCount,
-										},
-									]}
-								/>
+									{shown("gaps.consortialLifeline") && (
+										<TableStatPanel<ConsortialLifelineStat>
+											titleKey="insights.charts.consortial_lifeline.title"
+											subtitleKey="insights.charts.consortial_lifeline.subtitle"
+											queryOptions={consortialLifelineQueryOptions(client, {
+												...params,
+												libraryCode,
+											})}
+											getRowKey={(r) => r.clusterId}
+											columns={[
+												{
+													headerKey: "insights.charts.top_titles.col_title",
+													text: (r) => r.title,
+													cell: (r) => r.title ?? "—",
+												},
+												{
+													headerKey: "insights.charts.rare_gem.col_author",
+													text: (r) => r.author,
+													cell: (r) => r.author ?? "—",
+												},
+												{
+													headerKey:
+														"insights.charts.consortial_lifeline.col_supplied",
+													align: "right",
+													text: (r) => r.supplyCount,
+													cell: (r) => r.supplyCount,
+												},
+											]}
+										/>
+									)}
 
-								<NewAcquisitionsPanel
-									params={params}
-									libraryCode={libraryCode}
-								/>
-							</Stack>
-						</LazyPanel>
+									{shown("gaps.newAcquisitions") && (
+										<NewAcquisitionsPanel
+											params={params}
+											libraryCode={libraryCode}
+										/>
+									)}
+								</Stack>
+							</LazyPanel>
+						)}
 
 						{/* Unique collection value - requires a libraryCode. */}
-						<LazyPanel minHeight={320}>
-							<RareGemPanel params={{ ...params, libraryCode }} />
-						</LazyPanel>
+						<PanelRow minHeight={320}>
+							{shown("gaps.rareGems") && (
+								<RareGemPanel params={{ ...params, libraryCode }} />
+							)}
+						</PanelRow>
 					</Section>
 				)}
 

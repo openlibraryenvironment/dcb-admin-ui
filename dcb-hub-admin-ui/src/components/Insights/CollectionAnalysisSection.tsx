@@ -6,7 +6,8 @@ import ClusterQualityPanel from "./ClusterQualityPanel";
 import CollectionProfilePanel from "./CollectionProfilePanel";
 import FormatMixPanel from "./FormatMixPanel";
 import CollectionOverlapPanel from "./CollectionOverlapPanel";
-import LazyPanel from "./LazyPanel";
+import PanelRow from "./PanelRow";
+import { isInsightsPanelShown as shown } from "@helpers/featureFlags";
 
 /**
  * Collection analysis - its own section, and deliberately separate from everything above
@@ -49,41 +50,26 @@ export default function CollectionAnalysisSection({
 					</Typography>
 				</Box>
 
-				<LazyPanel minHeight={160}>
-					<CollectionTotalsTiles />
-				</LazyPanel>
+				<PanelRow minHeight={160}>
+					{shown("collection.totals") && <CollectionTotalsTiles />}
+				</PanelRow>
 
-				<LazyPanel minHeight={360}>
-					<Box
-						sx={{
-							display: "grid",
-							gap: 3,
-							gridTemplateColumns: { xs: "1fr", lg: "repeat(2, 1fr)" },
-						}}
-					>
-						{/* Confidence first: it qualifies every number in this section. */}
-						<ClusterQualityPanel />
+				{/* Confidence first: it qualifies every number in this section. */}
+				<PanelRow minHeight={360}>
+					{shown("collection.clusterQuality") && <ClusterQualityPanel />}
+					{shown("collection.profile") && (
 						<CollectionProfilePanel libraryCode={libraryCode} />
-					</Box>
-				</LazyPanel>
+					)}
+				</PanelRow>
 
-				<LazyPanel minHeight={340}>
-					<Box
-						sx={{
-							display: "grid",
-							gap: 3,
-							gridTemplateColumns: {
-								xs: "1fr",
-								lg: singleLibrary ? "repeat(2, 1fr)" : "1fr",
-							},
-						}}
-					>
+				<PanelRow minHeight={340}>
+					{shown("collection.formatMix") && (
 						<FormatMixPanel libraryCode={libraryCode} />
-						{singleLibrary && (
-							<CollectionOverlapPanel libraryCode={singleLibrary} />
-						)}
-					</Box>
-				</LazyPanel>
+					)}
+					{shown("collection.overlap") && singleLibrary && (
+						<CollectionOverlapPanel libraryCode={singleLibrary} />
+					)}
+				</PanelRow>
 			</Stack>
 		</Box>
 	);

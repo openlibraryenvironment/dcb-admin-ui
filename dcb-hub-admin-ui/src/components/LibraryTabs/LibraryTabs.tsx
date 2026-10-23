@@ -5,7 +5,7 @@ import { TabLink } from "@components/TabLink/TabLink";
 
 import {
 	isConsortiumBrandingEnabled,
-	isInsightsEnabled,
+	isInsightsPageShown,
 	isLibraryUserProvisioningEnabled,
 } from "@helpers/featureFlags";
 import { TABS } from "@constants/libraryTabs";
@@ -27,7 +27,8 @@ export default function LibraryTabs({ libraryId, value }: LibraryTabsProps) {
 	// - hidden only decides what renders. That invariant now carries three conditional
 	// tabs' worth of weight, and it is asserted in LibraryTabs.test.ts.
 	const hidden = new Set<string>();
-	if (!isInsightsEnabled()) hidden.add("/insights");
+	// And by choice: VITE_INSIGHTS_PAGES
+	if (!isInsightsPageShown("libraries")) hidden.add("/insights");
 	if (!isLibraryUserProvisioningEnabled()) hidden.add("/accounts");
 	if (!isConsortiumBrandingEnabled()) hidden.add("/branding");
 

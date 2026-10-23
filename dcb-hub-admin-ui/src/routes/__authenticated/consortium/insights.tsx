@@ -16,7 +16,7 @@ import {
 } from "@helpers/insightsScope";
 import { createRestClient } from "@helpers/createRestClient";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { isInsightsEnabled } from "@helpers/featureFlags";
+import { isInsightsPageShown } from "@helpers/featureFlags";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -39,11 +39,11 @@ import {
 
 export const Route = createFileRoute("/__authenticated/consortium/insights")({
 	validateSearch: insightsSearchSchema,
-	// The nav entry is hidden while the flag is off, but the URL is still
+	// The nav entry is hidden where the page is not shown, but the URL is still
 	// typeable - and the page would call statistics endpoints that this
 	// environment's dcb-service does not serve yet.
 	beforeLoad: () => {
-		if (!isInsightsEnabled()) {
+		if (!isInsightsPageShown("consortium")) {
 			throw redirect({ to: "/consortium" });
 		}
 	},

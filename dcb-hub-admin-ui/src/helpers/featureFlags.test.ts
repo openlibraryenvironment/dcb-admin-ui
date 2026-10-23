@@ -25,9 +25,9 @@ const repoFile = (relative: string) =>
 
 const declaredFlags = (): string[] => {
 	const source = repoFile("src/helpers/featureFlags.ts");
-	const names = [...source.matchAll(/readFlag\(\s*"([A-Z0-9_]+)"\s*\)/g)].map(
-		(m) => m[1],
-	);
+	const names = [
+		...source.matchAll(/read(?:Flag|Setting|Selection)\(\s*"([A-Z0-9_]+)"/g),
+	].map((m) => m[1]);
 
 	// Guard the guard: a refactor that renames readFlag would otherwise make this
 	// whole suite vacuously pass.

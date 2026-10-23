@@ -37,6 +37,8 @@ export default function SubjectBar({
 	params?: Record<string, string>;
 }) {
 	const { t } = useTranslation();
+	const subjects = visibleSubjects(scopedCodes);
+	if (subjects.length === 0) return null;
 
 	return (
 		<Box
@@ -56,7 +58,7 @@ export default function SubjectBar({
 				mb: 3,
 			}}
 		>
-			{visibleSubjects(scopedCodes).map((subject) => {
+			{subjects.map((subject) => {
 				const selected = subject === current;
 
 				return (

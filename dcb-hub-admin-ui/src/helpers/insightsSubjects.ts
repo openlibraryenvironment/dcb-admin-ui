@@ -1,3 +1,5 @@
+import { isInsightsSectionShown } from "@helpers/featureFlags";
+
 /**
  * The six subjects, and which panels belong to each.
  *
@@ -25,16 +27,22 @@ export const DEFAULT_SUBJECT: Subject = "trends";
  * rather than shown empty - see the plan section 7.3.
  */
 export const isSubjectAvailable = (subject: Subject, scopedCodes: number) =>
-	subject !== "gaps" || scopedCodes === 1;
+	(subject !== "gaps" || scopedCodes === 1) && isInsightsSectionShown(subject);
 
 export const visibleSubjects = (scopedCodes: number) =>
 	SUBJECTS.filter((subject) => isSubjectAvailable(subject, scopedCodes));
 
-/** A subject the current scope cannot show falls back rather than rendering nothing. */
+/**
+ * A subject the current scope cannot show, or the deployment does not (VITE_INSIGHTS_PANELS),
+ * falls back rather than rendering nothing.
+ */
 export const resolveSubject = (
 	requested: Subject | undefined,
 	scopedCodes: number,
-): Subject =>
-	requested && isSubjectAvailable(requested, scopedCodes)
-		? requested
-		: DEFAULT_SUBJECT;
+): Subject => {
+	const visible = visibleSubjects(scopedCodes);
+	if (requested && visible.includes(requested)) return requested;
+	return visible.includes(DEFAULT_SUBJECT)
+		? DEFAULT_SUBJECT
+		: (visible[0] ?? DEFAULT_SUBJECT);
+};

@@ -1,3 +1,13 @@
+import {
+	panelsOf,
+	selectPages,
+	selectPanels,
+	type InsightsPage,
+	type InsightsPanel,
+	type InsightsSection,
+	type Selection,
+} from "@helpers/insightsSelection";
+
 /**
  * Runtime feature flags.
  *
@@ -187,3 +197,57 @@ export const isSettingsInheritanceEnabled = (): boolean =>
  */
 export const isShelfBrowseEnabled = (): boolean =>
 	isSymposiaEnabled() && readFlag("VITE_FEATURE_SHELF_BROWSE");
+
+/** A setting that is not on or off, read from where readFlag reads. */
+const readSetting = (name: string): string | undefined => {
+	const injected =
+		typeof window !== "undefined" ? window.__APP_ENV__?.[name] : undefined;
+	const value = injected ?? import.meta.env[name];
+	return typeof value === "string" ? value : undefined;
+};
+
+/** Parsed once per value, and a name it does not know reported once: docs/deployment.md, 2b. */
+const readSelection = <Name extends string>(
+	name: string,
+	parse: (raw: string | undefined) => Selection<Name>,
+	warnUnknown: () => void,
+) => {
+	let last: { raw: string | undefined; shown: ReadonlySet<Name> } | undefined;
+	return (): ReadonlySet<Name> => {
+		const raw = readSetting(name);
+		if (!last || last.raw !== raw) {
+			const { shown, unknown } = parse(raw);
+			if (unknown.length > 0) warnUnknown();
+			last = { raw, shown };
+		}
+		return last.shown;
+	};
+};
+
+const insightsPages = readSelection("VITE_INSIGHTS_PAGES", selectPages, () =>
+	console.warn(
+		"VITE_INSIGHTS_PAGES names a page this app does not have: docs/deployment.md, 2b",
+	),
+);
+const insightsPanels = readSelection("VITE_INSIGHTS_PANELS", selectPanels, () =>
+	console.warn(
+		"VITE_INSIGHTS_PANELS names a panel this app does not have: docs/deployment.md, 2b",
+	),
+);
+
+// A panel on an endpoint the deployment's dcb-service lacks stays off whatever the list says
+const PANEL_CAPABILITY: Partial<Record<InsightsPanel, () => boolean>> = {
+	"trends.durationTrend": isInsightsTrendsEnabled,
+};
+
+/** An Insights page this deployment shows: VITE_INSIGHTS_PAGES, within VITE_FEATURE_INSIGHTS. */
+export const isInsightsPageShown = (page: InsightsPage): boolean =>
+	isInsightsEnabled() && insightsPages().has(page);
+
+/** An Insights panel this deployment shows: VITE_INSIGHTS_PANELS, within its release flag. */
+export const isInsightsPanelShown = (panel: InsightsPanel): boolean =>
+	insightsPanels().has(panel) && (PANEL_CAPABILITY[panel]?.() ?? true);
+
+/** A section with no panel shown is not shown, nor its subject's link. */
+export const isInsightsSectionShown = (section: InsightsSection): boolean =>
+	panelsOf(section).some(isInsightsPanelShown);
