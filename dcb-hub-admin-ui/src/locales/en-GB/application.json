@@ -2774,6 +2774,19 @@
 			"session_warning": "Your session is about to expire"
 		},
 		"data_grid": {
+			"column_menu": {
+				"move_left": "Move left",
+				"move_right": "Move right"
+			},
+			"saved_view": {
+				"restored": "Showing your last view",
+				"reset": "Reset to default",
+				"not_in_link": "Some filters are not included in a copied link",
+				"copy_link": "Copy link to this view",
+				"link_copied": "Link to this view copied",
+				"link_copied_private": "Link copied. It leaves out patron barcode and requester note filters, and search text",
+				"link_failed": "The link could not be copied. Copy the address from your browser's address bar instead"
+			},
 			"actions": "Actions",
 			"cancel": "Cancel",
 			"close": "Close",
@@ -2895,7 +2908,14 @@
 			"results_announcement_one": "{{count}} result",
 			"results_announcement_other": "{{count}} results",
 			"results_loading": "Loading results",
-			"search_by_audit": "Search by audit"
+			"search_by_audit": "Search by audit",
+			"aggregation": {
+				"sum": "Total",
+				"avg": "Average",
+				"min": "Lowest",
+				"max": "Highest",
+				"size": "Count"
+			}
 		},
 		"error": {
 			"401": {

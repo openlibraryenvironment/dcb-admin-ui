@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import {
 	Grid,
 	Typography,
@@ -19,7 +19,15 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewsRedirect } from "@helpers/viewState/viewRoute";
+import {
+	clusterItemsNotShownView,
+	clusterItemsView,
+	NOT_SHOWN_NAMESPACE,
+} from "@constants/dataGrid/gridViews";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { getItemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
@@ -34,6 +42,17 @@ import {
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/items",
 )({
+	validateSearch: (search: Record<string, unknown>) =>
+		validateGridSearch(search, [NOT_SHOWN_NAMESPACE]),
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewsRedirect(
+			[clusterItemsView, clusterItemsNotShownView],
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/search/$clusterId/items", params, ...restore });
+	},
 	component: ItemsPageComponent,
 });
 
@@ -51,29 +70,10 @@ function ItemsPageComponent() {
 	const [isItemsAccordionExpanded, setIsItemsAccordionExpanded] =
 		useState(false);
 
-	const itemsGridId = "ClusterRecordItems";
-	const itemsNotShownGridId = "ClusterRecordItemsNotShown";
-
-	// One useGridState per grid: stable model refs + change handlers, atomic store
-	// selectors (no whole-store re-render). Client-side pagination/sort here - the
-	// hook is pagination-mode-agnostic, so the same wiring serves server grids too.
-	const {
-		paginationModel: itemsPagination,
-		sortModel: itemsSort,
-		onPaginationModelChange: handleItemsPaginationChange,
-		onSortModelChange: handleItemsSortChange,
-	} = useGridState(itemsGridId, {
-		pagination: { page: 0, pageSize: 25 },
-		sort: [{ field: "availabilityDate", sort: "desc" }],
-	});
-	const {
-		paginationModel: itemsNotShownPagination,
-		sortModel: itemsNotShownSort,
-		onPaginationModelChange: handleItemsNotShownPaginationChange,
-		onSortModelChange: handleItemsNotShownSortChange,
-	} = useGridState(itemsNotShownGridId, {
-		pagination: { page: 0, pageSize: 25 },
-		sort: [{ field: "availabilityDate", sort: "desc" }],
+	const itemsGridId = clusterItemsView.id;
+	const itemsNotShownGridId = clusterItemsNotShownView.id;
+	const search = useSearch({
+		from: "/__authenticated/search/$clusterId/items",
 	});
 
 	const { data, isLoading } = useQuery({
@@ -155,6 +155,16 @@ function ItemsPageComponent() {
 		],
 		[itemColumns, t],
 	);
+	const itemsView = useGridView(
+		clusterItemsView,
+		itemColumnsWithWalkUp,
+		search,
+	);
+	const notShownView = useGridView(
+		clusterItemsNotShownView,
+		itemColumns,
+		search,
+	);
 
 	const itemsNotShown = useMemo(() => {
 		if (!data) return [];
@@ -222,16 +232,24 @@ function ItemsPageComponent() {
 					identifier={itemsGridId}
 					type="Items"
 					columns={itemColumnsWithWalkUp}
+					filterModel={itemsView.filterModel}
+					onFilterModelChange={itemsView.onFilterModelChange}
+					columnVisibilityModel={itemsView.columnVisibilityModel}
+					onColumnVisibilityModelChange={
+						itemsView.onColumnVisibilityModelChange
+					}
+					columnLayout={itemsView.columnLayout}
+					viewNotice={<GridViewNotice view={itemsView} />}
 					rows={items}
 					loading={isLoading}
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
 					pagination
-					paginationModel={itemsPagination}
-					onPaginationModelChange={handleItemsPaginationChange}
-					sortModel={itemsSort}
-					onSortModelChange={handleItemsSortChange}
+					paginationModel={itemsView.paginationModel}
+					onPaginationModelChange={itemsView.onPaginationModelChange}
+					sortModel={itemsView.sortModel}
+					onSortModelChange={itemsView.onSortModelChange}
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail type="items" row={row} />
 					)}
@@ -280,10 +298,10 @@ function ItemsPageComponent() {
 								sortingMode="client"
 								filterMode="client"
 								pagination
-								paginationModel={itemsNotShownPagination}
-								onPaginationModelChange={handleItemsNotShownPaginationChange}
-								sortModel={itemsNotShownSort}
-								onSortModelChange={handleItemsNotShownSortChange}
+								paginationModel={notShownView.paginationModel}
+								onPaginationModelChange={notShownView.onPaginationModelChange}
+								sortModel={notShownView.sortModel}
+								onSortModelChange={notShownView.onSortModelChange}
 								getDetailPanelContent={({ row }: any) => (
 									<MasterDetail type="items" row={row} />
 								)}

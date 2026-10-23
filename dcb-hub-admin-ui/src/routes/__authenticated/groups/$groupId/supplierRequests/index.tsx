@@ -1,9 +1,20 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { Grid, Typography } from "@mui/material";
 import GroupTabs from "@components/GroupTabs/GroupTabs";
+import type { GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import { groupSupplierRequestsView } from "@constants/dataGrid/gridViews";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -11,12 +22,9 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { defaultPatronRequestGroupVisibility } from "@columns/columnVisibility/defaultPatronRequestGroupVisibility";
 
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { getPatronRequests } from "@queries/getPatronRequests";
@@ -35,6 +43,20 @@ import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 export const Route = createFileRoute(
 	"/__authenticated/groups/$groupId/supplierRequests/",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			scopedView(groupSupplierRequestsView, params.groupId),
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/groups/$groupId/supplierRequests",
+				params,
+				...restore,
+			});
+	},
 	component: GroupSupplierRequests,
 });
 
@@ -44,24 +66,15 @@ function GroupSupplierRequests() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 
-	const gridId = `groupSupplierRequests-${groupId}`;
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "dateCreated", sort: "desc" }],
-		columnVisibility: defaultPatronRequestGroupVisibility,
+	const gridView = useMemo(
+		() => scopedView(groupSupplierRequestsView, groupId),
+		[groupId],
+	);
+	const gridId = gridView.id;
+	const search = useSearch({
+		from: "/__authenticated/groups/$groupId/supplierRequests/",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const {
 		data: groupData,
@@ -89,31 +102,6 @@ function GroupSupplierRequests() {
 		return uniqueCodes.map((c) => `supplyingAgencyCode:${c}`).join(" OR ");
 	}, [group]);
 
-	const {
-		data: requestsData,
-		isLoading: isRequestsLoading,
-		isFetching: isRequestsFetching,
-	} = useQuery({
-		queryKey: [gridId, groupId, paginationModel, sortModel, filterModel],
-		queryFn: async () => {
-			const baseQuery = `(${groupVariables})`;
-			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					baseQuery,
-					quickFilterFields: ["status", "description"],
-					defaultOrder: "dateCreated",
-					defaultPageSize: 20,
-				}),
-			);
-		},
-		enabled: !!groupVariables,
-		placeholderData: (previousData) => previousData,
-	});
-
 	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
 		...allLibrariesQuery(gqlClient), // Cache for 30 mins
 	});
@@ -131,6 +119,43 @@ function GroupSupplierRequests() {
 	const allColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(allColumns),
+		[allColumns],
+	);
+	const view = useGridView(gridView, viewColumns, search);
+
+	const {
+		data: requestsData,
+		isLoading: isRequestsLoading,
+		isFetching: isRequestsFetching,
+	} = useQuery({
+		queryKey: [
+			gridId,
+			groupId,
+			view.paginationModel,
+			view.sortModel,
+			view.appliedFilterModel,
+		],
+		queryFn: async () => {
+			const baseQuery = `(${groupVariables})`;
+			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+				getPatronRequests,
+				buildServerGridQueryVars({
+					filterModel: view.appliedFilterModel,
+					sortModel: view.sortModel,
+					paginationModel: view.paginationModel,
+					baseQuery,
+					quickFilterFields: ["status", "description"],
+					defaultOrder: "dateCreated",
+					defaultPageSize: 20,
+				}),
+			);
+		},
+		enabled: !!groupVariables,
+		placeholderData: (previousData) => previousData,
+	});
 
 	const isLoading =
 		isGroupLoading ||
@@ -205,21 +230,23 @@ function GroupSupplierRequests() {
 							identifier={gridId}
 							type={"patronRequests"}
 							columns={allColumns}
+							viewNotice={<GridViewNotice view={view} />}
 							rows={requestsData?.patronRequests?.content ?? []}
 							rowCount={requestsData?.patronRequests?.totalSize ?? 0}
 							loading={isRequestsFetching && !!requestsData}
 							paginationMode="server"
 							pagination
-							paginationModel={paginationModel}
-							onPaginationModelChange={handlePaginationChange}
+							paginationModel={view.paginationModel}
+							onPaginationModelChange={view.onPaginationModelChange}
 							sortingMode="server"
-							sortModel={sortModel}
-							onSortModelChange={handleSortChange}
+							sortModel={view.sortModel}
+							onSortModelChange={view.onSortModelChange}
 							filterMode="server"
-							filterModel={filterModel}
-							onFilterModelChange={handleFilterChange}
-							columnVisibilityModel={columnVisibilityModel}
-							onColumnVisibilityModelChange={handleColumnVisibilityChange}
+							filterModel={view.filterModel}
+							onFilterModelChange={view.onFilterModelChange}
+							columnVisibilityModel={view.columnVisibilityModel}
+							onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+							columnLayout={view.columnLayout}
 							getDetailPanelContent={({ row }: any) => (
 								<MasterDetail row={row} type="patronRequests" />
 							)}

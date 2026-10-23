@@ -4,8 +4,7 @@ import * as Yup from "yup";
 /** Koha's library_id is branches.branchcode, at most 10 characters. */
 export const KOHA_MAX_BRANCH_CODE_LENGTH = 10;
 
-const UUID =
-	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const required = () =>
 	i18n.t("ui.validation.required", { field: i18n.t("locations.local_id") });

@@ -1,24 +1,41 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { Grid, Chip } from "@mui/material";
 import { CheckCircle, Warning, Info } from "@mui/icons-material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import { clusterExplanationView } from "@constants/dataGrid/gridViews";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { parseClusteringAuditLog } from "@helpers/parseClusteringAuditLog";
-import { defaultClusterExplanationVisibility } from "@columns/columnVisibility/defaultClusterExplanationVisibility";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/clusterExplanation",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			clusterExplanationView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/search/$clusterId/clusterExplanation",
+				params,
+				...restore,
+			});
+	},
 	component: ClusterExplanation,
 });
 
@@ -27,23 +44,11 @@ function ClusterExplanation() {
 	const { clusterId } = Route.useParams();
 	const client = useDcbRestClient();
 
-	const gridId = `ClusterExplainer-${clusterId}`;
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 25 },
-		sort: [{ field: "formattedTimestamp", sort: "desc" }],
-		columnVisibility: defaultClusterExplanationVisibility,
+	const gridId = clusterExplanationView.id;
+	const search = useSearch({
+		from: "/__authenticated/search/$clusterId/clusterExplanation",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ["clusterAuditLog", clusterId],
@@ -127,6 +132,7 @@ function ClusterExplanation() {
 		],
 		[t],
 	);
+	const view = useGridView(clusterExplanationView, columns, search);
 
 	if (isLoading)
 		return (
@@ -158,6 +164,7 @@ function ClusterExplanation() {
 					identifier={gridId}
 					type="ClusterExplainer"
 					columns={columns}
+					viewNotice={<GridViewNotice view={view} />}
 					rows={rows}
 					loading={isLoading}
 					paginationMode="client"
@@ -165,18 +172,21 @@ function ClusterExplanation() {
 					filterMode="client"
 					pagination
 					disablePivoting
-					paginationModel={paginationModel}
-					onPaginationModelChange={handlePaginationChange}
-					sortModel={sortModel}
-					onSortModelChange={handleSortChange}
-					filterModel={filterModel}
-					onFilterModelChange={handleFilterChange}
-					columnVisibilityModel={columnVisibilityModel}
-					onColumnVisibilityModelChange={handleColumnVisibilityChange}
+					paginationModel={view.paginationModel}
+					onPaginationModelChange={view.onPaginationModelChange}
+					sortModel={view.sortModel}
+					onSortModelChange={view.onSortModelChange}
+					filterModel={view.filterModel}
+					onFilterModelChange={view.onFilterModelChange}
+					columnVisibilityModel={view.columnVisibilityModel}
+					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+					columnLayout={view.columnLayout}
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail row={row} type="ClusterExplainer" />
 					)}
 					disableAggregation={false}
+					aggregationModel={view.aggregationModel}
+					onAggregationModelChange={view.onAggregationModelChange}
 					disableRowGrouping={false}
 					disableHoverInteractions={false}
 					listViewEnabled={false}

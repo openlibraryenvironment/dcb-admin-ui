@@ -1,24 +1,54 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { dataChangeLogView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { dataChangeLogQuery } from "@/queryOptions/gridQueries";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { getDataChangeLog } from "@queries/getDataChangeLog";
 import { getDataChangeLogColumns } from "@columns/dataChangeLogColumns";
-import type { LoadDataChangeLogQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/dataChangeLog/",
 )({
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			dataChangeLogView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/serviceInfo/dataChangeLog", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
+		if (!auth?.isAuthenticated) return;
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(dataChangeLogView, deps, location.state);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			dataChangeLogQuery(createGraphQLClient(cfg, auth), models),
+		);
+	},
 	component: DataChangeLogsGrid,
 });
 
@@ -27,52 +57,34 @@ function DataChangeLogsGrid() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 
-	const gridId = "dataChangeLog";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "timestampLogged", sort: "desc" }],
-		columnVisibility: {
-			id: false,
-			changes: false,
-			changeReferenceUrl: false,
-		},
+	const gridId = dataChangeLogView.id;
+	const search = useSearch({
+		from: "/__authenticated/serviceInfo/dataChangeLog/",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
+	const columns: GridColDef[] = useMemo(
+		() => [...customColumns, ...getDataChangeLogColumns(t)],
+		[customColumns, t],
+	);
+
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(dataChangeLogView, viewColumns, search);
 
 	const {
 		data: gridData,
 		isLoading,
 		isFetching,
-	} = useQuery({
-		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadDataChangeLogQueryVariables>(
-				getDataChangeLog,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					defaultOrder: "timestampLogged",
-					defaultPageSize: 20,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
-
-	const columns: GridColDef[] = useMemo(
-		() => [...customColumns, ...getDataChangeLogColumns(t)],
-		[customColumns, t],
+	} = useQuery(
+		dataChangeLogQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
 	);
 
 	return (
@@ -81,21 +93,23 @@ function DataChangeLogsGrid() {
 				identifier={gridId}
 				type={"dataChangeLog"}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.dataChangeLog?.content ?? []}
 				rowCount={gridData?.dataChangeLog?.totalSize ?? 0}
 				loading={isLoading || isFetching}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="dataChangeLog" />
 				)}

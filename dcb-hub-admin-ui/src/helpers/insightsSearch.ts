@@ -81,6 +81,16 @@ export const insightsSearchSchema = z.object({
 
 export type InsightsSearch = z.infer<typeof insightsSearchSchema>;
 
+/**
+ * The view as the address writes it: a list of values is one comma-separated parameter, as
+ * everywhere in the URL grammar (docs/url-view-state.md), not the key repeated per value.
+ */
+export const insightsSearchToUrl = (search: InsightsSearch) => ({
+	...search,
+	scope: search.scope?.join(","),
+	series: search.series?.join(","),
+});
+
 /** The view a bare `/insights` shows, so callers never have to spell the defaults out. */
 export function resolveSearch(search: InsightsSearch) {
 	const custom =

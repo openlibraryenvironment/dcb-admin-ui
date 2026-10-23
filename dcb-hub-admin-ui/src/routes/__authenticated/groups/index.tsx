@@ -1,62 +1,50 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Button, Stack } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { groupsView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { groupsQuery } from "@/queryOptions/gridQueries";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
 import NewGroup from "@forms/NewGroup/NewGroup";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { standardFilters } from "@filters/standardFilters";
 
 import { getLibraryGroups } from "@queries/getLibraryGroups";
-import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import type { LoadGroupsQueryVariables } from "@generated/graphql";
-
-// Default-state prefetch: the component reads pagination/sort/filter state
-// from useGridStore (a Zustand store) at mount time, which the loader
-// cannot access (it isn't a hook and runs outside React). We can only
-// prefetch the grid's own hardcoded default first page/sort here - these
-// values must mirror the component's initial useState fallbacks below so
-// the cache entry lines up on a fresh (unauthenticated-store) render.
-const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 10 };
-const DEFAULT_SORT_MODEL = [{ field: "name", sort: "asc" }];
-const DEFAULT_FILTER_MODEL = { items: [] };
 
 export const Route = createFileRoute("/__authenticated/groups/")({
-	loader: ({ context: { queryClient, cfg, auth } }) => {
-		// Skip prefetching for unauthenticated visitors - the request would
-		// fail (no token) and its failure would trigger the global
-		// network/401 error handler in main.tsx before __authenticated.tsx's
-		// own component-level auth-gate redirect to /login ever runs.
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(groupsView, search, location.state);
+		if (restore) throw redirect({ to: "/groups", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
-		return queryClient.ensureQueryData({
-			queryKey: [
-				"groups",
-				DEFAULT_PAGINATION_MODEL,
-				DEFAULT_SORT_MODEL,
-				DEFAULT_FILTER_MODEL,
-			],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any, LoadGroupsQueryVariables>(
-					getLibraryGroups,
-					{
-						query: "",
-						pageno: DEFAULT_PAGINATION_MODEL.page,
-						pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-						order: DEFAULT_SORT_MODEL[0].field,
-						orderBy: "ASC",
-					},
-				),
-		});
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(groupsView, deps, location.state);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			groupsQuery(createGraphQLClient(cfg, auth), models),
+		);
 	},
 	component: GroupsRouteComponent,
 });
@@ -71,46 +59,11 @@ function GroupsRouteComponent() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const gridId = "groups";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 10 },
-		sort: [{ field: "name", sort: "asc" }],
-		columnVisibility: { id: false },
-	});
+	const gridId = groupsView.id;
+	const search = useSearch({ from: "/__authenticated/groups/" });
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const [showNewGroup, setShowNewGroup] = useState(false);
-
-	const {
-		data: gridData,
-		isLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadGroupsQueryVariables>(
-				getLibraryGroups,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					defaultOrder: "name",
-					defaultPageSize: 10,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -147,6 +100,25 @@ function GroupsRouteComponent() {
 		[customColumns, t],
 	);
 
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(groupsView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery(
+		groupsQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
+	);
+
 	// Cold-load guard: on a hard page load the prefetch loader is skipped
 	// while OIDC is still restoring the session (auth not yet authenticated),
 	// so the cache is empty when this mounts. Without this, the grid paints a
@@ -181,21 +153,23 @@ function GroupsRouteComponent() {
 				identifier={gridId}
 				type={"groups"}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.libraryGroups?.content ?? []}
 				rowCount={gridData?.libraryGroups?.totalSize ?? 0}
 				loading={isLoading || isFetching}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				exportConfig={{
 					query: getLibraryGroups,
 					coreType: "libraryGroups",

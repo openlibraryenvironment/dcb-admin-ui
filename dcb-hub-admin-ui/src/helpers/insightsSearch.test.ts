@@ -1,14 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { existsSync } from "fs";
 import { resolve } from "path";
+import { defaultParseSearch } from "@tanstack/react-router";
 
 import {
 	DEFAULT_RANGE,
 	DEFAULT_SERIES,
 	MAX_PLOT_SERIES,
 	insightsSearchSchema,
+	insightsSearchToUrl,
 	resolveSearch,
 } from "./insightsSearch";
+import { stringifySearch } from "./viewState/searchSerialiser";
 
 /**
  * A URL a reader can type, truncate or forward has to degrade rather than throw, and a
@@ -125,5 +128,24 @@ describe("the store this replaced", () => {
 			existsSync(resolve(__dirname, "../hooks/insightsPlotStore.ts")),
 			"insightsPlotStore is back - Insights view state belongs in the URL",
 		).toBe(false);
+	});
+});
+
+describe("the address Insights writes", () => {
+	const view = insightsSearchSchema.parse({
+		scope: ["group:7f3a", "library:91c2"],
+		series: ["LOANED", "ERROR"],
+		range: "90d",
+	});
+
+	it("writes a list of values as one comma-separated parameter", () => {
+		expect(stringifySearch(insightsSearchToUrl(view))).toBe(
+			"?range=90d&scope=group:7f3a,library:91c2&series=LOANED,ERROR",
+		);
+	});
+
+	it("reads back as the view it wrote", () => {
+		const href = stringifySearch(insightsSearchToUrl(view));
+		expect(insightsSearchSchema.parse(defaultParseSearch(href))).toEqual(view);
 	});
 });

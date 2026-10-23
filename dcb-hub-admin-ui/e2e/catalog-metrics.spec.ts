@@ -31,9 +31,12 @@ test.describe("Catalog metrics per Host LMS", () => {
 		await page.getByRole("combobox", { name: "Libraries" }).click();
 		await page.getByRole("option", { name: "North" }).click();
 
-		await expect(page.getByRole("status")).toContainText(
-			"for the selected libraries only",
-		);
+		// The grid's view notice is a second status on this page
+		await expect(
+			page
+				.getByRole("status")
+				.filter({ hasText: "for the selected libraries only" }),
+		).toBeVisible();
 		await expect.poll(() => scopedRequests.at(-1)).toBe("alpha-lms,beta-lms");
 		await expect(page).toHaveURL(/scope=/);
 
@@ -103,6 +106,32 @@ test.describe("Catalog metrics per Host LMS", () => {
 
 		await expect(page.getByText("Unable to find the record")).toBeVisible();
 	});
+
+	test("a reader's aggregate is in the link, and totals every row", async ({
+		page,
+	}) => {
+		await mockCatalogMetrics(page);
+		await page.goto("/serviceInfo/catalogMetricsByHostLms");
+		await expect(page.getByText(/Counted at 2026-09-29/)).toBeVisible();
+
+		const header = page
+			.getByRole("columnheader")
+			.filter({ hasText: "Harvested" });
+		await header.hover();
+		await header.getByRole("button", { name: "Harvested column menu" }).click();
+		await page
+			.getByRole("menu")
+			.getByRole("combobox", { name: "Aggregation" })
+			.click();
+		await page.getByRole("option", { name: "Average" }).click();
+
+		await expect(page).toHaveURL(/\?agg=sourceRecordCount:avg$/);
+		// Alpha 6,200 and Beta 0: the average is in no row
+		await expect(page.getByRole("gridcell", { name: "3,100" })).toBeVisible();
+
+		await page.reload();
+		await expect(page.getByRole("gridcell", { name: "3,100" })).toBeVisible();
+	});
 });
 
 // A dcb-service before the hostLmsCodes parameter ignores it and counts every Host LMS
@@ -121,9 +150,12 @@ test.describe("Catalog metrics on an older dcb-service", () => {
 
 		await page.goto("/serviceInfo/catalogMetricsByHostLms");
 
-		await expect(page.getByRole("status")).toContainText(
-			"Counts for every Host LMS are shared",
-		);
+		// The grid's view notice is a second status on this page
+		await expect(
+			page
+				.getByRole("status")
+				.filter({ hasText: "Counts for every Host LMS are shared" }),
+		).toBeVisible();
 		await expect(page.getByRole("combobox", { name: "Libraries" })).toHaveCount(
 			0,
 		);

@@ -1,12 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
 	createFileRoute,
+	redirect,
 	useNavigate,
 	useSearch,
 } from "@tanstack/react-router";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { z } from "@schemas/zod";
@@ -14,8 +15,12 @@ import { z } from "@schemas/zod";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import ScopeSelector from "@components/Insights/ScopeSelector";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
 
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import { catalogMetricsByHostLmsView } from "@constants/dataGrid/gridViews";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { scopeSearchParam } from "@helpers/insightsSearch";
@@ -36,7 +41,23 @@ const catalogMetricsSearchSchema = z.object({ scope: scopeSearchParam });
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/catalogMetricsByHostLms/",
 )({
-	validateSearch: catalogMetricsSearchSchema,
+	// A link that names a scope is a link: nothing remembered is restored over it
+	validateSearch: (search: Record<string, unknown>) => ({
+		...catalogMetricsSearchSchema.parse(search),
+		...validateGridSearch(search),
+	}),
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			catalogMetricsByHostLmsView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/serviceInfo/catalogMetricsByHostLms",
+				...restore,
+			});
+	},
 	component: CatalogMetricsByHostLms,
 });
 
@@ -46,9 +67,10 @@ function CatalogMetricsByHostLms() {
 	const navigate = useNavigate({
 		from: "/serviceInfo/catalogMetricsByHostLms/",
 	});
-	const { scope = [] } = useSearch({
+	const search = useSearch({
 		from: "/__authenticated/serviceInfo/catalogMetricsByHostLms/",
 	});
+	const { scope = [] } = search;
 	// An older dcb-service ignores hostLmsCodes and counts the whole consortium, which
 	// would be shown as the selection's count
 	const canScope = isHostLmsProbesEnabled();
@@ -74,28 +96,8 @@ function CatalogMetricsByHostLms() {
 	const nothingToCount = scoped && !resolving && codes.length === 0;
 	const tooMany = codes.length > MAX_SCOPED_HOST_LMS;
 
-	const gridId = "catalogMetricsByHostLms";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "name", sort: "asc" }],
-		columnVisibility: {
-			id: false,
-			checkPointId: false,
-			sourceSystemId: false,
-		},
-	});
+	const gridId = catalogMetricsByHostLmsView.id;
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const {
 		data: records,
@@ -191,6 +193,7 @@ function CatalogMetricsByHostLms() {
 		],
 		[t],
 	);
+	const view = useGridView(catalogMetricsByHostLmsView, columns, search);
 
 	return (
 		<PageContainer
@@ -205,7 +208,9 @@ function CatalogMetricsByHostLms() {
 						value={selected}
 						onChange={(next) =>
 							navigate({
+								// The grid's own view stays as it is
 								search: {
+									...search,
 									scope: next.length > 0 ? next.map(scopeId) : undefined,
 								},
 								replace: true,
@@ -258,21 +263,25 @@ function CatalogMetricsByHostLms() {
 					identifier={gridId}
 					type={"catalogMetricsByHostLms"}
 					columns={columns}
+					viewNotice={<GridViewNotice view={view} />}
 					rows={tooMany || nothingToCount ? [] : (records ?? [])}
 					loading={isFetching || resolving}
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
 					pagination
-					paginationModel={paginationModel}
-					onPaginationModelChange={handlePaginationChange}
-					sortModel={sortModel}
-					onSortModelChange={handleSortChange}
-					filterModel={filterModel}
-					onFilterModelChange={handleFilterChange}
-					columnVisibilityModel={columnVisibilityModel}
-					onColumnVisibilityModelChange={handleColumnVisibilityChange}
+					paginationModel={view.paginationModel}
+					onPaginationModelChange={view.onPaginationModelChange}
+					sortModel={view.sortModel}
+					onSortModelChange={view.onSortModelChange}
+					filterModel={view.filterModel}
+					onFilterModelChange={view.onFilterModelChange}
+					columnVisibilityModel={view.columnVisibilityModel}
+					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+					columnLayout={view.columnLayout}
 					disableAggregation={false}
+					aggregationModel={view.aggregationModel}
+					onAggregationModelChange={view.onAggregationModelChange}
 					disableHoverInteractions={false}
 					disableRowGrouping
 					disablePivoting

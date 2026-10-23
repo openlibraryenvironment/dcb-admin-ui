@@ -1,0 +1,714 @@
+{
+	"version": 2,
+	"filters": [
+		{
+			"text": "status:CONFIRMED",
+			"filter": {
+				"field": "status",
+				"operator": "is",
+				"values": ["CONFIRMED"]
+			}
+		},
+		{
+			"text": "status:SUBMITTED_TO_DCB,CONFIRMED",
+			"filter": {
+				"field": "status",
+				"operator": "is",
+				"values": ["SUBMITTED_TO_DCB", "CONFIRMED"]
+			}
+		},
+		{
+			"text": "title:contains:local history",
+			"filter": {
+				"field": "title",
+				"operator": "contains",
+				"values": ["local history"]
+			}
+		},
+		{
+			"text": "title:contains:Smith, John",
+			"filter": {
+				"field": "title",
+				"operator": "contains",
+				"values": ["Smith, John"]
+			}
+		},
+		{
+			"text": "author:Smith\\, John,Jones",
+			"filter": {
+				"field": "author",
+				"operator": "is",
+				"values": ["Smith, John", "Jones"]
+			}
+		},
+		{
+			"text": "path:C\\\\temp",
+			"filter": {
+				"field": "path",
+				"operator": "is",
+				"values": ["C\\temp"]
+			}
+		},
+		{
+			"text": "status:not:ERROR",
+			"filter": {
+				"field": "status",
+				"operator": "not",
+				"values": ["ERROR"]
+			}
+		},
+		{
+			"text": "description:phrase:read timeout",
+			"filter": {
+				"field": "description",
+				"operator": "phrase",
+				"values": ["read timeout"]
+			}
+		},
+		{
+			"text": "title:notContains:draft",
+			"filter": {
+				"field": "title",
+				"operator": "notContains",
+				"values": ["draft"]
+			}
+		},
+		{
+			"text": "dateCreated:from:2026-10-01",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "from",
+				"values": ["2026-10-01"]
+			}
+		},
+		{
+			"text": "dateCreated:to:2026-10-14",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "to",
+				"values": ["2026-10-14"]
+			}
+		},
+		{
+			"text": "dateCreated:after:2026-10-01",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "after",
+				"values": ["2026-10-01"]
+			}
+		},
+		{
+			"text": "dateCreated:before:2026-10-14",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "before",
+				"values": ["2026-10-14"]
+			}
+		},
+		{
+			"text": "dateCreated:between:2026-10-01..2026-10-14",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "between",
+				"values": ["2026-10-01", "2026-10-14"]
+			}
+		},
+		{
+			"text": "dateCreated:between:2026-10-01..",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "between",
+				"values": ["2026-10-01", ""]
+			}
+		},
+		{
+			"text": "dateCreated:between:..2026-10-14",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "between",
+				"values": ["", "2026-10-14"]
+			}
+		},
+		{
+			"text": "localHolds:min:2",
+			"filter": {
+				"field": "localHolds",
+				"operator": "min",
+				"values": ["2"]
+			}
+		},
+		{
+			"text": "localHolds:max:5",
+			"filter": {
+				"field": "localHolds",
+				"operator": "max",
+				"values": ["5"]
+			}
+		},
+		{
+			"text": "elapsed:over:PT2H",
+			"filter": {
+				"field": "elapsed",
+				"operator": "over",
+				"values": ["PT2H"]
+			}
+		},
+		{
+			"text": "elapsed:under:PT2H",
+			"filter": {
+				"field": "elapsed",
+				"operator": "under",
+				"values": ["PT2H"]
+			}
+		},
+		{
+			"text": "pickupLocation:empty",
+			"filter": {
+				"field": "pickupLocation",
+				"operator": "empty",
+				"values": []
+			}
+		},
+		{
+			"text": "pickupLocation:notEmpty",
+			"filter": {
+				"field": "pickupLocation",
+				"operator": "notEmpty",
+				"values": []
+			}
+		},
+		{
+			"text": "note:is:empty",
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["empty"]
+			}
+		},
+		{
+			"text": "note:is:contains:x",
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["contains:x"]
+			}
+		},
+		{
+			"text": "endpoint:https://a.example/b",
+			"filter": {
+				"field": "endpoint",
+				"operator": "is",
+				"values": ["https://a.example/b"]
+			}
+		},
+		{
+			"text": "item.barcode:123",
+			"filter": {
+				"field": "item.barcode",
+				"operator": "is",
+				"values": ["123"]
+			}
+		},
+		{
+			"text": "status",
+			"filter": null
+		},
+		{
+			"text": ":CONFIRMED",
+			"filter": null
+		},
+		{
+			"text": "1status:CONFIRMED",
+			"filter": null
+		},
+		{
+			"text": "status:",
+			"filter": null
+		},
+		{
+			"text": "status:A,",
+			"filter": null
+		},
+		{
+			"text": "title:contains:",
+			"filter": null
+		},
+		{
+			"text": "dateCreated:between:2026-10-01",
+			"filter": null
+		},
+		{
+			"text": "dateCreated:between:..",
+			"filter": null
+		},
+		{
+			"text": "title:startsWith:hist",
+			"filter": {
+				"field": "title",
+				"operator": "startsWith",
+				"values": ["hist"]
+			}
+		},
+		{
+			"text": "title:endsWith:ory",
+			"filter": {
+				"field": "title",
+				"operator": "endsWith",
+				"values": ["ory"]
+			}
+		},
+		{
+			"text": "dateCreated:last30Days",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "last30Days",
+				"values": []
+			}
+		},
+		{
+			"text": "dateCreated:last90Days",
+			"filter": {
+				"field": "dateCreated",
+				"operator": "last90Days",
+				"values": []
+			}
+		},
+		{
+			"text": "note:is:last30Days",
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["last30Days"]
+			}
+		},
+		{
+			"text": "pickupLocation:empty:yes",
+			"filter": {
+				"field": "pickupLocation",
+				"operator": "is",
+				"values": ["empty:yes"]
+			}
+		}
+	],
+	"encodings": [
+		{
+			"filter": {
+				"field": "status",
+				"operator": "is",
+				"values": ["CONFIRMED"]
+			},
+			"text": "status:CONFIRMED"
+		},
+		{
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["empty"]
+			},
+			"text": "note:is:empty"
+		},
+		{
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["last30Days"]
+			},
+			"text": "note:is:last30Days"
+		},
+		{
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["contains:x"]
+			},
+			"text": "note:is:contains:x"
+		},
+		{
+			"filter": {
+				"field": "note",
+				"operator": "is",
+				"values": ["a:b"]
+			},
+			"text": "note:a:b"
+		},
+		{
+			"filter": {
+				"field": "author",
+				"operator": "is",
+				"values": ["Smith, John", "Jones"]
+			},
+			"text": "author:Smith\\, John,Jones"
+		},
+		{
+			"filter": {
+				"field": "title",
+				"operator": "contains",
+				"values": ["Smith, John"]
+			},
+			"text": "title:contains:Smith, John"
+		},
+		{
+			"filter": {
+				"field": "dateCreated",
+				"operator": "between",
+				"values": ["2026-10-01", ""]
+			},
+			"text": "dateCreated:between:2026-10-01.."
+		},
+		{
+			"filter": {
+				"field": "pickupLocation",
+				"operator": "empty",
+				"values": []
+			},
+			"text": "pickupLocation:empty"
+		},
+		{
+			"filter": {
+				"field": "status",
+				"operator": "is",
+				"values": []
+			},
+			"text": null
+		},
+		{
+			"filter": {
+				"field": "dateCreated",
+				"operator": "between",
+				"values": ["a..b", ""]
+			},
+			"text": null
+		},
+		{
+			"filter": {
+				"field": "9lives",
+				"operator": "is",
+				"values": ["x"]
+			},
+			"text": null
+		}
+	],
+	"sorts": [
+		{
+			"text": "dateCreated:desc",
+			"sort": [
+				{
+					"field": "dateCreated",
+					"direction": "desc"
+				}
+			]
+		},
+		{
+			"text": "status:asc,dateCreated:desc",
+			"sort": [
+				{
+					"field": "status",
+					"direction": "asc"
+				},
+				{
+					"field": "dateCreated",
+					"direction": "desc"
+				}
+			]
+		},
+		{
+			"text": "none",
+			"sort": "none"
+		},
+		{
+			"text": "dateCreated",
+			"sort": null
+		},
+		{
+			"text": "dateCreated:up",
+			"sort": null
+		},
+		{
+			"text": "dateCreated:desc:extra",
+			"sort": null
+		}
+	],
+	"pages": [
+		{
+			"raw": "2",
+			"legacy": false,
+			"page": 1
+		},
+		{
+			"raw": 2,
+			"legacy": false,
+			"page": 1
+		},
+		{
+			"raw": "1",
+			"legacy": false,
+			"page": 0
+		},
+		{
+			"raw": "0",
+			"legacy": false,
+			"page": null
+		},
+		{
+			"raw": "1",
+			"legacy": true,
+			"page": 1
+		},
+		{
+			"raw": "0",
+			"legacy": true,
+			"page": 0
+		},
+		{
+			"raw": "-1",
+			"legacy": false,
+			"page": null
+		},
+		{
+			"raw": "two",
+			"legacy": false,
+			"page": null
+		},
+		{
+			"raw": "1.5",
+			"legacy": false,
+			"page": null
+		}
+	],
+	"views": [
+		{
+			"name": "an empty search is the default view",
+			"canonical": true,
+			"namespace": null,
+			"search": {},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": []
+			}
+		},
+		{
+			"name": "a full view, as the plan's example",
+			"canonical": true,
+			"namespace": null,
+			"search": {
+				"filters": [
+					"status:SUBMITTED_TO_DCB,CONFIRMED",
+					"title:contains:local history",
+					"dateCreated:from:2026-10-01"
+				],
+				"sort": "dateCreated:desc",
+				"page": 2,
+				"pageSize": 50,
+				"hide": "id,sourceSystem",
+				"show": "patronHostlmsCode"
+			},
+			"view": {
+				"filters": [
+					{
+						"field": "status",
+						"operator": "is",
+						"values": ["SUBMITTED_TO_DCB", "CONFIRMED"]
+					},
+					{
+						"field": "title",
+						"operator": "contains",
+						"values": ["local history"]
+					},
+					{
+						"field": "dateCreated",
+						"operator": "from",
+						"values": ["2026-10-01"]
+					}
+				],
+				"sort": [
+					{
+						"field": "dateCreated",
+						"direction": "desc"
+					}
+				],
+				"page": 1,
+				"pageSize": 50,
+				"hide": ["id", "sourceSystem"],
+				"show": ["patronHostlmsCode"]
+			}
+		},
+		{
+			"name": "a single filter arrives as a string, not an array",
+			"namespace": null,
+			"search": {
+				"filters": "status:CONFIRMED",
+				"logic": "or"
+			},
+			"view": {
+				"filters": [
+					{
+						"field": "status",
+						"operator": "is",
+						"values": ["CONFIRMED"]
+					}
+				],
+				"logic": "or",
+				"hide": [],
+				"show": []
+			}
+		},
+		{
+			"name": "a namespace reads only its own keys",
+			"namespace": "notShown",
+			"search": {
+				"filters": "status:AVAILABLE",
+				"notShown.filters": "reason:SUPPRESSED",
+				"notShown.page": "2"
+			},
+			"view": {
+				"filters": [
+					{
+						"field": "reason",
+						"operator": "is",
+						"values": ["SUPPRESSED"]
+					}
+				],
+				"page": 1,
+				"hide": [],
+				"show": []
+			}
+		},
+		{
+			"name": "invalid parts are dropped and the rest applies",
+			"namespace": null,
+			"search": {
+				"filters": ["status:CONFIRMED", "nonsense", ":x"],
+				"sort": "bad",
+				"page": "zero",
+				"logic": "xor",
+				"hide": "id,1bad"
+			},
+			"view": {
+				"filters": [
+					{
+						"field": "status",
+						"operator": "is",
+						"values": ["CONFIRMED"]
+					}
+				],
+				"hide": ["id"],
+				"show": []
+			}
+		},
+		{
+			"name": "a column both hidden and shown is hidden",
+			"namespace": null,
+			"search": {
+				"hide": "id",
+				"show": "id,title"
+			},
+			"view": {
+				"filters": [],
+				"hide": ["id"],
+				"show": ["title"]
+			}
+		},
+		{
+			"name": "pinned columns and a reader's order",
+			"canonical": true,
+			"namespace": null,
+			"search": {
+				"pinLeft": "status",
+				"pinRight": "id",
+				"order": "dateUpdated,status"
+			},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": [],
+				"pinLeft": ["status"],
+				"pinRight": ["id"],
+				"order": ["dateUpdated", "status"]
+			}
+		},
+		{
+			"name": "a column pinned both ways is pinned left, and a repeat is read once",
+			"namespace": null,
+			"search": {
+				"pinLeft": "status,status",
+				"pinRight": "status,id",
+				"order": "title,title"
+			},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": [],
+				"pinLeft": ["status"],
+				"pinRight": ["id"],
+				"order": ["title"]
+			}
+		},
+		{
+			"name": "aggregation, and none as distinct from the default",
+			"canonical": true,
+			"namespace": null,
+			"search": {
+				"agg": "recordCount:sum,lastIngest:max"
+			},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": [],
+				"agg": [
+					{
+						"field": "recordCount",
+						"fn": "sum"
+					},
+					{
+						"field": "lastIngest",
+						"fn": "max"
+					}
+				]
+			}
+		},
+		{
+			"name": "no aggregation is written as none",
+			"canonical": true,
+			"namespace": null,
+			"search": {
+				"agg": "none"
+			},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": [],
+				"agg": "none"
+			}
+		},
+		{
+			"name": "an aggregation that is not one is dropped whole",
+			"namespace": null,
+			"search": {
+				"agg": "recordCount:sum,recordCount:avg",
+				"pinLeft": "not a field"
+			},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": []
+			}
+		},
+		{
+			"name": "pinning and order under a namespace",
+			"canonical": true,
+			"namespace": "audit",
+			"search": {
+				"audit.pinLeft": "auditDate",
+				"audit.order": "briefDescription"
+			},
+			"view": {
+				"filters": [],
+				"hide": [],
+				"show": [],
+				"pinLeft": ["auditDate"],
+				"order": ["briefDescription"]
+			}
+		}
+	]
+}

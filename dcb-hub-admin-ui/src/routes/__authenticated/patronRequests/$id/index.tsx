@@ -3,7 +3,13 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	redirect,
+	useRouter,
+	useSearch,
+} from "@tanstack/react-router";
+import type { GridColDef } from "@mui/x-data-grid-premium";
 import dayjs from "dayjs";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -33,7 +39,14 @@ import PageActionsMenu, {
 	Action,
 } from "@components/PageActionsMenu/PageActionsMenu";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import {
+	AUDIT_NAMESPACE,
+	requestAuditView,
+} from "@constants/dataGrid/gridViews";
 import { formatDuration } from "@helpers/formatDuration";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
 import { getILS } from "@helpers/getILS";
@@ -78,7 +91,54 @@ import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 import { errorForLog } from "@helpers/safeErrorLog";
+
+// Stable, so the audit grid's columns are not new on every render
+const AUDIT_COLUMNS: GridColDef[] = [
+	{
+		field: "auditDate",
+		headerName: "Audit date",
+		minWidth: 60,
+		flex: 0.2,
+		editable: false,
+		filterable: true,
+		sortable: true,
+		valueGetter: (value: string, row: { auditDate: string }) => {
+			const auditDate = row.auditDate;
+			return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
+		},
+	},
+	{
+		field: "briefDescription",
+		headerName: "Description",
+		minWidth: 100,
+		flex: 0.4,
+	},
+	{
+		field: "fromStatus",
+		headerName: "fromStatus",
+		minWidth: 50,
+		flex: 0.25,
+	},
+	{
+		field: "toStatus",
+		headerName: "toStatus",
+		minWidth: 50,
+		flex: 0.25,
+	},
+];
+
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
+	validateSearch: (search: Record<string, unknown>) =>
+		validateGridSearch(search, [AUDIT_NAMESPACE]),
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			requestAuditView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/patronRequests/$id", params, ...restore });
+	},
 	component: RouteComponent,
 });
 
@@ -119,23 +179,11 @@ function RouteComponent() {
 		useState(false);
 	const [activeTab, setActiveTab] = useState(0);
 
-	const auditGridId = `audit-log-${id}`;
-	// Shared grid-state hook (as every other grid uses): seeds once from the store,
-	// subscribes with atomic selectors, and returns STABLE model references and
-	// change handlers. The stable `filterModel` reference is what stops MUI from
-	// resetting pagination to page 0 on every render (a changed filterModel ref is
-	// treated as a filter change, which resets the page).
-	const {
-		paginationModel: currentPagination,
-		sortModel: currentSort,
-		filterModel: currentFilter,
-		onPaginationModelChange: handleAuditPaginationChange,
-		onSortModelChange: handleAuditSortChange,
-		onFilterModelChange: handleAuditFilterChange,
-	} = useGridState(auditGridId, {
-		pagination: { page: 0, pageSize: 25 },
-		sort: [{ field: "auditDate", sort: "desc" }],
-	});
+	const audit = useGridView(
+		requestAuditView,
+		AUDIT_COLUMNS,
+		useSearch({ from: "/__authenticated/patronRequests/$id/" }),
+	);
 
 	const {
 		data,
@@ -2049,47 +2097,19 @@ function RouteComponent() {
 					<DataGrid
 						disablePivoting
 						rows={patronRequest?.audit ?? []}
-						columns={[
-							{
-								field: "auditDate",
-								headerName: "Audit date",
-								minWidth: 60,
-								flex: 0.2,
-								editable: false,
-								filterable: true,
-								sortable: true,
-								valueGetter: (value: string, row: { auditDate: string }) => {
-									const auditDate = row.auditDate;
-									return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
-								},
-							},
-							{
-								field: "briefDescription",
-								headerName: "Description",
-								minWidth: 100,
-								flex: 0.4,
-							},
-							{
-								field: "fromStatus",
-								headerName: "fromStatus",
-								minWidth: 50,
-								flex: 0.25,
-							},
-							{
-								field: "toStatus",
-								headerName: "toStatus",
-								minWidth: 50,
-								flex: 0.25,
-							},
-						]}
+						columns={AUDIT_COLUMNS}
+						columnVisibilityModel={audit.columnVisibilityModel}
+						onColumnVisibilityModelChange={audit.onColumnVisibilityModelChange}
+						columnLayout={audit.columnLayout}
+						viewNotice={<GridViewNotice view={audit} />}
 						type="audits"
 						identifier="AuditPatronRequestDetails"
 						// This grid could show click-through details of its own for each audit log entry
 						// sortModel={[{ field: "auditDate", sort: "desc" }]}
 						// operationDataType="Audit"
 						filterMode="client"
-						filterModel={currentFilter}
-						onFilterModelChange={handleAuditFilterChange}
+						filterModel={audit.filterModel}
+						onFilterModelChange={audit.onFilterModelChange}
 						disableAggregation={true}
 						disableHoverInteractions={true}
 						disableRowGrouping={true}
@@ -2098,15 +2118,15 @@ function RouteComponent() {
 						noResultsText={t("ui.data_grid.no_results")}
 						pagination
 						paginationMode="client"
-						paginationModel={currentPagination}
-						onPaginationModelChange={handleAuditPaginationChange}
+						paginationModel={audit.paginationModel}
+						onPaginationModelChange={audit.onPaginationModelChange}
 						pivotingEnabled={false}
 						toolbarVisible
 						searchText={t("ui.data_grid.search_by_audit")}
 						scrollbarVisible={false}
 						sortingMode="client"
-						sortModel={currentSort}
-						onSortModelChange={handleAuditSortChange}
+						sortModel={audit.sortModel}
+						onSortModelChange={audit.onSortModelChange}
 					/>
 				</TabPanel>
 			</TabContext>

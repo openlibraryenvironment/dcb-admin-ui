@@ -12,6 +12,7 @@ import { routeTree } from "./routeTree.gen";
 import App from "@components/App/App";
 import { GlobalError, NotFound } from "@components/GlobalErrors/GlobalErrors";
 import RoutePending from "@components/RoutePending/RoutePending";
+import { stringifySearch } from "@helpers/viewState/searchSerialiser";
 import {
 	clearChunkReloadGuard,
 	installChunkReloadGuard,
@@ -238,6 +239,8 @@ export async function mountDcbAdmin(
 		defaultPreloadStaleTime: 0,
 		defaultStaleTime: 5000,
 		scrollRestoration: true,
+		// Readable URLs; parseSearch stays the default, which reads them and every older link
+		stringifySearch,
 		// Inherited by every route, which is the point: six of the 84 route files
 		// declared an errorComponent and three a pendingComponent, so the other 78
 		// fell through to TanStack's built-in default - an unstyled, untranslated

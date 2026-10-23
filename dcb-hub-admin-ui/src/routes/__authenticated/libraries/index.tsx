@@ -1,20 +1,33 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useNavigate,
+	redirect,
+	useSearch,
+} from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Alert, AlertTitle } from "@mui/material";
 import { GroupAdd } from "@mui/icons-material";
 import {
-	GridPaginationModel,
-	GridSortModel,
-	GridFilterModel,
-	GridColumnVisibilityModel,
 	GridActionsCellItem,
 	useGridApiRef,
 	GridColDef,
 	GridRowId,
+	type GridRowModesModel,
 } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { librariesView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { librariesQuery } from "@/queryOptions/gridQueries";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -25,69 +38,42 @@ import AddLibraryToGroup from "@forms/AddLibraryToGroup/AddLibraryToGroup";
 import NewLibrary from "@forms/NewLibrary/NewLibrary";
 import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 
-import { useGridState } from "@hooks/useGridState";
-import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 
 import { getLibraries } from "@queries/getLibraries";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { libraryColumns } from "@columns/libraryColumns";
-import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { defaultLibraryColumnVisibility } from "@columns/columnVisibility/defaultLibraryColumnVisibility";
 import {
 	consortiumBasicsQuery,
 	readConsortiumPresence,
 } from "@/queryOptions/consortium";
-import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
-// Default-state prefetch: the component reads pagination/sort/filter state
-// from useGridStore (a Zustand store) at mount time, which the loader
-// cannot access (it isn't a hook and runs outside React). We can only
-// prefetch the grid's own hardcoded default first page/sort here - these
-// values must mirror the component's initial useState fallbacks below so
-// the cache entry lines up on a fresh (unauthenticated-store) render.
-const DEFAULT_PAGINATION_MODEL: GridPaginationModel = {
-	page: 0,
-	pageSize: MAX_DEFAULT_PAGE_SIZE,
-};
-const DEFAULT_SORT_MODEL: GridSortModel = [
-	{ field: "abbreviatedName", sort: "asc" },
-];
-const DEFAULT_FILTER_MODEL: GridFilterModel = { items: [] };
-const DEFAULT_COLUMN_VISIBILITY: GridColumnVisibilityModel =
-	defaultLibraryColumnVisibility;
 const EMPTY_ROWS: any[] = []; // Prevents the grid from remounting selection states
 
 export const Route = createFileRoute("/__authenticated/libraries/")({
-	loader: ({ context: { queryClient, cfg, auth } }) => {
-		// Skip prefetching for unauthenticated visitors - the request would
-		// fail (no token) and its failure would trigger the global
-		// network/401 error handler in main.tsx before __authenticated.tsx's
-		// own component-level auth-gate redirect to /login ever runs.
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			librariesView,
+			search,
+			location.state,
+		);
+		if (restore) throw redirect({ to: "/libraries", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
-		return queryClient.ensureQueryData({
-			queryKey: [
-				"librariesList",
-				DEFAULT_PAGINATION_MODEL,
-				DEFAULT_SORT_MODEL,
-				DEFAULT_FILTER_MODEL,
-			],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<
-					any,
-					LoadLibrariesQueryVariables
-				>(getLibraries, {
-					query: "",
-					pageno: DEFAULT_PAGINATION_MODEL.page,
-					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-					order: DEFAULT_SORT_MODEL[0].field,
-					orderBy: "ASC",
-				}),
-		});
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(librariesView, deps, location.state);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			librariesQuery(createGraphQLClient(cfg, auth), models),
+		);
 	},
 	component: Libraries,
 });
@@ -108,25 +94,10 @@ function Libraries() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const gridId = "librariesList";
+	const gridId = librariesView.id;
+	const search = useSearch({ from: "/__authenticated/libraries/" });
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: DEFAULT_PAGINATION_MODEL,
-		sort: DEFAULT_SORT_MODEL,
-		filter: DEFAULT_FILTER_MODEL,
-		columnVisibility: DEFAULT_COLUMN_VISIBILITY,
-	});
 	const libraryMutation = useEntityMutation("library");
 
 	const navigate = useNavigate();
@@ -140,26 +111,6 @@ function Libraries() {
 	// so the page says what is actually missing.
 	const consortiumQuery = useQuery(consortiumBasicsQuery(gqlClient));
 	const { hasConsortium } = readConsortiumPresence(consortiumQuery);
-
-	const {
-		data: gridData,
-		isLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibrariesQueryVariables>(
-				getLibraries,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					defaultOrder: "abbreviatedName",
-					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
 
 	const handleBulkAddToGroup = () => {
 		if (!apiRef.current || selectedLibraryIds.length === 0) return;
@@ -218,6 +169,25 @@ function Libraries() {
 			t,
 			libraryMutation,
 		],
+	);
+
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(librariesView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery(
+		librariesQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
 	);
 
 	// A library belongs to a consortium, and both of these produce something incoherent
@@ -320,21 +290,23 @@ function Libraries() {
 				type="libraries"
 				parentApiRef={apiRef}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.libraries?.content ?? EMPTY_ROWS}
 				rowCount={gridData?.libraries?.totalSize ?? 0}
 				loading={isLoading || isFetching}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				rowSelection
 				exportConfig={{
 					query: getLibraries,

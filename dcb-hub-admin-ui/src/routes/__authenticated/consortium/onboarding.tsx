@@ -31,7 +31,10 @@ import {
 	type LibraryMappingsState,
 	type MappingCategoryId,
 } from "@helpers/librarySetup";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import {
+	GridRowModesModel,
+	type GridPaginationModel,
+} from "@mui/x-data-grid-premium";
 
 import { getLibraries } from "@queries/getLibraries";
 import { getMappings } from "@queries/getMappings";
@@ -51,7 +54,6 @@ import type {
 	LoadNumericRangeMappingsQueryVariables,
 	LoadPatronRequestsQueryVariables,
 } from "@generated/graphql";
-import { useGridState } from "@hooks/useGridState";
 import { errorForLog } from "@helpers/safeErrorLog";
 import { VIEWPORT_BELOW_HEADER } from "@constants/layout";
 
@@ -177,10 +179,9 @@ function Onboarding() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const { paginationModel, onPaginationModelChange } = useGridState(
-		"onboardingLibraries",
-		{ pagination: { page: 0, pageSize: 20 } },
-	);
+	// No toolbar, so nothing to share: the page lives here, not in the URL
+	const [paginationModel, onPaginationModelChange] =
+		useState<GridPaginationModel>({ page: 0, pageSize: 20 });
 	// Fetch libraries and then batch-fetch the individual totalSize counts for each
 	const { data: librariesWithCounts, isLoading } = useQuery({
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],

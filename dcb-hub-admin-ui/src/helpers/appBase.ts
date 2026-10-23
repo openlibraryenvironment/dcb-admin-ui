@@ -34,7 +34,7 @@ export const getAppNamespace = (): string =>
 
 /**
  * Namespaces a persisted-store key. Sibling apps on the same origin share one
- * localStorage and one sessionStorage, so a bare key like "grid-storage"
+ * localStorage and one sessionStorage, so a bare key like "grid-views"
  * collides: last writer wins, and hydrating a sibling's differently-shaped
  * state can throw during render.
  */

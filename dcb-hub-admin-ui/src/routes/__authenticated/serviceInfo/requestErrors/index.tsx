@@ -1,21 +1,35 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import { requestErrorsView } from "@constants/dataGrid/gridViews";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Link from "@components/Link/Link";
 import Error from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { withRowIndexIds } from "@helpers/dataGrid/withRowIndexIds";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			requestErrorsView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/serviceInfo/requestErrors", ...restore });
+	},
 	component: RequestErrors,
 });
 
@@ -23,23 +37,11 @@ function RequestErrors() {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
 
-	const gridId = "errorOverview";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "total", sort: "desc" }],
+	const gridId = requestErrorsView.id;
+	const search = useSearch({
+		from: "/__authenticated/serviceInfo/requestErrors/",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const {
 		data: records,
@@ -137,6 +139,7 @@ function RequestErrors() {
 		],
 		[t],
 	);
+	const view = useGridView(requestErrorsView, columns, search);
 
 	if (isError) {
 		return (
@@ -158,20 +161,22 @@ function RequestErrors() {
 				identifier={gridId}
 				type={"requestErrors"}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={withRowIndexIds(records?.hits)}
 				loading={isLoading}
 				paginationMode="client"
 				sortingMode="client"
 				filterMode="client"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}

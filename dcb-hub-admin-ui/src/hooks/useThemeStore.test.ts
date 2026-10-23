@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+	describe,
+	it,
+	expect,
+	beforeAll,
+	beforeEach,
+	afterEach,
+	vi,
+} from "vitest";
 
 import { DEFAULT_DISPLAY } from "@themes/display";
 import { DEFAULT_FONT } from "@themes/fonts";
@@ -48,6 +56,13 @@ async function loadStoreWith(persisted: unknown) {
 	// every assertion would read the defaults it is meant to be checking against.
 	return useThemeStore;
 }
+
+// The first import transforms the store's whole module graph, which on a busy worker has
+// overrun the 5 s test timeout. That is setup, not the behaviour under test; every
+// loadStoreWith after it re-evaluates already-transformed code.
+beforeAll(async () => {
+	await import("./useThemeStore");
+}, 30_000);
 
 beforeEach(() => {
 	local = makeStorage();

@@ -1,31 +1,62 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
 import { Trans, useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useSearch } from "@tanstack/react-router";
-import dayjs from "dayjs";
-import { GridColDef } from "@mui/x-data-grid-premium";
 import { Alert } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
+import dayjs from "dayjs";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { alarmsView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { alarmsQuery } from "@/queryOptions/gridQueries";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Link from "@components/Link/Link";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { hostLmsAlarmsQuery } from "@helpers/hostLmsAlarms";
 import { alarmsSearchSchema } from "@schemas/routeSearch/alarmsSearch";
 
 import { getAlarms } from "@queries/getAlarms";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
-import type { LoadAlarmsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/serviceInfo/alarms/")({
-	validateSearch: (search: Record<string, unknown>) =>
-		alarmsSearchSchema.parse(search),
+	// A link that names a Host LMS is a link: nothing remembered is restored over it
+	validateSearch: (search: Record<string, unknown>) => ({
+		...alarmsSearchSchema.parse(search),
+		...validateGridSearch(search),
+	}),
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(alarmsView, search, location.state);
+		if (restore) throw redirect({ to: "/serviceInfo/alarms", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
+		if (!auth?.isAuthenticated) return;
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(alarmsView, deps, location.state);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			alarmsQuery(
+				createGraphQLClient(cfg, auth),
+				models,
+				deps.hostLms ? hostLmsAlarmsQuery(deps.hostLms) : "",
+			),
+		);
+	},
 	component: AlarmsRouteComponent,
 });
 
@@ -33,50 +64,12 @@ function AlarmsRouteComponent() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
-	const { hostLms } = useSearch({
-		from: "/__authenticated/serviceInfo/alarms/",
-	});
+
+	const gridId = alarmsView.id;
+	const search = useSearch({ from: "/__authenticated/serviceInfo/alarms/" });
+	const { hostLms } = search;
 	const baseQuery = hostLms ? hostLmsAlarmsQuery(hostLms) : "";
-
-	const gridId = "alarms";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "created", sort: "desc" }],
-		columnVisibility: { expires: false },
-	});
-
-	const {
-		data: gridData,
-		isLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [gridId, baseQuery, paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadAlarmsQueryVariables>(
-				getAlarms,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					baseQuery,
-					defaultOrder: "created",
-					defaultPageSize: 20,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -134,6 +127,29 @@ function AlarmsRouteComponent() {
 		[customColumns, t],
 	);
 
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(alarmsView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery(
+		alarmsQuery(
+			gqlClient,
+			{
+				paginationModel: view.paginationModel,
+				sortModel: view.sortModel,
+				filterModel: view.appliedFilterModel,
+			},
+			baseQuery,
+		),
+	);
+
 	return (
 		<PageContainer title={t("nav.serviceInfo.alarms.name")}>
 			{hostLms && (
@@ -151,21 +167,23 @@ function AlarmsRouteComponent() {
 				identifier={gridId}
 				type={"alarms"}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.alarms?.content ?? []}
 				rowCount={gridData?.alarms?.totalSize ?? 0}
 				loading={isLoading || isFetching}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				getDetailPanelContent={({ row }: any) => (
 					<MasterDetail row={row} type="alarms" />
 				)}

@@ -1,8 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Grid, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import type { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -11,55 +12,59 @@ import DataGrid from "@components/DataGrid/DataGrid";
 import PatronRequestTabs from "@components/PatronRequestTabs/PatronRequestTabs";
 
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { patronRequestsOutOfSequenceView } from "@constants/dataGrid/gridViews";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
-import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 
 import { allLocationsQuery } from "@/queryOptions/locations";
-import { getPatronRequests } from "@queries/getPatronRequests";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { patronRequestDashboardQuery } from "@/queryOptions/patronRequestDashboard";
 import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { queries } from "@constants/patronRequestGridQueries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/patronRequests/outOfSequence",
 )({
-	// Default-state prefetch: the loader has no access to the Zustand grid
-	// store (it's not a hook), so it can only prefetch the same defaults the
-	// component falls back to on first render - gridId
-	// "patronRequestsOutOfSequence", page 0/size 20, sort by dateCreated desc,
-	// no filter.
-	loader: ({ context: { queryClient, cfg, auth } }) => {
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			patronRequestsOutOfSequenceView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/patronRequests/outOfSequence", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
 		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
-		const gridId = "patronRequestsOutOfSequence";
-		const currentPagination = { page: 0, pageSize: 20 };
-		const currentSort = [{ field: "dateCreated", sort: "desc" }];
-		const currentFilter = { items: [] };
-		return queryClient.ensureQueryData({
-			queryKey: [
-				"patronRequests",
-				gridId,
-				currentPagination,
-				currentSort,
-				currentFilter,
-			],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<
-					any,
-					LoadPatronRequestsQueryVariables
-				>(getPatronRequests, {
-					query: queries.outOfSequence,
-					pageno: currentPagination.page,
-					pagesize: currentPagination.pageSize,
-					order: currentSort[0]?.field ?? "dateCreated",
-					orderBy: currentSort[0]?.sort?.toUpperCase() ?? "DESC",
-				}),
-		});
+		// The reader paging or sorting: the grid is already fetching it, and awaiting it here
+		// would hold back the address the grid is waiting on
+		if (cause === "stay") return;
+		const models = defaultQueryModels(
+			patronRequestsOutOfSequenceView,
+			deps,
+			location.state,
+		);
+		if (!models) return;
+		// Through the same factory as the component, which is the only way the two keys are equal
+		return queryClient.ensureQueryData(
+			patronRequestDashboardQuery(createGraphQLClient(cfg, auth), {
+				gridId: patronRequestsOutOfSequenceView.id,
+				baseQuery: queries.outOfSequence,
+				...models,
+			}),
+		);
 	},
 	component: OutOfSequence,
 });
@@ -68,23 +73,11 @@ function OutOfSequence() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 
-	const gridId = "patronRequestsOutOfSequence";
-	const {
-		paginationModel: currentPagination,
-		sortModel: currentSort,
-		filterModel: currentFilter,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange,
-		onSortModelChange,
-		onFilterModelChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "dateCreated", sort: "desc" }],
-		columnVisibility: defaultPatronRequestColumnVisibility,
+	const gridId = patronRequestsOutOfSequenceView.id;
+	const search = useSearch({
+		from: "/__authenticated/patronRequests/outOfSequence",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 	const currentPath = Route.fullPath;
 
 	const { data: patronRequestLocations = [] } = useQuery(
@@ -93,6 +86,27 @@ function OutOfSequence() {
 
 	const { data: supplyingLibraries, isLoading: supplyingLibrariesLoading } =
 		useQuery(allLibrariesQuery(gqlClient));
+
+	const customColumns = useCustomColumns();
+	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
+	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
+		locations: patronRequestLocations,
+		libraries: supplyingLibrariesContent,
+		variant: "standard",
+	});
+	const allColumns = useMemo(() => {
+		return [...customColumns, ...dynamicPatronRequestColumns];
+	}, [customColumns, dynamicPatronRequestColumns]);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(allColumns),
+		[allColumns],
+	);
+	const view = useGridView(
+		patronRequestsOutOfSequenceView,
+		viewColumns,
+		search,
+	);
 
 	// Rows and all four tab counts in ONE request. Four separate
 	// LoadPatronRequestTotals used to go out beside this one.
@@ -104,9 +118,9 @@ function OutOfSequence() {
 		patronRequestDashboardQuery(gqlClient, {
 			gridId,
 			baseQuery: queries.outOfSequence,
-			paginationModel: currentPagination,
-			sortModel: currentSort,
-			filterModel: currentFilter,
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
 		}),
 	);
 
@@ -132,17 +146,6 @@ function OutOfSequence() {
 		finished: finishedTotal,
 		all: exceptionTotal + outOfSequenceCount + inProgressTotal + finishedTotal,
 	};
-
-	const customColumns = useCustomColumns();
-	const supplyingLibrariesContent = supplyingLibraries?.libraries?.content;
-	const dynamicPatronRequestColumns = useDynamicPatronRequestColumns({
-		locations: patronRequestLocations,
-		libraries: supplyingLibrariesContent,
-		variant: "standard",
-	});
-	const allColumns = useMemo(() => {
-		return [...customColumns, ...dynamicPatronRequestColumns];
-	}, [customColumns, dynamicPatronRequestColumns]);
 
 	if (supplyingLibrariesLoading) {
 		return (
@@ -204,8 +207,9 @@ function OutOfSequence() {
 						autoRowHeight={false}
 						rowSelection
 						columns={allColumns}
-						columnVisibilityModel={columnVisibilityModel}
-						onColumnVisibilityModelChange={handleColumnVisibilityChange}
+						columnVisibilityModel={view.columnVisibilityModel}
+						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+						columnLayout={view.columnLayout}
 						disableAggregation={true}
 						disableHoverInteractions={false}
 						disablePivoting={true}
@@ -218,7 +222,7 @@ function OutOfSequence() {
 							wizard: true,
 						}}
 						filterMode="server"
-						filterModel={currentFilter}
+						filterModel={view.filterModel}
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="patronRequests" />
 						)}
@@ -226,23 +230,24 @@ function OutOfSequence() {
 						loading={gridLoading || isFetching}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
-						onFilterModelChange={onFilterModelChange}
-						onPaginationModelChange={onPaginationModelChange}
+						onFilterModelChange={view.onFilterModelChange}
+						onPaginationModelChange={view.onPaginationModelChange}
 						onRowModesModelChange={setRowModesModel}
-						onSortModelChange={onSortModelChange}
+						onSortModelChange={view.onSortModelChange}
 						pagination={true}
 						paginationMode="server"
-						paginationModel={currentPagination}
+						paginationModel={view.paginationModel}
 						pivotingEnabled={false}
 						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
 						rows={dashboard?.rows ?? []}
 						scrollbarVisible={true}
-						sortModel={currentSort}
+						sortModel={view.sortModel}
 						sortingMode="server"
 						toolbarVisible={true}
 						searchText=""
 						type={"patronRequests"}
+						viewNotice={<GridViewNotice view={view} />}
 					/>
 				</Grid>
 			</Grid>

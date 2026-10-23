@@ -1,20 +1,28 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { Grid } from "@mui/material";
+import type { GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import { clusterRequestingHistoryView } from "@constants/dataGrid/gridViews";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestColumns";
 import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
-import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 
 import { allLibrariesQuery } from "@/queryOptions/libraries";
 import { allLocationsQuery } from "@/queryOptions/locations";
@@ -25,6 +33,20 @@ import type { LoadPatronRequestsQueryVariables } from "@generated/graphql";
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/requestingHistory",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			scopedView(clusterRequestingHistoryView, params.clusterId),
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/search/$clusterId/requestingHistory",
+				params,
+				...restore,
+			});
+	},
 	component: RequestingHistory,
 });
 
@@ -33,27 +55,17 @@ function RequestingHistory() {
 	const { clusterId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
-	// Per-cluster id so grid UI state (page/sort/filter) is persisted separately
-	// per bib cluster. The row-click `type` is kept as the static
-	// `patronRequestsRecordHistory` below so it still matches rowClickRedirects.
-	const gridId = `patronRequestsRecordHistory-${clusterId}`;
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "dateCreated", sort: "desc" }],
-		columnVisibility: defaultPatronRequestColumnVisibility,
+	// The row-click `type` below stays the static `patronRequestsRecordHistory`, so it
+	// still matches rowClickRedirects
+	const gridView = useMemo(
+		() => scopedView(clusterRequestingHistoryView, clusterId),
+		[clusterId],
+	);
+	const gridId = gridView.id;
+	const search = useSearch({
+		from: "/__authenticated/search/$clusterId/requestingHistory",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const { data: librariesData, isLoading: isLibrariesLoading } = useQuery({
 		...allLibrariesQuery(gqlClient), // Cache for 30 mins
@@ -72,6 +84,12 @@ function RequestingHistory() {
 	const allColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(allColumns),
+		[allColumns],
+	);
+	const view = useGridView(gridView, viewColumns, search);
 
 	const {
 		data: requestsData,
@@ -79,15 +97,21 @@ function RequestingHistory() {
 		isFetching: isRequestsFetching,
 		isError,
 	} = useQuery({
-		queryKey: [gridId, clusterId, paginationModel, sortModel, filterModel],
+		queryKey: [
+			gridId,
+			clusterId,
+			view.paginationModel,
+			view.sortModel,
+			view.appliedFilterModel,
+		],
 		queryFn: async () => {
 			const baseQuery = `(bibClusterId:${clusterId})`;
 			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
 				getPatronRequests,
 				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
+					filterModel: view.appliedFilterModel,
+					sortModel: view.sortModel,
+					paginationModel: view.paginationModel,
 					baseQuery,
 					quickFilterFields: ["status", "description"],
 					defaultOrder: "dateCreated",
@@ -137,21 +161,23 @@ function RequestingHistory() {
 					identifier={gridId}
 					type="patronRequestsRecordHistory"
 					columns={allColumns}
+					viewNotice={<GridViewNotice view={view} />}
 					rows={requestsData?.patronRequests?.content ?? []}
 					rowCount={requestsData?.patronRequests?.totalSize ?? 0}
 					loading={isRequestsFetching && !!requestsData}
 					paginationMode="server"
 					pagination
-					paginationModel={paginationModel}
-					onPaginationModelChange={handlePaginationChange}
+					paginationModel={view.paginationModel}
+					onPaginationModelChange={view.onPaginationModelChange}
 					sortingMode="server"
-					sortModel={sortModel}
-					onSortModelChange={handleSortChange}
+					sortModel={view.sortModel}
+					onSortModelChange={view.onSortModelChange}
 					filterMode="server"
-					filterModel={filterModel}
-					onFilterModelChange={handleFilterChange}
-					columnVisibilityModel={columnVisibilityModel}
-					onColumnVisibilityModelChange={handleColumnVisibilityChange}
+					filterModel={view.filterModel}
+					onFilterModelChange={view.onFilterModelChange}
+					columnVisibilityModel={view.columnVisibilityModel}
+					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+					columnLayout={view.columnLayout}
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail row={row} type="patronRequests" />
 					)}
