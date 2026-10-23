@@ -284,8 +284,9 @@ variable, so every panel shows there until its configuration for that host names
 | `gaps`                          | `gaps.unmetLocal`, `gaps.acquisitionOpportunities`, `gaps.consortialLifeline`, `gaps.newAcquisitions`, `gaps.rareGems`                              |
 
 The names are the same in DCB Admin for Libraries, which adds `service.walkUp` and has one
-page, `insights`. `src/helpers/insightsSelection.ts` holds the list, and
-`src/helpers/insightsSelection.test.ts` fails when this table and it disagree.
+page, `insights`. `src/helpers/insightsSelection.ts` holds the panels and
+`src/helpers/insightsPages.ts` the pages, and `src/helpers/insightsSelection.test.ts`
+fails when these tables and the code disagree.
 
 ---
 

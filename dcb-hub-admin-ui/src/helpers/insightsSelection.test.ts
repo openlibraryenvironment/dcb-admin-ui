@@ -2,18 +2,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
+import { ALL_PANELS, panelsOf, selectPanels } from "@helpers/insightsSelection";
+import { INSIGHTS_PAGES, selectPages } from "@helpers/insightsPages";
+import { isInsightsPageShown } from "@helpers/featureFlags";
 import {
-	ALL_PANELS,
-	INSIGHTS_PAGES,
-	panelsOf,
-	selectPages,
-	selectPanels,
-} from "@helpers/insightsSelection";
-import {
-	isInsightsPageShown,
 	isInsightsPanelShown,
 	isInsightsSectionShown,
-} from "@helpers/featureFlags";
+} from "@helpers/insightsPanelFlags";
 import { resolveSubject, visibleSubjects } from "@helpers/insightsSubjects";
 
 const shown = (raw: string | undefined) => [...selectPanels(raw).shown].sort();

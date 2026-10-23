@@ -7,7 +7,7 @@ import CollectionProfilePanel from "./CollectionProfilePanel";
 import FormatMixPanel from "./FormatMixPanel";
 import CollectionOverlapPanel from "./CollectionOverlapPanel";
 import PanelRow from "./PanelRow";
-import { isInsightsPanelShown as shown } from "@helpers/featureFlags";
+import { isInsightsPanelShown as shown } from "@helpers/insightsPanelFlags";
 
 /**
  * Collection analysis - its own section, and deliberately separate from everything above

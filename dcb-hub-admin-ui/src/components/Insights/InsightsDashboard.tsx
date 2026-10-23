@@ -72,7 +72,7 @@ import { ExpandMore } from "@mui/icons-material";
 import { activeSystems } from "@helpers/insightsHeadline";
 
 import type { InsightsView } from "@hooks/useInsightsView";
-import type { RangePreset } from "@helpers/insightsSearch";
+import type { RangePreset, Subject } from "@helpers/insightsSearch";
 
 import SubjectBar from "./SubjectBar";
 import TrendStrip from "./TrendStrip";
@@ -80,11 +80,11 @@ import DrillLink from "./DrillLink";
 import { InsightsExportProvider } from "./ExportContext";
 import { clusterDrill, errorDrill } from "@helpers/insightsDrill";
 import DurationTrendPanel from "./DurationTrendPanel";
-import { resolveSubject, Subject } from "@helpers/insightsSubjects";
+import { resolveSubject } from "@helpers/insightsSubjects";
 import {
 	isInsightsPanelShown as shown,
 	isInsightsSectionShown,
-} from "@helpers/featureFlags";
+} from "@helpers/insightsPanelFlags";
 import type {
 	InsightsPanel,
 	InsightsSection,

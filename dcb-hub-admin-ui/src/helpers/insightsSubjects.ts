@@ -1,23 +1,5 @@
-import { isInsightsSectionShown } from "@helpers/featureFlags";
-
-/**
- * The six subjects, and which panels belong to each.
- *
- * The order is the reading order: what is happening, how well it went, what was asked
- * for, who with, what we hold, what we are missing. Rationale and the request cost of
- * each: INSIGHTS_IA_AND_UX_PLAN.md section 1.3.
- */
-
-export const SUBJECTS = [
-	"trends",
-	"service",
-	"demand",
-	"partners",
-	"collection",
-	"gaps",
-] as const;
-
-export type Subject = (typeof SUBJECTS)[number];
+import { isInsightsSectionShown } from "@helpers/insightsPanelFlags";
+import { SUBJECTS, type Subject } from "@helpers/insightsSearch";
 
 export const DEFAULT_SUBJECT: Subject = "trends";
 
