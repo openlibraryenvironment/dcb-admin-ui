@@ -24,7 +24,13 @@ const repoFile = (relative: string) =>
 	readFileSync(path.resolve(process.cwd(), relative), "utf8");
 
 const declaredFlags = (): string[] => {
-	const source = repoFile("src/helpers/featureFlags.ts");
+	// insightsPanelFlags.ts reads VITE_INSIGHTS_PANELS, outside the first load
+	const source = [
+		"src/helpers/featureFlags.ts",
+		"src/helpers/insightsPanelFlags.ts",
+	]
+		.map(repoFile)
+		.join("\n");
 	const names = [
 		...source.matchAll(/read(?:Flag|Setting|Selection)\(\s*"([A-Z0-9_]+)"/g),
 	].map((m) => m[1]);
