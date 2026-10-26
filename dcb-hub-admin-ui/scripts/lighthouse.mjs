@@ -80,6 +80,10 @@ function stopServer(server) {
 
 function runLighthouse(url, base) {
 	const { preset, chromeFlags = "", onlyCategories } = collect.settings ?? {};
+	// lhci added headless itself; Lighthouse's CLI does not, and a CI runner has no display
+	const flags = chromeFlags.includes("--headless")
+		? chromeFlags
+		: `--headless=new ${chromeFlags}`.trim();
 	const args = [
 		cli,
 		url,
@@ -87,7 +91,7 @@ function runLighthouse(url, base) {
 		"--output=html",
 		`--output-path=${base}`,
 		"--quiet",
-		`--chrome-flags=${chromeFlags}`,
+		`--chrome-flags=${flags}`,
 		...(preset ? [`--preset=${preset}`] : []),
 		...(onlyCategories
 			? [`--only-categories=${onlyCategories.join(",")}`]
