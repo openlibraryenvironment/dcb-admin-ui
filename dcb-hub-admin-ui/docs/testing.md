@@ -240,9 +240,13 @@ does not read code. In order:
 8. **Browser support**, then **languages**, with how complete each translation is.
 9. **Speed**, then **test reliability**, then **every check** and any failed test.
 
-The `report` job builds it after the verify stage, whether or not the checks passed, and
-every merge request links to it as **Release report**. Job artifacts expire, so
-`.releaserc.json` also attaches it to each GitLab Release, where it stays.
+The `report` job builds it after the verify stage, whether or not the checks passed, on
+`release` and in a pipeline run on demand (below); a merge request does not make one. Job
+artifacts expire, so `.releaserc.json` also attaches it to each GitLab Release, where it
+stays, at the permanent path `release-report.html`. So
+`/-/releases/permalink/latest/downloads/release-report.html` on the project always opens
+the latest release's report, and `/-/releases/<tag>/downloads/release-report.html` a given
+one. `src/helpers/releaseConfig.test.ts` fails if that path changes.
 
 It reads what the checks leave in `reports/`:
 
