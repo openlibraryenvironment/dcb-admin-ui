@@ -1,6 +1,6 @@
 # dcb-admin-ui — agent notes
 
-Consortium-facing administration UI for DCB. React 19, TanStack Router + Query, MUI 9 / MUI X 9, Vite 8, Vitest 4, GraphQL against `dcb-service`.
+Consortium-facing administration UI for DCB. React 19, TanStack Router + Query, MUI 9 / MUI X 9, Vite 8, Vitest 5, GraphQL against `dcb-service`.
 
 `CONTRIBUTING.md` in this directory is the team's own document on standards, formatting, linting and pre-commit checks. It outranks this file.
 
@@ -16,7 +16,7 @@ Consortium-facing administration UI for DCB. React 19, TanStack Router + Query, 
 
 **The application is in `dcb-hub-admin-ui/`, not the repository root.** The root holds only `CONTRIBUTING.md`, `README.md`, `LICENSE`, `docker-compose.yml` and `renovate.json`. Every `npm` command, every config file and every source path is one level down. A command run at the root fails in a way that reads like a broken install.
 
-**Versions here, read before writing an API from memory.** React 19.2.7, MUI 9.1.2, MUI X 9.12.0, TanStack Router 1.170.17, Query 5.101.2, TypeScript 6.0.3, Vite 8.1.3, Vitest 4.1.9, Playwright 1.61.1. This estate runs ahead of most training data, so read the installed types or copy a working usage from this repo. **MUI X is pinned in lockstep with `dcb-admin-for-libraries`** — those packages share `x-license` and `x-internals`, and a mixed set is a runtime hazard, not untidiness. Bump both repos together or neither.
+**Versions here, read before writing an API from memory.** React 19.2.7, MUI 9.1.2, MUI X 9.12.0, TanStack Router 1.170.17, Query 5.101.2, TypeScript 6.0.3, Vite 8.1.3, Vitest 5.0.5, Playwright 1.61.1. This estate runs ahead of most training data, so read the installed types or copy a working usage from this repo. **MUI X is pinned in lockstep with `dcb-admin-for-libraries`** — those packages share `x-license` and `x-internals`, and a mixed set is a runtime hazard, not untidiness. Bump both repos together or neither.
 
 **`npm run test` is watch mode and will hang the run forever.** The script is bare `vitest`. Use `npx vitest run`.
 
