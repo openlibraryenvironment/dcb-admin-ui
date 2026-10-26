@@ -18,6 +18,7 @@ import { welcomeLibrariesView } from "@constants/dataGrid/gridViews";
 import { welcomeLibrariesQuery } from "@/queryOptions/welcomeLibraries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import i18n from "@/i18n";
+import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated/")({
 	// The welcome grid's view, which is this page's main parameters
@@ -55,7 +56,7 @@ export const Route = createFileRoute("/__authenticated/")({
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
 				title={i18n.t("ui.error.unable_to_load_page")}
-				message={error.message}
+				message={errorForDisplay(error)}
 				action={i18n.t("ui.actions.reload")}
 				onAction={() => location.reload()}
 			/>

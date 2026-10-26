@@ -71,3 +71,10 @@ export function errorForLog(error: unknown): string {
 		return error.stack ?? `${error.name}: ${error.message}`;
 	return String(error);
 }
+
+/** What a page may show about anything thrown: a ClientError's message embeds the request's variables. */
+export function errorForDisplay(error: unknown): string {
+	if (isRequestError(error)) return requestErrorSummary(error);
+	if (error instanceof Error) return error.message;
+	return String(error);
+}
