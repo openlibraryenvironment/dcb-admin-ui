@@ -151,7 +151,8 @@ function SetupDonePage() {
 										// Six links all reading "Go to this step" are six
 										// identical entries in a screen reader's link list. The
 										// visible text stays short; the accessible name says
-										// which chapter (WCAG 2.4.4).
+										// which chapter (WCAG 2.4.4), after the visible words, so
+										// saying what is on screen still activates it (2.5.3).
 										aria-label={t(
 											step.complete
 												? "setup.done.change_named"

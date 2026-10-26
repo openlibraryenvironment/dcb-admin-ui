@@ -471,9 +471,13 @@ test.describe("Setup - structure and behaviour", () => {
 		await mockGraphQL(page, { ...MOCKS, LoadConsortium: finishedConsortium });
 		await page.goto("/setup/done");
 
-		// Named by chapter, not six links all reading "Go to this step" (WCAG 2.4.4).
+		// Named by chapter, not six links all reading "Go to this step" (WCAG 2.4.4), and
+		// the name starts with the words on screen (2.5.3).
 		await page
-			.getByRole("link", { name: "Change the Discovery branding step" })
+			.getByRole("link", {
+				name: "Change this: Discovery branding",
+				exact: true,
+			})
 			.click();
 
 		await expect(page).toHaveURL(/\/setup\/discovery$/);
