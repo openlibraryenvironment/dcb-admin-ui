@@ -2,13 +2,13 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { act, cleanup, render, waitFor } from "@testing-library/react";
 import {
+	createMemoryHistory,
 	createRootRoute,
 	createRoute,
 	createRouter,
 	redirect,
 	RouterProvider,
 } from "@tanstack/react-router";
-import { createMemoryHistory } from "@tanstack/history";
 import {
 	getGridStringOperators,
 	type GridColDef,
