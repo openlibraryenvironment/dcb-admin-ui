@@ -25,6 +25,39 @@ Exceeding it means cutting weight or bringing a written argument.
 Both carry ~15% headroom, the ratio `symposia-ui` uses: enough to absorb ordinary
 feature work, tight enough to trip on a heavyweight dependency.
 
+### `npm run lighthouse` is a script, not Lighthouse CI
+
+`scripts/lighthouse.mjs` reads `lighthouserc.js` the way `lhci autorun` did: the server
+command and its ready pattern, the URLs, three runs of each, the settings and the
+assertions. It runs Lighthouse's own CLI against Playwright's Chromium and judges each
+assertion on the median of the three runs. It writes `.lighthouseci/manifest.json` and
+`assertion-results.json` in the shape the release report reads, and fails on an `error`
+assertion that misses. It also refuses a setting or an aggregation method it would
+otherwise ignore.
+
+It replaced `@lhci/cli` 0.15.1 on 2026-10-26. That was lhci's latest release, there had
+been none since June 2025, and it pinned Lighthouse 12.6.1. It brought 277 packages and
+16 of the 18 advisories `npm audit` reported here. Lighthouse 13.5.0 added 84 packages
+and no advisory.
+
+Measured on one build, both on Chromium 156:
+
+| Measure                                     | lhci (Lighthouse 12.6.1) | Runner (Lighthouse 13.5.0) |
+| ------------------------------------------- | -----------------------: | -------------------------: |
+| `total-byte-weight`, `/login`               |                  583,251 |                    583,251 |
+| `total-byte-weight`, `/consortium/insights` |                  828,541 |                    828,541 |
+| CLS, accessibility, best practices, SEO     |                     same |                       same |
+| The step, start to finish                   |                    132 s |                  136-143 s |
+
+The bytes, the layout shift and every score that does not depend on the CPU are
+identical. The timings move about as much between two runs of the same tool on the same
+build: `/login` LCP read 1,346 ms and 1,884 ms on the runner. One looks like Lighthouse
+13 itself: `/consortium/insights` LCP read 2,581 ms in both of its runs against 1,830 on
+12, inside the 4,500 ms warning.
+
+`onlyCategories` keeps the four categories the release report explains. Lighthouse 13
+adds agentic browsing, which nothing here asserts.
+
 ## The bundle budget measures what every page loads, and the chunks around it
 
 `bundle-budget.json`, checked by `scripts/check-bundle-budget.mjs` after a

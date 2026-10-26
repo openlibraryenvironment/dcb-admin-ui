@@ -28,7 +28,7 @@ module.exports = {
 			// Port 4193: docs/testing.md, "Preview ports".
 			startServerCommand: `${process.env.USE_EXISTING_BUILD ? "" : "npm run build && "}node scripts/preview-for-lighthouse.mjs`,
 			// Match the PORT, not "Local:" — vite writes an ANSI reset between "Local"
-			// and its colon, so a /Local:/ pattern never matches and lhci silently waits
+			// and its colon, so a /Local:/ pattern never matches and the runner silently waits
 			// out the full readiness timeout on every run.
 			startServerReadyPattern: "4193",
 			startServerReadyTimeout: 180000,
@@ -50,6 +50,15 @@ module.exports = {
 				// performance 0.65 -> 0.93. total-byte-weight did not move by a byte,
 				// which is exactly why it is the assertion that holds the line.
 				preset: "desktop",
+
+				// The four the release report explains. Lighthouse 13 added agentic-browsing,
+				// which nothing here asserts and the report would show unexplained.
+				onlyCategories: [
+					"performance",
+					"accessibility",
+					"best-practices",
+					"seo",
+				],
 
 				// Chrome throttles timers and suspends rendering in a window that is not
 				// in the foreground, and a run that loses focus can die with `NO_FCP`.
@@ -89,9 +98,9 @@ module.exports = {
 			assertMatrix: [
 				{
 					matchingUrlPattern: ".*/login$",
-					// Per entry, not shared: lhci refuses aggregationMethod alongside
-					// assertMatrix, and the reason it is "median" is the same for both
-					// pages - see the note above.
+					// Per entry. scripts/lighthouse.mjs aggregates by median and refuses any
+					// other method; the reason it is "median" is the same for both pages -
+					// see the note above.
 					aggregationMethod: "median",
 					assertions: {
 						// THE SHARP EDGE: 550,617 B measured on a clean build (2026-10-22, median
