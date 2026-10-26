@@ -144,7 +144,7 @@ function holds(expression: string, variables: Variables): boolean {
 function compare(text: string, variables: Variables): boolean {
 	const unknown = () =>
 		new Error(
-			`The simulation cannot evaluate "${text}": it knows $VAR, ==, !=, =~, !~, && and ||`,
+			`The simulation cannot evaluate "${text}": it knows $VAR, ==, !=, =~, !~, null, && and ||`,
 		);
 	const match = COMPARISON.exec(text);
 	if (!match) throw unknown();
@@ -152,6 +152,9 @@ function compare(text: string, variables: Variables): boolean {
 	const value = variables[name];
 	if (!operator) return value !== undefined && value !== "";
 	if (operator === "==" || operator === "!=") {
+		// GitLab's null is an unset variable
+		if (operand === "null")
+			return (value === undefined) === (operator === "==");
 		const quoted = /^"([^"]*)"$/.exec(operand);
 		if (!quoted) throw unknown();
 		return (value === quoted[1]) === (operator === "==");
@@ -266,7 +269,11 @@ describe("the pipelines GitLab would create", () => {
 						.filter(
 							(need) =>
 								!jobs.has(need.job) ||
-								(!need.optional && present.get(need.job) !== "always"),
+								(!need.optional &&
+									present.get(need.job) !== "always" &&
+									// Identical rules put two jobs in exactly the same pipelines, `changes` or not
+									JSON.stringify(job.rules) !==
+										JSON.stringify(jobs.get(need.job)?.rules)),
 						)
 						.map((need) =>
 							jobs.has(need.job)

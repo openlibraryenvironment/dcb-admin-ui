@@ -30,7 +30,7 @@ const content = readFileSync(
 );
 
 async function lint(ref) {
-	const response = await fetch(`${api}/projects/${project}/ci/lint`, {
+	const response = await globalThis.fetch(`${api}/projects/${project}/ci/lint`, {
 		method: "POST",
 		headers: { "PRIVATE-TOKEN": token, "Content-Type": "application/json" },
 		body: JSON.stringify({ content, dry_run: true, include_jobs: true, ref }),

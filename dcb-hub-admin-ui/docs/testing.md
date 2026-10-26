@@ -448,10 +448,11 @@ a later stage, or sits in a stage `stages` does not declare. It needs no token.
 What it does not do:
 
 - **It evaluates only the rule syntax this file uses:** `$VAR`, `==`, `!=`, `=~`, `!~`,
-  `&&` and `||`. Anything else, such as parentheses, fails the test rather than being
+  `null`, `&&` and `||`. Anything else, such as parentheses, fails the test rather than being
   guessed at.
 - **It cannot know `changes`.** A job behind one may or may not be in a push or merge request
-  pipeline, so a job that needs it must mark the need `optional`.
+  pipeline, so a job that needs it must share its rules, which puts the two in the same
+  pipelines, or mark the need `optional`.
 - **It is not GitLab's validator.** It does not check keywords, values or limits.
 
 GitLab's own lint is a local command. Run it before merging a change to `.gitlab-ci.yml`:
