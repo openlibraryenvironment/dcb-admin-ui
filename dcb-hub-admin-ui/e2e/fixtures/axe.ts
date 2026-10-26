@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import type { AxeResults, Result } from "axe-core";
+import type { AxeRuleOutcome } from "../../scripts/report-facts";
 import { test } from "./test";
 
 /**
@@ -210,14 +211,6 @@ export async function expectPaintedScheme(
 
 	if (scheme === "dark") expect(luminance).toBeLessThan(0.5);
 	else expect(luminance).toBeGreaterThan(0.5);
-}
-
-/** One axe rule's outcome on a page, as the release report reads it from a test's attachment. */
-export interface AxeRuleOutcome {
-	id: string;
-	help: string;
-	outcome: "passed" | "failed" | "undecided";
-	criteria: string[];
 }
 
 /** The WCAG success criteria an axe rule tests, from its tags: "wcag1410" is 1.4.10. */

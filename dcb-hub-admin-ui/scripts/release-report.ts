@@ -11,7 +11,6 @@ import {
 } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
-import type { AxeRuleOutcome } from "../e2e/fixtures/axe";
 import gates from "./gates.json" with { type: "json" };
 import wcag from "./wcag-criteria.json" with { type: "json" };
 import catalogueJson from "./requirements.json" with { type: "json" };
@@ -35,6 +34,7 @@ import {
 	secretFindings,
 	securityHeaders,
 	vpatFacts,
+	type AxeRuleOutcome,
 	type Feature,
 	type Language,
 	type Licences,

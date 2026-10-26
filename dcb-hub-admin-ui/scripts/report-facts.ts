@@ -93,6 +93,16 @@ export function previousTag(
 		.sort((a, b) => compareVersions(b.name, a.name))[0]?.name;
 }
 
+// ── Accessibility
+
+/** One axe rule's outcome on a page, as the release report reads it from a test's attachment. */
+export interface AxeRuleOutcome {
+	id: string;
+	help: string;
+	outcome: "passed" | "failed" | "undecided";
+	criteria: string[];
+}
+
 // ── The VPAT: its currency and the gaps it states
 
 export interface VpatFacts {
